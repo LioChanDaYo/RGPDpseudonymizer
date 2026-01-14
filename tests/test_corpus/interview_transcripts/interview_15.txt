@@ -1,0 +1,35 @@
+Témoignage - Crise Management lors d'un Incident de Sécurité
+CISO: M. Vincent Chen, FinTech SecurePay
+Paris, 5 janvier 2025
+
+Interviewer: Monsieur Chen, racontez-nous la gestion de l'incident d'octobre dernier.
+
+Vincent Chen: SecurePay a subi une tentative d'intrusion le 15 octobre 2024. J'étais en réunion avec notre CEO, Mme Alice Durand, quand notre SOC a alerté.
+
+Interviewer: Premiers réflexes?
+
+M. Chen: Activation de la cellule de crise. J'ai convoqué M. David Park, notre directeur infra, Dr. Émilie Rousseau, responsable fraude, et Mme Sarah Benoit, directrice juridique. Notre COMEX s'est réuni sous la présidence de Mme Durand.
+
+Interviewer: Support externe immédiat?
+
+Vincent Chen: Appel à Wavestone, notre CERT préféré. Leur partner, M. Jean-Baptiste Soufron, a dépêché une équipe en 2h: Mme Laure Bertholom et M. Matthieu Bonenfant. On a aussi alerté l'ANSSI - l'astreinte, M. Guillaume Poupard, nous a rappelés rapidement.
+
+Interviewer: Aspects techniques?
+
+M. Chen: Notre architecte sécu, M. Romain Duval, a isolé les systèmes avec l'aide de Palo Alto Networks. Leur ingénieur, Mme Jennifer Smith, était en remote depuis les US. L'analyse forensique par SEKOIA.IO - contact Dr. Thomas Roccia. Microsoft DART nous a aussi aidés via M. John Lambert.
+
+Interviewer: Communication de crise?
+
+Vincent Chen: Géré par notre dircom, Mme Caroline Marchal, assistée de l'agence DGM, dirigée par M. Olivier Durand. On a informé nos clients via notre VP Customer Success, M. Ahmed Mansour. Relations presse confiées à Image Sept - Mme Anne Méaux nous conseillait.
+
+Interviewer: Régulateurs et autorités?
+
+M. Chen: Déclaration à la CNIL dans les 72h. Notre DPO, Maître Julie Legrand, a géré avec notre avocat de chez CMS Francis Lefebvre, Maître François Chambardon. L'ACPR a été notifiée - inspecteur M. Édouard Fernandez-Bollo. Et notre assureur cyber, Hiscox, via M. Jean-Marc Bideau, nous a soutenus.
+
+Interviewer: Équipes post-incident?
+
+Vincent Chen: Débriefing avec toute l'équipe sécu: Mme Laura Martin, analyste SOC, M. Kevin Zhang, pentester, Mme Nadia Amrani, GRC officer. On a fait appel à un psychologue du travail, Dr. Sophie Lemaire, pour gérer le stress. Et nos investisseurs, Partech avec Mme Roxanne Varza et Eurazeo avec M. Yann du Rusquec, ont été tenus informés.
+
+Interviewer: Leçons apprises?
+
+M. Chen: Amélioration du plan de réponse. Formation de l'équipe avec CyberTraining.fr, instructeur M. Damien Bancal. Tests réguliers avec notre red team externe de Synacktiv, dirigée par M. Fabien Perigaud. Et renforcement de notre cyber-résilience avec le cabinet Advens et leur CEO, M. Thierry Bedos.

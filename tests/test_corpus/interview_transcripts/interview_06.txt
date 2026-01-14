@@ -1,0 +1,29 @@
+Récit - Entrepreneuriat dans la Tech
+Fondatrice: Léa Rodriguez, CEO de CloudNative Solutions
+Enregistré à: Station F, Paris, 15 août 2024
+
+Léa Rodriguez: J'ai lancé CloudNative Solutions en 2020, en pleine pandémie. Beaucoup me disaient que c'était fou.
+
+Interviewer: Comment avez-vous démarré?
+
+Rodriguez: J'ai quitté mon poste chez Amazon à Seattle pour rentrer en France. Mon ancien manager, M. David Park, m'a beaucoup encouragée. J'ai cofondé la boîte avec deux associés: Thomas Dubois et Mme Yasmine Kader.
+
+Interviewer: Premiers clients?
+
+Léa Rodriguez: La Société Générale a été notre premier grand compte, grâce au contact de leur CTO, M. Philippe Aymerich. Ensuite BNP Paribas, Crédit Agricole, et même la Banque de France. Leur directeur innovation, Dr. Denis Beau, nous a ouvert des portes.
+
+Interviewer: Levée de fonds?
+
+Rodriguez: Nous avons levé 2 millions avec Partech Partners. La deal lead était Mme Roxanne Varza. Autres investisseurs: M. Xavier Niel via Kima Ventures, et Mme Anne-Sophie Pastel de Serena Capital. Notre board inclut maintenant M. Octave Klaba, fondateur d'OVHcloud.
+
+Interviewer: Équipe actuelle?
+
+Léa Rodriguez: Quinze personnes. Mon CTO est M. Romain Niccoli, ancien de Datadog. Notre VP Sales, Mme Caroline Thibault, vient de Salesforce. L'équipe produit est dirigée par M. Ahmed Mansour. On a aussi recruté Dr. Liu Wei pour l'IA.
+
+Interviewer: Partenaires technologiques?
+
+Rodriguez: Très proches de Google Cloud France - notre account manager est Mme Sophie Bernard. Partnership aussi avec HashiCorp, Docker, et Kubernetes Foundation. Je siège d'ailleurs au conseil consultatif de la Cloud Native Computing Foundation avec Mme Priyanka Sharma.
+
+Interviewer: Expansion?
+
+Léa Rodriguez: On vient d'ouvrir un bureau à Londres avec M. James Wilson comme directeur UK. Projets à Berlin et Barcelone. Notre conseiller international est M. Antonio Garcia de IE Business School à Madrid.

@@ -1,0 +1,116 @@
+RAPPORT DE PROJET
+Projet: Migration Cloud - Phase 1
+Date: 15 février 2024
+Rédigé par: Mme Caroline Petit, Chef de Projet
+
+---
+
+RÉSUMÉ EXÉCUTIF
+
+Le projet de migration cloud vers Azure, piloté par Dr. Marie Dubois (CTO) et M. Laurent Benoit (Architecte Cloud), s'est terminé avec succès le 31 janvier 2024. Cette note présente le bilan et les recommandations pour la Phase 2.
+
+---
+
+1. ÉQUIPE PROJET
+
+ÉQUIPE INTERNE:
+- Chef de projet: Mme Caroline Petit
+- Sponsor exécutif: Dr. Marie Dubois, CTO
+- Architecte: M. Laurent Benoit
+- Lead Developer: M. Kevin Zhang
+- DevOps: Mme Nadia Amrani
+- QA: M. Alexandre Blanc
+- Support: Mme Julie Marchand (Product), M. Maxime Dubois (Infra)
+
+ÉQUIPE EXTERNE:
+- Microsoft France: M. Romain Niccoli, Mme Sophie Bernard
+- Devoteam (intégrateur): M. David Park (chef de projet), M. Ahmed Mansour, Mme Émilie Rousseau
+- Wavestone (sécurité): Mme Laure Bertholom, M. Matthieu Bonenfant
+
+GOUVERNANCE:
+- Sponsor exécutif: Mme Isabelle Moreau (CEO)
+- Steering committee: M. Philippe Arnaud (CFO), Dr. Marie Dubois (CTO), M. Thomas Weber (Commercial)
+
+---
+
+2. RÉSULTATS Q1 2024
+
+MÉTRIQUES PRINCIPALES:
+- Infrastructure: 99.97% uptime (SLA respecté)
+- Performance: Temps de réponse <200ms (objectif atteint)
+- Sécurité: 0 incident majeur (félicitations à M. Vincent Chen et son équipe)
+- Coûts cloud: 15% sous budget (optimisation par M. Laurent Benoit)
+
+ÉQUIPE TECHNIQUE:
+- M. Kevin Zhang (Lead Dev): 3 releases majeures livrées
+- Mme Nadia Amrani (DevOps): Migration CI/CD réussie
+- M. Alexandre Blanc (QA): Automatisation testing 80% couverture
+- Mme Lucie Renard (réseau): Infrastructure zéro incident
+
+Félicitations à toute l'équipe!
+
+2. PARTENAIRES EXTERNES - BILAN
+
+Microsoft France (M. Romain Niccoli, Mme Sophie Bernard): Support excellent, disponibilité 24/7, escalade rapide auprès de M. Jean-Philippe Courtois (EVP Microsoft Global Sales).
+
+Devoteam (M. David Park, chef de projet): Intégration réussie. Équipe compétente (M. Ahmed Mansour, Mme Émilie Morel, M. Julien Sarrazin). Quelques retards sur les sprints 3 et 4, rattrapés.
+
+Wavestone sécurité (Mme Laure Bertholom): Excellente prestation. Pentest réalisé par M. Matthieu Bonenfant. Quelques vulnérabilités mineures corrigées.
+
+3. BUDGET ET PLANNING
+
+Budget initial: 1,2M€
+Consommé: 980K€
+Restant: 220K€
+
+M. François Leclerc (CFO) valide le budget. Pas de dépassement prévu.
+
+Planning:
+- Phase 1 (Infrastructure): terminée ✓
+- Phase 2 (Développement): en cours, 75% complété
+- Phase 3 (Tests): démarrage 15 mars
+- Go-Live: 15 avril 2024 (confirmé)
+
+4. SÉCURITÉ ET CONFORMITÉ
+
+M. Vincent Chen (RSSI) a réalisé le pentest avec Wavestone. Rapport présenté par Mme Laure Bertholom: 3 vulnérabilités critiques identifiées, toutes corrigées par M. Kevin Zhang et son équipe (M. Alexandre Jin, Mme Laura Martin).
+
+DPIA validée par Me Sarah Cohen (DPO) et revue par notre conseil externe, Maître Julie Legrand (GDPR Experts). La CNIL a été notifiée.
+
+Certification ISO 27001 prévue en mars avec Deloitte (auditeur: M. Jean-Luc Moreau).
+
+5. BUDGET ET FINANCES (M. Leclerc)
+
+Budget initial: 2,5M€
+Dépensé: 1,8M€
+Reste à engager: 0,7M€
+
+Principaux postes:
+- Licences Microsoft Azure: 350K€ (contact: M. Niccoli)
+- Prestation Devoteam: 180K€ (M. David Park)
+- Conseil Wavestone: 120K€ (Mme Laure Bertholom)
+- Formation équipes: 50K€ (organisme: M2i Formation, contact: M. Yves Blanc)
+
+Budget validé par CFO M. Philippe Arnaud et approuvé par le board (Mme Isabelle Moreau, M. François Leclerc).
+
+6. PROCHAINES ÉTAPES
+
+Phase 2: Déploiement - Mars à Mai 2024
+Chef de projet Phase 2: M. Romain Niccoli (Microsoft)
+
+Phase 3: Go-Live - Juin 2024
+Change management: Mme Sophie Laurent (DRH) avec cabinet Kea & Partners (consultant: M. Marc Durand)
+
+7. QUESTIONS DIVERSES
+
+M. Benoit: Infrastructure réseau ok, coordination avec Orange Business Services (contact: M. Karim Benzema)
+
+Mme Amrani: Pipeline CI/CD prêt, collaboration avec GitLab (account manager: Mme Laura Martin)
+
+M. Zhang: Équipe dev renforcée par 3 contractors via Mindquest (recruteur: M. Ahmed Mansour)
+
+===== FIN DU COMPTE-RENDU =====
+
+Prochaine réunion: 26 février 2024
+Rédacteur: Mme Caroline Petit, Chef de Projet
+Diffusion: Équipe projet + management (Mme Moreau, M. Arnaud, Dr. Dubois)

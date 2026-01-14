@@ -1,0 +1,491 @@
+{
+  "document_name": "contract_memo.txt",
+  "entities": [
+    {
+      "entity_text": "Managers\nDe",
+      "entity_type": "PERSON",
+      "start_pos": 43,
+      "end_pos": 54
+    },
+    {
+      "entity_text": "Direction Générale",
+      "entity_type": "PERSON",
+      "start_pos": 56,
+      "end_pos": 74
+    },
+    {
+      "entity_text": "M. Philippe Arnaud",
+      "entity_type": "PERSON",
+      "start_pos": 77,
+      "end_pos": 95
+    },
+    {
+      "entity_text": "Philippe Arnaud",
+      "entity_type": "PERSON",
+      "start_pos": 80,
+      "end_pos": 95
+    },
+    {
+      "entity_text": "Nouveau Contrat-",
+      "entity_type": "PERSON",
+      "start_pos": 129,
+      "end_pos": 145
+    },
+    {
+      "entity_text": "Cadre avec GlobalTech Industries",
+      "entity_type": "ORG",
+      "start_pos": 145,
+      "end_pos": 177
+    },
+    {
+      "entity_text": "Tech Industries",
+      "entity_type": "PERSON",
+      "start_pos": 162,
+      "end_pos": 177
+    },
+    {
+      "entity_text": "Mesdames, Messieurs",
+      "entity_type": "PERSON",
+      "start_pos": 179,
+      "end_pos": 198
+    },
+    {
+      "entity_text": "GlobalTech Industries",
+      "entity_type": "ORG",
+      "start_pos": 257,
+      "end_pos": 278
+    },
+    {
+      "entity_text": "Tech Industries",
+      "entity_type": "PERSON",
+      "start_pos": 263,
+      "end_pos": 278
+    },
+    {
+      "entity_text": "ésentée par leur VP Europe",
+      "entity_type": "ORG",
+      "start_pos": 284,
+      "end_pos": 310
+    },
+    {
+      "entity_text": "Europe, Mme",
+      "entity_type": "PERSON",
+      "start_pos": 304,
+      "end_pos": 315
+    },
+    {
+      "entity_text": "Mme Sarah Mc",
+      "entity_type": "PERSON",
+      "start_pos": 312,
+      "end_pos": 324
+    },
+    {
+      "entity_text": "Mme Sarah",
+      "entity_type": "PERSON",
+      "start_pos": 312,
+      "end_pos": 321
+    },
+    {
+      "entity_text": "Luc Moreau",
+      "entity_type": "PERSON",
+      "start_pos": 413,
+      "end_pos": 423
+    },
+    {
+      "entity_text": "Maître François",
+      "entity_type": "PERSON",
+      "start_pos": 488,
+      "end_pos": 503
+    },
+    {
+      "entity_text": "Mme Caroline Petit",
+      "entity_type": "PERSON",
+      "start_pos": 566,
+      "end_pos": 584
+    },
+    {
+      "entity_text": "Mme Caroline",
+      "entity_type": "PERSON",
+      "start_pos": 566,
+      "end_pos": 578
+    },
+    {
+      "entity_text": "Direction Juridique",
+      "entity_type": "PERSON",
+      "start_pos": 599,
+      "end_pos": 618
+    },
+    {
+      "entity_text": "M. Alexandre Blanc",
+      "entity_type": "PERSON",
+      "start_pos": 620,
+      "end_pos": 638
+    },
+    {
+      "entity_text": "Alexandre Blanc",
+      "entity_type": "PERSON",
+      "start_pos": 623,
+      "end_pos": 638
+    },
+    {
+      "entity_text": "Direction Technique",
+      "entity_type": "PERSON",
+      "start_pos": 662,
+      "end_pos": 681
+    },
+    {
+      "entity_text": "Dr. Thomas Martin",
+      "entity_type": "PERSON",
+      "start_pos": 683,
+      "end_pos": 700
+    },
+    {
+      "entity_text": "Thomas Martin",
+      "entity_type": "PERSON",
+      "start_pos": 687,
+      "end_pos": 700
+    },
+    {
+      "entity_text": "Mme Sophie Laurent",
+      "entity_type": "PERSON",
+      "start_pos": 730,
+      "end_pos": 748
+    },
+    {
+      "entity_text": "Mme Sophie",
+      "entity_type": "PERSON",
+      "start_pos": 730,
+      "end_pos": 740
+    },
+    {
+      "entity_text": "GlobalTech Industries",
+      "entity_type": "ORG",
+      "start_pos": 780,
+      "end_pos": 801
+    },
+    {
+      "entity_text": "Tech Industries",
+      "entity_type": "PERSON",
+      "start_pos": 786,
+      "end_pos": 801
+    },
+    {
+      "entity_text": "Palo Alto",
+      "entity_type": "PERSON",
+      "start_pos": 803,
+      "end_pos": 812
+    },
+    {
+      "entity_text": "Alto, Californie",
+      "entity_type": "PERSON",
+      "start_pos": 808,
+      "end_pos": 824
+    },
+    {
+      "entity_text": "M. Robert Chen",
+      "entity_type": "PERSON",
+      "start_pos": 835,
+      "end_pos": 849
+    },
+    {
+      "entity_text": "Robert Chen",
+      "entity_type": "PERSON",
+      "start_pos": 838,
+      "end_pos": 849
+    },
+    {
+      "entity_text": "VP Sales Europe",
+      "entity_type": "ORG",
+      "start_pos": 854,
+      "end_pos": 869
+    },
+    {
+      "entity_text": "Sales Europe",
+      "entity_type": "PERSON",
+      "start_pos": 857,
+      "end_pos": 869
+    },
+    {
+      "entity_text": "Mme Sarah Mc",
+      "entity_type": "PERSON",
+      "start_pos": 871,
+      "end_pos": 883
+    },
+    {
+      "entity_text": "Mme Sarah",
+      "entity_type": "PERSON",
+      "start_pos": 871,
+      "end_pos": 880
+    },
+    {
+      "entity_text": "Legal Counsel",
+      "entity_type": "PERSON",
+      "start_pos": 894,
+      "end_pos": 907
+    },
+    {
+      "entity_text": "M. David Park",
+      "entity_type": "PERSON",
+      "start_pos": 909,
+      "end_pos": 922
+    },
+    {
+      "entity_text": "David Park",
+      "entity_type": "PERSON",
+      "start_pos": 912,
+      "end_pos": 922
+    },
+    {
+      "entity_text": "Kinsey Paris",
+      "entity_type": "PERSON",
+      "start_pos": 944,
+      "end_pos": 956
+    },
+    {
+      "entity_text": "Paris",
+      "entity_type": "LOCATION",
+      "start_pos": 951,
+      "end_pos": 956
+    },
+    {
+      "entity_text": "M. Eric Hazan",
+      "entity_type": "PERSON",
+      "start_pos": 970,
+      "end_pos": 983
+    },
+    {
+      "entity_text": "Eric Hazan",
+      "entity_type": "PERSON",
+      "start_pos": 973,
+      "end_pos": 983
+    },
+    {
+      "entity_text": "KPMG France",
+      "entity_type": "ORG",
+      "start_pos": 1006,
+      "end_pos": 1017
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 1011,
+      "end_pos": 1017
+    },
+    {
+      "entity_text": "Mme Isabelle Blanchet",
+      "entity_type": "PERSON",
+      "start_pos": 1031,
+      "end_pos": 1052
+    },
+    {
+      "entity_text": "Mme Isabelle",
+      "entity_type": "PERSON",
+      "start_pos": 1031,
+      "end_pos": 1043
+    },
+    {
+      "entity_text": "Paris\n  Participants",
+      "entity_type": "PERSON",
+      "start_pos": 1103,
+      "end_pos": 1123
+    },
+    {
+      "entity_text": "Paris",
+      "entity_type": "LOCATION",
+      "start_pos": 1103,
+      "end_pos": 1108
+    },
+    {
+      "entity_text": "Moreau, Mme",
+      "entity_type": "PERSON",
+      "start_pos": 1128,
+      "end_pos": 1139
+    },
+    {
+      "entity_text": "Mme Petit",
+      "entity_type": "PERSON",
+      "start_pos": 1136,
+      "end_pos": 1145
+    },
+    {
+      "entity_text": "Chen, Mme",
+      "entity_type": "PERSON",
+      "start_pos": 1150,
+      "end_pos": 1159
+    },
+    {
+      "entity_text": "Mme Mc",
+      "entity_type": "PERSON",
+      "start_pos": 1156,
+      "end_pos": 1162
+    },
+    {
+      "entity_text": "Formation équipes",
+      "entity_type": "PERSON",
+      "start_pos": 1171,
+      "end_pos": 1188
+    },
+    {
+      "entity_text": "M. Laurent Benoit",
+      "entity_type": "PERSON",
+      "start_pos": 1222,
+      "end_pos": 1239
+    },
+    {
+      "entity_text": "Laurent Benoit",
+      "entity_type": "PERSON",
+      "start_pos": 1225,
+      "end_pos": 1239
+    },
+    {
+      "entity_text": "Mme Julie Marchand",
+      "entity_type": "PERSON",
+      "start_pos": 1256,
+      "end_pos": 1274
+    },
+    {
+      "entity_text": "Mme Julie",
+      "entity_type": "PERSON",
+      "start_pos": 1256,
+      "end_pos": 1265
+    },
+    {
+      "entity_text": "Paris",
+      "entity_type": "LOCATION",
+      "start_pos": 1318,
+      "end_pos": 1323
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 1357,
+      "end_pos": 1361
+    },
+    {
+      "entity_text": "Mme Nathalie Rousseau",
+      "entity_type": "PERSON",
+      "start_pos": 1363,
+      "end_pos": 1384
+    },
+    {
+      "entity_text": "Mme Nathalie",
+      "entity_type": "PERSON",
+      "start_pos": 1363,
+      "end_pos": 1375
+    },
+    {
+      "entity_text": "Toulouse",
+      "entity_type": "LOCATION",
+      "start_pos": 1422,
+      "end_pos": 1430
+    },
+    {
+      "entity_text": "M. Pierre Fontaine",
+      "entity_type": "PERSON",
+      "start_pos": 1432,
+      "end_pos": 1450
+    },
+    {
+      "entity_text": "Pierre Fontaine",
+      "entity_type": "PERSON",
+      "start_pos": 1435,
+      "end_pos": 1450
+    },
+    {
+      "entity_text": "Marseille",
+      "entity_type": "LOCATION",
+      "start_pos": 1484,
+      "end_pos": 1493
+    },
+    {
+      "entity_text": "M. Marc Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 1495,
+      "end_pos": 1509
+    },
+    {
+      "entity_text": "Marc Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 1498,
+      "end_pos": 1509
+    },
+    {
+      "entity_text": "égional\n\nPour",
+      "entity_type": "PERSON",
+      "start_pos": 1524,
+      "end_pos": 1537
+    },
+    {
+      "entity_text": "Mme Caroline Petit",
+      "entity_type": "PERSON",
+      "start_pos": 1564,
+      "end_pos": 1582
+    },
+    {
+      "entity_text": "Mme Caroline",
+      "entity_type": "PERSON",
+      "start_pos": 1564,
+      "end_pos": 1576
+    },
+    {
+      "entity_text": "Cordialement,\n\nPhilippe",
+      "entity_type": "PERSON",
+      "start_pos": 1687,
+      "end_pos": 1710
+    },
+    {
+      "entity_text": "Philippe Arnaud",
+      "entity_type": "PERSON",
+      "start_pos": 1702,
+      "end_pos": 1717
+    },
+    {
+      "entity_text": "Philippe Arnaud\nDirecteur Général\nTechSolutions France SA",
+      "entity_type": "ORG",
+      "start_pos": 1702,
+      "end_pos": 1759
+    },
+    {
+      "entity_text": "Directeur Général",
+      "entity_type": "PERSON",
+      "start_pos": 1718,
+      "end_pos": 1735
+    },
+    {
+      "entity_text": "Solutions France",
+      "entity_type": "PERSON",
+      "start_pos": 1740,
+      "end_pos": 1756
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 1750,
+      "end_pos": 1756
+    },
+    {
+      "entity_text": "Grande Armée",
+      "entity_type": "PERSON",
+      "start_pos": 1784,
+      "end_pos": 1796
+    },
+    {
+      "entity_text": "Armée, Paris",
+      "entity_type": "PERSON",
+      "start_pos": 1791,
+      "end_pos": 1803
+    },
+    {
+      "entity_text": "Paris",
+      "entity_type": "LOCATION",
+      "start_pos": 1798,
+      "end_pos": 1803
+    },
+    {
+      "entity_text": "ème\nContact",
+      "entity_type": "PERSON",
+      "start_pos": 1806,
+      "end_pos": 1817
+    }
+  ]
+}

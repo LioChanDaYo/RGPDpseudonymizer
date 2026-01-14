@@ -1,0 +1,209 @@
+PROCÈS-VERBAL DU CONSEIL D'ADMINISTRATION
+TechSolutions France SAS
+Date: 15 mars 2024
+Siège social: 45 Avenue de la Grande Armée, 75016 Paris
+
+---
+
+PRÉSENTS:
+
+Administrateurs:
+- M. Jean-Charles Le Goff, Président du Conseil
+- Mme Isabelle Moreau, CEO et administratrice
+- M. Philippe Arnaud, CFO et administrateur
+- Mme Roxanne Varza, administratrice indépendante (Partech Partners)
+- M. Xavier Niel, administrateur (Kima Ventures)
+- Mme Anne-Sophie Pastel, administratrice (Serena Capital)
+- M. Octave Klaba, administrateur (OVHcloud)
+
+Invités permanents:
+- Dr. Marie Dubois, CTO
+- M. François Leclerc, Directeur Juridique
+- Me Sarah Cohen, Secrétaire du Conseil
+
+ABSENTS EXCUSÉS:
+- M. Vincent Levita, administrateur (Ardian)
+- Mme Dominique Senequier, administratrice (Axa Investment Managers)
+
+---
+
+ORDRE DU JOUR:
+
+1. APPROBATION COMPTES ANNUELS 2023
+2. STRATÉGIE ET PLAN 2024-2026
+3. NOMINATION NOUVEAUX DIRIGEANTS
+4. AUTORISATION ACQUISITION CLOUDTECH SAS
+5. PLAN DE STOCK-OPTIONS 2024
+6. QUESTIONS DIVERSES
+
+---
+
+PROCÈS-VERBAL:
+
+Ouverture de la séance à 9h00 par M. Jean-Charles Le Goff, Président.
+
+---
+
+1. APPROBATION DES COMPTES ANNUELS 2023
+
+M. Philippe Arnaud, CFO, présente les comptes annuels 2023 audités par KPMG France (associé: M. Dominique Leboureix) et EY France (associée: Mme Isabelle de Silva).
+
+Principaux indicateurs:
+- Chiffre d'affaires: 45M€ (+18% vs 2022)
+- EBITDA: 8,5M€ (marge 19%)
+- Résultat net: 3,2M€
+- Trésorerie: 12M€
+
+Présentation des rapports des commissaires aux comptes:
+- KPMG: M. Dominique Leboureix
+- EY: Mme Isabelle Blanchet
+
+Le conseil félicite Mme Isabelle Moreau et son équipe (M. Thomas Weber, Dr. Marie Dubois, Mme Sophie Laurent, Mme Catherine Rousseau).
+
+VOTE: Comptes approuvés à l'unanimité
+
+---
+
+2. STRATÉGIE ET PLAN 2024-2026
+
+Mme Isabelle Moreau présente le plan stratégique triennal élaboré avec le cabinet McKinsey (partner: M. Eric Hazan) et Boston Consulting Group (partner: Mme Sylvie Ouziel).
+
+Objectifs 2026:
+- CA: 100M€
+- Expansion internationale: UK, Allemagne, Benelux
+- Recrutement: 150 → 300 employés
+
+Investissements nécessaires: 15M€
+- R&D: 8M€ (pilotage Dr. Marie Dubois)
+- Sales & Marketing: 5M€ (pilotage M. Thomas Weber et Mme Catherine Rousseau)
+- Infrastructure: 2M€ (pilotage M. Laurent Benoit)
+
+Plan de financement:
+- Autofinancement: 5M€
+- Dette bancaire: 5M€ (BNP Paribas, contact M. Jean Lemierre, et Société Générale, contact M. Philippe Aymerich)
+- Levée de fonds Series B: 5M€ (lead: Mme Roxanne Varza, Partech)
+
+Dr. Marie Dubois présente la roadmap technologique. Investissements en IA avec des partenariats académiques (INRIA, contact Pr. Raja Chatila, et Sorbonne Université, contact Mme Laurence Devillers).
+
+Discussion générale. Interventions de:
+- M. Xavier Niel: Soutien sur la partie recrutement tech via son réseau (École 42, contact M. Nicolas Sadirac)
+- M. Octave Klaba: Support infrastructure et cloud (OVHcloud)
+- Mme Anne-Sophie Pastel: Recommande d'accélérer l'international
+
+VOTE: Plan stratégique approuvé (7 voix pour, 0 contre)
+
+---
+
+3. NOMINATION NOUVEAUX DIRIGEANTS
+
+Sur proposition de Mme Isabelle Moreau:
+
+a) Nomination Dr. Émilie Rousseau comme Chief Data Officer (CDO)
+   - Ex-Google France (références: M. Yann LeCun, Mme Sundar Pichai)
+   - Rejoint le COMEX
+   VOTE: Approuvé à l'unanimité
+
+b) Nomination M. Kevin Zhang comme VP Engineering
+   - Promotion interne (8 ans dans l'entreprise)
+   - Rejoint le COMEX
+   VOTE: Approuvé à l'unanimité
+
+c) Nomination Mme Sarah Benoit comme Chief Security Officer (CSO)
+   - Ex-Thales (références: M. Patrice Caine)
+   - Rejoint le COMEX
+   - Remplace M. Vincent Chen (retraite)
+   VOTE: Approuvé à l'unanimité
+
+M. Le Goff félicite Mme Moreau pour ces recrutements de qualité.
+
+---
+
+4. AUTORISATION ACQUISITION CLOUDTECH SAS
+
+Mme Isabelle Moreau présente le projet d'acquisition de CloudTech SAS, société basée à Toulouse (20 employés, CA 3M€).
+
+Due diligence réalisée par:
+- Financière: Rothschild & Co (M. Alexandre de Rothschild, M. Matthieu Pigasse)
+- Juridique: Bredin Prat (Maître Didier Martin) et August Debouzy (Maître François Chambardon)
+- Technique: Deloitte France (M. Jean-Luc Moreau)
+- RH: Korn Ferry (consultant: M. Marc Durand)
+
+Prix d'acquisition: 8M€ (5M€ cash + 3M€ en earn-out sur 3 ans)
+
+Fondateurs de CloudTech:
+- CEO: M. Alain Bertrand (rejoindra TechSolutions comme VP Product)
+- CTO: Mme Nathalie Collin (rejoindra équipe Dr. Dubois)
+
+Synergies identifiées par Dr. Marie Dubois: Technologies IA complémentaires, équipe de 10 data scientists (dont Dr. Marc Laperrière et M. Fabien Perigaud).
+
+Financement: Trésorerie (5M€) + crédit acquisition BNP Paribas (3M€)
+
+Discussion:
+- M. Octave Klaba: Quid de la rétention des talents? Mme Moreau: Package de rétention prévu (stock-options)
+- Mme Roxanne Varza: Valorisation justifiée? M. Arnaud: Oui, multiples du marché (EBITDA x 2.7)
+
+VOTE: Acquisition autorisée (7 voix pour, 0 contre)
+
+Mandats:
+- Signature acte: M. François Leclerc avec Maître Didier Martin
+- Integration: Dr. Marie Dubois et M. Kevin Zhang
+- Communication: Mme Catherine Rousseau (interne/externe)
+
+---
+
+5. PLAN DE STOCK-OPTIONS 2024
+
+M. Philippe Arnaud présente le plan de stock-options 2024:
+- Enveloppe: 5% du capital (150 000 actions)
+- Bénéficiaires: COMEX, managers, talents clés
+- Vesting: 4 ans avec cliff 1 an
+
+Bénéficiaires principaux:
+- M. Kevin Zhang: 15 000 options
+- Dr. Émilie Rousseau: 15 000 options
+- Mme Sarah Benoit: 10 000 options
+- Autres managers (Mme Julie Marchand, M. Thomas Weber, Mme Sophie Laurent, M. Alexandre Blanc, etc.): 85 000 options
+- Réserve nouveaux recrutements: 25 000 options
+
+Conseil juridique: Cabinet CMS Francis Lefebvre (Maître François Chambardon)
+Conseil fiscal: Deloitte Société d'Avocats (M. David Kalfon)
+
+VOTE: Plan approuvé à l'unanimité
+
+Gestion administrative: Mme Sophie Laurent (DRH) avec support de Equityplan (plateforme, contact M. Jean-Marc Bideau)
+
+---
+
+6. QUESTIONS DIVERSES
+
+a) M. Xavier Niel: Suggestion de rejoindre France Digitale pour visibility
+   Mme Moreau: Déjà membre, représentée par M. Thomas Weber
+
+b) Mme Anne-Sophie Pastel: Calendrier Series B?
+   M. Arnaud: Q4 2024, objectif 15-20M€
+   Lead investors pressentis: Mme Roxanne Varza (Partech), M. Yann du Rusquec (Eurazeo)
+
+c) M. Octave Klaba: Partenariat OVHcloud à formaliser
+   Dr. Dubois: RDV prévu avec M. Michel Paulin (OVHcloud)
+
+d) Mme Roxanne Varza: ESG et impact?
+   Mme Moreau: Recrutement d'un VP Sustainability prévu
+   Accompagnement par le cabinet EcoVadis (contact Mme Élisabeth Laville)
+
+e) M. Le Goff: Prochain conseil?
+   Tous: 15 juin 2024, 9h00
+
+---
+
+CLÔTURE
+
+Séance levée à 13h30.
+
+Déjeuner offert par le Conseil à l'équipe dirigeante:
+Présents: Mme Moreau, M. Arnaud, Dr. Dubois, M. Weber, Mme Rousseau, Mme Laurent, M. Leclerc, Dr. Émilie Rousseau, M. Zhang, Mme Benoit
+
+---
+
+Le Président du Conseil: M. Jean-Charles Le Goff
+Le Secrétaire du Conseil: Me Sarah Cohen
+La CEO: Mme Isabelle Moreau

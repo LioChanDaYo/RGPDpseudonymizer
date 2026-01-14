@@ -1,0 +1,35 @@
+Témoignage - Reconversion Professionnelle vers le Digital
+Bénéficiaire: Mme Julie Bertrand, ex-hôtellerie vers développeuse web
+Paris, 28 novembre 2024
+
+Interviewer: Madame Bertrand, parlez-nous de votre reconversion.
+
+Julie Bertrand: J'ai travaillé quinze ans dans l'hôtellerie, dont dix comme manager à l'Hôtel Plaza Athénée. Mon directeur, M. Jean-Pierre Lavoignat, m'encourageait, mais je voulais changer.
+
+Interviewer: Quel a été le déclic?
+
+Mme Bertrand: Une amie, Mme Sophie Durand, développeuse chez Doctolib, m'a parlé du bootcamp Le Wagon. Leur directeur France, M. Boris Paillard, m'a reçue. J'ai aussi considéré OpenClassrooms et Simplon.co.
+
+Interviewer: Formation choisie?
+
+Julie Bertrand: Le Wagon à Paris. Mes profs étaient géniaux: M. Sébastien Saunier pour Ruby, Mme Cécile Veneziani pour le frontend, et M. Kevin Soltani comme lead teacher. Mes camarades de batch: Pierre Martin, Ahmed Karim, et Mme Léa Fontaine sont devenus des amis.
+
+Interviewer: Financement?
+
+Mme Bertrand: Mon CPF couvrait 60%. Pôle Emploi, via ma conseillère Mme Nathalie Legrand, a complété. La Région Île-de-France, sous Mme Valérie Pécresse, offre aussi des aides que j'ai obtenues.
+
+Interviewer: Premier emploi dans la tech?
+
+Julie Bertrand: Stage chez une startup, MedTech Innovations, fondée par Dr. Thomas Klein et Mme Sarah Hassan. Mon mentor était M. Romain Dufort, le CTO. Après trois mois, ils m'ont embauchée.
+
+Interviewer: Équipe actuelle?
+
+Mme Bertrand: On est six développeurs. Il y a M. Alexandre Petit senior dev, Mme Caroline Blanc sur le backend, M. Youssef Amrani en DevOps, et nos deux juniors: Mme Emma Rodriguez et M. Lucas Moreau. Notre product manager est Mme Isabelle Dumont.
+
+Interviewer: Soutien communautaire?
+
+Julie Bertrand: Je vais aux meetups Paris.js organisés par M. Christophe Porteneuve. Je suis aussi Women Who Code Paris, animé par Mme Marcy Ericka Charollois. Et j'ai rejoint le réseau Social Builder fondé par Mme Emmanuelle Larroque pour aider d'autres femmes en reconversion.
+
+Interviewer: Conseils?
+
+Mme Bertrand: Osez! Mon ancien collègue de l'hôtel, M. Marc Dubois, hésite encore. Je lui dis qu'avec les bons mentors comme ceux que j'ai eus - M. Sylvain Abelard et Mme Anne-Laure Civeyrac - tout est possible.

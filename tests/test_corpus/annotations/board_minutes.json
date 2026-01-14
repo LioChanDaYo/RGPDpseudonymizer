@@ -1,0 +1,1493 @@
+{
+  "document_name": "board_minutes.txt",
+  "entities": [
+    {
+      "entity_text": "ADMINISTRATION\nTechSolutions France SA",
+      "entity_type": "ORG",
+      "start_pos": 27,
+      "end_pos": 65
+    },
+    {
+      "entity_text": "Solutions France",
+      "entity_type": "PERSON",
+      "start_pos": 46,
+      "end_pos": 62
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 56,
+      "end_pos": 62
+    },
+    {
+      "entity_text": "Grande Armée",
+      "entity_type": "PERSON",
+      "start_pos": 116,
+      "end_pos": 128
+    },
+    {
+      "entity_text": "Paris",
+      "entity_type": "LOCATION",
+      "start_pos": 136,
+      "end_pos": 141
+    },
+    {
+      "entity_text": "Charles Le",
+      "entity_type": "PERSON",
+      "start_pos": 186,
+      "end_pos": 196
+    },
+    {
+      "entity_text": "Goff, Président",
+      "entity_type": "PERSON",
+      "start_pos": 197,
+      "end_pos": 212
+    },
+    {
+      "entity_text": "Mme Isabelle Moreau",
+      "entity_type": "PERSON",
+      "start_pos": 226,
+      "end_pos": 245
+    },
+    {
+      "entity_text": "Mme Isabelle",
+      "entity_type": "PERSON",
+      "start_pos": 226,
+      "end_pos": 238
+    },
+    {
+      "entity_text": "M. Philippe Arnaud",
+      "entity_type": "PERSON",
+      "start_pos": 272,
+      "end_pos": 290
+    },
+    {
+      "entity_text": "Philippe Arnaud",
+      "entity_type": "PERSON",
+      "start_pos": 275,
+      "end_pos": 290
+    },
+    {
+      "entity_text": "Mme Roxanne Varza",
+      "entity_type": "PERSON",
+      "start_pos": 316,
+      "end_pos": 333
+    },
+    {
+      "entity_text": "Mme Roxanne",
+      "entity_type": "PERSON",
+      "start_pos": 316,
+      "end_pos": 327
+    },
+    {
+      "entity_text": "Partech Partners",
+      "entity_type": "PERSON",
+      "start_pos": 365,
+      "end_pos": 381
+    },
+    {
+      "entity_text": "M. Xavier Niel",
+      "entity_type": "PERSON",
+      "start_pos": 385,
+      "end_pos": 399
+    },
+    {
+      "entity_text": "Xavier Niel",
+      "entity_type": "PERSON",
+      "start_pos": 388,
+      "end_pos": 399
+    },
+    {
+      "entity_text": "Kima Ventures",
+      "entity_type": "PERSON",
+      "start_pos": 417,
+      "end_pos": 430
+    },
+    {
+      "entity_text": "Mme Anne-",
+      "entity_type": "PERSON",
+      "start_pos": 434,
+      "end_pos": 443
+    },
+    {
+      "entity_text": "Sophie Pastel",
+      "entity_type": "PERSON",
+      "start_pos": 443,
+      "end_pos": 456
+    },
+    {
+      "entity_text": "Serena Capital",
+      "entity_type": "PERSON",
+      "start_pos": 475,
+      "end_pos": 489
+    },
+    {
+      "entity_text": "M. Octave Klaba",
+      "entity_type": "PERSON",
+      "start_pos": 493,
+      "end_pos": 508
+    },
+    {
+      "entity_text": "Octave Klaba",
+      "entity_type": "PERSON",
+      "start_pos": 496,
+      "end_pos": 508
+    },
+    {
+      "entity_text": "Dr. Marie Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 559,
+      "end_pos": 575
+    },
+    {
+      "entity_text": "Marie Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 563,
+      "end_pos": 575
+    },
+    {
+      "entity_text": "M. François Leclerc",
+      "entity_type": "PERSON",
+      "start_pos": 583,
+      "end_pos": 602
+    },
+    {
+      "entity_text": "François Leclerc",
+      "entity_type": "PERSON",
+      "start_pos": 586,
+      "end_pos": 602
+    },
+    {
+      "entity_text": "Leclerc, Directeur",
+      "entity_type": "PERSON",
+      "start_pos": 595,
+      "end_pos": 613
+    },
+    {
+      "entity_text": "Directeur Juridique",
+      "entity_type": "PERSON",
+      "start_pos": 604,
+      "end_pos": 623
+    },
+    {
+      "entity_text": "Me Sarah Cohen",
+      "entity_type": "PERSON",
+      "start_pos": 626,
+      "end_pos": 640
+    },
+    {
+      "entity_text": "Me Sarah",
+      "entity_type": "PERSON",
+      "start_pos": 626,
+      "end_pos": 634
+    },
+    {
+      "entity_text": "Cohen, Secrétaire",
+      "entity_type": "PERSON",
+      "start_pos": 635,
+      "end_pos": 652
+    },
+    {
+      "entity_text": "M. Vincent Levita",
+      "entity_type": "PERSON",
+      "start_pos": 684,
+      "end_pos": 701
+    },
+    {
+      "entity_text": "Vincent Levita",
+      "entity_type": "PERSON",
+      "start_pos": 687,
+      "end_pos": 701
+    },
+    {
+      "entity_text": "Mme Dominique Senequier",
+      "entity_type": "PERSON",
+      "start_pos": 729,
+      "end_pos": 752
+    },
+    {
+      "entity_text": "Mme Dominique",
+      "entity_type": "PERSON",
+      "start_pos": 729,
+      "end_pos": 742
+    },
+    {
+      "entity_text": "Axa Investment",
+      "entity_type": "PERSON",
+      "start_pos": 771,
+      "end_pos": 785
+    },
+    {
+      "entity_text": "AUTORISATION ACQUISITION CLOUDTECH SA",
+      "entity_type": "ORG",
+      "start_pos": 922,
+      "end_pos": 959
+    },
+    {
+      "entity_text": "Charles Le",
+      "entity_type": "PERSON",
+      "start_pos": 1077,
+      "end_pos": 1087
+    },
+    {
+      "entity_text": "Goff, Président",
+      "entity_type": "PERSON",
+      "start_pos": 1088,
+      "end_pos": 1103
+    },
+    {
+      "entity_text": "M. Philippe Arnaud",
+      "entity_type": "PERSON",
+      "start_pos": 1152,
+      "end_pos": 1170
+    },
+    {
+      "entity_text": "Philippe Arnaud",
+      "entity_type": "PERSON",
+      "start_pos": 1155,
+      "end_pos": 1170
+    },
+    {
+      "entity_text": "és par KPMG France",
+      "entity_type": "ORG",
+      "start_pos": 1216,
+      "end_pos": 1234
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 1228,
+      "end_pos": 1234
+    },
+    {
+      "entity_text": "M. Dominique Leboureix",
+      "entity_type": "PERSON",
+      "start_pos": 1245,
+      "end_pos": 1267
+    },
+    {
+      "entity_text": "Dominique Leboureix",
+      "entity_type": "PERSON",
+      "start_pos": 1248,
+      "end_pos": 1267
+    },
+    {
+      "entity_text": "EY France",
+      "entity_type": "ORG",
+      "start_pos": 1272,
+      "end_pos": 1281
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 1275,
+      "end_pos": 1281
+    },
+    {
+      "entity_text": "Mme Isabelle",
+      "entity_type": "PERSON",
+      "start_pos": 1293,
+      "end_pos": 1305
+    },
+    {
+      "entity_text": "M. Dominique Leboureix",
+      "entity_type": "PERSON",
+      "start_pos": 1518,
+      "end_pos": 1540
+    },
+    {
+      "entity_text": "Dominique Leboureix",
+      "entity_type": "PERSON",
+      "start_pos": 1521,
+      "end_pos": 1540
+    },
+    {
+      "entity_text": "Mme Isabelle Blanchet\n\nLe",
+      "entity_type": "PERSON",
+      "start_pos": 1547,
+      "end_pos": 1572
+    },
+    {
+      "entity_text": "Mme Isabelle",
+      "entity_type": "PERSON",
+      "start_pos": 1547,
+      "end_pos": 1559
+    },
+    {
+      "entity_text": "Blanchet\n\nLe",
+      "entity_type": "PERSON",
+      "start_pos": 1560,
+      "end_pos": 1572
+    },
+    {
+      "entity_text": "élicite Mme",
+      "entity_type": "PERSON",
+      "start_pos": 1582,
+      "end_pos": 1593
+    },
+    {
+      "entity_text": "Mme Isabelle Moreau",
+      "entity_type": "PERSON",
+      "start_pos": 1590,
+      "end_pos": 1609
+    },
+    {
+      "entity_text": "Isabelle Moreau",
+      "entity_type": "PERSON",
+      "start_pos": 1594,
+      "end_pos": 1609
+    },
+    {
+      "entity_text": "M. Thomas Weber",
+      "entity_type": "PERSON",
+      "start_pos": 1625,
+      "end_pos": 1640
+    },
+    {
+      "entity_text": "Thomas Weber",
+      "entity_type": "PERSON",
+      "start_pos": 1628,
+      "end_pos": 1640
+    },
+    {
+      "entity_text": "Weber, Dr",
+      "entity_type": "PERSON",
+      "start_pos": 1635,
+      "end_pos": 1644
+    },
+    {
+      "entity_text": "Dr. Marie Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 1642,
+      "end_pos": 1658
+    },
+    {
+      "entity_text": "Marie Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 1646,
+      "end_pos": 1658
+    },
+    {
+      "entity_text": "Dubois, Mme",
+      "entity_type": "PERSON",
+      "start_pos": 1652,
+      "end_pos": 1663
+    },
+    {
+      "entity_text": "Mme Sophie Laurent",
+      "entity_type": "PERSON",
+      "start_pos": 1660,
+      "end_pos": 1678
+    },
+    {
+      "entity_text": "Mme Sophie",
+      "entity_type": "PERSON",
+      "start_pos": 1660,
+      "end_pos": 1670
+    },
+    {
+      "entity_text": "Laurent, Mme",
+      "entity_type": "PERSON",
+      "start_pos": 1671,
+      "end_pos": 1683
+    },
+    {
+      "entity_text": "Mme Catherine Rousseau",
+      "entity_type": "PERSON",
+      "start_pos": 1680,
+      "end_pos": 1702
+    },
+    {
+      "entity_text": "Mme Catherine",
+      "entity_type": "PERSON",
+      "start_pos": 1680,
+      "end_pos": 1693
+    },
+    {
+      "entity_text": "Mme Isabelle Moreau",
+      "entity_type": "PERSON",
+      "start_pos": 1782,
+      "end_pos": 1801
+    },
+    {
+      "entity_text": "Mme Isabelle",
+      "entity_type": "PERSON",
+      "start_pos": 1782,
+      "end_pos": 1794
+    },
+    {
+      "entity_text": "M. Eric Hazan",
+      "entity_type": "PERSON",
+      "start_pos": 1883,
+      "end_pos": 1896
+    },
+    {
+      "entity_text": "Eric Hazan",
+      "entity_type": "PERSON",
+      "start_pos": 1886,
+      "end_pos": 1896
+    },
+    {
+      "entity_text": "Boston Consulting",
+      "entity_type": "PERSON",
+      "start_pos": 1901,
+      "end_pos": 1918
+    },
+    {
+      "entity_text": "Boston Consulting Group",
+      "entity_type": "ORG",
+      "start_pos": 1901,
+      "end_pos": 1924
+    },
+    {
+      "entity_text": "Mme Sylvie Ouziel",
+      "entity_type": "PERSON",
+      "start_pos": 1935,
+      "end_pos": 1952
+    },
+    {
+      "entity_text": "Mme Sylvie",
+      "entity_type": "PERSON",
+      "start_pos": 1935,
+      "end_pos": 1945
+    },
+    {
+      "entity_text": "Allemagne, Benelux",
+      "entity_type": "PERSON",
+      "start_pos": 2016,
+      "end_pos": 2034
+    },
+    {
+      "entity_text": "Allemagne",
+      "entity_type": "LOCATION",
+      "start_pos": 2016,
+      "end_pos": 2025
+    },
+    {
+      "entity_text": "és\n\nInvestissements",
+      "entity_type": "PERSON",
+      "start_pos": 2066,
+      "end_pos": 2085
+    },
+    {
+      "entity_text": "Dr. Marie Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 2125,
+      "end_pos": 2141
+    },
+    {
+      "entity_text": "Marie Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 2129,
+      "end_pos": 2141
+    },
+    {
+      "entity_text": "M. Thomas Weber",
+      "entity_type": "PERSON",
+      "start_pos": 2178,
+      "end_pos": 2193
+    },
+    {
+      "entity_text": "Thomas Weber",
+      "entity_type": "PERSON",
+      "start_pos": 2181,
+      "end_pos": 2193
+    },
+    {
+      "entity_text": "Mme Catherine Rousseau",
+      "entity_type": "PERSON",
+      "start_pos": 2197,
+      "end_pos": 2219
+    },
+    {
+      "entity_text": "Mme Catherine",
+      "entity_type": "PERSON",
+      "start_pos": 2197,
+      "end_pos": 2210
+    },
+    {
+      "entity_text": "M. Laurent Benoit",
+      "entity_type": "PERSON",
+      "start_pos": 2253,
+      "end_pos": 2270
+    },
+    {
+      "entity_text": "Laurent Benoit",
+      "entity_type": "PERSON",
+      "start_pos": 2256,
+      "end_pos": 2270
+    },
+    {
+      "entity_text": "M. Jean Lemierre",
+      "entity_type": "PERSON",
+      "start_pos": 2361,
+      "end_pos": 2377
+    },
+    {
+      "entity_text": "Jean Lemierre",
+      "entity_type": "PERSON",
+      "start_pos": 2364,
+      "end_pos": 2377
+    },
+    {
+      "entity_text": "Société Générale",
+      "entity_type": "PERSON",
+      "start_pos": 2382,
+      "end_pos": 2398
+    },
+    {
+      "entity_text": "M. Philippe Aymerich",
+      "entity_type": "PERSON",
+      "start_pos": 2408,
+      "end_pos": 2428
+    },
+    {
+      "entity_text": "Philippe Aymerich",
+      "entity_type": "PERSON",
+      "start_pos": 2411,
+      "end_pos": 2428
+    },
+    {
+      "entity_text": "Mme Roxanne Varza",
+      "entity_type": "PERSON",
+      "start_pos": 2468,
+      "end_pos": 2485
+    },
+    {
+      "entity_text": "Mme Roxanne",
+      "entity_type": "PERSON",
+      "start_pos": 2468,
+      "end_pos": 2479
+    },
+    {
+      "entity_text": "Varza, Partech",
+      "entity_type": "PERSON",
+      "start_pos": 2480,
+      "end_pos": 2494
+    },
+    {
+      "entity_text": "Dr. Marie Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 2497,
+      "end_pos": 2513
+    },
+    {
+      "entity_text": "Marie Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 2501,
+      "end_pos": 2513
+    },
+    {
+      "entity_text": "Pr. Raja Chatila",
+      "entity_type": "PERSON",
+      "start_pos": 2621,
+      "end_pos": 2637
+    },
+    {
+      "entity_text": "Raja Chatila",
+      "entity_type": "PERSON",
+      "start_pos": 2625,
+      "end_pos": 2637
+    },
+    {
+      "entity_text": "Sorbonne Université",
+      "entity_type": "PERSON",
+      "start_pos": 2642,
+      "end_pos": 2661
+    },
+    {
+      "entity_text": "Mme Laurence Devillers",
+      "entity_type": "PERSON",
+      "start_pos": 2671,
+      "end_pos": 2693
+    },
+    {
+      "entity_text": "Mme Laurence",
+      "entity_type": "PERSON",
+      "start_pos": 2671,
+      "end_pos": 2683
+    },
+    {
+      "entity_text": "M. Xavier Niel",
+      "entity_type": "PERSON",
+      "start_pos": 2738,
+      "end_pos": 2752
+    },
+    {
+      "entity_text": "Xavier Niel",
+      "entity_type": "PERSON",
+      "start_pos": 2741,
+      "end_pos": 2752
+    },
+    {
+      "entity_text": "M. Nicolas Sadirac",
+      "entity_type": "PERSON",
+      "start_pos": 2827,
+      "end_pos": 2845
+    },
+    {
+      "entity_text": "Nicolas Sadirac",
+      "entity_type": "PERSON",
+      "start_pos": 2830,
+      "end_pos": 2845
+    },
+    {
+      "entity_text": "M. Octave Klaba",
+      "entity_type": "PERSON",
+      "start_pos": 2849,
+      "end_pos": 2864
+    },
+    {
+      "entity_text": "Octave Klaba",
+      "entity_type": "PERSON",
+      "start_pos": 2852,
+      "end_pos": 2864
+    },
+    {
+      "entity_text": "Mme Anne-",
+      "entity_type": "PERSON",
+      "start_pos": 2911,
+      "end_pos": 2920
+    },
+    {
+      "entity_text": "Sophie Pastel",
+      "entity_type": "PERSON",
+      "start_pos": 2920,
+      "end_pos": 2933
+    },
+    {
+      "entity_text": "Mme Isabelle Moreau",
+      "entity_type": "PERSON",
+      "start_pos": 3091,
+      "end_pos": 3110
+    },
+    {
+      "entity_text": "Mme Isabelle",
+      "entity_type": "PERSON",
+      "start_pos": 3091,
+      "end_pos": 3103
+    },
+    {
+      "entity_text": "Nomination Dr",
+      "entity_type": "PERSON",
+      "start_pos": 3116,
+      "end_pos": 3129
+    },
+    {
+      "entity_text": "Dr. Émilie Rousseau",
+      "entity_type": "PERSON",
+      "start_pos": 3127,
+      "end_pos": 3146
+    },
+    {
+      "entity_text": "Émilie Rousseau",
+      "entity_type": "PERSON",
+      "start_pos": 3131,
+      "end_pos": 3146
+    },
+    {
+      "entity_text": "Chief Data",
+      "entity_type": "PERSON",
+      "start_pos": 3153,
+      "end_pos": 3163
+    },
+    {
+      "entity_text": "Google France",
+      "entity_type": "PERSON",
+      "start_pos": 3186,
+      "end_pos": 3199
+    },
+    {
+      "entity_text": "Google France ",
+      "entity_type": "ORG",
+      "start_pos": 3186,
+      "end_pos": 3200
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 3193,
+      "end_pos": 3199
+    },
+    {
+      "entity_text": "M. Yann Le",
+      "entity_type": "PERSON",
+      "start_pos": 3213,
+      "end_pos": 3223
+    },
+    {
+      "entity_text": "Yann Le",
+      "entity_type": "PERSON",
+      "start_pos": 3216,
+      "end_pos": 3223
+    },
+    {
+      "entity_text": "Cun, Mme",
+      "entity_type": "PERSON",
+      "start_pos": 3223,
+      "end_pos": 3231
+    },
+    {
+      "entity_text": "Mme Sundar Pichai",
+      "entity_type": "PERSON",
+      "start_pos": 3228,
+      "end_pos": 3245
+    },
+    {
+      "entity_text": "Mme Sundar",
+      "entity_type": "PERSON",
+      "start_pos": 3228,
+      "end_pos": 3238
+    },
+    {
+      "entity_text": "M. Kevin Zhang",
+      "entity_type": "PERSON",
+      "start_pos": 3316,
+      "end_pos": 3330
+    },
+    {
+      "entity_text": "Kevin Zhang",
+      "entity_type": "PERSON",
+      "start_pos": 3319,
+      "end_pos": 3330
+    },
+    {
+      "entity_text": "Nomination Mme",
+      "entity_type": "PERSON",
+      "start_pos": 3459,
+      "end_pos": 3473
+    },
+    {
+      "entity_text": "Mme Sarah Benoit",
+      "entity_type": "PERSON",
+      "start_pos": 3470,
+      "end_pos": 3486
+    },
+    {
+      "entity_text": "Sarah Benoit",
+      "entity_type": "PERSON",
+      "start_pos": 3474,
+      "end_pos": 3486
+    },
+    {
+      "entity_text": "Chief Security",
+      "entity_type": "PERSON",
+      "start_pos": 3493,
+      "end_pos": 3507
+    },
+    {
+      "entity_text": "M. Patrice Caine",
+      "entity_type": "PERSON",
+      "start_pos": 3550,
+      "end_pos": 3566
+    },
+    {
+      "entity_text": "Patrice Caine",
+      "entity_type": "PERSON",
+      "start_pos": 3553,
+      "end_pos": 3566
+    },
+    {
+      "entity_text": "M. Vincent Chen",
+      "entity_type": "PERSON",
+      "start_pos": 3604,
+      "end_pos": 3619
+    },
+    {
+      "entity_text": "Vincent Chen",
+      "entity_type": "PERSON",
+      "start_pos": 3607,
+      "end_pos": 3619
+    },
+    {
+      "entity_text": "M. Le Goff",
+      "entity_type": "PERSON",
+      "start_pos": 3664,
+      "end_pos": 3674
+    },
+    {
+      "entity_text": "Le Goff",
+      "entity_type": "PERSON",
+      "start_pos": 3667,
+      "end_pos": 3674
+    },
+    {
+      "entity_text": "élicite Mme",
+      "entity_type": "PERSON",
+      "start_pos": 3676,
+      "end_pos": 3687
+    },
+    {
+      "entity_text": "AUTORISATION ACQUISITION CLOUDTECH SA",
+      "entity_type": "ORG",
+      "start_pos": 3738,
+      "end_pos": 3775
+    },
+    {
+      "entity_text": "Mme Isabelle Moreau",
+      "entity_type": "PERSON",
+      "start_pos": 3778,
+      "end_pos": 3797
+    },
+    {
+      "entity_text": "Mme Isabelle",
+      "entity_type": "PERSON",
+      "start_pos": 3778,
+      "end_pos": 3790
+    },
+    {
+      "entity_text": "CloudTech SA",
+      "entity_type": "ORG",
+      "start_pos": 3834,
+      "end_pos": 3846
+    },
+    {
+      "entity_text": "Toulouse",
+      "entity_type": "LOCATION",
+      "start_pos": 3865,
+      "end_pos": 3873
+    },
+    {
+      "entity_text": "M. Matthieu Pigasse",
+      "entity_type": "PERSON",
+      "start_pos": 3985,
+      "end_pos": 4004
+    },
+    {
+      "entity_text": "Matthieu Pigasse",
+      "entity_type": "PERSON",
+      "start_pos": 3988,
+      "end_pos": 4004
+    },
+    {
+      "entity_text": "Bredin Prat",
+      "entity_type": "PERSON",
+      "start_pos": 4019,
+      "end_pos": 4030
+    },
+    {
+      "entity_text": "Maître Didier",
+      "entity_type": "PERSON",
+      "start_pos": 4032,
+      "end_pos": 4045
+    },
+    {
+      "entity_text": "August Debouzy",
+      "entity_type": "PERSON",
+      "start_pos": 4057,
+      "end_pos": 4071
+    },
+    {
+      "entity_text": "Maître François",
+      "entity_type": "PERSON",
+      "start_pos": 4073,
+      "end_pos": 4088
+    },
+    {
+      "entity_text": "Deloitte France",
+      "entity_type": "PERSON",
+      "start_pos": 4114,
+      "end_pos": 4129
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 4123,
+      "end_pos": 4129
+    },
+    {
+      "entity_text": "Luc Moreau",
+      "entity_type": "PERSON",
+      "start_pos": 4139,
+      "end_pos": 4149
+    },
+    {
+      "entity_text": "Korn Ferry",
+      "entity_type": "PERSON",
+      "start_pos": 4157,
+      "end_pos": 4167
+    },
+    {
+      "entity_text": "M. Marc Durand",
+      "entity_type": "PERSON",
+      "start_pos": 4181,
+      "end_pos": 4195
+    },
+    {
+      "entity_text": "Marc Durand",
+      "entity_type": "PERSON",
+      "start_pos": 4184,
+      "end_pos": 4195
+    },
+    {
+      "entity_text": "M. Alain Bertrand",
+      "entity_type": "PERSON",
+      "start_pos": 4294,
+      "end_pos": 4311
+    },
+    {
+      "entity_text": "Alain Bertrand",
+      "entity_type": "PERSON",
+      "start_pos": 4297,
+      "end_pos": 4311
+    },
+    {
+      "entity_text": "Mme Nathalie Collin",
+      "entity_type": "PERSON",
+      "start_pos": 4362,
+      "end_pos": 4381
+    },
+    {
+      "entity_text": "Mme Nathalie",
+      "entity_type": "PERSON",
+      "start_pos": 4362,
+      "end_pos": 4374
+    },
+    {
+      "entity_text": "équipe Dr",
+      "entity_type": "PERSON",
+      "start_pos": 4393,
+      "end_pos": 4402
+    },
+    {
+      "entity_text": "Dr. Marie Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 4439,
+      "end_pos": 4455
+    },
+    {
+      "entity_text": "Marie Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 4443,
+      "end_pos": 4455
+    },
+    {
+      "entity_text": "émentaires, équipe",
+      "entity_type": "PERSON",
+      "start_pos": 4478,
+      "end_pos": 4496
+    },
+    {
+      "entity_text": "Dr. Marc Laperrière",
+      "entity_type": "PERSON",
+      "start_pos": 4525,
+      "end_pos": 4544
+    },
+    {
+      "entity_text": "Marc Laperrière",
+      "entity_type": "PERSON",
+      "start_pos": 4529,
+      "end_pos": 4544
+    },
+    {
+      "entity_text": "M. Fabien Perigaud",
+      "entity_type": "PERSON",
+      "start_pos": 4548,
+      "end_pos": 4566
+    },
+    {
+      "entity_text": "Fabien Perigaud",
+      "entity_type": "PERSON",
+      "start_pos": 4551,
+      "end_pos": 4566
+    },
+    {
+      "entity_text": "M. Octave Klaba",
+      "entity_type": "PERSON",
+      "start_pos": 4654,
+      "end_pos": 4669
+    },
+    {
+      "entity_text": "Octave Klaba",
+      "entity_type": "PERSON",
+      "start_pos": 4657,
+      "end_pos": 4669
+    },
+    {
+      "entity_text": "Mme Moreau",
+      "entity_type": "PERSON",
+      "start_pos": 4705,
+      "end_pos": 4715
+    },
+    {
+      "entity_text": "Mme Roxanne Varza",
+      "entity_type": "PERSON",
+      "start_pos": 4762,
+      "end_pos": 4779
+    },
+    {
+      "entity_text": "Mme Roxanne",
+      "entity_type": "PERSON",
+      "start_pos": 4762,
+      "end_pos": 4773
+    },
+    {
+      "entity_text": "M. François Leclerc",
+      "entity_type": "PERSON",
+      "start_pos": 4937,
+      "end_pos": 4956
+    },
+    {
+      "entity_text": "François Leclerc",
+      "entity_type": "PERSON",
+      "start_pos": 4940,
+      "end_pos": 4956
+    },
+    {
+      "entity_text": "Maître Didier",
+      "entity_type": "PERSON",
+      "start_pos": 4962,
+      "end_pos": 4975
+    },
+    {
+      "entity_text": "Dr. Marie Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 4998,
+      "end_pos": 5014
+    },
+    {
+      "entity_text": "Marie Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 5002,
+      "end_pos": 5014
+    },
+    {
+      "entity_text": "M. Kevin Zhang",
+      "entity_type": "PERSON",
+      "start_pos": 5018,
+      "end_pos": 5032
+    },
+    {
+      "entity_text": "Kevin Zhang",
+      "entity_type": "PERSON",
+      "start_pos": 5021,
+      "end_pos": 5032
+    },
+    {
+      "entity_text": "Mme Catherine Rousseau",
+      "entity_type": "PERSON",
+      "start_pos": 5050,
+      "end_pos": 5072
+    },
+    {
+      "entity_text": "Mme Catherine",
+      "entity_type": "PERSON",
+      "start_pos": 5050,
+      "end_pos": 5063
+    },
+    {
+      "entity_text": "M. Philippe Arnaud",
+      "entity_type": "PERSON",
+      "start_pos": 5128,
+      "end_pos": 5146
+    },
+    {
+      "entity_text": "Philippe Arnaud",
+      "entity_type": "PERSON",
+      "start_pos": 5131,
+      "end_pos": 5146
+    },
+    {
+      "entity_text": "M. Kevin Zhang",
+      "entity_type": "PERSON",
+      "start_pos": 5341,
+      "end_pos": 5355
+    },
+    {
+      "entity_text": "Kevin Zhang",
+      "entity_type": "PERSON",
+      "start_pos": 5344,
+      "end_pos": 5355
+    },
+    {
+      "entity_text": "Dr. Émilie Rousseau",
+      "entity_type": "PERSON",
+      "start_pos": 5374,
+      "end_pos": 5393
+    },
+    {
+      "entity_text": "Émilie Rousseau",
+      "entity_type": "PERSON",
+      "start_pos": 5378,
+      "end_pos": 5393
+    },
+    {
+      "entity_text": "Mme Sarah Benoit",
+      "entity_type": "PERSON",
+      "start_pos": 5412,
+      "end_pos": 5428
+    },
+    {
+      "entity_text": "Mme Sarah",
+      "entity_type": "PERSON",
+      "start_pos": 5412,
+      "end_pos": 5421
+    },
+    {
+      "entity_text": "Mme Julie Marchand",
+      "entity_type": "PERSON",
+      "start_pos": 5464,
+      "end_pos": 5482
+    },
+    {
+      "entity_text": "Mme Julie",
+      "entity_type": "PERSON",
+      "start_pos": 5464,
+      "end_pos": 5473
+    },
+    {
+      "entity_text": "M. Thomas Weber",
+      "entity_type": "PERSON",
+      "start_pos": 5484,
+      "end_pos": 5499
+    },
+    {
+      "entity_text": "Thomas Weber",
+      "entity_type": "PERSON",
+      "start_pos": 5487,
+      "end_pos": 5499
+    },
+    {
+      "entity_text": "Weber, Mme",
+      "entity_type": "PERSON",
+      "start_pos": 5494,
+      "end_pos": 5504
+    },
+    {
+      "entity_text": "Mme Sophie Laurent",
+      "entity_type": "PERSON",
+      "start_pos": 5501,
+      "end_pos": 5519
+    },
+    {
+      "entity_text": "Mme Sophie",
+      "entity_type": "PERSON",
+      "start_pos": 5501,
+      "end_pos": 5511
+    },
+    {
+      "entity_text": "M. Alexandre Blanc",
+      "entity_type": "PERSON",
+      "start_pos": 5521,
+      "end_pos": 5539
+    },
+    {
+      "entity_text": "Alexandre Blanc",
+      "entity_type": "PERSON",
+      "start_pos": 5524,
+      "end_pos": 5539
+    },
+    {
+      "entity_text": "Francis Lefebvre",
+      "entity_type": "PERSON",
+      "start_pos": 5643,
+      "end_pos": 5659
+    },
+    {
+      "entity_text": "Maître François",
+      "entity_type": "PERSON",
+      "start_pos": 5661,
+      "end_pos": 5676
+    },
+    {
+      "entity_text": "Deloitte Société",
+      "entity_type": "PERSON",
+      "start_pos": 5705,
+      "end_pos": 5721
+    },
+    {
+      "entity_text": "M. David Kalfon",
+      "entity_type": "PERSON",
+      "start_pos": 5733,
+      "end_pos": 5748
+    },
+    {
+      "entity_text": "David Kalfon",
+      "entity_type": "PERSON",
+      "start_pos": 5736,
+      "end_pos": 5748
+    },
+    {
+      "entity_text": "Mme Sophie Laurent",
+      "entity_type": "PERSON",
+      "start_pos": 5810,
+      "end_pos": 5828
+    },
+    {
+      "entity_text": "Mme Sophie",
+      "entity_type": "PERSON",
+      "start_pos": 5810,
+      "end_pos": 5820
+    },
+    {
+      "entity_text": "Marc Bideau",
+      "entity_type": "PERSON",
+      "start_pos": 5891,
+      "end_pos": 5902
+    },
+    {
+      "entity_text": "M. Xavier Niel",
+      "entity_type": "PERSON",
+      "start_pos": 5936,
+      "end_pos": 5950
+    },
+    {
+      "entity_text": "Xavier Niel",
+      "entity_type": "PERSON",
+      "start_pos": 5939,
+      "end_pos": 5950
+    },
+    {
+      "entity_text": "Suggestion de rejoindre France",
+      "entity_type": "ORG",
+      "start_pos": 5952,
+      "end_pos": 5982
+    },
+    {
+      "entity_text": "France Digitale",
+      "entity_type": "PERSON",
+      "start_pos": 5976,
+      "end_pos": 5991
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 5976,
+      "end_pos": 5982
+    },
+    {
+      "entity_text": "Mme Moreau",
+      "entity_type": "PERSON",
+      "start_pos": 6011,
+      "end_pos": 6021
+    },
+    {
+      "entity_text": "M. Thomas Weber",
+      "entity_type": "PERSON",
+      "start_pos": 6052,
+      "end_pos": 6067
+    },
+    {
+      "entity_text": "Thomas Weber",
+      "entity_type": "PERSON",
+      "start_pos": 6055,
+      "end_pos": 6067
+    },
+    {
+      "entity_text": "Mme Anne-",
+      "entity_type": "PERSON",
+      "start_pos": 6072,
+      "end_pos": 6081
+    },
+    {
+      "entity_text": "Sophie Pastel",
+      "entity_type": "PERSON",
+      "start_pos": 6081,
+      "end_pos": 6094
+    },
+    {
+      "entity_text": "Calendrier Series",
+      "entity_type": "PERSON",
+      "start_pos": 6096,
+      "end_pos": 6113
+    },
+    {
+      "entity_text": "Mme Roxanne Varza",
+      "entity_type": "PERSON",
+      "start_pos": 6187,
+      "end_pos": 6204
+    },
+    {
+      "entity_text": "Mme Roxanne",
+      "entity_type": "PERSON",
+      "start_pos": 6187,
+      "end_pos": 6198
+    },
+    {
+      "entity_text": "M. Octave Klaba",
+      "entity_type": "PERSON",
+      "start_pos": 6249,
+      "end_pos": 6264
+    },
+    {
+      "entity_text": "Octave Klaba",
+      "entity_type": "PERSON",
+      "start_pos": 6252,
+      "end_pos": 6264
+    },
+    {
+      "entity_text": "M. Michel Paulin",
+      "entity_type": "PERSON",
+      "start_pos": 6330,
+      "end_pos": 6346
+    },
+    {
+      "entity_text": "Michel Paulin",
+      "entity_type": "PERSON",
+      "start_pos": 6333,
+      "end_pos": 6346
+    },
+    {
+      "entity_text": "Mme Roxanne Varza",
+      "entity_type": "PERSON",
+      "start_pos": 6362,
+      "end_pos": 6379
+    },
+    {
+      "entity_text": "Mme Roxanne",
+      "entity_type": "PERSON",
+      "start_pos": 6362,
+      "end_pos": 6373
+    },
+    {
+      "entity_text": "Mme Moreau",
+      "entity_type": "PERSON",
+      "start_pos": 6399,
+      "end_pos": 6409
+    },
+    {
+      "entity_text": "évu\n   Accompagnement",
+      "entity_type": "PERSON",
+      "start_pos": 6448,
+      "end_pos": 6469
+    },
+    {
+      "entity_text": "Mme Élisabeth Laville",
+      "entity_type": "PERSON",
+      "start_pos": 6503,
+      "end_pos": 6524
+    },
+    {
+      "entity_text": "Mme Élisabeth",
+      "entity_type": "PERSON",
+      "start_pos": 6503,
+      "end_pos": 6516
+    },
+    {
+      "entity_text": "M. Le Goff",
+      "entity_type": "PERSON",
+      "start_pos": 6530,
+      "end_pos": 6540
+    },
+    {
+      "entity_text": "Le Goff",
+      "entity_type": "PERSON",
+      "start_pos": 6533,
+      "end_pos": 6540
+    },
+    {
+      "entity_text": "Mme Moreau",
+      "entity_type": "PERSON",
+      "start_pos": 6690,
+      "end_pos": 6700
+    },
+    {
+      "entity_text": "Arnaud, Dr",
+      "entity_type": "PERSON",
+      "start_pos": 6705,
+      "end_pos": 6715
+    },
+    {
+      "entity_text": "Weber, Mme",
+      "entity_type": "PERSON",
+      "start_pos": 6728,
+      "end_pos": 6738
+    },
+    {
+      "entity_text": "Mme Rousseau",
+      "entity_type": "PERSON",
+      "start_pos": 6735,
+      "end_pos": 6747
+    },
+    {
+      "entity_text": "Rousseau, Mme",
+      "entity_type": "PERSON",
+      "start_pos": 6739,
+      "end_pos": 6752
+    },
+    {
+      "entity_text": "Mme Laurent",
+      "entity_type": "PERSON",
+      "start_pos": 6749,
+      "end_pos": 6760
+    },
+    {
+      "entity_text": "Leclerc, Dr",
+      "entity_type": "PERSON",
+      "start_pos": 6765,
+      "end_pos": 6776
+    },
+    {
+      "entity_text": "Dr. Émilie Rousseau",
+      "entity_type": "PERSON",
+      "start_pos": 6774,
+      "end_pos": 6793
+    },
+    {
+      "entity_text": "Émilie Rousseau",
+      "entity_type": "PERSON",
+      "start_pos": 6778,
+      "end_pos": 6793
+    },
+    {
+      "entity_text": "Zhang, Mme",
+      "entity_type": "PERSON",
+      "start_pos": 6798,
+      "end_pos": 6808
+    },
+    {
+      "entity_text": "Mme Benoit",
+      "entity_type": "PERSON",
+      "start_pos": 6805,
+      "end_pos": 6815
+    },
+    {
+      "entity_text": "Le Président",
+      "entity_type": "PERSON",
+      "start_pos": 6822,
+      "end_pos": 6834
+    },
+    {
+      "entity_text": "Charles Le",
+      "entity_type": "PERSON",
+      "start_pos": 6855,
+      "end_pos": 6865
+    },
+    {
+      "entity_text": "Goff\nLe",
+      "entity_type": "PERSON",
+      "start_pos": 6866,
+      "end_pos": 6873
+    },
+    {
+      "entity_text": "Me Sarah Cohen\nLa",
+      "entity_type": "PERSON",
+      "start_pos": 6897,
+      "end_pos": 6914
+    },
+    {
+      "entity_text": "Me Sarah",
+      "entity_type": "PERSON",
+      "start_pos": 6897,
+      "end_pos": 6905
+    },
+    {
+      "entity_text": "Cohen\nLa",
+      "entity_type": "PERSON",
+      "start_pos": 6906,
+      "end_pos": 6914
+    },
+    {
+      "entity_text": "Mme Isabelle Moreau",
+      "entity_type": "PERSON",
+      "start_pos": 6920,
+      "end_pos": 6939
+    },
+    {
+      "entity_text": "Mme Isabelle",
+      "entity_type": "PERSON",
+      "start_pos": 6920,
+      "end_pos": 6932
+    }
+  ]
+}

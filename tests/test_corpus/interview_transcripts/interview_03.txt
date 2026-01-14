@@ -1,0 +1,27 @@
+Interview - Transformation Digitale Secteur Public
+Interviewée: Mme Claire Fontaine, Directrice SI Mairie de Bordeaux
+Date: 22 mai 2024
+
+Interviewer: Madame Fontaine, parlez-nous de votre projet de transformation digitale.
+
+Claire Fontaine: Merci. À la Mairie de Bordeaux, nous avons lancé un ambitieux programme avec l'aide d'Accenture France. Le maire, M. Pierre Hurmic, nous a donné carte blanche.
+
+Interviewer: Qui compose votre équipe projet?
+
+Mme Fontaine: J'ai constitué une équipe mixte. Il y a Laurent Benoit, notre architecte cloud, Mme Sarah Cohen qui s'occupe de la cybersécurité, et le Dr. Yves Girard pour l'aspect données. On collabore aussi avec Orange Business Services et leur expert, M. Karim Benzema.
+
+Interviewer: Des partenariats institutionnels?
+
+Claire Fontaine: Absolument. Nous travaillons avec la Préfecture de la Gironde, la Région Nouvelle-Aquitaine, et même la Commission Européenne à Bruxelles. Leur représentant, Paolo Rossi, nous accompagne sur la conformité RGPD.
+
+Interviewer: Quels organismes vous soutiennent?
+
+Mme Fontaine: L'ANSSI nous a envoyé deux consultants: Julie Marchand et Alexandre Petit. On échange aussi avec d'autres villes comme Lyon - leur DSI, M. Dupont, est très coopératif - et Nantes. La DINUM à Paris nous guide également.
+
+Interviewer: Challenges techniques?
+
+Claire Fontaine: L'intégration avec les systèmes existants d'IBM et SAP France. Heureusement, nos partenaires de Capgemini, menés par Mme Léa Rodriguez, nous aident. On a aussi recruté un ancien de Google France, Thomas Kim.
+
+Interviewer: Prochaines étapes?
+
+Mme Fontaine: Extension à la Métropole de Bordeaux, en lien avec les communes de Mérignac, Pessac et Talence. Le projet sera présenté au Ministère de la Transformation Publique par notre chef de projet, Nicolas Blanc.

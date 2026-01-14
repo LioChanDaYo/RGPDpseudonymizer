@@ -1,0 +1,27 @@
+Interview Chercheur - Intelligence Artificielle et Éthique
+Dr. Sarah Cohen, INRIA Saclay
+Date: 20 septembre 2024
+
+Interviewer: Docteur Cohen, vos recherches portent sur l'éthique de l'IA?
+
+Dr. Sarah Cohen: Exactement. À l'INRIA, notre équipe travaille sur la transparence des algorithmes. Je collabore étroitement avec le Professeur Raja Chatila de Sorbonne Université et Mme Laurence Devillers du CNRS.
+
+Interviewer: Contexte international?
+
+Sarah Cohen: On échange avec le MIT Media Lab - notamment Pr. Cynthia Breazeal. En Europe, je travaille avec le Dr. Luciano Floridi à Oxford et Mme Virginia Dignum de l'Université d'Umeå. Notre projet H2020 inclut des partenaires de Fraunhofer Institute en Allemagne.
+
+Interviewer: Partenaires industriels?
+
+Dr. Cohen: Plusieurs. Meta AI France, avec M. Yann LeCun comme conseiller scientifique. DeepMind à Londres - leur chercheur, M. Demis Hassabis, participe à nos workshops. On travaille aussi avec Huawei France et leur directeur R&D, M. Chen Lifang.
+
+Interviewer: Votre équipe à l'INRIA?
+
+Sarah Cohen: Cinq personnes permanentes. Il y a le Dr. Thomas Martin en apprentissage automatique, Mme Aïcha Benali spécialiste données, M. Marc Dupuis côté juridique. Nos doctorants sont Mme Julie Petit, M. Kevin Zhang, et M. Antoine Roussel.
+
+Interviewer: Relations avec les régulateurs?
+
+Dr. Cohen: Nous conseillons la CNIL. Leur présidente, Mme Marie-Laure Denis, nous consulte régulièrement. J'ai aussi témoigné devant le Parlement Européen à l'invitation du député M. Axel Voss. En France, le député M. Cédric Villani a été un interlocuteur clé avant son décès.
+
+Interviewer: Projets avec d'autres organismes?
+
+Sarah Cohen: Oui. L'UNESCO à Paris, via leur programme éthique IA dirigé par Mme Gabriela Ramos. L'OCDE nous sollicite aussi. Et nous collaborons avec l'Institut Montaigne, leur expert M. Théophile Lenoir, et le think tank Terra Nova où travaille M. Lionel Janover.

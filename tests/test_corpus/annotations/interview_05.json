@@ -1,0 +1,419 @@
+{
+  "document_name": "interview_05.txt",
+  "entities": [
+    {
+      "entity_text": "Témoignage Avocat",
+      "entity_type": "PERSON",
+      "start_pos": 0,
+      "end_pos": 17
+    },
+    {
+      "entity_text": "Affaire Commerciale",
+      "entity_type": "PERSON",
+      "start_pos": 20,
+      "end_pos": 39
+    },
+    {
+      "entity_text": "Me Antoine Mercier",
+      "entity_type": "PERSON",
+      "start_pos": 40,
+      "end_pos": 58
+    },
+    {
+      "entity_text": "Me Antoine",
+      "entity_type": "PERSON",
+      "start_pos": 40,
+      "end_pos": 50
+    },
+    {
+      "entity_text": "Mercier, Cabinet",
+      "entity_type": "PERSON",
+      "start_pos": 51,
+      "end_pos": 67
+    },
+    {
+      "entity_text": "Cabinet Mercier",
+      "entity_type": "PERSON",
+      "start_pos": 60,
+      "end_pos": 75
+    },
+    {
+      "entity_text": "Associés, Nice",
+      "entity_type": "PERSON",
+      "start_pos": 78,
+      "end_pos": 92
+    },
+    {
+      "entity_text": "Nice\nEnregistrement",
+      "entity_type": "PERSON",
+      "start_pos": 88,
+      "end_pos": 107
+    },
+    {
+      "entity_text": "Nice",
+      "entity_type": "LOCATION",
+      "start_pos": 88,
+      "end_pos": 92
+    },
+    {
+      "entity_text": "Maître Mercier",
+      "entity_type": "PERSON",
+      "start_pos": 138,
+      "end_pos": 152
+    },
+    {
+      "entity_text": "Me Antoine Mercier",
+      "entity_type": "PERSON",
+      "start_pos": 233,
+      "end_pos": 251
+    },
+    {
+      "entity_text": "Me Antoine",
+      "entity_type": "PERSON",
+      "start_pos": 233,
+      "end_pos": 243
+    },
+    {
+      "entity_text": "SoftTech Industries",
+      "entity_type": "ORG",
+      "start_pos": 300,
+      "end_pos": 319
+    },
+    {
+      "entity_text": "Tech Industries",
+      "entity_type": "PERSON",
+      "start_pos": 304,
+      "end_pos": 319
+    },
+    {
+      "entity_text": "Antipolis et DataCorp Europe",
+      "entity_type": "ORG",
+      "start_pos": 335,
+      "end_pos": 363
+    },
+    {
+      "entity_text": "Corp Europe",
+      "entity_type": "PERSON",
+      "start_pos": 352,
+      "end_pos": 363
+    },
+    {
+      "entity_text": "Luxembourg",
+      "entity_type": "LOCATION",
+      "start_pos": 366,
+      "end_pos": 376
+    },
+    {
+      "entity_text": "était Soft",
+      "entity_type": "PERSON",
+      "start_pos": 389,
+      "end_pos": 399
+    },
+    {
+      "entity_text": "Mme Nathalie Rousseau",
+      "entity_type": "PERSON",
+      "start_pos": 430,
+      "end_pos": 451
+    },
+    {
+      "entity_text": "Mme Nathalie",
+      "entity_type": "PERSON",
+      "start_pos": 430,
+      "end_pos": 442
+    },
+    {
+      "entity_text": "Qui était",
+      "entity_type": "PERSON",
+      "start_pos": 467,
+      "end_pos": 476
+    },
+    {
+      "entity_text": "Antoine Mercier",
+      "entity_type": "PERSON",
+      "start_pos": 497,
+      "end_pos": 512
+    },
+    {
+      "entity_text": "DataCorp Europe",
+      "entity_type": "ORG",
+      "start_pos": 514,
+      "end_pos": 529
+    },
+    {
+      "entity_text": "Corp Europe",
+      "entity_type": "PERSON",
+      "start_pos": 518,
+      "end_pos": 529
+    },
+    {
+      "entity_text": "Maître Sarah",
+      "entity_type": "PERSON",
+      "start_pos": 544,
+      "end_pos": 556
+    },
+    {
+      "entity_text": "Clifford Chance",
+      "entity_type": "PERSON",
+      "start_pos": 576,
+      "end_pos": 591
+    },
+    {
+      "entity_text": "Paris",
+      "entity_type": "LOCATION",
+      "start_pos": 594,
+      "end_pos": 599
+    },
+    {
+      "entity_text": "M. Hans Mueller",
+      "entity_type": "PERSON",
+      "start_pos": 632,
+      "end_pos": 647
+    },
+    {
+      "entity_text": "Hans Mueller",
+      "entity_type": "PERSON",
+      "start_pos": 635,
+      "end_pos": 647
+    },
+    {
+      "entity_text": "était une affaire complexe impliquant aussi Amazon Web Services et Microsoft Corp",
+      "entity_type": "ORG",
+      "start_pos": 651,
+      "end_pos": 732
+    },
+    {
+      "entity_text": "Amazon Web",
+      "entity_type": "PERSON",
+      "start_pos": 695,
+      "end_pos": 705
+    },
+    {
+      "entity_text": "Amazon Web Services et Microsoft Corporation",
+      "entity_type": "ORG",
+      "start_pos": 695,
+      "end_pos": 739
+    },
+    {
+      "entity_text": "Microsoft Corporation",
+      "entity_type": "PERSON",
+      "start_pos": 718,
+      "end_pos": 739
+    },
+    {
+      "entity_text": "Me Mercier",
+      "entity_type": "PERSON",
+      "start_pos": 776,
+      "end_pos": 786
+    },
+    {
+      "entity_text": "Le Tribunal",
+      "entity_type": "PERSON",
+      "start_pos": 788,
+      "end_pos": 799
+    },
+    {
+      "entity_text": "Paris",
+      "entity_type": "LOCATION",
+      "start_pos": 815,
+      "end_pos": 820
+    },
+    {
+      "entity_text": "M. Jacques Lemaître",
+      "entity_type": "PERSON",
+      "start_pos": 848,
+      "end_pos": 867
+    },
+    {
+      "entity_text": "Jacques Lemaître",
+      "entity_type": "PERSON",
+      "start_pos": 851,
+      "end_pos": 867
+    },
+    {
+      "entity_text": "Professeur Marc Durand",
+      "entity_type": "PERSON",
+      "start_pos": 914,
+      "end_pos": 936
+    },
+    {
+      "entity_text": "Professeur Marc",
+      "entity_type": "PERSON",
+      "start_pos": 914,
+      "end_pos": 929
+    },
+    {
+      "entity_text": "Business School",
+      "entity_type": "PERSON",
+      "start_pos": 948,
+      "end_pos": 963
+    },
+    {
+      "entity_text": "Mme Christine Lagarde",
+      "entity_type": "PERSON",
+      "start_pos": 967,
+      "end_pos": 988
+    },
+    {
+      "entity_text": "Mme Christine",
+      "entity_type": "PERSON",
+      "start_pos": 967,
+      "end_pos": 980
+    },
+    {
+      "entity_text": "Antoine Mercier",
+      "entity_type": "PERSON",
+      "start_pos": 1088,
+      "end_pos": 1103
+    },
+    {
+      "entity_text": "ère Me",
+      "entity_type": "PERSON",
+      "start_pos": 1114,
+      "end_pos": 1120
+    },
+    {
+      "entity_text": "Me Pierre Blanc",
+      "entity_type": "PERSON",
+      "start_pos": 1118,
+      "end_pos": 1133
+    },
+    {
+      "entity_text": "Pierre Blanc",
+      "entity_type": "PERSON",
+      "start_pos": 1121,
+      "end_pos": 1133
+    },
+    {
+      "entity_text": "Me Isabella Ferrari",
+      "entity_type": "PERSON",
+      "start_pos": 1190,
+      "end_pos": 1209
+    },
+    {
+      "entity_text": "Me Isabella",
+      "entity_type": "PERSON",
+      "start_pos": 1190,
+      "end_pos": 1201
+    },
+    {
+      "entity_text": "M. François Molins",
+      "entity_type": "PERSON",
+      "start_pos": 1269,
+      "end_pos": 1287
+    },
+    {
+      "entity_text": "François Molins",
+      "entity_type": "PERSON",
+      "start_pos": 1272,
+      "end_pos": 1287
+    },
+    {
+      "entity_text": "Me Mercier",
+      "entity_type": "PERSON",
+      "start_pos": 1352,
+      "end_pos": 1362
+    },
+    {
+      "entity_text": "Luc Bertin",
+      "entity_type": "PERSON",
+      "start_pos": 1383,
+      "end_pos": 1393
+    },
+    {
+      "entity_text": "Tech, Mme",
+      "entity_type": "PERSON",
+      "start_pos": 1421,
+      "end_pos": 1430
+    },
+    {
+      "entity_text": "Mme Amélie Roussel",
+      "entity_type": "PERSON",
+      "start_pos": 1427,
+      "end_pos": 1445
+    },
+    {
+      "entity_text": "Mme Amélie",
+      "entity_type": "PERSON",
+      "start_pos": 1427,
+      "end_pos": 1437
+    },
+    {
+      "entity_text": "Deloitte France",
+      "entity_type": "PERSON",
+      "start_pos": 1464,
+      "end_pos": 1479
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 1473,
+      "end_pos": 1479
+    },
+    {
+      "entity_text": "Dr. Vincent Chen",
+      "entity_type": "PERSON",
+      "start_pos": 1487,
+      "end_pos": 1503
+    },
+    {
+      "entity_text": "Vincent Chen",
+      "entity_type": "PERSON",
+      "start_pos": 1491,
+      "end_pos": 1503
+    },
+    {
+      "entity_text": "Du côté de DataCorp",
+      "entity_type": "ORG",
+      "start_pos": 1530,
+      "end_pos": 1549
+    },
+    {
+      "entity_text": "M. Klaus Schmidt",
+      "entity_type": "PERSON",
+      "start_pos": 1568,
+      "end_pos": 1584
+    },
+    {
+      "entity_text": "Klaus Schmidt",
+      "entity_type": "PERSON",
+      "start_pos": 1571,
+      "end_pos": 1584
+    },
+    {
+      "entity_text": "Mme Elena Popescu",
+      "entity_type": "PERSON",
+      "start_pos": 1588,
+      "end_pos": 1605
+    },
+    {
+      "entity_text": "Mme Elena",
+      "entity_type": "PERSON",
+      "start_pos": 1588,
+      "end_pos": 1597
+    },
+    {
+      "entity_text": "Antoine Mercier",
+      "entity_type": "PERSON",
+      "start_pos": 1642,
+      "end_pos": 1657
+    },
+    {
+      "entity_text": "Mme Françoise Barré",
+      "entity_type": "PERSON",
+      "start_pos": 1705,
+      "end_pos": 1724
+    },
+    {
+      "entity_text": "Mme Françoise",
+      "entity_type": "PERSON",
+      "start_pos": 1705,
+      "end_pos": 1718
+    },
+    {
+      "entity_text": "Paris",
+      "entity_type": "LOCATION",
+      "start_pos": 1767,
+      "end_pos": 1772
+    }
+  ]
+}

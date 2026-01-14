@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python scripts/auto_annotate_corpus.py:*)",
+      "Bash(python scripts/count_entities.py:*)",
+      "Bash(python scripts/benchmark_nlp.py:*)",
+      "Bash(python:*)"
+    ]
+  }
+}

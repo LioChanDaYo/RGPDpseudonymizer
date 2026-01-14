@@ -1,0 +1,287 @@
+{
+  "document_name": "interview_01.txt",
+  "entities": [
+    {
+      "entity_text": "Dr. Marie Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 15,
+      "end_pos": 31
+    },
+    {
+      "entity_text": "Marie Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 19,
+      "end_pos": 31
+    },
+    {
+      "entity_text": "Directrice Innovation",
+      "entity_type": "PERSON",
+      "start_pos": 34,
+      "end_pos": 55
+    },
+    {
+      "entity_text": "Paris, Siège",
+      "entity_type": "PERSON",
+      "start_pos": 81,
+      "end_pos": 93
+    },
+    {
+      "entity_text": "Paris",
+      "entity_type": "LOCATION",
+      "start_pos": 81,
+      "end_pos": 86
+    },
+    {
+      "entity_text": "Siège Social",
+      "entity_type": "PERSON",
+      "start_pos": 88,
+      "end_pos": 100
+    },
+    {
+      "entity_text": "Siège Social TechCorp France",
+      "entity_type": "ORG",
+      "start_pos": 88,
+      "end_pos": 116
+    },
+    {
+      "entity_text": "Corp France",
+      "entity_type": "PERSON",
+      "start_pos": 105,
+      "end_pos": 116
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 110,
+      "end_pos": 116
+    },
+    {
+      "entity_text": "Bonjour Dr",
+      "entity_type": "PERSON",
+      "start_pos": 131,
+      "end_pos": 141
+    },
+    {
+      "entity_text": "Dr. Marie Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 189,
+      "end_pos": 205
+    },
+    {
+      "entity_text": "Marie Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 193,
+      "end_pos": 205
+    },
+    {
+      "entity_text": "Je suis ravie de partager notre expérience chez TechCorp France",
+      "entity_type": "ORG",
+      "start_pos": 221,
+      "end_pos": 284
+    },
+    {
+      "entity_text": "Corp France",
+      "entity_type": "PERSON",
+      "start_pos": 273,
+      "end_pos": 284
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 278,
+      "end_pos": 284
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 394,
+      "end_pos": 398
+    },
+    {
+      "entity_text": "Université Claude",
+      "entity_type": "PERSON",
+      "start_pos": 448,
+      "end_pos": 465
+    },
+    {
+      "entity_text": "é pour Microsoft France pendant cinq ans avant de rejoindre TechCorp",
+      "entity_type": "ORG",
+      "start_pos": 497,
+      "end_pos": 565
+    },
+    {
+      "entity_text": "Microsoft France",
+      "entity_type": "PERSON",
+      "start_pos": 504,
+      "end_pos": 520
+    },
+    {
+      "entity_text": "Microsoft France pendant cinq ans avant de rejoindre TechCorp en ",
+      "entity_type": "ORG",
+      "start_pos": 504,
+      "end_pos": 569
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 514,
+      "end_pos": 520
+    },
+    {
+      "entity_text": "TechCorp",
+      "entity_type": "ORG",
+      "start_pos": 641,
+      "end_pos": 649
+    },
+    {
+      "entity_text": "Chez Tech",
+      "entity_type": "PERSON",
+      "start_pos": 664,
+      "end_pos": 673
+    },
+    {
+      "entity_text": "Chez TechCorp",
+      "entity_type": "ORG",
+      "start_pos": 664,
+      "end_pos": 677
+    },
+    {
+      "entity_text": "Mon équipe",
+      "entity_type": "PERSON",
+      "start_pos": 716,
+      "end_pos": 726
+    },
+    {
+      "entity_text": "ée également",
+      "entity_type": "PERSON",
+      "start_pos": 733,
+      "end_pos": 745
+    },
+    {
+      "entity_text": "Pierre Martin",
+      "entity_type": "PERSON",
+      "start_pos": 758,
+      "end_pos": 771
+    },
+    {
+      "entity_text": "Toulouse",
+      "entity_type": "LOCATION",
+      "start_pos": 827,
+      "end_pos": 835
+    },
+    {
+      "entity_text": "Marseille",
+      "entity_type": "LOCATION",
+      "start_pos": 839,
+      "end_pos": 848
+    },
+    {
+      "entity_text": "Sophie Laurent",
+      "entity_type": "PERSON",
+      "start_pos": 1074,
+      "end_pos": 1088
+    },
+    {
+      "entity_text": "éveloppeuse, Pierre",
+      "entity_type": "PERSON",
+      "start_pos": 1102,
+      "end_pos": 1121
+    },
+    {
+      "entity_text": "Pierre Fontaine",
+      "entity_type": "PERSON",
+      "start_pos": 1115,
+      "end_pos": 1130
+    },
+    {
+      "entity_text": "Google Cloud",
+      "entity_type": "PERSON",
+      "start_pos": 1159,
+      "end_pos": 1171
+    },
+    {
+      "entity_text": "Mme Catherine Rousseau",
+      "entity_type": "PERSON",
+      "start_pos": 1176,
+      "end_pos": 1198
+    },
+    {
+      "entity_text": "Mme Catherine",
+      "entity_type": "PERSON",
+      "start_pos": 1176,
+      "end_pos": 1189
+    },
+    {
+      "entity_text": "Professeur Ahmed Ben Ali",
+      "entity_type": "PERSON",
+      "start_pos": 1258,
+      "end_pos": 1282
+    },
+    {
+      "entity_text": "Professeur Ahmed",
+      "entity_type": "PERSON",
+      "start_pos": 1258,
+      "end_pos": 1274
+    },
+    {
+      "entity_text": "Ben Ali",
+      "entity_type": "PERSON",
+      "start_pos": 1275,
+      "end_pos": 1282
+    },
+    {
+      "entity_text": "École Polytechnique",
+      "entity_type": "PERSON",
+      "start_pos": 1288,
+      "end_pos": 1307
+    },
+    {
+      "entity_text": "Paris",
+      "entity_type": "LOCATION",
+      "start_pos": 1405,
+      "end_pos": 1410
+    },
+    {
+      "entity_text": "Londres",
+      "entity_type": "LOCATION",
+      "start_pos": 1441,
+      "end_pos": 1448
+    },
+    {
+      "entity_text": "Berlin",
+      "entity_type": "LOCATION",
+      "start_pos": 1452,
+      "end_pos": 1458
+    },
+    {
+      "entity_text": "Mais avec des outils comme Slack et des réunions régulières avec IBM Europe",
+      "entity_type": "ORG",
+      "start_pos": 1460,
+      "end_pos": 1535
+    },
+    {
+      "entity_text": "IBM Europe",
+      "entity_type": "ORG",
+      "start_pos": 1525,
+      "end_pos": 1535
+    },
+    {
+      "entity_text": "Docteur Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 1592,
+      "end_pos": 1606
+    },
+    {
+      "entity_text": "Dr. Marie Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 1609,
+      "end_pos": 1625
+    },
+    {
+      "entity_text": "Marie Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 1613,
+      "end_pos": 1625
+    }
+  ]
+}

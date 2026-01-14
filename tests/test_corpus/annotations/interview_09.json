@@ -1,0 +1,395 @@
+{
+  "document_name": "interview_09.txt",
+  "entities": [
+    {
+      "entity_text": "Fusion Acquisition",
+      "entity_type": "PERSON",
+      "start_pos": 13,
+      "end_pos": 31
+    },
+    {
+      "entity_text": "Secteur Bancaire",
+      "entity_type": "PERSON",
+      "start_pos": 32,
+      "end_pos": 48
+    },
+    {
+      "entity_text": "Mme Isabelle Moreau",
+      "entity_type": "PERSON",
+      "start_pos": 54,
+      "end_pos": 73
+    },
+    {
+      "entity_text": "Mme Isabelle",
+      "entity_type": "PERSON",
+      "start_pos": 54,
+      "end_pos": 66
+    },
+    {
+      "entity_text": "Moreau, Banque",
+      "entity_type": "PERSON",
+      "start_pos": 67,
+      "end_pos": 81
+    },
+    {
+      "entity_text": "Banque Régionale",
+      "entity_type": "PERSON",
+      "start_pos": 75,
+      "end_pos": 91
+    },
+    {
+      "entity_text": "Sud\nNice",
+      "entity_type": "PERSON",
+      "start_pos": 95,
+      "end_pos": 103
+    },
+    {
+      "entity_text": "Nice",
+      "entity_type": "LOCATION",
+      "start_pos": 99,
+      "end_pos": 103
+    },
+    {
+      "entity_text": "Madame Moreau",
+      "entity_type": "PERSON",
+      "start_pos": 134,
+      "end_pos": 147
+    },
+    {
+      "entity_text": "Crédit Provençal",
+      "entity_type": "PERSON",
+      "start_pos": 187,
+      "end_pos": 203
+    },
+    {
+      "entity_text": "Isabelle Moreau",
+      "entity_type": "PERSON",
+      "start_pos": 206,
+      "end_pos": 221
+    },
+    {
+      "entity_text": "M. Jacques Martineau",
+      "entity_type": "PERSON",
+      "start_pos": 258,
+      "end_pos": 278
+    },
+    {
+      "entity_text": "Jacques Martineau",
+      "entity_type": "PERSON",
+      "start_pos": 261,
+      "end_pos": 278
+    },
+    {
+      "entity_text": "M. Olivier Roussel",
+      "entity_type": "PERSON",
+      "start_pos": 311,
+      "end_pos": 329
+    },
+    {
+      "entity_text": "Olivier Roussel",
+      "entity_type": "PERSON",
+      "start_pos": 314,
+      "end_pos": 329
+    },
+    {
+      "entity_text": "Marseille",
+      "entity_type": "LOCATION",
+      "start_pos": 395,
+      "end_pos": 404
+    },
+    {
+      "entity_text": "Mme Moreau",
+      "entity_type": "PERSON",
+      "start_pos": 443,
+      "end_pos": 453
+    },
+    {
+      "entity_text": "Bredin Prat",
+      "entity_type": "PERSON",
+      "start_pos": 559,
+      "end_pos": 570
+    },
+    {
+      "entity_text": "Maître Didier",
+      "entity_type": "PERSON",
+      "start_pos": 573,
+      "end_pos": 586
+    },
+    {
+      "entity_text": "Crédit Provençal",
+      "entity_type": "PERSON",
+      "start_pos": 611,
+      "end_pos": 627
+    },
+    {
+      "entity_text": "Mme Matthieu Pigasse",
+      "entity_type": "PERSON",
+      "start_pos": 657,
+      "end_pos": 677
+    },
+    {
+      "entity_text": "Mme Matthieu",
+      "entity_type": "PERSON",
+      "start_pos": 657,
+      "end_pos": 669
+    },
+    {
+      "entity_text": "August Debouzy",
+      "entity_type": "PERSON",
+      "start_pos": 693,
+      "end_pos": 707
+    },
+    {
+      "entity_text": "Isabelle Moreau",
+      "entity_type": "PERSON",
+      "start_pos": 754,
+      "end_pos": 769
+    },
+    {
+      "entity_text": "Menée par KPMG France",
+      "entity_type": "ORG",
+      "start_pos": 771,
+      "end_pos": 792
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 786,
+      "end_pos": 792
+    },
+    {
+      "entity_text": "M. Philippe Arnaud",
+      "entity_type": "PERSON",
+      "start_pos": 808,
+      "end_pos": 826
+    },
+    {
+      "entity_text": "Philippe Arnaud",
+      "entity_type": "PERSON",
+      "start_pos": 811,
+      "end_pos": 826
+    },
+    {
+      "entity_text": "Mme Sophie Duchemin",
+      "entity_type": "PERSON",
+      "start_pos": 859,
+      "end_pos": 878
+    },
+    {
+      "entity_text": "Mme Sophie",
+      "entity_type": "PERSON",
+      "start_pos": 859,
+      "end_pos": 869
+    },
+    {
+      "entity_text": "M. Laurent Benoist",
+      "entity_type": "PERSON",
+      "start_pos": 896,
+      "end_pos": 914
+    },
+    {
+      "entity_text": "Laurent Benoist",
+      "entity_type": "PERSON",
+      "start_pos": 899,
+      "end_pos": 914
+    },
+    {
+      "entity_text": "Claire Daveu",
+      "entity_type": "PERSON",
+      "start_pos": 945,
+      "end_pos": 957
+    },
+    {
+      "entity_text": "Crédit Provençal",
+      "entity_type": "PERSON",
+      "start_pos": 989,
+      "end_pos": 1005
+    },
+    {
+      "entity_text": "Mme Moreau",
+      "entity_type": "PERSON",
+      "start_pos": 1035,
+      "end_pos": 1045
+    },
+    {
+      "entity_text": "M. Dominique Laboureix",
+      "entity_type": "PERSON",
+      "start_pos": 1092,
+      "end_pos": 1114
+    },
+    {
+      "entity_text": "Dominique Laboureix",
+      "entity_type": "PERSON",
+      "start_pos": 1095,
+      "end_pos": 1114
+    },
+    {
+      "entity_text": "Mme Christine Lagarde",
+      "entity_type": "PERSON",
+      "start_pos": 1160,
+      "end_pos": 1181
+    },
+    {
+      "entity_text": "Mme Christine",
+      "entity_type": "PERSON",
+      "start_pos": 1160,
+      "end_pos": 1173
+    },
+    {
+      "entity_text": "Mme Isabelle",
+      "entity_type": "PERSON",
+      "start_pos": 1239,
+      "end_pos": 1251
+    },
+    {
+      "entity_text": "Isabelle Moreau",
+      "entity_type": "PERSON",
+      "start_pos": 1317,
+      "end_pos": 1332
+    },
+    {
+      "entity_text": "Côté Banque",
+      "entity_type": "PERSON",
+      "start_pos": 1334,
+      "end_pos": 1345
+    },
+    {
+      "entity_text": "M. Thierry Lecomte",
+      "entity_type": "PERSON",
+      "start_pos": 1383,
+      "end_pos": 1401
+    },
+    {
+      "entity_text": "Thierry Lecomte",
+      "entity_type": "PERSON",
+      "start_pos": 1386,
+      "end_pos": 1401
+    },
+    {
+      "entity_text": "Mme Valérie Blanc",
+      "entity_type": "PERSON",
+      "start_pos": 1410,
+      "end_pos": 1427
+    },
+    {
+      "entity_text": "Mme Valérie",
+      "entity_type": "PERSON",
+      "start_pos": 1410,
+      "end_pos": 1421
+    },
+    {
+      "entity_text": "M. Karim Benzema",
+      "entity_type": "PERSON",
+      "start_pos": 1436,
+      "end_pos": 1452
+    },
+    {
+      "entity_text": "Karim Benzema",
+      "entity_type": "PERSON",
+      "start_pos": 1439,
+      "end_pos": 1452
+    },
+    {
+      "entity_text": "Côté Crédit",
+      "entity_type": "PERSON",
+      "start_pos": 1454,
+      "end_pos": 1465
+    },
+    {
+      "entity_text": "M. Jean Durand",
+      "entity_type": "PERSON",
+      "start_pos": 1486,
+      "end_pos": 1500
+    },
+    {
+      "entity_text": "Jean Durand",
+      "entity_type": "PERSON",
+      "start_pos": 1489,
+      "end_pos": 1500
+    },
+    {
+      "entity_text": "Durand, Mme",
+      "entity_type": "PERSON",
+      "start_pos": 1494,
+      "end_pos": 1505
+    },
+    {
+      "entity_text": "Mme Nathalie Collin",
+      "entity_type": "PERSON",
+      "start_pos": 1502,
+      "end_pos": 1521
+    },
+    {
+      "entity_text": "Mme Nathalie",
+      "entity_type": "PERSON",
+      "start_pos": 1502,
+      "end_pos": 1514
+    },
+    {
+      "entity_text": "M. Pierre Serve",
+      "entity_type": "PERSON",
+      "start_pos": 1541,
+      "end_pos": 1556
+    },
+    {
+      "entity_text": "Pierre Serve",
+      "entity_type": "PERSON",
+      "start_pos": 1544,
+      "end_pos": 1556
+    },
+    {
+      "entity_text": "Mme Moreau",
+      "entity_type": "PERSON",
+      "start_pos": 1606,
+      "end_pos": 1616
+    },
+    {
+      "entity_text": "Dr. Yves Perrier",
+      "entity_type": "PERSON",
+      "start_pos": 1745,
+      "end_pos": 1761
+    },
+    {
+      "entity_text": "Yves Perrier",
+      "entity_type": "PERSON",
+      "start_pos": 1749,
+      "end_pos": 1761
+    },
+    {
+      "entity_text": "Mme Anne Marion Chauveau",
+      "entity_type": "PERSON",
+      "start_pos": 1783,
+      "end_pos": 1807
+    },
+    {
+      "entity_text": "Mme Anne",
+      "entity_type": "PERSON",
+      "start_pos": 1783,
+      "end_pos": 1791
+    },
+    {
+      "entity_text": "Marion Chauveau",
+      "entity_type": "PERSON",
+      "start_pos": 1792,
+      "end_pos": 1807
+    },
+    {
+      "entity_text": "M. Nicolas Namias",
+      "entity_type": "PERSON",
+      "start_pos": 1831,
+      "end_pos": 1848
+    },
+    {
+      "entity_text": "Nicolas Namias",
+      "entity_type": "PERSON",
+      "start_pos": 1834,
+      "end_pos": 1848
+    },
+    {
+      "entity_text": "Mme Leroy",
+      "entity_type": "PERSON",
+      "start_pos": 1918,
+      "end_pos": 1927
+    }
+  ]
+}

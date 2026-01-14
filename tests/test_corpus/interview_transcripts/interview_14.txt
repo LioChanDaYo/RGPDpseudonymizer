@@ -1,0 +1,31 @@
+Interview - Retail et Transformation Omnicanale
+Directrice e-commerce: Mme Sophie Laurent, Magasins ModeFrance
+Roubaix, 20 décembre 2024
+
+Interviewer: Madame Laurent, comment ModeFrance aborde le digital?
+
+Sophie Laurent: Nous sommes une enseigne familiale créée en 1950. Le PDG, M. Olivier Gaillard, petit-fils du fondateur, a lancé la transformation en 2022.
+
+Interviewer: Quelle organisation?
+
+Mme Laurent: Je dirige le digital avec trois pôles. M. Maxime Dubois gère le site e-commerce développé avec Salesforce Commerce Cloud. Mme Lucie Renard pilote l'omnicanal et notre appli mobile créée par Fabernovel. M. Alexandre Jin s'occupe du marketing digital avec Google France.
+
+Interviewer: Logistique et supply chain?
+
+Sophie Laurent: Révolution complète. Notre directeur supply, M. Jean-Michel Rousseau, travaille avec XPO Logistics. Leur VP opérations, Mme Delphine Mallet, nous aide. L'entrepôt de Lesquin est automatisé par Savoye et leur ingénieur, Dr. Marc Laperrière. ID Logistics gère le dernier kilomètre.
+
+Interviewer: Technologies déployées?
+
+Mme Laurent: Hybris SAP pour le PIM, implémenté par Deloitte Digital. Chef de projet: M. Vincent Gorse. Notre CRM Salesforce est géré par M. Karim Benani. La data platform sur Google Cloud avec l'aide de Publicis Sapient - consultante Mme Émilie Bernard. Et Contentsquare pour l'analytics, contact M. Jonathan Cherki.
+
+Interviewer: Équipes magasins?
+
+Sophie Laurent: 120 points de vente. Nos directeurs régionaux: Mme Carole Petit pour le Nord, M. Stéphane Martin pour Paris et l'Île-de-France, Mme Nadia Kadem pour le Sud. Formation digitale assurée par M. François Leroux, notre responsable RH, avec l'aide d'OpenClassrooms et leur B2B manager, Mme Anne Browaeys.
+
+Interviewer: Marketing et influence?
+
+Mme Laurent: Notre directrice marketing, Mme Clara Dumont, pilote. On travaille avec l'agence BETC, créatifs M. Rémi Babinet et Mme Mercedes Erra. Influenceurs: partenariats avec Léna Situations, Enjoy Phoenix (Marie Lopez), et le blogueur mode M. Alex Turrion. Notre social media manager, M. Thomas Khalifa, coordonne.
+
+Interviewer: Concurrence et benchmarking?
+
+Sophie Laurent: On s'inspire des leaders. J'ai rencontré M. Alexandre Bompard de Carrefour et Mme Régine Ballonad de Printemps. On benchmark Zara (Inditex), H&M, et les pure players comme Zalando. Membre de la FEVAD, je participe aux groupes de travail avec M. Marc Lolivier, le délégué général.

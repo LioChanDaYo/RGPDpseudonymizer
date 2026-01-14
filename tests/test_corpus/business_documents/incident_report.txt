@@ -1,0 +1,291 @@
+RAPPORT D'INCIDENT - CONFIDENTIEL
+Classification: INTERNE - Diffusion Restreinte
+
+Incident ID: INC-2024-047
+Date incident: 10 avril 2024, 14:32 CET
+Date rapport: 11 avril 2024
+Rédigé par: M. Vincent Chen, RSSI
+
+---
+
+1. RÉSUMÉ EXÉCUTIF
+
+Le 10 avril 2024 à 14h32, notre SOC (Security Operations Center) a détecté une tentative d'intrusion sur notre infrastructure Azure. L'incident a été contenu en 47 minutes sans perte de données ni interruption de service. Aucun impact client.
+
+Criticité: ÉLEVÉE
+Impact business: FAIBLE (contenu rapidement)
+Impact sécurité: MOYEN (système compromis isolé)
+
+---
+
+2. TIMELINE
+
+14:32 - Alerte SIEM (Splunk) déclenchée par comportement anomal
+        Détection: Mme Laura Martin, Analyste SOC
+
+14:35 - Escalade au RSSI M. Vincent Chen
+        Activation cellule de crise
+
+14:38 - Convocation équipe sécurité:
+        - Mme Catherine Rousseau, Responsable cyberdéfense
+        - M. Marc Dubois, Architecte sécurité
+        - M. Jonathan Cherki, Analyste GRC
+        - M. Matthieu Bonenfant, Pentester (Wavestone, prestataire)
+
+14:42 - Isolation du serveur compromis par M. Laurent Benoit (Architecte Cloud)
+        Coordination avec Microsoft Azure (M. Romain Niccoli, account manager)
+
+14:50 - Notification au management:
+        - Dr. Marie Dubois, CTO
+        - Mme Isabelle Moreau, CEO
+        - M. Philippe Arnaud, CFO
+        - M. François Leclerc, Directeur Juridique
+
+15:00 - Analyse forensique démarrée:
+        - Équipe interne: M. Kevin Zhang (VP Engineering), M. Alexandre Jin
+        - Support externe: Wavestone (Mme Laure Bertholom, Partner Cyber)
+
+15:30 - Containment confirmé par M. Romain Duval et Mme Nadia Amrani
+        Aucune latéral movement détecté
+
+16:00 - Briefing COMEX par M. Vincent Chen
+        Présents: Mme Moreau, M. Arnaud, Dr. Dubois, M. Thomas Weber
+
+16:30 - Notification régulateurs:
+        - ANSSI: Contact M. Guillaume Poupard (DG) via astreinte
+        - CNIL: Me Sarah Cohen (notre DPO) prépare notification
+
+17:00 - Appel assureur:
+        - Hiscox France: M. Jean-Marc Bideau (courtier)
+        - AXA Cyber: M. Thomas Buberl (souscripteur)
+
+18:00 - Débriefing équipe étendue
+
+15:19 (J+1) - All-clear confirmé par audit SEKOIA.IO (Dr. Thomas Roccia)
+
+---
+
+3. NATURE DE L'ATTAQUE
+
+Type: Tentative d'intrusion via credential stuffing
+Vecteur: API authentification (endpoint /auth/login)
+Source: IPs chinoises et russes (masquées via Tor)
+Cible: Base de données clients (Azure SQL)
+
+Volume: 15 000 tentatives de connexion en 12 minutes
+Taux de réussite: 0% (multi-factor authentication effectif)
+Serveur compromis: api-prod-3 (Azure West Europe)
+
+---
+
+4. ÉQUIPE DE RÉPONSE
+
+ÉQUIPE INTERNE:
+
+Direction:
+- M. Vincent Chen, RSSI (incident commander)
+- Dr. Marie Dubois, CTO (sponsor exécutif)
+
+Équipe technique:
+- Mme Laura Martin, Analyste SOC (détection)
+- Mme Catherine Rousseau, Responsable cyberdéfense (coordination)
+- M. Marc Dubois, Architecte sécurité (containment)
+- M. Laurent Benoit, Architecte Cloud (isolation infrastructure)
+- M. Kevin Zhang, VP Engineering (forensics)
+- M. Alexandre Jin, Lead Developer (analyse code)
+- M. Romain Duval, Backend Lead (remediation)
+- Mme Nadia Amrani, DevOps (monitoring)
+
+Support:
+- M. François Leclerc, Directeur Juridique (aspects légaux)
+- Me Sarah Cohen, DPO (notification CNIL/RGPD)
+- Mme Caroline Marchal, Dircom (communication crise)
+
+ÉQUIPE EXTERNE:
+
+Cybersécurité:
+- Wavestone: Mme Laure Bertholom (Partner), M. Matthieu Bonenfant (Consultant Senior)
+- SEKOIA.IO: Dr. Thomas Roccia (Threat Intelligence)
+- Microsoft DART: M. John Lambert (Detection & Response Team)
+
+Cloud & Infrastructure:
+- Microsoft Azure: M. Romain Niccoli (Account Director), Mme Sophie Bernard (Architecte)
+- Palo Alto Networks: Mme Jennifer Smith (Support Engineer)
+
+Juridique & Assurance:
+- Cabinet CMS Francis Lefebvre: Maître François Chambardon (cybercrime)
+- Hiscox: M. Jean-Marc Bideau (Claims Manager)
+- AXA: M. Jean-Laurent Bonnafé (Risk Manager)
+
+Autorités:
+- ANSSI: M. Guillaume Poupard (contact DG), M. Vincent Strubel (délégué)
+- CNIL: M. François Pellegrini (inspecteur), Mme Marie-Laure Denis (présidente informée)
+
+---
+
+5. ACTIONS IMMÉDIATES (réalisées)
+
+✓ Isolation serveur compromis (M. Laurent Benoit)
+✓ Rotation credentials et certificats (M. Romain Duval)
+✓ Scan complet infrastructure (M. Marc Dubois)
+✓ Analyse logs 30 derniers jours (Mme Laura Martin)
+✓ Revue accès privilégiés (Mme Catherine Rousseau)
+✓ Notification ANSSI dans délai légal (Me Sarah Cohen)
+✓ Communication interne (Mme Caroline Marchal)
+✓ Briefing board (Mme Isabelle Moreau au président M. Jean-Charles Le Goff)
+
+---
+
+6. ANALYSE ROOT CAUSE (par M. Kevin Zhang et Wavestone)
+
+CAUSES IDENTIFIÉES:
+
+1. Rate limiting insuffisant sur API auth
+   - Limite configurée: 100 req/min
+   - Devrait être: 10 req/min
+   Responsable fix: M. Alexandre Jin
+
+2. Logs Azure non ingérés dans SIEM temps réel
+   - Latence: 5 minutes
+   - Devrait être: temps réel
+   Responsable fix: Mme Nadia Amrani
+
+3. WAF rules pas à jour
+   - Dernière update: 3 semaines
+   - Devrait être: hebdomadaire
+   Responsable fix: M. Marc Dubois
+
+4. Absence d'IP geoblocking sur pays à risque
+   Responsable fix: M. Laurent Benoit
+
+---
+
+7. PLAN D'ACTION CORRECTIF (28 jours)
+
+Court terme (0-7 jours):
+
+1. Déploiement rate limiting strict (M. Alexandre Jin)
+   Deadline: 12 avril, 18h00
+   Validation: M. Kevin Zhang
+
+2. Configuration logs temps réel (Mme Nadia Amrani)
+   Deadline: 13 avril
+   Validation: Mme Laura Martin
+
+3. Update WAF rules (M. Marc Dubois)
+   Deadline: 14 avril
+   Support: Palo Alto (Mme Jennifer Smith)
+
+4. Activation geoblocking (M. Laurent Benoit)
+   Deadline: 15 avril
+   Validation: M. Vincent Chen
+
+Moyen terme (8-28 jours):
+
+5. Audit sécurité complet par Wavestone (Mme Laure Bertholom)
+   Deadline: 5 mai
+   Budget: 50K€ validé par M. Philippe Arnaud
+
+6. Pentest applicatif (M. Matthieu Bonenfant, Wavestone)
+   Deadline: 10 mai
+   Scope: Toutes les APIs
+
+7. Formation équipe développement (M. Kevin Zhang)
+   Organisme: SANS Institute, instructeur M. Damien Bancal
+   Deadline: 30 mai
+   Budget: 15K€
+
+8. Mise à jour plan de réponse incident (M. Vincent Chen)
+   Deadline: 15 mai
+   Revue: Dr. Marie Dubois
+
+---
+
+8. COMMUNICATION
+
+INTERNE:
+- COMEX: Briefing par M. Vincent Chen (fait)
+- Board: Notification par Mme Isabelle Moreau à M. Jean-Charles Le Goff (fait)
+- Tous collaborateurs: Email Mme Caroline Marchal (fait le 11 avril 9h00)
+
+EXTERNE:
+- Clients: Aucune notification requise (pas d'impact, pas de fuite données)
+- Partenaires clés: Information par M. Thomas Weber si sollicité
+- Média: Aucune communication (incident contenu, pas de fuite)
+
+RÉGULATEURS:
+- ANSSI: Notification faite par Me Sarah Cohen dans les 24h
+- CNIL: Pas de notification requise (pas de données personnelles exposées)
+- ACPR: Pas applicable (nous ne sommes pas établissement financier)
+
+---
+
+9. COÛTS
+
+Coûts incidents:
+- Heures équipe interne: ~200h (coût RH absorbé)
+- Wavestone forensics: 15K€
+- SEKOIA.IO threat intel: 5K€
+- Microsoft support priority: Inclus dans contrat
+
+Coûts remédiation:
+- Audit Wavestone: 50K€
+- Pentest: Inclus dans audit
+- Formation SANS: 15K€
+- Tooling additionnel: 10K€
+
+TOTAL: ~95K€
+Couvert par assurance cyber Hiscox (franchise 10K€)
+
+---
+
+10. LEÇONS APPRISES
+
+POINTS POSITIFS:
+- Détection rapide par SOC (Mme Laura Martin)
+- Containment efficace en <1h
+- Aucun impact client
+- Coordination équipes exemplaire
+- Support Microsoft réactif (M. Niccoli, Mme Bernard)
+
+POINTS D'AMÉLIORATION:
+- Rate limiting trop permissif
+- Logs pas en temps réel
+- Besoin d'automation réponse (SOAR)
+- Formation continue développeurs
+
+ACTIONS STRUCTURELLES (6 mois):
+
+1. Déploiement SOAR (Security Orchestration)
+   Chef de projet: Mme Catherine Rousseau
+   Solution évaluée: Splunk SOAR, PaloAlto Cortex XSOAR
+   Budget: 150K€
+   Sponsor: Dr. Marie Dubois
+
+2. Red Team trimestriel
+   Prestataire: Synacktiv (CEO M. Fabien Perigaud)
+   Budget annuel: 80K€
+   Sponsor: M. Vincent Chen
+
+3. Programme Security Champions
+   Pilote: M. Kevin Zhang
+   Formation: M. Alexandre Jin, Mme Nadia Amrani, M. Romain Duval
+   Partenaire: OWASP France
+
+---
+
+SIGNATURES
+
+Rédigé par: M. Vincent Chen, RSSI
+Validé par: Dr. Marie Dubois, CTO
+Approuvé par: Mme Isabelle Moreau, CEO
+
+Copie à:
+- M. Philippe Arnaud, CFO
+- M. François Leclerc, Directeur Juridique
+- M. Jean-Charles Le Goff, Président du Conseil
+- Me Sarah Cohen, DPO
+- M. Thomas Weber, Directeur Commercial
+- Mme Sophie Laurent, DRH
+
+Classification: CONFIDENTIEL - Distribution limitée
