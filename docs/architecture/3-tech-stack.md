@@ -6,8 +6,8 @@ This is the **DEFINITIVE** technology selection table. All development must use 
 |----------|------------|---------|---------|-----------|
 | **Runtime** | Python | 3.9+ | Application runtime environment | Balance of modern features (type hints, asyncio) with broad platform support. 3.9 EOL Oct 2025 provides safe window for MVP. |
 | **CLI Framework** | Typer | 0.9+ | Command-line interface | Excellent type hints support, automatic help generation, based on Click (mature foundation). Simpler than argparse for complex CLIs. |
-| **NLP Library** | spaCy OR Stanza | spaCy 3.7+ OR Stanza 1.7+ | French NER (entity detection) | **DECISION PENDING Epic 0-1 benchmark**. spaCy preferred for speed/docs, Stanza for Stanford quality. Must achieve ≥85% F1 score. |
-| **NLP Model** | fr_core_news_lg OR fr_default | spaCy 3.7 model OR Stanza 1.7 | French language model | Large model size for accuracy. Downloaded post-install (~500MB). |
+| **NLP Library** | spaCy | 3.7+ (tested: 3.8.0) | French NER (entity detection) | Selected after Story 1.2 benchmark (2026-01-16). Achieves 29.5% F1 vs Stanza 11.9% F1 (both below 85% target). Mandatory validation mode required for MVP. Fine-tuning planned post-MVP. See docs/nlp-benchmark-report.md for full analysis. |
+| **NLP Model** | fr_core_news_lg | 3.8.0 | French language model | spaCy large model (~571MB). Downloaded post-install. Baseline accuracy requires validation mode + hybrid detection (NLP + regex patterns). |
 | **Database** | SQLite | 3.35+ | Local data persistence | Embedded database, zero configuration, cross-platform. Python stdlib support eliminates dependency. |
 | **Encryption** | cryptography (Fernet) | 41.0+ | Symmetric encryption for mappings | Python-native (no compilation), NIST-approved AES-128-CBC with HMAC. Simpler than SQLCipher, higher install success rate. |
 | **ORM** | SQLAlchemy | 2.0+ | Database abstraction | Repository pattern support, migration tooling (Alembic), type-safe queries. Modern 2.0 API with async support (future-proof). |

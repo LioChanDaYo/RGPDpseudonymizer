@@ -5,19 +5,29 @@ This script benchmarks NLP library performance against ground truth annotations.
 It calculates precision, recall, and F1 scores per entity type.
 
 Usage:
-    python scripts/benchmark_nlp.py
-    python scripts/benchmark_nlp.py --library spacy --verbose
+    python scripts/benchmark_nlp.py --library spacy
+    python scripts/benchmark_nlp.py --library stanza --verbose
+    python scripts/benchmark_nlp.py --library spacy --performance
 
 NOTE: Typer CLI framework will be added in proper project setup (Epic 0).
-      This version uses argparse for Story 1.1 deliverable.
+      This version uses argparse for Story 1.2 deliverable.
 """
 
 from pathlib import Path
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Optional
 import json
 import argparse
 from dataclasses import dataclass
 from collections import defaultdict
+import time
+import sys
+
+# Add project root to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from gdpr_pseudonymizer.nlp.entity_detector import EntityDetector
+from gdpr_pseudonymizer.nlp.spacy_detector import SpaCyDetector
+from gdpr_pseudonymizer.nlp.stanza_detector import StanzaDetector
 
 
 @dataclass
@@ -112,20 +122,29 @@ def load_corpus(corpus_dir: Path) -> Dict[str, Tuple[str, List[Entity]]]:
     return corpus
 
 
-def run_ner_placeholder(text: str) -> List[Entity]:
-    """Placeholder NER function to be integrated after Story 1.2.
-
-    This will be replaced with actual spaCy or Stanza NER implementation.
+def run_ner(text: str, detector: EntityDetector) -> List[Entity]:
+    """Run NER on text using specified detector.
 
     Args:
         text: Document text
+        detector: EntityDetector implementation (spaCy or Stanza)
 
     Returns:
-        List of detected entities (empty for now)
+        List of Entity objects
     """
-    # TODO: Integrate actual NLP library after Story 1.2 benchmark
-    # Options: spaCy fr_core_news_lg or Stanza fr_default
-    return []
+    detected = detector.detect_entities(text)
+
+    # Convert DetectedEntity to Entity format for metrics
+    entities = []
+    for ent in detected:
+        entities.append(Entity(
+            text=ent.text,
+            type=ent.entity_type,
+            start=ent.start_pos,
+            end=ent.end_pos
+        ))
+
+    return entities
 
 
 def calculate_metrics(
@@ -198,6 +217,23 @@ def aggregate_metrics(metrics_list: List[MetricsResult]) -> MetricsResult:
     )
 
 
+def create_detector(library: str) -> Optional[EntityDetector]:
+    """Create detector instance for specified library.
+
+    Args:
+        library: Library name (spacy or stanza)
+
+    Returns:
+        EntityDetector instance or None
+    """
+    if library == "spacy":
+        return SpaCyDetector()
+    elif library == "stanza":
+        return StanzaDetector()
+    else:
+        return None
+
+
 def main():
     """Main function to run NLP benchmark."""
     parser = argparse.ArgumentParser(
@@ -212,8 +248,8 @@ def main():
     parser.add_argument(
         "--library",
         type=str,
-        default="placeholder",
-        choices=["placeholder", "spacy", "stanza"],
+        required=True,
+        choices=["spacy", "stanza"],
         help="NLP library to use"
     )
     parser.add_argument(
@@ -221,6 +257,12 @@ def main():
         "-v",
         action="store_true",
         help="Show per-document results"
+    )
+    parser.add_argument(
+        "--performance",
+        "-p",
+        action="store_true",
+        help="Measure performance metrics (time, memory)"
     )
 
     args = parser.parse_args()
@@ -240,17 +282,36 @@ def main():
         print("Error: No documents found in corpus")
         return 1
 
+    # Create detector
+    print(f"Initializing {args.library.upper()} detector...")
+    detector = create_detector(args.library)
+    if detector is None:
+        print(f"Error: Unknown library '{args.library}'")
+        return 1
+
+    # Measure model loading time if performance flag set
+    load_start_time = time.time() if args.performance else None
+
     # Initialize metrics storage
     entity_types = ["PERSON", "LOCATION", "ORG"]
     all_metrics = defaultdict(list)
+    processing_times = []
 
     # Process each document
     print(f"Running NER with library: {args.library}")
     print()
 
     for doc_name, (text, ground_truth) in corpus_data.items():
-        # Run NER (placeholder for now)
-        predicted = run_ner_placeholder(text)
+        # Measure processing time if performance flag set
+        doc_start_time = time.time() if args.performance else None
+
+        # Run NER
+        predicted = run_ner(text, detector)
+
+        # Record processing time
+        if args.performance and doc_start_time is not None:
+            doc_time = time.time() - doc_start_time
+            processing_times.append(doc_time)
 
         # Calculate metrics per entity type
         for entity_type in entity_types:
@@ -258,7 +319,10 @@ def main():
             all_metrics[entity_type].append(metrics)
 
         if args.verbose:
-            print(f"Processed: {doc_name}")
+            if args.performance and doc_start_time is not None:
+                print(f"Processed: {doc_name} ({doc_time:.3f}s)")
+            else:
+                print(f"Processed: {doc_name}")
 
     # Aggregate and display results
     print("=" * 60)
@@ -288,12 +352,39 @@ def main():
     print(f"  F1 Score:  {overall.f1:.4f}")
     print()
 
-    # Note about placeholder
-    if args.library == "placeholder":
+    # Display performance metrics if requested
+    if args.performance and processing_times:
         print("=" * 60)
-        print("NOTE: Using placeholder NER (returns no entities)")
-        print("Actual NLP library integration pending Story 1.2")
+        print("PERFORMANCE METRICS")
         print("=" * 60)
+        print()
+
+        avg_time = sum(processing_times) / len(processing_times)
+        total_time = sum(processing_times)
+        model_load_time = time.time() - load_start_time - total_time if load_start_time else 0
+
+        print(f"Model Loading Time: {model_load_time:.3f}s")
+        print(f"Average Processing Time per Document: {avg_time:.3f}s")
+        print(f"Total Processing Time: {total_time:.3f}s")
+        print(f"Documents Processed: {len(processing_times)}")
+        print()
+
+        # Model info
+        model_info = detector.get_model_info()
+        print("Model Information:")
+        print(f"  Library: {model_info['library']}")
+        print(f"  Name: {model_info['name']}")
+        print(f"  Version: {model_info['version']}")
+        print(f"  Language: {model_info['language']}")
+        print()
+
+    # Check if meets >=85% F1 threshold
+    print("=" * 60)
+    if overall.f1 >= 0.85:
+        print(f"PASS: {args.library.upper()} meets >=85% F1 threshold ({overall.f1:.4f})")
+    else:
+        print(f"FAIL: {args.library.upper()} does not meet >=85% F1 threshold ({overall.f1:.4f})")
+    print("=" * 60)
 
     return 0
 
