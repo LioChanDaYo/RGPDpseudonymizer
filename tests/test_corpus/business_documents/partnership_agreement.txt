@@ -1,0 +1,391 @@
+PROTOCOLE D'ACCORD DE PARTENARIAT STRATÉGIQUE
+Document de travail - Version 2.1 - 20 avril 2024
+
+ENTRE:
+
+TechSolutions France SAS
+Siège social: 45 Avenue de la Grande Armée, 75016 Paris
+RCS Paris 123 456 789
+Représentée par Mme Isabelle Moreau, CEO
+Assistée de M. François Leclerc, Directeur Juridique
+
+Ci-après dénommée "TECHSOLUTIONS"
+
+ET:
+
+GlobalTech Industries Inc.
+Siège social: 2500 Innovation Drive, Palo Alto, CA 94303, USA
+Représentée par M. Robert Chen, CEO
+Assistée de M. David Park, VP Europe & General Counsel
+
+Ci-après dénommée "GLOBALTECH"
+
+---
+
+PRÉAMBULE
+
+TECHSOLUTIONS, société française leader en solutions cloud, dirigée par Mme Isabelle Moreau (CEO), Dr. Marie Dubois (CTO), et M. Philippe Arnaud (CFO), développe des solutions pour les entreprises du CAC 40 (clients: Société Générale, BNP Paribas, Crédit Agricole).
+
+GLOBALTECH, groupe américain côté NASDAQ (symbole: GLTC), dirigé par M. Robert Chen (CEO) et Mme Sarah McDonald (VP Europe), fournit des plateformes d'intelligence artificielle à plus de 5 000 entreprises mondiales.
+
+Les parties souhaitent établir un partenariat stratégique en Europe.
+
+---
+
+1. REPRÉSENTANTS ET CONTACTS
+
+TECHSOLUTIONS:
+
+Direction:
+- Mme Isabelle Moreau, CEO (sponsor exécutif)
+- Dr. Marie Dubois, CTO (responsable technique)
+- M. Thomas Weber, Directeur Commercial (responsable business development)
+
+Équipe opérationnelle:
+- M. Kevin Zhang, VP Engineering
+- Mme Julie Marchand, Directrice Produit
+- M. Alexandre Blanc, Chef de projet partenariats
+- Mme Caroline Petit, PMO
+
+GLOBALTECH:
+
+Direction:
+- M. Robert Chen, CEO (sponsor exécutif)
+- Mme Sarah McDonald, VP Europe (responsable partenariat)
+- M. David Park, VP Europe & General Counsel (aspects juridiques)
+
+Équipe opérationnelle:
+- M. Laurent Benoit, Director Partner Engineering
+- Mme Émilie Rousseau, Director Product Marketing
+- M. Ahmed Mansour, Regional Manager France
+
+---
+
+2. PÉRIMÈTRE DU PARTENARIAT
+
+2.1 TERRITOIRES
+
+France: Responsabilité TECHSOLUTIONS
+   - Responsable: M. Thomas Weber
+   - Support: M. Alexandre Blanc
+
+Benelux: Responsabilité partagée
+   - Lead GLOBALTECH: Mme Sarah McDonald
+   - Support TECHSOLUTIONS: M. Pierre Fontaine
+
+Autres pays EU: À définir
+   - Négociateurs: M. Thomas Weber, Mme Sarah McDonald
+
+2.2 SOLUTIONS
+
+Plateforme IA GlobalTech intégrée dans solutions TECHSOLUTIONS:
+- Intégration technique: M. Kevin Zhang (TECHSOLUTIONS), M. Laurent Benoit (GLOBALTECH)
+- Go-to-market: Mme Julie Marchand (TECHSOLUTIONS), Mme Émilie Rousseau (GLOBALTECH)
+
+---
+
+3. MODÈLE ÉCONOMIQUE
+
+3.1 REVENUS
+
+Structure commission:
+- Ventes TECHSOLUTIONS avec technologie GLOBALTECH: 20% commission à GLOBALTECH
+- Ventes GLOBALTECH avec intégration TECHSOLUTIONS: 15% commission à TECHSOLUTIONS
+
+Gestion financière:
+- TECHSOLUTIONS: M. Philippe Arnaud (CFO), Mme Isabelle Blanchet (Contrôle de gestion)
+- GLOBALTECH: M. John Smith (CFO), Mme Laura Johnson (VP Finance Europe)
+
+3.2 OBJECTIFS 2024-2026
+
+Année 1 (2024): 5M€ de chiffre d'affaires combiné
+Année 2 (2025): 15M€
+Année 3 (2026): 30M€
+
+Responsables targets:
+- M. Thomas Weber (TECHSOLUTIONS)
+- Mme Sarah McDonald (GLOBALTECH)
+
+Revue trimestrielle par:
+- Mme Isabelle Moreau et M. Robert Chen (steering exécutif)
+
+---
+
+4. GOUVERNANCE
+
+4.1 COMITÉ DE PILOTAGE (trimestriel)
+
+TECHSOLUTIONS:
+- Mme Isabelle Moreau, CEO
+- Dr. Marie Dubois, CTO
+- M. Thomas Weber, Directeur Commercial
+
+GLOBALTECH:
+- Mme Sarah McDonald, VP Europe
+- M. Robert Chen, CEO (2 fois/an)
+- M. David Park, General Counsel
+
+4.2 COMITÉ OPÉRATIONNEL (mensuel)
+
+Coprésidents:
+- M. Alexandre Blanc (TECHSOLUTIONS)
+- M. Ahmed Mansour (GLOBALTECH)
+
+Membres:
+- M. Kevin Zhang, Mme Julie Marchand, Mme Caroline Petit (TECHSOLUTIONS)
+- M. Laurent Benoit, Mme Émilie Rousseau (GLOBALTECH)
+
+---
+
+5. ÉQUIPES DÉDIÉES
+
+5.1 TECHSOLUTIONS
+
+Équipe partenariat (5 personnes):
+- Chef de projet: M. Alexandre Blanc
+- Architecte: M. Laurent Benoit (détaché 50%)
+- Développeurs: M. Romain Duval, M. Alexandre Jin
+- Product Marketing: Mme Nadia Amrani
+
+Budget: 500K€/an
+Sponsor: Dr. Marie Dubois
+
+5.2 GLOBALTECH
+
+Équipe Europe (3 personnes):
+- Regional Manager France: M. Ahmed Mansour (basé Paris)
+- Technical Architect: M. Laurent Benoit (basé Palo Alto, travels Europe)
+- Account Manager: Mme Sophie Bernard (basée Londres)
+
+Budget: $600K/an
+Sponsor: Mme Sarah McDonald
+
+---
+
+6. CLIENTS CIBLES
+
+6.1 COMPTES STRATÉGIQUES (joint approach)
+
+Secteur Bancaire:
+- Société Générale: Contact M. Philippe Aymerich (CTO) - Lead TECHSOLUTIONS (M. Thomas Weber)
+- BNP Paribas: Contact M. Jean Lemierre - Lead TECHSOLUTIONS (Mme Julie Marchand)
+- Crédit Agricole: Contact M. Xavier Musca - Lead joint
+- Banque de France: Contact Dr. Denis Beau - Lead GLOBALTECH
+
+Secteur Assurance:
+- AXA: Contact M. Thomas Buberl - Lead GLOBALTECH
+- Allianz France: Contact M. Ludovic Subran - Lead joint
+- Generali France: Contact M. Philippe Donnet - Lead TECHSOLUTIONS
+
+Secteur Industrie:
+- Saint-Gobain: Contact M. Benoît Bazin - Lead TECHSOLUTIONS
+- Michelin: Contact Mme Florent Menegaux - Lead GLOBALTECH
+- Schneider Electric: Contact Mme Gwenaëlle Avice-Huet - Lead joint
+
+Affectation comptes: Décision conjointe M. Weber (TECHSOLUTIONS) et Mme McDonald (GLOBALTECH)
+
+6.2 NOUVEAUX COMPTES
+
+Génération leads:
+- TECHSOLUTIONS: M. Thomas Weber (réseau France), Mme Catherine Rousseau (marketing)
+- GLOBALTECH: Mme Sarah McDonald (réseau Europe), Mme Émilie Rousseau (marketing produit)
+
+Qualification:
+- Comité bi-hebdomadaire: M. Alexandre Blanc, M. Ahmed Mansour
+
+---
+
+7. PARTENAIRES ÉCOSYSTÈME
+
+Cloud Infrastructure:
+- Microsoft Azure: Contacts M. Romain Niccoli (TECHSOLUTIONS), M. Jean-Philippe Courtois (GLOBALTECH)
+- OVHcloud: Contact M. Octave Klaba (CEO) - Relation TECHSOLUTIONS
+- Google Cloud: Contact Mme Sundar Pichai - Relation GLOBALTECH
+
+Intégrateurs:
+- Deloitte France: Contact M. Jean-Luc Moreau - Relation TECHSOLUTIONS
+- Capgemini: Contact M. Ahmed Mansour - Relation partagée
+- Accenture: Contact Mme Julie Marchand - Relation GLOBALTECH
+
+---
+
+8. PROPRIÉTÉ INTELLECTUELLE
+
+8.1 IP EXISTANTE
+
+GLOBALTECH conserve:
+- Plateforme IA (propriétaire: GLOBALTECH)
+- Responsable IP: M. David Park (Legal), Dr. Lisa Wong (VP R&D)
+
+TECHSOLUTIONS conserve:
+- Solutions métiers (propriétaire: TECHSOLUTIONS)
+- Responsable IP: M. François Leclerc (Legal), Dr. Marie Dubois (CTO)
+
+8.2 IP COMMUNE (développements conjoints)
+
+Copropriété 50/50 sur:
+- Connecteurs d'intégration
+- Documentation commune
+- Cas d'usage verticaux
+
+Gestion:
+- Comité IP: M. François Leclerc (TECHSOLUTIONS), M. David Park (GLOBALTECH)
+- Arbitrage: Maître Didier Martin (Bredin Prat, conseil TECHSOLUTIONS), M. John Davis (Wilson Sonsini, conseil GLOBALTECH)
+
+---
+
+9. CONFIDENTIALITÉ ET DONNÉES
+
+9.1 NDA
+
+Accord de confidentialité mutuel signé le 15 mars 2024:
+- Signataires: Mme Isabelle Moreau (TECHSOLUTIONS), Mme Sarah McDonald (GLOBALTECH)
+- Durée: 5 ans
+- Juridiction: Paris
+
+9.2 DONNÉES CLIENTS
+
+Conformité RGPD:
+- DPO TECHSOLUTIONS: Me Sarah Cohen
+- DPO GLOBALTECH: M. Brian O'Connor (US), Mme Emer Cooke (EU)
+- Sous-traitance: Contrat DPA signé, conforme CNIL
+
+Sécurité:
+- RSSI TECHSOLUTIONS: M. Vincent Chen (sortant), Mme Sarah Benoit (entrante)
+- CISO GLOBALTECH: M. Chris Roberts
+- Certifications: ISO 27001 (les deux parties), SOC 2 Type II (GLOBALTECH)
+
+Audit tiers:
+- Deloitte Cyber (M. Jean-Luc Moreau) pour TECHSOLUTIONS
+- EY Cyber (M. Steve Stone) pour GLOBALTECH
+
+---
+
+10. MARKETING ET COMMUNICATION
+
+10.1 COMMUNICATION CONJOINTE
+
+Annonce partenariat:
+- Communiqué de presse: 15 mai 2024
+- Rédacteurs: Mme Caroline Marchal (TECHSOLUTIONS), M. Tom Anderson (GLOBALTECH)
+- Agences RP: Image Sept (France, Mme Anne Méaux), Brunswick Group (International, M. Alan Parker)
+
+Événements:
+- Lancement officiel: VivaTech Paris, 22-25 mai 2024
+- Keynote: Mme Isabelle Moreau + M. Robert Chen
+- Stand commun organisé par Mme Catherine Rousseau (TECHSOLUTIONS)
+
+10.2 CO-MARKETING
+
+Budget 2024: 200K€ (50/50)
+Responsables:
+- TECHSOLUTIONS: Mme Catherine Rousseau (Directrice Marketing)
+- GLOBALTECH: Mme Émilie Rousseau (Director Product Marketing)
+
+Actions:
+- Webinars trimestriels
+- Livres blancs (3 en 2024)
+- Études de cas clients (5 en 2024)
+- Présence salons (VivaTech, AWS re:Invent, Microsoft Ignite)
+
+---
+
+11. FORMATION ET CERTIFICATION
+
+11.1 FORMATION ÉQUIPES TECHSOLUTIONS
+
+Programme:
+- Formation GlobalTech AI Platform (5 jours)
+- Instructeur: M. Laurent Benoit (GLOBALTECH)
+- Participants: Équipe M. Kevin Zhang (10 personnes)
+- Lieu: Palo Alto, juin 2024
+- Coût: Pris en charge par GLOBALTECH
+
+Certification:
+- GlobalTech Certified Partner (niveau Gold visé)
+- Responsable certification: M. Alexandre Blanc
+- Objectif: Q3 2024
+
+11.2 FORMATION ÉQUIPES GLOBALTECH
+
+Programme:
+- Formation solutions TECHSOLUTIONS (3 jours)
+- Instructeur: M. Kevin Zhang, Mme Julie Marchand
+- Participants: Équipe M. Ahmed Mansour (GLOBALTECH Europe, 5 personnes)
+- Lieu: Paris, juillet 2024
+- Coût: Pris en charge par TECHSOLUTIONS
+
+---
+
+12. CONDITIONS JURIDIQUES
+
+12.1 EXCLUSIVITÉ
+
+NON-EXCLUSIVITÉ mutuelle:
+- TECHSOLUTIONS peut travailler avec d'autres fournisseurs IA (IBM Watson, Google AI)
+- GLOBALTECH peut travailler avec d'autres partenaires France (Capgemini, Atos)
+
+Clause de préférence pour projets conjoints.
+
+12.2 DURÉE
+
+Durée initiale: 3 ans (15 mai 2024 - 14 mai 2027)
+Renouvellement: Tacite par période d'1 an
+Résiliation: Préavis 6 mois
+
+12.3 DROIT APPLICABLE
+
+Droit français
+Juridiction: Tribunaux de Paris
+
+Médiation obligatoire avant contentieux:
+- Médiateur: Chambre de Commerce Internationale (CCI)
+- Paris
+
+---
+
+13. SIGNATURES
+
+Pour TECHSOLUTIONS:
+
+Mme Isabelle Moreau, CEO
+Date: ________________
+Signature: ________________
+
+M. François Leclerc, Directeur Juridique
+Date: ________________
+Signature: ________________
+
+Pour GLOBALTECH:
+
+Mme Sarah McDonald, VP Europe
+Date: ________________
+Signature: ________________
+
+M. David Park, VP Europe & General Counsel
+Date: ________________
+Signature: ________________
+
+---
+
+ANNEXES:
+
+Annexe A: Liste détaillée solutions (Responsable: M. Kevin Zhang, M. Laurent Benoit)
+Annexe B: Grille tarifaire (Responsable: M. Philippe Arnaud, M. John Smith)
+Annexe C: SLA et support (Responsable: M. Alexandre Blanc, M. Ahmed Mansour)
+Annexe D: Roadmap technique 2024-2026 (Responsable: Dr. Marie Dubois, Dr. Lisa Wong)
+Annexe E: Plan marketing (Responsable: Mme Catherine Rousseau, Mme Émilie Rousseau)
+
+---
+
+Contact urgence:
+- TECHSOLUTIONS: Mme Isabelle Moreau, +33 6 XX XX XX XX
+- GLOBALTECH: Mme Sarah McDonald, +1 650 XXX XXXX
+
+Document préparé par:
+- Cabinet Bredin Prat (Maître Didier Martin) pour TECHSOLUTIONS
+- Cabinet Wilson Sonsini (M. John Davis) pour GLOBALTECH
+
+Date: 20 avril 2024
+Version: 2.1
+Classification: CONFIDENTIEL

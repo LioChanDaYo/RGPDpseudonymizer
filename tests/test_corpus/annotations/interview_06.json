@@ -1,0 +1,263 @@
+{
+  "document_name": "interview_06.txt",
+  "entities": [
+    {
+      "entity_text": "Tech\nFondatrice",
+      "entity_type": "PERSON",
+      "start_pos": 32,
+      "end_pos": 47
+    },
+    {
+      "entity_text": "Léa Rodriguez",
+      "entity_type": "PERSON",
+      "start_pos": 49,
+      "end_pos": 62
+    },
+    {
+      "entity_text": "Paris",
+      "entity_type": "LOCATION",
+      "start_pos": 118,
+      "end_pos": 123
+    },
+    {
+      "entity_text": "Léa Rodriguez",
+      "entity_type": "PERSON",
+      "start_pos": 139,
+      "end_pos": 152
+    },
+    {
+      "entity_text": "Amazon ",
+      "entity_type": "ORG",
+      "start_pos": 334,
+      "end_pos": 341
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 367,
+      "end_pos": 373
+    },
+    {
+      "entity_text": "David Park",
+      "entity_type": "PERSON",
+      "start_pos": 398,
+      "end_pos": 408
+    },
+    {
+      "entity_text": "Thomas Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 477,
+      "end_pos": 490
+    },
+    {
+      "entity_text": "Mme Yasmine",
+      "entity_type": "PERSON",
+      "start_pos": 494,
+      "end_pos": 505
+    },
+    {
+      "entity_text": "Léa Rodriguez",
+      "entity_type": "PERSON",
+      "start_pos": 546,
+      "end_pos": 559
+    },
+    {
+      "entity_text": "Philippe Aymerich",
+      "entity_type": "PERSON",
+      "start_pos": 648,
+      "end_pos": 665
+    },
+    {
+      "entity_text": "Paribas, Crédit",
+      "entity_type": "PERSON",
+      "start_pos": 679,
+      "end_pos": 694
+    },
+    {
+      "entity_text": "ême la Banque de France",
+      "entity_type": "ORG",
+      "start_pos": 709,
+      "end_pos": 732
+    },
+    {
+      "entity_text": "Denis Beau",
+      "entity_type": "PERSON",
+      "start_pos": 765,
+      "end_pos": 775
+    },
+    {
+      "entity_text": "Partech Partners",
+      "entity_type": "PERSON",
+      "start_pos": 877,
+      "end_pos": 893
+    },
+    {
+      "entity_text": "était Mme",
+      "entity_type": "PERSON",
+      "start_pos": 908,
+      "end_pos": 917
+    },
+    {
+      "entity_text": "Roxanne Varza",
+      "entity_type": "PERSON",
+      "start_pos": 918,
+      "end_pos": 931
+    },
+    {
+      "entity_text": "Xavier Niel",
+      "entity_type": "PERSON",
+      "start_pos": 958,
+      "end_pos": 969
+    },
+    {
+      "entity_text": "Kima Ventures",
+      "entity_type": "PERSON",
+      "start_pos": 974,
+      "end_pos": 987
+    },
+    {
+      "entity_text": "Mme Anne-",
+      "entity_type": "PERSON",
+      "start_pos": 992,
+      "end_pos": 1001
+    },
+    {
+      "entity_text": "Sophie Pastel",
+      "entity_type": "PERSON",
+      "start_pos": 1001,
+      "end_pos": 1014
+    },
+    {
+      "entity_text": "Serena Capital",
+      "entity_type": "PERSON",
+      "start_pos": 1018,
+      "end_pos": 1032
+    },
+    {
+      "entity_text": "Octave Klaba",
+      "entity_type": "PERSON",
+      "start_pos": 1067,
+      "end_pos": 1079
+    },
+    {
+      "entity_text": "Léa Rodriguez",
+      "entity_type": "PERSON",
+      "start_pos": 1135,
+      "end_pos": 1148
+    },
+    {
+      "entity_text": "Romain Niccoli",
+      "entity_type": "PERSON",
+      "start_pos": 1183,
+      "end_pos": 1197
+    },
+    {
+      "entity_text": "Sales, Mme",
+      "entity_type": "PERSON",
+      "start_pos": 1227,
+      "end_pos": 1237
+    },
+    {
+      "entity_text": "Salesforce",
+      "entity_type": "ORG",
+      "start_pos": 1266,
+      "end_pos": 1276
+    },
+    {
+      "entity_text": "Ahmed Mansour",
+      "entity_type": "PERSON",
+      "start_pos": 1314,
+      "end_pos": 1327
+    },
+    {
+      "entity_text": "Liu Wei",
+      "entity_type": "PERSON",
+      "start_pos": 1352,
+      "end_pos": 1359
+    },
+    {
+      "entity_text": "Google Cloud France ",
+      "entity_type": "ORG",
+      "start_pos": 1441,
+      "end_pos": 1461
+    },
+    {
+      "entity_text": "Mme Sophie",
+      "entity_type": "PERSON",
+      "start_pos": 1489,
+      "end_pos": 1499
+    },
+    {
+      "entity_text": "Corp, Docker",
+      "entity_type": "PERSON",
+      "start_pos": 1537,
+      "end_pos": 1549
+    },
+    {
+      "entity_text": "Kubernetes Foundation",
+      "entity_type": "PERSON",
+      "start_pos": 1554,
+      "end_pos": 1575
+    },
+    {
+      "entity_text": "Cloud Native",
+      "entity_type": "PERSON",
+      "start_pos": 1626,
+      "end_pos": 1638
+    },
+    {
+      "entity_text": "Computing Foundation",
+      "entity_type": "PERSON",
+      "start_pos": 1639,
+      "end_pos": 1659
+    },
+    {
+      "entity_text": "Mme Priyanka",
+      "entity_type": "PERSON",
+      "start_pos": 1665,
+      "end_pos": 1677
+    },
+    {
+      "entity_text": "Léa Rodriguez",
+      "entity_type": "PERSON",
+      "start_pos": 1712,
+      "end_pos": 1725
+    },
+    {
+      "entity_text": "Londres",
+      "entity_type": "LOCATION",
+      "start_pos": 1757,
+      "end_pos": 1764
+    },
+    {
+      "entity_text": "James Wilson",
+      "entity_type": "PERSON",
+      "start_pos": 1773,
+      "end_pos": 1785
+    },
+    {
+      "entity_text": "Berlin",
+      "entity_type": "LOCATION",
+      "start_pos": 1816,
+      "end_pos": 1822
+    },
+    {
+      "entity_text": "Antonio Garcia",
+      "entity_type": "PERSON",
+      "start_pos": 1875,
+      "end_pos": 1889
+    },
+    {
+      "entity_text": "Business School",
+      "entity_type": "PERSON",
+      "start_pos": 1896,
+      "end_pos": 1911
+    },
+    {
+      "entity_text": "Madrid",
+      "entity_type": "LOCATION",
+      "start_pos": 1914,
+      "end_pos": 1920
+    }
+  ]
+}

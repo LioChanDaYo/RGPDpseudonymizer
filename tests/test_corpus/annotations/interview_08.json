@@ -1,0 +1,275 @@
+{
+  "document_name": "interview_08.txt",
+  "entities": [
+    {
+      "entity_text": "Interview Chercheur",
+      "entity_type": "PERSON",
+      "start_pos": 0,
+      "end_pos": 19
+    },
+    {
+      "entity_text": "Intelligence Artificielle",
+      "entity_type": "PERSON",
+      "start_pos": 22,
+      "end_pos": 47
+    },
+    {
+      "entity_text": "Éthique\nDr",
+      "entity_type": "PERSON",
+      "start_pos": 51,
+      "end_pos": 61
+    },
+    {
+      "entity_text": "Sarah Cohen",
+      "entity_type": "PERSON",
+      "start_pos": 63,
+      "end_pos": 74
+    },
+    {
+      "entity_text": "Saclay\nDate",
+      "entity_type": "PERSON",
+      "start_pos": 82,
+      "end_pos": 93
+    },
+    {
+      "entity_text": "Docteur Cohen",
+      "entity_type": "PERSON",
+      "start_pos": 127,
+      "end_pos": 140
+    },
+    {
+      "entity_text": "Sarah Cohen",
+      "entity_type": "PERSON",
+      "start_pos": 193,
+      "end_pos": 204
+    },
+    {
+      "entity_text": "Professeur Raja",
+      "entity_type": "PERSON",
+      "start_pos": 322,
+      "end_pos": 337
+    },
+    {
+      "entity_text": "Sorbonne Université",
+      "entity_type": "PERSON",
+      "start_pos": 349,
+      "end_pos": 368
+    },
+    {
+      "entity_text": "Mme Laurence",
+      "entity_type": "PERSON",
+      "start_pos": 372,
+      "end_pos": 384
+    },
+    {
+      "entity_text": "Sarah Cohen",
+      "entity_type": "PERSON",
+      "start_pos": 443,
+      "end_pos": 454
+    },
+    {
+      "entity_text": "On échange",
+      "entity_type": "PERSON",
+      "start_pos": 456,
+      "end_pos": 466
+    },
+    {
+      "entity_text": "Media Lab",
+      "entity_type": "PERSON",
+      "start_pos": 479,
+      "end_pos": 488
+    },
+    {
+      "entity_text": "Cynthia Breazeal",
+      "entity_type": "PERSON",
+      "start_pos": 505,
+      "end_pos": 521
+    },
+    {
+      "entity_text": "Luciano Floridi",
+      "entity_type": "PERSON",
+      "start_pos": 559,
+      "end_pos": 574
+    },
+    {
+      "entity_text": "Mme Virginia",
+      "entity_type": "PERSON",
+      "start_pos": 587,
+      "end_pos": 599
+    },
+    {
+      "entity_text": "Fraunhofer Institute",
+      "entity_type": "PERSON",
+      "start_pos": 676,
+      "end_pos": 696
+    },
+    {
+      "entity_text": "Allemagne",
+      "entity_type": "LOCATION",
+      "start_pos": 700,
+      "end_pos": 709
+    },
+    {
+      "entity_text": "Meta AI France",
+      "entity_type": "ORG",
+      "start_pos": 773,
+      "end_pos": 787
+    },
+    {
+      "entity_text": "Yann Le",
+      "entity_type": "PERSON",
+      "start_pos": 797,
+      "end_pos": 804
+    },
+    {
+      "entity_text": "Londres",
+      "entity_type": "LOCATION",
+      "start_pos": 850,
+      "end_pos": 857
+    },
+    {
+      "entity_text": "Demis Hassabis",
+      "entity_type": "PERSON",
+      "start_pos": 879,
+      "end_pos": 893
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 953,
+      "end_pos": 959
+    },
+    {
+      "entity_text": "Chen Lifang",
+      "entity_type": "PERSON",
+      "start_pos": 986,
+      "end_pos": 997
+    },
+    {
+      "entity_text": "Votre équipe",
+      "entity_type": "PERSON",
+      "start_pos": 1013,
+      "end_pos": 1025
+    },
+    {
+      "entity_text": "Sarah Cohen",
+      "entity_type": "PERSON",
+      "start_pos": 1038,
+      "end_pos": 1049
+    },
+    {
+      "entity_text": "Thomas Martin",
+      "entity_type": "PERSON",
+      "start_pos": 1093,
+      "end_pos": 1106
+    },
+    {
+      "entity_text": "Mme Aïcha",
+      "entity_type": "PERSON",
+      "start_pos": 1137,
+      "end_pos": 1146
+    },
+    {
+      "entity_text": "Marc Dupuis",
+      "entity_type": "PERSON",
+      "start_pos": 1178,
+      "end_pos": 1189
+    },
+    {
+      "entity_text": "Mme Julie",
+      "entity_type": "PERSON",
+      "start_pos": 1226,
+      "end_pos": 1235
+    },
+    {
+      "entity_text": "Kevin Zhang",
+      "entity_type": "PERSON",
+      "start_pos": 1246,
+      "end_pos": 1257
+    },
+    {
+      "entity_text": "Antoine Roussel",
+      "entity_type": "PERSON",
+      "start_pos": 1265,
+      "end_pos": 1280
+    },
+    {
+      "entity_text": "Mme Marie-",
+      "entity_type": "PERSON",
+      "start_pos": 1383,
+      "end_pos": 1393
+    },
+    {
+      "entity_text": "Laure Denis",
+      "entity_type": "PERSON",
+      "start_pos": 1393,
+      "end_pos": 1404
+    },
+    {
+      "entity_text": "Parlement Européen",
+      "entity_type": "PERSON",
+      "start_pos": 1465,
+      "end_pos": 1483
+    },
+    {
+      "entity_text": "Axel Voss",
+      "entity_type": "PERSON",
+      "start_pos": 1512,
+      "end_pos": 1521
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 1526,
+      "end_pos": 1532
+    },
+    {
+      "entity_text": "Cédric Villani",
+      "entity_type": "PERSON",
+      "start_pos": 1547,
+      "end_pos": 1561
+    },
+    {
+      "entity_text": "Sarah Cohen",
+      "entity_type": "PERSON",
+      "start_pos": 1655,
+      "end_pos": 1666
+    },
+    {
+      "entity_text": "Paris",
+      "entity_type": "LOCATION",
+      "start_pos": 1684,
+      "end_pos": 1689
+    },
+    {
+      "entity_text": "Mme Gabriela",
+      "entity_type": "PERSON",
+      "start_pos": 1732,
+      "end_pos": 1744
+    },
+    {
+      "entity_text": "Institut Montaigne",
+      "entity_type": "PERSON",
+      "start_pos": 1808,
+      "end_pos": 1826
+    },
+    {
+      "entity_text": "Théophile Lenoir",
+      "entity_type": "PERSON",
+      "start_pos": 1843,
+      "end_pos": 1859
+    },
+    {
+      "entity_text": "Terra Nova",
+      "entity_type": "PERSON",
+      "start_pos": 1878,
+      "end_pos": 1888
+    },
+    {
+      "entity_text": "Lionel Janover",
+      "entity_type": "PERSON",
+      "start_pos": 1905,
+      "end_pos": 1919
+    }
+  ]
+}

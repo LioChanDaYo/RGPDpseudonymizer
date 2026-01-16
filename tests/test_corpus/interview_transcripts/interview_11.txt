@@ -1,0 +1,31 @@
+Interview - Cybersécurité en PME
+RSSI: Mme Catherine Rousseau, DirectSoft Toulouse
+Date: 10 novembre 2024
+
+Interviewer: Madame Rousseau, comment une PME gère-t-elle la cybersécurité?
+
+Catherine Rousseau: Chez DirectSoft, on a 80 employés. Le patron, M. Alain Bertrand, a compris l'enjeu après une tentative de ransomware en 2023.
+
+Interviewer: Comment vous êtes-vous organisée?
+
+Mme Rousseau: J'ai rejoint l'entreprise en janvier 2024 comme première RSSI. J'ai embauché deux personnes: M. Kevin Martel, analyste SOC, et Mme Laura Benoit, spécialiste GRC. On s'appuie aussi sur un consultant externe, le Dr. Alexandre Blanc de CyberExpertise.
+
+Interviewer: Solutions techniques?
+
+Catherine Rousseau: On a déployé CrowdStrike pour l'EDR. Leur ingénieur avant-vente, M. George Kurtz, nous a convaincus. Pour le SIEM, on utilise Splunk avec l'aide de leur partenaire français Econocom, représenté par Mme Sophie Martin.
+
+Interviewer: Formation des employés?
+
+Mme Rousseau: KnowBe4 pour la sensibilisation. On organise aussi des ateliers avec l'ANSSI régionale. Leur délégué à Toulouse, M. Vincent Strubel, est venu former nos équipes. Notre coach cyber est Mme Nacira Salvan de la région Occitanie.
+
+Interviewer: Conformité RGPD?
+
+Catherine Rousseau: Notre DPO externe est Maître Julie Marchand du cabinet GDPR Experts. Elle travaille avec notre directeur administratif, M. Pierre Dubois. On a été audité par la CNIL - l'inspecteur, M. François Pellegrini, était satisfait.
+
+Interviewer: Réseau et échanges?
+
+Mme Rousseau: Je suis membre du CESIN. Leur président, M. Jérôme Notin, anime notre communauté. Localement, le cluster Digital 113 à Toulouse nous connecte. Sa directrice, Mme Maryse Fons, organise des meetups où j'ai rencontré M. Luc Barbier d'Airbus CyberSecurity et Mme Natacha Reynaud de Thales.
+
+Interviewer: Prochains investissements?
+
+Catherine Rousseau: Un SOC managé avec Orange Cyberdefense. Leur commercial, M. Michel Van Den Berghe, nous a fait une offre. Et on réfléchit à une cyber-assurance avec AXA, via leur expert M. Thomas Buberl.

@@ -1,0 +1,299 @@
+{
+  "document_name": "interview_14.txt",
+  "entities": [
+    {
+      "entity_text": "Transformation Omnicanale",
+      "entity_type": "PERSON",
+      "start_pos": 22,
+      "end_pos": 47
+    },
+    {
+      "entity_text": "Mme Sophie",
+      "entity_type": "PERSON",
+      "start_pos": 71,
+      "end_pos": 81
+    },
+    {
+      "entity_text": "Magasins Mode",
+      "entity_type": "PERSON",
+      "start_pos": 91,
+      "end_pos": 104
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 104,
+      "end_pos": 110
+    },
+    {
+      "entity_text": "Madame Laurent",
+      "entity_type": "PERSON",
+      "start_pos": 151,
+      "end_pos": 165
+    },
+    {
+      "entity_text": "ModeFrance",
+      "entity_type": "ORG",
+      "start_pos": 175,
+      "end_pos": 185
+    },
+    {
+      "entity_text": "Sophie Laurent",
+      "entity_type": "PERSON",
+      "start_pos": 206,
+      "end_pos": 220
+    },
+    {
+      "entity_text": "Olivier Gaillard",
+      "entity_type": "PERSON",
+      "start_pos": 283,
+      "end_pos": 299
+    },
+    {
+      "entity_text": "Mme Laurent",
+      "entity_type": "PERSON",
+      "start_pos": 397,
+      "end_pos": 408
+    },
+    {
+      "entity_text": "Maxime Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 452,
+      "end_pos": 465
+    },
+    {
+      "entity_text": "Salesforce Commerce",
+      "entity_type": "PERSON",
+      "start_pos": 505,
+      "end_pos": 524
+    },
+    {
+      "entity_text": "Mme Lucie",
+      "entity_type": "PERSON",
+      "start_pos": 532,
+      "end_pos": 541
+    },
+    {
+      "entity_text": "Alexandre Jin",
+      "entity_type": "PERSON",
+      "start_pos": 615,
+      "end_pos": 628
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 671,
+      "end_pos": 677
+    },
+    {
+      "entity_text": "Sophie Laurent",
+      "entity_type": "PERSON",
+      "start_pos": 722,
+      "end_pos": 736
+    },
+    {
+      "entity_text": "Michel Rousseau",
+      "entity_type": "PERSON",
+      "start_pos": 791,
+      "end_pos": 806
+    },
+    {
+      "entity_text": "Mme Delphine",
+      "entity_type": "PERSON",
+      "start_pos": 858,
+      "end_pos": 870
+    },
+    {
+      "entity_text": "énieur, Dr",
+      "entity_type": "PERSON",
+      "start_pos": 949,
+      "end_pos": 959
+    },
+    {
+      "entity_text": "Marc Laperrière",
+      "entity_type": "PERSON",
+      "start_pos": 961,
+      "end_pos": 976
+    },
+    {
+      "entity_text": "Mme Laurent",
+      "entity_type": "PERSON",
+      "start_pos": 1057,
+      "end_pos": 1068
+    },
+    {
+      "entity_text": "Hybris SA",
+      "entity_type": "ORG",
+      "start_pos": 1070,
+      "end_pos": 1079
+    },
+    {
+      "entity_text": "Vincent Gorse",
+      "entity_type": "PERSON",
+      "start_pos": 1146,
+      "end_pos": 1159
+    },
+    {
+      "entity_text": "Salesforce est g",
+      "entity_type": "ORG",
+      "start_pos": 1171,
+      "end_pos": 1187
+    },
+    {
+      "entity_text": "Karim Benani",
+      "entity_type": "PERSON",
+      "start_pos": 1198,
+      "end_pos": 1210
+    },
+    {
+      "entity_text": "Publicis Sapient",
+      "entity_type": "PERSON",
+      "start_pos": 1261,
+      "end_pos": 1277
+    },
+    {
+      "entity_text": "Mme Émilie",
+      "entity_type": "PERSON",
+      "start_pos": 1292,
+      "end_pos": 1302
+    },
+    {
+      "entity_text": "Et Contentsquare",
+      "entity_type": "PERSON",
+      "start_pos": 1312,
+      "end_pos": 1328
+    },
+    {
+      "entity_text": "Jonathan Cherki",
+      "entity_type": "PERSON",
+      "start_pos": 1358,
+      "end_pos": 1373
+    },
+    {
+      "entity_text": "Sophie Laurent",
+      "entity_type": "PERSON",
+      "start_pos": 1408,
+      "end_pos": 1422
+    },
+    {
+      "entity_text": "Mme Carole",
+      "entity_type": "PERSON",
+      "start_pos": 1471,
+      "end_pos": 1481
+    },
+    {
+      "entity_text": "Stéphane Martin",
+      "entity_type": "PERSON",
+      "start_pos": 1505,
+      "end_pos": 1520
+    },
+    {
+      "entity_text": "Paris",
+      "entity_type": "LOCATION",
+      "start_pos": 1526,
+      "end_pos": 1531
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 1544,
+      "end_pos": 1550
+    },
+    {
+      "entity_text": "Mme Nadia",
+      "entity_type": "PERSON",
+      "start_pos": 1552,
+      "end_pos": 1561
+    },
+    {
+      "entity_text": "François Leroux",
+      "entity_type": "PERSON",
+      "start_pos": 1615,
+      "end_pos": 1630
+    },
+    {
+      "entity_text": "Mme Anne",
+      "entity_type": "PERSON",
+      "start_pos": 1704,
+      "end_pos": 1712
+    },
+    {
+      "entity_text": "Mme Laurent",
+      "entity_type": "PERSON",
+      "start_pos": 1762,
+      "end_pos": 1773
+    },
+    {
+      "entity_text": "Mme Clara",
+      "entity_type": "PERSON",
+      "start_pos": 1803,
+      "end_pos": 1812
+    },
+    {
+      "entity_text": "Rémi Babinet",
+      "entity_type": "PERSON",
+      "start_pos": 1874,
+      "end_pos": 1886
+    },
+    {
+      "entity_text": "Mme Mercedes",
+      "entity_type": "PERSON",
+      "start_pos": 1890,
+      "end_pos": 1902
+    },
+    {
+      "entity_text": "Léna Situations",
+      "entity_type": "PERSON",
+      "start_pos": 1941,
+      "end_pos": 1956
+    },
+    {
+      "entity_text": "Enjoy Phoenix",
+      "entity_type": "PERSON",
+      "start_pos": 1958,
+      "end_pos": 1971
+    },
+    {
+      "entity_text": "Marie Lopez",
+      "entity_type": "PERSON",
+      "start_pos": 1973,
+      "end_pos": 1984
+    },
+    {
+      "entity_text": "Alex Turrion",
+      "entity_type": "PERSON",
+      "start_pos": 2010,
+      "end_pos": 2022
+    },
+    {
+      "entity_text": "Thomas Khalifa",
+      "entity_type": "PERSON",
+      "start_pos": 2055,
+      "end_pos": 2069
+    },
+    {
+      "entity_text": "Sophie Laurent",
+      "entity_type": "PERSON",
+      "start_pos": 2126,
+      "end_pos": 2140
+    },
+    {
+      "entity_text": "Alexandre Bompard",
+      "entity_type": "PERSON",
+      "start_pos": 2186,
+      "end_pos": 2203
+    },
+    {
+      "entity_text": "Mme Régine",
+      "entity_type": "PERSON",
+      "start_pos": 2220,
+      "end_pos": 2230
+    },
+    {
+      "entity_text": "Marc Lolivier",
+      "entity_type": "PERSON",
+      "start_pos": 2387,
+      "end_pos": 2400
+    }
+  ]
+}

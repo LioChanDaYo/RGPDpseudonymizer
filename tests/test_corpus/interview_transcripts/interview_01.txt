@@ -1,0 +1,27 @@
+Entretien avec Dr. Marie Dubois - Directrice Innovation
+Date: 15 mars 2024
+Lieu: Paris, Siège Social TechCorp France
+
+Interviewer: Bonjour Dr. Dubois, merci d'avoir accepté cet entretien.
+
+Dr. Marie Dubois: Avec plaisir. Je suis ravie de partager notre expérience chez TechCorp France.
+
+Interviewer: Pouvez-vous nous parler de votre parcours?
+
+Dr. Dubois: Bien sûr. J'ai commencé ma carrière à Lyon, où j'ai obtenu mon doctorat en informatique à l'Université Claude Bernard. Ensuite, j'ai travaillé pour Microsoft France pendant cinq ans avant de rejoindre TechCorp en 2019.
+
+Interviewer: Comment décririez-vous la culture d'innovation chez TechCorp?
+
+Dr. Dubois: Chez TechCorp, nous encourageons l'expérimentation. Mon équipe, dirigée également par M. Jean-Pierre Martin, travaille en étroite collaboration avec nos bureaux à Toulouse et Marseille. Nous avons récemment lancé un partenariat avec l'INRIA pour développer des solutions d'intelligence artificielle.
+
+Interviewer: Qui sont vos principaux collaborateurs sur ce projet?
+
+Dr. Dubois: L'équipe est diverse. Il y a Sophie Laurent, notre lead développeuse, Pierre Fontaine qui gère les relations avec Google Cloud, et Mme Catherine Rousseau, notre experte en sécurité. Nous travaillons aussi avec le Professeur Ahmed Ben Ali de l'École Polytechnique.
+
+Interviewer: Des défis particuliers?
+
+Dr. Dubois: Le plus grand défi est la coordination entre Paris et nos sites internationaux à Londres et Berlin. Mais avec des outils comme Slack et des réunions régulières avec IBM Europe, nous y arrivons.
+
+Interviewer: Merci pour votre temps, Docteur Dubois.
+
+Dr. Marie Dubois: Je vous en prie. N'hésitez pas à contacter notre bureau à la Défense si vous avez d'autres questions.

@@ -1,0 +1,37 @@
+2026-01-16 16:15:35 WARNING: Language fr package default expects mwt, which has been added
+============================================================
+COMPOUND NAME DETECTION ANALYSIS
+============================================================
+
+Extracting compound names from ground truth annotations...
+Found 1 compound name entities in corpus
+
+Sample compound names:
+  - M. Jean-Pierre Martin
+
+============================================================
+Testing spaCy detector...
+
+spaCy Compound Name Detection:
+============================================================
+  [DETECTED] M. Jean-Pierre Martin (interview_01)
+
+Detection Rate: 1/1 (100.00%)
+
+============================================================
+Testing Stanza detector...
+
+Stanza Compound Name Detection:
+============================================================
+  [DETECTED] M. Jean-Pierre Martin (interview_01)
+
+Detection Rate: 1/1 (100.00%)
+
+============================================================
+SUMMARY
+============================================================
+
+spaCy:  1/1 (100.00%)
+Stanza: 1/1 (100.00%)
+
+Both libraries perform equally on compound names

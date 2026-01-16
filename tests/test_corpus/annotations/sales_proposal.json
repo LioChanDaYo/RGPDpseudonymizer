@@ -1,0 +1,581 @@
+{
+  "document_name": "sales_proposal.txt",
+  "entities": [
+    {
+      "entity_text": "Jacques Martineau",
+      "entity_type": "PERSON",
+      "start_pos": 61,
+      "end_pos": 78
+    },
+    {
+      "entity_text": "CEO\n                  Banque",
+      "entity_type": "ORG",
+      "start_pos": 80,
+      "end_pos": 108
+    },
+    {
+      "entity_text": "Marseille",
+      "entity_type": "LOCATION",
+      "start_pos": 179,
+      "end_pos": 188
+    },
+    {
+      "entity_text": "Thomas Weber",
+      "entity_type": "PERSON",
+      "start_pos": 197,
+      "end_pos": 209
+    },
+    {
+      "entity_text": "Directeur Commercial",
+      "entity_type": "PERSON",
+      "start_pos": 211,
+      "end_pos": 231
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 250,
+      "end_pos": 256
+    },
+    {
+      "entity_text": "Grande Armée",
+      "entity_type": "PERSON",
+      "start_pos": 281,
+      "end_pos": 293
+    },
+    {
+      "entity_text": "Paris",
+      "entity_type": "LOCATION",
+      "start_pos": 301,
+      "end_pos": 306
+    },
+    {
+      "entity_text": "Général,\n\nSuite",
+      "entity_type": "PERSON",
+      "start_pos": 384,
+      "end_pos": 399
+    },
+    {
+      "entity_text": "ême, Mme",
+      "entity_type": "PERSON",
+      "start_pos": 447,
+      "end_pos": 455
+    },
+    {
+      "entity_text": "Olivier Roussel",
+      "entity_type": "PERSON",
+      "start_pos": 490,
+      "end_pos": 505
+    },
+    {
+      "entity_text": "Mme Valérie",
+      "entity_type": "PERSON",
+      "start_pos": 761,
+      "end_pos": 772
+    },
+    {
+      "entity_text": "Thierry Lecomte",
+      "entity_type": "PERSON",
+      "start_pos": 787,
+      "end_pos": 802
+    },
+    {
+      "entity_text": "Karim Benzema",
+      "entity_type": "PERSON",
+      "start_pos": 827,
+      "end_pos": 840
+    },
+    {
+      "entity_text": "ée\n\nVous",
+      "entity_type": "PERSON",
+      "start_pos": 1008,
+      "end_pos": 1016
+    },
+    {
+      "entity_text": "DataCorp Europe",
+      "entity_type": "ORG",
+      "start_pos": 1082,
+      "end_pos": 1097
+    },
+    {
+      "entity_text": "Hans Mueller",
+      "entity_type": "PERSON",
+      "start_pos": 1110,
+      "end_pos": 1122
+    },
+    {
+      "entity_text": "Thomas Weber",
+      "entity_type": "PERSON",
+      "start_pos": 1262,
+      "end_pos": 1274
+    },
+    {
+      "entity_text": "Directeur Commercial",
+      "entity_type": "PERSON",
+      "start_pos": 1276,
+      "end_pos": 1296
+    },
+    {
+      "entity_text": "Mme Julie",
+      "entity_type": "PERSON",
+      "start_pos": 1318,
+      "end_pos": 1327
+    },
+    {
+      "entity_text": "Account Manager",
+      "entity_type": "PERSON",
+      "start_pos": 1338,
+      "end_pos": 1353
+    },
+    {
+      "entity_text": "Marie Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 1405,
+      "end_pos": 1417
+    },
+    {
+      "entity_text": "Kevin Zhang",
+      "entity_type": "PERSON",
+      "start_pos": 1451,
+      "end_pos": 1462
+    },
+    {
+      "entity_text": "Émilie Rousseau",
+      "entity_type": "PERSON",
+      "start_pos": 1496,
+      "end_pos": 1511
+    },
+    {
+      "entity_text": "Mme Sarah",
+      "entity_type": "PERSON",
+      "start_pos": 1534,
+      "end_pos": 1543
+    },
+    {
+      "entity_text": "Blanc, Chef",
+      "entity_type": "PERSON",
+      "start_pos": 1598,
+      "end_pos": 1609
+    },
+    {
+      "entity_text": "Mme Nadia",
+      "entity_type": "PERSON",
+      "start_pos": 1622,
+      "end_pos": 1631
+    },
+    {
+      "entity_text": "Product Owner",
+      "entity_type": "PERSON",
+      "start_pos": 1640,
+      "end_pos": 1653
+    },
+    {
+      "entity_text": "Laurent Benoit",
+      "entity_type": "PERSON",
+      "start_pos": 1659,
+      "end_pos": 1673
+    },
+    {
+      "entity_text": "Architecte Cloud",
+      "entity_type": "PERSON",
+      "start_pos": 1675,
+      "end_pos": 1691
+    },
+    {
+      "entity_text": "Mme Caroline",
+      "entity_type": "PERSON",
+      "start_pos": 1694,
+      "end_pos": 1706
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 1769,
+      "end_pos": 1775
+    },
+    {
+      "entity_text": "Romain Niccoli",
+      "entity_type": "PERSON",
+      "start_pos": 1780,
+      "end_pos": 1794
+    },
+    {
+      "entity_text": "Mme Sophie",
+      "entity_type": "PERSON",
+      "start_pos": 1815,
+      "end_pos": 1825
+    },
+    {
+      "entity_text": "Octave Klaba",
+      "entity_type": "PERSON",
+      "start_pos": 1871,
+      "end_pos": 1883
+    },
+    {
+      "entity_text": "Michel Paulin",
+      "entity_type": "PERSON",
+      "start_pos": 1894,
+      "end_pos": 1907
+    },
+    {
+      "entity_text": "David Park",
+      "entity_type": "PERSON",
+      "start_pos": 1956,
+      "end_pos": 1966
+    },
+    {
+      "entity_text": "Ahmed Mansour",
+      "entity_type": "PERSON",
+      "start_pos": 2002,
+      "end_pos": 2015
+    },
+    {
+      "entity_text": "Mme Laure",
+      "entity_type": "PERSON",
+      "start_pos": 2066,
+      "end_pos": 2075
+    },
+    {
+      "entity_text": "Mme Sarah",
+      "entity_type": "PERSON",
+      "start_pos": 2120,
+      "end_pos": 2129
+    },
+    {
+      "entity_text": "Luc Moreau",
+      "entity_type": "PERSON",
+      "start_pos": 2192,
+      "end_pos": 2202
+    },
+    {
+      "entity_text": "Dominique Leboureix",
+      "entity_type": "PERSON",
+      "start_pos": 2224,
+      "end_pos": 2243
+    },
+    {
+      "entity_text": "Maître Julie",
+      "entity_type": "PERSON",
+      "start_pos": 2270,
+      "end_pos": 2282
+    },
+    {
+      "entity_text": "Société Générale",
+      "entity_type": "PERSON",
+      "start_pos": 2374,
+      "end_pos": 2390
+    },
+    {
+      "entity_text": "Philippe Aymerich",
+      "entity_type": "PERSON",
+      "start_pos": 2404,
+      "end_pos": 2421
+    },
+    {
+      "entity_text": "Jean Lemierre",
+      "entity_type": "PERSON",
+      "start_pos": 2586,
+      "end_pos": 2599
+    },
+    {
+      "entity_text": "App Store",
+      "entity_type": "PERSON",
+      "start_pos": 2736,
+      "end_pos": 2745
+    },
+    {
+      "entity_text": "Crédit Agricole",
+      "entity_type": "PERSON",
+      "start_pos": 2750,
+      "end_pos": 2765
+    },
+    {
+      "entity_text": "Xavier Musca",
+      "entity_type": "PERSON",
+      "start_pos": 2779,
+      "end_pos": 2791
+    },
+    {
+      "entity_text": "Banque de France",
+      "entity_type": "ORG",
+      "start_pos": 2940,
+      "end_pos": 2956
+    },
+    {
+      "entity_text": "Denis Beau",
+      "entity_type": "PERSON",
+      "start_pos": 2971,
+      "end_pos": 2981
+    },
+    {
+      "entity_text": "Mme Sarah",
+      "entity_type": "PERSON",
+      "start_pos": 3407,
+      "end_pos": 3416
+    },
+    {
+      "entity_text": "Salesforce Financial",
+      "entity_type": "PERSON",
+      "start_pos": 3476,
+      "end_pos": 3496
+    },
+    {
+      "entity_text": "étier\nResponsables",
+      "entity_type": "PERSON",
+      "start_pos": 3551,
+      "end_pos": 3569
+    },
+    {
+      "entity_text": "Mme Nadia",
+      "entity_type": "PERSON",
+      "start_pos": 3587,
+      "end_pos": 3596
+    },
+    {
+      "entity_text": "Émilie Rousseau",
+      "entity_type": "PERSON",
+      "start_pos": 3718,
+      "end_pos": 3733
+    },
+    {
+      "entity_text": "Karim Benani",
+      "entity_type": "PERSON",
+      "start_pos": 3738,
+      "end_pos": 3750
+    },
+    {
+      "entity_text": "Hypercare\nResponsables",
+      "entity_type": "PERSON",
+      "start_pos": 3828,
+      "end_pos": 3850
+    },
+    {
+      "entity_text": "Blanc, Mme",
+      "entity_type": "PERSON",
+      "start_pos": 3865,
+      "end_pos": 3875
+    },
+    {
+      "entity_text": "Nicolas Dufourcq",
+      "entity_type": "PERSON",
+      "start_pos": 4293,
+      "end_pos": 4309
+    },
+    {
+      "entity_text": "Éric Lombard",
+      "entity_type": "PERSON",
+      "start_pos": 4362,
+      "end_pos": 4374
+    },
+    {
+      "entity_text": "Prêt Numérique",
+      "entity_type": "PERSON",
+      "start_pos": 4381,
+      "end_pos": 4395
+    },
+    {
+      "entity_text": "Paribas Leasing",
+      "entity_type": "PERSON",
+      "start_pos": 4415,
+      "end_pos": 4430
+    },
+    {
+      "entity_text": "Laurent Bonnafé",
+      "entity_type": "PERSON",
+      "start_pos": 4448,
+      "end_pos": 4463
+    },
+    {
+      "entity_text": "Weber, Mme",
+      "entity_type": "PERSON",
+      "start_pos": 4845,
+      "end_pos": 4855
+    },
+    {
+      "entity_text": "Marie Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 4909,
+      "end_pos": 4921
+    },
+    {
+      "entity_text": "Jacques Martineau",
+      "entity_type": "PERSON",
+      "start_pos": 4926,
+      "end_pos": 4943
+    },
+    {
+      "entity_text": "Alexandre Blanc",
+      "entity_type": "PERSON",
+      "start_pos": 4975,
+      "end_pos": 4990
+    },
+    {
+      "entity_text": "Olivier Roussel",
+      "entity_type": "PERSON",
+      "start_pos": 4995,
+      "end_pos": 5010
+    },
+    {
+      "entity_text": "Maxime Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 5138,
+      "end_pos": 5151
+    },
+    {
+      "entity_text": "Benoît Bazin",
+      "entity_type": "PERSON",
+      "start_pos": 5342,
+      "end_pos": 5354
+    },
+    {
+      "entity_text": "Thomas Buberl",
+      "entity_type": "PERSON",
+      "start_pos": 5408,
+      "end_pos": 5421
+    },
+    {
+      "entity_text": "Marc Bideau",
+      "entity_type": "PERSON",
+      "start_pos": 5474,
+      "end_pos": 5485
+    },
+    {
+      "entity_text": "Participants Tech",
+      "entity_type": "PERSON",
+      "start_pos": 5613,
+      "end_pos": 5630
+    },
+    {
+      "entity_text": "Mme Isabelle",
+      "entity_type": "PERSON",
+      "start_pos": 5641,
+      "end_pos": 5653
+    },
+    {
+      "entity_text": "Marie Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 5672,
+      "end_pos": 5684
+    },
+    {
+      "entity_text": "Thomas Weber",
+      "entity_type": "PERSON",
+      "start_pos": 5695,
+      "end_pos": 5707
+    },
+    {
+      "entity_text": "Mme Isabelle",
+      "entity_type": "PERSON",
+      "start_pos": 5753,
+      "end_pos": 5765
+    },
+    {
+      "entity_text": "Olivier Roussel",
+      "entity_type": "PERSON",
+      "start_pos": 5783,
+      "end_pos": 5798
+    },
+    {
+      "entity_text": "Bredin Prat",
+      "entity_type": "PERSON",
+      "start_pos": 5970,
+      "end_pos": 5981
+    },
+    {
+      "entity_text": "Maître Didier",
+      "entity_type": "PERSON",
+      "start_pos": 5983,
+      "end_pos": 5996
+    },
+    {
+      "entity_text": "Général,\n\nTech",
+      "entity_type": "PERSON",
+      "start_pos": 6113,
+      "end_pos": 6127
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 6137,
+      "end_pos": 6143
+    },
+    {
+      "entity_text": "Mme Isabelle",
+      "entity_type": "PERSON",
+      "start_pos": 6176,
+      "end_pos": 6188
+    },
+    {
+      "entity_text": "Société Générale",
+      "entity_type": "PERSON",
+      "start_pos": 6276,
+      "end_pos": 6292
+    },
+    {
+      "entity_text": "Crédit Agricole",
+      "entity_type": "PERSON",
+      "start_pos": 6310,
+      "end_pos": 6325
+    },
+    {
+      "entity_text": "Mme Julie",
+      "entity_type": "PERSON",
+      "start_pos": 6435,
+      "end_pos": 6444
+    },
+    {
+      "entity_text": "Marie Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 6479,
+      "end_pos": 6491
+    },
+    {
+      "entity_text": "éer, Monsieur",
+      "entity_type": "PERSON",
+      "start_pos": 6586,
+      "end_pos": 6599
+    },
+    {
+      "entity_text": "Directeur Général",
+      "entity_type": "PERSON",
+      "start_pos": 6603,
+      "end_pos": 6620
+    },
+    {
+      "entity_text": "Thomas Weber",
+      "entity_type": "PERSON",
+      "start_pos": 6671,
+      "end_pos": 6683
+    },
+    {
+      "entity_text": "Directeur Commercial",
+      "entity_type": "PERSON",
+      "start_pos": 6684,
+      "end_pos": 6704
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 6719,
+      "end_pos": 6725
+    },
+    {
+      "entity_text": "Mme Isabelle",
+      "entity_type": "PERSON",
+      "start_pos": 6792,
+      "end_pos": 6804
+    },
+    {
+      "entity_text": "Marie Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 6839,
+      "end_pos": 6851
+    },
+    {
+      "entity_text": "Philippe Arnaud",
+      "entity_type": "PERSON",
+      "start_pos": 6878,
+      "end_pos": 6893
+    }
+  ]
+}

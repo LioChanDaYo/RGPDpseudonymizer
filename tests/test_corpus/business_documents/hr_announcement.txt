@@ -1,0 +1,132 @@
+COMMUNICATION RH
+Date: 1er mars 2024
+De: Mme Sophie Laurent, Directrice des Ressources Humaines
+
+Objet: Nominations et Mouvements - Mars 2024
+
+Chères collaboratrices, chers collaborateurs,
+
+Au nom de notre CEO, Mme Isabelle Moreau, et de tout le COMEX, j'ai le plaisir de vous annoncer plusieurs nominations et mouvements au sein de notre entreprise.
+
+---
+
+PROMOTIONS
+
+Félicitations à:
+
+1. M. Kevin Zhang - Promotion au poste de VP Engineering
+   Kevin rejoint le COMEX et reportera directement à Dr. Marie Dubois, notre CTO. Il supervisera les équipes de MM. Alexandre Jin, Romain Duval et Mmes Laura Martin, Nadia Amrani.
+
+2. Mme Julie Marchand - Promotion Directrice Produit
+   Julie pilotera toute la stratégie produit avec le soutien de M. Thomas Weber (Commercial) et Mme Catherine Rousseau (Marketing). Son équipe inclura M. Maxime Dubois et Mme Lucie Renard.
+
+3. M. Alexandre Blanc - Promotion Head of QA
+   Alexandre dirigera le département qualité. Il travaillera en étroite collaboration avec Mme Caroline Petit (PMO) et nos partenaires qualité (Deloitte, M. Jean-Luc Moreau).
+
+---
+
+NOUVEAUX ARRIVANTS
+
+Nous souhaitons la bienvenue à:
+
+1. Dr. Émilie Rousseau - Chief Data Officer
+   Émilie nous rejoint depuis Google France. Elle a travaillé 8 ans avec M. Yann LeCun avant de rejoindre Google sous la direction de Mme Sundar Pichai. Elle reportera à Dr. Marie Dubois.
+
+2. M. David Park - Directeur des Partenariats
+   David, ancien VP chez Microsoft (équipe de M. Satya Nadella), pilotera nos alliances stratégiques. Il travaillera avec M. Thomas Weber et notre VP Sales, M. Pierre Fontaine.
+
+3. Mme Sarah Benoit - Chief Security Officer
+   Sarah vient de Thales où elle travaillait pour M. Patrice Caine. Elle remplace M. Vincent Chen qui part à la retraite. L'équipe sécu (Mme Catherine Rousseau, M. Marc Dubois) reportera à Sarah.
+
+4. M. Ahmed Mansour - Head of Customer Success
+   Ahmed nous rejoint de Salesforce où il collaborait avec M. Marc Benioff. Il dirigera une équipe de 15 personnes incluant Mme Sophie Durand et M. Laurent Benoit.
+
+---
+
+MOBILITÉ INTERNE
+
+1. Mme Nadia Amrani: Passage de DevOps à Product Management
+   Nadia rejoint l'équipe de Mme Julie Marchand. Elle sera remplacée en DevOps par M. Julien Sarrazin (promotion interne).
+
+2. M. Maxime Dubois: Migration de l'Infrastructure vers l'équipe Cloud
+   Maxime rejoint l'équipe de M. Laurent Benoit pour renforcer nos compétences Azure. Remplacement par Mme Émilie Morel.
+
+---
+
+DÉPARTS
+
+Nous remercions pour leur contribution:
+
+1. M. Vincent Chen - Retraite après 25 ans de service
+   Vincent a bâti notre département sécurité. Pot de départ le 15 mars organisé par Mme Sophie Laurent. Dr. Marie Dubois prononcera un discours.
+
+2. M. Pierre Fontaine - Mutation vers notre filiale à Londres
+   Pierre rejoint TechSolutions UK comme COO. Il travaillera avec notre CEO UK, M. James Wilson. Remplacement en France par Mme Caroline Marchal.
+
+3. Mme Claire Fontaine - Départ pour création d'entreprise
+   Claire lance sa startup dans la FinTech. Nous lui souhaitons le meilleur succès. Son poste de Product Owner sera repris par M. Thomas Khalifa.
+
+---
+
+RÉORGANISATION DÉPARTEMENTS
+
+Suite à ces mouvements et sur proposition de notre CEO Mme Isabelle Moreau:
+
+NOUVEAU COMEX:
+- CEO: Mme Isabelle Moreau
+- CFO: M. Philippe Arnaud
+- CTO: Dr. Marie Dubois
+- CDO: Dr. Émilie Rousseau (NOUVEAU)
+- VP Engineering: M. Kevin Zhang (NOUVEAU)
+- Directeur Commercial: M. Thomas Weber
+- Directrice Marketing: Mme Catherine Rousseau
+- DRH: Mme Sophie Laurent
+- Directeur Juridique: M. François Leclerc
+- CSO: Mme Sarah Benoit (NOUVEAU)
+
+ÉQUIPES RENFORCÉES:
+
+Équipe Engineering (M. Kevin Zhang):
+- Frontend: M. Alexandre Jin, Mme Laura Martin
+- Backend: M. Romain Duval, M. Julien Sarrazin
+- Mobile: Mme Lucie Renard, M. Marc Petit
+- QA: M. Alexandre Blanc, Mme Sophie Bernard
+
+Équipe Data (Dr. Émilie Rousseau):
+- Data Engineering: M. Thomas Martin, Mme Nathalie Rousseau
+- Data Science: M. Karim Benani, Mme Émilie Bernard
+- Analytics: Mme Caroline Dumont, M. Vincent Gorse
+
+Équipe Product (Mme Julie Marchand):
+- Product Owners: M. Thomas Khalifa, Mme Nadia Amrani (NEW), M. Maxime Dubois
+- UX/UI: Mme Clara Dumont, M. Antonio Garcia
+
+Équipe Security (Mme Sarah Benoit):
+- Cybersecurity: Mme Catherine Rousseau, M. Marc Dubois
+- GRC: M. Jonathan Cherki, Mme Laure Bertholom
+- SOC: M. Matthieu Bonenfant, Mme Sophie Duchemin
+
+---
+
+ONBOARDING
+
+Nos nouveaux arrivants seront accueillis par:
+- Programme d'intégration: Mme Sophie Laurent (DRH) et M. François Leroux (RH)
+- Buddy system: Coordination Mme Caroline Petit
+- Formation technique: Dr. Marie Dubois et M. Kevin Zhang
+
+Partenaires formation: OpenClassrooms (contact: Mme Anne Browaeys), M2i Formation (contact: M. Yves Blanc).
+
+---
+
+Ces changements témoignent de notre croissance et de notre ambition. Je compte sur vous tous pour accueillir nos nouveaux talents et accompagner nos collègues dans leurs nouvelles responsabilités.
+
+Pour toute question, contactez le service RH ([email protected]) ou moi-même.
+
+Cordialement,
+
+Mme Sophie Laurent
+Directrice des Ressources Humaines
+TechSolutions France SAS
+
+cc: Mme Isabelle Moreau (CEO), Dr. Marie Dubois (CTO), M. Philippe Arnaud (CFO)

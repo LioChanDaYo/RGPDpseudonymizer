@@ -1,0 +1,95 @@
+COMPTE-RENDU DE RÉUNION
+Comité de Direction - Janvier 2024
+
+Date: 22 janvier 2024, 9h00-12h00
+Lieu: Salle de réunion A, Tour Montparnasse, Paris
+Président de séance: Mme Isabelle Moreau, CEO
+
+PARTICIPANTS:
+- Mme Isabelle Moreau, CEO
+- M. François Leclerc, CFO
+- Dr. Marie Dubois, CTO
+- Mme Sophie Laurent, DRH
+- M. Thomas Weber, Directeur Commercial
+- Mme Catherine Rousseau, Directrice Marketing
+- M. Pierre Fontaine, Directeur Opérations
+- Mme Julie Bertrand, Directrice Qualité
+
+ABSENTS EXCUSÉS:
+- M. Alexandre Blanc, Directeur Juridique (en déplacement Luxembourg)
+- Mme Sarah Cohen, Directrice Innovation (congé maladie)
+
+INVITÉS:
+- M. Jean-Luc Moreau, Partner chez Deloitte France (point 3)
+- Mme Caroline Petit, Chef de projet transformation digitale (point 4)
+
+---
+
+ORDRE DU JOUR:
+
+1. RÉSULTATS FINANCIERS Q4 2023 (Présenté par M. Leclerc)
+
+M. François Leclerc présente les résultats du trimestre. CA en hausse de 12% par rapport à Q4 2022. Discussion sur les prévisions 2024.
+
+Actions:
+- M. Leclerc: Finaliser le budget 2024 avec les directeurs de BU (échéance: 5 février)
+- Mme Moreau: Présentation aux actionnaires (Fond Ardian, contact M. Vincent Levita)
+
+2. RECRUTEMENT ET MOBILITÉ (Présenté par Mme Laurent)
+
+45 recrutements prévus en 2024. Besoin urgent en développeurs (10 postes) et data scientists (5 postes). Partenariat avec le cabinet Michael Page (consultant: M. Marc Dubois) et LinkedIn Talent Solutions (account manager: Mme Laura Martin).
+
+Mobilité interne: Promotion de M. Kevin Zhang au poste de Lead Developer et de Mme Nadia Amrani comme Senior Product Manager.
+
+Actions:
+- Mme Laurent: Lancer les campagnes de recrutement avec l'agence Hays (contact: M. Philippe Bernard)
+- Dr. Dubois: Définir les profils techniques avec M. Zhang
+
+3. AUDIT QUALITÉ ISO 27001 (Présenté par Mme Bertrand, avec M. Moreau de Deloitte)
+
+Audit de certification ISO 27001 planifié en mars 2024. M. Jean-Luc Moreau de Deloitte France sera l'auditeur principal, assisté de Mme Sophie Durand.
+
+Points de vigilance identifiés:
+- Gestion des accès (responsable: Mme Rousseau)
+- Documentation (responsable: M. Fontaine)
+- Formation collaborateurs (responsable: Mme Laurent)
+
+Actions:
+- Mme Bertrand: Plan d'action correctif (échéance: 15 février)
+- Tous les directeurs: Revue documentation avec leurs équipes
+- M. Pierre Fontaine: Organiser sessions de formation avec AFNOR Certification
+
+4. TRANSFORMATION DIGITALE - AVANCEMENT (Présenté par Mme Petit)
+
+Mme Caroline Petit présente l'avancement du projet de transformation digitale lancé en septembre 2023. Partenaires: Accenture France (lead consultant: M. David Park) et Microsoft France (account manager: M. Romain Niccoli).
+
+Phase 1 (CRM) terminée. Salesforce déployé dans les équipes commerciales à Paris, Lyon (directeur: M. Julien Sarrazin), et Marseille (directrice: Mme Émilie Morel).
+
+Phase 2 (ERP) en cours. SAP S/4HANA. Intégrateur: Capgemini (chef de projet: M. Ahmed Mansour).
+
+Actions:
+- Mme Petit: Formation utilisateurs phase 2 avec M. Mansour
+- M. Weber: Valider les processus commerciaux avec Mme Morel et M. Sarrazin
+- Dr. Dubois: Infrastructure cloud avec Azure (contact Microsoft: Mme Sophie Bernard)
+
+5. STRATÉGIE MARKETING 2024 (Présenté par Mme Rousseau)
+
+Nouveau positionnement de marque. Agence retenue: BETC Paris (directrice de clientèle: Mme Clara Dumont). Campagne de lancement en avril 2024.
+
+Partenariats média: Le Figaro (contact: M. Marc Feuillée), Les Échos (contact: Mme Sophie Pedder), LinkedIn Ads (responsable: M. Thomas Khalifa).
+
+Actions:
+- Mme Rousseau: Brief agence avec M. Weber et Mme Dumont (réunion: 30 janvier)
+- M. Weber: Validation budget avec M. Leclerc
+
+6. QUESTIONS DIVERSES
+
+- M. Fontaine: Nouvel entrepôt à Lille, négociations avec Prologis (contact: M. Ben Bannatyne) en cours
+- Dr. Dubois: Recrutement d'un VP Engineering, shortlist de 3 candidats avec le cabinet Heidrick & Struggles (consultant: Mme Valérie Martin)
+- Mme Moreau: Prochain COMEX le 19 février 2024
+
+---
+
+Prochaine réunion: 19 février 2024, 9h00
+Rédaction: Mme Nathalie Rousseau, Assistante de Direction
+Approbation: Mme Isabelle Moreau, CEO

@@ -1,0 +1,227 @@
+{
+  "document_name": "interview_03.txt",
+  "entities": [
+    {
+      "entity_text": "Transformation Digitale",
+      "entity_type": "PERSON",
+      "start_pos": 12,
+      "end_pos": 35
+    },
+    {
+      "entity_text": "Secteur Public",
+      "entity_type": "PERSON",
+      "start_pos": 36,
+      "end_pos": 50
+    },
+    {
+      "entity_text": "Mme Claire",
+      "entity_type": "PERSON",
+      "start_pos": 64,
+      "end_pos": 74
+    },
+    {
+      "entity_text": "Fontaine, Directrice",
+      "entity_type": "PERSON",
+      "start_pos": 75,
+      "end_pos": 95
+    },
+    {
+      "entity_text": "Bordeaux",
+      "entity_type": "LOCATION",
+      "start_pos": 109,
+      "end_pos": 117
+    },
+    {
+      "entity_text": "Madame Fontaine",
+      "entity_type": "PERSON",
+      "start_pos": 150,
+      "end_pos": 165
+    },
+    {
+      "entity_text": "Claire Fontaine",
+      "entity_type": "PERSON",
+      "start_pos": 224,
+      "end_pos": 239
+    },
+    {
+      "entity_text": "Bordeaux",
+      "entity_type": "LOCATION",
+      "start_pos": 263,
+      "end_pos": 271
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 337,
+      "end_pos": 343
+    },
+    {
+      "entity_text": "Pierre Hurmic",
+      "entity_type": "PERSON",
+      "start_pos": 358,
+      "end_pos": 371
+    },
+    {
+      "entity_text": "Mme Fontaine",
+      "entity_type": "PERSON",
+      "start_pos": 449,
+      "end_pos": 461
+    },
+    {
+      "entity_text": "Laurent Benoit",
+      "entity_type": "PERSON",
+      "start_pos": 503,
+      "end_pos": 517
+    },
+    {
+      "entity_text": "Mme Sarah",
+      "entity_type": "PERSON",
+      "start_pos": 543,
+      "end_pos": 552
+    },
+    {
+      "entity_text": "Yves Girard",
+      "entity_type": "PERSON",
+      "start_pos": 603,
+      "end_pos": 614
+    },
+    {
+      "entity_text": "Orange Business",
+      "entity_type": "PERSON",
+      "start_pos": 662,
+      "end_pos": 677
+    },
+    {
+      "entity_text": "Karim Benzema",
+      "entity_type": "PERSON",
+      "start_pos": 706,
+      "end_pos": 719
+    },
+    {
+      "entity_text": "Claire Fontaine",
+      "entity_type": "PERSON",
+      "start_pos": 770,
+      "end_pos": 785
+    },
+    {
+      "entity_text": "Commission Européenne",
+      "entity_type": "PERSON",
+      "start_pos": 891,
+      "end_pos": 912
+    },
+    {
+      "entity_text": "Paolo Rossi",
+      "entity_type": "PERSON",
+      "start_pos": 945,
+      "end_pos": 956
+    },
+    {
+      "entity_text": "Mme Fontaine",
+      "entity_type": "PERSON",
+      "start_pos": 1048,
+      "end_pos": 1060
+    },
+    {
+      "entity_text": "Julie Marchand",
+      "entity_type": "PERSON",
+      "start_pos": 1102,
+      "end_pos": 1116
+    },
+    {
+      "entity_text": "Alexandre Petit",
+      "entity_type": "PERSON",
+      "start_pos": 1120,
+      "end_pos": 1135
+    },
+    {
+      "entity_text": "On échange",
+      "entity_type": "PERSON",
+      "start_pos": 1137,
+      "end_pos": 1147
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 1181,
+      "end_pos": 1185
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 1234,
+      "end_pos": 1240
+    },
+    {
+      "entity_text": "Paris",
+      "entity_type": "LOCATION",
+      "start_pos": 1253,
+      "end_pos": 1258
+    },
+    {
+      "entity_text": "Claire Fontaine",
+      "entity_type": "PERSON",
+      "start_pos": 1319,
+      "end_pos": 1334
+    },
+    {
+      "entity_text": "IBM et SAP France",
+      "entity_type": "ORG",
+      "start_pos": 1380,
+      "end_pos": 1397
+    },
+    {
+      "entity_text": "Mme Léa",
+      "entity_type": "PERSON",
+      "start_pos": 1453,
+      "end_pos": 1460
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 1524,
+      "end_pos": 1530
+    },
+    {
+      "entity_text": "Thomas Kim",
+      "entity_type": "PERSON",
+      "start_pos": 1532,
+      "end_pos": 1542
+    },
+    {
+      "entity_text": "Prochaines étapes",
+      "entity_type": "PERSON",
+      "start_pos": 1558,
+      "end_pos": 1575
+    },
+    {
+      "entity_text": "Mme Fontaine",
+      "entity_type": "PERSON",
+      "start_pos": 1578,
+      "end_pos": 1590
+    },
+    {
+      "entity_text": "Bordeaux",
+      "entity_type": "LOCATION",
+      "start_pos": 1620,
+      "end_pos": 1628
+    },
+    {
+      "entity_text": "Mérignac, Pessac",
+      "entity_type": "PERSON",
+      "start_pos": 1659,
+      "end_pos": 1675
+    },
+    {
+      "entity_text": "Transformation Publique",
+      "entity_type": "PERSON",
+      "start_pos": 1731,
+      "end_pos": 1754
+    },
+    {
+      "entity_text": "Nicolas Blanc",
+      "entity_type": "PERSON",
+      "start_pos": 1781,
+      "end_pos": 1794
+    }
+  ]
+}

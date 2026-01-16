@@ -1,0 +1,137 @@
+{
+  "document_name": "interview_02.txt",
+  "entities": [
+    {
+      "entity_text": "Restructuration chez AutoMotive SA",
+      "entity_type": "ORG",
+      "start_pos": 13,
+      "end_pos": 47
+    },
+    {
+      "entity_text": "Dubois, Jean-",
+      "entity_type": "PERSON",
+      "start_pos": 61,
+      "end_pos": 74
+    },
+    {
+      "entity_text": "Strasbourg",
+      "entity_type": "LOCATION",
+      "start_pos": 120,
+      "end_pos": 130
+    },
+    {
+      "entity_text": "Marc Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 154,
+      "end_pos": 165
+    },
+    {
+      "entity_text": "AutoMotive SA",
+      "entity_type": "ORG",
+      "start_pos": 188,
+      "end_pos": 201
+    },
+    {
+      "entity_text": "François Leclerc",
+      "entity_type": "PERSON",
+      "start_pos": 370,
+      "end_pos": 386
+    },
+    {
+      "entity_text": "Mme Isabelle",
+      "entity_type": "PERSON",
+      "start_pos": 402,
+      "end_pos": 414
+    },
+    {
+      "entity_text": "On était",
+      "entity_type": "PERSON",
+      "start_pos": 503,
+      "end_pos": 511
+    },
+    {
+      "entity_text": "Thomas Weber",
+      "entity_type": "PERSON",
+      "start_pos": 692,
+      "end_pos": 704
+    },
+    {
+      "entity_text": "Volkswagen Group",
+      "entity_type": "PERSON",
+      "start_pos": 757,
+      "end_pos": 773
+    },
+    {
+      "entity_text": "Bernard Lefebvre",
+      "entity_type": "PERSON",
+      "start_pos": 842,
+      "end_pos": 858
+    },
+    {
+      "entity_text": "Oui, Auto",
+      "entity_type": "PERSON",
+      "start_pos": 929,
+      "end_pos": 938
+    },
+    {
+      "entity_text": "McKinsey France",
+      "entity_type": "ORG",
+      "start_pos": 986,
+      "end_pos": 1001
+    },
+    {
+      "entity_text": "Paris",
+      "entity_type": "LOCATION",
+      "start_pos": 1010,
+      "end_pos": 1015
+    },
+    {
+      "entity_text": "était Sophie",
+      "entity_type": "PERSON",
+      "start_pos": 1043,
+      "end_pos": 1055
+    },
+    {
+      "entity_text": "Peugeot Citroën",
+      "entity_type": "PERSON",
+      "start_pos": 1116,
+      "end_pos": 1131
+    },
+    {
+      "entity_text": "Strasbourg",
+      "entity_type": "LOCATION",
+      "start_pos": 1206,
+      "end_pos": 1216
+    },
+    {
+      "entity_text": "ègues Pierre",
+      "entity_type": "PERSON",
+      "start_pos": 1251,
+      "end_pos": 1263
+    },
+    {
+      "entity_text": "Anne Petit",
+      "entity_type": "PERSON",
+      "start_pos": 1281,
+      "end_pos": 1291
+    },
+    {
+      "entity_text": "ême été",
+      "entity_type": "PERSON",
+      "start_pos": 1297,
+      "end_pos": 1304
+    },
+    {
+      "entity_text": "Strasbourg",
+      "entity_type": "LOCATION",
+      "start_pos": 1471,
+      "end_pos": 1481
+    },
+    {
+      "entity_text": "Antoine Mercier",
+      "entity_type": "PERSON",
+      "start_pos": 1535,
+      "end_pos": 1550
+    }
+  ]
+}

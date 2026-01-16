@@ -1,0 +1,227 @@
+{
+  "document_name": "interview_10.txt",
+  "entities": [
+    {
+      "entity_text": "Innovation Agricole",
+      "entity_type": "PERSON",
+      "start_pos": 12,
+      "end_pos": 31
+    },
+    {
+      "entity_text": "Tech\nAgriculteur",
+      "entity_type": "PERSON",
+      "start_pos": 39,
+      "end_pos": 55
+    },
+    {
+      "entity_text": "Leclerc, Ferme",
+      "entity_type": "PERSON",
+      "start_pos": 78,
+      "end_pos": 92
+    },
+    {
+      "entity_text": "Beauce\nChartres",
+      "entity_type": "PERSON",
+      "start_pos": 96,
+      "end_pos": 111
+    },
+    {
+      "entity_text": "Monsieur Leclerc",
+      "entity_type": "PERSON",
+      "start_pos": 143,
+      "end_pos": 159
+    },
+    {
+      "entity_text": "François Leclerc",
+      "entity_type": "PERSON",
+      "start_pos": 215,
+      "end_pos": 231
+    },
+    {
+      "entity_text": "Sébastien Floc",
+      "entity_type": "PERSON",
+      "start_pos": 359,
+      "end_pos": 373
+    },
+    {
+      "entity_text": "François Leclerc",
+      "entity_type": "PERSON",
+      "start_pos": 455,
+      "end_pos": 471
+    },
+    {
+      "entity_text": "Bosch Agritech",
+      "entity_type": "PERSON",
+      "start_pos": 502,
+      "end_pos": 516
+    },
+    {
+      "entity_text": "énieur, Dr",
+      "entity_type": "PERSON",
+      "start_pos": 526,
+      "end_pos": 536
+    },
+    {
+      "entity_text": "Klaus Müller",
+      "entity_type": "PERSON",
+      "start_pos": 538,
+      "end_pos": 550
+    },
+    {
+      "entity_text": "Henri Seydoux",
+      "entity_type": "PERSON",
+      "start_pos": 666,
+      "end_pos": 679
+    },
+    {
+      "entity_text": "Thierry Coué",
+      "entity_type": "PERSON",
+      "start_pos": 821,
+      "end_pos": 833
+    },
+    {
+      "entity_text": "Christian Huyghe",
+      "entity_type": "PERSON",
+      "start_pos": 878,
+      "end_pos": 894
+    },
+    {
+      "entity_text": "Mme Julien",
+      "entity_type": "PERSON",
+      "start_pos": 958,
+      "end_pos": 968
+    },
+    {
+      "entity_text": "François Leclerc",
+      "entity_type": "PERSON",
+      "start_pos": 1061,
+      "end_pos": 1077
+    },
+    {
+      "entity_text": "Paris",
+      "entity_type": "LOCATION",
+      "start_pos": 1122,
+      "end_pos": 1127
+    },
+    {
+      "entity_text": "étaient Mme",
+      "entity_type": "PERSON",
+      "start_pos": 1148,
+      "end_pos": 1159
+    },
+    {
+      "entity_text": "Geneviève Fioraso",
+      "entity_type": "PERSON",
+      "start_pos": 1160,
+      "end_pos": 1177
+    },
+    {
+      "entity_text": "Marc Dufumier",
+      "entity_type": "PERSON",
+      "start_pos": 1188,
+      "end_pos": 1201
+    },
+    {
+      "entity_text": "Philippe Camburet",
+      "entity_type": "PERSON",
+      "start_pos": 1232,
+      "end_pos": 1249
+    },
+    {
+      "entity_text": "Christiane Lambert",
+      "entity_type": "PERSON",
+      "start_pos": 1385,
+      "end_pos": 1403
+    },
+    {
+      "entity_text": "Jeunes Agriculteurs",
+      "entity_type": "PERSON",
+      "start_pos": 1453,
+      "end_pos": 1472
+    },
+    {
+      "entity_text": "Mme Amandine",
+      "entity_type": "PERSON",
+      "start_pos": 1487,
+      "end_pos": 1499
+    },
+    {
+      "entity_text": "On échange",
+      "entity_type": "PERSON",
+      "start_pos": 1507,
+      "end_pos": 1517
+    },
+    {
+      "entity_text": "Pierre Martin",
+      "entity_type": "PERSON",
+      "start_pos": 1541,
+      "end_pos": 1554
+    },
+    {
+      "entity_text": "Mme Sophie",
+      "entity_type": "PERSON",
+      "start_pos": 1566,
+      "end_pos": 1576
+    },
+    {
+      "entity_text": "Jean Dupont",
+      "entity_type": "PERSON",
+      "start_pos": 1601,
+      "end_pos": 1612
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 1623,
+      "end_pos": 1629
+    },
+    {
+      "entity_text": "François Leclerc",
+      "entity_type": "PERSON",
+      "start_pos": 1671,
+      "end_pos": 1687
+    },
+    {
+      "entity_text": "Mme Marie",
+      "entity_type": "PERSON",
+      "start_pos": 1744,
+      "end_pos": 1753
+    },
+    {
+      "entity_text": "érative Axéréal",
+      "entity_type": "PERSON",
+      "start_pos": 1777,
+      "end_pos": 1792
+    },
+    {
+      "entity_text": "François Loiseau",
+      "entity_type": "PERSON",
+      "start_pos": 1814,
+      "end_pos": 1830
+    },
+    {
+      "entity_text": "Soufflet Négoce",
+      "entity_type": "PERSON",
+      "start_pos": 1865,
+      "end_pos": 1880
+    },
+    {
+      "entity_text": "Antoine Saunier",
+      "entity_type": "PERSON",
+      "start_pos": 1904,
+      "end_pos": 1919
+    },
+    {
+      "entity_text": "David Lefebvre",
+      "entity_type": "PERSON",
+      "start_pos": 2021,
+      "end_pos": 2035
+    },
+    {
+      "entity_text": "Mme Agnès",
+      "entity_type": "PERSON",
+      "start_pos": 2120,
+      "end_pos": 2129
+    }
+  ]
+}

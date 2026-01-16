@@ -1,0 +1,31 @@
+Entretien - Innovation Agricole et AgriTech
+Agriculteur connecté: M. François Leclerc, Ferme de Beauce
+Chartres, 25 octobre 2024
+
+Interviewer: Monsieur Leclerc, vous êtes pionnier de l'agriculture de précision?
+
+M. François Leclerc: Oui, j'ai modernisé notre exploitation familiale avec l'aide d'InVivo, la coopérative agricole. Leur directeur innovation, M. Sébastien Floc'h, m'a orienté vers les bonnes solutions.
+
+Interviewer: Technologies déployées?
+
+François Leclerc: Des capteurs IoT fournis par Bosch Agritech. Leur ingénieur, Dr. Klaus Müller, a supervisé l'installation. On utilise aussi les drones de Parrot, startup française. J'ai rencontré leur PDG, M. Henri Seydoux, au Salon de l'Agriculture.
+
+Interviewer: Soutien institutionnel?
+
+M. Leclerc: La Chambre d'Agriculture d'Eure-et-Loir, via son président M. Thierry Coué. L'INRAE nous accompagne - le chercheur Pr. Christian Huyghe suit nos expérimentations. Le Ministère de l'Agriculture, avec Mme Julien Denormandie comme ministre à l'époque, a subventionné.
+
+Interviewer: Formation et conseil?
+
+François Leclerc: Je me suis formé à l'école d'agronomie AgroParisTech. Mes formateurs étaient Mme Geneviève Fioraso et le Dr. Marc Dufumier. Mon conseiller technique, M. Philippe Camburet de la coopérative, m'aide au quotidien.
+
+Interviewer: Réseau professionnel?
+
+M. Leclerc: Je fais partie de la FNSEA. Son président, M. Christiane Lambert, défend nos intérêts. Localement, notre syndicat Jeunes Agriculteurs est animé par Mme Amandine Muret. On échange avec des collègues: M. Pierre Martin à Orléans, Mme Sophie Rousseau en Eure, et M. Jean Dupont en Île-de-France.
+
+Interviewer: Partenaires commerciaux?
+
+François Leclerc: On vend à Carrefour via leur centrale d'achat, contact Mme Marie Cheval. Aussi à la coopérative Axéréal, dirigée par M. Jean-François Loiseau. Pour l'export, on travaille avec Soufflet Négoce et leur responsable M. Antoine Saunier.
+
+Interviewer: Projets futurs?
+
+M. Leclerc: Agriculture bio certifiée par Ecocert. Leur auditeur, M. David Lefebvre, vient régulièrement. Et on teste des solutions blockchain avec Atos et leur expert Mme Agnès Pannier-Runacher pour la traçabilité.

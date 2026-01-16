@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python scripts/auto_annotate_corpus.py:*)",
+      "Bash(python scripts/count_entities.py:*)",
+      "Bash(python scripts/benchmark_nlp.py:*)",
+      "Bash(python:*)",
+      "Bash(pip install:*)",
+      "Bash(pyenv:*)",
+      "Bash(conda --version:*)",
+      "Bash(py:*)",
+      "Bash(tee:*)",
+      "Skill(BMad:tasks:execute-checklist)",
+      "Skill(BMad:tasks:execute-checklist:*)",
+      "Bash(if not exist \"docs\\\\qa\\\\gates\" mkdir \"docs\\\\qa\\\\gates\")"
+    ]
+  }
+}

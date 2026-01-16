@@ -1,0 +1,323 @@
+{
+  "document_name": "interview_12.txt",
+  "entities": [
+    {
+      "entity_text": "Reconversion Professionnelle",
+      "entity_type": "PERSON",
+      "start_pos": 13,
+      "end_pos": 41
+    },
+    {
+      "entity_text": "Digital\nBénéficiaire",
+      "entity_type": "PERSON",
+      "start_pos": 50,
+      "end_pos": 70
+    },
+    {
+      "entity_text": "Mme Julie",
+      "entity_type": "PERSON",
+      "start_pos": 72,
+      "end_pos": 81
+    },
+    {
+      "entity_text": "Paris",
+      "entity_type": "LOCATION",
+      "start_pos": 128,
+      "end_pos": 133
+    },
+    {
+      "entity_text": "Madame Bertrand",
+      "entity_type": "PERSON",
+      "start_pos": 166,
+      "end_pos": 181
+    },
+    {
+      "entity_text": "Julie Bertrand",
+      "entity_type": "PERSON",
+      "start_pos": 219,
+      "end_pos": 233
+    },
+    {
+      "entity_text": "Hôtel Plaza",
+      "entity_type": "PERSON",
+      "start_pos": 307,
+      "end_pos": 318
+    },
+    {
+      "entity_text": "Pierre Lavoignat",
+      "entity_type": "PERSON",
+      "start_pos": 351,
+      "end_pos": 367
+    },
+    {
+      "entity_text": "Mme Bertrand",
+      "entity_type": "PERSON",
+      "start_pos": 447,
+      "end_pos": 459
+    },
+    {
+      "entity_text": "Mme Sophie",
+      "entity_type": "PERSON",
+      "start_pos": 471,
+      "end_pos": 481
+    },
+    {
+      "entity_text": "Leur directeur France",
+      "entity_type": "ORG",
+      "start_pos": 550,
+      "end_pos": 571
+    },
+    {
+      "entity_text": "Boris Paillard",
+      "entity_type": "PERSON",
+      "start_pos": 576,
+      "end_pos": 590
+    },
+    {
+      "entity_text": "éré Open",
+      "entity_type": "PERSON",
+      "start_pos": 620,
+      "end_pos": 628
+    },
+    {
+      "entity_text": "Julie Bertrand",
+      "entity_type": "PERSON",
+      "start_pos": 688,
+      "end_pos": 702
+    },
+    {
+      "entity_text": "Paris",
+      "entity_type": "LOCATION",
+      "start_pos": 715,
+      "end_pos": 720
+    },
+    {
+      "entity_text": "Sébastien Saunier",
+      "entity_type": "PERSON",
+      "start_pos": 752,
+      "end_pos": 769
+    },
+    {
+      "entity_text": "Ruby, Mme",
+      "entity_type": "PERSON",
+      "start_pos": 775,
+      "end_pos": 784
+    },
+    {
+      "entity_text": "Kevin Soltani",
+      "entity_type": "PERSON",
+      "start_pos": 826,
+      "end_pos": 839
+    },
+    {
+      "entity_text": "Pierre Martin",
+      "entity_type": "PERSON",
+      "start_pos": 884,
+      "end_pos": 897
+    },
+    {
+      "entity_text": "Ahmed Karim",
+      "entity_type": "PERSON",
+      "start_pos": 899,
+      "end_pos": 910
+    },
+    {
+      "entity_text": "Mme Léa",
+      "entity_type": "PERSON",
+      "start_pos": 915,
+      "end_pos": 922
+    },
+    {
+      "entity_text": "Mme Bertrand",
+      "entity_type": "PERSON",
+      "start_pos": 983,
+      "end_pos": 995
+    },
+    {
+      "entity_text": "Pôle Emploi",
+      "entity_type": "PERSON",
+      "start_pos": 1019,
+      "end_pos": 1030
+    },
+    {
+      "entity_text": "ère Mme",
+      "entity_type": "PERSON",
+      "start_pos": 1047,
+      "end_pos": 1054
+    },
+    {
+      "entity_text": "Nathalie Legrand",
+      "entity_type": "PERSON",
+      "start_pos": 1055,
+      "end_pos": 1071
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 1102,
+      "end_pos": 1108
+    },
+    {
+      "entity_text": "Mme Valérie",
+      "entity_type": "PERSON",
+      "start_pos": 1115,
+      "end_pos": 1126
+    },
+    {
+      "entity_text": "Julie Bertrand",
+      "entity_type": "PERSON",
+      "start_pos": 1222,
+      "end_pos": 1236
+    },
+    {
+      "entity_text": "Tech Innovations",
+      "entity_type": "PERSON",
+      "start_pos": 1265,
+      "end_pos": 1281
+    },
+    {
+      "entity_text": "Thomas Klein",
+      "entity_type": "PERSON",
+      "start_pos": 1298,
+      "end_pos": 1310
+    },
+    {
+      "entity_text": "Mme Sarah",
+      "entity_type": "PERSON",
+      "start_pos": 1314,
+      "end_pos": 1323
+    },
+    {
+      "entity_text": "Romain Dufort",
+      "entity_type": "PERSON",
+      "start_pos": 1352,
+      "end_pos": 1365
+    },
+    {
+      "entity_text": "Mme Bertrand",
+      "entity_type": "PERSON",
+      "start_pos": 1446,
+      "end_pos": 1458
+    },
+    {
+      "entity_text": "Alexandre Petit",
+      "entity_type": "PERSON",
+      "start_pos": 1495,
+      "end_pos": 1510
+    },
+    {
+      "entity_text": "Mme Caroline",
+      "entity_type": "PERSON",
+      "start_pos": 1523,
+      "end_pos": 1535
+    },
+    {
+      "entity_text": "Youssef Amrani",
+      "entity_type": "PERSON",
+      "start_pos": 1561,
+      "end_pos": 1575
+    },
+    {
+      "entity_text": "Mme Emma",
+      "entity_type": "PERSON",
+      "start_pos": 1608,
+      "end_pos": 1616
+    },
+    {
+      "entity_text": "Lucas Moreau",
+      "entity_type": "PERSON",
+      "start_pos": 1633,
+      "end_pos": 1645
+    },
+    {
+      "entity_text": "Mme Isabelle",
+      "entity_type": "PERSON",
+      "start_pos": 1673,
+      "end_pos": 1685
+    },
+    {
+      "entity_text": "Julie Bertrand",
+      "entity_type": "PERSON",
+      "start_pos": 1732,
+      "end_pos": 1746
+    },
+    {
+      "entity_text": "Paris",
+      "entity_type": "LOCATION",
+      "start_pos": 1768,
+      "end_pos": 1773
+    },
+    {
+      "entity_text": "Christophe Porteneuve",
+      "entity_type": "PERSON",
+      "start_pos": 1794,
+      "end_pos": 1815
+    },
+    {
+      "entity_text": "Women Who",
+      "entity_type": "PERSON",
+      "start_pos": 1831,
+      "end_pos": 1840
+    },
+    {
+      "entity_text": "Code Paris",
+      "entity_type": "PERSON",
+      "start_pos": 1841,
+      "end_pos": 1851
+    },
+    {
+      "entity_text": "Mme Marcy",
+      "entity_type": "PERSON",
+      "start_pos": 1863,
+      "end_pos": 1872
+    },
+    {
+      "entity_text": "Ericka Charollois",
+      "entity_type": "PERSON",
+      "start_pos": 1873,
+      "end_pos": 1890
+    },
+    {
+      "entity_text": "éseau Social",
+      "entity_type": "PERSON",
+      "start_pos": 1912,
+      "end_pos": 1924
+    },
+    {
+      "entity_text": "Mme Emmanuelle",
+      "entity_type": "PERSON",
+      "start_pos": 1943,
+      "end_pos": 1957
+    },
+    {
+      "entity_text": "Mme Bertrand",
+      "entity_type": "PERSON",
+      "start_pos": 2036,
+      "end_pos": 2048
+    },
+    {
+      "entity_text": "Marc Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 2091,
+      "end_pos": 2102
+    },
+    {
+      "entity_text": "Sylvain Abelard",
+      "entity_type": "PERSON",
+      "start_pos": 2184,
+      "end_pos": 2199
+    },
+    {
+      "entity_text": "Mme Anne-",
+      "entity_type": "PERSON",
+      "start_pos": 2203,
+      "end_pos": 2212
+    },
+    {
+      "entity_text": "Laure Civeyrac",
+      "entity_type": "PERSON",
+      "start_pos": 2212,
+      "end_pos": 2226
+    }
+  ]
+}

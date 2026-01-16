@@ -1,0 +1,269 @@
+{
+  "document_name": "interview_15.txt",
+  "entities": [
+    {
+      "entity_text": "Crise Management",
+      "entity_type": "PERSON",
+      "start_pos": 13,
+      "end_pos": 29
+    },
+    {
+      "entity_text": "Chen, Fin",
+      "entity_type": "PERSON",
+      "start_pos": 78,
+      "end_pos": 87
+    },
+    {
+      "entity_text": "Tech Secure",
+      "entity_type": "PERSON",
+      "start_pos": 87,
+      "end_pos": 98
+    },
+    {
+      "entity_text": "Pay\nParis",
+      "entity_type": "PERSON",
+      "start_pos": 98,
+      "end_pos": 107
+    },
+    {
+      "entity_text": "Monsieur Chen",
+      "entity_type": "PERSON",
+      "start_pos": 138,
+      "end_pos": 151
+    },
+    {
+      "entity_text": "Vincent Chen",
+      "entity_type": "PERSON",
+      "start_pos": 212,
+      "end_pos": 224
+    },
+    {
+      "entity_text": "Mme Alice",
+      "entity_type": "PERSON",
+      "start_pos": 324,
+      "end_pos": 333
+    },
+    {
+      "entity_text": "David Park",
+      "entity_type": "PERSON",
+      "start_pos": 463,
+      "end_pos": 473
+    },
+    {
+      "entity_text": "Émilie Rousseau",
+      "entity_type": "PERSON",
+      "start_pos": 502,
+      "end_pos": 517
+    },
+    {
+      "entity_text": "Mme Sarah",
+      "entity_type": "PERSON",
+      "start_pos": 542,
+      "end_pos": 551
+    },
+    {
+      "entity_text": "Mme Durand",
+      "entity_type": "PERSON",
+      "start_pos": 628,
+      "end_pos": 638
+    },
+    {
+      "entity_text": "Vincent Chen",
+      "entity_type": "PERSON",
+      "start_pos": 681,
+      "end_pos": 693
+    },
+    {
+      "entity_text": "Baptiste Soufron",
+      "entity_type": "PERSON",
+      "start_pos": 756,
+      "end_pos": 772
+    },
+    {
+      "entity_text": "Mme Laure",
+      "entity_type": "PERSON",
+      "start_pos": 802,
+      "end_pos": 811
+    },
+    {
+      "entity_text": "Matthieu Bonenfant",
+      "entity_type": "PERSON",
+      "start_pos": 828,
+      "end_pos": 846
+    },
+    {
+      "entity_text": "Guillaume Poupard",
+      "entity_type": "PERSON",
+      "start_pos": 892,
+      "end_pos": 909
+    },
+    {
+      "entity_text": "Romain Duval",
+      "entity_type": "PERSON",
+      "start_pos": 1009,
+      "end_pos": 1021
+    },
+    {
+      "entity_text": "Palo Alto",
+      "entity_type": "PERSON",
+      "start_pos": 1059,
+      "end_pos": 1068
+    },
+    {
+      "entity_text": "énieur, Mme",
+      "entity_type": "PERSON",
+      "start_pos": 1087,
+      "end_pos": 1098
+    },
+    {
+      "entity_text": "Smith, était",
+      "entity_type": "PERSON",
+      "start_pos": 1108,
+      "end_pos": 1120
+    },
+    {
+      "entity_text": "Thomas Roccia",
+      "entity_type": "PERSON",
+      "start_pos": 1195,
+      "end_pos": 1208
+    },
+    {
+      "entity_text": "Microsoft DART nous a aussi aid",
+      "entity_type": "ORG",
+      "start_pos": 1210,
+      "end_pos": 1241
+    },
+    {
+      "entity_text": "John Lambert",
+      "entity_type": "PERSON",
+      "start_pos": 1251,
+      "end_pos": 1263
+    },
+    {
+      "entity_text": "Vincent Chen",
+      "entity_type": "PERSON",
+      "start_pos": 1304,
+      "end_pos": 1316
+    },
+    {
+      "entity_text": "Mme Caroline",
+      "entity_type": "PERSON",
+      "start_pos": 1341,
+      "end_pos": 1353
+    },
+    {
+      "entity_text": "Olivier Durand",
+      "entity_type": "PERSON",
+      "start_pos": 1404,
+      "end_pos": 1418
+    },
+    {
+      "entity_text": "Customer Success",
+      "entity_type": "PERSON",
+      "start_pos": 1458,
+      "end_pos": 1474
+    },
+    {
+      "entity_text": "Ahmed Mansour",
+      "entity_type": "PERSON",
+      "start_pos": 1479,
+      "end_pos": 1492
+    },
+    {
+      "entity_text": "Image Sept",
+      "entity_type": "PERSON",
+      "start_pos": 1522,
+      "end_pos": 1532
+    },
+    {
+      "entity_text": "Mme Anne",
+      "entity_type": "PERSON",
+      "start_pos": 1535,
+      "end_pos": 1543
+    },
+    {
+      "entity_text": "Maître Julie",
+      "entity_type": "PERSON",
+      "start_pos": 1665,
+      "end_pos": 1677
+    },
+    {
+      "entity_text": "Francis Lefebvre",
+      "entity_type": "PERSON",
+      "start_pos": 1724,
+      "end_pos": 1740
+    },
+    {
+      "entity_text": "Maître François",
+      "entity_type": "PERSON",
+      "start_pos": 1742,
+      "end_pos": 1757
+    },
+    {
+      "entity_text": "Édouard Fernandez-",
+      "entity_type": "PERSON",
+      "start_pos": 1808,
+      "end_pos": 1826
+    },
+    {
+      "entity_text": "Marc Bideau",
+      "entity_type": "PERSON",
+      "start_pos": 1878,
+      "end_pos": 1889
+    },
+    {
+      "entity_text": "Vincent Chen",
+      "entity_type": "PERSON",
+      "start_pos": 1946,
+      "end_pos": 1958
+    },
+    {
+      "entity_text": "Mme Laura",
+      "entity_type": "PERSON",
+      "start_pos": 1997,
+      "end_pos": 2006
+    },
+    {
+      "entity_text": "Kevin Zhang",
+      "entity_type": "PERSON",
+      "start_pos": 2032,
+      "end_pos": 2043
+    },
+    {
+      "entity_text": "Mme Nadia",
+      "entity_type": "PERSON",
+      "start_pos": 2056,
+      "end_pos": 2065
+    },
+    {
+      "entity_text": "Sophie Lemaire",
+      "entity_type": "PERSON",
+      "start_pos": 2136,
+      "end_pos": 2150
+    },
+    {
+      "entity_text": "Mme Roxanne",
+      "entity_type": "PERSON",
+      "start_pos": 2209,
+      "end_pos": 2220
+    },
+    {
+      "entity_text": "Damien Bancal",
+      "entity_type": "PERSON",
+      "start_pos": 2421,
+      "end_pos": 2434
+    },
+    {
+      "entity_text": "Fabien Perigaud",
+      "entity_type": "PERSON",
+      "start_pos": 2509,
+      "end_pos": 2524
+    },
+    {
+      "entity_text": "Thierry Bedos",
+      "entity_type": "PERSON",
+      "start_pos": 2607,
+      "end_pos": 2620
+    }
+  ]
+}

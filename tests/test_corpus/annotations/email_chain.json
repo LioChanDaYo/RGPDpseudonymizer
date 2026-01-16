@@ -1,0 +1,545 @@
+{
+  "document_name": "email_chain.txt",
+  "entities": [
+    {
+      "entity_text": "Lancement Projet",
+      "entity_type": "PERSON",
+      "start_pos": 162,
+      "end_pos": 178
+    },
+    {
+      "entity_text": "Validation Architecture",
+      "entity_type": "PERSON",
+      "start_pos": 189,
+      "end_pos": 212
+    },
+    {
+      "entity_text": "Microsoft ",
+      "entity_type": "ORG",
+      "start_pos": 274,
+      "end_pos": 284
+    },
+    {
+      "entity_text": "Romain Niccoli",
+      "entity_type": "PERSON",
+      "start_pos": 288,
+      "end_pos": 302
+    },
+    {
+      "entity_text": "Mme Sophie",
+      "entity_type": "PERSON",
+      "start_pos": 306,
+      "end_pos": 316
+    },
+    {
+      "entity_text": "Azure Cloud",
+      "entity_type": "PERSON",
+      "start_pos": 416,
+      "end_pos": 427
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 445,
+      "end_pos": 451
+    },
+    {
+      "entity_text": "Mme Caroline",
+      "entity_type": "PERSON",
+      "start_pos": 631,
+      "end_pos": 643
+    },
+    {
+      "entity_text": "Petit\nArchitecte",
+      "entity_type": "PERSON",
+      "start_pos": 644,
+      "end_pos": 660
+    },
+    {
+      "entity_text": "Laurent Benoit",
+      "entity_type": "PERSON",
+      "start_pos": 671,
+      "end_pos": 685
+    },
+    {
+      "entity_text": "Lead Developer",
+      "entity_type": "PERSON",
+      "start_pos": 686,
+      "end_pos": 700
+    },
+    {
+      "entity_text": "Kevin Zhang",
+      "entity_type": "PERSON",
+      "start_pos": 705,
+      "end_pos": 716
+    },
+    {
+      "entity_text": "Ops Engineer",
+      "entity_type": "PERSON",
+      "start_pos": 720,
+      "end_pos": 732
+    },
+    {
+      "entity_text": "Mme Nadia",
+      "entity_type": "PERSON",
+      "start_pos": 734,
+      "end_pos": 743
+    },
+    {
+      "entity_text": "Alexandre Blanc",
+      "entity_type": "PERSON",
+      "start_pos": 766,
+      "end_pos": 781
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 808,
+      "end_pos": 814
+    },
+    {
+      "entity_text": "Mme Bernard",
+      "entity_type": "PERSON",
+      "start_pos": 846,
+      "end_pos": 857
+    },
+    {
+      "entity_text": "Vincent Gorse",
+      "entity_type": "PERSON",
+      "start_pos": 917,
+      "end_pos": 930
+    },
+    {
+      "entity_text": "Mme Laure",
+      "entity_type": "PERSON",
+      "start_pos": 984,
+      "end_pos": 993
+    },
+    {
+      "entity_text": "Thomas Weber",
+      "entity_type": "PERSON",
+      "start_pos": 1083,
+      "end_pos": 1095
+    },
+    {
+      "entity_text": "Mme Julie",
+      "entity_type": "PERSON",
+      "start_pos": 1112,
+      "end_pos": 1121
+    },
+    {
+      "entity_text": "Cordialement,\nDr",
+      "entity_type": "PERSON",
+      "start_pos": 1186,
+      "end_pos": 1202
+    },
+    {
+      "entity_text": "Marie Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 1204,
+      "end_pos": 1216
+    },
+    {
+      "entity_text": "TechSolutions France",
+      "entity_type": "ORG",
+      "start_pos": 1222,
+      "end_pos": 1242
+    },
+    {
+      "entity_text": "Lancement Projet",
+      "entity_type": "PERSON",
+      "start_pos": 1432,
+      "end_pos": 1448
+    },
+    {
+      "entity_text": "Validation Architecture",
+      "entity_type": "PERSON",
+      "start_pos": 1459,
+      "end_pos": 1482
+    },
+    {
+      "entity_text": "Maxime Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 1530,
+      "end_pos": 1543
+    },
+    {
+      "entity_text": "Mme Lucie",
+      "entity_type": "PERSON",
+      "start_pos": 1567,
+      "end_pos": 1576
+    },
+    {
+      "entity_text": "Maître Sarah",
+      "entity_type": "PERSON",
+      "start_pos": 1643,
+      "end_pos": 1655
+    },
+    {
+      "entity_text": "Thomas Buberl",
+      "entity_type": "PERSON",
+      "start_pos": 1786,
+      "end_pos": 1799
+    },
+    {
+      "entity_text": "Vincent Chen",
+      "entity_type": "PERSON",
+      "start_pos": 1888,
+      "end_pos": 1900
+    },
+    {
+      "entity_text": "Laurent\n\nLaurent",
+      "entity_type": "PERSON",
+      "start_pos": 1903,
+      "end_pos": 1919
+    },
+    {
+      "entity_text": "Benoit\nArchitecte",
+      "entity_type": "PERSON",
+      "start_pos": 1920,
+      "end_pos": 1937
+    },
+    {
+      "entity_text": "Cloud\nTech",
+      "entity_type": "PERSON",
+      "start_pos": 1938,
+      "end_pos": 1948
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 1958,
+      "end_pos": 1964
+    },
+    {
+      "entity_text": "Lancement Projet",
+      "entity_type": "PERSON",
+      "start_pos": 2166,
+      "end_pos": 2182
+    },
+    {
+      "entity_text": "Validation Architecture",
+      "entity_type": "PERSON",
+      "start_pos": 2193,
+      "end_pos": 2216
+    },
+    {
+      "entity_text": "Laurent, Marie",
+      "entity_type": "PERSON",
+      "start_pos": 2218,
+      "end_pos": 2232
+    },
+    {
+      "entity_text": "Me Sarah",
+      "entity_type": "PERSON",
+      "start_pos": 2282,
+      "end_pos": 2290
+    },
+    {
+      "entity_text": "Vincent Chen",
+      "entity_type": "PERSON",
+      "start_pos": 2315,
+      "end_pos": 2327
+    },
+    {
+      "entity_text": "Me Cohen",
+      "entity_type": "PERSON",
+      "start_pos": 2377,
+      "end_pos": 2385
+    },
+    {
+      "entity_text": "Data Protection",
+      "entity_type": "PERSON",
+      "start_pos": 2404,
+      "end_pos": 2419
+    },
+    {
+      "entity_text": "Impact Assessment",
+      "entity_type": "PERSON",
+      "start_pos": 2420,
+      "end_pos": 2437
+    },
+    {
+      "entity_text": "Mme Catherine",
+      "entity_type": "PERSON",
+      "start_pos": 2504,
+      "end_pos": 2517
+    },
+    {
+      "entity_text": "Pierre Fontaine",
+      "entity_type": "PERSON",
+      "start_pos": 2533,
+      "end_pos": 2548
+    },
+    {
+      "entity_text": "François Leclerc",
+      "entity_type": "PERSON",
+      "start_pos": 2592,
+      "end_pos": 2608
+    },
+    {
+      "entity_text": "Microsoft\n",
+      "entity_type": "ORG",
+      "start_pos": 2633,
+      "end_pos": 2643
+    },
+    {
+      "entity_text": "Marc Bideau",
+      "entity_type": "PERSON",
+      "start_pos": 2676,
+      "end_pos": 2687
+    },
+    {
+      "entity_text": "Mme Isabelle",
+      "entity_type": "PERSON",
+      "start_pos": 2749,
+      "end_pos": 2761
+    },
+    {
+      "entity_text": "Philippe Arnaud",
+      "entity_type": "PERSON",
+      "start_pos": 2787,
+      "end_pos": 2802
+    },
+    {
+      "entity_text": "Me Sarah",
+      "entity_type": "PERSON",
+      "start_pos": 2871,
+      "end_pos": 2879
+    },
+    {
+      "entity_text": "Vincent Chen",
+      "entity_type": "PERSON",
+      "start_pos": 2897,
+      "end_pos": 2909
+    },
+    {
+      "entity_text": "David Park",
+      "entity_type": "PERSON",
+      "start_pos": 2922,
+      "end_pos": 2932
+    },
+    {
+      "entity_text": "Mme Émilie",
+      "entity_type": "PERSON",
+      "start_pos": 2947,
+      "end_pos": 2957
+    },
+    {
+      "entity_text": "Wavestone\n\nJe",
+      "entity_type": "PERSON",
+      "start_pos": 2970,
+      "end_pos": 2983
+    },
+    {
+      "entity_text": "Mme Sophie",
+      "entity_type": "PERSON",
+      "start_pos": 3010,
+      "end_pos": 3020
+    },
+    {
+      "entity_text": "Thomas Weber",
+      "entity_type": "PERSON",
+      "start_pos": 3114,
+      "end_pos": 3126
+    },
+    {
+      "entity_text": "Directeur Commercial",
+      "entity_type": "PERSON",
+      "start_pos": 3127,
+      "end_pos": 3147
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 3162,
+      "end_pos": 3168
+    },
+    {
+      "entity_text": "Grande Armée",
+      "entity_type": "PERSON",
+      "start_pos": 3189,
+      "end_pos": 3201
+    },
+    {
+      "entity_text": "Paris",
+      "entity_type": "LOCATION",
+      "start_pos": 3209,
+      "end_pos": 3214
+    },
+    {
+      "entity_text": "Lancement Projet",
+      "entity_type": "PERSON",
+      "start_pos": 3416,
+      "end_pos": 3432
+    },
+    {
+      "entity_text": "Validation Architecture",
+      "entity_type": "PERSON",
+      "start_pos": 3443,
+      "end_pos": 3466
+    },
+    {
+      "entity_text": "Tous,\n\nMerci",
+      "entity_type": "PERSON",
+      "start_pos": 3468,
+      "end_pos": 3480
+    },
+    {
+      "entity_text": "Kevin Zhang",
+      "entity_type": "PERSON",
+      "start_pos": 3629,
+      "end_pos": 3640
+    },
+    {
+      "entity_text": "Mme Nadia",
+      "entity_type": "PERSON",
+      "start_pos": 3682,
+      "end_pos": 3691
+    },
+    {
+      "entity_text": "Vincent Chen",
+      "entity_type": "PERSON",
+      "start_pos": 3752,
+      "end_pos": 3764
+    },
+    {
+      "entity_text": "Mme Julie",
+      "entity_type": "PERSON",
+      "start_pos": 3806,
+      "end_pos": 3815
+    },
+    {
+      "entity_text": "Maître Julie",
+      "entity_type": "PERSON",
+      "start_pos": 3916,
+      "end_pos": 3928
+    },
+    {
+      "entity_text": "Mme Alice",
+      "entity_type": "PERSON",
+      "start_pos": 3990,
+      "end_pos": 3999
+    },
+    {
+      "entity_text": "François Pellegrini",
+      "entity_type": "PERSON",
+      "start_pos": 4067,
+      "end_pos": 4086
+    },
+    {
+      "entity_text": "Zhang, Mme",
+      "entity_type": "PERSON",
+      "start_pos": 4186,
+      "end_pos": 4196
+    },
+    {
+      "entity_text": "Maître Sarah",
+      "entity_type": "PERSON",
+      "start_pos": 4206,
+      "end_pos": 4218
+    },
+    {
+      "entity_text": "TechSolutions France",
+      "entity_type": "ORG",
+      "start_pos": 4230,
+      "end_pos": 4250
+    },
+    {
+      "entity_text": "écédents\nDate",
+      "entity_type": "PERSON",
+      "start_pos": 4345,
+      "end_pos": 4358
+    },
+    {
+      "entity_text": "Lancement Projet",
+      "entity_type": "PERSON",
+      "start_pos": 4393,
+      "end_pos": 4409
+    },
+    {
+      "entity_text": "Validation Architecture",
+      "entity_type": "PERSON",
+      "start_pos": 4420,
+      "end_pos": 4443
+    },
+    {
+      "entity_text": "Équipe,\n\nMerci",
+      "entity_type": "PERSON",
+      "start_pos": 4445,
+      "end_pos": 4459
+    },
+    {
+      "entity_text": "Me Cohen",
+      "entity_type": "PERSON",
+      "start_pos": 4573,
+      "end_pos": 4581
+    },
+    {
+      "entity_text": "Zhang, Mme",
+      "entity_type": "PERSON",
+      "start_pos": 4595,
+      "end_pos": 4605
+    },
+    {
+      "entity_text": "Amrani, Mme",
+      "entity_type": "PERSON",
+      "start_pos": 4606,
+      "end_pos": 4617
+    },
+    {
+      "entity_text": "Mme Sophie",
+      "entity_type": "PERSON",
+      "start_pos": 4644,
+      "end_pos": 4654
+    },
+    {
+      "entity_text": "Microsoft",
+      "entity_type": "ORG",
+      "start_pos": 4760,
+      "end_pos": 4769
+    },
+    {
+      "entity_text": "Mme Bertholom",
+      "entity_type": "PERSON",
+      "start_pos": 4772,
+      "end_pos": 4785
+    },
+    {
+      "entity_text": "Maître François",
+      "entity_type": "PERSON",
+      "start_pos": 4938,
+      "end_pos": 4953
+    },
+    {
+      "entity_text": "Mme Moreau",
+      "entity_type": "PERSON",
+      "start_pos": 4995,
+      "end_pos": 5005
+    },
+    {
+      "entity_text": "Zhang, Mme",
+      "entity_type": "PERSON",
+      "start_pos": 5051,
+      "end_pos": 5061
+    },
+    {
+      "entity_text": "Me Cohen",
+      "entity_type": "PERSON",
+      "start_pos": 5118,
+      "end_pos": 5126
+    },
+    {
+      "entity_text": "Mme Petit",
+      "entity_type": "PERSON",
+      "start_pos": 5140,
+      "end_pos": 5149
+    },
+    {
+      "entity_text": "Marie Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 5291,
+      "end_pos": 5303
+    }
+  ]
+}

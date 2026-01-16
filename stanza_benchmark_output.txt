@@ -1,0 +1,66 @@
+2026-01-16 16:13:39 WARNING: Language fr package default expects mwt, which has been added
+============================================================
+NLP BENCHMARK - GDPR Pseudonymizer
+============================================================
+
+Loading corpus from: tests\test_corpus
+Loaded 25 documents
+
+Initializing STANZA detector...
+Running NER with library: stanza
+
+Processed: interview_01.txt
+Processed: interview_02.txt
+Processed: interview_03.txt
+Processed: interview_04.txt
+Processed: interview_05.txt
+Processed: interview_06.txt
+Processed: interview_07.txt
+Processed: interview_08.txt
+Processed: interview_09.txt
+Processed: interview_10.txt
+Processed: interview_11.txt
+Processed: interview_12.txt
+Processed: interview_13.txt
+Processed: interview_14.txt
+Processed: interview_15.txt
+Processed: audit_summary.txt
+Processed: board_minutes.txt
+Processed: contract_memo.txt
+Processed: email_chain.txt
+Processed: hr_announcement.txt
+Processed: incident_report.txt
+Processed: meeting_minutes.txt
+Processed: partnership_agreement.txt
+Processed: project_report.txt
+Processed: sales_proposal.txt
+============================================================
+BENCHMARK RESULTS
+============================================================
+
+PERSON:
+  Precision: 0.1246
+  Recall:    0.1026
+  F1 Score:  0.1126
+  TP: 167, FP: 1173, FN: 1460
+
+LOCATION:
+  Precision: 0.4255
+  Recall:    0.4878
+  F1 Score:  0.4545
+  TP: 60, FP: 81, FN: 63
+
+ORG:
+  Precision: 0.0326
+  Recall:    0.3333
+  F1 Score:  0.0595
+  TP: 35, FP: 1037, FN: 70
+
+OVERALL:
+  Precision: 0.1026
+  Recall:    0.1412
+  F1 Score:  0.1189
+
+============================================================
+FAIL: STANZA does not meet >=85% F1 threshold (0.1189)
+============================================================

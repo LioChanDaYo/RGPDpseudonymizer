@@ -1,0 +1,31 @@
+Entretien - Projet Smart City Lyon
+Chef de projet: M. Thomas Weber, Métropole de Lyon
+Date: 12 décembre 2024
+
+Interviewer: Monsieur Weber, présentez-nous le projet Smart City de Lyon.
+
+Thomas Weber: La Métropole de Lyon, sous la présidence de M. Bruno Bernard, a lancé un programme ambitieux de ville intelligente. Je coordonne avec plusieurs directions.
+
+Interviewer: Équipe projet interne?
+
+M. Weber: Une équipe transverse. Mme Émilie Morel pour la mobilité, M. Julien Sarrazin sur l'énergie, Dr. Nathalie Perrin-Gilbert pour le numérique. Le directeur général, M. Patrick Refondini, supervise. On travaille aussi avec les maires d'arrondissement comme M. Jean-Yves Sécheresse du 7ème.
+
+Interviewer: Partenaires technologiques?
+
+Thomas Weber: Cisco France pour l'infrastructure réseau, représenté par Mme Patricia Gélébart. IBM avec leur Smart Cities Lab - contact M. Bertrand Louvet. Schneider Electric à travers leur VP smart cities, Mme Gwenaëlle Avice-Huet. Et Enedis avec M. Philippe Monloubou.
+
+Interviewer: Startups impliquées?
+
+M. Weber: L'écosystème lyonnais est riche. On a Hikob pour l'IoT, fondée par Dr. Eric Benoit. Navya pour les navettes autonomes - leur CEO, Mme Sophie Desormière. Lancey Energy Storage avec M. Raphaël Meyer. Et Ellyssa, startup IA de Mme Jessica Fino.
+
+Interviewer: Aspects mobilité?
+
+Thomas Weber: Collaboration avec Keolis Lyon, dirigé par M. Thierry Mallet. SYTRAL Mobilités, où Mme Fouziya Bouzerda préside. Pour le vélo, on travaille avec Vélo'v exploité par JCDecaux - contact M. Jean-François Decaux. Les trottinettes: Lime et leur directeur France, M. Arthur-Louis Jacquier.
+
+Interviewer: Universités et recherche?
+
+M. Weber: INSA Lyon avec le Pr. Frédéric Fotiadu. École Centrale Lyon via Mme Isabelle Dussauge. Le laboratoire LIRIS du CNRS, animé par Dr. Lionel Brunie. Et emlyon business school pour les aspects innovation avec le Pr. Tawhid Chtioui.
+
+Interviewer: Financement et gouvernance?
+
+Thomas Weber: Budget de 50M€. La Caisse des Dépôts via M. Éric Lombard participe. La Région Auvergne-Rhône-Alpes, présidée par M. Laurent Wauquiez, cofinance. L'État soutient via l'ANCT et son directeur, M. Yves Le Breton. Notre comité de pilotage inclut aussi Mme Audrey Lebel de la French Tech Lyon et M. Pascal Demurger de la MAIF, partenaire assurance.

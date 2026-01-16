@@ -1,0 +1,74 @@
+================================================================================
+ANNOTATION QUALITY VALIDATION REPORT
+================================================================================
+
+[!] audit_summary.json: 1 issues found
+   - 0 overlapping entities
+   - 1 suspicious PERSON entities
+   - 0 suspicious ORG entities
+   Examples of suspicious PERSON entities:
+     * "Can
+Responsable"
+[OK] board_minutes.json: No issues detected
+[OK] contract_memo.json: No issues detected
+[OK] email_chain.json: No issues detected
+[!] hr_announcement.json: 1 issues found
+   - 0 overlapping entities
+   - 1 suspicious PERSON entities
+   - 0 suspicious ORG entities
+   Examples of suspicious PERSON entities:
+     * "Laurent
+Directrice"
+[!] incident_report.json: 3 issues found
+   - 0 overlapping entities
+   - 3 suspicious PERSON entities
+   - 0 suspicious ORG entities
+   Examples of suspicious PERSON entities:
+     * "Claims Manager"
+     * "Risk Manager"
+     * "éel
+   Responsable"
+[OK] interview_01.json: No issues detected
+[OK] interview_02.json: No issues detected
+[OK] interview_03.json: No issues detected
+[OK] interview_04.json: No issues detected
+[OK] interview_05.json: No issues detected
+[OK] interview_06.json: No issues detected
+[!] interview_07.json: 1 issues found
+   - 0 overlapping entities
+   - 1 suspicious PERSON entities
+   - 0 suspicious ORG entities
+   Examples of suspicious PERSON entities:
+     * "Entreprise
+Responsable"
+[OK] interview_08.json: No issues detected
+[OK] interview_09.json: No issues detected
+[OK] interview_10.json: No issues detected
+[OK] interview_11.json: No issues detected
+[OK] interview_12.json: No issues detected
+[OK] interview_13.json: No issues detected
+[OK] interview_14.json: No issues detected
+[!] interview_15.json: 1 issues found
+   - 0 overlapping entities
+   - 0 suspicious PERSON entities
+   - 1 suspicious ORG entities
+[OK] meeting_minutes.json: No issues detected
+[!] partnership_agreement.json: 3 issues found
+   - 0 overlapping entities
+   - 3 suspicious PERSON entities
+   - 0 suspicious ORG entities
+   Examples of suspicious PERSON entities:
+     * "Regional Manager"
+     * "Regional Manager"
+     * "Account Manager"
+[OK] project_report.json: No issues detected
+[!] sales_proposal.json: 1 issues found
+   - 0 overlapping entities
+   - 1 suspicious PERSON entities
+   - 0 suspicious ORG entities
+   Examples of suspicious PERSON entities:
+     * "Account Manager"
+
+================================================================================
+SUMMARY: 11 total issues found across 25 files
+================================================================================

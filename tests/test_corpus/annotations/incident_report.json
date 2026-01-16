@@ -1,0 +1,983 @@
+{
+  "document_name": "incident_report.txt",
+  "entities": [
+    {
+      "entity_text": "Diffusion Restreinte",
+      "entity_type": "PERSON",
+      "start_pos": 60,
+      "end_pos": 80
+    },
+    {
+      "entity_text": "Vincent Chen",
+      "entity_type": "PERSON",
+      "start_pos": 191,
+      "end_pos": 203
+    },
+    {
+      "entity_text": "Security Operations",
+      "entity_type": "PERSON",
+      "start_pos": 273,
+      "end_pos": 292
+    },
+    {
+      "entity_text": "Mme Laura",
+      "entity_type": "PERSON",
+      "start_pos": 694,
+      "end_pos": 703
+    },
+    {
+      "entity_text": "Martin, Analyste",
+      "entity_type": "PERSON",
+      "start_pos": 704,
+      "end_pos": 720
+    },
+    {
+      "entity_text": "Vincent Chen",
+      "entity_type": "PERSON",
+      "start_pos": 754,
+      "end_pos": 766
+    },
+    {
+      "entity_text": "Convocation équipe",
+      "entity_type": "PERSON",
+      "start_pos": 812,
+      "end_pos": 830
+    },
+    {
+      "entity_text": "Mme Catherine",
+      "entity_type": "PERSON",
+      "start_pos": 851,
+      "end_pos": 864
+    },
+    {
+      "entity_text": "Rousseau, Responsable",
+      "entity_type": "PERSON",
+      "start_pos": 865,
+      "end_pos": 886
+    },
+    {
+      "entity_text": "Marc Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 913,
+      "end_pos": 924
+    },
+    {
+      "entity_text": "Jonathan Cherki",
+      "entity_type": "PERSON",
+      "start_pos": 959,
+      "end_pos": 974
+    },
+    {
+      "entity_text": "Matthieu Bonenfant",
+      "entity_type": "PERSON",
+      "start_pos": 1002,
+      "end_pos": 1020
+    },
+    {
+      "entity_text": "Laurent Benoit",
+      "entity_type": "PERSON",
+      "start_pos": 1104,
+      "end_pos": 1118
+    },
+    {
+      "entity_text": "Architecte Cloud",
+      "entity_type": "PERSON",
+      "start_pos": 1120,
+      "end_pos": 1136
+    },
+    {
+      "entity_text": "Microsoft Azure ",
+      "entity_type": "ORG",
+      "start_pos": 1164,
+      "end_pos": 1180
+    },
+    {
+      "entity_text": "Romain Niccoli",
+      "entity_type": "PERSON",
+      "start_pos": 1184,
+      "end_pos": 1198
+    },
+    {
+      "entity_text": "Marie Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 1268,
+      "end_pos": 1280
+    },
+    {
+      "entity_text": "Mme Isabelle",
+      "entity_type": "PERSON",
+      "start_pos": 1296,
+      "end_pos": 1308
+    },
+    {
+      "entity_text": "Philippe Arnaud",
+      "entity_type": "PERSON",
+      "start_pos": 1334,
+      "end_pos": 1349
+    },
+    {
+      "entity_text": "François Leclerc",
+      "entity_type": "PERSON",
+      "start_pos": 1368,
+      "end_pos": 1384
+    },
+    {
+      "entity_text": "Directeur Juridique",
+      "entity_type": "PERSON",
+      "start_pos": 1386,
+      "end_pos": 1405
+    },
+    {
+      "entity_text": "Kevin Zhang",
+      "entity_type": "PERSON",
+      "start_pos": 1473,
+      "end_pos": 1484
+    },
+    {
+      "entity_text": "Alexandre Jin",
+      "entity_type": "PERSON",
+      "start_pos": 1506,
+      "end_pos": 1519
+    },
+    {
+      "entity_text": "Mme Laure",
+      "entity_type": "PERSON",
+      "start_pos": 1558,
+      "end_pos": 1567
+    },
+    {
+      "entity_text": "Partner Cyber",
+      "entity_type": "PERSON",
+      "start_pos": 1579,
+      "end_pos": 1592
+    },
+    {
+      "entity_text": "Romain Duval",
+      "entity_type": "PERSON",
+      "start_pos": 1631,
+      "end_pos": 1643
+    },
+    {
+      "entity_text": "Mme Nadia",
+      "entity_type": "PERSON",
+      "start_pos": 1647,
+      "end_pos": 1656
+    },
+    {
+      "entity_text": "Amrani\n        Aucune",
+      "entity_type": "PERSON",
+      "start_pos": 1657,
+      "end_pos": 1678
+    },
+    {
+      "entity_text": "Vincent Chen",
+      "entity_type": "PERSON",
+      "start_pos": 1735,
+      "end_pos": 1747
+    },
+    {
+      "entity_text": "Mme Moreau",
+      "entity_type": "PERSON",
+      "start_pos": 1766,
+      "end_pos": 1776
+    },
+    {
+      "entity_text": "Arnaud, Dr",
+      "entity_type": "PERSON",
+      "start_pos": 1781,
+      "end_pos": 1791
+    },
+    {
+      "entity_text": "Thomas Weber",
+      "entity_type": "PERSON",
+      "start_pos": 1804,
+      "end_pos": 1816
+    },
+    {
+      "entity_text": "Guillaume Poupard",
+      "entity_type": "PERSON",
+      "start_pos": 1880,
+      "end_pos": 1897
+    },
+    {
+      "entity_text": "Me Sarah",
+      "entity_type": "PERSON",
+      "start_pos": 1933,
+      "end_pos": 1941
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 2023,
+      "end_pos": 2029
+    },
+    {
+      "entity_text": "Marc Bideau",
+      "entity_type": "PERSON",
+      "start_pos": 2039,
+      "end_pos": 2050
+    },
+    {
+      "entity_text": "Thomas Buberl",
+      "entity_type": "PERSON",
+      "start_pos": 2086,
+      "end_pos": 2099
+    },
+    {
+      "entity_text": "Débriefing équipe",
+      "entity_type": "PERSON",
+      "start_pos": 2124,
+      "end_pos": 2141
+    },
+    {
+      "entity_text": "Thomas Roccia",
+      "entity_type": "PERSON",
+      "start_pos": 2209,
+      "end_pos": 2222
+    },
+    {
+      "entity_text": "Azure West",
+      "entity_type": "PERSON",
+      "start_pos": 2598,
+      "end_pos": 2608
+    },
+    {
+      "entity_text": "Vincent Chen",
+      "entity_type": "PERSON",
+      "start_pos": 2678,
+      "end_pos": 2690
+    },
+    {
+      "entity_text": "Marie Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 2724,
+      "end_pos": 2736
+    },
+    {
+      "entity_text": "Mme Laura",
+      "entity_type": "PERSON",
+      "start_pos": 2782,
+      "end_pos": 2791
+    },
+    {
+      "entity_text": "Martin, Analyste",
+      "entity_type": "PERSON",
+      "start_pos": 2792,
+      "end_pos": 2808
+    },
+    {
+      "entity_text": "Mme Catherine",
+      "entity_type": "PERSON",
+      "start_pos": 2827,
+      "end_pos": 2840
+    },
+    {
+      "entity_text": "Rousseau, Responsable",
+      "entity_type": "PERSON",
+      "start_pos": 2841,
+      "end_pos": 2862
+    },
+    {
+      "entity_text": "Marc Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 2896,
+      "end_pos": 2907
+    },
+    {
+      "entity_text": "Laurent Benoit",
+      "entity_type": "PERSON",
+      "start_pos": 2948,
+      "end_pos": 2962
+    },
+    {
+      "entity_text": "Architecte Cloud",
+      "entity_type": "PERSON",
+      "start_pos": 2964,
+      "end_pos": 2980
+    },
+    {
+      "entity_text": "Kevin Zhang",
+      "entity_type": "PERSON",
+      "start_pos": 3013,
+      "end_pos": 3024
+    },
+    {
+      "entity_text": "Jin, Lead",
+      "entity_type": "PERSON",
+      "start_pos": 3068,
+      "end_pos": 3077
+    },
+    {
+      "entity_text": "Romain Duval",
+      "entity_type": "PERSON",
+      "start_pos": 3108,
+      "end_pos": 3120
+    },
+    {
+      "entity_text": "Backend Lead",
+      "entity_type": "PERSON",
+      "start_pos": 3122,
+      "end_pos": 3134
+    },
+    {
+      "entity_text": "Mme Nadia",
+      "entity_type": "PERSON",
+      "start_pos": 3151,
+      "end_pos": 3160
+    },
+    {
+      "entity_text": "Amrani, Dev",
+      "entity_type": "PERSON",
+      "start_pos": 3161,
+      "end_pos": 3172
+    },
+    {
+      "entity_text": "François Leclerc",
+      "entity_type": "PERSON",
+      "start_pos": 3204,
+      "end_pos": 3220
+    },
+    {
+      "entity_text": "Directeur Juridique",
+      "entity_type": "PERSON",
+      "start_pos": 3222,
+      "end_pos": 3241
+    },
+    {
+      "entity_text": "Me Sarah",
+      "entity_type": "PERSON",
+      "start_pos": 3261,
+      "end_pos": 3269
+    },
+    {
+      "entity_text": "Mme Caroline",
+      "entity_type": "PERSON",
+      "start_pos": 3308,
+      "end_pos": 3320
+    },
+    {
+      "entity_text": "Marchal, Dircom",
+      "entity_type": "PERSON",
+      "start_pos": 3321,
+      "end_pos": 3336
+    },
+    {
+      "entity_text": "Mme Laure",
+      "entity_type": "PERSON",
+      "start_pos": 3405,
+      "end_pos": 3414
+    },
+    {
+      "entity_text": "Matthieu Bonenfant",
+      "entity_type": "PERSON",
+      "start_pos": 3439,
+      "end_pos": 3457
+    },
+    {
+      "entity_text": "Consultant Senior",
+      "entity_type": "PERSON",
+      "start_pos": 3459,
+      "end_pos": 3476
+    },
+    {
+      "entity_text": "Thomas Roccia",
+      "entity_type": "PERSON",
+      "start_pos": 3495,
+      "end_pos": 3508
+    },
+    {
+      "entity_text": "Threat Intelligence",
+      "entity_type": "PERSON",
+      "start_pos": 3510,
+      "end_pos": 3529
+    },
+    {
+      "entity_text": "Microsoft DART",
+      "entity_type": "ORG",
+      "start_pos": 3533,
+      "end_pos": 3547
+    },
+    {
+      "entity_text": "John Lambert",
+      "entity_type": "PERSON",
+      "start_pos": 3552,
+      "end_pos": 3564
+    },
+    {
+      "entity_text": "Response Team",
+      "entity_type": "PERSON",
+      "start_pos": 3578,
+      "end_pos": 3591
+    },
+    {
+      "entity_text": "Romain Niccoli",
+      "entity_type": "PERSON",
+      "start_pos": 3640,
+      "end_pos": 3654
+    },
+    {
+      "entity_text": "Account Director",
+      "entity_type": "PERSON",
+      "start_pos": 3656,
+      "end_pos": 3672
+    },
+    {
+      "entity_text": "Mme Sophie",
+      "entity_type": "PERSON",
+      "start_pos": 3675,
+      "end_pos": 3685
+    },
+    {
+      "entity_text": "Palo Alto",
+      "entity_type": "PERSON",
+      "start_pos": 3709,
+      "end_pos": 3718
+    },
+    {
+      "entity_text": "Mme Jennifer",
+      "entity_type": "PERSON",
+      "start_pos": 3729,
+      "end_pos": 3741
+    },
+    {
+      "entity_text": "Support Engineer",
+      "entity_type": "PERSON",
+      "start_pos": 3749,
+      "end_pos": 3765
+    },
+    {
+      "entity_text": "Francis Lefebvre",
+      "entity_type": "PERSON",
+      "start_pos": 3805,
+      "end_pos": 3821
+    },
+    {
+      "entity_text": "Maître François",
+      "entity_type": "PERSON",
+      "start_pos": 3823,
+      "end_pos": 3838
+    },
+    {
+      "entity_text": "Marc Bideau",
+      "entity_type": "PERSON",
+      "start_pos": 3881,
+      "end_pos": 3892
+    },
+    {
+      "entity_text": "Claims Manager",
+      "entity_type": "PERSON",
+      "start_pos": 3894,
+      "end_pos": 3908
+    },
+    {
+      "entity_text": "Laurent Bonnafé",
+      "entity_type": "PERSON",
+      "start_pos": 3925,
+      "end_pos": 3940
+    },
+    {
+      "entity_text": "Risk Manager",
+      "entity_type": "PERSON",
+      "start_pos": 3942,
+      "end_pos": 3954
+    },
+    {
+      "entity_text": "Guillaume Poupard",
+      "entity_type": "PERSON",
+      "start_pos": 3980,
+      "end_pos": 3997
+    },
+    {
+      "entity_text": "Vincent Strubel",
+      "entity_type": "PERSON",
+      "start_pos": 4015,
+      "end_pos": 4030
+    },
+    {
+      "entity_text": "François Pellegrini",
+      "entity_type": "PERSON",
+      "start_pos": 4052,
+      "end_pos": 4071
+    },
+    {
+      "entity_text": "Mme Marie-",
+      "entity_type": "PERSON",
+      "start_pos": 4086,
+      "end_pos": 4096
+    },
+    {
+      "entity_text": "Laure Denis",
+      "entity_type": "PERSON",
+      "start_pos": 4096,
+      "end_pos": 4107
+    },
+    {
+      "entity_text": "Laurent Benoit",
+      "entity_type": "PERSON",
+      "start_pos": 4205,
+      "end_pos": 4219
+    },
+    {
+      "entity_text": "Romain Duval",
+      "entity_type": "PERSON",
+      "start_pos": 4263,
+      "end_pos": 4275
+    },
+    {
+      "entity_text": "Marc Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 4311,
+      "end_pos": 4322
+    },
+    {
+      "entity_text": "Mme Laura",
+      "entity_type": "PERSON",
+      "start_pos": 4358,
+      "end_pos": 4367
+    },
+    {
+      "entity_text": "Mme Catherine",
+      "entity_type": "PERSON",
+      "start_pos": 4403,
+      "end_pos": 4416
+    },
+    {
+      "entity_text": "Me Sarah",
+      "entity_type": "PERSON",
+      "start_pos": 4466,
+      "end_pos": 4474
+    },
+    {
+      "entity_text": "Mme Caroline",
+      "entity_type": "PERSON",
+      "start_pos": 4507,
+      "end_pos": 4519
+    },
+    {
+      "entity_text": "Mme Isabelle",
+      "entity_type": "PERSON",
+      "start_pos": 4547,
+      "end_pos": 4559
+    },
+    {
+      "entity_text": "Charles Le",
+      "entity_type": "PERSON",
+      "start_pos": 4588,
+      "end_pos": 4598
+    },
+    {
+      "entity_text": "Kevin Zhang",
+      "entity_type": "PERSON",
+      "start_pos": 4641,
+      "end_pos": 4652
+    },
+    {
+      "entity_text": "Devrait être",
+      "entity_type": "PERSON",
+      "start_pos": 4772,
+      "end_pos": 4784
+    },
+    {
+      "entity_text": "Alexandre Jin",
+      "entity_type": "PERSON",
+      "start_pos": 4820,
+      "end_pos": 4833
+    },
+    {
+      "entity_text": "Logs Azure",
+      "entity_type": "PERSON",
+      "start_pos": 4838,
+      "end_pos": 4848
+    },
+    {
+      "entity_text": "Devrait être",
+      "entity_type": "PERSON",
+      "start_pos": 4911,
+      "end_pos": 4923
+    },
+    {
+      "entity_text": "éel\n   Responsable",
+      "entity_type": "PERSON",
+      "start_pos": 4932,
+      "end_pos": 4950
+    },
+    {
+      "entity_text": "Mme Nadia",
+      "entity_type": "PERSON",
+      "start_pos": 4956,
+      "end_pos": 4965
+    },
+    {
+      "entity_text": "Devrait être",
+      "entity_type": "PERSON",
+      "start_pos": 5036,
+      "end_pos": 5048
+    },
+    {
+      "entity_text": "Marc Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 5086,
+      "end_pos": 5097
+    },
+    {
+      "entity_text": "Laurent Benoit",
+      "entity_type": "PERSON",
+      "start_pos": 5168,
+      "end_pos": 5182
+    },
+    {
+      "entity_text": "Alexandre Jin",
+      "entity_type": "PERSON",
+      "start_pos": 5294,
+      "end_pos": 5307
+    },
+    {
+      "entity_text": "Kevin Zhang",
+      "entity_type": "PERSON",
+      "start_pos": 5356,
+      "end_pos": 5367
+    },
+    {
+      "entity_text": "Mme Nadia",
+      "entity_type": "PERSON",
+      "start_pos": 5403,
+      "end_pos": 5412
+    },
+    {
+      "entity_text": "Mme Laura",
+      "entity_type": "PERSON",
+      "start_pos": 5458,
+      "end_pos": 5467
+    },
+    {
+      "entity_text": "Marc Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 5500,
+      "end_pos": 5511
+    },
+    {
+      "entity_text": "Palo Alto",
+      "entity_type": "PERSON",
+      "start_pos": 5547,
+      "end_pos": 5556
+    },
+    {
+      "entity_text": "Mme Jennifer",
+      "entity_type": "PERSON",
+      "start_pos": 5558,
+      "end_pos": 5570
+    },
+    {
+      "entity_text": "Laurent Benoit",
+      "entity_type": "PERSON",
+      "start_pos": 5609,
+      "end_pos": 5623
+    },
+    {
+      "entity_text": "Vincent Chen",
+      "entity_type": "PERSON",
+      "start_pos": 5665,
+      "end_pos": 5677
+    },
+    {
+      "entity_text": "Mme Laure",
+      "entity_type": "PERSON",
+      "start_pos": 5747,
+      "end_pos": 5756
+    },
+    {
+      "entity_text": "Philippe Arnaud",
+      "entity_type": "PERSON",
+      "start_pos": 5817,
+      "end_pos": 5832
+    },
+    {
+      "entity_text": "Matthieu Bonenfant",
+      "entity_type": "PERSON",
+      "start_pos": 5860,
+      "end_pos": 5878
+    },
+    {
+      "entity_text": "Formation équipe",
+      "entity_type": "PERSON",
+      "start_pos": 5941,
+      "end_pos": 5957
+    },
+    {
+      "entity_text": "Kevin Zhang",
+      "entity_type": "PERSON",
+      "start_pos": 5976,
+      "end_pos": 5987
+    },
+    {
+      "entity_text": "SANS Institute",
+      "entity_type": "ORG",
+      "start_pos": 6003,
+      "end_pos": 6017
+    },
+    {
+      "entity_text": "Damien Bancal",
+      "entity_type": "PERSON",
+      "start_pos": 6034,
+      "end_pos": 6047
+    },
+    {
+      "entity_text": "Vincent Chen",
+      "entity_type": "PERSON",
+      "start_pos": 6129,
+      "end_pos": 6141
+    },
+    {
+      "entity_text": "Marie Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 6177,
+      "end_pos": 6189
+    },
+    {
+      "entity_text": "Vincent Chen",
+      "entity_type": "PERSON",
+      "start_pos": 6248,
+      "end_pos": 6260
+    },
+    {
+      "entity_text": "Mme Isabelle",
+      "entity_type": "PERSON",
+      "start_pos": 6294,
+      "end_pos": 6306
+    },
+    {
+      "entity_text": "Charles Le",
+      "entity_type": "PERSON",
+      "start_pos": 6324,
+      "end_pos": 6334
+    },
+    {
+      "entity_text": "Email Mme",
+      "entity_type": "PERSON",
+      "start_pos": 6370,
+      "end_pos": 6379
+    },
+    {
+      "entity_text": "Caroline Marchal",
+      "entity_type": "PERSON",
+      "start_pos": 6380,
+      "end_pos": 6396
+    },
+    {
+      "entity_text": "Thomas Weber",
+      "entity_type": "PERSON",
+      "start_pos": 6546,
+      "end_pos": 6558
+    },
+    {
+      "entity_text": "Me Sarah",
+      "entity_type": "PERSON",
+      "start_pos": 6681,
+      "end_pos": 6689
+    },
+    {
+      "entity_text": "Heures équipe",
+      "entity_type": "PERSON",
+      "start_pos": 6887,
+      "end_pos": 6900
+    },
+    {
+      "entity_text": "Microsoft support priority",
+      "entity_type": "ORG",
+      "start_pos": 6994,
+      "end_pos": 7020
+    },
+    {
+      "entity_text": "Audit Wavestone",
+      "entity_type": "PERSON",
+      "start_pos": 7064,
+      "end_pos": 7079
+    },
+    {
+      "entity_text": "Formation SA",
+      "entity_type": "ORG",
+      "start_pos": 7117,
+      "end_pos": 7129
+    },
+    {
+      "entity_text": "Mme Laura",
+      "entity_type": "PERSON",
+      "start_pos": 7304,
+      "end_pos": 7313
+    },
+    {
+      "entity_text": "Coordination équipes",
+      "entity_type": "PERSON",
+      "start_pos": 7376,
+      "end_pos": 7396
+    },
+    {
+      "entity_text": "Microsoft r",
+      "entity_type": "ORG",
+      "start_pos": 7418,
+      "end_pos": 7429
+    },
+    {
+      "entity_text": "Mme Bernard",
+      "entity_type": "PERSON",
+      "start_pos": 7449,
+      "end_pos": 7460
+    },
+    {
+      "entity_text": "Security Orchestration",
+      "entity_type": "PERSON",
+      "start_pos": 7668,
+      "end_pos": 7690
+    },
+    {
+      "entity_text": "Mme Catherine",
+      "entity_type": "PERSON",
+      "start_pos": 7711,
+      "end_pos": 7724
+    },
+    {
+      "entity_text": "Rousseau\n   Solution",
+      "entity_type": "PERSON",
+      "start_pos": 7725,
+      "end_pos": 7745
+    },
+    {
+      "entity_text": "Alto Cortex",
+      "entity_type": "PERSON",
+      "start_pos": 7772,
+      "end_pos": 7783
+    },
+    {
+      "entity_text": "Marie Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 7823,
+      "end_pos": 7835
+    },
+    {
+      "entity_text": "Red Team",
+      "entity_type": "PERSON",
+      "start_pos": 7840,
+      "end_pos": 7848
+    },
+    {
+      "entity_text": "Fabien Perigaud",
+      "entity_type": "PERSON",
+      "start_pos": 7895,
+      "end_pos": 7910
+    },
+    {
+      "entity_text": "Vincent Chen",
+      "entity_type": "PERSON",
+      "start_pos": 7950,
+      "end_pos": 7962
+    },
+    {
+      "entity_text": "Programme Security",
+      "entity_type": "PERSON",
+      "start_pos": 7967,
+      "end_pos": 7985
+    },
+    {
+      "entity_text": "Champions\n   Pilote",
+      "entity_type": "PERSON",
+      "start_pos": 7986,
+      "end_pos": 8005
+    },
+    {
+      "entity_text": "Kevin Zhang",
+      "entity_type": "PERSON",
+      "start_pos": 8010,
+      "end_pos": 8021
+    },
+    {
+      "entity_text": "Jin, Mme",
+      "entity_type": "PERSON",
+      "start_pos": 8049,
+      "end_pos": 8057
+    },
+    {
+      "entity_text": "Romain Duval",
+      "entity_type": "PERSON",
+      "start_pos": 8075,
+      "end_pos": 8087
+    },
+    {
+      "entity_text": "OWASP France",
+      "entity_type": "ORG",
+      "start_pos": 8103,
+      "end_pos": 8115
+    },
+    {
+      "entity_text": "Vincent Chen",
+      "entity_type": "PERSON",
+      "start_pos": 8149,
+      "end_pos": 8161
+    },
+    {
+      "entity_text": "Marie Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 8184,
+      "end_pos": 8196
+    },
+    {
+      "entity_text": "Mme Isabelle",
+      "entity_type": "PERSON",
+      "start_pos": 8216,
+      "end_pos": 8228
+    },
+    {
+      "entity_text": "Philippe Arnaud",
+      "entity_type": "PERSON",
+      "start_pos": 8256,
+      "end_pos": 8271
+    },
+    {
+      "entity_text": "François Leclerc",
+      "entity_type": "PERSON",
+      "start_pos": 8282,
+      "end_pos": 8298
+    },
+    {
+      "entity_text": "Directeur Juridique",
+      "entity_type": "PERSON",
+      "start_pos": 8300,
+      "end_pos": 8319
+    },
+    {
+      "entity_text": "Charles Le",
+      "entity_type": "PERSON",
+      "start_pos": 8330,
+      "end_pos": 8340
+    },
+    {
+      "entity_text": "Goff, Président",
+      "entity_type": "PERSON",
+      "start_pos": 8341,
+      "end_pos": 8356
+    },
+    {
+      "entity_text": "Me Sarah",
+      "entity_type": "PERSON",
+      "start_pos": 8370,
+      "end_pos": 8378
+    },
+    {
+      "entity_text": "Thomas Weber",
+      "entity_type": "PERSON",
+      "start_pos": 8395,
+      "end_pos": 8407
+    },
+    {
+      "entity_text": "Directeur Commercial",
+      "entity_type": "PERSON",
+      "start_pos": 8409,
+      "end_pos": 8429
+    },
+    {
+      "entity_text": "Mme Sophie",
+      "entity_type": "PERSON",
+      "start_pos": 8432,
+      "end_pos": 8442
+    }
+  ]
+}

@@ -1,0 +1,155 @@
+===== EMAIL 1 =====
+De: [email protected]
+À: [email protected]; [email protected]; [email protected]
+CC: [email protected]
+Date: 5 février 2024, 14:32
+Objet: RE: Lancement Projet Phoenix - Validation Architecture
+
+Bonjour à tous,
+
+Suite à notre réunion d'hier avec l'équipe Microsoft (M. Romain Niccoli et Mme Sophie Bernard), je vous confirme l'architecture retenue pour le projet Phoenix.
+
+ARCHITECTURE VALIDÉE:
+- Azure Cloud Platform (région France Central)
+- Kubernetes pour l'orchestration
+- PostgreSQL managé pour la base de données
+- Redis pour le cache
+- Azure AD pour l'authentification
+
+ÉQUIPE TECHNIQUE:
+Chef de projet: Mme Caroline Petit
+Architecte Cloud: M. Laurent Benoit
+Lead Developer: M. Kevin Zhang
+DevOps Engineer: Mme Nadia Amrani
+QA Manager: M. Alexandre Blanc
+
+PARTENAIRES:
+- Microsoft France: M. Niccoli (account manager), Mme Bernard (architecte solution)
+- Intégrateur: Devoteam (contact: M. Vincent Gorse, chef de projet)
+- Sécurité: Wavestone (consultante: Mme Laure Bertholom)
+
+Planning kick-off: 12 février 2024 dans nos locaux. J'ai invité également M. Thomas Weber (Commercial) et Mme Julie Marchand (Product).
+
+Pouvez-vous confirmer vos disponibilités?
+
+Cordialement,
+Dr. Marie Dubois
+CTO, TechSolutions France
+Mobile: +33 6 12 34 56 78
+
+===== EMAIL 2 =====
+De: [email protected]
+À: [email protected]
+CC: [email protected]; [email protected]; [email protected]
+Date: 5 février 2024, 15:18
+Objet: RE: Lancement Projet Phoenix - Validation Architecture
+
+Marie,
+
+OK pour moi le 12 février. J'amène M. Maxime Dubois de mon équipe infra et Mme Lucie Renard côté réseau.
+
+Question: Avez-vous déjà contacté notre DPO, Maître Sarah Cohen, pour la conformité RGPD? Ce projet va traiter des données clients sensibles.
+
+Aussi, notre assureur cyber (AXA, contact M. Thomas Buberl) demande une revue d'architecture. Pouvez-vous partager le document avec notre RSSI, M. Vincent Chen?
+
+Laurent
+
+Laurent Benoit
+Architecte Cloud
+TechSolutions France
+
+===== EMAIL 3 =====
+De: [email protected]
+À: [email protected]; [email protected]
+CC: [email protected]; [email protected]; [email protected]; [email protected]
+Date: 5 février 2024, 16:45
+Objet: RE: Lancement Projet Phoenix - Validation Architecture
+
+Laurent, Marie,
+
+Bonne initiative Laurent. J'ajoute à la boucle Me Sarah Cohen (notre DPO) et M. Vincent Chen (RSSI).
+
+ASPECTS JURIDIQUES ET SÉCURITÉ:
+- RGPD: Me Cohen va faire la DPIA (Data Protection Impact Assessment)
+- Sécurité: M. Chen doit valider l'architecture avec son équipe (Mme Catherine Rousseau et M. Pierre Fontaine)
+- Contrats: Notre directeur juridique, M. François Leclerc, revoit les termes avec Microsoft
+- Assurance: Je contacte M. Jean-Marc Bideau chez Hiscox (notre courtier)
+
+J'informe également notre CEO, Mme Isabelle Moreau, et notre CFO, M. Philippe Arnaud, pour validation budget.
+
+Marie, pour la réunion du 12, ajoutons:
+- Me Sarah Cohen (DPO)
+- M. Vincent Chen (RSSI)
+- M. David Park de Devoteam
+- Mme Émilie Rousseau de Wavestone
+
+Je demande à mon assistante, Mme Sophie Laurent, de bloquer la grande salle et d'organiser le déjeuner.
+
+Bon courage pour la suite,
+
+Thomas Weber
+Directeur Commercial
+TechSolutions France SAS
+45 Avenue de la Grande Armée, 75016 Paris
+
+===== EMAIL 4 =====
+De: [email protected]
+À: [email protected]; [email protected]; [email protected]
+CC: [email protected]; [email protected]; [email protected]
+Date: 5 février 2024, 17:22
+Objet: RE: Lancement Projet Phoenix - Validation Architecture
+
+Tous,
+
+Merci de m'inclure. Je lance la DPIA immédiatement.
+
+Pour le projet Phoenix, je vais avoir besoin de:
+1. Inventaire des données traitées (responsable: M. Kevin Zhang?)
+2. Cartographie des flux (responsable: Mme Nadia Amrani?)
+3. Mesures de sécurité techniques (responsable: M. Vincent Chen)
+4. Durées de conservation (responsable: Mme Julie Marchand?)
+
+Je travaillerai avec notre sous-traitant DPO externe, le cabinet GDPR Experts (contact: Maître Julie Legrand), et notre partenaire conseil OneTrust (consultante: Mme Alice Durand).
+
+La CNIL a récemment audité notre société (inspecteur: M. François Pellegrini). Soyons irréprochables.
+
+RDV de préparation avant le 12? Je propose le 8 février avec M. Chen, M. Zhang, Mme Amrani.
+
+Maître Sarah Cohen
+DPO, TechSolutions France
+Membre du réseau AFCDP
+
+===== EMAIL 5 =====
+De: [email protected]
+À: tous les destinataires précédents
+Date: 6 février 2024, 09:15
+Objet: RE: Lancement Projet Phoenix - Validation Architecture
+
+Équipe,
+
+Merci pour ces échanges constructifs.
+
+ACTIONS CONSOLIDÉES:
+
+1. RDV préparatoire RGPD: 8 février, 10h
+   Participants: Me Cohen, M. Chen, M. Zhang, Mme Amrani, Mme Marchand
+   Organisé par: Mme Sophie Laurent
+
+2. Revue architecture sécurité: 9 février, 14h
+   Participants: M. Chen, M. Benoit, M. Niccoli (Microsoft), Mme Bertholom (Wavestone)
+
+3. Kick-off officiel: 12 février, 9h-17h
+   Tous les stakeholders confirmés
+
+4. Validation contractuelle: M. Leclerc avec cabinet Jeantet (Maître François Durand)
+
+5. Board project: création avec Mme Moreau (CEO), M. Arnaud (CFO), Dr. Dubois (CTO)
+
+M. Zhang, Mme Amrani: Pouvez-vous préparer les documents demandés par Me Cohen avant le 8?
+
+Mme Petit: Vous coordonnez le planning global, merci de créer le channel Teams et d'inviter tous les participants.
+
+Let's make Phoenix a success!
+
+Dr. Marie Dubois
+CTO
