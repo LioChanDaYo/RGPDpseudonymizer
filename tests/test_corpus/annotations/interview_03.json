@@ -14,12 +14,6 @@
       "end_pos": 50
     },
     {
-      "entity_text": "Mme Claire Fontaine",
-      "entity_type": "PERSON",
-      "start_pos": 64,
-      "end_pos": 83
-    },
-    {
       "entity_text": "Mme Claire",
       "entity_type": "PERSON",
       "start_pos": 64,
@@ -30,12 +24,6 @@
       "entity_type": "PERSON",
       "start_pos": 75,
       "end_pos": 95
-    },
-    {
-      "entity_text": "Bordeaux\nDate",
-      "entity_type": "PERSON",
-      "start_pos": 109,
-      "end_pos": 122
     },
     {
       "entity_text": "Bordeaux",
@@ -62,22 +50,10 @@
       "end_pos": 271
     },
     {
-      "entity_text": "Accenture France",
-      "entity_type": "PERSON",
-      "start_pos": 327,
-      "end_pos": 343
-    },
-    {
       "entity_text": "France",
       "entity_type": "LOCATION",
       "start_pos": 337,
       "end_pos": 343
-    },
-    {
-      "entity_text": "M. Pierre Hurmic",
-      "entity_type": "PERSON",
-      "start_pos": 355,
-      "end_pos": 371
     },
     {
       "entity_text": "Pierre Hurmic",
@@ -98,22 +74,10 @@
       "end_pos": 517
     },
     {
-      "entity_text": "Mme Sarah Cohen",
-      "entity_type": "PERSON",
-      "start_pos": 543,
-      "end_pos": 558
-    },
-    {
       "entity_text": "Mme Sarah",
       "entity_type": "PERSON",
       "start_pos": 543,
       "end_pos": 552
-    },
-    {
-      "entity_text": "Dr. Yves Girard",
-      "entity_type": "PERSON",
-      "start_pos": 599,
-      "end_pos": 614
     },
     {
       "entity_text": "Yves Girard",
@@ -128,12 +92,6 @@
       "end_pos": 677
     },
     {
-      "entity_text": "M. Karim Benzema",
-      "entity_type": "PERSON",
-      "start_pos": 703,
-      "end_pos": 719
-    },
-    {
       "entity_text": "Karim Benzema",
       "entity_type": "PERSON",
       "start_pos": 706,
@@ -146,22 +104,10 @@
       "end_pos": 785
     },
     {
-      "entity_text": "Région Nouvelle-",
-      "entity_type": "PERSON",
-      "start_pos": 853,
-      "end_pos": 869
-    },
-    {
       "entity_text": "Commission Européenne",
       "entity_type": "PERSON",
       "start_pos": 891,
       "end_pos": 912
-    },
-    {
-      "entity_text": "ésentant, Paolo",
-      "entity_type": "PERSON",
-      "start_pos": 935,
-      "end_pos": 950
     },
     {
       "entity_text": "Paolo Rossi",
@@ -224,40 +170,10 @@
       "end_pos": 1397
     },
     {
-      "entity_text": "France",
-      "entity_type": "LOCATION",
-      "start_pos": 1391,
-      "end_pos": 1397
-    },
-    {
-      "entity_text": "Mme Léa Rodriguez",
-      "entity_type": "PERSON",
-      "start_pos": 1453,
-      "end_pos": 1470
-    },
-    {
       "entity_text": "Mme Léa",
       "entity_type": "PERSON",
       "start_pos": 1453,
       "end_pos": 1460
-    },
-    {
-      "entity_text": "On a aussi recruté un ancien de Google France",
-      "entity_type": "ORG",
-      "start_pos": 1485,
-      "end_pos": 1530
-    },
-    {
-      "entity_text": "Google France",
-      "entity_type": "PERSON",
-      "start_pos": 1517,
-      "end_pos": 1530
-    },
-    {
-      "entity_text": "France, Thomas",
-      "entity_type": "PERSON",
-      "start_pos": 1524,
-      "end_pos": 1538
     },
     {
       "entity_text": "France",

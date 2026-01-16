@@ -14,39 +14,15 @@
       "end_pos": 48
     },
     {
-      "entity_text": "Mme Isabelle Moreau",
-      "entity_type": "PERSON",
-      "start_pos": 54,
-      "end_pos": 73
-    },
-    {
       "entity_text": "Mme Isabelle",
       "entity_type": "PERSON",
       "start_pos": 54,
       "end_pos": 66
     },
     {
-      "entity_text": "Moreau, Banque",
-      "entity_type": "PERSON",
-      "start_pos": 67,
-      "end_pos": 81
-    },
-    {
-      "entity_text": "Banque Régionale",
-      "entity_type": "PERSON",
-      "start_pos": 75,
-      "end_pos": 91
-    },
-    {
       "entity_text": "Sud\nNice",
       "entity_type": "PERSON",
       "start_pos": 95,
-      "end_pos": 103
-    },
-    {
-      "entity_text": "Nice",
-      "entity_type": "LOCATION",
-      "start_pos": 99,
       "end_pos": 103
     },
     {
@@ -68,22 +44,10 @@
       "end_pos": 221
     },
     {
-      "entity_text": "M. Jacques Martineau",
-      "entity_type": "PERSON",
-      "start_pos": 258,
-      "end_pos": 278
-    },
-    {
       "entity_text": "Jacques Martineau",
       "entity_type": "PERSON",
       "start_pos": 261,
       "end_pos": 278
-    },
-    {
-      "entity_text": "M. Olivier Roussel",
-      "entity_type": "PERSON",
-      "start_pos": 311,
-      "end_pos": 329
     },
     {
       "entity_text": "Olivier Roussel",
@@ -122,12 +86,6 @@
       "end_pos": 627
     },
     {
-      "entity_text": "Mme Matthieu Pigasse",
-      "entity_type": "PERSON",
-      "start_pos": 657,
-      "end_pos": 677
-    },
-    {
       "entity_text": "Mme Matthieu",
       "entity_type": "PERSON",
       "start_pos": 657,
@@ -152,40 +110,16 @@
       "end_pos": 792
     },
     {
-      "entity_text": "France",
-      "entity_type": "LOCATION",
-      "start_pos": 786,
-      "end_pos": 792
-    },
-    {
-      "entity_text": "M. Philippe Arnaud",
-      "entity_type": "PERSON",
-      "start_pos": 808,
-      "end_pos": 826
-    },
-    {
       "entity_text": "Philippe Arnaud",
       "entity_type": "PERSON",
       "start_pos": 811,
       "end_pos": 826
     },
     {
-      "entity_text": "Mme Sophie Duchemin",
-      "entity_type": "PERSON",
-      "start_pos": 859,
-      "end_pos": 878
-    },
-    {
       "entity_text": "Mme Sophie",
       "entity_type": "PERSON",
       "start_pos": 859,
       "end_pos": 869
-    },
-    {
-      "entity_text": "M. Laurent Benoist",
-      "entity_type": "PERSON",
-      "start_pos": 896,
-      "end_pos": 914
     },
     {
       "entity_text": "Laurent Benoist",
@@ -212,22 +146,10 @@
       "end_pos": 1045
     },
     {
-      "entity_text": "M. Dominique Laboureix",
-      "entity_type": "PERSON",
-      "start_pos": 1092,
-      "end_pos": 1114
-    },
-    {
       "entity_text": "Dominique Laboureix",
       "entity_type": "PERSON",
       "start_pos": 1095,
       "end_pos": 1114
-    },
-    {
-      "entity_text": "Mme Christine Lagarde",
-      "entity_type": "PERSON",
-      "start_pos": 1160,
-      "end_pos": 1181
     },
     {
       "entity_text": "Mme Christine",
@@ -248,40 +170,16 @@
       "end_pos": 1332
     },
     {
-      "entity_text": "Côté Banque",
-      "entity_type": "PERSON",
-      "start_pos": 1334,
-      "end_pos": 1345
-    },
-    {
-      "entity_text": "M. Thierry Lecomte",
-      "entity_type": "PERSON",
-      "start_pos": 1383,
-      "end_pos": 1401
-    },
-    {
       "entity_text": "Thierry Lecomte",
       "entity_type": "PERSON",
       "start_pos": 1386,
       "end_pos": 1401
     },
     {
-      "entity_text": "Mme Valérie Blanc",
-      "entity_type": "PERSON",
-      "start_pos": 1410,
-      "end_pos": 1427
-    },
-    {
       "entity_text": "Mme Valérie",
       "entity_type": "PERSON",
       "start_pos": 1410,
       "end_pos": 1421
-    },
-    {
-      "entity_text": "M. Karim Benzema",
-      "entity_type": "PERSON",
-      "start_pos": 1436,
-      "end_pos": 1452
     },
     {
       "entity_text": "Karim Benzema",
@@ -296,40 +194,16 @@
       "end_pos": 1465
     },
     {
-      "entity_text": "M. Jean Durand",
-      "entity_type": "PERSON",
-      "start_pos": 1486,
-      "end_pos": 1500
-    },
-    {
       "entity_text": "Jean Durand",
       "entity_type": "PERSON",
       "start_pos": 1489,
       "end_pos": 1500
     },
     {
-      "entity_text": "Durand, Mme",
-      "entity_type": "PERSON",
-      "start_pos": 1494,
-      "end_pos": 1505
-    },
-    {
-      "entity_text": "Mme Nathalie Collin",
-      "entity_type": "PERSON",
-      "start_pos": 1502,
-      "end_pos": 1521
-    },
-    {
       "entity_text": "Mme Nathalie",
       "entity_type": "PERSON",
       "start_pos": 1502,
       "end_pos": 1514
-    },
-    {
-      "entity_text": "M. Pierre Serve",
-      "entity_type": "PERSON",
-      "start_pos": 1541,
-      "end_pos": 1556
     },
     {
       "entity_text": "Pierre Serve",
@@ -344,22 +218,10 @@
       "end_pos": 1616
     },
     {
-      "entity_text": "Dr. Yves Perrier",
-      "entity_type": "PERSON",
-      "start_pos": 1745,
-      "end_pos": 1761
-    },
-    {
       "entity_text": "Yves Perrier",
       "entity_type": "PERSON",
       "start_pos": 1749,
       "end_pos": 1761
-    },
-    {
-      "entity_text": "Mme Anne Marion Chauveau",
-      "entity_type": "PERSON",
-      "start_pos": 1783,
-      "end_pos": 1807
     },
     {
       "entity_text": "Mme Anne",
@@ -372,12 +234,6 @@
       "entity_type": "PERSON",
       "start_pos": 1792,
       "end_pos": 1807
-    },
-    {
-      "entity_text": "M. Nicolas Namias",
-      "entity_type": "PERSON",
-      "start_pos": 1831,
-      "end_pos": 1848
     },
     {
       "entity_text": "Nicolas Namias",

@@ -14,22 +14,10 @@
       "end_pos": 60
     },
     {
-      "entity_text": "M. Pierre Fontaine",
-      "entity_type": "PERSON",
-      "start_pos": 66,
-      "end_pos": 84
-    },
-    {
       "entity_text": "Pierre Fontaine",
       "entity_type": "PERSON",
       "start_pos": 69,
       "end_pos": 84
-    },
-    {
-      "entity_text": "Fontaine, Groupe",
-      "entity_type": "PERSON",
-      "start_pos": 76,
-      "end_pos": 92
     },
     {
       "entity_text": "Groupe Industriel",
@@ -50,22 +38,10 @@
       "end_pos": 175
     },
     {
-      "entity_text": "M. Pierre Fontaine",
-      "entity_type": "PERSON",
-      "start_pos": 233,
-      "end_pos": 251
-    },
-    {
       "entity_text": "Pierre Fontaine",
       "entity_type": "PERSON",
       "start_pos": 236,
       "end_pos": 251
-    },
-    {
-      "entity_text": "Le Groupe",
-      "entity_type": "PERSON",
-      "start_pos": 253,
-      "end_pos": 262
     },
     {
       "entity_text": "Le Group",
@@ -98,46 +74,16 @@
       "end_pos": 492
     },
     {
-      "entity_text": "Mme Sandrine Moreau",
-      "entity_type": "PERSON",
-      "start_pos": 489,
-      "end_pos": 508
-    },
-    {
-      "entity_text": "Mme Sandrine",
-      "entity_type": "PERSON",
-      "start_pos": 489,
-      "end_pos": 501
-    },
-    {
-      "entity_text": "Dr. Julien Leroy",
-      "entity_type": "PERSON",
-      "start_pos": 538,
-      "end_pos": 554
-    },
-    {
       "entity_text": "Julien Leroy",
       "entity_type": "PERSON",
       "start_pos": 542,
       "end_pos": 554
     },
     {
-      "entity_text": "M. Marc Petit",
-      "entity_type": "PERSON",
-      "start_pos": 574,
-      "end_pos": 587
-    },
-    {
       "entity_text": "Marc Petit",
       "entity_type": "PERSON",
       "start_pos": 577,
       "end_pos": 587
-    },
-    {
-      "entity_text": "Professeur Jean Jouzel",
-      "entity_type": "PERSON",
-      "start_pos": 644,
-      "end_pos": 666
     },
     {
       "entity_text": "Professeur Jean",
@@ -152,18 +98,6 @@
       "end_pos": 751
     },
     {
-      "entity_text": "France",
-      "entity_type": "LOCATION",
-      "start_pos": 745,
-      "end_pos": 751
-    },
-    {
-      "entity_text": "Mme Catherine Dupont",
-      "entity_type": "PERSON",
-      "start_pos": 788,
-      "end_pos": 808
-    },
-    {
       "entity_text": "Mme Catherine",
       "entity_type": "PERSON",
       "start_pos": 788,
@@ -176,22 +110,10 @@
       "end_pos": 845
     },
     {
-      "entity_text": "M. Patrick Pouyanné",
-      "entity_type": "PERSON",
-      "start_pos": 888,
-      "end_pos": 907
-    },
-    {
       "entity_text": "Patrick Pouyanné",
       "entity_type": "PERSON",
       "start_pos": 891,
       "end_pos": 907
-    },
-    {
-      "entity_text": "M. Yves Le Gélard",
-      "entity_type": "PERSON",
-      "start_pos": 968,
-      "end_pos": 985
     },
     {
       "entity_text": "Yves Le",
@@ -206,40 +128,16 @@
       "end_pos": 1041
     },
     {
-      "entity_text": "M. Arnaud Leroy",
-      "entity_type": "PERSON",
-      "start_pos": 1091,
-      "end_pos": 1106
-    },
-    {
       "entity_text": "Arnaud Leroy",
       "entity_type": "PERSON",
       "start_pos": 1094,
       "end_pos": 1106
     },
     {
-      "entity_text": "La Région",
-      "entity_type": "PERSON",
-      "start_pos": 1127,
-      "end_pos": 1136
-    },
-    {
-      "entity_text": "Mme Hervé Morin",
-      "entity_type": "PERSON",
-      "start_pos": 1164,
-      "end_pos": 1179
-    },
-    {
       "entity_text": "Mme Hervé",
       "entity_type": "PERSON",
       "start_pos": 1164,
       "end_pos": 1173
-    },
-    {
-      "entity_text": "M. Hervé Morin",
-      "entity_type": "PERSON",
-      "start_pos": 1190,
-      "end_pos": 1204
     },
     {
       "entity_text": "Hervé Morin",
@@ -254,34 +152,16 @@
       "end_pos": 1279
     },
     {
-      "entity_text": "Mme Alice Martin",
-      "entity_type": "PERSON",
-      "start_pos": 1395,
-      "end_pos": 1411
-    },
-    {
       "entity_text": "Mme Alice",
       "entity_type": "PERSON",
       "start_pos": 1395,
       "end_pos": 1404
     },
     {
-      "entity_text": "M. Luc Bernard",
-      "entity_type": "PERSON",
-      "start_pos": 1456,
-      "end_pos": 1470
-    },
-    {
       "entity_text": "Luc Bernard",
       "entity_type": "PERSON",
       "start_pos": 1459,
       "end_pos": 1470
-    },
-    {
-      "entity_text": "Dr. Sophie Renard",
-      "entity_type": "PERSON",
-      "start_pos": 1549,
-      "end_pos": 1566
     },
     {
       "entity_text": "Sophie Renard",
@@ -308,22 +188,10 @@
       "end_pos": 1678
     },
     {
-      "entity_text": "M. Benoît Bazin",
-      "entity_type": "PERSON",
-      "start_pos": 1742,
-      "end_pos": 1757
-    },
-    {
       "entity_text": "Benoît Bazin",
       "entity_type": "PERSON",
       "start_pos": 1745,
       "end_pos": 1757
-    },
-    {
-      "entity_text": "Mme Florent Menegaux",
-      "entity_type": "PERSON",
-      "start_pos": 1791,
-      "end_pos": 1811
     },
     {
       "entity_text": "Mme Florent",
@@ -336,12 +204,6 @@
       "entity_type": "PERSON",
       "start_pos": 1871,
       "end_pos": 1879
-    },
-    {
-      "entity_text": "Mme Élisabeth Laville",
-      "entity_type": "PERSON",
-      "start_pos": 1893,
-      "end_pos": 1914
     },
     {
       "entity_text": "Mme Élisabeth",

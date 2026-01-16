@@ -8,40 +8,16 @@
       "end_pos": 47
     },
     {
-      "entity_text": "Mme Sophie Laurent",
-      "entity_type": "PERSON",
-      "start_pos": 71,
-      "end_pos": 89
-    },
-    {
       "entity_text": "Mme Sophie",
       "entity_type": "PERSON",
       "start_pos": 71,
       "end_pos": 81
     },
     {
-      "entity_text": "Laurent, Magasins",
-      "entity_type": "PERSON",
-      "start_pos": 82,
-      "end_pos": 99
-    },
-    {
       "entity_text": "Magasins Mode",
       "entity_type": "PERSON",
       "start_pos": 91,
       "end_pos": 104
-    },
-    {
-      "entity_text": "Magasins ModeFrance",
-      "entity_type": "ORG",
-      "start_pos": 91,
-      "end_pos": 110
-    },
-    {
-      "entity_text": "France\nRoubaix",
-      "entity_type": "PERSON",
-      "start_pos": 104,
-      "end_pos": 118
     },
     {
       "entity_text": "France",
@@ -62,22 +38,10 @@
       "end_pos": 185
     },
     {
-      "entity_text": "France",
-      "entity_type": "LOCATION",
-      "start_pos": 179,
-      "end_pos": 185
-    },
-    {
       "entity_text": "Sophie Laurent",
       "entity_type": "PERSON",
       "start_pos": 206,
       "end_pos": 220
-    },
-    {
-      "entity_text": "M. Olivier Gaillard",
-      "entity_type": "PERSON",
-      "start_pos": 280,
-      "end_pos": 299
     },
     {
       "entity_text": "Olivier Gaillard",
@@ -92,12 +56,6 @@
       "end_pos": 408
     },
     {
-      "entity_text": "M. Maxime Dubois",
-      "entity_type": "PERSON",
-      "start_pos": 449,
-      "end_pos": 465
-    },
-    {
       "entity_text": "Maxime Dubois",
       "entity_type": "PERSON",
       "start_pos": 452,
@@ -110,40 +68,16 @@
       "end_pos": 524
     },
     {
-      "entity_text": "Salesforce Commerce Cloud",
-      "entity_type": "ORG",
-      "start_pos": 505,
-      "end_pos": 530
-    },
-    {
-      "entity_text": "Mme Lucie Renard",
-      "entity_type": "PERSON",
-      "start_pos": 532,
-      "end_pos": 548
-    },
-    {
       "entity_text": "Mme Lucie",
       "entity_type": "PERSON",
       "start_pos": 532,
       "end_pos": 541
     },
     {
-      "entity_text": "M. Alexandre Jin",
-      "entity_type": "PERSON",
-      "start_pos": 612,
-      "end_pos": 628
-    },
-    {
       "entity_text": "Alexandre Jin",
       "entity_type": "PERSON",
       "start_pos": 615,
       "end_pos": 628
-    },
-    {
-      "entity_text": "Google France",
-      "entity_type": "PERSON",
-      "start_pos": 664,
-      "end_pos": 677
     },
     {
       "entity_text": "France",
@@ -164,18 +98,6 @@
       "end_pos": 806
     },
     {
-      "entity_text": "érations, Mme",
-      "entity_type": "PERSON",
-      "start_pos": 848,
-      "end_pos": 861
-    },
-    {
-      "entity_text": "Mme Delphine Mallet",
-      "entity_type": "PERSON",
-      "start_pos": 858,
-      "end_pos": 877
-    },
-    {
       "entity_text": "Mme Delphine",
       "entity_type": "PERSON",
       "start_pos": 858,
@@ -186,12 +108,6 @@
       "entity_type": "PERSON",
       "start_pos": 949,
       "end_pos": 959
-    },
-    {
-      "entity_text": "Dr. Marc Laperrière",
-      "entity_type": "PERSON",
-      "start_pos": 957,
-      "end_pos": 976
     },
     {
       "entity_text": "Marc Laperrière",
@@ -212,24 +128,6 @@
       "end_pos": 1079
     },
     {
-      "entity_text": "SAP pour le PIM",
-      "entity_type": "ORG",
-      "start_pos": 1077,
-      "end_pos": 1092
-    },
-    {
-      "entity_text": "Deloitte Digital",
-      "entity_type": "PERSON",
-      "start_pos": 1109,
-      "end_pos": 1125
-    },
-    {
-      "entity_text": "M. Vincent Gorse",
-      "entity_type": "PERSON",
-      "start_pos": 1143,
-      "end_pos": 1159
-    },
-    {
       "entity_text": "Vincent Gorse",
       "entity_type": "PERSON",
       "start_pos": 1146,
@@ -242,40 +140,16 @@
       "end_pos": 1187
     },
     {
-      "entity_text": "M. Karim Benani",
-      "entity_type": "PERSON",
-      "start_pos": 1195,
-      "end_pos": 1210
-    },
-    {
       "entity_text": "Karim Benani",
       "entity_type": "PERSON",
       "start_pos": 1198,
       "end_pos": 1210
     },
     {
-      "entity_text": "Google Cloud",
-      "entity_type": "PERSON",
-      "start_pos": 1233,
-      "end_pos": 1245
-    },
-    {
-      "entity_text": "Google Cloud avec l",
-      "entity_type": "ORG",
-      "start_pos": 1233,
-      "end_pos": 1252
-    },
-    {
       "entity_text": "Publicis Sapient",
       "entity_type": "PERSON",
       "start_pos": 1261,
       "end_pos": 1277
-    },
-    {
-      "entity_text": "Mme Émilie Bernard",
-      "entity_type": "PERSON",
-      "start_pos": 1292,
-      "end_pos": 1310
     },
     {
       "entity_text": "Mme Émilie",
@@ -290,12 +164,6 @@
       "end_pos": 1328
     },
     {
-      "entity_text": "M. Jonathan Cherki",
-      "entity_type": "PERSON",
-      "start_pos": 1355,
-      "end_pos": 1373
-    },
-    {
       "entity_text": "Jonathan Cherki",
       "entity_type": "PERSON",
       "start_pos": 1358,
@@ -308,22 +176,10 @@
       "end_pos": 1422
     },
     {
-      "entity_text": "Mme Carole Petit",
-      "entity_type": "PERSON",
-      "start_pos": 1471,
-      "end_pos": 1487
-    },
-    {
       "entity_text": "Mme Carole",
       "entity_type": "PERSON",
       "start_pos": 1471,
       "end_pos": 1481
-    },
-    {
-      "entity_text": "M. Stéphane Martin",
-      "entity_type": "PERSON",
-      "start_pos": 1502,
-      "end_pos": 1520
     },
     {
       "entity_text": "Stéphane Martin",
@@ -338,22 +194,10 @@
       "end_pos": 1531
     },
     {
-      "entity_text": "France, Mme",
-      "entity_type": "PERSON",
-      "start_pos": 1544,
-      "end_pos": 1555
-    },
-    {
       "entity_text": "France",
       "entity_type": "LOCATION",
       "start_pos": 1544,
       "end_pos": 1550
-    },
-    {
-      "entity_text": "Mme Nadia Kadem",
-      "entity_type": "PERSON",
-      "start_pos": 1552,
-      "end_pos": 1567
     },
     {
       "entity_text": "Mme Nadia",
@@ -362,22 +206,10 @@
       "end_pos": 1561
     },
     {
-      "entity_text": "M. François Leroux",
-      "entity_type": "PERSON",
-      "start_pos": 1612,
-      "end_pos": 1630
-    },
-    {
       "entity_text": "François Leroux",
       "entity_type": "PERSON",
       "start_pos": 1615,
       "end_pos": 1630
-    },
-    {
-      "entity_text": "Mme Anne Browaeys",
-      "entity_type": "PERSON",
-      "start_pos": 1704,
-      "end_pos": 1721
     },
     {
       "entity_text": "Mme Anne",
@@ -392,34 +224,16 @@
       "end_pos": 1773
     },
     {
-      "entity_text": "Mme Clara Dumont",
-      "entity_type": "PERSON",
-      "start_pos": 1803,
-      "end_pos": 1819
-    },
-    {
       "entity_text": "Mme Clara",
       "entity_type": "PERSON",
       "start_pos": 1803,
       "end_pos": 1812
     },
     {
-      "entity_text": "M. Rémi Babinet",
-      "entity_type": "PERSON",
-      "start_pos": 1871,
-      "end_pos": 1886
-    },
-    {
       "entity_text": "Rémi Babinet",
       "entity_type": "PERSON",
       "start_pos": 1874,
       "end_pos": 1886
-    },
-    {
-      "entity_text": "Mme Mercedes Erra",
-      "entity_type": "PERSON",
-      "start_pos": 1890,
-      "end_pos": 1907
     },
     {
       "entity_text": "Mme Mercedes",
@@ -434,12 +248,6 @@
       "end_pos": 1956
     },
     {
-      "entity_text": "Situations, Enjoy",
-      "entity_type": "PERSON",
-      "start_pos": 1946,
-      "end_pos": 1963
-    },
-    {
       "entity_text": "Enjoy Phoenix",
       "entity_type": "PERSON",
       "start_pos": 1958,
@@ -452,22 +260,10 @@
       "end_pos": 1984
     },
     {
-      "entity_text": "M. Alex Turrion",
-      "entity_type": "PERSON",
-      "start_pos": 2007,
-      "end_pos": 2022
-    },
-    {
       "entity_text": "Alex Turrion",
       "entity_type": "PERSON",
       "start_pos": 2010,
       "end_pos": 2022
-    },
-    {
-      "entity_text": "M. Thomas Khalifa",
-      "entity_type": "PERSON",
-      "start_pos": 2052,
-      "end_pos": 2069
     },
     {
       "entity_text": "Thomas Khalifa",
@@ -482,34 +278,16 @@
       "end_pos": 2140
     },
     {
-      "entity_text": "M. Alexandre Bompard",
-      "entity_type": "PERSON",
-      "start_pos": 2183,
-      "end_pos": 2203
-    },
-    {
       "entity_text": "Alexandre Bompard",
       "entity_type": "PERSON",
       "start_pos": 2186,
       "end_pos": 2203
     },
     {
-      "entity_text": "Mme Régine Ballonad",
-      "entity_type": "PERSON",
-      "start_pos": 2220,
-      "end_pos": 2239
-    },
-    {
       "entity_text": "Mme Régine",
       "entity_type": "PERSON",
       "start_pos": 2220,
       "end_pos": 2230
-    },
-    {
-      "entity_text": "M. Marc Lolivier",
-      "entity_type": "PERSON",
-      "start_pos": 2384,
-      "end_pos": 2400
     },
     {
       "entity_text": "Marc Lolivier",

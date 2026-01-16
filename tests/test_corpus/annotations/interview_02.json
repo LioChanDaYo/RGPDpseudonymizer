@@ -32,22 +32,10 @@
       "end_pos": 201
     },
     {
-      "entity_text": "M. François Leclerc",
-      "entity_type": "PERSON",
-      "start_pos": 367,
-      "end_pos": 386
-    },
-    {
       "entity_text": "François Leclerc",
       "entity_type": "PERSON",
       "start_pos": 370,
       "end_pos": 386
-    },
-    {
-      "entity_text": "Mme Isabelle Moreau",
-      "entity_type": "PERSON",
-      "start_pos": 402,
-      "end_pos": 421
     },
     {
       "entity_text": "Mme Isabelle",
@@ -62,22 +50,10 @@
       "end_pos": 511
     },
     {
-      "entity_text": "Dr. Thomas Weber",
-      "entity_type": "PERSON",
-      "start_pos": 688,
-      "end_pos": 704
-    },
-    {
       "entity_text": "Thomas Weber",
       "entity_type": "PERSON",
       "start_pos": 692,
       "end_pos": 704
-    },
-    {
-      "entity_text": "Il venait de Volkswagen Group",
-      "entity_type": "ORG",
-      "start_pos": 744,
-      "end_pos": 773
     },
     {
       "entity_text": "Volkswagen Group",
@@ -98,27 +74,9 @@
       "end_pos": 938
     },
     {
-      "entity_text": "AutoMotive SA",
-      "entity_type": "ORG",
-      "start_pos": 934,
-      "end_pos": 947
-    },
-    {
       "entity_text": "McKinsey France",
       "entity_type": "ORG",
       "start_pos": 986,
-      "end_pos": 1001
-    },
-    {
-      "entity_text": "Kinsey France",
-      "entity_type": "PERSON",
-      "start_pos": 988,
-      "end_pos": 1001
-    },
-    {
-      "entity_text": "France",
-      "entity_type": "LOCATION",
-      "start_pos": 995,
       "end_pos": 1001
     },
     {
@@ -132,12 +90,6 @@
       "entity_type": "PERSON",
       "start_pos": 1043,
       "end_pos": 1055
-    },
-    {
-      "entity_text": "Elle a aussi impliqué des experts de Renault et PSA",
-      "entity_type": "ORG",
-      "start_pos": 1064,
-      "end_pos": 1115
     },
     {
       "entity_text": "Peugeot Citroën",
@@ -174,18 +126,6 @@
       "entity_type": "LOCATION",
       "start_pos": 1471,
       "end_pos": 1481
-    },
-    {
-      "entity_text": "Le Professeur",
-      "entity_type": "PERSON",
-      "start_pos": 1521,
-      "end_pos": 1534
-    },
-    {
-      "entity_text": "Professeur Antoine Mercier",
-      "entity_type": "PERSON",
-      "start_pos": 1524,
-      "end_pos": 1550
     },
     {
       "entity_text": "Antoine Mercier",

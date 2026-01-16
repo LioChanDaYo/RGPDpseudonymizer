@@ -14,34 +14,10 @@
       "end_pos": 34
     },
     {
-      "entity_text": "Lyon",
-      "entity_type": "LOCATION",
-      "start_pos": 30,
-      "end_pos": 34
-    },
-    {
-      "entity_text": "M. Thomas Weber",
-      "entity_type": "PERSON",
-      "start_pos": 51,
-      "end_pos": 66
-    },
-    {
       "entity_text": "Thomas Weber",
       "entity_type": "PERSON",
       "start_pos": 54,
       "end_pos": 66
-    },
-    {
-      "entity_text": "Weber, Métropole",
-      "entity_type": "PERSON",
-      "start_pos": 61,
-      "end_pos": 77
-    },
-    {
-      "entity_text": "Lyon\nDate",
-      "entity_type": "PERSON",
-      "start_pos": 81,
-      "end_pos": 90
     },
     {
       "entity_text": "Lyon",
@@ -74,22 +50,10 @@
       "end_pos": 197
     },
     {
-      "entity_text": "La Métropole",
-      "entity_type": "PERSON",
-      "start_pos": 199,
-      "end_pos": 211
-    },
-    {
       "entity_text": "Lyon",
       "entity_type": "LOCATION",
       "start_pos": 215,
       "end_pos": 219
-    },
-    {
-      "entity_text": "M. Bruno Bernard",
-      "entity_type": "PERSON",
-      "start_pos": 243,
-      "end_pos": 259
     },
     {
       "entity_text": "Bruno Bernard",
@@ -104,22 +68,10 @@
       "end_pos": 413
     },
     {
-      "entity_text": "Mme Émilie Morel",
-      "entity_type": "PERSON",
-      "start_pos": 426,
-      "end_pos": 442
-    },
-    {
       "entity_text": "Mme Émilie",
       "entity_type": "PERSON",
       "start_pos": 426,
       "end_pos": 436
-    },
-    {
-      "entity_text": "M. Julien Sarrazin",
-      "entity_type": "PERSON",
-      "start_pos": 461,
-      "end_pos": 479
     },
     {
       "entity_text": "Julien Sarrazin",
@@ -134,22 +86,10 @@
       "end_pos": 497
     },
     {
-      "entity_text": "Dr. Nathalie Perrin-",
-      "entity_type": "PERSON",
-      "start_pos": 495,
-      "end_pos": 515
-    },
-    {
       "entity_text": "Nathalie Perrin-",
       "entity_type": "PERSON",
       "start_pos": 499,
       "end_pos": 515
-    },
-    {
-      "entity_text": "M. Patrick Refondini",
-      "entity_type": "PERSON",
-      "start_pos": 564,
-      "end_pos": 584
     },
     {
       "entity_text": "Patrick Refondini",
@@ -170,22 +110,10 @@
       "end_pos": 743
     },
     {
-      "entity_text": "Cisco France",
-      "entity_type": "PERSON",
-      "start_pos": 745,
-      "end_pos": 757
-    },
-    {
       "entity_text": "France",
       "entity_type": "LOCATION",
       "start_pos": 751,
       "end_pos": 757
-    },
-    {
-      "entity_text": "Mme Patricia Gélébart",
-      "entity_type": "PERSON",
-      "start_pos": 803,
-      "end_pos": 824
     },
     {
       "entity_text": "Mme Patricia",
@@ -194,22 +122,10 @@
       "end_pos": 815
     },
     {
-      "entity_text": "IBM avec leur Smart Cities Lab ",
-      "entity_type": "ORG",
-      "start_pos": 826,
-      "end_pos": 857
-    },
-    {
       "entity_text": "Smart Cities",
       "entity_type": "PERSON",
       "start_pos": 840,
       "end_pos": 852
-    },
-    {
-      "entity_text": "M. Bertrand Louvet",
-      "entity_type": "PERSON",
-      "start_pos": 867,
-      "end_pos": 885
     },
     {
       "entity_text": "Bertrand Louvet",
@@ -224,12 +140,6 @@
       "end_pos": 905
     },
     {
-      "entity_text": "Mme Gwenaëlle Avice-",
-      "entity_type": "PERSON",
-      "start_pos": 938,
-      "end_pos": 958
-    },
-    {
       "entity_text": "Mme Gwenaëlle",
       "entity_type": "PERSON",
       "start_pos": 938,
@@ -242,34 +152,16 @@
       "end_pos": 973
     },
     {
-      "entity_text": "M. Philippe Monloubou",
-      "entity_type": "PERSON",
-      "start_pos": 979,
-      "end_pos": 1000
-    },
-    {
       "entity_text": "Philippe Monloubou",
       "entity_type": "PERSON",
       "start_pos": 982,
       "end_pos": 1000
     },
     {
-      "entity_text": "Dr. Eric Benoit",
-      "entity_type": "PERSON",
-      "start_pos": 1115,
-      "end_pos": 1130
-    },
-    {
       "entity_text": "Eric Benoit",
       "entity_type": "PERSON",
       "start_pos": 1119,
       "end_pos": 1130
-    },
-    {
-      "entity_text": "Mme Sophie Desormière",
-      "entity_type": "PERSON",
-      "start_pos": 1178,
-      "end_pos": 1199
     },
     {
       "entity_text": "Mme Sophie",
@@ -284,12 +176,6 @@
       "end_pos": 1214
     },
     {
-      "entity_text": "M. Raphaël Meyer",
-      "entity_type": "PERSON",
-      "start_pos": 1228,
-      "end_pos": 1244
-    },
-    {
       "entity_text": "Raphaël Meyer",
       "entity_type": "PERSON",
       "start_pos": 1231,
@@ -300,12 +186,6 @@
       "entity_type": "PERSON",
       "start_pos": 1246,
       "end_pos": 1256
-    },
-    {
-      "entity_text": "Mme Jessica Fino",
-      "entity_type": "PERSON",
-      "start_pos": 1272,
-      "end_pos": 1288
     },
     {
       "entity_text": "Mme Jessica",
@@ -326,28 +206,10 @@
       "end_pos": 1367
     },
     {
-      "entity_text": "Lyon",
-      "entity_type": "LOCATION",
-      "start_pos": 1363,
-      "end_pos": 1367
-    },
-    {
-      "entity_text": "M. Thierry Mallet",
-      "entity_type": "PERSON",
-      "start_pos": 1380,
-      "end_pos": 1397
-    },
-    {
       "entity_text": "Thierry Mallet",
       "entity_type": "PERSON",
       "start_pos": 1383,
       "end_pos": 1397
-    },
-    {
-      "entity_text": "Mme Fouziya Bouzerda",
-      "entity_type": "PERSON",
-      "start_pos": 1420,
-      "end_pos": 1440
     },
     {
       "entity_text": "Mme Fouziya",
@@ -365,12 +227,6 @@
       "entity_text": "Lime et leur directeur France",
       "entity_type": "ORG",
       "start_pos": 1564,
-      "end_pos": 1593
-    },
-    {
-      "entity_text": "France",
-      "entity_type": "LOCATION",
-      "start_pos": 1587,
       "end_pos": 1593
     },
     {
@@ -392,12 +248,6 @@
       "end_pos": 1681
     },
     {
-      "entity_text": "Pr. Frédéric Fotiadu",
-      "entity_type": "PERSON",
-      "start_pos": 1690,
-      "end_pos": 1710
-    },
-    {
       "entity_text": "Frédéric Fotiadu",
       "entity_type": "PERSON",
       "start_pos": 1694,
@@ -416,34 +266,16 @@
       "end_pos": 1731
     },
     {
-      "entity_text": "Mme Isabelle Dussauge",
-      "entity_type": "PERSON",
-      "start_pos": 1736,
-      "end_pos": 1757
-    },
-    {
       "entity_text": "Mme Isabelle",
       "entity_type": "PERSON",
       "start_pos": 1736,
       "end_pos": 1748
     },
     {
-      "entity_text": "Dr. Lionel Brunie",
-      "entity_type": "PERSON",
-      "start_pos": 1799,
-      "end_pos": 1816
-    },
-    {
       "entity_text": "Lionel Brunie",
       "entity_type": "PERSON",
       "start_pos": 1803,
       "end_pos": 1816
-    },
-    {
-      "entity_text": "Pr. Tawhid Chtioui",
-      "entity_type": "PERSON",
-      "start_pos": 1880,
-      "end_pos": 1898
     },
     {
       "entity_text": "Tawhid Chtioui",
@@ -458,34 +290,10 @@
       "end_pos": 1955
     },
     {
-      "entity_text": "La Caisse",
-      "entity_type": "PERSON",
-      "start_pos": 1973,
-      "end_pos": 1982
-    },
-    {
-      "entity_text": "M. Éric Lombard",
-      "entity_type": "PERSON",
-      "start_pos": 1998,
-      "end_pos": 2013
-    },
-    {
       "entity_text": "Éric Lombard",
       "entity_type": "PERSON",
       "start_pos": 2001,
       "end_pos": 2013
-    },
-    {
-      "entity_text": "La Région",
-      "entity_type": "PERSON",
-      "start_pos": 2025,
-      "end_pos": 2034
-    },
-    {
-      "entity_text": "M. Laurent Wauquiez",
-      "entity_type": "PERSON",
-      "start_pos": 2070,
-      "end_pos": 2089
     },
     {
       "entity_text": "Laurent Wauquiez",
@@ -494,22 +302,10 @@
       "end_pos": 2089
     },
     {
-      "entity_text": "M. Yves Le Breton",
-      "entity_type": "PERSON",
-      "start_pos": 2147,
-      "end_pos": 2164
-    },
-    {
       "entity_text": "Yves Le",
       "entity_type": "PERSON",
       "start_pos": 2150,
       "end_pos": 2157
-    },
-    {
-      "entity_text": "Mme Audrey Lebel",
-      "entity_type": "PERSON",
-      "start_pos": 2204,
-      "end_pos": 2220
     },
     {
       "entity_text": "Mme Audrey",
@@ -528,12 +324,6 @@
       "entity_type": "LOCATION",
       "start_pos": 2239,
       "end_pos": 2243
-    },
-    {
-      "entity_text": "M. Pascal Demurger",
-      "entity_type": "PERSON",
-      "start_pos": 2247,
-      "end_pos": 2265
     },
     {
       "entity_text": "Pascal Demurger",

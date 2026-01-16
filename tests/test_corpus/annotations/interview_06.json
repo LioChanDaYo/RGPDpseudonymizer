@@ -14,12 +14,6 @@
       "end_pos": 62
     },
     {
-      "entity_text": "Native Solutions",
-      "entity_type": "PERSON",
-      "start_pos": 76,
-      "end_pos": 92
-    },
-    {
       "entity_text": "Paris",
       "entity_type": "LOCATION",
       "start_pos": 118,
@@ -30,18 +24,6 @@
       "entity_type": "PERSON",
       "start_pos": 139,
       "end_pos": 152
-    },
-    {
-      "entity_text": "Native Solutions",
-      "entity_type": "PERSON",
-      "start_pos": 170,
-      "end_pos": 186
-    },
-    {
-      "entity_text": "é mon poste chez Amazon à Seattle pour rentrer en France",
-      "entity_type": "ORG",
-      "start_pos": 317,
-      "end_pos": 373
     },
     {
       "entity_text": "Amazon ",
@@ -56,12 +38,6 @@
       "end_pos": 373
     },
     {
-      "entity_text": "M. David Park",
-      "entity_type": "PERSON",
-      "start_pos": 395,
-      "end_pos": 408
-    },
-    {
       "entity_text": "David Park",
       "entity_type": "PERSON",
       "start_pos": 398,
@@ -72,12 +48,6 @@
       "entity_type": "PERSON",
       "start_pos": 477,
       "end_pos": 490
-    },
-    {
-      "entity_text": "Mme Yasmine Kader",
-      "entity_type": "PERSON",
-      "start_pos": 494,
-      "end_pos": 511
     },
     {
       "entity_text": "Mme Yasmine",
@@ -92,18 +62,6 @@
       "end_pos": 559
     },
     {
-      "entity_text": "La Société",
-      "entity_type": "PERSON",
-      "start_pos": 561,
-      "end_pos": 571
-    },
-    {
-      "entity_text": "M. Philippe Aymerich",
-      "entity_type": "PERSON",
-      "start_pos": 645,
-      "end_pos": 665
-    },
-    {
       "entity_text": "Philippe Aymerich",
       "entity_type": "PERSON",
       "start_pos": 648,
@@ -116,28 +74,10 @@
       "end_pos": 694
     },
     {
-      "entity_text": "Crédit Agricole",
-      "entity_type": "PERSON",
-      "start_pos": 688,
-      "end_pos": 703
-    },
-    {
       "entity_text": "ême la Banque de France",
       "entity_type": "ORG",
       "start_pos": 709,
       "end_pos": 732
-    },
-    {
-      "entity_text": "France",
-      "entity_type": "LOCATION",
-      "start_pos": 726,
-      "end_pos": 732
-    },
-    {
-      "entity_text": "Dr. Denis Beau",
-      "entity_type": "PERSON",
-      "start_pos": 761,
-      "end_pos": 775
     },
     {
       "entity_text": "Denis Beau",
@@ -158,22 +98,10 @@
       "end_pos": 917
     },
     {
-      "entity_text": "Mme Roxanne Varza",
-      "entity_type": "PERSON",
-      "start_pos": 914,
-      "end_pos": 931
-    },
-    {
       "entity_text": "Roxanne Varza",
       "entity_type": "PERSON",
       "start_pos": 918,
       "end_pos": 931
-    },
-    {
-      "entity_text": "M. Xavier Niel",
-      "entity_type": "PERSON",
-      "start_pos": 955,
-      "end_pos": 969
     },
     {
       "entity_text": "Xavier Niel",
@@ -206,12 +134,6 @@
       "end_pos": 1032
     },
     {
-      "entity_text": "M. Octave Klaba",
-      "entity_type": "PERSON",
-      "start_pos": 1064,
-      "end_pos": 1079
-    },
-    {
       "entity_text": "Octave Klaba",
       "entity_type": "PERSON",
       "start_pos": 1067,
@@ -222,12 +144,6 @@
       "entity_type": "PERSON",
       "start_pos": 1135,
       "end_pos": 1148
-    },
-    {
-      "entity_text": "M. Romain Niccoli",
-      "entity_type": "PERSON",
-      "start_pos": 1180,
-      "end_pos": 1197
     },
     {
       "entity_text": "Romain Niccoli",
@@ -242,28 +158,10 @@
       "end_pos": 1237
     },
     {
-      "entity_text": "Mme Caroline Thibault",
-      "entity_type": "PERSON",
-      "start_pos": 1234,
-      "end_pos": 1255
-    },
-    {
-      "entity_text": "Mme Caroline",
-      "entity_type": "PERSON",
-      "start_pos": 1234,
-      "end_pos": 1246
-    },
-    {
       "entity_text": "Salesforce",
       "entity_type": "ORG",
       "start_pos": 1266,
       "end_pos": 1276
-    },
-    {
-      "entity_text": "M. Ahmed Mansour",
-      "entity_type": "PERSON",
-      "start_pos": 1311,
-      "end_pos": 1327
     },
     {
       "entity_text": "Ahmed Mansour",
@@ -272,28 +170,10 @@
       "end_pos": 1327
     },
     {
-      "entity_text": "Dr. Liu Wei",
-      "entity_type": "PERSON",
-      "start_pos": 1348,
-      "end_pos": 1359
-    },
-    {
       "entity_text": "Liu Wei",
       "entity_type": "PERSON",
       "start_pos": 1352,
       "end_pos": 1359
-    },
-    {
-      "entity_text": "Très proches de Google Cloud France",
-      "entity_type": "ORG",
-      "start_pos": 1425,
-      "end_pos": 1460
-    },
-    {
-      "entity_text": "Google Cloud",
-      "entity_type": "PERSON",
-      "start_pos": 1441,
-      "end_pos": 1453
     },
     {
       "entity_text": "Google Cloud France ",
@@ -302,28 +182,10 @@
       "end_pos": 1461
     },
     {
-      "entity_text": "France",
-      "entity_type": "LOCATION",
-      "start_pos": 1454,
-      "end_pos": 1460
-    },
-    {
-      "entity_text": "Mme Sophie Bernard",
-      "entity_type": "PERSON",
-      "start_pos": 1489,
-      "end_pos": 1507
-    },
-    {
       "entity_text": "Mme Sophie",
       "entity_type": "PERSON",
       "start_pos": 1489,
       "end_pos": 1499
-    },
-    {
-      "entity_text": "Partnership aussi avec HashiCorp",
-      "entity_type": "ORG",
-      "start_pos": 1509,
-      "end_pos": 1541
     },
     {
       "entity_text": "Corp, Docker",
@@ -350,12 +212,6 @@
       "end_pos": 1659
     },
     {
-      "entity_text": "Mme Priyanka Sharma",
-      "entity_type": "PERSON",
-      "start_pos": 1665,
-      "end_pos": 1684
-    },
-    {
       "entity_text": "Mme Priyanka",
       "entity_type": "PERSON",
       "start_pos": 1665,
@@ -374,12 +230,6 @@
       "end_pos": 1764
     },
     {
-      "entity_text": "M. James Wilson",
-      "entity_type": "PERSON",
-      "start_pos": 1770,
-      "end_pos": 1785
-    },
-    {
       "entity_text": "James Wilson",
       "entity_type": "PERSON",
       "start_pos": 1773,
@@ -390,12 +240,6 @@
       "entity_type": "LOCATION",
       "start_pos": 1816,
       "end_pos": 1822
-    },
-    {
-      "entity_text": "M. Antonio Garcia",
-      "entity_type": "PERSON",
-      "start_pos": 1872,
-      "end_pos": 1889
     },
     {
       "entity_text": "Antonio Garcia",

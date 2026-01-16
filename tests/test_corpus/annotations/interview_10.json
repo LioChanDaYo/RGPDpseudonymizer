@@ -14,18 +14,6 @@
       "end_pos": 55
     },
     {
-      "entity_text": "M. François Leclerc",
-      "entity_type": "PERSON",
-      "start_pos": 66,
-      "end_pos": 85
-    },
-    {
-      "entity_text": "François Leclerc",
-      "entity_type": "PERSON",
-      "start_pos": 69,
-      "end_pos": 85
-    },
-    {
       "entity_text": "Leclerc, Ferme",
       "entity_type": "PERSON",
       "start_pos": 78,
@@ -44,22 +32,10 @@
       "end_pos": 159
     },
     {
-      "entity_text": "M. François Leclerc",
-      "entity_type": "PERSON",
-      "start_pos": 212,
-      "end_pos": 231
-    },
-    {
       "entity_text": "François Leclerc",
       "entity_type": "PERSON",
       "start_pos": 215,
       "end_pos": 231
-    },
-    {
-      "entity_text": "M. Sébastien Floc",
-      "entity_type": "PERSON",
-      "start_pos": 356,
-      "end_pos": 373
     },
     {
       "entity_text": "Sébastien Floc",
@@ -86,22 +62,10 @@
       "end_pos": 536
     },
     {
-      "entity_text": "Dr. Klaus Müller",
-      "entity_type": "PERSON",
-      "start_pos": 534,
-      "end_pos": 550
-    },
-    {
       "entity_text": "Klaus Müller",
       "entity_type": "PERSON",
       "start_pos": 538,
       "end_pos": 550
-    },
-    {
-      "entity_text": "M. Henri Seydoux",
-      "entity_type": "PERSON",
-      "start_pos": 663,
-      "end_pos": 679
     },
     {
       "entity_text": "Henri Seydoux",
@@ -110,46 +74,16 @@
       "end_pos": 679
     },
     {
-      "entity_text": "La Chambre",
-      "entity_type": "PERSON",
-      "start_pos": 759,
-      "end_pos": 769
-    },
-    {
-      "entity_text": "M. Thierry Coué",
-      "entity_type": "PERSON",
-      "start_pos": 818,
-      "end_pos": 833
-    },
-    {
       "entity_text": "Thierry Coué",
       "entity_type": "PERSON",
       "start_pos": 821,
       "end_pos": 833
     },
     {
-      "entity_text": "Pr. Christian Huyghe",
-      "entity_type": "PERSON",
-      "start_pos": 874,
-      "end_pos": 894
-    },
-    {
       "entity_text": "Christian Huyghe",
       "entity_type": "PERSON",
       "start_pos": 878,
       "end_pos": 894
-    },
-    {
-      "entity_text": "Le Ministère",
-      "entity_type": "PERSON",
-      "start_pos": 922,
-      "end_pos": 934
-    },
-    {
-      "entity_text": "Mme Julien Denormandie",
-      "entity_type": "PERSON",
-      "start_pos": 958,
-      "end_pos": 980
     },
     {
       "entity_text": "Mme Julien",
@@ -176,22 +110,10 @@
       "end_pos": 1159
     },
     {
-      "entity_text": "Mme Geneviève Fioraso",
-      "entity_type": "PERSON",
-      "start_pos": 1156,
-      "end_pos": 1177
-    },
-    {
       "entity_text": "Geneviève Fioraso",
       "entity_type": "PERSON",
       "start_pos": 1160,
       "end_pos": 1177
-    },
-    {
-      "entity_text": "Dr. Marc Dufumier",
-      "entity_type": "PERSON",
-      "start_pos": 1184,
-      "end_pos": 1201
     },
     {
       "entity_text": "Marc Dufumier",
@@ -200,22 +122,10 @@
       "end_pos": 1201
     },
     {
-      "entity_text": "M. Philippe Camburet",
-      "entity_type": "PERSON",
-      "start_pos": 1229,
-      "end_pos": 1249
-    },
-    {
       "entity_text": "Philippe Camburet",
       "entity_type": "PERSON",
       "start_pos": 1232,
       "end_pos": 1249
-    },
-    {
-      "entity_text": "M. Christiane Lambert",
-      "entity_type": "PERSON",
-      "start_pos": 1382,
-      "end_pos": 1403
     },
     {
       "entity_text": "Christiane Lambert",
@@ -230,12 +140,6 @@
       "end_pos": 1472
     },
     {
-      "entity_text": "Mme Amandine Muret",
-      "entity_type": "PERSON",
-      "start_pos": 1487,
-      "end_pos": 1505
-    },
-    {
       "entity_text": "Mme Amandine",
       "entity_type": "PERSON",
       "start_pos": 1487,
@@ -248,40 +152,16 @@
       "end_pos": 1517
     },
     {
-      "entity_text": "M. Pierre Martin",
-      "entity_type": "PERSON",
-      "start_pos": 1538,
-      "end_pos": 1554
-    },
-    {
       "entity_text": "Pierre Martin",
       "entity_type": "PERSON",
       "start_pos": 1541,
       "end_pos": 1554
     },
     {
-      "entity_text": "Orléans, Mme",
-      "entity_type": "PERSON",
-      "start_pos": 1557,
-      "end_pos": 1569
-    },
-    {
-      "entity_text": "Mme Sophie Rousseau",
-      "entity_type": "PERSON",
-      "start_pos": 1566,
-      "end_pos": 1585
-    },
-    {
       "entity_text": "Mme Sophie",
       "entity_type": "PERSON",
       "start_pos": 1566,
       "end_pos": 1576
-    },
-    {
-      "entity_text": "M. Jean Dupont",
-      "entity_type": "PERSON",
-      "start_pos": 1598,
-      "end_pos": 1612
     },
     {
       "entity_text": "Jean Dupont",
@@ -300,12 +180,6 @@
       "entity_type": "PERSON",
       "start_pos": 1671,
       "end_pos": 1687
-    },
-    {
-      "entity_text": "Mme Marie Cheval",
-      "entity_type": "PERSON",
-      "start_pos": 1744,
-      "end_pos": 1760
     },
     {
       "entity_text": "Mme Marie",
@@ -332,34 +206,16 @@
       "end_pos": 1880
     },
     {
-      "entity_text": "M. Antoine Saunier",
-      "entity_type": "PERSON",
-      "start_pos": 1901,
-      "end_pos": 1919
-    },
-    {
       "entity_text": "Antoine Saunier",
       "entity_type": "PERSON",
       "start_pos": 1904,
       "end_pos": 1919
     },
     {
-      "entity_text": "M. David Lefebvre",
-      "entity_type": "PERSON",
-      "start_pos": 2018,
-      "end_pos": 2035
-    },
-    {
       "entity_text": "David Lefebvre",
       "entity_type": "PERSON",
       "start_pos": 2021,
       "end_pos": 2035
-    },
-    {
-      "entity_text": "Mme Agnès Pannier-",
-      "entity_type": "PERSON",
-      "start_pos": 2120,
-      "end_pos": 2138
     },
     {
       "entity_text": "Mme Agnès",

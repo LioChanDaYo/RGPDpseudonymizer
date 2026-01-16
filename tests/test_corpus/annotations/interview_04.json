@@ -8,22 +8,10 @@
       "end_pos": 19
     },
     {
-      "entity_text": "Pr. Élisabeth Martin",
-      "entity_type": "PERSON",
-      "start_pos": 53,
-      "end_pos": 73
-    },
-    {
       "entity_text": "Élisabeth Martin",
       "entity_type": "PERSON",
       "start_pos": 57,
       "end_pos": 73
-    },
-    {
-      "entity_text": "Lille\nDate",
-      "entity_type": "PERSON",
-      "start_pos": 82,
-      "end_pos": 92
     },
     {
       "entity_text": "Lille",
@@ -38,12 +26,6 @@
       "end_pos": 138
     },
     {
-      "entity_text": "Pr. Élisabeth Martin",
-      "entity_type": "PERSON",
-      "start_pos": 199,
-      "end_pos": 219
-    },
-    {
       "entity_text": "Élisabeth Martin",
       "entity_type": "PERSON",
       "start_pos": 203,
@@ -54,18 +36,6 @@
       "entity_type": "LOCATION",
       "start_pos": 231,
       "end_pos": 236
-    },
-    {
-      "entity_text": "Le Directeur",
-      "entity_type": "PERSON",
-      "start_pos": 295,
-      "end_pos": 307
-    },
-    {
-      "entity_text": "M. Frédéric Boiron",
-      "entity_type": "PERSON",
-      "start_pos": 317,
-      "end_pos": 335
     },
     {
       "entity_text": "Frédéric Boiron",
@@ -98,12 +68,6 @@
       "end_pos": 496
     },
     {
-      "entity_text": "Dr. Bruno Canard",
-      "entity_type": "PERSON",
-      "start_pos": 511,
-      "end_pos": 527
-    },
-    {
       "entity_text": "Bruno Canard",
       "entity_type": "PERSON",
       "start_pos": 515,
@@ -114,12 +78,6 @@
       "entity_type": "PERSON",
       "start_pos": 531,
       "end_pos": 541
-    },
-    {
-      "entity_text": "Professeur Yazdan Yazdanpanah",
-      "entity_type": "PERSON",
-      "start_pos": 606,
-      "end_pos": 635
     },
     {
       "entity_text": "Professeur Yazdan",
@@ -134,22 +92,10 @@
       "end_pos": 797
     },
     {
-      "entity_text": "Pr. Karine Lacombe",
-      "entity_type": "PERSON",
-      "start_pos": 807,
-      "end_pos": 825
-    },
-    {
       "entity_text": "Karine Lacombe",
       "entity_type": "PERSON",
       "start_pos": 811,
       "end_pos": 825
-    },
-    {
-      "entity_text": "Dr. Gilles Pialoux",
-      "entity_type": "PERSON",
-      "start_pos": 832,
-      "end_pos": 850
     },
     {
       "entity_text": "Gilles Pialoux",
@@ -164,22 +110,10 @@
       "end_pos": 871
     },
     {
-      "entity_text": "Professeur Didier Raoult",
-      "entity_type": "PERSON",
-      "start_pos": 905,
-      "end_pos": 929
-    },
-    {
       "entity_text": "Professeur Didier",
       "entity_type": "PERSON",
       "start_pos": 905,
       "end_pos": 922
-    },
-    {
-      "entity_text": "Les équipes",
-      "entity_type": "PERSON",
-      "start_pos": 984,
-      "end_pos": 995
     },
     {
       "entity_text": "Nice",
@@ -206,12 +140,6 @@
       "end_pos": 1114
     },
     {
-      "entity_text": "Sanofi France",
-      "entity_type": "PERSON",
-      "start_pos": 1116,
-      "end_pos": 1129
-    },
-    {
       "entity_text": "France",
       "entity_type": "LOCATION",
       "start_pos": 1123,
@@ -222,12 +150,6 @@
       "entity_type": "PERSON",
       "start_pos": 1186,
       "end_pos": 1205
-    },
-    {
-      "entity_text": "Pfizer Europe",
-      "entity_type": "PERSON",
-      "start_pos": 1217,
-      "end_pos": 1230
     },
     {
       "entity_text": "Europe, Bio",
@@ -242,12 +164,6 @@
       "end_pos": 1253
     },
     {
-      "entity_text": "Dr. Ugur Sahin",
-      "entity_type": "PERSON",
-      "start_pos": 1340,
-      "end_pos": 1354
-    },
-    {
       "entity_text": "Ugur Sahin",
       "entity_type": "PERSON",
       "start_pos": 1344,
@@ -258,12 +174,6 @@
       "entity_type": "PERSON",
       "start_pos": 1421,
       "end_pos": 1438
-    },
-    {
-      "entity_text": "Mme Emer Cooke",
-      "entity_type": "PERSON",
-      "start_pos": 1473,
-      "end_pos": 1487
     },
     {
       "entity_text": "Mme Emer",
@@ -278,34 +188,10 @@
       "end_pos": 1508
     },
     {
-      "entity_text": "France",
-      "entity_type": "LOCATION",
-      "start_pos": 1502,
-      "end_pos": 1508
-    },
-    {
-      "entity_text": "M. Christophe Lestavel",
-      "entity_type": "PERSON",
-      "start_pos": 1522,
-      "end_pos": 1544
-    },
-    {
       "entity_text": "Christophe Lestavel",
       "entity_type": "PERSON",
       "start_pos": 1525,
       "end_pos": 1544
-    },
-    {
-      "entity_text": "églementaire, Mme",
-      "entity_type": "PERSON",
-      "start_pos": 1593,
-      "end_pos": 1610
-    },
-    {
-      "entity_text": "Mme Julie Bertrand",
-      "entity_type": "PERSON",
-      "start_pos": 1607,
-      "end_pos": 1625
     },
     {
       "entity_text": "Mme Julie",
@@ -332,22 +218,10 @@
       "end_pos": 1716
     },
     {
-      "entity_text": "Dr. Sophie Rogez",
-      "entity_type": "PERSON",
-      "start_pos": 1729,
-      "end_pos": 1745
-    },
-    {
       "entity_text": "Sophie Rogez",
       "entity_type": "PERSON",
       "start_pos": 1733,
       "end_pos": 1745
-    },
-    {
-      "entity_text": "M. Laurent Dubus",
-      "entity_type": "PERSON",
-      "start_pos": 1760,
-      "end_pos": 1776
     },
     {
       "entity_text": "Laurent Dubus",
@@ -356,22 +230,10 @@
       "end_pos": 1776
     },
     {
-      "entity_text": "Mme Caroline Lacoste",
-      "entity_type": "PERSON",
-      "start_pos": 1803,
-      "end_pos": 1823
-    },
-    {
       "entity_text": "Mme Caroline",
       "entity_type": "PERSON",
       "start_pos": 1803,
       "end_pos": 1815
-    },
-    {
-      "entity_text": "Dr. François Trottier",
-      "entity_type": "PERSON",
-      "start_pos": 1885,
-      "end_pos": 1906
     },
     {
       "entity_text": "François Trottier",

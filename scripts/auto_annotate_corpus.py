@@ -8,23 +8,35 @@ import json
 import re
 from typing import List, Dict, Tuple
 
-# Patterns for entity detection
+# IMPROVED Patterns for entity detection
+# These patterns are more conservative to reduce false positives
+
 PERSON_PATTERNS = [
+    # Title + Full Name (Dr. Marie Dubois, M. Jean-Pierre Martin)
     r'(?:Dr\.|Pr\.|M\.|Mme|Me|Professeur|Docteur)\s+[A-ZÀ-ÖØ-öø-ÿ][a-zà-öø-ÿ\-]+(?:\s+[A-ZÀ-ÖØ-öø-ÿ][a-zà-öø-ÿ\-]+)+',
-    r'[A-ZÀ-ÖØ-öø-ÿ][a-zà-öø-ÿ\-]+,\s+[A-ZÀ-ÖØ-öø-ÿ][a-zà-öø-ÿ\-]+',  # Last, First
-    r'[A-ZÀ-ÖØ-öø-ÿ][a-zà-öø-ÿ\-]+\s+[A-ZÀ-ÖØ-öø-ÿ][a-zà-öø-ÿ\-]+',  # First Last
+    # Full Name (Marie Dubois, Jean-Pierre Martin)
+    # More restrictive: requires at least 2 capitalized words, minimum 3 chars each
+    r'\b[A-ZÀ-ÖØ-öø-ÿ][a-zà-öø-ÿ]{2,}(?:\-[A-ZÀ-ÖØ-öø-ÿ][a-zà-öø-ÿ]{2,})?\s+[A-ZÀ-ÖØ-öø-ÿ][a-zà-öø-ÿ]{2,}\b',
 ]
 
 ORG_PATTERNS = [
-    r'[A-ZÀ-ÖØ-öø-ÿ][A-Za-zÀ-ÖØ-öø-ÿ\s]+(?:SA|SAS|SARL|France|Europe|Group|Industries|Corp|Corporation|Institute|Institut|Université|University)',
-    r'(?:Microsoft|Google|IBM|Amazon|Apple|Oracle|Salesforce|SAP)[A-Za-z\s]*',
-    r'[A-ZÀ-ÖØ-öø-ÿ][A-Za-zÀ-ÖØ-öø-ÿ]+\s+(?:Banque|Bank|Crédit|Assurance|Insurance)',
+    # Known tech companies with optional suffixes
+    r'\b(?:Microsoft|Google|IBM|Amazon|Apple|Oracle|Salesforce|SAP|Huawei|Cisco)(?:\s+(?:France|Europe|Cloud|Corporation))?\b',
+    # French universities and institutions
+    r'\b(?:Université|École|Institut|INRIA)\s+[A-ZÀ-ÖØ-öø-ÿ][A-Za-zÀ-ÖØ-öø-ÿ\-\s]+\b',
+    # Companies with legal suffixes (keep short to avoid sentence fragments)
+    r'\b[A-ZÀ-ÖØ-öø-ÿ][A-Za-zÀ-ÖØ-öø-ÿ]{2,}\s+(?:SA|SAS|SARL|Corp|Corporation|Group|Industries)\b',
+    # Financial institutions
+    r'\b[A-ZÀ-ÖØ-öø-ÿ][A-Za-zÀ-ÖØ-öø-ÿ]+\s+(?:Banque|Bank|Crédit|Assurance)\b',
 ]
 
 LOCATION_PATTERNS = [
-    r'(?:Paris|Lyon|Marseille|Toulouse|Nice|Nantes|Strasbourg|Montpellier|Bordeaux|Lille|Rennes)',
-    r'(?:France|Allemagne|Italie|Espagne|Belgique|Suisse|Luxembourg)',
-    r'(?:Londres|Berlin|Madrid|Rome|Brussels|Geneva|Zurich)',
+    # French cities
+    r'\b(?:Paris|Lyon|Marseille|Toulouse|Nice|Nantes|Strasbourg|Montpellier|Bordeaux|Lille|Rennes|Défense)\b',
+    # Countries
+    r'\b(?:France|Allemagne|Italie|Espagne|Belgique|Suisse|Luxembourg)\b',
+    # International cities
+    r'\b(?:Londres|Berlin|Madrid|Rome|Brussels|Geneva|Zurich)\b',
 ]
 
 def find_all_entities(text: str, pattern: str, entity_type: str) -> List[Dict]:

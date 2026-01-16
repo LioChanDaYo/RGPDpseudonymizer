@@ -14,12 +14,6 @@
       "end_pos": 70
     },
     {
-      "entity_text": "Mme Julie Bertrand",
-      "entity_type": "PERSON",
-      "start_pos": 72,
-      "end_pos": 90
-    },
-    {
       "entity_text": "Mme Julie",
       "entity_type": "PERSON",
       "start_pos": 72,
@@ -62,40 +56,16 @@
       "end_pos": 459
     },
     {
-      "entity_text": "Mme Sophie Durand",
-      "entity_type": "PERSON",
-      "start_pos": 471,
-      "end_pos": 488
-    },
-    {
       "entity_text": "Mme Sophie",
       "entity_type": "PERSON",
       "start_pos": 471,
       "end_pos": 481
     },
     {
-      "entity_text": "Le Wagon",
-      "entity_type": "PERSON",
-      "start_pos": 540,
-      "end_pos": 548
-    },
-    {
       "entity_text": "Leur directeur France",
       "entity_type": "ORG",
       "start_pos": 550,
       "end_pos": 571
-    },
-    {
-      "entity_text": "France",
-      "entity_type": "LOCATION",
-      "start_pos": 565,
-      "end_pos": 571
-    },
-    {
-      "entity_text": "M. Boris Paillard",
-      "entity_type": "PERSON",
-      "start_pos": 573,
-      "end_pos": 590
     },
     {
       "entity_text": "Boris Paillard",
@@ -116,22 +86,10 @@
       "end_pos": 702
     },
     {
-      "entity_text": "Le Wagon",
-      "entity_type": "PERSON",
-      "start_pos": 704,
-      "end_pos": 712
-    },
-    {
       "entity_text": "Paris",
       "entity_type": "LOCATION",
       "start_pos": 715,
       "end_pos": 720
-    },
-    {
-      "entity_text": "M. Sébastien Saunier",
-      "entity_type": "PERSON",
-      "start_pos": 749,
-      "end_pos": 769
     },
     {
       "entity_text": "Sébastien Saunier",
@@ -146,24 +104,6 @@
       "end_pos": 784
     },
     {
-      "entity_text": "Mme Cécile Veneziani",
-      "entity_type": "PERSON",
-      "start_pos": 781,
-      "end_pos": 801
-    },
-    {
-      "entity_text": "Mme Cécile",
-      "entity_type": "PERSON",
-      "start_pos": 781,
-      "end_pos": 791
-    },
-    {
-      "entity_text": "M. Kevin Soltani",
-      "entity_type": "PERSON",
-      "start_pos": 823,
-      "end_pos": 839
-    },
-    {
       "entity_text": "Kevin Soltani",
       "entity_type": "PERSON",
       "start_pos": 826,
@@ -176,22 +116,10 @@
       "end_pos": 897
     },
     {
-      "entity_text": "Martin, Ahmed",
-      "entity_type": "PERSON",
-      "start_pos": 891,
-      "end_pos": 904
-    },
-    {
       "entity_text": "Ahmed Karim",
       "entity_type": "PERSON",
       "start_pos": 899,
       "end_pos": 910
-    },
-    {
-      "entity_text": "Mme Léa Fontaine",
-      "entity_type": "PERSON",
-      "start_pos": 915,
-      "end_pos": 931
     },
     {
       "entity_text": "Mme Léa",
@@ -218,34 +146,16 @@
       "end_pos": 1054
     },
     {
-      "entity_text": "Mme Nathalie Legrand",
-      "entity_type": "PERSON",
-      "start_pos": 1051,
-      "end_pos": 1071
-    },
-    {
       "entity_text": "Nathalie Legrand",
       "entity_type": "PERSON",
       "start_pos": 1055,
       "end_pos": 1071
     },
     {
-      "entity_text": "La Région",
-      "entity_type": "PERSON",
-      "start_pos": 1085,
-      "end_pos": 1094
-    },
-    {
       "entity_text": "France",
       "entity_type": "LOCATION",
       "start_pos": 1102,
       "end_pos": 1108
-    },
-    {
-      "entity_text": "Mme Valérie Pécresse",
-      "entity_type": "PERSON",
-      "start_pos": 1115,
-      "end_pos": 1135
     },
     {
       "entity_text": "Mme Valérie",
@@ -266,34 +176,16 @@
       "end_pos": 1281
     },
     {
-      "entity_text": "Dr. Thomas Klein",
-      "entity_type": "PERSON",
-      "start_pos": 1294,
-      "end_pos": 1310
-    },
-    {
       "entity_text": "Thomas Klein",
       "entity_type": "PERSON",
       "start_pos": 1298,
       "end_pos": 1310
     },
     {
-      "entity_text": "Mme Sarah Hassan",
-      "entity_type": "PERSON",
-      "start_pos": 1314,
-      "end_pos": 1330
-    },
-    {
       "entity_text": "Mme Sarah",
       "entity_type": "PERSON",
       "start_pos": 1314,
       "end_pos": 1323
-    },
-    {
-      "entity_text": "M. Romain Dufort",
-      "entity_type": "PERSON",
-      "start_pos": 1349,
-      "end_pos": 1365
     },
     {
       "entity_text": "Romain Dufort",
@@ -308,22 +200,10 @@
       "end_pos": 1458
     },
     {
-      "entity_text": "M. Alexandre Petit",
-      "entity_type": "PERSON",
-      "start_pos": 1492,
-      "end_pos": 1510
-    },
-    {
       "entity_text": "Alexandre Petit",
       "entity_type": "PERSON",
       "start_pos": 1495,
       "end_pos": 1510
-    },
-    {
-      "entity_text": "Mme Caroline Blanc",
-      "entity_type": "PERSON",
-      "start_pos": 1523,
-      "end_pos": 1541
     },
     {
       "entity_text": "Mme Caroline",
@@ -332,22 +212,10 @@
       "end_pos": 1535
     },
     {
-      "entity_text": "M. Youssef Amrani",
-      "entity_type": "PERSON",
-      "start_pos": 1558,
-      "end_pos": 1575
-    },
-    {
       "entity_text": "Youssef Amrani",
       "entity_type": "PERSON",
       "start_pos": 1561,
       "end_pos": 1575
-    },
-    {
-      "entity_text": "Mme Emma Rodriguez",
-      "entity_type": "PERSON",
-      "start_pos": 1608,
-      "end_pos": 1626
     },
     {
       "entity_text": "Mme Emma",
@@ -356,22 +224,10 @@
       "end_pos": 1616
     },
     {
-      "entity_text": "M. Lucas Moreau",
-      "entity_type": "PERSON",
-      "start_pos": 1630,
-      "end_pos": 1645
-    },
-    {
       "entity_text": "Lucas Moreau",
       "entity_type": "PERSON",
       "start_pos": 1633,
       "end_pos": 1645
-    },
-    {
-      "entity_text": "Mme Isabelle Dumont",
-      "entity_type": "PERSON",
-      "start_pos": 1673,
-      "end_pos": 1692
     },
     {
       "entity_text": "Mme Isabelle",
@@ -392,12 +248,6 @@
       "end_pos": 1773
     },
     {
-      "entity_text": "M. Christophe Porteneuve",
-      "entity_type": "PERSON",
-      "start_pos": 1791,
-      "end_pos": 1815
-    },
-    {
       "entity_text": "Christophe Porteneuve",
       "entity_type": "PERSON",
       "start_pos": 1794,
@@ -414,18 +264,6 @@
       "entity_type": "PERSON",
       "start_pos": 1841,
       "end_pos": 1851
-    },
-    {
-      "entity_text": "Paris",
-      "entity_type": "LOCATION",
-      "start_pos": 1846,
-      "end_pos": 1851
-    },
-    {
-      "entity_text": "Mme Marcy Ericka Charollois",
-      "entity_type": "PERSON",
-      "start_pos": 1863,
-      "end_pos": 1890
     },
     {
       "entity_text": "Mme Marcy",
@@ -446,12 +284,6 @@
       "end_pos": 1924
     },
     {
-      "entity_text": "Mme Emmanuelle Larroque",
-      "entity_type": "PERSON",
-      "start_pos": 1943,
-      "end_pos": 1966
-    },
-    {
       "entity_text": "Mme Emmanuelle",
       "entity_type": "PERSON",
       "start_pos": 1943,
@@ -464,22 +296,10 @@
       "end_pos": 2048
     },
     {
-      "entity_text": "M. Marc Dubois",
-      "entity_type": "PERSON",
-      "start_pos": 2088,
-      "end_pos": 2102
-    },
-    {
       "entity_text": "Marc Dubois",
       "entity_type": "PERSON",
       "start_pos": 2091,
       "end_pos": 2102
-    },
-    {
-      "entity_text": "M. Sylvain Abelard",
-      "entity_type": "PERSON",
-      "start_pos": 2181,
-      "end_pos": 2199
     },
     {
       "entity_text": "Sylvain Abelard",

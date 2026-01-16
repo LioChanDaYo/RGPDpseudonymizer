@@ -2,33 +2,15 @@
   "document_name": "interview_11.txt",
   "entities": [
     {
-      "entity_text": "Mme Catherine Rousseau",
-      "entity_type": "PERSON",
-      "start_pos": 39,
-      "end_pos": 61
-    },
-    {
       "entity_text": "Mme Catherine",
       "entity_type": "PERSON",
       "start_pos": 39,
       "end_pos": 52
     },
     {
-      "entity_text": "Rousseau, Direct",
-      "entity_type": "PERSON",
-      "start_pos": 53,
-      "end_pos": 69
-    },
-    {
       "entity_text": "Soft Toulouse",
       "entity_type": "PERSON",
       "start_pos": 69,
-      "end_pos": 82
-    },
-    {
-      "entity_text": "Toulouse",
-      "entity_type": "LOCATION",
-      "start_pos": 74,
       "end_pos": 82
     },
     {
@@ -44,18 +26,6 @@
       "end_pos": 202
     },
     {
-      "entity_text": "Chez Direct",
-      "entity_type": "PERSON",
-      "start_pos": 204,
-      "end_pos": 215
-    },
-    {
-      "entity_text": "M. Alain Bertrand",
-      "entity_type": "PERSON",
-      "start_pos": 250,
-      "end_pos": 267
-    },
-    {
       "entity_text": "Alain Bertrand",
       "entity_type": "PERSON",
       "start_pos": 253,
@@ -68,34 +38,16 @@
       "end_pos": 391
     },
     {
-      "entity_text": "M. Kevin Martel",
-      "entity_type": "PERSON",
-      "start_pos": 486,
-      "end_pos": 501
-    },
-    {
       "entity_text": "Kevin Martel",
       "entity_type": "PERSON",
       "start_pos": 489,
       "end_pos": 501
     },
     {
-      "entity_text": "Mme Laura Benoit",
-      "entity_type": "PERSON",
-      "start_pos": 520,
-      "end_pos": 536
-    },
-    {
       "entity_text": "Mme Laura",
       "entity_type": "PERSON",
       "start_pos": 520,
       "end_pos": 529
-    },
-    {
-      "entity_text": "Dr. Alexandre Blanc",
-      "entity_type": "PERSON",
-      "start_pos": 603,
-      "end_pos": 622
     },
     {
       "entity_text": "Alexandre Blanc",
@@ -116,12 +68,6 @@
       "end_pos": 717
     },
     {
-      "entity_text": "M. George Kurtz",
-      "entity_type": "PERSON",
-      "start_pos": 764,
-      "end_pos": 779
-    },
-    {
       "entity_text": "George Kurtz",
       "entity_type": "PERSON",
       "start_pos": 767,
@@ -132,12 +78,6 @@
       "entity_type": "PERSON",
       "start_pos": 867,
       "end_pos": 880
-    },
-    {
-      "entity_text": "Mme Sophie Martin",
-      "entity_type": "PERSON",
-      "start_pos": 897,
-      "end_pos": 914
     },
     {
       "entity_text": "Mme Sophie",
@@ -158,34 +98,16 @@
       "end_pos": 1080
     },
     {
-      "entity_text": "M. Vincent Strubel",
-      "entity_type": "PERSON",
-      "start_pos": 1082,
-      "end_pos": 1100
-    },
-    {
       "entity_text": "Vincent Strubel",
       "entity_type": "PERSON",
       "start_pos": 1085,
       "end_pos": 1100
     },
     {
-      "entity_text": "Mme Nacira Salvan",
-      "entity_type": "PERSON",
-      "start_pos": 1153,
-      "end_pos": 1170
-    },
-    {
       "entity_text": "Mme Nacira",
       "entity_type": "PERSON",
       "start_pos": 1153,
       "end_pos": 1163
-    },
-    {
-      "entity_text": "égion Occitanie",
-      "entity_type": "PERSON",
-      "start_pos": 1178,
-      "end_pos": 1193
     },
     {
       "entity_text": "Catherine Rousseau",
@@ -200,28 +122,10 @@
       "end_pos": 1281
     },
     {
-      "entity_text": "M. Pierre Dubois",
-      "entity_type": "PERSON",
-      "start_pos": 1367,
-      "end_pos": 1383
-    },
-    {
       "entity_text": "Pierre Dubois",
       "entity_type": "PERSON",
       "start_pos": 1370,
       "end_pos": 1383
-    },
-    {
-      "entity_text": "M. François Pellegrini",
-      "entity_type": "PERSON",
-      "start_pos": 1429,
-      "end_pos": 1451
-    },
-    {
-      "entity_text": "François Pellegrini",
-      "entity_type": "PERSON",
-      "start_pos": 1432,
-      "end_pos": 1451
     },
     {
       "entity_text": "Pellegrini, était",
@@ -236,12 +140,6 @@
       "end_pos": 1517
     },
     {
-      "entity_text": "M. Jérôme Notin",
-      "entity_type": "PERSON",
-      "start_pos": 1560,
-      "end_pos": 1575
-    },
-    {
       "entity_text": "Jérôme Notin",
       "entity_type": "PERSON",
       "start_pos": 1563,
@@ -254,22 +152,10 @@
       "end_pos": 1646
     },
     {
-      "entity_text": "Mme Maryse Fons",
-      "entity_type": "PERSON",
-      "start_pos": 1677,
-      "end_pos": 1692
-    },
-    {
       "entity_text": "Mme Maryse",
       "entity_type": "PERSON",
       "start_pos": 1677,
       "end_pos": 1687
-    },
-    {
-      "entity_text": "M. Luc Barbier",
-      "entity_type": "PERSON",
-      "start_pos": 1733,
-      "end_pos": 1747
     },
     {
       "entity_text": "Luc Barbier",
@@ -282,12 +168,6 @@
       "entity_type": "PERSON",
       "start_pos": 1750,
       "end_pos": 1762
-    },
-    {
-      "entity_text": "Mme Natacha Reynaud",
-      "entity_type": "PERSON",
-      "start_pos": 1774,
-      "end_pos": 1793
     },
     {
       "entity_text": "Mme Natacha",
@@ -308,12 +188,6 @@
       "end_pos": 1905
     },
     {
-      "entity_text": "M. Michel Van Den Berghe",
-      "entity_type": "PERSON",
-      "start_pos": 1924,
-      "end_pos": 1948
-    },
-    {
       "entity_text": "Michel Van",
       "entity_type": "PERSON",
       "start_pos": 1927,
@@ -324,12 +198,6 @@
       "entity_type": "PERSON",
       "start_pos": 1938,
       "end_pos": 1948
-    },
-    {
-      "entity_text": "M. Thomas Buberl",
-      "entity_type": "PERSON",
-      "start_pos": 2037,
-      "end_pos": 2053
     },
     {
       "entity_text": "Thomas Buberl",

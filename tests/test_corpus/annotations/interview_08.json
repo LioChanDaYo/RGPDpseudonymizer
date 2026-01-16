@@ -20,12 +20,6 @@
       "end_pos": 61
     },
     {
-      "entity_text": "Dr. Sarah Cohen",
-      "entity_type": "PERSON",
-      "start_pos": 59,
-      "end_pos": 74
-    },
-    {
       "entity_text": "Sarah Cohen",
       "entity_type": "PERSON",
       "start_pos": 63,
@@ -44,28 +38,10 @@
       "end_pos": 140
     },
     {
-      "entity_text": "Dr. Sarah Cohen",
-      "entity_type": "PERSON",
-      "start_pos": 189,
-      "end_pos": 204
-    },
-    {
       "entity_text": "Sarah Cohen",
       "entity_type": "PERSON",
       "start_pos": 193,
       "end_pos": 204
-    },
-    {
-      "entity_text": "Je collabore étroitement avec le Professeur Raja Chatila de Sorbonne Université",
-      "entity_type": "ORG",
-      "start_pos": 289,
-      "end_pos": 368
-    },
-    {
-      "entity_text": "Professeur Raja Chatila",
-      "entity_type": "PERSON",
-      "start_pos": 322,
-      "end_pos": 345
     },
     {
       "entity_text": "Professeur Raja",
@@ -78,12 +54,6 @@
       "entity_type": "PERSON",
       "start_pos": 349,
       "end_pos": 368
-    },
-    {
-      "entity_text": "Mme Laurence Devillers",
-      "entity_type": "PERSON",
-      "start_pos": 372,
-      "end_pos": 394
     },
     {
       "entity_text": "Mme Laurence",
@@ -110,40 +80,16 @@
       "end_pos": 488
     },
     {
-      "entity_text": "Pr. Cynthia Breazeal",
-      "entity_type": "PERSON",
-      "start_pos": 501,
-      "end_pos": 521
-    },
-    {
       "entity_text": "Cynthia Breazeal",
       "entity_type": "PERSON",
       "start_pos": 505,
       "end_pos": 521
     },
     {
-      "entity_text": "En Europe",
-      "entity_type": "PERSON",
-      "start_pos": 523,
-      "end_pos": 532
-    },
-    {
-      "entity_text": "Dr. Luciano Floridi",
-      "entity_type": "PERSON",
-      "start_pos": 555,
-      "end_pos": 574
-    },
-    {
       "entity_text": "Luciano Floridi",
       "entity_type": "PERSON",
       "start_pos": 559,
       "end_pos": 574
-    },
-    {
-      "entity_text": "Mme Virginia Dignum",
-      "entity_type": "PERSON",
-      "start_pos": 587,
-      "end_pos": 606
     },
     {
       "entity_text": "Mme Virginia",
@@ -170,18 +116,6 @@
       "end_pos": 787
     },
     {
-      "entity_text": "France",
-      "entity_type": "LOCATION",
-      "start_pos": 781,
-      "end_pos": 787
-    },
-    {
-      "entity_text": "M. Yann Le",
-      "entity_type": "PERSON",
-      "start_pos": 794,
-      "end_pos": 804
-    },
-    {
       "entity_text": "Yann Le",
       "entity_type": "PERSON",
       "start_pos": 797,
@@ -194,40 +128,16 @@
       "end_pos": 857
     },
     {
-      "entity_text": "M. Demis Hassabis",
-      "entity_type": "PERSON",
-      "start_pos": 876,
-      "end_pos": 893
-    },
-    {
       "entity_text": "Demis Hassabis",
       "entity_type": "PERSON",
       "start_pos": 879,
       "end_pos": 893
     },
     {
-      "entity_text": "On travaille aussi avec Huawei France",
-      "entity_type": "ORG",
-      "start_pos": 922,
-      "end_pos": 959
-    },
-    {
-      "entity_text": "Huawei France",
-      "entity_type": "PERSON",
-      "start_pos": 946,
-      "end_pos": 959
-    },
-    {
       "entity_text": "France",
       "entity_type": "LOCATION",
       "start_pos": 953,
       "end_pos": 959
-    },
-    {
-      "entity_text": "M. Chen Lifang",
-      "entity_type": "PERSON",
-      "start_pos": 983,
-      "end_pos": 997
     },
     {
       "entity_text": "Chen Lifang",
@@ -248,22 +158,10 @@
       "end_pos": 1049
     },
     {
-      "entity_text": "Dr. Thomas Martin",
-      "entity_type": "PERSON",
-      "start_pos": 1089,
-      "end_pos": 1106
-    },
-    {
       "entity_text": "Thomas Martin",
       "entity_type": "PERSON",
       "start_pos": 1093,
       "end_pos": 1106
-    },
-    {
-      "entity_text": "Mme Aïcha Benali",
-      "entity_type": "PERSON",
-      "start_pos": 1137,
-      "end_pos": 1153
     },
     {
       "entity_text": "Mme Aïcha",
@@ -272,22 +170,10 @@
       "end_pos": 1146
     },
     {
-      "entity_text": "M. Marc Dupuis",
-      "entity_type": "PERSON",
-      "start_pos": 1175,
-      "end_pos": 1189
-    },
-    {
       "entity_text": "Marc Dupuis",
       "entity_type": "PERSON",
       "start_pos": 1178,
       "end_pos": 1189
-    },
-    {
-      "entity_text": "Mme Julie Petit",
-      "entity_type": "PERSON",
-      "start_pos": 1226,
-      "end_pos": 1241
     },
     {
       "entity_text": "Mme Julie",
@@ -296,34 +182,16 @@
       "end_pos": 1235
     },
     {
-      "entity_text": "M. Kevin Zhang",
-      "entity_type": "PERSON",
-      "start_pos": 1243,
-      "end_pos": 1257
-    },
-    {
       "entity_text": "Kevin Zhang",
       "entity_type": "PERSON",
       "start_pos": 1246,
       "end_pos": 1257
     },
     {
-      "entity_text": "M. Antoine Roussel",
-      "entity_type": "PERSON",
-      "start_pos": 1262,
-      "end_pos": 1280
-    },
-    {
       "entity_text": "Antoine Roussel",
       "entity_type": "PERSON",
       "start_pos": 1265,
       "end_pos": 1280
-    },
-    {
-      "entity_text": "ésidente, Mme",
-      "entity_type": "PERSON",
-      "start_pos": 1373,
-      "end_pos": 1386
     },
     {
       "entity_text": "Mme Marie-",
@@ -344,34 +212,16 @@
       "end_pos": 1483
     },
     {
-      "entity_text": "M. Axel Voss",
-      "entity_type": "PERSON",
-      "start_pos": 1509,
-      "end_pos": 1521
-    },
-    {
       "entity_text": "Axel Voss",
       "entity_type": "PERSON",
       "start_pos": 1512,
       "end_pos": 1521
     },
     {
-      "entity_text": "En France",
-      "entity_type": "PERSON",
-      "start_pos": 1523,
-      "end_pos": 1532
-    },
-    {
       "entity_text": "France",
       "entity_type": "LOCATION",
       "start_pos": 1526,
       "end_pos": 1532
-    },
-    {
-      "entity_text": "M. Cédric Villani",
-      "entity_type": "PERSON",
-      "start_pos": 1544,
-      "end_pos": 1561
     },
     {
       "entity_text": "Cédric Villani",
@@ -392,12 +242,6 @@
       "end_pos": 1689
     },
     {
-      "entity_text": "Mme Gabriela Ramos",
-      "entity_type": "PERSON",
-      "start_pos": 1732,
-      "end_pos": 1750
-    },
-    {
       "entity_text": "Mme Gabriela",
       "entity_type": "PERSON",
       "start_pos": 1732,
@@ -410,12 +254,6 @@
       "end_pos": 1826
     },
     {
-      "entity_text": "M. Théophile Lenoir",
-      "entity_type": "PERSON",
-      "start_pos": 1840,
-      "end_pos": 1859
-    },
-    {
       "entity_text": "Théophile Lenoir",
       "entity_type": "PERSON",
       "start_pos": 1843,
@@ -426,12 +264,6 @@
       "entity_type": "PERSON",
       "start_pos": 1878,
       "end_pos": 1888
-    },
-    {
-      "entity_text": "M. Lionel Janover",
-      "entity_type": "PERSON",
-      "start_pos": 1902,
-      "end_pos": 1919
     },
     {
       "entity_text": "Lionel Janover",
