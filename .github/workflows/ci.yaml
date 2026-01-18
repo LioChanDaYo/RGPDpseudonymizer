@@ -15,6 +15,11 @@ jobs:
       matrix:
         os: [ubuntu-22.04, macos-latest, windows-latest]
         python-version: ['3.9', '3.10', '3.11']
+        exclude:
+          # Exclude Windows + Python 3.9 due to spaCy/thinc access violation crash
+          # See: https://github.com/explosion/spaCy/issues/12659
+          - os: windows-latest
+            python-version: '3.9'
 
     steps:
       - name: Checkout code
