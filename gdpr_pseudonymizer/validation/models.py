@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import List, Optional
+from typing import List
 
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 
@@ -41,8 +41,8 @@ class EntityReview:
 
     entity: DetectedEntity
     state: EntityReviewState = EntityReviewState.PENDING
-    user_modification: Optional[str] = None
-    suggested_pseudonym: Optional[str] = None
+    user_modification: str | None = None
+    suggested_pseudonym: str | None = None
 
 
 @dataclass
@@ -74,7 +74,7 @@ class ValidationSession:
             EntityReview(entity=entity, state=EntityReviewState.PENDING)
         )
 
-    def get_current_entity(self) -> Optional[EntityReview]:
+    def get_current_entity(self) -> EntityReview | None:
         """Get entity at current review index.
 
         Returns:

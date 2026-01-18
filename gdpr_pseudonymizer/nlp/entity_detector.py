@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 
 @dataclass
@@ -30,8 +30,8 @@ class DetectedEntity:
     entity_type: str
     start_pos: int
     end_pos: int
-    confidence: Optional[float] = None
-    gender: Optional[str] = None
+    confidence: float | None = None
+    gender: str | None = None
 
 
 class EntityDetector(ABC):

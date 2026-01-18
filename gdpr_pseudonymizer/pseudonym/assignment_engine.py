@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass
@@ -20,8 +19,8 @@ class PseudonymAssignment:
     """
 
     pseudonym_full: str
-    pseudonym_first: Optional[str]
-    pseudonym_last: Optional[str]
+    pseudonym_first: str | None
+    pseudonym_last: str | None
     theme: str
     exhaustion_percentage: float
 
@@ -50,11 +49,11 @@ class PseudonymManager(ABC):
     def assign_pseudonym(
         self,
         entity_type: str,
-        first_name: Optional[str] = None,
-        last_name: Optional[str] = None,
-        gender: Optional[str] = None,
-        existing_first: Optional[str] = None,
-        existing_last: Optional[str] = None,
+        first_name: str | None = None,
+        last_name: str | None = None,
+        gender: str | None = None,
+        existing_first: str | None = None,
+        existing_last: str | None = None,
     ) -> PseudonymAssignment:
         """Assign pseudonym using compositional logic.
 
@@ -98,7 +97,7 @@ class SimplePseudonymManager(PseudonymManager):
 
     def __init__(self) -> None:
         """Initialize pseudonym manager with empty state."""
-        self._theme: Optional[str] = None
+        self._theme: str | None = None
 
     def load_library(self, theme: str) -> None:
         """Load library (stub implementation).
@@ -112,11 +111,11 @@ class SimplePseudonymManager(PseudonymManager):
     def assign_pseudonym(
         self,
         entity_type: str,
-        first_name: Optional[str] = None,
-        last_name: Optional[str] = None,
-        gender: Optional[str] = None,
-        existing_first: Optional[str] = None,
-        existing_last: Optional[str] = None,
+        first_name: str | None = None,
+        last_name: str | None = None,
+        gender: str | None = None,
+        existing_first: str | None = None,
+        existing_last: str | None = None,
     ) -> PseudonymAssignment:
         """Assign pseudonym (stub implementation).
 

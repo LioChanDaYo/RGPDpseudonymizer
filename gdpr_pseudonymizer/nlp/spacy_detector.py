@@ -8,7 +8,7 @@ with the fr_core_news_lg French language model.
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, List
 
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity, EntityDetector
 
@@ -27,8 +27,8 @@ class SpaCyDetector(EntityDetector):
 
     def __init__(self) -> None:
         """Initialize spaCy detector without loading model."""
-        self._nlp: Optional["Language"] = None
-        self._model_name: Optional[str] = None
+        self._nlp: "Language" | None = None
+        self._model_name: str | None = None
 
     def load_model(self, model_name: str = "fr_core_news_lg") -> None:
         """Load spaCy NLP model into memory.
@@ -112,7 +112,7 @@ class SpaCyDetector(EntityDetector):
             logger.error(f"entity_detection_failed: error={str(e)}")
             raise RuntimeError(f"Entity detection failed: {str(e)}") from e
 
-    def _map_entity_type(self, spacy_label: str) -> Optional[str]:
+    def _map_entity_type(self, spacy_label: str) -> str | None:
         """Map spaCy entity labels to standard entity types.
 
         Args:

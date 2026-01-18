@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import List
 
 from gdpr_pseudonymizer.data.models import Entity
 
@@ -16,7 +16,7 @@ class MappingRepository(ABC):
     """
 
     @abstractmethod
-    def find_by_full_name(self, full_name: str) -> Optional[Entity]:
+    def find_by_full_name(self, full_name: str) -> Entity | None:
         """Find existing entity by full name for idempotency.
 
         Args:
@@ -67,8 +67,8 @@ class MappingRepository(ABC):
     @abstractmethod
     def find_all(
         self,
-        entity_type: Optional[str] = None,
-        is_ambiguous: Optional[bool] = None,
+        entity_type: str | None = None,
+        is_ambiguous: bool | None = None,
     ) -> List[Entity]:
         """Query entities with optional filters.
 
@@ -97,7 +97,7 @@ class SQLiteMappingRepository(MappingRepository):
         """
         self.db_path = db_path
 
-    def find_by_full_name(self, full_name: str) -> Optional[Entity]:
+    def find_by_full_name(self, full_name: str) -> Entity | None:
         """Find entity by full name (stub implementation).
 
         Args:
@@ -148,8 +148,8 @@ class SQLiteMappingRepository(MappingRepository):
 
     def find_all(
         self,
-        entity_type: Optional[str] = None,
-        is_ambiguous: Optional[bool] = None,
+        entity_type: str | None = None,
+        is_ambiguous: bool | None = None,
     ) -> List[Entity]:
         """Query all entities (stub implementation).
 

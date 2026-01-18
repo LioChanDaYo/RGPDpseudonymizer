@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 from sqlalchemy import JSON, Boolean, DateTime, Float, Integer, String
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
@@ -33,15 +33,11 @@ class Entity(Base):
     )  # PERSON, LOCATION, ORG
 
     # Encrypted fields (encryption logic in Epic 2)
-    first_name: Mapped[Optional[str]] = mapped_column(
-        String, nullable=True
-    )  # PERSON only
-    last_name: Mapped[Optional[str]] = mapped_column(
-        String, nullable=True
-    )  # PERSON only
+    first_name: Mapped[str | None] = mapped_column(String, nullable=True)  # PERSON only
+    last_name: Mapped[str | None] = mapped_column(String, nullable=True)  # PERSON only
     full_name: Mapped[str] = mapped_column(String, nullable=False)
-    pseudonym_first: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    pseudonym_last: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    pseudonym_first: Mapped[str | None] = mapped_column(String, nullable=True)
+    pseudonym_last: Mapped[str | None] = mapped_column(String, nullable=True)
     pseudonym_full: Mapped[str] = mapped_column(String, nullable=False)
 
     # Metadata fields
@@ -51,17 +47,17 @@ class Entity(Base):
         default=datetime.utcnow,
         insert_default=datetime.utcnow,
     )
-    gender: Mapped[Optional[str]] = mapped_column(
+    gender: Mapped[str | None] = mapped_column(
         String, nullable=True
     )  # male/female/neutral/unknown
-    confidence_score: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    confidence_score: Mapped[float | None] = mapped_column(Float, nullable=True)
     theme: Mapped[str] = mapped_column(String, nullable=False)  # neutral/star_wars/lotr
 
     # Validation support fields
     is_ambiguous: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=False, insert_default=False
     )
-    ambiguity_reason: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    ambiguity_reason: Mapped[str | None] = mapped_column(String, nullable=True)
 
     def __init__(self, **kwargs: Any) -> None:
         """Initialize Entity with auto-generated defaults."""
@@ -96,7 +92,7 @@ class Operation(Base):
 
     # JSON fields
     files_processed: Mapped[List[str]] = mapped_column(JSON, nullable=False)
-    user_modifications: Mapped[Optional[Dict[str, Any]]] = mapped_column(
+    user_modifications: Mapped[Dict[str, Any] | None] = mapped_column(
         JSON, nullable=True
     )
 
@@ -107,7 +103,7 @@ class Operation(Base):
     entity_count: Mapped[int] = mapped_column(Integer, nullable=False)
     processing_time_seconds: Mapped[float] = mapped_column(Float, nullable=False)
     success: Mapped[bool] = mapped_column(Boolean, nullable=False)
-    error_message: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    error_message: Mapped[str | None] = mapped_column(String, nullable=True)
 
     def __init__(self, **kwargs: Any) -> None:
         """Initialize Operation with auto-generated defaults."""
