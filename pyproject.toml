@@ -103,6 +103,7 @@ ignore = [
 "__init__.py" = ["F401"]  # Allow unused imports in __init__.py
 "scripts/*.py" = ["E402"]  # Allow imports after sys.path modification
 "tests/unit/test_*.py" = ["E402"]  # Allow imports after sys.path modification
+"gdpr_pseudonymizer/data/models.py" = ["UP045"]  # SQLAlchemy Mapped[] requires Optional[] for Python 3.9 compatibility
 
 # pytest configuration
 [tool.pytest.ini_options]
