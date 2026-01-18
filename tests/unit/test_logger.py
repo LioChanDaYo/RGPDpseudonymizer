@@ -60,7 +60,9 @@ def test_log_with_context_info_level(capsys: pytest.CaptureFixture) -> None:
     logger = get_logger("test_module")
 
     # Verify log_with_context doesn't raise an exception
-    log_with_context(logger, "info", "entity_detected", entity_type="PERSON", count=5)
+    log_with_context(
+        logger, "info", "entity_detected", entity_type="PERSON", count=5
+    )
 
     # Note: capsys may not capture structlog output in all environments
     # The important part is that logging doesn't raise exceptions
