@@ -62,10 +62,10 @@ class Entity(Base):
 
     def __init__(self, **kwargs):
         """Initialize Entity with auto-generated defaults."""
-        if 'first_seen_timestamp' not in kwargs:
-            kwargs['first_seen_timestamp'] = datetime.utcnow()
-        if 'is_ambiguous' not in kwargs:
-            kwargs['is_ambiguous'] = False
+        if "first_seen_timestamp" not in kwargs:
+            kwargs["first_seen_timestamp"] = datetime.utcnow()
+        if "is_ambiguous" not in kwargs:
+            kwargs["is_ambiguous"] = False
         super().__init__(**kwargs)
 
 
@@ -105,8 +105,8 @@ class Operation(Base):
 
     def __init__(self, **kwargs):
         """Initialize Operation with auto-generated defaults."""
-        if 'timestamp' not in kwargs:
-            kwargs['timestamp'] = datetime.utcnow()
+        if "timestamp" not in kwargs:
+            kwargs["timestamp"] = datetime.utcnow()
         super().__init__(**kwargs)
 
 
@@ -136,6 +136,6 @@ class Metadata(Base):
 
     def __init__(self, **kwargs):
         """Initialize Metadata with auto-generated defaults."""
-        if 'updated_at' not in kwargs:
-            kwargs['updated_at'] = datetime.utcnow()
+        if "updated_at" not in kwargs:
+            kwargs["updated_at"] = datetime.utcnow()
         super().__init__(**kwargs)
