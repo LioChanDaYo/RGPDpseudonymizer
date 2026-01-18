@@ -32,8 +32,7 @@ def test_load_config_with_missing_file(tmp_path: Path) -> None:
 def test_load_config_with_valid_yaml(tmp_path: Path) -> None:
     """Test loading valid YAML config file."""
     config_file = tmp_path / "test-config.yaml"
-    config_file.write_text(
-        """
+    config_file.write_text("""
 logging:
   level: DEBUG
 
@@ -48,8 +47,7 @@ database:
 
 validation:
   enabled: false
-"""
-    )
+""")
 
     config = load_config(str(config_file))
 
@@ -63,15 +61,13 @@ validation:
 def test_load_config_partial_yaml(tmp_path: Path) -> None:
     """Test loading config file with only some sections (rest use defaults)."""
     config_file = tmp_path / "partial-config.yaml"
-    config_file.write_text(
-        """
+    config_file.write_text("""
 logging:
   level: WARNING
 
 pseudonym:
   theme: lotr
-"""
-    )
+""")
 
     config = load_config(str(config_file))
 
@@ -88,13 +84,11 @@ pseudonym:
 def test_load_config_invalid_yaml_syntax(tmp_path: Path) -> None:
     """Test error handling for invalid YAML syntax."""
     config_file = tmp_path / "invalid.yaml"
-    config_file.write_text(
-        """
+    config_file.write_text("""
 logging:
   level: DEBUG
     broken indentation
-"""
-    )
+""")
 
     with pytest.raises(ConfigurationError, match="Invalid log level"):
         load_config(str(config_file))
@@ -103,12 +97,10 @@ logging:
 def test_load_config_invalid_log_level(tmp_path: Path) -> None:
     """Test validation of log level values."""
     config_file = tmp_path / "invalid-log-level.yaml"
-    config_file.write_text(
-        """
+    config_file.write_text("""
 logging:
   level: INVALID
-"""
-    )
+""")
 
     with pytest.raises(ConfigurationError, match="Invalid log level"):
         load_config(str(config_file))
@@ -117,12 +109,10 @@ logging:
 def test_load_config_invalid_theme(tmp_path: Path) -> None:
     """Test validation of theme values."""
     config_file = tmp_path / "invalid-theme.yaml"
-    config_file.write_text(
-        """
+    config_file.write_text("""
 pseudonym:
   theme: invalid_theme
-"""
-    )
+""")
 
     with pytest.raises(ConfigurationError, match="Invalid theme"):
         load_config(str(config_file))
@@ -131,11 +121,9 @@ pseudonym:
 def test_load_config_invalid_section_type(tmp_path: Path) -> None:
     """Test error handling when section is not a dictionary."""
     config_file = tmp_path / "invalid-section.yaml"
-    config_file.write_text(
-        """
+    config_file.write_text("""
 logging: not_a_dict
-"""
-    )
+""")
 
     with pytest.raises(ConfigurationError, match="must be a dictionary"):
         load_config(str(config_file))
@@ -159,12 +147,10 @@ def test_load_config_empty_file(tmp_path: Path) -> None:
 def test_load_config_not_yaml_dict(tmp_path: Path) -> None:
     """Test error when YAML file doesn't contain a dictionary at root."""
     config_file = tmp_path / "list.yaml"
-    config_file.write_text(
-        """
+    config_file.write_text("""
 - item1
 - item2
-"""
-    )
+""")
 
     with pytest.raises(ConfigurationError, match="must contain a YAML dictionary"):
         load_config(str(config_file))
@@ -186,12 +172,10 @@ def test_load_config_search_order_defaults() -> None:
 def test_load_config_invalid_validation_enabled_type(tmp_path: Path) -> None:
     """Test error when validation.enabled is not a boolean."""
     config_file = tmp_path / "invalid-validation.yaml"
-    config_file.write_text(
-        """
+    config_file.write_text("""
 validation:
   enabled: "yes"
-"""
-    )
+""")
 
     with pytest.raises(ConfigurationError, match="must be true or false"):
         load_config(str(config_file))
