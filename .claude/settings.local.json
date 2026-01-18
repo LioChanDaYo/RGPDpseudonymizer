@@ -18,7 +18,13 @@
       "Bash(git branch:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Skill(BMad:agents:dev)",
+      "Skill(BMad:agents:dev:*)",
+      "Bash(gh run list:*)",
+      "Bash(poetry install:*)",
+      "Bash(curl:*)",
+      "Bash(if not exist \"docs\\\\qa\\\\gates\" mkdir docsqagates)"
     ]
   }
 }
