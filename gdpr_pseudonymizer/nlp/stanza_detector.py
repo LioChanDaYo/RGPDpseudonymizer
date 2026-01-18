@@ -5,10 +5,13 @@ This module implements the EntityDetector interface using the Stanza NLP library
 (Stanford NLP) with French language models.
 """
 
-from typing import List, Optional
 import logging
+from typing import TYPE_CHECKING, Optional
 
-from gdpr_pseudonymizer.nlp.entity_detector import EntityDetector, DetectedEntity
+from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity, EntityDetector
+
+if TYPE_CHECKING:
+    from stanza.pipeline.core import Pipeline
 
 logger = logging.getLogger(__name__)
 
@@ -20,9 +23,9 @@ class StanzaDetector(EntityDetector):
     Model is loaded lazily on first detect_entities() call.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize Stanza detector without loading model."""
-        self._nlp = None
+        self._nlp: Optional["Pipeline"] = None
         self._model_name: Optional[str] = None
 
     def load_model(self, model_name: str = "fr") -> None:
@@ -55,7 +58,7 @@ class StanzaDetector(EntityDetector):
                 f"Download with: import stanza; stanza.download('{model_name}')"
             ) from e
 
-    def detect_entities(self, text: str) -> List[DetectedEntity]:
+    def detect_entities(self, text: str) -> list[DetectedEntity]:
         """Detect named entities in text using Stanza.
 
         Args:
@@ -74,6 +77,9 @@ class StanzaDetector(EntityDetector):
         # Lazy load model if not already loaded
         if self._nlp is None:
             self.load_model()
+
+        # Type guard: load_model() guarantees _nlp is not None
+        assert self._nlp is not None, "Model failed to load"
 
         try:
             # Process text with Stanza
@@ -129,7 +135,7 @@ class StanzaDetector(EntityDetector):
         }
         return label_mapping.get(stanza_label.upper())
 
-    def get_model_info(self) -> dict:
+    def get_model_info(self) -> dict[str, str]:
         """Get Stanza model metadata.
 
         Returns:

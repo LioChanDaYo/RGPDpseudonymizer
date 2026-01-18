@@ -4,15 +4,16 @@ Unit Tests for SpaCy Detector Implementation
 Tests the SpaCyDetector class implementation of the EntityDetector interface.
 """
 
-import pytest
 import sys
 from pathlib import Path
+
+import pytest
 
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from gdpr_pseudonymizer.nlp.spacy_detector import SpaCyDetector
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
+from gdpr_pseudonymizer.nlp.spacy_detector import SpaCyDetector
 
 
 class TestSpaCyDetector:
@@ -80,7 +81,7 @@ class TestSpaCyDetector:
         assert len(locations) >= 1
 
         # Check Paris is detected
-        paris = [l for l in locations if "Paris" in l.text]
+        paris = [loc for loc in locations if "Paris" in loc.text]
         assert len(paris) >= 1
 
     def test_detect_entities_org(self, detector):
@@ -89,7 +90,7 @@ class TestSpaCyDetector:
         entities = detector.detect_entities(text)
 
         # Find org entities (may not detect with default model)
-        orgs = [e for e in entities if e.entity_type == "ORG"]
+        [e for e in entities if e.entity_type == "ORG"]
         # Note: spaCy may not always detect ORG correctly, this is informational
         # We don't assert on count due to known accuracy issues
 

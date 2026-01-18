@@ -3,24 +3,23 @@ Validation script to identify annotation quality issues.
 Detects overlapping entities, suspicious patterns, and common false positives.
 """
 
-from pathlib import Path
 import json
-from typing import List, Dict, Tuple
+from pathlib import Path
 
 
-def load_annotation(annotation_path: Path) -> Dict:
+def load_annotation(annotation_path: Path) -> dict:
     """Load annotation JSON file."""
-    with open(annotation_path, "r", encoding="utf-8") as f:
+    with open(annotation_path, encoding="utf-8") as f:
         return json.load(f)
 
 
 def load_document(doc_path: Path) -> str:
     """Load source document text."""
-    with open(doc_path, "r", encoding="utf-8") as f:
+    with open(doc_path, encoding="utf-8") as f:
         return f.read()
 
 
-def check_overlapping_entities(entities: List[Dict]) -> List[Tuple[Dict, Dict]]:
+def check_overlapping_entities(entities: list[dict]) -> list[tuple[dict, dict]]:
     """Find overlapping entity boundaries."""
     overlaps = []
     sorted_entities = sorted(entities, key=lambda x: x["start_pos"])
@@ -36,7 +35,7 @@ def check_overlapping_entities(entities: List[Dict]) -> List[Tuple[Dict, Dict]]:
     return overlaps
 
 
-def check_suspicious_person_entities(entities: List[Dict], text: str) -> List[Dict]:
+def check_suspicious_person_entities(entities: list[dict], text: str) -> list[dict]:
     """Identify PERSON entities that might be job titles or fragments."""
     suspicious = []
 
@@ -101,7 +100,7 @@ def check_suspicious_person_entities(entities: List[Dict], text: str) -> List[Di
     return suspicious
 
 
-def check_suspicious_org_entities(entities: List[Dict], text: str) -> List[Dict]:
+def check_suspicious_org_entities(entities: list[dict], text: str) -> list[dict]:
     """Identify ORG entities that are too broad (full sentences)."""
     suspicious = []
 
@@ -126,7 +125,7 @@ def check_suspicious_org_entities(entities: List[Dict], text: str) -> List[Dict]
     return suspicious
 
 
-def validate_annotation_file(annotation_path: Path, corpus_dir: Path) -> Dict:
+def validate_annotation_file(annotation_path: Path, corpus_dir: Path) -> dict:
     """Validate a single annotation file."""
     annotation = load_annotation(annotation_path)
     doc_name = annotation["document_name"]
@@ -206,7 +205,7 @@ def main():
 
             # Show examples
             if result["issues"]["suspicious_persons"]:
-                print(f"   Examples of suspicious PERSON entities:")
+                print("   Examples of suspicious PERSON entities:")
                 for entity in result["issues"]["suspicious_persons"][:3]:
                     print(f"     * \"{entity['entity_text']}\"")
         else:

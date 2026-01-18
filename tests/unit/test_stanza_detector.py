@@ -4,15 +4,15 @@ Unit Tests for Stanza Detector Implementation
 Tests the StanzaDetector class implementation of the EntityDetector interface.
 """
 
-import pytest
 import sys
 from pathlib import Path
+
+import pytest
 
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from gdpr_pseudonymizer.nlp.stanza_detector import StanzaDetector
-from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 
 
 class TestStanzaDetector:

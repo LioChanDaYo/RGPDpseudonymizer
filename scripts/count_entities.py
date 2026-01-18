@@ -2,9 +2,9 @@
 Count entity types across the test corpus to verify minimum requirements.
 """
 
-from pathlib import Path
 import json
 from collections import Counter
+from pathlib import Path
 
 
 def count_entities():
@@ -17,7 +17,7 @@ def count_entities():
     doc_counts = []
 
     for annotation_path in sorted(annotations_dir.glob("*.json")):
-        with open(annotation_path, "r", encoding="utf-8") as f:
+        with open(annotation_path, encoding="utf-8") as f:
             data = json.load(f)
 
         doc_counter = Counter()

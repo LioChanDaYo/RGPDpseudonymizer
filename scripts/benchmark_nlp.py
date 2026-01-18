@@ -13,14 +13,14 @@ NOTE: Typer CLI framework will be added in proper project setup (Epic 0).
       This version uses argparse for Story 1.2 deliverable.
 """
 
-from pathlib import Path
-from typing import List, Dict, Tuple, Optional
-import json
 import argparse
-from dataclasses import dataclass
-from collections import defaultdict
-import time
+import json
 import sys
+import time
+from collections import defaultdict
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Optional
 
 # Add project root to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -61,11 +61,11 @@ def load_document(doc_path: Path) -> str:
     Returns:
         Document text content
     """
-    with open(doc_path, "r", encoding="utf-8") as f:
+    with open(doc_path, encoding="utf-8") as f:
         return f.read()
 
 
-def load_annotations(annotation_path: Path) -> List[Entity]:
+def load_annotations(annotation_path: Path) -> list[Entity]:
     """Load ground truth annotations from JSON file.
 
     Args:
@@ -74,7 +74,7 @@ def load_annotations(annotation_path: Path) -> List[Entity]:
     Returns:
         List of Entity objects
     """
-    with open(annotation_path, "r", encoding="utf-8") as f:
+    with open(annotation_path, encoding="utf-8") as f:
         data = json.load(f)
 
     entities = []
@@ -91,7 +91,7 @@ def load_annotations(annotation_path: Path) -> List[Entity]:
     return entities
 
 
-def load_corpus(corpus_dir: Path) -> Dict[str, Tuple[str, List[Entity]]]:
+def load_corpus(corpus_dir: Path) -> dict[str, tuple[str, list[Entity]]]:
     """Load all documents and annotations from corpus directory.
 
     Args:
@@ -126,7 +126,7 @@ def load_corpus(corpus_dir: Path) -> Dict[str, Tuple[str, List[Entity]]]:
     return corpus
 
 
-def run_ner(text: str, detector: EntityDetector) -> List[Entity]:
+def run_ner(text: str, detector: EntityDetector) -> list[Entity]:
     """Run NER on text using specified detector.
 
     Args:
@@ -154,7 +154,7 @@ def run_ner(text: str, detector: EntityDetector) -> List[Entity]:
 
 
 def calculate_metrics(
-    predicted: List[Entity], ground_truth: List[Entity], entity_type: str
+    predicted: list[Entity], ground_truth: list[Entity], entity_type: str
 ) -> MetricsResult:
     """Calculate precision, recall, and F1 for a specific entity type.
 
@@ -206,7 +206,7 @@ def calculate_metrics(
     )
 
 
-def aggregate_metrics(metrics_list: List[MetricsResult]) -> MetricsResult:
+def aggregate_metrics(metrics_list: list[MetricsResult]) -> MetricsResult:
     """Aggregate metrics across multiple documents.
 
     Args:

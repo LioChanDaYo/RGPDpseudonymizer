@@ -5,10 +5,13 @@ This module implements the EntityDetector interface using the spaCy NLP library
 with the fr_core_news_lg French language model.
 """
 
-from typing import List, Optional
 import logging
+from typing import TYPE_CHECKING, Optional
 
-from gdpr_pseudonymizer.nlp.entity_detector import EntityDetector, DetectedEntity
+from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity, EntityDetector
+
+if TYPE_CHECKING:
+    from spacy.language import Language
 
 logger = logging.getLogger(__name__)
 
@@ -20,9 +23,9 @@ class SpaCyDetector(EntityDetector):
     Model is loaded lazily on first detect_entities() call.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize spaCy detector without loading model."""
-        self._nlp = None
+        self._nlp: Optional["Language"] = None
         self._model_name: Optional[str] = None
 
     def load_model(self, model_name: str = "fr_core_news_lg") -> None:
@@ -52,7 +55,7 @@ class SpaCyDetector(EntityDetector):
             logger.error(f"spacy_model_load_failed: model={model_name}, error={str(e)}")
             raise
 
-    def detect_entities(self, text: str) -> List[DetectedEntity]:
+    def detect_entities(self, text: str) -> list[DetectedEntity]:
         """Detect named entities in text using spaCy.
 
         Args:
@@ -71,6 +74,9 @@ class SpaCyDetector(EntityDetector):
         # Lazy load model if not already loaded
         if self._nlp is None:
             self.load_model()
+
+        # Type guard: load_model() guarantees _nlp is not None
+        assert self._nlp is not None, "Model failed to load"
 
         try:
             # Process text with spaCy
@@ -125,7 +131,7 @@ class SpaCyDetector(EntityDetector):
         }
         return label_mapping.get(spacy_label.upper())
 
-    def get_model_info(self) -> dict:
+    def get_model_info(self) -> dict[str, str]:
         """Get spaCy model metadata.
 
         Returns:

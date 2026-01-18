@@ -4,11 +4,11 @@ Unit tests for benchmark_nlp.py
 Tests corpus loading, metrics calculation, and aggregation functions.
 """
 
-import sys
-from pathlib import Path
 import json
-import tempfile
 import shutil
+import sys
+import tempfile
+from pathlib import Path
 
 # Add scripts directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "scripts"))
@@ -16,11 +16,11 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent / "scripts"))
 from benchmark_nlp import (
     Entity,
     MetricsResult,
-    load_document,
+    aggregate_metrics,
+    calculate_metrics,
     load_annotations,
     load_corpus,
-    calculate_metrics,
-    aggregate_metrics,
+    load_document,
 )
 
 

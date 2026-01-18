@@ -4,7 +4,6 @@ Unit tests for CI/CD configuration validation.
 Tests verify project configuration files are valid and dependencies are correctly specified.
 """
 
-import importlib
 import sys
 from pathlib import Path
 

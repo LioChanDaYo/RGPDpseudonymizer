@@ -5,10 +5,10 @@ Analyzes how well spaCy and Stanza detect French compound hyphenated names
 like "Jean-Pierre", "Marie-Claire", etc.
 """
 
-from pathlib import Path
 import json
 import re
 import sys
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -32,7 +32,7 @@ def extract_compound_names_from_annotations(corpus_dir: Path):
     annotations_dir = corpus_dir / "annotations"
 
     for annotation_file in annotations_dir.glob("*.json"):
-        with open(annotation_file, "r", encoding="utf-8") as f:
+        with open(annotation_file, encoding="utf-8") as f:
             data = json.load(f)
 
         for entity in data["entities"]:
@@ -67,7 +67,7 @@ def load_document_text(corpus_dir: Path, doc_name: str) -> str:
         # Try business documents
         doc_path = corpus_dir / "business_documents" / f"{doc_name}.txt"
 
-    with open(doc_path, "r", encoding="utf-8") as f:
+    with open(doc_path, encoding="utf-8") as f:
         return f.read()
 
 

@@ -8,7 +8,7 @@ without changing core application logic.
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import Optional
 
 
 @dataclass
@@ -54,7 +54,7 @@ class EntityDetector(ABC):
         pass
 
     @abstractmethod
-    def detect_entities(self, text: str) -> List[DetectedEntity]:
+    def detect_entities(self, text: str) -> list[DetectedEntity]:
         """Detect named entities in text.
 
         This method performs NER on the input text and returns all detected entities.
@@ -73,7 +73,7 @@ class EntityDetector(ABC):
         pass
 
     @abstractmethod
-    def get_model_info(self) -> dict:
+    def get_model_info(self) -> dict[str, str]:
         """Get model metadata for audit logging.
 
         Returns:

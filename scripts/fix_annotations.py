@@ -3,25 +3,24 @@ Script to automatically fix common annotation issues.
 Removes overlapping entities and filters out false positives.
 """
 
-from pathlib import Path
 import json
-from typing import List, Dict
 import re
+from pathlib import Path
 
 
-def load_annotation(annotation_path: Path) -> Dict:
+def load_annotation(annotation_path: Path) -> dict:
     """Load annotation JSON file."""
-    with open(annotation_path, "r", encoding="utf-8") as f:
+    with open(annotation_path, encoding="utf-8") as f:
         return json.load(f)
 
 
 def load_document(doc_path: Path) -> str:
     """Load source document text."""
-    with open(doc_path, "r", encoding="utf-8") as f:
+    with open(doc_path, encoding="utf-8") as f:
         return f.read()
 
 
-def is_false_positive_person(entity: Dict, text: str) -> bool:
+def is_false_positive_person(entity: dict, text: str) -> bool:
     """Check if a PERSON entity is likely a false positive."""
     entity_text = entity["entity_text"]
 
@@ -120,7 +119,7 @@ def is_false_positive_person(entity: Dict, text: str) -> bool:
     return False
 
 
-def is_false_positive_org(entity: Dict, text: str) -> bool:
+def is_false_positive_org(entity: dict, text: str) -> bool:
     """Check if an ORG entity is likely a false positive (too broad)."""
     entity_text = entity["entity_text"]
 
@@ -146,7 +145,7 @@ def is_false_positive_org(entity: Dict, text: str) -> bool:
     return False
 
 
-def remove_overlaps(entities: List[Dict]) -> List[Dict]:
+def remove_overlaps(entities: list[dict]) -> list[dict]:
     """Remove overlapping entities, keeping the most specific one."""
     if not entities:
         return []
@@ -186,7 +185,7 @@ def remove_overlaps(entities: List[Dict]) -> List[Dict]:
     return cleaned
 
 
-def fix_annotation(annotation: Dict, text: str) -> Dict:
+def fix_annotation(annotation: dict, text: str) -> dict:
     """Fix issues in an annotation."""
     entities = annotation["entities"]
 
@@ -209,7 +208,7 @@ def fix_annotation(annotation: Dict, text: str) -> Dict:
     return {"document_name": annotation["document_name"], "entities": cleaned_entities}
 
 
-def process_annotation_file(annotation_path: Path, corpus_dir: Path) -> Dict:
+def process_annotation_file(annotation_path: Path, corpus_dir: Path) -> dict:
     """Process and fix a single annotation file."""
     annotation = load_annotation(annotation_path)
     doc_name = annotation["document_name"]
@@ -279,7 +278,7 @@ def main():
 
     print()
     print("=" * 80)
-    print(f"SUMMARY:")
+    print("SUMMARY:")
     print(f"  Original entities: {total_original}")
     print(f"  Cleaned entities:  {total_new}")
     print(f"  Removed:           {total_removed}")

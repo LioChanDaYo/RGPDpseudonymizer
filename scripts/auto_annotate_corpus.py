@@ -3,10 +3,9 @@ Automated annotation script for test corpus.
 Uses pattern matching to identify and annotate entities.
 """
 
-from pathlib import Path
 import json
 import re
-from typing import List, Dict, Tuple
+from pathlib import Path
 
 # IMPROVED Patterns for entity detection
 # These patterns are more conservative to reduce false positives
@@ -40,7 +39,7 @@ LOCATION_PATTERNS = [
 ]
 
 
-def find_all_entities(text: str, pattern: str, entity_type: str) -> List[Dict]:
+def find_all_entities(text: str, pattern: str, entity_type: str) -> list[dict]:
     """Find all entities matching a pattern."""
     entities = []
     for match in re.finditer(pattern, text):
@@ -55,9 +54,9 @@ def find_all_entities(text: str, pattern: str, entity_type: str) -> List[Dict]:
     return entities
 
 
-def annotate_document(document_path: Path) -> Dict:
+def annotate_document(document_path: Path) -> dict:
     """Auto-annotate a document."""
-    with open(document_path, "r", encoding="utf-8") as f:
+    with open(document_path, encoding="utf-8") as f:
         text = f.read()
 
     entities = []
