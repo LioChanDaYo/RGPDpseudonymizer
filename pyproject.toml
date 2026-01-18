@@ -95,7 +95,10 @@ select = [
 ]
 ignore = [
     "E501",  # Line too long (handled by Black)
+    "UP006",  # Use PEP 585 (list[T]) - requires Python 3.9+ (using List[T] for 3.9 compat)
+    "UP035",  # typing.X is deprecated - requires Python 3.10+ (using typing.X for 3.9 compat)
     "UP037",  # Remove quotes from type annotation (needed for TYPE_CHECKING imports)
+    "UP045",  # Use X | None - requires Python 3.10+ (using Optional[X] for 3.9 compat)
 ]
 
 [tool.ruff.lint.per-file-ignores]
@@ -169,5 +172,10 @@ module = [
     "spacy.*",
     "stanza.*",
     "pytest.*",
+    "sqlalchemy",
+    "sqlalchemy.*",
+    "structlog",
+    "structlog.*",
+    "yaml",
 ]
 ignore_missing_imports = true

@@ -6,9 +6,11 @@ must conform to. This enables swapping between different NLP libraries (spaCy, S
 without changing core application logic.
 """
 
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Optional
+from typing import Dict, List, Optional
 
 
 @dataclass
@@ -54,7 +56,7 @@ class EntityDetector(ABC):
         pass
 
     @abstractmethod
-    def detect_entities(self, text: str) -> list[DetectedEntity]:
+    def detect_entities(self, text: str) -> List[DetectedEntity]:
         """Detect named entities in text.
 
         This method performs NER on the input text and returns all detected entities.
@@ -73,7 +75,7 @@ class EntityDetector(ABC):
         pass
 
     @abstractmethod
-    def get_model_info(self) -> dict[str, str]:
+    def get_model_info(self) -> Dict[str, str]:
         """Get model metadata for audit logging.
 
         Returns:

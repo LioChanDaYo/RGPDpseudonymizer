@@ -272,7 +272,7 @@ Once we reach v1.0 MVP (Week 14), we'll welcome:
 
 ## 📧 Contact & Support
 
-**Project Lead:** John (PM) - [@yourusername](https://github.com/yourusername)
+**Project Lead:** Lionel Deveaux - [@LioChanDaYo](https://github.com/LioChanDaYo)
 
 **For questions:**
 - 💬 [GitHub Discussions](https://github.com/yourusername/RGPDpseudonymizer/discussions) - General questions, use cases

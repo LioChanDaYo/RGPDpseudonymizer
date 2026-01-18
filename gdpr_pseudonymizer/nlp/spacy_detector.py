@@ -5,8 +5,10 @@ This module implements the EntityDetector interface using the spaCy NLP library
 with the fr_core_news_lg French language model.
 """
 
+from __future__ import annotations
+
 import logging
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional
 
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity, EntityDetector
 
@@ -55,7 +57,7 @@ class SpaCyDetector(EntityDetector):
             logger.error(f"spacy_model_load_failed: model={model_name}, error={str(e)}")
             raise
 
-    def detect_entities(self, text: str) -> list[DetectedEntity]:
+    def detect_entities(self, text: str) -> List[DetectedEntity]:
         """Detect named entities in text using spaCy.
 
         Args:
@@ -131,7 +133,7 @@ class SpaCyDetector(EntityDetector):
         }
         return label_mapping.get(spacy_label.upper())
 
-    def get_model_info(self) -> dict[str, str]:
+    def get_model_info(self) -> Dict[str, str]:
         """Get spaCy model metadata.
 
         Returns:

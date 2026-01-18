@@ -24,7 +24,9 @@
       "Bash(gh run list:*)",
       "Bash(poetry install:*)",
       "Bash(curl:*)",
-      "Bash(if not exist \"docs\\\\qa\\\\gates\" mkdir docsqagates)"
+      "Bash(if not exist \"docs\\\\qa\\\\gates\" mkdir docsqagates)",
+      "Bash(echo:*)",
+      "Bash(pytest:*)"
     ]
   }
 }
