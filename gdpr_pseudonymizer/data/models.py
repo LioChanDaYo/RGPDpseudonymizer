@@ -46,7 +46,7 @@ class Entity(Base):
 
     # Metadata fields
     first_seen_timestamp: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=datetime.utcnow
+        DateTime, nullable=False, default=datetime.utcnow, insert_default=datetime.utcnow
     )
     gender: Mapped[Optional[str]] = mapped_column(
         String, nullable=True
@@ -55,8 +55,18 @@ class Entity(Base):
     theme: Mapped[str] = mapped_column(String, nullable=False)  # neutral/star_wars/lotr
 
     # Validation support fields
-    is_ambiguous: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    is_ambiguous: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, insert_default=False
+    )
     ambiguity_reason: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+
+    def __init__(self, **kwargs):
+        """Initialize Entity with auto-generated defaults."""
+        if 'first_seen_timestamp' not in kwargs:
+            kwargs['first_seen_timestamp'] = datetime.utcnow()
+        if 'is_ambiguous' not in kwargs:
+            kwargs['is_ambiguous'] = False
+        super().__init__(**kwargs)
 
 
 class Operation(Base):
@@ -72,7 +82,7 @@ class Operation(Base):
         String, primary_key=True, default=lambda: str(uuid.uuid4())
     )
     timestamp: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=datetime.utcnow
+        DateTime, nullable=False, default=datetime.utcnow, insert_default=datetime.utcnow
     )
     operation_type: Mapped[str] = mapped_column(
         String, nullable=False
@@ -93,6 +103,12 @@ class Operation(Base):
     success: Mapped[bool] = mapped_column(Boolean, nullable=False)
     error_message: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
+    def __init__(self, **kwargs):
+        """Initialize Operation with auto-generated defaults."""
+        if 'timestamp' not in kwargs:
+            kwargs['timestamp'] = datetime.utcnow()
+        super().__init__(**kwargs)
+
 
 class Metadata(Base):
     """Metadata key-value store for configuration and encryption parameters.
@@ -111,5 +127,15 @@ class Metadata(Base):
     key: Mapped[str] = mapped_column(String, primary_key=True)
     value: Mapped[str] = mapped_column(String, nullable=False)  # JSON-serialized
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow
+        DateTime,
+        nullable=False,
+        default=datetime.utcnow,
+        insert_default=datetime.utcnow,
+        onupdate=datetime.utcnow,
     )
+
+    def __init__(self, **kwargs):
+        """Initialize Metadata with auto-generated defaults."""
+        if 'updated_at' not in kwargs:
+            kwargs['updated_at'] = datetime.utcnow()
+        super().__init__(**kwargs)
