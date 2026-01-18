@@ -6,10 +6,15 @@ Tests verify project configuration files are valid and dependencies are correctl
 
 import importlib
 import sys
-import tomllib
 from pathlib import Path
 
 import pytest
+
+# Python 3.11+ has tomllib built-in, earlier versions need tomli
+try:
+    import tomllib
+except ModuleNotFoundError:
+    import tomli as tomllib
 
 
 def test_pyproject_toml_is_valid():
