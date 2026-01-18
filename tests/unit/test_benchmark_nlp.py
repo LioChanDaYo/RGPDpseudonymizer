@@ -29,12 +29,7 @@ class TestEntityClass:
 
     def test_entity_creation(self):
         """Test creating an Entity object."""
-        entity = Entity(
-            text="Marie Dubois",
-            type="PERSON",
-            start=10,
-            end=22
-        )
+        entity = Entity(text="Marie Dubois", type="PERSON", start=10, end=22)
 
         assert entity.text == "Marie Dubois"
         assert entity.type == "PERSON"
@@ -53,7 +48,7 @@ class TestMetricsResultClass:
             f1=0.874,
             true_positives=85,
             false_positives=15,
-            false_negatives=10
+            false_negatives=10,
         )
 
         assert metrics.precision == 0.85
@@ -69,7 +64,9 @@ class TestLoadDocument:
 
     def test_load_simple_document(self):
         """Test loading a simple text document."""
-        with tempfile.NamedTemporaryFile(mode='w', encoding='utf-8', delete=False, suffix='.txt') as f:
+        with tempfile.NamedTemporaryFile(
+            mode="w", encoding="utf-8", delete=False, suffix=".txt"
+        ) as f:
             f.write("Test document content")
             temp_path = Path(f.name)
 
@@ -81,7 +78,9 @@ class TestLoadDocument:
 
     def test_load_utf8_document(self):
         """Test loading UTF-8 document with French characters."""
-        with tempfile.NamedTemporaryFile(mode='w', encoding='utf-8', delete=False, suffix='.txt') as f:
+        with tempfile.NamedTemporaryFile(
+            mode="w", encoding="utf-8", delete=False, suffix=".txt"
+        ) as f:
             f.write("François Élisabeth été")
             temp_path = Path(f.name)
 
@@ -104,18 +103,20 @@ class TestLoadAnnotations:
                     "entity_text": "Marie Dubois",
                     "entity_type": "PERSON",
                     "start_pos": 0,
-                    "end_pos": 12
+                    "end_pos": 12,
                 },
                 {
                     "entity_text": "Paris",
                     "entity_type": "LOCATION",
                     "start_pos": 20,
-                    "end_pos": 25
-                }
-            ]
+                    "end_pos": 25,
+                },
+            ],
         }
 
-        with tempfile.NamedTemporaryFile(mode='w', encoding='utf-8', delete=False, suffix='.json') as f:
+        with tempfile.NamedTemporaryFile(
+            mode="w", encoding="utf-8", delete=False, suffix=".json"
+        ) as f:
             json.dump(annotation_data, f)
             temp_path = Path(f.name)
 
@@ -137,12 +138,11 @@ class TestLoadAnnotations:
 
     def test_load_empty_annotations(self):
         """Test loading annotation file with no entities."""
-        annotation_data = {
-            "document_name": "test.txt",
-            "entities": []
-        }
+        annotation_data = {"document_name": "test.txt", "entities": []}
 
-        with tempfile.NamedTemporaryFile(mode='w', encoding='utf-8', delete=False, suffix='.json') as f:
+        with tempfile.NamedTemporaryFile(
+            mode="w", encoding="utf-8", delete=False, suffix=".json"
+        ) as f:
             json.dump(annotation_data, f)
             temp_path = Path(f.name)
 
@@ -207,8 +207,8 @@ class TestCalculateMetrics:
         metrics = calculate_metrics(predicted, ground_truth, "PERSON")
 
         assert metrics.precision == 0.5  # 1 TP / (1 TP + 1 FP)
-        assert metrics.recall == 0.5     # 1 TP / (1 TP + 1 FN)
-        assert metrics.f1 == 0.5         # 2 * (0.5 * 0.5) / (0.5 + 0.5)
+        assert metrics.recall == 0.5  # 1 TP / (1 TP + 1 FN)
+        assert metrics.f1 == 0.5  # 2 * (0.5 * 0.5) / (0.5 + 0.5)
         assert metrics.true_positives == 1
         assert metrics.false_positives == 1
         assert metrics.false_negatives == 1
@@ -251,7 +251,7 @@ class TestCalculateMetrics:
         metrics = calculate_metrics(predicted, ground_truth, "PERSON")
 
         assert metrics.precision == 0.0  # 0 TP / (0 TP + 2 FP)
-        assert metrics.recall == 0.0     # 0 TP / (0 TP + 1 FN)
+        assert metrics.recall == 0.0  # 0 TP / (0 TP + 1 FN)
         assert metrics.f1 == 0.0
         assert metrics.true_positives == 0
         assert metrics.false_positives == 2
@@ -270,7 +270,7 @@ class TestAggregateMetrics:
                 f1=0.85,
                 true_positives=80,
                 false_positives=20,
-                false_negatives=10
+                false_negatives=10,
             )
         ]
 
@@ -292,7 +292,7 @@ class TestAggregateMetrics:
                 f1=1.0,
                 true_positives=10,
                 false_positives=0,
-                false_negatives=0
+                false_negatives=0,
             ),
             MetricsResult(
                 precision=0.5,
@@ -300,8 +300,8 @@ class TestAggregateMetrics:
                 f1=0.667,
                 true_positives=5,
                 false_positives=5,
-                false_negatives=0
-            )
+                false_negatives=0,
+            ),
         ]
 
         aggregated = aggregate_metrics(metrics_list)
@@ -311,7 +311,7 @@ class TestAggregateMetrics:
         assert aggregated.false_positives == 5
         assert aggregated.false_negatives == 0
         assert aggregated.precision == 0.75  # 15 / (15 + 5)
-        assert aggregated.recall == 1.0      # 15 / (15 + 0)
+        assert aggregated.recall == 1.0  # 15 / (15 + 0)
         assert aggregated.f1 == 2 * (0.75 * 1.0) / (0.75 + 1.0)  # ~0.857
 
     def test_aggregate_all_zeros(self):
@@ -323,7 +323,7 @@ class TestAggregateMetrics:
                 f1=0.0,
                 true_positives=0,
                 false_positives=0,
-                false_negatives=10
+                false_negatives=10,
             ),
             MetricsResult(
                 precision=0.0,
@@ -331,8 +331,8 @@ class TestAggregateMetrics:
                 f1=0.0,
                 true_positives=0,
                 false_positives=0,
-                false_negatives=5
-            )
+                false_negatives=5,
+            ),
         ]
 
         aggregated = aggregate_metrics(metrics_list)
@@ -361,19 +361,29 @@ class TestLoadCorpus:
 
             # Create a test document
             doc_path = temp_dir / "interview_transcripts" / "test_01.txt"
-            with open(doc_path, 'w', encoding='utf-8') as f:
+            with open(doc_path, "w", encoding="utf-8") as f:
                 f.write("Marie Dubois works in Paris.")
 
             # Create corresponding annotation
             annotation_data = {
                 "document_name": "test_01.txt",
                 "entities": [
-                    {"entity_text": "Marie Dubois", "entity_type": "PERSON", "start_pos": 0, "end_pos": 12},
-                    {"entity_text": "Paris", "entity_type": "LOCATION", "start_pos": 23, "end_pos": 28}
-                ]
+                    {
+                        "entity_text": "Marie Dubois",
+                        "entity_type": "PERSON",
+                        "start_pos": 0,
+                        "end_pos": 12,
+                    },
+                    {
+                        "entity_text": "Paris",
+                        "entity_type": "LOCATION",
+                        "start_pos": 23,
+                        "end_pos": 28,
+                    },
+                ],
             }
             annotation_path = temp_dir / "annotations" / "test_01.json"
-            with open(annotation_path, 'w', encoding='utf-8') as f:
+            with open(annotation_path, "w", encoding="utf-8") as f:
                 json.dump(annotation_data, f)
 
             # Load corpus
@@ -401,7 +411,7 @@ class TestLoadCorpus:
 
             # Create document without annotation
             doc_path = temp_dir / "interview_transcripts" / "test_no_annot.txt"
-            with open(doc_path, 'w', encoding='utf-8') as f:
+            with open(doc_path, "w", encoding="utf-8") as f:
                 f.write("Test content")
 
             corpus = load_corpus(temp_dir)
@@ -432,6 +442,7 @@ if __name__ == "__main__":
     # Run tests with pytest if available, otherwise print message
     try:
         import pytest
+
         pytest.main([__file__, "-v"])
     except ImportError:
         print("pytest not installed. Install with: pip install pytest")

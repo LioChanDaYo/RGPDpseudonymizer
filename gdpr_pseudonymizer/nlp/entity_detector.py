@@ -23,6 +23,7 @@ class DetectedEntity:
         confidence: NER confidence score (0.0-1.0), None if not available
         gender: Gender classification (male/female/neutral/unknown), None if not available
     """
+
     text: str
     entity_type: str
     start_pos: int

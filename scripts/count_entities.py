@@ -6,28 +6,33 @@ from pathlib import Path
 import json
 from collections import Counter
 
+
 def count_entities():
     """Count all entities by type across corpus."""
-    annotations_dir = Path(__file__).parent.parent / "tests" / "test_corpus" / "annotations"
+    annotations_dir = (
+        Path(__file__).parent.parent / "tests" / "test_corpus" / "annotations"
+    )
 
     total_counts = Counter()
     doc_counts = []
 
     for annotation_path in sorted(annotations_dir.glob("*.json")):
-        with open(annotation_path, 'r', encoding='utf-8') as f:
+        with open(annotation_path, "r", encoding="utf-8") as f:
             data = json.load(f)
 
         doc_counter = Counter()
-        for entity in data['entities']:
-            entity_type = entity['entity_type']
+        for entity in data["entities"]:
+            entity_type = entity["entity_type"]
             doc_counter[entity_type] += 1
             total_counts[entity_type] += 1
 
-        doc_counts.append({
-            'document': data['document_name'],
-            'counts': dict(doc_counter),
-            'total': sum(doc_counter.values())
-        })
+        doc_counts.append(
+            {
+                "document": data["document_name"],
+                "counts": dict(doc_counter),
+                "total": sum(doc_counter.values()),
+            }
+        )
 
     # Print summary
     print("=" * 60)
@@ -47,11 +52,7 @@ def count_entities():
     print("=" * 60)
     print("ACCEPTANCE CRITERIA VERIFICATION")
     print("=" * 60)
-    requirements = {
-        'PERSON': 100,
-        'LOCATION': 50,
-        'ORG': 30
-    }
+    requirements = {"PERSON": 100, "LOCATION": 50, "ORG": 30}
 
     all_met = True
     for entity_type, required in requirements.items():
@@ -74,8 +75,9 @@ def count_entities():
     for doc_info in doc_counts:
         print(f"\n{doc_info['document']}:")
         print(f"  Total: {doc_info['total']}")
-        for etype, count in sorted(doc_info['counts'].items()):
+        for etype, count in sorted(doc_info["counts"].items()):
             print(f"    {etype}: {count}")
+
 
 if __name__ == "__main__":
     count_entities()

@@ -37,6 +37,7 @@ class SpaCyDetector(EntityDetector):
         """
         try:
             import spacy
+
             logger.info(f"loading_spacy_model: model={model_name}")
             self._nlp = spacy.load(model_name)
             self._model_name = model_name
@@ -83,16 +84,20 @@ class SpaCyDetector(EntityDetector):
 
                 # Only include PERSON, LOCATION, ORG entities
                 if entity_type:
-                    entities.append(DetectedEntity(
-                        text=ent.text,
-                        entity_type=entity_type,
-                        start_pos=ent.start_char,
-                        end_pos=ent.end_char,
-                        confidence=None,  # spaCy doesn't provide per-entity confidence
-                        gender=None  # spaCy doesn't provide gender classification
-                    ))
+                    entities.append(
+                        DetectedEntity(
+                            text=ent.text,
+                            entity_type=entity_type,
+                            start_pos=ent.start_char,
+                            end_pos=ent.end_char,
+                            confidence=None,  # spaCy doesn't provide per-entity confidence
+                            gender=None,  # spaCy doesn't provide gender classification
+                        )
+                    )
 
-            logger.info(f"entities_detected: count={len(entities)}, text_length={len(text)}")
+            logger.info(
+                f"entities_detected: count={len(entities)}, text_length={len(text)}"
+            )
             return entities
 
         except Exception as e:
@@ -116,7 +121,7 @@ class SpaCyDetector(EntityDetector):
             "LOCATION": "LOCATION",
             "GPE": "LOCATION",  # Geopolitical entity
             "ORG": "ORG",
-            "ORGANIZATION": "ORG"
+            "ORGANIZATION": "ORG",
         }
         return label_mapping.get(spacy_label.upper())
 
@@ -131,7 +136,7 @@ class SpaCyDetector(EntityDetector):
                 "name": self._model_name or "not_loaded",
                 "version": "unknown",
                 "library": "spacy",
-                "language": "fr"
+                "language": "fr",
             }
 
         meta = self._nlp.meta
@@ -139,7 +144,7 @@ class SpaCyDetector(EntityDetector):
             "name": meta.get("name", self._model_name),
             "version": meta.get("version", "unknown"),
             "library": "spacy",
-            "language": meta.get("lang", "fr")
+            "language": meta.get("lang", "fr"),
         }
 
     @property

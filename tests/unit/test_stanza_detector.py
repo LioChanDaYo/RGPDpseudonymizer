@@ -148,7 +148,7 @@ class TestStanzaDetector:
 
         for entity in entities:
             # Extract text at reported position
-            extracted_text = text[entity.start_pos:entity.end_pos]
+            extracted_text = text[entity.start_pos : entity.end_pos]
             # Should match entity text
             assert extracted_text == entity.text
 
@@ -182,10 +182,9 @@ class TestStanzaDetector:
 
     def test_long_document(self, detector):
         """Test detection on longer document."""
-        text = " ".join([
-            f"Marie Dubois numéro {i} travaille à Paris."
-            for i in range(10)
-        ])
+        text = " ".join(
+            [f"Marie Dubois numéro {i} travaille à Paris." for i in range(10)]
+        )
         entities = detector.detect_entities(text)
 
         # Should detect multiple entities without errors

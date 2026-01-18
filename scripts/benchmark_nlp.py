@@ -33,6 +33,7 @@ from gdpr_pseudonymizer.nlp.stanza_detector import StanzaDetector
 @dataclass
 class Entity:
     """Represents a named entity."""
+
     text: str
     type: str
     start: int
@@ -42,6 +43,7 @@ class Entity:
 @dataclass
 class MetricsResult:
     """Metrics for entity detection."""
+
     precision: float
     recall: float
     f1: float
@@ -59,7 +61,7 @@ def load_document(doc_path: Path) -> str:
     Returns:
         Document text content
     """
-    with open(doc_path, 'r', encoding='utf-8') as f:
+    with open(doc_path, "r", encoding="utf-8") as f:
         return f.read()
 
 
@@ -72,17 +74,19 @@ def load_annotations(annotation_path: Path) -> List[Entity]:
     Returns:
         List of Entity objects
     """
-    with open(annotation_path, 'r', encoding='utf-8') as f:
+    with open(annotation_path, "r", encoding="utf-8") as f:
         data = json.load(f)
 
     entities = []
-    for entity_data in data['entities']:
-        entities.append(Entity(
-            text=entity_data['entity_text'],
-            type=entity_data['entity_type'],
-            start=entity_data['start_pos'],
-            end=entity_data['end_pos']
-        ))
+    for entity_data in data["entities"]:
+        entities.append(
+            Entity(
+                text=entity_data["entity_text"],
+                type=entity_data["entity_type"],
+                start=entity_data["start_pos"],
+                end=entity_data["end_pos"],
+            )
+        )
 
     return entities
 
@@ -137,20 +141,20 @@ def run_ner(text: str, detector: EntityDetector) -> List[Entity]:
     # Convert DetectedEntity to Entity format for metrics
     entities = []
     for ent in detected:
-        entities.append(Entity(
-            text=ent.text,
-            type=ent.entity_type,
-            start=ent.start_pos,
-            end=ent.end_pos
-        ))
+        entities.append(
+            Entity(
+                text=ent.text,
+                type=ent.entity_type,
+                start=ent.start_pos,
+                end=ent.end_pos,
+            )
+        )
 
     return entities
 
 
 def calculate_metrics(
-    predicted: List[Entity],
-    ground_truth: List[Entity],
-    entity_type: str
+    predicted: List[Entity], ground_truth: List[Entity], entity_type: str
 ) -> MetricsResult:
     """Calculate precision, recall, and F1 for a specific entity type.
 
@@ -172,13 +176,25 @@ def calculate_metrics(
     false_negatives = len(true_entities - pred_entities)
 
     # Calculate precision
-    precision = true_positives / (true_positives + false_positives) if (true_positives + false_positives) > 0 else 0.0
+    precision = (
+        true_positives / (true_positives + false_positives)
+        if (true_positives + false_positives) > 0
+        else 0.0
+    )
 
     # Calculate recall
-    recall = true_positives / (true_positives + false_negatives) if (true_positives + false_negatives) > 0 else 0.0
+    recall = (
+        true_positives / (true_positives + false_negatives)
+        if (true_positives + false_negatives) > 0
+        else 0.0
+    )
 
     # Calculate F1 score
-    f1 = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0.0
+    f1 = (
+        2 * (precision * recall) / (precision + recall)
+        if (precision + recall) > 0
+        else 0.0
+    )
 
     return MetricsResult(
         precision=precision,
@@ -186,7 +202,7 @@ def calculate_metrics(
         f1=f1,
         true_positives=true_positives,
         false_positives=false_positives,
-        false_negatives=false_negatives
+        false_negatives=false_negatives,
     )
 
 
@@ -205,7 +221,11 @@ def aggregate_metrics(metrics_list: List[MetricsResult]) -> MetricsResult:
 
     precision = total_tp / (total_tp + total_fp) if (total_tp + total_fp) > 0 else 0.0
     recall = total_tp / (total_tp + total_fn) if (total_tp + total_fn) > 0 else 0.0
-    f1 = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0.0
+    f1 = (
+        2 * (precision * recall) / (precision + recall)
+        if (precision + recall) > 0
+        else 0.0
+    )
 
     return MetricsResult(
         precision=precision,
@@ -213,7 +233,7 @@ def aggregate_metrics(metrics_list: List[MetricsResult]) -> MetricsResult:
         f1=f1,
         true_positives=total_tp,
         false_positives=total_fp,
-        false_negatives=total_fn
+        false_negatives=total_fn,
     )
 
 
@@ -243,26 +263,23 @@ def main():
         "--corpus",
         type=Path,
         default=Path("tests/test_corpus"),
-        help="Path to test corpus directory"
+        help="Path to test corpus directory",
     )
     parser.add_argument(
         "--library",
         type=str,
         required=True,
         choices=["spacy", "stanza"],
-        help="NLP library to use"
+        help="NLP library to use",
     )
     parser.add_argument(
-        "--verbose",
-        "-v",
-        action="store_true",
-        help="Show per-document results"
+        "--verbose", "-v", action="store_true", help="Show per-document results"
     )
     parser.add_argument(
         "--performance",
         "-p",
         action="store_true",
-        help="Measure performance metrics (time, memory)"
+        help="Measure performance metrics (time, memory)",
     )
 
     args = parser.parse_args()
@@ -337,7 +354,9 @@ def main():
         print(f"  Precision: {aggregated.precision:.4f}")
         print(f"  Recall:    {aggregated.recall:.4f}")
         print(f"  F1 Score:  {aggregated.f1:.4f}")
-        print(f"  TP: {aggregated.true_positives}, FP: {aggregated.false_positives}, FN: {aggregated.false_negatives}")
+        print(
+            f"  TP: {aggregated.true_positives}, FP: {aggregated.false_positives}, FN: {aggregated.false_negatives}"
+        )
         print()
 
     # Calculate overall metrics
@@ -361,7 +380,9 @@ def main():
 
         avg_time = sum(processing_times) / len(processing_times)
         total_time = sum(processing_times)
-        model_load_time = time.time() - load_start_time - total_time if load_start_time else 0
+        model_load_time = (
+            time.time() - load_start_time - total_time if load_start_time else 0
+        )
 
         print(f"Model Loading Time: {model_load_time:.3f}s")
         print(f"Average Processing Time per Document: {avg_time:.3f}s")
@@ -381,9 +402,13 @@ def main():
     # Check if meets >=85% F1 threshold
     print("=" * 60)
     if overall.f1 >= 0.85:
-        print(f"PASS: {args.library.upper()} meets >=85% F1 threshold ({overall.f1:.4f})")
+        print(
+            f"PASS: {args.library.upper()} meets >=85% F1 threshold ({overall.f1:.4f})"
+        )
     else:
-        print(f"FAIL: {args.library.upper()} does not meet >=85% F1 threshold ({overall.f1:.4f})")
+        print(
+            f"FAIL: {args.library.upper()} does not meet >=85% F1 threshold ({overall.f1:.4f})"
+        )
     print("=" * 60)
 
     return 0

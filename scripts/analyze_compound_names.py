@@ -15,9 +15,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from gdpr_pseudonymizer.nlp.spacy_detector import SpaCyDetector
 from gdpr_pseudonymizer.nlp.stanza_detector import StanzaDetector
 
-
 # Pattern for French compound names
-COMPOUND_NAME_PATTERN = r'[A-ZÀ-Ÿ][a-zàâäéèêëïîôùûüÿ]+-[A-ZÀ-Ÿ][a-zàâäéèêëïîôùûüÿ]+'
+COMPOUND_NAME_PATTERN = r"[A-ZÀ-Ÿ][a-zàâäéèêëïîôùûüÿ]+-[A-ZÀ-Ÿ][a-zàâäéèêëïîôùûüÿ]+"
 
 
 def extract_compound_names_from_annotations(corpus_dir: Path):
@@ -33,19 +32,21 @@ def extract_compound_names_from_annotations(corpus_dir: Path):
     annotations_dir = corpus_dir / "annotations"
 
     for annotation_file in annotations_dir.glob("*.json"):
-        with open(annotation_file, 'r', encoding='utf-8') as f:
+        with open(annotation_file, "r", encoding="utf-8") as f:
             data = json.load(f)
 
-        for entity in data['entities']:
+        for entity in data["entities"]:
             # Check if entity text contains compound name pattern
-            if re.search(COMPOUND_NAME_PATTERN, entity['entity_text']):
-                if entity['entity_type'] == 'PERSON':
-                    compound_names.append((
-                        annotation_file.stem,
-                        entity['entity_text'],
-                        entity['start_pos'],
-                        entity['end_pos']
-                    ))
+            if re.search(COMPOUND_NAME_PATTERN, entity["entity_text"]):
+                if entity["entity_type"] == "PERSON":
+                    compound_names.append(
+                        (
+                            annotation_file.stem,
+                            entity["entity_text"],
+                            entity["start_pos"],
+                            entity["end_pos"],
+                        )
+                    )
 
     return compound_names
 
@@ -66,11 +67,13 @@ def load_document_text(corpus_dir: Path, doc_name: str) -> str:
         # Try business documents
         doc_path = corpus_dir / "business_documents" / f"{doc_name}.txt"
 
-    with open(doc_path, 'r', encoding='utf-8') as f:
+    with open(doc_path, "r", encoding="utf-8") as f:
         return f.read()
 
 
-def test_detector_on_compound_names(detector, detector_name, compound_names, corpus_dir):
+def test_detector_on_compound_names(
+    detector, detector_name, compound_names, corpus_dir
+):
     """Test detector on compound name test cases.
 
     Args:
@@ -99,9 +102,11 @@ def test_detector_on_compound_names(detector, detector_name, compound_names, cor
         found = False
         for ent in detected:
             # Check for exact match or overlap
-            if (ent.start_pos <= start_pos < ent.end_pos or
-                ent.start_pos < end_pos <= ent.end_pos or
-                (start_pos <= ent.start_pos and end_pos >= ent.end_pos)):
+            if (
+                ent.start_pos <= start_pos < ent.end_pos
+                or ent.start_pos < end_pos <= ent.end_pos
+                or (start_pos <= ent.start_pos and end_pos >= ent.end_pos)
+            ):
                 found = True
                 detected_count += 1
                 break
@@ -167,9 +172,13 @@ def main():
     print(f"Stanza: {stanza_detected}/{stanza_total} ({stanza_rate:.2%})")
 
     if spacy_rate > stanza_rate:
-        print(f"\nspaCy performs better on compound names (+{(spacy_rate - stanza_rate):.2%})")
+        print(
+            f"\nspaCy performs better on compound names (+{(spacy_rate - stanza_rate):.2%})"
+        )
     elif stanza_rate > spacy_rate:
-        print(f"\nStanza performs better on compound names (+{(stanza_rate - spacy_rate):.2%})")
+        print(
+            f"\nStanza performs better on compound names (+{(stanza_rate - spacy_rate):.2%})"
+        )
     else:
         print("\nBoth libraries perform equally on compound names")
 
