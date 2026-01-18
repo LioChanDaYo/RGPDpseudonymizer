@@ -63,7 +63,7 @@ class Entity(Base):
     )
     ambiguity_reason: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize Entity with auto-generated defaults."""
         if "first_seen_timestamp" not in kwargs:
             kwargs["first_seen_timestamp"] = datetime.utcnow()
@@ -109,7 +109,7 @@ class Operation(Base):
     success: Mapped[bool] = mapped_column(Boolean, nullable=False)
     error_message: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize Operation with auto-generated defaults."""
         if "timestamp" not in kwargs:
             kwargs["timestamp"] = datetime.utcnow()
@@ -140,7 +140,7 @@ class Metadata(Base):
         onupdate=datetime.utcnow,
     )
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize Metadata with auto-generated defaults."""
         if "updated_at" not in kwargs:
             kwargs["updated_at"] = datetime.utcnow()
