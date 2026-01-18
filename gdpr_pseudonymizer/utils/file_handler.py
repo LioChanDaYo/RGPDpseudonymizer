@@ -116,6 +116,5 @@ def ensure_absolute_path(file_path: str) -> str:
         Absolute path as string
     """
     path = Path(file_path)
-    if not path.is_absolute():
-        path = path.resolve()
-    return str(path)
+    # resolve() always returns absolute path, even for non-existent files
+    return str(path.resolve())
