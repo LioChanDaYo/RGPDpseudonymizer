@@ -133,11 +133,12 @@ def test_ruff_configuration():
         config = tomllib.load(f)
 
     ruff_config = config["tool"]["ruff"]
+    ruff_lint_config = ruff_config["lint"]
 
     assert ruff_config["line-length"] == 88
     assert ruff_config["target-version"] == "py39"
-    assert "F" in ruff_config["select"]  # Pyflakes
-    assert "E" in ruff_config["select"]  # pycodestyle errors
+    assert "F" in ruff_lint_config["select"]  # Pyflakes
+    assert "E" in ruff_lint_config["select"]  # pycodestyle errors
 
 
 def test_pytest_configuration():
