@@ -26,7 +26,8 @@
       "Bash(curl:*)",
       "Bash(if not exist \"docs\\\\qa\\\\gates\" mkdir docsqagates)",
       "Bash(echo:*)",
-      "Bash(pytest:*)"
+      "Bash(pytest:*)",
+      "Bash(poetry run black:*)"
     ]
   }
 }

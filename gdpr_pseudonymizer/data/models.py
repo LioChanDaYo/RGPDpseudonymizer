@@ -46,7 +46,7 @@ class Entity(Base):
 
     # Metadata fields
     first_seen_timestamp: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow
+        DateTime, nullable=False, default=datetime.utcnow
     )
     gender: Mapped[Optional[str]] = mapped_column(
         String, nullable=True
@@ -55,7 +55,7 @@ class Entity(Base):
     theme: Mapped[str] = mapped_column(String, nullable=False)  # neutral/star_wars/lotr
 
     # Validation support fields
-    is_ambiguous: Mapped[bool] = mapped_column(Boolean, default=False)
+    is_ambiguous: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     ambiguity_reason: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
 
@@ -71,7 +71,9 @@ class Operation(Base):
     id: Mapped[str] = mapped_column(
         String, primary_key=True, default=lambda: str(uuid.uuid4())
     )
-    timestamp: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    timestamp: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, default=datetime.utcnow
+    )
     operation_type: Mapped[str] = mapped_column(
         String, nullable=False
     )  # PROCESS, BATCH, VALIDATE, etc.
@@ -109,5 +111,5 @@ class Metadata(Base):
     key: Mapped[str] = mapped_column(String, primary_key=True)
     value: Mapped[str] = mapped_column(String, nullable=False)  # JSON-serialized
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+        DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow
     )

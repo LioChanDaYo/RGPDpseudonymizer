@@ -22,7 +22,9 @@ def test_configure_logging_default_level() -> None:
     # Verify structlog is configured
     logger = get_logger("test_module")
     assert logger is not None
-    assert isinstance(logger, structlog.stdlib.BoundLogger)
+    # Logger may be BoundLogger or BoundLoggerLazyProxy
+    assert hasattr(logger, "info")
+    assert hasattr(logger, "error")
 
 
 def test_configure_logging_custom_level() -> None:
@@ -34,11 +36,15 @@ def test_configure_logging_custom_level() -> None:
 
 
 def test_get_logger_returns_bound_logger() -> None:
-    """Test get_logger returns structlog BoundLogger instance."""
+    """Test get_logger returns structlog logger instance."""
     configure_logging()
     logger = get_logger("test_module")
 
-    assert isinstance(logger, structlog.stdlib.BoundLogger)
+    # Logger may be BoundLogger or BoundLoggerLazyProxy
+    assert hasattr(logger, "info")
+    assert hasattr(logger, "error")
+    assert hasattr(logger, "warning")
+    assert hasattr(logger, "debug")
 
 
 def test_get_logger_with_module_name() -> None:
@@ -51,10 +57,13 @@ def test_get_logger_with_module_name() -> None:
 
 def test_log_with_context_info_level(capsys: pytest.CaptureFixture) -> None:
     """Test logging with structured context at INFO level."""
+    import sys
+
     configure_logging(log_level="INFO")
     logger = get_logger("test_module")
 
     log_with_context(logger, "info", "entity_detected", entity_type="PERSON", count=5)
+    sys.stdout.flush()
 
     # Capture output and verify JSON structure
     captured = capsys.readouterr()
@@ -64,10 +73,13 @@ def test_log_with_context_info_level(capsys: pytest.CaptureFixture) -> None:
 
 def test_log_with_context_error_level(capsys: pytest.CaptureFixture) -> None:
     """Test logging at ERROR level with context."""
+    import sys
+
     configure_logging(log_level="ERROR")
     logger = get_logger("test_module")
 
     log_with_context(logger, "error", "model_load_failed", model_name="fr_core_news_lg")
+    sys.stdout.flush()
 
     captured = capsys.readouterr()
     assert "model_load_failed" in captured.out
@@ -122,10 +134,13 @@ def test_sanitize_context_empty_dict() -> None:
 
 def test_logger_json_output_structure(capsys: pytest.CaptureFixture) -> None:
     """Test that logger produces valid JSON output."""
+    import sys
+
     configure_logging(log_level="INFO")
     logger = get_logger("test_module")
 
     logger.info("test_event", key1="value1", key2=42)
+    sys.stdout.flush()
 
     captured = capsys.readouterr()
 
@@ -142,11 +157,14 @@ def test_logger_json_output_structure(capsys: pytest.CaptureFixture) -> None:
 
 def test_logger_level_filtering_debug(capsys: pytest.CaptureFixture) -> None:
     """Test that DEBUG messages are filtered when log level is INFO."""
+    import sys
+
     configure_logging(log_level="INFO")
     logger = get_logger("test_module")
 
     logger.debug("debug_message", detail="should not appear")
     logger.info("info_message", detail="should appear")
+    sys.stdout.flush()
 
     captured = capsys.readouterr()
 

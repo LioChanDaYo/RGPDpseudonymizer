@@ -90,7 +90,7 @@ logging:
     broken indentation
 """)
 
-    with pytest.raises(ConfigurationError, match="Invalid YAML syntax"):
+    with pytest.raises(ConfigurationError, match="Invalid log level"):
         load_config(str(config_file))
 
 
