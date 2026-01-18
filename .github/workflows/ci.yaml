@@ -26,7 +26,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Cache Poetry installation
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.local/share/pypoetry
@@ -39,7 +39,7 @@ jobs:
           pip install poetry>=1.7.0
 
       - name: Cache Poetry dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.cache/pypoetry
@@ -52,7 +52,7 @@ jobs:
         run: poetry install --no-interaction
 
       - name: Cache spaCy models
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.spacy
@@ -75,7 +75,7 @@ jobs:
           fail_ci_if_error: false
 
       - name: Upload coverage artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: coverage-${{ matrix.os }}-py${{ matrix.python-version }}
