@@ -46,7 +46,10 @@ class Entity(Base):
 
     # Metadata fields
     first_seen_timestamp: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=datetime.utcnow, insert_default=datetime.utcnow
+        DateTime,
+        nullable=False,
+        default=datetime.utcnow,
+        insert_default=datetime.utcnow,
     )
     gender: Mapped[Optional[str]] = mapped_column(
         String, nullable=True
@@ -82,7 +85,10 @@ class Operation(Base):
         String, primary_key=True, default=lambda: str(uuid.uuid4())
     )
     timestamp: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=datetime.utcnow, insert_default=datetime.utcnow
+        DateTime,
+        nullable=False,
+        default=datetime.utcnow,
+        insert_default=datetime.utcnow,
     )
     operation_type: Mapped[str] = mapped_column(
         String, nullable=False
