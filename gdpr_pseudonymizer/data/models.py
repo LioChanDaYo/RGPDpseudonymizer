@@ -33,8 +33,12 @@ class Entity(Base):
     )  # PERSON, LOCATION, ORG
 
     # Encrypted fields (encryption logic in Epic 2)
-    first_name: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # PERSON only
-    last_name: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # PERSON only
+    first_name: Mapped[Optional[str]] = mapped_column(
+        String, nullable=True
+    )  # PERSON only
+    last_name: Mapped[Optional[str]] = mapped_column(
+        String, nullable=True
+    )  # PERSON only
     full_name: Mapped[str] = mapped_column(String, nullable=False)
     pseudonym_first: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     pseudonym_last: Mapped[Optional[str]] = mapped_column(String, nullable=True)
