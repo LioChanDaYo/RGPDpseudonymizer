@@ -9,14 +9,12 @@ Full implementation in Story 1.7.
 
 from __future__ import annotations
 
-from typing import List
-
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 from gdpr_pseudonymizer.validation.models import ValidationSession
 
 
 def create_validation_session(
-    document_path: str, document_text: str, entities: List[DetectedEntity]
+    document_path: str, document_text: str, entities: list[DetectedEntity]
 ) -> ValidationSession:
     """Create validation session from detected entities (stub for Story 1.7).
 

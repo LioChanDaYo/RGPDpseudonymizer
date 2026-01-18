@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import List
 
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 
@@ -61,7 +60,7 @@ class ValidationSession:
 
     document_path: str
     document_text: str
-    entities: List[EntityReview] = field(default_factory=list)
+    entities: list[EntityReview] = field(default_factory=list)
     current_index: int = 0
 
     def add_entity(self, entity: DetectedEntity) -> None:

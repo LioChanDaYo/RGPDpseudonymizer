@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any
 
 from sqlalchemy import JSON, Boolean, DateTime, Float, Integer, String
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
@@ -91,8 +91,8 @@ class Operation(Base):
     )  # PROCESS, BATCH, VALIDATE, etc.
 
     # JSON fields
-    files_processed: Mapped[List[str]] = mapped_column(JSON, nullable=False)
-    user_modifications: Mapped[Dict[str, Any] | None] = mapped_column(
+    files_processed: Mapped[list[str]] = mapped_column(JSON, nullable=False)
+    user_modifications: Mapped[dict[str, Any] | None] = mapped_column(
         JSON, nullable=True
     )
 

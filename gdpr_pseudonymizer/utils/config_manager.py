@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 import yaml
 
@@ -51,7 +51,7 @@ def load_config(config_path: str | None = None) -> Config:
     Raises:
         ConfigurationError: If config file is invalid or has syntax errors
     """
-    config_data: Dict[str, Any] = {}
+    config_data: dict[str, Any] = {}
 
     # If explicit path provided, use it exclusively
     if config_path:
@@ -75,7 +75,7 @@ def load_config(config_path: str | None = None) -> Config:
     return _build_config(config_data)
 
 
-def _load_yaml_file(path: Path) -> Dict[str, Any]:
+def _load_yaml_file(path: Path) -> dict[str, Any]:
     """Load and parse YAML file with secure loader.
 
     Args:
@@ -104,7 +104,7 @@ def _load_yaml_file(path: Path) -> Dict[str, Any]:
         raise ConfigurationError(f"Cannot read config file {path}: {e}") from e
 
 
-def _build_config(data: Dict[str, Any]) -> Config:
+def _build_config(data: dict[str, Any]) -> Config:
     """Build Config object from parsed YAML data.
 
     Args:

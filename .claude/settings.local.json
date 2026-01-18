@@ -27,7 +27,15 @@
       "Bash(if not exist \"docs\\\\qa\\\\gates\" mkdir docsqagates)",
       "Bash(echo:*)",
       "Bash(pytest:*)",
-      "Bash(poetry run black:*)"
+      "Bash(poetry run black:*)",
+      "Bash(git fetch:*)",
+      "Bash(where gh:*)",
+      "Bash(winget install:*)",
+      "Bash(gh auth status:*)",
+      "Bash(export PATH=\"$PATH:/c/Program Files/GitHub CLI\")",
+      "Bash(gh:*)",
+      "Bash(git pull:*)",
+      "Bash(git ls-tree:*)"
     ]
   }
 }

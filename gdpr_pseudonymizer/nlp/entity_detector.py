@@ -10,7 +10,6 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Dict, List
 
 
 @dataclass
@@ -56,7 +55,7 @@ class EntityDetector(ABC):
         pass
 
     @abstractmethod
-    def detect_entities(self, text: str) -> List[DetectedEntity]:
+    def detect_entities(self, text: str) -> list[DetectedEntity]:
         """Detect named entities in text.
 
         This method performs NER on the input text and returns all detected entities.
@@ -75,7 +74,7 @@ class EntityDetector(ABC):
         pass
 
     @abstractmethod
-    def get_model_info(self) -> Dict[str, str]:
+    def get_model_info(self) -> dict[str, str]:
         """Get model metadata for audit logging.
 
         Returns:

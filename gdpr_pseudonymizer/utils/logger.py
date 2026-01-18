@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import logging
 import sys
-from typing import Any, Dict
+from typing import Any
 
 import structlog
 
@@ -92,7 +92,7 @@ def log_with_context(
     log_method(message, **context)
 
 
-def sanitize_context(context: Dict[str, Any]) -> Dict[str, Any]:
+def sanitize_context(context: dict[str, Any]) -> dict[str, Any]:
     """Remove sensitive fields from logging context.
 
     This function removes known sensitive fields to prevent accidental

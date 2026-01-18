@@ -7,7 +7,6 @@ for cross-platform compatibility.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import List
 
 from gdpr_pseudonymizer.exceptions import FileProcessingError
 
@@ -65,7 +64,7 @@ def write_file(file_path: str, content: str) -> None:
         raise FileProcessingError(f"Cannot write file {file_path}: {e}") from e
 
 
-def validate_file_path(file_path: str, allowed_extensions: List[str]) -> bool:
+def validate_file_path(file_path: str, allowed_extensions: list[str]) -> bool:
     """Validate file path and extension.
 
     Args:

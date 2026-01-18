@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import List
 
 from gdpr_pseudonymizer.data.models import Entity
 
@@ -28,7 +27,7 @@ class MappingRepository(ABC):
         pass
 
     @abstractmethod
-    def find_by_component(self, component: str, component_type: str) -> List[Entity]:
+    def find_by_component(self, component: str, component_type: str) -> list[Entity]:
         """Find entities with matching name component for compositional logic.
 
         Args:
@@ -53,7 +52,7 @@ class MappingRepository(ABC):
         pass
 
     @abstractmethod
-    def save_batch(self, entities: List[Entity]) -> List[Entity]:
+    def save_batch(self, entities: list[Entity]) -> list[Entity]:
         """Persist multiple entities in single transaction.
 
         Args:
@@ -69,7 +68,7 @@ class MappingRepository(ABC):
         self,
         entity_type: str | None = None,
         is_ambiguous: bool | None = None,
-    ) -> List[Entity]:
+    ) -> list[Entity]:
         """Query entities with optional filters.
 
         Args:
@@ -109,7 +108,7 @@ class SQLiteMappingRepository(MappingRepository):
         # Stub: Full implementation in Epic 2
         return None
 
-    def find_by_component(self, component: str, component_type: str) -> List[Entity]:
+    def find_by_component(self, component: str, component_type: str) -> list[Entity]:
         """Find entities by name component (stub implementation).
 
         Args:
@@ -134,7 +133,7 @@ class SQLiteMappingRepository(MappingRepository):
         # Stub: Full implementation in Epic 2
         return entity
 
-    def save_batch(self, entities: List[Entity]) -> List[Entity]:
+    def save_batch(self, entities: list[Entity]) -> list[Entity]:
         """Save multiple entities (stub implementation).
 
         Args:
@@ -150,7 +149,7 @@ class SQLiteMappingRepository(MappingRepository):
         self,
         entity_type: str | None = None,
         is_ambiguous: bool | None = None,
-    ) -> List[Entity]:
+    ) -> list[Entity]:
         """Query all entities (stub implementation).
 
         Args:
