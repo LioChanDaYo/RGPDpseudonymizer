@@ -10,16 +10,19 @@ jobs:
   test:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
+    continue-on-error: ${{ matrix.experimental || false }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-22.04, macos-latest, windows-latest]
         python-version: ['3.9', '3.10', '3.11']
-        exclude:
-          # Exclude Windows + Python 3.9 due to spaCy/thinc access violation crash
+        include:
+          # Mark Windows + Python 3.9 as experimental (allowed to fail)
+          # Known spaCy/thinc access violation on this platform
           # See: https://github.com/explosion/spaCy/issues/12659
           - os: windows-latest
             python-version: '3.9'
+            experimental: true
 
     steps:
       - name: Checkout code
