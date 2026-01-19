@@ -1,0 +1,131 @@
+# Story 1.5 Demo Script - Walking Skeleton
+
+## Prerequisites
+```bash
+# Install dependencies
+poetry install
+
+# Verify CLI entry point registered
+poetry run gdpr-pseudo --version
+```
+
+## Demo 1: Basic Processing (No Validation)
+
+**Command:**
+```bash
+poetry run gdpr-pseudo process tests/fixtures/sample_interview_01.txt
+```
+
+**Expected Behavior:**
+- Reads `sample_interview_01.txt`
+- Detects entities (Marie Dubois, Jean Martin, Sophie Laurent, Pierre Dupont, Paris, Lyon, Marseille, Acme SA, TechCorp)
+- Applies pseudonymization
+- Creates `sample_interview_01_pseudonymized.txt`
+- Displays success message with entity counts
+
+**Verify Output:**
+- Original entities replaced with Star Wars names
+- Document structure preserved
+- Newlines and formatting intact
+
+## Demo 2: Processing with Custom Output File
+
+**Command:**
+```bash
+poetry run gdpr-pseudo process tests/fixtures/sample_interview_01.txt output_custom.txt
+```
+
+**Expected Behavior:**
+- Processes file
+- Writes to specified `output_custom.txt`
+
+## Demo 3: Processing with Validation Mode
+
+**Command:**
+```bash
+poetry run gdpr-pseudo process tests/fixtures/sample_interview_01.txt --validate
+```
+
+**Expected Behavior:**
+- Displays entity table showing:
+  - Entity text (Marie Dubois, etc.)
+  - Entity type (PERSON, LOCATION, ORG)
+  - Suggested pseudonym (Leia Organa, etc.)
+- Shows total and unique entity counts
+- Prompts: "Confirm pseudonymization? (y/n)"
+- If 'y': proceeds with processing
+- If 'n': cancels and displays "Processing cancelled by user"
+
+## Demo 4: Error Handling - Invalid File Format
+
+**Command:**
+```bash
+echo "test" > test.docx
+poetry run gdpr-pseudo process test.docx
+```
+
+**Expected Behavior:**
+- Displays error: "Invalid File Format"
+- Shows supported formats: .txt, .md
+- Exits with code 1
+
+## Demo 5: Error Handling - File Not Found
+
+**Command:**
+```bash
+poetry run gdpr-pseudo process nonexistent.txt
+```
+
+**Expected Behavior:**
+- Displays error message about file not found
+- Exits with code 2
+
+## Demo 6: Help Display
+
+**Commands:**
+```bash
+# Main help
+poetry run gdpr-pseudo --help
+
+# Command-specific help
+poetry run gdpr-pseudo process --help
+```
+
+**Expected Behavior:**
+- Shows command descriptions
+- Lists available options
+- Displays usage examples
+
+## Stakeholder Demo Talking Points
+
+1. **Walking Skeleton Complete:**
+   - CLI framework operational (Typer)
+   - End-to-end pipeline working (read → detect → replace → write)
+   - Validation stub demonstrates human-in-the-loop workflow
+
+2. **Foundation for Future Stories:**
+   - Story 1.6: Replace naive detection with NLP (spaCy)
+   - Story 1.7: Enhance validation UI with entity editing
+   - Story 2.x: Add database persistence, encryption
+
+3. **Quality Assurance:**
+   - Unit tests: 14 tests for naive processor
+   - Unit tests: 10+ tests for validation stub
+   - Unit tests: 13+ tests for process command
+   - Integration tests: 17+ end-to-end scenarios
+   - Code quality: Black, Ruff, mypy passing
+
+4. **Demonstration:**
+   - Show basic processing
+   - Show validation mode with table display
+   - Show error handling (invalid format)
+   - Highlight entity replacement accuracy
+
+## Test Coverage Report
+
+Run to verify coverage:
+```bash
+poetry run pytest tests/unit/test_naive_processor.py tests/unit/test_validation_stub.py tests/unit/test_process_command.py --cov=gdpr_pseudonymizer/cli --cov=gdpr_pseudonymizer/core --cov-report=term-missing
+```
+
+Target: ≥70% coverage for Epic 1
