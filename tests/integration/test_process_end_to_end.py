@@ -22,9 +22,7 @@ def test_process_end_to_end_without_validation(tmp_path: Path) -> None:
     output_file = tmp_path / "output.txt"
 
     # Run CLI command
-    result = runner.invoke(
-        app, ["process", str(input_file), str(output_file)]
-    )
+    result = runner.invoke(app, ["process", str(input_file), str(output_file)])
 
     # Verify command succeeded
     assert result.exit_code == 0
@@ -233,7 +231,9 @@ def test_process_end_to_end_help_command() -> None:
 
     assert result.exit_code == 0
     assert "Process a single document" in result.stdout
-    assert "--validate" in result.stdout
+    assert (
+        "validate" in result.stdout
+    )  # Check for "validate" without dashes (handles ANSI formatting)
     assert "INPUT_FILE" in result.stdout or "input-file" in result.stdout
 
 
