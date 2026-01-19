@@ -242,9 +242,9 @@ See full analysis: [docs/nlp-benchmark-report.md](docs/nlp-benchmark-report.md)
 - ✅ **Story 1.2:** NLP benchmark (spaCy selected, contingency plan approved)
 - ✅ **Story 1.3:** CI/CD pipeline setup (GitHub Actions)
 - ✅ **Story 1.4:** Project foundation & module structure
+- ✅ **Story 1.5:** Walking skeleton - basic process command (48 tests passing)
 
 ### In Progress 🔄
-- 📅 **Story 1.5:** Walking skeleton - basic process command
 - 📅 **Story 1.6:** NLP integration (spaCy `fr_core_news_lg`)
 - 📅 **Story 1.7:** Validation UI implementation *(NEW - Critical path)*
 - 📅 **Story 1.8:** Hybrid detection strategy *(NEW - NLP + regex)*
@@ -351,6 +351,6 @@ Likely: MIT or Apache 2.0 (open-source, permissive)
 
 ---
 
-**Last Updated:** 2026-01-16 (PRD v2.0 - AI-Assisted Positioning Approved)
+**Last Updated:** 2026-01-19 (Story 1.5 Complete - Walking Skeleton Operational)
 
-**Current Focus:** Epic 1 - Validation UI Design & Implementation
+**Current Focus:** Epic 1 - NLP Integration (Story 1.6)
