@@ -1,0 +1,25 @@
+Entretien de recherche - Projet GDPR
+
+Date: 15 janvier 2026
+Lieu: Paris
+Organisation: Acme SA
+
+Résumé de l'entretien avec Marie Dubois, directrice technique chez Acme SA.
+
+Marie Dubois a expliqué que l'équipe technique basée à Paris travaille
+sur des projets d'innovation depuis 2020. Elle collabore régulièrement
+avec Jean Martin, chef de projet, et Sophie Laurent, développeuse senior.
+
+"Notre collaboration avec TechCorp a été très fructueuse", explique
+Marie Dubois. "Jean Martin et moi avons organisé plusieurs ateliers
+à Lyon pour former les équipes."
+
+L'équipe d'Acme SA comprend également Pierre Dupont, qui gère les
+relations avec les clients à Paris et Marseille.
+
+Notes additionnelles:
+- Marie Dubois: contact principal
+- Jean Martin: coordination projet
+- Sophie Laurent: expertise technique
+- Acme SA: organisation partenaire
+- TechCorp: partenaire technologique

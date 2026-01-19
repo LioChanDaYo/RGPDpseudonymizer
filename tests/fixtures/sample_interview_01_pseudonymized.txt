@@ -1,0 +1,25 @@
+Entretien de recherche - Projet GDPR
+
+Date: 15 janvier 2026
+Lieu: Coruscant
+Organisation: Rebel Alliance
+
+Résumé de l'entretien avec Leia Organa, directrice technique chez Rebel Alliance.
+
+Leia Organa a expliqué que l'équipe technique basée à Coruscant travaille
+sur des projets d'innovation depuis 2020. Elle collabore régulièrement
+avec Luke Skywalker, chef de projet, et Rey, développeuse senior.
+
+"Notre collaboration avec Galactic Empire a été très fructueuse", explique
+Leia Organa. "Luke Skywalker et moi avons organisé plusieurs ateliers
+à Naboo pour former les équipes."
+
+L'équipe d'Rebel Alliance comprend également Han Solo, qui gère les
+relations avec les clients à Coruscant et Tatooine.
+
+Notes additionnelles:
+- Leia Organa: contact principal
+- Luke Skywalker: coordination projet
+- Rey: expertise technique
+- Rebel Alliance: organisation partenaire
+- Galactic Empire: partenaire technologique
