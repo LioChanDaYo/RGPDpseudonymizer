@@ -1,4 +1,4 @@
-"""Unit tests for process command."""
+"""Unit tests for process command with spaCy detection."""
 
 from __future__ import annotations
 
@@ -22,8 +22,15 @@ def test_process_command_reads_input_file(
     # Mock components to isolate file reading
     mock_read = mocker.patch("gdpr_pseudonymizer.cli.commands.process.read_file")
     mock_read.return_value = "Test content with Marie Dubois."
-    mocker.patch("gdpr_pseudonymizer.cli.commands.process.detect_naive_entities")
-    mocker.patch("gdpr_pseudonymizer.cli.commands.process.apply_naive_replacements")
+
+    # Mock SpaCyDetector
+    mock_detector = mocker.Mock()
+    mock_detector.detect_entities.return_value = []
+    mocker.patch(
+        "gdpr_pseudonymizer.cli.commands.process.SpaCyDetector",
+        return_value=mock_detector,
+    )
+
     mocker.patch("gdpr_pseudonymizer.cli.commands.process.write_file")
     mocker.patch("gdpr_pseudonymizer.cli.commands.process.format_info_message")
     mocker.patch("gdpr_pseudonymizer.cli.commands.process.format_success_message")
@@ -49,13 +56,15 @@ def test_process_command_writes_output_file(
         "gdpr_pseudonymizer.cli.commands.process.read_file",
         return_value="Test content.",
     )
+
+    # Mock SpaCyDetector
+    mock_detector = mocker.Mock()
+    mock_detector.detect_entities.return_value = []
     mocker.patch(
-        "gdpr_pseudonymizer.cli.commands.process.detect_naive_entities", return_value=[]
+        "gdpr_pseudonymizer.cli.commands.process.SpaCyDetector",
+        return_value=mock_detector,
     )
-    mocker.patch(
-        "gdpr_pseudonymizer.cli.commands.process.apply_naive_replacements",
-        return_value="Test content.",
-    )
+
     mock_write = mocker.patch("gdpr_pseudonymizer.cli.commands.process.write_file")
     mocker.patch("gdpr_pseudonymizer.cli.commands.process.format_info_message")
     mocker.patch("gdpr_pseudonymizer.cli.commands.process.format_success_message")
@@ -151,9 +160,17 @@ def test_process_command_with_validation_enabled(
         "gdpr_pseudonymizer.cli.commands.process.read_file",
         return_value="Test with Marie Dubois.",
     )
+    # Mock SpaCyDetector
+    mock_detector = mocker.MagicMock()
+    mock_entity = mocker.MagicMock()
+    mock_entity.text = "Marie Dubois"
+    mock_entity.entity_type = "PERSON"
+    mock_entity.start_pos = 10
+    mock_entity.end_pos = 22
+    mock_detector.detect_entities.return_value = [mock_entity]
     mocker.patch(
-        "gdpr_pseudonymizer.cli.commands.process.detect_naive_entities",
-        return_value=[("Marie Dubois", "PERSON", 10, 22, "Leia Organa")],
+        "gdpr_pseudonymizer.cli.commands.process.SpaCyDetector",
+        return_value=mock_detector,
     )
     mock_present = mocker.patch(
         "gdpr_pseudonymizer.cli.commands.process.present_entities_for_validation"
@@ -163,7 +180,7 @@ def test_process_command_with_validation_enabled(
         return_value=True,
     )
     mocker.patch(
-        "gdpr_pseudonymizer.cli.commands.process.apply_naive_replacements",
+        "gdpr_pseudonymizer.cli.commands.process.apply_pseudonymization",
         return_value="Test with Leia Organa.",
     )
     mocker.patch("gdpr_pseudonymizer.cli.commands.process.write_file")
@@ -190,9 +207,17 @@ def test_process_command_with_validation_user_rejects(
         "gdpr_pseudonymizer.cli.commands.process.read_file",
         return_value="Test with Marie Dubois.",
     )
+    # Mock SpaCyDetector
+    mock_detector = mocker.MagicMock()
+    mock_entity = mocker.MagicMock()
+    mock_entity.text = "Marie Dubois"
+    mock_entity.entity_type = "PERSON"
+    mock_entity.start_pos = 10
+    mock_entity.end_pos = 22
+    mock_detector.detect_entities.return_value = [mock_entity]
     mocker.patch(
-        "gdpr_pseudonymizer.cli.commands.process.detect_naive_entities",
-        return_value=[("Marie Dubois", "PERSON", 10, 22, "Leia Organa")],
+        "gdpr_pseudonymizer.cli.commands.process.SpaCyDetector",
+        return_value=mock_detector,
     )
     mocker.patch(
         "gdpr_pseudonymizer.cli.commands.process.present_entities_for_validation"
@@ -229,11 +254,15 @@ def test_process_command_generates_default_output_filename(
         "gdpr_pseudonymizer.cli.commands.process.read_file",
         return_value="Test content.",
     )
+    # Mock SpaCyDetector
+    mock_detector = mocker.MagicMock()
+    mock_detector.detect_entities.return_value = []
     mocker.patch(
-        "gdpr_pseudonymizer.cli.commands.process.detect_naive_entities", return_value=[]
+        "gdpr_pseudonymizer.cli.commands.process.SpaCyDetector",
+        return_value=mock_detector,
     )
     mocker.patch(
-        "gdpr_pseudonymizer.cli.commands.process.apply_naive_replacements",
+        "gdpr_pseudonymizer.cli.commands.process.apply_pseudonymization",
         return_value="Test content.",
     )
     mock_write = mocker.patch("gdpr_pseudonymizer.cli.commands.process.write_file")
@@ -249,7 +278,7 @@ def test_process_command_generates_default_output_filename(
     assert "interview_pseudonymized.txt" in output_path
 
 
-def test_process_command_calls_detect_naive_entities(
+def test_process_command_calls_spacy_detector(
     mocker: MockerFixture, tmp_path: Path
 ) -> None:
     """Test process command calls entity detection."""
@@ -261,12 +290,20 @@ def test_process_command_calls_detect_naive_entities(
         "gdpr_pseudonymizer.cli.commands.process.read_file",
         return_value="Test with Marie Dubois.",
     )
-    mock_detect = mocker.patch(
-        "gdpr_pseudonymizer.cli.commands.process.detect_naive_entities",
-        return_value=[("Marie Dubois", "PERSON", 10, 22, "Leia Organa")],
+    # Mock SpaCyDetector
+    mock_detector = mocker.MagicMock()
+    mock_entity = mocker.MagicMock()
+    mock_entity.text = "Marie Dubois"
+    mock_entity.entity_type = "PERSON"
+    mock_entity.start_pos = 10
+    mock_entity.end_pos = 22
+    mock_detector.detect_entities.return_value = [mock_entity]
+    mock_spacy_class = mocker.patch(
+        "gdpr_pseudonymizer.cli.commands.process.SpaCyDetector",
+        return_value=mock_detector,
     )
     mocker.patch(
-        "gdpr_pseudonymizer.cli.commands.process.apply_naive_replacements",
+        "gdpr_pseudonymizer.cli.commands.process.apply_pseudonymization",
         return_value="Test with Leia Organa.",
     )
     mocker.patch("gdpr_pseudonymizer.cli.commands.process.write_file")
@@ -276,30 +313,37 @@ def test_process_command_calls_detect_naive_entities(
     # Run command
     process_command(input_file=input_file, output_file=None, validate=False)
 
-    # Verify detect was called with file content
-    mock_detect.assert_called_once_with("Test with Marie Dubois.")
+    # Verify SpaCyDetector was instantiated and detect_entities called
+    mock_spacy_class.assert_called_once()
+    mock_detector.detect_entities.assert_called_once_with("Test with Marie Dubois.")
 
 
-def test_process_command_calls_apply_naive_replacements(
+def test_process_command_calls_apply_pseudonymization(
     mocker: MockerFixture, tmp_path: Path
 ) -> None:
     """Test process command calls replacement logic."""
     input_file = tmp_path / "test.txt"
     input_file.write_text("Test with Marie Dubois.")
 
-    entities = [("Marie Dubois", "PERSON", 10, 22, "Leia Organa")]
-
     # Mock components
     mocker.patch(
         "gdpr_pseudonymizer.cli.commands.process.read_file",
         return_value="Test with Marie Dubois.",
     )
+    # Mock SpaCyDetector
+    mock_detector = mocker.MagicMock()
+    mock_entity = mocker.MagicMock()
+    mock_entity.text = "Marie Dubois"
+    mock_entity.entity_type = "PERSON"
+    mock_entity.start_pos = 10
+    mock_entity.end_pos = 22
+    mock_detector.detect_entities.return_value = [mock_entity]
     mocker.patch(
-        "gdpr_pseudonymizer.cli.commands.process.detect_naive_entities",
-        return_value=entities,
+        "gdpr_pseudonymizer.cli.commands.process.SpaCyDetector",
+        return_value=mock_detector,
     )
     mock_apply = mocker.patch(
-        "gdpr_pseudonymizer.cli.commands.process.apply_naive_replacements",
+        "gdpr_pseudonymizer.cli.commands.process.apply_pseudonymization",
         return_value="Test with Leia Organa.",
     )
     mocker.patch("gdpr_pseudonymizer.cli.commands.process.write_file")
@@ -310,7 +354,10 @@ def test_process_command_calls_apply_naive_replacements(
     process_command(input_file=input_file, output_file=None, validate=False)
 
     # Verify apply was called with content and entities
-    mock_apply.assert_called_once_with("Test with Marie Dubois.", entities)
+    mock_apply.assert_called_once()
+    call_args = mock_apply.call_args[0]
+    assert call_args[0] == "Test with Marie Dubois."
+    assert len(call_args[1]) == 1
 
 
 def test_process_command_logs_processing_steps(
@@ -325,11 +372,15 @@ def test_process_command_logs_processing_steps(
         "gdpr_pseudonymizer.cli.commands.process.read_file",
         return_value="Test content.",
     )
+    # Mock SpaCyDetector
+    mock_detector = mocker.MagicMock()
+    mock_detector.detect_entities.return_value = []
     mocker.patch(
-        "gdpr_pseudonymizer.cli.commands.process.detect_naive_entities", return_value=[]
+        "gdpr_pseudonymizer.cli.commands.process.SpaCyDetector",
+        return_value=mock_detector,
     )
     mocker.patch(
-        "gdpr_pseudonymizer.cli.commands.process.apply_naive_replacements",
+        "gdpr_pseudonymizer.cli.commands.process.apply_pseudonymization",
         return_value="Test content.",
     )
     mocker.patch("gdpr_pseudonymizer.cli.commands.process.write_file")
