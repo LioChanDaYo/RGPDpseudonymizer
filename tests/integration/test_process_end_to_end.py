@@ -71,7 +71,9 @@ def test_process_end_to_end_with_default_output_filename(tmp_path: Path) -> None
 def test_process_end_to_end_with_txt_file(tmp_path: Path) -> None:
     """Test processing .txt file."""
     input_file = tmp_path / "test.txt"
-    input_file.write_text("Sophie Laurent travaille chez TechCorp à Lyon.", encoding="utf-8")
+    input_file.write_text(
+        "Sophie Laurent travaille chez TechCorp à Lyon.", encoding="utf-8"
+    )
 
     output_file = tmp_path / "output.txt"
 
