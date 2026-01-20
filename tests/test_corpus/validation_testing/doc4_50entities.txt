@@ -1,0 +1,67 @@
+Dossier de candidature - Poste de Directeur Technique
+
+INFORMATIONS PERSONNELLES
+Nom: Jean Martin
+Adresse: 15 rue de la République, 75001 Paris
+Email: j.martin@email.fr
+
+EXPÉRIENCE PROFESSIONNELLE
+
+2020-2024: Lead Developer chez TechStart (Paris)
+Sous la direction de Marie Dubois, j'ai dirigé une équipe de 8 développeurs. Collaboration étroite avec Sophie Lefebvre (Senior Dev), Pierre Rousseau (Designer), et Paul Girard (Data Scientist). Projets majeurs incluant CloudSuite et DataViz.
+
+Partenariats techniques avec DataCorp (contact: Marc Dubois), CloudTech (contact: Claire Martin), et WebServices (contact: Thomas Leroy). Participation aux conférences TechShow à Paris et CloudConf à Lyon.
+
+2018-2020: Senior Developer chez DataCorp (Lyon)
+Travail sous Anne Bernard, CTO. Développement de solutions cloud pour clients majeurs: BankCorp, TradeCo, et HealthSystems. Collaboration avec l'équipe de Marseille dirigée par Paul Lefebvre.
+
+2015-2018: Developer chez InnoLab (Toulouse)
+Premier poste après l'obtention de mon diplôme de l'Université de Paris. Mentoré par Philippe Girard et Sophie Bernard. Projets innovants avec DesignPro et TechVentures.
+
+FORMATION
+2015: Master Informatique, Université de Paris
+Mémoire dirigé par Professeur Marie Leroy
+2013: Licence Informatique, École Polytechnique
+
+COMPÉTENCES TECHNIQUES
+Langages: Python, Java, JavaScript
+Frameworks: Django, React, Vue.js
+Cloud: AWS, Azure, Google Cloud
+Outils: Docker, Kubernetes, Jenkins
+
+PROJETS MARQUANTS
+
+1. CloudSuite (TechStart, 2023)
+Architecture cloud développée avec Sophie Lefebvre. Déployée chez des clients comme FinanceCorp, TradeSystems, et GlobalRetail. Interface design par Pierre Rousseau. Analytics par Paul Girard.
+
+2. DataViz Platform (TechStart, 2022)
+Gestion projet avec Anne Bernard. Équipes distribuées à Paris, Lyon et Marseille. Partenariat avec l'Université de Toulouse pour la recherche en visualisation. Clients: MediaGroup, SportsCo, et EducationHub.
+
+3. Banking Solution (DataCorp, 2019)
+Système sécurisé pour BankCorp. Travail avec Marc Dubois (sécurité), Claire Martin (architecture), et Thomas Leroy (infrastructure). Conformité réglementaire validée par l'Autorité Bancaire Française.
+
+RÉFÉRENCES
+
+Marie Dubois - Directrice RH, TechStart Paris
+Email: m.dubois@techstart.fr
+
+Sophie Lefebvre - Lead Developer, TechStart Paris
+Email: s.lefebvre@techstart.fr
+
+Anne Bernard - CTO, DataCorp Lyon
+Email: a.bernard@datacorp.fr
+
+CERTIFICATIONS
+- AWS Certified Solutions Architect (2022)
+- Scrum Master Certification (2021)
+- Formation Continue à l'École des Mines de Paris (2020)
+
+LANGUES
+Français: Langue maternelle
+Anglais: Courant (TOEIC 950)
+Allemand: Intermédiaire
+
+CENTRES D'INTÉRÊT
+Membre de l'Association des Développeurs de Paris
+Intervenant à TechConf et PyConFR
+Contributions open-source sur GitHub

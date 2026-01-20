@@ -19,15 +19,12 @@ from gdpr_pseudonymizer.cli.formatters import (
     format_validation_cancelled,
 )
 from gdpr_pseudonymizer.cli.naive_data import NAIVE_ENTITIES
-from gdpr_pseudonymizer.cli.validation_stub import (
-    confirm_processing,
-    present_entities_for_validation,
-)
 from gdpr_pseudonymizer.exceptions import FileProcessingError, ValidationError
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 from gdpr_pseudonymizer.nlp.spacy_detector import SpaCyDetector
 from gdpr_pseudonymizer.utils.file_handler import read_file, write_file
 from gdpr_pseudonymizer.utils.logger import configure_logging, get_logger
+from gdpr_pseudonymizer.validation.workflow import run_validation_workflow
 
 # Configure logging
 configure_logging()
@@ -173,25 +170,21 @@ def process_command(
         None,
         help="Output file path (default: <input>_pseudonymized.txt)",
     ),
-    validate: bool = typer.Option(
-        False,
-        "--validate",
-        help="Enable validation mode (review entities before processing)",
-    ),
 ) -> None:
     """Process a single document and apply spaCy-based pseudonymization.
 
     This command reads a text document, detects entities using spaCy NLP,
-    optionally presents them for validation, and writes the pseudonymized output.
+    presents them for mandatory validation, and writes the pseudonymized output.
+
+    Validation is required for accuracy assurance. All detected entities must be reviewed.
 
     Args:
         input_file: Path to input document (.txt or .md)
         output_file: Path to output document (optional)
-        validate: Enable validation mode for entity review
 
     Examples:
         gdpr-pseudo process interview.txt
-        gdpr-pseudo process interview.txt output.txt --validate
+        gdpr-pseudo process interview.txt output.txt
     """
     try:
         # Validate file extension
@@ -213,7 +206,7 @@ def process_command(
             "processing_started",
             input_file=str(input_file),
             output_file=str(output_file),
-            validation_enabled=validate,
+            validation_enabled=True,  # Validation is mandatory
         )
 
         format_info_message(f"Reading input file: {input_file}")
@@ -263,19 +256,30 @@ def process_command(
             types=list(set(entity.entity_type for entity in entities)),
         )
 
-        # Validation mode: present entities and confirm
-        if validate:
-            validation_entities = convert_entities_for_validation(entities)
-            present_entities_for_validation(validation_entities)
+        # MANDATORY VALIDATION WORKFLOW (Story 1.7)
+        format_info_message("Starting validation workflow...")
+        try:
+            validated_entities = run_validation_workflow(
+                entities=entities,
+                document_text=content,
+                document_path=str(input_file),
+                pseudonym_assigner=assign_pseudonym,
+            )
+        except KeyboardInterrupt:
+            format_validation_cancelled()
+            logger.info("processing_cancelled", reason="user_quit_validation")
+            sys.exit(0)
 
-            if not confirm_processing():
-                format_validation_cancelled()
-                logger.info("processing_cancelled", reason="user_rejected")
-                sys.exit(0)
+        # Log validation results
+        logger.info(
+            "validation_complete",
+            original_count=len(entities),
+            validated_count=len(validated_entities),
+        )
 
-        # Apply pseudonymization
+        # Apply pseudonymization with validated entities
         format_info_message("Applying pseudonymization...")
-        pseudonymized_content = apply_pseudonymization(content, entities)
+        pseudonymized_content = apply_pseudonymization(content, validated_entities)
 
         # Write output file
         format_info_message(f"Writing output file: {output_file}")
@@ -285,7 +289,7 @@ def process_command(
         logger.info(
             "processing_complete",
             output_file=str(output_file),
-            entities_replaced=len(entities),
+            entities_replaced=len(validated_entities),
         )
 
         # Display success message
@@ -293,8 +297,8 @@ def process_command(
             input_file=input_file,
             output_file=output_file,
             entities_detected=len(entities),
-            entities_replaced=len(entities),
-            unique_entities=unique_entities,
+            entities_replaced=len(validated_entities),
+            unique_entities=len(set(e.text for e in validated_entities)),
         )
 
     except FileProcessingError as e:

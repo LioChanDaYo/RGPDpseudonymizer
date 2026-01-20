@@ -23,6 +23,7 @@ class DetectedEntity:
         end_pos: Character offset end position in document
         confidence: NER confidence score (0.0-1.0), None if not available
         gender: Gender classification (male/female/neutral/unknown), None if not available
+        is_ambiguous: Whether entity is flagged as ambiguous (low confidence, partial match, etc.)
     """
 
     text: str
@@ -31,6 +32,7 @@ class DetectedEntity:
     end_pos: int
     confidence: float | None = None
     gender: str | None = None
+    is_ambiguous: bool = False
 
 
 class EntityDetector(ABC):

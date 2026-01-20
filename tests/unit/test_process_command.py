@@ -1,4 +1,4 @@
-"""Unit tests for process command with spaCy detection."""
+"""Unit tests for process command with spaCy detection and validation workflow."""
 
 from __future__ import annotations
 
@@ -9,6 +9,7 @@ from pytest_mock import MockerFixture
 
 from gdpr_pseudonymizer.cli.commands.process import process_command
 from gdpr_pseudonymizer.exceptions import FileProcessingError
+from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 
 
 def test_process_command_reads_input_file(
@@ -31,12 +32,18 @@ def test_process_command_reads_input_file(
         return_value=mock_detector,
     )
 
+    # Mock validation workflow (mandatory in Story 1.7)
+    mocker.patch(
+        "gdpr_pseudonymizer.cli.commands.process.run_validation_workflow",
+        return_value=[],
+    )
+
     mocker.patch("gdpr_pseudonymizer.cli.commands.process.write_file")
     mocker.patch("gdpr_pseudonymizer.cli.commands.process.format_info_message")
     mocker.patch("gdpr_pseudonymizer.cli.commands.process.format_success_message")
 
     # Run command
-    process_command(input_file=input_file, output_file=None, validate=False)
+    process_command(input_file=input_file, output_file=None)
 
     # Verify read_file was called
     mock_read.assert_called_once_with(str(input_file))
@@ -65,12 +72,18 @@ def test_process_command_writes_output_file(
         return_value=mock_detector,
     )
 
+    # Mock validation workflow (mandatory in Story 1.7)
+    mocker.patch(
+        "gdpr_pseudonymizer.cli.commands.process.run_validation_workflow",
+        return_value=[],
+    )
+
     mock_write = mocker.patch("gdpr_pseudonymizer.cli.commands.process.write_file")
     mocker.patch("gdpr_pseudonymizer.cli.commands.process.format_info_message")
     mocker.patch("gdpr_pseudonymizer.cli.commands.process.format_success_message")
 
     # Run command
-    process_command(input_file=input_file, output_file=output_file, validate=False)
+    process_command(input_file=input_file, output_file=output_file)
 
     # Verify write_file was called
     mock_write.assert_called_once()
@@ -95,7 +108,7 @@ def test_process_command_handles_file_not_found_error(
 
     # Run command and expect sys.exit(1)
     with pytest.raises(SystemExit) as exc_info:
-        process_command(input_file=input_file, output_file=None, validate=False)
+        process_command(input_file=input_file, output_file=None)
 
     assert exc_info.value.code == 1
     mock_error_format.assert_called_once()
@@ -119,7 +132,7 @@ def test_process_command_handles_permission_error(
 
     # Run command and expect sys.exit(1)
     with pytest.raises(SystemExit) as exc_info:
-        process_command(input_file=input_file, output_file=None, validate=False)
+        process_command(input_file=input_file, output_file=None)
 
     assert exc_info.value.code == 1
     mock_error_format.assert_called_once()
@@ -139,7 +152,7 @@ def test_process_command_validates_file_extensions(
 
     # Run command and expect sys.exit(1)
     with pytest.raises(SystemExit) as exc_info:
-        process_command(input_file=input_file, output_file=None, validate=False)
+        process_command(input_file=input_file, output_file=None)
 
     assert exc_info.value.code == 1
     mock_error_format.assert_called_once()
@@ -148,10 +161,10 @@ def test_process_command_validates_file_extensions(
     assert "Invalid File Format" in call_args[0]
 
 
-def test_process_command_with_validation_enabled(
+def test_process_command_with_validation_workflow(
     mocker: MockerFixture, tmp_path: Path
 ) -> None:
-    """Test process command with validation enabled."""
+    """Test process command runs validation workflow (Story 1.7)."""
     input_file = tmp_path / "test.txt"
     input_file.write_text("Test with Marie Dubois.")
 
@@ -160,45 +173,41 @@ def test_process_command_with_validation_enabled(
         "gdpr_pseudonymizer.cli.commands.process.read_file",
         return_value="Test with Marie Dubois.",
     )
+
     # Mock SpaCyDetector
     mock_detector = mocker.MagicMock()
-    mock_entity = mocker.MagicMock()
-    mock_entity.text = "Marie Dubois"
-    mock_entity.entity_type = "PERSON"
-    mock_entity.start_pos = 10
-    mock_entity.end_pos = 22
+    mock_entity = DetectedEntity("Marie Dubois", "PERSON", 10, 22)
     mock_detector.detect_entities.return_value = [mock_entity]
     mocker.patch(
         "gdpr_pseudonymizer.cli.commands.process.SpaCyDetector",
         return_value=mock_detector,
     )
-    mock_present = mocker.patch(
-        "gdpr_pseudonymizer.cli.commands.process.present_entities_for_validation"
+
+    # Mock validation workflow (Story 1.7 - mandatory)
+    mock_validation = mocker.patch(
+        "gdpr_pseudonymizer.cli.commands.process.run_validation_workflow",
+        return_value=[mock_entity],
     )
-    mock_confirm = mocker.patch(
-        "gdpr_pseudonymizer.cli.commands.process.confirm_processing",
-        return_value=True,
-    )
-    mocker.patch(
-        "gdpr_pseudonymizer.cli.commands.process.apply_pseudonymization",
-        return_value="Test with Leia Organa.",
-    )
+
     mocker.patch("gdpr_pseudonymizer.cli.commands.process.write_file")
     mocker.patch("gdpr_pseudonymizer.cli.commands.process.format_info_message")
     mocker.patch("gdpr_pseudonymizer.cli.commands.process.format_success_message")
 
-    # Run command with validation
-    process_command(input_file=input_file, output_file=None, validate=True)
+    # Run command
+    process_command(input_file=input_file, output_file=None)
 
-    # Verify validation functions were called
-    mock_present.assert_called_once()
-    mock_confirm.assert_called_once()
+    # Verify validation workflow was called
+    mock_validation.assert_called_once()
+    call_kwargs = mock_validation.call_args.kwargs
+    assert call_kwargs["document_text"] == "Test with Marie Dubois."
+    assert call_kwargs["document_path"] == str(input_file)
+    assert len(call_kwargs["entities"]) == 1
 
 
-def test_process_command_with_validation_user_rejects(
+def test_process_command_with_validation_user_cancels(
     mocker: MockerFixture, tmp_path: Path
 ) -> None:
-    """Test process command when user rejects validation."""
+    """Test process command when user cancels validation (KeyboardInterrupt)."""
     input_file = tmp_path / "test.txt"
     input_file.write_text("Test with Marie Dubois.")
 
@@ -207,25 +216,22 @@ def test_process_command_with_validation_user_rejects(
         "gdpr_pseudonymizer.cli.commands.process.read_file",
         return_value="Test with Marie Dubois.",
     )
+
     # Mock SpaCyDetector
     mock_detector = mocker.MagicMock()
-    mock_entity = mocker.MagicMock()
-    mock_entity.text = "Marie Dubois"
-    mock_entity.entity_type = "PERSON"
-    mock_entity.start_pos = 10
-    mock_entity.end_pos = 22
+    mock_entity = DetectedEntity("Marie Dubois", "PERSON", 10, 22)
     mock_detector.detect_entities.return_value = [mock_entity]
     mocker.patch(
         "gdpr_pseudonymizer.cli.commands.process.SpaCyDetector",
         return_value=mock_detector,
     )
+
+    # Mock validation workflow to raise KeyboardInterrupt
     mocker.patch(
-        "gdpr_pseudonymizer.cli.commands.process.present_entities_for_validation"
+        "gdpr_pseudonymizer.cli.commands.process.run_validation_workflow",
+        side_effect=KeyboardInterrupt,
     )
-    mocker.patch(
-        "gdpr_pseudonymizer.cli.commands.process.confirm_processing",
-        return_value=False,
-    )
+
     mock_write = mocker.patch("gdpr_pseudonymizer.cli.commands.process.write_file")
     mock_cancelled = mocker.patch(
         "gdpr_pseudonymizer.cli.commands.process.format_validation_cancelled"
@@ -234,11 +240,11 @@ def test_process_command_with_validation_user_rejects(
 
     # Run command and expect sys.exit(0)
     with pytest.raises(SystemExit) as exc_info:
-        process_command(input_file=input_file, output_file=None, validate=True)
+        process_command(input_file=input_file, output_file=None)
 
     assert exc_info.value.code == 0
     mock_cancelled.assert_called_once()
-    # Verify write_file was NOT called (user rejected)
+    # Verify write_file was NOT called (user cancelled)
     mock_write.assert_not_called()
 
 
@@ -254,6 +260,7 @@ def test_process_command_generates_default_output_filename(
         "gdpr_pseudonymizer.cli.commands.process.read_file",
         return_value="Test content.",
     )
+
     # Mock SpaCyDetector
     mock_detector = mocker.MagicMock()
     mock_detector.detect_entities.return_value = []
@@ -261,16 +268,19 @@ def test_process_command_generates_default_output_filename(
         "gdpr_pseudonymizer.cli.commands.process.SpaCyDetector",
         return_value=mock_detector,
     )
+
+    # Mock validation workflow (mandatory in Story 1.7)
     mocker.patch(
-        "gdpr_pseudonymizer.cli.commands.process.apply_pseudonymization",
-        return_value="Test content.",
+        "gdpr_pseudonymizer.cli.commands.process.run_validation_workflow",
+        return_value=[],
     )
+
     mock_write = mocker.patch("gdpr_pseudonymizer.cli.commands.process.write_file")
     mocker.patch("gdpr_pseudonymizer.cli.commands.process.format_info_message")
     mocker.patch("gdpr_pseudonymizer.cli.commands.process.format_success_message")
 
     # Run command without output_file
-    process_command(input_file=input_file, output_file=None, validate=False)
+    process_command(input_file=input_file, output_file=None)
 
     # Verify default filename was generated
     mock_write.assert_called_once()
@@ -290,28 +300,28 @@ def test_process_command_calls_spacy_detector(
         "gdpr_pseudonymizer.cli.commands.process.read_file",
         return_value="Test with Marie Dubois.",
     )
+
     # Mock SpaCyDetector
     mock_detector = mocker.MagicMock()
-    mock_entity = mocker.MagicMock()
-    mock_entity.text = "Marie Dubois"
-    mock_entity.entity_type = "PERSON"
-    mock_entity.start_pos = 10
-    mock_entity.end_pos = 22
+    mock_entity = DetectedEntity("Marie Dubois", "PERSON", 10, 22)
     mock_detector.detect_entities.return_value = [mock_entity]
     mock_spacy_class = mocker.patch(
         "gdpr_pseudonymizer.cli.commands.process.SpaCyDetector",
         return_value=mock_detector,
     )
+
+    # Mock validation workflow (mandatory in Story 1.7)
     mocker.patch(
-        "gdpr_pseudonymizer.cli.commands.process.apply_pseudonymization",
-        return_value="Test with Leia Organa.",
+        "gdpr_pseudonymizer.cli.commands.process.run_validation_workflow",
+        return_value=[mock_entity],
     )
+
     mocker.patch("gdpr_pseudonymizer.cli.commands.process.write_file")
     mocker.patch("gdpr_pseudonymizer.cli.commands.process.format_info_message")
     mocker.patch("gdpr_pseudonymizer.cli.commands.process.format_success_message")
 
     # Run command
-    process_command(input_file=input_file, output_file=None, validate=False)
+    process_command(input_file=input_file, output_file=None)
 
     # Verify SpaCyDetector was instantiated and detect_entities called
     mock_spacy_class.assert_called_once()
@@ -330,18 +340,22 @@ def test_process_command_calls_apply_pseudonymization(
         "gdpr_pseudonymizer.cli.commands.process.read_file",
         return_value="Test with Marie Dubois.",
     )
+
     # Mock SpaCyDetector
     mock_detector = mocker.MagicMock()
-    mock_entity = mocker.MagicMock()
-    mock_entity.text = "Marie Dubois"
-    mock_entity.entity_type = "PERSON"
-    mock_entity.start_pos = 10
-    mock_entity.end_pos = 22
+    mock_entity = DetectedEntity("Marie Dubois", "PERSON", 10, 22)
     mock_detector.detect_entities.return_value = [mock_entity]
     mocker.patch(
         "gdpr_pseudonymizer.cli.commands.process.SpaCyDetector",
         return_value=mock_detector,
     )
+
+    # Mock validation workflow returns validated entities
+    mocker.patch(
+        "gdpr_pseudonymizer.cli.commands.process.run_validation_workflow",
+        return_value=[mock_entity],
+    )
+
     mock_apply = mocker.patch(
         "gdpr_pseudonymizer.cli.commands.process.apply_pseudonymization",
         return_value="Test with Leia Organa.",
@@ -351,9 +365,9 @@ def test_process_command_calls_apply_pseudonymization(
     mocker.patch("gdpr_pseudonymizer.cli.commands.process.format_success_message")
 
     # Run command
-    process_command(input_file=input_file, output_file=None, validate=False)
+    process_command(input_file=input_file, output_file=None)
 
-    # Verify apply was called with content and entities
+    # Verify apply was called with content and validated entities
     mock_apply.assert_called_once()
     call_args = mock_apply.call_args[0]
     assert call_args[0] == "Test with Marie Dubois."
@@ -372,6 +386,7 @@ def test_process_command_logs_processing_steps(
         "gdpr_pseudonymizer.cli.commands.process.read_file",
         return_value="Test content.",
     )
+
     # Mock SpaCyDetector
     mock_detector = mocker.MagicMock()
     mock_detector.detect_entities.return_value = []
@@ -379,10 +394,13 @@ def test_process_command_logs_processing_steps(
         "gdpr_pseudonymizer.cli.commands.process.SpaCyDetector",
         return_value=mock_detector,
     )
+
+    # Mock validation workflow (mandatory in Story 1.7)
     mocker.patch(
-        "gdpr_pseudonymizer.cli.commands.process.apply_pseudonymization",
-        return_value="Test content.",
+        "gdpr_pseudonymizer.cli.commands.process.run_validation_workflow",
+        return_value=[],
     )
+
     mocker.patch("gdpr_pseudonymizer.cli.commands.process.write_file")
     mock_info = mocker.patch(
         "gdpr_pseudonymizer.cli.commands.process.format_info_message"
@@ -390,7 +408,8 @@ def test_process_command_logs_processing_steps(
     mocker.patch("gdpr_pseudonymizer.cli.commands.process.format_success_message")
 
     # Run command
-    process_command(input_file=input_file, output_file=None, validate=False)
+    process_command(input_file=input_file, output_file=None)
 
     # Verify info messages were displayed
-    assert mock_info.call_count >= 3  # Reading, detecting, writing messages
+    # Expected: Reading, Loading NLP, Detecting, Starting validation, Applying, Writing
+    assert mock_info.call_count >= 5

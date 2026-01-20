@@ -3,20 +3,390 @@
 This module coordinates the human-in-the-loop validation process,
 managing the flow between entity detection, user review, and
 pseudonym assignment.
-
-Full implementation in Story 1.7.
 """
 
 from __future__ import annotations
 
+from collections import defaultdict
+from typing import Callable
+
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
+from gdpr_pseudonymizer.validation.context_precomputer import ContextPrecomputer
 from gdpr_pseudonymizer.validation.models import ValidationSession
+from gdpr_pseudonymizer.validation.ui import (
+    FinalConfirmationScreen,
+    HelpOverlay,
+    ReviewScreen,
+    SummaryScreen,
+    display_info_message,
+    display_warning_message,
+    get_confirmation,
+    get_text_input,
+    get_user_action,
+)
+
+
+class ValidationWorkflow:
+    """Orchestrates the multi-step validation workflow."""
+
+    def __init__(self) -> None:
+        """Initialize validation workflow with UI components."""
+        self.summary_screen = SummaryScreen()
+        self.review_screen = ReviewScreen()
+        self.final_screen = FinalConfirmationScreen()
+        self.help_overlay = HelpOverlay()
+        self.context_precomputer = ContextPrecomputer(context_words=10)
+
+    def run(
+        self,
+        entities: list[DetectedEntity],
+        document_text: str,
+        document_path: str = "",
+        pseudonym_assigner: Callable[[DetectedEntity], str] | None = None,
+    ) -> list[DetectedEntity]:
+        """Execute the validation workflow.
+
+        Args:
+            entities: List of detected entities to validate
+            document_text: Full document text
+            document_path: Path to document being validated
+            pseudonym_assigner: Function to assign pseudonyms (optional)
+
+        Returns:
+            List of validated entities after user review
+
+        Raises:
+            KeyboardInterrupt: If user cancels validation with Ctrl+C
+        """
+        # Handle empty entity list
+        if not entities:
+            display_info_message("No entities detected in document.")
+            if get_confirmation("Would you like to manually add entities?"):
+                # Allow manual entity addition
+                return self._manual_entity_addition_flow(document_text, document_path)
+            return []
+
+        # Handle large entity count warning
+        if len(entities) >= 100:
+            display_warning_message(
+                f"Large document detected: {len(entities)} entities. "
+                f"Validation may take {(len(entities) * 6) // 60} minutes."
+            )
+            if not get_confirmation("Continue with validation?"):
+                raise KeyboardInterrupt("User cancelled validation")
+
+        # Create validation session
+        session = ValidationSession(
+            document_path=document_path,
+            document_text=document_text,
+        )
+
+        # Add entities to session
+        for entity in entities:
+            session.add_entity(entity)
+
+        # Precompute context snippets for performance
+        session.context_cache = self.context_precomputer.precompute_all(
+            document_text, entities
+        )
+
+        # Step 1: Display summary screen
+        self._display_summary(entities)
+
+        # Step 2: Review entities by type (PERSON → ORG → LOCATION)
+        try:
+            self._review_entities_by_type(session, pseudonym_assigner)
+        except KeyboardInterrupt:
+            if get_confirmation("Quit validation? Progress will be lost."):
+                raise
+            # Continue if user cancels quit
+            return self.run(entities, document_text, document_path, pseudonym_assigner)
+
+        # Step 3: Ambiguous entities are handled during review
+
+        # Step 4: Display final confirmation
+        summary_stats = session.get_summary_stats()
+        self.final_screen.display(summary_stats)
+
+        if not get_confirmation("Ready to process document with validated entities?"):
+            display_info_message("Validation cancelled. Returning to review.")
+            # Restart validation workflow
+            return self.run(entities, document_text, document_path, pseudonym_assigner)
+
+        # Step 5: Return validated entities
+        validated_entities = session.get_validated_entities()
+        display_info_message(
+            f"Validation complete. Processing {len(validated_entities)} entities."
+        )
+
+        return validated_entities
+
+    def _display_summary(self, entities: list[DetectedEntity]) -> None:
+        """Display summary screen with entity statistics.
+
+        Args:
+            entities: List of detected entities
+        """
+        # Count entities by type
+        entity_counts: dict[str, int] = defaultdict(int)
+        for entity in entities:
+            entity_counts[entity.entity_type] += 1
+
+        # Display summary
+        self.summary_screen.display(len(entities), dict(entity_counts))
+        self.summary_screen.wait_for_enter()
+
+    def _review_entities_by_type(
+        self,
+        session: ValidationSession,
+        pseudonym_assigner: Callable[[DetectedEntity], str] | None = None,
+    ) -> None:
+        """Review entities by type in priority order.
+
+        Args:
+            session: Validation session with entities
+            pseudonym_assigner: Function to assign pseudonyms (optional)
+        """
+        # Group entities by type
+        entities_by_type: dict[str, list[DetectedEntity]] = defaultdict(list)
+        for entity in session.entities:
+            entities_by_type[entity.entity_type].append(entity)
+
+        # Review in priority order: PERSON → ORG → LOCATION
+        priority_order = ["PERSON", "ORG", "LOCATION"]
+
+        for entity_type in priority_order:
+            if entity_type not in entities_by_type:
+                continue
+
+            type_entities = entities_by_type[entity_type]
+            display_info_message(
+                f"Reviewing {entity_type} entities ({len(type_entities)} total)"
+            )
+
+            # Review each entity of this type
+            entity_index = 0
+            while entity_index < len(type_entities):
+                entity = type_entities[entity_index]
+
+                # Get context and pseudonym
+                context = self.context_precomputer.get_context_for_entity(
+                    entity, session.context_cache
+                )
+                pseudonym = self._get_pseudonym(entity, pseudonym_assigner)
+
+                # Display ambiguous warning if needed
+                if entity.is_ambiguous:
+                    reason = self._get_ambiguity_reason(entity)
+                    self.review_screen.display_ambiguous_warning(entity, reason)
+
+                # Display entity for review
+                self.review_screen.display_entity(
+                    entity,
+                    context,
+                    pseudonym,
+                    entity_index + 1,
+                    len(type_entities),
+                    entity_type,
+                )
+
+                # Get user action
+                action = get_user_action()
+
+                # Handle action
+                if action == "confirm":
+                    session.mark_confirmed(entity)
+                    entity_index += 1
+
+                elif action == "reject":
+                    session.mark_rejected(entity)
+                    entity_index += 1
+
+                elif action == "modify":
+                    new_text = get_text_input("Enter corrected entity text")
+                    if new_text and new_text != entity.text:
+                        modified_entity = DetectedEntity(
+                            text=new_text,
+                            entity_type=entity.entity_type,
+                            start_pos=entity.start_pos,
+                            end_pos=entity.end_pos,
+                            confidence=entity.confidence,
+                            gender=entity.gender,
+                            is_ambiguous=False,
+                        )
+                        session.mark_modified(entity, modified_entity)
+                    else:
+                        session.mark_confirmed(entity)
+                    entity_index += 1
+
+                elif action == "change_pseudonym":
+                    new_pseudonym = get_text_input("Enter custom pseudonym")
+                    if new_pseudonym:
+                        session.change_pseudonym(entity, new_pseudonym)
+                    else:
+                        session.mark_confirmed(entity)
+                    entity_index += 1
+
+                elif action == "add":
+                    self._handle_add_entity(session)
+                    # Don't advance index, stay on current entity
+
+                elif action == "next":
+                    if entity_index < len(type_entities) - 1:
+                        entity_index += 1
+                    else:
+                        display_info_message("Already at last entity of this type")
+
+                elif action == "previous":
+                    if entity_index > 0:
+                        entity_index -= 1
+                    else:
+                        display_info_message("Already at first entity of this type")
+
+                elif action == "help":
+                    self.help_overlay.display()
+                    # Stay on current entity
+
+                elif action == "quit":
+                    if get_confirmation("Quit validation? Progress will be lost."):
+                        raise KeyboardInterrupt("User quit validation")
+                    # Continue if cancelled
+
+                elif action == "batch_accept":
+                    if get_confirmation(
+                        f"Accept all {len(type_entities)} {entity_type} entities?"
+                    ):
+                        for e in type_entities:
+                            if e not in [
+                                d.original_entity for d in session.user_decisions
+                            ]:
+                                session.mark_confirmed(e)
+                        display_info_message(f"Accepted all {entity_type} entities")
+                        break  # Move to next type
+
+                elif action == "batch_reject":
+                    if get_confirmation(
+                        f"Reject all {len(type_entities)} {entity_type} entities?"
+                    ):
+                        for e in type_entities:
+                            if e not in [
+                                d.original_entity for d in session.user_decisions
+                            ]:
+                                session.mark_rejected(e)
+                        display_info_message(f"Rejected all {entity_type} entities")
+                        break  # Move to next type
+
+                elif action == "invalid":
+                    display_warning_message("Invalid key. Press H for help.")
+
+    def _get_pseudonym(
+        self,
+        entity: DetectedEntity,
+        pseudonym_assigner: Callable[[DetectedEntity], str] | None,
+    ) -> str:
+        """Get pseudonym for entity.
+
+        Args:
+            entity: Entity to get pseudonym for
+            pseudonym_assigner: Optional function to assign pseudonyms
+
+        Returns:
+            Assigned pseudonym or placeholder
+        """
+        if pseudonym_assigner:
+            return pseudonym_assigner(entity)
+        else:
+            # Placeholder pseudonym if no assigner provided
+            return f"[{entity.entity_type}_{entity.text[:10]}]"
+
+    def _get_ambiguity_reason(self, entity: DetectedEntity) -> str:
+        """Get reason for entity ambiguity.
+
+        Args:
+            entity: Ambiguous entity
+
+        Returns:
+            Human-readable ambiguity reason
+        """
+        if entity.confidence is not None and entity.confidence < 0.6:
+            return "Low confidence score from NLP model"
+        elif " " in entity.text and len(entity.text.split()) == 1:
+            return "Partial compound name detected"
+        else:
+            return "Entity flagged as ambiguous by detection algorithm"
+
+    def _handle_add_entity(self, session: ValidationSession) -> None:
+        """Handle manual entity addition flow.
+
+        Args:
+            session: Validation session to add entity to
+        """
+        display_info_message("Add manual entity")
+
+        entity_text = get_text_input("Entity text")
+        if not entity_text:
+            display_warning_message("Entity text cannot be empty")
+            return
+
+        entity_type = get_text_input("Entity type (PERSON/LOCATION/ORG)").upper()
+        if entity_type not in ["PERSON", "LOCATION", "ORG"]:
+            display_warning_message("Invalid entity type")
+            return
+
+        # Find position in document
+        start_pos = session.document_text.find(entity_text)
+        if start_pos == -1:
+            display_warning_message(f"'{entity_text}' not found in document")
+            return
+
+        end_pos = start_pos + len(entity_text)
+
+        # Create new entity
+        new_entity = DetectedEntity(
+            text=entity_text,
+            entity_type=entity_type,
+            start_pos=start_pos,
+            end_pos=end_pos,
+            confidence=None,
+            gender=None,
+            is_ambiguous=False,
+        )
+
+        session.add_manual_entity(new_entity)
+        display_info_message(f"Added {entity_type} entity: {entity_text}")
+
+    def _manual_entity_addition_flow(
+        self, document_text: str, document_path: str
+    ) -> list[DetectedEntity]:
+        """Handle manual entity addition when no entities detected.
+
+        Args:
+            document_text: Full document text
+            document_path: Path to document
+
+        Returns:
+            List of manually added entities
+        """
+        session = ValidationSession(
+            document_path=document_path,
+            document_text=document_text,
+        )
+
+        display_info_message("Manual entity addition mode")
+
+        while True:
+            self._handle_add_entity(session)
+
+            if not get_confirmation("Add another entity?"):
+                break
+
+        return session.get_validated_entities()
 
 
 def create_validation_session(
     document_path: str, document_text: str, entities: list[DetectedEntity]
 ) -> ValidationSession:
-    """Create validation session from detected entities (stub for Story 1.7).
+    """Create validation session from detected entities.
 
     Args:
         document_path: Path to document being validated
@@ -24,22 +394,43 @@ def create_validation_session(
         entities: List of entities detected by NLP engine
 
     Returns:
-        Initialized ValidationSession
+        Initialized ValidationSession with precomputed context
     """
-    # Stub: Full implementation in Story 1.7
     session = ValidationSession(
         document_path=document_path, document_text=document_text
     )
+
     for entity in entities:
         session.add_entity(entity)
+
+    # Precompute context snippets
+    precomputer = ContextPrecomputer(context_words=10)
+    session.context_cache = precomputer.precompute_all(document_text, entities)
+
     return session
 
 
-def run_validation_workflow(session: ValidationSession) -> None:
-    """Execute interactive validation workflow (stub for Story 1.7).
+def run_validation_workflow(
+    entities: list[DetectedEntity],
+    document_text: str,
+    document_path: str = "",
+    pseudonym_assigner: Callable[[DetectedEntity], str] | None = None,
+) -> list[DetectedEntity]:
+    """Execute interactive validation workflow.
+
+    This is the main entry point for running the validation workflow.
 
     Args:
-        session: ValidationSession to process
+        entities: List of detected entities to validate
+        document_text: Full document text
+        document_path: Path to document being validated (optional)
+        pseudonym_assigner: Function to assign pseudonyms (optional)
+
+    Returns:
+        List of validated entities after user review
+
+    Raises:
+        KeyboardInterrupt: If user cancels validation
     """
-    # Stub: Full implementation in Story 1.7
-    pass
+    workflow = ValidationWorkflow()
+    return workflow.run(entities, document_text, document_path, pseudonym_assigner)

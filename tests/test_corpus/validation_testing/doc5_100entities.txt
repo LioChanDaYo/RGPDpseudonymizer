@@ -1,0 +1,120 @@
+Rapport annuel complet - TechStart France 2023-2024
+
+DIRECTION ET GOUVERNANCE
+
+Marie Dubois occupe le poste de Directrice Générale de TechStart depuis janvier 2020. Elle est assistée par Jean Martin (Directeur Technique), Sophie Lefebvre (Directrice Innovation), Pierre Rousseau (Directeur Design), et Anne Bernard (Directrice RH).
+
+Le conseil d'administration comprend Paul Girard (Président), Thomas Leroy (Trésorier), Claire Martin (Secrétaire), Marc Dubois (Administrateur), et Philippe Bernard (Administrateur externe de InvestCorp).
+
+ÉQUIPE DE DIRECTION - PARIS
+
+Le siège social à Paris héberge 45 collaborateurs. Jean Martin dirige le département technique avec Sophie Lefebvre comme Lead Developer, Pierre Rousseau comme UX Lead, et Paul Girard comme Data Science Lead.
+
+L'équipe marketing est menée par Anne Bernard, avec Thomas Leroy (Digital Marketing), Claire Martin (Content), Marc Dubois (Communications), et Philippe Girard (Brand Manager).
+
+Sophie Bernard gère les opérations avec l'aide de Paul Rousseau (Office Manager) et Marie Leroy (Coordinatrice Administrative).
+
+BUREAUX RÉGIONAUX
+
+Lyon: Bureau dirigé par Thomas Martin avec 12 collaborateurs incluant Claire Dubois (Sales Lead), Marc Lefebvre (Technical Lead), et Anne Rousseau (Customer Success).
+
+Marseille: Équipe de 8 personnes sous la direction de Philippe Leroy, avec Sophie Martin (Developer), Paul Bernard (Designer), et Marie Girard (Project Manager).
+
+Toulouse: Petite équipe de 5 collaborateurs dirigée par Jean Lefebvre, incluant Pierre Martin (Developer) et Claire Rousseau (Support).
+
+PARTENARIATS STRATÉGIQUES
+
+DataCorp (Paris): Partenariat technique avec Marc Bernard (CEO), Sophie Leroy (CTO), et Paul Martin (VP Engineering).
+
+CloudTech (Lyon): Collaboration cloud menée par Thomas Dubois (Director), Anne Leroy (Technical Lead), et Jean Rousseau (Solutions Architect).
+
+WebServices (Marseille): Infrastructure web avec Claire Bernard (CEO), Pierre Lefebvre (COO), et Marie Martin (Head of Infrastructure).
+
+InnoLab (Toulouse): Innovation avec Philippe Martin (Director), Sophie Rousseau (Research Lead), et Paul Dubois (Innovation Manager).
+
+DesignPro (Paris): Design avec Marc Martin (Creative Director), Anne Lefebvre (Design Lead), et Thomas Rousseau (Senior Designer).
+
+CLIENTS MAJEURS
+
+Finance:
+BankCorp (contact: Jean Bernard), FinanceCorp (contact: Sophie Girard), TradeSystems (contact: Pierre Bernard), InvestGroup (contact: Paul Leroy)
+
+Retail:
+GlobalRetail (contact: Marie Bernard), TradeCo (contact: Thomas Girard), ShopSystems (contact: Claire Lefebvre), RetailHub (contact: Marc Rousseau)
+
+Technologie:
+TechVentures (contact: Philippe Dubois), DataSystems (contact: Anne Martin), CloudCorp (contact: Jean Girard), WebTech (contact: Sophie Bernard)
+
+Santé:
+HealthSystems (contact: Pierre Dubois), MediCorp (contact: Paul Lefebvre), CarePlus (contact: Marie Rousseau), HealthTech (contact: Thomas Bernard)
+
+Éducation:
+EducationHub (contact: Claire Girard), SchoolSystems (contact: Marc Leroy), UniversityTech (contact: Anne Dubois), LearnCorp (contact: Philippe Lefebvre)
+
+PROJETS 2023
+
+CloudSuite (Q1-Q4):
+Chef de projet: Jean Martin
+Équipe: Sophie Lefebvre, Pierre Rousseau, Paul Girard, Anne Bernard
+Partenaires: DataCorp (Marc Dubois), CloudTech (Thomas Leroy)
+Clients: BankCorp, FinanceCorp, GlobalRetail
+
+DataViz Platform (Q2-Q4):
+Chef de projet: Anne Bernard
+Équipe: Thomas Martin, Claire Dubois, Marc Lefebvre, Sophie Martin
+Partenaires: InnoLab (Philippe Martin), Université de Paris (Pr. Marie Leroy)
+Clients: MediaGroup, SportsCo, EducationHub
+
+Mobile Suite (Q3-Q4):
+Chef de projet: Pierre Rousseau
+Équipe: Paul Bernard, Marie Girard, Philippe Leroy, Jean Lefebvre
+Partenaires: DesignPro (Marc Martin), WebServices (Claire Bernard)
+Clients: RetailHub, ShopSystems, TradeCo
+
+AI Platform (Q4):
+Chef de projet: Paul Girard
+Équipe: Sophie Bernard, Thomas Dubois, Anne Leroy, Jean Rousseau
+Partenaires: École Polytechnique (Pr. Pierre Martin), InnoLab (Sophie Rousseau)
+Clients: DataSystems, TechVentures, HealthSystems
+
+FORMATION ET DÉVELOPPEMENT
+
+Programme de formation interne dirigé par Marie Dubois avec Sophie Lefebvre (formation technique), Pierre Rousseau (design thinking), et Anne Bernard (soft skills).
+
+Partenariats éducatifs avec:
+- Université de Paris (contact: Pr. Marie Leroy, Pr. Jean Bernard)
+- École Polytechnique (contact: Pr. Pierre Martin, Pr. Sophie Girard)
+- École des Mines (contact: Pr. Paul Dubois, Pr. Thomas Lefebvre)
+- ESSEC Business School (contact: Pr. Claire Martin, Pr. Marc Rousseau)
+
+ÉVÉNEMENTS ET CONFÉRENCES
+
+TechShow Paris 2023:
+Speakers: Marie Dubois, Jean Martin, Sophie Lefebvre
+Participants: Pierre Rousseau, Paul Girard, Anne Bernard, Thomas Leroy
+
+CloudConf Lyon 2023:
+Organisation: Claire Martin, Marc Dubois
+Speakers: Philippe Girard, Sophie Bernard, Paul Rousseau
+
+DesignWeek Marseille 2023:
+Speakers: Pierre Rousseau, Marc Martin, Anne Lefebvre
+Sponsors: TechStart (Marie Dubois), DesignPro (Thomas Rousseau)
+
+AI Summit Toulouse 2023:
+Speakers: Paul Girard, Sophie Rousseau, Philippe Martin
+Partenaires: InnoLab (Paul Dubois), Université de Toulouse (Pr. Jean Girard)
+
+PERSPECTIVES 2024
+
+Expansion européenne dirigée par Marie Dubois avec ouverture de bureaux à:
+- Berlin (responsable pressenti: Marc Bernard)
+- Amsterdam (responsable pressenti: Sophie Leroy)
+- Barcelone (responsable pressenti: Jean Rousseau)
+
+Nouveaux partenariats en négociation:
+- TechEurope (contact: Pierre Lefebvre)
+- CloudGlobal (contact: Paul Martin)
+- InnoEurope (contact: Marie Martin)
+
+Recrutements prévus: 50 nouveaux collaborateurs sur tous les sites.
