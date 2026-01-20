@@ -29,7 +29,8 @@ GDPR Pseudonymizer is a **privacy-first CLI tool** that combines AI efficiency w
 ### 🤝 **AI + Human Verification**
 - ✅ **Hybrid detection** - AI pre-detects 40-50% of entities (NLP + regex patterns)
 - ✅ **Mandatory validation** - You review and confirm all entities (ensures 100% accuracy)
-- ✅ **Fast validation UI** - Keyboard-driven interface, <2 min per document
+- ✅ **Fast validation UI** - Rich CLI interface with keyboard shortcuts, <2 min per document
+- ✅ **Smart workflow** - Entity-by-type grouping (PERSON → ORG → LOCATION) with context display
 - ✅ **Batch actions** - Confirm/reject multiple entities efficiently
 
 ### 📊 **Batch Processing**
@@ -51,8 +52,8 @@ GDPR Pseudonymizer is a **privacy-first CLI tool** that combines AI efficiency w
 ### Current Development Stage
 
 We're actively developing v1.0 MVP with an **AI-assisted approach**:
-- ✅ **Story 1.2 Complete:** NLP library benchmark (spaCy selected: 29.5% F1)
-- 🔄 **Week 1-5 (Current):** Epic 1 - Foundation & Validation UI
+- ✅ **Story 1.7 Complete:** Validation UI with rich CLI interface operational
+- 🔄 **Week 1-5 (Current):** Epic 1 - Entity deduplication & hybrid detection
 - 📅 **Week 6-14:** Core engine, CLI polish, launch prep
 - 🎯 **MVP Launch:** Week 14 (estimated Q2 2026)
 
@@ -163,6 +164,30 @@ After comprehensive benchmarking on 25 French interview/business documents (1,85
 
 See full analysis: [docs/nlp-benchmark-report.md](docs/nlp-benchmark-report.md)
 
+### Validation Workflow (Story 1.7 - Complete)
+
+The validation UI provides an intuitive keyboard-driven interface for reviewing detected entities:
+
+**Features:**
+- ✅ **Entity-by-type grouping** - Review PERSON → ORG → LOCATION in logical order
+- ✅ **Context display** - See 10 words before/after each entity with highlighting
+- ✅ **Confidence scores** - Color-coded confidence from spaCy NER (green >80%, yellow 60-80%, red <60%)
+- ✅ **Keyboard shortcuts** - Single-key actions: [Space] Confirm, [R] Reject, [E] Modify, [A] Add, [C] Change pseudonym
+- ✅ **Batch operations** - Accept/reject all entities of a type at once (Shift+A/R)
+- ✅ **Help overlay** - Press [H] for full command reference
+- ✅ **Performance** - <2 minutes for typical 20-30 entity documents
+
+**Workflow Steps:**
+1. Summary screen (entity counts by type)
+2. Review entities by type with context
+3. Flag ambiguous entities for careful review
+4. Final confirmation with summary of changes
+5. Process document with validated entities
+
+**Known Limitation (v1.0):** Duplicate entities validated separately (Story 1.9 will add deduplication for 100+ entity docs)
+
+---
+
 ### Technology Stack
 
 | Component | Technology | Version | Purpose |
@@ -173,6 +198,7 @@ See full analysis: [docs/nlp-benchmark-report.md](docs/nlp-benchmark-report.md)
 | **Database** | SQLite | 3.35+ | Local mapping table storage |
 | **Encryption** | cryptography (Fernet) | 41.0+ | Symmetric encryption for mappings |
 | **Validation UI** | rich | 13.7+ | Interactive CLI entity review |
+| **Keyboard Input** | readchar | 4.2+ | Single-keypress capture for validation UI |
 | **Testing** | pytest | 7.4+ | Unit & integration testing |
 | **CI/CD** | GitHub Actions | N/A | Automated testing (Windows/Mac/Linux) |
 
@@ -281,9 +307,10 @@ See full analysis: [docs/nlp-benchmark-report.md](docs/nlp-benchmark-report.md)
 - ✅ **Story 1.4:** Project foundation & module structure
 - ✅ **Story 1.5:** Walking skeleton - basic process command (48 tests passing)
 - ✅ **Story 1.6:** NLP integration with spaCy `fr_core_news_lg` (QA gate: PASS)
+- ✅ **Story 1.7:** Validation UI implementation with rich library (QA gate: CONCERNS - see Story 1.9)
 
 ### In Progress 🔄
-- 📅 **Story 1.7:** Validation UI implementation *(NEW - Critical path)*
+- 📅 **Story 1.9:** Entity deduplication for validation UI *(NEW - Critical path for 100+ entity docs)*
 - 📅 **Story 1.8:** Hybrid detection strategy *(NEW - NLP + regex)*
 
 ### Upcoming 📅
@@ -363,16 +390,19 @@ Likely: MIT or Apache 2.0 (open-source, permissive)
 
 ---
 
-## 📊 Project Metrics (As of 2026-01-16)
+## 📊 Project Metrics (As of 2026-01-20)
 
 | Metric | Value | Status |
 |--------|-------|--------|
 | **Development Progress** | Week 1/14 | 🔄 In Progress |
+| **Stories Complete** | 7/14 (Epic 1) | ✅ 50% Epic 1 |
 | **Test Corpus Size** | 25 docs, 1,855 entities | ✅ Complete |
 | **NLP Accuracy (Baseline)** | 29.5% F1 (spaCy) | ✅ Measured |
 | **Target Accuracy (Hybrid)** | 40-50% F1 | 📅 Epic 1 Story 1.8 |
 | **Final Accuracy (AI+Human)** | 100% (validated) | 🎯 By Design |
-| **Code Coverage** | TBD | 📅 Epic 1 Story 1.3 |
+| **Validation UI** | Operational | ✅ Story 1.7 Complete |
+| **Validation Time** | <2 min (20-30 entities) | ✅ Target Met |
+| **Unit Test Coverage** | 12/12 passing (validation) | ✅ Story 1.7 |
 | **Supported Languages** | French | 🇫🇷 v1.0 only |
 | **Supported Formats** | .txt, .md | 📝 v1.0 scope |
 
@@ -388,6 +418,6 @@ Likely: MIT or Apache 2.0 (open-source, permissive)
 
 ---
 
-**Last Updated:** 2026-01-20 (Story 1.6 Complete - spaCy NLP Integration Operational)
+**Last Updated:** 2026-01-20 (Story 1.7 Complete - Validation UI Operational)
 
-**Current Focus:** Epic 1 - Validation UI & Hybrid Detection (Stories 1.7-1.8)
+**Current Focus:** Epic 1 - Entity Deduplication & Hybrid Detection (Stories 1.9, 1.8)

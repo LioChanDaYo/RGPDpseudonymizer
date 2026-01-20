@@ -35,7 +35,23 @@
       "Bash(export PATH=\"$PATH:/c/Program Files/GitHub CLI\")",
       "Bash(gh:*)",
       "Bash(git pull:*)",
-      "Bash(git ls-tree:*)"
+      "Bash(git ls-tree:*)",
+      "Bash(poetry run ruff:*)",
+      "Bash(git remote:*)",
+      "Bash(winget:*)",
+      "Bash(\"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" --version)",
+      "Bash(\"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" run view 21118693254 --log-failed)",
+      "Bash(poetry run pytest:*)",
+      "Bash(poetry --version:*)",
+      "Bash(where poetry:*)",
+      "Bash(where:*)",
+      "Bash(poetry env use:*)",
+      "Bash(poetry run gdpr-pseudo:*)",
+      "Bash(poetry run mypy:*)",
+      "Bash(poetry lock:*)",
+      "Bash(poetry run python:*)",
+      "Bash(poetry add:*)",
+      "Bash(poetry show:*)"
     ]
   }
 }

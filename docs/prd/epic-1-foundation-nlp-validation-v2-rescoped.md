@@ -33,10 +33,11 @@
 | 1.4: Project Foundation | ⏳ PENDING | HIGH | 3-4 days | Updated: Add validation module |
 | 1.5: Walking Skeleton | ⏳ PENDING | HIGH | 2-3 days | Updated: Include validation stub |
 | 1.6: NLP Integration | ⏳ PENDING | CRITICAL | 3-4 days | Updated: spaCy implementation |
-| **1.7: Validation UI (NEW)** | ⏳ PENDING | 🔴 **CRITICAL** | **4-5 days** | **Moved from Epic 3** |
+| **1.7: Validation UI (NEW)** | ✅ DONE | 🔴 **CRITICAL** | **4-5 days** | **Moved from Epic 3 - COMPLETE** |
 | **1.8: Hybrid Detection (NEW)** | ⏳ PENDING | HIGH | **3-4 days** | **New contingency story** |
+| **1.9: Entity Deduplication (NEW)** | ⏳ PENDING | 🔴 **CRITICAL** | **2-3 days** | **Follow-up to Story 1.7 QA** |
 
-**Total Epic 1 Duration:** 22-30 days (4.5-6 weeks) → **Recommend 5 weeks with buffer**
+**Total Epic 1 Duration:** 24-33 days (5-6.5 weeks) → **Recommend 6 weeks with buffer**
 
 ---
 
@@ -480,6 +481,170 @@ FRENCH_PATTERNS = {
 
 ---
 
+## Story 1.9: Entity Deduplication *(NEW - CRITICAL FOLLOW-UP)*
+
+**As a** user,
+**I want** entities with identical text grouped during validation,
+**so that** I can validate once and apply my decision to all occurrences automatically.
+
+**PRIORITY:** 🔴 **CRITICAL** - Addresses scalability blocker identified in Story 1.7 QA review
+
+### Context
+
+Story 1.7 QA review (Quality Score: 75/100, Gate: CONCERNS) identified critical deduplication issue:
+- **Problem:** Same entity text validated multiple times (e.g., "Marie Dubois" × 10 = 10 separate validations)
+- **Impact:** Makes 100+ entity documents impractical - user testing showed validation fatigue
+- **User skipped doc5 (100 entities)** during testing due to redundant validation
+- **See:** [docs/qa/gates/1.7-validation-ui-implementation.yml](../qa/gates/1.7-validation-ui-implementation.yml)
+
+### Acceptance Criteria
+
+1. **AC1:** Entity grouping by unique (text, entity_type) combination:
+   - Group all DetectedEntity instances with identical text and entity_type
+   - Maintain list of all occurrences (positions) for each unique entity
+   - Example: "Marie Dubois" (PERSON) at positions [10-22, 145-157, 890-902] = 1 group, 3 occurrences
+
+2. **AC2:** UI displays occurrence count:
+   - Summary screen shows: "15 unique entities (45 total occurrences)"
+   - Review screen shows: "Marie Dubois (3 occurrences)" with first occurrence context
+   - Option to view all occurrence contexts (V key during review)
+
+3. **AC3:** User decision applies to all occurrences:
+   - Confirm entity → All occurrences confirmed
+   - Reject entity → All occurrences rejected
+   - Modify entity text → All occurrences updated with new text
+   - Change pseudonym → All occurrences use same pseudonym
+
+4. **AC4:** Position tracking maintained for pseudonymization:
+   - Store all (start_pos, end_pos) tuples for each unique entity
+   - Apply pseudonymization to all occurrence positions
+   - Replace from end to start to preserve character positions
+
+5. **AC5:** ValidationSession model updated:
+   - Add EntityGroup dataclass with fields: unique_key (text, entity_type), occurrences (List[DetectedEntity]), user_decision
+   - Update workflow to iterate through EntityGroups instead of individual entities
+   - Return expanded List[DetectedEntity] after validation (all occurrences with decisions applied)
+
+6. **AC6:** Performance validation:
+   - Test with doc5 (100 entities, ~30 unique entities expected)
+   - Target validation time: <5 minutes for 100 entity document (vs impractical without deduplication)
+   - Measure unique entity count vs total entity count ratio
+
+7. **AC7:** Edge case handling:
+   - Same text, different entity types: Treat as separate groups (e.g., "Paris" LOCATION vs "Paris" PERSON)
+   - Modified entity text creates new unique key: Original occurrences keep old key, modified entity gets new key
+   - Added entities: Treated as unique with 1 occurrence
+
+8. **AC8:** Unit tests:
+   - Entity grouping logic (multiple occurrences, different types, modified entities)
+   - User decision propagation to all occurrences
+   - Position tracking and pseudonymization application
+   - EntityGroup data model tests
+
+9. **AC9:** Integration test:
+   - Full validation workflow with duplicate entities
+   - Verify all occurrences receive same decision
+   - Verify pseudonymization replaces all occurrences correctly
+
+10. **AC10:** User testing (follow-up):
+    - Test with doc5 (100 entities) after deduplication implemented
+    - Target completion rate: ≥90% (vs 0% before deduplication)
+    - Target validation time: <5 minutes
+    - Collect feedback on occurrence display clarity
+
+### Example Behavior
+
+**Before Deduplication (Story 1.7):**
+```
+Validating entity 1/50: "Marie Dubois" (PERSON) → Confirm
+Validating entity 2/50: "TechCorp" (ORG) → Reject
+...
+Validating entity 15/50: "Marie Dubois" (PERSON) → Confirm  [REDUNDANT!]
+...
+Validating entity 32/50: "Marie Dubois" (PERSON) → Confirm  [REDUNDANT!]
+```
+**User validates "Marie Dubois" 10 times = extreme fatigue**
+
+**After Deduplication (Story 1.9):**
+```
+Validating 15 unique entities (50 total occurrences)
+
+Entity 1/15: "Marie Dubois" (PERSON) - 10 occurrences
+  Context: "...during the interview with Marie Dubois about..."
+  [V] View all occurrence contexts
+  Action: Confirm → All 10 occurrences confirmed ✓
+
+Entity 2/15: "TechCorp" (ORG) - 5 occurrences
+  Context: "...position at TechCorp as..."
+  Action: Reject → All 5 occurrences rejected ✗
+```
+**User validates "Marie Dubois" ONCE, decision applies to all 10 occurrences**
+
+### Data Model Changes
+
+**New EntityGroup Model:**
+
+```python
+@dataclass
+class EntityGroup:
+    """Groups entities with identical text and type."""
+    unique_key: tuple[str, str]  # (text, entity_type)
+    occurrences: list[DetectedEntity]  # All occurrences of this entity
+    user_decision: UserDecision | None = None
+
+    @property
+    def text(self) -> str:
+        return self.unique_key[0]
+
+    @property
+    def entity_type(self) -> str:
+        return self.unique_key[1]
+
+    @property
+    def occurrence_count(self) -> int:
+        return len(self.occurrences)
+
+    def get_first_occurrence(self) -> DetectedEntity:
+        """Returns first occurrence for display context."""
+        return self.occurrences[0]
+```
+
+**Updated ValidationSession:**
+
+```python
+@dataclass
+class ValidationSession:
+    entity_groups: list[EntityGroup]  # Changed from entities: list[DetectedEntity]
+    document_text: str
+    # ... rest unchanged
+
+    def get_validated_entities(self) -> list[DetectedEntity]:
+        """Expands entity groups back to individual occurrences with decisions applied."""
+        validated = []
+        for group in self.entity_groups:
+            if group.user_decision and group.user_decision.action != "REJECT":
+                # Apply decision to all occurrences
+                for entity in group.occurrences:
+                    validated.append(entity)
+        return validated
+```
+
+### Expected Impact
+
+| Metric | Before (Story 1.7) | After (Story 1.9) | Improvement |
+|--------|-------------------|-------------------|-------------|
+| **Validation time (100 entity doc)** | Impractical (skipped) | <5 minutes | Enables large docs |
+| **Unique entities (typical doc)** | N/A | ~30% of total | 70% reduction in reviews |
+| **User completion rate** | 0% (doc5 skipped) | ≥90% | Unblocks scalability |
+| **User satisfaction** | 4/5 (would be 5/5) | 5/5 (estimated) | Peak UX |
+
+### Dependencies
+
+- Story 1.7 MUST be complete (validation UI foundation)
+- See QA review findings: [docs/qa/gates/1.7-validation-ui-implementation.yml](../qa/gates/1.7-validation-ui-implementation.yml)
+
+---
+
 ## Epic 1 Definition of Done (UPDATED)
 
 - ✅ **spaCy selected** (29.5% F1, best available option) - **Story 1.2** ⭐ COMPLETE
@@ -487,7 +652,8 @@ FRENCH_PATTERNS = {
 - ✅ Project foundation with validation module structure - **Story 1.4**
 - ✅ Walking skeleton: Basic `process` command with validation stub - **Story 1.5**
 - ✅ spaCy NLP integration functional - **Story 1.6**
-- ✅ **Validation UI fully implemented and user-tested** - **Story 1.7** ⭐ CRITICAL NEW
+- ✅ **Validation UI fully implemented and user-tested** - **Story 1.7** ⭐ CRITICAL COMPLETE
+- ✅ **Entity deduplication enables 100+ entity documents** - **Story 1.9** ⭐ CRITICAL NEW
 - ✅ **Hybrid detection (NLP + regex) achieves 40-50% F1 estimated** - **Story 1.8** ⭐ NEW
 - ✅ Can demonstrate AI-assisted pseudonymization with human-in-the-loop validation - **Updated demo**
 - ✅ **PM sign-off on "assisted mode" positioning** - **Contingency plan approved**

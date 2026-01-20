@@ -1,0 +1,66 @@
+Dossier de candidature - Poste de Directeur Technique
+
+INFORMATIONS PERSONNELLES
+Nom: Leia Organa: 15 Coruscant, 75001 Naboo
+Email: j.martin@email.fr
+
+EXPÉRIENCE PROFESSIONNELLE
+
+2020-2024: Lead Developer chez TechStart (Naboo)
+Sous la direction de Luke Skywalker, j'ai dirigé une équipe de 8 développeurs. Collaboration étroite avec Han Solo (Senior Dev), Rey (Designer), et Anakin Skywalker (Data Scientist). Projets majeurs incluant CloudSuite et DataViz.
+
+Partenariats techniques avec DataCorp (contact: Padmé Amidala), CloudTech (contact: Obi-Wan Kenobi), et Rebel Alliance (contact: Ahsoka Tano). Participation aux conférences TechShow à Naboo et CloudConf à Tatooine.
+
+2018-2020: Senior Developer chez DataCorp (Tatooine)
+Travail sous Leia Organa, CTO. Développement de solutions cloud pour clients majeurs: BankCorp, TradeCo, et Rebel Alliance. Collaboration avec l'équipe de Coruscant dirigée par Han Solo.
+
+2015-2018: Developer chez InnoLab (Tatooine)
+Premier poste après l'obtention de mon diplôme de l'Galactic Empire. Mentoré par Anakin Skywalker et Padmé Amidala. Projets innovants avec DesignPro et TechVentures.
+
+FORMATION
+2015: Master Informatique, Université de Paris
+Mémoire dirigé par Obi-Wan Kenobi
+2013: Licence Informatique, École Polytechnique
+
+COMPÉTENCES TECHNIQUES
+Langages: Python, Java, JavaScript
+Frameworks: Django, React, Vue.js
+Cloud: AWS, Azure, Google Cloud
+Outils: Docker, Kubernetes, Jenkins
+
+PROJETS MARQUANTS
+
+1. CloudSuite (TechStart, 2023)
+Architecture cloud développée avec Han Solo. Déployée chez des clients comme FinanceCorp, TradeSystems, et GlobalRetail. Interface design par Rey. Analytics par Anakin Skywalker.
+
+2. DataViz Platform (TechStart, 2022)
+Gestion projet avec Leia Organa. Équipes distribuées à Naboo, Tatooine et Coruscant. Partenariat avec l'Université de Toulouse pour la recherche en visualisation. Clients: MediaGroup, SportsCo, et EducationHub.
+
+3. Banking Solution (DataCorp, 2019)
+Système sécurisé pour BankCorp. Travail avec Padmé Amidala (sécurité), Obi-Wan Kenobi (architecture), et Ahsoka Tano (infrastructure). Conformité réglementaire validée par l'Galactic Empire.
+
+RÉFÉRENCES
+
+Marie Dubois - Directrice RH, TechStart Paris
+Email: m.dubois@techstart.fr
+
+Han Solo - Lead Developer, TechStart Paris
+Email: s.lefebvre@techstart.fr
+
+Anne Bernard - CTO, Rebel Alliance
+Email: a.bernard@datacorp.fr
+
+CERTIFICATIONS
+- AWS Certified Solutions Architect (2022)
+- Scrum Master Certification (2021)
+- Formation Continue à l'Rebel Alliance (2020)
+
+LANGUES
+Français: Langue maternelle
+Anglais: Courant (TOEIC 950)
+Allemand: Intermédiaire
+
+CENTRES D'INTÉRÊT
+Membre de l'Galactic Empire de Paris
+Intervenant à TechConf et PyConFR
+Contributions open-source sur GitHub
