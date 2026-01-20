@@ -1,10 +1,16 @@
 """Naive entity detection and pseudonymization processor.
 
-This module provides simple string-matching entity detection and replacement
+DEPRECATED: This module is deprecated as of Story 1.6. Use SpaCyDetector instead.
+
+This module provided simple string-matching entity detection and replacement
 for the walking skeleton implementation (Story 1.5).
 
-IMPORTANT: This is a temporary implementation. NLP-based detection will
-be implemented in Story 1.6.
+MIGRATION PATH:
+- Replace: from gdpr_pseudonymizer.core.naive_processor import detect_naive_entities
+- With: from gdpr_pseudonymizer.nlp.spacy_detector import SpaCyDetector
+- See: gdpr_pseudonymizer/cli/commands/process.py for migration example
+
+This file will be removed in Epic 2.
 """
 
 from __future__ import annotations

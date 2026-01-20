@@ -1,10 +1,17 @@
 """Hardcoded entity list for naive pseudonymization.
 
-This module provides a simple entity list for the walking skeleton
-implementation (Story 1.5). It will be replaced by NLP-based detection
-in later stories.
+PARTIALLY DEPRECATED: Pseudonym mappings still in use by process.py.
 
-IMPORTANT: This is a temporary implementation for demonstration purposes only.
+This module provided a simple entity list for the walking skeleton
+implementation (Story 1.5). Entity detection has been replaced by SpaCyDetector,
+but the pseudonym lists (NAIVE_ENTITIES) are still used for mapping detected
+entities to Star Wars pseudonyms.
+
+FUTURE: This will be replaced by proper pseudonym library system in Epic 2.
+For now: Pseudonym assignments are managed in process.py using these pools.
+
+NOTE: The entity_text field (first tuple element) is no longer used for detection.
+Only the pseudonym pools (entity_type + pseudonym) are actively used.
 """
 
 from __future__ import annotations

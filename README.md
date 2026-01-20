@@ -84,6 +84,43 @@ We're actively developing v1.0 MVP with an **AI-assisted approach**:
 
 ---
 
+## ⚙️ Installation (MVP Development)
+
+**Current status:** Development version only (not ready for production use)
+
+### Prerequisites
+- Python 3.9-3.13 (Python 3.14+ not supported due to spaCy compatibility)
+- Poetry 1.7+
+
+### Quick Install
+
+```bash
+# Clone repository
+git clone https://github.com/your-org/gdpr-pseudonymizer.git
+cd gdpr-pseudonymizer
+
+# Install dependencies
+poetry install
+
+# Install spaCy French model (required - 571MB download)
+poetry run python scripts/install_spacy_model.py
+```
+
+### Verify Installation
+
+```bash
+# Run CLI
+poetry run gdpr-pseudo --help
+
+# Test on sample document
+echo "Marie Dubois travaille à Paris pour Acme SA." > test.txt
+poetry run gdpr-pseudo process test.txt output.txt
+```
+
+Expected output: "Leia Organa travaille à Coruscant pour Rebel Alliance."
+
+---
+
 ## 📖 Documentation
 
 **For Users:**
@@ -130,7 +167,7 @@ See full analysis: [docs/nlp-benchmark-report.md](docs/nlp-benchmark-report.md)
 
 | Component | Technology | Version | Purpose |
 |-----------|------------|---------|---------|
-| **Runtime** | Python | 3.9+ | Cross-platform compatibility |
+| **Runtime** | Python | 3.9-3.13 | Cross-platform compatibility (3.14+ not supported) |
 | **NLP Library** | spaCy | 3.8.0 | French entity detection (fr_core_news_lg) |
 | **CLI Framework** | Typer | 0.9+ | Command-line interface |
 | **Database** | SQLite | 3.35+ | Local mapping table storage |
@@ -243,9 +280,9 @@ See full analysis: [docs/nlp-benchmark-report.md](docs/nlp-benchmark-report.md)
 - ✅ **Story 1.3:** CI/CD pipeline setup (GitHub Actions)
 - ✅ **Story 1.4:** Project foundation & module structure
 - ✅ **Story 1.5:** Walking skeleton - basic process command (48 tests passing)
+- ✅ **Story 1.6:** NLP integration with spaCy `fr_core_news_lg` (QA gate: PASS)
 
 ### In Progress 🔄
-- 📅 **Story 1.6:** NLP integration (spaCy `fr_core_news_lg`)
 - 📅 **Story 1.7:** Validation UI implementation *(NEW - Critical path)*
 - 📅 **Story 1.8:** Hybrid detection strategy *(NEW - NLP + regex)*
 
@@ -351,6 +388,6 @@ Likely: MIT or Apache 2.0 (open-source, permissive)
 
 ---
 
-**Last Updated:** 2026-01-19 (Story 1.5 Complete - Walking Skeleton Operational)
+**Last Updated:** 2026-01-20 (Story 1.6 Complete - spaCy NLP Integration Operational)
 
-**Current Focus:** Epic 1 - NLP Integration (Story 1.6)
+**Current Focus:** Epic 1 - Validation UI & Hybrid Detection (Stories 1.7-1.8)
