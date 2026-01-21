@@ -29,13 +29,16 @@ def mock_validation_workflow(monkeypatch):
     available in CI environments. This fixture makes all tests non-interactive
     by automatically approving all detected entities.
     """
-    def auto_approve_entities(entities, document_text, document_path, pseudonym_assigner):
+
+    def auto_approve_entities(
+        entities, document_text, document_path, pseudonym_assigner
+    ):
         """Auto-approve all entities without user interaction."""
         return entities  # Return all entities as approved
 
     monkeypatch.setattr(
         "gdpr_pseudonymizer.cli.commands.process.run_validation_workflow",
-        auto_approve_entities
+        auto_approve_entities,
     )
 
 
@@ -301,7 +304,9 @@ def test_process_end_to_end_help_command() -> None:
 
     assert result.exit_code == 0
     assert "Process a single document" in result.stdout
-    assert "validation" in result.stdout or "Validation" in result.stdout  # Story 1.7: mandatory validation
+    assert (
+        "validation" in result.stdout or "Validation" in result.stdout
+    )  # Story 1.7: mandatory validation
     assert "INPUT_FILE" in result.stdout or "input-file" in result.stdout
 
 
