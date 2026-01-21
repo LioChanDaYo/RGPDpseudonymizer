@@ -20,6 +20,27 @@ def reset_pseudonym_cache() -> None:
     process._pseudonym_cache.clear()
 
 
+@pytest.fixture(autouse=True)
+def mock_validation_workflow(monkeypatch):
+    """Mock validation workflow to auto-approve all entities for CI testing.
+
+    The validation workflow requires interactive terminal input which is not
+    available in CI environments. This fixture makes all tests non-interactive
+    by automatically approving all detected entities.
+    """
+
+    def auto_approve_entities(
+        entities, document_text, document_path, pseudonym_assigner
+    ):
+        """Auto-approve all entities without user interaction."""
+        return entities  # Return all entities as approved
+
+    monkeypatch.setattr(
+        "gdpr_pseudonymizer.cli.commands.process.run_validation_workflow",
+        auto_approve_entities,
+    )
+
+
 def test_process_end_to_end_without_validation(tmp_path: Path) -> None:
     """Test full processing workflow without validation."""
     # Create input file with entities (French text)
@@ -283,8 +304,8 @@ def test_process_end_to_end_help_command() -> None:
     assert result.exit_code == 0
     assert "Process a single document" in result.stdout
     assert (
-        "validate" in result.stdout
-    )  # Check for "validate" without dashes (handles ANSI formatting)
+        "validation" in result.stdout or "Validation" in result.stdout
+    )  # Story 1.7: mandatory validation
     assert "INPUT_FILE" in result.stdout or "input-file" in result.stdout
 
 
