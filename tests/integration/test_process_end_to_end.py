@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 from typer.testing import CliRunner
@@ -18,6 +19,24 @@ def reset_pseudonym_cache() -> None:
     from gdpr_pseudonymizer.cli.commands import process
 
     process._pseudonym_cache.clear()
+
+
+@pytest.fixture(autouse=True)
+def mock_validation_workflow(monkeypatch):
+    """Mock validation workflow to auto-approve all entities for CI testing.
+
+    The validation workflow requires interactive terminal input which is not
+    available in CI environments. This fixture makes all tests non-interactive
+    by automatically approving all detected entities.
+    """
+    def auto_approve_entities(entities, document_text, document_path, pseudonym_assigner):
+        """Auto-approve all entities without user interaction."""
+        return entities  # Return all entities as approved
+
+    monkeypatch.setattr(
+        "gdpr_pseudonymizer.cli.commands.process.run_validation_workflow",
+        auto_approve_entities
+    )
 
 
 def test_process_end_to_end_without_validation(tmp_path: Path) -> None:
@@ -282,9 +301,7 @@ def test_process_end_to_end_help_command() -> None:
 
     assert result.exit_code == 0
     assert "Process a single document" in result.stdout
-    assert (
-        "validate" in result.stdout
-    )  # Check for "validate" without dashes (handles ANSI formatting)
+    assert "validation" in result.stdout or "Validation" in result.stdout  # Story 1.7: mandatory validation
     assert "INPUT_FILE" in result.stdout or "input-file" in result.stdout
 
 
