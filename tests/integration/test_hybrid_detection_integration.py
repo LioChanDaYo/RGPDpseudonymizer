@@ -11,7 +11,6 @@ import pytest
 
 from gdpr_pseudonymizer.nlp.hybrid_detector import HybridDetector
 
-
 # Skip all tests due to spaCy compatibility issue with Python 3.14+
 pytestmark = pytest.mark.skipif(
     sys.version_info >= (3, 14),

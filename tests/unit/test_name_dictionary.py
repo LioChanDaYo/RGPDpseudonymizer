@@ -2,7 +2,6 @@
 Unit tests for NameDictionary
 """
 
-from pathlib import Path
 
 import pytest
 

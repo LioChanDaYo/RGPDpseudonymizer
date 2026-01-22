@@ -67,7 +67,7 @@ def benchmark_detector(detector, test_corpus_path: Path, detector_name: str) -> 
 
     # Process each document
     for doc_path in test_docs:
-        with open(doc_path, "r", encoding="utf-8") as f:
+        with open(doc_path, encoding="utf-8") as f:
             text = f.read()
 
         # Measure processing time

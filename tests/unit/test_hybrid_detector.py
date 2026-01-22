@@ -9,7 +9,6 @@ import pytest
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 from gdpr_pseudonymizer.nlp.hybrid_detector import HybridDetector
 
-
 pytestmark = pytest.mark.skipif(
     sys.version_info >= (3, 14),
     reason="spaCy compatibility issue with Python 3.14+ - tests run in CI with Python 3.9-3.12",
