@@ -81,7 +81,9 @@ class TestRegexMatcher:
         text = "Il habite à Paris depuis 2020."
         entities = matcher.match_entities(text)
 
-        matching = [e for e in entities if "Paris" in e.text and e.entity_type == "LOCATION"]
+        matching = [
+            e for e in entities if "Paris" in e.text and e.entity_type == "LOCATION"
+        ]
         assert len(matching) >= 1
         assert matching[0].confidence >= 0.6
 
@@ -122,8 +124,12 @@ class TestRegexMatcher:
         assert len(persons) >= 2
 
         names = [e.text for e in persons]
-        assert "Marie Dubois" in names or any("Marie" in n and "Dubois" in n for n in names)
-        assert "Jean Martin" in names or any("Jean" in n and "Martin" in n for n in names)
+        assert "Marie Dubois" in names or any(
+            "Marie" in n and "Dubois" in n for n in names
+        )
+        assert "Jean Martin" in names or any(
+            "Jean" in n and "Martin" in n for n in names
+        )
 
     def test_full_name_not_in_dictionary(self, matcher: RegexMatcher) -> None:
         """Test that non-dictionary names are not matched."""
@@ -131,7 +137,9 @@ class TestRegexMatcher:
         entities = matcher.match_entities(text)
 
         # Should not match fake names
-        fake_entities = [e for e in entities if "XyzAbc" in e.text or "NotRealName" in e.text]
+        fake_entities = [
+            e for e in entities if "XyzAbc" in e.text or "NotRealName" in e.text
+        ]
         assert len(fake_entities) == 0
 
     def test_entity_positions_correct(self, matcher: RegexMatcher) -> None:
@@ -143,7 +151,7 @@ class TestRegexMatcher:
         entity = entities[0]
 
         # Verify position matches actual text
-        extracted = text[entity.start_pos:entity.end_pos]
+        extracted = text[entity.start_pos : entity.end_pos]
         assert extracted == entity.text
 
     def test_no_duplicate_entities(self, matcher: RegexMatcher) -> None:
@@ -153,7 +161,9 @@ class TestRegexMatcher:
 
         # Check for duplicates by span
         spans = [(e.start_pos, e.end_pos) for e in entities]
-        assert len(spans) == len(set(spans)), "Duplicate entities with same span detected"
+        assert len(spans) == len(
+            set(spans)
+        ), "Duplicate entities with same span detected"
 
     def test_french_accents_in_patterns(self, matcher: RegexMatcher) -> None:
         """Test pattern matching with French accented characters."""

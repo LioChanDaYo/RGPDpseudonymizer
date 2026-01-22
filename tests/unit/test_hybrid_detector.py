@@ -8,7 +8,9 @@ from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 from gdpr_pseudonymizer.nlp.hybrid_detector import HybridDetector
 
 
-pytestmark = pytest.mark.skip(reason="spaCy compatibility issue with Python 3.14 - tests will run in CI with Python 3.9-3.12")
+pytestmark = pytest.mark.skip(
+    reason="spaCy compatibility issue with Python 3.14 - tests will run in CI with Python 3.9-3.12"
+)
 
 
 class TestHybridDetector:
@@ -70,7 +72,9 @@ class TestHybridDetector:
 
         # Check that there are no duplicate spans
         spans = [(e.start_pos, e.end_pos) for e in entities]
-        assert len(spans) == len(set(spans)), "Duplicate entities with same span detected"
+        assert len(spans) == len(
+            set(spans)
+        ), "Duplicate entities with same span detected"
 
     def test_partial_overlap_flags_ambiguous(self, detector: HybridDetector) -> None:
         """Test that partial overlaps are flagged as ambiguous."""
@@ -81,8 +85,10 @@ class TestHybridDetector:
         # If there are partial overlaps, at least one should be flagged ambiguous
         overlapping_entities = []
         for i, e1 in enumerate(entities):
-            for e2 in entities[i + 1:]:
-                if detector._has_overlap(e1, e2) and not detector._is_exact_match(e1, e2):
+            for e2 in entities[i + 1 :]:
+                if detector._has_overlap(e1, e2) and not detector._is_exact_match(
+                    e1, e2
+                ):
                     overlapping_entities.extend([e1, e2])
 
         if overlapping_entities:
@@ -141,7 +147,7 @@ class TestHybridDetector:
 
         for entity in entities:
             # Verify position matches actual text
-            extracted = text[entity.start_pos:entity.end_pos]
+            extracted = text[entity.start_pos : entity.end_pos]
             assert extracted == entity.text
 
     def test_entities_sorted_by_position(self, detector: HybridDetector) -> None:
@@ -158,7 +164,9 @@ class TestHybridDetector:
         with pytest.raises(ValueError, match="Text cannot be empty"):
             detector.detect_entities("")
 
-    def test_model_info_includes_both_components(self, detector: HybridDetector) -> None:
+    def test_model_info_includes_both_components(
+        self, detector: HybridDetector
+    ) -> None:
         """Test that model info includes both spaCy and regex components."""
         info = detector.get_model_info()
 

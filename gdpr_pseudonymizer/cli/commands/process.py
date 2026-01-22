@@ -216,7 +216,9 @@ def process_command(
         content = read_file(str(input_file))
 
         # Initialize hybrid detector (spaCy + regex)
-        format_info_message("Loading hybrid detection model (spaCy + regex patterns)...")
+        format_info_message(
+            "Loading hybrid detection model (spaCy + regex patterns)..."
+        )
         try:
             detector = HybridDetector()
         except OSError as e:

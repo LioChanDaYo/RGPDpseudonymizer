@@ -41,7 +41,9 @@ class TestHybridDetectionIntegration:
         entities = detector.detect_entities(document)
 
         # Verify hybrid detection finds more entities than baseline
-        assert len(entities) >= 8, "Should detect at least 8 entities with hybrid approach"
+        assert (
+            len(entities) >= 8
+        ), "Should detect at least 8 entities with hybrid approach"
 
         # Verify entity types are detected
         entity_types = {e.entity_type for e in entities}
@@ -164,8 +166,7 @@ class TestHybridDetectionIntegration:
         # At least one should have a legal suffix
         org_texts = [e.text for e in orgs]
         assert any(
-            suffix in " ".join(org_texts)
-            for suffix in ["SA", "SARL", "SAS"]
+            suffix in " ".join(org_texts) for suffix in ["SA", "SARL", "SAS"]
         ), "Should detect organization with legal suffix"
 
     def test_location_indicators_detected(self, detector: HybridDetector) -> None:
@@ -189,7 +190,9 @@ class TestHybridDetectionIntegration:
 
     def test_mixed_source_entities(self, detector: HybridDetector) -> None:
         """Test that hybrid detection includes entities from both sources."""
-        document = "M. Dupont (regex) habite à Paris (spaCy might catch) pour TechCorp SA."
+        document = (
+            "M. Dupont (regex) habite à Paris (spaCy might catch) pour TechCorp SA."
+        )
         entities = detector.detect_entities(document)
 
         # Should have entities from different sources

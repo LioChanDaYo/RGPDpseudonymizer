@@ -222,8 +222,11 @@ def main() -> None:
     """Run hybrid detection benchmark."""
     # Force UTF-8 output for Windows compatibility
     import io
+
     if sys.platform == "win32":
-        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+        sys.stdout = io.TextIOWrapper(
+            sys.stdout.buffer, encoding="utf-8", errors="replace"
+        )
 
     print("=" * 80)
     print("HYBRID DETECTION BENCHMARK")
@@ -270,7 +273,9 @@ def main() -> None:
     print("=" * 80)
     print("RESULTS")
     print("=" * 80)
-    print(f"[UP] Entity detection improvement: +{improvement} entities (+{improvement_pct:.1f}%)")
+    print(
+        f"[UP] Entity detection improvement: +{improvement} entities (+{improvement_pct:.1f}%)"
+    )
     print(
         f"[TIME] Performance impact: +{hybrid_results['avg_time_per_doc'] - spacy_results['avg_time_per_doc']:.2f}s/doc"
     )
