@@ -24,11 +24,11 @@ def test_process_command_reads_input_file(
     mock_read = mocker.patch("gdpr_pseudonymizer.cli.commands.process.read_file")
     mock_read.return_value = "Test content with Marie Dubois."
 
-    # Mock SpaCyDetector
+    # Mock HybridDetector
     mock_detector = mocker.Mock()
     mock_detector.detect_entities.return_value = []
     mocker.patch(
-        "gdpr_pseudonymizer.cli.commands.process.SpaCyDetector",
+        "gdpr_pseudonymizer.cli.commands.process.HybridDetector",
         return_value=mock_detector,
     )
 
@@ -64,11 +64,11 @@ def test_process_command_writes_output_file(
         return_value="Test content.",
     )
 
-    # Mock SpaCyDetector
+    # Mock HybridDetector
     mock_detector = mocker.Mock()
     mock_detector.detect_entities.return_value = []
     mocker.patch(
-        "gdpr_pseudonymizer.cli.commands.process.SpaCyDetector",
+        "gdpr_pseudonymizer.cli.commands.process.HybridDetector",
         return_value=mock_detector,
     )
 
@@ -174,12 +174,12 @@ def test_process_command_with_validation_workflow(
         return_value="Test with Marie Dubois.",
     )
 
-    # Mock SpaCyDetector
+    # Mock HybridDetector
     mock_detector = mocker.MagicMock()
     mock_entity = DetectedEntity("Marie Dubois", "PERSON", 10, 22)
     mock_detector.detect_entities.return_value = [mock_entity]
     mocker.patch(
-        "gdpr_pseudonymizer.cli.commands.process.SpaCyDetector",
+        "gdpr_pseudonymizer.cli.commands.process.HybridDetector",
         return_value=mock_detector,
     )
 
@@ -217,12 +217,12 @@ def test_process_command_with_validation_user_cancels(
         return_value="Test with Marie Dubois.",
     )
 
-    # Mock SpaCyDetector
+    # Mock HybridDetector
     mock_detector = mocker.MagicMock()
     mock_entity = DetectedEntity("Marie Dubois", "PERSON", 10, 22)
     mock_detector.detect_entities.return_value = [mock_entity]
     mocker.patch(
-        "gdpr_pseudonymizer.cli.commands.process.SpaCyDetector",
+        "gdpr_pseudonymizer.cli.commands.process.HybridDetector",
         return_value=mock_detector,
     )
 
@@ -261,11 +261,11 @@ def test_process_command_generates_default_output_filename(
         return_value="Test content.",
     )
 
-    # Mock SpaCyDetector
+    # Mock HybridDetector
     mock_detector = mocker.MagicMock()
     mock_detector.detect_entities.return_value = []
     mocker.patch(
-        "gdpr_pseudonymizer.cli.commands.process.SpaCyDetector",
+        "gdpr_pseudonymizer.cli.commands.process.HybridDetector",
         return_value=mock_detector,
     )
 
@@ -288,7 +288,7 @@ def test_process_command_generates_default_output_filename(
     assert "interview_pseudonymized.txt" in output_path
 
 
-def test_process_command_calls_spacy_detector(
+def test_process_command_calls_hybrid_detector(
     mocker: MockerFixture, tmp_path: Path
 ) -> None:
     """Test process command calls entity detection."""
@@ -301,12 +301,12 @@ def test_process_command_calls_spacy_detector(
         return_value="Test with Marie Dubois.",
     )
 
-    # Mock SpaCyDetector
+    # Mock HybridDetector
     mock_detector = mocker.MagicMock()
     mock_entity = DetectedEntity("Marie Dubois", "PERSON", 10, 22)
     mock_detector.detect_entities.return_value = [mock_entity]
     mock_spacy_class = mocker.patch(
-        "gdpr_pseudonymizer.cli.commands.process.SpaCyDetector",
+        "gdpr_pseudonymizer.cli.commands.process.HybridDetector",
         return_value=mock_detector,
     )
 
@@ -323,7 +323,7 @@ def test_process_command_calls_spacy_detector(
     # Run command
     process_command(input_file=input_file, output_file=None)
 
-    # Verify SpaCyDetector was instantiated and detect_entities called
+    # Verify HybridDetector was instantiated and detect_entities called
     mock_spacy_class.assert_called_once()
     mock_detector.detect_entities.assert_called_once_with("Test with Marie Dubois.")
 
@@ -341,12 +341,12 @@ def test_process_command_calls_apply_pseudonymization(
         return_value="Test with Marie Dubois.",
     )
 
-    # Mock SpaCyDetector
+    # Mock HybridDetector
     mock_detector = mocker.MagicMock()
     mock_entity = DetectedEntity("Marie Dubois", "PERSON", 10, 22)
     mock_detector.detect_entities.return_value = [mock_entity]
     mocker.patch(
-        "gdpr_pseudonymizer.cli.commands.process.SpaCyDetector",
+        "gdpr_pseudonymizer.cli.commands.process.HybridDetector",
         return_value=mock_detector,
     )
 
@@ -387,11 +387,11 @@ def test_process_command_logs_processing_steps(
         return_value="Test content.",
     )
 
-    # Mock SpaCyDetector
+    # Mock HybridDetector
     mock_detector = mocker.MagicMock()
     mock_detector.detect_entities.return_value = []
     mocker.patch(
-        "gdpr_pseudonymizer.cli.commands.process.SpaCyDetector",
+        "gdpr_pseudonymizer.cli.commands.process.HybridDetector",
         return_value=mock_detector,
     )
 

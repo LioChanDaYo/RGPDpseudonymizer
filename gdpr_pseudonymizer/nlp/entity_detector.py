@@ -24,6 +24,7 @@ class DetectedEntity:
         confidence: NER confidence score (0.0-1.0), None if not available
         gender: Gender classification (male/female/neutral/unknown), None if not available
         is_ambiguous: Whether entity is flagged as ambiguous (low confidence, partial match, etc.)
+        source: Detection source ("spacy", "regex", or "hybrid")
     """
 
     text: str
@@ -33,6 +34,7 @@ class DetectedEntity:
     confidence: float | None = None
     gender: str | None = None
     is_ambiguous: bool = False
+    source: str = "spacy"
 
 
 class EntityDetector(ABC):

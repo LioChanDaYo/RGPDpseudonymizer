@@ -51,7 +51,8 @@
       "Bash(poetry lock:*)",
       "Bash(poetry run python:*)",
       "Bash(poetry add:*)",
-      "Bash(poetry show:*)"
+      "Bash(poetry show:*)",
+      "Bash(dir:*)"
     ]
   }
 }

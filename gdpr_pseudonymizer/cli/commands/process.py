@@ -21,7 +21,7 @@ from gdpr_pseudonymizer.cli.formatters import (
 from gdpr_pseudonymizer.cli.naive_data import NAIVE_ENTITIES
 from gdpr_pseudonymizer.exceptions import FileProcessingError, ValidationError
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
-from gdpr_pseudonymizer.nlp.spacy_detector import SpaCyDetector
+from gdpr_pseudonymizer.nlp.hybrid_detector import HybridDetector
 from gdpr_pseudonymizer.utils.file_handler import read_file, write_file
 from gdpr_pseudonymizer.utils.logger import configure_logging, get_logger
 from gdpr_pseudonymizer.validation.workflow import run_validation_workflow
@@ -171,10 +171,11 @@ def process_command(
         help="Output file path (default: <input>_pseudonymized.txt)",
     ),
 ) -> None:
-    """Process a single document and apply spaCy-based pseudonymization.
+    """Process a single document and apply hybrid (spaCy + regex) pseudonymization.
 
-    This command reads a text document, detects entities using spaCy NLP,
-    presents them for mandatory validation, and writes the pseudonymized output.
+    This command reads a text document, detects entities using hybrid detection
+    (spaCy NLP + regex patterns), presents them for mandatory validation, and
+    writes the pseudonymized output.
 
     Validation is required for accuracy assurance. All detected entities must be reviewed.
 
@@ -214,10 +215,12 @@ def process_command(
         # Read input file
         content = read_file(str(input_file))
 
-        # Initialize spaCy detector
-        format_info_message("Loading NLP model...")
+        # Initialize hybrid detector (spaCy + regex)
+        format_info_message(
+            "Loading hybrid detection model (spaCy + regex patterns)..."
+        )
         try:
-            detector = SpaCyDetector()
+            detector = HybridDetector()
         except OSError as e:
             format_error_message(
                 "NLP Model Not Found",
@@ -226,8 +229,8 @@ def process_command(
             )
             sys.exit(2)
 
-        # Detect entities using spaCy
-        format_info_message("Detecting entities with spaCy...")
+        # Detect entities using hybrid approach
+        format_info_message("Detecting entities with hybrid detector...")
         try:
             entities = detector.detect_entities(content)
         except ValueError as e:
