@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
+from typing import Any
 
 import yaml
 
@@ -41,9 +42,9 @@ class RegexMatcher:
             config_path: Path to detection patterns YAML configuration
         """
         self.config_path = config_path
-        self.patterns: dict = {}
+        self.patterns: dict[str, list[dict[str, Any]]] = {}
         self.name_dictionary: NameDictionary | None = None
-        self._config: dict = {}
+        self._config: dict[str, Any] = {}
 
     def load_patterns(self, config_path: str | None = None) -> None:
         """Load regex patterns from YAML configuration.
@@ -122,10 +123,10 @@ class RegexMatcher:
     def _needs_name_dictionary(self) -> bool:
         """Check if name dictionary is required by configuration."""
         pattern_config = self._config.get("patterns", {})
-        full_names_config = pattern_config.get("full_names", {})
-        return full_names_config.get("enabled", False) and full_names_config.get(
-            "use_name_dictionary", False
-        )
+        full_names_config: dict[str, Any] = pattern_config.get("full_names", {})
+        enabled = bool(full_names_config.get("enabled", False))
+        use_dict = bool(full_names_config.get("use_name_dictionary", False))
+        return enabled and use_dict
 
     def match_entities(self, text: str) -> list[DetectedEntity]:
         """Match entities in text using regex patterns.
@@ -154,7 +155,7 @@ class RegexMatcher:
                         start_pos=start_pos,
                         end_pos=end_pos,
                         confidence=pattern_def["confidence"],
-                        source="regex",  # type: ignore[call-arg]
+                        source="regex",
                     )
                     entities.append(entity)
 
@@ -171,7 +172,8 @@ class RegexMatcher:
     def _is_full_names_enabled(self) -> bool:
         """Check if full names pattern matching is enabled."""
         pattern_config = self._config.get("patterns", {})
-        return pattern_config.get("full_names", {}).get("enabled", False)
+        full_names_config: dict[str, Any] = pattern_config.get("full_names", {})
+        return bool(full_names_config.get("enabled", False))
 
     def _match_full_names(self, text: str) -> list[DetectedEntity]:
         """Match full names using name dictionary.
@@ -219,7 +221,7 @@ class RegexMatcher:
                     start_pos=match.start(),
                     end_pos=match.end(),
                     confidence=confidence,
-                    source="regex",  # type: ignore[call-arg]
+                    source="regex",
                 )
                 entities.append(entity)
 
