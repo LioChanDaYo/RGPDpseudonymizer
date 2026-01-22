@@ -60,97 +60,40 @@ def mock_hybrid_detector_for_deterministic_tests(monkeypatch):
 
         def detect_entities(self, text: str) -> list[DetectedEntity]:
             """Return predictable entities for common test patterns."""
+            import re
+
             entities = []
 
-            # Detect common test entities to maintain test stability
-            if "Marie Dubois" in text:
-                entities.append(
-                    DetectedEntity(
-                        text="Marie Dubois",
-                        entity_type="PERSON",
-                        start_pos=text.find("Marie Dubois"),
-                        end_pos=text.find("Marie Dubois") + len("Marie Dubois"),
-                        confidence=0.95,
-                        source="spacy",
+            # Define entity patterns to detect (handles multiple occurrences)
+            patterns = [
+                ("Marie Dubois", "PERSON", 0.95),
+                ("Jean Martin", "PERSON", 0.95),
+                ("Sophie Laurent", "PERSON", 0.95),
+                ("Pierre Fontaine", "PERSON", 0.95),
+                ("Pierre Dupont", "PERSON", 0.95),
+                ("Paris", "LOCATION", 0.90),
+                ("Lyon", "LOCATION", 0.90),
+                ("Marseille", "LOCATION", 0.90),
+                ("Acme SA", "ORG", 0.85),
+                ("TechCorp", "ORG", 0.85),
+                ("Renault", "ORG", 0.85),
+                ("Peugeot", "ORG", 0.85),
+            ]
+
+            # Find all occurrences of each pattern
+            for pattern_text, entity_type, confidence in patterns:
+                # Use regex to find all occurrences (case-sensitive word boundary match)
+                for match in re.finditer(re.escape(pattern_text), text):
+                    entities.append(
+                        DetectedEntity(
+                            text=pattern_text,
+                            entity_type=entity_type,
+                            start_pos=match.start(),
+                            end_pos=match.end(),
+                            confidence=confidence,
+                            source="spacy",
+                        )
                     )
-                )
-            if "Jean Martin" in text:
-                entities.append(
-                    DetectedEntity(
-                        text="Jean Martin",
-                        entity_type="PERSON",
-                        start_pos=text.find("Jean Martin"),
-                        end_pos=text.find("Jean Martin") + len("Jean Martin"),
-                        confidence=0.95,
-                        source="spacy",
-                    )
-                )
-            if "Paris" in text:
-                entities.append(
-                    DetectedEntity(
-                        text="Paris",
-                        entity_type="LOCATION",
-                        start_pos=text.find("Paris"),
-                        end_pos=text.find("Paris") + len("Paris"),
-                        confidence=0.90,
-                        source="spacy",
-                    )
-                )
-            if "Acme SA" in text:
-                entities.append(
-                    DetectedEntity(
-                        text="Acme SA",
-                        entity_type="ORG",
-                        start_pos=text.find("Acme SA"),
-                        end_pos=text.find("Acme SA") + len("Acme SA"),
-                        confidence=0.85,
-                        source="spacy",
-                    )
-                )
-            if "TechCorp" in text:
-                entities.append(
-                    DetectedEntity(
-                        text="TechCorp",
-                        entity_type="ORG",
-                        start_pos=text.find("TechCorp"),
-                        end_pos=text.find("TechCorp") + len("TechCorp"),
-                        confidence=0.85,
-                        source="spacy",
-                    )
-                )
-            if "Lyon" in text:
-                entities.append(
-                    DetectedEntity(
-                        text="Lyon",
-                        entity_type="LOCATION",
-                        start_pos=text.find("Lyon"),
-                        end_pos=text.find("Lyon") + len("Lyon"),
-                        confidence=0.90,
-                        source="spacy",
-                    )
-                )
-            if "Sophie Laurent" in text:
-                entities.append(
-                    DetectedEntity(
-                        text="Sophie Laurent",
-                        entity_type="PERSON",
-                        start_pos=text.find("Sophie Laurent"),
-                        end_pos=text.find("Sophie Laurent") + len("Sophie Laurent"),
-                        confidence=0.95,
-                        source="spacy",
-                    )
-                )
-            if "Pierre Fontaine" in text:
-                entities.append(
-                    DetectedEntity(
-                        text="Pierre Fontaine",
-                        entity_type="PERSON",
-                        start_pos=text.find("Pierre Fontaine"),
-                        end_pos=text.find("Pierre Fontaine") + len("Pierre Fontaine"),
-                        confidence=0.95,
-                        source="spacy",
-                    )
-                )
 
             return sorted(entities, key=lambda e: e.start_pos)
 
