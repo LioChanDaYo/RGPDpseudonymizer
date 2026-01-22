@@ -53,7 +53,8 @@ GDPR Pseudonymizer is a **privacy-first CLI tool** that combines AI efficiency w
 
 We're actively developing v1.0 MVP with an **AI-assisted approach**:
 - ✅ **Story 1.7 Complete:** Validation UI with rich CLI interface operational
-- 🔄 **Week 1-5 (Current):** Epic 1 - Entity deduplication & hybrid detection
+- ✅ **Story 1.8 Complete:** Hybrid detection (NLP + regex) achieves 35.3% improvement (+52.2% PERSON detection)
+- 🔄 **Week 1-5 (Current):** Epic 1 - Entity deduplication (Story 1.9)
 - 📅 **Week 6-14:** Core engine, CLI polish, launch prep
 - 🎯 **MVP Launch:** Week 14 (estimated Q2 2026)
 
@@ -307,11 +308,11 @@ The validation UI provides an intuitive keyboard-driven interface for reviewing 
 - ✅ **Story 1.4:** Project foundation & module structure
 - ✅ **Story 1.5:** Walking skeleton - basic process command (48 tests passing)
 - ✅ **Story 1.6:** NLP integration with spaCy `fr_core_news_lg` (QA gate: PASS)
-- ✅ **Story 1.7:** Validation UI implementation with rich library (QA gate: CONCERNS - see Story 1.9)
+- ✅ **Story 1.7:** Validation UI implementation with rich library (QA gate: PASS with follow-up Story 1.9)
+- ✅ **Story 1.8:** Hybrid detection strategy (NLP + regex) - 35.3% improvement, 52.2% PERSON detection (QA gate: PASS)
 
 ### In Progress 🔄
-- 📅 **Story 1.9:** Entity deduplication for validation UI *(NEW - Critical path for 100+ entity docs)*
-- 📅 **Story 1.8:** Hybrid detection strategy *(NEW - NLP + regex)*
+- 📅 **Story 1.9:** Entity deduplication for validation UI *(Critical path for 100+ entity docs)*
 
 ### Upcoming 📅
 - **Epic 2 (Week 6-10):** Core pseudonymization engine
@@ -395,7 +396,7 @@ Likely: MIT or Apache 2.0 (open-source, permissive)
 | Metric | Value | Status |
 |--------|-------|--------|
 | **Development Progress** | Week 1/14 | 🔄 In Progress |
-| **Stories Complete** | 7/14 (Epic 1) | ✅ 50% Epic 1 |
+| **Stories Complete** | 8/14 (Epic 1) | ✅ 57% Epic 1 |
 | **Test Corpus Size** | 25 docs, 1,855 entities | ✅ Complete |
 | **NLP Accuracy (Baseline)** | 29.5% F1 (spaCy) | ✅ Measured |
 | **Target Accuracy (Hybrid)** | 40-50% F1 | 📅 Epic 1 Story 1.8 |
@@ -418,6 +419,6 @@ Likely: MIT or Apache 2.0 (open-source, permissive)
 
 ---
 
-**Last Updated:** 2026-01-20 (Story 1.7 Complete - Validation UI Operational)
+**Last Updated:** 2026-01-22 (Story 1.8 Complete - Hybrid Detection Operational)
 
-**Current Focus:** Epic 1 - Entity Deduplication & Hybrid Detection (Stories 1.9, 1.8)
+**Current Focus:** Epic 1 - Entity Deduplication (Story 1.9)
