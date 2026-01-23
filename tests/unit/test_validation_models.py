@@ -1,12 +1,13 @@
 """Unit tests for validation data models.
 
-Tests ValidationSession, EntityReviewState, UserDecision, and EntityReview classes.
+Tests ValidationSession, EntityReviewState, UserDecision, EntityReview, and EntityGroup classes.
 """
 
 from __future__ import annotations
 
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 from gdpr_pseudonymizer.validation.models import (
+    EntityGroup,
     EntityReview,
     EntityReviewState,
     UserDecision,
@@ -331,3 +332,307 @@ def test_validation_session_get_pending_entities() -> None:
     assert any(e.text == entity2.text for e in pending)
     assert any(e.text == entity3.text for e in pending)
     assert not any(e.text == entity1.text for e in pending)
+
+
+# ===== Entity Deduplication Tests (Story 1.9) =====
+
+
+def test_entity_group_creation() -> None:
+    """Test EntityGroup creation and properties."""
+    entities = [
+        DetectedEntity("Marie Dubois", "PERSON", 0, 12),
+        DetectedEntity("Marie Dubois", "PERSON", 50, 62),
+        DetectedEntity("Marie Dubois", "PERSON", 100, 112),
+    ]
+
+    group = EntityGroup(
+        unique_key=("Marie Dubois", "PERSON"),
+        occurrences=entities,
+    )
+
+    assert group.text == "Marie Dubois"
+    assert group.entity_type == "PERSON"
+    assert group.count == 3
+    assert len(group.occurrences) == 3
+    assert group.current_context_index == 0
+
+
+def test_entity_group_representative_entity() -> None:
+    """Test getting representative entity from group."""
+    entities = [
+        DetectedEntity("Paris", "LOCATION", 10, 15),
+        DetectedEntity("Paris", "LOCATION", 40, 45),
+    ]
+
+    group = EntityGroup(
+        unique_key=("Paris", "LOCATION"),
+        occurrences=entities,
+    )
+
+    # Should return first entity by default
+    representative = group.get_representative_entity()
+    assert representative == entities[0]
+    assert representative.start_pos == 10
+
+
+def test_entity_group_cycle_context() -> None:
+    """Test cycling through contexts in entity group."""
+    entities = [
+        DetectedEntity("Marie Dubois", "PERSON", 0, 12),
+        DetectedEntity("Marie Dubois", "PERSON", 50, 62),
+        DetectedEntity("Marie Dubois", "PERSON", 100, 112),
+    ]
+
+    group = EntityGroup(
+        unique_key=("Marie Dubois", "PERSON"),
+        occurrences=entities,
+    )
+
+    # Start at index 0
+    assert group.current_context_index == 0
+    assert group.get_representative_entity() == entities[0]
+
+    # Cycle to index 1
+    group.cycle_context()
+    assert group.current_context_index == 1
+    assert group.get_representative_entity() == entities[1]
+
+    # Cycle to index 2
+    group.cycle_context()
+    assert group.current_context_index == 2
+    assert group.get_representative_entity() == entities[2]
+
+    # Cycle back to index 0
+    group.cycle_context()
+    assert group.current_context_index == 0
+    assert group.get_representative_entity() == entities[0]
+
+
+def test_get_entity_groups_basic() -> None:
+    """Test grouping entities by unique (text, entity_type)."""
+    session = ValidationSession(
+        document_path="test.txt",
+        document_text="Marie Dubois travaille à Paris avec Marie Dubois à Paris.",
+    )
+
+    # Add duplicate entities
+    session.add_entity(DetectedEntity("Marie Dubois", "PERSON", 0, 12))
+    session.add_entity(DetectedEntity("Paris", "LOCATION", 26, 31))
+    session.add_entity(DetectedEntity("Marie Dubois", "PERSON", 37, 49))
+    session.add_entity(DetectedEntity("Paris", "LOCATION", 52, 57))
+
+    groups = session.get_entity_groups()
+
+    # Should have 2 groups: Marie Dubois (PERSON) and Paris (LOCATION)
+    assert len(groups) == 2
+
+    # Verify Marie Dubois group
+    marie_group = next(g for g in groups if g.text == "Marie Dubois")
+    assert marie_group.entity_type == "PERSON"
+    assert marie_group.count == 2
+    assert marie_group.occurrences[0].start_pos == 0
+    assert marie_group.occurrences[1].start_pos == 37
+
+    # Verify Paris group
+    paris_group = next(g for g in groups if g.text == "Paris")
+    assert paris_group.entity_type == "LOCATION"
+    assert paris_group.count == 2
+    assert paris_group.occurrences[0].start_pos == 26
+    assert paris_group.occurrences[1].start_pos == 52
+
+
+def test_get_entity_groups_filter_by_type() -> None:
+    """Test filtering entity groups by entity type."""
+    session = ValidationSession(
+        document_path="test.txt",
+        document_text="Marie Dubois at TechCorp in Paris.",
+    )
+
+    session.add_entity(DetectedEntity("Marie Dubois", "PERSON", 0, 12))
+    session.add_entity(DetectedEntity("TechCorp", "ORG", 16, 24))
+    session.add_entity(DetectedEntity("Paris", "LOCATION", 28, 33))
+
+    # Get only PERSON groups
+    person_groups = session.get_entity_groups("PERSON")
+    assert len(person_groups) == 1
+    assert person_groups[0].text == "Marie Dubois"
+    assert person_groups[0].entity_type == "PERSON"
+
+    # Get only LOCATION groups
+    location_groups = session.get_entity_groups("LOCATION")
+    assert len(location_groups) == 1
+    assert location_groups[0].text == "Paris"
+
+    # Get all groups
+    all_groups = session.get_entity_groups()
+    assert len(all_groups) == 3
+
+
+def test_get_entity_groups_different_types_same_text() -> None:
+    """Test that same text with different types creates separate groups."""
+    session = ValidationSession(
+        document_path="test.txt",
+        document_text="Paris (the city) and Paris (the company).",
+    )
+
+    # Same text "Paris" but different types
+    session.add_entity(DetectedEntity("Paris", "LOCATION", 0, 5))
+    session.add_entity(DetectedEntity("Paris", "ORG", 21, 26))
+
+    groups = session.get_entity_groups()
+
+    # Should have 2 separate groups
+    assert len(groups) == 2
+
+    location_group = next(g for g in groups if g.entity_type == "LOCATION")
+    assert location_group.count == 1
+    assert location_group.text == "Paris"
+
+    org_group = next(g for g in groups if g.entity_type == "ORG")
+    assert org_group.count == 1
+    assert org_group.text == "Paris"
+
+
+def test_get_entity_groups_sorted_by_position() -> None:
+    """Test that groups are sorted by first occurrence position."""
+    session = ValidationSession(
+        document_path="test.txt",
+        document_text="Paris, Marie Dubois, TechCorp, Paris again.",
+    )
+
+    # Add in non-position order
+    session.add_entity(DetectedEntity("Marie Dubois", "PERSON", 7, 19))
+    session.add_entity(DetectedEntity("Paris", "LOCATION", 0, 5))
+    session.add_entity(DetectedEntity("TechCorp", "ORG", 21, 29))
+    session.add_entity(DetectedEntity("Paris", "LOCATION", 31, 36))
+
+    groups = session.get_entity_groups()
+
+    # Groups should be sorted by first occurrence position
+    assert groups[0].text == "Paris"  # First at position 0
+    assert groups[1].text == "Marie Dubois"  # Second at position 7
+    assert groups[2].text == "TechCorp"  # Third at position 21
+
+
+def test_get_entity_groups_single_occurrence() -> None:
+    """Test entity groups with single occurrence (edge case)."""
+    session = ValidationSession(
+        document_path="test.txt",
+        document_text="Marie Dubois works at TechCorp.",
+    )
+
+    session.add_entity(DetectedEntity("Marie Dubois", "PERSON", 0, 12))
+    session.add_entity(DetectedEntity("TechCorp", "ORG", 22, 30))
+
+    groups = session.get_entity_groups()
+
+    # Each entity should be in its own group with count=1
+    assert len(groups) == 2
+    assert all(g.count == 1 for g in groups)
+
+
+def test_decision_applies_to_all_group_occurrences() -> None:
+    """Test that confirming applies to all entity instances in group."""
+    session = ValidationSession(
+        document_path="test.txt",
+        document_text="Marie Dubois and Marie Dubois and Marie Dubois.",
+    )
+
+    # Add 3 occurrences of same entity
+    e1 = DetectedEntity("Marie Dubois", "PERSON", 0, 12)
+    e2 = DetectedEntity("Marie Dubois", "PERSON", 17, 29)
+    e3 = DetectedEntity("Marie Dubois", "PERSON", 34, 46)
+
+    session.add_entity(e1)
+    session.add_entity(e2)
+    session.add_entity(e3)
+
+    # Confirm all occurrences
+    session.mark_confirmed(e1)
+    session.mark_confirmed(e2)
+    session.mark_confirmed(e3)
+
+    # All should be confirmed
+    validated = session.get_validated_entities()
+    assert len(validated) == 3
+    assert all(e.text == "Marie Dubois" for e in validated)
+
+
+def test_custom_pseudonym_applies_to_all_group_occurrences() -> None:
+    """Test that custom pseudonym applies to all entity instances in group (AC3)."""
+    session = ValidationSession(
+        document_path="test.txt",
+        document_text="Marie Dubois met Marie Dubois.",
+    )
+
+    # Add 2 occurrences of same entity
+    e1 = DetectedEntity("Marie Dubois", "PERSON", 0, 12)
+    e2 = DetectedEntity("Marie Dubois", "PERSON", 17, 29)
+
+    session.add_entity(e1)
+    session.add_entity(e2)
+
+    # Change pseudonym for both occurrences
+    session.change_pseudonym(e1, "Leia Organa")
+    session.change_pseudonym(e2, "Leia Organa")
+
+    # Verify both have custom pseudonym
+    review1 = session.get_entity_review(e1)
+    review2 = session.get_entity_review(e2)
+
+    assert review1 is not None
+    assert review2 is not None
+    assert review1.custom_pseudonym == "Leia Organa"
+    assert review2.custom_pseudonym == "Leia Organa"
+
+
+def test_get_summary_stats_includes_unique_count() -> None:
+    """Test that summary stats includes unique entity count for deduplication."""
+    session = ValidationSession(
+        document_path="test.txt",
+        document_text="Marie Dubois and Marie Dubois at Paris and Paris.",
+    )
+
+    # Add 4 entities (2 unique)
+    session.add_entity(DetectedEntity("Marie Dubois", "PERSON", 0, 12))
+    session.add_entity(DetectedEntity("Marie Dubois", "PERSON", 17, 29))
+    session.add_entity(DetectedEntity("Paris", "LOCATION", 33, 38))
+    session.add_entity(DetectedEntity("Paris", "LOCATION", 43, 48))
+
+    stats = session.get_summary_stats()
+
+    assert stats["total"] == 4  # Total occurrences
+    assert stats["unique"] == 2  # Unique entities (Marie Dubois + Paris)
+
+
+def test_get_entity_groups_empty_session() -> None:
+    """Test get_entity_groups on session with no entities."""
+    session = ValidationSession(
+        document_path="test.txt",
+        document_text="No entities here.",
+    )
+
+    groups = session.get_entity_groups()
+    assert len(groups) == 0
+
+
+def test_get_entity_groups_occurrences_sorted_by_position() -> None:
+    """Test that occurrences within group are sorted by position."""
+    session = ValidationSession(
+        document_path="test.txt",
+        document_text="Text with Paris at start and Paris at end and Paris in middle.",
+    )
+
+    # Add in non-position order
+    session.add_entity(DetectedEntity("Paris", "LOCATION", 45, 50))  # Middle
+    session.add_entity(DetectedEntity("Paris", "LOCATION", 10, 15))  # Start
+    session.add_entity(DetectedEntity("Paris", "LOCATION", 29, 34))  # End
+
+    groups = session.get_entity_groups()
+    assert len(groups) == 1
+
+    paris_group = groups[0]
+    # Occurrences should be sorted by start_pos
+    assert paris_group.occurrences[0].start_pos == 10  # Start
+    assert paris_group.occurrences[1].start_pos == 29  # End
+    assert paris_group.occurrences[2].start_pos == 45  # Middle

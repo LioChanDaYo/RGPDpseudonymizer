@@ -10,6 +10,51 @@ from enum import Enum
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 
 
+@dataclass
+class EntityGroup:
+    """Group of entities with same text and type.
+
+    Enables deduplication by grouping multiple occurrences of the same entity
+    (e.g., 10 instances of "Marie Dubois" as PERSON) for single user validation.
+
+    Attributes:
+        unique_key: Tuple of (text, entity_type) identifying the group
+        occurrences: List of DetectedEntity instances with this text+type
+        current_context_index: Index for context cycling (0-based)
+    """
+
+    unique_key: tuple[str, str]
+    occurrences: list[DetectedEntity] = field(default_factory=list)
+    current_context_index: int = 0
+
+    @property
+    def text(self) -> str:
+        """Get entity text from unique key."""
+        return self.unique_key[0]
+
+    @property
+    def entity_type(self) -> str:
+        """Get entity type from unique key."""
+        return self.unique_key[1]
+
+    @property
+    def count(self) -> int:
+        """Get number of occurrences in this group."""
+        return len(self.occurrences)
+
+    def get_representative_entity(self) -> DetectedEntity:
+        """Get entity for current context (for cycling).
+
+        Returns:
+            Entity at current context index
+        """
+        return self.occurrences[self.current_context_index]
+
+    def cycle_context(self) -> None:
+        """Move to next context in group (cycles back to start)."""
+        self.current_context_index = (self.current_context_index + 1) % self.count
+
+
 class EntityReviewState(Enum):
     """State of entity review in validation workflow.
 
@@ -279,21 +324,65 @@ class ValidationSession:
 
         return validated + added_entities
 
+    def get_entity_groups(self, entity_type: str | None = None) -> list[EntityGroup]:
+        """Get entities grouped by unique (text, entity_type).
+
+        Deduplicates entities for validation UI by grouping identical entities
+        (same text and type) into single review items. Preserves position tracking
+        for all occurrences.
+
+        Args:
+            entity_type: Filter by entity type (PERSON, LOCATION, ORG) or None for all
+
+        Returns:
+            List of EntityGroup objects sorted by first occurrence position
+        """
+        from collections import defaultdict
+
+        # Group entities by (text, entity_type)
+        grouped: dict[tuple[str, str], list[DetectedEntity]] = defaultdict(list)
+
+        for entity in self.entities:
+            if entity_type is None or entity.entity_type == entity_type:
+                key = (entity.text, entity.entity_type)
+                grouped[key].append(entity)
+
+        # Convert to EntityGroup objects, sorted by first occurrence
+        groups = [
+            EntityGroup(
+                unique_key=key,
+                occurrences=sorted(occurrences, key=lambda e: e.start_pos),
+            )
+            for key, occurrences in grouped.items()
+        ]
+
+        # Sort groups by position of first occurrence
+        return sorted(groups, key=lambda g: g.occurrences[0].start_pos)
+
     def get_summary_stats(self) -> dict[str, int]:
         """Get summary statistics of validation decisions.
 
         Returns:
-            Dictionary with counts of confirmed, rejected, modified, added entities
+            Dictionary with counts of confirmed, rejected, modified, added entities,
+            including unique entity counts for deduplication display
         """
         confirmed = sum(1 for d in self.user_decisions if d.action == "CONFIRM")
         rejected = sum(1 for d in self.user_decisions if d.action == "REJECT")
         modified = sum(1 for d in self.user_decisions if d.action == "MODIFY")
         added = sum(1 for d in self.user_decisions if d.action == "ADD")
+        changed_pseudonym = sum(
+            1 for d in self.user_decisions if d.action == "CHANGE_PSEUDONYM"
+        )
+
+        # Calculate unique entity count
+        unique_count = len(self.get_entity_groups())
 
         return {
             "confirmed": confirmed,
             "rejected": rejected,
             "modified": modified,
             "added": added,
+            "changed_pseudonym": changed_pseudonym,
             "total": len(self.entities),
+            "unique": unique_count,
         }

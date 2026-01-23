@@ -52,10 +52,12 @@ GDPR Pseudonymizer is a **privacy-first CLI tool** that combines AI efficiency w
 ### Current Development Stage
 
 We're actively developing v1.0 MVP with an **AI-assisted approach**:
-- ✅ **Story 1.7 Complete:** Validation UI with rich CLI interface operational
-- ✅ **Story 1.8 Complete:** Hybrid detection (NLP + regex) achieves 35.3% improvement (+52.2% PERSON detection)
-- 🔄 **Week 1-5 (Current):** Epic 1 - Entity deduplication (Story 1.9)
-- 📅 **Week 6-14:** Core engine, CLI polish, launch prep
+- ✅ **Epic 1 Complete (9/9 stories):** Foundation & NLP validation operational
+  - Story 1.7: Validation UI with rich CLI interface
+  - Story 1.8: Hybrid detection (35.3% improvement, +52.2% PERSON detection)
+  - Story 1.9: Entity deduplication (66% time reduction for large docs)
+- 🔄 **Week 6-10 (Current):** Epic 2 - Core pseudonymization engine
+- 📅 **Week 11-14:** CLI polish, batch processing, launch prep
 - 🎯 **MVP Launch:** Week 14 (estimated Q2 2026)
 
 ### Realistic Expectations for v1.0
@@ -185,7 +187,7 @@ The validation UI provides an intuitive keyboard-driven interface for reviewing 
 4. Final confirmation with summary of changes
 5. Process document with validated entities
 
-**Known Limitation (v1.0):** Duplicate entities validated separately (Story 1.9 will add deduplication for 100+ entity docs)
+**Deduplication Feature (Story 1.9):** Duplicate entities grouped together - validate once, apply to all occurrences (66% time reduction for large docs)
 
 ---
 
@@ -308,14 +310,14 @@ The validation UI provides an intuitive keyboard-driven interface for reviewing 
 - ✅ **Story 1.4:** Project foundation & module structure
 - ✅ **Story 1.5:** Walking skeleton - basic process command (48 tests passing)
 - ✅ **Story 1.6:** NLP integration with spaCy `fr_core_news_lg` (QA gate: PASS)
-- ✅ **Story 1.7:** Validation UI implementation with rich library (QA gate: PASS with follow-up Story 1.9)
+- ✅ **Story 1.7:** Validation UI implementation with rich library (QA gate: PASS)
 - ✅ **Story 1.8:** Hybrid detection strategy (NLP + regex) - 35.3% improvement, 52.2% PERSON detection (QA gate: PASS)
+- ✅ **Story 1.9:** Entity deduplication for validation UI - 66% time reduction for large docs (QA gate: PASS)
 
 ### In Progress 🔄
-- 📅 **Story 1.9:** Entity deduplication for validation UI *(Critical path for 100+ entity docs)*
+- 📅 **Epic 2 (Week 6-10):** Core pseudonymization engine
 
 ### Upcoming 📅
-- **Epic 2 (Week 6-10):** Core pseudonymization engine
 - **Epic 3 (Week 11-13):** CLI polish & batch processing
 - **Epic 4 (Week 14):** Launch readiness & LLM validation
 
@@ -391,19 +393,19 @@ Likely: MIT or Apache 2.0 (open-source, permissive)
 
 ---
 
-## 📊 Project Metrics (As of 2026-01-20)
+## 📊 Project Metrics (As of 2026-01-23)
 
 | Metric | Value | Status |
 |--------|-------|--------|
-| **Development Progress** | Week 1/14 | 🔄 In Progress |
-| **Stories Complete** | 8/14 (Epic 1) | ✅ 57% Epic 1 |
+| **Development Progress** | Week 5/14 | 🔄 Epic 1 Complete |
+| **Stories Complete** | 9/9 (Epic 1) | ✅ 100% Epic 1 Complete |
 | **Test Corpus Size** | 25 docs, 1,855 entities | ✅ Complete |
 | **NLP Accuracy (Baseline)** | 29.5% F1 (spaCy) | ✅ Measured |
-| **Target Accuracy (Hybrid)** | 40-50% F1 | 📅 Epic 1 Story 1.8 |
+| **Hybrid Accuracy (NLP+Regex)** | 35.3% F1 (+52.2% PERSON) | ✅ Story 1.8 Complete |
 | **Final Accuracy (AI+Human)** | 100% (validated) | 🎯 By Design |
-| **Validation UI** | Operational | ✅ Story 1.7 Complete |
-| **Validation Time** | <2 min (20-30 entities) | ✅ Target Met |
-| **Unit Test Coverage** | 12/12 passing (validation) | ✅ Story 1.7 |
+| **Validation UI** | Operational with deduplication | ✅ Stories 1.7, 1.9 Complete |
+| **Validation Time** | <2 min (20-30 entities), <5 min (100 entities) | ✅ Targets Met |
+| **Unit Test Coverage** | 25/25 passing (validation) | ✅ Stories 1.7 + 1.9 |
 | **Supported Languages** | French | 🇫🇷 v1.0 only |
 | **Supported Formats** | .txt, .md | 📝 v1.0 scope |
 
@@ -419,6 +421,6 @@ Likely: MIT or Apache 2.0 (open-source, permissive)
 
 ---
 
-**Last Updated:** 2026-01-22 (Story 1.8 Complete - Hybrid Detection Operational)
+**Last Updated:** 2026-01-23 (Epic 1 Complete - Foundation & NLP Validation Operational)
 
-**Current Focus:** Epic 1 - Entity Deduplication (Story 1.9)
+**Current Focus:** Epic 2 - Core Pseudonymization Engine (Week 6-10)
