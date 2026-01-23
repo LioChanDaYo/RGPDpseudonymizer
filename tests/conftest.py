@@ -6,6 +6,7 @@ spaCy/Thinc access violations on Windows systems.
 """
 
 import os
+
 import pytest
 
 
