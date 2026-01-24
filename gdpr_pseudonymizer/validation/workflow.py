@@ -90,8 +90,8 @@ class ValidationWorkflow:
             document_text, entities
         )
 
-        # Step 1: Display summary screen
-        self._display_summary(entities)
+        # Step 1: Display summary screen with unique entity count
+        self._display_summary(entities, session)
 
         # Step 2: Review entities by type (PERSON → ORG → LOCATION)
         try:
@@ -121,19 +121,27 @@ class ValidationWorkflow:
 
         return validated_entities
 
-    def _display_summary(self, entities: list[DetectedEntity]) -> None:
+    def _display_summary(
+        self, entities: list[DetectedEntity], session: ValidationSession | None = None
+    ) -> None:
         """Display summary screen with entity statistics.
 
         Args:
             entities: List of detected entities
+            session: Optional validation session for unique entity count
         """
         # Count entities by type
         entity_counts: dict[str, int] = defaultdict(int)
         for entity in entities:
             entity_counts[entity.entity_type] += 1
 
+        # Get unique entity count if session provided
+        unique_count = None
+        if session:
+            unique_count = len(session.get_entity_groups())
+
         # Display summary
-        self.summary_screen.display(len(entities), dict(entity_counts))
+        self.summary_screen.display(len(entities), dict(entity_counts), unique_count)
         self.summary_screen.wait_for_enter()
 
     def _review_entities_by_type(
@@ -141,143 +149,185 @@ class ValidationWorkflow:
         session: ValidationSession,
         pseudonym_assigner: Callable[[DetectedEntity], str] | None = None,
     ) -> None:
-        """Review entities by type in priority order.
+        """Review entities by type in priority order using entity groups.
 
         Args:
             session: Validation session with entities
             pseudonym_assigner: Function to assign pseudonyms (optional)
         """
-        # Group entities by type
-        entities_by_type: dict[str, list[DetectedEntity]] = defaultdict(list)
-        for entity in session.entities:
-            entities_by_type[entity.entity_type].append(entity)
-
         # Review in priority order: PERSON → ORG → LOCATION
         priority_order = ["PERSON", "ORG", "LOCATION"]
 
         for entity_type in priority_order:
-            if entity_type not in entities_by_type:
+            # Get entity groups for this type
+            entity_groups = session.get_entity_groups(entity_type)
+
+            if not entity_groups:
                 continue
 
-            type_entities = entities_by_type[entity_type]
+            # Calculate total occurrences for display
+            total_occurrences = sum(group.count for group in entity_groups)
             display_info_message(
-                f"Reviewing {entity_type} entities ({len(type_entities)} total)"
+                f"Reviewing {entity_type} entities "
+                f"({total_occurrences} occurrences, {len(entity_groups)} unique)"
             )
 
-            # Review each entity of this type
-            entity_index = 0
-            while entity_index < len(type_entities):
-                entity = type_entities[entity_index]
+            # Review each entity group
+            group_index = 0
+            while group_index < len(entity_groups):
+                group = entity_groups[group_index]
 
-                # Get context and pseudonym
-                context = self.context_precomputer.get_context_for_entity(
-                    entity, session.context_cache
-                )
-                pseudonym = self._get_pseudonym(entity, pseudonym_assigner)
+                # Inner loop for context cycling within a group
+                while True:
+                    # Get representative entity for current context
+                    current_entity = group.get_representative_entity()
 
-                # Display ambiguous warning if needed
-                if entity.is_ambiguous:
-                    reason = self._get_ambiguity_reason(entity)
-                    self.review_screen.display_ambiguous_warning(entity, reason)
+                    # Get context and pseudonym
+                    context = self.context_precomputer.get_context_for_entity(
+                        current_entity, session.context_cache
+                    )
+                    pseudonym = self._get_pseudonym(current_entity, pseudonym_assigner)
 
-                # Display entity for review
-                self.review_screen.display_entity(
-                    entity,
-                    context,
-                    pseudonym,
-                    entity_index + 1,
-                    len(type_entities),
-                    entity_type,
-                )
-
-                # Get user action
-                action = get_user_action()
-
-                # Handle action
-                if action == "confirm":
-                    session.mark_confirmed(entity)
-                    entity_index += 1
-
-                elif action == "reject":
-                    session.mark_rejected(entity)
-                    entity_index += 1
-
-                elif action == "modify":
-                    new_text = get_text_input("Enter corrected entity text")
-                    if new_text and new_text != entity.text:
-                        modified_entity = DetectedEntity(
-                            text=new_text,
-                            entity_type=entity.entity_type,
-                            start_pos=entity.start_pos,
-                            end_pos=entity.end_pos,
-                            confidence=entity.confidence,
-                            gender=entity.gender,
-                            is_ambiguous=False,
+                    # Display ambiguous warning if needed
+                    if current_entity.is_ambiguous:
+                        reason = self._get_ambiguity_reason(current_entity)
+                        self.review_screen.display_ambiguous_warning(
+                            current_entity, reason
                         )
-                        session.mark_modified(entity, modified_entity)
-                    else:
-                        session.mark_confirmed(entity)
-                    entity_index += 1
 
-                elif action == "change_pseudonym":
-                    new_pseudonym = get_text_input("Enter custom pseudonym")
-                    if new_pseudonym:
-                        session.change_pseudonym(entity, new_pseudonym)
-                    else:
-                        session.mark_confirmed(entity)
-                    entity_index += 1
+                    # Display entity group for review
+                    self.review_screen.display_entity(
+                        current_entity,
+                        context,
+                        pseudonym,
+                        group_index + 1,
+                        len(entity_groups),
+                        entity_type,
+                        occurrence_count=group.count,
+                        context_index=group.current_context_index + 1,
+                    )
 
-                elif action == "add":
-                    self._handle_add_entity(session)
-                    # Don't advance index, stay on current entity
+                    # Get user action
+                    action = get_user_action()
 
-                elif action == "next":
-                    if entity_index < len(type_entities) - 1:
-                        entity_index += 1
-                    else:
-                        display_info_message("Already at last entity of this type")
+                    # Handle context cycling for groups
+                    if action == "expand_context" and group.count > 1:
+                        group.cycle_context()
+                        continue  # Redisplay with new context
 
-                elif action == "previous":
-                    if entity_index > 0:
-                        entity_index -= 1
-                    else:
-                        display_info_message("Already at first entity of this type")
+                    # Handle other actions - apply to ALL occurrences in group
+                    if action == "confirm":
+                        for entity in group.occurrences:
+                            session.mark_confirmed(entity)
+                        group_index += 1
+                        break  # Exit inner loop, move to next group
 
-                elif action == "help":
-                    self.help_overlay.display()
-                    # Stay on current entity
+                    elif action == "reject":
+                        for entity in group.occurrences:
+                            session.mark_rejected(entity)
+                        group_index += 1
+                        break
 
-                elif action == "quit":
-                    if get_confirmation("Quit validation? Progress will be lost."):
-                        raise KeyboardInterrupt("User quit validation")
-                    # Continue if cancelled
+                    elif action == "modify":
+                        new_text = get_text_input("Enter corrected entity text")
+                        if new_text and new_text != current_entity.text:
+                            # Apply modification to all occurrences in group
+                            for entity in group.occurrences:
+                                modified_entity = DetectedEntity(
+                                    text=new_text,
+                                    entity_type=entity.entity_type,
+                                    start_pos=entity.start_pos,
+                                    end_pos=entity.end_pos,
+                                    confidence=entity.confidence,
+                                    gender=entity.gender,
+                                    is_ambiguous=False,
+                                )
+                                session.mark_modified(entity, modified_entity)
+                        else:
+                            for entity in group.occurrences:
+                                session.mark_confirmed(entity)
+                        group_index += 1
+                        break
 
-                elif action == "batch_accept":
-                    if get_confirmation(
-                        f"Accept all {len(type_entities)} {entity_type} entities?"
-                    ):
-                        for e in type_entities:
-                            if e not in [
-                                d.original_entity for d in session.user_decisions
-                            ]:
-                                session.mark_confirmed(e)
-                        display_info_message(f"Accepted all {entity_type} entities")
-                        break  # Move to next type
+                    elif action == "change_pseudonym":
+                        new_pseudonym = get_text_input("Enter custom pseudonym")
+                        if new_pseudonym:
+                            # Apply custom pseudonym to all occurrences in group
+                            for entity in group.occurrences:
+                                session.change_pseudonym(entity, new_pseudonym)
+                        else:
+                            for entity in group.occurrences:
+                                session.mark_confirmed(entity)
+                        group_index += 1
+                        break
 
-                elif action == "batch_reject":
-                    if get_confirmation(
-                        f"Reject all {len(type_entities)} {entity_type} entities?"
-                    ):
-                        for e in type_entities:
-                            if e not in [
-                                d.original_entity for d in session.user_decisions
-                            ]:
-                                session.mark_rejected(e)
-                        display_info_message(f"Rejected all {entity_type} entities")
-                        break  # Move to next type
+                    elif action == "add":
+                        self._handle_add_entity(session)
+                        # Don't advance index, stay on current group
+                        break
 
-                elif action == "invalid":
-                    display_warning_message("Invalid key. Press H for help.")
+                    elif action == "next":
+                        if group_index < len(entity_groups) - 1:
+                            group_index += 1
+                        else:
+                            display_info_message("Already at last entity of this type")
+                        break
+
+                    elif action == "previous":
+                        if group_index > 0:
+                            group_index -= 1
+                        else:
+                            display_info_message("Already at first entity of this type")
+                        break
+
+                    elif action == "help":
+                        self.help_overlay.display()
+                        # Stay on current group, redisplay
+                        continue
+
+                    elif action == "quit":
+                        if get_confirmation("Quit validation? Progress will be lost."):
+                            raise KeyboardInterrupt("User quit validation")
+                        # Continue if cancelled
+                        continue
+
+                    elif action == "batch_accept":
+                        if get_confirmation(
+                            f"Accept all {len(entity_groups)} unique {entity_type} entities "
+                            f"({total_occurrences} total occurrences)?"
+                        ):
+                            # Accept all groups
+                            for eg in entity_groups:
+                                for e in eg.occurrences:
+                                    if e not in [
+                                        d.original_entity
+                                        for d in session.user_decisions
+                                    ]:
+                                        session.mark_confirmed(e)
+                            display_info_message(f"Accepted all {entity_type} entities")
+                            return  # Exit type review entirely
+                        break  # Exit group if confirmation cancelled
+
+                    elif action == "batch_reject":
+                        if get_confirmation(
+                            f"Reject all {len(entity_groups)} unique {entity_type} entities "
+                            f"({total_occurrences} total occurrences)?"
+                        ):
+                            # Reject all groups
+                            for eg in entity_groups:
+                                for e in eg.occurrences:
+                                    if e not in [
+                                        d.original_entity
+                                        for d in session.user_decisions
+                                    ]:
+                                        session.mark_rejected(e)
+                            display_info_message(f"Rejected all {entity_type} entities")
+                            return  # Exit type review entirely
+                        break  # Exit group if confirmation cancelled
+
+                    elif action == "invalid":
+                        display_warning_message("Invalid key. Press H for help.")
+                        continue
 
     def _get_pseudonym(
         self,

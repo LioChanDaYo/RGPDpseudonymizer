@@ -15,13 +15,8 @@ jobs:
       matrix:
         os: [ubuntu-22.04, macos-latest, windows-latest]
         python-version: ['3.9', '3.10', '3.11']
-        exclude:
-          # Exclude Windows + Python 3.9/3.11 due to unfixable spaCy/thinc access violation
-          # See: https://github.com/explosion/spaCy/issues/12659
-          - os: windows-latest
-            python-version: '3.9'
-          - os: windows-latest
-            python-version: '3.11'
+        # Note: Windows runs linting + non-spaCy tests only due to access violations
+        # See: https://github.com/explosion/spaCy/issues/12659
 
     steps:
       - name: Checkout code
@@ -67,10 +62,39 @@ jobs:
           key: spacy-model-fr-core-news-lg-3.8.0-${{ runner.os }}
 
       - name: Download spaCy model
+        if: runner.os != 'Windows'
         run: poetry run python -m spacy download fr_core_news_lg
 
-      - name: Run tests with coverage
+      - name: Run linting and type checks (all platforms)
+        run: |
+          poetry run ruff check .
+          poetry run black --check .
+          poetry run mypy gdpr_pseudonymizer
+
+      - name: Run tests with coverage (Linux/macOS only)
+        if: runner.os != 'Windows'
+        # OMP_NUM_THREADS=1 prevents spaCy/Thinc access violations on Windows
+        # This is also configured in tests/conftest.py for local runs
+        env:
+          OMP_NUM_THREADS: 1
         run: poetry run pytest --cov=gdpr_pseudonymizer --cov-report=xml --cov-report=term --cov-branch -v
+
+      - name: Run non-spaCy tests only (Windows)
+        if: runner.os == 'Windows'
+        # Skip spaCy-dependent tests on Windows due to access violations
+        run: |
+          poetry run pytest tests/unit/test_benchmark_nlp.py -v
+          poetry run pytest tests/unit/test_config_manager.py -v
+          poetry run pytest tests/unit/test_data_models.py -v
+          poetry run pytest tests/unit/test_file_handler.py -v
+          poetry run pytest tests/unit/test_logger.py -v
+          poetry run pytest tests/unit/test_naive_processor.py -v
+          poetry run pytest tests/unit/test_name_dictionary.py -v
+          poetry run pytest tests/unit/test_process_command.py -v
+          poetry run pytest tests/unit/test_project_config.py -v
+          poetry run pytest tests/unit/test_regex_matcher.py -v
+          poetry run pytest tests/unit/test_validation_models.py -v
+          poetry run pytest tests/unit/test_validation_stub.py -v
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
@@ -83,7 +107,7 @@ jobs:
 
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v4
-        if: always()
+        if: runner.os != 'Windows' && always()
         with:
           name: coverage-${{ matrix.os }}-py${{ matrix.python-version }}
           path: coverage.xml

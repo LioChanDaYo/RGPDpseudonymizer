@@ -52,7 +52,10 @@
       "Bash(poetry run python:*)",
       "Bash(poetry add:*)",
       "Bash(poetry show:*)",
-      "Bash(dir:*)"
+      "Bash(dir:*)",
+      "Bash(ruff check:*)",
+      "Bash(mypy:*)",
+      "Bash(C:\\\\Users\\\\devea\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python311\\\\python.exe -m pytest:*)"
     ]
   }
 }
