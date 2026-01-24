@@ -57,6 +57,7 @@ We're actively developing v1.0 MVP with an **AI-assisted approach**:
   - Story 1.8: Hybrid detection (35.3% improvement, +52.2% PERSON detection)
   - Story 1.9: Entity deduplication (66% time reduction for large docs)
 - 🔄 **Week 6-10 (Current):** Epic 2 - Core pseudonymization engine
+  - Story 2.0.1: Integration tests ✅ (19 tests, 80.49% coverage)
 - 📅 **Week 11-14:** CLI polish, batch processing, launch prep
 - 🎯 **MVP Launch:** Week 14 (estimated Q2 2026)
 
@@ -93,7 +94,7 @@ We're actively developing v1.0 MVP with an **AI-assisted approach**:
 **Current status:** Development version only (not ready for production use)
 
 ### Prerequisites
-- Python 3.9-3.13 (Python 3.14+ not supported due to spaCy compatibility)
+- Python 3.9-3.11 (validated in CI/CD, Python 3.12-3.13 support planned, Python 3.14+ not supported due to spaCy compatibility)
 - Poetry 1.7+
 
 ### Quick Install
@@ -101,7 +102,7 @@ We're actively developing v1.0 MVP with an **AI-assisted approach**:
 ```bash
 # Clone repository
 git clone https://github.com/LioChanDaYo/RGPDpseudonymizer.git
-cd gdpr_pseudonymizer
+cd RGPDpseudonymizer
 
 # Install dependencies
 poetry install
@@ -195,7 +196,7 @@ The validation UI provides an intuitive keyboard-driven interface for reviewing 
 
 | Component | Technology | Version | Purpose |
 |-----------|------------|---------|---------|
-| **Runtime** | Python | 3.9-3.13 | Cross-platform compatibility (3.14+ not supported) |
+| **Runtime** | Python | 3.9-3.11 | Validated baseline (3.12-3.13 planned, 3.14+ not supported) |
 | **NLP Library** | spaCy | 3.8.0 | French entity detection (fr_core_news_lg) |
 | **CLI Framework** | Typer | 0.9+ | Command-line interface |
 | **Database** | SQLite | 3.35+ | Local mapping table storage |
@@ -313,6 +314,7 @@ The validation UI provides an intuitive keyboard-driven interface for reviewing 
 - ✅ **Story 1.7:** Validation UI implementation with rich library (QA gate: PASS)
 - ✅ **Story 1.8:** Hybrid detection strategy (NLP + regex) - 35.3% improvement, 52.2% PERSON detection (QA gate: PASS)
 - ✅ **Story 1.9:** Entity deduplication for validation UI - 66% time reduction for large docs (QA gate: PASS)
+- ✅ **Story 2.0.1:** Integration tests for validation workflow - 19 tests, 80.49% coverage, all quality gates pass (QA gate: PASS)
 
 ### In Progress 🔄
 - 📅 **Epic 2 (Week 6-10):** Core pseudonymization engine
@@ -393,19 +395,98 @@ Likely: MIT or Apache 2.0 (open-source, permissive)
 
 ---
 
-## 📊 Project Metrics (As of 2026-01-23)
+## 🧪 Testing
+
+### Running Tests
+
+The project includes comprehensive unit and integration tests covering the validation workflow, NLP detection, and core functionality.
+
+**Note for Windows users:** Due to known spaCy access violations on Windows ([spaCy issue #12659](https://github.com/explosion/spaCy/issues/12659)), Windows CI runs non-spaCy tests only. Full test suite runs on Linux/macOS.
+
+**Run all tests:**
+```bash
+poetry run pytest -v
+```
+
+**Run only unit tests:**
+```bash
+poetry run pytest tests/unit/ -v
+```
+
+**Run only integration tests:**
+```bash
+poetry run pytest tests/integration/ -v
+```
+
+**Run with coverage report:**
+```bash
+poetry run pytest --cov=gdpr_pseudonymizer --cov-report=term-missing --cov-report=html
+```
+
+**Run validation workflow integration tests specifically:**
+```bash
+poetry run pytest tests/integration/test_validation_workflow_integration.py -v
+```
+
+**Run quality checks:**
+```bash
+# Code formatting check
+poetry run black --check gdpr_pseudonymizer tests
+
+# Format code automatically
+poetry run black gdpr_pseudonymizer tests
+
+# Linting check
+poetry run ruff check gdpr_pseudonymizer tests
+
+# Type checking
+poetry run mypy gdpr_pseudonymizer
+```
+
+**Run Windows-safe tests only (excludes spaCy-dependent tests):**
+```bash
+# Run non-spaCy unit tests (follows Windows CI pattern)
+poetry run pytest tests/unit/test_benchmark_nlp.py tests/unit/test_config_manager.py tests/unit/test_data_models.py tests/unit/test_file_handler.py tests/unit/test_logger.py tests/unit/test_naive_processor.py tests/unit/test_name_dictionary.py tests/unit/test_process_command.py tests/unit/test_project_config.py tests/unit/test_regex_matcher.py tests/unit/test_validation_models.py tests/unit/test_validation_stub.py -v
+
+# Run validation workflow integration tests (Windows-safe)
+poetry run pytest tests/integration/test_validation_workflow_integration.py -v
+```
+
+### Test Coverage
+
+- **Unit tests:** 34 tests for validation models, UI components, and workflow logic
+- **Integration tests:** 19 tests for end-to-end validation workflow (Story 2.0.1 - Complete)
+- **Current coverage:** 80.49% for validation module (combined unit + integration)
+- **CI/CD:** Tests run on Python 3.9-3.11 across Windows, macOS, and Linux
+- **Quality gates:** All pass (Black, Ruff, mypy, pytest)
+
+### Key Integration Test Scenarios
+
+The validation workflow integration tests cover:
+- ✅ Full workflow: entity detection → summary → review → confirmation
+- ✅ User actions: confirm (Space), reject (R), modify (E), add entity (A), change pseudonym (C), context cycling (X)
+- ✅ State transitions: PENDING → CONFIRMED/REJECTED/MODIFIED
+- ✅ Entity deduplication with grouped review
+- ✅ Edge cases: empty documents, large documents (320+ entities), Ctrl+C interruption, invalid input
+- ✅ Batch operations: Accept All Type (Shift+A), Reject All Type (Shift+R) with confirmation prompts
+- ✅ Mock user input: Full simulation of keyboard interactions and prompts
+
+---
+
+## 📊 Project Metrics (As of 2026-01-24)
 
 | Metric | Value | Status |
 |--------|-------|--------|
-| **Development Progress** | Week 5/14 | 🔄 Epic 1 Complete |
-| **Stories Complete** | 9/9 (Epic 1) | ✅ 100% Epic 1 Complete |
+| **Development Progress** | Week 6/14 | 🔄 Epic 2 In Progress |
+| **Stories Complete** | 10 (Epic 1 + Story 2.0.1) | ✅ Epic 1 + Integration Tests |
 | **Test Corpus Size** | 25 docs, 1,855 entities | ✅ Complete |
 | **NLP Accuracy (Baseline)** | 29.5% F1 (spaCy) | ✅ Measured |
 | **Hybrid Accuracy (NLP+Regex)** | 35.3% F1 (+52.2% PERSON) | ✅ Story 1.8 Complete |
 | **Final Accuracy (AI+Human)** | 100% (validated) | 🎯 By Design |
 | **Validation UI** | Operational with deduplication | ✅ Stories 1.7, 1.9 Complete |
 | **Validation Time** | <2 min (20-30 entities), <5 min (100 entities) | ✅ Targets Met |
-| **Unit Test Coverage** | 25/25 passing (validation) | ✅ Stories 1.7 + 1.9 |
+| **Test Coverage** | 53 tests (34 unit + 19 integration), 80.49% validation module | ✅ Story 2.0.1 Complete |
+| **Quality Gates** | Black, Ruff, mypy, pytest | ✅ All Pass |
 | **Supported Languages** | French | 🇫🇷 v1.0 only |
 | **Supported Formats** | .txt, .md | 📝 v1.0 scope |
 
@@ -421,6 +502,6 @@ Likely: MIT or Apache 2.0 (open-source, permissive)
 
 ---
 
-**Last Updated:** 2026-01-23 (Epic 1 Complete - Foundation & NLP Validation Operational)
+**Last Updated:** 2026-01-24 (Story 2.0.1 complete: 19 integration tests, 80.49% validation coverage, all quality gates pass)
 
 **Current Focus:** Epic 2 - Core Pseudonymization Engine (Week 6-10)

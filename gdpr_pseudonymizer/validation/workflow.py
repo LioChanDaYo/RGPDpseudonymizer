@@ -305,7 +305,9 @@ class ValidationWorkflow:
                                     ]:
                                         session.mark_confirmed(e)
                             display_info_message(f"Accepted all {entity_type} entities")
-                            return  # Exit type review entirely
+                            # Exit current entity type review, continue to next type
+                            group_index = len(entity_groups)  # Force exit of group loop
+                            break
                         break  # Exit group if confirmation cancelled
 
                     elif action == "batch_reject":
@@ -322,7 +324,9 @@ class ValidationWorkflow:
                                     ]:
                                         session.mark_rejected(e)
                             display_info_message(f"Rejected all {entity_type} entities")
-                            return  # Exit type review entirely
+                            # Exit current entity type review, continue to next type
+                            group_index = len(entity_groups)  # Force exit of group loop
+                            break
                         break  # Exit group if confirmation cancelled
 
                     elif action == "invalid":

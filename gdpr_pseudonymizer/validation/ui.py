@@ -29,8 +29,13 @@ def get_user_action() -> str:
     key = readchar.readkey()
 
     # Map single-key actions
+    # Check batch operations FIRST (Shift+A, Shift+R) before lowercase checks
     if key == " ":
         return "confirm"
+    elif key == "A":  # Shift+A (must check uppercase before lowercase)
+        return "batch_accept"
+    elif key == "R":  # Shift+R (must check uppercase before lowercase)
+        return "batch_reject"
     elif key.lower() == "r":
         return "reject"
     elif key.lower() == "e":
@@ -49,10 +54,6 @@ def get_user_action() -> str:
         return "previous"
     elif key.lower() == "q":
         return "quit"
-    elif key.upper() == "A":  # Shift+A
-        return "batch_accept"
-    elif key.upper() == "R":  # Shift+R
-        return "batch_reject"
     else:
         return "invalid"
 
