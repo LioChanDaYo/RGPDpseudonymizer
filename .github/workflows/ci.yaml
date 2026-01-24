@@ -71,6 +71,15 @@ jobs:
           poetry run black --check .
           poetry run mypy gdpr_pseudonymizer
 
+      - name: Run integration tests (Linux/macOS only)
+        if: runner.os != 'Windows'
+        env:
+          OMP_NUM_THREADS: 1
+        run: |
+          echo "Running integration tests with time limit check..."
+          poetry run pytest tests/integration/ -v --durations=0
+          echo "Integration tests completed successfully"
+
       - name: Run tests with coverage (Linux/macOS only)
         if: runner.os != 'Windows'
         # OMP_NUM_THREADS=1 prevents spaCy/Thinc access violations on Windows
