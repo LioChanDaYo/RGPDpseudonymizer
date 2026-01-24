@@ -86,12 +86,15 @@ class LibraryBasedPseudonymManager(PseudonymManager):
             ValueError: If library format is invalid
         """
         # Construct path: data/pseudonyms/{theme}.json
-        library_path = Path(__file__).parent.parent.parent / "data" / "pseudonyms" / f"{theme}.json"
+        library_path = (
+            Path(__file__).parent.parent.parent
+            / "data"
+            / "pseudonyms"
+            / f"{theme}.json"
+        )
 
         if not library_path.exists():
-            raise FileNotFoundError(
-                f"Pseudonym library not found: {library_path}"
-            )
+            raise FileNotFoundError(f"Pseudonym library not found: {library_path}")
 
         # Load and validate JSON structure
         try:

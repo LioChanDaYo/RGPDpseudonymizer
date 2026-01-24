@@ -79,7 +79,9 @@ class TestLibraryLoading:
         manager = LibraryBasedPseudonymManager()
 
         # Mock json.load to raise JSONDecodeError
-        with patch("gdpr_pseudonymizer.pseudonym.library_manager.json.load") as mock_load:
+        with patch(
+            "gdpr_pseudonymizer.pseudonym.library_manager.json.load"
+        ) as mock_load:
             mock_load.side_effect = json.JSONDecodeError("Invalid JSON", "", 0)
 
             with pytest.raises(ValueError, match="Invalid JSON format"):
@@ -227,7 +229,10 @@ class TestPseudonymAssignment:
         assert isinstance(assignment, PseudonymAssignment)
         assert assignment.pseudonym_first in manager.first_names["male"]
         assert assignment.pseudonym_last in manager.last_names
-        assert assignment.pseudonym_full == f"{assignment.pseudonym_first} {assignment.pseudonym_last}"
+        assert (
+            assignment.pseudonym_full
+            == f"{assignment.pseudonym_first} {assignment.pseudonym_last}"
+        )
         assert assignment.theme == "neutral"
         assert 0.0 <= assignment.exhaustion_percentage <= 1.0
 
@@ -281,9 +286,7 @@ class TestPseudonymAssignment:
         manager = LibraryBasedPseudonymManager()
         manager.load_library("lotr")
 
-        assignment = manager.assign_pseudonym(
-            entity_type="LOCATION", last_name="Paris"
-        )
+        assignment = manager.assign_pseudonym(entity_type="LOCATION", last_name="Paris")
 
         assert assignment.pseudonym_first is None
         assert assignment.pseudonym_last in manager.last_names
@@ -295,9 +298,7 @@ class TestPseudonymAssignment:
         manager = LibraryBasedPseudonymManager()
         manager.load_library("star_wars")
 
-        assignment = manager.assign_pseudonym(
-            entity_type="ORG", last_name="ACME Corp"
-        )
+        assignment = manager.assign_pseudonym(entity_type="ORG", last_name="ACME Corp")
 
         assert assignment.pseudonym_first is None
         assert assignment.pseudonym_last in manager.last_names
@@ -476,9 +477,7 @@ class TestFallbackNaming:
 
         # Should use fallback naming
         assert assignment.pseudonym_full.startswith("Person-")
-        assert assignment.pseudonym_full.endswith(
-            "001"
-        )  # First fallback for PERSON
+        assert assignment.pseudonym_full.endswith("001")  # First fallback for PERSON
 
     def test_fallback_naming_location(self) -> None:
         """Test systematic fallback naming for LOCATION entity."""
@@ -530,13 +529,19 @@ class TestFallbackNaming:
             # First collision
             manager._used_pseudonyms.add(test_full)
             assignment1 = manager.assign_pseudonym(
-                entity_type="PERSON", first_name="Test1", last_name="User1", gender="male"
+                entity_type="PERSON",
+                first_name="Test1",
+                last_name="User1",
+                gender="male",
             )
 
             # Second collision
             manager._used_pseudonyms.add(assignment1.pseudonym_full)
             assignment2 = manager.assign_pseudonym(
-                entity_type="PERSON", first_name="Test2", last_name="User2", gender="male"
+                entity_type="PERSON",
+                first_name="Test2",
+                last_name="User2",
+                gender="male",
             )
 
         # Verify counter incremented
@@ -640,9 +645,7 @@ class TestDataModelIntegration:
         manager = LibraryBasedPseudonymManager()
         manager.load_library("lotr")
 
-        assignment = manager.assign_pseudonym(
-            entity_type="LOCATION", last_name="Paris"
-        )
+        assignment = manager.assign_pseudonym(entity_type="LOCATION", last_name="Paris")
 
         # LOCATION should have null first name
         assert assignment.pseudonym_full is not None
