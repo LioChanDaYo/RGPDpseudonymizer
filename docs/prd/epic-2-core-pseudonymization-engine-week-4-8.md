@@ -13,7 +13,7 @@
 |-------|----------|---------------|----------------|
 | **2.0.1: Integration Tests for Validation Workflow** | 🔴 **HIGH** | **2-3 days** | **TD-001 (Epic 1 debt)** |
 | 2.1: Pseudonym Library System | HIGH | 3-4 days | Original Epic 2 |
-| **Task 2.1.1: Resolve Type Ignore Comments** | MEDIUM | **20 min** | **TD-003 (Epic 1 debt)** |
+| ~~**Task 2.1.1: Resolve Type Ignore Comments**~~ | ~~MEDIUM~~ | ~~**20 min**~~ | **✅ RESOLVED (TD-003)** |
 | 2.2: Compositional Pseudonymization Logic | CRITICAL | 4-5 days | Original Epic 2 |
 | 2.3: Compound Name Handling | HIGH | 2-3 days | Original Epic 2 |
 | 2.4: Encrypted Mapping Table | CRITICAL | 4-5 days | Original Epic 2 |
@@ -159,25 +159,24 @@ def test_full_validation_workflow_with_confirm_reject():
 6. **AC6:** Unit tests: library loading, pseudonym selection (with/without gender), exhaustion handling.
 7. **AC7:** Library sourcing documented for legal compliance (public domain, fair use considerations).
 
-#### Task 2.1.1: Resolve Type Ignore Comments in regex_matcher.py (TD-003)
+#### ~~Task 2.1.1: Resolve Type Ignore Comments in regex_matcher.py (TD-003)~~ ✅ RESOLVED
 
 **Source:** Epic 1 Technical Debt (Story 1.8 QA Gate)
 
-**Description:** Fix 2 instances of `# type: ignore` comments by updating DetectedEntity signature to eliminate type safety warnings.
+**Status:** ✅ **RESOLVED** - Completed January 22, 2026 (commit 4e7533d)
 
-**Priority:** MEDIUM (Quick Win - 20 minutes)
+**Resolution Summary:**
+- Added `source: str = "spacy"` parameter to DetectedEntity dataclass
+- Added `is_ambiguous: bool = False` parameter to DetectedEntity dataclass
+- Removed both `# type: ignore[call-arg]` comments from lines 157 and 222
+- Added proper type hints (`dict[str, Any]`) to RegexMatcher class
+- All mypy checks passing: `Success: no issues found in 7 source files`
 
-**Rationale:** Clean code before Epic 2 adds more regex/NLP integration. Story 2.2 and 2.3 will interact with regex patterns - type safety helps prevent bugs.
+**Resolved By:** Commit 4e7533d "fix: resolve mypy type errors in regex_matcher" (January 22, 2026)
 
-**Acceptance Criteria:**
-- [ ] Remove `# type: ignore` comments at lines 157 and 222 in `gdpr_pseudonymizer/nlp/regex_matcher.py`
-- [ ] Update `DetectedEntity` dataclass signature if needed to resolve type conflicts
-- [ ] Run `mypy` type checking - must pass with no errors
-- [ ] Run full test suite - all existing tests must still pass
-- [ ] Verify no new type warnings introduced elsewhere
+**Verification:** Confirmed via mypy validation on January 24, 2026 during Story 2.1 PO validation
 
-**Estimated Effort:** 20 minutes
-**Target:** Execute during Story 2.1 setup or as standalone quick task
+**Impact on Story 2.1:** Task 2.1.1 removed from Story 2.1 scope (no work required)
 
 ---
 
@@ -365,10 +364,12 @@ def test_full_validation_workflow_with_confirm_reject():
    - Effort: 2-3 days
    - Rationale: Required for Story 2.6 integration testing; pays down Epic 1 technical debt
 
-2. ✅ **TD-003:** Resolve Type Ignore Comments → **Task 2.1.1**
+2. ✅ **TD-003:** Resolve Type Ignore Comments → **✅ RESOLVED (Commit 4e7533d, Jan 22 2026)**
    - Priority: MEDIUM (Quick Win)
-   - Effort: 20 minutes
+   - Effort: 20 minutes → **Actual: Completed during Story 1.8**
    - Rationale: Clean code before Epic 2 adds more regex/NLP integration
+   - Resolution: Added `source` and `is_ambiguous` fields to DetectedEntity, removed type: ignore comments
+   - Verification: mypy clean (0 errors) as of January 24, 2026
 
 **From Epic 1 Future Enhancements:**
 3. 🤔 **FE-003:** Performance Regression Tests → **Task 2.6.1 or 2.7.1 (Optional)**
@@ -412,7 +413,7 @@ def test_full_validation_workflow_with_confirm_reject():
 ### **Epic 2 with Backlog Additions (10 stories + 3 optional tasks):**
 - **Story 2.0.1:** Integration Tests (2-3 days) ← NEW from TD-001
 - Story 2.1: Pseudonym Library (3-4 days)
-- **Task 2.1.1:** Type Ignore Comments (20 min) ← NEW from TD-003
+- ~~**Task 2.1.1:** Type Ignore Comments (20 min)~~ ← ✅ RESOLVED (TD-003)
 - Story 2.2: Compositional Logic (4-5 days)
 - Story 2.3: Compound Names (2-3 days)
 - Story 2.4: Encrypted Mapping (4-5 days)
@@ -423,18 +424,18 @@ def test_full_validation_workflow_with_confirm_reject():
 - **Task 2.7.1:** Performance Tests (1 hour - optional alternative) ← NEW from FE-003
 - Story 2.8: Alpha Release Prep (2-3 days)
 
-**Revised Total (with required backlog items):** 24-33 days (4.8-6.6 weeks)
-**Revised Total (with all optional items):** 24.2-33.2 days (4.8-6.6 weeks)
+**Revised Total (with required backlog items):** 22-30 days (4.4-6 weeks) - TD-003 already resolved
+**Revised Total (with all optional items):** 22.2-30.2 days (4.4-6 weeks)
 
 ### **Timeline Feasibility Check:**
 - **Epic 2 Allocated Time:** 5 weeks (Week 6-10)
-- **Revised Estimate:** 4.8-6.6 weeks
-- **Buffer:** 0.2 weeks minimum, -1.6 weeks maximum (upper bound exceeds by 1.6 weeks)
-- **Verdict:** Within tolerance if upper bound avoided; recommend aggressive prioritization
+- **Revised Estimate:** 4.4-6 weeks (TD-003 resolved saves 20 min)
+- **Buffer:** 0.6 weeks minimum, -1 week maximum (upper bound exceeds by 1 week)
+- **Verdict:** Improved feasibility; within tolerance with moderate prioritization
 
 ### **Risk Mitigation:**
 1. **Story 2.0.1 is non-negotiable** - must complete before Story 2.6 (integration testing dependency)
-2. **Task 2.1.1 is quick win** - 20 minutes won't impact timeline
+2. ~~**Task 2.1.1 is quick win**~~ - ✅ Already resolved (no timeline impact)
 3. **Task 2.6.1/2.7.1 are optional** - defer if timeline pressure builds
 4. **Monitor Story 2.1-2.5 velocity** - if stories run long, defer optional tasks and compress Story 2.7-2.8
 
@@ -450,7 +451,7 @@ def test_full_validation_workflow_with_confirm_reject():
    - Can run in parallel with early Story 2.1 work if team has capacity
 
 2. **Story 2.1:** Pseudonym Library System (3-4 days)
-   - **Task 2.1.1:** Resolve Type Ignore Comments (execute during setup - 20 min)
+   - ~~**Task 2.1.1:** Resolve Type Ignore Comments~~ ✅ Already resolved (TD-003)
 
 3. **Story 2.2:** Compositional Pseudonymization Logic (4-5 days)
 
@@ -474,7 +475,7 @@ def test_full_validation_workflow_with_confirm_reject():
 ## ✅ Epic 2 Definition of Done (Updated)
 
 - ✅ **Story 2.0.1 Complete:** Integration tests for validation workflow passing in CI/CD (TD-001 resolved)
-- ✅ **Task 2.1.1 Complete:** Type ignore comments resolved, mypy clean (TD-003 resolved)
+- ✅ **TD-003 Pre-Resolved:** Type ignore comments resolved, mypy clean (completed Jan 22, 2026)
 - ✅ Pseudonym libraries created with ≥500 names each (3 themes)
 - ✅ Compositional pseudonymization logic functional (FR4-5)
 - ✅ Compound name handling operational (FR20)
