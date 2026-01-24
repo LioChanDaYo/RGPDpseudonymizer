@@ -101,7 +101,7 @@ We're actively developing v1.0 MVP with an **AI-assisted approach**:
 ```bash
 # Clone repository
 git clone https://github.com/LioChanDaYo/RGPDpseudonymizer.git
-cd gdpr-pseudonymizer
+cd gdpr_pseudonymizer
 
 # Install dependencies
 poetry install
