@@ -100,7 +100,7 @@ We're actively developing v1.0 MVP with an **AI-assisted approach**:
 
 ```bash
 # Clone repository
-git clone https://github.com/your-org/gdpr-pseudonymizer.git
+git clone https://github.com/LioChanDaYo/RGPDpseudonymizer.git
 cd gdpr-pseudonymizer
 
 # Install dependencies
