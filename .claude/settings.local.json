@@ -55,7 +55,10 @@
       "Bash(dir:*)",
       "Bash(ruff check:*)",
       "Bash(mypy:*)",
-      "Bash(C:\\\\Users\\\\devea\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python311\\\\python.exe -m pytest:*)"
+      "Bash(C:\\\\Users\\\\devea\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python311\\\\python.exe -m pytest:*)",
+      "Bash(for file in star_wars.json lotr.json)",
+      "Bash(do python -c \"\nimport json\nfrom collections import OrderedDict\n\nwith open\\(''$file'', ''r'', encoding=''utf-8''\\) as f:\n    data = json.load\\(f\\)\n\nmale_before = len\\(data[''first_names''][''male'']\\)\nfemale_before = len\\(data[''first_names''][''female'']\\)\nneutral_before = len\\(data[''first_names''][''neutral'']\\)\n\ndata[''first_names''][''male''] = list\\(OrderedDict.fromkeys\\(data[''first_names''][''male'']\\)\\)\ndata[''first_names''][''female''] = list\\(OrderedDict.fromkeys\\(data[''first_names''][''female'']\\)\\)\ndata[''first_names''][''neutral''] = list\\(OrderedDict.fromkeys\\(data[''first_names''][''neutral'']\\)\\)\n\nmale_after = len\\(data[''first_names''][''male'']\\)\nfemale_after = len\\(data[''first_names''][''female'']\\)\nneutral_after = len\\(data[''first_names''][''neutral'']\\)\n\nprint\\(f''=== $file ===''\\)\nprint\\(f''  Male: {male_before} -> {male_after} \\(removed {male_before - male_after}\\)''\\)\nprint\\(f''  Female: {female_before} -> {female_after} \\(removed {female_before - female_after}\\)''\\)\nprint\\(f''  Neutral: {neutral_before} -> {neutral_after} \\(removed {neutral_before - neutral_after}\\)''\\)\nprint\\(f''  Total: {male_after + female_after + neutral_after}''\\)\n\nif male_before != male_after or female_before != female_after or neutral_before != neutral_after:\n    with open\\(''$file'', ''w'', encoding=''utf-8''\\) as f:\n        json.dump\\(data, f, ensure_ascii=False, indent=2\\)\n    print\\(''  File updated.''\\)\nelse:\n    print\\(''  No duplicates found.''\\)\n\")",
+      "Bash(done)"
     ]
   }
 }
