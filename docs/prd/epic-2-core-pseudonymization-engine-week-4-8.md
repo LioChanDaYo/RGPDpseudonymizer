@@ -214,6 +214,31 @@ def test_full_validation_workflow_with_confirm_reject():
 5. **AC5:** Unit tests: compound name detection, pseudonym assignment, edge cases (triple compounds, non-standard separators).
 6. **AC6:** Test corpus validation: Verify compound names in test corpus processed correctly (from Story 1.1 edge cases).
 
+#### 📝 Scope Enhancement Note (Added 2026-01-25)
+
+**Context:** During Story 2.2 testing, a defect was discovered where French honorific titles (Dr., M., Mme., etc.) are incorrectly treated as part of names, causing duplicate entity mappings:
+- "Dr. Marie Dubois" → parsed as `first_name="Dr. Marie"`, creating a separate mapping from "Marie Dubois"
+- This breaks Story 2.2's compositional logic consistency
+
+**Decision:** Enhanced Story 2.3 scope to include **title preprocessing** in addition to compound name handling:
+- **Rationale:** Both are name parsing edge cases touching the same code area (`parse_full_name()`)
+- **Impact:** Minimal effort increase (1-2 hours for title regex patterns)
+- **Benefit:** Fixes duplicate mapping issue without reopening completed Story 2.2 (QA-approved)
+- **Priority:** HIGH - Must be fixed before Story 2.6 (Single-Document Workflow) to meet accuracy targets
+
+**Updated Story Title:** "French Name Preprocessing (Titles + Compound Names)"
+
+**Enhanced Acceptance Criteria Added:**
+- AC1: Title stripping (Dr., M., Mme., Mlle., Pr., Prof.)
+- AC5: Title edge cases (with/without periods, multiple titles, title+compound combos)
+- AC6: Integration with Story 2.2 compositional logic (replaces original AC6)
+- AC7: Unit tests for titles and compounds
+- AC8: Integration tests verifying no duplicate mappings
+
+**Estimated Effort:** Remains 2-3 days (unchanged)
+
+**Story File:** [docs/stories/2.3.french-name-preprocessing.story.md](../stories/2.3.french-name-preprocessing.story.md)
+
 ---
 
 ### Story 2.4: Encrypted Mapping Table with Python-Native Encryption

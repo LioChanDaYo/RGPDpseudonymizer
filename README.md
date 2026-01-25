@@ -59,6 +59,7 @@ We're actively developing v1.0 MVP with an **AI-assisted approach**:
 - 🔄 **Week 6-10 (Current):** Epic 2 - Core pseudonymization engine
   - Story 2.0.1: Integration tests ✅ (19 tests, 80.49% coverage)
   - Story 2.1: Pseudonym library system ✅ (3 themed libraries, 90.76% coverage)
+  - Story 2.2: Compositional pseudonymization logic ✅ (37 tests, 94% coverage, QA score 95/100)
 - 📅 **Week 11-14:** CLI polish, batch processing, launch prep
 - 🎯 **MVP Launch:** Week 14 (estimated Q2 2026)
 
@@ -317,6 +318,7 @@ The validation UI provides an intuitive keyboard-driven interface for reviewing 
 - ✅ **Story 1.9:** Entity deduplication for validation UI - 66% time reduction for large docs (QA gate: PASS)
 - ✅ **Story 2.0.1:** Integration tests for validation workflow - 19 tests, 80.49% coverage, all quality gates pass (QA gate: PASS)
 - ✅ **Story 2.1:** Pseudonym library system - 3 themed libraries (neutral, Star Wars, LOTR), gender-matching, exhaustion detection, 36 tests, 90.76% coverage (QA gate: PASS, Score: 98/100)
+- ✅ **Story 2.2:** Compositional pseudonymization logic - Component-based matching ("Marie Dubois" → "Leia Organa", "Marie" → "Leia"), 37 tests, 94% coverage (QA gate: PASS, Score: 95/100)
 
 ### In Progress 🔄
 - 📅 **Epic 2 (Week 6-10):** Core pseudonymization engine
@@ -475,20 +477,21 @@ The validation workflow integration tests cover:
 
 ---
 
-## 📊 Project Metrics (As of 2026-01-24)
+## 📊 Project Metrics (As of 2026-01-25)
 
 | Metric | Value | Status |
 |--------|-------|--------|
 | **Development Progress** | Week 6/14 | 🔄 Epic 2 In Progress |
-| **Stories Complete** | 11 (Epic 1 + Stories 2.0.1, 2.1) | ✅ Epic 1 + 2 Epic 2 Stories |
+| **Stories Complete** | 12 (Epic 1 + Stories 2.0.1, 2.1, 2.2) | ✅ Epic 1 + 3 Epic 2 Stories |
 | **Test Corpus Size** | 25 docs, 1,855 entities | ✅ Complete |
 | **NLP Accuracy (Baseline)** | 29.5% F1 (spaCy) | ✅ Measured |
 | **Hybrid Accuracy (NLP+Regex)** | 35.3% F1 (+52.2% PERSON) | ✅ Story 1.8 Complete |
 | **Final Accuracy (AI+Human)** | 100% (validated) | 🎯 By Design |
 | **Pseudonym Libraries** | 3 themes (2,426 names total) | ✅ Story 2.1 Complete |
+| **Compositional Matching** | Operational (component reuse) | ✅ Story 2.2 Complete |
 | **Validation UI** | Operational with deduplication | ✅ Stories 1.7, 1.9 Complete |
 | **Validation Time** | <2 min (20-30 entities), <5 min (100 entities) | ✅ Targets Met |
-| **Test Coverage** | 89 tests (70 unit + 19 integration) | ✅ Stories 2.0.1, 2.1 Complete |
+| **Test Coverage** | 401 tests, 86.07% coverage | ✅ Stories 2.0.1, 2.1, 2.2 Complete |
 | **Quality Gates** | Black, Ruff, mypy, pytest | ✅ All Pass |
 | **Supported Languages** | French | 🇫🇷 v1.0 only |
 | **Supported Formats** | .txt, .md | 📝 v1.0 scope |
@@ -505,6 +508,6 @@ The validation workflow integration tests cover:
 
 ---
 
-**Last Updated:** 2026-01-24 (Story 2.1 complete: Pseudonym library system with 3 themed libraries, 36 tests, 90.76% coverage, QA score 98/100)
+**Last Updated:** 2026-01-25 (Story 2.2 complete: Compositional pseudonymization logic with component-based matching, 37 tests, 94% coverage, QA score 95/100)
 
 **Current Focus:** Epic 2 - Core Pseudonymization Engine (Week 6-10)
