@@ -1,5 +1,37 @@
 # 19. Coding Standards
 
+### 19.0 Build & Test Commands (CRITICAL)
+
+**This project uses Poetry. ALL commands must use `poetry run`:**
+
+```bash
+# GOOD - Install dependencies
+poetry install
+
+# GOOD - Run tests
+poetry run pytest tests/
+
+# GOOD - Run linting
+poetry run ruff check gdpr_pseudonymizer/
+
+# GOOD - Run type checking
+poetry run mypy gdpr_pseudonymizer/
+
+# BAD - DO NOT use system Python or pip
+pip install -e .          # ❌ NO
+pytest tests/             # ❌ NO (use 'poetry run pytest')
+python -m pytest tests/   # ❌ NO (use 'poetry run pytest')
+```
+
+**Why?** Poetry ensures:
+- Correct Python version (3.9-3.11, not 3.12+)
+- Locked dependency versions
+- Isolated virtual environment
+
+**Supported Python:** 3.9 - 3.11 (excludes 3.12+ for dependency compatibility)
+
+---
+
 ### 19.1 Critical Rules
 
 1. **Module Imports:** Always use absolute imports

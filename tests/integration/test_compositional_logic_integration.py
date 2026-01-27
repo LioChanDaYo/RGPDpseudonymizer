@@ -689,3 +689,368 @@ class TestCompositionalLogicIntegration:
         # Note: Gender verification would require checking against library gender lists,
         # but since we're using real LibraryBasedPseudonymManager from Story 2.1,
         # we trust that gender logic is already tested in test_library_manager.py
+
+
+class TestTitleAndCompoundNameIntegration:
+    """Integration tests for title stripping and compound name handling (Story 2.3)."""
+
+    @pytest.fixture
+    def pseudonym_manager(self) -> LibraryBasedPseudonymManager:
+        """Create real LibraryBasedPseudonymManager with loaded library.
+
+        Returns:
+            Configured pseudonym manager with star_wars theme
+        """
+        manager = LibraryBasedPseudonymManager()
+        manager.load_library("star_wars")
+        return manager
+
+    @pytest.fixture
+    def mock_mapping_repository(self) -> MagicMock:
+        """Create mock MappingRepository for testing.
+
+        Returns:
+            Mock repository with configurable behavior
+        """
+        return MagicMock()
+
+    @pytest.fixture
+    def compositional_engine(
+        self,
+        pseudonym_manager: LibraryBasedPseudonymManager,
+        mock_mapping_repository: MagicMock,
+    ) -> CompositionalPseudonymEngine:
+        """Create CompositionalPseudonymEngine with real manager and mock repository.
+
+        Returns:
+            Configured compositional engine
+        """
+        return CompositionalPseudonymEngine(pseudonym_manager, mock_mapping_repository)
+
+    def test_title_deduplication_creates_single_mapping(
+        self,
+        mock_mapping_repository: MagicMock,
+    ) -> None:
+        """Test that title variants parse to same components (no duplicate entities).
+
+        Scenario:
+        - "Dr. Marie Dubois" (with title) parses to ("Marie", "Dubois")
+        - "Marie Dubois" (without title) parses to ("Marie", "Dubois")
+        Both parse to identical components, so they'd create the same entity mapping.
+        """
+        # Create fresh manager to avoid library exhaustion from previous tests
+        manager = LibraryBasedPseudonymManager()
+        manager.load_library("star_wars")
+        engine = CompositionalPseudonymEngine(manager, mock_mapping_repository)
+
+        # Verify parsing produces same components for both title variants
+        first_1, last_1, ambiguous_1 = engine.parse_full_name("Dr. Marie Dubois")
+        first_2, last_2, ambiguous_2 = engine.parse_full_name("Marie Dubois")
+
+        # Both should parse to exact same components
+        assert first_1 == first_2 == "Marie"
+        assert last_1 == last_2 == "Dubois"
+        assert ambiguous_1 == ambiguous_2 is False
+
+        # Since both parse to identical components, they would create the same
+        # entity mapping in the repository (no duplicate entities)
+
+    def test_compound_first_name_sharing(
+        self,
+        compositional_engine: CompositionalPseudonymEngine,
+        mock_mapping_repository: MagicMock,
+    ) -> None:
+        """Test atomic compound first name shared across entities.
+
+        Scenario:
+        - "Jean-Pierre Martin" -> "Han Skywalker"
+        - "Jean-Pierre Dupont" -> "Han Organa" (shares Jean-Pierre → Han)
+        """
+        assigned_entities: list[Entity] = []
+
+        def mock_find_by_component(component: str, component_type: str) -> list[Entity]:
+            """Mock repository lookup."""
+            return [
+                e
+                for e in assigned_entities
+                if (component_type == "first_name" and e.first_name == component)
+                or (component_type == "last_name" and e.last_name == component)
+            ]
+
+        mock_mapping_repository.find_by_component.side_effect = mock_find_by_component
+
+        # First: "Jean-Pierre Martin"
+        assignment_1 = compositional_engine.assign_compositional_pseudonym(
+            entity_text="Jean-Pierre Martin",
+            entity_type="PERSON",
+            gender="male",
+        )
+
+        entity_1 = Entity(
+            entity_type="PERSON",
+            first_name="Jean-Pierre",
+            last_name="Martin",
+            full_name="Jean-Pierre Martin",
+            pseudonym_first=assignment_1.pseudonym_first,
+            pseudonym_last=assignment_1.pseudonym_last,
+            pseudonym_full=assignment_1.pseudonym_full,
+            theme="star_wars",
+        )
+        assigned_entities.append(entity_1)
+
+        # Second: "Jean-Pierre Dupont" (shares compound "Jean-Pierre")
+        assignment_2 = compositional_engine.assign_compositional_pseudonym(
+            entity_text="Jean-Pierre Dupont",
+            entity_type="PERSON",
+            gender="male",
+        )
+
+        # Verify "Jean-Pierre" reused (same pseudonym first)
+        assert assignment_2.pseudonym_first == assignment_1.pseudonym_first
+        assert assignment_2.pseudonym_last != assignment_1.pseudonym_last
+        # Compound names get SIMPLE pseudonyms (no hyphens)
+        assert "-" not in assignment_1.pseudonym_first
+        assert "-" not in assignment_2.pseudonym_first
+
+    def test_compound_last_name_sharing(
+        self,
+        compositional_engine: CompositionalPseudonymEngine,
+        mock_mapping_repository: MagicMock,
+    ) -> None:
+        """Test atomic compound last name shared across entities.
+
+        Scenario:
+        - "Marie Paluel-Marmont" -> "Leia Solo"
+        - "Jean Paluel-Marmont" -> "Luke Solo" (shares Paluel-Marmont → Solo)
+        """
+        assigned_entities: list[Entity] = []
+
+        def mock_find_by_component(component: str, component_type: str) -> list[Entity]:
+            """Mock repository lookup."""
+            return [
+                e
+                for e in assigned_entities
+                if (component_type == "first_name" and e.first_name == component)
+                or (component_type == "last_name" and e.last_name == component)
+            ]
+
+        mock_mapping_repository.find_by_component.side_effect = mock_find_by_component
+
+        # First: "Marie Paluel-Marmont"
+        assignment_1 = compositional_engine.assign_compositional_pseudonym(
+            entity_text="Marie Paluel-Marmont",
+            entity_type="PERSON",
+            gender="female",
+        )
+
+        entity_1 = Entity(
+            entity_type="PERSON",
+            first_name="Marie",
+            last_name="Paluel-Marmont",
+            full_name="Marie Paluel-Marmont",
+            pseudonym_first=assignment_1.pseudonym_first,
+            pseudonym_last=assignment_1.pseudonym_last,
+            pseudonym_full=assignment_1.pseudonym_full,
+            theme="star_wars",
+        )
+        assigned_entities.append(entity_1)
+
+        # Second: "Jean Paluel-Marmont" (shares compound "Paluel-Marmont")
+        assignment_2 = compositional_engine.assign_compositional_pseudonym(
+            entity_text="Jean Paluel-Marmont",
+            entity_type="PERSON",
+            gender="male",
+        )
+
+        # Verify "Paluel-Marmont" reused (same pseudonym last)
+        assert assignment_2.pseudonym_first != assignment_1.pseudonym_first
+        assert assignment_2.pseudonym_last == assignment_1.pseudonym_last
+        # Compound names get SIMPLE pseudonyms (no hyphens)
+        assert "-" not in assignment_1.pseudonym_last
+        assert "-" not in assignment_2.pseudonym_last
+
+    def test_atomic_compound_separation_order_independent(
+        self,
+        compositional_engine: CompositionalPseudonymEngine,
+        mock_mapping_repository: MagicMock,
+    ) -> None:
+        """Test compound and standalone components are distinct (order-independent).
+
+        Scenario:
+        - "Jean-Pierre Dubois" -> compound "Jean-Pierre" gets pseudonym (e.g., "Han")
+        - "Jean Martin" -> simple "Jean" gets different pseudonym (e.g., "Luke")
+        NO ambiguity flagging needed - they are distinct entities by design.
+        """
+        assigned_entities: list[Entity] = []
+
+        def mock_find_by_component(component: str, component_type: str) -> list[Entity]:
+            """Mock repository lookup."""
+            return [
+                e
+                for e in assigned_entities
+                if (component_type == "first_name" and e.first_name == component)
+                or (component_type == "last_name" and e.last_name == component)
+            ]
+
+        mock_mapping_repository.find_by_component.side_effect = mock_find_by_component
+
+        # First: "Jean-Pierre Dubois" (compound first name)
+        assignment_1 = compositional_engine.assign_compositional_pseudonym(
+            entity_text="Jean-Pierre Dubois",
+            entity_type="PERSON",
+            gender="male",
+        )
+
+        entity_1 = Entity(
+            entity_type="PERSON",
+            first_name="Jean-Pierre",
+            last_name="Dubois",
+            full_name="Jean-Pierre Dubois",
+            pseudonym_first=assignment_1.pseudonym_first,
+            pseudonym_last=assignment_1.pseudonym_last,
+            pseudonym_full=assignment_1.pseudonym_full,
+            theme="star_wars",
+        )
+        assigned_entities.append(entity_1)
+
+        # Second: "Jean Martin" (simple first name - DISTINCT from "Jean-Pierre")
+        assignment_2 = compositional_engine.assign_compositional_pseudonym(
+            entity_text="Jean Martin",
+            entity_type="PERSON",
+            gender="male",
+        )
+
+        # Verify "Jean" and "Jean-Pierre" get different pseudonyms
+        assert assignment_2.pseudonym_first != assignment_1.pseudonym_first
+        # Neither should be flagged as ambiguous (they are distinct entities)
+        assert assignment_1.is_ambiguous is False
+        assert assignment_2.is_ambiguous is False
+
+    def test_title_stripping_with_compound_names(
+        self,
+        compositional_engine: CompositionalPseudonymEngine,
+        mock_mapping_repository: MagicMock,
+    ) -> None:
+        """Test title stripping combined with compound name handling.
+
+        Scenario:
+        - "Dr. Jean-Pierre Dubois" (title + compound first)
+        - "M. Jean-Pierre Martin" (title + compound first)
+        After title stripping, both share compound "Jean-Pierre".
+        """
+        assigned_entities: list[Entity] = []
+
+        def mock_find_by_component(component: str, component_type: str) -> list[Entity]:
+            """Mock repository lookup."""
+            return [
+                e
+                for e in assigned_entities
+                if (component_type == "first_name" and e.first_name == component)
+                or (component_type == "last_name" and e.last_name == component)
+            ]
+
+        mock_mapping_repository.find_by_component.side_effect = mock_find_by_component
+
+        # First: "Dr. Jean-Pierre Dubois"
+        assignment_1 = compositional_engine.assign_compositional_pseudonym(
+            entity_text="Dr. Jean-Pierre Dubois",
+            entity_type="PERSON",
+            gender="male",
+        )
+
+        entity_1 = Entity(
+            entity_type="PERSON",
+            first_name="Jean-Pierre",
+            last_name="Dubois",
+            full_name="Dr. Jean-Pierre Dubois",
+            pseudonym_first=assignment_1.pseudonym_first,
+            pseudonym_last=assignment_1.pseudonym_last,
+            pseudonym_full=assignment_1.pseudonym_full,
+            theme="star_wars",
+        )
+        assigned_entities.append(entity_1)
+
+        # Second: "M. Jean-Pierre Martin" (same compound after title strip)
+        assignment_2 = compositional_engine.assign_compositional_pseudonym(
+            entity_text="M. Jean-Pierre Martin",
+            entity_type="PERSON",
+            gender="male",
+        )
+
+        # Verify "Jean-Pierre" reused after title stripping
+        assert assignment_2.pseudonym_first == assignment_1.pseudonym_first
+        assert assignment_2.pseudonym_last != assignment_1.pseudonym_last
+
+    def test_compound_names_with_all_libraries(
+        self,
+        mock_mapping_repository: MagicMock,
+    ) -> None:
+        """Test compound name handling works with all pseudonym libraries.
+
+        Verifies neutral, star_wars, and lotr libraries correctly assign
+        pseudonyms for compound names. Note: Some libraries (e.g., lotr)
+        may contain hyphenated names in their pseudonym pool (like "Tar-Atanamir"),
+        which is valid - the important thing is that pseudonyms are assigned
+        as atomic units.
+        """
+        mock_mapping_repository.find_by_component.return_value = []
+
+        themes = ["neutral", "star_wars", "lotr"]
+
+        for theme in themes:
+            # Create fresh manager for each theme
+            manager = LibraryBasedPseudonymManager()
+            manager.load_library(theme)
+            engine = CompositionalPseudonymEngine(manager, mock_mapping_repository)
+
+            # Test compound first name
+            assignment_first = engine.assign_compositional_pseudonym(
+                entity_text="Jean-Pierre Martin",
+                entity_type="PERSON",
+                gender="male",
+            )
+
+            # Verify pseudonyms assigned successfully
+            assert assignment_first.pseudonym_first is not None
+            assert assignment_first.pseudonym_last is not None
+            assert assignment_first.theme == theme
+            assert assignment_first.is_ambiguous is False
+
+            # Test compound last name
+            assignment_last = engine.assign_compositional_pseudonym(
+                entity_text="Marie Paluel-Marmont",
+                entity_type="PERSON",
+                gender="female",
+            )
+
+            # Verify pseudonym assigned successfully
+            assert assignment_last.pseudonym_first is not None
+            assert assignment_last.pseudonym_last is not None
+            assert assignment_last.theme == theme
+            assert assignment_last.is_ambiguous is False
+
+    def test_multiple_titles_with_compound_names(
+        self,
+        compositional_engine: CompositionalPseudonymEngine,
+        mock_mapping_repository: MagicMock,
+    ) -> None:
+        """Test multiple consecutive titles with compound names.
+
+        Scenario:
+        - "Dr. Pr. Jean-Pierre Paluel-Marmont"
+        All titles stripped, both compound names handled correctly.
+        """
+        mock_mapping_repository.find_by_component.return_value = []
+
+        assignment = compositional_engine.assign_compositional_pseudonym(
+            entity_text="Dr. Pr. Jean-Pierre Paluel-Marmont",
+            entity_type="PERSON",
+            gender="male",
+        )
+
+        # Verify both compound names get SIMPLE pseudonyms
+        assert assignment.pseudonym_first is not None
+        assert "-" not in assignment.pseudonym_first
+        assert assignment.pseudonym_last is not None
+        assert "-" not in assignment.pseudonym_last
+        assert assignment.is_ambiguous is False

@@ -1,4 +1,5 @@
 markdownExploder: true
+buildSystem: poetry  # REQUIRED: Use 'poetry run' for all commands (tests, linting, etc.)
 qa:
   qaLocation: docs/qa
 prd:

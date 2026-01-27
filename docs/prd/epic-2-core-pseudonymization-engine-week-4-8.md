@@ -208,8 +208,8 @@ def test_full_validation_workflow_with_confirm_reject():
 #### Acceptance Criteria
 
 1. **AC1:** Compound first name detection: Identify hyphenated first names in NER results.
-2. **AC2:** Compound pseudonym assignment: Map compound names to compound pseudonyms (e.g., "Jean-Pierre" → "Luke-Han").
-3. **AC3:** Component awareness: If "Jean" or "Pierre" appear separately, handle based on context (log as ambiguous if unclear).
+2. **AC2:** Simple pseudonym assignment for compounds: Map compound names to SIMPLE pseudonyms as atomic units (e.g., "Jean-Pierre" → "Han", not "Luke-Han"). This simplifies implementation and avoids gender consistency checks across compound components.
+3. **AC3:** Atomic compound handling: Treat compound names (e.g., "Jean-Pierre") as distinct from their component parts (e.g., "Jean"). Standalone "Jean" and compound "Jean-Pierre" are separate entities receiving different pseudonyms.
 4. **AC4:** Regex pattern support: Fallback regex for detecting common French compound patterns if NER doesn't identify them.
 5. **AC5:** Unit tests: compound name detection, pseudonym assignment, edge cases (triple compounds, non-standard separators).
 6. **AC6:** Test corpus validation: Verify compound names in test corpus processed correctly (from Story 1.1 edge cases).
@@ -234,6 +234,13 @@ def test_full_validation_workflow_with_confirm_reject():
 - AC6: Integration with Story 2.2 compositional logic (replaces original AC6)
 - AC7: Unit tests for titles and compounds
 - AC8: Integration tests verifying no duplicate mappings
+
+**Design Decision Update (2026-01-26 - PO Approved):**
+- **Original AC2:** Compound-to-compound mapping ("Jean-Pierre" → "Luke-Han")
+- **Updated AC2:** Compound-to-simple mapping ("Jean-Pierre" → "Han")
+- **Rationale:** Simplifies implementation, eliminates gender consistency complexity across compound components, uses existing LibraryBasedPseudonymManager without modification, produces cleaner/more readable pseudonyms
+- **Impact:** User-facing change - compound names receive simple pseudonyms instead of compound pseudonyms
+- **PO Approval:** Sarah (Product Owner) - 2026-01-26
 
 **Estimated Effort:** Remains 2-3 days (unchanged)
 
