@@ -98,6 +98,196 @@ class TestParseFullName:
         assert ambiguous is True
 
 
+class TestParseFullNameWithTitles:
+    """Test suite for full name parsing with French titles (Story 2.3)."""
+
+    def test_parse_full_name_with_title_dr(self) -> None:
+        """Test parsing name with Dr. title strips title before parsing."""
+        mock_manager = Mock()
+        mock_repo = Mock()
+        engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
+
+        first, last, ambiguous = engine.parse_full_name("Dr. Marie Dubois")
+
+        assert first == "Marie"
+        assert last == "Dubois"
+        assert ambiguous is False
+
+    def test_parse_full_name_with_title_m(self) -> None:
+        """Test parsing name with M. title strips title before parsing."""
+        mock_manager = Mock()
+        mock_repo = Mock()
+        engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
+
+        first, last, ambiguous = engine.parse_full_name("M. Jean Martin")
+
+        assert first == "Jean"
+        assert last == "Martin"
+        assert ambiguous is False
+
+    def test_parse_full_name_with_title_mme(self) -> None:
+        """Test parsing name with Mme. title strips title before parsing."""
+        mock_manager = Mock()
+        mock_repo = Mock()
+        engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
+
+        first, last, ambiguous = engine.parse_full_name("Mme. Sophie Dubois")
+
+        assert first == "Sophie"
+        assert last == "Dubois"
+        assert ambiguous is False
+
+    def test_parse_full_name_with_multiple_titles(self) -> None:
+        """Test parsing name with multiple titles strips all titles."""
+        mock_manager = Mock()
+        mock_repo = Mock()
+        engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
+
+        first, last, ambiguous = engine.parse_full_name("Dr. Pr. Marie Dubois")
+
+        assert first == "Marie"
+        assert last == "Dubois"
+        assert ambiguous is False
+
+    def test_parse_full_name_with_title_uppercase(self) -> None:
+        """Test parsing name with uppercase title (case-insensitive)."""
+        mock_manager = Mock()
+        mock_repo = Mock()
+        engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
+
+        first, last, ambiguous = engine.parse_full_name("DR MARIE DUBOIS")
+
+        assert first == "MARIE"
+        assert last == "DUBOIS"
+        assert ambiguous is False
+
+    def test_parse_full_name_with_title_no_period(self) -> None:
+        """Test parsing name with title without period."""
+        mock_manager = Mock()
+        mock_repo = Mock()
+        engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
+
+        first, last, ambiguous = engine.parse_full_name("Dr Marie Dubois")
+
+        assert first == "Marie"
+        assert last == "Dubois"
+        assert ambiguous is False
+
+
+class TestParseFullNameWithCompounds:
+    """Test suite for compound name parsing (Story 2.3)."""
+
+    def test_parse_full_name_compound_first_name(self) -> None:
+        """Test parsing hyphenated compound first name."""
+        mock_manager = Mock()
+        mock_repo = Mock()
+        engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
+
+        first, last, ambiguous = engine.parse_full_name("Jean-Pierre Martin")
+
+        assert first == "Jean-Pierre"
+        assert last == "Martin"
+        assert ambiguous is False
+
+    def test_parse_full_name_compound_last_name(self) -> None:
+        """Test parsing hyphenated compound last name."""
+        mock_manager = Mock()
+        mock_repo = Mock()
+        engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
+
+        first, last, ambiguous = engine.parse_full_name("Marie Paluel-Marmont")
+
+        assert first == "Marie"
+        assert last == "Paluel-Marmont"
+        assert ambiguous is False
+
+    def test_parse_full_name_compound_both(self) -> None:
+        """Test parsing both compound first and last names."""
+        mock_manager = Mock()
+        mock_repo = Mock()
+        engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
+
+        first, last, ambiguous = engine.parse_full_name("Jean-Pierre Paluel-Marmont")
+
+        assert first == "Jean-Pierre"
+        assert last == "Paluel-Marmont"
+        assert ambiguous is False
+
+    def test_parse_full_name_compound_first_only(self) -> None:
+        """Test parsing compound first name without last name (ambiguous)."""
+        mock_manager = Mock()
+        mock_repo = Mock()
+        engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
+
+        first, last, ambiguous = engine.parse_full_name("Jean-Pierre")
+
+        assert first == "Jean-Pierre"
+        assert last is None
+        assert ambiguous is True
+
+    def test_parse_full_name_multi_hyphen_first(self) -> None:
+        """Test parsing multi-hyphen compound first name."""
+        mock_manager = Mock()
+        mock_repo = Mock()
+        engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
+
+        first, last, ambiguous = engine.parse_full_name("Jean-Pierre-Paul Martin")
+
+        assert first == "Jean-Pierre-Paul"
+        assert last == "Martin"
+        assert ambiguous is False
+
+    def test_parse_full_name_multi_hyphen_last(self) -> None:
+        """Test parsing multi-hyphen compound last name."""
+        mock_manager = Mock()
+        mock_repo = Mock()
+        engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
+
+        first, last, ambiguous = engine.parse_full_name("Marie Saint-Exupéry-Dubois")
+
+        assert first == "Marie"
+        assert last == "Saint-Exupéry-Dubois"
+        assert ambiguous is False
+
+    def test_parse_full_name_title_and_compound(self) -> None:
+        """Test parsing name with title and compound first name."""
+        mock_manager = Mock()
+        mock_repo = Mock()
+        engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
+
+        first, last, ambiguous = engine.parse_full_name("Dr. Jean-Pierre Dubois")
+
+        assert first == "Jean-Pierre"
+        assert last == "Dubois"
+        assert ambiguous is False
+
+    def test_parse_full_name_multiple_titles_and_compound(self) -> None:
+        """Test parsing name with multiple titles and both compound names."""
+        mock_manager = Mock()
+        mock_repo = Mock()
+        engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
+
+        first, last, ambiguous = engine.parse_full_name(
+            "Dr. Pr. Jean-Pierre Paluel-Marmont"
+        )
+
+        assert first == "Jean-Pierre"
+        assert last == "Paluel-Marmont"
+        assert ambiguous is False
+
+    def test_parse_full_name_title_and_compound_first_only(self) -> None:
+        """Test parsing title with compound first name only (ambiguous)."""
+        mock_manager = Mock()
+        mock_repo = Mock()
+        engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
+
+        first, last, ambiguous = engine.parse_full_name("M. Jean-Pierre")
+
+        assert first == "Jean-Pierre"
+        assert last is None
+        assert ambiguous is True
+
+
 class TestFindStandaloneComponents:
     """Test suite for standalone component lookup functionality."""
 

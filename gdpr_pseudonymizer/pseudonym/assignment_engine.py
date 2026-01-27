@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import re
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
@@ -14,6 +15,13 @@ if TYPE_CHECKING:
 
 # Configure structured logging (no sensitive data)
 logger = logging.getLogger(__name__)
+
+# French title pattern for preprocessing
+# Matches: Dr./Dr, Pr./Pr, Prof./Prof, M./M, Mme./Mme, Mlle./Mlle
+# Case-insensitive, with or without periods
+# (?!\w) ensures title is not followed by a word character (prevents matching "Dr" in "Drapeau")
+# \s* consumes optional trailing whitespace
+FRENCH_TITLE_PATTERN = r"\b(?:Dr\.?|Pr\.?|Prof\.?|M\.?|Mme\.?|Mlle\.?)(?!\w)\s*"
 
 
 @dataclass
@@ -196,6 +204,35 @@ class CompositionalPseudonymEngine:
         self.pseudonym_manager = pseudonym_manager
         self.mapping_repository = mapping_repository
 
+    def strip_titles(self, text: str) -> str:
+        """Remove French honorific titles from entity text.
+
+        Handles titles with/without periods, case-insensitive.
+        Multiple titles are stripped iteratively.
+
+        Examples:
+            "Dr. Marie Dubois" → "Marie Dubois"
+            "M Jean-Pierre" → "Jean-Pierre"
+            "DR MARIE DUBOIS" → "MARIE DUBOIS"
+            "Dr. Pr. Marie Dubois" → "Marie Dubois"
+
+        Args:
+            text: Entity text potentially containing titles
+
+        Returns:
+            Text with titles removed
+        """
+        # Strip titles iteratively (handles multiple titles)
+        while True:
+            stripped = re.sub(
+                FRENCH_TITLE_PATTERN, "", text, flags=re.IGNORECASE
+            ).strip()
+            if stripped == text:
+                break
+            text = stripped
+
+        return text
+
     def assign_compositional_pseudonym(
         self,
         entity_text: str,
@@ -272,10 +309,24 @@ class CompositionalPseudonymEngine:
     def parse_full_name(self, entity_text: str) -> tuple[str | None, str | None, bool]:
         """Parse PERSON entity text into first and last name components.
 
+        NEW: Handles titles and compound names (first or last).
+
+        Steps:
+        1. Strip titles (Dr., M., Mme., etc.)
+        2. Split on whitespace
+        3. Detect compound names (hyphenated first or last names)
+        4. Parse into first_name, last_name
+
         Parsing logic:
         - Single word: first_name only, flagged as ambiguous
         - Two words: first_name + last_name, not ambiguous
         - Three+ words: first words as first_name, last word as last_name, flagged as ambiguous
+
+        Examples:
+            "Dr. Marie Dubois" → ("Marie", "Dubois", False)
+            "Jean-Pierre Martin" → ("Jean-Pierre", "Martin", False)
+            "Marie Paluel-Marmont" → ("Marie", "Paluel-Marmont", False)
+            "Dr. Jean-Pierre" → ("Jean-Pierre", None, True)
 
         Args:
             entity_text: Entity text to parse (e.g., "Marie Dubois")
@@ -283,7 +334,11 @@ class CompositionalPseudonymEngine:
         Returns:
             Tuple of (first_name, last_name, is_ambiguous)
         """
-        words = entity_text.strip().split()
+        # Step 1: Strip titles
+        text = self.strip_titles(entity_text)
+
+        # Step 2: Split words
+        words = text.strip().split()
 
         if len(words) == 0:
             return None, None, True
