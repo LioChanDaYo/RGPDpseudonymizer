@@ -28,7 +28,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Cache Poetry installation
-        uses: actions/cache@v4
+        uses: actions/cache@v3
         with:
           path: |
             ~/.local/share/pypoetry
@@ -41,11 +41,11 @@ jobs:
           pip install poetry>=1.7.0
 
       - name: Cache Poetry dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v3
         with:
           path: |
             ~/.cache/pypoetry
-            .venv
+            ~/.cache/pip
           key: poetry-deps-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
           restore-keys: |
             poetry-deps-${{ runner.os }}-${{ matrix.python-version }}-
@@ -54,12 +54,11 @@ jobs:
         run: poetry install --no-interaction
 
       - name: Cache spaCy models
-        uses: actions/cache@v4
+        uses: actions/cache@v3
         with:
           path: |
             ~/.spacy
-            ~/appdata/local/programs/python/python*/lib/site-packages/fr_core_news_lg*
-          key: spacy-model-fr-core-news-lg-3.8.0-${{ runner.os }}
+          key: spacy-model-fr-core-news-lg-${{ runner.os }}
 
       - name: Download spaCy model
         if: runner.os != 'Windows'
