@@ -64,6 +64,7 @@ We're actively developing v1.0 MVP with an **AI-assisted approach**:
   - Story 2.3: French name preprocessing (titles + compounds) ✅ (53 tests, 94.64% coverage, QA score 100/100)
   - Story 2.4: Encrypted mapping table ✅ (9 integration tests, database encryption with passphrase protection)
   - Story 2.5: Audit logging ✅ (32 tests, 91.41% coverage, GDPR Article 30 compliance, QA score 100/100)
+  - Story 2.6: Single-document pseudonymization workflow ✅ (10 tests passing, end-to-end integration, 6 critical bug fixes for consistent pseudonyms)
 - 📅 **Week 11-14:** CLI polish, batch processing, launch prep
 - 🎯 **MVP Launch:** Week 14 (estimated Q2 2026)
 
@@ -123,9 +124,12 @@ poetry run python scripts/install_spacy_model.py
 # Run CLI
 poetry run gdpr-pseudo --help
 
-# Test on sample document
+# Test on sample document (output defaults to test_pseudonymized.txt)
 echo "Marie Dubois travaille à Paris pour Acme SA." > test.txt
-poetry run gdpr-pseudo process test.txt output.txt
+poetry run gdpr-pseudo process test.txt
+
+# Or specify custom output file
+poetry run gdpr-pseudo process test.txt -o output.txt
 ```
 
 Expected output: "Leia Organa travaille à Coruscant pour Rebel Alliance."
@@ -327,9 +331,10 @@ The validation UI provides an intuitive keyboard-driven interface for reviewing 
 - ✅ **Story 2.3:** French name preprocessing (titles + compounds) - Title stripping ("Dr. Marie Dubois" → "Marie Dubois"), compound names ("Jean-Pierre" treated as atomic), simple pseudonyms for compounds, 53 tests (31 unit + 15 unit + 7 integration), 94.64% coverage (QA gate: PASS, Score: 100/100)
 - ✅ **Story 2.4:** Encrypted mapping table - Database encryption with AES-128-CBC (Fernet), passphrase protection, PBKDF2 key derivation (210,000 iterations), column-level encryption, WAL mode for concurrency, 9 integration tests (QA gate: PASS)
 - ✅ **Story 2.5:** Audit logging - Comprehensive audit logs for GDPR Article 30 compliance, operations table tracks all pseudonymization operations, JSON/CSV export functionality, 32 unit tests, 91.41% coverage (QA gate: PASS, Score: 100/100)
+- ✅ **Story 2.6:** Single-document pseudonymization workflow - End-to-end integration of all Epic 2 components, idempotent processing, optional `--output` parameter, 10 tests passing (3 unit + 7 integration), 6 critical bug fixes for consistent pseudonym generation across documents (QA gate: PASS, Ready for Done)
 
 ### In Progress 🔄
-- 📅 **Epic 2 (Week 6-10):** Core pseudonymization engine
+- 📅 **Epic 2 (Week 6-10):** Core pseudonymization engine (6/8 stories complete)
 
 ### Upcoming 📅
 - **Epic 3 (Week 11-13):** CLI polish & batch processing
@@ -532,6 +537,6 @@ The integration test suite covers:
 
 ---
 
-**Last Updated:** 2026-01-28 (Story 2.5 complete: Audit logging with GDPR Article 30 compliance, operations table, JSON/CSV export, 32 unit tests, 91.41% coverage, 553 total tests passing)
+**Last Updated:** 2026-01-29 (Story 2.6 complete: Single-document pseudonymization workflow with end-to-end integration, optional `--output` parameter, 6 critical bug fixes for consistent pseudonyms, 10 tests passing, validation mode deferred to Epic 3)
 
-**Current Focus:** Epic 2 - Core Pseudonymization Engine (Week 6-10)
+**Current Focus:** Epic 2 - Core Pseudonymization Engine (Week 6-10, 6/8 stories complete)
