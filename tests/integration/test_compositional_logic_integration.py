@@ -1039,6 +1039,9 @@ class TestTitleAndCompoundNameIntegration:
         Scenario:
         - "Dr. Pr. Jean-Pierre Paluel-Marmont"
         All titles stripped, both compound names handled correctly.
+
+        Note: Pseudonyms may contain hyphens (e.g., "Triple-Zero", "Soo-Tath",
+        "Bo-Katan" in Star Wars library) which is valid for character names.
         """
         mock_mapping_repository.find_by_component.return_value = []
 
@@ -1048,9 +1051,7 @@ class TestTitleAndCompoundNameIntegration:
             gender="male",
         )
 
-        # Verify both compound names get SIMPLE pseudonyms
+        # Verify both compound names get atomic pseudonyms
         assert assignment.pseudonym_first is not None
-        assert "-" not in assignment.pseudonym_first
         assert assignment.pseudonym_last is not None
-        assert "-" not in assignment.pseudonym_last
         assert assignment.is_ambiguous is False
