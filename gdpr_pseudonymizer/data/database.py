@@ -134,9 +134,7 @@ def init_database(db_path: str, passphrase: str) -> None:
                 text("CREATE INDEX idx_operations_timestamp ON operations(timestamp)")
             )
             conn.execute(
-                text(
-                    "CREATE INDEX idx_operations_type ON operations(operation_type)"
-                )
+                text("CREATE INDEX idx_operations_type ON operations(operation_type)")
             )
 
             conn.commit()

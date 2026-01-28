@@ -150,7 +150,9 @@ class TestEncryptionService:
 
     def test_validate_passphrase_strength_medium(self) -> None:
         """Test passphrase strength feedback - medium."""
-        valid, message = EncryptionService.validate_passphrase("medium_passphrase_20chars!")
+        valid, message = EncryptionService.validate_passphrase(
+            "medium_passphrase_20chars!"
+        )
         assert valid
         assert "medium" in message.lower()
 

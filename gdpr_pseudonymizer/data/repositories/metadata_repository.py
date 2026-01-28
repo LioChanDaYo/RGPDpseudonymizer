@@ -162,9 +162,7 @@ class MetadataRepository:
         """
         # Query all metadata keys starting with "file:" and ending with ":hash"
         records = (
-            self._session.query(Metadata)
-            .filter(Metadata.key.like("file:%:hash"))
-            .all()
+            self._session.query(Metadata).filter(Metadata.key.like("file:%:hash")).all()
         )
 
         # Extract file paths from keys (format: "file:{path}:hash")

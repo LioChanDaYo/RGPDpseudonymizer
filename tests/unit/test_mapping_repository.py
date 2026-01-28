@@ -187,9 +187,7 @@ class TestSQLiteMappingRepository:
             assert all(e.last_name == "Dubois" for e in entities)
             assert {e.first_name for e in entities} == {"Jean", "Marie"}
 
-    def test_find_by_component_invalid_type_raises_error(
-        self, tmp_path: Path
-    ) -> None:
+    def test_find_by_component_invalid_type_raises_error(self, tmp_path: Path) -> None:
         """Test find_by_component() raises ValueError for invalid component_type."""
         db_path = tmp_path / "test.db"
         passphrase = "test_passphrase_123!"

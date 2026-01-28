@@ -181,7 +181,9 @@ class AuditRepository:
             >>> # Get average time for batch operations
             >>> avg_time = repo.get_average_processing_time(operation_type="BATCH")
         """
-        query = self._session.query(Operation).filter(Operation.success == True)  # noqa: E712
+        query = self._session.query(Operation).filter(
+            Operation.success == True
+        )  # noqa: E712
 
         if operation_type is not None:
             query = query.filter(Operation.operation_type == operation_type)

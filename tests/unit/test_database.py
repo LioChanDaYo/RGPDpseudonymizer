@@ -33,9 +33,7 @@ class TestDatabaseInitialization:
         with open_database(str(db_path), passphrase) as db_session:
             # Query table names from SQLite
             result = db_session.session.execute(
-                text(
-                    "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name"
-                )
+                text("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name")
             )
             tables = [row[0] for row in result]
 
@@ -51,11 +49,7 @@ class TestDatabaseInitialization:
         init_database(str(db_path), passphrase)
 
         with open_database(str(db_path), passphrase) as db_session:
-            metadata = (
-                db_session.session.query(Metadata)
-                .order_by(Metadata.key)
-                .all()
-            )
+            metadata = db_session.session.query(Metadata).order_by(Metadata.key).all()
             keys = {m.key for m in metadata}
 
             # Verify all required keys present
@@ -106,9 +100,7 @@ class TestDatabaseInitialization:
             foreign_keys = result.scalar()
             assert foreign_keys == 1  # 1 = enabled
 
-    def test_init_database_duplicate_initialization_fails(
-        self, tmp_path: Path
-    ) -> None:
+    def test_init_database_duplicate_initialization_fails(self, tmp_path: Path) -> None:
         """Test duplicate initialization raises error."""
         db_path = tmp_path / "test.db"
         passphrase = "test_passphrase_123!"
@@ -232,9 +224,7 @@ class TestDatabaseSessionManagement:
 
         # Corrupt database by deleting salt metadata
         with open_database(str(db_path), passphrase) as db_session:
-            db_session.session.query(Metadata).filter_by(
-                key="encryption_salt"
-            ).delete()
+            db_session.session.query(Metadata).filter_by(key="encryption_salt").delete()
             db_session.session.commit()
 
         # Attempt to open corrupted database
@@ -330,9 +320,7 @@ class TestDatabaseSessionManagement:
             metadata2 = db_session2.session.query(Metadata).all()
             assert len(metadata2) > 0
 
-    def test_open_database_encryption_service_functional(
-        self, tmp_path: Path
-    ) -> None:
+    def test_open_database_encryption_service_functional(self, tmp_path: Path) -> None:
         """Test encryption service from open_database() works correctly."""
         db_path = tmp_path / "test.db"
         passphrase = "test_passphrase_123!"

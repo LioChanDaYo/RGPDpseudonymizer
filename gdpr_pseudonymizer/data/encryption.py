@@ -49,7 +49,9 @@ class EncryptionService:
     # Passphrase validation canary
     CANARY_VALUE = "GDPR_PSEUDO_CANARY_V1"
 
-    def __init__(self, passphrase: str, salt: bytes, iterations: int = PBKDF2_ITERATIONS) -> None:
+    def __init__(
+        self, passphrase: str, salt: bytes, iterations: int = PBKDF2_ITERATIONS
+    ) -> None:
         """Initialize encryption service with passphrase-derived key.
 
         Args:
@@ -209,7 +211,10 @@ class EncryptionService:
 
         # Minimum length requirement (NFR12)
         if length < 12:
-            return False, f"Passphrase must be at least 12 characters (current: {length})"
+            return (
+                False,
+                f"Passphrase must be at least 12 characters (current: {length})",
+            )
 
         # Character diversity analysis
         has_lower = any(c.islower() for c in passphrase)
@@ -223,9 +228,18 @@ class EncryptionService:
         if length >= 30 and diversity_count >= 3:
             return True, "strong - Excellent passphrase!"
         elif length >= 20 and diversity_count >= 2:
-            return True, "medium - Good passphrase. Consider adding more character types for stronger security."
+            return (
+                True,
+                "medium - Good passphrase. Consider adding more character types for stronger security.",
+            )
         elif length >= 12:
-            return True, "weak - Passphrase meets minimum requirements. Consider using 20+ characters with mixed case, numbers, and special characters."
+            return (
+                True,
+                "weak - Passphrase meets minimum requirements. Consider using 20+ characters with mixed case, numbers, and special characters.",
+            )
         else:
             # Should not reach here due to earlier check, but included for completeness
-            return False, f"Passphrase must be at least 12 characters (current: {length})"
+            return (
+                False,
+                f"Passphrase must be at least 12 characters (current: {length})",
+            )
