@@ -8,8 +8,11 @@ Note: Operations table does NOT contain sensitive entity data, so no encryption 
 
 from __future__ import annotations
 
-from datetime import datetime
-from typing import Optional
+import csv
+import json
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any, Optional
 
 from sqlalchemy.orm import Session
 
@@ -219,3 +222,187 @@ class AuditRepository:
 
         failed_count = sum(1 for op in operations if not op.success)
         return failed_count / len(operations)
+
+    def export_to_json(
+        self,
+        output_path: str,
+        operation_type: Optional[str] = None,
+        success: Optional[bool] = None,
+        start_date: Optional[datetime] = None,
+        end_date: Optional[datetime] = None,
+        limit: Optional[int] = None,
+    ) -> None:
+        """Export operations to JSON file with optional filters.
+
+        Args:
+            output_path: Path to output JSON file
+            operation_type: Filter by operation type (PROCESS, BATCH, VALIDATE, etc.)
+            success: Filter by success status (True/False)
+            start_date: Filter operations after this timestamp (inclusive)
+            end_date: Filter operations before this timestamp (inclusive)
+            limit: Maximum number of results to export
+
+        Raises:
+            OSError: If file cannot be written due to permissions or invalid path
+
+        Example:
+            >>> repo.export_to_json(
+            ...     "audit_export.json",
+            ...     operation_type="PROCESS",
+            ...     success=True
+            ... )
+        """
+        try:
+            # Query operations with filters
+            operations = self.find_operations(
+                operation_type=operation_type,
+                success=success,
+                start_date=start_date,
+                end_date=end_date,
+                limit=limit,
+            )
+
+            # Build filters dictionary for metadata
+            filters_applied: dict[str, Any] = {}
+            if operation_type is not None:
+                filters_applied["operation_type"] = operation_type
+            if success is not None:
+                filters_applied["success"] = success
+            if start_date is not None:
+                filters_applied["start_date"] = start_date.isoformat()
+            if end_date is not None:
+                filters_applied["end_date"] = end_date.isoformat()
+            if limit is not None:
+                filters_applied["limit"] = limit
+
+            # Serialize operations to dictionaries
+            operations_data = [
+                {
+                    "id": op.id,
+                    "timestamp": op.timestamp.isoformat(),
+                    "operation_type": op.operation_type,
+                    "files_processed": op.files_processed,
+                    "model_name": op.model_name,
+                    "model_version": op.model_version,
+                    "theme_selected": op.theme_selected,
+                    "user_modifications": op.user_modifications,
+                    "entity_count": op.entity_count,
+                    "processing_time_seconds": op.processing_time_seconds,
+                    "success": op.success,
+                    "error_message": op.error_message,
+                }
+                for op in operations
+            ]
+
+            # Build export document with metadata
+            export_document = {
+                "export_metadata": {
+                    "schema_version": "1.0.0",
+                    "export_timestamp": datetime.now(timezone.utc).isoformat(),
+                    "filters_applied": filters_applied if filters_applied else None,
+                    "total_results": len(operations),
+                },
+                "operations": operations_data,
+            }
+
+            # Write to file
+            output_file = Path(output_path)
+            output_file.parent.mkdir(parents=True, exist_ok=True)
+            with output_file.open("w", encoding="utf-8") as f:
+                json.dump(export_document, f, indent=2, ensure_ascii=False)
+
+        except OSError as e:
+            raise OSError(
+                f"Failed to write JSON export to {output_path}: {str(e)}"
+            ) from e
+
+    def export_to_csv(
+        self,
+        output_path: str,
+        operation_type: Optional[str] = None,
+        success: Optional[bool] = None,
+        start_date: Optional[datetime] = None,
+        end_date: Optional[datetime] = None,
+        limit: Optional[int] = None,
+    ) -> None:
+        """Export operations to CSV file with optional filters.
+
+        Args:
+            output_path: Path to output CSV file
+            operation_type: Filter by operation type (PROCESS, BATCH, VALIDATE, etc.)
+            success: Filter by success status (True/False)
+            start_date: Filter operations after this timestamp (inclusive)
+            end_date: Filter operations before this timestamp (inclusive)
+            limit: Maximum number of results to export
+
+        Raises:
+            OSError: If file cannot be written due to permissions or invalid path
+
+        Example:
+            >>> repo.export_to_csv(
+            ...     "audit_export.csv",
+            ...     success=False,
+            ...     start_date=datetime(2026, 1, 1)
+            ... )
+        """
+        try:
+            # Query operations with filters
+            operations = self.find_operations(
+                operation_type=operation_type,
+                success=success,
+                start_date=start_date,
+                end_date=end_date,
+                limit=limit,
+            )
+
+            # Prepare CSV data
+            output_file = Path(output_path)
+            output_file.parent.mkdir(parents=True, exist_ok=True)
+
+            # Define CSV headers
+            headers = [
+                "id",
+                "timestamp",
+                "operation_type",
+                "files_processed",
+                "model_name",
+                "model_version",
+                "theme_selected",
+                "user_modifications",
+                "entity_count",
+                "processing_time_seconds",
+                "success",
+                "error_message",
+            ]
+
+            # Write CSV file
+            with output_file.open("w", encoding="utf-8", newline="") as f:
+                writer = csv.DictWriter(f, fieldnames=headers)
+                writer.writeheader()
+
+                for op in operations:
+                    # Flatten JSON fields into CSV-compatible strings
+                    row = {
+                        "id": op.id,
+                        "timestamp": op.timestamp.isoformat(),
+                        "operation_type": op.operation_type,
+                        "files_processed": ",".join(op.files_processed)
+                        if op.files_processed
+                        else "",
+                        "model_name": op.model_name,
+                        "model_version": op.model_version,
+                        "theme_selected": op.theme_selected,
+                        "user_modifications": json.dumps(op.user_modifications)
+                        if op.user_modifications
+                        else "",
+                        "entity_count": op.entity_count,
+                        "processing_time_seconds": op.processing_time_seconds,
+                        "success": op.success,
+                        "error_message": op.error_message if op.error_message else "",
+                    }
+                    writer.writerow(row)
+
+        except OSError as e:
+            raise OSError(
+                f"Failed to write CSV export to {output_path}: {str(e)}"
+            ) from e
