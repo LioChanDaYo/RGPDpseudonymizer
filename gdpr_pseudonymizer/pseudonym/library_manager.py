@@ -253,9 +253,24 @@ class LibraryBasedPseudonymManager(PseudonymManager):
             # Use fallback naming
             pseudonym_full = self._generate_fallback_name(entity_type)
             if entity_type == "PERSON":
-                # Parse fallback name (e.g., "Person-001" -> first=None, last="Person-001")
-                pseudonym_first_name = None
-                pseudonym_last_name = pseudonym_full
+                # For compositional consistency: preserve existing components if provided
+                # If existing_first was passed, keep it (e.g., reusing "Leia" from previous mapping)
+                # Only replace the component that wasn't already assigned
+                if existing_first and not existing_last:
+                    # Keep existing first, use fallback for last
+                    pseudonym_first_name = existing_first
+                    pseudonym_last_name = pseudonym_full
+                    pseudonym_full = f"{pseudonym_first_name} {pseudonym_last_name}"
+                elif existing_last and not existing_first:
+                    # Keep existing last, use fallback for first
+                    pseudonym_first_name = pseudonym_full
+                    pseudonym_last_name = existing_last
+                    pseudonym_full = f"{pseudonym_first_name} {pseudonym_last_name}"
+                else:
+                    # No existing components or both provided: use fallback as single unit
+                    # Parse fallback name (e.g., "Person-001" -> first=None, last="Person-001")
+                    pseudonym_first_name = None
+                    pseudonym_last_name = pseudonym_full
             else:
                 pseudonym_last_name = pseudonym_full
 

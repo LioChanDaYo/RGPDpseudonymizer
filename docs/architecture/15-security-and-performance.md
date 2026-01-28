@@ -6,10 +6,11 @@
 
 | Security Property | Implementation | Standard |
 |-------------------|----------------|----------|
-| **Algorithm** | Fernet (AES-128-CBC + HMAC-SHA256) | NIST approved |
-| **Key Derivation** | PBKDF2-HMAC-SHA256, 100K iterations | NIST SP 800-132 |
+| **Algorithm** | AES-256-SIV (deterministic AEAD) | NIST approved, RFC 5297 |
+| **Key Derivation** | PBKDF2-HMAC-SHA256, 100K iterations, 64-byte output | NIST SP 800-132 |
 | **Salt** | 32 bytes, cryptographically random | NIST recommendation |
-| **Authentication** | HMAC prevents tampering | Authenticated encryption |
+| **Authentication** | SIV prevents tampering | Authenticated encryption |
+| **Deterministic Property** | Same plaintext → same ciphertext | Enables encrypted field queries |
 
 #### 15.1.2 Input Validation
 
@@ -29,9 +30,65 @@ def validate_file_path(path: str) -> Path:
 
 | OWASP Risk | Relevance | Mitigation |
 |------------|-----------|------------|
-| **A02: Cryptographic Failures** | High | NIST-approved Fernet encryption, PBKDF2 key derivation |
+| **A02: Cryptographic Failures** | High | NIST-approved AES-256-SIV encryption, PBKDF2 key derivation |
 | **A03: Injection** | Medium | SQLAlchemy ORM prevents SQL injection |
 | **A07: Authentication Failures** | Medium | Strong passphrase requirements, canary validation |
+
+#### 15.1.4 Deterministic Encryption & GDPR Compliance
+
+**Why Deterministic Encryption (AES-256-SIV)?**
+
+This project uses **AES-256-SIV** (Synthetic IV mode, RFC 5297) instead of traditional randomized encryption (like AES-CBC or AES-GCM). This is a deliberate architectural decision driven by functional requirements:
+
+| Requirement | Rationale |
+|-------------|-----------|
+| **Compositional Pseudonymization (Story 2.2)** | Need to query encrypted fields: `find_by_component("Marie")` must work on encrypted database |
+| **Performance (NFR1: <30s)** | Database indexes on encrypted fields enable fast lookups |
+| **Industry Standard** | AWS DynamoDB, Google Tink, MongoDB all use deterministic encryption for searchable databases |
+
+**Security Trade-Off: Pattern Leakage**
+
+Deterministic encryption reveals patterns that randomized encryption does not:
+
+| Revealed | Not Revealed |
+|----------|--------------|
+| ✅ Duplicate entries produce identical ciphertexts (frequency analysis possible) | ❌ Actual plaintext names remain encrypted |
+| ✅ Correlation patterns visible (Entity X always appears with Entity Y) | ❌ What the actual names are |
+
+**Risk Assessment: LOW**
+
+Pattern leakage is **low risk** for this application due to multiple mitigating factors:
+
+1. **Local-Only Database (NFR11):** No network exposure, attacker needs physical machine access
+2. **Passphrase Protection (NFR12):** PBKDF2 100K iterations prevents brute force, attacker without passphrase cannot decrypt
+3. **Threat Model:** If attacker has passphrase → pattern leakage irrelevant (they can decrypt everything anyway)
+4. **Alternative Analysis:** Hash-based lookup has identical pattern leakage with more implementation complexity
+
+**GDPR Article 32 Compliance**
+
+This implementation satisfies **GDPR Article 32(1)(a)** requirement for "appropriate technical and organizational measures" to ensure security of processing:
+
+| GDPR Requirement | Implementation | Status |
+|------------------|----------------|--------|
+| **Encryption of personal data** | AES-256-SIV NIST-approved encryption | ✅ Compliant |
+| **Confidentiality** | Attacker without passphrase cannot read plaintext | ✅ Compliant |
+| **Integrity** | SIV authentication prevents tampering | ✅ Compliant |
+| **Availability** | Passphrase-based access control | ✅ Compliant |
+| **Reversibility** (Art. 16, 17) | Decryption supports GDPR rights (access, rectification, erasure) | ✅ Compliant |
+
+**Acceptable for GDPR:** YES
+
+- Deterministic encryption is **industry standard** for searchable encryption use cases
+- GDPR Article 32 requires "appropriate" measures, not maximum theoretical security
+- Risk-based approach: pattern leakage without passphrase is **low impact** for this threat model
+- Transparent disclosure: security trade-off will be documented in user-facing documentation
+
+**Precedent & Standards:**
+
+- **RFC 5297 (AES-SIV):** IETF standard for deterministic authenticated encryption
+- **AWS DynamoDB Encryption:** Uses deterministic encryption for searchable encrypted fields
+- **Google Tink:** Recommends AES-SIV for deterministic encryption use cases
+- **MongoDB Client-Side Encryption:** Offers deterministic mode for queryable encrypted fields
 
 ---
 

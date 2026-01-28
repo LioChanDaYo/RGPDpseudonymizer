@@ -109,43 +109,75 @@ CREATE TABLE metadata (
 **Encryption Service:**
 
 ```python
-from cryptography.fernet import Fernet
+from cryptography.hazmat.primitives.ciphers.aead import AESSIV
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2
 import base64
 import os
 
 class EncryptionService:
-    """Fernet symmetric encryption for sensitive database fields."""
+    """AES-256-SIV deterministic authenticated encryption for sensitive database fields.
+
+    Uses AES-SIV (Synthetic IV mode, RFC 5297) which provides:
+    - Deterministic encryption: same plaintext + key → same ciphertext
+    - Authenticated encryption: prevents tampering via SIV authentication
+    - Searchable: enables database queries on encrypted fields
+
+    Security Trade-Off: Pattern leakage (duplicate plaintexts produce identical
+    ciphertexts). Acceptable for this use case due to local-only database +
+    passphrase protection.
+    """
 
     PBKDF2_ITERATIONS = 100000  # NIST minimum
     SALT_LENGTH = 32             # 256 bits
 
     def __init__(self, passphrase: str, salt: bytes):
-        kdf = PBKDF2(
+        # Derive 64-byte key (512 bits) for AES-256-SIV
+        # 256 bits for encryption + 256 bits for authentication
+        kdf = PBKDF2HMAC(
             algorithm=hashes.SHA256(),
-            length=32,
+            length=64,  # AES-256-SIV requires 512-bit key
             salt=salt,
             iterations=self.PBKDF2_ITERATIONS
         )
-        key = base64.urlsafe_b64encode(kdf.derive(passphrase.encode('utf-8')))
-        self.fernet = Fernet(key)
+        key = kdf.derive(passphrase.encode('utf-8'))
+        self.aessiv = AESSIV(key)
 
     def encrypt(self, plaintext: str) -> str:
-        """Encrypt with authenticated encryption (AES-128-CBC + HMAC)."""
+        """Encrypt with AES-256-SIV deterministic authenticated encryption.
+
+        Returns base64-encoded ciphertext. Same plaintext always produces
+        same ciphertext (deterministic), enabling database queries.
+        """
         if plaintext is None:
             return None
-        encrypted_bytes = self.fernet.encrypt(plaintext.encode('utf-8'))
-        return base64.urlsafe_b64encode(encrypted_bytes).decode('ascii')
+        ciphertext_bytes = self.aessiv.encrypt(plaintext.encode('utf-8'), None)
+        return base64.urlsafe_b64encode(ciphertext_bytes).decode('ascii')
 
     def decrypt(self, ciphertext: str) -> str:
-        """Decrypt and verify HMAC (prevents tampering)."""
+        """Decrypt and verify SIV authentication (prevents tampering)."""
         if ciphertext is None:
             return None
-        encrypted_bytes = base64.urlsafe_b64decode(ciphertext.encode('ascii'))
-        plaintext_bytes = self.fernet.decrypt(encrypted_bytes)
+        ciphertext_bytes = base64.urlsafe_b64decode(ciphertext.encode('ascii'))
+        plaintext_bytes = self.aessiv.decrypt(ciphertext_bytes, None)
         return plaintext_bytes.decode('utf-8')
 ```
+
+**Why AES-SIV (Deterministic Encryption)?**
+
+- **Required for compositional logic:** Story 2.2 needs `find_by_component("Marie")` queries on encrypted fields
+- **Performance:** Enables database indexes for <30s processing (NFR1)
+- **Industry standard:** AWS DynamoDB, Google Tink, MongoDB use deterministic encryption for searchable databases
+- **GDPR compliant:** Meets Article 32 "appropriate technical measures" requirement
+
+**Security Assessment:**
+
+| Property | Status | Notes |
+|----------|--------|-------|
+| **Confidentiality** | ✅ Strong | Names encrypted, attacker without passphrase cannot read plaintext |
+| **Integrity** | ✅ Strong | SIV authentication prevents tampering |
+| **Pattern Leakage** | ⚠️ Low Risk | Duplicate names produce identical ciphertexts, but local-only + passphrase mitigates risk |
+| **GDPR Article 32** | ✅ Compliant | Deterministic encryption is industry-standard "appropriate measure" |
 
 ---
 
@@ -153,7 +185,7 @@ class EncryptionService:
 
 ```python
 def init_database(db_path: str, passphrase: str) -> None:
-    """Initialize new mapping table database."""
+    """Initialize new mapping table database with AES-256-SIV encryption."""
 
     # Validate passphrase
     is_valid, message = EncryptionService.validate_passphrase(passphrase)
@@ -163,16 +195,17 @@ def init_database(db_path: str, passphrase: str) -> None:
     # Generate salt
     salt = EncryptionService.generate_salt()
 
-    # Create encryption service
-    encryption = EncryptionService(passphrase, salt, iterations=100000)
+    # Create encryption service (AES-256-SIV)
+    encryption = EncryptionService(passphrase, salt)
 
     # Create database
     engine = create_engine(f'sqlite:///{db_path}')
     Base.metadata.create_all(engine)
 
-    # Enable WAL mode
+    # Enable WAL mode (concurrent reads for batch processing)
     with engine.connect() as conn:
         conn.execute("PRAGMA journal_mode=WAL")
+        conn.execute("PRAGMA foreign_keys=ON")
         conn.commit()
 
     # Initialize metadata
@@ -183,8 +216,10 @@ def init_database(db_path: str, passphrase: str) -> None:
         session.add(Metadata(key='schema_version', value=json.dumps('1.0.0')))
         session.add(Metadata(key='encryption_salt', value=base64.b64encode(salt).decode('ascii')))
         session.add(Metadata(key='kdf_iterations', value=json.dumps(100000)))
+        session.add(Metadata(key='encryption_algorithm', value=json.dumps('AES-256-SIV')))
 
-        # Passphrase canary (Risk #1 mitigation)
+        # Passphrase canary (validates correct passphrase on database open)
+        # Encrypted with AES-SIV deterministic encryption
         canary_encrypted = encryption.encrypt('GDPR_PSEUDO_CANARY_V1')
         session.add(Metadata(key='passphrase_canary', value=canary_encrypted))
 
