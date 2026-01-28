@@ -8,12 +8,11 @@ from sqlalchemy import text
 
 from gdpr_pseudonymizer.data.database import (
     CorruptedDatabaseError,
-    DatabaseSession,
     init_database,
     open_database,
 )
 from gdpr_pseudonymizer.data.encryption import EncryptionService
-from gdpr_pseudonymizer.data.models import Entity, Metadata, Operation
+from gdpr_pseudonymizer.data.models import Metadata
 
 
 class TestDatabaseInitialization:
@@ -302,12 +301,8 @@ class TestDatabaseSessionManagement:
 
         init_database(str(db_path), passphrase)
 
-        # Track whether context manager was used correctly
-        db_session_ref = None
-
         # Use context manager
         with open_database(str(db_path), passphrase) as db_session:
-            db_session_ref = db_session
             # Session should work inside context
             metadata = db_session.session.query(Metadata).all()
             assert len(metadata) > 0

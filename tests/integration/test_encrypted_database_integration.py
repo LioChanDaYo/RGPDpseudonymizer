@@ -7,7 +7,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 
 from gdpr_pseudonymizer.data.database import init_database, open_database
-from gdpr_pseudonymizer.data.models import Entity, Metadata, Operation
+from gdpr_pseudonymizer.data.models import Entity, Operation
 from gdpr_pseudonymizer.data.repositories.audit_repository import AuditRepository
 from gdpr_pseudonymizer.data.repositories.mapping_repository import (
     SQLiteMappingRepository,
@@ -154,8 +154,8 @@ class TestEncryptedDatabaseIntegration:
 
         # Read raw database file (bypassing encryption)
         engine = create_engine(f"sqlite:///{db_path}")
-        SessionLocal = sessionmaker(bind=engine)
-        raw_session = SessionLocal()
+        session_local = sessionmaker(bind=engine)
+        raw_session = session_local()
 
         try:
             raw_entity = raw_session.query(Entity).first()

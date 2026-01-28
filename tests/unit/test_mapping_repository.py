@@ -1,6 +1,5 @@
 """Unit tests for SQLiteMappingRepository with encryption."""
 
-from datetime import datetime
 from pathlib import Path
 
 import pytest
@@ -8,7 +7,6 @@ import pytest
 from gdpr_pseudonymizer.data.database import init_database, open_database
 from gdpr_pseudonymizer.data.models import Entity
 from gdpr_pseudonymizer.data.repositories.mapping_repository import (
-    DatabaseError,
     DuplicateEntityError,
     SQLiteMappingRepository,
 )
