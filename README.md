@@ -63,6 +63,7 @@ We're actively developing v1.0 MVP with an **AI-assisted approach**:
   - Story 2.2: Compositional pseudonymization logic ✅ (37 tests, 94% coverage, QA score 95/100)
   - Story 2.3: French name preprocessing (titles + compounds) ✅ (53 tests, 94.64% coverage, QA score 100/100)
   - Story 2.4: Encrypted mapping table ✅ (9 integration tests, database encryption with passphrase protection)
+  - Story 2.5: Audit logging ✅ (32 tests, 91.41% coverage, GDPR Article 30 compliance, QA score 100/100)
 - 📅 **Week 11-14:** CLI polish, batch processing, launch prep
 - 🎯 **MVP Launch:** Week 14 (estimated Q2 2026)
 
@@ -285,7 +286,7 @@ The validation UI provides an intuitive keyboard-driven interface for reviewing 
 | GDPR Requirement | Implementation |
 |------------------|----------------|
 | **Art. 25 - Data Protection by Design** | Local processing, no cloud dependencies, encrypted storage |
-| **Art. 30 - Processing Records** | Audit logs capture all operations, timestamps, model versions |
+| **Art. 30 - Processing Records** | Comprehensive audit logs (Story 2.5): operations table tracks timestamp, files processed, entity count, model version, theme, success/failure, processing time; JSON/CSV export for compliance reporting |
 | **Art. 32 - Security Measures** | AES-128-CBC encryption (Fernet) with PBKDF2 key derivation (210,000 iterations), passphrase-protected storage, column-level encryption for sensitive fields |
 | **Art. 35 - Privacy Impact Assessment** | Transparent methodology, cite-able approach for DPIA documentation |
 | **Recital 26 - Pseudonymization** | Consistent pseudonym mapping, reversibility with passphrase |
@@ -325,6 +326,7 @@ The validation UI provides an intuitive keyboard-driven interface for reviewing 
 - ✅ **Story 2.2:** Compositional pseudonymization logic - Component-based matching ("Marie Dubois" → "Leia Organa", "Marie" → "Leia"), 37 tests, 94% coverage (QA gate: PASS, Score: 95/100)
 - ✅ **Story 2.3:** French name preprocessing (titles + compounds) - Title stripping ("Dr. Marie Dubois" → "Marie Dubois"), compound names ("Jean-Pierre" treated as atomic), simple pseudonyms for compounds, 53 tests (31 unit + 15 unit + 7 integration), 94.64% coverage (QA gate: PASS, Score: 100/100)
 - ✅ **Story 2.4:** Encrypted mapping table - Database encryption with AES-128-CBC (Fernet), passphrase protection, PBKDF2 key derivation (210,000 iterations), column-level encryption, WAL mode for concurrency, 9 integration tests (QA gate: PASS)
+- ✅ **Story 2.5:** Audit logging - Comprehensive audit logs for GDPR Article 30 compliance, operations table tracks all pseudonymization operations, JSON/CSV export functionality, 32 unit tests, 91.41% coverage (QA gate: PASS, Score: 100/100)
 
 ### In Progress 🔄
 - 📅 **Epic 2 (Week 6-10):** Core pseudonymization engine
@@ -464,10 +466,10 @@ poetry run pytest tests/integration/test_validation_workflow_integration.py -v
 
 ### Test Coverage
 
-- **Unit tests:** 431 tests covering validation models, UI components, encryption, database operations, and core logic
+- **Unit tests:** 463 tests covering validation models, UI components, encryption, database operations, audit logging, and core logic
 - **Integration tests:** 90 tests for end-to-end workflows including validation (Story 2.0.1), encrypted database operations (Story 2.4), compositional logic, and hybrid detection
-- **Current coverage:** 86%+ across all modules
-- **Total tests:** 520 tests (519 passed, 1 skipped)
+- **Current coverage:** 86%+ across all modules (91.41% for AuditRepository)
+- **Total tests:** 553 tests (552 passed, 1 skipped)
 - **CI/CD:** Tests run on Python 3.9-3.11 across Windows, macOS, and Linux
 - **Quality gates:** All pass (Black, Ruff, mypy, pytest)
 
@@ -502,7 +504,7 @@ The integration test suite covers:
 | Metric | Value | Status |
 |--------|-------|--------|
 | **Development Progress** | Week 6/14 | 🔄 Epic 2 In Progress |
-| **Stories Complete** | 14 (Epic 1 + Stories 2.0.1-2.4) | ✅ Epic 1 + 5 Epic 2 Stories |
+| **Stories Complete** | 15 (Epic 1 + Stories 2.0.1-2.5) | ✅ Epic 1 + 6 Epic 2 Stories |
 | **Test Corpus Size** | 25 docs, 1,855 entities | ✅ Complete |
 | **NLP Accuracy (Baseline)** | 29.5% F1 (spaCy) | ✅ Measured |
 | **Hybrid Accuracy (NLP+Regex)** | 35.3% F1 (+52.2% PERSON) | ✅ Story 1.8 Complete |
@@ -510,9 +512,10 @@ The integration test suite covers:
 | **Pseudonym Libraries** | 3 themes (2,426 names total) | ✅ Story 2.1 Complete |
 | **Compositional Matching** | Operational (component reuse + title stripping + compound names) | ✅ Stories 2.2, 2.3 Complete |
 | **Encrypted Storage** | AES-128-CBC with passphrase protection (PBKDF2 210K iterations) | ✅ Story 2.4 Complete |
+| **Audit Logging** | GDPR Article 30 compliance (operations table + JSON/CSV export) | ✅ Story 2.5 Complete |
 | **Validation UI** | Operational with deduplication | ✅ Stories 1.7, 1.9 Complete |
 | **Validation Time** | <2 min (20-30 entities), <5 min (100 entities) | ✅ Targets Met |
-| **Test Coverage** | 520 tests (519 passed, 1 skipped), 86%+ coverage | ✅ Stories 2.0.1-2.4 Complete |
+| **Test Coverage** | 553 tests (552 passed, 1 skipped), 86%+ coverage | ✅ Stories 2.0.1-2.5 Complete |
 | **Quality Gates** | Black, Ruff, mypy, pytest | ✅ All Pass |
 | **Supported Languages** | French | 🇫🇷 v1.0 only |
 | **Supported Formats** | .txt, .md | 📝 v1.0 scope |
@@ -529,6 +532,6 @@ The integration test suite covers:
 
 ---
 
-**Last Updated:** 2026-01-28 (Story 2.4 complete: Encrypted mapping table with AES-128-CBC, passphrase protection, PBKDF2 key derivation, 9 integration tests, 520 total tests passing)
+**Last Updated:** 2026-01-28 (Story 2.5 complete: Audit logging with GDPR Article 30 compliance, operations table, JSON/CSV export, 32 unit tests, 91.41% coverage, 553 total tests passing)
 
 **Current Focus:** Epic 2 - Core Pseudonymization Engine (Week 6-10)
