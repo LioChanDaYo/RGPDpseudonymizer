@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
+import pytest
+
 
 def test_import_all_modules() -> None:
     """Test that all modules can be imported without errors."""
@@ -209,16 +213,25 @@ def test_spacy_detector_instantiation() -> None:
     assert detector.supports_gender_classification is False
 
 
-def test_repository_instantiation() -> None:
+def test_repository_instantiation(tmp_path: Path) -> None:
     """Test that SQLiteMappingRepository can be instantiated."""
+    from gdpr_pseudonymizer.data.database import init_database, open_database
     from gdpr_pseudonymizer.data.repositories.mapping_repository import (
         SQLiteMappingRepository,
     )
 
-    repository = SQLiteMappingRepository(db_path=":memory:")
+    # Initialize encrypted database with test passphrase
+    db_path = tmp_path / "test_repo.db"
+    passphrase = "test_passphrase_123!"
+    init_database(str(db_path), passphrase)
 
-    assert repository is not None
-    assert repository.db_path == ":memory:"
+    # Open database and create repository
+    with open_database(str(db_path), passphrase) as db_session:
+        repository = SQLiteMappingRepository(db_session)
+
+        assert repository is not None
+        assert repository._session is not None
+        assert repository._encryption is not None
 
 
 def test_pseudonym_manager_instantiation() -> None:

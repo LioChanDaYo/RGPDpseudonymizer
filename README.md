@@ -23,7 +23,7 @@ GDPR Pseudonymizer is a **privacy-first CLI tool** that combines AI efficiency w
 ### 🔒 **Privacy-First Architecture**
 - ✅ **100% local processing** - Your data never leaves your machine
 - ✅ **No cloud dependencies** - Works completely offline after installation
-- ✅ **Encrypted mapping tables** - Reversible pseudonymization with passphrase protection
+- ✅ **Encrypted mapping tables** - AES-128-CBC encryption with PBKDF2 key derivation (210K iterations), passphrase-protected reversible pseudonymization
 - ✅ **Zero telemetry** - No analytics, crash reporting, or external communication
 
 ### 🤝 **AI + Human Verification**
@@ -62,6 +62,7 @@ We're actively developing v1.0 MVP with an **AI-assisted approach**:
   - Story 2.1: Pseudonym library system ✅ (3 themed libraries, 90.76% coverage)
   - Story 2.2: Compositional pseudonymization logic ✅ (37 tests, 94% coverage, QA score 95/100)
   - Story 2.3: French name preprocessing (titles + compounds) ✅ (53 tests, 94.64% coverage, QA score 100/100)
+  - Story 2.4: Encrypted mapping table ✅ (9 integration tests, database encryption with passphrase protection)
 - 📅 **Week 11-14:** CLI polish, batch processing, launch prep
 - 🎯 **MVP Launch:** Week 14 (estimated Q2 2026)
 
@@ -203,8 +204,9 @@ The validation UI provides an intuitive keyboard-driven interface for reviewing 
 | **Runtime** | Python | 3.9-3.11 | Validated baseline (3.12-3.13 planned, 3.14+ not supported) |
 | **NLP Library** | spaCy | 3.8.0 | French entity detection (fr_core_news_lg) |
 | **CLI Framework** | Typer | 0.9+ | Command-line interface |
-| **Database** | SQLite | 3.35+ | Local mapping table storage |
-| **Encryption** | cryptography (Fernet) | 41.0+ | Symmetric encryption for mappings |
+| **Database** | SQLite | 3.35+ | Local mapping table storage with WAL mode |
+| **Encryption** | cryptography (Fernet) | 41.0+ | AES-128-CBC encryption for sensitive fields (PBKDF2 key derivation, passphrase-protected) |
+| **ORM** | SQLAlchemy | 2.0+ | Database abstraction and session management |
 | **Validation UI** | rich | 13.7+ | Interactive CLI entity review |
 | **Keyboard Input** | readchar | 4.2+ | Single-keypress capture for validation UI |
 | **Testing** | pytest | 7.4+ | Unit & integration testing |
@@ -284,7 +286,7 @@ The validation UI provides an intuitive keyboard-driven interface for reviewing 
 |------------------|----------------|
 | **Art. 25 - Data Protection by Design** | Local processing, no cloud dependencies, encrypted storage |
 | **Art. 30 - Processing Records** | Audit logs capture all operations, timestamps, model versions |
-| **Art. 32 - Security Measures** | AES-128-CBC encryption (Fernet), passphrase-protected, secure deletion |
+| **Art. 32 - Security Measures** | AES-128-CBC encryption (Fernet) with PBKDF2 key derivation (210,000 iterations), passphrase-protected storage, column-level encryption for sensitive fields |
 | **Art. 35 - Privacy Impact Assessment** | Transparent methodology, cite-able approach for DPIA documentation |
 | **Recital 26 - Pseudonymization** | Consistent pseudonym mapping, reversibility with passphrase |
 
@@ -322,6 +324,7 @@ The validation UI provides an intuitive keyboard-driven interface for reviewing 
 - ✅ **Story 2.1:** Pseudonym library system - 3 themed libraries (neutral, Star Wars, LOTR), gender-matching, exhaustion detection, 36 tests, 90.76% coverage (QA gate: PASS, Score: 98/100)
 - ✅ **Story 2.2:** Compositional pseudonymization logic - Component-based matching ("Marie Dubois" → "Leia Organa", "Marie" → "Leia"), 37 tests, 94% coverage (QA gate: PASS, Score: 95/100)
 - ✅ **Story 2.3:** French name preprocessing (titles + compounds) - Title stripping ("Dr. Marie Dubois" → "Marie Dubois"), compound names ("Jean-Pierre" treated as atomic), simple pseudonyms for compounds, 53 tests (31 unit + 15 unit + 7 integration), 94.64% coverage (QA gate: PASS, Score: 100/100)
+- ✅ **Story 2.4:** Encrypted mapping table - Database encryption with AES-128-CBC (Fernet), passphrase protection, PBKDF2 key derivation (210,000 iterations), column-level encryption, WAL mode for concurrency, 9 integration tests (QA gate: PASS)
 
 ### In Progress 🔄
 - 📅 **Epic 2 (Week 6-10):** Core pseudonymization engine
@@ -461,15 +464,18 @@ poetry run pytest tests/integration/test_validation_workflow_integration.py -v
 
 ### Test Coverage
 
-- **Unit tests:** 34 tests for validation models, UI components, and workflow logic
-- **Integration tests:** 19 tests for end-to-end validation workflow (Story 2.0.1 - Complete)
-- **Current coverage:** 80.49% for validation module (combined unit + integration)
+- **Unit tests:** 431 tests covering validation models, UI components, encryption, database operations, and core logic
+- **Integration tests:** 90 tests for end-to-end workflows including validation (Story 2.0.1), encrypted database operations (Story 2.4), compositional logic, and hybrid detection
+- **Current coverage:** 86%+ across all modules
+- **Total tests:** 520 tests (519 passed, 1 skipped)
 - **CI/CD:** Tests run on Python 3.9-3.11 across Windows, macOS, and Linux
 - **Quality gates:** All pass (Black, Ruff, mypy, pytest)
 
 ### Key Integration Test Scenarios
 
-The validation workflow integration tests cover:
+The integration test suite covers:
+
+**Validation Workflow (19 tests):**
 - ✅ Full workflow: entity detection → summary → review → confirmation
 - ✅ User actions: confirm (Space), reject (R), modify (E), add entity (A), change pseudonym (C), context cycling (X)
 - ✅ State transitions: PENDING → CONFIRMED/REJECTED/MODIFIED
@@ -478,6 +484,17 @@ The validation workflow integration tests cover:
 - ✅ Batch operations: Accept All Type (Shift+A), Reject All Type (Shift+R) with confirmation prompts
 - ✅ Mock user input: Full simulation of keyboard interactions and prompts
 
+**Encrypted Database (9 tests):**
+- ✅ End-to-end workflow: init → open → save → query → close
+- ✅ Cross-session consistency: Same passphrase retrieves same data
+- ✅ Idempotency: Multiple queries return same results
+- ✅ Encrypted data at rest: Sensitive fields stored encrypted in SQLite
+- ✅ Compositional logic integration: Encrypted component queries
+- ✅ Repository integration: All repositories (mapping, audit, metadata) work with encrypted session
+- ✅ Concurrent reads: WAL mode enables multiple readers
+- ✅ Database indexes: Query performance optimization verified
+- ✅ Batch save rollback: Transaction integrity on errors
+
 ---
 
 ## 📊 Project Metrics (As of 2026-01-25)
@@ -485,16 +502,17 @@ The validation workflow integration tests cover:
 | Metric | Value | Status |
 |--------|-------|--------|
 | **Development Progress** | Week 6/14 | 🔄 Epic 2 In Progress |
-| **Stories Complete** | 13 (Epic 1 + Stories 2.0.1-2.3) | ✅ Epic 1 + 4 Epic 2 Stories |
+| **Stories Complete** | 14 (Epic 1 + Stories 2.0.1-2.4) | ✅ Epic 1 + 5 Epic 2 Stories |
 | **Test Corpus Size** | 25 docs, 1,855 entities | ✅ Complete |
 | **NLP Accuracy (Baseline)** | 29.5% F1 (spaCy) | ✅ Measured |
 | **Hybrid Accuracy (NLP+Regex)** | 35.3% F1 (+52.2% PERSON) | ✅ Story 1.8 Complete |
 | **Final Accuracy (AI+Human)** | 100% (validated) | 🎯 By Design |
 | **Pseudonym Libraries** | 3 themes (2,426 names total) | ✅ Story 2.1 Complete |
 | **Compositional Matching** | Operational (component reuse + title stripping + compound names) | ✅ Stories 2.2, 2.3 Complete |
+| **Encrypted Storage** | AES-128-CBC with passphrase protection (PBKDF2 210K iterations) | ✅ Story 2.4 Complete |
 | **Validation UI** | Operational with deduplication | ✅ Stories 1.7, 1.9 Complete |
 | **Validation Time** | <2 min (20-30 entities), <5 min (100 entities) | ✅ Targets Met |
-| **Test Coverage** | 431 tests, 86%+ coverage | ✅ Stories 2.0.1-2.3 Complete |
+| **Test Coverage** | 520 tests (519 passed, 1 skipped), 86%+ coverage | ✅ Stories 2.0.1-2.4 Complete |
 | **Quality Gates** | Black, Ruff, mypy, pytest | ✅ All Pass |
 | **Supported Languages** | French | 🇫🇷 v1.0 only |
 | **Supported Formats** | .txt, .md | 📝 v1.0 scope |
@@ -511,6 +529,6 @@ The validation workflow integration tests cover:
 
 ---
 
-**Last Updated:** 2026-01-27 (Story 2.3 complete: French name preprocessing with title stripping and compound name handling, 53 tests, 94.64% coverage, QA score 100/100)
+**Last Updated:** 2026-01-28 (Story 2.4 complete: Encrypted mapping table with AES-128-CBC, passphrase protection, PBKDF2 key derivation, 9 integration tests, 520 total tests passing)
 
 **Current Focus:** Epic 2 - Core Pseudonymization Engine (Week 6-10)

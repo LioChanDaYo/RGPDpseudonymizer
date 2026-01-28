@@ -39,7 +39,7 @@ class Entity(Base):
     last_name: Mapped[Optional[str]] = mapped_column(
         String, nullable=True
     )  # PERSON only
-    full_name: Mapped[str] = mapped_column(String, nullable=False)
+    full_name: Mapped[str] = mapped_column(String, nullable=False, unique=True)
     pseudonym_first: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     pseudonym_last: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     pseudonym_full: Mapped[str] = mapped_column(String, nullable=False)
