@@ -17,11 +17,11 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 # French title pattern for preprocessing
-# Matches: Dr./Dr, Pr./Pr, Prof./Prof, M./M, Mme./Mme, Mlle./Mlle
+# Matches: Dr./Dr, Docteur, Pr./Pr, Prof./Prof, Professeur, M./M, Mme./Mme, Mlle./Mlle, Madame, Monsieur, Mademoiselle
 # Case-insensitive, with or without periods
 # (?!\w) ensures title is not followed by a word character (prevents matching "Dr" in "Drapeau")
 # \s* consumes optional trailing whitespace
-FRENCH_TITLE_PATTERN = r"\b(?:Dr\.?|Pr\.?|Prof\.?|M\.?|Mme\.?|Mlle\.?)(?!\w)\s*"
+FRENCH_TITLE_PATTERN = r"\b(?:Docteur|Professeur|Madame|Monsieur|Mademoiselle|Dr\.?|Pr\.?|Prof\.?|M\.?|Mme\.?|Mlle\.?)(?!\w)\s*"
 
 
 @dataclass
@@ -394,26 +394,57 @@ class CompositionalPseudonymEngine:
     ) -> PseudonymAssignment:
         """Handle standalone component pseudonymization with ambiguity flagging.
 
+        CRITICAL FIX: Check BOTH first_name and last_name for existing mappings.
+        Single words like "Dubois" could be either a first or last name.
+
         Args:
-            component: Standalone component text (e.g., "Marie")
+            component: Standalone component text (e.g., "Marie" or "Dubois")
             gender: Gender hint for name selection
 
         Returns:
             PseudonymAssignment with ambiguity flag set
         """
-        # Check if component already mapped
-        existing_pseudonym = self.find_standalone_components(component, "first_name")
+        # Check if component already mapped as FIRST name
+        existing_first_pseudonym = self.find_standalone_components(
+            component, "first_name"
+        )
 
-        if existing_pseudonym:
-            # Use existing mapping, but flag as ambiguous
+        # CRITICAL FIX: Also check if component already mapped as LAST name
+        # Example: "Dr. Marie Dubois" stored as first="Marie", last="Dubois"
+        # Later "Dr. Dubois" should match the existing last_name="Dubois"
+        existing_last_pseudonym = self.find_standalone_components(
+            component, "last_name"
+        )
+
+        if existing_first_pseudonym:
+            # Use existing first_name mapping, but flag as ambiguous
             assignment = PseudonymAssignment(
-                pseudonym_full=existing_pseudonym,
-                pseudonym_first=existing_pseudonym,
+                pseudonym_full=existing_first_pseudonym,
+                pseudonym_first=existing_first_pseudonym,
                 pseudonym_last=None,
                 theme=getattr(self.pseudonym_manager, "theme", "unknown"),
                 exhaustion_percentage=self.pseudonym_manager.check_exhaustion(),
                 is_ambiguous=True,
                 ambiguity_reason="Standalone component without full name context",
+            )
+            logger.info(
+                "Standalone component matched existing first_name: component=%s",
+                component,
+            )
+        elif existing_last_pseudonym:
+            # Use existing last_name mapping, but flag as ambiguous
+            assignment = PseudonymAssignment(
+                pseudonym_full=existing_last_pseudonym,
+                pseudonym_first=None,
+                pseudonym_last=existing_last_pseudonym,
+                theme=getattr(self.pseudonym_manager, "theme", "unknown"),
+                exhaustion_percentage=self.pseudonym_manager.check_exhaustion(),
+                is_ambiguous=True,
+                ambiguity_reason="Standalone component without full name context",
+            )
+            logger.info(
+                "Standalone component matched existing last_name: component=%s",
+                component,
             )
         else:
             # Assign new pseudonym for standalone component
@@ -427,9 +458,9 @@ class CompositionalPseudonymEngine:
             assignment.ambiguity_reason = (
                 "Standalone component without full name context"
             )
-
-        logger.info(
-            "Standalone component flagged as ambiguous: component_type=first_name"
-        )
+            logger.info(
+                "Standalone component assigned new pseudonym: component=%s",
+                component,
+            )
 
         return assignment

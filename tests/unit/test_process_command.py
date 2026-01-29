@@ -1,4 +1,15 @@
-"""Unit tests for process command with spaCy detection and validation workflow."""
+"""Unit tests for process command with spaCy detection and validation workflow.
+
+STORY 2.6 NOTE: These tests are for the pre-Story 2.6 architecture where the process
+command had helper functions (read_file, write_file, apply_pseudonymization, etc.).
+
+In Story 2.6, the process command was refactored to use DocumentProcessor, which
+delegates all processing logic. The new architecture is comprehensively tested in:
+- tests/integration/test_single_document_workflow.py (DocumentProcessor tests)
+- tests/integration/test_process_end_to_end.py (CLI integration tests)
+
+These tests are kept but skipped to document the architectural change.
+"""
 
 from __future__ import annotations
 
@@ -10,6 +21,12 @@ from pytest_mock import MockerFixture
 from gdpr_pseudonymizer.cli.commands.process import process_command
 from gdpr_pseudonymizer.exceptions import FileProcessingError
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
+
+# Skip all tests in this module - tests for deprecated architecture
+pytestmark = pytest.mark.skip(
+    reason="Story 2.6: Process command refactored to use DocumentProcessor. "
+    "See test_single_document_workflow.py for current architecture tests."
+)
 
 
 def test_process_command_reads_input_file(

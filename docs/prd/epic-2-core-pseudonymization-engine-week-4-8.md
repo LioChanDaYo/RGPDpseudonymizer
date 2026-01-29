@@ -9,19 +9,20 @@
 
 ## 📋 Epic 2 Story List (Updated)
 
-| Story | Priority | Est. Duration | Backlog Source |
-|-------|----------|---------------|----------------|
-| **2.0.1: Integration Tests for Validation Workflow** | 🔴 **HIGH** | **2-3 days** | **TD-001 (Epic 1 debt)** |
-| 2.1: Pseudonym Library System | HIGH | 3-4 days | Original Epic 2 |
-| ~~**Task 2.1.1: Resolve Type Ignore Comments**~~ | ~~MEDIUM~~ | ~~**20 min**~~ | **✅ RESOLVED (TD-003)** |
-| 2.2: Compositional Pseudonymization Logic | CRITICAL | 4-5 days | Original Epic 2 |
-| 2.3: Compound Name Handling | HIGH | 2-3 days | Original Epic 2 |
-| 2.4: Encrypted Mapping Table | CRITICAL | 4-5 days | Original Epic 2 |
-| 2.5: Audit Logging | HIGH | 2-3 days | Original Epic 2 |
-| 2.6: Single-Document Pseudonymization Workflow | CRITICAL | 3-4 days | Original Epic 2 |
-| **Task 2.6.1 or 2.7.1: Performance Regression Tests** | LOW (Optional) | **1 hour** | **FE-003 (Optional)** |
-| 2.7: Architectural Spike - Batch Processing | MEDIUM | 2-3 days | Original Epic 2 |
-| 2.8: Alpha Release Preparation | MEDIUM | 2-3 days | Original Epic 2 |
+| Story | Priority | Est. Duration | Backlog Source | Status |
+|-------|----------|---------------|----------------|--------|
+| **2.0.1: Integration Tests for Validation Workflow** | 🔴 **HIGH** | **2-3 days** | **TD-001 (Epic 1 debt)** | ✅ **DONE** |
+| 2.1: Pseudonym Library System | HIGH | 3-4 days | Original Epic 2 | ✅ **DONE** |
+| ~~**Task 2.1.1: Resolve Type Ignore Comments**~~ | ~~MEDIUM~~ | ~~**20 min**~~ | **✅ RESOLVED (TD-003)** | ✅ **DONE** |
+| 2.2: Compositional Pseudonymization Logic | CRITICAL | 4-5 days | Original Epic 2 | ✅ **DONE** |
+| 2.3: Compound Name Handling | HIGH | 2-3 days | Original Epic 2 | ✅ **DONE** |
+| 2.4: Encrypted Mapping Table | CRITICAL | 4-5 days | Original Epic 2 | ✅ **DONE** |
+| 2.5: Audit Logging | HIGH | 2-3 days | Original Epic 2 | ✅ **DONE** |
+| 2.6: Single-Document Pseudonymization Workflow | CRITICAL | 3-4 days | Original Epic 2 | ✅ **DONE** (QA: PASS) |
+| **2.6.1: Performance Benchmark Test** | 🟡 **LOW** | **1-2 days** | **TEST-001 (Story 2.6 QA deferred)** | 📋 **BACKLOG** |
+| **2.6.2: Accuracy Validation Test Corpus** | 🟡 **LOW** | **2-3 days** | **TEST-002 (Story 2.6 QA deferred)** | 📋 **BACKLOG** |
+| 2.7: Architectural Spike - Batch Processing | MEDIUM | 2-3 days | Original Epic 2 | 📋 **BACKLOG** |
+| 2.8: Alpha Release Preparation | MEDIUM | 2-3 days | Original Epic 2 | 📋 **BACKLOG** |
 
 **Total Epic 2 Duration:** 24-33 days (4.8-6.6 weeks) vs 5 weeks allocated → Within tolerance
 
@@ -526,7 +527,70 @@ def test_full_validation_workflow_with_confirm_reject():
 
 ---
 
+## 🆕 Story 2.6.1: Performance Benchmark Test (TEST-001)
+
+**Source:** Story 2.6 QA Gate Review - Deferred Item (Low priority)
+
+**As a** developer,
+**I want** automated performance benchmarks for document processing,
+**so that** I can validate NFR1 compliance and prevent performance regressions.
+
+**Priority:** 🟡 **LOW** - Post-MVP enhancement
+**QA Gate Reference:** TEST-001 (Story 2.6 QA review)
+**Story File:** [docs/stories/2.6.1.performance-benchmark-test.story.md](../stories/2.6.1.performance-benchmark-test.story.md)
+
+**Rationale:**
+- Story 2.6 QA review identified missing automated performance tests (AC5)
+- Manual validation shows <30s for 3000-word docs; needs automated regression testing
+- pytest-benchmark tests will prevent performance degradation in future changes
+- Low priority: Manual validation sufficient for MVP/alpha release
+
+### Acceptance Criteria
+
+1. **AC1:** Automated pytest-benchmark test validates NFR1: <30s for 2-5K word documents
+2. **AC2:** Test realistic documents with varied entity densities (low/medium/high)
+3. **AC3:** Performance baseline documented (mean, std dev, min/max)
+4. **AC4:** CI/CD integration with regression detection (>20% slowdown fails build)
+5. **AC5:** Performance metrics logged (NLP, DB ops, file I/O breakdown)
+
+**Estimated Duration:** 1-2 days
+
+---
+
+## 🆕 Story 2.6.2: Accuracy Validation Test Corpus (TEST-002)
+
+**Source:** Story 2.6 QA Gate Review - Deferred Item (Low priority)
+
+**As a** quality engineer,
+**I want** automated accuracy validation against a ground-truth test corpus,
+**so that** I can verify NER accuracy meets NFR8/NFR9 thresholds.
+
+**Priority:** 🟡 **LOW** - Post-MVP enhancement
+**QA Gate Reference:** TEST-002 (Story 2.6 QA review)
+**Story File:** [docs/stories/2.6.2.accuracy-validation-test-corpus.story.md](../stories/2.6.2.accuracy-validation-test-corpus.story.md)
+
+**Rationale:**
+- Story 2.6 QA review identified missing accuracy validation (AC6)
+- NFR8 (<10% false negatives) and NFR9 (<15% false positives) not validated against test corpus
+- NLP accuracy known from Story 1.2, but systematic validation missing
+- Low priority: Validation mode (Epic 3) will provide user correction mechanism
+
+### Acceptance Criteria
+
+1. **AC1:** Test corpus with ground-truth annotations (25+ documents)
+2. **AC2:** Automated test calculates false negative rate: <10% (NFR8)
+3. **AC3:** Automated test calculates false positive rate: <15% (NFR9)
+4. **AC4:** Per-entity-type accuracy metrics (PERSON, LOCATION, ORG)
+5. **AC5:** Accuracy report generated with failure case analysis
+6. **AC6:** CI/CD integration for NLP model change regression detection
+
+**Estimated Duration:** 2-3 days
+**Dependency:** May require test corpus creation (Story 1.1 artifact check)
+
+---
+
 **Document Status:** APPROVED v2.0 (Post-Epic 1 Completion, Backlog Integration)
+**Updated:** 2026-01-28 (QA Gate Review - Stories 2.6.1 and 2.6.2 added)
 **Date:** 2026-01-23
 **Last Updated:** 2026-01-24 (PM Approval)
 
@@ -540,6 +604,8 @@ def test_full_validation_workflow_with_confirm_reject():
 - ✅ TD-003 (Type Ignore) added as Task 2.1.1 - quick win during Story 2.1 setup
 - 🤔 FE-003 (Performance Tests) optional - defer if timeline pressure
 - ⏸️ TD-002, FE-001, FE-002 deferred to Epic 3/4 - not in Epic 2 scope
+- 📋 **NEW:** TEST-001 (Performance Benchmark) → Story 2.6.1 (LOW priority, post-MVP)
+- 📋 **NEW:** TEST-002 (Accuracy Validation) → Story 2.6.2 (LOW priority, post-MVP)
 
 **PM Approval Rationale:**
 - Story 2.0.1 is a non-negotiable dependency for Story 2.6 AC7 integration testing
