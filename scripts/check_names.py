@@ -1,6 +1,7 @@
 """Check pseudonyms for specific names."""
 
 from sqlalchemy import text
+
 from gdpr_pseudonymizer.data.database import open_database
 
 db_path = "tests/fixtures/batch_spike/spike_test.db"

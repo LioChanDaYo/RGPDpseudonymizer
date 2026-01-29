@@ -127,7 +127,7 @@ def batch_process_sequential(
     total_new = sum(r.get("entities_new", 0) for r in results if r["success"])
     total_reused = sum(r.get("entities_reused", 0) for r in results if r["success"])
 
-    print(f"\nSequential Results:")
+    print("\nSequential Results:")
     print(f"  Successful: {successful}/{len(results)}")
     print(
         f"  Total entities: {total_entities} ({total_new} new, {total_reused} reused)"
@@ -204,7 +204,7 @@ def batch_process_parallel(
     total_new = sum(r.get("entities_new", 0) for r in results if r["success"])
     total_reused = sum(r.get("entities_reused", 0) for r in results if r["success"])
 
-    print(f"\nParallel Results:")
+    print("\nParallel Results:")
     print(f"  Successful: {successful}/{len(results)}")
     if failed > 0:
         print(f"  Failed: {failed}")
@@ -281,7 +281,7 @@ def main() -> None:
         print("  Expected files: doc_001.txt, doc_002.txt, ..., doc_010.txt")
         return
 
-    print(f"\nConfiguration:")
+    print("\nConfiguration:")
     print(f"  Test corpus: {test_corpus_dir}")
     print(f"  Documents: {len(document_paths)}")
     print(f"  Database: {db_path}")

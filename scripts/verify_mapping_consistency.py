@@ -8,8 +8,7 @@ This script verifies that the batch processing maintains entity mapping consiste
 
 from pathlib import Path
 
-from sqlalchemy import create_engine, text
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import text
 
 from gdpr_pseudonymizer.data.database import open_database
 from gdpr_pseudonymizer.data.repositories.mapping_repository import (
@@ -34,31 +33,31 @@ def verify_mapping_consistency(db_path: str, passphrase: str) -> None:
 
         # Test 1: Check total unique entities
         total_entities = session.execute(text("SELECT COUNT(*) FROM entities")).scalar()
-        print(f"\nTest 1: Total Entities")
+        print("\nTest 1: Total Entities")
         print(f"  Total entities in database: {total_entities}")
 
         # Test 2: Check for Marie Dubois (should appear in docs 1, 3, 7)
-        print(f"\nTest 2: Cross-Document Entity - Marie Dubois")
+        print("\nTest 2: Cross-Document Entity - Marie Dubois")
         marie_entities = repo.find_by_full_name("Marie Dubois")
         if marie_entities:
-            print(f"  [OK] Found 1 entity entry for 'Marie Dubois'")
+            print("  [OK] Found 1 entity entry for 'Marie Dubois'")
             print(f"      Pseudonym: {marie_entities.pseudonym_full}")
             print(f"      First seen: {marie_entities.first_seen_timestamp}")
         else:
-            print(f"  [FAIL] No entity found for 'Marie Dubois'")
+            print("  [FAIL] No entity found for 'Marie Dubois'")
 
         # Test 3: Check for Pierre Lefebvre (should appear in docs 1, 9)
-        print(f"\nTest 3: Cross-Document Entity - Pierre Lefebvre")
+        print("\nTest 3: Cross-Document Entity - Pierre Lefebvre")
         pierre_entities = repo.find_by_full_name("Pierre Lefebvre")
         if pierre_entities:
-            print(f"  [OK] Found 1 entity entry for 'Pierre Lefebvre'")
+            print("  [OK] Found 1 entity entry for 'Pierre Lefebvre'")
             print(f"      Pseudonym: {pierre_entities.pseudonym_full}")
             print(f"      First seen: {pierre_entities.first_seen_timestamp}")
         else:
-            print(f"  [FAIL] No entity found for 'Pierre Lefebvre'")
+            print("  [FAIL] No entity found for 'Pierre Lefebvre'")
 
         # Test 4: Check for duplicate pseudonyms (should be none)
-        print(f"\nTest 4: Duplicate Pseudonym Detection")
+        print("\nTest 4: Duplicate Pseudonym Detection")
         duplicate_pseudonyms = session.execute(
             text(
                 """
@@ -76,10 +75,10 @@ def verify_mapping_consistency(db_path: str, passphrase: str) -> None:
             for row in duplicate_pseudonyms:
                 print(f"      - {row[0]}: {row[1]} occurrences")
         else:
-            print(f"  [OK] No duplicate pseudonyms found")
+            print("  [OK] No duplicate pseudonyms found")
 
         # Test 5: Check for duplicate full names (should be none - unique constraint)
-        print(f"\nTest 5: Duplicate Entity Name Detection")
+        print("\nTest 5: Duplicate Entity Name Detection")
         duplicate_names = session.execute(
             text(
                 """
@@ -97,10 +96,10 @@ def verify_mapping_consistency(db_path: str, passphrase: str) -> None:
             for row in duplicate_names:
                 print(f"      - {row[0]}: {row[1]} occurrences")
         else:
-            print(f"  [OK] No duplicate entity names found")
+            print("  [OK] No duplicate entity names found")
 
         # Test 6: List all PERSON entities
-        print(f"\nTest 6: All PERSON Entities")
+        print("\nTest 6: All PERSON Entities")
         all_people = session.execute(
             text(
                 """
@@ -113,12 +112,12 @@ def verify_mapping_consistency(db_path: str, passphrase: str) -> None:
         ).fetchall()
 
         print(f"  Total PERSON entities: {len(all_people)}")
-        print(f"  Sample entities (first 10):")
+        print("  Sample entities (first 10):")
         for i, row in enumerate(all_people[:10], 1):
             print(f"      {i}. {row[0]} (type: {row[1]}, theme: {row[2]})")
 
         # Test 7: Check operations log
-        print(f"\nTest 7: Operations Audit Log")
+        print("\nTest 7: Operations Audit Log")
         total_operations = session.execute(
             text("SELECT COUNT(*) FROM operations")
         ).scalar()
