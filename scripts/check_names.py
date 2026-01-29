@@ -11,12 +11,16 @@ with open_database(db_path, passphrase) as db_session:
     enc = db_session.encryption
 
     # Get all PERSON entities
-    entities = session.execute(text("""
+    entities = session.execute(
+        text(
+            """
         SELECT full_name, first_name, last_name, pseudonym_first, pseudonym_last, pseudonym_full
         FROM entities
         WHERE entity_type = 'PERSON'
         ORDER BY full_name
-    """)).fetchall()
+    """
+        )
+    ).fetchall()
 
     print("\nPseudonyms for Dubois/Lefebvre entities:")
     print("=" * 80)
@@ -24,7 +28,7 @@ with open_database(db_path, passphrase) as db_session:
     for e in entities:
         full_dec = enc.decrypt(e[0])
 
-        if any(name in full_dec for name in ['Dubois', 'Lefebvre']):
+        if any(name in full_dec for name in ["Dubois", "Lefebvre"]):
             first_dec = enc.decrypt(e[1])
             last_dec = enc.decrypt(e[2]) if e[2] else None
             pseudo_first = enc.decrypt(e[3]) if e[3] else None
@@ -32,8 +36,8 @@ with open_database(db_path, passphrase) as db_session:
             pseudo_full = enc.decrypt(e[5])
 
             print(f"\n{full_dec}:")
-            print(f"  Real components: first=\"{first_dec}\", last=\"{last_dec}\"")
-            print(f"  Pseudonym: \"{pseudo_full}\"")
-            print(f"  Pseudo components: first=\"{pseudo_first}\", last=\"{pseudo_last}\"")
+            print(f'  Real components: first="{first_dec}", last="{last_dec}"')
+            print(f'  Pseudonym: "{pseudo_full}"')
+            print(f'  Pseudo components: first="{pseudo_first}", last="{pseudo_last}"')
 
 print("\nDone.")

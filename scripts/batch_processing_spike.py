@@ -68,7 +68,11 @@ def process_single_document(args: tuple[str, str, str, str, str]) -> dict[str, A
 
 
 def batch_process_sequential(
-    document_paths: list[str], output_dir: str, db_path: str, passphrase: str, theme: str = "neutral"
+    document_paths: list[str],
+    output_dir: str,
+    db_path: str,
+    passphrase: str,
+    theme: str = "neutral",
 ) -> tuple[list[dict[str, Any]], float]:
     """Process documents sequentially (baseline for comparison).
 
@@ -89,7 +93,9 @@ def batch_process_sequential(
     args_list = [
         (
             doc_path,
-            str(Path(output_dir) / f"{Path(doc_path).stem}_sequential_pseudonymized.txt"),
+            str(
+                Path(output_dir) / f"{Path(doc_path).stem}_sequential_pseudonymized.txt"
+            ),
             db_path,
             passphrase,
             theme,
@@ -123,7 +129,9 @@ def batch_process_sequential(
 
     print(f"\nSequential Results:")
     print(f"  Successful: {successful}/{len(results)}")
-    print(f"  Total entities: {total_entities} ({total_new} new, {total_reused} reused)")
+    print(
+        f"  Total entities: {total_entities} ({total_new} new, {total_reused} reused)"
+    )
     print(f"  Total time: {elapsed_time:.2f}s")
     print(f"  Avg per doc: {elapsed_time / len(results):.2f}s")
 
@@ -200,7 +208,9 @@ def batch_process_parallel(
     print(f"  Successful: {successful}/{len(results)}")
     if failed > 0:
         print(f"  Failed: {failed}")
-    print(f"  Total entities: {total_entities} ({total_new} new, {total_reused} reused)")
+    print(
+        f"  Total entities: {total_entities} ({total_new} new, {total_reused} reused)"
+    )
     print(f"  Total time: {elapsed_time:.2f}s")
     print(f"  Avg per doc: {elapsed_time / len(results):.2f}s")
     print(f"  Throughput: {len(results) / elapsed_time:.2f} docs/sec")
@@ -208,7 +218,9 @@ def batch_process_parallel(
     return results, elapsed_time
 
 
-def compare_performance(sequential_time: float, parallel_time: float, num_workers: int) -> None:
+def compare_performance(
+    sequential_time: float, parallel_time: float, num_workers: int
+) -> None:
     """Print performance comparison between sequential and parallel processing.
 
     Args:
