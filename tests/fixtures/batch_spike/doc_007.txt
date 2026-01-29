@@ -1,0 +1,21 @@
+Projet Beta - Spécifications techniques
+
+Chef de projet: Marie Dubois
+Architecte: François Lambert
+
+Le projet Beta, sous la direction de Marie Dubois, vise à moderniser notre plateforme web. François Lambert a conçu l'architecture technique en collaboration avec Dubois.
+
+Équipe technique:
+- Lambert (Architecture)
+- Dr. Marie Dubois (Gestion de projet)
+- Sarah Morel (Développement frontend)
+- Alexandre Roux (Développement backend)
+
+Sarah Morel a proposé d'utiliser React pour l'interface utilisateur. Alexandre Roux préfère Node.js pour le backend. François Lambert validera les choix technologiques finaux.
+
+Calendrier prévu par Marie Dubois:
+- Phase 1 (Mars 2024): Conception par Lambert et Morel
+- Phase 2 (Avril-Mai 2024): Développement par Roux et Morel
+- Phase 3 (Juin 2024): Tests et déploiement supervisés par Dubois
+
+Budget total: 180 000 euros (approuvé par Marie Dubois).

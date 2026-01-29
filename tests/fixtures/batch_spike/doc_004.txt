@@ -1,0 +1,16 @@
+Rapport juridique - Conformité RGPD
+
+Auteur: Nicolas Blanchard (Juriste senior)
+
+Ce document présente l'analyse de conformité RGPD réalisée par Nicolas Blanchard avec l'assistance de Véronique Mercier, DPO de l'organisation.
+
+Mercier a identifié plusieurs non-conformités mineures dans les processus de collecte de données. Blanchard recommande la mise en place d'un registre des traitements.
+
+Émilie Durand, responsable qualité, a participé à l'audit. Durand confirme que les procédures documentées sont insuffisantes.
+
+Actions correctives proposées par Nicolas Blanchard:
+- Formation RGPD pour tous les managers
+- Mise à jour des mentions légales
+- Audit annuel par Véronique Mercier
+
+Budget: 45 000 euros (estimé par Blanchard)
