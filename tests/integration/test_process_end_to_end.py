@@ -188,7 +188,7 @@ def test_process_end_to_end_with_default_output_filename(tmp_path: Path) -> None
     input_file.write_text("Réunion avec Marie Dubois à Paris.", encoding="utf-8")
 
     # Run CLI command without specifying output file
-    result = runner.invoke(app, ["process", str(input_file)])
+    result = runner.invoke(app, ["process", str(input_file), "--theme", "star_wars"])
 
     # Verify command succeeded
     assert result.exit_code == 0
@@ -214,7 +214,15 @@ def test_process_end_to_end_with_txt_file(tmp_path: Path) -> None:
     output_file = tmp_path / "output.txt"
 
     result = runner.invoke(
-        app, ["process", str(input_file), "--output", str(output_file)]
+        app,
+        [
+            "process",
+            str(input_file),
+            "--output",
+            str(output_file),
+            "--theme",
+            "star_wars",
+        ],
     )
 
     assert result.exit_code == 0
@@ -244,7 +252,15 @@ def test_process_end_to_end_with_md_file(tmp_path: Path) -> None:
     output_file = tmp_path / "output.md"
 
     result = runner.invoke(
-        app, ["process", str(input_file), "--output", str(output_file)]
+        app,
+        [
+            "process",
+            str(input_file),
+            "--output",
+            str(output_file),
+            "--theme",
+            "star_wars",
+        ],
     )
 
     assert result.exit_code == 0
@@ -308,7 +324,15 @@ def test_process_end_to_end_multiple_occurrences(tmp_path: Path) -> None:
     output_file = tmp_path / "output.txt"
 
     result = runner.invoke(
-        app, ["process", str(input_file), "--output", str(output_file)]
+        app,
+        [
+            "process",
+            str(input_file),
+            "--output",
+            str(output_file),
+            "--theme",
+            "star_wars",
+        ],
     )
 
     assert result.exit_code == 0
@@ -351,7 +375,15 @@ def test_process_end_to_end_all_entity_types(tmp_path: Path) -> None:
     output_file = tmp_path / "output.txt"
 
     result = runner.invoke(
-        app, ["process", str(input_file), "--output", str(output_file)]
+        app,
+        [
+            "process",
+            str(input_file),
+            "--output",
+            str(output_file),
+            "--theme",
+            "star_wars",
+        ],
     )
 
     assert result.exit_code == 0
@@ -401,7 +433,15 @@ def test_process_end_to_end_preserves_formatting(tmp_path: Path) -> None:
     output_file = tmp_path / "output.txt"
 
     result = runner.invoke(
-        app, ["process", str(input_file), "--output", str(output_file)]
+        app,
+        [
+            "process",
+            str(input_file),
+            "--output",
+            str(output_file),
+            "--theme",
+            "star_wars",
+        ],
     )
 
     assert result.exit_code == 0
@@ -475,7 +515,15 @@ Notes:
     output_file = tmp_path / "interview_anonymized.txt"
 
     result = runner.invoke(
-        app, ["process", str(input_file), "--output", str(output_file)]
+        app,
+        [
+            "process",
+            str(input_file),
+            "--output",
+            str(output_file),
+            "--theme",
+            "star_wars",
+        ],
     )
 
     assert result.exit_code == 0
