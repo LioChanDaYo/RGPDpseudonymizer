@@ -137,12 +137,25 @@ def test_process_end_to_end_without_validation(tmp_path: Path) -> None:
     output_file = tmp_path / "output.txt"
 
     # Run CLI command with star_wars theme to match assertions
-    result = runner.invoke(app, ["process", str(input_file), "--output", str(output_file), "--theme", "star_wars"])
+    result = runner.invoke(
+        app,
+        [
+            "process",
+            str(input_file),
+            "--output",
+            str(output_file),
+            "--theme",
+            "star_wars",
+        ],
+    )
 
     # Debug: Save output if command failed
     if result.exit_code != 0:
         debug_file = tmp_path / "debug_output.txt"
-        debug_file.write_text(f"Exit code: {result.exit_code}\n\n{result.stdout}\n\n{result.exception if result.exception else 'No exception'}", encoding="utf-8")
+        debug_file.write_text(
+            f"Exit code: {result.exit_code}\n\n{result.stdout}\n\n{result.exception if result.exception else 'No exception'}",
+            encoding="utf-8",
+        )
         print(f"\nDebug output saved to: {debug_file}")
 
     # Verify command succeeded
@@ -164,7 +177,9 @@ def test_process_end_to_end_without_validation(tmp_path: Path) -> None:
 
     # Verify output is not empty and has reasonable length
     assert len(output_content) > 0
-    assert len(output_content) >= len(input_content) * 0.8  # Allow some length variation
+    assert (
+        len(output_content) >= len(input_content) * 0.8
+    )  # Allow some length variation
 
 
 def test_process_end_to_end_with_default_output_filename(tmp_path: Path) -> None:
@@ -199,7 +214,9 @@ def test_process_end_to_end_with_txt_file(tmp_path: Path) -> None:
 
     output_file = tmp_path / "output.txt"
 
-    result = runner.invoke(app, ["process", str(input_file), "--output", str(output_file)])
+    result = runner.invoke(
+        app, ["process", str(input_file), "--output", str(output_file)]
+    )
 
     assert result.exit_code == 0
     assert output_file.exists()
@@ -227,7 +244,9 @@ def test_process_end_to_end_with_md_file(tmp_path: Path) -> None:
 
     output_file = tmp_path / "output.md"
 
-    result = runner.invoke(app, ["process", str(input_file), "--output", str(output_file)])
+    result = runner.invoke(
+        app, ["process", str(input_file), "--output", str(output_file)]
+    )
 
     assert result.exit_code == 0
     assert output_file.exists()
@@ -253,7 +272,9 @@ def test_process_end_to_end_file_not_found(tmp_path: Path) -> None:
     input_file = tmp_path / "nonexistent.txt"
     output_file = tmp_path / "output.txt"
 
-    result = runner.invoke(app, ["process", str(input_file), "--output", str(output_file)])
+    result = runner.invoke(
+        app, ["process", str(input_file), "--output", str(output_file)]
+    )
 
     # Command should fail with exit code 2 (file doesn't exist - Typer validation)
     assert result.exit_code == 2
@@ -268,7 +289,9 @@ def test_process_end_to_end_invalid_file_format(tmp_path: Path) -> None:
 
     output_file = tmp_path / "output.txt"
 
-    result = runner.invoke(app, ["process", str(input_file), "--output", str(output_file)])
+    result = runner.invoke(
+        app, ["process", str(input_file), "--output", str(output_file)]
+    )
 
     # Command should fail with exit code 1 (invalid format)
     assert result.exit_code == 1
@@ -285,7 +308,9 @@ def test_process_end_to_end_multiple_occurrences(tmp_path: Path) -> None:
 
     output_file = tmp_path / "output.txt"
 
-    result = runner.invoke(app, ["process", str(input_file), "--output", str(output_file)])
+    result = runner.invoke(
+        app, ["process", str(input_file), "--output", str(output_file)]
+    )
 
     assert result.exit_code == 0
 
@@ -302,7 +327,9 @@ def test_process_end_to_end_no_entities(tmp_path: Path) -> None:
 
     output_file = tmp_path / "output.txt"
 
-    result = runner.invoke(app, ["process", str(input_file), "--output", str(output_file)])
+    result = runner.invoke(
+        app, ["process", str(input_file), "--output", str(output_file)]
+    )
 
     # Command should succeed
     assert result.exit_code == 0
@@ -324,7 +351,9 @@ def test_process_end_to_end_all_entity_types(tmp_path: Path) -> None:
 
     output_file = tmp_path / "output.txt"
 
-    result = runner.invoke(app, ["process", str(input_file), "--output", str(output_file)])
+    result = runner.invoke(
+        app, ["process", str(input_file), "--output", str(output_file)]
+    )
 
     assert result.exit_code == 0
 
@@ -372,7 +401,9 @@ def test_process_end_to_end_preserves_formatting(tmp_path: Path) -> None:
 
     output_file = tmp_path / "output.txt"
 
-    result = runner.invoke(app, ["process", str(input_file), "--output", str(output_file)])
+    result = runner.invoke(
+        app, ["process", str(input_file), "--output", str(output_file)]
+    )
 
     assert result.exit_code == 0
 
@@ -444,7 +475,9 @@ Notes:
 
     output_file = tmp_path / "interview_anonymized.txt"
 
-    result = runner.invoke(app, ["process", str(input_file), "--output", str(output_file)])
+    result = runner.invoke(
+        app, ["process", str(input_file), "--output", str(output_file)]
+    )
 
     assert result.exit_code == 0
     assert output_file.exists()
