@@ -418,9 +418,7 @@ def display_error_message(title: str, message: str) -> None:
         message: Error message details
     """
     console.print()
-    error_panel = Panel(
-        f"[red]{message}[/red]", title=f"❌ {title}", border_style="red"
-    )
+    error_panel = Panel(f"[red]{message}[/red]", title=f"❌ {title}", border_style="red")
     console.print(error_panel)
     console.print()
 

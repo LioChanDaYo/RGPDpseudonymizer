@@ -279,7 +279,11 @@ class TestComponentExhaustion:
         manager.load_library("neutral")
 
         # Override first_names with small list for testing
-        manager.first_names = {"male": ["Charlie", "Delta"], "female": [], "neutral": []}
+        manager.first_names = {
+            "male": ["Charlie", "Delta"],
+            "female": [],
+            "neutral": [],
+        }
 
         # Assign 2 unique first names (exhaust male category)
         assignment1 = manager.assign_pseudonym(
@@ -508,4 +512,6 @@ class TestEdgeCases:
         assert assignment3.pseudonym_last == dubois_pseudo  # Reused Dubois mapping
 
         # Verify component mappings count (Marie, Dubois, + 10 Person + 10 Name = 22)
-        assert len(manager._component_mappings) >= 12  # At least Marie + Dubois + 10 others
+        assert (
+            len(manager._component_mappings) >= 12
+        )  # At least Marie + Dubois + 10 others

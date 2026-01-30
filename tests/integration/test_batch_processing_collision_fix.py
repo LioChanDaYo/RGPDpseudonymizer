@@ -98,7 +98,9 @@ class TestBatchProcessingCollisionFix:
         for doc_file in sorted(test_documents_dir.glob("doc*.txt")):
             output_file = output_dir / f"{doc_file.stem}_pseudonymized.txt"
             result = processor.process_document(str(doc_file), str(output_file))
-            assert result.success, f"Processing failed for {doc_file}: {result.error_message}"
+            assert (
+                result.success
+            ), f"Processing failed for {doc_file}: {result.error_message}"
 
         # Verify no duplicate pseudonyms in database
         with open_database(test_db_path, "test_passphrase_2024") as db_session:
@@ -122,9 +124,7 @@ class TestBatchProcessingCollisionFix:
             if duplicate_pseudonyms:
                 print("\n=== DUPLICATE PSEUDONYMS DETECTED ===")
                 for row in duplicate_pseudonyms:
-                    print(
-                        f"  Pseudonym: {row[0]} -> Used {row[1]} times for: {row[2]}"
-                    )
+                    print(f"  Pseudonym: {row[0]} -> Used {row[1]} times for: {row[2]}")
                 pytest.fail(
                     f"Found {len(duplicate_pseudonyms)} duplicate pseudonyms (violates GDPR 1:1 mapping)"
                 )
@@ -173,7 +173,9 @@ class TestBatchProcessingCollisionFix:
 
             # Verify all "Dubois" last names map to same pseudonym component
             if len(dubois_entities) > 1:
-                dubois_pseudo_last_names = set([entity[4] for entity in dubois_entities])
+                dubois_pseudo_last_names = set(
+                    [entity[4] for entity in dubois_entities]
+                )
                 assert (
                     len(dubois_pseudo_last_names) == 1
                 ), f"Dubois mapped to {len(dubois_pseudo_last_names)} different pseudonyms: {dubois_pseudo_last_names}"
@@ -388,18 +390,13 @@ class TestBatchProcessingStressTest:
                 entities.append(f"{first} {last}")
 
             content = "\n".join(
-                [
-                    f"{entity} travaille sur le projet {i+1}."
-                    for entity in entities[:3]
-                ]
+                [f"{entity} travaille sur le projet {i+1}." for entity in entities[:3]]
             )
             content += "\n" + "\n".join(
                 [f"{entity} est présent." for entity in entities[3:]]
             )
 
-            (docs_dir / f"stress_doc_{i:03d}.txt").write_text(
-                content, encoding="utf-8"
-            )
+            (docs_dir / f"stress_doc_{i:03d}.txt").write_text(content, encoding="utf-8")
 
         # Process all documents
         processor = DocumentProcessor(
@@ -419,7 +416,9 @@ class TestBatchProcessingStressTest:
             if result.success:
                 processed_count += 1
 
-        assert processed_count >= 45, f"Only {processed_count}/50 documents processed successfully"
+        assert (
+            processed_count >= 45
+        ), f"Only {processed_count}/50 documents processed successfully"
 
         # Verify no duplicate pseudonyms in database
         with open_database(db_path, "stress_test_passphrase") as db_session:
