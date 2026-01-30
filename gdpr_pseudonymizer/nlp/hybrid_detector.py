@@ -210,7 +210,9 @@ class HybridDetector(EntityDetector):
         # Strip titles iteratively (handles multiple titles like "Dr. Pr. Marie Dubois")
         normalized = text
         while True:
-            stripped = re.sub(FRENCH_TITLE_PATTERN, "", normalized, flags=re.IGNORECASE).strip()
+            stripped = re.sub(
+                FRENCH_TITLE_PATTERN, "", normalized, flags=re.IGNORECASE
+            ).strip()
             if stripped == normalized:
                 break
             normalized = stripped

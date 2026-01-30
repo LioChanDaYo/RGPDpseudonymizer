@@ -60,7 +60,11 @@ class TestSingleDocumentWorkflow:
 
     @patch("gdpr_pseudonymizer.core.document_processor.run_validation_workflow")
     def test_happy_path_complete_workflow(
-        self, mock_validation_workflow, test_db: str, sample_document: str, tmp_path: Path
+        self,
+        mock_validation_workflow,
+        test_db: str,
+        sample_document: str,
+        tmp_path: Path,
     ) -> None:
         """Test complete workflow: process document end-to-end.
 
@@ -124,7 +128,11 @@ class TestSingleDocumentWorkflow:
 
     @patch("gdpr_pseudonymizer.core.document_processor.run_validation_workflow")
     def test_idempotency_reuses_mappings(
-        self, mock_validation_workflow, test_db: str, sample_document: str, tmp_path: Path
+        self,
+        mock_validation_workflow,
+        test_db: str,
+        sample_document: str,
+        tmp_path: Path,
     ) -> None:
         """Test FR19: Reprocessing same document reuses existing mappings.
 
@@ -190,7 +198,9 @@ class TestSingleDocumentWorkflow:
             assert all(op.success is True for op in operations)
 
     @patch("gdpr_pseudonymizer.core.document_processor.run_validation_workflow")
-    def test_idempotency_with_same_entity(self, mock_validation_workflow, test_db: str, tmp_path: Path) -> None:
+    def test_idempotency_with_same_entity(
+        self, mock_validation_workflow, test_db: str, tmp_path: Path
+    ) -> None:
         """Test idempotency with same entity across documents.
 
         Verifies:

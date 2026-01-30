@@ -41,7 +41,9 @@ def mock_validation_workflow():
     Since tests run non-interactively, we mock the validation workflow
     to simply return all detected entities (simulating user accepting all).
     """
-    with patch("gdpr_pseudonymizer.core.document_processor.run_validation_workflow") as mock:
+    with patch(
+        "gdpr_pseudonymizer.core.document_processor.run_validation_workflow"
+    ) as mock:
         # Pass through all entities (simulate user accepting everything)
         mock.side_effect = lambda entities, **kwargs: entities
         yield mock

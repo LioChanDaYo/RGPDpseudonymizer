@@ -207,7 +207,9 @@ class TestHybridDetector:
         assert detector._normalize_entity_text("Mme Fontaine") == "Fontaine"
         assert detector._normalize_entity_text("Marie Dubois") == "Marie Dubois"
 
-    def test_normalize_entity_text_multiple_titles(self, detector: HybridDetector) -> None:
+    def test_normalize_entity_text_multiple_titles(
+        self, detector: HybridDetector
+    ) -> None:
         """Test that title normalization handles multiple consecutive titles."""
         assert detector._normalize_entity_text("Dr. Pr. Marie Dubois") == "Marie Dubois"
         assert detector._normalize_entity_text("M. Dr. Jean Martin") == "Jean Martin"
@@ -222,13 +224,17 @@ class TestHybridDetector:
         entities = detector.detect_entities(text)
 
         # Should only detect Marie Dubois twice (both occurrences, not title variants)
-        marie_entities = [e for e in entities if "Marie" in e.text or "Dubois" in e.text]
+        marie_entities = [
+            e for e in entities if "Marie" in e.text or "Dubois" in e.text
+        ]
 
         # Verify no title variants in results
         entity_texts = [e.text for e in marie_entities]
         # Should not have both "Dr. Marie Dubois" and "Marie Dubois" from same occurrence
         # Only should have "Marie Dubois" twice (once at pos 0-16 area, once at pos 32-44 area)
-        assert len(marie_entities) <= 2, f"Expected max 2 Marie entities, got {len(marie_entities)}: {entity_texts}"
+        assert (
+            len(marie_entities) <= 2
+        ), f"Expected max 2 Marie entities, got {len(marie_entities)}: {entity_texts}"
 
     def test_improved_recall_over_spacy_only(self, detector: HybridDetector) -> None:
         """Test that hybrid detection finds more entities than spaCy alone."""
