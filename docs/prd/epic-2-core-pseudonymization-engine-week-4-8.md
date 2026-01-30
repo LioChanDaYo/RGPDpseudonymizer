@@ -21,10 +21,13 @@
 | 2.6: Single-Document Pseudonymization Workflow | CRITICAL | 3-4 days | Original Epic 2 | ✅ **DONE** (QA: PASS) |
 | **2.6.1: Performance Benchmark Test** | 🟡 **LOW** | **1-2 days** | **TEST-001 (Story 2.6 QA deferred)** | 📋 **BACKLOG** |
 | **2.6.2: Accuracy Validation Test Corpus** | 🟡 **LOW** | **2-3 days** | **TEST-002 (Story 2.6 QA deferred)** | 📋 **BACKLOG** |
-| 2.7: Architectural Spike - Batch Processing | MEDIUM | 2-3 days | Original Epic 2 | 📋 **BACKLOG** |
-| 2.8: Alpha Release Preparation | MEDIUM | 2-3 days | Original Epic 2 | 📋 **BACKLOG** |
+| 2.7: Architectural Spike - Batch Processing | MEDIUM | 2-3 days | Original Epic 2 | ✅ **DONE** (QA: PASS with critical bug found) |
+| **2.8: Pseudonym Component Collision Fix** | 🔴 **CRITICAL** | **2-3 days** | **BUG-001 (Story 2.7 discovery)** | 📋 **BACKLOG** - **BLOCKING for Epic 3** |
+| 2.9: Alpha Release Preparation | MEDIUM | 2-3 days | Original Epic 2 | 📋 **BACKLOG** |
 
-**Total Epic 2 Duration:** 24-33 days (4.8-6.6 weeks) vs 5 weeks allocated → Within tolerance
+**Total Epic 2 Duration:** 26-36 days (5.2-7.2 weeks) vs 5 weeks allocated → Story 2.8 added post-Epic 2 completion
+
+**⚠️ CRITICAL:** Story 2.8 (Pseudonym Component Collision Fix) is BLOCKING for Epic 3 implementation. Discovered during Story 2.7 spike - two different real entities can receive same pseudonym, violating GDPR 1:1 mapping requirement.
 
 ---
 
@@ -589,8 +592,62 @@ def test_full_validation_workflow_with_confirm_reject():
 
 ---
 
-**Document Status:** APPROVED v2.0 (Post-Epic 1 Completion, Backlog Integration)
-**Updated:** 2026-01-28 (QA Gate Review - Stories 2.6.1 and 2.6.2 added)
+## 🆕 Story 2.8: Pseudonym Component Collision Fix (BUG-001) - **CRITICAL**
+
+**Source:** Story 2.7 Architectural Spike - Critical Bug Discovery
+
+**As a** GDPR compliance officer,
+**I want** pseudonym component assignments to be collision-free at the component level,
+**so that** two different real entities never receive the same pseudonym, ensuring 1:1 reversible mapping (GDPR Article 4(5)).
+
+**Priority:** 🔴 **CRITICAL** - BLOCKING for Epic 3
+
+**Bug Discovery:** During Story 2.7 batch processing verification, two different real last names ("Dubois" and "Lefebvre") were assigned the same pseudonym ("Neto"). This violates the fundamental 1:1 mapping requirement for GDPR-compliant pseudonymization.
+
+**Root Cause:** `LibraryBasedPseudonymManager._used_pseudonyms` only tracks FULL pseudonyms (e.g., "Alexia Neto"), not individual components (e.g., "Neto"). Random selection can assign the same component to different real entities.
+
+**Impact:**
+- **GDPR Compliance:** Violates Article 4(5) (1:1 reversible mapping)
+- **Data Integrity:** Different individuals conflated in processed documents
+- **Probability:** Low (~0.1% with 500-name library) but non-zero in production
+
+**References:**
+- Bug Report: `docs/architecture/CRITICAL-BUG-PSEUDONYM-COLLISION.md`
+- Story File: `docs/stories/2.8.pseudonym-component-collision-fix.story.md`
+- Spike Findings: `docs/architecture/batch-processing-spike-findings.md` (Issue 5)
+
+### Key Acceptance Criteria
+
+1. **AC1:** Implement component-level collision prevention in `LibraryBasedPseudonymManager`
+2. **AC2-3:** Update `_select_first_name()` and `_select_last_name()` with collision tracking
+3. **AC6:** Unit tests verify no component collisions after 100+ assignments
+4. **AC7:** Integration test with Story 2.7 test corpus - all 5 consistency tests PASS
+5. **AC9:** Backwards compatibility - reconstruct mappings from existing database
+6. **AC10:** Performance validation - <5ms overhead per assignment
+
+### Implementation Strategy
+
+Add `_component_mappings` dict to track real component → pseudonym component mappings:
+```python
+self._component_mappings: dict[tuple[str, str], str] = {}
+# Key: (real_component, component_type)
+# Value: pseudonym_component
+```
+
+Before assigning pseudonym component:
+1. Check if real component already has mapping (idempotency)
+2. Select random pseudonym component
+3. Verify no other real component uses this pseudonym (collision prevention)
+4. Store mapping for future consistency
+
+**Estimated Duration:** 2-3 days
+**Dependency:** Story 2.7 (Architectural Spike) - COMPLETE ✅
+**Blocking:** Epic 3 (Batch Processing CLI) - cannot proceed until fixed
+
+---
+
+**Document Status:** APPROVED v2.1 (Post-Story 2.7 - Critical Bug Added)
+**Updated:** 2026-01-29 (Story 2.8 added as CRITICAL/BLOCKING, Story 2.7 marked DONE)
 **Date:** 2026-01-23
 **Last Updated:** 2026-01-24 (PM Approval)
 

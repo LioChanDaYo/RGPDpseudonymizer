@@ -197,7 +197,8 @@ class TestDocumentProcessor:
         assert result.entities_detected == 2
         assert result.entities_new == 2
         assert result.entities_reused == 0
-        assert result.processing_time_seconds > 0
+        # Note: With mocking, processing can be very fast (< timer resolution)
+        assert result.processing_time_seconds >= 0
         assert result.error_message is None
 
         # Assert: File operations

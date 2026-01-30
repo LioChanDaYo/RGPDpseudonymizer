@@ -1,0 +1,17 @@
+Évaluation technique - Infrastructure IT
+
+Rédigé par: Dr. Marie Dubois
+Validé par: Mme Claire Fontaine
+
+Marie Dubois a réalisé une évaluation complète de notre infrastructure IT. Les résultats indiquent que plusieurs serveurs nécessitent une mise à niveau urgente.
+
+Claire Fontaine, directrice technique, a approuvé les recommandations de Dubois. Le budget estimé par Marie Dubois s'élève à 250 000 euros.
+
+Recommandations de Dr. Dubois:
+1. Migration vers le cloud computing
+2. Renforcement de la sécurité réseau
+3. Formation du personnel IT
+
+Claire Fontaine coordonnera la mise en œuvre avec Antoine Girard du service infrastructure. Girard a déjà identifié les fournisseurs potentiels.
+
+Calendrier proposé par Marie Dubois: démarrage en février 2024.

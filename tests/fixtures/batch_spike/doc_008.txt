@@ -1,0 +1,17 @@
+Audit de sécurité - Rapport annuel
+
+Auditeur principal: Olivier Dumas
+Co-auditeur: Nathalie Chevalier
+
+Olivier Dumas a mené l'audit de sécurité annuel de l'organisation en collaboration avec Nathalie Chevalier. L'audit a révélé quelques vulnérabilités mineures.
+
+Chevalier a testé la résistance du réseau aux attaques externes. Les tests de pénétration réalisés par Dumas ont identifié trois failles de sécurité.
+
+Recommandations urgentes d'Olivier Dumas:
+1. Mise à jour des pare-feux (priorité: haute)
+2. Renforcement des mots de passe (priorité: moyenne)
+3. Formation sécurité pour le personnel (priorité: moyenne)
+
+Nathalie Chevalier supervisera la mise en œuvre des correctifs. Dumas effectuera un contrôle de suivi en mars 2024.
+
+Coût estimé par Olivier Dumas: 35 000 euros.

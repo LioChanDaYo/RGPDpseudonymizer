@@ -61,6 +61,13 @@ local_settings.py
 db.sqlite3
 db.sqlite3-journal
 
+# Project-specific: Test databases and outputs
+*.db
+*.db-shm
+*.db-wal
+tests/fixtures/*/output/
+temp_*.txt
+
 # Flask stuff:
 instance/
 .webassets-cache
