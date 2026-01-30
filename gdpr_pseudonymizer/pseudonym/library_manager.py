@@ -54,12 +54,14 @@ class LibraryBasedPseudonymManager(PseudonymManager):
     - Exhaustion detection with 80% warning threshold
     - Systematic fallback naming when library exhausted (Person-001, Location-001)
     - Collision prevention (no duplicate pseudonyms assigned)
+    - Component-level collision prevention (Story 2.8) - ensures 1:1 reversible mapping
 
     Attributes:
         theme: Currently loaded library theme
         first_names: First names grouped by gender
         last_names: Last names list
         _used_pseudonyms: Set of already assigned full pseudonyms
+        _component_mappings: Dict mapping (real_component, component_type) to pseudonym_component
         _fallback_counters: Counters for fallback naming by entity type
     """
 
@@ -69,6 +71,13 @@ class LibraryBasedPseudonymManager(PseudonymManager):
         self.first_names: FirstNames = {"male": [], "female": [], "neutral": []}
         self.last_names: list[str] = []
         self._used_pseudonyms: set[str] = set()
+
+        # Component-level collision prevention (Story 2.8)
+        # Key: (real_component_value, component_type)
+        # Value: pseudonym_component
+        # Example: {("Dubois", "last_name"): "Neto", ("Marie", "first_name"): "Alexia"}
+        self._component_mappings: dict[tuple[str, str], str] = {}
+
         self._fallback_counters: dict[str, int] = {
             "PERSON": 0,
             "LOCATION": 0,
@@ -113,6 +122,7 @@ class LibraryBasedPseudonymManager(PseudonymManager):
 
         # Reset usage tracking for new library
         self._used_pseudonyms.clear()
+        self._component_mappings.clear()
         self._fallback_counters = {"PERSON": 0, "LOCATION": 0, "ORG": 0}
 
         logger.info(
@@ -230,15 +240,18 @@ class LibraryBasedPseudonymManager(PseudonymManager):
         # Generate pseudonym based on entity type
         if entity_type == "PERSON":
             if pseudonym_first_name is None:
-                pseudonym_first_name = self._select_first_name(gender)
+                # Pass real first name for component collision tracking
+                pseudonym_first_name = self._select_first_name(gender, first_name)
             if pseudonym_last_name is None:
-                pseudonym_last_name = self._select_last_name()
+                # Pass real last name for component collision tracking
+                pseudonym_last_name = self._select_last_name(last_name)
 
             pseudonym_full = f"{pseudonym_first_name} {pseudonym_last_name}"
         else:
             # LOCATION and ORG use only last names
             pseudonym_first_name = None
             if pseudonym_last_name is None:
+                # For LOCATION/ORG, we don't track component mapping (no compositional reuse)
                 pseudonym_last_name = self._select_last_name()
             pseudonym_full = pseudonym_last_name
 
@@ -285,18 +298,28 @@ class LibraryBasedPseudonymManager(PseudonymManager):
             exhaustion_percentage=exhaustion,
         )
 
-    def _select_first_name(self, gender: str | None) -> str:
-        """Select first name from library with gender-matching.
+    def _select_first_name(
+        self, gender: str | None, real_first_name: str | None = None
+    ) -> str:
+        """Select first name from library with gender-matching and collision prevention.
 
         Args:
             gender: Gender hint (male/female/neutral/unknown/None)
+            real_first_name: Real first name component (for collision tracking)
 
         Returns:
             Selected first name
 
         Raises:
-            RuntimeError: If no names available for gender
+            RuntimeError: If no names available for gender or no collision-free component found
         """
+        # Check if real_first_name already has mapping
+        if real_first_name:
+            mapping_key = (real_first_name, "first_name")
+            if mapping_key in self._component_mappings:
+                # Reuse existing mapping for consistency
+                return self._component_mappings[mapping_key]
+
         # Map gender to library categories
         if gender == "male" and self.first_names["male"]:
             candidates = self.first_names["male"]
@@ -315,21 +338,84 @@ class LibraryBasedPseudonymManager(PseudonymManager):
         if not candidates:
             raise RuntimeError(f"No first names available for gender: {gender}")
 
-        return secrets.choice(candidates)
+        # Select with collision prevention
+        max_attempts = 100
+        for attempt in range(max_attempts):
+            candidate = secrets.choice(candidates)
 
-    def _select_last_name(self) -> str:
-        """Select last name from library.
+            # Check if this pseudonym component already used for different real component
+            is_collision = False
+            for (
+                real_comp,
+                comp_type,
+            ), pseudo_comp in self._component_mappings.items():
+                if comp_type == "first_name" and pseudo_comp == candidate:
+                    # This pseudonym is already used for a different real first name
+                    if real_first_name and real_comp != real_first_name:
+                        is_collision = True
+                        break
+
+            if not is_collision:
+                # No collision - safe to use this pseudonym component
+                if real_first_name:
+                    self._component_mappings[
+                        (real_first_name, "first_name")
+                    ] = candidate
+                return candidate
+
+        # Failed to find collision-free component after max attempts
+        raise RuntimeError(
+            f"Unable to find unique first name component for '{real_first_name}' "
+            f"after {max_attempts} attempts. Library may be exhausted."
+        )
+
+    def _select_last_name(self, real_last_name: str | None = None) -> str:
+        """Select last name from library with collision prevention.
+
+        Args:
+            real_last_name: Real last name component (for collision tracking)
 
         Returns:
             Selected last name
 
         Raises:
-            RuntimeError: If no last names available
+            RuntimeError: If no last names available or no collision-free component found
         """
         if not self.last_names:
             raise RuntimeError("No last names available in library")
 
-        return secrets.choice(self.last_names)
+        # Check if real_last_name already has mapping
+        if real_last_name:
+            mapping_key = (real_last_name, "last_name")
+            if mapping_key in self._component_mappings:
+                # Reuse existing mapping for consistency
+                return self._component_mappings[mapping_key]
+
+        # Select new pseudonym component, ensure no collision
+        max_attempts = 100
+        for attempt in range(max_attempts):
+            candidate = secrets.choice(self.last_names)
+
+            # Check if this pseudonym component already used for different real component
+            is_collision = False
+            for (real_comp, comp_type), pseudo_comp in self._component_mappings.items():
+                if comp_type == "last_name" and pseudo_comp == candidate:
+                    # This pseudonym is already used for a different real last name
+                    if real_last_name and real_comp != real_last_name:
+                        is_collision = True
+                        break
+
+            if not is_collision:
+                # No collision - safe to use this pseudonym component
+                if real_last_name:
+                    self._component_mappings[(real_last_name, "last_name")] = candidate
+                return candidate
+
+        # Failed to find collision-free component after max attempts
+        raise RuntimeError(
+            f"Unable to find unique last name component for '{real_last_name}' "
+            f"after {max_attempts} attempts. Library may be exhausted."
+        )
 
     def _generate_fallback_name(self, entity_type: str) -> str:
         """Generate systematic fallback name when library exhausted.
@@ -343,6 +429,42 @@ class LibraryBasedPseudonymManager(PseudonymManager):
         self._fallback_counters[entity_type] += 1
         counter = self._fallback_counters[entity_type]
         return f"{entity_type.title()}-{counter:03d}"
+
+    def load_existing_mappings(
+        self, existing_entities: list[Any]
+    ) -> None:  # pragma: no cover
+        """Load existing component mappings from database to prevent collisions.
+
+        Reconstructs _component_mappings from existing database entities to ensure
+        new assignments don't collide with previously assigned pseudonyms.
+
+        Args:
+            existing_entities: List of Entity objects from MappingRepository.find_all()
+        """
+        loaded_components = 0
+
+        for entity in existing_entities:
+            # Only PERSON entities have component-level tracking
+            if entity.entity_type == "PERSON":
+                # Extract real components and pseudonym components
+                if entity.first_name and entity.pseudonym_first:
+                    key = (entity.first_name, "first_name")
+                    self._component_mappings[key] = entity.pseudonym_first
+                    loaded_components += 1
+
+                if entity.last_name and entity.pseudonym_last:
+                    key = (entity.last_name, "last_name")
+                    self._component_mappings[key] = entity.pseudonym_last
+                    loaded_components += 1
+
+            # Track full pseudonym as used
+            self._used_pseudonyms.add(entity.pseudonym_full)
+
+        logger.info(
+            "Loaded %d existing component mappings from database (%d entities processed)",
+            loaded_components,
+            len(existing_entities),
+        )
 
     def check_exhaustion(self) -> float:
         """Get library exhaustion percentage.

@@ -182,6 +182,11 @@ class DocumentProcessor:
                 # Initialize pseudonym manager and engine
                 pseudonym_manager = LibraryBasedPseudonymManager()
                 pseudonym_manager.load_library(self.theme)
+
+                # Load existing mappings from database to prevent component collisions (Story 2.8)
+                existing_entities = mapping_repo.find_all()
+                pseudonym_manager.load_existing_mappings(existing_entities)
+
                 compositional_engine = CompositionalPseudonymEngine(
                     pseudonym_manager=pseudonym_manager,
                     mapping_repository=mapping_repo,

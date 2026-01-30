@@ -17,7 +17,7 @@ console = Console()
 
 
 def present_entities_for_validation(
-    entities: list[tuple[str, str, int, int, str]]
+    entities: list[tuple[str, str, int, int, str]],
 ) -> None:
     """Display detected entities in a formatted table.
 
