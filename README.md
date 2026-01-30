@@ -42,7 +42,8 @@ GDPR Pseudonymizer is a **privacy-first CLI tool** that combines AI efficiency w
 ### 🎭 **Themed Pseudonyms**
 - ✅ **Readable output** - Star Wars, LOTR, or generic French names
 - ✅ **Maintains context** - LLM analysis preserves ≥80% document utility
-- ✅ **Gender-preserving** - When NER provides gender classification
+- ✅ **Gender-preserving** - When NER provides gender classification (PERSON entities)
+- ✅ **Full entity support** - PERSON, LOCATION, and ORGANIZATION pseudonyms for all themes
 
 ---
 
@@ -343,9 +344,11 @@ The validation UI provides an intuitive keyboard-driven interface for reviewing 
 - ✅ **Story 2.7:** Batch processing scalability spike - Multiprocessing.Pool validated (1.17x speedup on small docs, 2-3x projected for 3000-word docs), mapping consistency verified, architectural validation complete, 1 critical bug discovered (pseudonym component collision - Story 2.8 created), 5 test scripts + findings document (QA gate: PASS with critical bug found)
 - ✅ **Story 2.8:** Pseudonym component collision fix - Component-level collision prevention implemented in LibraryBasedPseudonymManager, `_component_mappings` dict tracks real→pseudonym component assignments, database reconstruction for backwards compatibility, 18 tests passing (13 unit + 5 integration), GDPR Article 4(5) compliance restored, Epic 3 unblocked (QA gate: PASS, Score: 92/100)
 - ✅ **Story 2.9:** Alpha release preparation - Installation verification complete (Windows tested), alpha documentation created (ALPHA-INSTALL.md, ALPHA-QUICKSTART.md, ALPHA-TESTING-PROTOCOL.md), CHANGELOG.md with v0.1.0-alpha release notes, README updated to alpha status, git tag v0.1.0-alpha ready (Alpha Release: 2026-01-30)
+- ✅ **Story 3.0:** LOCATION and ORGANIZATION pseudonym libraries - Extended all 3 themes with 80 locations + 35 organizations each (neutral: French cities/companies, Star Wars: planets/alliances, LOTR: Middle-earth locations/kingdoms), updated LibraryBasedPseudonymManager for atomic LOC/ORG pseudonymization, 8 new unit tests + integration tests, all ACs met (QA gate: PASS, Score: 95/100)
 
 ### Completed ✅
 - ✅ **Epic 2 (Week 6-10):** Core pseudonymization engine - 9/9 stories complete, Epic 2 complete, v0.1.0-alpha released
+- ✅ **Story 3.0 (Week 10):** LOCATION/ORG pseudonym libraries - Epic 3 first story, extends pseudonymization to all entity types
 
 ### Upcoming 📅
 - **Epic 3 (Week 11-13):** CLI polish & batch processing
@@ -519,21 +522,21 @@ The integration test suite covers:
 
 | Metric | Value | Status |
 |--------|-------|--------|
-| **Development Progress** | Week 10/14 | ✅ Epic 2 Complete - v0.1.0-alpha Released |
-| **Stories Complete** | 18 (Epic 1 + Epic 2 Complete) | ✅ Epic 1 + Epic 2 (9 stories) |
+| **Development Progress** | Week 10/14 | ✅ Epic 2 Complete + Story 3.0 - v0.1.0-alpha Released |
+| **Stories Complete** | 19 (Epic 1 + Epic 2 + Story 3.0) | ✅ Epic 1 (9) + Epic 2 (9) + Story 3.0 |
 | **Critical Bugs Found** | 1 (Story 2.8) | ✅ RESOLVED - Epic 3 Unblocked |
 | **Test Corpus Size** | 25 docs, 1,855 entities | ✅ Complete |
 | **NLP Accuracy (Baseline)** | 29.5% F1 (spaCy) | ✅ Measured |
 | **Hybrid Accuracy (NLP+Regex)** | 35.3% F1 (+52.2% PERSON) | ✅ Story 1.8 Complete |
 | **Final Accuracy (AI+Human)** | 100% (validated) | 🎯 By Design |
-| **Pseudonym Libraries** | 3 themes (2,426 names total) | ✅ Story 2.1 Complete |
+| **Pseudonym Libraries** | 3 themes (2,426 names + 240 locations + 105 orgs) | ✅ Stories 2.1, 3.0 Complete |
 | **Compositional Matching** | Operational (component reuse + title stripping + compound names) | ✅ Stories 2.2, 2.3 Complete |
 | **Batch Processing** | Architecture validated (multiprocessing.Pool, 1.17x-2.5x speedup) | ✅ Story 2.7 Complete |
 | **Encrypted Storage** | AES-128-CBC with passphrase protection (PBKDF2 210K iterations) | ✅ Story 2.4 Complete |
 | **Audit Logging** | GDPR Article 30 compliance (operations table + JSON/CSV export) | ✅ Story 2.5 Complete |
 | **Validation UI** | Operational with deduplication | ✅ Stories 1.7, 1.9 Complete |
 | **Validation Time** | <2 min (20-30 entities), <5 min (100 entities) | ✅ Targets Met |
-| **Test Coverage** | 553 tests (552 passed, 1 skipped), 86%+ coverage | ✅ All Quality Checks Pass |
+| **Test Coverage** | 589 tests (475 unit + 114 integration), 86%+ coverage | ✅ All Quality Checks Pass |
 | **Quality Gates** | Ruff, mypy, pytest | ✅ All Pass (0 issues) |
 | **Supported Languages** | French | 🇫🇷 v1.0 only |
 | **Supported Formats** | .txt, .md | 📝 v1.0 scope |
@@ -550,6 +553,6 @@ The integration test suite covers:
 
 ---
 
-**Last Updated:** 2026-01-30 (v0.1.0-alpha released: Epic 2 complete with all 9 stories; Alpha documentation created; Seeking 3-5 alpha testers for feedback; 553 tests passing, all quality gates pass)
+**Last Updated:** 2026-01-30 (v0.1.0-alpha released: Epic 2 complete; Story 3.0 complete - LOCATION/ORG pseudonym libraries added; Alpha documentation created; Seeking 3-5 alpha testers for feedback; 589 tests (475 unit passed, all quality gates pass)
 
-**Current Focus:** Alpha testing period (1 week) - Gathering user feedback to inform Epic 3 priorities (CLI polish & batch processing, Week 11-13)
+**Current Focus:** Epic 3 development - Story 3.0 complete (LOC/ORG pseudonym libraries for all 3 themes), CLI polish & batch processing features in progress

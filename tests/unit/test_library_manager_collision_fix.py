@@ -434,8 +434,12 @@ class TestEdgeCases:
         manager = LibraryBasedPseudonymManager()
         manager.load_library("neutral")
 
-        # Override last_names with small list
-        manager.last_names = ["Alpha", "Beta"]
+        # Override locations with small list for testing
+        manager.locations = {
+            "cities": ["Alpha", "Beta"],
+            "countries": [],
+            "regions": [],
+        }
 
         # Assign without real_name (LOCATION entity)
         assignment1 = manager.assign_pseudonym(

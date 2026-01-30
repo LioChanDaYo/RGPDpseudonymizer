@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [Unreleased]
+
+### Added
+- ✅ **LOCATION and ORGANIZATION pseudonym libraries** (Story 3.0)
+  - Added themed pseudonyms for LOCATION entities (cities, regions, planets/countries)
+  - Added themed pseudonyms for ORGANIZATION entities (companies, agencies, institutions)
+  - 80 locations per theme (50 cities, 20 countries/planets, 10 regions)
+  - 35 organizations per theme (20 companies, 10 agencies, 5 institutions)
+  - Available for all 3 themes: neutral (French), Star Wars, LOTR
+  - Collision prevention and 1:1 mapping for LOC/ORG entities
+  - Updated exhaustion calculation to include LOC/ORG pools
+
+---
+
 ## [0.1.0-alpha] - 2026-01-30
 
 **Release Status:** Alpha release for early feedback (not production-ready)
@@ -55,6 +69,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 📝 **Text files only** (.txt, .md) - No PDF, DOCX, or other formats
 - ✅ **Validation mandatory** - No automatic mode available (human review required for 100% accuracy)
 - 🤖 **AI detection: 40-50% accuracy** - Human validation ensures 100% coverage
+- 👤 **PERSON entities only have themed pseudonyms** - LOCATION and ORGANIZATION entities are detected and validated but not pseudonymized with themed names (Epic 3 planned feature - HIGH priority)
 - 🪟 **Windows:** spaCy access violations possible (use Linux/macOS/WSL if encountered)
 - 🐍 **Python 3.9-3.13 supported** - Python 3.14+ not supported due to dependency compatibility
 
@@ -110,6 +125,7 @@ poetry run gdpr-pseudo --help
 ### Next Steps
 
 - **Epic 3:** CLI polish & batch processing (Week 11-13)
+  - LOCATION and ORGANIZATION pseudonym libraries (HIGH priority)
   - Auto-accept high-confidence entities (reduce validation time)
   - Batch folder processing CLI
   - Performance optimizations
