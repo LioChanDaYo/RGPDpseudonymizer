@@ -64,17 +64,6 @@ def cleanup_test_database():
 
 
 @pytest.fixture(autouse=True)
-def mock_validation_workflow(monkeypatch):
-    """Mock validation workflow to auto-approve all entities for CI testing.
-
-    Story 2.6: Validation workflow was deferred to Epic 3 Story 3.2.
-    The process command now runs without validation by default.
-    This fixture is kept for backward compatibility but does nothing.
-    """
-    pass
-
-
-@pytest.fixture(autouse=True)
 def mock_hybrid_detector_for_deterministic_tests(monkeypatch):
     """Mock HybridDetector to return predictable entities for test stability.
 
