@@ -23,6 +23,13 @@ logger = logging.getLogger(__name__)
 # \s* consumes optional trailing whitespace
 FRENCH_TITLE_PATTERN = r"\b(?:Docteur|Professeur|Madame|Monsieur|Mademoiselle|Dr\.?|Pr\.?|Prof\.?|M\.?|Mme\.?|Mlle\.?)(?!\w)\s*"
 
+# French preposition pattern for location preprocessing
+# Matches common French prepositions that precede location names: à, au, aux, en, de, du, des, d', l'
+# Handles contractions and elisions
+# ^[\s]* matches optional leading whitespace
+# \s* consumes trailing whitespace after preposition
+FRENCH_PREPOSITION_PATTERN = r"^[\s]*(?:à|au|aux|en|de|du|des|d'|l'|la|le|les)\s+"
+
 
 @dataclass
 class PseudonymAssignment:
@@ -233,6 +240,31 @@ class CompositionalPseudonymEngine:
 
         return text
 
+    def strip_prepositions(self, text: str) -> str:
+        """Remove French prepositions from location entity text.
+
+        Handles common prepositions that precede location names in French.
+        Only strips from the beginning of the text.
+
+        Examples:
+            "à Paris" → "Paris"
+            "en France" → "France"
+            "du Nord" → "Nord"
+            "l'Europe" → "Europe"
+            "au Brésil" → "Brésil"
+
+        Args:
+            text: Entity text potentially containing prepositions
+
+        Returns:
+            Text with leading prepositions removed
+        """
+        # Strip prepositions from the beginning only
+        stripped = re.sub(
+            FRENCH_PREPOSITION_PATTERN, "", text, flags=re.IGNORECASE
+        ).strip()
+        return stripped
+
     def assign_compositional_pseudonym(
         self,
         entity_text: str,
@@ -362,7 +394,8 @@ class CompositionalPseudonymEngine:
     ) -> str | None:
         """Find existing pseudonym for standalone component.
 
-        Queries MappingRepository for matching component mappings.
+        Checks both database (persisted mappings) AND in-memory component mappings
+        (validation preview mappings that haven't been saved yet).
 
         Args:
             component: Name component to search for (e.g., "Marie")
@@ -371,7 +404,16 @@ class CompositionalPseudonymEngine:
         Returns:
             Pseudonym component if found, None otherwise
         """
-        # Query repository for existing component mappings
+        # FIRST: Check in-memory component mappings (validation preview)
+        # This ensures consistent pseudonym component reuse during validation
+        # Example: "Claire Fontaine" preview generates ("Fontaine", "last_name") -> "Martin"
+        #          Later "Fontaine" standalone should reuse "Martin"
+        if hasattr(self.pseudonym_manager, '_component_mappings'):
+            mapping_key = (component, component_type)
+            if mapping_key in self.pseudonym_manager._component_mappings:
+                return self.pseudonym_manager._component_mappings[mapping_key]
+
+        # SECOND: Query repository for existing component mappings (persisted)
         existing_entities = self.mapping_repository.find_by_component(
             component, component_type
         )

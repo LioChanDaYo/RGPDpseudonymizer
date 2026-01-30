@@ -27,6 +27,26 @@ from gdpr_pseudonymizer.data.encryption import EncryptionService
 from gdpr_pseudonymizer.exceptions import FileProcessingError
 from gdpr_pseudonymizer.utils.logger import configure_logging, get_logger
 
+# Configure Windows console to handle Unicode encoding errors gracefully
+if sys.platform == "win32":
+    import io
+    # Reconfigure stdout to use UTF-8 with error replacement (instead of charmap)
+    # This allows Unicode characters (spinners, Braille) to be replaced with '?' instead of crashing
+    if hasattr(sys.stdout, 'buffer'):
+        sys.stdout = io.TextIOWrapper(
+            sys.stdout.buffer,
+            encoding='utf-8',
+            errors='replace',  # Replace unsupported characters with '?'
+            line_buffering=True
+        )
+    if hasattr(sys.stderr, 'buffer'):
+        sys.stderr = io.TextIOWrapper(
+            sys.stderr.buffer,
+            encoding='utf-8',
+            errors='replace',
+            line_buffering=True
+        )
+
 # Configure logging
 configure_logging()
 logger = get_logger(__name__)
@@ -199,13 +219,12 @@ def process_command(
             model=model,
         )
 
-        # Process document with progress indicators
+        # Initialize processor with progress indicator
         with Progress(
             SpinnerColumn(),
             TextColumn("[progress.description]{task.description}"),
             console=console,
         ) as progress:
-            # Step 1: Initialize processor
             task = progress.add_task("Initializing processor...", total=None)
             try:
                 processor = DocumentProcessor(
@@ -223,13 +242,12 @@ def process_command(
                     )
                 sys.exit(1)
 
-            # Step 2: Process document
-            progress.update(task, description="Processing document...")
-            result = processor.process_document(
-                input_path=str(input_file),
-                output_path=str(output_file),
-            )
-            progress.update(task, description="✓ Processing complete")
+        # Process document (without progress bar to avoid interfering with interactive validation UI)
+        console.print("\n[bold]Processing document...[/bold]")
+        result = processor.process_document(
+            input_path=str(input_file),
+            output_path=str(output_file),
+        )
 
         # Display results
         if result.success:

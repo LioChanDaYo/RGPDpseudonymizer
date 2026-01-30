@@ -18,19 +18,19 @@
 
 ---
 
-### Epic 3: CLI Interface & Batch Processing (Week 8-11)
+### Epic 3: CLI Polish & Batch Processing (Week 11-13)
 
-**Goal:** Deliver complete command-line interface with all user-facing commands, process-based parallel batch processing, and optional interactive validation mode, achieving production-ready workflows for real-world use cases.
-
----
-
-### Epic 4: Launch Readiness & LLM Validation (Week 11-13)
-
-**Goal:** Validate LLM utility preservation with real AI services, complete comprehensive documentation package, achieve all NFR quality thresholds, and prepare for confident early adopter release with full user support.
+**Goal:** Complete the pseudonymization engine with LOCATION/ORG support, deliver production-ready batch processing CLI, and provide comprehensive user documentation for v1.0 MVP launch.
 
 ---
 
-**Timeline: 13 weeks total (includes 1-week buffer for NLP selection and compositional logic complexity risks)**
+### Epic 4: Launch Readiness & LLM Validation (Week 14)
+
+**Goal:** Validate LLM utility preservation with real AI services, complete comprehensive documentation package, achieve all NFR quality thresholds, and prepare for confident v1.0 MVP launch with full user support.
+
+---
+
+**Timeline: 14 weeks total (Epics 1-2: Week 1-10, Epic 3: Week 11-13, Epic 4: Week 14)**
 
 ---
 
@@ -59,13 +59,14 @@
 - ✓ **Alpha Release:** 3-5 friendly users provide initial feedback (after week 6)
 
 **Epic 3 DoD:**
-- ✓ All CLI commands (FR15) functional and tested
-- ✓ Batch processing achieves NFR2 (<30min for 50 docs) with process-based parallelism
-- ✓ Optional validation mode (`--validate` flag) operational
-- ✓ Markdown format-aware processing (FR21) handles all edge cases
-- ✓ Idempotent processing (FR19) validated
-- ✓ Installation succeeds on Windows, macOS, Linux (initial NFR3 validation on 3 platforms)
-- ✓ **Beta Release:** 10-15 early adopters using tool in real workflows (after week 10)
+- ✓ LOCATION and ORGANIZATION pseudonym libraries complete for all 3 themes (50+ locations, 30+ orgs per theme)
+- ✓ Batch processing CLI functional with process-based parallelism (NFR2: <30min for 50 docs)
+- ✓ Progress reporting with real-time indicators for large batches
+- ✓ Configuration file support (.gdpr-pseudo.yaml) operational
+- ✓ CLI UX polish complete (error messages, help text)
+- ✓ User documentation complete (installation guide, tutorial, CLI reference)
+- ✓ Performance regression tests (pytest-benchmark) integrated
+- ✓ **Post-Alpha Improvements:** Alpha tester feedback integrated into Story 3.0 implementation
 
 **Epic 4 DoD:**
 - ✓ LLM utility preservation validated: ≥80% utility score (NFR10) with real ChatGPT/Claude API testing
@@ -80,9 +81,9 @@
 
 ### Release Strategy
 
-- **Week 6 (Post-Epic 2):** Alpha release to 3-5 friendly users for core functionality feedback
-- **Week 10 (Post-Epic 3):** Beta release to 10-15 early adopters for production workflow validation
-- **Week 13 (Post-Epic 4):** Public MVP release to broader early adopter community (target: 50+ users)
+- **Week 10 (Post-Epic 2):** Alpha release v0.1.0 to 3-5 friendly users for core functionality feedback ✅ COMPLETE (2026-01-30)
+- **Week 13 (Post-Epic 3):** Beta release v0.2.0 to 10-15 early adopters for production workflow validation
+- **Week 14+ (Post-Epic 4):** Public v1.0 MVP release to broader early adopter community (target: 50+ users)
 
 ---
 

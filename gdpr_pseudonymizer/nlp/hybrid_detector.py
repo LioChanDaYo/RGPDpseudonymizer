@@ -10,12 +10,18 @@ Implements EntityDetector interface using a hybrid approach:
 
 from __future__ import annotations
 
+import re
+
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity, EntityDetector
 from gdpr_pseudonymizer.nlp.regex_matcher import RegexMatcher
 from gdpr_pseudonymizer.nlp.spacy_detector import SpaCyDetector
 from gdpr_pseudonymizer.utils.logger import get_logger
 
 logger = get_logger(__name__)
+
+# French title pattern for entity normalization during deduplication
+# Same pattern used in assignment_engine.py to ensure consistency
+FRENCH_TITLE_PATTERN = r"\b(?:Docteur|Professeur|Madame|Monsieur|Mademoiselle|Dr\.?|Pr\.?|Prof\.?|M\.?|Mme\.?|Mlle\.?)(?!\w)\s*"
 
 
 class HybridDetector(EntityDetector):
@@ -184,17 +190,56 @@ class HybridDetector(EntityDetector):
         """
         return not (e1.end_pos <= e2.start_pos or e2.end_pos <= e1.start_pos)
 
+    def _normalize_entity_text(self, text: str) -> str:
+        """Normalize entity text by stripping French titles.
+
+        This ensures that "Dr. Marie Dubois" and "Marie Dubois" are recognized as
+        the same entity during deduplication, preventing duplicate validation prompts.
+
+        Args:
+            text: Entity text potentially containing titles
+
+        Returns:
+            Text with titles removed and whitespace normalized
+
+        Examples:
+            "Dr. Marie Dubois" → "Marie Dubois"
+            "Mme Fontaine" → "Fontaine"
+            "Marie Dubois" → "Marie Dubois" (unchanged)
+        """
+        # Strip titles iteratively (handles multiple titles like "Dr. Pr. Marie Dubois")
+        normalized = text
+        while True:
+            stripped = re.sub(FRENCH_TITLE_PATTERN, "", normalized, flags=re.IGNORECASE).strip()
+            if stripped == normalized:
+                break
+            normalized = stripped
+        return normalized
+
     def _is_exact_match(self, e1: DetectedEntity, e2: DetectedEntity) -> bool:
-        """Check if two entities have identical span.
+        """Check if two entities have identical span OR normalized text.
+
+        Checks both positional exact match and normalized text match to handle
+        cases where one detector includes a title and the other doesn't
+        (e.g., "Dr. Marie Dubois" from regex vs "Marie Dubois" from spaCy).
 
         Args:
             e1: First entity
             e2: Second entity
 
         Returns:
-            True if entities have same start and end positions
+            True if entities have same start/end positions OR same normalized text
         """
-        return e1.start_pos == e2.start_pos and e1.end_pos == e2.end_pos
+        # Check positional exact match
+        if e1.start_pos == e2.start_pos and e1.end_pos == e2.end_pos:
+            return True
+
+        # Check normalized text match (strips titles for comparison)
+        # This handles "Dr. Marie Dubois" == "Marie Dubois" cases
+        if self._normalize_entity_text(e1.text) == self._normalize_entity_text(e2.text):
+            return True
+
+        return False
 
     def get_model_info(self) -> dict[str, str]:
         """Get model metadata for audit logging.
