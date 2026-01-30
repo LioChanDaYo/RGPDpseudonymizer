@@ -226,6 +226,14 @@ Proposed pseudonym: [Leia Organa] (theme: neutral)
 - **Why:** AI detection accuracy is 40-50%, human validation ensures 100%
 - **Epic 3 feature:** Auto-accept high-confidence entities (coming soon)
 
+### Pseudonym Support
+- **PERSON, LOCATION, and ORGANIZATION entities supported** - All three entity types have themed pseudonyms
+  - PERSON: First name + last name from themed libraries
+  - LOCATION: Cities, regions, and planets/countries from themed libraries
+  - ORGANIZATION: Companies, agencies, and institutions from themed libraries
+- Themed pseudonyms available for all 3 themes (neutral, Star Wars, LOTR)
+- **Alpha feedback requested:** Survey question #14 asks about your specific use cases to inform implementation details
+
 ### Detection Accuracy
 - **AI detection:** 40-50% recall (misses about half of entities)
 - **Common misses:**

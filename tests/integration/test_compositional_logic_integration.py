@@ -597,10 +597,10 @@ class TestCompositionalLogicIntegration:
             gender=None,
         )
 
-        # Verify simple assignment used
+        # Verify simple assignment used (Story 3.0: LOC/ORG are atomic - no components)
         assert location_assignment.pseudonym_first is None
-        assert location_assignment.pseudonym_last is not None
-        assert location_assignment.pseudonym_full == location_assignment.pseudonym_last
+        assert location_assignment.pseudonym_last is None
+        assert location_assignment.pseudonym_full is not None
 
         # Process ORG entity
         org_assignment = compositional_engine.assign_compositional_pseudonym(
@@ -609,9 +609,10 @@ class TestCompositionalLogicIntegration:
             gender=None,
         )
 
-        # Verify simple assignment used
+        # Verify simple assignment used (Story 3.0: LOC/ORG are atomic - no components)
         assert org_assignment.pseudonym_first is None
-        assert org_assignment.pseudonym_last is not None
+        assert org_assignment.pseudonym_last is None
+        assert org_assignment.pseudonym_full is not None
 
         # Verify repository NOT queried for LOCATION or ORG
         mock_mapping_repository.find_by_component.assert_not_called()

@@ -124,6 +124,16 @@ class TestLibraryLoading:
                 "neutral": [],
             },
             "last_names": ["Last"] * 500,
+            "locations": {
+                "cities": ["City"] * 50,
+                "countries": ["Country"] * 20,
+                "regions": ["Region"] * 10,
+            },
+            "organizations": {
+                "companies": ["Company"] * 20,
+                "agencies": ["Agency"] * 10,
+                "institutions": ["Institution"] * 5,
+            },
         }
 
         mismatched_path = tmp_path / "pseudonyms" / "correct_theme.json"
@@ -151,6 +161,16 @@ class TestLibraryLoading:
                 "neutral": [],
             },
             "last_names": ["Last"] * 500,
+            "locations": {
+                "cities": ["City"] * 50,
+                "countries": ["Country"] * 20,
+                "regions": ["Region"] * 10,
+            },
+            "organizations": {
+                "companies": ["Company"] * 20,
+                "agencies": ["Agency"] * 10,
+                "institutions": ["Institution"] * 5,
+            },
         }
 
         insufficient_path = tmp_path / "pseudonyms" / "insufficient.json"
@@ -178,6 +198,16 @@ class TestLibraryLoading:
                 "neutral": [],
             },
             "last_names": ["Last"] * 100,  # Only 100, need 500
+            "locations": {
+                "cities": ["City"] * 50,
+                "countries": ["Country"] * 20,
+                "regions": ["Region"] * 10,
+            },
+            "organizations": {
+                "companies": ["Company"] * 20,
+                "agencies": ["Agency"] * 10,
+                "institutions": ["Institution"] * 5,
+            },
         }
 
         insufficient_path = tmp_path / "pseudonyms" / "insufficient.json"
@@ -282,27 +312,41 @@ class TestPseudonymAssignment:
         assert assignment.pseudonym_last in manager.last_names
 
     def test_assign_pseudonym_location(self) -> None:
-        """Test pseudonym assignment for LOCATION entity (last name only)."""
+        """Test pseudonym assignment for LOCATION entity (from locations library)."""
         manager = LibraryBasedPseudonymManager()
         manager.load_library("lotr")
 
-        assignment = manager.assign_pseudonym(entity_type="LOCATION", last_name="Paris")
+        assignment = manager.assign_pseudonym(entity_type="LOCATION")
+
+        # Flatten all location categories
+        all_locations = (
+            manager.locations["cities"]
+            + manager.locations["planets"]
+            + manager.locations["regions"]
+        )
 
         assert assignment.pseudonym_first is None
-        assert assignment.pseudonym_last in manager.last_names
-        assert assignment.pseudonym_full == assignment.pseudonym_last
+        assert assignment.pseudonym_last is None  # LOC is atomic (no components)
+        assert assignment.pseudonym_full in all_locations
         assert assignment.theme == "lotr"
 
     def test_assign_pseudonym_org(self) -> None:
-        """Test pseudonym assignment for ORG entity (last name only)."""
+        """Test pseudonym assignment for ORG entity (from organizations library)."""
         manager = LibraryBasedPseudonymManager()
         manager.load_library("star_wars")
 
-        assignment = manager.assign_pseudonym(entity_type="ORG", last_name="ACME Corp")
+        assignment = manager.assign_pseudonym(entity_type="ORG")
+
+        # Flatten all organization categories
+        all_orgs = (
+            manager.organizations["companies"]
+            + manager.organizations["agencies"]
+            + manager.organizations["institutions"]
+        )
 
         assert assignment.pseudonym_first is None
-        assert assignment.pseudonym_last in manager.last_names
-        assert assignment.pseudonym_full == assignment.pseudonym_last
+        assert assignment.pseudonym_last is None  # ORG is atomic (no components)
+        assert assignment.pseudonym_full in all_orgs
         assert assignment.theme == "star_wars"
 
     def test_assign_pseudonym_invalid_entity_type(self) -> None:
@@ -485,13 +529,11 @@ class TestFallbackNaming:
         manager.load_library("neutral")
 
         # Simulate collision
-        test_last = manager.last_names[0]
-        manager._used_pseudonyms.add(test_last)
+        test_location = manager.locations["cities"][0]
+        manager._used_pseudonyms.add(test_location)
 
-        with patch.object(manager, "_select_last_name", return_value=test_last):
-            assignment = manager.assign_pseudonym(
-                entity_type="LOCATION", last_name="Paris"
-            )
+        with patch.object(manager, "_select_location", return_value=test_location):
+            assignment = manager.assign_pseudonym(entity_type="LOCATION")
 
         # Should use fallback naming
         assert assignment.pseudonym_full.startswith("Location-")
@@ -503,11 +545,11 @@ class TestFallbackNaming:
         manager.load_library("neutral")
 
         # Simulate collision
-        test_last = manager.last_names[0]
-        manager._used_pseudonyms.add(test_last)
+        test_org = manager.organizations["companies"][0]
+        manager._used_pseudonyms.add(test_org)
 
-        with patch.object(manager, "_select_last_name", return_value=test_last):
-            assignment = manager.assign_pseudonym(entity_type="ORG", last_name="ACME")
+        with patch.object(manager, "_select_organization", return_value=test_org):
+            assignment = manager.assign_pseudonym(entity_type="ORG")
 
         # Should use fallback naming
         assert assignment.pseudonym_full.startswith("Org-")
@@ -553,20 +595,18 @@ class TestFallbackNaming:
         manager = LibraryBasedPseudonymManager()
         manager.load_library("neutral")
 
-        test_last = manager.last_names[0]
+        test_location = manager.locations["cities"][0]
+        test_org = manager.organizations["companies"][0]
 
-        with patch.object(manager, "_select_last_name", return_value=test_last):
-            # Force LOCATION collision
-            manager._used_pseudonyms.add(test_last)
-            loc_assignment = manager.assign_pseudonym(
-                entity_type="LOCATION", last_name="Paris"
-            )
+        # Force LOCATION collision
+        manager._used_pseudonyms.add(test_location)
+        with patch.object(manager, "_select_location", return_value=test_location):
+            loc_assignment = manager.assign_pseudonym(entity_type="LOCATION")
 
-            # Force ORG collision
-            manager._used_pseudonyms.add(loc_assignment.pseudonym_full)
-            org_assignment = manager.assign_pseudonym(
-                entity_type="ORG", last_name="ACME"
-            )
+        # Force ORG collision
+        manager._used_pseudonyms.add(test_org)
+        with patch.object(manager, "_select_organization", return_value=test_org):
+            org_assignment = manager.assign_pseudonym(entity_type="ORG")
 
         # Verify separate counters
         assert loc_assignment.pseudonym_full == "Location-001"
@@ -645,12 +685,12 @@ class TestDataModelIntegration:
         manager = LibraryBasedPseudonymManager()
         manager.load_library("lotr")
 
-        assignment = manager.assign_pseudonym(entity_type="LOCATION", last_name="Paris")
+        assignment = manager.assign_pseudonym(entity_type="LOCATION")
 
-        # LOCATION should have null first name
+        # LOCATION should have null first and last names (atomic entity)
         assert assignment.pseudonym_full is not None
         assert assignment.pseudonym_first is None
-        assert assignment.pseudonym_last is not None
+        assert assignment.pseudonym_last is None
         assert assignment.theme == "lotr"
 
     def test_assignment_org_entity_fields(self) -> None:
@@ -658,10 +698,192 @@ class TestDataModelIntegration:
         manager = LibraryBasedPseudonymManager()
         manager.load_library("neutral")
 
-        assignment = manager.assign_pseudonym(entity_type="ORG", last_name="ACME Corp")
+        assignment = manager.assign_pseudonym(entity_type="ORG")
 
-        # ORG should have null first name
+        # ORG should have null first and last names (atomic entity)
         assert assignment.pseudonym_full is not None
         assert assignment.pseudonym_first is None
-        assert assignment.pseudonym_last is not None
+        assert assignment.pseudonym_last is None
         assert assignment.theme == "neutral"
+
+
+class TestLocationOrganizationSupport:
+    """Test suite for LOCATION and ORGANIZATION entity pseudonymization (Story 3.0)."""
+
+    def test_load_library_with_locations_organizations(self) -> None:
+        """Test library loading with locations and organizations fields."""
+        manager = LibraryBasedPseudonymManager()
+        manager.load_library("neutral")
+
+        # Verify locations loaded correctly
+        assert manager.locations is not None
+        assert "cities" in manager.locations
+        assert "countries" in manager.locations
+        assert "regions" in manager.locations
+        assert len(manager.locations["cities"]) >= 50
+        assert len(manager.locations["countries"]) >= 20
+        assert len(manager.locations["regions"]) >= 10
+
+        # Verify organizations loaded correctly
+        assert manager.organizations is not None
+        assert "companies" in manager.organizations
+        assert "agencies" in manager.organizations
+        assert "institutions" in manager.organizations
+        assert len(manager.organizations["companies"]) >= 20
+        assert len(manager.organizations["agencies"]) >= 10
+        assert len(manager.organizations["institutions"]) >= 5
+
+    def test_assign_location_pseudonym_from_library(self) -> None:
+        """Test LOCATION pseudonym assignment uses locations field."""
+        manager = LibraryBasedPseudonymManager()
+        manager.load_library("star_wars")
+
+        assignment = manager.assign_pseudonym(entity_type="LOCATION")
+
+        # Flatten all location categories
+        all_locations = (
+            manager.locations["cities"]
+            + manager.locations["planets"]
+            + manager.locations["regions"]
+        )
+
+        # Verify pseudonym comes from locations library
+        assert assignment.pseudonym_full in all_locations
+        assert assignment.pseudonym_first is None  # LOC has no first name
+        assert assignment.pseudonym_last is None  # LOC is atomic
+
+    def test_location_collision_prevention(self) -> None:
+        """Test 1:1 mapping for LOCATION entities (same LOC → same pseudonym)."""
+        manager = LibraryBasedPseudonymManager()
+        manager.load_library("lotr")
+
+        # Assign first location pseudonym
+        assignment1 = manager.assign_pseudonym(entity_type="LOCATION")
+
+        # Verify the pseudonym is tracked as used
+        assert assignment1.pseudonym_full in manager._used_pseudonyms
+
+        # Assign second location pseudonym - should be different
+        assignment2 = manager.assign_pseudonym(entity_type="LOCATION")
+
+        # Verify different pseudonyms (collision prevention)
+        if assignment1.pseudonym_full != assignment2.pseudonym_full:
+            assert assignment2.pseudonym_full not in [assignment1.pseudonym_full]
+
+    def test_location_no_gender_filtering(self) -> None:
+        """Test gender parameter ignored for LOCATION entities."""
+        manager = LibraryBasedPseudonymManager()
+        manager.load_library("neutral")
+
+        # Assign location with gender hint - should be ignored
+        assignment1 = manager.assign_pseudonym(entity_type="LOCATION", gender="male")
+        assignment2 = manager.assign_pseudonym(entity_type="LOCATION", gender="female")
+
+        # Both should come from locations library (gender ignored)
+        all_locations = (
+            manager.locations["cities"]
+            + manager.locations["countries"]
+            + manager.locations["regions"]
+        )
+
+        assert assignment1.pseudonym_full in all_locations
+        assert assignment2.pseudonym_full in all_locations
+
+    def test_assign_org_pseudonym_from_library(self) -> None:
+        """Test ORG pseudonym assignment uses organizations field."""
+        manager = LibraryBasedPseudonymManager()
+        manager.load_library("star_wars")
+
+        assignment = manager.assign_pseudonym(entity_type="ORG")
+
+        # Flatten all organization categories
+        all_orgs = (
+            manager.organizations["companies"]
+            + manager.organizations["agencies"]
+            + manager.organizations["institutions"]
+        )
+
+        # Verify pseudonym comes from organizations library
+        assert assignment.pseudonym_full in all_orgs
+        assert assignment.pseudonym_first is None  # ORG has no first name
+        assert assignment.pseudonym_last is None  # ORG is atomic
+
+    def test_org_collision_prevention(self) -> None:
+        """Test 1:1 mapping for ORG entities (same ORG → same pseudonym)."""
+        manager = LibraryBasedPseudonymManager()
+        manager.load_library("lotr")
+
+        # Assign first organization pseudonym
+        assignment1 = manager.assign_pseudonym(entity_type="ORG")
+
+        # Verify the pseudonym is tracked as used
+        assert assignment1.pseudonym_full in manager._used_pseudonyms
+
+        # Assign second organization pseudonym - should be different
+        assignment2 = manager.assign_pseudonym(entity_type="ORG")
+
+        # Verify different pseudonyms (collision prevention)
+        if assignment1.pseudonym_full != assignment2.pseudonym_full:
+            assert assignment2.pseudonym_full not in [assignment1.pseudonym_full]
+
+    def test_org_no_gender_filtering(self) -> None:
+        """Test gender parameter ignored for ORG entities."""
+        manager = LibraryBasedPseudonymManager()
+        manager.load_library("neutral")
+
+        # Assign organization with gender hint - should be ignored
+        assignment1 = manager.assign_pseudonym(entity_type="ORG", gender="male")
+        assignment2 = manager.assign_pseudonym(entity_type="ORG", gender="female")
+
+        # Both should come from organizations library (gender ignored)
+        all_orgs = (
+            manager.organizations["companies"]
+            + manager.organizations["agencies"]
+            + manager.organizations["institutions"]
+        )
+
+        assert assignment1.pseudonym_full in all_orgs
+        assert assignment2.pseudonym_full in all_orgs
+
+    def test_exhaustion_calculation_includes_loc_org(self) -> None:
+        """Test exhaustion % accounts for LOC/ORG pools."""
+        manager = LibraryBasedPseudonymManager()
+        manager.load_library("neutral")
+
+        # Initial exhaustion should be 0.0
+        exhaustion_initial = manager.check_exhaustion()
+        assert exhaustion_initial == 0.0
+
+        # Assign some PERSON, LOCATION, and ORG pseudonyms
+        manager.assign_pseudonym(entity_type="PERSON", gender="male")
+        manager.assign_pseudonym(entity_type="LOCATION")
+        manager.assign_pseudonym(entity_type="ORG")
+
+        # Exhaustion should increase
+        exhaustion_after = manager.check_exhaustion()
+        assert exhaustion_after > 0.0
+        assert exhaustion_after < 1.0
+
+        # Verify calculation includes all entity types
+        total_first_names = (
+            len(manager.first_names["male"])
+            + len(manager.first_names["female"])
+            + len(manager.first_names["neutral"])
+        )
+        person_combinations = total_first_names * len(manager.last_names)
+        location_combinations = (
+            len(manager.locations["cities"])
+            + len(manager.locations["countries"])
+            + len(manager.locations["regions"])
+        )
+        org_combinations = (
+            len(manager.organizations["companies"])
+            + len(manager.organizations["agencies"])
+            + len(manager.organizations["institutions"])
+        )
+        total_combinations = (
+            person_combinations + location_combinations + org_combinations
+        )
+
+        expected_exhaustion = len(manager._used_pseudonyms) / total_combinations
+        assert exhaustion_after == pytest.approx(expected_exhaustion)

@@ -36,6 +36,22 @@ class FirstNames(TypedDict):
     neutral: list[str]
 
 
+class Locations(TypedDict):
+    """Locations grouped by type (cities, planets/countries, regions)."""
+
+    cities: list[str]
+    planets: list[str]  # or 'countries' for neutral theme
+    regions: list[str]
+
+
+class Organizations(TypedDict):
+    """Organizations grouped by type (companies, agencies, institutions)."""
+
+    companies: list[str]
+    agencies: list[str]
+    institutions: list[str]
+
+
 class PseudonymLibrary(TypedDict):
     """JSON structure for pseudonym library files."""
 
@@ -43,6 +59,8 @@ class PseudonymLibrary(TypedDict):
     data_sources: list[DataSource]
     first_names: FirstNames
     last_names: list[str]
+    locations: Locations
+    organizations: Organizations
 
 
 class LibraryBasedPseudonymManager(PseudonymManager):
@@ -60,6 +78,8 @@ class LibraryBasedPseudonymManager(PseudonymManager):
         theme: Currently loaded library theme
         first_names: First names grouped by gender
         last_names: Last names list
+        locations: Locations grouped by type (cities, planets/countries, regions)
+        organizations: Organizations grouped by type (companies, agencies, institutions)
         _used_pseudonyms: Set of already assigned full pseudonyms
         _component_mappings: Dict mapping (real_component, component_type) to pseudonym_component
         _fallback_counters: Counters for fallback naming by entity type
@@ -70,6 +90,12 @@ class LibraryBasedPseudonymManager(PseudonymManager):
         self.theme: str | None = None
         self.first_names: FirstNames = {"male": [], "female": [], "neutral": []}
         self.last_names: list[str] = []
+        self.locations: Locations = {"cities": [], "planets": [], "regions": []}
+        self.organizations: Organizations = {
+            "companies": [],
+            "agencies": [],
+            "institutions": [],
+        }
         self._used_pseudonyms: set[str] = set()
 
         # Component-level collision prevention (Story 2.8)
@@ -119,19 +145,73 @@ class LibraryBasedPseudonymManager(PseudonymManager):
         self.theme = library_data["theme"]
         self.first_names = library_data["first_names"]
         self.last_names = library_data["last_names"]
+        self.locations = library_data["locations"]
+        self.organizations = library_data["organizations"]
 
         # Reset usage tracking for new library
         self._used_pseudonyms.clear()
         self._component_mappings.clear()
         self._fallback_counters = {"PERSON": 0, "LOCATION": 0, "ORG": 0}
 
+        # Calculate location and organization totals
+        # Use planets for themed libraries, countries for neutral
+        planets_or_countries = self.locations.get(
+            "planets", self.locations.get("countries", [])
+        )
+        if planets_or_countries is None:
+            planets_or_countries = []
+        total_locations = (
+            len(self.locations["cities"])
+            + len(planets_or_countries)
+            + len(self.locations["regions"])
+        )
+        total_organizations = (
+            len(self.organizations["companies"])
+            + len(self.organizations["agencies"])
+            + len(self.organizations["institutions"])
+        )
+
         logger.info(
-            "Pseudonym library loaded: theme=%s, male_first=%d, female_first=%d, neutral_first=%d, last=%d",
+            "Pseudonym library loaded: theme=%s, male_first=%d, female_first=%d, neutral_first=%d, last=%d, locations=%d, organizations=%d",
             self.theme,
             len(self.first_names["male"]),
             len(self.first_names["female"]),
             len(self.first_names["neutral"]),
             len(self.last_names),
+            total_locations,
+            total_organizations,
+        )
+
+    def _flatten_location_list(self, locations: Locations | dict[Any, Any]) -> list[str]:
+        """Flatten location categories into a single list.
+
+        Args:
+            locations: Locations dictionary with cities, planets/countries, regions
+
+        Returns:
+            Flattened list of all location names
+        """
+        planets_or_countries = locations.get("planets", locations.get("countries", []))
+        if planets_or_countries is None:
+            planets_or_countries = []
+
+        return (
+            locations["cities"] + planets_or_countries + locations["regions"]
+        )
+
+    def _flatten_organization_list(self, organizations: Organizations | dict[Any, Any]) -> list[str]:
+        """Flatten organization categories into a single list.
+
+        Args:
+            organizations: Organizations dictionary with companies, agencies, institutions
+
+        Returns:
+            Flattened list of all organization names
+        """
+        return (
+            organizations["companies"]
+            + organizations["agencies"]
+            + organizations["institutions"]
         )
 
     def _validate_library_structure(
@@ -147,7 +227,14 @@ class LibraryBasedPseudonymManager(PseudonymManager):
             ValueError: If validation fails
         """
         # Check required top-level fields
-        required_fields = ["theme", "data_sources", "first_names", "last_names"]
+        required_fields = [
+            "theme",
+            "data_sources",
+            "first_names",
+            "last_names",
+            "locations",
+            "organizations",
+        ]
         for field in required_fields:
             if field not in library_data:
                 raise ValueError(f"Missing required field: {field}")
@@ -175,6 +262,40 @@ class LibraryBasedPseudonymManager(PseudonymManager):
         if not isinstance(library_data["last_names"], list):
             raise ValueError("last_names must be a list")
 
+        # Validate locations structure
+        locations = library_data["locations"]
+        if not isinstance(locations, dict):
+            raise ValueError("locations must be a dictionary")
+
+        required_location_keys = ["cities", "regions"]
+        for loc_key in required_location_keys:
+            if loc_key not in locations:
+                raise ValueError(f"Missing location category: {loc_key}")
+            if not isinstance(locations[loc_key], list):
+                raise ValueError(f"locations.{loc_key} must be a list")
+
+        # Check for planets (themed) or countries (neutral) - at least one must exist
+        if "planets" not in locations and "countries" not in locations:
+            raise ValueError(
+                "locations must have either 'planets' or 'countries' field"
+            )
+        if "planets" in locations and not isinstance(locations["planets"], list):
+            raise ValueError("locations.planets must be a list")
+        if "countries" in locations and not isinstance(locations["countries"], list):
+            raise ValueError("locations.countries must be a list")
+
+        # Validate organizations structure
+        organizations = library_data["organizations"]
+        if not isinstance(organizations, dict):
+            raise ValueError("organizations must be a dictionary")
+
+        required_org_keys = ["companies", "agencies", "institutions"]
+        for org_key in required_org_keys:
+            if org_key not in organizations:
+                raise ValueError(f"Missing organization category: {org_key}")
+            if not isinstance(organizations[org_key], list):
+                raise ValueError(f"organizations.{org_key} must be a list")
+
         # Check minimum name counts (≥500 first names total, ≥500 last names)
         total_first_names = (
             len(first_names["male"])
@@ -189,6 +310,20 @@ class LibraryBasedPseudonymManager(PseudonymManager):
         if len(library_data["last_names"]) < 500:
             raise ValueError(
                 f"Insufficient last names: {len(library_data['last_names'])} < 500 required"
+            )
+
+        # Check minimum location counts (≥80 total)
+        total_locations = len(self._flatten_location_list(locations))
+        if total_locations < 80:
+            raise ValueError(
+                f"Insufficient locations: {total_locations} < 80 required"
+            )
+
+        # Check minimum organization counts (≥35 total)
+        total_organizations = len(self._flatten_organization_list(organizations))
+        if total_organizations < 35:
+            raise ValueError(
+                f"Insufficient organizations: {total_organizations} < 35 required"
             )
 
     def assign_pseudonym(
@@ -247,13 +382,26 @@ class LibraryBasedPseudonymManager(PseudonymManager):
                 pseudonym_last_name = self._select_last_name(last_name)
 
             pseudonym_full = f"{pseudonym_first_name} {pseudonym_last_name}"
-        else:
-            # LOCATION and ORG use only last names
+        elif entity_type == "LOCATION":
+            # LOCATION entities use dedicated location library (no components)
             pseudonym_first_name = None
-            if pseudonym_last_name is None:
-                # For LOCATION/ORG, we don't track component mapping (no compositional reuse)
-                pseudonym_last_name = self._select_last_name()
-            pseudonym_full = pseudonym_last_name
+            pseudonym_last_name = None
+            if existing_last is not None:
+                # Reuse existing location pseudonym for consistency
+                pseudonym_full = existing_last
+            else:
+                pseudonym_full = self._select_location()
+        elif entity_type == "ORG":
+            # ORG entities use dedicated organization library (no components)
+            pseudonym_first_name = None
+            pseudonym_last_name = None
+            if existing_last is not None:
+                # Reuse existing organization pseudonym for consistency
+                pseudonym_full = existing_last
+            else:
+                pseudonym_full = self._select_organization()
+        else:
+            raise ValueError(f"Unsupported entity_type: {entity_type}")
 
         # Check for collision and use fallback if needed
         if pseudonym_full in self._used_pseudonyms:
@@ -417,6 +565,64 @@ class LibraryBasedPseudonymManager(PseudonymManager):
             f"after {max_attempts} attempts. Library may be exhausted."
         )
 
+    def _select_location(self) -> str:
+        """Select location pseudonym from library with collision prevention.
+
+        Returns:
+            Selected location name
+
+        Raises:
+            RuntimeError: If no locations available or unable to find unique location
+        """
+        if not self.locations:
+            raise RuntimeError("No locations available in library")
+
+        # Flatten all location categories into single candidate list
+        candidates = self._flatten_location_list(self.locations)
+
+        if not candidates:
+            raise RuntimeError("No location candidates available in library")
+
+        # Select with collision prevention
+        max_attempts = 100
+        for attempt in range(max_attempts):
+            candidate = secrets.choice(candidates)
+            if candidate not in self._used_pseudonyms:
+                return candidate
+
+        raise RuntimeError(
+            f"Unable to find unique location after {max_attempts} attempts. Library may be exhausted."
+        )
+
+    def _select_organization(self) -> str:
+        """Select organization pseudonym from library with collision prevention.
+
+        Returns:
+            Selected organization name
+
+        Raises:
+            RuntimeError: If no organizations available or unable to find unique organization
+        """
+        if not self.organizations:
+            raise RuntimeError("No organizations available in library")
+
+        # Flatten all organization categories into single candidate list
+        candidates = self._flatten_organization_list(self.organizations)
+
+        if not candidates:
+            raise RuntimeError("No organization candidates available in library")
+
+        # Select with collision prevention
+        max_attempts = 100
+        for attempt in range(max_attempts):
+            candidate = secrets.choice(candidates)
+            if candidate not in self._used_pseudonyms:
+                return candidate
+
+        raise RuntimeError(
+            f"Unable to find unique organization after {max_attempts} attempts. Library may be exhausted."
+        )
+
     def _generate_fallback_name(self, entity_type: str) -> str:
         """Generate systematic fallback name when library exhausted.
 
@@ -471,7 +677,8 @@ class LibraryBasedPseudonymManager(PseudonymManager):
 
         Calculates exhaustion based on used pseudonyms vs. total possible combinations.
         For PERSON entities: total = first_names * last_names
-        For LOCATION/ORG: total = last_names only
+        For LOCATION entities: total = cities + planets/countries + regions
+        For ORG entities: total = companies + agencies + institutions
 
         Returns:
             Float between 0.0 (unused) and 1.0 (fully exhausted)
@@ -479,8 +686,7 @@ class LibraryBasedPseudonymManager(PseudonymManager):
         if self.theme is None or not self.last_names:
             return 0.0
 
-        # Calculate total possible combinations
-        # For simplicity, assume most entities are PERSON type
+        # Calculate total possible combinations for PERSON entities
         total_first_names = (
             len(self.first_names["male"])
             + len(self.first_names["female"])
@@ -489,10 +695,21 @@ class LibraryBasedPseudonymManager(PseudonymManager):
 
         if total_first_names == 0:
             # Only last names available (edge case)
-            total_combinations = len(self.last_names)
+            person_combinations = len(self.last_names)
         else:
             # PERSON entities use first + last combinations
-            total_combinations = total_first_names * len(self.last_names)
+            person_combinations = total_first_names * len(self.last_names)
+
+        # Calculate total available LOCATION pseudonyms
+        location_combinations = len(self._flatten_location_list(self.locations))
+
+        # Calculate total available ORG pseudonyms
+        org_combinations = len(self._flatten_organization_list(self.organizations))
+
+        # Total pool includes PERSON, LOCATION, and ORG pseudonyms
+        total_combinations = (
+            person_combinations + location_combinations + org_combinations
+        )
 
         # Calculate exhaustion percentage
         if total_combinations == 0:
