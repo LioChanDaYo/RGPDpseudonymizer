@@ -1,8 +1,9 @@
-# CRITICAL BUG: Pseudonym Component Collision
+# ✅ RESOLVED: Pseudonym Component Collision (Story 2.8)
 
 **Discovered:** 2026-01-29 during Story 2.7 (Batch Processing Spike)
 **Severity:** CRITICAL - BLOCKING for Epic 3
-**Status:** IDENTIFIED - Awaiting fix
+**Status:** ✅ **RESOLVED** - Fixed in Story 2.8 (2026-01-30)
+**Resolution:** Component-level collision prevention implemented ([Story 2.8](../stories/2.8.pseudonym-component-collision-fix.story.md))
 
 ---
 
@@ -151,4 +152,63 @@ Before merging fix:
 
 ---
 
-**Status:** This is exactly the kind of critical issue that architectural spikes are designed to discover. The batch processing architecture itself is sound - this bug exists in the pseudonym assignment logic and would have occurred in single-document processing as well (just with lower probability).
+## ✅ Resolution (Story 2.8 - Completed 2026-01-30)
+
+**Implementation:** Option 1 (Component-Level Collision Prevention) was implemented successfully.
+
+### Changes Made
+
+1. **Added `_component_mappings` dict** to `LibraryBasedPseudonymManager.__init__()`
+   - Tracks `{(real_component, component_type) → pseudonym_component}`
+   - Prevents same pseudonym component from being assigned to different real components
+
+2. **Updated `_select_first_name()`** to include collision prevention
+   - Accepts optional `real_first_name` parameter
+   - Checks existing mappings before random selection
+   - Ensures no collision across 100 attempts
+
+3. **Updated `_select_last_name()`** to include collision prevention
+   - Accepts optional `real_last_name` parameter
+   - Checks existing mappings before random selection
+   - Ensures no collision across 100 attempts
+
+4. **Updated `assign_pseudonym()`** to pass real component values
+   - Passes `first_name` and `last_name` to selection methods
+   - Enables component-level collision tracking
+
+5. **Added `load_existing_mappings()` method** for backwards compatibility
+   - Reconstructs `_component_mappings` from database on startup
+   - Prevents collisions with previously assigned pseudonyms
+   - Called in `DocumentProcessor` initialization
+
+### Test Results
+
+✅ **All tests pass:**
+- **Unit tests:** 13 new tests for component collision prevention (100% pass rate)
+- **Integration tests:** 3 batch processing tests (100% pass rate)
+- **Existing tests:** 36 library manager tests (no regressions)
+- **Story 2.7 verification:** All 5 consistency tests now PASS (Test 4 previously FAILED)
+
+### Verification
+
+**Critical test:** "Dubois" and "Lefebvre" collision scenario
+- ✅ Different real components now get different pseudonym components
+- ✅ Same real component returns same pseudonym (idempotency)
+- ✅ No duplicate pseudonyms in database after batch processing
+- ✅ Component reuse maintains consistency across documents
+
+### Files Modified
+
+- `gdpr_pseudonymizer/pseudonym/library_manager.py` - Component collision prevention logic
+- `gdpr_pseudonymizer/core/document_processor.py` - Database reconstruction on init
+- `tests/unit/test_library_manager_collision_fix.py` - New unit tests (13 tests)
+- `tests/integration/test_batch_processing_collision_fix.py` - New integration tests (3 tests)
+
+### References
+
+- **Story:** [2.8 Pseudonym Component Collision Fix](../stories/2.8.pseudonym-component-collision-fix.story.md)
+- **Findings Update:** [Batch Processing Spike Findings - Issue 5 RESOLVED](batch-processing-spike-findings.md#issue-5-pseudonym-component-collision--resolved---story-28)
+
+---
+
+**Status:** ~~This is exactly the kind of critical issue that architectural spikes are designed to discover. The batch processing architecture itself is sound - this bug exists in the pseudonym assignment logic and would have occurred in single-document processing as well (just with lower probability).~~ **✅ RESOLVED - Epic 3 is now unblocked.**

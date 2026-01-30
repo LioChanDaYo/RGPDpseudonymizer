@@ -168,12 +168,14 @@ This violates the **1:1 mapping requirement** for GDPR-compliant pseudonymizatio
 1. **Document size threshold:** Use sequential processing for documents <500 words
 2. **Adaptive worker count:** Reduce workers for small batches (e.g., 2 workers for 5-10 documents)
 
-### Issue 5: Pseudonym Component Collision (CRITICAL - BLOCKING)
+### Issue 5: Pseudonym Component Collision (✅ RESOLVED - Story 2.8)
 
-**Problem:** Random last-name selection can assign same pseudonym component to different real names
-- LibraryBasedPseudonymManager uses `secrets.choice()` to randomly select last names
+**Status:** ✅ **RESOLVED** in Story 2.8 (2026-01-30)
+
+**Original Problem:** Random last-name selection could assign same pseudonym component to different real names
+- LibraryBasedPseudonymManager used `secrets.choice()` to randomly select last names
 - No collision prevention for component-level assignments
-- Compositional reuse then propagates the collision to standalone entities
+- Compositional reuse then propagated the collision to standalone entities
 
 **Discovered:** Two different last names ("Dubois" and "Lefebvre") both assigned pseudonym "Neto"
 
@@ -202,9 +204,18 @@ This violates the **1:1 mapping requirement** for GDPR-compliant pseudonymizatio
 - **Data Integrity:** Different individuals conflated in processed documents
 - **Probability:** Low (~0.1% with 500-name library) but non-zero in production
 
-**BLOCKING for Epic 3:** This bug MUST be fixed before production implementation.
+**BLOCKING for Epic 3:** ~~This bug MUST be fixed before production implementation.~~ **✅ FIXED in Story 2.8**
 
-**Proposed Fix Options:**
+**Resolution Details (Story 2.8):**
+- Implemented component-level collision prevention in LibraryBasedPseudonymManager
+- Added `_component_mappings` dict to track `{(real_component, type) → pseudonym_component}`
+- Updated `_select_first_name()` and `_select_last_name()` to prevent collisions
+- Added backwards compatibility via database mapping reconstruction
+- All Story 2.7 verification tests now PASS (previously Test 4 was FAILING)
+
+**Reference:** [Story 2.8: Pseudonym Component Collision Fix](../stories/2.8.pseudonym-component-collision-fix.story.md)
+
+**Original Proposed Fix Options:**
 
 **Option 1: Component-Level Collision Prevention (Recommended)**
 - Track used components separately: `_used_first_names`, `_used_last_names`

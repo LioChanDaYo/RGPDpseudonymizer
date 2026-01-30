@@ -110,6 +110,7 @@ class TestDocumentProcessor:
         # Mock mapping repository (no existing entities)
         mock_mapping_repo = Mock()
         mock_mapping_repo.find_by_full_name.return_value = None
+        mock_mapping_repo.find_all.return_value = []  # Story 2.8: No existing mappings
         mock_mapping_repo.save_batch.return_value = [
             Entity(
                 id="test-id-1",
@@ -285,6 +286,10 @@ class TestDocumentProcessor:
             existing_person,
             existing_location,
         ]
+        mock_mapping_repo.find_all.return_value = [
+            existing_person,
+            existing_location,
+        ]  # Story 2.8: Existing mappings to load
 
         mock_audit_repo = Mock()
 
