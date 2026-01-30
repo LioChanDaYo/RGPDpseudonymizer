@@ -48,7 +48,7 @@ GDPR Pseudonymizer is a **privacy-first CLI tool** that combines AI efficiency w
 
 ## 🚀 Quick Start
 
-**Status:** 🚧 **Pre-MVP Development** (Week 1/14 - Epic 1 in progress)
+**Status:** 🎉 **Alpha Release v0.1.0** - Seeking 3-5 alpha testers for feedback (see [ALPHA-INSTALL.md](docs/ALPHA-INSTALL.md))
 
 ### Current Development Stage
 
@@ -66,7 +66,8 @@ We're actively developing v1.0 MVP with an **AI-assisted approach**:
   - Story 2.5: Audit logging ✅ (32 tests, 91.41% coverage, GDPR Article 30 compliance, QA score 100/100)
   - Story 2.6: Single-document pseudonymization workflow ✅ (10 tests passing, end-to-end integration, 6 critical bug fixes for consistent pseudonyms)
   - Story 2.7: Batch processing scalability spike ✅ (multiprocessing validated, 1 critical bug discovered - Story 2.8 created)
-  - Story 2.8: Pseudonym component collision fix 🔄 (BLOCKING for Epic 3, 2-3 days estimated)
+  - Story 2.8: Pseudonym component collision fix ✅ (18 tests passing, GDPR 1:1 mapping restored, QA score 92/100, Epic 3 unblocked)
+  - Story 2.9: Alpha release preparation ✅ (installation verification complete, alpha documentation created, v0.1.0-alpha tag ready)
 - 📅 **Week 11-14:** CLI polish, batch processing, launch prep
 - 🎯 **MVP Launch:** Week 14 (estimated Q2 2026)
 
@@ -98,9 +99,9 @@ We're actively developing v1.0 MVP with an **AI-assisted approach**:
 
 ---
 
-## ⚙️ Installation (MVP Development)
+## ⚙️ Installation
 
-**Current status:** Development version only (not ready for production use)
+**Current status:** v0.1.0-alpha released! See [ALPHA-INSTALL.md](docs/ALPHA-INSTALL.md) for detailed installation instructions.
 
 ### Prerequisites
 - Python 3.9-3.11 (validated in CI/CD, Python 3.12-3.13 support planned, Python 3.14+ not supported due to spaCy compatibility)
@@ -139,6 +140,11 @@ Expected output: "Leia Organa travaille à Coruscant pour Rebel Alliance."
 ---
 
 ## 📖 Documentation
+
+**For Alpha Testers:**
+- 📘 [Alpha Installation Guide](docs/ALPHA-INSTALL.md) - Step-by-step installation for alpha testing
+- 📗 [Alpha Quick Start](docs/ALPHA-QUICKSTART.md) - First pseudonymization tutorial and validation UI walkthrough
+- 📋 [Alpha Testing Protocol](docs/ALPHA-TESTING-PROTOCOL.md) - Test scenarios and feedback survey
 
 **For Users:**
 - 📘 [Installation Guide](docs/installation.md) *(Coming in Epic 3)*
@@ -335,10 +341,11 @@ The validation UI provides an intuitive keyboard-driven interface for reviewing 
 - ✅ **Story 2.5:** Audit logging - Comprehensive audit logs for GDPR Article 30 compliance, operations table tracks all pseudonymization operations, JSON/CSV export functionality, 32 unit tests, 91.41% coverage (QA gate: PASS, Score: 100/100)
 - ✅ **Story 2.6:** Single-document pseudonymization workflow - End-to-end integration of all Epic 2 components, idempotent processing, optional `--output` parameter, 10 tests passing (3 unit + 7 integration), 6 critical bug fixes for consistent pseudonym generation across documents (QA gate: PASS, Ready for Done)
 - ✅ **Story 2.7:** Batch processing scalability spike - Multiprocessing.Pool validated (1.17x speedup on small docs, 2-3x projected for 3000-word docs), mapping consistency verified, architectural validation complete, 1 critical bug discovered (pseudonym component collision - Story 2.8 created), 5 test scripts + findings document (QA gate: PASS with critical bug found)
+- ✅ **Story 2.8:** Pseudonym component collision fix - Component-level collision prevention implemented in LibraryBasedPseudonymManager, `_component_mappings` dict tracks real→pseudonym component assignments, database reconstruction for backwards compatibility, 18 tests passing (13 unit + 5 integration), GDPR Article 4(5) compliance restored, Epic 3 unblocked (QA gate: PASS, Score: 92/100)
+- ✅ **Story 2.9:** Alpha release preparation - Installation verification complete (Windows tested), alpha documentation created (ALPHA-INSTALL.md, ALPHA-QUICKSTART.md, ALPHA-TESTING-PROTOCOL.md), CHANGELOG.md with v0.1.0-alpha release notes, README updated to alpha status, git tag v0.1.0-alpha ready (Alpha Release: 2026-01-30)
 
-### In Progress 🔄
-- 🔄 **Story 2.8:** Pseudonym component collision fix - CRITICAL bug discovered in Story 2.7 (two different entities can receive same pseudonym), component-level collision prevention required, BLOCKING for Epic 3 (estimated 2-3 days)
-- 📅 **Epic 2 (Week 6-10):** Core pseudonymization engine (7/9 stories complete, 1 in progress)
+### Completed ✅
+- ✅ **Epic 2 (Week 6-10):** Core pseudonymization engine - 9/9 stories complete, Epic 2 complete, v0.1.0-alpha released
 
 ### Upcoming 📅
 - **Epic 3 (Week 11-13):** CLI polish & batch processing
@@ -508,13 +515,13 @@ The integration test suite covers:
 
 ---
 
-## 📊 Project Metrics (As of 2026-01-29)
+## 📊 Project Metrics (As of 2026-01-30)
 
 | Metric | Value | Status |
 |--------|-------|--------|
-| **Development Progress** | Week 6/14 | 🔄 Epic 2 In Progress |
-| **Stories Complete** | 16 (Epic 1 + Stories 2.0.1-2.7) | ✅ Epic 1 + 7 Epic 2 Stories |
-| **Critical Bugs Found** | 1 (Story 2.8 - Component Collision) | ⚠️ BLOCKING for Epic 3 |
+| **Development Progress** | Week 10/14 | ✅ Epic 2 Complete - v0.1.0-alpha Released |
+| **Stories Complete** | 18 (Epic 1 + Epic 2 Complete) | ✅ Epic 1 + Epic 2 (9 stories) |
+| **Critical Bugs Found** | 1 (Story 2.8) | ✅ RESOLVED - Epic 3 Unblocked |
 | **Test Corpus Size** | 25 docs, 1,855 entities | ✅ Complete |
 | **NLP Accuracy (Baseline)** | 29.5% F1 (spaCy) | ✅ Measured |
 | **Hybrid Accuracy (NLP+Regex)** | 35.3% F1 (+52.2% PERSON) | ✅ Story 1.8 Complete |
@@ -526,7 +533,7 @@ The integration test suite covers:
 | **Audit Logging** | GDPR Article 30 compliance (operations table + JSON/CSV export) | ✅ Story 2.5 Complete |
 | **Validation UI** | Operational with deduplication | ✅ Stories 1.7, 1.9 Complete |
 | **Validation Time** | <2 min (20-30 entities), <5 min (100 entities) | ✅ Targets Met |
-| **Test Coverage** | 531 tests (531 passed), 86%+ coverage | ✅ All Quality Checks Pass |
+| **Test Coverage** | 553 tests (552 passed, 1 skipped), 86%+ coverage | ✅ All Quality Checks Pass |
 | **Quality Gates** | Ruff, mypy, pytest | ✅ All Pass (0 issues) |
 | **Supported Languages** | French | 🇫🇷 v1.0 only |
 | **Supported Formats** | .txt, .md | 📝 v1.0 scope |
@@ -543,6 +550,6 @@ The integration test suite covers:
 
 ---
 
-**Last Updated:** 2026-01-29 (Story 2.7 complete: Batch processing scalability spike validated multiprocessing architecture, 1 critical bug discovered requiring Story 2.8 fix before Epic 3; 531 tests passing, all quality gates pass)
+**Last Updated:** 2026-01-30 (v0.1.0-alpha released: Epic 2 complete with all 9 stories; Alpha documentation created; Seeking 3-5 alpha testers for feedback; 553 tests passing, all quality gates pass)
 
-**Current Focus:** Epic 2 - Core Pseudonymization Engine (Week 6-10, 7/9 stories complete, Story 2.8 in progress - BLOCKING for Epic 3)
+**Current Focus:** Alpha testing period (1 week) - Gathering user feedback to inform Epic 3 priorities (CLI polish & batch processing, Week 11-13)
