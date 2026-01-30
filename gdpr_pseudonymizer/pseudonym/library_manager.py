@@ -182,7 +182,9 @@ class LibraryBasedPseudonymManager(PseudonymManager):
             total_organizations,
         )
 
-    def _flatten_location_list(self, locations: Locations | dict[Any, Any]) -> list[str]:
+    def _flatten_location_list(
+        self, locations: Locations | dict[Any, Any]
+    ) -> list[str]:
         """Flatten location categories into a single list.
 
         Args:
@@ -195,11 +197,11 @@ class LibraryBasedPseudonymManager(PseudonymManager):
         if planets_or_countries is None:
             planets_or_countries = []
 
-        return (
-            locations["cities"] + planets_or_countries + locations["regions"]
-        )
+        return locations["cities"] + planets_or_countries + locations["regions"]
 
-    def _flatten_organization_list(self, organizations: Organizations | dict[Any, Any]) -> list[str]:
+    def _flatten_organization_list(
+        self, organizations: Organizations | dict[Any, Any]
+    ) -> list[str]:
         """Flatten organization categories into a single list.
 
         Args:
@@ -315,9 +317,7 @@ class LibraryBasedPseudonymManager(PseudonymManager):
         # Check minimum location counts (≥80 total)
         total_locations = len(self._flatten_location_list(locations))
         if total_locations < 80:
-            raise ValueError(
-                f"Insufficient locations: {total_locations} < 80 required"
-            )
+            raise ValueError(f"Insufficient locations: {total_locations} < 80 required")
 
         # Check minimum organization counts (≥35 total)
         total_organizations = len(self._flatten_organization_list(organizations))
