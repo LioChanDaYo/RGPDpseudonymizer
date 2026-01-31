@@ -288,7 +288,17 @@ After completing test scenarios, please answer these questions:
       - [ ] GUI (graphical interface instead of CLI)
       - [ ] De-pseudonymization CLI (automated reversal)
 
-14. **Open feedback:**
+14. **LOCATION and ORGANIZATION pseudonym support:**
+    - **Current limitation:** Only PERSON entities (names) have themed pseudonyms (neutral, Star Wars, LOTR). LOCATION and ORGANIZATION entities are detected but not pseudonymized.
+    - **Epic 3 planned:** This feature will be added as HIGH priority based on initial assessment.
+    - **Your feedback helps us prioritize implementation details:**
+      - How important is LOCATION pseudonymization for your use case? (1-5 scale, 1 = not important, 5 = critical)
+      - How important is ORGANIZATION pseudonymization for your use case? (1-5 scale, 1 = not important, 5 = critical)
+      - What percentage of entities in your documents are LOCATION or ORGANIZATION (vs PERSON)?
+      - What types of locations appear most in your documents? (cities, countries, regions, addresses, landmarks)
+      - What types of organizations appear most? (companies, universities, government agencies, NGOs)
+
+15. **Open feedback:**
     - What worked well?
     - What didn't work well?
     - Any other comments or suggestions?

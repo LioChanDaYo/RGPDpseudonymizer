@@ -1,14 +1,16 @@
 # Product Backlog - GDPR Pseudonymizer
 
-**Last Updated:** 2026-01-23
+**Last Updated:** 2026-01-30
 **Epic 1 Status:** ✅ Complete (9/9 stories)
-**Current Epic:** Epic 2 - Core Pseudonymization Engine
+**Epic 2 Status:** ✅ Complete (9/9 stories)
+**Current Status:** Alpha Release v0.1.0 - Awaiting alpha tester feedback
 
 ---
 
 ## 🎯 Backlog Categories
 
 - **Technical Debt:** Items deferred from Epic 1 that should be addressed
+- **High Priority Enhancements:** Critical features for v1.0 MVP
 - **Future Enhancements:** Nice-to-have improvements identified during development
 - **Monitoring Items:** Things to watch in production/user testing
 - **Epic 2+ Items:** Features planned for future epics
@@ -163,6 +165,48 @@ Press Enter to continue...
 
 ---
 
+---
+
+## 🔥 HIGH Priority Enhancements
+
+#### FE-005: LOCATION and ORGANIZATION Pseudonym Libraries ✅ ASSIGNED TO EPIC 3
+**Source:** Story 2.9 Alpha Testing Preparation (discovered during quick test)
+**Description:** Add LOCATION and ORGANIZATION pseudonym libraries for all 3 themes (neutral, star_wars, lotr)
+**Current State:** Pseudonym libraries only contain PERSON entity pseudonyms (first_names, last_names). LOCATION and ORG entities are detected and validated but cannot be pseudonymized with themed pseudonyms.
+**Impact:**
+- LOCATION entities (e.g., "Paris", "Lyon", "Marseille") cannot be pseudonymized with themed alternatives
+- ORGANIZATION entities (e.g., "Acme SA", "CNRS") cannot be pseudonymized with themed alternatives
+- **Significantly limits tool utility** for documents with location/organization references
+- Core feature gap that should be addressed before v1.0 launch
+**Effort:** Medium (3-5 days)
+  - Design pseudonym structure for locations (cities, countries, regions)
+  - Design pseudonym structure for organizations (companies, universities, agencies)
+  - Populate 3 themed libraries with 50-100 entries each
+  - Update pseudonymization logic to handle non-PERSON entity types
+  - Add tests for LOCATION/ORG pseudonymization
+**Priority:** HIGH
+**Target:** Epic 3 (Week 11-13) - New story or extend existing story
+**Epic 3 Assignment:** To be determined - potential new Story 3.X or integrate into Story 3.1
+**Rationale:** Core pseudonymization feature gap; tool is incomplete without multi-entity-type support; should be part of v1.0 MVP
+**References:**
+- [data/pseudonyms/neutral.json](../data/pseudonyms/neutral.json)
+- [data/pseudonyms/star_wars.json](../data/pseudonyms/star_wars.json)
+- [data/pseudonyms/lotr.json](../data/pseudonyms/lotr.json)
+
+**Acceptance Criteria:**
+- [ ] Add `locations` field to all 3 pseudonym library JSON files
+- [ ] Add `organizations` field to all 3 pseudonym library JSON files
+- [ ] Neutral theme: 50+ French cities/regions, 30+ realistic organization names
+- [ ] Star Wars theme: 50+ Star Wars planets/locations, 30+ Star Wars organizations
+- [ ] LOTR theme: 50+ Middle-earth locations, 30+ LOTR organizations
+- [ ] Update pseudonymization logic to use location/org pseudonyms
+- [ ] Add tests verifying LOCATION and ORG entities are pseudonymized correctly
+- [ ] Update documentation to reflect LOCATION/ORG pseudonym support
+
+**Note:** Alpha tester feedback (survey question #14) will still inform implementation details and validate importance.
+
+---
+
 ## 📊 Monitoring Items
 
 ### MON-001: Validation UI Performance with Real Users
@@ -236,6 +280,9 @@ Press Enter to continue...
 - Story 3.4: CLI UX polish (better error messages, help text)
 - Story 3.5: Installation guide and user documentation
 
+**Confirmed Additions from Backlog:**
+- ✅ **FE-005:** LOCATION and ORGANIZATION pseudonym libraries (HIGH priority - new Story 3.X or integrate into Story 3.1)
+
 **Potential Additions from Backlog:**
 - FE-001: Visual indicator for context cycling (if high user demand)
 - FE-002: Batch operations visual feedback
@@ -307,17 +354,20 @@ When adding items from future stories:
 
 **Backlog Maintained By:** Sarah (Product Owner)
 **Review Cadence:** End of each epic
-**Last Review:** 2026-01-23 (Epic 1 → Epic 2 transition)
-**Last Epic 2 Update:** 2026-01-23 (Epic 2 document updated with backlog integration)
-**Next Review:** End of Epic 2 (Week 10)
+**Last Review:** 2026-01-30 (Epic 2 completion, alpha release)
+**Last Update:** 2026-01-30 (Added FE-005: LOCATION/ORG pseudonym libraries)
+**Next Review:** After alpha tester feedback (1 week)
 
 ---
 
 ## 📊 Epic 2 Backlog Summary
 
-### **Assigned to Epic 2:**
+### **Completed in Epic 2:**
 - ✅ **TD-001:** Integration Tests for Validation Workflow → Story 2.0.1
 - ✅ **TD-003:** Resolve Type Ignore Comments → Task 2.1.1
+
+### **Added During Epic 2 (Assigned to Epic 3):**
+- ✅ **FE-005:** LOCATION and ORGANIZATION Pseudonym Libraries → Epic 3 (HIGH priority)
 
 ### **Optional for Epic 2:**
 - 🤔 **FE-003:** Performance Regression Tests → Task 2.6.1 or 2.7.1 (if time permits)
@@ -331,5 +381,6 @@ When adding items from future stories:
 - 📊 **MON-002:** Hybrid detection processing time (Story 2.6 performance validation)
 - 📊 **MON-005:** spaCy Python 3.14 compatibility (passive monitoring)
 
-**Epic 2 Timeline Impact:** +2-3 days (TD-001), +20 min (TD-003), +1 hour optional (FE-003)
-**Estimated Epic 2 Duration:** 24-33 days (4.8-6.6 weeks) vs 5 weeks allocated → Within tolerance
+**Epic 2 Status:** ✅ Complete (9/9 stories)
+**Epic 2 Actual Duration:** 6 weeks (within allocated 5-week estimate + 1 week tolerance)
+**Alpha Release:** v0.1.0-alpha - 2026-01-30

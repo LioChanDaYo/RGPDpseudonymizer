@@ -9,6 +9,7 @@ Tests the complete end-to-end workflow including:
 from __future__ import annotations
 
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
@@ -22,6 +23,16 @@ from gdpr_pseudonymizer.data.repositories.mapping_repository import (
 
 class TestSingleDocumentWorkflow:
     """Integration tests for complete single-document workflow."""
+
+    @pytest.fixture(autouse=True)
+    def mock_validation_workflow(self):
+        """Mock validation workflow to auto-accept all detected entities."""
+        with patch(
+            "gdpr_pseudonymizer.core.document_processor.run_validation_workflow"
+        ) as mock:
+            # Pass through all entities (simulate user accepting everything)
+            mock.side_effect = lambda entities, **kwargs: entities
+            yield mock
 
     @pytest.fixture
     def test_db(self, tmp_path: Path) -> str:
@@ -57,8 +68,13 @@ class TestSingleDocumentWorkflow:
         doc_path.write_text(content, encoding="utf-8")
         return str(doc_path)
 
+    @patch("gdpr_pseudonymizer.core.document_processor.run_validation_workflow")
     def test_happy_path_complete_workflow(
-        self, test_db: str, sample_document: str, tmp_path: Path
+        self,
+        mock_validation_workflow,
+        test_db: str,
+        sample_document: str,
+        tmp_path: Path,
     ) -> None:
         """Test complete workflow: process document end-to-end.
 
@@ -72,6 +88,9 @@ class TestSingleDocumentWorkflow:
         # Arrange
         output_path = tmp_path / "output.txt"
         passphrase = "test_passphrase_12345"
+
+        # Mock validation workflow to pass through all detected entities
+        mock_validation_workflow.side_effect = lambda entities, **kwargs: entities
 
         # Act: Process document
         processor = DocumentProcessor(
@@ -117,8 +136,13 @@ class TestSingleDocumentWorkflow:
             assert operations[0].success is True
             assert operations[0].entity_count > 0
 
+    @patch("gdpr_pseudonymizer.core.document_processor.run_validation_workflow")
     def test_idempotency_reuses_mappings(
-        self, test_db: str, sample_document: str, tmp_path: Path
+        self,
+        mock_validation_workflow,
+        test_db: str,
+        sample_document: str,
+        tmp_path: Path,
     ) -> None:
         """Test FR19: Reprocessing same document reuses existing mappings.
 
@@ -132,6 +156,9 @@ class TestSingleDocumentWorkflow:
         output1_path = tmp_path / "output1.txt"
         output2_path = tmp_path / "output2.txt"
         passphrase = "test_passphrase_12345"
+
+        # Mock validation workflow to pass through all detected entities
+        mock_validation_workflow.side_effect = lambda entities, **kwargs: entities
 
         processor = DocumentProcessor(
             db_path=test_db,
@@ -180,7 +207,10 @@ class TestSingleDocumentWorkflow:
             assert all(op.operation_type == "PROCESS" for op in operations)
             assert all(op.success is True for op in operations)
 
-    def test_idempotency_with_same_entity(self, test_db: str, tmp_path: Path) -> None:
+    @patch("gdpr_pseudonymizer.core.document_processor.run_validation_workflow")
+    def test_idempotency_with_same_entity(
+        self, mock_validation_workflow, test_db: str, tmp_path: Path
+    ) -> None:
         """Test idempotency with same entity across documents.
 
         Verifies:
@@ -190,6 +220,9 @@ class TestSingleDocumentWorkflow:
         """
         # Arrange
         passphrase = "test_passphrase_12345"
+
+        # Mock validation workflow to pass through all detected entities
+        mock_validation_workflow.side_effect = lambda entities, **kwargs: entities
 
         # Document 1: Marie Dubois
         doc1_path = tmp_path / "doc1.txt"
