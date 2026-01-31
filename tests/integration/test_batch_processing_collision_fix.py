@@ -278,6 +278,16 @@ class TestBatchProcessingCollisionFix:
 class TestStoryTwoSevenVerification:
     """Run Story 2.7 verification tests to confirm fix."""
 
+    @pytest.fixture(autouse=True)
+    def mock_validation_workflow(self):
+        """Mock validation workflow to auto-accept all detected entities."""
+        with patch(
+            "gdpr_pseudonymizer.core.document_processor.run_validation_workflow"
+        ) as mock:
+            # Pass through all entities (simulate user accepting everything)
+            mock.side_effect = lambda entities, **kwargs: entities
+            yield mock
+
     @pytest.fixture
     def spike_test_corpus(self) -> Path:
         """Get Story 2.7 test corpus path."""
@@ -354,6 +364,16 @@ class TestStoryTwoSevenVerification:
 @pytest.mark.slow
 class TestBatchProcessingStressTest:
     """Stress tests for component collision prevention at scale."""
+
+    @pytest.fixture(autouse=True)
+    def mock_validation_workflow(self):
+        """Mock validation workflow to auto-accept all detected entities."""
+        with patch(
+            "gdpr_pseudonymizer.core.document_processor.run_validation_workflow"
+        ) as mock:
+            # Pass through all entities (simulate user accepting everything)
+            mock.side_effect = lambda entities, **kwargs: entities
+            yield mock
 
     def test_50_documents_high_entity_overlap(self, tmp_path: Path) -> None:
         """Test batch processing with 50+ documents and high entity overlap.

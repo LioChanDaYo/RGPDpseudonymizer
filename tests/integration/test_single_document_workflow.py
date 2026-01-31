@@ -24,6 +24,16 @@ from gdpr_pseudonymizer.data.repositories.mapping_repository import (
 class TestSingleDocumentWorkflow:
     """Integration tests for complete single-document workflow."""
 
+    @pytest.fixture(autouse=True)
+    def mock_validation_workflow(self):
+        """Mock validation workflow to auto-accept all detected entities."""
+        with patch(
+            "gdpr_pseudonymizer.core.document_processor.run_validation_workflow"
+        ) as mock:
+            # Pass through all entities (simulate user accepting everything)
+            mock.side_effect = lambda entities, **kwargs: entities
+            yield mock
+
     @pytest.fixture
     def test_db(self, tmp_path: Path) -> str:
         """Create and initialize test database.
