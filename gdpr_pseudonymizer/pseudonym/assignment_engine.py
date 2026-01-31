@@ -409,10 +409,13 @@ class CompositionalPseudonymEngine:
         # Example: "Claire Fontaine" preview generates ("Fontaine", "last_name") -> "Martin"
         #          Later "Fontaine" standalone should reuse "Martin"
         if hasattr(self.pseudonym_manager, "_component_mappings"):
-            mapping_key = (component, component_type)
-            if mapping_key in self.pseudonym_manager._component_mappings:
-                result: str = self.pseudonym_manager._component_mappings[mapping_key]
-                return result
+            component_mappings = self.pseudonym_manager._component_mappings
+            # Ensure it's actually a dict (not a Mock in tests)
+            if isinstance(component_mappings, dict):
+                mapping_key = (component, component_type)
+                if mapping_key in component_mappings:
+                    result: str = component_mappings[mapping_key]
+                    return result
 
         # SECOND: Query repository for existing component mappings (persisted)
         existing_entities = self.mapping_repository.find_by_component(
