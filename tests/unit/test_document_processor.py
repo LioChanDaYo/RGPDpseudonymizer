@@ -164,6 +164,8 @@ class TestDocumentProcessor:
                         mock_engine = Mock()
                         # Mock strip_titles to return input unchanged (no titles in test data)
                         mock_engine.strip_titles.side_effect = lambda x: x
+                        # Mock strip_prepositions to return input unchanged (no prepositions in test data)
+                        mock_engine.strip_prepositions.side_effect = lambda x: x
                         # Mock parse_full_name for PERSON entities
                         mock_engine.parse_full_name.side_effect = [
                             ("Marie", "Dubois", False),  # First call for "Marie Dubois"
