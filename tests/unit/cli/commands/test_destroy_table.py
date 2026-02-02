@@ -3,15 +3,13 @@
 from __future__ import annotations
 
 from pathlib import Path
-from unittest.mock import patch
 
-import pytest
 import typer
 from typer.testing import CliRunner
 
 from gdpr_pseudonymizer.cli.commands.destroy_table import (
-    destroy_table_command,
     _secure_delete,
+    destroy_table_command,
 )
 
 

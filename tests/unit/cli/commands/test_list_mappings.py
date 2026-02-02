@@ -15,13 +15,12 @@ from datetime import datetime
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-import pytest
 import typer
 from typer.testing import CliRunner
 
 from gdpr_pseudonymizer.cli.commands.list_mappings import (
-    list_mappings_command,
     _export_to_csv,
+    list_mappings_command,
 )
 
 
