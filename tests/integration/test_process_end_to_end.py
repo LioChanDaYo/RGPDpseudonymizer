@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 from typer.testing import CliRunner
@@ -34,6 +35,21 @@ def reset_pseudonym_cache() -> None:
 
 
 @pytest.fixture(autouse=True)
+def mock_validation_workflow():
+    """Mock validation workflow to auto-accept all detected entities.
+
+    Since tests run non-interactively, we mock the validation workflow
+    to simply return all detected entities (simulating user accepting all).
+    """
+    with patch(
+        "gdpr_pseudonymizer.core.document_processor.run_validation_workflow"
+    ) as mock:
+        # Pass through all entities (simulate user accepting everything)
+        mock.side_effect = lambda entities, **kwargs: entities
+        yield mock
+
+
+@pytest.fixture(autouse=True)
 def cleanup_test_database():
     """Clean up test database files after each test.
 
@@ -45,17 +61,6 @@ def cleanup_test_database():
     db_path = Path("mappings.db")
     if db_path.exists():
         db_path.unlink()
-
-
-@pytest.fixture(autouse=True)
-def mock_validation_workflow(monkeypatch):
-    """Mock validation workflow to auto-approve all entities for CI testing.
-
-    Story 2.6: Validation workflow was deferred to Epic 3 Story 3.2.
-    The process command now runs without validation by default.
-    This fixture is kept for backward compatibility but does nothing.
-    """
-    pass
 
 
 @pytest.fixture(autouse=True)

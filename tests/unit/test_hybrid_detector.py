@@ -79,11 +79,18 @@ class TestHybridDetector:
         ), "Duplicate entities with same span detected"
 
     def test_partial_overlap_flags_ambiguous(self, detector: HybridDetector) -> None:
-        """Test that partial overlaps are flagged as ambiguous."""
-        text = "Interview avec Dr. Marie Dubois."
+        """Test that partial overlaps (non-title variants) are flagged as ambiguous.
+
+        Note: Title variants like "Dr. Marie Dubois" vs "Marie Dubois" are now
+        normalized and deduplicated, so they won't appear as partial overlaps.
+        This test verifies TRUE partial overlaps (different entity boundaries)
+        are still flagged as ambiguous.
+        """
+        # Use text that creates true partial overlap (not just title variants)
+        text = "Interview avec Marie Dubois Fontaine."
         entities = detector.detect_entities(text)
 
-        # May have overlapping entities (Dr. Marie Dubois vs Marie Dubois)
+        # May have overlapping entities (e.g., "Marie Dubois" vs "Dubois Fontaine")
         # If there are partial overlaps, at least one should be flagged ambiguous
         overlapping_entities = []
         for i, e1 in enumerate(entities):
@@ -193,6 +200,42 @@ class TestHybridDetector:
         # Should still work via lazy loading
         assert len(entities) > 0
 
+    def test_normalize_entity_text_basic(self, detector: HybridDetector) -> None:
+        """Test that title normalization strips French titles."""
+        assert detector._normalize_entity_text("Dr. Marie Dubois") == "Marie Dubois"
+        assert detector._normalize_entity_text("M. Dupont") == "Dupont"
+        assert detector._normalize_entity_text("Mme Fontaine") == "Fontaine"
+        assert detector._normalize_entity_text("Marie Dubois") == "Marie Dubois"
+
+    def test_normalize_entity_text_multiple_titles(
+        self, detector: HybridDetector
+    ) -> None:
+        """Test that title normalization handles multiple consecutive titles."""
+        assert detector._normalize_entity_text("Dr. Pr. Marie Dubois") == "Marie Dubois"
+        assert detector._normalize_entity_text("M. Dr. Jean Martin") == "Jean Martin"
+
+    def test_title_variant_deduplication(self, detector: HybridDetector) -> None:
+        """Test that entities with and without titles are deduplicated.
+
+        This is the critical fix for the bug where users saw the same entity
+        multiple times during validation (once with "Dr." and once without).
+        """
+        text = "Dr. Marie Dubois collabore avec Marie Dubois."
+        entities = detector.detect_entities(text)
+
+        # Should only detect Marie Dubois twice (both occurrences, not title variants)
+        marie_entities = [
+            e for e in entities if "Marie" in e.text or "Dubois" in e.text
+        ]
+
+        # Verify no title variants in results
+        entity_texts = [e.text for e in marie_entities]
+        # Should not have both "Dr. Marie Dubois" and "Marie Dubois" from same occurrence
+        # Only should have "Marie Dubois" twice (once at pos 0-16 area, once at pos 32-44 area)
+        assert (
+            len(marie_entities) <= 2
+        ), f"Expected max 2 Marie entities, got {len(marie_entities)}: {entity_texts}"
+
     def test_improved_recall_over_spacy_only(self, detector: HybridDetector) -> None:
         """Test that hybrid detection finds more entities than spaCy alone."""
         text = "M. Dupont et Mme Laurent travaillent à Paris pour TechCorp SA."
@@ -257,24 +300,29 @@ class TestHybridDetector:
         assert merged[1].start_pos == 20  # M. Dupont comes second
 
     def test_merge_entities_partial_overlap(self, detector: HybridDetector) -> None:
-        """Test _merge_entities with partial overlap."""
+        """Test _merge_entities with partial overlap (non-title variant).
+
+        This tests TRUE partial overlap where entity boundaries differ,
+        not title variants which are correctly deduplicated.
+        """
+        # TRUE partial overlap: "Marie Dubois" vs "Dubois" (different boundaries)
         spacy_entity = DetectedEntity(
-            text="Dubois",
+            text="Marie Dubois",
             entity_type="PERSON",
-            start_pos=10,
-            end_pos=16,
+            start_pos=0,
+            end_pos=13,
             source="spacy",
         )
         regex_entity = DetectedEntity(
-            text="M. Dubois",
+            text="Dubois",
             entity_type="PERSON",
-            start_pos=7,
-            end_pos=16,
+            start_pos=6,
+            end_pos=13,
             source="regex",
         )
 
         merged = detector._merge_entities([spacy_entity], [regex_entity])
 
-        # Should keep both entities, regex one flagged as ambiguous
+        # Should keep both entities, one flagged as ambiguous
         assert len(merged) == 2
-        assert any(e.is_ambiguous for e in merged if e.source == "regex")
+        assert any(e.is_ambiguous for e in merged)

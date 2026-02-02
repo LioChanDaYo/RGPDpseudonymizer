@@ -10,6 +10,7 @@
 ## 🎯 Backlog Categories
 
 - **Technical Debt:** Items deferred from Epic 1 that should be addressed
+- **High Priority Enhancements:** Critical features for v1.0 MVP
 - **Future Enhancements:** Nice-to-have improvements identified during development
 - **Monitoring Items:** Things to watch in production/user testing
 - **Epic 2+ Items:** Features planned for future epics
@@ -164,9 +165,22 @@ Press Enter to continue...
 
 ---
 
+---
+
+## 🔥 HIGH Priority Enhancements
+
+#### FE-005: LOCATION and ORGANIZATION Pseudonym Libraries ✅ COMPLETED (Story 3.0)
+**Source:** Story 2.9 Alpha Testing Preparation (discovered during quick test)
+**Description:** Add LOCATION and ORGANIZATION pseudonym libraries for all 3 themes (neutral, star_wars, lotr)
+**Status:** ✅ **COMPLETED** - Implemented in Story 3.0 (2026-02-02)
+**References:**
+- [docs/stories/3.0.location-org-pseudonym-libraries.story.md](stories/3.0.location-org-pseudonym-libraries.story.md)
+
+---
+
 ### MEDIUM Priority
 
-#### FE-005: Expand Organization Pseudonym Library
+#### FE-006: Expand Organization Pseudonym Library
 **Source:** Story 3.0 - Batch processing testing (2026-02-02)
 **Description:** Expand neutral theme organization library from 35 to 150-200 entries to support larger document corpora without exhausting the library and falling back to generic naming (Org-001, etc.)
 **Impact:** Batch processing of 15+ documents exhausts the 35-entry organization library quickly
@@ -262,6 +276,9 @@ Press Enter to continue...
 - Story 3.4: CLI UX polish (better error messages, help text)
 - Story 3.5: Installation guide and user documentation
 
+**Confirmed Additions from Backlog:**
+- ✅ **FE-005:** LOCATION and ORGANIZATION pseudonym libraries (HIGH priority - new Story 3.X or integrate into Story 3.1)
+
 **Potential Additions from Backlog:**
 - FE-001: Visual indicator for context cycling (if high user demand)
 - FE-002: Batch operations visual feedback
@@ -333,17 +350,20 @@ When adding items from future stories:
 
 **Backlog Maintained By:** Sarah (Product Owner)
 **Review Cadence:** End of each epic
-**Last Review:** 2026-01-23 (Epic 1 → Epic 2 transition)
-**Last Epic 2 Update:** 2026-01-23 (Epic 2 document updated with backlog integration)
-**Next Review:** End of Epic 2 (Week 10)
+**Last Review:** 2026-01-30 (Epic 2 completion, alpha release)
+**Last Update:** 2026-01-30 (Added FE-005: LOCATION/ORG pseudonym libraries)
+**Next Review:** After alpha tester feedback (1 week)
 
 ---
 
 ## 📊 Epic 2 Backlog Summary
 
-### **Assigned to Epic 2:**
+### **Completed in Epic 2:**
 - ✅ **TD-001:** Integration Tests for Validation Workflow → Story 2.0.1
 - ✅ **TD-003:** Resolve Type Ignore Comments → Task 2.1.1
+
+### **Added During Epic 2 (Assigned to Epic 3):**
+- ✅ **FE-005:** LOCATION and ORGANIZATION Pseudonym Libraries → Epic 3 (HIGH priority)
 
 ### **Optional for Epic 2:**
 - 🤔 **FE-003:** Performance Regression Tests → Task 2.6.1 or 2.7.1 (if time permits)
@@ -357,5 +377,6 @@ When adding items from future stories:
 - 📊 **MON-002:** Hybrid detection processing time (Story 2.6 performance validation)
 - 📊 **MON-005:** spaCy Python 3.14 compatibility (passive monitoring)
 
-**Epic 2 Timeline Impact:** +2-3 days (TD-001), +20 min (TD-003), +1 hour optional (FE-003)
-**Estimated Epic 2 Duration:** 24-33 days (4.8-6.6 weeks) vs 5 weeks allocated → Within tolerance
+**Epic 2 Status:** ✅ Complete (9/9 stories)
+**Epic 2 Actual Duration:** 6 weeks (within allocated 5-week estimate + 1 week tolerance)
+**Alpha Release:** v0.1.0-alpha - 2026-01-30

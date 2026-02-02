@@ -33,6 +33,7 @@ from gdpr_pseudonymizer.pseudonym.assignment_engine import (
 from gdpr_pseudonymizer.pseudonym.library_manager import LibraryBasedPseudonymManager
 from gdpr_pseudonymizer.utils.file_handler import read_file, write_file
 from gdpr_pseudonymizer.utils.logger import get_logger
+from gdpr_pseudonymizer.validation.workflow import run_validation_workflow
 
 # Configure logging (NO sensitive data)
 logger = get_logger(__name__)
@@ -134,12 +135,13 @@ class DocumentProcessor:
         Workflow:
         1. FileHandler.read_document() → document_text
         2. HybridEntityDetector.detect_entities() → List[DetectedEntity]
-        3. For each entity, check MappingRepository.find_by_full_name() for existing mapping
-        4. If existing, reuse pseudonym; if new, assign using CompositionalPseudonymEngine
-        5. Save new entities to MappingRepository (encrypted storage)
-        6. Apply replacements to document text (respect exclusion zones)
-        7. FileHandler.write_document() → output file
-        8. AuditRepository.log_operation() with all FR12 fields
+        3. Interactive validation workflow → List[ValidatedEntity] (user confirms/rejects each entity)
+        4. For each validated entity, check MappingRepository.find_by_full_name() for existing mapping
+        5. If existing, reuse pseudonym; if new, assign using CompositionalPseudonymEngine
+        6. Save new entities to MappingRepository (encrypted storage)
+        7. Apply replacements to document text (respect exclusion zones)
+        8. FileHandler.write_document() → output file
+        9. AuditRepository.log_operation() with all FR12 fields
 
         Args:
             input_path: Path to input document (.txt or .md)
@@ -173,13 +175,16 @@ class DocumentProcessor:
                 unique_count=len(set(e.text for e in detected_entities)),
             )
 
-            # Step 3-6: Open database and process entities
+            # Step 2.5-6: Open database ONCE for validation and processing (prevents Windows SQLite locking)
+            logger.info(
+                "starting_validation_workflow", entity_count=len(detected_entities)
+            )
             with open_database(self.db_path, self.passphrase) as db_session:
                 # Initialize repositories (use interface type for maintainability)
                 mapping_repo: MappingRepository = SQLiteMappingRepository(db_session)
                 audit_repo = AuditRepository(db_session.session)
 
-                # Initialize pseudonym manager and engine
+                # Initialize pseudonym manager and engine (used for both validation preview AND processing)
                 pseudonym_manager = LibraryBasedPseudonymManager()
                 pseudonym_manager.load_library(self.theme)
 
@@ -192,21 +197,126 @@ class DocumentProcessor:
                     mapping_repository=mapping_repo,
                 )
 
-                # Step 3-5: Process each entity (check for existing, assign, collect for batch save)
+                # Create pseudonym assigner for validation workflow preview
+                # Local cache for preview-only pseudonyms (ensures consistent component reuse)
+                preview_cache: dict[
+                    str, str
+                ] = {}  # entity_text_stripped -> pseudonym_full
+
+                def pseudonym_assigner(entity: DetectedEntity) -> str:
+                    """Generate pseudonym preview for validation UI.
+
+                    Uses cached preview pseudonyms to ensure consistent component reuse
+                    during validation (e.g., "Claire Fontaine" and "Fontaine" should
+                    share the "Fontaine" component in their pseudonym previews).
+
+                    Args:
+                        entity: Entity to generate pseudonym for
+
+                    Returns:
+                        Pseudonym string for display in validation UI
+                    """
+                    # Strip titles/prepositions before lookup/assignment
+                    entity_text_stripped = compositional_engine.strip_titles(
+                        entity.text
+                    )
+
+                    # Also strip prepositions for LOCATION entities (à Paris -> Paris)
+                    if entity.entity_type == "LOCATION":
+                        entity_text_stripped = compositional_engine.strip_prepositions(
+                            entity_text_stripped
+                        )
+
+                    # Check if mapping already exists in database
+                    existing_entity = mapping_repo.find_by_full_name(
+                        entity_text_stripped
+                    )
+                    if existing_entity:
+                        return existing_entity.pseudonym_full
+
+                    # Check preview cache for previously generated preview in this session
+                    if entity_text_stripped in preview_cache:
+                        return preview_cache[entity_text_stripped]
+
+                    # Generate new pseudonym preview (not saved yet)
+                    try:
+                        assignment = (
+                            compositional_engine.assign_compositional_pseudonym(
+                                entity_text=entity_text_stripped,
+                                entity_type=entity.entity_type,
+                                gender=None,
+                            )
+                        )
+                        # Cache the preview for consistency within this validation session
+                        preview_cache[entity_text_stripped] = assignment.pseudonym_full
+                        return assignment.pseudonym_full
+                    except Exception:
+                        # Fallback for any assignment errors
+                        return f"[{entity.entity_type}_PREVIEW]"
+
+                # Run interactive validation workflow
+                try:
+                    validated_entities = run_validation_workflow(
+                        entities=detected_entities,
+                        document_text=document_text,
+                        document_path=input_path,
+                        pseudonym_assigner=pseudonym_assigner,
+                    )
+                    logger.info(
+                        "validation_complete",
+                        validated_count=len(validated_entities),
+                        original_count=len(detected_entities),
+                    )
+                except KeyboardInterrupt:
+                    # User cancelled validation - abort processing
+                    logger.info("validation_cancelled", reason="user_interrupt")
+                    raise
+
+                # CRITICAL FIX: Reset pseudonym manager state after validation
+                # The validation preview generates pseudonyms and adds them to _used_pseudonyms,
+                # but those previews are never saved. We must clear the state to prevent
+                # collision false positives during actual processing.
+                pseudonym_manager._used_pseudonyms.clear()
+                pseudonym_manager._component_mappings.clear()
+                # Reload existing mappings from database (restores legitimate collision prevention)
+                existing_entities = mapping_repo.find_all()
+                pseudonym_manager.load_existing_mappings(existing_entities)
+                logger.info(
+                    "pseudonym_manager_reset_after_validation",
+                    existing_mappings_reloaded=len(existing_entities),
+                )
+
+                # Step 3-5: Process each VALIDATED entity (check for existing, assign, collect for batch save)
+                # Note: pseudonym_manager and compositional_engine already initialized above for validation
+                logger.info(
+                    "starting_entity_processing",
+                    validated_count=len(validated_entities),
+                )
                 replacements: list[tuple[int, int, str]] = []  # (start, end, pseudonym)
                 new_entities: list[Entity] = []  # Collect new entities for batch save
                 entity_cache: dict[
                     str, str
                 ] = {}  # In-memory cache for this document (full_name -> pseudonym)
 
-                for entity in detected_entities:
+                for entity in validated_entities:
+                    logger.debug(
+                        "processing_entity",
+                        entity_text=entity.text,
+                        entity_type=entity.entity_type,
+                    )
                     # Step 3: Check for existing mapping (idempotency)
-                    # CRITICAL FIX: Strip titles from entity text BEFORE database lookup
-                    # The database stores names WITHOUT titles (e.g., "Marie Dubois" not "Dr. Marie Dubois")
-                    # Title stripping must happen BEFORE find_by_full_name() check
+                    # CRITICAL FIX: Strip titles/prepositions from entity text BEFORE database lookup
+                    # The database stores names WITHOUT titles/prepositions
+                    # (e.g., "Marie Dubois" not "Dr. Marie Dubois", "Paris" not "à Paris")
                     entity_text_stripped = compositional_engine.strip_titles(
                         entity.text
                     )
+
+                    # Also strip prepositions for LOCATION entities
+                    if entity.entity_type == "LOCATION":
+                        entity_text_stripped = compositional_engine.strip_prepositions(
+                            entity_text_stripped
+                        )
 
                     # Check both database AND in-memory cache for this document
                     if entity_text_stripped in entity_cache:
@@ -351,7 +461,41 @@ class DocumentProcessor:
                                 )
 
                     # Collect replacement for later application
-                    replacements.append((entity.start_pos, entity.end_pos, pseudonym))
+                    # CRITICAL: Preserve titles/prepositions in output text for readability
+                    # Example: "Dr. Marie Dubois" -> "Dr. Emma Martin", not "Emma Martin"
+                    # Example: "à Paris" -> "à Lyon", not "Lyon"
+                    original_text = entity.text
+                    prefix = ""
+
+                    # Extract title prefix for PERSON entities
+                    if entity.entity_type == "PERSON":
+                        # Find how much of the original text is title
+                        stripped = compositional_engine.strip_titles(original_text)
+                        if stripped != original_text:
+                            # Extract the title prefix
+                            prefix_end = original_text.find(stripped)
+                            if prefix_end > 0:
+                                prefix = original_text[:prefix_end]
+
+                    # Extract preposition prefix for LOCATION entities
+                    elif entity.entity_type == "LOCATION":
+                        # First strip titles (in case location has one, unlikely but possible)
+                        temp_stripped = compositional_engine.strip_titles(original_text)
+                        # Then check for preposition
+                        stripped = compositional_engine.strip_prepositions(
+                            temp_stripped
+                        )
+                        if stripped != temp_stripped:
+                            # Extract the preposition prefix
+                            prefix_end = temp_stripped.find(stripped)
+                            if prefix_end > 0:
+                                prefix = temp_stripped[:prefix_end]
+
+                    # Prepend prefix to pseudonym for final replacement
+                    pseudonym_with_prefix = prefix + pseudonym
+                    replacements.append(
+                        (entity.start_pos, entity.end_pos, pseudonym_with_prefix)
+                    )
 
                 # Step 5b: Save all new entities in single transaction for data consistency
                 # If this fails, no partial data will be committed to database
@@ -416,7 +560,7 @@ class DocumentProcessor:
                     model_name=self.model_name,
                     model_version=self._get_model_version(),
                     theme_selected=self.theme,
-                    entity_count=len(detected_entities),
+                    entity_count=len(validated_entities),
                     processing_time_seconds=processing_time,
                     success=True,
                     error_message=None,
@@ -426,6 +570,7 @@ class DocumentProcessor:
                 logger.info(
                     "processing_complete",
                     entities_detected=len(detected_entities),
+                    entities_validated=len(validated_entities),
                     entities_new=entities_new,
                     entities_reused=entities_reused,
                     processing_time=processing_time,
@@ -435,7 +580,7 @@ class DocumentProcessor:
                     success=True,
                     input_file=input_path,
                     output_file=output_path,
-                    entities_detected=len(detected_entities),
+                    entities_detected=len(validated_entities),
                     entities_new=entities_new,
                     entities_reused=entities_reused,
                     processing_time_seconds=processing_time,

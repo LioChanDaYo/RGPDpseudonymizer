@@ -68,6 +68,7 @@ class TestDocumentProcessor:
             ),
         ]
 
+    @patch("gdpr_pseudonymizer.core.document_processor.run_validation_workflow")
     @patch("gdpr_pseudonymizer.core.document_processor.open_database")
     @patch("gdpr_pseudonymizer.core.document_processor.read_file")
     @patch("gdpr_pseudonymizer.core.document_processor.write_file")
@@ -78,6 +79,7 @@ class TestDocumentProcessor:
         mock_write_file: Mock,
         mock_read_file: Mock,
         mock_open_db: Mock,
+        mock_validation_workflow: Mock,
         temp_db: str,
         mock_db_session: MagicMock,
         sample_entities: list[DetectedEntity],
@@ -101,6 +103,9 @@ class TestDocumentProcessor:
         mock_detector.nlp = Mock()
         mock_detector.nlp.meta = {"name": "fr_core_news_lg", "version": "3.8.0"}
         mock_detector_class.return_value = mock_detector
+
+        # Arrange: Mock validation workflow (simulate user accepting all entities)
+        mock_validation_workflow.return_value = sample_entities
 
         # Arrange: Mock database session and repositories
         mock_db_session.__enter__ = Mock(return_value=mock_db_session)
@@ -159,6 +164,8 @@ class TestDocumentProcessor:
                         mock_engine = Mock()
                         # Mock strip_titles to return input unchanged (no titles in test data)
                         mock_engine.strip_titles.side_effect = lambda x: x
+                        # Mock strip_prepositions to return input unchanged (no prepositions in test data)
+                        mock_engine.strip_prepositions.side_effect = lambda x: x
                         # Mock parse_full_name for PERSON entities
                         mock_engine.parse_full_name.side_effect = [
                             ("Marie", "Dubois", False),  # First call for "Marie Dubois"
@@ -223,6 +230,7 @@ class TestDocumentProcessor:
         assert logged_operation.success is True
         assert logged_operation.entity_count == 2
 
+    @patch("gdpr_pseudonymizer.core.document_processor.run_validation_workflow")
     @patch("gdpr_pseudonymizer.core.document_processor.open_database")
     @patch("gdpr_pseudonymizer.core.document_processor.read_file")
     @patch("gdpr_pseudonymizer.core.document_processor.HybridDetector")
@@ -231,6 +239,7 @@ class TestDocumentProcessor:
         mock_detector_class: Mock,
         mock_read_file: Mock,
         mock_open_db: Mock,
+        mock_validation_workflow: Mock,
         temp_db: str,
         mock_db_session: MagicMock,
         sample_entities: list[DetectedEntity],
@@ -253,6 +262,9 @@ class TestDocumentProcessor:
         mock_detector.nlp = Mock()
         mock_detector.nlp.meta = {"name": "fr_core_news_lg", "version": "3.8.0"}
         mock_detector_class.return_value = mock_detector
+
+        # Arrange: Mock validation workflow (simulate user accepting all entities)
+        mock_validation_workflow.return_value = sample_entities
 
         # Arrange: Mock database session
         mock_db_session.__enter__ = Mock(return_value=mock_db_session)
