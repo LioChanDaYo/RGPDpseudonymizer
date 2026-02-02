@@ -22,11 +22,23 @@
    - `import-mappings` - Load mappings from previous project
    - `export` - Export audit log
    - `destroy-table` - Secure deletion with confirmation prompt
+   - `clear-mappings` - Delete pseudonym mappings (single entity or all) with confirmation prompt
 2. **AC2:** Consistent command structure: global options (--config, --verbose), command-specific options.
 3. **AC3:** Help text for all commands: `gdpr-pseudo --help`, `gdpr-pseudo process --help`.
-4. **AC4:** Configuration file support: `.gdpr-pseudo.yaml` in home directory or project root for default settings.
+4. **AC4:** Configuration file support: `.gdpr-pseudo.yaml` in home directory or project root for default settings (including custom passphrase).
 5. **AC5:** Unit tests for each command: argument parsing, execution, error handling.
 6. **AC6:** CLI documentation: Command reference with examples, common workflows.
+7. **AC7 (Bug #5):** `clear-mappings` command functionality:
+   - `clear-mappings --all` - Clear all pseudonym mappings with confirmation prompt
+   - `clear-mappings --entity "Name"` - Clear specific entity mapping
+   - `clear-mappings --type PERSON|LOCATION|ORG` - Clear all mappings of specific type
+   - Confirmation prompt required for all deletion operations
+   - Success message showing count of deleted mappings
+8. **AC8 (Bug #6):** Shorter default passphrase option:
+   - Configuration file (`.gdpr-pseudo.yaml`) supports custom passphrase setting
+   - Default passphrase shortened from current implementation
+   - Documentation updated with passphrase configuration examples
+   - Security warning if passphrase is too short (< 12 characters)
 
 ---
 
@@ -51,6 +63,11 @@
 6. **AC6:** User modifications logged in audit log (FR12).
 7. **AC7:** Unit tests: Validation flow, user input handling, modification application.
 8. **AC8:** Integration test: Run validation mode on test document, simulate user interactions, verify final output.
+9. **AC9 (Bug #2):** Title preservation in validation display:
+   - When displaying entity and pseudonym during interactive validation, preserve titles in both original and pseudonym
+   - Example: "Mme Nathalie Rousseau" should show pseudonym as "Mme Salomé Blanchard" (not "Salomé Blanchard")
+   - Apply to all supported titles: M., Mme, Mlle, Dr, Pr, Maître, Me, etc.
+   - Validation UI should clearly show titled form to avoid user confusion
 
 ---
 
@@ -135,6 +152,12 @@
 4. **AC4:** User-friendly validation: Validate inputs before processing (file exists, passphrase strength, valid config).
 5. **AC5:** Unit tests: Trigger each error scenario, verify message format and clarity.
 6. **AC6:** Target validation (NFR7): ≥80% of users resolve issues without support (measured in Beta testing).
+7. **AC7 (Bug #1):** Early passphrase validation:
+   - Validate passphrase BEFORE starting any document processing or entity detection
+   - Current issue: Processing begins before passphrase check, wasting time on incorrect passphrase
+   - Validation order: passphrase → file existence → file permissions → model availability → processing
+   - Fast-fail on invalid passphrase with clear error message (ref AC2)
+   - Unit test: Verify processing does not start with invalid passphrase
 
 ---
 
@@ -175,6 +198,47 @@
 5. **AC5:** Beta feedback collection: Structured survey + open-ended feedback + usage analytics (if users opt-in).
 6. **AC6:** Beta support channel: Dedicated communication channel (Slack/Discord) for beta testers.
 7. **AC7:** Beta feedback review: Scheduled review session (end of week 10-11) to prioritize Epic 4 work and identify critical bugs.
+
+---
+
+### Story 3.9: NER & Title Handling Improvements
+
+**As a** user processing French legal documents with professional titles and organizations,
+**I want** accurate entity detection and complete title preservation throughout the pseudonymization process,
+**so that** professional titles (Maître, Me) are not lost and organization patterns (Cabinet X) are correctly detected as ORG entities.
+
+#### Acceptance Criteria
+
+1. **AC1 (Bug #3):** Cabinet pattern detection:
+   - Add pattern matching rules to detect "Cabinet [Name]" as ORGANIZATION entity
+   - Patterns: "Cabinet [LastName]", "Cabinet [LastName] & Associés", "Cabinet [Name1] et [Name2]"
+   - Use entity ruler or pattern matching before NER pipeline
+   - Test case: "Cabinet Mercier & Associés" in `tests/test_corpus/interview_transcripts/interview_05.txt` should be detected as ORG (not PERSON)
+2. **AC2 (Bug #4):** Professional title recognition:
+   - Extend title recognition to include "Maître", "Me", "Me." (attorney titles)
+   - Titles preserved in both final output AND validation UI display (related to Bug #2 in Story 3.2)
+   - Example: "Maître Dubois" → "Maître [Pseudonym]" (title not stripped)
+3. **AC3:** Unit tests for Cabinet patterns:
+   - `test_cabinet_pattern_single_name()`: "Cabinet Mercier" → ORG
+   - `test_cabinet_pattern_with_associates()`: "Cabinet Mercier & Associés" → ORG
+   - `test_cabinet_pattern_multiple_names()`: "Cabinet Dupont et Martin" → ORG
+   - `test_cabinet_pattern_not_person()`: Verify NOT detected as PERSON
+4. **AC4:** Unit tests for professional titles:
+   - `test_maitre_title_detection()`: "Maître Dubois" detected with title
+   - `test_me_title_detection()`: "Me Dubois" detected with title
+   - `test_maitre_title_preserved_in_output()`: Title appears in pseudonymized output
+   - `test_me_title_preserved_in_output()`: Title appears in pseudonymized output
+5. **AC5:** Integration tests:
+   - Process `interview_05.txt` with "Cabinet Mercier & Associés" and verify ORG detection
+   - Process document with "Maître"/"Me" titles and verify preservation
+6. **AC6:** Regression testing:
+   - All existing tests pass
+   - No breaking changes to existing title detection (M., Mme, Dr, etc.)
+   - No breaking changes to PERSON/LOCATION/ORG detection
+7. **AC7:** Test corpus update:
+   - Add or update test corpus documents with Cabinet patterns and professional titles
+
+**Note:** Full story details available in [docs/stories/3.9.ner-title-handling-improvements.story.md](../stories/3.9.ner-title-handling-improvements.story.md)
 
 ---
 

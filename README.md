@@ -58,18 +58,18 @@ We're actively developing v1.0 MVP with an **AI-assisted approach**:
   - Story 1.7: Validation UI with rich CLI interface
   - Story 1.8: Hybrid detection (35.3% improvement, +52.2% PERSON detection)
   - Story 1.9: Entity deduplication (66% time reduction for large docs)
-- 🔄 **Week 6-10 (Current):** Epic 2 - Core pseudonymization engine
-  - Story 2.0.1: Integration tests ✅ (19 tests, 80.49% coverage)
-  - Story 2.1: Pseudonym library system ✅ (3 themed libraries, 90.76% coverage)
-  - Story 2.2: Compositional pseudonymization logic ✅ (37 tests, 94% coverage, QA score 95/100)
-  - Story 2.3: French name preprocessing (titles + compounds) ✅ (53 tests, 94.64% coverage, QA score 100/100)
-  - Story 2.4: Encrypted mapping table ✅ (9 integration tests, database encryption with passphrase protection)
-  - Story 2.5: Audit logging ✅ (32 tests, 91.41% coverage, GDPR Article 30 compliance, QA score 100/100)
-  - Story 2.6: Single-document pseudonymization workflow ✅ (10 tests passing, end-to-end integration, 6 critical bug fixes for consistent pseudonyms)
-  - Story 2.7: Batch processing scalability spike ✅ (multiprocessing validated, 1 critical bug discovered - Story 2.8 created)
-  - Story 2.8: Pseudonym component collision fix ✅ (18 tests passing, GDPR 1:1 mapping restored, QA score 92/100, Epic 3 unblocked)
-  - Story 2.9: Alpha release preparation ✅ (installation verification complete, alpha documentation created, v0.1.0-alpha tag ready)
-- 📅 **Week 11-14:** CLI polish, batch processing, launch prep
+- ✅ **Epic 2 Complete:** Core pseudonymization engine
+  - Story 2.1-2.5: Pseudonym libraries, compositional logic, encryption, audit logging
+  - Story 2.6-2.8: End-to-end workflow, batch processing spike, GDPR 1:1 mapping fix
+  - Story 2.9: Alpha release v0.1.0 preparation
+- 🔄 **Week 8-11 (Current):** Epic 3 - CLI Interface & Batch Processing
+  - Story 3.0: LOCATION/ORG pseudonym libraries ✅ (themed locations + organizations for all 3 themes)
+  - Story 3.1: Complete CLI command set ✅ (8 new commands, 155+ tests, 80.56% coverage)
+    - Commands: init, batch, list-mappings, validate-mappings, stats, import-mappings, export, destroy-table
+    - Bug fixes: LOC/ORG fallback naming, batch excludes `*_pseudonymized.*` files
+  - Story 3.2: Interactive validation mode (planned)
+  - Story 3.3: Process-based batch parallelism (planned)
+- 📅 **Week 11-14:** Beta release, launch prep
 - 🎯 **MVP Launch:** Week 14 (estimated Q2 2026)
 
 ### Realistic Expectations for v1.0

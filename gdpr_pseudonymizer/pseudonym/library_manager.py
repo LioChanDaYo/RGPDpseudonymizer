@@ -590,9 +590,12 @@ class LibraryBasedPseudonymManager(PseudonymManager):
             if candidate not in self._used_pseudonyms:
                 return candidate
 
-        raise RuntimeError(
-            f"Unable to find unique location after {max_attempts} attempts. Library may be exhausted."
+        # Library exhausted - use fallback naming (Location-001, Location-002, etc.)
+        logger.warning(
+            "Location library exhausted after %d attempts, using fallback naming",
+            max_attempts,
         )
+        return self._generate_fallback_name("LOCATION")
 
     def _select_organization(self) -> str:
         """Select organization pseudonym from library with collision prevention.
@@ -619,9 +622,12 @@ class LibraryBasedPseudonymManager(PseudonymManager):
             if candidate not in self._used_pseudonyms:
                 return candidate
 
-        raise RuntimeError(
-            f"Unable to find unique organization after {max_attempts} attempts. Library may be exhausted."
+        # Library exhausted - use fallback naming (Org-001, Org-002, etc.)
+        logger.warning(
+            "Organization library exhausted after %d attempts, using fallback naming",
+            max_attempts,
         )
+        return self._generate_fallback_name("ORG")
 
     def _generate_fallback_name(self, entity_type: str) -> str:
         """Generate systematic fallback name when library exhausted.

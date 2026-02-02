@@ -1,8 +1,9 @@
 # Product Backlog - GDPR Pseudonymizer
 
-**Last Updated:** 2026-01-23
+**Last Updated:** 2026-02-02
 **Epic 1 Status:** ✅ Complete (9/9 stories)
-**Current Epic:** Epic 2 - Core Pseudonymization Engine
+**Epic 2 Status:** ✅ Complete
+**Current Epic:** Epic 3 - CLI Interface & Batch Processing
 
 ---
 
@@ -160,6 +161,31 @@ Press Enter to continue...
 - Tab key (cycle through contexts)
 - Arrow keys (Left/Right to cycle)
 - V key (View all contexts)
+
+---
+
+### MEDIUM Priority
+
+#### FE-005: Expand Organization Pseudonym Library
+**Source:** Story 3.0 - Batch processing testing (2026-02-02)
+**Description:** Expand neutral theme organization library from 35 to 150-200 entries to support larger document corpora without exhausting the library and falling back to generic naming (Org-001, etc.)
+**Impact:** Batch processing of 15+ documents exhausts the 35-entry organization library quickly
+**Effort:** Medium (2-4 hours - research + data entry)
+**Target:** Epic 4 or v1.1
+**References:**
+- [data/pseudonyms/neutral.json](../data/pseudonyms/neutral.json)
+- [docs/stories/3.0.location-org-pseudonym-libraries.story.md](stories/3.0.location-org-pseudonym-libraries.story.md#future-enhancements)
+
+**Current State:**
+- 35 organizations (20 companies + 10 agencies + 5 institutions)
+- Fallback to Org-001, Org-002, etc. when exhausted (fixed 2026-02-02)
+
+**Recommended Expansion:**
+- 80-100 companies (diverse sectors: tech, manufacturing, finance, retail, healthcare)
+- 40-50 agencies (government agencies, NGOs, research bodies)
+- 30-50 institutions (universities, hospitals, professional associations)
+
+**Note:** Location library (80 entries) may also need expansion for very large corpora.
 
 ---
 
