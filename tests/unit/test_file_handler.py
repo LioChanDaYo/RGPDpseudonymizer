@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 import pytest
@@ -149,6 +150,8 @@ def test_ensure_absolute_path_relative() -> None:
     relative_path = "subdir/file.txt"
     absolute_path = ensure_absolute_path(relative_path)
 
+    # Use os.path.isabs for more reliable cross-platform check
+    assert os.path.isabs(absolute_path), f"Expected absolute path, got: {absolute_path}"
     assert Path(absolute_path).is_absolute()
 
 

@@ -1,0 +1,67 @@
+# Quality Gate Decision
+# Story 3.1: Complete CLI Command Set
+
+schema: 1
+story: "3.1"
+story_title: "Complete CLI Command Set"
+gate: PASS
+status_reason: "All 7 acceptance criteria fully implemented. 155 tests pass. Security requirements (passphrase protection, config rejection, secure deletion) validated. No blocking issues found."
+reviewer: "Quinn (Test Architect)"
+updated: "2026-02-02T12:00:00Z"
+
+waiver: { active: false }
+
+top_issues: []
+
+# Quality metrics
+quality_score: 95
+expires: "2026-02-16T00:00:00Z"
+
+evidence:
+  tests_reviewed: 155
+  tests_passing: 155
+  risks_identified: 0
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7]
+    ac_gaps: []
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: "Passphrase never stored in config files. PassphraseInConfigError properly raised. 3-pass secure deletion implemented."
+  performance:
+    status: PASS
+    notes: "Sequential batch processing appropriate for Story 3.1 scope. Parallel processing deferred to Story 3.3."
+  reliability:
+    status: PASS
+    notes: "Comprehensive error handling with proper exit codes. KeyboardInterrupt handled gracefully."
+  maintainability:
+    status: PASS
+    notes: "Consistent command structure. Shared utilities for passphrase and config. Clear docstrings with examples."
+
+risk_summary:
+  totals: { critical: 0, high: 0, medium: 0, low: 0 }
+  recommendations:
+    must_fix: []
+    monitor: []
+
+recommendations:
+  immediate: []
+  future:
+    - action: "Extract _format_size() helper to formatters.py to reduce duplication"
+      refs: ["gdpr_pseudonymizer/cli/commands/destroy_table.py:199", "gdpr_pseudonymizer/cli/commands/stats.py:218"]
+
+coverage:
+  overall_cli: "75.80%"
+  new_story_files:
+    config.py: "98.28%"
+    passphrase.py: "100.00%"
+    init.py: "94.00%"
+    batch.py: "93.68%"
+    list_mappings.py: "89.60%"
+    validate_mappings.py: "94.44%"
+    stats.py: "85.27%"
+    import_mappings.py: "81.82%"
+    export.py: "87.50%"
+    destroy_table.py: "80.37%"
+  note: "Pre-existing files (process.py, main.py, naive_data.py, validation_stub.py) have lower coverage, reducing overall percentage. New Story 3.1 code exceeds 80% coverage."

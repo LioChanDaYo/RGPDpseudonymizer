@@ -1,9 +1,9 @@
 # Product Backlog - GDPR Pseudonymizer
 
-**Last Updated:** 2026-01-30
+**Last Updated:** 2026-02-02
 **Epic 1 Status:** ✅ Complete (9/9 stories)
-**Epic 2 Status:** ✅ Complete (9/9 stories)
-**Current Status:** Alpha Release v0.1.0 - Awaiting alpha tester feedback
+**Epic 2 Status:** ✅ Complete
+**Current Epic:** Epic 3 - CLI Interface & Batch Processing
 
 ---
 
@@ -169,41 +169,37 @@ Press Enter to continue...
 
 ## 🔥 HIGH Priority Enhancements
 
-#### FE-005: LOCATION and ORGANIZATION Pseudonym Libraries ✅ ASSIGNED TO EPIC 3
+#### FE-005: LOCATION and ORGANIZATION Pseudonym Libraries ✅ COMPLETED (Story 3.0)
 **Source:** Story 2.9 Alpha Testing Preparation (discovered during quick test)
 **Description:** Add LOCATION and ORGANIZATION pseudonym libraries for all 3 themes (neutral, star_wars, lotr)
-**Current State:** Pseudonym libraries only contain PERSON entity pseudonyms (first_names, last_names). LOCATION and ORG entities are detected and validated but cannot be pseudonymized with themed pseudonyms.
-**Impact:**
-- LOCATION entities (e.g., "Paris", "Lyon", "Marseille") cannot be pseudonymized with themed alternatives
-- ORGANIZATION entities (e.g., "Acme SA", "CNRS") cannot be pseudonymized with themed alternatives
-- **Significantly limits tool utility** for documents with location/organization references
-- Core feature gap that should be addressed before v1.0 launch
-**Effort:** Medium (3-5 days)
-  - Design pseudonym structure for locations (cities, countries, regions)
-  - Design pseudonym structure for organizations (companies, universities, agencies)
-  - Populate 3 themed libraries with 50-100 entries each
-  - Update pseudonymization logic to handle non-PERSON entity types
-  - Add tests for LOCATION/ORG pseudonymization
-**Priority:** HIGH
-**Target:** Epic 3 (Week 11-13) - New story or extend existing story
-**Epic 3 Assignment:** To be determined - potential new Story 3.X or integrate into Story 3.1
-**Rationale:** Core pseudonymization feature gap; tool is incomplete without multi-entity-type support; should be part of v1.0 MVP
+**Status:** ✅ **COMPLETED** - Implemented in Story 3.0 (2026-02-02)
+**References:**
+- [docs/stories/3.0.location-org-pseudonym-libraries.story.md](stories/3.0.location-org-pseudonym-libraries.story.md)
+
+---
+
+### MEDIUM Priority
+
+#### FE-006: Expand Organization Pseudonym Library
+**Source:** Story 3.0 - Batch processing testing (2026-02-02)
+**Description:** Expand neutral theme organization library from 35 to 150-200 entries to support larger document corpora without exhausting the library and falling back to generic naming (Org-001, etc.)
+**Impact:** Batch processing of 15+ documents exhausts the 35-entry organization library quickly
+**Effort:** Medium (2-4 hours - research + data entry)
+**Target:** Epic 4 or v1.1
 **References:**
 - [data/pseudonyms/neutral.json](../data/pseudonyms/neutral.json)
-- [data/pseudonyms/star_wars.json](../data/pseudonyms/star_wars.json)
-- [data/pseudonyms/lotr.json](../data/pseudonyms/lotr.json)
+- [docs/stories/3.0.location-org-pseudonym-libraries.story.md](stories/3.0.location-org-pseudonym-libraries.story.md#future-enhancements)
 
-**Acceptance Criteria:**
-- [ ] Add `locations` field to all 3 pseudonym library JSON files
-- [ ] Add `organizations` field to all 3 pseudonym library JSON files
-- [ ] Neutral theme: 50+ French cities/regions, 30+ realistic organization names
-- [ ] Star Wars theme: 50+ Star Wars planets/locations, 30+ Star Wars organizations
-- [ ] LOTR theme: 50+ Middle-earth locations, 30+ LOTR organizations
-- [ ] Update pseudonymization logic to use location/org pseudonyms
-- [ ] Add tests verifying LOCATION and ORG entities are pseudonymized correctly
-- [ ] Update documentation to reflect LOCATION/ORG pseudonym support
+**Current State:**
+- 35 organizations (20 companies + 10 agencies + 5 institutions)
+- Fallback to Org-001, Org-002, etc. when exhausted (fixed 2026-02-02)
 
-**Note:** Alpha tester feedback (survey question #14) will still inform implementation details and validate importance.
+**Recommended Expansion:**
+- 80-100 companies (diverse sectors: tech, manufacturing, finance, retail, healthcare)
+- 40-50 agencies (government agencies, NGOs, research bodies)
+- 30-50 institutions (universities, hospitals, professional associations)
+
+**Note:** Location library (80 entries) may also need expansion for very large corpora.
 
 ---
 
