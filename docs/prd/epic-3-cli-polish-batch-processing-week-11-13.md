@@ -389,6 +389,7 @@ gdpr-pseudo process doc.txt --theme neutral
 - `gdpr-pseudo --help`: Show all commands with brief descriptions
 - `gdpr-pseudo <command> --help`: Show command-specific arguments and examples
 - Include usage examples for common workflows
+- **Bug Fix:** Correct program name display in `--help` (shows `gdpr-pseudo.cmd` on Windows instead of `gdpr-pseudo`)
 
 **Example Help Text:**
 ```
@@ -418,6 +419,7 @@ Examples:
 - Validate database path (create if doesn't exist, error if unreadable)
 - Validate theme name (suggest valid themes if invalid)
 - Validate passphrase strength (min 12 characters, warn if weak)
+- **Security:** `destroy-table` command must verify passphrase before destruction (prevents accidental deletion of wrong database)
 
 #### AC5: Optional: Visual Indicators for Batch Operations (FE-001/FE-002)
 **Conditional based on alpha tester demand** (survey question #13):
@@ -437,6 +439,10 @@ Examples:
 4. **Task 3.4.4:** Implement input validation (file exists, database valid, theme valid)
 5. **Task 3.4.5:** Optional: FE-001/FE-002 visual indicators (if alpha demand ≥3 testers)
 6. **Task 3.4.6:** Add unit tests (error scenarios, validation logic)
+7. **Task 3.4.7:** Security hygiene - Add CLI warning for `--passphrase` flag (shell history exposure risk); update help text and emit runtime warning recommending env var or interactive prompt
+8. **Task 3.4.8:** Security hygiene - Remove dead stub encryption code (`utils/encryption.py`) that was superseded by production `data/encryption.py` in Epic 2
+9. **Task 3.4.9:** Bug fix - Correct program name display in `--help` (Windows shows `gdpr-pseudo.cmd` instead of `gdpr-pseudo`)
+10. **Task 3.4.10:** Security - Add passphrase verification to `destroy-table` command before allowing database destruction
 
 **Estimated Effort:** 2-3 days (Week 13) + 1-2 hours if FE-001/FE-002 added
 
@@ -458,11 +464,13 @@ Examples:
 - Prerequisites: Python version, Poetry installation
 - Step-by-step installation: Clone repo → Install dependencies → Install spaCy model → Verify
 - Troubleshooting section: Common installation issues + solutions
+- **Command invocation:** Document clearly that during beta phase, command is `poetry run gdpr-pseudo <cmd>` (direct `gdpr-pseudo` command available after Epic 4 PyPI publication)
 
 **Content:**
 - Platform: Windows 11, macOS (Intel/ARM), Ubuntu 22.04
 - Python: 3.9-3.13 (note: 3.14+ not supported due to spaCy compatibility)
 - Poetry: 1.7+
+- **Command usage:** `poetry run gdpr-pseudo <command>` (beta) → `gdpr-pseudo <command>` (v1.0 after pip install)
 - Troubleshooting: Python version mismatch, model download failures, permission issues
 
 #### AC2: Usage Tutorial (docs/tutorial.md)

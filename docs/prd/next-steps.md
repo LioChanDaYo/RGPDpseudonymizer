@@ -13,8 +13,9 @@ Please review [docs/prd.md](docs/prd.md) and [docs/brief.md](docs/brief.md), the
 - **Key Constraints:** Maintain local-first architecture (no cloud dependencies), cross-platform desktop app (Windows/Mac/Linux), preserve security model (encrypted mapping tables)
 - **Phase 1 Integration:** GUI should wrap existing CLI core logic, not duplicate it
 - **Accessibility:** WCAG AA compliance for professional/academic contexts
+- **Internationalization (i18n):** French language support must be planned from the start (primary target audience is French-speaking researchers). Architecture must support multi-language UI from day one to avoid costly retrofitting.
 
-Deliverables: UX architecture document with wireframes, interaction patterns, and implementation guidance.
+Deliverables: UX architecture document with wireframes, interaction patterns, i18n architecture, and implementation guidance.
 
 ---
 
