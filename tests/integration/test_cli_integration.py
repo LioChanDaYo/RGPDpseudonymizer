@@ -9,6 +9,7 @@ Tests verify:
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 import pytest
@@ -16,7 +17,18 @@ from typer.testing import CliRunner
 
 from gdpr_pseudonymizer.cli.main import app
 
-runner = CliRunner()
+# CliRunner for testing CLI commands
+runner = CliRunner(mix_stderr=False)
+
+
+def strip_ansi(text: str) -> str:
+    """Strip ANSI escape codes from text for reliable string matching.
+
+    Rich adds color codes to output, which can break substring assertions.
+    This helper removes those codes so tests can match plain text.
+    """
+    ansi_pattern = re.compile(r"\x1b\[[0-9;]*m")
+    return ansi_pattern.sub("", text)
 
 
 class TestCLICommandRegistration:
@@ -47,13 +59,14 @@ class TestCLICommandRegistration:
     def test_main_help_displays(self) -> None:
         """Test main help text displays correctly."""
         result = runner.invoke(app, ["--help"])
+        output = strip_ansi(result.stdout)
 
         assert result.exit_code == 0
-        assert "GDPR-compliant pseudonymization tool" in result.stdout
-        assert "--version" in result.stdout
-        assert "--config" in result.stdout
-        assert "--verbose" in result.stdout
-        assert "--quiet" in result.stdout
+        assert "GDPR-compliant pseudonymization tool" in output
+        assert "--version" in output
+        assert "--config" in output
+        assert "--verbose" in output
+        assert "--quiet" in output
 
 
 class TestCommandHelp:
@@ -140,10 +153,11 @@ pseudonymization:
     def test_verbose_and_quiet_flags_exist(self) -> None:
         """Test that both --verbose and --quiet flags are available."""
         result = runner.invoke(app, ["--help"])
+        output = strip_ansi(result.stdout)
 
         assert result.exit_code == 0
-        assert "--verbose" in result.stdout
-        assert "--quiet" in result.stdout
+        assert "--verbose" in output
+        assert "--quiet" in output
 
 
 class TestCommandExecution:
