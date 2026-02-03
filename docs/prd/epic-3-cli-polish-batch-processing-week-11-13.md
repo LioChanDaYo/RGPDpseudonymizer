@@ -443,6 +443,11 @@ Examples:
 8. **Task 3.4.8:** Security hygiene - Remove dead stub encryption code (`utils/encryption.py`) that was superseded by production `data/encryption.py` in Epic 2
 9. **Task 3.4.9:** Bug fix - Correct program name display in `--help` (Windows shows `gdpr-pseudo.cmd` instead of `gdpr-pseudo`)
 10. **Task 3.4.10:** Security - Add passphrase verification to `destroy-table` command before allowing database destruction
+11. **Task 3.4.11:** UX - Auto-accept known entities in batch validation (FE-006)
+    - During batch processing, entities with existing DB mappings should be auto-accepted in validation workflow
+    - Reduces validation fatigue for multi-file batches with recurring entities (e.g., "Paris" validated in file 1 shouldn't require re-validation in file 2)
+    - Show count of auto-accepted entities: "Auto-accepted 12 known entities"
+    - Discovered during Story 3.2 manual testing
 
 **Estimated Effort:** 2-3 days (Week 13) + 1-2 hours if FE-001/FE-002 added
 

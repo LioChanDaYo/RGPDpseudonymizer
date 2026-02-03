@@ -13,7 +13,8 @@ from pathlib import Path
 from typing import Optional
 
 import typer
-from rich.console import Console
+from rich.console import Console, Group
+from rich.live import Live
 from rich.progress import (
     BarColumn,
     Progress,
@@ -23,9 +24,11 @@ from rich.progress import (
     TimeElapsedColumn,
 )
 from rich.table import Table
+from rich.text import Text
 
 from gdpr_pseudonymizer.cli.formatters import format_error_message
 from gdpr_pseudonymizer.cli.passphrase import resolve_passphrase
+from gdpr_pseudonymizer.cli.progress import ETAColumn, ProgressTracker
 from gdpr_pseudonymizer.core.document_processor import DocumentProcessor
 from gdpr_pseudonymizer.data.database import init_database
 from gdpr_pseudonymizer.utils.logger import configure_logging, get_logger
@@ -231,19 +234,56 @@ def batch_command(
 
         # Process files with progress bar
         batch_result = BatchResult(total_files=len(files))
+        progress_tracker = ProgressTracker(total_files=len(files))
         start_time = time.time()
 
-        with Progress(
+        # Create progress bar with ETA display
+        progress = Progress(
             SpinnerColumn(),
             TextColumn("[progress.description]{task.description}"),
             BarColumn(),
             TaskProgressColumn(),
+            TextColumn("["),
             TimeElapsedColumn(),
-            console=console,
-        ) as progress:
-            task = progress.add_task("Processing files...", total=len(files))
+            ETAColumn(),
+            TextColumn("]"),
+            expand=False,
+        )
+        task = progress.add_task(
+            "Processing Batch...",
+            total=len(files),
+            eta="calculating...",
+        )
 
+        # Current file and stats displays
+        current_file_text = Text("Current: ", style="dim")
+        stats_text = Text("Entities: 0 | New: 0 | Reused: 0", style="dim")
+
+        def make_progress_group() -> Group:
+            """Create grouped display with progress bar and stats."""
+            return Group(
+                progress,
+                current_file_text,
+                stats_text,
+            )
+
+        with Live(
+            make_progress_group(), console=console, refresh_per_second=10
+        ) as live:
             for file_path in files:
+                file_start_time = time.time()
+
+                # Update current file being processed
+                progress_tracker.set_current_file(file_path.name)
+
+                # Truncate long filenames
+                display_name = file_path.name
+                if len(display_name) > 40:
+                    display_name = "..." + display_name[-37:]
+                current_file_text = Text(f"Current: {display_name}", style="cyan")
+
+                live.update(make_progress_group())
+
                 # Generate output path
                 if output_dir:
                     output_dir.mkdir(parents=True, exist_ok=True)
@@ -257,21 +297,47 @@ def batch_command(
                     )
 
                 try:
-                    # Process document
+                    # Stop live display during document processing
+                    # This allows the validation workflow UI to display properly
+                    live.stop()
+
+                    # Process document (includes interactive validation)
                     result = processor.process_document(
                         input_path=str(file_path),
                         output_path=str(output_file),
                     )
+
+                    # Restart live display for progress updates
+                    live.start()
+
+                    file_processing_time = time.time() - file_start_time
 
                     if result.success:
                         batch_result.successful_files += 1
                         batch_result.total_entities += result.entities_detected
                         batch_result.new_entities += result.entities_new
                         batch_result.reused_entities += result.entities_reused
+
+                        # Update progress tracker
+                        progress_tracker.update_file_complete(
+                            file_name=file_path.name,
+                            processing_time=file_processing_time,
+                            entities_detected=result.entities_detected,
+                            pseudonyms_new=result.entities_new,
+                            pseudonyms_reused=result.entities_reused,
+                        )
                     else:
                         batch_result.failed_files += 1
                         batch_result.errors.append(
                             f"{file_path.name}: {result.error_message}"
+                        )
+                        # Still track time for failed files for ETA accuracy
+                        progress_tracker.update_file_complete(
+                            file_name=file_path.name,
+                            processing_time=file_processing_time,
+                            entities_detected=0,
+                            pseudonyms_new=0,
+                            pseudonyms_reused=0,
                         )
 
                         if not continue_on_error:
@@ -279,6 +345,11 @@ def batch_command(
                             break
 
                 except Exception as e:
+                    # Ensure live display is restarted even on error
+                    if not live.is_started:
+                        live.start()
+
+                    file_processing_time = time.time() - file_start_time
                     batch_result.failed_files += 1
                     batch_result.errors.append(f"{file_path.name}: {str(e)}")
                     logger.error(
@@ -286,14 +357,35 @@ def batch_command(
                         file=str(file_path),
                         error=str(e),
                     )
+                    # Track time for failed files
+                    progress_tracker.update_file_complete(
+                        file_name=file_path.name,
+                        processing_time=file_processing_time,
+                        entities_detected=0,
+                        pseudonyms_new=0,
+                        pseudonyms_reused=0,
+                    )
 
                     if not continue_on_error:
                         progress.update(task, description="✗ Processing stopped")
                         break
 
-                progress.advance(task)
+                # Update progress display with live stats
+                entities = progress_tracker.entities_detected
+                new_p = progress_tracker.pseudonyms_new
+                reused_p = progress_tracker.pseudonyms_reused
+                stats_text = Text(
+                    f"Entities: {entities:,} | New: {new_p:,} | Reused: {reused_p:,}"
+                )
 
+                progress.update(task, eta=progress_tracker.calculate_eta())
+                progress.advance(task)
+                live.update(make_progress_group())
+
+            # Completion state
             progress.update(task, description="✓ Processing complete")
+            current_file_text = Text("")
+            live.update(make_progress_group())
 
         batch_result.total_time_seconds = time.time() - start_time
 
