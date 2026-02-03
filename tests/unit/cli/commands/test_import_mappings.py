@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -9,6 +10,12 @@ import typer
 from typer.testing import CliRunner
 
 from gdpr_pseudonymizer.cli.commands.import_mappings import import_mappings_command
+
+
+def strip_ansi(text: str) -> str:
+    """Strip ANSI escape codes from text for reliable string matching."""
+    ansi_pattern = re.compile(r"\x1b\[[0-9;]*m")
+    return ansi_pattern.sub("", text)
 
 
 def create_test_app() -> typer.Typer:
@@ -112,10 +119,11 @@ class TestImportMappingsCommand:
 
     def test_import_help_text(self) -> None:
         result = runner.invoke(app, ["import-mappings", "--help"])
+        output = strip_ansi(result.stdout)
 
         assert result.exit_code == 0
-        assert "Import mappings from another database" in result.stdout
-        assert "--source-passphrase" in result.stdout
+        assert "Import mappings from another database" in output
+        assert "--source-passphrase" in output
 
     def test_import_empty_source(self, tmp_path: Path) -> None:
         """Test import from empty source database."""

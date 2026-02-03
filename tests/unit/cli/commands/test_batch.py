@@ -11,6 +11,7 @@ Tests cover:
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from pathlib import Path
 from unittest.mock import patch
@@ -23,6 +24,15 @@ from gdpr_pseudonymizer.cli.commands.batch import (
     batch_command,
     collect_files,
 )
+
+
+def strip_ansi(text: str) -> str:
+    """Strip ANSI escape codes from text for reliable string matching.
+
+    Rich adds color codes to output, which can break substring assertions.
+    """
+    ansi_pattern = re.compile(r"\x1b\[[0-9;]*m")
+    return ansi_pattern.sub("", text)
 
 
 def create_test_app() -> typer.Typer:
@@ -339,13 +349,14 @@ class TestBatchCommand:
     def test_batch_help_text(self) -> None:
         """Test batch command help text is displayed."""
         result = runner.invoke(app, ["batch", "--help"])
+        output = strip_ansi(result.stdout)
 
         assert result.exit_code == 0
-        assert "Process multiple documents" in result.stdout
-        assert "--output" in result.stdout
-        assert "--theme" in result.stdout
-        assert "--recursive" in result.stdout
-        assert "--continue-on-error" in result.stdout
+        assert "Process multiple documents" in output
+        assert "--output" in output
+        assert "--theme" in output
+        assert "--recursive" in output
+        assert "--continue-on-error" in output
 
     def test_batch_keyboard_interrupt(self, tmp_path: Path) -> None:
         """Test batch command handles keyboard interrupt."""

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 import typer
@@ -11,6 +12,12 @@ from gdpr_pseudonymizer.cli.commands.destroy_table import (
     _secure_delete,
     destroy_table_command,
 )
+
+
+def strip_ansi(text: str) -> str:
+    """Strip ANSI escape codes from text for reliable string matching."""
+    ansi_pattern = re.compile(r"\x1b\[[0-9;]*m")
+    return ansi_pattern.sub("", text)
 
 
 def create_test_app() -> typer.Typer:
@@ -96,10 +103,11 @@ class TestDestroyTableCommand:
 
     def test_destroy_help_text(self) -> None:
         result = runner.invoke(app, ["destroy-table", "--help"])
+        output = strip_ansi(result.stdout)
 
         assert result.exit_code == 0
-        assert "Securely delete" in result.stdout
-        assert "--force" in result.stdout
+        assert "Securely delete" in output
+        assert "--force" in output
 
 
 class TestSecureDelete:

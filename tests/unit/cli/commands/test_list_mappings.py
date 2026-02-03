@@ -11,6 +11,7 @@ Tests cover:
 
 from __future__ import annotations
 
+import re
 from datetime import datetime
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -22,6 +23,12 @@ from gdpr_pseudonymizer.cli.commands.list_mappings import (
     _export_to_csv,
     list_mappings_command,
 )
+
+
+def strip_ansi(text: str) -> str:
+    """Strip ANSI escape codes from text for reliable string matching."""
+    ansi_pattern = re.compile(r"\x1b\[[0-9;]*m")
+    return ansi_pattern.sub("", text)
 
 
 def create_test_app() -> typer.Typer:
@@ -273,12 +280,13 @@ class TestListMappingsCommand:
     def test_list_mappings_help_text(self) -> None:
         """Test list-mappings command help text is displayed."""
         result = runner.invoke(app, ["list-mappings", "--help"])
+        output = strip_ansi(result.stdout)
 
         assert result.exit_code == 0
-        assert "View entity-to-pseudonym mappings" in result.stdout
-        assert "--type" in result.stdout
-        assert "--search" in result.stdout
-        assert "--export" in result.stdout
+        assert "View entity-to-pseudonym mappings" in output
+        assert "--type" in output
+        assert "--search" in output
+        assert "--export" in output
 
     def test_list_mappings_wrong_passphrase(self, tmp_path: Path) -> None:
         """Test listing mappings with wrong passphrase."""

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from datetime import datetime
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -10,6 +11,12 @@ import typer
 from typer.testing import CliRunner
 
 from gdpr_pseudonymizer.cli.commands.export import export_command
+
+
+def strip_ansi(text: str) -> str:
+    """Strip ANSI escape codes from text for reliable string matching."""
+    ansi_pattern = re.compile(r"\x1b\[[0-9;]*m")
+    return ansi_pattern.sub("", text)
 
 
 def create_test_app() -> typer.Typer:
@@ -181,12 +188,13 @@ class TestExportCommand:
 
     def test_export_help_text(self) -> None:
         result = runner.invoke(app, ["export", "--help"])
+        output = strip_ansi(result.stdout)
 
         assert result.exit_code == 0
-        assert "Export audit log" in result.stdout
-        assert "--type" in result.stdout
-        assert "--from" in result.stdout
-        assert "--to" in result.stdout
+        assert "Export audit log" in output
+        assert "--type" in output
+        assert "--from" in output
+        assert "--to" in output
 
     def test_export_empty_operations(self, tmp_path: Path) -> None:
         """Test export with no operations."""

@@ -11,6 +11,7 @@ Tests cover:
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 from unittest.mock import patch
 
@@ -19,6 +20,12 @@ import typer
 from typer.testing import CliRunner
 
 from gdpr_pseudonymizer.cli.commands.init import init_command
+
+
+def strip_ansi(text: str) -> str:
+    """Strip ANSI escape codes from text for reliable string matching."""
+    ansi_pattern = re.compile(r"\x1b\[[0-9;]*m")
+    return ansi_pattern.sub("", text)
 
 
 def create_test_app() -> typer.Typer:
@@ -170,12 +177,13 @@ class TestInitCommand:
     def test_init_help_text(self) -> None:
         """Test init command help text is displayed."""
         result = runner.invoke(app, ["init", "--help"])
+        output = strip_ansi(result.stdout)
 
         assert result.exit_code == 0
-        assert "Initialize a new encrypted mapping database" in result.stdout
-        assert "--db" in result.stdout
-        assert "--passphrase" in result.stdout
-        assert "--force" in result.stdout
+        assert "Initialize a new encrypted mapping database" in output
+        assert "--db" in output
+        assert "--passphrase" in output
+        assert "--force" in output
 
     def test_init_keyboard_interrupt(self, tmp_path: Path) -> None:
         """Test init command handles keyboard interrupt gracefully."""
