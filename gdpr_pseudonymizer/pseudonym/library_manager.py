@@ -632,15 +632,39 @@ class LibraryBasedPseudonymManager(PseudonymManager):
     def _generate_fallback_name(self, entity_type: str) -> str:
         """Generate systematic fallback name when library exhausted.
 
+        Generates unique fallback names like "Org-001", "Location-002", etc.
+        Loops until finding a name not already in _used_pseudonyms to prevent
+        collisions with previously assigned pseudonyms.
+
         Args:
             entity_type: Entity type (PERSON, LOCATION, ORG)
 
         Returns:
             Fallback name in format "{Type}-{Counter:03d}"
         """
-        self._fallback_counters[entity_type] += 1
-        counter = self._fallback_counters[entity_type]
-        return f"{entity_type.title()}-{counter:03d}"
+        # Safety limit to prevent infinite loops
+        max_attempts = 10000
+
+        for _ in range(max_attempts):
+            self._fallback_counters[entity_type] += 1
+            counter = self._fallback_counters[entity_type]
+            fallback_name = f"{entity_type.title()}-{counter:03d}"
+
+            # Check if this fallback name is already used
+            if fallback_name not in self._used_pseudonyms:
+                return fallback_name
+
+            # Name already used, continue to next counter value
+            logger.debug(
+                "Fallback name %s already in use, incrementing counter",
+                fallback_name,
+            )
+
+        # Should never reach here in normal usage
+        raise RuntimeError(
+            f"Unable to generate unique fallback name for {entity_type} "
+            f"after {max_attempts} attempts"
+        )
 
     def load_existing_mappings(
         self, existing_entities: list[Any]
@@ -650,10 +674,18 @@ class LibraryBasedPseudonymManager(PseudonymManager):
         Reconstructs _component_mappings from existing database entities to ensure
         new assignments don't collide with previously assigned pseudonyms.
 
+        Also restores fallback counters from existing fallback-style pseudonyms
+        (e.g., "Org-001", "Location-002") to ensure new fallback names don't collide.
+
         Args:
             existing_entities: List of Entity objects from MappingRepository.find_all()
         """
+        import re
+
         loaded_components = 0
+
+        # Pattern to match fallback-style pseudonyms: "Person-001", "Location-002", "Org-003"
+        fallback_pattern = re.compile(r"^(Person|Location|Org)-(\d+)$")
 
         for entity in existing_entities:
             # Only PERSON entities have component-level tracking
@@ -672,10 +704,30 @@ class LibraryBasedPseudonymManager(PseudonymManager):
             # Track full pseudonym as used
             self._used_pseudonyms.add(entity.pseudonym_full)
 
+            # Check if this is a fallback-style pseudonym and update counter
+            match = fallback_pattern.match(entity.pseudonym_full)
+            if match:
+                entity_type_str = match.group(1).upper()
+                counter_value = int(match.group(2))
+
+                # Update counter to max of current and loaded value
+                if entity_type_str in self._fallback_counters:
+                    if counter_value > self._fallback_counters[entity_type_str]:
+                        self._fallback_counters[entity_type_str] = counter_value
+                        logger.debug(
+                            "Updated fallback counter for %s to %d",
+                            entity_type_str,
+                            counter_value,
+                        )
+
         logger.info(
-            "Loaded %d existing component mappings from database (%d entities processed)",
+            "Loaded %d existing component mappings from database (%d entities processed). "
+            "Fallback counters: PERSON=%d, LOCATION=%d, ORG=%d",
             loaded_components,
             len(existing_entities),
+            self._fallback_counters["PERSON"],
+            self._fallback_counters["LOCATION"],
+            self._fallback_counters["ORG"],
         )
 
     def check_exhaustion(self) -> float:

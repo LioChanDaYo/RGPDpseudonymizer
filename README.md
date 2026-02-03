@@ -67,7 +67,7 @@ We're actively developing v1.0 MVP with an **AI-assisted approach**:
   - Story 3.1: Complete CLI command set ✅ (8 new commands, 155+ tests, 80.56% coverage)
     - Commands: init, batch, list-mappings, validate-mappings, stats, import-mappings, export, destroy-table
     - Bug fixes: LOC/ORG fallback naming, batch excludes `*_pseudonymized.*` files
-  - Story 3.2: Interactive validation mode (planned)
+  - Story 3.2: Progress reporting for large batches ✅ (live entity counts, ETA calculation, 29 tests, 100% module coverage)
   - Story 3.3: Process-based batch parallelism (planned)
 - 📅 **Week 11-14:** Beta release, launch prep
 - 🎯 **MVP Launch:** Week 14 (estimated Q2 2026)
@@ -349,6 +349,8 @@ The validation UI provides an intuitive keyboard-driven interface for reviewing 
 ### Completed ✅
 - ✅ **Epic 2 (Week 6-10):** Core pseudonymization engine - 9/9 stories complete, Epic 2 complete, v0.1.0-alpha released
 - ✅ **Story 3.0 (Week 10):** LOCATION/ORG pseudonym libraries - Epic 3 first story, extends pseudonymization to all entity types
+- ✅ **Story 3.1 (Week 10-11):** Complete CLI command set - 8 new commands (init, batch, list-mappings, validate-mappings, stats, import-mappings, export, destroy-table), 155+ tests
+- ✅ **Story 3.2 (Week 11):** Progress reporting for large batches - Live entity counts, ETA calculation, rolling average, 29 tests with 100% module coverage
 
 ### Upcoming 📅
 - **Epic 3 (Week 11-13):** CLI polish & batch processing
@@ -485,10 +487,10 @@ poetry run pytest tests/integration/test_validation_workflow_integration.py -v
 
 ### Test Coverage
 
-- **Unit tests:** 463 tests covering validation models, UI components, encryption, database operations, audit logging, and core logic
+- **Unit tests:** 492 tests covering validation models, UI components, encryption, database operations, audit logging, progress tracking, and core logic
 - **Integration tests:** 90 tests for end-to-end workflows including validation (Story 2.0.1), encrypted database operations (Story 2.4), compositional logic, and hybrid detection
-- **Current coverage:** 86%+ across all modules (91.41% for AuditRepository)
-- **Total tests:** 553 tests (552 passed, 1 skipped)
+- **Current coverage:** 86%+ across all modules (100% for progress module, 91.41% for AuditRepository)
+- **Total tests:** 616 tests collected (600+ passed, 12 skipped)
 - **CI/CD:** Tests run on Python 3.9-3.11 across Windows, macOS, and Linux
 - **Quality gates:** All pass (Black, Ruff, mypy, pytest)
 
@@ -518,12 +520,12 @@ The integration test suite covers:
 
 ---
 
-## 📊 Project Metrics (As of 2026-01-30)
+## 📊 Project Metrics (As of 2026-02-03)
 
 | Metric | Value | Status |
 |--------|-------|--------|
-| **Development Progress** | Week 10/14 | ✅ Epic 2 Complete + Story 3.0 - v0.1.0-alpha Released |
-| **Stories Complete** | 19 (Epic 1 + Epic 2 + Story 3.0) | ✅ Epic 1 (9) + Epic 2 (9) + Story 3.0 |
+| **Development Progress** | Week 11/14 | ✅ Epic 2 Complete + Stories 3.0-3.2 - v0.1.0-alpha Released |
+| **Stories Complete** | 21 (Epic 1 + Epic 2 + Stories 3.0-3.2) | ✅ Epic 1 (9) + Epic 2 (9) + Stories 3.0, 3.1, 3.2 |
 | **Critical Bugs Found** | 1 (Story 2.8) | ✅ RESOLVED - Epic 3 Unblocked |
 | **Test Corpus Size** | 25 docs, 1,855 entities | ✅ Complete |
 | **NLP Accuracy (Baseline)** | 29.5% F1 (spaCy) | ✅ Measured |
@@ -536,7 +538,7 @@ The integration test suite covers:
 | **Audit Logging** | GDPR Article 30 compliance (operations table + JSON/CSV export) | ✅ Story 2.5 Complete |
 | **Validation UI** | Operational with deduplication | ✅ Stories 1.7, 1.9 Complete |
 | **Validation Time** | <2 min (20-30 entities), <5 min (100 entities) | ✅ Targets Met |
-| **Test Coverage** | 589 tests (475 unit + 114 integration), 86%+ coverage | ✅ All Quality Checks Pass |
+| **Test Coverage** | 616 tests (502 unit + 114 integration), 86%+ coverage | ✅ All Quality Checks Pass |
 | **Quality Gates** | Ruff, mypy, pytest | ✅ All Pass (0 issues) |
 | **Supported Languages** | French | 🇫🇷 v1.0 only |
 | **Supported Formats** | .txt, .md | 📝 v1.0 scope |
@@ -553,6 +555,6 @@ The integration test suite covers:
 
 ---
 
-**Last Updated:** 2026-01-30 (v0.1.0-alpha released: Epic 2 complete; Story 3.0 complete - LOCATION/ORG pseudonym libraries added; Alpha documentation created; Seeking 3-5 alpha testers for feedback; 589 tests (475 unit passed, all quality gates pass)
+**Last Updated:** 2026-02-03 (v0.1.0-alpha released: Epic 2 complete; Stories 3.0-3.2 complete - LOCATION/ORG pseudonym libraries, complete CLI command set, progress reporting for large batches; Alpha documentation created; Seeking 3-5 alpha testers for feedback; 616 tests, all quality gates pass)
 
-**Current Focus:** Epic 3 development - Story 3.0 complete (LOC/ORG pseudonym libraries for all 3 themes), CLI polish & batch processing features in progress
+**Current Focus:** Epic 3 development - Stories 3.0-3.2 complete (LOC/ORG pseudonym libraries, 8 CLI commands, batch progress reporting), Story 3.3 (process-based batch parallelism) next

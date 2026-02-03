@@ -519,3 +519,201 @@ class TestEdgeCases:
         assert (
             len(manager._component_mappings) >= 12
         )  # At least Marie + Dubois + 10 others
+
+
+class TestFallbackCollisionPrevention:
+    """Test suite for fallback naming collision prevention (Story 3.2 bug fix).
+
+    Bug discovered: In batch processing, numbered fallback pseudonyms like
+    "Org-001" could be reused for different entities because:
+    1. _generate_fallback_name() didn't check _used_pseudonyms
+    2. load_existing_mappings() didn't restore fallback counters
+    """
+
+    def test_generate_fallback_skips_used_names(self) -> None:
+        """Test that _generate_fallback_name() skips already-used names.
+
+        CRITICAL: If "Org-001" and "Org-002" are already used, the next
+        fallback should be "Org-003", not "Org-001".
+        """
+        manager = LibraryBasedPseudonymManager()
+        manager.load_library("neutral")
+
+        # Pre-populate _used_pseudonyms with fallback-style names
+        manager._used_pseudonyms.add("Org-001")
+        manager._used_pseudonyms.add("Org-002")
+        manager._used_pseudonyms.add("Org-003")
+
+        # Generate fallback should skip 001, 002, 003 and return 004
+        fallback = manager._generate_fallback_name("ORG")
+
+        assert fallback == "Org-004"
+        assert manager._fallback_counters["ORG"] == 4
+
+    def test_generate_fallback_skips_gaps(self) -> None:
+        """Test that fallback generation handles non-sequential used names."""
+        manager = LibraryBasedPseudonymManager()
+        manager.load_library("neutral")
+
+        # Non-sequential: 001 and 003 used, 002 not used
+        manager._used_pseudonyms.add("Location-001")
+        manager._used_pseudonyms.add("Location-003")
+
+        # First fallback should be 001 (counter starts at 0)
+        # But 001 is used, so increment to 002
+        fallback1 = manager._generate_fallback_name("LOCATION")
+        assert fallback1 == "Location-002"
+
+        # Next should be 004 (003 is used, 002 is now used)
+        manager._used_pseudonyms.add(fallback1)
+        fallback2 = manager._generate_fallback_name("LOCATION")
+        assert fallback2 == "Location-004"
+
+    def test_load_existing_mappings_restores_fallback_counters(self) -> None:
+        """Test that load_existing_mappings() restores fallback counters.
+
+        If database contains "Org-001", "Org-005", the counter should be
+        set to 5 so next fallback is "Org-006".
+        """
+        manager = LibraryBasedPseudonymManager()
+        manager.load_library("neutral")
+
+        # Create mock entities with fallback-style pseudonyms
+        mock_org1 = MagicMock()
+        mock_org1.entity_type = "ORG"
+        mock_org1.first_name = None
+        mock_org1.last_name = None
+        mock_org1.pseudonym_first = None
+        mock_org1.pseudonym_last = "Org-001"
+        mock_org1.pseudonym_full = "Org-001"
+
+        mock_org2 = MagicMock()
+        mock_org2.entity_type = "ORG"
+        mock_org2.first_name = None
+        mock_org2.last_name = None
+        mock_org2.pseudonym_first = None
+        mock_org2.pseudonym_last = "Org-005"
+        mock_org2.pseudonym_full = "Org-005"
+
+        mock_location = MagicMock()
+        mock_location.entity_type = "LOCATION"
+        mock_location.first_name = None
+        mock_location.last_name = None
+        mock_location.pseudonym_first = None
+        mock_location.pseudonym_last = "Location-003"
+        mock_location.pseudonym_full = "Location-003"
+
+        existing_entities = [mock_org1, mock_org2, mock_location]
+
+        # Load existing mappings
+        manager.load_existing_mappings(existing_entities)
+
+        # Verify counters restored to max values
+        assert manager._fallback_counters["ORG"] == 5
+        assert manager._fallback_counters["LOCATION"] == 3
+        assert manager._fallback_counters["PERSON"] == 0  # No PERSON fallbacks
+
+        # Verify next fallback names are correct
+        next_org = manager._generate_fallback_name("ORG")
+        assert next_org == "Org-006"
+
+        next_location = manager._generate_fallback_name("LOCATION")
+        assert next_location == "Location-004"
+
+    def test_batch_scenario_no_collision(self) -> None:
+        """Test batch processing scenario that previously caused bug.
+
+        Scenario:
+        - File 1: ORG library exhausts, generates "Org-001", "Org-002"
+        - File 2: NEW manager created, loads existing mappings
+        - File 2: New ORG should get "Org-003", NOT "Org-001"
+        """
+        # Simulate File 1 processing
+        manager1 = LibraryBasedPseudonymManager()
+        manager1.load_library("neutral")
+        manager1.organizations = {
+            "companies": ["TinyLib"],  # Force early exhaustion
+            "agencies": [],
+            "institutions": [],
+        }
+
+        # First ORG gets library name
+        assignment1 = manager1.assign_pseudonym(entity_type="ORG")
+        assert assignment1.pseudonym_full == "TinyLib"
+
+        # Second ORG exhausts library, gets fallback
+        assignment2 = manager1.assign_pseudonym(entity_type="ORG")
+        assert assignment2.pseudonym_full == "Org-001"
+
+        # Third ORG gets next fallback
+        assignment3 = manager1.assign_pseudonym(entity_type="ORG")
+        assert assignment3.pseudonym_full == "Org-002"
+
+        # Simulate File 2 processing - NEW manager instance
+        manager2 = LibraryBasedPseudonymManager()
+        manager2.load_library("neutral")
+        manager2.organizations = {
+            "companies": ["TinyLib"],  # Same exhausted library
+            "agencies": [],
+            "institutions": [],
+        }
+
+        # Simulate loading existing mappings from database
+        mock_entities = []
+        for pseudonym in ["TinyLib", "Org-001", "Org-002"]:
+            mock = MagicMock()
+            mock.entity_type = "ORG"
+            mock.first_name = None
+            mock.last_name = None
+            mock.pseudonym_first = None
+            mock.pseudonym_last = pseudonym
+            mock.pseudonym_full = pseudonym
+            mock_entities.append(mock)
+
+        manager2.load_existing_mappings(mock_entities)
+
+        # Verify counter restored
+        assert manager2._fallback_counters["ORG"] == 2
+
+        # New ORG in File 2 should get "Org-003", NOT "Org-001"
+        assignment4 = manager2.assign_pseudonym(entity_type="ORG")
+
+        # TinyLib is already used, so it should go to fallback
+        assert assignment4.pseudonym_full == "Org-003"
+
+    def test_mixed_library_and_fallback_pseudonyms(self) -> None:
+        """Test loading mix of library and fallback pseudonyms."""
+        manager = LibraryBasedPseudonymManager()
+        manager.load_library("neutral")
+
+        # Mix of library names and fallback names
+        mock_entities = []
+
+        # Library-style name (should NOT affect fallback counter)
+        mock1 = MagicMock()
+        mock1.entity_type = "ORG"
+        mock1.first_name = None
+        mock1.last_name = None
+        mock1.pseudonym_first = None
+        mock1.pseudonym_last = "Acme Corporation"  # Library name
+        mock1.pseudonym_full = "Acme Corporation"
+        mock_entities.append(mock1)
+
+        # Fallback name
+        mock2 = MagicMock()
+        mock2.entity_type = "ORG"
+        mock2.first_name = None
+        mock2.last_name = None
+        mock2.pseudonym_first = None
+        mock2.pseudonym_last = "Org-007"  # Fallback name
+        mock2.pseudonym_full = "Org-007"
+        mock_entities.append(mock2)
+
+        manager.load_existing_mappings(mock_entities)
+
+        # Counter should be 7 (from "Org-007")
+        assert manager._fallback_counters["ORG"] == 7
+
+        # Both should be in used pseudonyms
+        assert "Acme Corporation" in manager._used_pseudonyms
+        assert "Org-007" in manager._used_pseudonyms

@@ -169,4 +169,35 @@
 8. **AC8:** Success metrics tracking setup: User count, downloads, GitHub stars, issue volume, community activity.
 
 ---
+
+## Future Enhancements (Post-Launch Backlog)
+
+These items were identified during Phase 1 development but deferred to post-launch or Phase 2:
+
+### FE-007: Gender-Aware Pseudonym Assignment for French Names
+
+**Source:** Story 3.2 (user feedback during batch processing testing)
+
+**Problem:**
+Currently, pseudonym assignment does not preserve gender for PERSON entities when using French pseudonyms. The NER detectors (spaCy, Stanza) identify PERSON entities but do not provide gender classification. As a result:
+- `PseudonymLibraryManager.get_pseudonym()` receives `gender=None`
+- Falls back to using combined male+female+neutral names list
+- A female name like "Marie Dupont" may receive a male pseudonym like "Jean Martin"
+
+**Impact:**
+- Reduces utility for LLM analysis where gender context matters
+- May affect document coherence (pronouns, gendered references)
+- Less natural pseudonymized output for French-language documents
+
+**Potential Solutions:**
+1. **LLM-based gender detection:** Use Claude/GPT to classify PERSON entities by gender before pseudonym assignment
+2. **Name-based heuristic:** Build French name→gender lookup (though error-prone for unisex names)
+3. **Context-based inference:** Analyze surrounding pronouns/adjectives for gender hints
+4. **User validation extension:** Add gender selection to validation workflow
+
+**Priority:** Medium (enhances quality but not blocking for core functionality)
+
+**Effort Estimate:** Story-sized (2-3 days)
+
+---
 
