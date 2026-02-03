@@ -196,7 +196,10 @@ class TestImportMappingsCommand:
             )
 
         assert result.exit_code == 1
-        assert "Source Database Error" in result.stdout or "Authentication Failed" in result.stdout
+        assert (
+            "Source Database Error" in result.stdout
+            or "Authentication Failed" in result.stdout
+        )
 
     def test_import_unexpected_error(self, tmp_path: Path) -> None:
         """Test import with unexpected error."""

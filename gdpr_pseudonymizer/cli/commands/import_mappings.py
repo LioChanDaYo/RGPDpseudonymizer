@@ -131,7 +131,9 @@ def import_mappings_command(
             task = progress.add_task("Reading source database...", total=None)
 
             try:
-                with open_database(str(source_db), source_resolved_passphrase) as source_session:
+                with open_database(
+                    str(source_db), source_resolved_passphrase
+                ) as source_session:
                     source_repo = SQLiteMappingRepository(source_session)
                     source_entities = source_repo.find_all()
                     progress.update(
@@ -167,7 +169,9 @@ def import_mappings_command(
                         continue
 
                     # Prompt user for duplicate
-                    console.print(f"\n[yellow]Duplicate found:[/yellow] {entity.full_name}")
+                    console.print(
+                        f"\n[yellow]Duplicate found:[/yellow] {entity.full_name}"
+                    )
                     console.print(f"  Existing pseudonym: {existing.pseudonym_full}")
                     console.print(f"  Import pseudonym:   {entity.pseudonym_full}")
 

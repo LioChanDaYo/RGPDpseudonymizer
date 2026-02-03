@@ -94,9 +94,7 @@ class TestListMappingsCommand:
             mock_open_db.return_value.__exit__ = MagicMock(return_value=False)
             mock_repo.return_value.find_all.return_value = mock_entities
 
-            result = runner.invoke(
-                app, ["list-mappings", "--db", str(db_path)]
-            )
+            result = runner.invoke(app, ["list-mappings", "--db", str(db_path)])
 
         assert result.exit_code == 0
         assert "Entity Mappings" in result.stdout
@@ -128,7 +126,9 @@ class TestListMappingsCommand:
             )
 
             # Verify find_all was called with entity_type
-            mock_repo.return_value.find_all.assert_called_once_with(entity_type="PERSON")
+            mock_repo.return_value.find_all.assert_called_once_with(
+                entity_type="PERSON"
+            )
 
         assert result.exit_code == 0
 
@@ -151,7 +151,9 @@ class TestListMappingsCommand:
 
         mock_entities = [
             create_mock_entity(full_name="Marie Dubois", pseudonym_full="Leia Organa"),
-            create_mock_entity(full_name="Jean Martin", pseudonym_full="Luke Skywalker"),
+            create_mock_entity(
+                full_name="Jean Martin", pseudonym_full="Luke Skywalker"
+            ),
         ]
 
         with patch(
@@ -228,9 +230,7 @@ class TestListMappingsCommand:
             mock_open_db.return_value.__exit__ = MagicMock(return_value=False)
             mock_repo.return_value.find_all.return_value = []
 
-            result = runner.invoke(
-                app, ["list-mappings", "--db", str(db_path)]
-            )
+            result = runner.invoke(app, ["list-mappings", "--db", str(db_path)])
 
         assert result.exit_code == 0
         assert "No mappings found" in result.stdout
@@ -249,9 +249,7 @@ class TestListMappingsCommand:
         db_path = tmp_path / "test.db"
         db_path.touch()
 
-        mock_entities = [
-            create_mock_entity(full_name=f"Person {i}") for i in range(10)
-        ]
+        mock_entities = [create_mock_entity(full_name=f"Person {i}") for i in range(10)]
 
         with patch(
             "gdpr_pseudonymizer.cli.commands.list_mappings.resolve_passphrase"
@@ -295,9 +293,7 @@ class TestListMappingsCommand:
             mock_resolve.return_value = "wrongpassphrase123!"
             mock_open_db.side_effect = ValueError("Incorrect passphrase")
 
-            result = runner.invoke(
-                app, ["list-mappings", "--db", str(db_path)]
-            )
+            result = runner.invoke(app, ["list-mappings", "--db", str(db_path)])
 
         assert result.exit_code == 1
         assert "Authentication Failed" in result.stdout

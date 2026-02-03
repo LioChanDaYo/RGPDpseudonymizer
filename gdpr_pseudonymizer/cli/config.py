@@ -182,11 +182,7 @@ def merge_config_dicts(
     result = base.copy()
 
     for key, value in override.items():
-        if (
-            key in result
-            and isinstance(result[key], dict)
-            and isinstance(value, dict)
-        ):
+        if key in result and isinstance(result[key], dict) and isinstance(value, dict):
             # Recursively merge nested dicts
             result[key] = merge_config_dicts(result[key], value)
         else:

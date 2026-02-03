@@ -112,13 +112,19 @@ def init_command(
                 progress.update(task, description="✓ Database initialized")
             except ValueError as e:
                 progress.update(task, description="✗ Initialization failed")
-                console.print(f"\n[bold red]Database initialization failed:[/bold red] {e}")
+                console.print(
+                    f"\n[bold red]Database initialization failed:[/bold red] {e}"
+                )
                 sys.exit(1)
 
         # Success message
-        console.print("\n[bold green]✓ Database Initialized Successfully[/bold green]\n")
+        console.print(
+            "\n[bold green]✓ Database Initialized Successfully[/bold green]\n"
+        )
         console.print(f"[bold]Database path:[/bold] {db_file.absolute()}")
-        console.print("\n[dim]You can now use 'gdpr-pseudo process' to pseudonymize documents.[/dim]")
+        console.print(
+            "\n[dim]You can now use 'gdpr-pseudo process' to pseudonymize documents.[/dim]"
+        )
 
         logger.info(
             "database_initialized",

@@ -160,9 +160,7 @@ def batch_command(
         files = collect_files(input_path, recursive)
 
         if not files:
-            console.print(
-                f"[yellow]No supported files found in {input_path}[/yellow]"
-            )
+            console.print(f"[yellow]No supported files found in {input_path}[/yellow]")
             console.print(
                 f"[dim]Supported extensions: {', '.join(SUPPORTED_EXTENSIONS)}[/dim]"
             )
@@ -200,7 +198,9 @@ def batch_command(
                     init_database(db_path, resolved_passphrase)
                     progress.update(task, description="✓ Database initialized")
                 except ValueError as e:
-                    console.print(f"\n[bold red]Database initialization failed:[/bold red] {e}")
+                    console.print(
+                        f"\n[bold red]Database initialization failed:[/bold red] {e}"
+                    )
                     sys.exit(1)
             console.print()
 
@@ -247,9 +247,14 @@ def batch_command(
                 # Generate output path
                 if output_dir:
                     output_dir.mkdir(parents=True, exist_ok=True)
-                    output_file = output_dir / f"{file_path.stem}_pseudonymized{file_path.suffix}"
+                    output_file = (
+                        output_dir / f"{file_path.stem}_pseudonymized{file_path.suffix}"
+                    )
                 else:
-                    output_file = file_path.parent / f"{file_path.stem}_pseudonymized{file_path.suffix}"
+                    output_file = (
+                        file_path.parent
+                        / f"{file_path.stem}_pseudonymized{file_path.suffix}"
+                    )
 
                 try:
                     # Process document
@@ -265,7 +270,9 @@ def batch_command(
                         batch_result.reused_entities += result.entities_reused
                     else:
                         batch_result.failed_files += 1
-                        batch_result.errors.append(f"{file_path.name}: {result.error_message}")
+                        batch_result.errors.append(
+                            f"{file_path.name}: {result.error_message}"
+                        )
 
                         if not continue_on_error:
                             progress.update(task, description="✗ Processing stopped")
@@ -335,15 +342,9 @@ def _display_batch_summary(result: BatchResult) -> None:
     table.add_column("Value", justify="right")
 
     table.add_row("Total files", str(result.total_files))
-    table.add_row(
-        "Successful",
-        f"[green]{result.successful_files}[/green]"
-    )
+    table.add_row("Successful", f"[green]{result.successful_files}[/green]")
     if result.failed_files > 0:
-        table.add_row(
-            "Failed",
-            f"[red]{result.failed_files}[/red]"
-        )
+        table.add_row("Failed", f"[red]{result.failed_files}[/red]")
     table.add_row("", "")
     table.add_row("Total entities", str(result.total_entities))
     table.add_row("New entities", str(result.new_entities))

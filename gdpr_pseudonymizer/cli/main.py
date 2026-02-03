@@ -110,7 +110,9 @@ def main(
     # Load and validate config file if specified
     if config is not None:
         if not config.exists():
-            console.print(f"[bold red]Error:[/bold red] Config file not found: {config}")
+            console.print(
+                f"[bold red]Error:[/bold red] Config file not found: {config}"
+            )
             raise typer.Exit(1)
 
         try:

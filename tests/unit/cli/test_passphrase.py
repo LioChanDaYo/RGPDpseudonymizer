@@ -21,7 +21,9 @@ from gdpr_pseudonymizer.cli.passphrase import resolve_passphrase
 class TestResolvePassphrasePriority:
     """Tests for passphrase resolution priority."""
 
-    def test_cli_passphrase_highest_priority(self, monkeypatch: pytest.MonkeyPatch) -> None:
+    def test_cli_passphrase_highest_priority(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         """CLI passphrase should be used even if env var is set."""
         monkeypatch.setenv("GDPR_PSEUDO_PASSPHRASE", "env_passphrase123")
 
@@ -45,9 +47,7 @@ class TestResolvePassphrasePriority:
         """Interactive prompt is used when no CLI or env passphrase."""
         monkeypatch.delenv("GDPR_PSEUDO_PASSPHRASE", raising=False)
 
-        with patch(
-            "gdpr_pseudonymizer.cli.passphrase.typer.prompt"
-        ) as mock_prompt:
+        with patch("gdpr_pseudonymizer.cli.passphrase.typer.prompt") as mock_prompt:
             mock_prompt.return_value = "prompted_passphrase123!"
 
             result = resolve_passphrase(cli_passphrase=None)
@@ -65,9 +65,7 @@ class TestResolvePassphraseConfirmation:
         """Confirmation prompt is shown when confirm=True."""
         monkeypatch.delenv("GDPR_PSEUDO_PASSPHRASE", raising=False)
 
-        with patch(
-            "gdpr_pseudonymizer.cli.passphrase.typer.prompt"
-        ) as mock_prompt:
+        with patch("gdpr_pseudonymizer.cli.passphrase.typer.prompt") as mock_prompt:
             mock_prompt.side_effect = [
                 "new_passphrase123!",
                 "new_passphrase123!",  # Confirmation matches
@@ -78,15 +76,11 @@ class TestResolvePassphraseConfirmation:
         assert mock_prompt.call_count == 2
         assert result == "new_passphrase123!"
 
-    def test_confirmation_mismatch_exits(
-        self, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    def test_confirmation_mismatch_exits(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Mismatched confirmation exits with error."""
         monkeypatch.delenv("GDPR_PSEUDO_PASSPHRASE", raising=False)
 
-        with patch(
-            "gdpr_pseudonymizer.cli.passphrase.typer.prompt"
-        ) as mock_prompt:
+        with patch("gdpr_pseudonymizer.cli.passphrase.typer.prompt") as mock_prompt:
             mock_prompt.side_effect = [
                 "passphrase_one123!",
                 "passphrase_two123!",  # Different!
@@ -103,9 +97,7 @@ class TestResolvePassphraseConfirmation:
         """No confirmation prompt when confirm=False."""
         monkeypatch.delenv("GDPR_PSEUDO_PASSPHRASE", raising=False)
 
-        with patch(
-            "gdpr_pseudonymizer.cli.passphrase.typer.prompt"
-        ) as mock_prompt:
+        with patch("gdpr_pseudonymizer.cli.passphrase.typer.prompt") as mock_prompt:
             mock_prompt.return_value = "passphrase_123456!"
 
             result = resolve_passphrase(cli_passphrase=None, confirm=False)

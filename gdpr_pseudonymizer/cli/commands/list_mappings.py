@@ -133,7 +133,8 @@ def list_mappings_command(
             if search:
                 search_lower = search.lower()
                 entities = [
-                    e for e in entities
+                    e
+                    for e in entities
                     if search_lower in e.full_name.lower()
                     or search_lower in e.pseudonym_full.lower()
                 ]
@@ -148,7 +149,7 @@ def list_mappings_command(
                 if entity_type:
                     console.print(f"[dim]Filter: type={entity_type}[/dim]")
                 if search:
-                    console.print(f"[dim]Filter: search=\"{search}\"[/dim]")
+                    console.print(f'[dim]Filter: search="{search}"[/dim]')
                 sys.exit(0)
 
             # Export to CSV if requested
@@ -231,7 +232,7 @@ def _display_mappings_table(
         if type_filter:
             filter_parts.append(f"type={type_filter}")
         if search_filter:
-            filter_parts.append(f"search=\"{search_filter}\"")
+            filter_parts.append(f'search="{search_filter}"')
         console.print(f"[dim]Filters: {', '.join(filter_parts)}[/dim]\n")
 
     # Create table
@@ -297,18 +298,20 @@ def _export_to_csv(entities: list[Entity], output_path: Path) -> None:
         writer.writeheader()
 
         for entity in entities:
-            writer.writerow({
-                "entity_type": entity.entity_type,
-                "full_name": entity.full_name,
-                "first_name": entity.first_name,
-                "last_name": entity.last_name,
-                "pseudonym_full": entity.pseudonym_full,
-                "pseudonym_first": entity.pseudonym_first,
-                "pseudonym_last": entity.pseudonym_last,
-                "theme": entity.theme,
-                "confidence_score": entity.confidence_score,
-                "is_ambiguous": entity.is_ambiguous,
-                "first_seen_timestamp": entity.first_seen_timestamp.isoformat()
-                if entity.first_seen_timestamp
-                else "",
-            })
+            writer.writerow(
+                {
+                    "entity_type": entity.entity_type,
+                    "full_name": entity.full_name,
+                    "first_name": entity.first_name,
+                    "last_name": entity.last_name,
+                    "pseudonym_full": entity.pseudonym_full,
+                    "pseudonym_first": entity.pseudonym_first,
+                    "pseudonym_last": entity.pseudonym_last,
+                    "theme": entity.theme,
+                    "confidence_score": entity.confidence_score,
+                    "is_ambiguous": entity.is_ambiguous,
+                    "first_seen_timestamp": entity.first_seen_timestamp.isoformat()
+                    if entity.first_seen_timestamp
+                    else "",
+                }
+            )

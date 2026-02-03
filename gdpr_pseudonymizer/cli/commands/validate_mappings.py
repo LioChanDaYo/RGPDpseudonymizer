@@ -156,7 +156,9 @@ def validate_mappings_command(
         sys.exit(0)
 
     except Exception as e:
-        logger.error("validate_mappings_error", error=str(e), error_type=type(e).__name__)
+        logger.error(
+            "validate_mappings_error", error=str(e), error_type=type(e).__name__
+        )
         format_error_message(
             "Unexpected Error",
             str(e),
@@ -171,8 +173,12 @@ def _display_validation_table(entities: list[Entity]) -> None:
     Args:
         entities: List of entities to display
     """
-    console.print(f"\n[bold]Mapping Validation Review[/bold] ({len(entities)} mappings)\n")
-    console.print("[dim]This is a read-only view. No modifications will be made.[/dim]\n")
+    console.print(
+        f"\n[bold]Mapping Validation Review[/bold] ({len(entities)} mappings)\n"
+    )
+    console.print(
+        "[dim]This is a read-only view. No modifications will be made.[/dim]\n"
+    )
 
     table = Table(show_header=True, header_style="bold cyan")
     table.add_column("#", width=4)
@@ -186,7 +192,11 @@ def _display_validation_table(entities: list[Entity]) -> None:
     for idx, entity in enumerate(entities, 1):
         # Format confidence
         conf_str = f"{entity.confidence_score:.2f}" if entity.confidence_score else "-"
-        conf_color = "green" if entity.confidence_score and entity.confidence_score >= 0.85 else "yellow"
+        conf_color = (
+            "green"
+            if entity.confidence_score and entity.confidence_score >= 0.85
+            else "yellow"
+        )
 
         # Format timestamp
         timestamp_str = (
@@ -217,7 +227,9 @@ def _display_validation_table(entities: list[Entity]) -> None:
 
     # Summary
     ambiguous_count = sum(1 for e in entities if e.is_ambiguous)
-    low_conf_count = sum(1 for e in entities if e.confidence_score and e.confidence_score < 0.85)
+    low_conf_count = sum(
+        1 for e in entities if e.confidence_score and e.confidence_score < 0.85
+    )
 
     console.print("\n[bold]Summary:[/bold]")
     console.print(f"  • Total mappings: {len(entities)}")
@@ -233,9 +245,15 @@ def _interactive_review(entities: list[Entity]) -> None:
     Args:
         entities: List of entities to review
     """
-    console.print(f"\n[bold]Interactive Mapping Review[/bold] ({len(entities)} mappings)\n")
-    console.print("[dim]Review each mapping. Press Enter to continue, 'q' to quit.[/dim]")
-    console.print("[dim]Note: Flagging is for tracking only - no database changes are made.[/dim]\n")
+    console.print(
+        f"\n[bold]Interactive Mapping Review[/bold] ({len(entities)} mappings)\n"
+    )
+    console.print(
+        "[dim]Review each mapping. Press Enter to continue, 'q' to quit.[/dim]"
+    )
+    console.print(
+        "[dim]Note: Flagging is for tracking only - no database changes are made.[/dim]\n"
+    )
 
     flagged = []
 
@@ -245,7 +263,11 @@ def _interactive_review(entities: list[Entity]) -> None:
         console.print(f"  Original:   [bold]{entity.full_name}[/bold]")
         console.print(f"  Pseudonym:  [bold]{entity.pseudonym_full}[/bold]")
         console.print(f"  Theme:      {entity.theme or '-'}")
-        console.print(f"  Confidence: {entity.confidence_score:.2f}" if entity.confidence_score else "  Confidence: -")
+        console.print(
+            f"  Confidence: {entity.confidence_score:.2f}"
+            if entity.confidence_score
+            else "  Confidence: -"
+        )
         console.print(f"  Ambiguous:  {'Yes' if entity.is_ambiguous else 'No'}")
 
         try:

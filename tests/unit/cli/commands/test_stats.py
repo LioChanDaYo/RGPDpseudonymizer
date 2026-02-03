@@ -27,7 +27,9 @@ app = create_test_app()
 runner = CliRunner()
 
 
-def create_mock_entity(entity_type: str = "PERSON", theme: str = "neutral") -> MagicMock:
+def create_mock_entity(
+    entity_type: str = "PERSON", theme: str = "neutral"
+) -> MagicMock:
     entity = MagicMock()
     entity.entity_type = entity_type
     entity.theme = theme

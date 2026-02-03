@@ -86,7 +86,9 @@ def stats_command(
             # Entity counts by type
             all_entities = mapping_repo.find_all()
             person_count = len([e for e in all_entities if e.entity_type == "PERSON"])
-            location_count = len([e for e in all_entities if e.entity_type == "LOCATION"])
+            location_count = len(
+                [e for e in all_entities if e.entity_type == "LOCATION"]
+            )
             org_count = len([e for e in all_entities if e.entity_type == "ORG"])
 
             # Ambiguous entities
@@ -137,7 +139,10 @@ def stats_command(
         entity_table.add_row("  LOCATION", str(location_count))
         entity_table.add_row("  ORG", str(org_count))
         entity_table.add_row("", "")
-        entity_table.add_row("Ambiguous", f"[yellow]{ambiguous_count}[/yellow]" if ambiguous_count else "0")
+        entity_table.add_row(
+            "Ambiguous",
+            f"[yellow]{ambiguous_count}[/yellow]" if ambiguous_count else "0",
+        )
         console.print(entity_table)
         console.print()
 
@@ -159,16 +164,22 @@ def stats_command(
         ops_table.add_column("Value", justify="right")
         ops_table.add_row("Total Operations", str(len(all_operations)))
         ops_table.add_row("Successful", f"[green]{len(successful_ops)}[/green]")
-        ops_table.add_row("Failed", f"[red]{len(failed_ops)}[/red]" if failed_ops else "0")
+        ops_table.add_row(
+            "Failed", f"[red]{len(failed_ops)}[/red]" if failed_ops else "0"
+        )
 
         if recent_op:
             ops_table.add_row("", "")
             ops_table.add_row("Last Operation", recent_op.operation_type)
-            ops_table.add_row("  Timestamp", recent_op.timestamp.strftime("%Y-%m-%d %H:%M"))
+            ops_table.add_row(
+                "  Timestamp", recent_op.timestamp.strftime("%Y-%m-%d %H:%M")
+            )
             ops_table.add_row("  Entities", str(recent_op.entity_count))
             ops_table.add_row(
                 "  Status",
-                "[green]Success[/green]" if recent_op.success else f"[red]Failed: {recent_op.error_message}[/red]"
+                "[green]Success[/green]"
+                if recent_op.success
+                else f"[red]Failed: {recent_op.error_message}[/red]",
             )
 
         console.print(ops_table)

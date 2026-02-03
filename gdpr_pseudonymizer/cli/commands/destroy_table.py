@@ -92,7 +92,9 @@ def destroy_table_command(
             )
 
             if confirmation.lower() != "yes":
-                console.print("\n[green]Destruction cancelled. Database is safe.[/green]")
+                console.print(
+                    "\n[green]Destruction cancelled. Database is safe.[/green]"
+                )
                 sys.exit(0)
 
         # Perform secure deletion
@@ -124,8 +126,12 @@ def destroy_table_command(
             console.print(f"[dim]  Deleted SHM file: {shm_file.name}[/dim]")
 
         console.print("\n[bold green]✓ Database Destroyed Successfully[/bold green]")
-        console.print(f"\nThe database at {db_file.absolute()} has been securely deleted.")
-        console.print("Data has been overwritten with 3-pass secure wipe and cannot be recovered.")
+        console.print(
+            f"\nThe database at {db_file.absolute()} has been securely deleted."
+        )
+        console.print(
+            "Data has been overwritten with 3-pass secure wipe and cannot be recovered."
+        )
 
         logger.info(
             "database_destroyed",
@@ -175,13 +181,13 @@ def _secure_delete(file_path: Path) -> None:
     with open(file_path, "r+b") as f:
         # Pass 1: Overwrite with zeros
         f.seek(0)
-        f.write(b'\x00' * file_size)
+        f.write(b"\x00" * file_size)
         f.flush()
         os.fsync(f.fileno())
 
         # Pass 2: Overwrite with ones
         f.seek(0)
-        f.write(b'\xFF' * file_size)
+        f.write(b"\xFF" * file_size)
         f.flush()
         os.fsync(f.fileno())
 

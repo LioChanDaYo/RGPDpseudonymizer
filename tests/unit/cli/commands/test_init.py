@@ -136,7 +136,9 @@ class TestInitCommand:
 
         assert result.exit_code == 0
 
-    def test_init_default_database_path(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    def test_init_default_database_path(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         """Test init command uses default database path."""
         monkeypatch.chdir(tmp_path)
 

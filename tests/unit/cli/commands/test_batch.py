@@ -204,9 +204,7 @@ class TestBatchCommand:
         ) as mock_resolve:
             mock_resolve.return_value = "testpassphrase123!"
 
-            result = runner.invoke(
-                app, ["batch", str(tmp_path), "--theme", "invalid"]
-            )
+            result = runner.invoke(app, ["batch", str(tmp_path), "--theme", "invalid"])
 
         assert result.exit_code == 1
         assert "Invalid Theme" in result.stdout
@@ -255,9 +253,7 @@ class TestBatchCommand:
             mock_resolve.return_value = "testpassphrase123!"
             mock_processor.return_value.process_document.return_value = mock_result
 
-            result = runner.invoke(
-                app, ["batch", str(tmp_path), "--stop-on-error"]
-            )
+            result = runner.invoke(app, ["batch", str(tmp_path), "--stop-on-error"])
 
         assert result.exit_code == 1
         # Only one file attempted because processing stopped

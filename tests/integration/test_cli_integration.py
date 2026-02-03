@@ -149,7 +149,9 @@ pseudonymization:
 class TestCommandExecution:
     """Tests for command execution."""
 
-    def test_init_creates_database(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    def test_init_creates_database(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         """Test init command creates database."""
         monkeypatch.chdir(tmp_path)
         db_path = tmp_path / "test.db"
@@ -185,7 +187,9 @@ class TestCommandExecution:
         db_path = tmp_path / "test.db"
         db_path.write_bytes(b"test data")
 
-        result = runner.invoke(app, ["destroy-table", "--db", str(db_path)], input="no\n")
+        result = runner.invoke(
+            app, ["destroy-table", "--db", str(db_path)], input="no\n"
+        )
 
         assert result.exit_code == 0
         assert "cancelled" in result.stdout.lower()
