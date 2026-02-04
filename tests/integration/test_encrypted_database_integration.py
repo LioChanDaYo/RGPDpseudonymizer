@@ -346,8 +346,14 @@ class TestEncryptedDatabaseIntegration:
             assert result is not None
             assert result.full_name == "Person 5"
 
-    def test_batch_save_rollback_on_error(self, tmp_path: Path) -> None:
-        """Test batch save rolls back all changes on error (all-or-nothing)."""
+    def test_batch_save_handles_duplicates_gracefully(self, tmp_path: Path) -> None:
+        """Test batch save handles duplicates via race condition handling.
+
+        When a batch contains an entity that already exists, the batch save
+        should handle it gracefully by looking up the existing entity instead
+        of failing. This is essential for parallel batch processing where
+        multiple workers might try to save the same entity.
+        """
         db_path = tmp_path / "test.db"
         passphrase = "integration_test_passphrase_123!"
 
@@ -365,7 +371,7 @@ class TestEncryptedDatabaseIntegration:
             )
             repo.save(entity1)
 
-            # Attempt batch save with duplicate
+            # Batch save with a duplicate - should NOT raise an error
             entities = [
                 Entity(
                     entity_type="PERSON",
@@ -375,22 +381,24 @@ class TestEncryptedDatabaseIntegration:
                 ),
                 Entity(
                     entity_type="PERSON",
-                    full_name="First Entity",  # Duplicate!
-                    pseudonym_full="Duplicate Pseudonym",
+                    full_name="First Entity",  # Duplicate - will be looked up
+                    pseudonym_full="Duplicate Pseudonym",  # This won't be used
                     theme="neutral",
                 ),
             ]
 
-            try:
-                repo.save_batch(entities)
-                pytest.fail("Expected DatabaseError due to duplicate")
-            except Exception:
-                pass  # Expected
+            # Should succeed without exception (race condition handling)
+            result = repo.save_batch(entities)
 
-            # Verify "Batch Entity 1" was NOT saved (rollback worked)
-            result = repo.find_by_full_name("Batch Entity 1")
-            assert result is None
+            # Should return both entities
+            assert len(result) == 2
 
-            # Verify original entity still exists
-            result = repo.find_by_full_name("First Entity")
-            assert result is not None
+            # Verify new entity was saved
+            batch_entity = repo.find_by_full_name("Batch Entity 1")
+            assert batch_entity is not None
+            assert batch_entity.pseudonym_full == "Batch Pseudonym 1"
+
+            # Verify duplicate used ORIGINAL pseudonym (not the new one)
+            original_entity = repo.find_by_full_name("First Entity")
+            assert original_entity is not None
+            assert original_entity.pseudonym_full == "First Pseudonym"  # Original!
