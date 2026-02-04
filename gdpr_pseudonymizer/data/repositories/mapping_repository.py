@@ -224,19 +224,23 @@ class SQLiteMappingRepository(MappingRepository):
             raise DatabaseError(f"Database operation failed: {e}") from e
 
     def save_batch(self, entities: list[Entity]) -> list[Entity]:
-        """Persist multiple entities in single transaction.
+        """Persist multiple entities in single transaction with race condition handling.
 
         Args:
             entities: List of entities with plaintext fields
 
         Returns:
-            List of saved entities with plaintext fields
+            List of saved entities with plaintext fields (includes both new and
+            existing entities that were found during race condition handling)
 
         Raises:
-            DatabaseError: If batch operation fails (transaction rolled back)
+            DatabaseError: If batch operation fails after retry attempts
 
         Note:
-            All-or-nothing semantics: if any entity fails, entire batch rolled back.
+            Race condition handling: If batch insert fails due to UNIQUE constraint
+            (common in parallel processing), falls back to individual saves with
+            duplicate detection. Entities that already exist are looked up and
+            returned instead of failing.
 
         Example:
             >>> entities = [Entity(...), Entity(...), Entity(...)]
@@ -259,9 +263,54 @@ class SQLiteMappingRepository(MappingRepository):
             # Return decrypted entities
             return [self._decrypt_entity(e) for e in encrypted_entities]
 
-        except (IntegrityError, OperationalError) as e:
+        except IntegrityError:
+            # Race condition: another worker inserted same entity
+            # Fall back to individual saves with duplicate handling
+            self._session.rollback()
+            return self._save_batch_with_retry(entities)
+
+        except OperationalError as e:
             self._session.rollback()
             raise DatabaseError(f"Batch save failed: {e}") from e
+
+    def _save_batch_with_retry(self, entities: list[Entity]) -> list[Entity]:
+        """Save entities individually, handling duplicates by lookup.
+
+        Used as fallback when batch save fails due to race condition.
+
+        Args:
+            entities: List of entities to save
+
+        Returns:
+            List of saved/found entities
+        """
+        from sqlalchemy.exc import IntegrityError
+
+        saved_entities: list[Entity] = []
+
+        for entity in entities:
+            try:
+                # Try to save individually
+                encrypted_entity = self._encrypt_entity(entity)
+                self._session.add(encrypted_entity)
+                self._session.commit()
+                self._session.refresh(encrypted_entity)
+                saved_entities.append(self._decrypt_entity(encrypted_entity))
+
+            except IntegrityError:
+                # Entity already exists (race condition) - look it up
+                self._session.rollback()
+                existing = self.find_by_full_name(entity.full_name)
+                if existing:
+                    saved_entities.append(existing)
+                else:
+                    # Unexpected: integrity error but entity not found
+                    # Re-raise as this shouldn't happen
+                    raise DatabaseError(
+                        f"Race condition but entity not found: {entity.full_name}"
+                    )
+
+        return saved_entities
 
     def find_all(
         self,

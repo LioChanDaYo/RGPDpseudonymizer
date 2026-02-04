@@ -16,6 +16,7 @@ import pytest
 
 from gdpr_pseudonymizer.cli.config import (
     AppConfig,
+    BatchConfig,
     ConfigValidationError,
     DatabaseConfig,
     LoggingConfig,
@@ -42,6 +43,8 @@ class TestGetDefaultConfig:
         assert config.pseudonymization.model == "spacy"
         assert config.logging.level == "INFO"
         assert config.logging.file is None
+        assert config.batch.workers == 4
+        assert config.batch.output_dir is None
 
 
 class TestValidateConfigDict:
@@ -115,6 +118,46 @@ class TestValidateConfigDict:
             config_dict = {"logging": {"level": level}}
             validate_config_dict(config_dict)  # Should not raise
 
+    def test_batch_workers_validation_rejects_below_1(self) -> None:
+        """Test batch.workers must be at least 1."""
+        config_dict = {"batch": {"workers": 0}}
+
+        with pytest.raises(ConfigValidationError) as exc_info:
+            validate_config_dict(config_dict)
+
+        assert "batch.workers" in str(exc_info.value)
+        assert "must be 1-8" in str(exc_info.value)
+
+    def test_batch_workers_validation_rejects_above_8(self) -> None:
+        """Test batch.workers must be at most 8."""
+        config_dict = {"batch": {"workers": 10}}
+
+        with pytest.raises(ConfigValidationError) as exc_info:
+            validate_config_dict(config_dict)
+
+        assert "batch.workers" in str(exc_info.value)
+        assert "must be 1-8" in str(exc_info.value)
+
+    def test_batch_workers_validation_rejects_non_integer(self) -> None:
+        """Test batch.workers must be an integer."""
+        config_dict = {"batch": {"workers": "four"}}
+
+        with pytest.raises(ConfigValidationError) as exc_info:
+            validate_config_dict(config_dict)
+
+        assert "batch.workers" in str(exc_info.value)
+
+    def test_batch_workers_validation_accepts_valid_range(self) -> None:
+        """Test valid worker counts are accepted."""
+        for workers in [1, 2, 4, 8]:
+            config_dict = {"batch": {"workers": workers}}
+            validate_config_dict(config_dict)  # Should not raise
+
+    def test_batch_output_dir_accepted(self) -> None:
+        """Test batch.output_dir is accepted."""
+        config_dict = {"batch": {"output_dir": "./output"}}
+        validate_config_dict(config_dict)  # Should not raise
+
 
 class TestMergeConfigDicts:
     """Tests for configuration merging."""
@@ -164,6 +207,7 @@ class TestDictToConfig:
             "database": {"path": "custom.db"},
             "pseudonymization": {"theme": "star_wars", "model": "spacy"},
             "logging": {"level": "DEBUG", "file": "app.log"},
+            "batch": {"workers": 2, "output_dir": "./output"},
         }
 
         config = dict_to_config(config_dict)
@@ -172,10 +216,13 @@ class TestDictToConfig:
         assert isinstance(config.database, DatabaseConfig)
         assert isinstance(config.pseudonymization, PseudonymizationConfig)
         assert isinstance(config.logging, LoggingConfig)
+        assert isinstance(config.batch, BatchConfig)
         assert config.database.path == "custom.db"
         assert config.pseudonymization.theme == "star_wars"
         assert config.logging.level == "DEBUG"
         assert config.logging.file == "app.log"
+        assert config.batch.workers == 2
+        assert config.batch.output_dir == "./output"
 
     def test_partial_config_uses_defaults(self) -> None:
         """Test that missing fields use defaults."""
@@ -188,6 +235,8 @@ class TestDictToConfig:
         assert config.pseudonymization.model == "spacy"  # Default
         assert config.logging.level == "INFO"  # Default
         assert config.logging.file is None  # Default
+        assert config.batch.workers == 4  # Default
+        assert config.batch.output_dir is None  # Default
 
     def test_empty_dict_uses_all_defaults(self) -> None:
         """Test that empty dict uses all defaults."""
@@ -198,6 +247,8 @@ class TestDictToConfig:
         assert config.pseudonymization.model == "spacy"
         assert config.logging.level == "INFO"
         assert config.logging.file is None
+        assert config.batch.workers == 4
+        assert config.batch.output_dir is None
 
 
 class TestLoadConfigFile:

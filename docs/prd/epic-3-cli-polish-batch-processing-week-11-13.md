@@ -421,6 +421,13 @@ Examples:
 - Validate passphrase strength (min 12 characters, warn if weak)
 - **Security:** `destroy-table` command must verify passphrase before destruction (prevents accidental deletion of wrong database)
 
+#### AC4.5: Config CLI Assistance Commands
+- `config --init` generates template `.gdpr-pseudo.yaml` with all options documented (implemented in Story 3.3)
+- `config set <key> <value>` allows users to modify config without manual YAML editing
+- Examples: `config set pseudonymization.theme star_wars`, `config set batch.workers 2`
+- Validates values before writing (e.g., theme must be valid, workers must be 1-8)
+- Creates config file if doesn't exist, updates existing file preserving comments where possible
+
 #### AC5: Optional: Visual Indicators for Batch Operations (FE-001/FE-002)
 **Conditional based on alpha tester demand** (survey question #13):
 - FE-001: Visual indicator for context cycling (e.g., dot navigation ● ○ ○)
@@ -448,8 +455,14 @@ Examples:
     - Reduces validation fatigue for multi-file batches with recurring entities (e.g., "Paris" validated in file 1 shouldn't require re-validation in file 2)
     - Show count of auto-accepted entities: "Auto-accepted 12 known entities"
     - Discovered during Story 3.2 manual testing
+12. **Task 3.4.12:** Config CLI assistance - `config set` command (AC4.5)
+    - Implement `config set <key> <value>` subcommand for programmatic config updates
+    - Support dotted keys: `pseudonymization.theme`, `batch.workers`, `logging.level`, etc.
+    - Validate values before writing (reuse existing validation from config.py)
+    - Create `.gdpr-pseudo.yaml` if doesn't exist; update existing file preserving structure
+    - Note: `config --init` already implemented in Story 3.3 enhancement
 
-**Estimated Effort:** 2-3 days (Week 13) + 1-2 hours if FE-001/FE-002 added
+**Estimated Effort:** 2-3 days (Week 13) + 1-2 hours if FE-001/FE-002 added + 1-2 hours for Task 3.4.12
 
 ---
 

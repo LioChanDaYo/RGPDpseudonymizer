@@ -129,6 +129,7 @@ class DocumentProcessor:
         self,
         input_path: str,
         output_path: str,
+        skip_validation: bool = False,
     ) -> ProcessingResult:
         """Process single document with complete pseudonymization workflow.
 
@@ -136,6 +137,7 @@ class DocumentProcessor:
         1. FileHandler.read_document() → document_text
         2. HybridEntityDetector.detect_entities() → List[DetectedEntity]
         3. Interactive validation workflow → List[ValidatedEntity] (user confirms/rejects each entity)
+           - When skip_validation=True, all entities are auto-accepted (for parallel batch processing)
         4. For each validated entity, check MappingRepository.find_by_full_name() for existing mapping
         5. If existing, reuse pseudonym; if new, assign using CompositionalPseudonymEngine
         6. Save new entities to MappingRepository (encrypted storage)
@@ -146,6 +148,8 @@ class DocumentProcessor:
         Args:
             input_path: Path to input document (.txt or .md)
             output_path: Path to output document
+            skip_validation: If True, skip interactive validation and auto-accept all entities.
+                           Used for parallel batch processing where stdin is unavailable.
 
         Returns:
             ProcessingResult with processing metadata
@@ -254,23 +258,33 @@ class DocumentProcessor:
                         # Fallback for any assignment errors
                         return f"[{entity.entity_type}_PREVIEW]"
 
-                # Run interactive validation workflow
-                try:
-                    validated_entities = run_validation_workflow(
-                        entities=detected_entities,
-                        document_text=document_text,
-                        document_path=input_path,
-                        pseudonym_assigner=pseudonym_assigner,
-                    )
+                # Run validation workflow (interactive or auto-accept)
+                if skip_validation:
+                    # Parallel mode: auto-accept all entities without user interaction
+                    validated_entities = detected_entities
                     logger.info(
-                        "validation_complete",
-                        validated_count=len(validated_entities),
-                        original_count=len(detected_entities),
+                        "validation_skipped",
+                        auto_accepted_count=len(validated_entities),
+                        reason="parallel_mode",
                     )
-                except KeyboardInterrupt:
-                    # User cancelled validation - abort processing
-                    logger.info("validation_cancelled", reason="user_interrupt")
-                    raise
+                else:
+                    # Interactive mode: run validation workflow with user prompts
+                    try:
+                        validated_entities = run_validation_workflow(
+                            entities=detected_entities,
+                            document_text=document_text,
+                            document_path=input_path,
+                            pseudonym_assigner=pseudonym_assigner,
+                        )
+                        logger.info(
+                            "validation_complete",
+                            validated_count=len(validated_entities),
+                            original_count=len(detected_entities),
+                        )
+                    except KeyboardInterrupt:
+                        # User cancelled validation - abort processing
+                        logger.info("validation_cancelled", reason="user_interrupt")
+                        raise
 
                 # CRITICAL FIX: Reset pseudonym manager state after validation
                 # The validation preview generates pseudonyms and adds them to _used_pseudonyms,
