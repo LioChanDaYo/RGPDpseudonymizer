@@ -566,9 +566,7 @@ class TestParallelBatchProcessing:
             "gdpr_pseudonymizer.cli.commands.batch.init_database"
         ):
             mock_resolve.return_value = "testpassphrase123!"
-            mock_parallel.return_value = BatchResult(
-                total_files=1, successful_files=1
-            )
+            mock_parallel.return_value = BatchResult(total_files=1, successful_files=1)
 
             result = runner.invoke(app, ["batch", str(tmp_path)])
 
@@ -611,9 +609,7 @@ class TestParallelBatchProcessing:
             "gdpr_pseudonymizer.cli.commands.batch.init_database"
         ):
             mock_resolve.return_value = "testpassphrase123!"
-            mock_parallel.return_value = BatchResult(
-                total_files=1, successful_files=1
-            )
+            mock_parallel.return_value = BatchResult(total_files=1, successful_files=1)
 
             result = runner.invoke(app, ["batch", str(tmp_path), "--workers", "2"])
 
@@ -650,9 +646,7 @@ class TestParallelBatchProcessing:
             "gdpr_pseudonymizer.cli.commands.batch.cpu_count"
         ) as mock_cpu:
             mock_resolve.return_value = "testpassphrase123!"
-            mock_parallel.return_value = BatchResult(
-                total_files=1, successful_files=1
-            )
+            mock_parallel.return_value = BatchResult(total_files=1, successful_files=1)
             mock_cpu.return_value = 8
 
             result = runner.invoke(app, ["batch", str(tmp_path), "--workers", "4"])
@@ -685,7 +679,14 @@ class TestWorkerFunction:
             mock_processor.return_value.process_document.return_value = mock_result
 
             result = _process_single_document_worker(
-                (str(input_file), str(output_file), db_path, "testpass", "neutral", "spacy")
+                (
+                    str(input_file),
+                    str(output_file),
+                    db_path,
+                    "testpass",
+                    "neutral",
+                    "spacy",
+                )
             )
 
         assert result["success"] is True
@@ -714,7 +715,14 @@ class TestWorkerFunction:
             mock_processor.return_value.process_document.return_value = mock_result
 
             result = _process_single_document_worker(
-                (str(input_file), str(output_file), db_path, "testpass", "neutral", "spacy")
+                (
+                    str(input_file),
+                    str(output_file),
+                    db_path,
+                    "testpass",
+                    "neutral",
+                    "spacy",
+                )
             )
 
         assert result["success"] is False
@@ -733,7 +741,14 @@ class TestWorkerFunction:
             mock_processor.side_effect = RuntimeError("Unexpected error")
 
             result = _process_single_document_worker(
-                (str(input_file), str(output_file), db_path, "testpass", "neutral", "spacy")
+                (
+                    str(input_file),
+                    str(output_file),
+                    db_path,
+                    "testpass",
+                    "neutral",
+                    "spacy",
+                )
             )
 
         assert result["success"] is False
@@ -777,9 +792,7 @@ pseudonymization:
             "gdpr_pseudonymizer.cli.commands.batch.init_database"
         ):
             mock_resolve.return_value = "testpassphrase123!"
-            mock_parallel.return_value = BatchResult(
-                total_files=1, successful_files=1
-            )
+            mock_parallel.return_value = BatchResult(total_files=1, successful_files=1)
 
             result = runner.invoke(app, ["batch", str(project_dir)])
 
@@ -821,9 +834,7 @@ batch:
             "gdpr_pseudonymizer.cli.commands.batch.init_database"
         ):
             mock_resolve.return_value = "testpassphrase123!"
-            mock_parallel.return_value = BatchResult(
-                total_files=1, successful_files=1
-            )
+            mock_parallel.return_value = BatchResult(total_files=1, successful_files=1)
 
             result = runner.invoke(app, ["batch", str(project_dir)])
 
@@ -865,14 +876,10 @@ pseudonymization:
             "gdpr_pseudonymizer.cli.commands.batch.init_database"
         ):
             mock_resolve.return_value = "testpassphrase123!"
-            mock_parallel.return_value = BatchResult(
-                total_files=1, successful_files=1
-            )
+            mock_parallel.return_value = BatchResult(total_files=1, successful_files=1)
 
             # CLI flag overrides config
-            result = runner.invoke(
-                app, ["batch", str(project_dir), "--theme", "lotr"]
-            )
+            result = runner.invoke(app, ["batch", str(project_dir), "--theme", "lotr"])
 
         assert result.exit_code == 0
         # Check that lotr theme was used (CLI override)
@@ -912,14 +919,10 @@ batch:
             "gdpr_pseudonymizer.cli.commands.batch.init_database"
         ):
             mock_resolve.return_value = "testpassphrase123!"
-            mock_parallel.return_value = BatchResult(
-                total_files=1, successful_files=1
-            )
+            mock_parallel.return_value = BatchResult(total_files=1, successful_files=1)
 
             # CLI flag overrides config
-            result = runner.invoke(
-                app, ["batch", str(project_dir), "--workers", "6"]
-            )
+            result = runner.invoke(app, ["batch", str(project_dir), "--workers", "6"])
 
         assert result.exit_code == 0
         # Check that workers=6 was used (CLI override)

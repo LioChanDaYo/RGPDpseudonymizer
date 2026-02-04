@@ -175,11 +175,11 @@ def _generate_config_template(force: bool = False) -> None:
 
     try:
         config_path.write_text(CONFIG_TEMPLATE, encoding="utf-8")
-        console.print(
-            f"[bold green]Created:[/bold green] {config_path}"
-        )
+        console.print(f"[bold green]Created:[/bold green] {config_path}")
         console.print("\nEdit this file to customize your settings.")
-        console.print("Run [bold]gdpr-pseudo config[/bold] to view effective configuration.")
+        console.print(
+            "Run [bold]gdpr-pseudo config[/bold] to view effective configuration."
+        )
     except OSError as e:
         console.print(f"[bold red]Error:[/bold red] Failed to write config file: {e}")
         raise typer.Exit(1)

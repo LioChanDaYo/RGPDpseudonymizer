@@ -378,8 +378,10 @@ def batch_command(
         effective_model = model if model is not None else config.pseudonymization.model
         effective_db_path = db_path if db_path is not None else config.database.path
         effective_workers = workers if workers is not None else config.batch.workers
-        effective_output_dir = output_dir if output_dir is not None else (
-            Path(config.batch.output_dir) if config.batch.output_dir else None
+        effective_output_dir = (
+            output_dir
+            if output_dir is not None
+            else (Path(config.batch.output_dir) if config.batch.output_dir else None)
         )
 
         # Collect files to process
@@ -462,9 +464,7 @@ def batch_command(
             )
         else:
             # SEQUENTIAL MODE: With interactive validation
-            console.print(
-                "[dim]Sequential mode: Interactive validation enabled[/dim]"
-            )
+            console.print("[dim]Sequential mode: Interactive validation enabled[/dim]")
 
             # Initialize processor for sequential mode only
             # (parallel mode workers create their own processors)

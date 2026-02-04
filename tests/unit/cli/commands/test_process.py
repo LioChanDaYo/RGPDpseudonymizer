@@ -291,9 +291,7 @@ pseudonymization:
             mock_processor.return_value.process_document.return_value = mock_result
 
             # CLI flag overrides config
-            result = runner.invoke(
-                app, ["process", str(input_file), "--theme", "lotr"]
-            )
+            result = runner.invoke(app, ["process", str(input_file), "--theme", "lotr"])
 
         assert result.exit_code == 0
         # Check that lotr theme was used (CLI override)
