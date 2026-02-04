@@ -13,6 +13,7 @@ import typer
 from rich.console import Console
 
 from gdpr_pseudonymizer.cli.commands.batch import batch_command
+from gdpr_pseudonymizer.cli.commands.config_show import config_show_command
 from gdpr_pseudonymizer.cli.commands.destroy_table import destroy_table_command
 from gdpr_pseudonymizer.cli.commands.export import export_command
 from gdpr_pseudonymizer.cli.commands.import_mappings import import_mappings_command
@@ -160,6 +161,9 @@ app.command(name="import-mappings", help="Import mappings from another database"
 app.command(name="export", help="Export audit log to JSON or CSV")(export_command)
 app.command(name="destroy-table", help="Securely delete the mapping database")(
     destroy_table_command
+)
+app.command(name="config", help="Display current effective configuration")(
+    config_show_command
 )
 
 

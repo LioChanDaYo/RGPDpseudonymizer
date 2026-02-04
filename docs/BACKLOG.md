@@ -1,6 +1,6 @@
 # Product Backlog - GDPR Pseudonymizer
 
-**Last Updated:** 2026-02-02
+**Last Updated:** 2026-02-04
 **Epic 1 Status:** ✅ Complete (9/9 stories)
 **Epic 2 Status:** ✅ Complete
 **Current Epic:** Epic 3 - CLI Interface & Batch Processing
@@ -80,6 +80,42 @@
 - [ ] Update DetectedEntity dataclass if needed
 - [ ] mypy type checking passes with no errors
 - [ ] All existing tests still pass
+
+---
+
+#### TD-004: Python Version Support Inconsistency 🔧 NEW
+**Source:** PM Review (2026-02-04)
+**Description:** Misalignment between pyproject.toml, CI/CD matrix, and documentation regarding Python version support
+**Impact:** Medium - Users may attempt installation on untested Python versions; CI doesn't verify claimed compatibility
+**Effort:** Low (1-2 hours)
+**Target:** Epic 3 or Epic 4
+**Owner:** DevOps / PM to verify spaCy compatibility before expansion
+
+**Current State (Inconsistent):**
+| Source | Python Versions | Notes |
+|--------|-----------------|-------|
+| pyproject.toml | `>=3.9,<3.14` | Claims 3.12, 3.13 support |
+| CI/CD (ci.yaml) | `['3.9', '3.10', '3.11']` | Does NOT test 3.12, 3.13 |
+| ALPHA-INSTALL.md | "3.9-3.12 (NOT 3.13+)" | Contradicts pyproject.toml |
+| BACKLOG.md TD-001 | "Python 3.9-3.13" | Aspirational, not actual |
+| coding-standards.md | "3.9-3.11, not 3.12+" | Outdated |
+
+**Root Cause:** spaCy wheel availability and compatibility varies by Python version. No systematic verification before expanding version claims.
+
+**Acceptance Criteria:**
+- [ ] Verify spaCy 3.7+ wheel availability for Python 3.12 and 3.13
+- [ ] If verified: Add 3.12 and 3.13 to CI/CD matrix (ci.yaml)
+- [ ] If NOT verified: Tighten pyproject.toml to match actual tested versions
+- [ ] Update ALPHA-INSTALL.md to match pyproject.toml
+- [ ] Update coding-standards.md to match pyproject.toml
+- [ ] Update TD-001 acceptance criteria to match actual CI matrix
+- [ ] All documentation reflects actual tested/supported versions
+
+**References:**
+- [pyproject.toml](../pyproject.toml):14
+- [.github/workflows/ci.yaml](../.github/workflows/ci.yaml):17
+- [docs/ALPHA-INSTALL.md](ALPHA-INSTALL.md):13
+- [docs/architecture/19-coding-standards.md](architecture/19-coding-standards.md):27
 
 ---
 
@@ -241,12 +277,30 @@ Press Enter to continue...
 
 ---
 
-### MON-005: spaCy Python 3.14 Compatibility
-**Source:** Story 1.8 QA Gate
-**Description:** Watch for spaCy updates supporting Python 3.14+
-**Metric:** spaCy release notes, Python 3.14 compatibility announcements
-**Target:** spaCy supports Python 3.14 within 6 months of Python 3.14 stable release
-**Action if Available:** Update pyproject.toml to support Python 3.14, update CI/CD matrix
+### MON-005: spaCy Python 3.12/3.13/3.14 Compatibility
+**Source:** Story 1.8 QA Gate, PM Review (2026-02-04)
+**Owner:** PM (quarterly check) + DevOps (implementation)
+**Description:** Monitor spaCy releases for Python version compatibility; verify wheel availability before expanding support
+**Metric:** spaCy release notes, PyPI wheel availability, GitHub issues
+**Frequency:** Quarterly review (or upon major spaCy/Python release)
+**Target:** Add Python version to CI within 1 month of confirmed spaCy wheel availability
+**Action if Available:**
+1. Verify spaCy wheels available on PyPI for target Python version
+2. Test locally: `pip install spacy` on target Python version
+3. Run full test suite on target version
+4. If passing: Update CI matrix, pyproject.toml, and documentation (see TD-004)
+
+**Current Status (2026-02-04):**
+| Python | spaCy Status | CI Status | Action Needed |
+|--------|--------------|-----------|---------------|
+| 3.12 | ⚠️ Unverified | ❌ Not in matrix | Verify & add |
+| 3.13 | ⚠️ Unverified | ❌ Not in matrix | Verify & add |
+| 3.14 | ❌ Not released | N/A | Monitor |
+
+**References:**
+- spaCy releases: https://github.com/explosion/spaCy/releases
+- spaCy PyPI: https://pypi.org/project/spacy/#files
+- TD-004: Python Version Support Inconsistency
 
 ---
 

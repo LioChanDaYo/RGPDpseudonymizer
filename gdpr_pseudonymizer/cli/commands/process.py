@@ -20,6 +20,7 @@ import typer
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
+from gdpr_pseudonymizer.cli.config import load_config
 from gdpr_pseudonymizer.cli.formatters import format_error_message
 from gdpr_pseudonymizer.core.document_processor import DocumentProcessor
 from gdpr_pseudonymizer.data.database import init_database
@@ -28,7 +29,8 @@ from gdpr_pseudonymizer.exceptions import FileProcessingError
 from gdpr_pseudonymizer.utils.logger import configure_logging, get_logger
 
 # Configure Windows console to handle Unicode encoding errors gracefully
-if sys.platform == "win32":
+# Skip reconfiguration when running under pytest to avoid interfering with capture
+if sys.platform == "win32" and "pytest" not in sys.modules:
     import io
 
     # Reconfigure stdout to use UTF-8 with error replacement (instead of charmap)
@@ -104,22 +106,22 @@ def process_command(
         "-o",
         help="Output file path (defaults to <input>_pseudonymized.ext)",
     ),
-    theme: str = typer.Option(
-        "neutral",
+    theme: Optional[str] = typer.Option(
+        None,
         "--theme",
         "-t",
-        help="Pseudonym library theme (neutral/star_wars/lotr)",
+        help="Pseudonym library theme (neutral/star_wars/lotr). Default from config.",
     ),
-    model: str = typer.Option(
-        "spacy",
+    model: Optional[str] = typer.Option(
+        None,
         "--model",
         "-m",
-        help="NLP model name (spacy)",
+        help="NLP model name (spacy). Default from config.",
     ),
-    db_path: str = typer.Option(
-        "mappings.db",
+    db_path: Optional[str] = typer.Option(
+        None,
         "--db",
-        help="Database file path",
+        help="Database file path. Default from config.",
     ),
     passphrase: Optional[str] = typer.Option(
         None,
@@ -139,6 +141,7 @@ def process_command(
     - Idempotent processing: reprocessing same document reuses existing mappings
     - Encrypted storage: all entity mappings encrypted at rest
     - Audit trail: all operations logged for GDPR Article 30 compliance
+    - Configuration support: defaults can be set in ~/.gdpr-pseudo.yaml or ./.gdpr-pseudo.yaml
 
     Args:
         input_file: Path to input document (.txt or .md)
@@ -155,6 +158,13 @@ def process_command(
         gdpr-pseudo process input.txt --db custom.db
     """
     try:
+        # Load configuration (project > home > defaults)
+        config = load_config()
+
+        # Apply config defaults where CLI flags not specified
+        effective_theme = theme if theme is not None else config.pseudonymization.theme
+        effective_model = model if model is not None else config.pseudonymization.model
+        effective_db_path = db_path if db_path is not None else config.database.path
         # Validate file extension
         allowed_extensions = [".txt", ".md"]
         if input_file.suffix.lower() not in allowed_extensions:
@@ -175,10 +185,10 @@ def process_command(
 
         # Validate theme
         valid_themes = ["neutral", "star_wars", "lotr"]
-        if theme not in valid_themes:
+        if effective_theme not in valid_themes:
             format_error_message(
                 "Invalid Theme",
-                f"Theme '{theme}' is not recognized.",
+                f"Theme '{effective_theme}' is not recognized.",
                 f"Valid themes: {', '.join(valid_themes)}",
             )
             sys.exit(1)
@@ -188,7 +198,7 @@ def process_command(
             passphrase = get_passphrase_from_env_or_prompt()
 
         # Initialize database if it doesn't exist
-        db_file = Path(db_path)
+        db_file = Path(effective_db_path)
         if not db_file.exists():
             with Progress(
                 SpinnerColumn(),
@@ -199,7 +209,7 @@ def process_command(
                     "Initializing encrypted database...", total=None
                 )
                 try:
-                    init_database(db_path, passphrase)
+                    init_database(effective_db_path, passphrase)
                     progress.update(task, description="✓ Database initialized")
                 except ValueError as e:
                     console.print(
@@ -213,8 +223,8 @@ def process_command(
             "processing_started",
             input_file=str(input_file),
             output_file=str(output_file),
-            theme=theme,
-            model=model,
+            theme=effective_theme,
+            model=effective_model,
         )
 
         # Initialize processor with progress indicator
@@ -226,10 +236,10 @@ def process_command(
             task = progress.add_task("Initializing processor...", total=None)
             try:
                 processor = DocumentProcessor(
-                    db_path=db_path,
+                    db_path=effective_db_path,
                     passphrase=passphrase,
-                    theme=theme,
-                    model_name=model,
+                    theme=effective_theme,
+                    model_name=effective_model,
                 )
                 progress.update(task, description="✓ Processor initialized")
             except ValueError as e:

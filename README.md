@@ -68,7 +68,7 @@ We're actively developing v1.0 MVP with an **AI-assisted approach**:
     - Commands: init, batch, list-mappings, validate-mappings, stats, import-mappings, export, destroy-table
     - Bug fixes: LOC/ORG fallback naming, batch excludes `*_pseudonymized.*` files
   - Story 3.2: Progress reporting for large batches ✅ (live entity counts, ETA calculation, 29 tests, 100% module coverage)
-  - Story 3.3: Process-based batch parallelism (planned)
+  - Story 3.3: Configuration file support & parallel batch ✅ (`.gdpr-pseudo.yaml` config files, `config --init` template generation, parallel `--workers` flag, 215 tests)
 - 📅 **Week 11-14:** Beta release, launch prep
 - 🎯 **MVP Launch:** Week 14 (estimated Q2 2026)
 
@@ -137,6 +137,37 @@ poetry run gdpr-pseudo process test.txt -o output.txt
 ```
 
 Expected output: "Leia Organa travaille à Coruscant pour Rebel Alliance."
+
+### Configuration File (Optional)
+
+Generate a config template to customize default settings:
+
+```bash
+# Generate .gdpr-pseudo.yaml template in current directory
+poetry run gdpr-pseudo config --init
+
+# View current effective configuration
+poetry run gdpr-pseudo config
+```
+
+Example `.gdpr-pseudo.yaml`:
+```yaml
+database:
+  path: mappings.db
+
+pseudonymization:
+  theme: star_wars    # neutral, star_wars, lotr
+  model: spacy
+
+batch:
+  workers: 4          # 1-8 (use 1 for interactive validation)
+  output_dir: null
+
+logging:
+  level: INFO
+```
+
+**Note:** Passphrase is never stored in config files (security). Use `GDPR_PSEUDO_PASSPHRASE` env var or interactive prompt.
 
 ---
 
@@ -351,6 +382,7 @@ The validation UI provides an intuitive keyboard-driven interface for reviewing 
 - ✅ **Story 3.0 (Week 10):** LOCATION/ORG pseudonym libraries - Epic 3 first story, extends pseudonymization to all entity types
 - ✅ **Story 3.1 (Week 10-11):** Complete CLI command set - 8 new commands (init, batch, list-mappings, validate-mappings, stats, import-mappings, export, destroy-table), 155+ tests
 - ✅ **Story 3.2 (Week 11):** Progress reporting for large batches - Live entity counts, ETA calculation, rolling average, 29 tests with 100% module coverage
+- ✅ **Story 3.3 (Week 11):** Configuration file support & parallel batch - `.gdpr-pseudo.yaml` config files, `config --init` template generation, parallel `--workers` flag for batch command, 215 tests
 
 ### Upcoming 📅
 - **Epic 3 (Week 11-13):** CLI polish & batch processing
@@ -524,8 +556,8 @@ The integration test suite covers:
 
 | Metric | Value | Status |
 |--------|-------|--------|
-| **Development Progress** | Week 11/14 | ✅ Epic 2 Complete + Stories 3.0-3.2 - v0.1.0-alpha Released |
-| **Stories Complete** | 21 (Epic 1 + Epic 2 + Stories 3.0-3.2) | ✅ Epic 1 (9) + Epic 2 (9) + Stories 3.0, 3.1, 3.2 |
+| **Development Progress** | Week 11/14 | ✅ Epic 2 Complete + Stories 3.0-3.3 - v0.1.0-alpha Released |
+| **Stories Complete** | 22 (Epic 1 + Epic 2 + Stories 3.0-3.3) | ✅ Epic 1 (9) + Epic 2 (9) + Stories 3.0, 3.1, 3.2, 3.3 |
 | **Critical Bugs Found** | 1 (Story 2.8) | ✅ RESOLVED - Epic 3 Unblocked |
 | **Test Corpus Size** | 25 docs, 1,855 entities | ✅ Complete |
 | **NLP Accuracy (Baseline)** | 29.5% F1 (spaCy) | ✅ Measured |
@@ -555,6 +587,6 @@ The integration test suite covers:
 
 ---
 
-**Last Updated:** 2026-02-03 (v0.1.0-alpha released: Epic 2 complete; Stories 3.0-3.2 complete - LOCATION/ORG pseudonym libraries, complete CLI command set, progress reporting for large batches; Alpha documentation created; Seeking 3-5 alpha testers for feedback; 616 tests, all quality gates pass)
+**Last Updated:** 2026-02-04 (v0.1.0-alpha released: Epic 2 complete; Stories 3.0-3.3 complete - LOCATION/ORG pseudonym libraries, complete CLI command set, progress reporting, config file support with `config --init`; Alpha documentation created; Seeking 3-5 alpha testers for feedback; 215 CLI tests, all quality gates pass)
 
-**Current Focus:** Epic 3 development - Stories 3.0-3.2 complete (LOC/ORG pseudonym libraries, 8 CLI commands, batch progress reporting), Story 3.3 (process-based batch parallelism) next
+**Current Focus:** Epic 3 development - Stories 3.0-3.3 complete (LOC/ORG pseudonym libraries, 8 CLI commands, batch progress reporting, config file support with `config --init`), Story 3.4 (CLI UX polish) next

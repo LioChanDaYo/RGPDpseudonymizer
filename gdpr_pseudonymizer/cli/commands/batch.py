@@ -1,7 +1,10 @@
 """Batch command for processing multiple documents.
 
-This command processes multiple documents sequentially with progress indicators.
-Parallel processing will be added in Story 3.3.
+This command processes multiple documents with progress indicators.
+Supports both sequential processing (with interactive validation) and
+parallel processing (auto-accept mode) using multiprocessing.Pool.
+
+Story 3.3: Added --workers parameter and parallel batch processing.
 """
 
 from __future__ import annotations
@@ -9,8 +12,9 @@ from __future__ import annotations
 import sys
 import time
 from dataclasses import dataclass, field
+from multiprocessing import Pool, cpu_count
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 import typer
 from rich.console import Console, Group
@@ -26,6 +30,7 @@ from rich.progress import (
 from rich.table import Table
 from rich.text import Text
 
+from gdpr_pseudonymizer.cli.config import load_config
 from gdpr_pseudonymizer.cli.formatters import format_error_message
 from gdpr_pseudonymizer.cli.passphrase import resolve_passphrase
 from gdpr_pseudonymizer.cli.progress import ETAColumn, ProgressTracker
@@ -56,6 +61,190 @@ class BatchResult:
     reused_entities: int = 0
     total_time_seconds: float = 0.0
     errors: list[str] = field(default_factory=list)
+
+
+def _process_single_document_worker(
+    args: tuple[str, str, str, str, str, str]
+) -> dict[str, Any]:
+    """Worker function for parallel batch processing.
+
+    Each worker initializes its own DocumentProcessor with separate
+    SQLite connection, spaCy model, and encryption service.
+
+    Args:
+        args: Tuple of (input_path, output_path, db_path, passphrase, theme, model)
+
+    Returns:
+        Dictionary with processing results:
+        - success: bool
+        - file: input document path
+        - entities_detected: int (if success)
+        - entities_new: int (if success)
+        - entities_reused: int (if success)
+        - processing_time: float (if success)
+        - error: str (if failure)
+    """
+    input_path, output_path, db_path, passphrase, theme, model = args
+
+    try:
+        # Each worker initializes its own DocumentProcessor
+        processor = DocumentProcessor(
+            db_path=db_path,
+            passphrase=passphrase,
+            theme=theme,
+            model_name=model,
+        )
+
+        # Process document with validation SKIPPED (parallel mode has no stdin)
+        result = processor.process_document(
+            input_path, output_path, skip_validation=True
+        )
+
+        return {
+            "success": result.success,
+            "file": input_path,
+            "entities_detected": result.entities_detected,
+            "entities_new": result.entities_new,
+            "entities_reused": result.entities_reused,
+            "processing_time": result.processing_time_seconds,
+            "error": result.error_message if not result.success else None,
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "file": input_path,
+            "entities_detected": 0,
+            "entities_new": 0,
+            "entities_reused": 0,
+            "processing_time": 0.0,
+            "error": str(e),
+        }
+
+
+def _process_batch_parallel(
+    files: list[Path],
+    output_dir: Optional[Path],
+    db_path: str,
+    passphrase: str,
+    theme: str,
+    model: str,
+    num_workers: int,
+) -> BatchResult:
+    """Process documents in parallel using multiprocessing pool.
+
+    Args:
+        files: List of input file paths
+        output_dir: Output directory (None = same as input)
+        db_path: Database file path
+        passphrase: Encryption passphrase
+        theme: Pseudonym library theme
+        model: NLP model name
+        num_workers: Number of worker processes
+
+    Returns:
+        BatchResult with processing statistics
+    """
+    # Cap workers at cpu_count and 8
+    effective_workers = min(cpu_count(), num_workers, 8)
+
+    # Ensure at least 1 worker
+    effective_workers = max(1, effective_workers)
+
+    logger.info(
+        "batch_parallel_start",
+        total_files=len(files),
+        requested_workers=num_workers,
+        effective_workers=effective_workers,
+        cpu_count=cpu_count(),
+    )
+
+    # Prepare arguments for each file
+    args_list: list[tuple[str, str, str, str, str, str]] = []
+    for file_path in files:
+        if output_dir:
+            out_file = output_dir / f"{file_path.stem}_pseudonymized{file_path.suffix}"
+        else:
+            out_file = (
+                file_path.parent / f"{file_path.stem}_pseudonymized{file_path.suffix}"
+            )
+        args_list.append(
+            (str(file_path), str(out_file), db_path, passphrase, theme, model)
+        )
+
+    batch_result = BatchResult(total_files=len(files))
+    start_time = time.time()
+
+    # Create progress bar
+    progress = Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        BarColumn(),
+        TaskProgressColumn(),
+        TextColumn("["),
+        TimeElapsedColumn(),
+        TextColumn("]"),
+        expand=False,
+    )
+
+    task = progress.add_task(
+        f"Processing ({effective_workers} workers)...",
+        total=len(files),
+    )
+
+    # Stats text for live display
+    stats_text = Text(
+        f"Entities: 0 | New: 0 | Reused: 0 | Workers: {effective_workers}",
+        style="dim",
+    )
+
+    def make_progress_group() -> Group:
+        return Group(progress, stats_text)
+
+    with Live(make_progress_group(), console=console, refresh_per_second=4) as live:
+        # Process in parallel using imap_unordered for real-time progress
+        with Pool(processes=effective_workers) as pool:
+            for result in pool.imap_unordered(
+                _process_single_document_worker, args_list
+            ):
+                if result["success"]:
+                    batch_result.successful_files += 1
+                    batch_result.total_entities += result["entities_detected"]
+                    batch_result.new_entities += result["entities_new"]
+                    batch_result.reused_entities += result["entities_reused"]
+                else:
+                    batch_result.failed_files += 1
+                    error_msg = result.get("error", "Unknown error")
+                    file_name = Path(result["file"]).name
+                    batch_result.errors.append(f"{file_name}: {error_msg}")
+
+                # Update progress display
+                stats_text = Text(
+                    f"Entities: {batch_result.total_entities:,} | "
+                    f"New: {batch_result.new_entities:,} | "
+                    f"Reused: {batch_result.reused_entities:,} | "
+                    f"Workers: {effective_workers}",
+                    style="dim",
+                )
+                progress.advance(task)
+                live.update(make_progress_group())
+
+        # Completion state
+        progress.update(task, description="✓ Processing complete")
+        live.update(make_progress_group())
+
+    batch_result.total_time_seconds = time.time() - start_time
+
+    logger.info(
+        "batch_parallel_complete",
+        total_files=batch_result.total_files,
+        successful=batch_result.successful_files,
+        failed=batch_result.failed_files,
+        total_entities=batch_result.total_entities,
+        processing_time=batch_result.total_time_seconds,
+        workers=effective_workers,
+    )
+
+    return batch_result
 
 
 def collect_files(input_path: Path, recursive: bool = False) -> list[Path]:
@@ -103,22 +292,22 @@ def batch_command(
         "-o",
         help="Output directory (defaults to same directory as input with _pseudonymized suffix)",
     ),
-    theme: str = typer.Option(
-        "neutral",
+    theme: Optional[str] = typer.Option(
+        None,
         "--theme",
         "-t",
-        help="Pseudonym library theme (neutral/star_wars/lotr)",
+        help="Pseudonym library theme (neutral/star_wars/lotr). Default from config.",
     ),
-    model: str = typer.Option(
-        "spacy",
+    model: Optional[str] = typer.Option(
+        None,
         "--model",
         "-m",
-        help="NLP model name (spacy)",
+        help="NLP model name (spacy). Default from config.",
     ),
-    db_path: str = typer.Option(
-        "mappings.db",
+    db_path: Optional[str] = typer.Option(
+        None,
         "--db",
-        help="Database file path",
+        help="Database file path. Default from config.",
     ),
     passphrase: Optional[str] = typer.Option(
         None,
@@ -137,28 +326,64 @@ def batch_command(
         "--continue-on-error/--stop-on-error",
         help="Continue processing on individual file errors (default: continue)",
     ),
+    workers: Optional[int] = typer.Option(
+        None,
+        "--workers",
+        "-w",
+        min=1,
+        max=8,
+        help="Number of parallel workers (1=sequential with validation, 2-8=parallel without validation). Default from config.",
+    ),
 ) -> None:
     """Process multiple documents with pseudonymization.
 
     Processes all .txt and .md files in the specified directory or file list.
-    Each file is processed sequentially with progress indicators.
+
+    With --workers 1 (sequential mode): Files are processed one at a time with
+    interactive validation prompts for each entity detected.
+
+    With --workers 2-8 (parallel mode): Files are processed in parallel using
+    multiple worker processes. Interactive validation is SKIPPED in this mode
+    (all entities are auto-accepted). Use this for large batches where manual
+    review is not feasible.
 
     Output files are saved with '_pseudonymized' suffix in the output directory.
 
+    Configuration support: Default values for theme, model, db, workers, and
+    output_dir can be set in ~/.gdpr-pseudo.yaml or ./.gdpr-pseudo.yaml.
+    Use 'gdpr-pseudo config' to view effective configuration.
+
     Examples:
-        # Process all files in a directory
+        # Sequential processing with validation (explicit)
+        gdpr-pseudo batch ./documents/ --workers 1
+
+        # Parallel processing with 4 workers (default)
         gdpr-pseudo batch ./documents/
+
+        # Parallel processing with 8 workers
+        gdpr-pseudo batch ./documents/ --workers 8
 
         # Process recursively with custom output
         gdpr-pseudo batch ./documents/ -o ./output/ --recursive
 
         # Process with specific theme
         gdpr-pseudo batch ./documents/ --theme star_wars
-
-        # Stop on first error
-        gdpr-pseudo batch ./documents/ --stop-on-error
     """
     try:
+        # Load configuration (project > home > defaults)
+        config = load_config()
+
+        # Apply config defaults where CLI flags not specified
+        effective_theme = theme if theme is not None else config.pseudonymization.theme
+        effective_model = model if model is not None else config.pseudonymization.model
+        effective_db_path = db_path if db_path is not None else config.database.path
+        effective_workers = workers if workers is not None else config.batch.workers
+        effective_output_dir = (
+            output_dir
+            if output_dir is not None
+            else (Path(config.batch.output_dir) if config.batch.output_dir else None)
+        )
+
         # Collect files to process
         files = collect_files(input_path, recursive)
 
@@ -173,10 +398,10 @@ def batch_command(
 
         # Validate theme
         valid_themes = ["neutral", "star_wars", "lotr"]
-        if theme not in valid_themes:
+        if effective_theme not in valid_themes:
             format_error_message(
                 "Invalid Theme",
-                f"Theme '{theme}' is not recognized.",
+                f"Theme '{effective_theme}' is not recognized.",
                 f"Valid themes: {', '.join(valid_themes)}",
             )
             sys.exit(1)
@@ -189,7 +414,7 @@ def batch_command(
         )
 
         # Initialize database if needed
-        db_file = Path(db_path)
+        db_file = Path(effective_db_path)
         if not db_file.exists():
             with Progress(
                 SpinnerColumn(),
@@ -198,7 +423,7 @@ def batch_command(
             ) as progress:
                 task = progress.add_task("Initializing database...", total=None)
                 try:
-                    init_database(db_path, resolved_passphrase)
+                    init_database(effective_db_path, resolved_passphrase)
                     progress.update(task, description="✓ Database initialized")
                 except ValueError as e:
                     console.print(
@@ -207,131 +432,200 @@ def batch_command(
                     sys.exit(1)
             console.print()
 
-        # Initialize processor
-        with Progress(
-            SpinnerColumn(),
-            TextColumn("[progress.description]{task.description}"),
-            console=console,
-        ) as progress:
-            task = progress.add_task("Initializing processor...", total=None)
-            try:
-                processor = DocumentProcessor(
-                    db_path=db_path,
-                    passphrase=resolved_passphrase,
-                    theme=theme,
-                    model_name=model,
+        # Determine processing mode based on workers parameter
+        actual_workers = min(cpu_count(), effective_workers, 8)
+        actual_workers = max(1, actual_workers)
+
+        if actual_workers > 1:
+            # PARALLEL MODE: Skip interactive validation
+            console.print(
+                "[yellow]Parallel mode:[/yellow] Skipping interactive validation "
+                "(use --workers 1 for manual review)"
+            )
+            console.print(
+                f"[dim]Using {actual_workers} worker processes "
+                f"(requested: {effective_workers}, CPU count: {cpu_count()})[/dim]"
+            )
+            console.print()
+
+            # Create output directory if specified
+            if effective_output_dir:
+                effective_output_dir.mkdir(parents=True, exist_ok=True)
+
+            # Process in parallel
+            batch_result = _process_batch_parallel(
+                files=files,
+                output_dir=effective_output_dir,
+                db_path=effective_db_path,
+                passphrase=resolved_passphrase,
+                theme=effective_theme,
+                model=effective_model,
+                num_workers=effective_workers,
+            )
+        else:
+            # SEQUENTIAL MODE: With interactive validation
+            console.print("[dim]Sequential mode: Interactive validation enabled[/dim]")
+
+            # Initialize processor for sequential mode only
+            # (parallel mode workers create their own processors)
+            with Progress(
+                SpinnerColumn(),
+                TextColumn("[progress.description]{task.description}"),
+                console=console,
+            ) as init_progress:
+                init_task = init_progress.add_task(
+                    "Initializing processor...", total=None
                 )
-                progress.update(task, description="✓ Processor initialized")
-            except ValueError as e:
-                console.print(f"\n[bold red]Error:[/bold red] {e}")
-                if "passphrase" in str(e).lower():
-                    console.print(
-                        "[yellow]Hint:[/yellow] Check passphrase or delete database to reinitialize"
+                try:
+                    processor = DocumentProcessor(
+                        db_path=effective_db_path,
+                        passphrase=resolved_passphrase,
+                        theme=effective_theme,
+                        model_name=effective_model,
                     )
-                sys.exit(1)
+                    init_progress.update(
+                        init_task, description="✓ Processor initialized"
+                    )
+                except ValueError as e:
+                    console.print(f"\n[bold red]Error:[/bold red] {e}")
+                    if "passphrase" in str(e).lower():
+                        console.print(
+                            "[yellow]Hint:[/yellow] Check passphrase or "
+                            "delete database to reinitialize"
+                        )
+                    sys.exit(1)
 
-        console.print()
+            console.print()
 
-        # Process files with progress bar
-        batch_result = BatchResult(total_files=len(files))
-        progress_tracker = ProgressTracker(total_files=len(files))
-        start_time = time.time()
+            # Process files with progress bar
+            batch_result = BatchResult(total_files=len(files))
+            progress_tracker = ProgressTracker(total_files=len(files))
+            start_time = time.time()
 
-        # Create progress bar with ETA display
-        progress = Progress(
-            SpinnerColumn(),
-            TextColumn("[progress.description]{task.description}"),
-            BarColumn(),
-            TaskProgressColumn(),
-            TextColumn("["),
-            TimeElapsedColumn(),
-            ETAColumn(),
-            TextColumn("]"),
-            expand=False,
-        )
-        task = progress.add_task(
-            "Processing Batch...",
-            total=len(files),
-            eta="calculating...",
-        )
-
-        # Current file and stats displays
-        current_file_text = Text("Current: ", style="dim")
-        stats_text = Text("Entities: 0 | New: 0 | Reused: 0", style="dim")
-
-        def make_progress_group() -> Group:
-            """Create grouped display with progress bar and stats."""
-            return Group(
-                progress,
-                current_file_text,
-                stats_text,
+            # Create progress bar with ETA display
+            progress = Progress(
+                SpinnerColumn(),
+                TextColumn("[progress.description]{task.description}"),
+                BarColumn(),
+                TaskProgressColumn(),
+                TextColumn("["),
+                TimeElapsedColumn(),
+                ETAColumn(),
+                TextColumn("]"),
+                expand=False,
+            )
+            task = progress.add_task(
+                "Processing Batch...",
+                total=len(files),
+                eta="calculating...",
             )
 
-        with Live(
-            make_progress_group(), console=console, refresh_per_second=10
-        ) as live:
-            for file_path in files:
-                file_start_time = time.time()
+            # Current file and stats displays
+            current_file_text = Text("Current: ", style="dim")
+            stats_text = Text("Entities: 0 | New: 0 | Reused: 0", style="dim")
 
-                # Update current file being processed
-                progress_tracker.set_current_file(file_path.name)
+            def make_progress_group() -> Group:
+                """Create grouped display with progress bar and stats."""
+                return Group(
+                    progress,
+                    current_file_text,
+                    stats_text,
+                )
 
-                # Truncate long filenames
-                display_name = file_path.name
-                if len(display_name) > 40:
-                    display_name = "..." + display_name[-37:]
-                current_file_text = Text(f"Current: {display_name}", style="cyan")
+            with Live(
+                make_progress_group(), console=console, refresh_per_second=10
+            ) as live:
+                for file_path in files:
+                    file_start_time = time.time()
 
-                live.update(make_progress_group())
+                    # Update current file being processed
+                    progress_tracker.set_current_file(file_path.name)
 
-                # Generate output path
-                if output_dir:
-                    output_dir.mkdir(parents=True, exist_ok=True)
-                    output_file = (
-                        output_dir / f"{file_path.stem}_pseudonymized{file_path.suffix}"
-                    )
-                else:
-                    output_file = (
-                        file_path.parent
-                        / f"{file_path.stem}_pseudonymized{file_path.suffix}"
-                    )
+                    # Truncate long filenames
+                    display_name = file_path.name
+                    if len(display_name) > 40:
+                        display_name = "..." + display_name[-37:]
+                    current_file_text = Text(f"Current: {display_name}", style="cyan")
 
-                try:
-                    # Stop live display during document processing
-                    # This allows the validation workflow UI to display properly
-                    live.stop()
+                    live.update(make_progress_group())
 
-                    # Process document (includes interactive validation)
-                    result = processor.process_document(
-                        input_path=str(file_path),
-                        output_path=str(output_file),
-                    )
-
-                    # Restart live display for progress updates
-                    live.start()
-
-                    file_processing_time = time.time() - file_start_time
-
-                    if result.success:
-                        batch_result.successful_files += 1
-                        batch_result.total_entities += result.entities_detected
-                        batch_result.new_entities += result.entities_new
-                        batch_result.reused_entities += result.entities_reused
-
-                        # Update progress tracker
-                        progress_tracker.update_file_complete(
-                            file_name=file_path.name,
-                            processing_time=file_processing_time,
-                            entities_detected=result.entities_detected,
-                            pseudonyms_new=result.entities_new,
-                            pseudonyms_reused=result.entities_reused,
+                    # Generate output path
+                    if effective_output_dir:
+                        effective_output_dir.mkdir(parents=True, exist_ok=True)
+                        output_file = (
+                            effective_output_dir
+                            / f"{file_path.stem}_pseudonymized{file_path.suffix}"
                         )
                     else:
-                        batch_result.failed_files += 1
-                        batch_result.errors.append(
-                            f"{file_path.name}: {result.error_message}"
+                        output_file = (
+                            file_path.parent
+                            / f"{file_path.stem}_pseudonymized{file_path.suffix}"
                         )
-                        # Still track time for failed files for ETA accuracy
+
+                    try:
+                        # Stop live display during document processing
+                        # This allows the validation workflow UI to display properly
+                        live.stop()
+
+                        # Process document (includes interactive validation)
+                        result = processor.process_document(
+                            input_path=str(file_path),
+                            output_path=str(output_file),
+                        )
+
+                        # Restart live display for progress updates
+                        live.start()
+
+                        file_processing_time = time.time() - file_start_time
+
+                        if result.success:
+                            batch_result.successful_files += 1
+                            batch_result.total_entities += result.entities_detected
+                            batch_result.new_entities += result.entities_new
+                            batch_result.reused_entities += result.entities_reused
+
+                            # Update progress tracker
+                            progress_tracker.update_file_complete(
+                                file_name=file_path.name,
+                                processing_time=file_processing_time,
+                                entities_detected=result.entities_detected,
+                                pseudonyms_new=result.entities_new,
+                                pseudonyms_reused=result.entities_reused,
+                            )
+                        else:
+                            batch_result.failed_files += 1
+                            batch_result.errors.append(
+                                f"{file_path.name}: {result.error_message}"
+                            )
+                            # Still track time for failed files for ETA accuracy
+                            progress_tracker.update_file_complete(
+                                file_name=file_path.name,
+                                processing_time=file_processing_time,
+                                entities_detected=0,
+                                pseudonyms_new=0,
+                                pseudonyms_reused=0,
+                            )
+
+                            if not continue_on_error:
+                                progress.update(
+                                    task, description="✗ Processing stopped"
+                                )
+                                break
+
+                    except Exception as e:
+                        # Ensure live display is restarted even on error
+                        if not live.is_started:
+                            live.start()
+
+                        file_processing_time = time.time() - file_start_time
+                        batch_result.failed_files += 1
+                        batch_result.errors.append(f"{file_path.name}: {str(e)}")
+                        logger.error(
+                            "batch_file_error",
+                            file=str(file_path),
+                            error=str(e),
+                        )
+                        # Track time for failed files
                         progress_tracker.update_file_complete(
                             file_name=file_path.name,
                             processing_time=file_processing_time,
@@ -344,50 +638,24 @@ def batch_command(
                             progress.update(task, description="✗ Processing stopped")
                             break
 
-                except Exception as e:
-                    # Ensure live display is restarted even on error
-                    if not live.is_started:
-                        live.start()
-
-                    file_processing_time = time.time() - file_start_time
-                    batch_result.failed_files += 1
-                    batch_result.errors.append(f"{file_path.name}: {str(e)}")
-                    logger.error(
-                        "batch_file_error",
-                        file=str(file_path),
-                        error=str(e),
-                    )
-                    # Track time for failed files
-                    progress_tracker.update_file_complete(
-                        file_name=file_path.name,
-                        processing_time=file_processing_time,
-                        entities_detected=0,
-                        pseudonyms_new=0,
-                        pseudonyms_reused=0,
+                    # Update progress display with live stats
+                    entities = progress_tracker.entities_detected
+                    new_p = progress_tracker.pseudonyms_new
+                    reused_p = progress_tracker.pseudonyms_reused
+                    stats_text = Text(
+                        f"Entities: {entities:,} | New: {new_p:,} | Reused: {reused_p:,}"
                     )
 
-                    if not continue_on_error:
-                        progress.update(task, description="✗ Processing stopped")
-                        break
+                    progress.update(task, eta=progress_tracker.calculate_eta())
+                    progress.advance(task)
+                    live.update(make_progress_group())
 
-                # Update progress display with live stats
-                entities = progress_tracker.entities_detected
-                new_p = progress_tracker.pseudonyms_new
-                reused_p = progress_tracker.pseudonyms_reused
-                stats_text = Text(
-                    f"Entities: {entities:,} | New: {new_p:,} | Reused: {reused_p:,}"
-                )
-
-                progress.update(task, eta=progress_tracker.calculate_eta())
-                progress.advance(task)
+                # Completion state
+                progress.update(task, description="✓ Processing complete")
+                current_file_text = Text("")
                 live.update(make_progress_group())
 
-            # Completion state
-            progress.update(task, description="✓ Processing complete")
-            current_file_text = Text("")
-            live.update(make_progress_group())
-
-        batch_result.total_time_seconds = time.time() - start_time
+            batch_result.total_time_seconds = time.time() - start_time
 
         # Display summary report
         _display_batch_summary(batch_result)

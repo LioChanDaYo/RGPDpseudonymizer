@@ -43,6 +43,14 @@ class LoggingConfig:
 
 
 @dataclass
+class BatchConfig:
+    """Batch processing configuration settings."""
+
+    workers: int = 4
+    output_dir: Optional[str] = None
+
+
+@dataclass
 class AppConfig:
     """Complete application configuration."""
 
@@ -51,6 +59,7 @@ class AppConfig:
         default_factory=PseudonymizationConfig
     )
     logging: LoggingConfig = field(default_factory=LoggingConfig)
+    batch: BatchConfig = field(default_factory=BatchConfig)
 
 
 class ConfigValidationError(Exception):
@@ -131,6 +140,16 @@ def validate_config_dict(config_dict: dict[str, Any], source: str = "config") ->
                 f"Valid levels: {', '.join(VALID_LOG_LEVELS)}"
             )
 
+    # Validate batch config
+    batch_config = config_dict.get("batch", {})
+    if isinstance(batch_config, dict):
+        workers = batch_config.get("workers")
+        if workers is not None:
+            if not isinstance(workers, int) or workers < 1 or workers > 8:
+                raise ConfigValidationError(
+                    f"Invalid batch.workers '{workers}' in {source} (must be 1-8)"
+                )
+
 
 def load_config_file(config_path: Path) -> dict[str, Any]:
     """Load and validate a single config file.
@@ -204,6 +223,7 @@ def dict_to_config(config_dict: dict[str, Any]) -> AppConfig:
     database_dict = config_dict.get("database", {})
     pseudonymization_dict = config_dict.get("pseudonymization", {})
     logging_dict = config_dict.get("logging", {})
+    batch_dict = config_dict.get("batch", {})
 
     return AppConfig(
         database=DatabaseConfig(
@@ -216,6 +236,10 @@ def dict_to_config(config_dict: dict[str, Any]) -> AppConfig:
         logging=LoggingConfig(
             level=logging_dict.get("level", "INFO"),
             file=logging_dict.get("file"),
+        ),
+        batch=BatchConfig(
+            workers=batch_dict.get("workers", 4),
+            output_dir=batch_dict.get("output_dir"),
         ),
     )
 
@@ -249,6 +273,7 @@ def load_config(
         "database": {"path": "mappings.db"},
         "pseudonymization": {"theme": "neutral", "model": "spacy"},
         "logging": {"level": "INFO", "file": None},
+        "batch": {"workers": 4, "output_dir": None},
     }
 
     # Load home config if exists (~/.gdpr-pseudo.yaml)
