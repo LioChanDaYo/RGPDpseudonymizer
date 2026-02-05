@@ -87,21 +87,25 @@ jobs:
           OMP_NUM_THREADS: 1
         run: poetry run pytest --cov=gdpr_pseudonymizer --cov-report=xml --cov-report=term --cov-branch -v
 
-      - name: Download spaCy model (Windows)
+      - name: Run non-spaCy tests only (Windows)
         if: runner.os == 'Windows'
-        run: poetry run python -m spacy download fr_core_news_lg
-
-      - name: Run full tests (Windows - experimental)
-        if: runner.os == 'Windows'
-        # OMP/MKL/OpenBLAS threads set to 1 to prevent access violations
+        # Skip spaCy-dependent tests on Windows due to access violations
+        # OMP_NUM_THREADS=1 doesn't fully fix the issue
         # See: https://github.com/explosion/spaCy/issues/12659
-        env:
-          OMP_NUM_THREADS: 1
-          MKL_NUM_THREADS: 1
-          OPENBLAS_NUM_THREADS: 1
         run: |
-          poetry run pytest tests/unit/ -v --timeout=120
-          poetry run pytest tests/integration/ -v --timeout=120
+          poetry run pytest tests/unit/cli/ -v
+          poetry run pytest tests/unit/test_benchmark_nlp.py -v
+          poetry run pytest tests/unit/test_config_manager.py -v
+          poetry run pytest tests/unit/test_data_models.py -v
+          poetry run pytest tests/unit/test_file_handler.py -v
+          poetry run pytest tests/unit/test_logger.py -v
+          poetry run pytest tests/unit/test_naive_processor.py -v
+          poetry run pytest tests/unit/test_name_dictionary.py -v
+          poetry run pytest tests/unit/test_process_command.py -v
+          poetry run pytest tests/unit/test_project_config.py -v
+          poetry run pytest tests/unit/test_regex_matcher.py -v
+          poetry run pytest tests/unit/test_validation_models.py -v
+          poetry run pytest tests/unit/test_validation_stub.py -v
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
