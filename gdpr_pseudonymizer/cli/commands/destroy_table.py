@@ -1,6 +1,11 @@
 """Destroy-table command for secure database deletion.
 
 This command implements secure deletion with 3-pass overwrite before deletion.
+
+Security Hardening (Story 3.4):
+- SQLite magic number verification (AC4)
+- Symlink protection (AC4)
+- Passphrase verification before destruction (AC4)
 """
 
 from __future__ import annotations
@@ -8,13 +13,18 @@ from __future__ import annotations
 import os
 import sys
 from pathlib import Path
+from typing import Optional
 
 import typer
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.prompt import Prompt
 
-from gdpr_pseudonymizer.cli.formatters import format_error_message
+from gdpr_pseudonymizer.cli.formatters import (
+    ErrorCode,
+    format_error_message,
+    format_styled_error,
+)
 from gdpr_pseudonymizer.utils.logger import configure_logging, get_logger
 
 # Configure logging
@@ -23,6 +33,61 @@ logger = get_logger(__name__)
 
 # Rich console for output
 console = Console()
+
+# SQLite file format magic number (first 16 bytes)
+SQLITE_MAGIC = b"SQLite format 3\x00"
+
+
+def _verify_sqlite_file(file_path: Path) -> bool:
+    """Verify file is a SQLite database by checking magic number (AC4).
+
+    Args:
+        file_path: Path to file to verify
+
+    Returns:
+        True if file has SQLite magic number, False otherwise
+    """
+    try:
+        with open(file_path, "rb") as f:
+            header = f.read(16)
+        return header == SQLITE_MAGIC
+    except Exception:
+        return False
+
+
+def _verify_not_symlink(file_path: Path) -> bool:
+    """Check if file is a symbolic link (AC4).
+
+    Args:
+        file_path: Path to check
+
+    Returns:
+        True if file is NOT a symlink (safe to proceed), False if it IS a symlink
+    """
+    return not file_path.is_symlink()
+
+
+def _verify_passphrase(db_path: Path, passphrase: str) -> bool:
+    """Verify passphrase can decrypt the database (AC4).
+
+    Attempts to open the database and verify the encryption canary.
+
+    Args:
+        db_path: Path to the encrypted database
+        passphrase: Passphrase to verify
+
+    Returns:
+        True if passphrase is correct, False otherwise
+    """
+    try:
+        from gdpr_pseudonymizer.data.database import open_database
+
+        with open_database(str(db_path), passphrase) as session:
+            # If we can open the database and the session is valid,
+            # the passphrase is correct
+            return session is not None
+    except Exception:
+        return False
 
 
 def destroy_table_command(
@@ -37,6 +102,17 @@ def destroy_table_command(
         "-f",
         help="Skip confirmation prompt (use with caution)",
     ),
+    passphrase: Optional[str] = typer.Option(
+        None,
+        "--passphrase",
+        "-p",
+        help="Passphrase to verify database ownership (recommended for safety)",
+    ),
+    skip_passphrase_check: bool = typer.Option(
+        False,
+        "--skip-passphrase-check",
+        help="Skip passphrase verification (not recommended)",
+    ),
 ) -> None:
     """Securely delete the mapping database.
 
@@ -50,6 +126,11 @@ def destroy_table_command(
 
     This ensures data cannot be recovered with standard recovery tools.
 
+    Security Checks:
+    - Verifies file is a valid SQLite database (prevents accidental deletion)
+    - Rejects symbolic links (prevents following links to critical files)
+    - Optionally verifies passphrase (ensures you're deleting the right database)
+
     Examples:
         # Delete with confirmation
         gdpr-pseudo destroy-table
@@ -59,15 +140,41 @@ def destroy_table_command(
 
         # Skip confirmation (dangerous!)
         gdpr-pseudo destroy-table --force
+
+        # Verify passphrase before deletion (recommended)
+        gdpr-pseudo destroy-table --passphrase
     """
     try:
         # Validate database exists
         db_file = Path(db_path)
         if not db_file.exists():
-            format_error_message(
-                "Database Not Found",
+            format_styled_error(
+                ErrorCode.DATABASE_NOT_FOUND,
                 f"Database file not found: {db_file.absolute()}",
-                "No action needed - database does not exist.",
+            )
+            sys.exit(1)
+
+        # Security check: Reject symbolic links (AC4)
+        if not _verify_not_symlink(db_file):
+            format_styled_error(
+                ErrorCode.SYMLINK_REJECTED,
+                f"Target is a symbolic link: {db_file.absolute()}",
+            )
+            logger.warning(
+                "destroy_rejected_symlink",
+                path=str(db_file.absolute()),
+            )
+            sys.exit(1)
+
+        # Security check: Verify SQLite magic number (AC4)
+        if not _verify_sqlite_file(db_file):
+            format_styled_error(
+                ErrorCode.NOT_SQLITE_FILE,
+                f"File does not appear to be a SQLite database: {db_file.absolute()}",
+            )
+            logger.warning(
+                "destroy_rejected_not_sqlite",
+                path=str(db_file.absolute()),
             )
             sys.exit(1)
 
@@ -83,6 +190,32 @@ def destroy_table_command(
         console.print("[yellow]This action CANNOT be undone![/yellow]")
         console.print("All entity mappings and audit logs will be permanently deleted.")
         console.print()
+
+        # Passphrase verification (AC4)
+        if not skip_passphrase_check:
+            # Prompt for passphrase if not provided
+            if passphrase is None:
+                passphrase = Prompt.ask(
+                    "Enter passphrase to verify database ownership",
+                    password=True,
+                )
+
+            if not _verify_passphrase(db_file, passphrase):
+                format_styled_error(
+                    ErrorCode.PASSPHRASE_VERIFICATION_FAILED,
+                    "Could not verify database with provided passphrase. Destruction aborted.",
+                )
+                logger.warning(
+                    "destroy_passphrase_verification_failed",
+                    path=str(db_file.absolute()),
+                )
+                sys.exit(1)
+
+            console.print("[green]Passphrase verified successfully.[/green]\n")
+        else:
+            console.print(
+                "[yellow]Warning: Skipping passphrase verification as requested.[/yellow]\n"
+            )
 
         # Confirmation
         if not force:

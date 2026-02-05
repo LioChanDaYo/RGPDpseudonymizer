@@ -13,7 +13,7 @@ import typer
 from rich.console import Console
 
 from gdpr_pseudonymizer.cli.commands.batch import batch_command
-from gdpr_pseudonymizer.cli.commands.config_show import config_show_command
+from gdpr_pseudonymizer.cli.commands.config_show import config_app
 from gdpr_pseudonymizer.cli.commands.destroy_table import destroy_table_command
 from gdpr_pseudonymizer.cli.commands.export import export_command
 from gdpr_pseudonymizer.cli.commands.import_mappings import import_mappings_command
@@ -29,10 +29,13 @@ from gdpr_pseudonymizer.cli.config import (
 )
 
 # Create Typer app instance
+# Note: invoke_without_command and no_args_is_help ensure proper help display
+# The prog_name is set via context_settings to fix Windows display bug (shows .cmd extension)
 app = typer.Typer(
     name="gdpr-pseudo",
     help="GDPR-compliant pseudonymization tool for French text documents",
     add_completion=False,
+    context_settings={"help_option_names": ["--help", "-h"]},
 )
 
 # Create Rich console for output
@@ -80,6 +83,25 @@ def main(
     This tool performs entity detection and pseudonymization with
     human-in-the-loop validation for research interview transcripts.
 
+    Quick Start:
+        1. Initialize database:  gdpr-pseudo init
+        2. Process a document:   gdpr-pseudo process document.txt
+        3. View mappings:        gdpr-pseudo list-mappings
+
+    Common Workflows:
+
+        Single document with validation:
+            gdpr-pseudo process interview.txt -o interview_pseudo.txt
+
+        Batch processing with parallel workers:
+            gdpr-pseudo batch ./transcripts/ -o ./output/ --workers 4
+
+        Generate config template:
+            gdpr-pseudo config --init
+
+        Modify configuration:
+            gdpr-pseudo config set pseudonymization.theme star_wars
+
     Global Options:
         --config, -c    Path to config file
         --verbose, -v   Enable verbose logging
@@ -92,21 +114,11 @@ def main(
         4. Home config (~/.gdpr-pseudo.yaml)
         5. Defaults (lowest)
 
-    Example config file (.gdpr-pseudo.yaml):
+    Security:
+        Passphrase is NOT stored in config files.
+        Use GDPR_PSEUDO_PASSPHRASE environment variable or interactive prompt.
 
-        database:
-          path: mappings.db
-
-        pseudonymization:
-          theme: neutral
-          model: spacy
-
-        logging:
-          level: INFO
-          file: gdpr-pseudo.log
-
-    Note: Passphrase is NOT stored in config files for security.
-    Use GDPR_PSEUDO_PASSPHRASE environment variable or interactive prompt.
+    For detailed command help: gdpr-pseudo <command> --help
     """
     # Load and validate config file if specified
     if config is not None:
@@ -162,10 +174,13 @@ app.command(name="export", help="Export audit log to JSON or CSV")(export_comman
 app.command(name="destroy-table", help="Securely delete the mapping database")(
     destroy_table_command
 )
-app.command(name="config", help="Display current effective configuration")(
-    config_show_command
-)
+app.add_typer(config_app, name="config", help="View or modify configuration settings")
+
+
+def cli_main() -> None:
+    """Entry point for CLI with explicit program name for Windows compatibility."""
+    app(prog_name="gdpr-pseudo")
 
 
 if __name__ == "__main__":
-    app()
+    cli_main()

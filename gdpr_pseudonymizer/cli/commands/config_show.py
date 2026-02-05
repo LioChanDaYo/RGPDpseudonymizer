@@ -1,8 +1,9 @@
-"""Config show command for displaying effective configuration.
+"""Config commands for displaying and modifying configuration.
 
-This command displays the merged configuration from all sources
-(home config, project config, defaults) with source annotations.
-Also supports generating a template config file with --init.
+This module provides commands for:
+- Displaying merged configuration from all sources
+- Generating template config files with --init
+- Setting individual config values with 'config set'
 """
 
 from __future__ import annotations
@@ -11,12 +12,22 @@ from pathlib import Path
 from typing import Any
 
 import typer
+import yaml
 from rich.console import Console
 from rich.table import Table
 
 from gdpr_pseudonymizer.cli.config import (
     load_config_file,
     merge_config_dicts,
+)
+from gdpr_pseudonymizer.cli.formatters import (
+    ErrorCode,
+    format_styled_error,
+)
+from gdpr_pseudonymizer.cli.validators import (
+    validate_log_level,
+    validate_theme,
+    validate_workers,
 )
 
 # Template for config file generation
@@ -306,3 +317,172 @@ def config_show_command(
             console.print(f"  [dim]\u2717 {path} (not found)[/dim]")
 
     console.print()
+
+
+# Valid config keys and their validators
+CONFIG_KEY_VALIDATORS = {
+    "pseudonymization.theme": ("theme", validate_theme),
+    "pseudonymization.model": ("model", lambda x: (x.lower() == "spacy", x.lower())),
+    "batch.workers": ("workers", lambda x: validate_workers(int(x))),
+    "batch.output_dir": (
+        "output_dir",
+        lambda x: (True, x if x.lower() != "null" else None),
+    ),
+    "logging.level": ("level", validate_log_level),
+    "logging.file": ("file", lambda x: (True, x if x.lower() != "null" else None)),
+    "database.path": ("path", lambda x: (True, x)),
+}
+
+
+def _set_nested_value(config: dict[str, Any], key: str, value: Any) -> None:
+    """Set a nested value in a config dictionary.
+
+    Args:
+        config: Config dictionary to modify
+        key: Dotted key path (e.g., "pseudonymization.theme")
+        value: Value to set
+    """
+    parts = key.split(".")
+    current = config
+
+    # Navigate to parent
+    for part in parts[:-1]:
+        if part not in current:
+            current[part] = {}
+        current = current[part]
+
+    # Set the value
+    current[parts[-1]] = value
+
+
+def config_set_command(
+    key: str = typer.Argument(..., help="Config key (e.g., pseudonymization.theme)"),
+    value: str = typer.Argument(..., help="Value to set"),
+) -> None:
+    """Set a configuration value.
+
+    Modifies the project config file (.gdpr-pseudo.yaml) in the current directory.
+    Creates the file if it doesn't exist.
+
+    Supported keys:
+        pseudonymization.theme   Theme for pseudonyms (neutral, star_wars, lotr)
+        pseudonymization.model   NLP model (spacy)
+        batch.workers            Number of parallel workers (1-8)
+        batch.output_dir         Default output directory (or null)
+        logging.level            Log level (DEBUG, INFO, WARNING, ERROR)
+        logging.file             Log file path (or null)
+        database.path            Database file path
+
+    Examples:
+        gdpr-pseudo config set pseudonymization.theme star_wars
+        gdpr-pseudo config set batch.workers 2
+        gdpr-pseudo config set logging.level DEBUG
+    """
+    # Validate key
+    if key not in CONFIG_KEY_VALIDATORS:
+        format_styled_error(
+            ErrorCode.INVALID_CONFIG_VALUE,
+            f"Unknown config key: {key}",
+        )
+        console.print(
+            f"[dim]Valid keys: {', '.join(CONFIG_KEY_VALIDATORS.keys())}[/dim]"
+        )
+        raise typer.Exit(1)
+
+    # Validate value
+    field_name, validator = CONFIG_KEY_VALIDATORS[key]
+    try:
+        is_valid, validated_value = validator(value)
+    except (ValueError, TypeError) as e:
+        format_styled_error(
+            ErrorCode.INVALID_CONFIG_VALUE,
+            f"Invalid value for {key}: {e}",
+        )
+        raise typer.Exit(1)
+
+    if not is_valid:
+        raise typer.Exit(1)
+
+    # Load existing config or create empty
+    config_path = Path.cwd() / ".gdpr-pseudo.yaml"
+    config_dict: dict[str, Any] = {}
+
+    if config_path.exists():
+        try:
+            content = config_path.read_text(encoding="utf-8")
+            loaded = yaml.safe_load(content)
+            if loaded is not None:
+                config_dict = loaded
+        except yaml.YAMLError as e:
+            format_styled_error(
+                ErrorCode.CONFIG_PARSE_ERROR,
+                f"Failed to parse existing config: {e}",
+            )
+            raise typer.Exit(1)
+
+    # Set the value
+    _set_nested_value(config_dict, key, validated_value)
+
+    # Write back
+    try:
+        # Use yaml.dump with nice formatting
+        yaml_content = yaml.dump(
+            config_dict,
+            default_flow_style=False,
+            allow_unicode=True,
+            sort_keys=False,
+        )
+
+        # Add header comment if new file
+        if not config_path.exists():
+            header = "# GDPR Pseudonymizer Configuration\n# Generated by 'gdpr-pseudo config set'\n\n"
+            yaml_content = header + yaml_content
+
+        config_path.write_text(yaml_content, encoding="utf-8")
+        console.print(f"[green]Set {key} = {validated_value}[/green]")
+        console.print(f"[dim]Config file: {config_path}[/dim]")
+
+    except OSError as e:
+        format_styled_error(
+            ErrorCode.PERMISSION_DENIED,
+            f"Failed to write config file: {e}",
+        )
+        raise typer.Exit(1)
+
+
+# Create config sub-app for subcommands
+config_app = typer.Typer(
+    name="config",
+    help="View or modify configuration settings",
+    no_args_is_help=False,
+    invoke_without_command=True,
+)
+
+
+@config_app.callback(invoke_without_command=True)
+def config_callback(
+    ctx: typer.Context,
+    init: bool = typer.Option(
+        False,
+        "--init",
+        help="Generate a template .gdpr-pseudo.yaml in current directory",
+    ),
+    force: bool = typer.Option(
+        False,
+        "--force",
+        "-f",
+        help="Overwrite existing config file when using --init",
+    ),
+) -> None:
+    """Display the current effective configuration or generate a template.
+
+    Without flags or subcommands, shows the merged configuration from all
+    sources with annotations indicating where each value came from.
+    """
+    # If no subcommand was invoked, run the show command
+    if ctx.invoked_subcommand is None:
+        config_show_command(init=init, force=force)
+
+
+# Register set subcommand
+config_app.command(name="set")(config_set_command)

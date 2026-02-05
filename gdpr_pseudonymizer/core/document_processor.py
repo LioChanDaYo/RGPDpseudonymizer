@@ -269,17 +269,74 @@ class DocumentProcessor:
                     )
                 else:
                     # Interactive mode: run validation workflow with user prompts
-                    try:
-                        validated_entities = run_validation_workflow(
-                            entities=detected_entities,
-                            document_text=document_text,
-                            document_path=input_path,
-                            pseudonym_assigner=pseudonym_assigner,
+                    # Story 3.4, AC8: Auto-accept entities with existing mappings
+                    # to reduce validation fatigue in batch mode
+
+                    # Separate entities into known (auto-accept) and unknown (need validation)
+                    known_entities: list[DetectedEntity] = []
+                    unknown_entities: list[DetectedEntity] = []
+
+                    for entity in detected_entities:
+                        entity_text_stripped = compositional_engine.strip_titles(
+                            entity.text
                         )
+                        if entity.entity_type == "LOCATION":
+                            entity_text_stripped = (
+                                compositional_engine.strip_prepositions(
+                                    entity_text_stripped
+                                )
+                            )
+
+                        # Check if mapping exists in database
+                        existing = mapping_repo.find_by_full_name(entity_text_stripped)
+                        if existing:
+                            known_entities.append(entity)
+                        else:
+                            unknown_entities.append(entity)
+
+                    # Display auto-accepted count (Story 3.4, AC8)
+                    if known_entities:
+                        # Import here to avoid circular import
+                        from gdpr_pseudonymizer.cli.formatters import console
+
+                        auto_accept_count = len(known_entities)
+                        unique_known = len(set(e.text for e in known_entities))
+                        console.print(
+                            f"[dim]Auto-accepted {auto_accept_count} known entities "
+                            f"({unique_known} unique) with existing mappings[/dim]"
+                        )
+                        logger.info(
+                            "auto_accepted_known_entities",
+                            auto_accepted_count=auto_accept_count,
+                            unique_count=unique_known,
+                        )
+
+                    try:
+                        # Only validate unknown entities
+                        if unknown_entities:
+                            validated_unknown = run_validation_workflow(
+                                entities=unknown_entities,
+                                document_text=document_text,
+                                document_path=input_path,
+                                pseudonym_assigner=pseudonym_assigner,
+                            )
+                        else:
+                            validated_unknown = []
+                            # No unknown entities - skip validation workflow
+                            console.print(
+                                "[green]All entities have existing mappings. "
+                                "Skipping validation.[/green]"
+                            )
+
+                        # Combine auto-accepted known entities with validated unknown
+                        validated_entities = known_entities + validated_unknown
+
                         logger.info(
                             "validation_complete",
                             validated_count=len(validated_entities),
                             original_count=len(detected_entities),
+                            auto_accepted=len(known_entities),
+                            user_validated=len(validated_unknown),
                         )
                     except KeyboardInterrupt:
                         # User cancelled validation - abort processing

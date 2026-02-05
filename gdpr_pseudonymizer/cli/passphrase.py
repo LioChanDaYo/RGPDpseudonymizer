@@ -53,6 +53,14 @@ def resolve_passphrase(
     if cli_passphrase:
         logger.info("passphrase_source", source="cli_flag")
         passphrase = cli_passphrase
+        # Security warning for --passphrase flag (AC7)
+        console.print(
+            "[yellow]Warning: Using --passphrase exposes passphrase in shell history.[/yellow]"
+        )
+        console.print(
+            "[yellow]Prefer GDPR_PSEUDO_PASSPHRASE environment variable or interactive prompt.[/yellow]"
+        )
+        console.print()
 
     # Priority 2: Environment variable
     if passphrase is None:
@@ -76,17 +84,10 @@ def resolve_passphrase(
                 console.print("[bold red]Passphrases do not match.[/bold red]")
                 sys.exit(1)
 
-    # Validate passphrase
+    # Validate passphrase (NFR12: minimum 12 characters enforced by EncryptionService)
     is_valid, feedback = EncryptionService.validate_passphrase(str(passphrase))
     if not is_valid:
         console.print(f"[bold red]Invalid passphrase:[/bold red] {feedback}")
         sys.exit(1)
-
-    # Warning for weak passphrase (below recommended length but still valid)
-    if len(str(passphrase)) < 12:
-        console.print(
-            "[yellow][WARNING] Passphrase is shorter than recommended 12 characters. "
-            "Consider using a stronger passphrase.[/yellow]"
-        )
 
     return str(passphrase)
