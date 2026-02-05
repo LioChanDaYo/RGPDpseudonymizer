@@ -199,10 +199,14 @@ class TestCommandExecution:
     def test_destroy_table_requires_confirmation(self, tmp_path: Path) -> None:
         """Test destroy-table requires confirmation."""
         db_path = tmp_path / "test.db"
-        db_path.write_bytes(b"test data")
+        # Must include SQLite magic header for security verification (Story 3.4)
+        sqlite_magic = b"SQLite format 3\x00"
+        db_path.write_bytes(sqlite_magic + b"\x00" * 100)
 
         result = runner.invoke(
-            app, ["destroy-table", "--db", str(db_path)], input="no\n"
+            app,
+            ["destroy-table", "--db", str(db_path), "--skip-passphrase-check"],
+            input="no\n",
         )
 
         assert result.exit_code == 0

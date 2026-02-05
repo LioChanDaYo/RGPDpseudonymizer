@@ -294,11 +294,11 @@ class DocumentProcessor:
                         else:
                             unknown_entities.append(entity)
 
+                    # Import here to avoid circular import (needed for auto-accept messages)
+                    from gdpr_pseudonymizer.cli.formatters import console
+
                     # Display auto-accepted count (Story 3.4, AC8)
                     if known_entities:
-                        # Import here to avoid circular import
-                        from gdpr_pseudonymizer.cli.formatters import console
-
                         auto_accept_count = len(known_entities)
                         unique_known = len(set(e.text for e in known_entities))
                         console.print(
