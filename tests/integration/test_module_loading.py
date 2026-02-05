@@ -144,13 +144,9 @@ def test_file_handler_available() -> None:
 
 def test_encryption_interface_available() -> None:
     """Test that encryption interface can be imported."""
-    from gdpr_pseudonymizer.utils.encryption import (
-        EncryptionService,
-        FernetEncryptionService,
-    )
+    from gdpr_pseudonymizer.data.encryption import EncryptionService
 
     assert EncryptionService is not None
-    assert FernetEncryptionService is not None
 
 
 def test_exceptions_available() -> None:

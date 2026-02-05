@@ -11,7 +11,6 @@ pseudonymization workflow with:
 
 from __future__ import annotations
 
-import os
 import sys
 from pathlib import Path
 from typing import Optional
@@ -22,9 +21,9 @@ from rich.progress import Progress, SpinnerColumn, TextColumn
 
 from gdpr_pseudonymizer.cli.config import load_config
 from gdpr_pseudonymizer.cli.formatters import format_error_message
+from gdpr_pseudonymizer.cli.passphrase import resolve_passphrase
 from gdpr_pseudonymizer.core.document_processor import DocumentProcessor
 from gdpr_pseudonymizer.data.database import init_database
-from gdpr_pseudonymizer.data.encryption import EncryptionService
 from gdpr_pseudonymizer.exceptions import FileProcessingError
 from gdpr_pseudonymizer.utils.logger import configure_logging, get_logger
 
@@ -53,42 +52,6 @@ logger = get_logger(__name__)
 
 # Rich console for progress indicators
 console = Console()
-
-
-def get_passphrase_from_env_or_prompt() -> str:
-    """Get database passphrase from environment variable or user prompt.
-
-    Checks GDPR_PSEUDO_PASSPHRASE environment variable first. If not found,
-    prompts user interactively with validation.
-
-    Returns:
-        Validated passphrase string
-
-    Raises:
-        SystemExit: If user cancels prompt or passphrase invalid
-    """
-    # Check environment variable first
-    passphrase = os.getenv("GDPR_PSEUDO_PASSPHRASE")
-    if passphrase:
-        logger.info("passphrase_source", source="environment_variable")
-        return passphrase
-
-    # Prompt user
-    console.print("\n[bold yellow]Database Passphrase Required[/bold yellow]")
-    console.print(
-        "Enter passphrase to unlock encrypted mapping database " "(min 12 characters):"
-    )
-
-    passphrase_input = typer.prompt("Passphrase", hide_input=True)
-
-    # Validate passphrase
-    is_valid, feedback = EncryptionService.validate_passphrase(str(passphrase_input))
-    if not is_valid:
-        console.print(f"[bold red]Invalid passphrase:[/bold red] {feedback}")
-        sys.exit(1)
-
-    logger.info("passphrase_source", source="user_prompt")
-    return str(passphrase_input)
 
 
 def process_command(
@@ -193,9 +156,8 @@ def process_command(
             )
             sys.exit(1)
 
-        # Get passphrase
-        if passphrase is None:
-            passphrase = get_passphrase_from_env_or_prompt()
+        # Get passphrase (with warning if --passphrase flag used)
+        passphrase = resolve_passphrase(cli_passphrase=passphrase)
 
         # Initialize database if it doesn't exist
         db_file = Path(effective_db_path)

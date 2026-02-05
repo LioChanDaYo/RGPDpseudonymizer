@@ -96,7 +96,7 @@ pseudonymization:
         monkeypatch.setattr(Path, "home", lambda: home_dir)
 
         with patch(
-            "gdpr_pseudonymizer.cli.commands.process.get_passphrase_from_env_or_prompt"
+            "gdpr_pseudonymizer.cli.commands.process.resolve_passphrase"
         ) as mock_passphrase, patch(
             "gdpr_pseudonymizer.cli.commands.process.DocumentProcessor"
         ) as mock_processor, patch(
@@ -153,7 +153,7 @@ pseudonymization:
         monkeypatch.setattr(Path, "home", lambda: home_dir)
 
         with patch(
-            "gdpr_pseudonymizer.cli.commands.process.get_passphrase_from_env_or_prompt"
+            "gdpr_pseudonymizer.cli.commands.process.resolve_passphrase"
         ) as mock_passphrase, patch(
             "gdpr_pseudonymizer.cli.commands.process.DocumentProcessor"
         ) as mock_processor, patch(
@@ -210,7 +210,7 @@ database:
         monkeypatch.setattr(Path, "home", lambda: home_dir)
 
         with patch(
-            "gdpr_pseudonymizer.cli.commands.process.get_passphrase_from_env_or_prompt"
+            "gdpr_pseudonymizer.cli.commands.process.resolve_passphrase"
         ) as mock_passphrase, patch(
             "gdpr_pseudonymizer.cli.commands.process.DocumentProcessor"
         ) as mock_processor, patch(
@@ -267,7 +267,7 @@ pseudonymization:
         monkeypatch.setattr(Path, "home", lambda: home_dir)
 
         with patch(
-            "gdpr_pseudonymizer.cli.commands.process.get_passphrase_from_env_or_prompt"
+            "gdpr_pseudonymizer.cli.commands.process.resolve_passphrase"
         ) as mock_passphrase, patch(
             "gdpr_pseudonymizer.cli.commands.process.DocumentProcessor"
         ) as mock_processor, patch(
@@ -325,7 +325,7 @@ database:
         monkeypatch.setattr(Path, "home", lambda: home_dir)
 
         with patch(
-            "gdpr_pseudonymizer.cli.commands.process.get_passphrase_from_env_or_prompt"
+            "gdpr_pseudonymizer.cli.commands.process.resolve_passphrase"
         ) as mock_passphrase, patch(
             "gdpr_pseudonymizer.cli.commands.process.DocumentProcessor"
         ) as mock_processor, patch(

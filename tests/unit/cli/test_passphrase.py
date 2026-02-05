@@ -128,27 +128,6 @@ class TestResolvePassphraseValidation:
         assert result == "valid_passphrase_123!"
 
 
-class TestResolvePassphraseWarnings:
-    """Tests for passphrase warnings."""
-
-    def test_short_passphrase_shows_warning(
-        self, capsys: pytest.CaptureFixture[str]
-    ) -> None:
-        """Short passphrase (< 12 chars) shows warning but still works."""
-        # The EncryptionService allows shorter passphrases with a warning
-        # This test verifies the warning is shown
-        with patch(
-            "gdpr_pseudonymizer.cli.passphrase.EncryptionService.validate_passphrase"
-        ) as mock_validate:
-            # Simulate valid but short passphrase
-            mock_validate.return_value = (True, "Valid but short")
-
-            result = resolve_passphrase(cli_passphrase="shortpass1")
-
-        # The passphrase should still be returned (it's valid)
-        assert result == "shortpass1"
-
-
 class TestResolvePassphrasePromptMessage:
     """Tests for custom prompt messages."""
 

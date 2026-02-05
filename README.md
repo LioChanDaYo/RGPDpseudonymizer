@@ -167,7 +167,7 @@ logging:
   level: INFO
 ```
 
-**Note:** Passphrase is never stored in config files (security). Use `GDPR_PSEUDO_PASSPHRASE` env var or interactive prompt.
+**Note:** Passphrase is never stored in config files (security). Use `GDPR_PSEUDO_PASSPHRASE` env var or interactive prompt. Minimum 12 characters required (NFR12).
 
 ---
 
