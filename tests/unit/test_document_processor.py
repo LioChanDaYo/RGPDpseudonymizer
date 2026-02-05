@@ -198,7 +198,10 @@ class TestDocumentProcessor:
                             theme="neutral",
                             model_name="spacy",
                         )
-                        result = processor.process_document("input.txt", "output.txt")
+                        # skip_validation=True to test core processing without AC8 auto-accept
+                        result = processor.process_document(
+                            "input.txt", "output.txt", skip_validation=True
+                        )
 
         # Assert: Processing successful
         assert result.success is True
@@ -324,7 +327,10 @@ class TestDocumentProcessor:
                         theme="neutral",
                         model_name="spacy",
                     )
-                    result = processor.process_document("input.txt", "output.txt")
+                    # skip_validation=True to test core processing without AC8 auto-accept
+                    result = processor.process_document(
+                        "input.txt", "output.txt", skip_validation=True
+                    )
 
         # Assert: Processing successful
         assert result.success is True
