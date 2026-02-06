@@ -64,7 +64,7 @@ class BatchResult:
 
 
 def _process_single_document_worker(
-    args: tuple[str, str, str, str, str, str]
+    args: tuple[str, str, str, str, str, str],
 ) -> dict[str, Any]:
     """Worker function for parallel batch processing.
 

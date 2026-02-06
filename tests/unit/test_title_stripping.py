@@ -154,6 +154,47 @@ class TestTitleStripping:
         result = engine.strip_titles("Dr. Pr. Jean-Pierre Paluel-Marmont")
         assert result == "Jean-Pierre Paluel-Marmont"
 
+    # Story 3.9: Professional Title Tests (AC4) - Maître/Me
+    def test_strip_titles_maitre(self, engine):
+        """Test title stripping: Maître (attorney title, full form)."""
+        result = engine.strip_titles("Maître Dubois")
+        assert result == "Dubois"
+
+    def test_strip_titles_maitre_full_name(self, engine):
+        """Test title stripping: Maître with full name."""
+        result = engine.strip_titles("Maître Marie Dubois")
+        assert result == "Marie Dubois"
+
+    def test_strip_titles_me(self, engine):
+        """Test title stripping: Me (attorney title, abbreviated)."""
+        result = engine.strip_titles("Me Dubois")
+        assert result == "Dubois"
+
+    def test_strip_titles_me_with_period(self, engine):
+        """Test title stripping: Me. with period."""
+        result = engine.strip_titles("Me. Dubois")
+        assert result == "Dubois"
+
+    def test_strip_titles_me_full_name(self, engine):
+        """Test title stripping: Me with full name."""
+        result = engine.strip_titles("Me Antoine Mercier")
+        assert result == "Antoine Mercier"
+
+    def test_strip_titles_maitre_uppercase(self, engine):
+        """Test title stripping: MAÎTRE in uppercase."""
+        result = engine.strip_titles("MAÎTRE DUBOIS")
+        assert result == "DUBOIS"
+
+    def test_strip_titles_maitre_mixed_case(self, engine):
+        """Test title stripping: maître in lowercase."""
+        result = engine.strip_titles("maître Marie Dubois")
+        assert result == "Marie Dubois"
+
+    def test_strip_titles_me_and_dr(self, engine):
+        """Test stripping multiple titles including Me and Dr."""
+        result = engine.strip_titles("Me Dr. Jean Dupont")
+        assert result == "Jean Dupont"
+
 
 class TestTitleStrippingEdgeCases:
     """Test edge cases for title stripping."""

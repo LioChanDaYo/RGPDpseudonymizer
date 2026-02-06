@@ -326,3 +326,49 @@ class TestHybridDetector:
         # Should keep both entities, one flagged as ambiguous
         assert len(merged) == 2
         assert any(e.is_ambiguous for e in merged)
+
+    def test_filter_title_only_entities(self, detector: HybridDetector) -> None:
+        """Test that title-only entities are filtered out.
+
+        spaCy sometimes incorrectly detects titles like "Maître" alone as PERSON
+        entities. The filter removes these false positives.
+        """
+        # Create a title-only entity (e.g., "Maître" without a name)
+        title_only = DetectedEntity(
+            text="Maître",
+            entity_type="PERSON",
+            start_pos=0,
+            end_pos=6,
+            source="spacy",
+        )
+        # Create a valid entity with name
+        valid_entity = DetectedEntity(
+            text="Maître Mercier",
+            entity_type="PERSON",
+            start_pos=10,
+            end_pos=24,
+            source="spacy",
+        )
+
+        filtered = detector._filter_title_only_entities([title_only, valid_entity])
+
+        # Title-only entity should be filtered out
+        assert len(filtered) == 1
+        assert filtered[0].text == "Maître Mercier"
+
+    def test_filter_title_only_preserves_orgs(self, detector: HybridDetector) -> None:
+        """Test that ORG entities are not affected by title filter."""
+        # ORG entities should never be filtered by title logic
+        org_entity = DetectedEntity(
+            text="M. Dupont SA",
+            entity_type="ORG",
+            start_pos=0,
+            end_pos=12,
+            source="regex",
+        )
+
+        filtered = detector._filter_title_only_entities([org_entity])
+
+        # ORG should be preserved
+        assert len(filtered) == 1
+        assert filtered[0].text == "M. Dupont SA"

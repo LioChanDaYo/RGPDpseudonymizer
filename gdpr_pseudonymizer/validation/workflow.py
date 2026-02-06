@@ -7,10 +7,12 @@ pseudonym assignment.
 
 from __future__ import annotations
 
+import re
 from collections import defaultdict
 from typing import Callable
 
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
+from gdpr_pseudonymizer.pseudonym.assignment_engine import FRENCH_TITLE_PATTERN
 from gdpr_pseudonymizer.validation.context_precomputer import ContextPrecomputer
 from gdpr_pseudonymizer.validation.models import ValidationSession
 from gdpr_pseudonymizer.validation.ui import (
@@ -96,7 +98,11 @@ class ValidationWorkflow:
         # Step 2: Review entities by type (PERSON → ORG → LOCATION)
         try:
             self._review_entities_by_type(session, pseudonym_assigner)
-        except KeyboardInterrupt:
+        except KeyboardInterrupt as e:
+            # If this was an intentional quit (from Q key), don't prompt again
+            if str(e) == "User quit validation":
+                raise
+            # For Ctrl+C, prompt for confirmation
             if get_confirmation("Quit validation? Progress will be lost."):
                 raise
             # Continue if user cancels quit
@@ -286,12 +292,16 @@ class ValidationWorkflow:
                         continue
 
                     elif action == "quit":
+                        # Print newline to reset terminal after readchar
+                        print()
                         if get_confirmation("Quit validation? Progress will be lost."):
                             raise KeyboardInterrupt("User quit validation")
                         # Continue if cancelled
                         continue
 
                     elif action == "batch_accept":
+                        # Print newline to reset terminal after readchar
+                        print()
                         if get_confirmation(
                             f"Accept all {len(entity_groups)} unique {entity_type} entities "
                             f"({total_occurrences} total occurrences)?"
@@ -311,6 +321,8 @@ class ValidationWorkflow:
                         break  # Exit group if confirmation cancelled
 
                     elif action == "batch_reject":
+                        # Print newline to reset terminal after readchar
+                        print()
                         if get_confirmation(
                             f"Reject all {len(entity_groups)} unique {entity_type} entities "
                             f"({total_occurrences} total occurrences)?"
@@ -338,17 +350,29 @@ class ValidationWorkflow:
         entity: DetectedEntity,
         pseudonym_assigner: Callable[[DetectedEntity], str] | None,
     ) -> str:
-        """Get pseudonym for entity.
+        """Get pseudonym for entity, preserving title prefixes.
+
+        For PERSON entities, extracts any French title prefix (M., Mme, Maître, etc.)
+        from the original text and prepends it to the pseudonym.
 
         Args:
             entity: Entity to get pseudonym for
             pseudonym_assigner: Optional function to assign pseudonyms
 
         Returns:
-            Assigned pseudonym or placeholder
+            Assigned pseudonym with preserved title prefix, or placeholder
         """
         if pseudonym_assigner:
-            return pseudonym_assigner(entity)
+            base_pseudonym = pseudonym_assigner(entity)
+
+            # Preserve title prefix for PERSON entities
+            if entity.entity_type == "PERSON":
+                title_match = re.match(FRENCH_TITLE_PATTERN, entity.text, re.IGNORECASE)
+                if title_match:
+                    title_prefix = title_match.group(0).rstrip()
+                    return f"{title_prefix} {base_pseudonym}"
+
+            return base_pseudonym
         else:
             # Placeholder pseudonym if no assigner provided
             return f"[{entity.entity_type}_{entity.text[:10]}]"

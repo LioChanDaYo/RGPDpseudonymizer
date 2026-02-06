@@ -18,10 +18,11 @@ logger = logging.getLogger(__name__)
 
 # French title pattern for preprocessing
 # Matches: Dr./Dr, Docteur, Pr./Pr, Prof./Prof, Professeur, M./M, Mme./Mme, Mlle./Mlle, Madame, Monsieur, Mademoiselle
+# Also matches: Maître (attorney title), Me./Me (abbreviated attorney title)
 # Case-insensitive, with or without periods
 # (?!\w) ensures title is not followed by a word character (prevents matching "Dr" in "Drapeau")
 # \s* consumes optional trailing whitespace
-FRENCH_TITLE_PATTERN = r"\b(?:Docteur|Professeur|Madame|Monsieur|Mademoiselle|Dr\.?|Pr\.?|Prof\.?|M\.?|Mme\.?|Mlle\.?)(?!\w)\s*"
+FRENCH_TITLE_PATTERN = r"\b(?:Docteur|Professeur|Madame|Monsieur|Mademoiselle|Maître|Dr\.?|Pr\.?|Prof\.?|M\.?|Mme\.?|Mlle\.?|Me\.?)(?!\w)\s*"
 
 # French preposition pattern for location preprocessing
 # Matches common French prepositions that precede location names: à, au, aux, en, de, du, des, d', l'
