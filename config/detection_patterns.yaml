@@ -8,13 +8,16 @@ patterns:
     confidence: 0.85
     entity_type: PERSON
     patterns:
-      - pattern: '\b(M\.|Mme|Mlle|Dr\.|Pr\.)\s+([A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][a-zàâäéèêëïîôöùûü]+(?:\s+[A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][a-zàâäéèêëïîôöùûü]+)?)'
-        description: "Matches titles + names: M. Dupont, Dr. Marie Dubois, Mme Laurent"
+      - pattern: '\b(M\.|Mme|Mlle|Dr\.|Pr\.|Maître|Me\.?)\s+([A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][a-zàâäéèêëïîôöùûü]+(?:\s+[A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][a-zàâäéèêëïîôöùûü]+)?)'
+        description: "Matches titles + names: M. Dupont, Dr. Marie Dubois, Mme Laurent, Maître Dupont, Me Mercier"
         examples:
           - "M. Dupont"
           - "Mme Laurent"
           - "Dr. Marie Dubois"
           - "Pr. François Martin"
+          - "Maître Dupont"
+          - "Me Mercier"
+          - "Me. Dubois"
 
   # High confidence patterns: Compound hyphenated names
   compound_names:
@@ -58,13 +61,15 @@ patterns:
           - "Solutions Informatiques SARL"
           - "Conseil Entreprises SAS"
           - "Cabinet Dubois EURL"
-      - pattern: '\b(Société|Entreprise|Cabinet|Groupe|Compagnie)\s+([A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][A-Za-zàâäéèêëïîôöùûü\s]+)'
-        description: "Matches organization prefixes: Société TechCorp, Cabinet Martin"
+      - pattern: '\b(Société|Entreprise|Cabinet|Groupe|Compagnie)\s+([A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][A-Za-zàâäéèêëïîôöùûü\s&,]+)'
+        description: "Matches organization prefixes: Société TechCorp, Cabinet Martin, Cabinet Mercier & Associés"
         examples:
           - "Société TechCorp"
           - "Entreprise Dubois"
           - "Cabinet Martin"
           - "Groupe Lefebvre"
+          - "Cabinet Mercier & Associés"
+          - "Cabinet Dupont et Martin"
 
   # Medium confidence patterns: Full names using dictionary
   full_names:

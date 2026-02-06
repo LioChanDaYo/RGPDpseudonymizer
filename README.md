@@ -69,6 +69,7 @@ We're actively developing v1.0 MVP with an **AI-assisted approach**:
   - Story 3.3: Configuration file support & parallel batch ✅ (`.gdpr-pseudo.yaml` config files, `config --init`, parallel `--workers` flag)
   - Story 3.4: CLI UX Polish ✅ (standardized error messages, `config set` command, `destroy-table` security features)
   - Story 3.5: User documentation & guides ✅ (installation.md, tutorial.md)
+  - Story 3.9: NER & Title Handling Improvements ✅ (Cabinet→ORG detection, Maître/Me title preservation, false positive filtering)
 - 📅 **Week 13-14:** Beta release, launch prep
 - 🎯 **MVP Launch:** Week 14 (estimated Q2 2026)
 
@@ -385,6 +386,7 @@ The validation UI provides an intuitive keyboard-driven interface for reviewing 
 - ✅ **Story 3.2 (Week 11):** Progress reporting for large batches - Live entity counts, ETA calculation, rolling average, 29 tests with 100% module coverage
 - ✅ **Story 3.3 (Week 11):** Configuration file support & parallel batch - `.gdpr-pseudo.yaml` config files, `config --init` template generation, parallel `--workers` flag for batch command, 215 tests
 - ✅ **Story 3.4 (Week 11-12):** CLI UX Polish - Improved help text, standardized error messages, `config set` command, `destroy-table` security features (passphrase verification, SQLite magic check, symlink protection)
+- ✅ **Story 3.9 (Week 12):** NER & Title Handling Improvements - Cabinet pattern→ORG detection, Maître/Me title recognition and preservation, false positive filtering for title-only entities and label words
 
 ### Upcoming 📅
 - **Epic 4 (Week 14):** Launch readiness & LLM validation
@@ -558,7 +560,7 @@ The integration test suite covers:
 | Metric | Value | Status |
 |--------|-------|--------|
 | **Development Progress** | Week 12/14 | ✅ Epic 2 Complete + Epic 3 Complete (Stories 3.0-3.5) - v0.1.0-alpha Released |
-| **Stories Complete** | 24 (Epic 1 + Epic 2 + Stories 3.0-3.5) | ✅ Epic 1 (9) + Epic 2 (9) + Stories 3.0, 3.1, 3.2, 3.3, 3.4, 3.5 |
+| **Stories Complete** | 25 (Epic 1 + Epic 2 + Stories 3.0-3.5, 3.9) | ✅ Epic 1 (9) + Epic 2 (9) + Stories 3.0, 3.1, 3.2, 3.3, 3.4, 3.5, 3.9 |
 | **Critical Bugs Found** | 1 (Story 2.8) | ✅ RESOLVED - Epic 3 Unblocked |
 | **Test Corpus Size** | 25 docs, 1,855 entities | ✅ Complete |
 | **NLP Accuracy (Baseline)** | 29.5% F1 (spaCy) | ✅ Measured |
@@ -588,6 +590,6 @@ The integration test suite covers:
 
 ---
 
-**Last Updated:** 2026-02-06 (v0.1.0-alpha released: Epic 2 complete; Stories 3.0-3.4 complete - LOCATION/ORG pseudonym libraries, complete CLI command set, progress reporting, config file support, CLI UX polish; User documentation created (installation.md, tutorial.md); Seeking 3-5 alpha testers for feedback)
+**Last Updated:** 2026-02-06 (v0.1.0-alpha released: Epic 2 complete; Stories 3.0-3.5, 3.9 complete - LOCATION/ORG pseudonym libraries, complete CLI command set, progress reporting, config file support, CLI UX polish, NER & title handling improvements; User documentation created (installation.md, tutorial.md); Seeking 3-5 alpha testers for feedback)
 
-**Current Focus:** Epic 3 complete - Stories 3.0-3.5 all complete (User Documentation & Guides ready), Epic 4 launch readiness next
+**Current Focus:** Epic 3 complete - Stories 3.0-3.5, 3.9 all complete (User Documentation & Guides ready, NER improvements), Epic 4 launch readiness next

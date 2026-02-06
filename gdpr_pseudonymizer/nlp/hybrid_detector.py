@@ -21,7 +21,8 @@ logger = get_logger(__name__)
 
 # French title pattern for entity normalization during deduplication
 # Same pattern used in assignment_engine.py to ensure consistency
-FRENCH_TITLE_PATTERN = r"\b(?:Docteur|Professeur|Madame|Monsieur|Mademoiselle|Dr\.?|Pr\.?|Prof\.?|M\.?|Mme\.?|Mlle\.?)(?!\w)\s*"
+# Includes attorney titles: Maître (full form), Me (abbreviated form)
+FRENCH_TITLE_PATTERN = r"\b(?:Docteur|Professeur|Madame|Monsieur|Mademoiselle|Maître|Dr\.?|Pr\.?|Prof\.?|M\.?|Mme\.?|Mlle\.?|Me\.?)(?!\w)\s*"
 
 
 class HybridDetector(EntityDetector):
@@ -132,6 +133,7 @@ class HybridDetector(EntityDetector):
             - Exact overlap (same span) → Keep spaCy entity (prefer NLP confidence)
             - No overlap → Keep both entities
             - Partial overlap → Flag regex entity as ambiguous, keep both
+            - Special case: Regex ORG with "Cabinet" overlapping spaCy PERSON → Prefer ORG
 
         Args:
             spacy_entities: Entities detected by spaCy
@@ -141,6 +143,8 @@ class HybridDetector(EntityDetector):
             Merged and deduplicated list of entities, sorted by position
         """
         merged: list[DetectedEntity] = list(spacy_entities)
+        # Track spaCy entities to remove (when regex ORG supersedes spaCy PERSON)
+        entities_to_remove: list[DetectedEntity] = []
 
         for regex_entity in regex_entities:
             overlap_found = False
@@ -155,6 +159,18 @@ class HybridDetector(EntityDetector):
                             "duplicate_entity_removed",
                             text=regex_entity.text,
                             reason="exact_match_with_spacy",
+                        )
+                        break
+                    elif self._should_prefer_regex_org(regex_entity, spacy_entity):
+                        # Special case: Regex ORG (Cabinet pattern) supersedes spaCy PERSON
+                        # Remove spaCy PERSON and add regex ORG (not ambiguous)
+                        entities_to_remove.append(spacy_entity)
+                        merged.append(regex_entity)
+                        logger.debug(
+                            "org_supersedes_person",
+                            regex_text=regex_entity.text,
+                            spacy_text=spacy_entity.text,
+                            reason="cabinet_pattern_preferred",
                         )
                         break
                     else:
@@ -173,10 +189,135 @@ class HybridDetector(EntityDetector):
                 # No overlap → Add regex entity (new detection)
                 merged.append(regex_entity)
 
+        # Remove superseded spaCy entities
+        for entity in entities_to_remove:
+            if entity in merged:
+                merged.remove(entity)
+
+        # Filter out title-only entities (e.g., "Maître" without a name)
+        merged = self._filter_title_only_entities(merged)
+
+        # Filter out common French label words detected as entities
+        merged = self._filter_label_words(merged)
+
         # Sort by start position
         merged.sort(key=lambda e: e.start_pos)
 
         return merged
+
+    def _should_prefer_regex_org(
+        self, regex_entity: DetectedEntity, spacy_entity: DetectedEntity
+    ) -> bool:
+        """Check if regex ORG entity should supersede spaCy PERSON entity.
+
+        This handles the "Cabinet" pattern case where spaCy incorrectly detects
+        "Cabinet Mercier" as PERSON, but regex correctly detects
+        "Cabinet Mercier & Associés" as ORG.
+
+        Args:
+            regex_entity: Regex-detected entity
+            spacy_entity: spaCy-detected entity
+
+        Returns:
+            True if regex ORG should replace spaCy PERSON
+        """
+        # Only apply when regex is ORG and spaCy is PERSON
+        if regex_entity.entity_type != "ORG" or spacy_entity.entity_type != "PERSON":
+            return False
+
+        # Check if regex entity starts with organization prefix patterns
+        org_prefixes = ("Cabinet", "Société", "Entreprise", "Groupe", "Compagnie")
+        if not regex_entity.text.startswith(org_prefixes):
+            return False
+
+        # Check if spaCy entity is contained within regex entity
+        # (i.e., regex detected a larger span that includes the spaCy detection)
+        if (
+            regex_entity.start_pos <= spacy_entity.start_pos
+            and regex_entity.end_pos >= spacy_entity.end_pos
+        ):
+            return True
+
+        return False
+
+    def _filter_title_only_entities(
+        self, entities: list[DetectedEntity]
+    ) -> list[DetectedEntity]:
+        """Filter out entities that are just titles without actual names.
+
+        Entities like "Maître" or "Dr." alone (without a following name) are
+        sometimes incorrectly detected by spaCy as PERSON entities. This filter
+        removes such false positives.
+
+        Args:
+            entities: List of detected entities
+
+        Returns:
+            Filtered list with title-only entities removed
+        """
+        filtered = []
+        for entity in entities:
+            # Only filter PERSON entities (titles don't apply to ORG/LOCATION)
+            if entity.entity_type != "PERSON":
+                filtered.append(entity)
+                continue
+
+            # Check if entity becomes empty after stripping titles
+            normalized = self._normalize_entity_text(entity.text)
+            if normalized:
+                filtered.append(entity)
+            else:
+                logger.debug(
+                    "title_only_entity_filtered",
+                    text=entity.text,
+                    source=entity.source,
+                    reason="entity_is_title_only",
+                )
+
+        return filtered
+
+    def _filter_label_words(
+        self, entities: list[DetectedEntity]
+    ) -> list[DetectedEntity]:
+        """Filter out common French label words incorrectly detected as entities.
+
+        Words like "Lieu" (Location label), "Date", etc. are sometimes detected
+        by spaCy as named entities when they appear as document labels.
+
+        Args:
+            entities: List of detected entities
+
+        Returns:
+            Filtered list with label words removed
+        """
+        # Common French label words that are not actual named entities
+        # These appear in documents as field labels (e.g., "Lieu: Paris")
+        label_words = {
+            "lieu",  # Location label
+            "date",  # Date label
+            "heure",  # Time label
+            "objet",  # Subject label
+            "sujet",  # Subject label
+            "titre",  # Title label
+            "nom",  # Name label
+            "adresse",  # Address label
+        }
+
+        filtered = []
+        for entity in entities:
+            # Check if entity text (lowercase) is just a label word
+            if entity.text.lower().strip() in label_words:
+                logger.debug(
+                    "label_word_entity_filtered",
+                    text=entity.text,
+                    entity_type=entity.entity_type,
+                    source=entity.source,
+                    reason="entity_is_label_word",
+                )
+            else:
+                filtered.append(entity)
+
+        return filtered
 
     def _has_overlap(self, e1: DetectedEntity, e2: DetectedEntity) -> bool:
         """Check if two entities overlap in text span.

@@ -212,3 +212,97 @@ class TestRegexMatcher:
         # Might be 0 or small number depending on patterns
         # Main test is that it doesn't crash
         assert isinstance(entities, list)
+
+    # Story 3.9: Cabinet Pattern Tests (AC2)
+    def test_cabinet_pattern_single_name(self, matcher: RegexMatcher) -> None:
+        """Test Cabinet + single name detected as ORG (Bug #3 fix)."""
+        text = "Le Cabinet Mercier gère le dossier."
+        entities = matcher.match_entities(text)
+
+        orgs = [e for e in entities if e.entity_type == "ORG"]
+        matching = [e for e in orgs if "Cabinet Mercier" in e.text]
+        assert len(matching) >= 1, "Cabinet Mercier should be detected as ORG"
+
+    def test_cabinet_pattern_with_associates(self, matcher: RegexMatcher) -> None:
+        """Test Cabinet + name with '& Associés' detected as ORG (Bug #3 fix)."""
+        text = "Contactez le Cabinet Mercier & Associés pour plus d'informations."
+        entities = matcher.match_entities(text)
+
+        orgs = [e for e in entities if e.entity_type == "ORG"]
+        matching = [e for e in orgs if "Cabinet Mercier & Associés" in e.text]
+        assert (
+            len(matching) >= 1
+        ), "Cabinet Mercier & Associés should be detected as ORG"
+
+    def test_cabinet_pattern_multiple_names(self, matcher: RegexMatcher) -> None:
+        """Test Cabinet + multiple names detected as ORG."""
+        text = "Le Cabinet Dupont et Martin représente le client."
+        entities = matcher.match_entities(text)
+
+        orgs = [e for e in entities if e.entity_type == "ORG"]
+        matching = [e for e in orgs if "Cabinet Dupont et Martin" in e.text]
+        assert len(matching) >= 1, "Cabinet Dupont et Martin should be detected as ORG"
+
+    def test_cabinet_pattern_not_person(self, matcher: RegexMatcher) -> None:
+        """Test Cabinet patterns are NOT detected as PERSON."""
+        text = "Cabinet Mercier & Associés représente le client."
+        entities = matcher.match_entities(text)
+
+        # Check that "Cabinet Mercier" is not detected as PERSON
+        persons = [e for e in entities if e.entity_type == "PERSON"]
+        cabinet_as_person = [e for e in persons if "Cabinet" in e.text]
+        assert len(cabinet_as_person) == 0, "Cabinet should not be detected as PERSON"
+
+    def test_cabinet_pattern_complex(self, matcher: RegexMatcher) -> None:
+        """Test Cabinet + complex pattern with comma and ampersand."""
+        text = "Le Cabinet Dupont, Martin & Associés est renommé."
+        entities = matcher.match_entities(text)
+
+        orgs = [e for e in entities if e.entity_type == "ORG"]
+        matching = [
+            e for e in orgs if "Cabinet Dupont" in e.text and "Associés" in e.text
+        ]
+        assert (
+            len(matching) >= 1
+        ), "Cabinet Dupont, Martin & Associés should be detected as ORG"
+
+    # Story 3.9: Professional Title Detection Tests (AC4)
+    def test_maitre_title_detection(self, matcher: RegexMatcher) -> None:
+        """Test Maître title detection (attorney title, full form)."""
+        text = "Maître Dubois représente le client."
+        entities = matcher.match_entities(text)
+
+        matching = [e for e in entities if "Maître Dubois" in e.text]
+        assert len(matching) >= 1, "Maître Dubois should be detected"
+        assert matching[0].entity_type == "PERSON"
+
+    def test_me_title_detection(self, matcher: RegexMatcher) -> None:
+        """Test Me title detection (attorney title, abbreviated)."""
+        text = "Me Mercier a plaidé le dossier."
+        entities = matcher.match_entities(text)
+
+        matching = [e for e in entities if "Me Mercier" in e.text]
+        assert len(matching) >= 1, "Me Mercier should be detected"
+        assert matching[0].entity_type == "PERSON"
+
+    def test_me_with_period_detection(self, matcher: RegexMatcher) -> None:
+        """Test Me. title with period detection."""
+        text = "Me. Dubois est absent aujourd'hui."
+        entities = matcher.match_entities(text)
+
+        matching = [e for e in entities if "Dubois" in e.text]
+        assert len(matching) >= 1, "Me. Dubois should be detected"
+        assert matching[0].entity_type == "PERSON"
+
+    def test_maitre_title_full_name(self, matcher: RegexMatcher) -> None:
+        """Test Maître title with full name."""
+        text = "Maître Antoine Mercier est présent."
+        entities = matcher.match_entities(text)
+
+        matching = [
+            e
+            for e in entities
+            if "Antoine Mercier" in e.text or "Maître Antoine" in e.text
+        ]
+        assert len(matching) >= 1, "Maître Antoine Mercier should be detected"
+        assert all(e.entity_type == "PERSON" for e in matching)
