@@ -127,7 +127,30 @@ ls mappings.db
 
 To pseudonymize multiple documents with consistent entity mappings:
 
-### Example: 3 Documents with Overlapping Entities
+### Option 1: Using the `batch` Command (Recommended - Epic 3)
+
+```bash
+# Create a directory with test documents
+mkdir documents
+echo "Marie Dubois travaille à Paris." > documents/doc1.txt
+echo "Jean Martin collabore avec Marie Dubois." > documents/doc2.txt
+echo "Marie Dubois et Jean Martin sont à Lyon." > documents/doc3.txt
+
+# Process all documents at once
+poetry run gdpr-pseudo batch documents/ -o output/
+
+# Check results
+cat output/doc1_pseudonymized.txt
+cat output/doc2_pseudonymized.txt
+cat output/doc3_pseudonymized.txt
+```
+
+**Batch command features:**
+- Real-time progress bar with ETA
+- Consistent pseudonyms across all documents
+- Optional parallel processing with `--workers` flag
+
+### Option 2: Sequential Processing
 
 **Create test documents:**
 ```bash
@@ -153,6 +176,50 @@ cat doc2_pseudonymized.txt
 cat doc3_pseudonymized.txt
 
 # All should show "Marie Dubois" mapped to same pseudonym (e.g., "Leia Organa")
+```
+
+---
+
+## Configuration Files (Epic 3)
+
+Set default options using a configuration file instead of command-line flags.
+
+### Generate Config Template
+
+```bash
+poetry run gdpr-pseudo config --init
+```
+
+This creates `.gdpr-pseudo.yaml` in the current directory.
+
+### Example Configuration
+
+```yaml
+database:
+  path: project_mappings.db
+
+pseudonymization:
+  theme: star_wars    # neutral | star_wars | lotr
+  model: spacy
+
+batch:
+  workers: 1          # 1 for validation, 2-8 for parallel
+
+logging:
+  level: INFO
+```
+
+### View Current Configuration
+
+```bash
+poetry run gdpr-pseudo config
+```
+
+### Update Configuration
+
+```bash
+poetry run gdpr-pseudo config set pseudonymization.theme lotr
+poetry run gdpr-pseudo config set database.path my_mappings.db
 ```
 
 ---
@@ -199,9 +266,11 @@ Proposed pseudonym: [Leia Organa] (theme: neutral)
 - **`r`**: Reject entity (keep original, don't pseudonymize)
 - **`?`**: Show more information about entity type
 
-**Batch Operations (Coming in Epic 3):**
-- Accept All / Reject All Type (not available in alpha)
-- Currently: Must validate each entity individually
+**Batch Operations (Epic 3):**
+- **Shift+A**: Accept all entities of current type
+- **Shift+R**: Reject all entities of current type
+- Individual validation still available for fine-grained control
+- **Note:** These shortcuts are not shown on the main screen - press **H** to see all available shortcuts
 
 ---
 
@@ -224,7 +293,10 @@ Proposed pseudonym: [Leia Organa] (theme: neutral)
 - **Validation mandatory** - No automatic mode available
 - Every entity must be manually accepted/rejected
 - **Why:** AI detection accuracy is 40-50%, human validation ensures 100%
-- **Epic 3 feature:** Auto-accept high-confidence entities (coming soon)
+- **Epic 3 features now available:**
+  - Batch accept/reject operations (Shift+A/Shift+R)
+  - Configuration file support (`.gdpr-pseudo.yaml`)
+  - Progress reporting for batch processing
 
 ### Pseudonym Support
 - **PERSON, LOCATION, and ORGANIZATION entities supported** - All three entity types have themed pseudonyms
@@ -350,11 +422,10 @@ export GDPR_PSEUDO_PASSPHRASE="MySecurePass123"
 
 **Example:** "Marie Dubois" detected as two separate entities.
 
-**Workaround (alpha version):**
+**Solution:**
 1. Reject incorrect detections during validation
-2. Report issue via feedback survey (helps improve AI model)
-
-**Coming in Epic 3:** Improved compound name detection
+2. The tool now has improved compound name handling (Story 2.3)
+3. Report persistent issues via feedback survey
 
 ### Problem: Validation UI not showing entities
 

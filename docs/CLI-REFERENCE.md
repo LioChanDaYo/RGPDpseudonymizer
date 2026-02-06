@@ -9,6 +9,7 @@ This document provides complete reference documentation for the `gdpr-pseudo` co
   - [init](#init)
   - [process](#process)
   - [batch](#batch)
+  - [config](#config)
   - [list-mappings](#list-mappings)
   - [validate-mappings](#validate-mappings)
   - [stats](#stats)
@@ -152,6 +153,7 @@ gdpr-pseudo batch INPUT_PATH [OPTIONS]
 | `--recursive` | `-r` | | Process subdirectories recursively |
 | `--continue-on-error` | | Yes | Continue processing on individual file errors |
 | `--stop-on-error` | | | Stop on first error |
+| `--workers` | `-w` | 1 | Number of parallel workers (1-8). Use 1 for interactive validation, 2-8 for parallel processing without validation |
 
 **Examples:**
 ```bash
@@ -166,7 +168,66 @@ gdpr-pseudo batch ./documents/ --theme star_wars
 
 # Stop on first error
 gdpr-pseudo batch ./documents/ --stop-on-error
+
+# Parallel processing (no validation, faster for pre-validated entities)
+gdpr-pseudo batch ./documents/ --workers 4
+
+# Sequential with validation (default)
+gdpr-pseudo batch ./documents/ --workers 1
 ```
+
+---
+
+### config
+
+View or modify configuration settings.
+
+**Usage:**
+```bash
+gdpr-pseudo config [OPTIONS] [COMMAND]
+```
+
+**Options:**
+
+| Option | Short | Default | Description |
+|--------|-------|---------|-------------|
+| `--init` | | | Generate a template `.gdpr-pseudo.yaml` in current directory |
+| `--force` | `-f` | | Overwrite existing config file when using `--init` |
+
+**Subcommands:**
+
+| Subcommand | Description |
+|------------|-------------|
+| `set KEY VALUE` | Set a configuration value |
+
+**Examples:**
+```bash
+# View current effective configuration
+gdpr-pseudo config
+
+# Generate config template
+gdpr-pseudo config --init
+
+# Overwrite existing config
+gdpr-pseudo config --init --force
+
+# Set configuration values
+gdpr-pseudo config set pseudonymization.theme star_wars
+gdpr-pseudo config set database.path my_mappings.db
+gdpr-pseudo config set batch.workers 4
+gdpr-pseudo config set logging.level DEBUG
+```
+
+**Configuration Keys:**
+
+| Key | Type | Description |
+|-----|------|-------------|
+| `database.path` | string | Database file path |
+| `pseudonymization.theme` | string | Pseudonym theme (neutral/star_wars/lotr) |
+| `pseudonymization.model` | string | NLP model (spacy) |
+| `batch.workers` | integer | Parallel workers (1-8) |
+| `batch.output_dir` | string | Default output directory |
+| `logging.level` | string | Log level (DEBUG/INFO/WARNING/ERROR) |
 
 ---
 
@@ -380,20 +441,35 @@ gdpr-pseudo destroy-table [OPTIONS]
 |--------|-------|---------|-------------|
 | `--db PATH` | | `mappings.db` | Database file path to destroy |
 | `--force` | `-f` | | Skip confirmation prompt |
+| `--passphrase TEXT` | `-p` | (prompt) | Passphrase to verify database ownership (recommended) |
+| `--skip-passphrase-check` | | | Skip passphrase verification (not recommended) |
 
 **Examples:**
 ```bash
-# Delete with confirmation
+# Delete with confirmation and passphrase verification (safest)
 gdpr-pseudo destroy-table
 
-# Delete specific database
-gdpr-pseudo destroy-table --db project.db
+# Delete specific database with passphrase
+gdpr-pseudo destroy-table --db project.db -p "your_passphrase"
 
-# Skip confirmation (dangerous!)
+# Skip confirmation (requires passphrase by default)
 gdpr-pseudo destroy-table --force
+
+# Skip both confirmation and passphrase (dangerous!)
+gdpr-pseudo destroy-table --force --skip-passphrase-check
 ```
 
-**⚠️ WARNING:** This operation is irreversible! The database is securely overwritten with a 3-pass wipe before deletion.
+**Security Features:**
+
+1. **Passphrase Verification:** By default, you must provide the correct passphrase to prove ownership of the database before deletion.
+
+2. **SQLite Magic Number Check:** The tool verifies the file is a valid SQLite database before attempting deletion (prevents accidental deletion of non-database files).
+
+3. **Symlink Protection:** Symbolic links are rejected to prevent attacks where a symlink could redirect deletion to unintended files.
+
+4. **3-Pass Secure Wipe:** Data is overwritten before file deletion to prevent recovery.
+
+**⚠️ WARNING:** This operation is irreversible! Use `--skip-passphrase-check` only when you're certain and have no other option.
 
 ---
 
@@ -430,6 +506,14 @@ Use one of these methods instead:
 1. **Interactive prompt** (most secure - default behavior)
 2. **Environment variable** `GDPR_PSEUDO_PASSPHRASE` (for automation)
 3. **CLI flag** `--passphrase` (visible in process lists - use with caution)
+
+**Warning about `--passphrase` flag:**
+When you use `--passphrase` on the command line, the passphrase may be:
+- Visible in shell history (`~/.bash_history`, `~/.zsh_history`)
+- Visible in process lists (`ps aux`)
+- Logged by audit systems
+
+For security-sensitive environments, prefer the environment variable or interactive prompt.
 
 ---
 
@@ -583,6 +667,7 @@ gdpr-pseudo stats --db new_project.db
 
 ## Related Documentation
 
-- [Installation Guide](installation.md)
-- [User Guide](usage.md)
-- [Architecture Documentation](architecture.md)
+- [Installation Guide](installation.md) - Setup instructions for all platforms
+- [Usage Tutorial](tutorial.md) - Step-by-step usage tutorials
+- [Architecture Documentation](architecture/) - Technical design documents
+- [ALPHA-QUICKSTART.md](ALPHA-QUICKSTART.md) - Quick start for alpha testers

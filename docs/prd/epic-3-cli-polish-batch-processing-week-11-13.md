@@ -34,8 +34,9 @@
 | 3.3 | Configuration File Support | 2-3 days | MEDIUM | Story 3.1 |
 | 3.4 | CLI UX Polish | 2-3 days | MEDIUM | Stories 3.1-3.3 |
 | 3.5 | User Documentation & Guides | 3-4 days | HIGH | Stories 3.0-3.4 |
+| 3.9 | NER & Title Handling Improvements (Bug Fix) | 2-3 days | HIGH | None |
 
-**Total Estimated Effort:** 16-24 days (within 3-week timeline with parallelization)
+**Total Estimated Effort:** 18-27 days (within 3-week timeline with parallelization)
 
 ---
 
@@ -549,6 +550,44 @@ Examples:
 
 ---
 
+## Story 3.9: NER & Title Handling Improvements (Bug Fix)
+
+**Source:** Bugs #3 and #4 discovered during post-Story 3.0 testing
+**Priority:** HIGH - Core feature bugs affecting entity detection accuracy
+
+**As a** user processing French legal documents with professional titles and organizations,
+**I want** accurate entity detection and complete title preservation throughout the pseudonymization process,
+**so that** professional titles (Maître, Me) are not lost and organization patterns (Cabinet X) are correctly detected as ORG entities.
+
+### Context
+This story addresses two critical bugs discovered during testing:
+- **Bug #3:** "Cabinet" pattern misdetection - "Cabinet Mercier & Associés" detected as PERSON instead of ORG
+- **Bug #4:** Professional title stripping - "Maître" and "Me" titles lost in pseudonymized output
+
+### Acceptance Criteria Summary
+
+1. **AC1-AC2:** Cabinet pattern detection with entity ruler patterns + unit tests
+2. **AC3-AC4:** Professional title recognition ("Maître", "Me", "Me.") + preservation in output + tests
+3. **AC5:** Regression testing - all existing tests continue to pass
+4. **AC6:** Test corpus validation with new patterns
+
+### Story 3.9 Task Breakdown
+
+1. **Task 3.9.1:** Investigate current NER & title detection logic
+2. **Task 3.9.2:** Implement Cabinet pattern detection (entity ruler)
+3. **Task 3.9.3:** Implement professional title recognition
+4. **Task 3.9.4:** Add unit tests for Cabinet patterns
+5. **Task 3.9.5:** Add unit tests for professional titles
+6. **Task 3.9.6:** Add integration tests
+7. **Task 3.9.7:** Regression testing
+8. **Task 3.9.8:** Update test corpus
+
+**Full Story Details:** See [docs/stories/3.9.ner-title-handling-improvements.story.md](../stories/3.9.ner-title-handling-improvements.story.md)
+
+**Estimated Effort:** 2-3 days
+
+---
+
 ## Epic 3 Success Criteria
 
 ### Primary Goals
@@ -556,6 +595,7 @@ Examples:
 2. ✅ **Batch Processing:** Process 50+ documents efficiently with consistent mappings
 3. ✅ **User Documentation:** Self-service installation and usage guides complete
 4. ✅ **Alpha Limitations Addressed:** "PERSON only" limitation removed
+5. ✅ **Bug Fixes:** NER entity detection accuracy and title preservation issues resolved (Story 3.9)
 
 ### Performance Targets
 - **Batch Processing:** 50 documents in <30 minutes (≥1.5 files/min)
@@ -648,6 +688,7 @@ Examples:
 3. User-facing documentation (installation, tutorial, CLI reference)
 4. Performance regression tests (pytest-benchmark)
 5. Updated ALPHA-*.md docs (no "PERSON only" limitation)
+6. Bug fixes: NER entity detection for French legal patterns (Cabinet→ORG) and title preservation (Maître/Me)
 
 **Epic 4 Focus:**
 - LLM validation (verify pseudonymized docs maintain utility)
@@ -661,5 +702,5 @@ Examples:
 
 **PM Contact:** John (Product Manager)
 **PO Contact:** Sarah (Product Owner)
-**Last Updated:** 2026-01-30
+**Last Updated:** 2026-02-06
 **Next Review:** End of Week 11 (progress check), End of Week 13 (Epic 3 completion)
