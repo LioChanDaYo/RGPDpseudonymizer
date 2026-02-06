@@ -1,0 +1,59 @@
+# Quality Gate Decision
+# Story 3.5: User Documentation & Guides
+
+schema: 1
+story: "3.5"
+story_title: "User Documentation & Guides"
+gate: PASS
+status_reason: "All core documentation deliverables complete and production-ready. 5/6 ACs fully met, AC6 user testing is external coordination pending post-merge."
+reviewer: "Quinn (Test Architect)"
+updated: "2026-02-06T12:00:00Z"
+
+waiver: { active: false }
+
+top_issues: []
+
+quality_score: 95
+expires: "2026-02-20T00:00:00Z"
+
+evidence:
+  tests_reviewed: 0  # Documentation story - no code tests
+  risks_identified: 0
+  documentation_files_reviewed: 6
+  trace:
+    ac_covered: [1, 2, 3, 4, 5]
+    ac_gaps: [6]  # AC6 user testing pending external coordination
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: "Documentation correctly advises on passphrase security practices"
+  performance:
+    status: PASS
+    notes: "N/A for documentation story"
+  reliability:
+    status: PASS
+    notes: "N/A for documentation story"
+  maintainability:
+    status: PASS
+    notes: "Well-structured documentation with clear cross-references"
+
+recommendations:
+  immediate: []
+  future:
+    - action: "Complete user testing coordination (AC6 final subtask)"
+      refs: ["docs/installation.md"]
+    - action: "Create docs/faq.md per Story 4.3 (already in backlog)"
+      refs: ["docs/BACKLOG.md:347", "docs/prd/epic-4-launch-readiness-llm-validation-week-11-13.md:79"]
+
+risk_summary:
+  totals: { critical: 0, high: 0, medium: 0, low: 1 }
+  recommendations:
+    must_fix: []
+    monitor:
+      - "AC6 user testing should be coordinated before v1.0 launch"
+
+history:
+  - at: "2026-02-06T12:00:00Z"
+    gate: PASS
+    note: "Initial review - comprehensive documentation complete, user testing pending"

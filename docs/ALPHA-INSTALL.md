@@ -10,7 +10,7 @@
 
 Before installing the GDPR Pseudonymizer, ensure you have:
 
-- **Python:** 3.9, 3.10, 3.11, or 3.12 (NOT 3.13+)
+- **Python:** 3.9, 3.10, or 3.11 (validated in CI/CD; 3.12+ not yet tested)
   - Check version: `python --version`
   - Download from: https://www.python.org/downloads/
 - **Poetry:** 1.7+ (dependency management)
@@ -155,10 +155,10 @@ Commands:
 3. Restart terminal/command prompt
 4. Try `python -m poetry` instead of `poetry`
 
-### Problem: Python version not supported (3.13+ detected)
+### Problem: Python version not supported (3.12+ detected)
 
 **Solution:**
-1. Install Python 3.9-3.12 from https://www.python.org/downloads/
+1. Install Python 3.9-3.11 from https://www.python.org/downloads/
 2. Use `py -3.11` (Windows) or `python3.11` (macOS/Linux) to specify version
 3. Configure Poetry to use specific Python: `poetry env use python3.11`
 
