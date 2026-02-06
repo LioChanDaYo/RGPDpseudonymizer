@@ -200,4 +200,68 @@ Currently, pseudonym assignment does not preserve gender for PERSON entities whe
 **Effort Estimate:** Story-sized (2-3 days)
 
 ---
+
+### FE-008: GDPR Right to Erasure - Selective Entity Deletion
+
+**Source:** User feedback (PM session, 2026-02-05)
+
+**Problem:**
+Currently, there is no CLI command to delete specific entity mappings from the database. To fulfill GDPR Article 17 "Right to Erasure" requests, users must either:
+- Delete the entire mapping database (destroys all mappings, not just the requested individual)
+- Manually edit the SQLite database (requires technical expertise, bypasses encryption)
+
+**GDPR Legal Basis:**
+Deleting a mapping entry effectively converts **pseudonymization** into **anonymization**:
+- Before deletion: "Leia Organa" → links to "Marie Dupont" (personal data under GDPR)
+- After deletion: "Leia Organa" → no link exists (anonymous data, outside GDPR scope)
+
+This is a legally valid approach for Article 17 compliance because:
+- The **ability to re-identify** is what makes data "personal"
+- Without the mapping, the pseudonym cannot be linked to an identifiable individual
+- The document content remains intact, but the data subject is no longer identifiable
+
+**User Story:**
+```
+As a data controller processing GDPR subject access requests,
+I want to delete specific entity mappings from the database,
+So that I can fulfill Article 17 erasure requests without destroying entire documents or affecting other individuals' data.
+```
+
+**Proposed CLI:**
+```bash
+# Delete by entity name
+gdpr-pseudo delete-mapping "Marie Dupont" --db mappings.db
+
+# Delete by entity ID (for programmatic use)
+gdpr-pseudo delete-mapping --id <entity-uuid> --db mappings.db
+
+# List entities (to find the one to delete)
+gdpr-pseudo list-entities --db mappings.db --search "Dupont"
+```
+
+**Acceptance Criteria:**
+1. **AC1:** `delete-mapping` command removes entity from `entities` table
+2. **AC2:** Passphrase verification required before deletion (security)
+3. **AC3:** Confirmation prompt: "This will permanently anonymize 'Marie Dupont'. Continue? [y/N]"
+4. **AC4:** Audit log entry created in `operations` table with `operation_type='DESTROY'`
+5. **AC5:** `list-entities` command shows all entities with search/filter capability
+6. **AC6:** Documentation explains GDPR compliance implications
+
+**Impact:**
+- **High value** for enterprise/academic users with GDPR compliance requirements
+- Enables selective erasure without data loss
+- Differentiates tool from competitors (most anonymization tools lack this granularity)
+
+**Potential Solutions:**
+1. **Direct deletion:** Remove entity row from `entities` table
+2. **Soft deletion:** Mark entity as `deleted=True` (preserves audit trail but complicates queries)
+3. **Cryptographic erasure:** Delete encryption key for specific entity (requires per-entity keys - architectural change)
+
+**Recommendation:** Direct deletion (Option 1) - simplest, meets GDPR requirements, audit trail via `operations` table.
+
+**Priority:** High (significant compliance value, low implementation effort)
+
+**Effort Estimate:** Story-sized (2-3 days)
+
+---
 

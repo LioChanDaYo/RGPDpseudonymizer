@@ -419,7 +419,10 @@ Examples:
 - Validate database path (create if doesn't exist, error if unreadable)
 - Validate theme name (suggest valid themes if invalid)
 - Validate passphrase strength (min 12 characters, warn if weak)
-- **Security:** `destroy-table` command must verify passphrase before destruction (prevents accidental deletion of wrong database)
+- **Security:** `destroy-table` command hardening:
+  - Verify passphrase before destruction (prevents accidental deletion of wrong database)
+  - Verify SQLite magic number header (prevents destruction of non-database files)
+  - Reject symbolic links (prevents destruction of linked system/critical files)
 
 #### AC4.5: Config CLI Assistance Commands
 - `config --init` generates template `.gdpr-pseudo.yaml` with all options documented (implemented in Story 3.3)
@@ -461,8 +464,19 @@ Examples:
     - Validate values before writing (reuse existing validation from config.py)
     - Create `.gdpr-pseudo.yaml` if doesn't exist; update existing file preserving structure
     - Note: `config --init` already implemented in Story 3.3 enhancement
+13. **Task 3.4.13:** Security - Add SQLite magic number verification to `destroy-table`
+    - Verify file header matches SQLite format (`SQLite format 3\0`) before destruction
+    - Prevents accidental destruction of non-database files (e.g., `--db important.docx`)
+    - Clear error message: "File is not a SQLite database. Destruction aborted."
+    - Estimated effort: 30 min
+14. **Task 3.4.14:** Security - Add symlink protection to `destroy-table`
+    - Check `Path.is_symlink()` before any file operations
+    - Reject destruction if target is a symbolic link (prevents destroying linked files)
+    - Clear error message: "Refusing to delete symbolic link for security reasons."
+    - Cross-platform compatible (Windows requires Developer Mode for symlinks)
+    - Estimated effort: 15 min
 
-**Estimated Effort:** 2-3 days (Week 13) + 1-2 hours if FE-001/FE-002 added + 1-2 hours for Task 3.4.12
+**Estimated Effort:** 2-3 days (Week 13) + 1-2 hours if FE-001/FE-002 added + 1-2 hours for Task 3.4.12 + 45 min for Tasks 3.4.13-3.4.14
 
 ---
 
