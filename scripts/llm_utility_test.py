@@ -14,7 +14,7 @@ import time
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 from dotenv import load_dotenv
 
@@ -193,7 +193,7 @@ class LLMUtilityTester:
             messages=[{"role": "user", "content": full_prompt}],
         )
 
-        response_text = message.content[0].text
+        response_text = message.content[0].text  # type: ignore[union-attr]
         tokens_used = message.usage.input_tokens + message.usage.output_tokens
 
         return response_text, tokens_used
@@ -256,9 +256,7 @@ class LLMUtilityTester:
             # Original version
             print("  Original version:")
             orig_content = doc.original_path.read_text(encoding="utf-8")
-            orig_responses = self.run_prompts_on_document(
-                doc, "original", orig_content
-            )
+            orig_responses = self.run_prompts_on_document(doc, "original", orig_content)
             self.responses.extend(orig_responses)
             current += len(PROMPTS)
             print(f"  Progress: {current}/{total}")
@@ -297,7 +295,7 @@ class LLMUtilityTester:
             messages=[{"role": "user", "content": judge_prompt}],
         )
 
-        response_text = message.content[0].text
+        response_text = message.content[0].text  # type: ignore[union-attr]
 
         # Parse JSON from response
         try:
@@ -436,7 +434,7 @@ class LLMUtilityTester:
         )
         print(f"Evaluations saved to: {output_path}")
 
-    def calculate_statistics(self) -> dict:
+    def calculate_statistics(self) -> dict[str, Any]:
         """Calculate summary statistics from evaluations.
 
         Returns:
@@ -446,20 +444,36 @@ class LLMUtilityTester:
             return {}
 
         # Overall scores
-        all_utility = [e.overall_utility for e in self.evaluations if e.overall_utility > 0]
-        all_thematic = [e.thematic_accuracy for e in self.evaluations if e.thematic_accuracy > 0]
-        all_coherence = [e.relationship_coherence for e in self.evaluations if e.relationship_coherence > 0]
-        all_factual = [e.factual_preservation for e in self.evaluations if e.factual_preservation > 0]
+        all_utility = [
+            e.overall_utility for e in self.evaluations if e.overall_utility > 0
+        ]
+        all_thematic = [
+            e.thematic_accuracy for e in self.evaluations if e.thematic_accuracy > 0
+        ]
+        all_coherence = [
+            e.relationship_coherence
+            for e in self.evaluations
+            if e.relationship_coherence > 0
+        ]
+        all_factual = [
+            e.factual_preservation
+            for e in self.evaluations
+            if e.factual_preservation > 0
+        ]
 
-        def calc_stats(values: list[int]) -> dict:
+        def calc_stats(values: list[int]) -> dict[str, Any]:
             if not values:
                 return {"mean": 0, "median": 0, "std": 0, "min": 0, "max": 0}
             n = len(values)
             mean = sum(values) / n
             sorted_vals = sorted(values)
-            median = sorted_vals[n // 2] if n % 2 else (sorted_vals[n // 2 - 1] + sorted_vals[n // 2]) / 2
+            median = (
+                sorted_vals[n // 2]
+                if n % 2
+                else (sorted_vals[n // 2 - 1] + sorted_vals[n // 2]) / 2
+            )
             variance = sum((x - mean) ** 2 for x in values) / n
-            std = variance ** 0.5
+            std = variance**0.5
             return {
                 "mean": round(mean, 2),
                 "median": median,
@@ -517,7 +531,7 @@ class LLMUtilityTester:
             "valid_evaluations": len(all_utility),
         }
 
-    def print_summary(self, stats: dict) -> None:
+    def print_summary(self, stats: dict[str, Any]) -> None:
         """Print a summary of the evaluation results.
 
         Args:
@@ -538,9 +552,15 @@ class LLMUtilityTester:
         print(f"RESULT: {result}")
 
         print("\nBY DIMENSION:")
-        for dim in ["thematic_accuracy", "relationship_coherence", "factual_preservation"]:
+        for dim in [
+            "thematic_accuracy",
+            "relationship_coherence",
+            "factual_preservation",
+        ]:
             dim_stats = stats.get(dim, {})
-            print(f"  {dim.replace('_', ' ').title()}: {dim_stats.get('mean', 0):.2f}/5.0")
+            print(
+                f"  {dim.replace('_', ' ').title()}: {dim_stats.get('mean', 0):.2f}/5.0"
+            )
 
         print("\nBY DOCUMENT TYPE:")
         for doc_type, doc_stats in stats.get("by_document_type", {}).items():

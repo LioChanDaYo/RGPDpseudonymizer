@@ -36,7 +36,7 @@ def validate_anthropic_api() -> bool:
             messages=[{"role": "user", "content": "Reply with just: API OK"}],
         )
 
-        response_text = message.content[0].text
+        response_text = message.content[0].text  # type: ignore[union-attr]
         print(f"API Response: {response_text}")
         print("SUCCESS: Anthropic API connection validated!")
         return True
