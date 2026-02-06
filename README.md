@@ -41,7 +41,7 @@ GDPR Pseudonymizer is a **privacy-first CLI tool** that combines AI efficiency w
 
 ### 🎭 **Themed Pseudonyms**
 - ✅ **Readable output** - Star Wars, LOTR, or generic French names
-- ✅ **Maintains context** - LLM analysis preserves ≥80% document utility
+- ✅ **Maintains context** - LLM analysis preserves 85% document utility (validated: 4.27/5.0)
 - ✅ **Gender-preserving** - When NER provides gender classification (PERSON entities)
 - ✅ **Full entity support** - PERSON, LOCATION, and ORGANIZATION pseudonyms for all themes
 
@@ -388,8 +388,12 @@ The validation UI provides an intuitive keyboard-driven interface for reviewing 
 - ✅ **Story 3.4 (Week 11-12):** CLI UX Polish - Improved help text, standardized error messages, `config set` command, `destroy-table` security features (passphrase verification, SQLite magic check, symlink protection)
 - ✅ **Story 3.9 (Week 12):** NER & Title Handling Improvements - Cabinet pattern→ORG detection, Maître/Me title recognition and preservation, false positive filtering for title-only entities and label words
 
+### In Progress 🚧
+- **Epic 4 (Week 13-14):** Launch Readiness & LLM Validation
+  - Story 4.1: LLM Utility Preservation Testing ✅ **PASSED** (4.27/5.0 = 85.4%, threshold: 80%)
+
 ### Upcoming 📅
-- **Epic 4 (Week 14):** Launch readiness & LLM validation
+- Stories 4.2-4.5: Documentation polish, performance testing, beta release
 
 ---
 
@@ -559,8 +563,9 @@ The integration test suite covers:
 
 | Metric | Value | Status |
 |--------|-------|--------|
-| **Development Progress** | Week 12/14 | ✅ Epic 2 Complete + Epic 3 Complete (Stories 3.0-3.5) - v0.1.0-alpha Released |
-| **Stories Complete** | 25 (Epic 1 + Epic 2 + Stories 3.0-3.5, 3.9) | ✅ Epic 1 (9) + Epic 2 (9) + Stories 3.0, 3.1, 3.2, 3.3, 3.4, 3.5, 3.9 |
+| **Development Progress** | Week 13/14 | ✅ Epic 3 Complete + Story 4.1 - LLM Utility PASSED |
+| **Stories Complete** | 26 (Epic 1 + Epic 2 + Epic 3 + Story 4.1) | ✅ Epic 1 (9) + Epic 2 (9) + Stories 3.0-3.5, 3.9 + Story 4.1 |
+| **LLM Utility (NFR10)** | 4.27/5.0 (85.4%) | ✅ PASSED (threshold: 80%) |
 | **Critical Bugs Found** | 1 (Story 2.8) | ✅ RESOLVED - Epic 3 Unblocked |
 | **Test Corpus Size** | 25 docs, 1,855 entities | ✅ Complete |
 | **NLP Accuracy (Baseline)** | 29.5% F1 (spaCy) | ✅ Measured |
@@ -590,6 +595,6 @@ The integration test suite covers:
 
 ---
 
-**Last Updated:** 2026-02-06 (v0.1.0-alpha released: Epic 2 complete; Stories 3.0-3.5, 3.9 complete - LOCATION/ORG pseudonym libraries, complete CLI command set, progress reporting, config file support, CLI UX polish, NER & title handling improvements; User documentation created (installation.md, tutorial.md); Seeking 3-5 alpha testers for feedback)
+**Last Updated:** 2026-02-06 (Story 4.1 LLM Utility Preservation Testing complete - NFR10 PASSED with 4.27/5.0 score (85.4% utility), validated on 10 documents with 90 API calls, pseudonymized documents maintain full utility for LLM analysis)
 
-**Current Focus:** Epic 3 complete - Stories 3.0-3.5, 3.9 all complete (User Documentation & Guides ready, NER improvements), Epic 4 launch readiness next
+**Current Focus:** Epic 4 in progress - Story 4.1 complete (LLM utility validated), remaining launch readiness stories next

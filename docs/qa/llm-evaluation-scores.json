@@ -1,0 +1,382 @@
+{
+  "metadata": {
+    "generated_at": "2026-02-06T23:05:19.087743",
+    "model": "claude-sonnet-4-20250514",
+    "total_evaluations": 30
+  },
+  "evaluations": [
+    {
+      "document": "interview_01",
+      "prompt_type": "themes",
+      "thematic_accuracy": 5,
+      "relationship_coherence": 4,
+      "factual_preservation": 4,
+      "overall_utility": 4,
+      "notes": "Different pseudonymized names/locations but relationships preserved; academic background changed from 'PhD Computer Science' to generic 'doctorate in computer science' and added renewable energy career detail not in original",
+      "timestamp": "2026-02-06T23:03:20.988068"
+    },
+    {
+      "document": "interview_01",
+      "prompt_type": "relationships",
+      "thematic_accuracy": 5,
+      "relationship_coherence": 5,
+      "factual_preservation": 5,
+      "overall_utility": 5,
+      "notes": "",
+      "timestamp": "2026-02-06T23:03:24.324805"
+    },
+    {
+      "document": "interview_01",
+      "prompt_type": "actions",
+      "thematic_accuracy": 5,
+      "relationship_coherence": 4,
+      "factual_preservation": 4,
+      "overall_utility": 5,
+      "notes": "Entity names and locations changed due to pseudonymization (Dr. Marie Dubois → Dr. Esteban Moreau, INRIA → Org-060, etc.) and some inconsistencies noted, but core themes and utility preserved",
+      "timestamp": "2026-02-06T23:03:28.525677"
+    },
+    {
+      "document": "interview_03",
+      "prompt_type": "themes",
+      "thematic_accuracy": 5,
+      "relationship_coherence": 4,
+      "factual_preservation": 3,
+      "overall_utility": 4,
+      "notes": "Factual preservation reduced due to location change (Bordeaux→Nice) and some organization pseudonymization making specific entities unclear, but core themes and relationships remain intact",
+      "timestamp": "2026-02-06T23:03:32.664652"
+    },
+    {
+      "document": "interview_03",
+      "prompt_type": "relationships",
+      "thematic_accuracy": 5,
+      "relationship_coherence": 5,
+      "factual_preservation": 5,
+      "overall_utility": 5,
+      "notes": "",
+      "timestamp": "2026-02-06T23:03:35.814073"
+    },
+    {
+      "document": "interview_03",
+      "prompt_type": "actions",
+      "thematic_accuracy": 5,
+      "relationship_coherence": 3,
+      "factual_preservation": 3,
+      "overall_utility": 4,
+      "notes": "Geographic locations changed (France to Lorraine region, specific French cities to different ones) and organization names altered (Accenture France to Org-071, etc.), but core themes and utility preserved",
+      "timestamp": "2026-02-06T23:03:40.209729"
+    },
+    {
+      "document": "interview_05",
+      "prompt_type": "themes",
+      "thematic_accuracy": 5,
+      "relationship_coherence": 5,
+      "factual_preservation": 5,
+      "overall_utility": 5,
+      "notes": "",
+      "timestamp": "2026-02-06T23:03:43.266008"
+    },
+    {
+      "document": "interview_05",
+      "prompt_type": "relationships",
+      "thematic_accuracy": 5,
+      "relationship_coherence": 5,
+      "factual_preservation": 5,
+      "overall_utility": 5,
+      "notes": "",
+      "timestamp": "2026-02-06T23:03:46.395519"
+    },
+    {
+      "document": "interview_05",
+      "prompt_type": "actions",
+      "thematic_accuracy": 5,
+      "relationship_coherence": 4,
+      "factual_preservation": 4,
+      "overall_utility": 4,
+      "notes": "Minor inconsistencies: mediator's name/location changed from 'Françoise Barré' to 'Lorenzo Salgado from Lyon', DataCorp name changed from 'DataCorp Europe' to 'DataCorp Île-de-France', and some lawyer names omitted, but core content and utility preserved",
+      "timestamp": "2026-02-06T23:03:51.178296"
+    },
+    {
+      "document": "interview_07",
+      "prompt_type": "themes",
+      "thematic_accuracy": 5,
+      "relationship_coherence": 4,
+      "factual_preservation": 4,
+      "overall_utility": 4,
+      "notes": "Minor geographic inconsistencies (locations changed from Le Havre/Caen/Cherbourg to Midi-Pyrénées/Secteur Est/Créteil) and some entity name changes, but core structure and content preserved",
+      "timestamp": "2026-02-06T23:03:56.274799"
+    },
+    {
+      "document": "interview_07",
+      "prompt_type": "relationships",
+      "thematic_accuracy": 5,
+      "relationship_coherence": 5,
+      "factual_preservation": 5,
+      "overall_utility": 5,
+      "notes": "",
+      "timestamp": "2026-02-06T23:03:59.703586"
+    },
+    {
+      "document": "interview_07",
+      "prompt_type": "actions",
+      "thematic_accuracy": 5,
+      "relationship_coherence": 4,
+      "factual_preservation": 4,
+      "overall_utility": 5,
+      "notes": "Different location names (Le Havre/Caen/Cherbourg vs Midi-Pyrénées/Le Secteur Est/Créteil) and different person names due to pseudonymization, but all structural relationships and core facts preserved",
+      "timestamp": "2026-02-06T23:04:04.136500"
+    },
+    {
+      "document": "interview_10",
+      "prompt_type": "themes",
+      "thematic_accuracy": 5,
+      "relationship_coherence": 4,
+      "factual_preservation": 3,
+      "overall_utility": 2,
+      "notes": "Factual preservation reduced due to pseudonymization artifacts (Org-092 references, name inconsistencies). Overall utility significantly impacted by questioning document integrity, which could mislead researchers about data authenticity.",
+      "timestamp": "2026-02-06T23:04:08.669054"
+    },
+    {
+      "document": "interview_10",
+      "prompt_type": "relationships",
+      "thematic_accuracy": 5,
+      "relationship_coherence": 5,
+      "factual_preservation": 5,
+      "overall_utility": 5,
+      "notes": "",
+      "timestamp": "2026-02-06T23:04:12.020613"
+    },
+    {
+      "document": "interview_10",
+      "prompt_type": "actions",
+      "thematic_accuracy": 5,
+      "relationship_coherence": 4,
+      "factual_preservation": 4,
+      "overall_utility": 5,
+      "notes": "Minor entity name differences due to pseudonymization (e.g., 'M. Drake Miranda' vs original names, 'Org-100' vs 'Atos') but relationships and structure preserved",
+      "timestamp": "2026-02-06T23:04:15.978751"
+    },
+    {
+      "document": "meeting_minutes",
+      "prompt_type": "themes",
+      "thematic_accuracy": 5,
+      "relationship_coherence": 4,
+      "factual_preservation": 4,
+      "overall_utility": 5,
+      "notes": "Minor location discrepancies (Lille vs Villeurbanne warehouse, BETC Paris vs unnamed marketing agency) but core themes, structure, and utility remain intact",
+      "timestamp": "2026-02-06T23:04:20.274724"
+    },
+    {
+      "document": "meeting_minutes",
+      "prompt_type": "relationships",
+      "thematic_accuracy": 4,
+      "relationship_coherence": 3,
+      "factual_preservation": 2,
+      "overall_utility": 3,
+      "notes": "While main organizational themes are preserved, pseudonymization created inconsistencies in person-role mappings and lost specific company/partner identifications, reducing factual accuracy and research utility",
+      "timestamp": "2026-02-06T23:04:24.952351"
+    },
+    {
+      "document": "meeting_minutes",
+      "prompt_type": "actions",
+      "thematic_accuracy": 5,
+      "relationship_coherence": 4,
+      "factual_preservation": 5,
+      "overall_utility": 4,
+      "notes": "Organization codes (Org-106, Org-107, etc.) make some relationships less immediately clear than the original's explicit company names, but all core information is preserved",
+      "timestamp": "2026-02-06T23:04:29.166439"
+    },
+    {
+      "document": "email_chain",
+      "prompt_type": "themes",
+      "thematic_accuracy": 5,
+      "relationship_coherence": 2,
+      "factual_preservation": 3,
+      "overall_utility": 3,
+      "notes": "Pseudonymized version introduces incorrect entity names/relationships (e.g., Pharmaceutique Rhône-Alpes, Agence Régionale de Santé) not present in original, and loses specific stakeholder roles like CTO, Cloud Architect positions",
+      "timestamp": "2026-02-06T23:04:33.541627"
+    },
+    {
+      "document": "email_chain",
+      "prompt_type": "relationships",
+      "thematic_accuracy": 5,
+      "relationship_coherence": 5,
+      "factual_preservation": 5,
+      "overall_utility": 5,
+      "notes": "",
+      "timestamp": "2026-02-06T23:04:36.772264"
+    },
+    {
+      "document": "email_chain",
+      "prompt_type": "actions",
+      "thematic_accuracy": 5,
+      "relationship_coherence": 5,
+      "factual_preservation": 5,
+      "overall_utility": 5,
+      "notes": "",
+      "timestamp": "2026-02-06T23:04:40.026526"
+    },
+    {
+      "document": "incident_report",
+      "prompt_type": "themes",
+      "thematic_accuracy": 5,
+      "relationship_coherence": 5,
+      "factual_preservation": 5,
+      "overall_utility": 5,
+      "notes": "",
+      "timestamp": "2026-02-06T23:04:43.121463"
+    },
+    {
+      "document": "incident_report",
+      "prompt_type": "relationships",
+      "thematic_accuracy": 5,
+      "relationship_coherence": 5,
+      "factual_preservation": 5,
+      "overall_utility": 5,
+      "notes": "",
+      "timestamp": "2026-02-06T23:04:46.046198"
+    },
+    {
+      "document": "incident_report",
+      "prompt_type": "actions",
+      "thematic_accuracy": 5,
+      "relationship_coherence": 5,
+      "factual_preservation": 4,
+      "overall_utility": 5,
+      "notes": "Minor omissions in factual details (missing some vendor names like Palo Alto, SEKOIA.IO, specific insurance company details) but all core action items, deadlines, budgets and decisions accurately preserved",
+      "timestamp": "2026-02-06T23:04:50.811279"
+    },
+    {
+      "document": "hr_announcement",
+      "prompt_type": "themes",
+      "thematic_accuracy": 5,
+      "relationship_coherence": 4,
+      "factual_preservation": 4,
+      "overall_utility": 4,
+      "notes": "Pseudonymized response captures all main themes but loses some specific details like company origins (Google, Microsoft, etc.) and has slightly less strategic insight depth",
+      "timestamp": "2026-02-06T23:04:55.251367"
+    },
+    {
+      "document": "hr_announcement",
+      "prompt_type": "relationships",
+      "thematic_accuracy": 5,
+      "relationship_coherence": 5,
+      "factual_preservation": 5,
+      "overall_utility": 5,
+      "notes": "Both responses capture identical organizational themes, preserve all hierarchical and collaborative relationships accurately through pseudonymization, maintain all factual details with consistent name mappings, and provide equivalent analytical value for understanding company structure.",
+      "timestamp": "2026-02-06T23:04:59.413854"
+    },
+    {
+      "document": "hr_announcement",
+      "prompt_type": "actions",
+      "thematic_accuracy": 4,
+      "relationship_coherence": 3,
+      "factual_preservation": 2,
+      "overall_utility": 3,
+      "notes": "Major issues: Missing key personnel moves (Nadia Amrani, internal mobility chains), incorrect department names, incomplete COMEX information, and some pseudonymized names don't match between documents. Structure and main themes preserved but significant details lost.",
+      "timestamp": "2026-02-06T23:05:04.414899"
+    },
+    {
+      "document": "contract_memo",
+      "prompt_type": "themes",
+      "thematic_accuracy": 5,
+      "relationship_coherence": 3,
+      "factual_preservation": 3,
+      "overall_utility": 3,
+      "notes": "Pseudonymized response identifies data quality issues and inconsistencies that weren't mentioned in original, plus includes extra locations/details not in original summary, suggesting some confusion in entity mapping",
+      "timestamp": "2026-02-06T23:05:08.717427"
+    },
+    {
+      "document": "contract_memo",
+      "prompt_type": "relationships",
+      "thematic_accuracy": 4,
+      "relationship_coherence": 2,
+      "factual_preservation": 2,
+      "overall_utility": 2,
+      "notes": "While main themes are preserved, pseudonymization created significant issues: relationship coherence suffers from inconsistent name mapping (e.g., multiple entities per person), factual preservation fails due to garbled names and incorrect organizational assignments, severely limiting research utility despite structural similarity.",
+      "timestamp": "2026-02-06T23:05:13.370054"
+    },
+    {
+      "document": "contract_memo",
+      "prompt_type": "actions",
+      "thematic_accuracy": 5,
+      "relationship_coherence": 4,
+      "factual_preservation": 3,
+      "overall_utility": 4,
+      "notes": "Names and locations were pseudonymized (Marseille→Montpellier, Paris→Orléans, all personal names changed) affecting factual accuracy, but core content structure and relationships preserved",
+      "timestamp": "2026-02-06T23:05:17.586844"
+    }
+  ],
+  "statistics": {
+    "overall_utility": {
+      "mean": 4.27,
+      "median": 5.0,
+      "std": 0.93,
+      "min": 2,
+      "max": 5
+    },
+    "thematic_accuracy": {
+      "mean": 4.9,
+      "median": 5.0,
+      "std": 0.3,
+      "min": 4,
+      "max": 5
+    },
+    "relationship_coherence": {
+      "mean": 4.13,
+      "median": 4.0,
+      "std": 0.88,
+      "min": 2,
+      "max": 5
+    },
+    "factual_preservation": {
+      "mean": 4.0,
+      "median": 4.0,
+      "std": 1.0,
+      "min": 2,
+      "max": 5
+    },
+    "by_document_type": {
+      "interview": {
+        "mean": 4.47,
+        "median": 5,
+        "std": 0.81,
+        "min": 2,
+        "max": 5
+      },
+      "business": {
+        "mean": 4.07,
+        "median": 4,
+        "std": 1.0,
+        "min": 2,
+        "max": 5
+      }
+    },
+    "by_prompt_type": {
+      "themes": {
+        "mean": 3.9,
+        "median": 4.0,
+        "std": 0.94,
+        "min": 2,
+        "max": 5
+      },
+      "relationships": {
+        "mean": 4.5,
+        "median": 5.0,
+        "std": 1.02,
+        "min": 2,
+        "max": 5
+      },
+      "actions": {
+        "mean": 4.4,
+        "median": 4.5,
+        "std": 0.66,
+        "min": 3,
+        "max": 5
+      }
+    },
+    "pass_threshold": 4.0,
+    "passed": true,
+    "total_evaluations": 30,
+    "valid_evaluations": 30
+  }
+}
