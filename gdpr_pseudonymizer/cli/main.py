@@ -49,7 +49,7 @@ def version_callback(value: bool) -> None:
         raise typer.Exit()
 
 
-@app.callback()
+@app.callback()  # type: ignore[untyped-decorator]
 def main(
     version: bool = typer.Option(
         False,

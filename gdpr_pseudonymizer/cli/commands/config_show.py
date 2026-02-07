@@ -459,7 +459,7 @@ config_app = typer.Typer(
 )
 
 
-@config_app.callback(invoke_without_command=True)
+@config_app.callback(invoke_without_command=True)  # type: ignore[untyped-decorator]
 def config_callback(
     ctx: typer.Context,
     init: bool = typer.Option(

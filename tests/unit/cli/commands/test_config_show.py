@@ -128,12 +128,10 @@ class TestGetConfigWithSources:
         home_dir = tmp_path / "home"
         home_dir.mkdir()
         home_config = home_dir / ".gdpr-pseudo.yaml"
-        home_config.write_text(
-            """
+        home_config.write_text("""
 pseudonymization:
   theme: star_wars
-"""
-        )
+""")
 
         # Empty project dir
         project_dir = tmp_path / "project"
@@ -157,12 +155,10 @@ pseudonymization:
         project_dir = tmp_path / "project"
         project_dir.mkdir()
         project_config = project_dir / ".gdpr-pseudo.yaml"
-        project_config.write_text(
-            """
+        project_config.write_text("""
 batch:
   workers: 2
-"""
-        )
+""")
 
         # Empty home dir
         home_dir = tmp_path / "home"
@@ -184,23 +180,19 @@ batch:
         home_dir = tmp_path / "home"
         home_dir.mkdir()
         home_config = home_dir / ".gdpr-pseudo.yaml"
-        home_config.write_text(
-            """
+        home_config.write_text("""
 pseudonymization:
   theme: star_wars
-"""
-        )
+""")
 
         # Create project config with different theme
         project_dir = tmp_path / "project"
         project_dir.mkdir()
         project_config = project_dir / ".gdpr-pseudo.yaml"
-        project_config.write_text(
-            """
+        project_config.write_text("""
 pseudonymization:
   theme: lotr
-"""
-        )
+""")
 
         monkeypatch.chdir(project_dir)
         monkeypatch.setattr(Path, "home", lambda: home_dir)
@@ -285,12 +277,10 @@ class TestConfigShowCommand:
         project_dir = tmp_path / "project"
         project_dir.mkdir()
         project_config = project_dir / ".gdpr-pseudo.yaml"
-        project_config.write_text(
-            """
+        project_config.write_text("""
 pseudonymization:
   theme: lotr
-"""
-        )
+""")
 
         # Empty home dir
         home_dir = tmp_path / "home"

@@ -15,17 +15,13 @@ with open_database(db_path, passphrase) as db_session:
     enc = db_session.encryption
 
     # Find duplicate pseudonyms
-    duplicates = session.execute(
-        text(
-            """
+    duplicates = session.execute(text("""
         SELECT pseudonym_full, COUNT(*) as count
         FROM entities
         WHERE entity_type = 'PERSON'
         GROUP BY pseudonym_full
         HAVING count > 1
-    """
-        )
-    ).fetchall()
+    """)).fetchall()
 
     print(f"Found {len(duplicates)} duplicate pseudonym(s)\n")
 
@@ -35,13 +31,11 @@ with open_database(db_path, passphrase) as db_session:
 
         # Get all entities with this pseudonym
         entities = session.execute(
-            text(
-                """
+            text("""
             SELECT id, full_name, first_name, last_name, pseudonym_first, pseudonym_last
             FROM entities
             WHERE pseudonym_full = :p AND entity_type = 'PERSON'
-        """
-            ),
+        """),
             {"p": dup_pseudo},
         ).fetchall()
 

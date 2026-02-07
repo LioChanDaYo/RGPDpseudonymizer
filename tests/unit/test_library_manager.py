@@ -512,9 +512,10 @@ class TestFallbackNaming:
         manager._used_pseudonyms.add(test_full)
 
         # Mock selection to always return the same name (causing collision)
-        with patch.object(
-            manager, "_select_first_name", return_value=test_first
-        ), patch.object(manager, "_select_last_name", return_value=test_last):
+        with (
+            patch.object(manager, "_select_first_name", return_value=test_first),
+            patch.object(manager, "_select_last_name", return_value=test_last),
+        ):
             assignment = manager.assign_pseudonym(
                 entity_type="PERSON", first_name="Test", last_name="User", gender="male"
             )
@@ -565,9 +566,10 @@ class TestFallbackNaming:
         test_last = manager.last_names[0]
         test_full = f"{test_first} {test_last}"
 
-        with patch.object(
-            manager, "_select_first_name", return_value=test_first
-        ), patch.object(manager, "_select_last_name", return_value=test_last):
+        with (
+            patch.object(manager, "_select_first_name", return_value=test_first),
+            patch.object(manager, "_select_last_name", return_value=test_last),
+        ):
             # First collision
             manager._used_pseudonyms.add(test_full)
             assignment1 = manager.assign_pseudonym(
@@ -649,9 +651,10 @@ class TestCollisionPrevention:
         manager._used_pseudonyms.add(collision_name)
 
         # Mock to always return same names (causing collision)
-        with patch.object(
-            manager, "_select_first_name", return_value=test_first
-        ), patch.object(manager, "_select_last_name", return_value=test_last):
+        with (
+            patch.object(manager, "_select_first_name", return_value=test_first),
+            patch.object(manager, "_select_last_name", return_value=test_last),
+        ):
             assignment = manager.assign_pseudonym(
                 entity_type="PERSON", first_name="Test", last_name="User", gender="male"
             )

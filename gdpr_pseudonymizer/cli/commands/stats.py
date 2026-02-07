@@ -177,9 +177,11 @@ def stats_command(
             ops_table.add_row("  Entities", str(recent_op.entity_count))
             ops_table.add_row(
                 "  Status",
-                "[green]Success[/green]"
-                if recent_op.success
-                else f"[red]Failed: {recent_op.error_message}[/red]",
+                (
+                    "[green]Success[/green]"
+                    if recent_op.success
+                    else f"[red]Failed: {recent_op.error_message}[/red]"
+                ),
             )
 
         console.print(ops_table)

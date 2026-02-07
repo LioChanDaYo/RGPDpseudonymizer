@@ -118,18 +118,14 @@ class TestBatchProcessingCollisionFix:
             session = db_session.session
 
             # Query for duplicate pseudonyms
-            duplicate_pseudonyms = session.execute(
-                text(
-                    """
+            duplicate_pseudonyms = session.execute(text("""
                 SELECT pseudonym_full, COUNT(*) as count,
                        GROUP_CONCAT(full_name) as real_names
                 FROM entities
                 WHERE entity_type = 'PERSON'
                 GROUP BY pseudonym_full
                 HAVING count > 1
-            """
-                )
-            ).fetchall()
+            """)).fetchall()
 
             # CRITICAL: No duplicate pseudonyms allowed
             if duplicate_pseudonyms:
@@ -172,15 +168,11 @@ class TestBatchProcessingCollisionFix:
             session = db_session.session
 
             # Get all PERSON entities with last_name "Dubois"
-            dubois_entities = session.execute(
-                text(
-                    """
+            dubois_entities = session.execute(text("""
                 SELECT full_name, first_name, last_name, pseudonym_first, pseudonym_last
                 FROM entities
                 WHERE last_name = 'Dubois' AND entity_type = 'PERSON'
-            """
-                )
-            ).fetchall()
+            """)).fetchall()
 
             # Verify all "Dubois" last names map to same pseudonym component
             if len(dubois_entities) > 1:
@@ -192,15 +184,11 @@ class TestBatchProcessingCollisionFix:
                 ), f"Dubois mapped to {len(dubois_pseudo_last_names)} different pseudonyms: {dubois_pseudo_last_names}"
 
             # Get all PERSON entities with first_name "Marie"
-            marie_entities = session.execute(
-                text(
-                    """
+            marie_entities = session.execute(text("""
                 SELECT full_name, first_name, last_name, pseudonym_first, pseudonym_last
                 FROM entities
                 WHERE first_name = 'Marie' AND entity_type = 'PERSON'
-            """
-                )
-            ).fetchall()
+            """)).fetchall()
 
             # Verify all "Marie" first names map to same pseudonym component
             if len(marie_entities) > 1:
@@ -237,16 +225,12 @@ class TestBatchProcessingCollisionFix:
             session = db_session.session
 
             # Get all distinct (last_name, pseudonym_last) pairs
-            last_name_mappings = session.execute(
-                text(
-                    """
+            last_name_mappings = session.execute(text("""
                 SELECT DISTINCT last_name, pseudonym_last
                 FROM entities
                 WHERE entity_type = 'PERSON' AND last_name IS NOT NULL
                 ORDER BY last_name
-            """
-                )
-            ).fetchall()
+            """)).fetchall()
 
             # Build mapping dict: real_last_name -> pseudonym_last
             mappings = {}
@@ -343,17 +327,13 @@ class TestStoryTwoSevenVerification:
             session = db_session.session
 
             # Test 4: Check for duplicate pseudonyms (MUST PASS NOW)
-            duplicate_pseudonyms = session.execute(
-                text(
-                    """
+            duplicate_pseudonyms = session.execute(text("""
                 SELECT pseudonym_full, COUNT(*) as count
                 FROM entities
                 WHERE entity_type = 'PERSON'
                 GROUP BY pseudonym_full
                 HAVING count > 1
-            """
-                )
-            ).fetchall()
+            """)).fetchall()
 
             # CRITICAL: No duplicate pseudonyms allowed
             assert (
@@ -463,17 +443,13 @@ class TestBatchProcessingStressTest:
             assert total_entities[0] > 0, "No entities stored in database"
 
             # Check for duplicate pseudonyms
-            duplicate_pseudonyms = session.execute(
-                text(
-                    """
+            duplicate_pseudonyms = session.execute(text("""
                 SELECT pseudonym_full, COUNT(*) as count
                 FROM entities
                 WHERE entity_type = 'PERSON'
                 GROUP BY pseudonym_full
                 HAVING count > 1
-            """
-                )
-            ).fetchall()
+            """)).fetchall()
 
             # CRITICAL: No duplicate pseudonyms even under stress
             assert (
@@ -482,15 +458,11 @@ class TestBatchProcessingStressTest:
 
             # Verify component consistency: Same real name = same pseudonym
             # Get all "Marie Dubois" entries
-            marie_dubois_entries = session.execute(
-                text(
-                    """
+            marie_dubois_entries = session.execute(text("""
                 SELECT pseudonym_full, pseudonym_first, pseudonym_last
                 FROM entities
                 WHERE full_name = 'Marie Dubois' AND entity_type = 'PERSON'
-            """
-                )
-            ).fetchall()
+            """)).fetchall()
 
             if len(marie_dubois_entries) > 1:
                 # All "Marie Dubois" should have identical pseudonyms

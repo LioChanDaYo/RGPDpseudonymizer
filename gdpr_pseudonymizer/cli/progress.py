@@ -230,7 +230,7 @@ class ProgressTracker:
         return f"{minutes}m {secs}s"
 
 
-class CurrentFileColumn(ProgressColumn):
+class CurrentFileColumn(ProgressColumn):  # type: ignore[misc]
     """Display current file being processed.
 
     Shows the file name with truncation for long names.
@@ -263,7 +263,7 @@ class CurrentFileColumn(ProgressColumn):
         return Text(current_file, style="cyan")
 
 
-class EntityStatsColumn(ProgressColumn):
+class EntityStatsColumn(ProgressColumn):  # type: ignore[misc]
     """Display entity statistics.
 
     Shows: 'Entities: X | New: Y | Reused: Z'
@@ -291,7 +291,7 @@ class EntityStatsColumn(ProgressColumn):
         return Text(f"Entities: {entities_str} | New: {new_str} | Reused: {reused_str}")
 
 
-class ETAColumn(ProgressColumn):
+class ETAColumn(ProgressColumn):  # type: ignore[misc]
     """Display estimated time remaining.
 
     Shows: '< Xm Ys' format.

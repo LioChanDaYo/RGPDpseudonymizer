@@ -80,4 +80,4 @@ def confirm_processing() -> bool:
         >>> confirm_processing()
         False
     """
-    return Confirm.ask("Confirm pseudonymization?")
+    return Confirm.ask("Confirm pseudonymization?")  # type: ignore[no-any-return]

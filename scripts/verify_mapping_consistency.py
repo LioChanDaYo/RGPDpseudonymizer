@@ -58,17 +58,13 @@ def verify_mapping_consistency(db_path: str, passphrase: str) -> None:
 
         # Test 4: Check for duplicate pseudonyms (should be none)
         print("\nTest 4: Duplicate Pseudonym Detection")
-        duplicate_pseudonyms = session.execute(
-            text(
-                """
+        duplicate_pseudonyms = session.execute(text("""
             SELECT pseudonym_full, COUNT(*) as count
             FROM entities
             WHERE entity_type = 'PERSON'
             GROUP BY pseudonym_full
             HAVING count > 1
-            """
-            )
-        ).fetchall()
+            """)).fetchall()
 
         if duplicate_pseudonyms:
             print(f"  [FAIL] Found {len(duplicate_pseudonyms)} duplicate pseudonyms:")
@@ -79,17 +75,13 @@ def verify_mapping_consistency(db_path: str, passphrase: str) -> None:
 
         # Test 5: Check for duplicate full names (should be none - unique constraint)
         print("\nTest 5: Duplicate Entity Name Detection")
-        duplicate_names = session.execute(
-            text(
-                """
+        duplicate_names = session.execute(text("""
             SELECT pseudonym_full, COUNT(*) as count
             FROM entities
             WHERE entity_type = 'PERSON'
             GROUP BY full_name
             HAVING count > 1
-            """
-            )
-        ).fetchall()
+            """)).fetchall()
 
         if duplicate_names:
             print(f"  [FAIL] Found {len(duplicate_names)} duplicate entity names:")
@@ -100,16 +92,12 @@ def verify_mapping_consistency(db_path: str, passphrase: str) -> None:
 
         # Test 6: List all PERSON entities
         print("\nTest 6: All PERSON Entities")
-        all_people = session.execute(
-            text(
-                """
+        all_people = session.execute(text("""
             SELECT pseudonym_full, entity_type, theme
             FROM entities
             WHERE entity_type = 'PERSON'
             ORDER BY pseudonym_full
-            """
-            )
-        ).fetchall()
+            """)).fetchall()
 
         print(f"  Total PERSON entities: {len(all_people)}")
         print("  Sample entities (first 10):")

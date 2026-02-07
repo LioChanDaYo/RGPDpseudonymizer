@@ -257,16 +257,14 @@ class TestLoadConfigFile:
     def test_load_valid_config_file(self, tmp_path: Path) -> None:
         """Test loading valid config file."""
         config_file = tmp_path / ".gdpr-pseudo.yaml"
-        config_file.write_text(
-            """
+        config_file.write_text("""
 database:
   path: custom.db
 pseudonymization:
   theme: lotr
 logging:
   level: WARNING
-"""
-        )
+""")
 
         config_dict = load_config_file(config_file)
 
@@ -303,13 +301,11 @@ logging:
     def test_passphrase_in_file_rejected(self, tmp_path: Path) -> None:
         """SECURITY TEST: Config file with passphrase is rejected."""
         config_file = tmp_path / "insecure.yaml"
-        config_file.write_text(
-            """
+        config_file.write_text("""
 database:
   path: mappings.db
   passphrase: my_secret_passphrase_123
-"""
-        )
+""")
 
         with pytest.raises(PassphraseInConfigError) as exc_info:
             load_config_file(config_file)
@@ -343,25 +339,21 @@ class TestLoadConfig:
         home_dir = tmp_path / "home"
         home_dir.mkdir()
         home_config = home_dir / ".gdpr-pseudo.yaml"
-        home_config.write_text(
-            """
+        home_config.write_text("""
 database:
   path: home.db
 pseudonymization:
   theme: star_wars
-"""
-        )
+""")
 
         # Create project config
         project_dir = tmp_path / "project"
         project_dir.mkdir()
         project_config = project_dir / ".gdpr-pseudo.yaml"
-        project_config.write_text(
-            """
+        project_config.write_text("""
 database:
   path: project.db
-"""
-        )
+""")
 
         # Mock home and cwd
         monkeypatch.setattr(Path, "home", lambda: home_dir)
@@ -382,23 +374,19 @@ database:
         project_dir = tmp_path / "project"
         project_dir.mkdir()
         project_config = project_dir / ".gdpr-pseudo.yaml"
-        project_config.write_text(
-            """
+        project_config.write_text("""
 database:
   path: project.db
 pseudonymization:
   theme: star_wars
-"""
-        )
+""")
 
         # Create custom config
         custom_config = tmp_path / "custom.yaml"
-        custom_config.write_text(
-            """
+        custom_config.write_text("""
 database:
   path: custom.db
-"""
-        )
+""")
 
         # Mock cwd
         monkeypatch.chdir(project_dir)
@@ -420,14 +408,12 @@ database:
         project_dir = tmp_path / "project"
         project_dir.mkdir()
         project_config = project_dir / ".gdpr-pseudo.yaml"
-        project_config.write_text(
-            """
+        project_config.write_text("""
 database:
   path: project.db
 pseudonymization:
   theme: star_wars
-"""
-        )
+""")
 
         # Mock cwd and home
         monkeypatch.chdir(project_dir)

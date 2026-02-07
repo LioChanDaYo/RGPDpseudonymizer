@@ -320,7 +320,7 @@ def _secure_delete(file_path: Path) -> None:
 
         # Pass 2: Overwrite with ones
         f.seek(0)
-        f.write(b"\xFF" * file_size)
+        f.write(b"\xff" * file_size)
         f.flush()
         os.fsync(f.fileno())
 

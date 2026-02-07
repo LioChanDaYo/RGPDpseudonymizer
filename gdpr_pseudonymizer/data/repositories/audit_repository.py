@@ -127,7 +127,7 @@ class AuditRepository:
         if limit is not None:
             query = query.limit(limit)
 
-        return query.all()
+        return query.all()  # type: ignore[no-any-return]
 
     def get_operation_by_id(self, operation_id: str) -> Optional[Operation]:
         """Retrieve specific operation by ID.
@@ -141,7 +141,7 @@ class AuditRepository:
         Example:
             >>> operation = repo.get_operation_by_id("abc-123-def-456")
         """
-        return self._session.query(Operation).filter_by(id=operation_id).first()
+        return self._session.query(Operation).filter_by(id=operation_id).first()  # type: ignore[no-any-return]
 
     def get_total_entity_count(
         self, operation_type: Optional[str] = None, success: Optional[bool] = True
@@ -195,7 +195,7 @@ class AuditRepository:
             return 0.0
 
         total_time = sum(op.processing_time_seconds for op in operations)
-        return total_time / len(operations)
+        return total_time / len(operations)  # type: ignore[no-any-return]
 
     def get_failure_rate(self, operation_type: Optional[str] = None) -> float:
         """Calculate failure rate for operations.
@@ -386,15 +386,17 @@ class AuditRepository:
                         "id": op.id,
                         "timestamp": op.timestamp.isoformat(),
                         "operation_type": op.operation_type,
-                        "files_processed": ",".join(op.files_processed)
-                        if op.files_processed
-                        else "",
+                        "files_processed": (
+                            ",".join(op.files_processed) if op.files_processed else ""
+                        ),
                         "model_name": op.model_name,
                         "model_version": op.model_version,
                         "theme_selected": op.theme_selected,
-                        "user_modifications": json.dumps(op.user_modifications)
-                        if op.user_modifications
-                        else "",
+                        "user_modifications": (
+                            json.dumps(op.user_modifications)
+                            if op.user_modifications
+                            else ""
+                        ),
                         "entity_count": op.entity_count,
                         "processing_time_seconds": op.processing_time_seconds,
                         "success": op.success,

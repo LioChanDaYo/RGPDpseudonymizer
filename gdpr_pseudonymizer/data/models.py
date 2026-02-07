@@ -10,7 +10,7 @@ from sqlalchemy import JSON, Boolean, DateTime, Float, Integer, String
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
-class Base(DeclarativeBase):
+class Base(DeclarativeBase):  # type: ignore[misc]
     """Base class for all SQLAlchemy models."""
 
     pass

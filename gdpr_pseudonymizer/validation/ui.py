@@ -67,7 +67,7 @@ def get_text_input(prompt_text: str) -> str:
     Returns:
         User input string
     """
-    return Prompt.ask(prompt_text)
+    return Prompt.ask(prompt_text)  # type: ignore[no-any-return]
 
 
 def get_confirmation(prompt_text: str) -> bool:
@@ -79,7 +79,7 @@ def get_confirmation(prompt_text: str) -> bool:
     Returns:
         True if user confirms, False otherwise
     """
-    return Confirm.ask(prompt_text)
+    return Confirm.ask(prompt_text)  # type: ignore[no-any-return]
 
 
 class SummaryScreen:
@@ -418,7 +418,9 @@ def display_error_message(title: str, message: str) -> None:
         message: Error message details
     """
     console.print()
-    error_panel = Panel(f"[red]{message}[/red]", title=f"❌ {title}", border_style="red")
+    error_panel = Panel(
+        f"[red]{message}[/red]", title=f"❌ {title}", border_style="red"
+    )
     console.print(error_panel)
     console.print()
 

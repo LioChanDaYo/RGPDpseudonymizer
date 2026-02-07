@@ -135,11 +135,10 @@ class TestResolvePassphrasePromptMessage:
         """Custom prompt message is displayed."""
         monkeypatch.delenv("GDPR_PSEUDO_PASSPHRASE", raising=False)
 
-        with patch(
-            "gdpr_pseudonymizer.cli.passphrase.typer.prompt"
-        ) as mock_prompt, patch(
-            "gdpr_pseudonymizer.cli.passphrase.console.print"
-        ) as mock_print:
+        with (
+            patch("gdpr_pseudonymizer.cli.passphrase.typer.prompt") as mock_prompt,
+            patch("gdpr_pseudonymizer.cli.passphrase.console.print") as mock_print,
+        ):
             mock_prompt.return_value = "passphrase_123456!"
 
             resolve_passphrase(

@@ -142,7 +142,7 @@ class EncryptionService:
         # Decrypt with SIV authentication verification
         plaintext_bytes = self._cipher.decrypt(ciphertext_bytes, None)
 
-        return plaintext_bytes.decode("utf-8")
+        return plaintext_bytes.decode("utf-8")  # type: ignore[no-any-return]
 
     def encrypt_canary(self) -> str:
         """Encrypt canary value for passphrase validation.

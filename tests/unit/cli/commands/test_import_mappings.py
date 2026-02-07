@@ -59,13 +59,17 @@ class TestImportMappingsCommand:
 
         mock_entities = [create_mock_entity()]
 
-        with patch(
-            "gdpr_pseudonymizer.cli.commands.import_mappings.resolve_passphrase"
-        ) as mock_resolve, patch(
-            "gdpr_pseudonymizer.cli.commands.import_mappings.open_database"
-        ) as mock_open_db, patch(
-            "gdpr_pseudonymizer.cli.commands.import_mappings.SQLiteMappingRepository"
-        ) as mock_repo:
+        with (
+            patch(
+                "gdpr_pseudonymizer.cli.commands.import_mappings.resolve_passphrase"
+            ) as mock_resolve,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.import_mappings.open_database"
+            ) as mock_open_db,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.import_mappings.SQLiteMappingRepository"
+            ) as mock_repo,
+        ):
             mock_resolve.return_value = "testpassphrase123!"
             mock_open_db.return_value.__enter__ = MagicMock(return_value=MagicMock())
             mock_open_db.return_value.__exit__ = MagicMock(return_value=False)
@@ -132,13 +136,17 @@ class TestImportMappingsCommand:
         source_db.touch()
         target_db.touch()
 
-        with patch(
-            "gdpr_pseudonymizer.cli.commands.import_mappings.resolve_passphrase"
-        ) as mock_resolve, patch(
-            "gdpr_pseudonymizer.cli.commands.import_mappings.open_database"
-        ) as mock_open_db, patch(
-            "gdpr_pseudonymizer.cli.commands.import_mappings.SQLiteMappingRepository"
-        ) as mock_repo:
+        with (
+            patch(
+                "gdpr_pseudonymizer.cli.commands.import_mappings.resolve_passphrase"
+            ) as mock_resolve,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.import_mappings.open_database"
+            ) as mock_open_db,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.import_mappings.SQLiteMappingRepository"
+            ) as mock_repo,
+        ):
             mock_resolve.return_value = "testpassphrase123!"
             mock_open_db.return_value.__enter__ = MagicMock(return_value=MagicMock())
             mock_open_db.return_value.__exit__ = MagicMock(return_value=False)
@@ -162,13 +170,17 @@ class TestImportMappingsCommand:
         mock_entities = [create_mock_entity()]
         existing_entity = create_mock_entity()
 
-        with patch(
-            "gdpr_pseudonymizer.cli.commands.import_mappings.resolve_passphrase"
-        ) as mock_resolve, patch(
-            "gdpr_pseudonymizer.cli.commands.import_mappings.open_database"
-        ) as mock_open_db, patch(
-            "gdpr_pseudonymizer.cli.commands.import_mappings.SQLiteMappingRepository"
-        ) as mock_repo:
+        with (
+            patch(
+                "gdpr_pseudonymizer.cli.commands.import_mappings.resolve_passphrase"
+            ) as mock_resolve,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.import_mappings.open_database"
+            ) as mock_open_db,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.import_mappings.SQLiteMappingRepository"
+            ) as mock_repo,
+        ):
             mock_resolve.return_value = "testpassphrase123!"
             mock_open_db.return_value.__enter__ = MagicMock(return_value=MagicMock())
             mock_open_db.return_value.__exit__ = MagicMock(return_value=False)
@@ -190,11 +202,14 @@ class TestImportMappingsCommand:
         source_db.touch()
         target_db.touch()
 
-        with patch(
-            "gdpr_pseudonymizer.cli.commands.import_mappings.resolve_passphrase"
-        ) as mock_resolve, patch(
-            "gdpr_pseudonymizer.cli.commands.import_mappings.open_database"
-        ) as mock_open_db:
+        with (
+            patch(
+                "gdpr_pseudonymizer.cli.commands.import_mappings.resolve_passphrase"
+            ) as mock_resolve,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.import_mappings.open_database"
+            ) as mock_open_db,
+        ):
             mock_resolve.return_value = "wrongpassphrase!!"
             mock_open_db.side_effect = ValueError("Invalid passphrase")
 
@@ -216,11 +231,14 @@ class TestImportMappingsCommand:
         source_db.touch()
         target_db.touch()
 
-        with patch(
-            "gdpr_pseudonymizer.cli.commands.import_mappings.resolve_passphrase"
-        ) as mock_resolve, patch(
-            "gdpr_pseudonymizer.cli.commands.import_mappings.open_database"
-        ) as mock_open_db:
+        with (
+            patch(
+                "gdpr_pseudonymizer.cli.commands.import_mappings.resolve_passphrase"
+            ) as mock_resolve,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.import_mappings.open_database"
+            ) as mock_open_db,
+        ):
             mock_resolve.return_value = "testpassphrase123!"
             mock_open_db.side_effect = RuntimeError("Unexpected error")
 
@@ -241,13 +259,17 @@ class TestImportMappingsCommand:
 
         mock_entities = [create_mock_entity()]
 
-        with patch(
-            "gdpr_pseudonymizer.cli.commands.import_mappings.resolve_passphrase"
-        ) as mock_resolve, patch(
-            "gdpr_pseudonymizer.cli.commands.import_mappings.open_database"
-        ) as mock_open_db, patch(
-            "gdpr_pseudonymizer.cli.commands.import_mappings.SQLiteMappingRepository"
-        ) as mock_repo:
+        with (
+            patch(
+                "gdpr_pseudonymizer.cli.commands.import_mappings.resolve_passphrase"
+            ) as mock_resolve,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.import_mappings.open_database"
+            ) as mock_open_db,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.import_mappings.SQLiteMappingRepository"
+            ) as mock_repo,
+        ):
             mock_resolve.return_value = "testpassphrase123!"
             mock_open_db.return_value.__enter__ = MagicMock(return_value=MagicMock())
             mock_open_db.return_value.__exit__ = MagicMock(return_value=False)

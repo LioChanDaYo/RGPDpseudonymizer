@@ -77,12 +77,10 @@ class TestProcessConfigIntegration:
         project_dir = tmp_path / "project"
         project_dir.mkdir()
         config_file = project_dir / ".gdpr-pseudo.yaml"
-        config_file.write_text(
-            """
+        config_file.write_text("""
 pseudonymization:
   theme: star_wars
-"""
-        )
+""")
 
         # Create test file
         input_file = project_dir / "input.txt"
@@ -95,12 +93,14 @@ pseudonymization:
         monkeypatch.chdir(project_dir)
         monkeypatch.setattr(Path, "home", lambda: home_dir)
 
-        with patch(
-            "gdpr_pseudonymizer.cli.commands.process.resolve_passphrase"
-        ) as mock_passphrase, patch(
-            "gdpr_pseudonymizer.cli.commands.process.DocumentProcessor"
-        ) as mock_processor, patch(
-            "gdpr_pseudonymizer.cli.commands.process.init_database"
+        with (
+            patch(
+                "gdpr_pseudonymizer.cli.commands.process.resolve_passphrase"
+            ) as mock_passphrase,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.process.DocumentProcessor"
+            ) as mock_processor,
+            patch("gdpr_pseudonymizer.cli.commands.process.init_database"),
         ):
             mock_passphrase.return_value = "testpassphrase123!"
 
@@ -134,12 +134,10 @@ pseudonymization:
         project_dir = tmp_path / "project"
         project_dir.mkdir()
         config_file = project_dir / ".gdpr-pseudo.yaml"
-        config_file.write_text(
-            """
+        config_file.write_text("""
 pseudonymization:
   model: spacy
-"""
-        )
+""")
 
         # Create test file
         input_file = project_dir / "input.txt"
@@ -152,12 +150,14 @@ pseudonymization:
         monkeypatch.chdir(project_dir)
         monkeypatch.setattr(Path, "home", lambda: home_dir)
 
-        with patch(
-            "gdpr_pseudonymizer.cli.commands.process.resolve_passphrase"
-        ) as mock_passphrase, patch(
-            "gdpr_pseudonymizer.cli.commands.process.DocumentProcessor"
-        ) as mock_processor, patch(
-            "gdpr_pseudonymizer.cli.commands.process.init_database"
+        with (
+            patch(
+                "gdpr_pseudonymizer.cli.commands.process.resolve_passphrase"
+            ) as mock_passphrase,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.process.DocumentProcessor"
+            ) as mock_processor,
+            patch("gdpr_pseudonymizer.cli.commands.process.init_database"),
         ):
             mock_passphrase.return_value = "testpassphrase123!"
 
@@ -191,12 +191,10 @@ pseudonymization:
         project_dir = tmp_path / "project"
         project_dir.mkdir()
         config_file = project_dir / ".gdpr-pseudo.yaml"
-        config_file.write_text(
-            """
+        config_file.write_text("""
 database:
   path: custom_db.db
-"""
-        )
+""")
 
         # Create test file
         input_file = project_dir / "input.txt"
@@ -209,12 +207,14 @@ database:
         monkeypatch.chdir(project_dir)
         monkeypatch.setattr(Path, "home", lambda: home_dir)
 
-        with patch(
-            "gdpr_pseudonymizer.cli.commands.process.resolve_passphrase"
-        ) as mock_passphrase, patch(
-            "gdpr_pseudonymizer.cli.commands.process.DocumentProcessor"
-        ) as mock_processor, patch(
-            "gdpr_pseudonymizer.cli.commands.process.init_database"
+        with (
+            patch(
+                "gdpr_pseudonymizer.cli.commands.process.resolve_passphrase"
+            ) as mock_passphrase,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.process.DocumentProcessor"
+            ) as mock_processor,
+            patch("gdpr_pseudonymizer.cli.commands.process.init_database"),
         ):
             mock_passphrase.return_value = "testpassphrase123!"
 
@@ -248,12 +248,10 @@ database:
         project_dir = tmp_path / "project"
         project_dir.mkdir()
         config_file = project_dir / ".gdpr-pseudo.yaml"
-        config_file.write_text(
-            """
+        config_file.write_text("""
 pseudonymization:
   theme: star_wars
-"""
-        )
+""")
 
         # Create test file
         input_file = project_dir / "input.txt"
@@ -266,12 +264,14 @@ pseudonymization:
         monkeypatch.chdir(project_dir)
         monkeypatch.setattr(Path, "home", lambda: home_dir)
 
-        with patch(
-            "gdpr_pseudonymizer.cli.commands.process.resolve_passphrase"
-        ) as mock_passphrase, patch(
-            "gdpr_pseudonymizer.cli.commands.process.DocumentProcessor"
-        ) as mock_processor, patch(
-            "gdpr_pseudonymizer.cli.commands.process.init_database"
+        with (
+            patch(
+                "gdpr_pseudonymizer.cli.commands.process.resolve_passphrase"
+            ) as mock_passphrase,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.process.DocumentProcessor"
+            ) as mock_processor,
+            patch("gdpr_pseudonymizer.cli.commands.process.init_database"),
         ):
             mock_passphrase.return_value = "testpassphrase123!"
 
@@ -306,12 +306,10 @@ pseudonymization:
         project_dir = tmp_path / "project"
         project_dir.mkdir()
         config_file = project_dir / ".gdpr-pseudo.yaml"
-        config_file.write_text(
-            """
+        config_file.write_text("""
 database:
   path: config_db.db
-"""
-        )
+""")
 
         # Create test file
         input_file = project_dir / "input.txt"
@@ -324,12 +322,14 @@ database:
         monkeypatch.chdir(project_dir)
         monkeypatch.setattr(Path, "home", lambda: home_dir)
 
-        with patch(
-            "gdpr_pseudonymizer.cli.commands.process.resolve_passphrase"
-        ) as mock_passphrase, patch(
-            "gdpr_pseudonymizer.cli.commands.process.DocumentProcessor"
-        ) as mock_processor, patch(
-            "gdpr_pseudonymizer.cli.commands.process.init_database"
+        with (
+            patch(
+                "gdpr_pseudonymizer.cli.commands.process.resolve_passphrase"
+            ) as mock_passphrase,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.process.DocumentProcessor"
+            ) as mock_processor,
+            patch("gdpr_pseudonymizer.cli.commands.process.init_database"),
         ):
             mock_passphrase.return_value = "testpassphrase123!"
 

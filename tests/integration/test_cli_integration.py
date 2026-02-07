@@ -136,14 +136,12 @@ class TestGlobalOptions:
     def test_config_option_with_valid_config(self, tmp_path: Path) -> None:
         """Test --config with valid config file."""
         config_path = tmp_path / "valid.yaml"
-        config_path.write_text(
-            """
+        config_path.write_text("""
 database:
   path: custom.db
 pseudonymization:
   theme: star_wars
-"""
-        )
+""")
 
         # Should succeed and display help
         result = runner.invoke(app, ["--config", str(config_path), "--help"])

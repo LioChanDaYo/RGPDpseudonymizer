@@ -51,13 +51,17 @@ class TestExportCommand:
 
         mock_operations = [create_mock_operation()]
 
-        with patch(
-            "gdpr_pseudonymizer.cli.commands.export.resolve_passphrase"
-        ) as mock_resolve, patch(
-            "gdpr_pseudonymizer.cli.commands.export.open_database"
-        ) as mock_open_db, patch(
-            "gdpr_pseudonymizer.cli.commands.export.AuditRepository"
-        ) as mock_repo:
+        with (
+            patch(
+                "gdpr_pseudonymizer.cli.commands.export.resolve_passphrase"
+            ) as mock_resolve,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.export.open_database"
+            ) as mock_open_db,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.export.AuditRepository"
+            ) as mock_repo,
+        ):
             mock_resolve.return_value = "testpassphrase123!"
             db_session = MagicMock()
             mock_open_db.return_value.__enter__ = MagicMock(return_value=db_session)
@@ -79,13 +83,17 @@ class TestExportCommand:
 
         mock_operations = [create_mock_operation()]
 
-        with patch(
-            "gdpr_pseudonymizer.cli.commands.export.resolve_passphrase"
-        ) as mock_resolve, patch(
-            "gdpr_pseudonymizer.cli.commands.export.open_database"
-        ) as mock_open_db, patch(
-            "gdpr_pseudonymizer.cli.commands.export.AuditRepository"
-        ) as mock_repo:
+        with (
+            patch(
+                "gdpr_pseudonymizer.cli.commands.export.resolve_passphrase"
+            ) as mock_resolve,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.export.open_database"
+            ) as mock_open_db,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.export.AuditRepository"
+            ) as mock_repo,
+        ):
             mock_resolve.return_value = "testpassphrase123!"
             db_session = MagicMock()
             mock_open_db.return_value.__enter__ = MagicMock(return_value=db_session)
@@ -132,13 +140,17 @@ class TestExportCommand:
 
         mock_operations = [create_mock_operation()]
 
-        with patch(
-            "gdpr_pseudonymizer.cli.commands.export.resolve_passphrase"
-        ) as mock_resolve, patch(
-            "gdpr_pseudonymizer.cli.commands.export.open_database"
-        ) as mock_open_db, patch(
-            "gdpr_pseudonymizer.cli.commands.export.AuditRepository"
-        ) as mock_repo:
+        with (
+            patch(
+                "gdpr_pseudonymizer.cli.commands.export.resolve_passphrase"
+            ) as mock_resolve,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.export.open_database"
+            ) as mock_open_db,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.export.AuditRepository"
+            ) as mock_repo,
+        ):
             mock_resolve.return_value = "testpassphrase123!"
             db_session = MagicMock()
             mock_open_db.return_value.__enter__ = MagicMock(return_value=db_session)
@@ -202,13 +214,17 @@ class TestExportCommand:
         db_path.touch()
         output_path = tmp_path / "export.json"
 
-        with patch(
-            "gdpr_pseudonymizer.cli.commands.export.resolve_passphrase"
-        ) as mock_resolve, patch(
-            "gdpr_pseudonymizer.cli.commands.export.open_database"
-        ) as mock_open_db, patch(
-            "gdpr_pseudonymizer.cli.commands.export.AuditRepository"
-        ) as mock_repo:
+        with (
+            patch(
+                "gdpr_pseudonymizer.cli.commands.export.resolve_passphrase"
+            ) as mock_resolve,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.export.open_database"
+            ) as mock_open_db,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.export.AuditRepository"
+            ) as mock_repo,
+        ):
             mock_resolve.return_value = "testpassphrase123!"
             db_session = MagicMock()
             mock_open_db.return_value.__enter__ = MagicMock(return_value=db_session)
@@ -232,13 +248,17 @@ class TestExportCommand:
 
         mock_operations = [create_mock_operation()]
 
-        with patch(
-            "gdpr_pseudonymizer.cli.commands.export.resolve_passphrase"
-        ) as mock_resolve, patch(
-            "gdpr_pseudonymizer.cli.commands.export.open_database"
-        ) as mock_open_db, patch(
-            "gdpr_pseudonymizer.cli.commands.export.AuditRepository"
-        ) as mock_repo:
+        with (
+            patch(
+                "gdpr_pseudonymizer.cli.commands.export.resolve_passphrase"
+            ) as mock_resolve,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.export.open_database"
+            ) as mock_open_db,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.export.AuditRepository"
+            ) as mock_repo,
+        ):
             mock_resolve.return_value = "testpassphrase123!"
             db_session = MagicMock()
             mock_open_db.return_value.__enter__ = MagicMock(return_value=db_session)
@@ -261,13 +281,17 @@ class TestExportCommand:
 
         mock_operations = [create_mock_operation()]
 
-        with patch(
-            "gdpr_pseudonymizer.cli.commands.export.resolve_passphrase"
-        ) as mock_resolve, patch(
-            "gdpr_pseudonymizer.cli.commands.export.open_database"
-        ) as mock_open_db, patch(
-            "gdpr_pseudonymizer.cli.commands.export.AuditRepository"
-        ) as mock_repo:
+        with (
+            patch(
+                "gdpr_pseudonymizer.cli.commands.export.resolve_passphrase"
+            ) as mock_resolve,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.export.open_database"
+            ) as mock_open_db,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.export.AuditRepository"
+            ) as mock_repo,
+        ):
             mock_resolve.return_value = "testpassphrase123!"
             db_session = MagicMock()
             mock_open_db.return_value.__enter__ = MagicMock(return_value=db_session)
@@ -289,13 +313,17 @@ class TestExportCommand:
 
         mock_operations = [create_mock_operation()]
 
-        with patch(
-            "gdpr_pseudonymizer.cli.commands.export.resolve_passphrase"
-        ) as mock_resolve, patch(
-            "gdpr_pseudonymizer.cli.commands.export.open_database"
-        ) as mock_open_db, patch(
-            "gdpr_pseudonymizer.cli.commands.export.AuditRepository"
-        ) as mock_repo:
+        with (
+            patch(
+                "gdpr_pseudonymizer.cli.commands.export.resolve_passphrase"
+            ) as mock_resolve,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.export.open_database"
+            ) as mock_open_db,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.export.AuditRepository"
+            ) as mock_repo,
+        ):
             mock_resolve.return_value = "testpassphrase123!"
             db_session = MagicMock()
             mock_open_db.return_value.__enter__ = MagicMock(return_value=db_session)
@@ -315,11 +343,14 @@ class TestExportCommand:
         db_path.touch()
         output_path = tmp_path / "export.json"
 
-        with patch(
-            "gdpr_pseudonymizer.cli.commands.export.resolve_passphrase"
-        ) as mock_resolve, patch(
-            "gdpr_pseudonymizer.cli.commands.export.open_database"
-        ) as mock_open_db:
+        with (
+            patch(
+                "gdpr_pseudonymizer.cli.commands.export.resolve_passphrase"
+            ) as mock_resolve,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.export.open_database"
+            ) as mock_open_db,
+        ):
             mock_resolve.return_value = "wrongpassphrase!!"
             mock_open_db.side_effect = ValueError("Invalid passphrase")
 
@@ -337,11 +368,14 @@ class TestExportCommand:
         db_path.touch()
         output_path = tmp_path / "export.json"
 
-        with patch(
-            "gdpr_pseudonymizer.cli.commands.export.resolve_passphrase"
-        ) as mock_resolve, patch(
-            "gdpr_pseudonymizer.cli.commands.export.open_database"
-        ) as mock_open_db:
+        with (
+            patch(
+                "gdpr_pseudonymizer.cli.commands.export.resolve_passphrase"
+            ) as mock_resolve,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.export.open_database"
+            ) as mock_open_db,
+        ):
             mock_resolve.return_value = "testpassphrase123!"
             mock_open_db.side_effect = RuntimeError("Unexpected error")
 
