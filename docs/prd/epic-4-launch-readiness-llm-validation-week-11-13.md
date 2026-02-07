@@ -264,4 +264,49 @@ gdpr-pseudo list-entities --db mappings.db --search "Dupont"
 **Effort Estimate:** Story-sized (2-3 days)
 
 ---
+
+### FE-009: Standalone Executable Distribution (.exe/.app)
+
+**Source:** PM review during Story 4.2 planning (installation accessibility analysis)
+
+**Problem:**
+The v1.0 MVP requires Python installation and command-line comfort, which excludes non-technical users (HR professionals, legal teams, compliance officers) who would benefit from the tool but lack technical skills. While `pip install` (Story 4.7) simplifies installation for users with Python, it still requires:
+- Python 3.9-3.11 pre-installed
+- Command-line/terminal usage
+- Understanding of virtual environments (recommended)
+
+Docker was considered but is actually **harder** for non-technical Windows/Mac users (requires Docker Desktop, virtualization, container concepts).
+
+**User Story:**
+```
+As a non-technical Windows or macOS user,
+I want to download and run GDPR Pseudonymizer without installing Python or using the command line,
+So that I can pseudonymize my documents with minimal technical barriers.
+```
+
+**Proposed Solution:**
+Create standalone executables using PyInstaller or similar:
+- **Windows:** `.exe` installer or portable executable
+- **macOS:** `.app` bundle (drag to Applications)
+- **Linux:** AppImage or .deb/.rpm packages (optional, Linux users typically more technical)
+
+**Technical Considerations:**
+1. **PyInstaller bundling:** Package Python runtime + all dependencies + spaCy model (~800MB-1GB total)
+2. **Code signing:** Required for macOS Gatekeeper and Windows SmartScreen trust
+3. **Auto-update mechanism:** Consider for future versions
+4. **GUI wrapper:** Standalone exe should include Phase 2 GUI, not just CLI
+
+**Relationship to Phase 2 GUI:**
+This enhancement is **tightly coupled** with Phase 2 GUI development. The standalone executable should ship WITH the GUI — a CLI-only .exe provides limited value to non-technical users. Recommended approach:
+1. Phase 2 GUI development
+2. Bundle GUI + CLI into standalone executables
+3. Distribute via GitHub Releases, website download
+
+**Priority:** High (critical for Phase 2 broader adoption goal)
+
+**Effort Estimate:** Epic-sized (depends on GUI complexity, 2-4 weeks including signing/distribution)
+
+**Phase 2 Requirement:** This is a **must-have** for Phase 2 launch, not a nice-to-have.
+
+---
 

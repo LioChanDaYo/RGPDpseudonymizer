@@ -14,6 +14,7 @@ Please review [docs/prd.md](docs/prd.md) and [docs/brief.md](docs/brief.md), the
 - **Phase 1 Integration:** GUI should wrap existing CLI core logic, not duplicate it
 - **Accessibility:** WCAG AA compliance for professional/academic contexts
 - **Internationalization (i18n):** French language support must be planned from the start (primary target audience is French-speaking researchers). Architecture must support multi-language UI from day one to avoid costly retrofitting.
+- **Standalone Distribution (CRITICAL):** Phase 2 MUST include standalone executables (.exe for Windows, .app for macOS) that bundle the GUI + Python runtime. Non-technical users cannot be expected to install Python. See FE-009 in Epic 4 Future Enhancements for details.
 
 Deliverables: UX architecture document with wireframes, interaction patterns, i18n architecture, and implementation guidance.
 

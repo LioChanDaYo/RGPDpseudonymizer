@@ -391,9 +391,10 @@ The validation UI provides an intuitive keyboard-driven interface for reviewing 
 ### In Progress 🚧
 - **Epic 4 (Week 13-14):** Launch Readiness & LLM Validation
   - Story 4.1: LLM Utility Preservation Testing ✅ **PASSED** (4.27/5.0 = 85.4%, threshold: 80%)
+  - Story 4.2: Cross-Platform Installation Validation ✅ **PASSED** (NFR3: 87.5% > 85%, NFR14: 100%)
 
 ### Upcoming 📅
-- Stories 4.2-4.5: Documentation polish, performance testing, beta release
+- Stories 4.3-4.5: Performance testing, beta release
 
 ---
 
@@ -559,13 +560,15 @@ The integration test suite covers:
 
 ---
 
-## 📊 Project Metrics (As of 2026-02-06)
+## 📊 Project Metrics (As of 2026-02-07)
 
 | Metric | Value | Status |
 |--------|-------|--------|
-| **Development Progress** | Week 13/14 | ✅ Epic 3 Complete + Story 4.1 - LLM Utility PASSED |
-| **Stories Complete** | 26 (Epic 1 + Epic 2 + Epic 3 + Story 4.1) | ✅ Epic 1 (9) + Epic 2 (9) + Stories 3.0-3.5, 3.9 + Story 4.1 |
+| **Development Progress** | Week 13/14 | ✅ Epic 3 Complete + Stories 4.1-4.2 PASSED |
+| **Stories Complete** | 27 (Epic 1 + Epic 2 + Epic 3 + Stories 4.1-4.2) | ✅ Epic 1 (9) + Epic 2 (9) + Stories 3.0-3.5, 3.9 + Stories 4.1-4.2 |
 | **LLM Utility (NFR10)** | 4.27/5.0 (85.4%) | ✅ PASSED (threshold: 80%) |
+| **Installation Success (NFR3)** | 87.5% (7/8 platforms) | ✅ PASSED (threshold: 85%) |
+| **First Pseudonymization (NFR14)** | 100% within 30 min | ✅ PASSED (threshold: 80%) |
 | **Critical Bugs Found** | 1 (Story 2.8) | ✅ RESOLVED - Epic 3 Unblocked |
 | **Test Corpus Size** | 25 docs, 1,855 entities | ✅ Complete |
 | **NLP Accuracy (Baseline)** | 29.5% F1 (spaCy) | ✅ Measured |
@@ -595,6 +598,6 @@ The integration test suite covers:
 
 ---
 
-**Last Updated:** 2026-02-06 (Story 4.1 LLM Utility Preservation Testing complete - NFR10 PASSED with 4.27/5.0 score (85.4% utility), validated on 10 documents with 90 API calls, pseudonymized documents maintain full utility for LLM analysis)
+**Last Updated:** 2026-02-07 (Story 4.2 Cross-Platform Installation Validation complete - NFR3 PASSED 87.5%, NFR14 PASSED 100%)
 
-**Current Focus:** Epic 4 in progress - Story 4.1 complete (LLM utility validated), remaining launch readiness stories next
+**Current Focus:** Epic 4 in progress - Stories 4.1-4.2 complete, remaining launch readiness stories next

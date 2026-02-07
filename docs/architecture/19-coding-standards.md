@@ -5,19 +5,18 @@
 **This project uses Poetry. ALL commands must use `poetry run`:**
 
 ```bash
-# GOOD - Install dependencies
+# Install dependencies
 poetry install
 
-# GOOD - Run tests
-poetry run pytest tests/
+# CI Quality Checks - ALL FOUR MUST PASS before PR
+poetry run black --check gdpr_pseudonymizer/ tests/  # Formatting
+poetry run ruff check gdpr_pseudonymizer/            # Linting
+poetry run mypy gdpr_pseudonymizer/                  # Type checking
+poetry run pytest tests/                             # Tests
+```
 
-# GOOD - Run linting
-poetry run ruff check gdpr_pseudonymizer/
-
-# GOOD - Run type checking
-poetry run mypy gdpr_pseudonymizer/
-
-# BAD - DO NOT use system Python or pip
+**BAD - DO NOT use system Python or pip:**
+```bash
 pip install -e .          # ❌ NO
 pytest tests/             # ❌ NO (use 'poetry run pytest')
 python -m pytest tests/   # ❌ NO (use 'poetry run pytest')
