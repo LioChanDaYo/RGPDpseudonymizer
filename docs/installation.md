@@ -228,6 +228,59 @@ poetry run gdpr-pseudo --help
 
 ---
 
+### Linux (Fedora 39+)
+
+#### Step 1: Install Python and Build Tools
+
+```bash
+sudo dnf install python3.11 python3.11-devel gcc git curl
+```
+
+Verify:
+```bash
+python3.11 --version
+# Expected: Python 3.11.x
+```
+
+#### Step 2: Install Poetry
+
+```bash
+curl -sSL https://install.python-poetry.org | python3 -
+```
+
+Add to PATH (add to `~/.bashrc` for persistence):
+```bash
+export PATH="$HOME/.local/bin:$PATH"
+source ~/.bashrc
+```
+
+Verify:
+```bash
+poetry --version
+```
+
+#### Step 3: Clone and Install
+
+```bash
+git clone https://github.com/LioChanDaYo/RGPDpseudonymizer.git
+cd RGPDpseudonymizer
+poetry install
+```
+
+#### Step 4: Install spaCy Model
+
+```bash
+poetry run python scripts/install_spacy_model.py
+```
+
+#### Step 5: Verify Installation
+
+```bash
+poetry run gdpr-pseudo --help
+```
+
+---
+
 ## Command Usage (Beta Phase)
 
 **Important:** During the beta phase, all commands must be prefixed with `poetry run`:
@@ -317,6 +370,27 @@ poetry run gdpr-pseudo config
    ```bash
    poetry env use python3.11
    poetry install
+   ```
+
+**Note:** If your system has Python 3.12+ but Poetry uses 3.9-3.11, the tool works correctly. Poetry manages its own virtual environment independently of system Python. Check with:
+```bash
+poetry env info
+# Look for "Virtualenv Python: 3.11.x" (should be 3.9-3.11)
+```
+
+---
+
+### Passphrase requirements
+
+**Error:** `Passphrase must be at least 12 characters`
+
+**Cause:** Security requirement - passphrases must be 12+ characters.
+
+**Solution:**
+1. Use a passphrase with at least 12 characters
+2. Or set via environment variable:
+   ```bash
+   export GDPR_PSEUDO_PASSPHRASE="your-secure-passphrase-here"
    ```
 
 ---
