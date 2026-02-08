@@ -16,7 +16,9 @@ from gdpr_pseudonymizer.nlp.spacy_detector import SpaCyDetector
 from gdpr_pseudonymizer.nlp.stanza_detector import StanzaDetector
 
 # Pattern for French compound names
-COMPOUND_NAME_PATTERN = r"[A-ZÀ-Ÿ][a-zàâäéèêëïîôùûüÿ]+-[A-ZÀ-Ÿ][a-zàâäéèêëïîôùûüÿ]+"
+COMPOUND_NAME_PATTERN = (
+    r"[A-ZÀ-ÖØ-Ÿ][a-zàâäéèêëïîôùûüÿ]+-[A-ZÀ-ÖØ-Ÿ][a-zàâäéèêëïîôùûüÿ]+"
+)
 
 
 def extract_compound_names_from_annotations(corpus_dir: Path):
