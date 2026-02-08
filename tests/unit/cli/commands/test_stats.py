@@ -62,15 +62,20 @@ class TestStatsCommand:
         mock_entities = [create_mock_entity()]
         mock_operations = [create_mock_operation()]
 
-        with patch(
-            "gdpr_pseudonymizer.cli.commands.stats.resolve_passphrase"
-        ) as mock_resolve, patch(
-            "gdpr_pseudonymizer.cli.commands.stats.open_database"
-        ) as mock_open_db, patch(
-            "gdpr_pseudonymizer.cli.commands.stats.SQLiteMappingRepository"
-        ) as mock_mapping_repo, patch(
-            "gdpr_pseudonymizer.cli.commands.stats.AuditRepository"
-        ) as mock_audit_repo:
+        with (
+            patch(
+                "gdpr_pseudonymizer.cli.commands.stats.resolve_passphrase"
+            ) as mock_resolve,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.stats.open_database"
+            ) as mock_open_db,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.stats.SQLiteMappingRepository"
+            ) as mock_mapping_repo,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.stats.AuditRepository"
+            ) as mock_audit_repo,
+        ):
             mock_resolve.return_value = "testpassphrase123!"
             db_session = MagicMock()
             mock_open_db.return_value.__enter__ = MagicMock(return_value=db_session)

@@ -107,7 +107,8 @@ def batch_process_sequential(
     start_time = time.time()
     results = []
     for i, args in enumerate(args_list, 1):
-        print(f"  [{i}/{len(args_list)}] Processing {Path(args[0]).name}...")
+        doc_name = Path(document_paths[i - 1]).name
+        print(f"  [{i}/{len(args_list)}] Processing {doc_name}...")
         result = process_single_document(args)
         results.append(result)
         if result["success"]:
@@ -117,7 +118,7 @@ def batch_process_sequential(
                 f"in {result['processing_time']:.2f}s"
             )
         else:
-            print(f"    [FAIL] Failed: {result['error']}")
+            print("    [FAIL] Failed (see logs for details)")
 
     elapsed_time = time.time() - start_time
 
@@ -195,7 +196,7 @@ def batch_process_parallel(
                 f"in {result['processing_time']:.2f}s"
             )
         else:
-            print(f"  [{i}] {doc_name}: FAILED - {result['error']}")
+            print(f"  [{i}] {doc_name}: FAILED (see logs for details)")
 
     # Summary
     successful = sum(1 for r in results if r["success"])

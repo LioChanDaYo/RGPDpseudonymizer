@@ -310,8 +310,10 @@ def _export_to_csv(entities: list[Entity], output_path: Path) -> None:
                     "theme": entity.theme,
                     "confidence_score": entity.confidence_score,
                     "is_ambiguous": entity.is_ambiguous,
-                    "first_seen_timestamp": entity.first_seen_timestamp.isoformat()
-                    if entity.first_seen_timestamp
-                    else "",
+                    "first_seen_timestamp": (
+                        entity.first_seen_timestamp.isoformat()
+                        if entity.first_seen_timestamp
+                        else ""
+                    ),
                 }
             )

@@ -386,15 +386,17 @@ class AuditRepository:
                         "id": op.id,
                         "timestamp": op.timestamp.isoformat(),
                         "operation_type": op.operation_type,
-                        "files_processed": ",".join(op.files_processed)
-                        if op.files_processed
-                        else "",
+                        "files_processed": (
+                            ",".join(op.files_processed) if op.files_processed else ""
+                        ),
                         "model_name": op.model_name,
                         "model_version": op.model_version,
                         "theme_selected": op.theme_selected,
-                        "user_modifications": json.dumps(op.user_modifications)
-                        if op.user_modifications
-                        else "",
+                        "user_modifications": (
+                            json.dumps(op.user_modifications)
+                            if op.user_modifications
+                            else ""
+                        ),
                         "entity_count": op.entity_count,
                         "processing_time_seconds": op.processing_time_seconds,
                         "success": op.success,

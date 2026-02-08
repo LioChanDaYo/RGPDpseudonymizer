@@ -22,7 +22,7 @@ def validate_anthropic_api() -> bool:
         print("ERROR: Please replace placeholder with actual API key in .env")
         return False
 
-    print(f"API key found: {api_key[:12]}...{api_key[-4:]}")
+    print("API key found in environment")
 
     try:
         import anthropic

@@ -95,12 +95,14 @@ pseudonymization:
         monkeypatch.chdir(project_dir)
         monkeypatch.setattr(Path, "home", lambda: home_dir)
 
-        with patch(
-            "gdpr_pseudonymizer.cli.commands.process.resolve_passphrase"
-        ) as mock_passphrase, patch(
-            "gdpr_pseudonymizer.cli.commands.process.DocumentProcessor"
-        ) as mock_processor, patch(
-            "gdpr_pseudonymizer.cli.commands.process.init_database"
+        with (
+            patch(
+                "gdpr_pseudonymizer.cli.commands.process.resolve_passphrase"
+            ) as mock_passphrase,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.process.DocumentProcessor"
+            ) as mock_processor,
+            patch("gdpr_pseudonymizer.cli.commands.process.init_database"),
         ):
             mock_passphrase.return_value = "testpassphrase123!"
 
@@ -152,12 +154,14 @@ pseudonymization:
         monkeypatch.chdir(project_dir)
         monkeypatch.setattr(Path, "home", lambda: home_dir)
 
-        with patch(
-            "gdpr_pseudonymizer.cli.commands.process.resolve_passphrase"
-        ) as mock_passphrase, patch(
-            "gdpr_pseudonymizer.cli.commands.process.DocumentProcessor"
-        ) as mock_processor, patch(
-            "gdpr_pseudonymizer.cli.commands.process.init_database"
+        with (
+            patch(
+                "gdpr_pseudonymizer.cli.commands.process.resolve_passphrase"
+            ) as mock_passphrase,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.process.DocumentProcessor"
+            ) as mock_processor,
+            patch("gdpr_pseudonymizer.cli.commands.process.init_database"),
         ):
             mock_passphrase.return_value = "testpassphrase123!"
 
@@ -209,12 +213,14 @@ database:
         monkeypatch.chdir(project_dir)
         monkeypatch.setattr(Path, "home", lambda: home_dir)
 
-        with patch(
-            "gdpr_pseudonymizer.cli.commands.process.resolve_passphrase"
-        ) as mock_passphrase, patch(
-            "gdpr_pseudonymizer.cli.commands.process.DocumentProcessor"
-        ) as mock_processor, patch(
-            "gdpr_pseudonymizer.cli.commands.process.init_database"
+        with (
+            patch(
+                "gdpr_pseudonymizer.cli.commands.process.resolve_passphrase"
+            ) as mock_passphrase,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.process.DocumentProcessor"
+            ) as mock_processor,
+            patch("gdpr_pseudonymizer.cli.commands.process.init_database"),
         ):
             mock_passphrase.return_value = "testpassphrase123!"
 
@@ -266,12 +272,14 @@ pseudonymization:
         monkeypatch.chdir(project_dir)
         monkeypatch.setattr(Path, "home", lambda: home_dir)
 
-        with patch(
-            "gdpr_pseudonymizer.cli.commands.process.resolve_passphrase"
-        ) as mock_passphrase, patch(
-            "gdpr_pseudonymizer.cli.commands.process.DocumentProcessor"
-        ) as mock_processor, patch(
-            "gdpr_pseudonymizer.cli.commands.process.init_database"
+        with (
+            patch(
+                "gdpr_pseudonymizer.cli.commands.process.resolve_passphrase"
+            ) as mock_passphrase,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.process.DocumentProcessor"
+            ) as mock_processor,
+            patch("gdpr_pseudonymizer.cli.commands.process.init_database"),
         ):
             mock_passphrase.return_value = "testpassphrase123!"
 
@@ -324,12 +332,14 @@ database:
         monkeypatch.chdir(project_dir)
         monkeypatch.setattr(Path, "home", lambda: home_dir)
 
-        with patch(
-            "gdpr_pseudonymizer.cli.commands.process.resolve_passphrase"
-        ) as mock_passphrase, patch(
-            "gdpr_pseudonymizer.cli.commands.process.DocumentProcessor"
-        ) as mock_processor, patch(
-            "gdpr_pseudonymizer.cli.commands.process.init_database"
+        with (
+            patch(
+                "gdpr_pseudonymizer.cli.commands.process.resolve_passphrase"
+            ) as mock_passphrase,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.process.DocumentProcessor"
+            ) as mock_processor,
+            patch("gdpr_pseudonymizer.cli.commands.process.init_database"),
         ):
             mock_passphrase.return_value = "testpassphrase123!"
 

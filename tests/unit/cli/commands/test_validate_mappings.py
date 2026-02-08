@@ -59,13 +59,17 @@ class TestValidateMappingsCommand:
 
         mock_entities = [create_mock_entity()]
 
-        with patch(
-            "gdpr_pseudonymizer.cli.commands.validate_mappings.resolve_passphrase"
-        ) as mock_resolve, patch(
-            "gdpr_pseudonymizer.cli.commands.validate_mappings.open_database"
-        ) as mock_open_db, patch(
-            "gdpr_pseudonymizer.cli.commands.validate_mappings.SQLiteMappingRepository"
-        ) as mock_repo:
+        with (
+            patch(
+                "gdpr_pseudonymizer.cli.commands.validate_mappings.resolve_passphrase"
+            ) as mock_resolve,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.validate_mappings.open_database"
+            ) as mock_open_db,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.validate_mappings.SQLiteMappingRepository"
+            ) as mock_repo,
+        ):
             mock_resolve.return_value = "testpassphrase123!"
             mock_open_db.return_value.__enter__ = MagicMock(return_value=MagicMock())
             mock_open_db.return_value.__exit__ = MagicMock(return_value=False)
@@ -80,13 +84,17 @@ class TestValidateMappingsCommand:
         db_path = tmp_path / "test.db"
         db_path.touch()
 
-        with patch(
-            "gdpr_pseudonymizer.cli.commands.validate_mappings.resolve_passphrase"
-        ) as mock_resolve, patch(
-            "gdpr_pseudonymizer.cli.commands.validate_mappings.open_database"
-        ) as mock_open_db, patch(
-            "gdpr_pseudonymizer.cli.commands.validate_mappings.SQLiteMappingRepository"
-        ) as mock_repo:
+        with (
+            patch(
+                "gdpr_pseudonymizer.cli.commands.validate_mappings.resolve_passphrase"
+            ) as mock_resolve,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.validate_mappings.open_database"
+            ) as mock_open_db,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.validate_mappings.SQLiteMappingRepository"
+            ) as mock_repo,
+        ):
             mock_resolve.return_value = "testpassphrase123!"
             mock_open_db.return_value.__enter__ = MagicMock(return_value=MagicMock())
             mock_open_db.return_value.__exit__ = MagicMock(return_value=False)
@@ -120,13 +128,17 @@ class TestValidateMappingsCommand:
 
         mock_entities = [create_mock_entity(entity_type="PERSON")]
 
-        with patch(
-            "gdpr_pseudonymizer.cli.commands.validate_mappings.resolve_passphrase"
-        ) as mock_resolve, patch(
-            "gdpr_pseudonymizer.cli.commands.validate_mappings.open_database"
-        ) as mock_open_db, patch(
-            "gdpr_pseudonymizer.cli.commands.validate_mappings.SQLiteMappingRepository"
-        ) as mock_repo:
+        with (
+            patch(
+                "gdpr_pseudonymizer.cli.commands.validate_mappings.resolve_passphrase"
+            ) as mock_resolve,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.validate_mappings.open_database"
+            ) as mock_open_db,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.validate_mappings.SQLiteMappingRepository"
+            ) as mock_repo,
+        ):
             mock_resolve.return_value = "testpassphrase123!"
             mock_open_db.return_value.__enter__ = MagicMock(return_value=MagicMock())
             mock_open_db.return_value.__exit__ = MagicMock(return_value=False)
@@ -158,13 +170,17 @@ class TestValidateMappingsCommand:
 
         mock_entities = [create_mock_entity(is_ambiguous=True)]
 
-        with patch(
-            "gdpr_pseudonymizer.cli.commands.validate_mappings.resolve_passphrase"
-        ) as mock_resolve, patch(
-            "gdpr_pseudonymizer.cli.commands.validate_mappings.open_database"
-        ) as mock_open_db, patch(
-            "gdpr_pseudonymizer.cli.commands.validate_mappings.SQLiteMappingRepository"
-        ) as mock_repo:
+        with (
+            patch(
+                "gdpr_pseudonymizer.cli.commands.validate_mappings.resolve_passphrase"
+            ) as mock_resolve,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.validate_mappings.open_database"
+            ) as mock_open_db,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.validate_mappings.SQLiteMappingRepository"
+            ) as mock_repo,
+        ):
             mock_resolve.return_value = "testpassphrase123!"
             mock_open_db.return_value.__enter__ = MagicMock(return_value=MagicMock())
             mock_open_db.return_value.__exit__ = MagicMock(return_value=False)
@@ -182,13 +198,17 @@ class TestValidateMappingsCommand:
 
         mock_entities = [create_mock_entity(confidence_score=0.5)]
 
-        with patch(
-            "gdpr_pseudonymizer.cli.commands.validate_mappings.resolve_passphrase"
-        ) as mock_resolve, patch(
-            "gdpr_pseudonymizer.cli.commands.validate_mappings.open_database"
-        ) as mock_open_db, patch(
-            "gdpr_pseudonymizer.cli.commands.validate_mappings.SQLiteMappingRepository"
-        ) as mock_repo:
+        with (
+            patch(
+                "gdpr_pseudonymizer.cli.commands.validate_mappings.resolve_passphrase"
+            ) as mock_resolve,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.validate_mappings.open_database"
+            ) as mock_open_db,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.validate_mappings.SQLiteMappingRepository"
+            ) as mock_repo,
+        ):
             mock_resolve.return_value = "testpassphrase123!"
             mock_open_db.return_value.__enter__ = MagicMock(return_value=MagicMock())
             mock_open_db.return_value.__exit__ = MagicMock(return_value=False)
@@ -206,15 +226,20 @@ class TestValidateMappingsCommand:
 
         mock_entities = [create_mock_entity()]
 
-        with patch(
-            "gdpr_pseudonymizer.cli.commands.validate_mappings.resolve_passphrase"
-        ) as mock_resolve, patch(
-            "gdpr_pseudonymizer.cli.commands.validate_mappings.open_database"
-        ) as mock_open_db, patch(
-            "gdpr_pseudonymizer.cli.commands.validate_mappings.SQLiteMappingRepository"
-        ) as mock_repo, patch(
-            "gdpr_pseudonymizer.cli.commands.validate_mappings.Confirm.ask"
-        ) as mock_confirm:
+        with (
+            patch(
+                "gdpr_pseudonymizer.cli.commands.validate_mappings.resolve_passphrase"
+            ) as mock_resolve,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.validate_mappings.open_database"
+            ) as mock_open_db,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.validate_mappings.SQLiteMappingRepository"
+            ) as mock_repo,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.validate_mappings.Confirm.ask"
+            ) as mock_confirm,
+        ):
             mock_resolve.return_value = "testpassphrase123!"
             mock_open_db.return_value.__enter__ = MagicMock(return_value=MagicMock())
             mock_open_db.return_value.__exit__ = MagicMock(return_value=False)
@@ -236,15 +261,20 @@ class TestValidateMappingsCommand:
 
         mock_entities = [create_mock_entity()]
 
-        with patch(
-            "gdpr_pseudonymizer.cli.commands.validate_mappings.resolve_passphrase"
-        ) as mock_resolve, patch(
-            "gdpr_pseudonymizer.cli.commands.validate_mappings.open_database"
-        ) as mock_open_db, patch(
-            "gdpr_pseudonymizer.cli.commands.validate_mappings.SQLiteMappingRepository"
-        ) as mock_repo, patch(
-            "gdpr_pseudonymizer.cli.commands.validate_mappings.Confirm.ask"
-        ) as mock_confirm:
+        with (
+            patch(
+                "gdpr_pseudonymizer.cli.commands.validate_mappings.resolve_passphrase"
+            ) as mock_resolve,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.validate_mappings.open_database"
+            ) as mock_open_db,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.validate_mappings.SQLiteMappingRepository"
+            ) as mock_repo,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.validate_mappings.Confirm.ask"
+            ) as mock_confirm,
+        ):
             mock_resolve.return_value = "testpassphrase123!"
             mock_open_db.return_value.__enter__ = MagicMock(return_value=MagicMock())
             mock_open_db.return_value.__exit__ = MagicMock(return_value=False)
@@ -263,11 +293,14 @@ class TestValidateMappingsCommand:
         db_path = tmp_path / "test.db"
         db_path.touch()
 
-        with patch(
-            "gdpr_pseudonymizer.cli.commands.validate_mappings.resolve_passphrase"
-        ) as mock_resolve, patch(
-            "gdpr_pseudonymizer.cli.commands.validate_mappings.open_database"
-        ) as mock_open_db:
+        with (
+            patch(
+                "gdpr_pseudonymizer.cli.commands.validate_mappings.resolve_passphrase"
+            ) as mock_resolve,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.validate_mappings.open_database"
+            ) as mock_open_db,
+        ):
             mock_resolve.return_value = "wrongpassphrase!!"
             mock_open_db.side_effect = ValueError("Invalid passphrase")
 
@@ -281,11 +314,14 @@ class TestValidateMappingsCommand:
         db_path = tmp_path / "test.db"
         db_path.touch()
 
-        with patch(
-            "gdpr_pseudonymizer.cli.commands.validate_mappings.resolve_passphrase"
-        ) as mock_resolve, patch(
-            "gdpr_pseudonymizer.cli.commands.validate_mappings.open_database"
-        ) as mock_open_db:
+        with (
+            patch(
+                "gdpr_pseudonymizer.cli.commands.validate_mappings.resolve_passphrase"
+            ) as mock_resolve,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.validate_mappings.open_database"
+            ) as mock_open_db,
+        ):
             mock_resolve.return_value = "testpassphrase123!"
             mock_open_db.side_effect = RuntimeError("Unexpected error")
 
