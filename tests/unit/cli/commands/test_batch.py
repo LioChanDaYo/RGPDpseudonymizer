@@ -789,7 +789,7 @@ class TestBatchConfigIntegration:
     """Tests for batch command configuration file integration (Story 3.3.4)."""
 
     def test_uses_config_file_theme(
-        self, tmp_path: Path, monkeypatch: "pytest.MonkeyPatch"
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         """Test batch command uses theme from config file when not specified on CLI."""
         # Create project directory with config file
@@ -833,7 +833,7 @@ pseudonymization:
         assert call_kwargs[1]["theme"] == "star_wars"
 
     def test_uses_config_file_workers(
-        self, tmp_path: Path, monkeypatch: "pytest.MonkeyPatch"
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         """Test batch command uses workers from config file when not specified on CLI."""
         # Create project directory with config file
@@ -877,7 +877,7 @@ batch:
         assert call_kwargs[1]["num_workers"] == 2
 
     def test_cli_flag_overrides_config_theme(
-        self, tmp_path: Path, monkeypatch: "pytest.MonkeyPatch"
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         """Test CLI --theme flag overrides config file value."""
         # Create project directory with config file
@@ -922,7 +922,7 @@ pseudonymization:
         assert call_kwargs[1]["theme"] == "lotr"
 
     def test_cli_flag_overrides_config_workers(
-        self, tmp_path: Path, monkeypatch: "pytest.MonkeyPatch"
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         """Test CLI --workers flag overrides config file value."""
         # Create project directory with config file
