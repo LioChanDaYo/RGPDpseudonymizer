@@ -1,5 +1,7 @@
 # Alpha Installation Guide
 
+> **DEPRECATED:** This document has been superseded by [Installation Guide](installation.md). Please use the Installation Guide for up-to-date instructions.
+
 **Version:** v0.1.0-alpha
 **Status:** Early Alpha - Not Production Ready
 **Target Users:** 3-5 friendly testers for feedback collection
@@ -10,7 +12,7 @@
 
 Before installing the GDPR Pseudonymizer, ensure you have:
 
-- **Python:** 3.9, 3.10, or 3.11 (validated in CI/CD; 3.12+ not yet tested)
+- **Python:** 3.10, 3.11, or 3.12 (validated in CI/CD; 3.9 no longer supported)
   - Check version: `python --version`
   - Download from: https://www.python.org/downloads/
 - **Poetry:** 1.7+ (dependency management)
@@ -136,7 +138,7 @@ Commands:
 ### macOS
 
 - Ensure Xcode Command Line Tools installed: `xcode-select --install`
-- Apple Silicon (M1/M2) users: Python 3.9+ has native ARM support
+- Apple Silicon (M1/M2) users: Python 3.10+ has native ARM support
 
 ### Linux
 
@@ -155,10 +157,10 @@ Commands:
 3. Restart terminal/command prompt
 4. Try `python -m poetry` instead of `poetry`
 
-### Problem: Python version not supported (3.12+ detected)
+### Problem: Python version not supported
 
 **Solution:**
-1. Install Python 3.9-3.11 from https://www.python.org/downloads/
+1. Install Python 3.10-3.12 from https://www.python.org/downloads/
 2. Use `py -3.11` (Windows) or `python3.11` (macOS/Linux) to specify version
 3. Configure Poetry to use specific Python: `poetry env use python3.11`
 
@@ -181,7 +183,7 @@ Commands:
 ### Problem: `poetry install` fails with dependency conflicts
 
 **Solution:**
-1. Ensure Python version is 3.9-3.12 (check with `python --version`)
+1. Ensure Python version is 3.10-3.12 (check with `python --version`)
 2. Delete existing virtual environment:
    ```bash
    poetry env remove python

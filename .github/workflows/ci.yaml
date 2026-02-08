@@ -17,7 +17,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-22.04, macos-latest, windows-latest]
-        python-version: ['3.10', '3.11']
+        python-version: ['3.10', '3.11', '3.12']
         # Note: Windows runs linting + non-spaCy tests only due to access violations
         # See: https://github.com/explosion/spaCy/issues/12659
 
@@ -38,7 +38,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Cache Poetry installation
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.local/share/pypoetry
@@ -51,7 +51,7 @@ jobs:
           pip install poetry>=1.7.0
 
       - name: Cache Poetry dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.cache/pypoetry
@@ -64,7 +64,7 @@ jobs:
         run: poetry install --no-interaction
 
       - name: Cache spaCy models
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.spacy

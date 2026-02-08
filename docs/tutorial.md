@@ -398,6 +398,90 @@ poetry run gdpr-pseudo list-mappings --db case_12345.db --export mappings.csv
 
 ---
 
+## Tutorial 5: Managing Mappings
+
+Review and manage your entity-to-pseudonym mappings.
+
+### Validate Existing Mappings
+
+Review stored mappings without processing documents:
+
+```bash
+# View all mappings with metadata
+poetry run gdpr-pseudo validate-mappings
+
+# Interactive review mode
+poetry run gdpr-pseudo validate-mappings --interactive
+
+# Filter by entity type
+poetry run gdpr-pseudo validate-mappings --type PERSON
+```
+
+### Import Mappings from Another Project
+
+Combine mappings from multiple databases:
+
+```bash
+# Import from old project to new
+poetry run gdpr-pseudo import-mappings old_project.db --db new_project.db
+
+# Prompt for each duplicate (instead of auto-skipping)
+poetry run gdpr-pseudo import-mappings old_project.db --prompt-duplicates
+```
+
+### Securely Destroy a Database
+
+When a project is complete and mappings are no longer needed:
+
+```bash
+# Interactive destruction (safest - prompts for confirmation and passphrase)
+poetry run gdpr-pseudo destroy-table --db project.db
+
+# Force destruction (skips confirmation, still verifies passphrase)
+poetry run gdpr-pseudo destroy-table --db project.db --force
+```
+
+**Security features:**
+- Passphrase verification prevents accidental deletion of wrong database
+- SQLite magic number check prevents deletion of non-database files
+- Symlink protection prevents redirect attacks
+- 3-pass secure wipe overwrites data before file deletion
+
+---
+
+## Tips and Best Practices
+
+### Security
+
+1. **Use environment variables for passphrases** rather than `--passphrase` flag (which appears in shell history)
+2. **Store mapping databases separately** from pseudonymized documents — the combination allows re-identification
+3. **Use strong passphrases** (12+ characters, mix of letters, numbers, symbols)
+4. **Back up your mapping database** before batch operations — you cannot reverse pseudonymization without it
+
+### Workflow Efficiency
+
+1. **Press H during validation** to see all keyboard shortcuts (batch operations are hidden by default)
+2. **Use batch accept/reject** (`Shift+A` / `Shift+R`) for entity types where detection is reliable
+3. **Process a small test file first** to verify settings before running batch jobs
+4. **Use the same database** for all related documents to ensure consistent pseudonyms
+5. **Choose your theme upfront** — switching themes mid-project creates inconsistent pseudonyms
+
+### Organization
+
+1. **One database per project** — keep separate mapping databases for unrelated projects
+2. **Use `--output` or `-o`** to keep pseudonymized files in a separate directory
+3. **Export audit logs regularly** for compliance documentation: `poetry run gdpr-pseudo export audit.json`
+4. **Use `stats` command** to monitor processing history and entity counts
+
+### Known Limitations
+
+- **French only** — no other languages in v1.0
+- **Text formats only** — `.txt` and `.md` (no PDF/DOCX)
+- **Validation is mandatory** — every entity must be reviewed (AI detection ~40-50% recall)
+- **Passphrase is irrecoverable** — if lost, existing mappings cannot be decrypted
+
+---
+
 ## Troubleshooting
 
 ### No entities detected
@@ -443,4 +527,5 @@ poetry run gdpr-pseudo init --force
 
 - [CLI Reference](CLI-REFERENCE.md) - Complete command documentation
 - [Installation Guide](installation.md) - Detailed setup instructions
-- [ALPHA-TESTING-PROTOCOL.md](ALPHA-TESTING-PROTOCOL.md) - Test scenarios for alpha testers
+- [FAQ](faq.md) - Common questions and answers
+- [Troubleshooting Guide](troubleshooting.md) - Comprehensive error reference

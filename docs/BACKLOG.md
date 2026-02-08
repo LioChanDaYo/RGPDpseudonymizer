@@ -1,9 +1,10 @@
 # Product Backlog - GDPR Pseudonymizer
 
-**Last Updated:** 2026-02-04
+**Last Updated:** 2026-02-07
 **Epic 1 Status:** ✅ Complete (9/9 stories)
 **Epic 2 Status:** ✅ Complete
-**Current Epic:** Epic 3 - CLI Interface & Batch Processing
+**Epic 3 Status:** ✅ Complete
+**Current Epic:** Epic 4 - Launch Readiness & LLM Validation
 
 ---
 
@@ -43,13 +44,15 @@
 
 ### MEDIUM Priority
 
-#### TD-002: External User Testing for Validation UI ⏸️ DEFERRED TO EPIC 4
+#### TD-002: External User Testing for Validation UI ✅ ASSIGNED TO EPIC 4
 **Source:** Story 1.7 QA Gate (AC10)
 **Description:** Conduct external user testing (2-3 users) to validate UX with real users
 **Impact:** Self-testing showed excellent results (4-5/5), but external validation deferred
 **Effort:** Low (1-2 days including participant recruitment)
-**Target:** Pre-MVP launch (Epic 4)
+**Target:** Epic 4 - Story 4.6 AC10 (Beta Feedback Integration & Bug Fixes)
 **Epic 2 Decision:** DEFER - Epic 2 focuses on core engine, not validation UI. Better timing after CLI polish (Epic 3).
+**Epic 4 Assignment:** Story 4.6 AC10: External user testing with 2-3 users
+**Rationale:** CLI is now polished (Epic 3 complete); Story 4.6 is the natural home for user testing before launch
 **References:**
 - [docs/qa/gates/1.7-validation-ui-implementation.yml](qa/gates/1.7-validation-ui-implementation.yml)
 - tests/test_corpus/validation_testing/USER_TESTING_GUIDE.md
@@ -83,13 +86,15 @@
 
 ---
 
-#### TD-004: Python Version Support Inconsistency 🔧 NEW
+#### TD-004: Python Version Support Inconsistency ✅ ASSIGNED TO EPIC 4
 **Source:** PM Review (2026-02-04)
 **Description:** Misalignment between pyproject.toml, CI/CD matrix, and documentation regarding Python version support
 **Impact:** Medium - Users may attempt installation on untested Python versions; CI doesn't verify claimed compatibility
 **Effort:** Low (1-2 hours)
-**Target:** Epic 3 or Epic 4
+**Target:** Epic 4 - Story 4.3 AC9 (Complete Documentation Package)
 **Owner:** DevOps / PM to verify spaCy compatibility before expansion
+**Epic 4 Assignment:** Story 4.3 AC9: Python version alignment across all sources
+**Rationale:** Story 4.2 confirmed Python 3.12 works on Ubuntu 24.04 and Fedora 39; Story 4.3 documentation package is the natural place to align all references
 
 **Current State (Inconsistent):**
 | Source | Python Versions | Notes |
@@ -216,12 +221,14 @@ Press Enter to continue...
 
 ### MEDIUM Priority
 
-#### FE-006: Expand Organization Pseudonym Library
+#### FE-006: Expand Organization Pseudonym Library ✅ ASSIGNED TO EPIC 4
 **Source:** Story 3.0 - Batch processing testing (2026-02-02)
 **Description:** Expand neutral theme organization library from 35 to 150-200 entries to support larger document corpora without exhausting the library and falling back to generic naming (Org-001, etc.)
 **Impact:** Batch processing of 15+ documents exhausts the 35-entry organization library quickly
 **Effort:** Medium (2-4 hours - research + data entry)
-**Target:** Epic 4 or v1.1
+**Target:** Epic 4 - Story 4.6 AC9 (Beta Feedback Integration & Bug Fixes)
+**Epic 4 Assignment:** Story 4.6 AC9: Organization pseudonym library expansion
+**Rationale:** Known quality gap impacting batch users; must resolve before launch
 **References:**
 - [data/pseudonyms/neutral.json](../data/pseudonyms/neutral.json)
 - [docs/stories/3.0.location-org-pseudonym-libraries.story.md](stories/3.0.location-org-pseudonym-libraries.story.md#future-enhancements)
@@ -236,6 +243,36 @@ Press Enter to continue...
 - 30-50 institutions (universities, hospitals, professional associations)
 
 **Note:** Location library (80 entries) may also need expansion for very large corpora.
+
+---
+
+#### FE-010: French Documentation Translation 📅 PLANNED FOR v1.1
+**Source:** PM session (2026-02-08)
+**Description:** Translate all user-facing documentation into French to serve the primary target audience (French-speaking researchers, HR professionals, compliance officers)
+**Impact:** High — removes language barrier for the primary user base; lowers adoption friction before v2.0 GUI
+**Effort:** Medium (1-2 weeks)
+**Target:** v1.1 (Q2-Q3 2026)
+**Rationale:** Primary audience is French-speaking (stated across PRD). Documentation translation is independent of the v2.0 GUI i18n effort and delivers immediate value to CLI users.
+
+**Scope:**
+- README.md (French version or bilingual)
+- ALPHA-INSTALL.md / installation guide
+- CLI `--help` text and error messages
+- User guide / FAQ / troubleshooting
+- CHANGELOG (summary sections)
+
+**Out of Scope (deferred to v2.0 i18n):**
+- GUI interface translation
+- i18n architecture / framework
+- Developer-facing docs (architecture, PRD, stories)
+
+**Acceptance Criteria:**
+- [ ] French README available (README.fr.md or bilingual README)
+- [ ] French installation guide available
+- [ ] CLI `--help` output available in French (via `--lang fr` flag or locale detection)
+- [ ] User guide translated into French
+- [ ] Language toggle or clear navigation between EN/FR versions
+- [ ] Native French speaker review for quality
 
 ---
 
@@ -348,8 +385,11 @@ Press Enter to continue...
 - Story 4.4: Launch checklist (README polish, license selection, etc.)
 
 **Must Complete from Backlog:**
-- TD-002: External user testing (2-3 users)
-- Review MON-001 through MON-005 monitoring results
+- TD-002: External user testing (→ Story 4.6 AC10)
+- TD-004: Python version support alignment (→ Story 4.3 AC9)
+- FE-006: Organization pseudonym library expansion (→ Story 4.6 AC9)
+- MON-001, MON-003, MON-004 review (→ Story 4.4 AC9)
+- MON-002, MON-005 review (→ Story 4.5 AC9)
 
 ---
 
@@ -360,6 +400,9 @@ Press Enter to continue...
 - Optional `--no-validate` flag for high-confidence workflows
 - Additional language support (English, Spanish, German)
 - PDF/DOCX format support
+
+**Planned Backlog Items:**
+- FE-010: French documentation translation (README, install guide, CLI help, user guide)
 
 **Potential Backlog Items:**
 - FE-003: Performance regression tests (if not added in Epic 2-3)
@@ -404,9 +447,9 @@ When adding items from future stories:
 
 **Backlog Maintained By:** Sarah (Product Owner)
 **Review Cadence:** End of each epic
-**Last Review:** 2026-01-30 (Epic 2 completion, alpha release)
-**Last Update:** 2026-01-30 (Added FE-005: LOCATION/ORG pseudonym libraries)
-**Next Review:** After alpha tester feedback (1 week)
+**Last Review:** 2026-02-07 (Epic 4 gap analysis — all backlog items assigned)
+**Last Update:** 2026-02-07 (Assigned TD-002 → 4.6, TD-004 → 4.3, FE-006 → 4.6, MON-001/3/4 → 4.4, MON-002/5 → 4.5)
+**Next Review:** After Story 4.7 completion (launch readiness)
 
 ---
 

@@ -4,12 +4,12 @@ This is the **DEFINITIVE** technology selection table. All development must use 
 
 | Category | Technology | Version | Purpose | Rationale |
 |----------|------------|---------|---------|-----------|
-| **Runtime** | Python | 3.9+ | Application runtime environment | Balance of modern features (type hints, asyncio) with broad platform support. 3.9 EOL Oct 2025 provides safe window for MVP. |
+| **Runtime** | Python | 3.10+ | Application runtime environment | Balance of modern features (type hints, asyncio) with broad platform support. 3.9 dropped (EOL Oct 2025). 3.12 confirmed working. |
 | **CLI Framework** | Typer | 0.9+ | Command-line interface | Excellent type hints support, automatic help generation, based on Click (mature foundation). Simpler than argparse for complex CLIs. |
 | **NLP Library** | spaCy | 3.7+ (tested: 3.8.0) | French NER (entity detection) | Selected after Story 1.2 benchmark (2026-01-16). Achieves 29.5% F1 vs Stanza 11.9% F1 (both below 85% target). Mandatory validation mode required for MVP. Fine-tuning planned post-MVP. See docs/nlp-benchmark-report.md for full analysis. |
 | **NLP Model** | fr_core_news_lg | 3.8.0 | French language model | spaCy large model (~571MB). Downloaded post-install. Baseline accuracy requires validation mode + hybrid detection (NLP + regex patterns). |
 | **Database** | SQLite | 3.35+ | Local data persistence | Embedded database, zero configuration, cross-platform. Python stdlib support eliminates dependency. |
-| **Encryption** | cryptography (Fernet) | 41.0+ | Symmetric encryption for mappings | Python-native (no compilation), NIST-approved AES-128-CBC with HMAC. Simpler than SQLCipher, higher install success rate. |
+| **Encryption** | cryptography (AESSIV) | 44.0+ | Symmetric encryption for mappings | Python-native (no compilation), AES-256-SIV (RFC 5297) deterministic authenticated encryption. Simpler than SQLCipher, higher install success rate. |
 | **ORM** | SQLAlchemy | 2.0+ | Database abstraction | Repository pattern support, migration tooling (Alembic), type-safe queries. Modern 2.0 API with async support (future-proof). |
 | **Dependency Mgmt** | Poetry | 1.7+ | Development dependency management | Modern lockfile (reproducible builds), PEP 621 compliant, better resolver than pip. |
 | **Code Formatter** | Black | 23.12+ | Consistent code formatting | Uncompromising formatter eliminates style debates. Industry standard for Python projects. |
