@@ -171,5 +171,8 @@ cython_debug/
 
 .ignore
 
+# Windows NUL device artifact
+nul
+
 # LLM test artifacts (Story 4.1)
 tests/test_corpus/llm_test/
