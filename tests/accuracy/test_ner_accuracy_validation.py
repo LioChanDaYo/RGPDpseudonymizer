@@ -61,15 +61,15 @@ def _aggregate_by_source(
 # Edge-case categorisation helpers (Task 4.4.3)
 # ---------------------------------------------------------------------------
 
-_COMPOUND_RE = re.compile(r"[A-ZÀ-Ÿa-zà-ÿ]+-[A-ZÀ-Ÿa-zà-ÿ]+")
+_COMPOUND_RE = re.compile(r"[A-ZÀ-ÖØ-Ÿa-zà-öø-ÿ]+-[A-ZÀ-ÖØ-Ÿa-zà-öø-ÿ]+")
 _TITLE_RE = re.compile(
     r"^(?:Dr\.?|Pr\.?|Prof\.?|M\.?|Mme\.?|Mlle\.?|Me\.?|Docteur|Professeur|"
     r"Madame|Monsieur|Mademoiselle|Maître)\s",
     re.IGNORECASE,
 )
-_ABBREVIATION_RE = re.compile(r"\b[A-ZÀ-Ÿ](?:-[A-ZÀ-Ÿ])?\.\s")
+_ABBREVIATION_RE = re.compile(r"\b[A-ZÀ-ÖØ-Ÿ](?:-[A-ZÀ-ÖØ-Ÿ])?\.\s")
 _DIACRITICS_RE = re.compile(r"[àâäéèêëïîôùûüÿçœæÀÂÄÉÈÊËÏÎÔÙÛÜŸÇŒÆ]")
-_LAST_FIRST_RE = re.compile(r"^[A-ZÀ-Ÿ][a-zà-ÿ]+,\s")
+_LAST_FIRST_RE = re.compile(r"^[A-ZÀ-ÖØ-Ÿ][a-zà-öø-ÿ]+,\s")
 _MULTI_WORD_ORG_RE = re.compile(r"\s")
 
 
