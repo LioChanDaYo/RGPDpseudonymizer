@@ -89,7 +89,7 @@ class SQLiteMappingRepository(MappingRepository):
     encryption for queryable encrypted fields.
     """
 
-    def __init__(self, db_session: "DatabaseSession") -> None:  # type: ignore  # noqa: F821
+    def __init__(self, db_session: DatabaseSession) -> None:  # type: ignore  # noqa: F821
         """Initialize repository with database session.
 
         Args:

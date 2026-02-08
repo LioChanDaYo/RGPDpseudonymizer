@@ -12,7 +12,7 @@ import csv
 import json
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from sqlalchemy.orm import Session
 
@@ -83,11 +83,11 @@ class AuditRepository:
 
     def find_operations(
         self,
-        operation_type: Optional[str] = None,
-        success: Optional[bool] = None,
-        start_date: Optional[datetime] = None,
-        end_date: Optional[datetime] = None,
-        limit: Optional[int] = None,
+        operation_type: str | None = None,
+        success: bool | None = None,
+        start_date: datetime | None = None,
+        end_date: datetime | None = None,
+        limit: int | None = None,
     ) -> list[Operation]:
         """Query operations with optional filters.
 
@@ -129,7 +129,7 @@ class AuditRepository:
 
         return query.all()
 
-    def get_operation_by_id(self, operation_id: str) -> Optional[Operation]:
+    def get_operation_by_id(self, operation_id: str) -> Operation | None:
         """Retrieve specific operation by ID.
 
         Args:
@@ -144,7 +144,7 @@ class AuditRepository:
         return self._session.query(Operation).filter_by(id=operation_id).first()
 
     def get_total_entity_count(
-        self, operation_type: Optional[str] = None, success: Optional[bool] = True
+        self, operation_type: str | None = None, success: bool | None = True
     ) -> int:
         """Get total entity count across all operations.
 
@@ -169,9 +169,7 @@ class AuditRepository:
         operations = query.all()
         return sum(op.entity_count for op in operations)
 
-    def get_average_processing_time(
-        self, operation_type: Optional[str] = None
-    ) -> float:
+    def get_average_processing_time(self, operation_type: str | None = None) -> float:
         """Get average processing time across operations.
 
         Args:
@@ -197,7 +195,7 @@ class AuditRepository:
         total_time = sum(op.processing_time_seconds for op in operations)
         return total_time / len(operations)
 
-    def get_failure_rate(self, operation_type: Optional[str] = None) -> float:
+    def get_failure_rate(self, operation_type: str | None = None) -> float:
         """Calculate failure rate for operations.
 
         Args:
@@ -226,11 +224,11 @@ class AuditRepository:
     def export_to_json(
         self,
         output_path: str,
-        operation_type: Optional[str] = None,
-        success: Optional[bool] = None,
-        start_date: Optional[datetime] = None,
-        end_date: Optional[datetime] = None,
-        limit: Optional[int] = None,
+        operation_type: str | None = None,
+        success: bool | None = None,
+        start_date: datetime | None = None,
+        end_date: datetime | None = None,
+        limit: int | None = None,
     ) -> None:
         """Export operations to JSON file with optional filters.
 
@@ -319,11 +317,11 @@ class AuditRepository:
     def export_to_csv(
         self,
         output_path: str,
-        operation_type: Optional[str] = None,
-        success: Optional[bool] = None,
-        start_date: Optional[datetime] = None,
-        end_date: Optional[datetime] = None,
-        limit: Optional[int] = None,
+        operation_type: str | None = None,
+        success: bool | None = None,
+        start_date: datetime | None = None,
+        end_date: datetime | None = None,
+        limit: int | None = None,
     ) -> None:
         """Export operations to CSV file with optional filters.
 

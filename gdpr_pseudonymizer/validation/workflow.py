@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import re
 from collections import defaultdict
-from typing import Callable
+from collections.abc import Callable
 
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 from gdpr_pseudonymizer.pseudonym.assignment_engine import FRENCH_TITLE_PATTERN

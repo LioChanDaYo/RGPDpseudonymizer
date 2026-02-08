@@ -15,7 +15,6 @@ from __future__ import annotations
 import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from typing import Optional
 
 from gdpr_pseudonymizer.data.database import DatabaseSession, open_database
 from gdpr_pseudonymizer.data.models import Entity, Operation
@@ -61,7 +60,7 @@ class ProcessingResult:
     entities_new: int
     entities_reused: int
     processing_time_seconds: float
-    error_message: Optional[str] = None
+    error_message: str | None = None
 
 
 class DocumentProcessor:
@@ -107,10 +106,10 @@ class DocumentProcessor:
         self.model_name = model_name
 
         # Database session will be created per operation (context manager pattern)
-        self._db_session: Optional[DatabaseSession] = None
+        self._db_session: DatabaseSession | None = None
 
         # NLP detector (initialized lazily)
-        self._detector: Optional[HybridDetector] = None
+        self._detector: HybridDetector | None = None
 
     def _get_detector(self) -> HybridDetector:
         """Get or initialize hybrid entity detector.

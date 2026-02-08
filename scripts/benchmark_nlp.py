@@ -20,7 +20,6 @@ import time
 from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 # Add project root to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -237,7 +236,7 @@ def aggregate_metrics(metrics_list: list[MetricsResult]) -> MetricsResult:
     )
 
 
-def create_detector(library: str) -> Optional[EntityDetector]:
+def create_detector(library: str) -> EntityDetector | None:
     """Create detector instance for specified library.
 
     Args:

@@ -5,8 +5,10 @@ This module implements the EntityDetector interface using the Stanza NLP library
 (Stanford NLP) with French language models.
 """
 
+from __future__ import annotations
+
 import logging
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity, EntityDetector
 
@@ -25,8 +27,8 @@ class StanzaDetector(EntityDetector):
 
     def __init__(self) -> None:
         """Initialize Stanza detector without loading model."""
-        self._nlp: Optional["Pipeline"] = None
-        self._model_name: Optional[str] = None
+        self._nlp: Pipeline | None = None
+        self._model_name: str | None = None
 
     def load_model(self, model_name: str = "fr") -> None:
         """Load Stanza NLP model into memory.
@@ -114,7 +116,7 @@ class StanzaDetector(EntityDetector):
             logger.error(f"entity_detection_failed: error={str(e)}")
             raise RuntimeError(f"Entity detection failed: {str(e)}") from e
 
-    def _map_entity_type(self, stanza_label: str) -> Optional[str]:
+    def _map_entity_type(self, stanza_label: str) -> str | None:
         """Map Stanza entity labels to standard entity types.
 
         Args:
