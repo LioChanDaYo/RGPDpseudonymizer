@@ -12,12 +12,12 @@ Before installing, ensure you have:
 
 | Requirement | Version | How to Check |
 |-------------|---------|--------------|
-| **Python** | 3.9, 3.10, or 3.11 | `python --version` |
+| **Python** | 3.10, 3.11, or 3.12 | `python --version` |
 | **Poetry** | 1.7+ | `poetry --version` |
 | **Disk Space** | ~1GB free | For spaCy French model |
 | **Internet** | Required for installation | Model download ~571MB |
 
-**Important:** Python 3.12+ is not yet tested. Python 3.9-3.11 are validated in CI/CD.
+**Important:** Python 3.10-3.11 are validated in CI/CD. Python 3.12 is confirmed working (tested on Ubuntu 24.04 and Fedora 39). Python 3.9 is no longer supported (EOL October 2025). Python 3.13+ is not yet tested.
 
 ---
 
@@ -281,6 +281,46 @@ poetry run gdpr-pseudo --help
 
 ---
 
+### Docker (Alternative)
+
+Docker provides a platform-independent installation method. A Dockerfile is not yet included in the repository (planned for post-MVP), but you can run the tool in a Docker container manually.
+
+#### Quick Docker Setup
+
+```bash
+# Start an interactive Python container
+docker run -it --rm -v "$(pwd)/documents:/data" python:3.11 bash
+
+# Inside the container:
+pip install poetry
+git clone https://github.com/LioChanDaYo/RGPDpseudonymizer.git
+cd RGPDpseudonymizer
+poetry config virtualenvs.create false
+poetry install
+python -m spacy download fr_core_news_lg
+
+# Process a document from mounted /data directory
+gdpr-pseudo process /data/input.txt -o /data/output.txt
+```
+
+#### Notes
+
+- Mount your documents directory with `-v` so output files persist after the container exits
+- Use `poetry config virtualenvs.create false` to install directly in the container (no need for a virtual environment inside Docker)
+- The `--rm` flag cleans up the container after exit; omit it if you want to reuse the container
+- **Tested on:** Docker Desktop 29.2.0 (Windows), Ubuntu 24.04 container, Debian 12 container, Fedora 39 container
+
+#### Planned Improvements
+
+A pre-built Dockerfile and published Docker image are planned for a future release, which will simplify this to:
+
+```bash
+# Future (not yet available)
+docker run -v "$(pwd):/data" gdpr-pseudonymizer process /data/input.txt
+```
+
+---
+
 ## Command Usage (Beta Phase)
 
 **Important:** During the beta phase, all commands must be prefixed with `poetry run`:
@@ -362,20 +402,20 @@ poetry run gdpr-pseudo config
 
 ### Python version not supported
 
-**Error:** `The currently activated Python version 3.12.x is not supported`
+**Error:** `The currently activated Python version X.Y.Z is not supported`
 
 **Solution:**
-1. Install Python 3.9, 3.10, or 3.11
+1. Install Python 3.10, 3.11, or 3.12
 2. Configure Poetry to use correct version:
    ```bash
    poetry env use python3.11
    poetry install
    ```
 
-**Note:** If your system has Python 3.12+ but Poetry uses 3.9-3.11, the tool works correctly. Poetry manages its own virtual environment independently of system Python. Check with:
+**Note:** If your system has Python 3.13+ but Poetry uses 3.10-3.12, the tool works correctly. Poetry manages its own virtual environment independently of system Python. Check with:
 ```bash
 poetry env info
-# Look for "Virtualenv Python: 3.11.x" (should be 3.9-3.11)
+# Look for "Virtualenv Python: 3.11.x" (should be 3.10-3.12)
 ```
 
 ---
@@ -430,7 +470,7 @@ poetry env info
 ### `poetry install` fails with dependency conflicts
 
 **Solution:**
-1. Verify Python version (must be 3.9-3.11)
+1. Verify Python version (must be 3.10-3.12)
 2. Clear virtual environment and reinstall:
    ```bash
    poetry env remove python
@@ -510,7 +550,7 @@ After installation:
 
 1. **Quick Start Tutorial:** [tutorial.md](tutorial.md) - First pseudonymization in 5 minutes
 2. **CLI Reference:** [CLI-REFERENCE.md](CLI-REFERENCE.md) - Complete command documentation
-3. **Alpha Testing:** [ALPHA-TESTING-PROTOCOL.md](ALPHA-TESTING-PROTOCOL.md) - Test scenarios
+3. **FAQ:** [faq.md](faq.md) - Common questions and answers
 
 ---
 
@@ -523,4 +563,5 @@ After installation:
 **Documentation:**
 - [CLI Reference](CLI-REFERENCE.md)
 - [Tutorial](tutorial.md)
-- [FAQ](faq.md) *(Coming in v1.0)*
+- [FAQ](faq.md)
+- [Troubleshooting](troubleshooting.md)

@@ -1,0 +1,83 @@
+site_name: GDPR Pseudonymizer
+site_description: AI-Assisted Pseudonymization for French Documents with Human Verification
+site_url: https://liochandayo.github.io/RGPDpseudonymizer/
+repo_url: https://github.com/LioChanDaYo/RGPDpseudonymizer
+repo_name: LioChanDaYo/RGPDpseudonymizer
+
+theme:
+  name: material
+  language: en
+  features:
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+exclude_docs: |
+  architecture/
+  prd/
+  stories/
+  qa/
+  ALPHA-INSTALL.md
+  ALPHA-QUICKSTART.md
+  ALPHA-TESTING-PROTOCOL.md
+  BACKLOG.md
+  DELIVERABLES-SUMMARY-*.md
+  PM-APPROVAL-CHECKLIST.md
+  ci-cd.md
+  hybrid-benchmark-report.md
+  hybrid-detection.md
+  installation-validation-report.md
+  llm-validation-report.md
+  module-dependencies.md
+  nlp-benchmark-report.md
+  positioning-messaging-*.md
+  validation-ui-spec*.md
+
+validation:
+  nav:
+    omitted_files: info
+  links:
+    not_found: warn
+
+plugins:
+  - search
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Installation: installation.md
+    - Quick Start: tutorial.md
+  - User Guide:
+    - CLI Reference: CLI-REFERENCE.md
+    - FAQ: faq.md
+    - Troubleshooting: troubleshooting.md
+  - Methodology:
+    - Technical Approach & GDPR Compliance: methodology.md
+  - Developer Guide:
+    - API Reference: api-reference.md
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - toc:
+      permalink: true

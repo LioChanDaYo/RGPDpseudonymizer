@@ -1,5 +1,7 @@
 # Alpha Quick Start Guide
 
+> **DEPRECATED:** This document has been superseded by [Usage Tutorial](tutorial.md). Please use the Tutorial for up-to-date instructions.
+
 **Version:** v0.1.0-alpha
 **Estimated Time:** 10 minutes for first pseudonymization
 

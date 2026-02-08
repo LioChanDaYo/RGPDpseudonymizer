@@ -91,6 +91,12 @@
    - Extension points for customization
 7. **AC7:** Documentation hosted: GitHub Pages or Read the Docs with search functionality.
 8. **AC8:** Documentation effectiveness validated: <20% of users require support beyond documentation (NFR14 target).
+9. **AC9:** Python version support aligned across all sources (TD-004):
+   - Verify spaCy 3.7+ wheel availability for Python 3.12 and 3.13
+   - If verified: Add to CI/CD matrix (ci.yaml) and update pyproject.toml
+   - If NOT verified: Tighten pyproject.toml to match actual tested versions
+   - Align ALPHA-INSTALL.md, coding-standards.md, and all documentation to match
+   - Note: Story 4.2 confirmed Python 3.12 works on Ubuntu 24.04 and Fedora 39
 
 ---
 
@@ -110,6 +116,10 @@
 6. **AC6:** Confidence score analysis: Correlation between NER confidence and actual accuracy (informational for future features).
 7. **AC7:** Results compared to Epic 1 benchmarking: Validate no regression from full implementation complexity.
 8. **AC8:** Quality report created: Accuracy metrics, known limitations, recommended validation mode use cases.
+9. **AC9:** Monitoring baselines reviewed (MON-001, MON-003, MON-004):
+   - MON-001: Validation UI performance — report validation time per unique entity and completion rate against targets (<10s/entity, ≥90% completion)
+   - MON-003: LOCATION/ORG detection accuracy — report user-added entities by type against target (<10%)
+   - MON-004: Context cycling UX discoverability — assess whether users discover X key cycling
 
 ---
 
@@ -129,6 +139,9 @@
 6. **AC6:** Stress testing: Process 100-document batch, validate behavior (should complete or fail gracefully with clear errors).
 7. **AC7:** Performance regression testing: Compare to Epic 2-3 baseline, ensure no degradation.
 8. **AC8:** Performance report created: Metrics summary, hardware specifications used, optimization recommendations for Phase 2.
+9. **AC9:** Monitoring baselines reviewed (MON-002, MON-005):
+   - MON-002: Hybrid detection processing time — validate 0.07s average holds at scale, report p95/p99 against <30s target
+   - MON-005: spaCy Python version compatibility — report current wheel availability for 3.12/3.13/3.14, feed findings to Story 4.3 AC9 (TD-004)
 
 ---
 
@@ -148,6 +161,18 @@
 6. **AC6:** Bug fix testing: Regression tests for all fixes, validate no new issues introduced.
 7. **AC7:** Beta testers notified: Release notes with fixes, request final verification.
 8. **AC8:** Launch readiness review: PM/Dev/QA sign-off that product is ready for public release.
+9. **AC9:** Organization pseudonym library expanded (FE-006):
+   - Expand neutral theme from 35 to 150-200 entries (80-100 companies, 40-50 agencies, 30-50 institutions)
+   - Evaluate location library expansion needs (currently 80 entries)
+   - Validate batch processing of 50+ documents no longer exhausts library
+   - Source: Story 3.0 batch processing testing identified library exhaustion at 15+ documents
+10. **AC10:** External user testing conducted (TD-002):
+    - Recruit 2-3 external users (academic researchers, HR professionals, or compliance officers)
+    - Provide test documents (20-50 entities each)
+    - Measure: validation time, satisfaction (1-5 scale), completion rate
+    - Target: ≥4/5 satisfaction, <5 min validation time for 50 entities
+    - Document feedback and iterate on UX if needed
+    - Source: Story 1.7 QA Gate (AC10), deferred from Epic 1 → Epic 2 → Epic 4
 
 ---
 
@@ -172,7 +197,7 @@
 
 ## Future Enhancements (Post-Launch Backlog)
 
-These items were identified during Phase 1 development but deferred to post-launch or Phase 2:
+These items were identified during Phase 1 development but deferred to post-launch releases (see [next-steps.md](next-steps.md) for the unified roadmap: v1.1 quick wins, v2.0 GUI, v3.0 NLP accuracy):
 
 ### FE-007: Gender-Aware Pseudonym Assignment for French Names
 
@@ -196,6 +221,8 @@ Currently, pseudonym assignment does not preserve gender for PERSON entities whe
 4. **User validation extension:** Add gender selection to validation workflow
 
 **Priority:** Medium (enhances quality but not blocking for core functionality)
+
+**Target Release:** v1.1
 
 **Effort Estimate:** Story-sized (2-3 days)
 
@@ -261,6 +288,8 @@ gdpr-pseudo list-entities --db mappings.db --search "Dupont"
 
 **Priority:** High (significant compliance value, low implementation effort)
 
+**Target Release:** v1.1
+
 **Effort Estimate:** Story-sized (2-3 days)
 
 ---
@@ -304,9 +333,11 @@ This enhancement is **tightly coupled** with Phase 2 GUI development. The standa
 
 **Priority:** High (critical for Phase 2 broader adoption goal)
 
+**Target Release:** v2.0
+
 **Effort Estimate:** Epic-sized (depends on GUI complexity, 2-4 weeks including signing/distribution)
 
-**Phase 2 Requirement:** This is a **must-have** for Phase 2 launch, not a nice-to-have.
+**Phase 2 Requirement:** This is a **must-have** for v2.0 launch, not a nice-to-have.
 
 ---
 

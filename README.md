@@ -23,7 +23,7 @@ GDPR Pseudonymizer is a **privacy-first CLI tool** that combines AI efficiency w
 ### 🔒 **Privacy-First Architecture**
 - ✅ **100% local processing** - Your data never leaves your machine
 - ✅ **No cloud dependencies** - Works completely offline after installation
-- ✅ **Encrypted mapping tables** - AES-128-CBC encryption with PBKDF2 key derivation (210K iterations), passphrase-protected reversible pseudonymization
+- ✅ **Encrypted mapping tables** - AES-256-SIV encryption with PBKDF2 key derivation (210K iterations), passphrase-protected reversible pseudonymization
 - ✅ **Zero telemetry** - No analytics, crash reporting, or external communication
 
 ### 🤝 **AI + Human Verification**
@@ -49,7 +49,7 @@ GDPR Pseudonymizer is a **privacy-first CLI tool** that combines AI efficiency w
 
 ## 🚀 Quick Start
 
-**Status:** 🎉 **Alpha Release v0.1.0** - Seeking 3-5 alpha testers for feedback (see [ALPHA-INSTALL.md](docs/ALPHA-INSTALL.md))
+**Status:** 🎉 **Alpha Release v0.1.0** - Seeking 3-5 alpha testers for feedback (see [Installation Guide](docs/installation.md))
 
 ### Current Development Stage
 
@@ -88,25 +88,36 @@ We're actively developing v1.0 MVP with an **AI-assisted approach**:
 
 ### Roadmap
 
-**v1.0 (MVP - Week 14):** AI-assisted with mandatory validation
+**v1.0 (MVP - Q2 2026):** AI-assisted CLI with mandatory validation
 - Target: Privacy-conscious early adopters who value human oversight
+- 100% local processing, encrypted mapping tables, audit trails
 
-**v1.1 (Q2 2026):** Semi-automatic with optional validation
-- Fine-tuned model: 70-85% F1 accuracy
+**v1.1 (Q2-Q3 2026):** Quick wins & GDPR compliance
+- GDPR Right to Erasure: selective entity deletion (`delete-mapping` command, Article 17)
+- Gender-aware pseudonym assignment for French names
+- Beta feedback bug fixes and UX improvements
+
+**v2.0 (Q3-Q4 2026):** GUI & broader accessibility
+- Desktop GUI wrapping CLI core (drag-and-drop, visual entity review)
+- Standalone executables (.exe for Windows, .app for macOS) — no Python required
+- French-first UI with i18n architecture (multi-language ready)
+- WCAG AA accessibility for professional/academic contexts
+- Target: Non-technical users (HR, legal, compliance teams)
+
+**v3.0 (2027+):** NLP accuracy & automation
+- Fine-tuned French NER model (70-85% F1 target, up from 40-50%)
 - Optional `--no-validate` flag for high-confidence workflows
-
-**v2.0 (Future):** Fully automatic with confidence thresholds
-- 85%+ F1 accuracy
-- Confidence-based auto-processing
+- Confidence-based auto-processing (85%+ F1 target)
+- Multi-language support (English, Spanish, German)
 
 ---
 
 ## ⚙️ Installation
 
-**Current status:** v0.1.0-alpha released! See [ALPHA-INSTALL.md](docs/ALPHA-INSTALL.md) for detailed installation instructions.
+**Current status:** v0.1.0-alpha released! See [Installation Guide](docs/installation.md) for detailed installation instructions.
 
 ### Prerequisites
-- Python 3.9-3.11 (validated in CI/CD, Python 3.12-3.13 support planned, Python 3.14+ not supported due to spaCy compatibility)
+- Python 3.10-3.12 (validated in CI/CD, Python 3.13+ not yet tested, Python 3.9 no longer supported)
 - Poetry 1.7+
 
 ### Quick Install
@@ -174,22 +185,20 @@ logging:
 
 ## 📖 Documentation
 
-**For Alpha Testers:**
-- 📘 [Alpha Installation Guide](docs/ALPHA-INSTALL.md) - Step-by-step installation for alpha testing
-- 📗 [Alpha Quick Start](docs/ALPHA-QUICKSTART.md) - First pseudonymization tutorial and validation UI walkthrough
-- 📋 [Alpha Testing Protocol](docs/ALPHA-TESTING-PROTOCOL.md) - Test scenarios and feedback survey
+**Documentation Site:** [https://liochandayo.github.io/RGPDpseudonymizer/](https://liochandayo.github.io/RGPDpseudonymizer/)
 
 **For Users:**
 - 📘 [Installation Guide](docs/installation.md) - Platform-specific installation instructions
 - 📗 [Usage Tutorial](docs/tutorial.md) - Step-by-step usage tutorials
 - 📕 [CLI Reference](docs/CLI-REFERENCE.md) - Complete command documentation
-- 📕 [Methodology & Academic Citation](docs/methodology.md) *(Coming in Epic 4)*
-- ❓ [FAQ](docs/faq.md) *(Coming in Epic 4)*
+- 📕 [Methodology & Academic Citation](docs/methodology.md) - Technical approach and GDPR compliance
+- ❓ [FAQ](docs/faq.md) - Common questions and answers
+- 🔧 [Troubleshooting](docs/troubleshooting.md) - Error reference and solutions
 
 **For Developers:**
-- 🏗️ [Architecture Documentation](docs/architecture/) *(In progress)*
-- 📊 [NLP Benchmark Report](docs/nlp-benchmark-report.md) *(Complete)*
-- 🎯 [Product Requirements (PRD)](docs/.ignore/prd.md) *(v2.0 - Updated 2026-01-16)*
+- 📚 [API Reference](docs/api-reference.md) - Module documentation and extension points
+- 🏗️ [Architecture Documentation](docs/architecture/) - Technical design
+- 📊 [NLP Benchmark Report](docs/nlp-benchmark-report.md) - NER accuracy analysis
 
 **For Stakeholders:**
 - 🎨 [Positioning & Messaging](docs/positioning-messaging-v2-assisted.md)
@@ -216,7 +225,7 @@ After comprehensive benchmarking on 25 French interview/business documents (1,85
 **Approved Solution:**
 - ✅ **Hybrid approach** (NLP + regex) targets 40-50% F1
 - ✅ **Mandatory validation** ensures 100% final accuracy
-- 📅 **Fine-tuning** deferred to v1.1 (70-85% F1 target)
+- 📅 **Fine-tuning** deferred to v3.0 (70-85% F1 target, requires training data from v1.x/v2.x user validations)
 
 See full analysis: [docs/nlp-benchmark-report.md](docs/nlp-benchmark-report.md)
 
@@ -248,11 +257,11 @@ The validation UI provides an intuitive keyboard-driven interface for reviewing 
 
 | Component | Technology | Version | Purpose |
 |-----------|------------|---------|---------|
-| **Runtime** | Python | 3.9-3.11 | Validated baseline (3.12-3.13 planned, 3.14+ not supported) |
+| **Runtime** | Python | 3.10-3.12 | Validated in CI/CD (3.13+ not yet tested) |
 | **NLP Library** | spaCy | 3.8.0 | French entity detection (fr_core_news_lg) |
 | **CLI Framework** | Typer | 0.9+ | Command-line interface |
 | **Database** | SQLite | 3.35+ | Local mapping table storage with WAL mode |
-| **Encryption** | cryptography (Fernet) | 41.0+ | AES-128-CBC encryption for sensitive fields (PBKDF2 key derivation, passphrase-protected) |
+| **Encryption** | cryptography (AESSIV) | 44.0+ | AES-256-SIV encryption for sensitive fields (PBKDF2 key derivation, passphrase-protected) |
 | **ORM** | SQLAlchemy | 2.0+ | Database abstraction and session management |
 | **Validation UI** | rich | 13.7+ | Interactive CLI entity review |
 | **Keyboard Input** | readchar | 4.2+ | Single-keypress capture for validation UI |
@@ -333,7 +342,7 @@ The validation UI provides an intuitive keyboard-driven interface for reviewing 
 |------------------|----------------|
 | **Art. 25 - Data Protection by Design** | Local processing, no cloud dependencies, encrypted storage |
 | **Art. 30 - Processing Records** | Comprehensive audit logs (Story 2.5): operations table tracks timestamp, files processed, entity count, model version, theme, success/failure, processing time; JSON/CSV export for compliance reporting |
-| **Art. 32 - Security Measures** | AES-128-CBC encryption (Fernet) with PBKDF2 key derivation (210,000 iterations), passphrase-protected storage, column-level encryption for sensitive fields |
+| **Art. 32 - Security Measures** | AES-256-SIV encryption with PBKDF2 key derivation (210,000 iterations), passphrase-protected storage, column-level encryption for sensitive fields |
 | **Art. 35 - Privacy Impact Assessment** | Transparent methodology, cite-able approach for DPIA documentation |
 | **Recital 26 - Pseudonymization** | Consistent pseudonym mapping, reversibility with passphrase |
 
@@ -371,7 +380,7 @@ The validation UI provides an intuitive keyboard-driven interface for reviewing 
 - ✅ **Story 2.1:** Pseudonym library system - 3 themed libraries (neutral, Star Wars, LOTR), gender-matching, exhaustion detection, 36 tests, 90.76% coverage (QA gate: PASS, Score: 98/100)
 - ✅ **Story 2.2:** Compositional pseudonymization logic - Component-based matching ("Marie Dubois" → "Leia Organa", "Marie" → "Leia"), 37 tests, 94% coverage (QA gate: PASS, Score: 95/100)
 - ✅ **Story 2.3:** French name preprocessing (titles + compounds) - Title stripping ("Dr. Marie Dubois" → "Marie Dubois"), compound names ("Jean-Pierre" treated as atomic), simple pseudonyms for compounds, 53 tests (31 unit + 15 unit + 7 integration), 94.64% coverage (QA gate: PASS, Score: 100/100)
-- ✅ **Story 2.4:** Encrypted mapping table - Database encryption with AES-128-CBC (Fernet), passphrase protection, PBKDF2 key derivation (210,000 iterations), column-level encryption, WAL mode for concurrency, 9 integration tests (QA gate: PASS)
+- ✅ **Story 2.4:** Encrypted mapping table - Database encryption with AES-256-SIV, passphrase protection, PBKDF2 key derivation (210,000 iterations), column-level encryption, WAL mode for concurrency, 9 integration tests (QA gate: PASS)
 - ✅ **Story 2.5:** Audit logging - Comprehensive audit logs for GDPR Article 30 compliance, operations table tracks all pseudonymization operations, JSON/CSV export functionality, 32 unit tests, 91.41% coverage (QA gate: PASS, Score: 100/100)
 - ✅ **Story 2.6:** Single-document pseudonymization workflow - End-to-end integration of all Epic 2 components, idempotent processing, optional `--output` parameter, 10 tests passing (3 unit + 7 integration), 6 critical bug fixes for consistent pseudonym generation across documents (QA gate: PASS, Ready for Done)
 - ✅ **Story 2.7:** Batch processing scalability spike - Multiprocessing.Pool validated (1.17x speedup on small docs, 2-3x projected for 3000-word docs), mapping consistency verified, architectural validation complete, 1 critical bug discovered (pseudonym component collision - Story 2.8 created), 5 test scripts + findings document (QA gate: PASS with critical bug found)
@@ -392,9 +401,10 @@ The validation UI provides an intuitive keyboard-driven interface for reviewing 
 - **Epic 4 (Week 13-14):** Launch Readiness & LLM Validation
   - Story 4.1: LLM Utility Preservation Testing ✅ **PASSED** (4.27/5.0 = 85.4%, threshold: 80%)
   - Story 4.2: Cross-Platform Installation Validation ✅ **PASSED** (NFR3: 87.5% > 85%, NFR14: 100%)
+  - Story 4.3: Complete Documentation Package ✅ **DONE** (8 doc pages, MkDocs site, GitHub Pages deployment)
 
 ### Upcoming 📅
-- Stories 4.3-4.5: Performance testing, beta release
+- Stories 4.4-4.5: Performance testing, beta release
 
 ---
 
@@ -531,7 +541,7 @@ poetry run pytest tests/integration/test_validation_workflow_integration.py -v
 - **Integration tests:** 90 tests for end-to-end workflows including validation (Story 2.0.1), encrypted database operations (Story 2.4), compositional logic, and hybrid detection
 - **Current coverage:** 86%+ across all modules (100% for progress module, 91.41% for AuditRepository)
 - **Total tests:** 616 tests collected (600+ passed, 12 skipped)
-- **CI/CD:** Tests run on Python 3.9-3.11 across Windows, macOS, and Linux
+- **CI/CD:** Tests run on Python 3.10-3.12 across Windows, macOS, and Linux
 - **Quality gates:** All pass (Black, Ruff, mypy, pytest)
 
 ### Key Integration Test Scenarios
@@ -577,7 +587,7 @@ The integration test suite covers:
 | **Pseudonym Libraries** | 3 themes (2,426 names + 240 locations + 105 orgs) | ✅ Stories 2.1, 3.0 Complete |
 | **Compositional Matching** | Operational (component reuse + title stripping + compound names) | ✅ Stories 2.2, 2.3 Complete |
 | **Batch Processing** | Architecture validated (multiprocessing.Pool, 1.17x-2.5x speedup) | ✅ Story 2.7 Complete |
-| **Encrypted Storage** | AES-128-CBC with passphrase protection (PBKDF2 210K iterations) | ✅ Story 2.4 Complete |
+| **Encrypted Storage** | AES-256-SIV with passphrase protection (PBKDF2 210K iterations) | ✅ Story 2.4 Complete |
 | **Audit Logging** | GDPR Article 30 compliance (operations table + JSON/CSV export) | ✅ Story 2.5 Complete |
 | **Validation UI** | Operational with deduplication | ✅ Stories 1.7, 1.9 Complete |
 | **Validation Time** | <2 min (20-30 entities), <5 min (100 entities) | ✅ Targets Met |
@@ -598,6 +608,6 @@ The integration test suite covers:
 
 ---
 
-**Last Updated:** 2026-02-07 (Story 4.2 Cross-Platform Installation Validation complete - NFR3 PASSED 87.5%, NFR14 PASSED 100%)
+**Last Updated:** 2026-02-08 (Story 4.3 Complete Documentation Package - MkDocs site, methodology, FAQ, troubleshooting, API reference, encryption terminology aligned to AES-256-SIV)
 
-**Current Focus:** Epic 4 in progress - Stories 4.1-4.2 complete, remaining launch readiness stories next
+**Current Focus:** Epic 4 in progress - Stories 4.1-4.3 complete, remaining launch readiness stories next

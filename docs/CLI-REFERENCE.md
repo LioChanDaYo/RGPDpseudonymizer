@@ -669,5 +669,5 @@ gdpr-pseudo stats --db new_project.db
 
 - [Installation Guide](installation.md) - Setup instructions for all platforms
 - [Usage Tutorial](tutorial.md) - Step-by-step usage tutorials
-- [Architecture Documentation](architecture/) - Technical design documents
-- [ALPHA-QUICKSTART.md](ALPHA-QUICKSTART.md) - Quick start for alpha testers
+- [FAQ](faq.md) - Common questions and answers
+- [Troubleshooting](troubleshooting.md) - Error reference and solutions
