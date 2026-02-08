@@ -402,9 +402,10 @@ The validation UI provides an intuitive keyboard-driven interface for reviewing 
   - Story 4.1: LLM Utility Preservation Testing ✅ **PASSED** (4.27/5.0 = 85.4%, threshold: 80%)
   - Story 4.2: Cross-Platform Installation Validation ✅ **PASSED** (NFR3: 87.5% > 85%, NFR14: 100%)
   - Story 4.3: Complete Documentation Package ✅ **DONE** (8 doc pages, MkDocs site, GitHub Pages deployment)
+  - Story 4.4: NER Accuracy Comprehensive Validation ✅ **DONE** (22 tests, F1=29.74%, NFR8/NFR9 baselines documented, quality report + monitoring baselines)
 
 ### Upcoming 📅
-- Stories 4.4-4.5: Performance testing, beta release
+- Stories 4.5-4.7: Performance testing, beta release, launch readiness
 
 ---
 
@@ -501,6 +502,11 @@ poetry run pytest tests/unit/ -v
 poetry run pytest tests/integration/ -v
 ```
 
+**Run accuracy validation tests (requires spaCy model):**
+```bash
+poetry run pytest tests/accuracy/ -v -m accuracy -s
+```
+
 **Run with coverage report:**
 ```bash
 poetry run pytest --cov=gdpr_pseudonymizer --cov-report=term-missing --cov-report=html
@@ -537,10 +543,11 @@ poetry run pytest tests/integration/test_validation_workflow_integration.py -v
 
 ### Test Coverage
 
-- **Unit tests:** 492 tests covering validation models, UI components, encryption, database operations, audit logging, progress tracking, and core logic
+- **Unit tests:** 777 tests covering validation models, UI components, encryption, database operations, audit logging, progress tracking, and core logic
 - **Integration tests:** 90 tests for end-to-end workflows including validation (Story 2.0.1), encrypted database operations (Story 2.4), compositional logic, and hybrid detection
+- **Accuracy tests:** 22 tests validating NER accuracy against 25-document ground-truth corpus (Story 4.4)
 - **Current coverage:** 86%+ across all modules (100% for progress module, 91.41% for AuditRepository)
-- **Total tests:** 616 tests collected (600+ passed, 12 skipped)
+- **Total tests:** 799 tests (777 passed + 22 accuracy, 12 skipped)
 - **CI/CD:** Tests run on Python 3.10-3.12 across Windows, macOS, and Linux
 - **Quality gates:** All pass (Black, Ruff, mypy, pytest)
 
@@ -574,8 +581,8 @@ The integration test suite covers:
 
 | Metric | Value | Status |
 |--------|-------|--------|
-| **Development Progress** | Week 13/14 | ✅ Epic 3 Complete + Stories 4.1-4.2 PASSED |
-| **Stories Complete** | 27 (Epic 1 + Epic 2 + Epic 3 + Stories 4.1-4.2) | ✅ Epic 1 (9) + Epic 2 (9) + Stories 3.0-3.5, 3.9 + Stories 4.1-4.2 |
+| **Development Progress** | Week 13/14 | ✅ Epic 3 Complete + Stories 4.1-4.4 Done |
+| **Stories Complete** | 28 (Epic 1 + Epic 2 + Epic 3 + Stories 4.1-4.4) | ✅ Epic 1 (9) + Epic 2 (9) + Stories 3.0-3.5, 3.9 + Stories 4.1-4.4 |
 | **LLM Utility (NFR10)** | 4.27/5.0 (85.4%) | ✅ PASSED (threshold: 80%) |
 | **Installation Success (NFR3)** | 87.5% (7/8 platforms) | ✅ PASSED (threshold: 85%) |
 | **First Pseudonymization (NFR14)** | 100% within 30 min | ✅ PASSED (threshold: 80%) |
@@ -591,7 +598,7 @@ The integration test suite covers:
 | **Audit Logging** | GDPR Article 30 compliance (operations table + JSON/CSV export) | ✅ Story 2.5 Complete |
 | **Validation UI** | Operational with deduplication | ✅ Stories 1.7, 1.9 Complete |
 | **Validation Time** | <2 min (20-30 entities), <5 min (100 entities) | ✅ Targets Met |
-| **Test Coverage** | 616 tests (502 unit + 114 integration), 86%+ coverage | ✅ All Quality Checks Pass |
+| **Test Coverage** | 799 tests (777 unit + 22 accuracy), 86%+ coverage | ✅ All Quality Checks Pass |
 | **Quality Gates** | Ruff, mypy, pytest | ✅ All Pass (0 issues) |
 | **Supported Languages** | French | 🇫🇷 v1.0 only |
 | **Supported Formats** | .txt, .md | 📝 v1.0 scope |
@@ -608,6 +615,6 @@ The integration test suite covers:
 
 ---
 
-**Last Updated:** 2026-02-08 (Story 4.3 Complete Documentation Package - MkDocs site, methodology, FAQ, troubleshooting, API reference, encryption terminology aligned to AES-256-SIV)
+**Last Updated:** 2026-02-08 (Story 4.4 NER Accuracy Comprehensive Validation - 22-test accuracy suite, quality report, monitoring baselines, CI workflow)
 
-**Current Focus:** Epic 4 in progress - Stories 4.1-4.3 complete, remaining launch readiness stories next
+**Current Focus:** Epic 4 in progress - Stories 4.1-4.4 complete, remaining launch readiness stories next

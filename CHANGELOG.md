@@ -10,6 +10,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- ✅ **NER Accuracy Comprehensive Validation** (Story 4.4)
+  - 22-test automated accuracy validation suite (`tests/accuracy/`)
+  - Validates hybrid detection pipeline against 25-document annotated corpus (1,855 entities)
+  - Overall metrics: F1=29.74%, Precision=25.25%, Recall=36.17%
+  - Per-entity-type breakdown: PERSON F1=33.71%, LOCATION F1=37.05%, ORG F1=9.16%
+  - Edge case analysis: 6 categories (compound names, titles, abbreviations, multi-word ORG, diacritics, Last/First order)
+  - Confidence score analysis (83.8% entities lack confidence — spaCy limitation)
+  - Regression comparison vs Epic 1 baselines (no regression, within 3% tolerance)
+  - Quality report: `docs/qa/ner-accuracy-report.md`
+  - Monitoring baselines review: `docs/qa/monitoring-baselines-4.4.md` (MON-001, MON-003, MON-004)
+  - Dedicated CI workflow: `.github/workflows/accuracy.yaml`
+  - NFR8/NFR9 targets documented as aspirational (validation mode is mitigation)
+  - Backlog items FE-011/012/013 added for future NLP improvements
 - ✅ **LOCATION and ORGANIZATION pseudonym libraries** (Story 3.0)
   - Added themed pseudonyms for LOCATION entities (cities, regions, planets/countries)
   - Added themed pseudonyms for ORGANIZATION entities (companies, agencies, institutions)

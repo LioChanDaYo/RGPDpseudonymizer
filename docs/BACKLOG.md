@@ -1,6 +1,6 @@
 # Product Backlog - GDPR Pseudonymizer
 
-**Last Updated:** 2026-02-07
+**Last Updated:** 2026-02-08
 **Epic 1 Status:** ✅ Complete (9/9 stories)
 **Epic 2 Status:** ✅ Complete
 **Epic 3 Status:** ✅ Complete
@@ -246,6 +246,78 @@ Press Enter to continue...
 
 ---
 
+#### FE-011: NLP Accuracy — Regex Pattern Expansion 📅 POST-MVP
+**Source:** Story 4.4 NER Accuracy Report, MON-003 Baseline Review
+**Description:** Expand regex patterns to address lowest-accuracy edge case categories identified in Story 4.4 accuracy validation
+**Impact:** High — LOCATION FN=37%, ORG FN=66%, Last/First recall=0%. Regex improvements are the fastest path to reducing user-added entities in validation mode
+**Effort:** Medium (1-2 days)
+**Target:** v1.1 (post-MVP)
+**Rationale:** Story 4.4 identified specific pattern gaps causing high false negative rates. These are independent of NLP model fine-tuning and can be implemented incrementally.
+
+**Specific Improvements:**
+1. **Last, First name format** (0% recall): Add regex for `LastName, FirstName` pattern (e.g., "Dubois, Jean-Marc")
+2. **ORG suffix expansion**: Add patterns for Association, Fondation, Institut, Groupe, Consortium, Fédération
+3. **LOCATION dictionary**: Add French city/department/region dictionary to supplement spaCy detection
+4. **Title normalization**: Improve matching when titles (Dr., M., Mme.) are part of annotated entities
+
+**Acceptance Criteria:**
+- [ ] Last, First regex pattern added to `regex_matcher.py`
+- [ ] ORG suffix patterns expanded (target: 15+ suffixes)
+- [ ] French geography dictionary added (top 100 cities, 13 regions, 101 departments)
+- [ ] Accuracy test re-run shows measurable improvement (target: LOCATION FN <25%, ORG FN <50%)
+- [ ] No regression in PERSON detection
+
+**References:**
+- [docs/qa/ner-accuracy-report.md](qa/ner-accuracy-report.md) — Edge Case Analysis, Recommendations
+- [docs/qa/monitoring-baselines-4.4.md](qa/monitoring-baselines-4.4.md) — MON-003 findings
+- [gdpr_pseudonymizer/nlp/regex_matcher.py](../gdpr_pseudonymizer/nlp/regex_matcher.py)
+
+---
+
+#### FE-012: Ground-Truth Annotation Quality Cleanup 📅 POST-MVP
+**Source:** Story 4.4 Task 4.4.1 corpus validation
+**Description:** Clean up annotation quality issues discovered during Story 4.4 accuracy validation
+**Impact:** Medium — annotation quality issues inflate FN counts and make accuracy metrics unreliable for trend analysis
+**Effort:** Low (2-4 hours)
+**Target:** v1.1 (before next accuracy benchmark)
+
+**Issues Identified:**
+1. **Entity count discrepancy:** `tests/test_corpus/annotations/README.md` claims 3,230 entities but actual count is 1,855
+2. **board_minutes.json quality:** Entities spanning newlines, ORGs mislabeled as PERSON, truncated entities at hyphen boundaries, garbage annotations (e.g., "élicite Mme")
+3. **Title inclusion inconsistency:** Some annotations include titles ("Mme Sophie Laurent") while others don't ("Sophie Laurent")
+
+**Acceptance Criteria:**
+- [ ] README entity count corrected to match actual count
+- [ ] board_minutes.json annotations cleaned (fix or remove garbage entries)
+- [ ] Consistent annotation policy for titles documented
+- [ ] Accuracy test re-run to establish clean baseline
+
+**References:**
+- [tests/test_corpus/annotations/README.md](../tests/test_corpus/annotations/README.md)
+- [tests/test_corpus/annotations/board_minutes.json](../tests/test_corpus/annotations/board_minutes.json)
+- [docs/qa/ner-accuracy-report.md](qa/ner-accuracy-report.md) — Known Limitations
+
+---
+
+#### FE-013: Confidence Score Calibration Layer 📅 v1.1+
+**Source:** Story 4.4 Confidence Score Analysis (AC6)
+**Description:** Implement a confidence calibration layer to enable confidence-based auto-accept/auto-reject in validation mode
+**Impact:** Medium — would allow skipping validation for high-confidence entities, reducing user effort
+**Effort:** High (1-2 weeks — requires ML training)
+**Target:** v1.1+ (dependent on FE-011 regex improvements first)
+**Rationale:** Story 4.4 found 83.8% of entities have confidence=None (spaCy limitation). The 16.2% with regex confidence scores show counterintuitive precision (0.5-0.7 bucket better than 0.7-0.9). A dedicated calibration model is needed.
+
+**Acceptance Criteria:**
+- [ ] Calibration model trained on ground-truth corpus
+- [ ] All detected entities assigned meaningful confidence (0.0-1.0)
+- [ ] Higher confidence correlates with higher precision (monotonic)
+- [ ] Optional `--auto-accept-threshold` flag in validation mode
+
+**References:**
+- [docs/qa/ner-accuracy-report.md](qa/ner-accuracy-report.md) — Confidence Score Analysis
+
+---
+
 #### FE-010: French Documentation Translation 📅 PLANNED FOR v1.1
 **Source:** PM session (2026-02-08)
 **Description:** Translate all user-facing documentation into French to serve the primary target audience (French-speaking researchers, HR professionals, compliance officers)
@@ -396,13 +468,16 @@ Press Enter to continue...
 ### v1.1 (Post-MVP)
 
 **Roadmap Items:**
-- Fine-tuned spaCy model (target: 70-85% F1 accuracy)
-- Optional `--no-validate` flag for high-confidence workflows
+- Fine-tuned spaCy model (target: 70-85% F1 accuracy) — Story 4.4 confirmed current F1=29.74%, consider CamemBERT/FlauBERT as alternatives
+- Optional `--no-validate` flag for high-confidence workflows (requires FE-013 confidence calibration first)
 - Additional language support (English, Spanish, German)
 - PDF/DOCX format support
 
 **Planned Backlog Items:**
 - FE-010: French documentation translation (README, install guide, CLI help, user guide)
+- FE-011: Regex pattern expansion — Last/First format, ORG suffixes, LOCATION dictionary (from Story 4.4)
+- FE-012: Ground-truth annotation quality cleanup (from Story 4.4)
+- FE-013: Confidence score calibration layer (from Story 4.4)
 
 **Potential Backlog Items:**
 - FE-003: Performance regression tests (if not added in Epic 2-3)
@@ -448,7 +523,7 @@ When adding items from future stories:
 **Backlog Maintained By:** Sarah (Product Owner)
 **Review Cadence:** End of each epic
 **Last Review:** 2026-02-07 (Epic 4 gap analysis — all backlog items assigned)
-**Last Update:** 2026-02-07 (Assigned TD-002 → 4.6, TD-004 → 4.3, FE-006 → 4.6, MON-001/3/4 → 4.4, MON-002/5 → 4.5)
+**Last Update:** 2026-02-08 (Added FE-011/012/013 from Story 4.4 accuracy findings; updated v1.1 roadmap)
 **Next Review:** After Story 4.7 completion (launch readiness)
 
 ---
