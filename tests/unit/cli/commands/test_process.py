@@ -70,7 +70,7 @@ class TestProcessConfigIntegration:
     """Tests for process command configuration file integration (Story 3.3.3)."""
 
     def test_uses_config_file_theme(
-        self, tmp_path: Path, monkeypatch: "pytest.MonkeyPatch"
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         """Test process command uses theme from config file when not specified on CLI."""
         # Create project directory with config file
@@ -95,12 +95,14 @@ pseudonymization:
         monkeypatch.chdir(project_dir)
         monkeypatch.setattr(Path, "home", lambda: home_dir)
 
-        with patch(
-            "gdpr_pseudonymizer.cli.commands.process.resolve_passphrase"
-        ) as mock_passphrase, patch(
-            "gdpr_pseudonymizer.cli.commands.process.DocumentProcessor"
-        ) as mock_processor, patch(
-            "gdpr_pseudonymizer.cli.commands.process.init_database"
+        with (
+            patch(
+                "gdpr_pseudonymizer.cli.commands.process.resolve_passphrase"
+            ) as mock_passphrase,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.process.DocumentProcessor"
+            ) as mock_processor,
+            patch("gdpr_pseudonymizer.cli.commands.process.init_database"),
         ):
             mock_passphrase.return_value = "testpassphrase123!"
 
@@ -127,7 +129,7 @@ pseudonymization:
         assert call_kwargs[1]["theme"] == "star_wars"
 
     def test_uses_config_file_model(
-        self, tmp_path: Path, monkeypatch: "pytest.MonkeyPatch"
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         """Test process command uses model from config file when not specified on CLI."""
         # Create project directory with config file
@@ -152,12 +154,14 @@ pseudonymization:
         monkeypatch.chdir(project_dir)
         monkeypatch.setattr(Path, "home", lambda: home_dir)
 
-        with patch(
-            "gdpr_pseudonymizer.cli.commands.process.resolve_passphrase"
-        ) as mock_passphrase, patch(
-            "gdpr_pseudonymizer.cli.commands.process.DocumentProcessor"
-        ) as mock_processor, patch(
-            "gdpr_pseudonymizer.cli.commands.process.init_database"
+        with (
+            patch(
+                "gdpr_pseudonymizer.cli.commands.process.resolve_passphrase"
+            ) as mock_passphrase,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.process.DocumentProcessor"
+            ) as mock_processor,
+            patch("gdpr_pseudonymizer.cli.commands.process.init_database"),
         ):
             mock_passphrase.return_value = "testpassphrase123!"
 
@@ -184,7 +188,7 @@ pseudonymization:
         assert call_kwargs[1]["model_name"] == "spacy"
 
     def test_uses_config_file_db_path(
-        self, tmp_path: Path, monkeypatch: "pytest.MonkeyPatch"
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         """Test process command uses db_path from config file when not specified on CLI."""
         # Create project directory with config file
@@ -209,12 +213,14 @@ database:
         monkeypatch.chdir(project_dir)
         monkeypatch.setattr(Path, "home", lambda: home_dir)
 
-        with patch(
-            "gdpr_pseudonymizer.cli.commands.process.resolve_passphrase"
-        ) as mock_passphrase, patch(
-            "gdpr_pseudonymizer.cli.commands.process.DocumentProcessor"
-        ) as mock_processor, patch(
-            "gdpr_pseudonymizer.cli.commands.process.init_database"
+        with (
+            patch(
+                "gdpr_pseudonymizer.cli.commands.process.resolve_passphrase"
+            ) as mock_passphrase,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.process.DocumentProcessor"
+            ) as mock_processor,
+            patch("gdpr_pseudonymizer.cli.commands.process.init_database"),
         ):
             mock_passphrase.return_value = "testpassphrase123!"
 
@@ -241,7 +247,7 @@ database:
         assert call_kwargs[1]["db_path"] == "custom_db.db"
 
     def test_cli_flag_overrides_config_theme(
-        self, tmp_path: Path, monkeypatch: "pytest.MonkeyPatch"
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         """Test CLI --theme flag overrides config file value."""
         # Create project directory with config file
@@ -266,12 +272,14 @@ pseudonymization:
         monkeypatch.chdir(project_dir)
         monkeypatch.setattr(Path, "home", lambda: home_dir)
 
-        with patch(
-            "gdpr_pseudonymizer.cli.commands.process.resolve_passphrase"
-        ) as mock_passphrase, patch(
-            "gdpr_pseudonymizer.cli.commands.process.DocumentProcessor"
-        ) as mock_processor, patch(
-            "gdpr_pseudonymizer.cli.commands.process.init_database"
+        with (
+            patch(
+                "gdpr_pseudonymizer.cli.commands.process.resolve_passphrase"
+            ) as mock_passphrase,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.process.DocumentProcessor"
+            ) as mock_processor,
+            patch("gdpr_pseudonymizer.cli.commands.process.init_database"),
         ):
             mock_passphrase.return_value = "testpassphrase123!"
 
@@ -299,7 +307,7 @@ pseudonymization:
         assert call_kwargs[1]["theme"] == "lotr"
 
     def test_cli_flag_overrides_config_db_path(
-        self, tmp_path: Path, monkeypatch: "pytest.MonkeyPatch"
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         """Test CLI --db flag overrides config file value."""
         # Create project directory with config file
@@ -324,12 +332,14 @@ database:
         monkeypatch.chdir(project_dir)
         monkeypatch.setattr(Path, "home", lambda: home_dir)
 
-        with patch(
-            "gdpr_pseudonymizer.cli.commands.process.resolve_passphrase"
-        ) as mock_passphrase, patch(
-            "gdpr_pseudonymizer.cli.commands.process.DocumentProcessor"
-        ) as mock_processor, patch(
-            "gdpr_pseudonymizer.cli.commands.process.init_database"
+        with (
+            patch(
+                "gdpr_pseudonymizer.cli.commands.process.resolve_passphrase"
+            ) as mock_passphrase,
+            patch(
+                "gdpr_pseudonymizer.cli.commands.process.DocumentProcessor"
+            ) as mock_processor,
+            patch("gdpr_pseudonymizer.cli.commands.process.init_database"),
         ):
             mock_passphrase.return_value = "testpassphrase123!"
 

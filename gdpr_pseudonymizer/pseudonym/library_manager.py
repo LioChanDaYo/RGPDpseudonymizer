@@ -506,9 +506,9 @@ class LibraryBasedPseudonymManager(PseudonymManager):
             if not is_collision:
                 # No collision - safe to use this pseudonym component
                 if real_first_name:
-                    self._component_mappings[
-                        (real_first_name, "first_name")
-                    ] = candidate
+                    self._component_mappings[(real_first_name, "first_name")] = (
+                        candidate
+                    )
                 return candidate
 
         # Failed to find collision-free component after max attempts

@@ -96,7 +96,7 @@ class TestGetConfigWithSources:
     """Tests for _get_config_with_sources function."""
 
     def test_returns_defaults_when_no_files(
-        self, tmp_path: Path, monkeypatch: "pytest.MonkeyPatch"
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         """Test that defaults are returned when no config files exist."""
         # Empty directories with no config files
@@ -121,7 +121,7 @@ class TestGetConfigWithSources:
         assert sources["batch.workers"] == "default"
 
     def test_tracks_home_config_source(
-        self, tmp_path: Path, monkeypatch: "pytest.MonkeyPatch"
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         """Test that home config values are tracked as 'home' source."""
         # Create home config
@@ -150,7 +150,7 @@ pseudonymization:
         assert sources["database.path"] == "default"
 
     def test_tracks_project_config_source(
-        self, tmp_path: Path, monkeypatch: "pytest.MonkeyPatch"
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         """Test that project config values are tracked as 'project' source."""
         # Create project config
@@ -177,7 +177,7 @@ batch:
         assert sources["batch.workers"] == "project"
 
     def test_project_overrides_home(
-        self, tmp_path: Path, monkeypatch: "pytest.MonkeyPatch"
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         """Test that project config overrides home config."""
         # Create home config
@@ -216,7 +216,7 @@ class TestConfigShowCommand:
     """Tests for config show command."""
 
     def test_displays_effective_configuration(
-        self, tmp_path: Path, monkeypatch: "pytest.MonkeyPatch"
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         """Test that command displays effective configuration."""
         # Empty directories
@@ -239,7 +239,7 @@ class TestConfigShowCommand:
         assert "logging.level" in output
 
     def test_displays_source_annotations(
-        self, tmp_path: Path, monkeypatch: "pytest.MonkeyPatch"
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         """Test that command displays source annotations."""
         # Empty directories
@@ -258,7 +258,7 @@ class TestConfigShowCommand:
         assert "[default]" in output
 
     def test_displays_config_files_status(
-        self, tmp_path: Path, monkeypatch: "pytest.MonkeyPatch"
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         """Test that command displays config files status."""
         # Empty directories
@@ -278,7 +278,7 @@ class TestConfigShowCommand:
         assert "not found" in output
 
     def test_displays_loaded_config_file(
-        self, tmp_path: Path, monkeypatch: "pytest.MonkeyPatch"
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         """Test that loaded config files are shown as loaded."""
         # Create project config
@@ -326,7 +326,7 @@ class TestConfigInit:
     """Tests for config --init functionality."""
 
     def test_init_creates_config_file(
-        self, tmp_path: Path, monkeypatch: "pytest.MonkeyPatch"
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         """Test that --init creates a config file in current directory."""
         monkeypatch.chdir(tmp_path)
@@ -341,7 +341,7 @@ class TestConfigInit:
         assert "theme: neutral" in content
 
     def test_init_creates_valid_yaml_template(
-        self, tmp_path: Path, monkeypatch: "pytest.MonkeyPatch"
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         """Test that generated template contains all config sections."""
         monkeypatch.chdir(tmp_path)
@@ -362,7 +362,7 @@ class TestConfigInit:
         assert "level: INFO" in content
 
     def test_init_refuses_overwrite_without_force(
-        self, tmp_path: Path, monkeypatch: "pytest.MonkeyPatch"
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         """Test that --init won't overwrite existing config without --force."""
         monkeypatch.chdir(tmp_path)
@@ -381,7 +381,7 @@ class TestConfigInit:
         assert existing_config.read_text() == "existing: config\n"
 
     def test_init_overwrites_with_force(
-        self, tmp_path: Path, monkeypatch: "pytest.MonkeyPatch"
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         """Test that --init --force overwrites existing config."""
         monkeypatch.chdir(tmp_path)
@@ -398,7 +398,7 @@ class TestConfigInit:
         assert "pseudonymization:" in content
 
     def test_init_displays_success_message(
-        self, tmp_path: Path, monkeypatch: "pytest.MonkeyPatch"
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         """Test that --init displays helpful success message."""
         monkeypatch.chdir(tmp_path)

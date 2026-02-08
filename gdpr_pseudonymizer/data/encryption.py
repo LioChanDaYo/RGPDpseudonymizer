@@ -15,7 +15,6 @@ from __future__ import annotations
 
 import base64
 import os
-from typing import Optional
 
 from cryptography.hazmat.primitives.ciphers.aead import AESSIV
 from cryptography.hazmat.primitives.hashes import SHA256
@@ -81,7 +80,7 @@ class EncryptionService:
         # Initialize AES-256-SIV cipher
         self._cipher = AESSIV(key)
 
-    def encrypt(self, plaintext: Optional[str]) -> Optional[str]:
+    def encrypt(self, plaintext: str | None) -> str | None:
         """Encrypt plaintext string using AES-256-SIV.
 
         Deterministic encryption: same plaintext always produces same ciphertext.
@@ -111,7 +110,7 @@ class EncryptionService:
         # Return base64-encoded for safe string storage
         return base64.b64encode(ciphertext).decode("ascii")
 
-    def decrypt(self, ciphertext: Optional[str]) -> Optional[str]:
+    def decrypt(self, ciphertext: str | None) -> str | None:
         """Decrypt ciphertext string using AES-256-SIV.
 
         SIV mode provides authentication - decryption fails if ciphertext tampered.

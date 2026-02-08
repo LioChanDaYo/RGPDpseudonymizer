@@ -2,7 +2,6 @@
 Unit tests for NameDictionary
 """
 
-
 import pytest
 
 from gdpr_pseudonymizer.nlp.name_dictionary import NameDictionary

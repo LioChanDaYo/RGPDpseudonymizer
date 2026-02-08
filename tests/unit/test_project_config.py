@@ -96,7 +96,7 @@ def test_pyproject_has_dev_dependencies():
 
 
 def test_python_version_compatibility():
-    """Test that project supports Python 3.9+."""
+    """Test that project supports Python 3.10+."""
     pyproject_path = Path(__file__).parent.parent.parent / "pyproject.toml"
 
     with open(pyproject_path, "rb") as f:
@@ -104,12 +104,12 @@ def test_python_version_compatibility():
 
     python_version = config["tool"]["poetry"]["dependencies"]["python"]
 
-    # Should be ^3.9 or similar
-    assert "3.9" in python_version, "Project must support Python 3.9+"
+    # Should be >=3.10 or similar
+    assert "3.10" in python_version, "Project must support Python 3.10+"
 
     # Verify current Python version is supported
     current_version = sys.version_info
-    assert current_version >= (3, 9), f"Python 3.9+ required, got {current_version}"
+    assert current_version >= (3, 10), f"Python 3.10+ required, got {current_version}"
 
 
 def test_black_configuration():
@@ -122,7 +122,7 @@ def test_black_configuration():
     black_config = config["tool"]["black"]
 
     assert black_config["line-length"] == 88
-    assert "py39" in black_config["target-version"]
+    assert "py310" in black_config["target-version"]
 
 
 def test_ruff_configuration():
@@ -136,7 +136,7 @@ def test_ruff_configuration():
     ruff_lint_config = ruff_config["lint"]
 
     assert ruff_config["line-length"] == 88
-    assert ruff_config["target-version"] == "py39"
+    assert ruff_config["target-version"] == "py310"
     assert "F" in ruff_lint_config["select"]  # Pyflakes
     assert "E" in ruff_lint_config["select"]  # pycodestyle errors
 
@@ -163,7 +163,7 @@ def test_mypy_configuration():
 
     mypy_config = config["tool"]["mypy"]
 
-    assert mypy_config["python_version"] == "3.9"
+    assert mypy_config["python_version"] == "3.10"
     assert mypy_config["strict"] is True
 
 

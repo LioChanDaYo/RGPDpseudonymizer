@@ -15,7 +15,6 @@ from __future__ import annotations
 import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from typing import Optional
 
 from gdpr_pseudonymizer.data.database import DatabaseSession, open_database
 from gdpr_pseudonymizer.data.models import Entity, Operation
@@ -61,7 +60,7 @@ class ProcessingResult:
     entities_new: int
     entities_reused: int
     processing_time_seconds: float
-    error_message: Optional[str] = None
+    error_message: str | None = None
 
 
 class DocumentProcessor:
@@ -107,10 +106,10 @@ class DocumentProcessor:
         self.model_name = model_name
 
         # Database session will be created per operation (context manager pattern)
-        self._db_session: Optional[DatabaseSession] = None
+        self._db_session: DatabaseSession | None = None
 
         # NLP detector (initialized lazily)
-        self._detector: Optional[HybridDetector] = None
+        self._detector: HybridDetector | None = None
 
     def _get_detector(self) -> HybridDetector:
         """Get or initialize hybrid entity detector.
@@ -203,9 +202,9 @@ class DocumentProcessor:
 
                 # Create pseudonym assigner for validation workflow preview
                 # Local cache for preview-only pseudonyms (ensures consistent component reuse)
-                preview_cache: dict[
-                    str, str
-                ] = {}  # entity_text_stripped -> pseudonym_full
+                preview_cache: dict[str, str] = (
+                    {}
+                )  # entity_text_stripped -> pseudonym_full
 
                 def pseudonym_assigner(entity: DetectedEntity) -> str:
                     """Generate pseudonym preview for validation UI.
@@ -365,9 +364,9 @@ class DocumentProcessor:
                 )
                 replacements: list[tuple[int, int, str]] = []  # (start, end, pseudonym)
                 new_entities: list[Entity] = []  # Collect new entities for batch save
-                entity_cache: dict[
-                    str, str
-                ] = {}  # In-memory cache for this document (full_name -> pseudonym)
+                entity_cache: dict[str, str] = (
+                    {}
+                )  # In-memory cache for this document (full_name -> pseudonym)
 
                 for entity in validated_entities:
                     logger.debug(
@@ -407,9 +406,9 @@ class DocumentProcessor:
                         if existing_entity:
                             # Step 4a: Reuse existing pseudonym from database
                             pseudonym = existing_entity.pseudonym_full
-                            entity_cache[
-                                entity_text_stripped
-                            ] = pseudonym  # Cache for subsequent occurrences
+                            entity_cache[entity_text_stripped] = (
+                                pseudonym  # Cache for subsequent occurrences
+                            )
                             entities_reused += 1
                             logger.debug(
                                 "entity_reused",
@@ -486,9 +485,9 @@ class DocumentProcessor:
                                     gender=None,  # Could be extracted from NER metadata if available
                                 )
                                 pseudonym = assignment.pseudonym_full
-                                entity_cache[
-                                    entity_text_stripped
-                                ] = pseudonym  # Cache for subsequent occurrences
+                                entity_cache[entity_text_stripped] = (
+                                    pseudonym  # Cache for subsequent occurrences
+                                )
 
                                 # CRITICAL FIX: Parse original entity text to extract first/last name components
                                 # for PERSON entities. These are the ORIGINAL names that will be encrypted,
@@ -516,9 +515,11 @@ class DocumentProcessor:
                                     pseudonym_full=assignment.pseudonym_full,
                                     first_seen_timestamp=datetime.now(timezone.utc),
                                     gender=None,
-                                    confidence_score=entity.confidence
-                                    if hasattr(entity, "confidence")
-                                    else None,
+                                    confidence_score=(
+                                        entity.confidence
+                                        if hasattr(entity, "confidence")
+                                        else None
+                                    ),
                                     theme=self.theme,
                                     is_ambiguous=assignment.is_ambiguous,
                                     ambiguity_reason=assignment.ambiguity_reason,

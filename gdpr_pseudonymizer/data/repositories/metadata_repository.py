@@ -9,8 +9,6 @@ Provides key-value storage for:
 
 from __future__ import annotations
 
-from typing import Optional
-
 from sqlalchemy.orm import Session
 
 from gdpr_pseudonymizer.data.models import Metadata
@@ -37,7 +35,7 @@ class MetadataRepository:
         """
         self._session = session
 
-    def get(self, key: str) -> Optional[str]:
+    def get(self, key: str) -> str | None:
         """Retrieve value for given key.
 
         Args:
@@ -105,7 +103,7 @@ class MetadataRepository:
         key = f"file:{file_path}:hash"
         self.set(key, file_hash)
 
-    def get_file_hash(self, file_path: str) -> Optional[str]:
+    def get_file_hash(self, file_path: str) -> str | None:
         """Retrieve stored hash for file.
 
         Args:
@@ -134,7 +132,7 @@ class MetadataRepository:
         key = f"file:{file_path}:processed"
         self.set(key, timestamp)
 
-    def get_file_processed(self, file_path: str) -> Optional[str]:
+    def get_file_processed(self, file_path: str) -> str | None:
         """Retrieve last processed timestamp for file.
 
         Args:

@@ -27,7 +27,7 @@ class SpaCyDetector(EntityDetector):
 
     def __init__(self) -> None:
         """Initialize spaCy detector without loading model."""
-        self._nlp: "Language" | None = None
+        self._nlp: Language | None = None
         self._model_name: str | None = None
 
     def load_model(self, model_name: str = "fr_core_news_lg") -> None:
