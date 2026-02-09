@@ -64,7 +64,7 @@ class BatchResult:
 
 
 def _process_single_document_worker(
-    args: tuple[str, str, str, str, str, str],
+    args: tuple[str, str, str, str, str, str, Optional[str]],
 ) -> dict[str, Any]:
     """Worker function for parallel batch processing.
 
@@ -72,7 +72,9 @@ def _process_single_document_worker(
     SQLite connection, spaCy model, and encryption service.
 
     Args:
-        args: Tuple of (input_path, output_path, db_path, passphrase, theme, model)
+        args: Tuple of (input_path, output_path, db_path, passphrase, theme, model,
+              entity_types_csv). entity_types_csv is a comma-separated string of
+              entity types to filter, or None for all types.
 
     Returns:
         Dictionary with processing results:
@@ -84,7 +86,12 @@ def _process_single_document_worker(
         - processing_time: float (if success)
         - error: str (if failure)
     """
-    input_path, output_path, db_path, passphrase, theme, model = args
+    input_path, output_path, db_path, passphrase, theme, model, entity_types_csv = args
+
+    # Reconstruct entity_type_filter from CSV string (sets aren't picklable for multiprocessing)
+    entity_type_filter: set[str] | None = None
+    if entity_types_csv is not None:
+        entity_type_filter = set(entity_types_csv.split(","))
 
     try:
         # Each worker initializes its own DocumentProcessor
@@ -97,7 +104,10 @@ def _process_single_document_worker(
 
         # Process document with validation SKIPPED (parallel mode has no stdin)
         result = processor.process_document(
-            input_path, output_path, skip_validation=True
+            input_path,
+            output_path,
+            skip_validation=True,
+            entity_type_filter=entity_type_filter,
         )
 
         return {
@@ -129,6 +139,7 @@ def _process_batch_parallel(
     theme: str,
     model: str,
     num_workers: int,
+    entity_type_filter: Optional[set[str]] = None,
 ) -> BatchResult:
     """Process documents in parallel using multiprocessing pool.
 
@@ -140,6 +151,7 @@ def _process_batch_parallel(
         theme: Pseudonym library theme
         model: NLP model name
         num_workers: Number of worker processes
+        entity_type_filter: Optional set of entity types to keep
 
     Returns:
         BatchResult with processing statistics
@@ -159,7 +171,12 @@ def _process_batch_parallel(
     )
 
     # Prepare arguments for each file
-    args_list: list[tuple[str, str, str, str, str, str]] = []
+    # Convert set to CSV string for pickling across process boundaries
+    entity_types_csv: Optional[str] = None
+    if entity_type_filter is not None:
+        entity_types_csv = ",".join(sorted(entity_type_filter))
+
+    args_list: list[tuple[str, str, str, str, str, str, Optional[str]]] = []
     for file_path in files:
         if output_dir:
             out_file = output_dir / f"{file_path.stem}_pseudonymized{file_path.suffix}"
@@ -168,7 +185,15 @@ def _process_batch_parallel(
                 file_path.parent / f"{file_path.stem}_pseudonymized{file_path.suffix}"
             )
         args_list.append(
-            (str(file_path), str(out_file), db_path, passphrase, theme, model)
+            (
+                str(file_path),
+                str(out_file),
+                db_path,
+                passphrase,
+                theme,
+                model,
+                entity_types_csv,
+            )
         )
 
     batch_result = BatchResult(total_files=len(files))
@@ -334,6 +359,11 @@ def batch_command(
         max=8,
         help="Number of parallel workers (1=sequential with validation, 2-8=parallel without validation). Default from config.",
     ),
+    entity_types: Optional[str] = typer.Option(
+        None,
+        "--entity-types",
+        help="Filter entity types to process (comma-separated). Options: PERSON, LOCATION, ORG. Default: all types.",
+    ),
 ) -> None:
     """Process multiple documents with pseudonymization.
 
@@ -383,6 +413,27 @@ def batch_command(
             if output_dir is not None
             else (Path(config.batch.output_dir) if config.batch.output_dir else None)
         )
+
+        # Parse entity type filter
+        entity_type_filter: set[str] | None = None
+        if entity_types is not None:
+            valid_types = {"PERSON", "LOCATION", "ORG"}
+            parsed = {t.strip().upper() for t in entity_types.split(",")}
+            invalid = parsed - valid_types
+            if invalid:
+                console.print(
+                    f"[yellow]Warning: Unknown entity type(s): {', '.join(sorted(invalid))}. "
+                    f"Valid types: {', '.join(sorted(valid_types))}[/yellow]"
+                )
+            entity_type_filter = parsed & valid_types
+            if not entity_type_filter:
+                console.print(
+                    "[bold red]Error: No valid entity types specified.[/bold red]"
+                )
+                sys.exit(1)
+            console.print(
+                f"[dim]Filtering entities: {', '.join(sorted(entity_type_filter))}[/dim]"
+            )
 
         # Collect files to process
         files = collect_files(input_path, recursive)
@@ -461,6 +512,7 @@ def batch_command(
                 theme=effective_theme,
                 model=effective_model,
                 num_workers=effective_workers,
+                entity_type_filter=entity_type_filter,
             )
         else:
             # SEQUENTIAL MODE: With interactive validation
@@ -571,6 +623,7 @@ def batch_command(
                         result = processor.process_document(
                             input_path=str(file_path),
                             output_path=str(output_file),
+                            entity_type_filter=entity_type_filter,
                         )
 
                         # Restart live display for progress updates

@@ -108,6 +108,7 @@ gdpr-pseudo process INPUT_FILE [OPTIONS]
 | `--model TEXT` | `-m` | `spacy` | NLP model name |
 | `--db PATH` | | `mappings.db` | Database file path |
 | `--passphrase TEXT` | `-p` | (prompt) | Database passphrase |
+| `--entity-types TEXT` | | (all) | Filter entity types to process (comma-separated: PERSON,LOCATION,ORG). Only specified types will be detected and pseudonymized. |
 
 **Examples:**
 ```bash
@@ -122,6 +123,9 @@ gdpr-pseudo process input.txt --theme star_wars
 
 # Process with custom database
 gdpr-pseudo process input.txt --db project.db
+
+# Process only PERSON and LOCATION entities (skip ORG)
+gdpr-pseudo process input.txt --entity-types PERSON,LOCATION
 ```
 
 ---
@@ -154,6 +158,7 @@ gdpr-pseudo batch INPUT_PATH [OPTIONS]
 | `--continue-on-error` | | Yes | Continue processing on individual file errors |
 | `--stop-on-error` | | | Stop on first error |
 | `--workers` | `-w` | 1 | Number of parallel workers (1-8). Use 1 for interactive validation, 2-8 for parallel processing without validation |
+| `--entity-types TEXT` | | (all) | Filter entity types to process (comma-separated: PERSON,LOCATION,ORG). Only specified types will be detected and pseudonymized. |
 
 **Examples:**
 ```bash
@@ -174,6 +179,12 @@ gdpr-pseudo batch ./documents/ --workers 4
 
 # Sequential with validation (default)
 gdpr-pseudo batch ./documents/ --workers 1
+
+# Process only PERSON entities across all documents
+gdpr-pseudo batch ./documents/ --entity-types PERSON
+
+# Process PERSON and ORG entities in parallel
+gdpr-pseudo batch ./documents/ --entity-types PERSON,ORG --workers 4
 ```
 
 ---

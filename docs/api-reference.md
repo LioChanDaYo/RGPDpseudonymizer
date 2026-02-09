@@ -39,7 +39,8 @@ processor = DocumentProcessor(
 result = processor.process_document(
     input_path="input.txt",
     output_path="output.txt",
-    skip_validation=False    # Set True for programmatic use (no UI)
+    skip_validation=False,    # Set True for programmatic use (no UI)
+    entity_type_filter=None   # Optional: set of types e.g. {"PERSON", "LOCATION"}
 )
 ```
 
@@ -146,6 +147,36 @@ names.load()
 names.is_first_name("Marie")  # True
 names.is_last_name("Dubois")  # True
 ```
+
+### EntityGrouping (`entity_grouping` module)
+
+Groups variant forms of the same real-world entity into single validation items, reducing user validation fatigue. For example, "Marie Dubois", "Pr. Dubois", and "Dubois" are grouped as one item.
+
+```python
+from gdpr_pseudonymizer.nlp.entity_grouping import group_entity_variants
+
+groups = group_entity_variants(detected_entities)
+for canonical, occurrences, variant_texts in groups:
+    print(f"{canonical.text} (appears as: {variant_texts})")
+```
+
+**Return type:** `list[tuple[DetectedEntity, list[DetectedEntity], set[str]]]`
+
+Each tuple contains:
+
+| Element | Type | Description |
+|---------|------|-------------|
+| `canonical` | `DetectedEntity` | Representative entity (longest text form) |
+| `occurrences` | `list[DetectedEntity]` | All entity instances in the group |
+| `variant_texts` | `set[str]` | Unique text forms in the group |
+
+**Grouping rules by entity type:**
+
+| Type | Rule |
+|------|------|
+| `PERSON` | Title stripping + surname matching. "Marie Dubois" and "Dubois" group together. Different first names stay separate ("Marie Dubois" vs "Jean Dubois"). Ambiguous single-word surnames matching multiple people are isolated. |
+| `LOCATION` | French preposition stripping. "a Lyon" and "Lyon" group together. |
+| `ORG` | Case-insensitive matching. "ACME Corp" and "acme corp" group together. |
 
 ---
 
@@ -493,7 +524,8 @@ processor = DocumentProcessor(
 result = processor.process_document(
     input_path="interview.txt",
     output_path="interview_pseudonymized.txt",
-    skip_validation=True
+    skip_validation=True,
+    entity_type_filter={"PERSON", "LOCATION"}  # Optional: only process these types
 )
 
 if result.success:

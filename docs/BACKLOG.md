@@ -1,6 +1,6 @@
 # Product Backlog - GDPR Pseudonymizer
 
-**Last Updated:** 2026-02-08
+**Last Updated:** 2026-02-09
 **Epic 1 Status:** ✅ Complete (9/9 stories)
 **Epic 2 Status:** ✅ Complete
 **Epic 3 Status:** ✅ Complete
@@ -221,28 +221,14 @@ Press Enter to continue...
 
 ### MEDIUM Priority
 
-#### FE-006: Expand Organization Pseudonym Library ✅ ASSIGNED TO EPIC 4
+#### FE-006: Expand Organization Pseudonym Library ✅ COMPLETED (Story 4.6)
 **Source:** Story 3.0 - Batch processing testing (2026-02-02)
 **Description:** Expand neutral theme organization library from 35 to 150-200 entries to support larger document corpora without exhausting the library and falling back to generic naming (Org-001, etc.)
-**Impact:** Batch processing of 15+ documents exhausts the 35-entry organization library quickly
-**Effort:** Medium (2-4 hours - research + data entry)
-**Target:** Epic 4 - Story 4.6 AC9 (Beta Feedback Integration & Bug Fixes)
-**Epic 4 Assignment:** Story 4.6 AC9: Organization pseudonym library expansion
-**Rationale:** Known quality gap impacting batch users; must resolve before launch
+**Status:** ✅ **COMPLETED** - Implemented in Story 4.6 Task 4.6.6 (2026-02-09)
+**Outcome:** Expanded neutral.json from 35 to 196 ORG entries (101 companies, 50 agencies, 45 institutions). Location library (80 entries) evaluated as sufficient. Themed libraries (35 each) adequate for their design intent.
 **References:**
 - [data/pseudonyms/neutral.json](../data/pseudonyms/neutral.json)
-- [docs/stories/3.0.location-org-pseudonym-libraries.story.md](stories/3.0.location-org-pseudonym-libraries.story.md#future-enhancements)
-
-**Current State:**
-- 35 organizations (20 companies + 10 agencies + 5 institutions)
-- Fallback to Org-001, Org-002, etc. when exhausted (fixed 2026-02-02)
-
-**Recommended Expansion:**
-- 80-100 companies (diverse sectors: tech, manufacturing, finance, retail, healthcare)
-- 40-50 agencies (government agencies, NGOs, research bodies)
-- 30-50 institutions (universities, hospitals, professional associations)
-
-**Note:** Location library (80 entries) may also need expansion for very large corpora.
+- [docs/stories/4.6.beta-feedback-integration-bug-fixes.story.md](stories/4.6.beta-feedback-integration-bug-fixes.story.md)
 
 ---
 
@@ -315,6 +301,26 @@ Press Enter to continue...
 
 **References:**
 - [docs/qa/ner-accuracy-report.md](qa/ner-accuracy-report.md) — Confidence Score Analysis
+
+---
+
+#### FE-014: Extended Coreference Resolution 📅 POST-MVP
+**Source:** Story 4.6 FB-001 (alpha feedback — entity variant grouping)
+**Description:** Extend entity variant grouping beyond heuristic suffix/prefix matching to full NLP coreference resolution (pronoun resolution, contextual entity linking)
+**Impact:** Medium — current heuristic grouping handles common cases (title variants, last-name-only references) but misses pronoun references ("il", "elle") and complex coreference chains
+**Effort:** High (1-2 weeks — requires coreference model integration)
+**Target:** v1.1+ (dependent on NLP model improvements)
+**Rationale:** Story 4.6 implemented basic variant grouping (suffix matching, title stripping, preposition stripping). Full coreference resolution requires a dedicated NLP component (e.g., neuralcoref, crosslingual-coreference) which is out of scope for MVP.
+
+**Acceptance Criteria:**
+- [ ] Pronoun resolution for French (il/elle → nearest PERSON entity)
+- [ ] Cross-sentence entity linking (contextual coreference)
+- [ ] Integration with validation UI (grouped entities include pronoun references)
+- [ ] No regression in current variant grouping behavior
+
+**References:**
+- [gdpr_pseudonymizer/nlp/entity_grouping.py](../gdpr_pseudonymizer/nlp/entity_grouping.py) — current heuristic implementation
+- [docs/qa/alpha-feedback-summary.md](qa/alpha-feedback-summary.md) — FB-001 original feedback
 
 ---
 
@@ -399,12 +405,14 @@ Press Enter to continue...
 3. Run full test suite on target version
 4. If passing: Update CI matrix, pyproject.toml, and documentation (see TD-004)
 
-**Current Status (2026-02-04):**
+**Current Status (2026-02-09):**
 | Python | spaCy Status | CI Status | Action Needed |
 |--------|--------------|-----------|---------------|
-| 3.12 | ⚠️ Unverified | ❌ Not in matrix | Verify & add |
-| 3.13 | ⚠️ Unverified | ❌ Not in matrix | Verify & add |
-| 3.14 | ❌ Not released | N/A | Monitor |
+| 3.12 | ✅ Verified | ✅ In matrix | None |
+| 3.13 | ❌ Blocked (thinc lacks cp313 wheels) | ❌ Not in matrix | Monitor thinc releases |
+| 3.14 | ❌ Pre-release | N/A | Monitor |
+
+**Story 4.6 Finding (2026-02-09):** Python 3.13 blocked by `thinc` (spaCy's ML backend). Neither thinc 8.3.2 (locked) nor thinc 9.1.1 (latest) publishes cp313 wheels. Also blocked: `srsly` <2.5.0 and `numpy` <2.1.0 lack 3.13 wheels. Re-evaluate when thinc publishes 3.13 support.
 
 **References:**
 - spaCy releases: https://github.com/explosion/spaCy/releases
@@ -478,6 +486,7 @@ Press Enter to continue...
 - FE-011: Regex pattern expansion — Last/First format, ORG suffixes, LOCATION dictionary (from Story 4.4)
 - FE-012: Ground-truth annotation quality cleanup (from Story 4.4)
 - FE-013: Confidence score calibration layer (from Story 4.4)
+- FE-014: Extended coreference resolution — pronoun resolution, cross-sentence entity linking (from Story 4.6 FB-001)
 
 **Potential Backlog Items:**
 - FE-003: Performance regression tests (if not added in Epic 2-3)
@@ -523,7 +532,7 @@ When adding items from future stories:
 **Backlog Maintained By:** Sarah (Product Owner)
 **Review Cadence:** End of each epic
 **Last Review:** 2026-02-07 (Epic 4 gap analysis — all backlog items assigned)
-**Last Update:** 2026-02-08 (Added FE-011/012/013 from Story 4.4 accuracy findings; updated v1.1 roadmap)
+**Last Update:** 2026-02-09 (Story 4.6: FE-006 completed, FE-014 added, MON-005 Python 3.13 status updated, deferred items documented)
 **Next Review:** After Story 4.7 completion (launch readiness)
 
 ---

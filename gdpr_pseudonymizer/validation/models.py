@@ -12,24 +12,31 @@ from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 
 @dataclass
 class EntityGroup:
-    """Group of entities with same text and type.
+    """Group of entities with same text and type (including variant forms).
 
     Enables deduplication by grouping multiple occurrences of the same entity
     (e.g., 10 instances of "Marie Dubois" as PERSON) for single user validation.
+    Also supports variant grouping where different text forms of the same
+    real-world entity (e.g., "Marie Dubois", "Pr. Dubois", "Dubois") are
+    merged into a single validation item.
 
     Attributes:
-        unique_key: Tuple of (text, entity_type) identifying the group
-        occurrences: List of DetectedEntity instances with this text+type
+        unique_key: Tuple of (canonical_text, entity_type) identifying the group
+        occurrences: List of DetectedEntity instances across all variant forms
+        variant_texts: Set of unique text forms in this group
+        canonical_entity: The representative entity (longest/most complete form)
         current_context_index: Index for context cycling (0-based)
     """
 
     unique_key: tuple[str, str]
     occurrences: list[DetectedEntity] = field(default_factory=list)
+    variant_texts: set[str] = field(default_factory=set)
+    canonical_entity: DetectedEntity | None = None
     current_context_index: int = 0
 
     @property
     def text(self) -> str:
-        """Get entity text from unique key."""
+        """Get canonical entity text from unique key."""
         return self.unique_key[0]
 
     @property
@@ -42,8 +49,31 @@ class EntityGroup:
         """Get number of occurrences in this group."""
         return len(self.occurrences)
 
+    @property
+    def has_variants(self) -> bool:
+        """Whether this group contains multiple text forms."""
+        return len(self.variant_texts) > 1
+
+    @property
+    def non_canonical_variants(self) -> list[str]:
+        """Get variant texts excluding the canonical form."""
+        canonical = self.text
+        return sorted(v for v in self.variant_texts if v != canonical)
+
     def get_representative_entity(self) -> DetectedEntity:
-        """Get entity for current context (for cycling).
+        """Get canonical entity for display.
+
+        Returns the canonical entity (longest form) for primary display.
+
+        Returns:
+            Canonical entity if set, otherwise entity at current context index
+        """
+        if self.canonical_entity is not None:
+            return self.canonical_entity
+        return self.occurrences[self.current_context_index]
+
+    def get_current_context_entity(self) -> DetectedEntity:
+        """Get entity at current context index (for context snippet display).
 
         Returns:
             Entity at current context index
@@ -325,11 +355,11 @@ class ValidationSession:
         return validated + added_entities
 
     def get_entity_groups(self, entity_type: str | None = None) -> list[EntityGroup]:
-        """Get entities grouped by unique (text, entity_type).
+        """Get entities grouped by variant forms of the same real-world entity.
 
-        Deduplicates entities for validation UI by grouping identical entities
-        (same text and type) into single review items. Preserves position tracking
-        for all occurrences.
+        Uses variant-aware grouping to merge different text forms of the same
+        entity (e.g., "Marie Dubois" / "Pr. Dubois" / "Dubois") into single
+        review items. Falls back to exact-match grouping for unknown types.
 
         Args:
             entity_type: Filter by entity type (PERSON, LOCATION, ORG) or None for all
@@ -337,23 +367,27 @@ class ValidationSession:
         Returns:
             List of EntityGroup objects sorted by first occurrence position
         """
-        from collections import defaultdict
+        from gdpr_pseudonymizer.nlp.entity_grouping import group_entity_variants
 
-        # Group entities by (text, entity_type)
-        grouped: dict[tuple[str, str], list[DetectedEntity]] = defaultdict(list)
+        # Filter entities by type if requested
+        filtered_entities = [
+            e
+            for e in self.entities
+            if entity_type is None or e.entity_type == entity_type
+        ]
 
-        for entity in self.entities:
-            if entity_type is None or entity.entity_type == entity_type:
-                key = (entity.text, entity.entity_type)
-                grouped[key].append(entity)
+        # Use variant-aware grouping
+        variant_groups = group_entity_variants(filtered_entities)
 
-        # Convert to EntityGroup objects, sorted by first occurrence
+        # Convert to EntityGroup objects
         groups = [
             EntityGroup(
-                unique_key=key,
-                occurrences=sorted(occurrences, key=lambda e: e.start_pos),
+                unique_key=(canonical.text, canonical.entity_type),
+                occurrences=occurrences,
+                variant_texts=variant_texts,
+                canonical_entity=canonical,
             )
-            for key, occurrences in grouped.items()
+            for canonical, occurrences, variant_texts in variant_groups
         ]
 
         # Sort groups by position of first occurrence

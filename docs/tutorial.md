@@ -118,6 +118,25 @@ poetry run gdpr-pseudo stats --db project.db
 
 Shows entity counts, themes used, and processing history.
 
+### Filtering by Entity Type
+
+If you only need to pseudonymize certain entity types, use the `--entity-types` flag:
+
+```bash
+# Process only PERSON entities (skip LOCATION and ORG)
+poetry run gdpr-pseudo batch documents/ --db project.db --entity-types PERSON
+
+# Process PERSON and LOCATION entities (skip ORG)
+poetry run gdpr-pseudo batch documents/ --db project.db --entity-types PERSON,LOCATION
+```
+
+This is useful when:
+- You only need to anonymize people's names but want to keep real locations
+- You want to process entity types in separate passes for review efficiency
+- Your documents contain many irrelevant ORG detections you want to skip
+
+The `--entity-types` flag also works with the `process` command for single documents.
+
 ---
 
 ## Tutorial 3: Using Configuration Files
@@ -335,10 +354,22 @@ Proposed pseudonym: [Sophie Martin] (theme: neutral)
 |-----|--------|
 | `H` / `?` | Show help overlay (displays all shortcuts including batch operations) |
 
+### Entity Variant Grouping
+
+The validation UI automatically groups related entity forms into single validation items. For example, if a document contains "Marie Dubois", "Pr. Dubois", and "Dubois", these are shown as one item:
+
+```
+Entity: Marie Dubois
+Type: PERSON
+Also appears as: Pr. Dubois, Dubois
+```
+
+Accepting or rejecting this item applies the decision to all variant forms. This reduces validation fatigue when documents use multiple forms to refer to the same person (titles, surnames, abbreviations).
+
 ### Validation Workflow
 
 1. **Summary Screen:** See entity counts by type (PERSON, LOCATION, ORG)
-2. **Review Entities:** Go through each entity with context
+2. **Review Entities:** Go through each entity with context (variants grouped)
 3. **Make Decisions:** Accept, reject, edit, or change pseudonym
 4. **Final Confirmation:** Review summary of changes
 5. **Process Document:** Pseudonymization applied

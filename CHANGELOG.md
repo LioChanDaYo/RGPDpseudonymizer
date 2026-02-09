@@ -10,6 +10,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- ✅ **Beta Feedback Integration & Bug Fixes** (Story 4.6)
+  - **Entity variant grouping in validation UI** (FB-001): Groups related entity forms (e.g., "Marie Dubois", "Pr. Dubois", "Dubois") into a single validation item. Reduces redundant validation prompts. Shows "Also appears as:" for variant forms.
+  - **Selective entity type processing** (FB-003): New `--entity-types` CLI flag for both `process` and `batch` commands. Filter entities by type (e.g., `--entity-types PERSON,LOCATION`). Valid types: PERSON, LOCATION, ORG.
+  - **Expanded organization pseudonym library** (FE-006): Neutral theme expanded from 35 to 196 organization entries (101 companies, 50 agencies, 45 institutions). Supports batch processing of 50+ documents without library exhaustion.
+  - New backlog item FE-014 for extended coreference resolution (v1.1+)
+
+### Changed
+- 🔄 **Faster `--help` display** (FB-007): Refactored CLI to use lazy imports — heavy dependencies (spaCy, torch, SQLAlchemy, cryptography) only loaded when commands are invoked, not during `--help`. Import time reduced ~55%.
+- 🔄 **Python 3.13 CI evaluation** (FB-006): Evaluated and deferred — blocked by `thinc` (spaCy ML backend) lacking Python 3.13 wheels. CI matrix remains Python 3.10-3.12.
+
+### Fixed
+- 🐛 **Entity variant grouping bridging bug** (FB-001): Fixed Union-Find transitive bridging where a titled surname (e.g., "Mme Durand") could incorrectly merge two different people sharing the same family name (e.g., "M. Olivier Durand" and "Mme Alice Durand"). Ambiguous single-word names are now detected and isolated from Union-Find pairing.
+- 🐛 **`--entity-types` filter not applied in batch mode** (FB-003): Fixed `entity_type_filter` not being forwarded to `process_document()` in batch command — affected sequential mode, parallel worker, and parallel orchestrator call sites.
+- 🐛 **Deferred items documented**: FB-002 (French docs → FE-010 v1.1), FB-004 (DOCX/PDF → v1.1), FB-005 (GUI → v2.0), Python 3.14 (→ MON-005 monitoring)
+
+---
+
+- ✅ **Performance & Stability Validation** (Story 4.5)
+  - NFR validation suite with automated performance benchmarks
+  - All NFR targets PASS: NFR1 ~6s (<30s), NFR2 ~5min (<30min), NFR4 ~1GB (<8GB), NFR5 0.56s (<5s), NFR6 <1% (<10%)
+  - Monitoring baselines documented: `docs/qa/monitoring-baselines-4.5.md`
+  - Stress testing: 100-document batch, 10K+ word documents, concurrent processing
+
 - ✅ **NER Accuracy Comprehensive Validation** (Story 4.4)
   - 22-test automated accuracy validation suite (`tests/accuracy/`)
   - Validates hybrid detection pipeline against 25-document annotated corpus (1,855 entities)
@@ -84,7 +107,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 🤖 **AI detection: 40-50% accuracy** - Human validation ensures 100% coverage
 - 👤 **PERSON entities only have themed pseudonyms** - LOCATION and ORGANIZATION entities are detected and validated but not pseudonymized with themed names (Epic 3 planned feature - HIGH priority)
 - 🪟 **Windows:** spaCy access violations possible (use Linux/macOS/WSL if encountered)
-- 🐍 **Python 3.9-3.13 supported** - Python 3.14+ not supported due to dependency compatibility
+- 🐍 **Python 3.10-3.12 supported** - Python 3.13+ blocked by thinc (spaCy dependency) lacking wheels
 
 ### Installation
 
@@ -109,9 +132,9 @@ poetry run gdpr-pseudo --help
 
 ### Testing
 
-- ✅ **553 tests passing** (86%+ coverage across all modules)
-- ✅ **All quality gates pass** (Ruff linting, mypy type checking, pytest)
-- ✅ **Validated on Python 3.9-3.11** (CI/CD matrix testing)
+- ✅ **802+ tests passing** (86%+ coverage across all modules)
+- ✅ **All quality gates pass** (black, ruff, mypy, pytest)
+- ✅ **Validated on Python 3.10-3.12** (CI/CD matrix testing)
 
 ### Documentation
 
@@ -158,12 +181,6 @@ Epic 2 implementation team (Stories 2.0.1 - 2.9):
 ### License
 
 MIT License - See [LICENSE](LICENSE) file for details
-
----
-
-## [Unreleased]
-
-Changes in development not yet released.
 
 ---
 
