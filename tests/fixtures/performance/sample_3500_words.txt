@@ -1,0 +1,207 @@
+COMPTE-RENDU DE RÉUNION STRATÉGIQUE
+Direction Générale - Premier Trimestre 2024
+
+Date: 14 février 2024, 9h00-17h00
+Lieu: Salle du Conseil, Tour Atlantique, Lyon
+Président de séance: M. Jean-Marc Lefort, Directeur Général
+
+PARTICIPANTS:
+- M. Jean-Marc Lefort, Directeur Général
+- Mme Nathalie Rousseau, Directrice Financière
+- M. Patrick Dufour, Directeur des Opérations
+- Mme Véronique Blanc, Directrice des Ressources Humaines
+- M. Christophe Lemaire, Directeur Commercial
+- Mme Sandrine Morel, Directrice Marketing
+- M. Thierry Faure, Directeur Technique
+- Mme Élise Gauthier, Directrice Juridique
+- M. Olivier Marchand, Directeur de la Transformation Digitale
+
+ABSENTS EXCUSÉS:
+- M. Bruno Lefèvre, Directeur International (en mission à Singapour)
+
+INVITÉS:
+- M. Frédéric Bonnet, Auditeur senior chez Ernst & Young (point 2)
+- Mme Caroline Vincent, Consultante McKinsey (point 5)
+
+---
+
+1. OUVERTURE ET MOT DU DIRECTEUR GÉNÉRAL
+
+M. Jean-Marc Lefort ouvre la séance et remercie les participants pour leur présence. Il rappelle que cette réunion stratégique annuelle est un moment clé pour définir les orientations de l'entreprise et pour aligner l'ensemble de l'équipe dirigeante sur les priorités de l'année à venir.
+
+M. Lefort commence par un bref bilan de l'année écoulée. Le groupe a réalisé un chiffre d'affaires consolidé de quatre cent vingt millions d'euros, en progression de huit pour cent par rapport à l'exercice précédent. Cette croissance est principalement portée par les activités en France et au Benelux, tandis que les marchés du sud de l'Europe ont connu un léger recul. La marge opérationnelle s'établit à onze virgule cinq pour cent, en amélioration de zéro virgule huit point par rapport à l'année précédente.
+
+Le Directeur Général souligne que ces résultats ont été obtenus dans un contexte économique difficile, marqué par l'inflation persistante, les tensions géopolitiques et l'incertitude des marchés financiers. Il félicite l'ensemble des équipes pour leur engagement et leur résilience face à ces défis multiples.
+
+2. PRÉSENTATION DES RÉSULTATS FINANCIERS (Présenté par Mme Rousseau et M. Bonnet)
+
+Mme Nathalie Rousseau présente en détail les résultats financiers du quatrième trimestre et de l'exercice complet. Elle note que le quatrième trimestre a été particulièrement dynamique, avec un chiffre d'affaires en hausse de douze pour cent par rapport au même trimestre de l'année précédente. Cette performance s'explique notamment par la signature de plusieurs contrats importants dans le secteur public et par le démarrage réussi de la nouvelle ligne de produits lancée en septembre.
+
+Les charges opérationnelles ont été maîtrisées grâce aux efforts d'optimisation menés tout au long de l'année. Les coûts de personnel représentent soixante-deux pour cent du chiffre d'affaires, un ratio stable par rapport à l'année précédente. Les investissements en recherche et développement ont augmenté de quinze pour cent pour atteindre vingt-huit millions d'euros, conformément à la stratégie d'innovation du groupe.
+
+M. Frédéric Bonnet, auditeur senior chez Ernst & Young, présente les conclusions de l'audit des comptes. Il confirme que les états financiers donnent une image fidèle de la situation patrimoniale de l'entreprise. Il note cependant quelques points d'attention concernant les provisions pour risques et charges, qu'il recommande de renforcer pour faire face aux litiges en cours, notamment celui relatif au contrat avec la société Nexus Technologies à Bordeaux.
+
+Actions décidées:
+- Mme Rousseau: Finaliser le rapport financier annuel et préparer la présentation pour le conseil d'administration prévu le vingt-huit février.
+- M. Bonnet: Transmettre le rapport d'audit définitif avant le vingt février.
+- M. Lefort: Organiser une réunion avec les actionnaires principaux pour présenter les résultats.
+
+3. BILAN DES OPÉRATIONS (Présenté par M. Dufour)
+
+M. Patrick Dufour fait le point sur les opérations de l'année écoulée. Le taux de satisfaction client s'établit à quatre-vingt-sept pour cent, en progression de deux points par rapport à l'année précédente. Le délai moyen de livraison a été réduit de trois jours grâce à l'optimisation de la chaîne logistique et à la mise en place d'un nouveau système de gestion des commandes.
+
+L'usine de Toulouse a atteint un taux d'utilisation de quatre-vingt-douze pour cent, un record historique. L'investissement de cinq millions d'euros dans la modernisation de la ligne de production a permis d'augmenter la capacité de vingt pour cent tout en réduisant les coûts de maintenance. Le site de Strasbourg a également bénéficié d'améliorations significatives avec l'installation de nouveaux équipements automatisés.
+
+M. Dufour signale toutefois des difficultés sur le site de Marseille, où des retards de livraison ont été constatés en raison de problèmes d'approvisionnement en composants électroniques. Des mesures correctives ont été mises en place avec les fournisseurs concernés, et la situation devrait se normaliser au cours du premier trimestre.
+
+Actions décidées:
+- M. Dufour: Présenter un plan d'investissement quinquennal pour la modernisation des sites industriels lors du prochain comité de direction.
+- M. Dufour: Renforcer les stocks de sécurité pour les composants critiques identifiés sur le site de Marseille.
+
+4. RESSOURCES HUMAINES (Présenté par Mme Blanc)
+
+Mme Véronique Blanc présente le bilan social de l'année. L'effectif total du groupe s'élève à deux mille trois cent quarante-cinq collaborateurs, en augmentation nette de cent vingt postes par rapport à l'année précédente. Le taux de turnover s'établit à neuf pour cent, légèrement en deçà de la moyenne du secteur.
+
+Le programme de formation a représenté un investissement de trois virgule deux millions d'euros, avec une moyenne de vingt-huit heures de formation par collaborateur. Les formations les plus demandées concernent le management de projet, les compétences numériques et les langues étrangères.
+
+Mme Blanc présente également le nouveau plan d'actions en faveur de la diversité et de l'inclusion. Le comité exécutif compte désormais quatre femmes sur dix membres, et l'objectif est d'atteindre la parité d'ici deux ans. Un programme de mentorat destiné aux jeunes talents issus de la diversité sera lancé au deuxième trimestre, sous la coordination de M. Yannick Pelletier, responsable de la diversité.
+
+La directrice des ressources humaines alerte sur les tensions croissantes sur le marché de l'emploi dans le secteur technologique. Le recrutement de profils spécialisés en intelligence artificielle et en cybersécurité reste particulièrement difficile. Pour y remédier, elle propose de renforcer les partenariats avec les grandes écoles, notamment avec l'École Centrale de Lyon et l'Institut National des Sciences Appliquées, et de réviser la grille salariale pour ces profils en tension.
+
+Actions décidées:
+- Mme Blanc: Lancer le programme de mentorat diversité avant fin mars avec M. Pelletier.
+- Mme Blanc: Proposer une nouvelle grille salariale pour les profils technologiques en tension pour validation au prochain comité.
+
+5. TRANSFORMATION DIGITALE (Présenté par M. Marchand et Mme Vincent)
+
+M. Olivier Marchand présente l'état d'avancement du programme de transformation digitale lancé il y a dix-huit mois. Le déploiement du nouveau système d'information a été achevé sur huit des dix sites, avec un taux d'adoption par les utilisateurs de soixante-quinze pour cent. Les deux sites restants, Nice et Lille, seront déployés au premier trimestre.
+
+Mme Caroline Vincent, consultante chez McKinsey, partage les résultats de l'étude de benchmark réalisée auprès des principaux acteurs du secteur. Elle souligne que le groupe se positionne dans le premier quartile en termes de maturité digitale, mais qu'il reste des marges de progression significatives dans les domaines de l'analytique avancée et de l'automatisation des processus.
+
+M. Marchand détaille les prochaines étapes du programme. La priorité sera donnée au déploiement d'un outil de business intelligence accessible à l'ensemble des managers, à l'automatisation des processus administratifs répétitifs grâce à la robotisation, et au renforcement de la cybersécurité avec la mise en place d'un centre opérationnel de sécurité.
+
+Le budget alloué à la transformation digitale pour l'année en cours s'élève à douze millions d'euros, répartis entre les infrastructures technologiques, les licences logicielles, les prestations de conseil et la formation des utilisateurs. M. Lefort insiste sur l'importance de mesurer le retour sur investissement de chaque initiative et demande à M. Marchand de mettre en place des indicateurs de performance clés.
+
+Actions décidées:
+- M. Marchand: Finaliser le déploiement du système d'information sur les sites de Nice et Lille avant fin mars.
+- Mme Vincent: Livrer le rapport de benchmark complet avec recommandations prioritaires avant fin février.
+- M. Marchand: Définir les indicateurs de performance pour chaque initiative digitale.
+
+6. STRATÉGIE COMMERCIALE (Présenté par M. Lemaire)
+
+M. Christophe Lemaire présente la stratégie commerciale pour l'année. L'objectif est d'atteindre un chiffre d'affaires de quatre cent soixante millions d'euros, soit une croissance de dix pour cent. Cette ambition repose sur trois leviers principaux: le développement des ventes auprès des grands comptes, la conquête de nouveaux segments de marché et l'expansion internationale.
+
+Sur le plan international, M. Lemaire annonce l'ouverture d'un bureau commercial à Munich pour renforcer la présence sur le marché allemand, le plus important d'Europe. Il informe également que des discussions sont en cours avec un partenaire local à Milan pour développer le marché italien.
+
+Le directeur commercial souligne l'importance croissante du canal digital dans la génération de prospects. Le site web de l'entreprise a enregistré trois cent mille visiteurs uniques l'année dernière, en hausse de quarante pour cent. L'investissement dans le marketing digital sera doublé pour capitaliser sur cette tendance.
+
+Mme Sandrine Morel complète la présentation avec le plan marketing. Elle détaille les campagnes prévues pour le salon professionnel de Hanovre en avril et pour la conférence technologique de Barcelone en novembre. Un événement client de grande envergure est prévu en juin à Paris, avec comme invité d'honneur M. Jacques Attali, économiste et essayiste.
+
+Actions décidées:
+- M. Lemaire: Recruter le responsable du bureau de Munich avant fin mars.
+- M. Lemaire: Finaliser l'accord de partenariat avec le distributeur italien avant fin avril.
+- Mme Morel: Présenter le plan détaillé des événements marketing au prochain comité.
+
+7. INNOVATION ET TECHNOLOGIE (Présenté par M. Faure)
+
+M. Thierry Faure présente la feuille de route technologique. Trois projets majeurs sont identifiés pour l'année: le développement d'une plateforme d'intelligence artificielle pour l'analyse prédictive, la mise au point d'un nouveau produit intégrant des capteurs connectés, et l'exploration des technologies quantiques pour l'optimisation combinatoire.
+
+Le directeur technique annonce le recrutement de Mme Amina Khelifi, docteure en intelligence artificielle de l'université Paris-Saclay, qui prendra la direction du nouveau laboratoire d'IA. Ce laboratoire, basé à Grenoble, disposera d'un budget de quatre millions d'euros et d'une équipe initiale de huit chercheurs.
+
+M. Faure présente également les résultats des brevets déposés l'année précédente. Le groupe a obtenu douze brevets, contre huit l'année précédente, couvrant des innovations dans les domaines de l'automatisation industrielle, des matériaux intelligents et des algorithmes d'optimisation.
+
+Actions décidées:
+- M. Faure: Préparer le plan de recrutement du laboratoire IA de Grenoble avec Mme Khelifi.
+- M. Faure: Soumettre le dossier de candidature au programme européen Horizon Europe pour le projet de capteurs connectés.
+
+8. AFFAIRES JURIDIQUES (Présenté par Mme Gauthier)
+
+Mme Élise Gauthier fait le point sur les dossiers juridiques en cours. Le litige avec Nexus Technologies est en phase de médiation, avec une audience prévue en mars devant le tribunal de commerce de Bordeaux. L'enjeu financier est estimé à trois virgule cinq millions d'euros. Mme Gauthier recommande de provisionner cette somme dans les comptes, ce qui est en ligne avec les recommandations de M. Bonnet.
+
+La directrice juridique présente également les implications de la nouvelle réglementation européenne sur l'intelligence artificielle. Elle souligne que le groupe doit se mettre en conformité avant la date d'entrée en vigueur prévue en deux mille vingt-six. Un groupe de travail transversal sera constitué pour évaluer l'impact sur les produits et services du groupe.
+
+Enfin, Mme Gauthier informe que le renouvellement du contrat de distribution exclusive avec la société Amaris Group basée à Genève est en cours de négociation. Les principales modifications portent sur les conditions tarifaires et les objectifs de volume.
+
+Actions décidées:
+- Mme Gauthier: Suivre la procédure de médiation avec Nexus Technologies et tenir le comité informé.
+- Mme Gauthier: Constituer le groupe de travail sur la conformité IA avec les directions concernées.
+- Mme Gauthier: Finaliser la négociation avec Amaris Group avant le trente et un mars.
+
+9. CLÔTURE DE LA RÉUNION
+
+M. Jean-Marc Lefort remercie l'ensemble des participants pour la qualité des échanges. Il souligne que cette réunion a permis de définir des orientations claires et ambitieuses pour l'année. Il rappelle que la prochaine réunion stratégique est fixée au quinze mai et qu'un point d'avancement intermédiaire sera fait lors du comité de direction mensuel de mars.
+
+Le Directeur Général conclut en insistant sur trois priorités transversales: l'excellence opérationnelle, l'innovation technologique et le développement des talents. Il demande à chaque directeur de décliner ces priorités dans son plan d'action annuel et de les communiquer à l'ensemble de ses équipes.
+
+9. POINT SUR LA QUALITÉ ET L'ENVIRONNEMENT (Présenté par M. Dufour au nom de Mme Sylvie Prost)
+
+En l'absence de Mme Sylvie Prost, Directrice Qualité et Environnement, actuellement en déplacement sur le site de Strasbourg pour un audit de certification, M. Patrick Dufour présente le bilan qualité de l'année écoulée. Le système de management de la qualité a fait l'objet de deux audits externes conduits par le Bureau Veritas, avec des résultats très satisfaisants: aucune non-conformité majeure n'a été identifiée.
+
+Le taux de réclamations clients a diminué de quinze pour cent par rapport à l'année précédente, passant de zéro virgule huit pour cent à zéro virgule soixante-huit pour cent du chiffre d'affaires. Cette amélioration est attribuée aux actions correctives mises en place à la suite de l'analyse approfondie des causes racines menée par l'équipe qualité au premier semestre.
+
+Sur le plan environnemental, la consommation d'énergie des sites industriels a été réduite de sept pour cent grâce à l'installation de systèmes de récupération de chaleur et à l'optimisation des processus de climatisation. Le programme de réduction des déchets a permis de diminuer le volume d'enfouissement de vingt-deux pour cent. L'objectif de certification ISO 14001 pour tous les sites sera atteint au troisième trimestre, après la mise en conformité du site de Strasbourg.
+
+M. Dufour mentionne que Mme Prost a préparé un plan d'action détaillé pour atteindre la neutralité carbone des opérations d'ici deux mille trente. Ce plan sera présenté lors de la prochaine réunion du comité développement durable, présidé par M. Lefort.
+
+Actions décidées:
+- M. Dufour: Transmettre le rapport qualité complet de Mme Prost aux membres du comité.
+- M. Lefort: Programmer la réunion du comité développement durable avant fin mars.
+
+10. PROJETS SPÉCIAUX ET PARTENARIATS (Présenté par M. Lefort)
+
+M. Jean-Marc Lefort présente trois projets stratégiques qui nécessitent l'implication transversale de plusieurs directions.
+
+Premièrement, le projet de construction d'un nouveau centre logistique à Bordeaux, d'un investissement estimé à vingt millions d'euros. Ce centre permettra de centraliser les opérations de distribution pour le sud-ouest de la France et la péninsule ibérique. Mme Élise Gauthier indique que le permis de construire a été obtenu et que les travaux pourraient commencer au troisième trimestre. Le directeur du projet, M. Arnaud Leblanc, a été nommé et prendra ses fonctions le premier mars.
+
+Deuxièmement, le renouvellement du contrat-cadre avec le Ministère de la Défense, un client stratégique représentant sept pour cent du chiffre d'affaires. Les négociations sont menées par M. Christophe Lemaire avec le soutien de Mme Gauthier. La signature est attendue pour juin, avec un engagement pluriannuel de cinq ans.
+
+Troisièmement, l'initiative d'innovation ouverte baptisée «Horizon», qui vise à identifier et accompagner des startups technologiques dont les solutions pourraient bénéficier au groupe. M. Lefort annonce la création d'un fonds d'investissement corporate de dix millions d'euros, géré par Mme Béatrice Fournier, ancienne associée du fonds Partech. Deux premiers investissements ont déjà été réalisés: l'un dans une startup spécialisée dans les jumeaux numériques basée à Sophia Antipolis, et l'autre dans une entreprise de biotechnologie industrielle située à Montpellier.
+
+Actions décidées:
+- M. Leblanc: Présenter le planning détaillé du centre logistique de Bordeaux au prochain comité.
+- M. Lemaire et Mme Gauthier: Soumettre le projet de contrat Défense pour validation avant la réunion d'avril.
+- Mme Fournier: Présenter la pipeline d'investissement du fonds Horizon au comité de juin.
+
+11. QUESTIONS DIVERSES
+
+M. Thierry Faure soulève la question de la propriété intellectuelle et propose de renforcer le dispositif de veille technologique et de protection des inventions. Il recommande de recruter un ingénieur brevets supplémentaire et de mettre en place un système de primes pour les inventeurs. M. Lefort approuve cette proposition et demande à Mme Blanc de l'intégrer dans le plan de recrutement.
+
+Mme Nathalie Rousseau rappelle les échéances fiscales du premier trimestre et demande aux directeurs de transmettre leurs projections budgétaires révisées avant le vingt-huit février. Elle signale également que le changement de commissaire aux comptes, avec le passage d'Ernst & Young à KPMG, sera effectif à compter de l'exercice suivant, conformément à la décision du conseil de surveillance.
+
+M. Olivier Marchand alerte sur un incident de cybersécurité mineur survenu en janvier, impliquant une tentative de phishing ciblant les cadres dirigeants. L'attaque a été détectée et neutralisée par l'équipe de sécurité informatique. Il recommande de renforcer les formations de sensibilisation à la cybersécurité pour l'ensemble du personnel et de mettre en place une authentification à double facteur pour tous les accès aux systèmes critiques.
+
+12. CLÔTURE
+
+M. Jean-Marc Lefort remercie l'ensemble des participants pour la qualité des échanges. Il souligne que cette réunion a permis de définir des orientations claires et ambitieuses pour l'année. Il rappelle que la prochaine réunion stratégique est fixée au quinze mai et qu'un point d'avancement intermédiaire sera fait lors du comité de direction mensuel de mars.
+
+Le Directeur Général conclut en insistant sur trois priorités transversales: l'excellence opérationnelle, l'innovation technologique et le développement des talents. Il demande à chaque directeur de décliner ces priorités dans son plan d'action annuel et de les communiquer à l'ensemble de ses équipes.
+
+La séance est levée à seize heures trente.
+
+---
+
+PROCHAINE RÉUNION STRATÉGIQUE: 15 mai 2024, 9h00-17h00
+DISTRIBUTION: Tous les participants, M. Lefèvre (absent excusé), secrétariat général
+RÉDACTION: M. Marc Girard, Secrétaire Général
+
+---
+
+ANNEXE: SYNTHÈSE DES INDICATEURS CLÉS
+
+Les indicateurs de performance présentés lors de cette réunion stratégique confirment la trajectoire positive du groupe sur l'ensemble des dimensions stratégiques. Le chiffre d'affaires en progression de huit pour cent témoigne de la solidité de notre positionnement commercial sur les marchés européens, tandis que l'amélioration de la marge opérationnelle de zéro virgule huit point démontre l'efficacité de nos actions d'optimisation des coûts et de productivité.
+
+Sur le plan social, l'augmentation nette de cent vingt postes confirme la dynamique de croissance responsable du groupe. Le taux de turnover maîtrisé à neuf pour cent est un indicateur particulièrement positif dans un contexte de marché de l'emploi tendu, notamment pour les profils technologiques. Le programme de formation ambitieux, avec vingt-huit heures de formation par collaborateur, contribue à maintenir les compétences au meilleur niveau.
+
+L'avancement du programme de transformation digitale, avec un taux d'adoption de soixante-quinze pour cent sur les sites déployés, progresse conformément aux objectifs fixés. Les deux derniers sites seront opérationnels au premier trimestre, marquant l'achèvement de la première phase de la transformation.
+
+La stratégie commerciale définie pour l'année vise une accélération de la croissance à dix pour cent, un objectif ambitieux mais réaliste compte tenu du pipeline commercial existant et des nouvelles initiatives d'expansion internationale. L'ouverture du bureau de Munich et les discussions en cours en Italie renforcent notre présence sur les deux premiers marchés européens.
+
+Les perspectives d'innovation sont solides avec le lancement du laboratoire d'intelligence artificielle de Grenoble et le recrutement de Mme Khelifi pour en assurer la direction. Ce laboratoire sera un accélérateur déterminant pour l'ensemble des activités du groupe dans les années à venir.
+
+L'ensemble de ces indicateurs et initiatives place le groupe dans une position favorable pour atteindre les objectifs du plan stratégique à cinq ans et pour affirmer son leadership sur les marchés européens de la technologie industrielle.
+
+En complément de ces données quantitatives, il convient de souligner la qualité du dialogue social au sein du groupe. Les négociations annuelles obligatoires se sont conclues dans un climat constructif, avec la signature d'un accord d'intéressement indexé sur les résultats opérationnels de chaque site. Cet accord, négocié par Mme Véronique Blanc avec les partenaires sociaux, prévoit une enveloppe globale pouvant atteindre trois pour cent de la masse salariale en cas d'atteinte des objectifs.
+
+Le comité social et économique central, présidé par M. Arnaud Leblanc en tant que représentant de la direction, a tenu quatre réunions ordinaires et deux réunions extraordinaires au cours de l'année. Les principaux sujets abordés ont porté sur les conditions de travail, la politique de rémunération, le plan de formation et les orientations stratégiques du groupe.
+
+Enfin, la direction de la communication, sous la responsabilité de Mme Sandrine Morel, a mené plusieurs campagnes de communication institutionnelle qui ont contribué à renforcer la notoriété et l'image du groupe auprès de ses parties prenantes. La présence sur les réseaux sociaux professionnels a été significativement développée, avec une augmentation de soixante pour cent du nombre d'abonnés sur les principales plateformes.
