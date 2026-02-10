@@ -17,10 +17,8 @@ import pytest
 from gdpr_pseudonymizer.cli.config import (
     AppConfig,
     BatchConfig,
-    ConfigValidationError,
     DatabaseConfig,
     LoggingConfig,
-    PassphraseInConfigError,
     PseudonymizationConfig,
     dict_to_config,
     get_default_config,
@@ -28,6 +26,10 @@ from gdpr_pseudonymizer.cli.config import (
     load_config_file,
     merge_config_dicts,
     validate_config_dict,
+)
+from gdpr_pseudonymizer.exceptions import (
+    ConfigValidationError,
+    PassphraseInConfigError,
 )
 
 

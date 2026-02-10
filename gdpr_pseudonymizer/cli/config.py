@@ -18,6 +18,11 @@ from typing import Any, Optional
 
 import yaml
 
+from gdpr_pseudonymizer.exceptions import (
+    ConfigValidationError,
+    PassphraseInConfigError,
+)
+
 
 @dataclass
 class DatabaseConfig:
@@ -60,18 +65,6 @@ class AppConfig:
     )
     logging: LoggingConfig = field(default_factory=LoggingConfig)
     batch: BatchConfig = field(default_factory=BatchConfig)
-
-
-class ConfigValidationError(Exception):
-    """Raised when configuration validation fails."""
-
-    pass
-
-
-class PassphraseInConfigError(ConfigValidationError):
-    """Raised when passphrase is found in config file (security violation)."""
-
-    pass
 
 
 # Valid configuration values

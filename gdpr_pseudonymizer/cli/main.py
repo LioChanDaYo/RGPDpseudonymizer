@@ -13,10 +13,10 @@ import typer
 from rich.console import Console
 
 from gdpr_pseudonymizer.cli.commands.config_show import config_app
-from gdpr_pseudonymizer.cli.config import (
+from gdpr_pseudonymizer.cli.config import load_config
+from gdpr_pseudonymizer.exceptions import (
     ConfigValidationError,
     PassphraseInConfigError,
-    load_config,
 )
 
 # Create Typer app instance

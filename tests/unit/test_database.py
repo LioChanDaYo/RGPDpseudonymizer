@@ -7,10 +7,10 @@ import pytest
 from sqlalchemy import text
 
 from gdpr_pseudonymizer.data.database import (
-    CorruptedDatabaseError,
     init_database,
     open_database,
 )
+from gdpr_pseudonymizer.exceptions import CorruptedDatabaseError
 from gdpr_pseudonymizer.data.encryption import EncryptionService
 from gdpr_pseudonymizer.data.models import Metadata
 
