@@ -374,3 +374,172 @@ class TestResetPseudonymState:
         ctx.pseudonym_manager.reset_preview_state.assert_called_once()
         ctx.mapping_repo.find_all.assert_called_once()
         ctx.pseudonym_manager.load_existing_mappings.assert_called_once_with(existing)
+
+
+# ===========================================================================
+# _check_component_match
+# ===========================================================================
+
+
+class TestCheckComponentMatch:
+    """Tests for _check_component_match()."""
+
+    def test_returns_none_when_not_ambiguous(self) -> None:
+        """Non-ambiguous names (two-word) should not match."""
+        ctx = Mock()
+        ctx.compositional_engine.parse_full_name.return_value = (
+            "Marie",
+            "Dubois",
+            False,
+        )
+
+        processor = _make_processor()
+        result = processor._check_component_match(ctx, "Marie Dubois", [])
+        assert result is None
+
+    def test_matches_first_name_component(self) -> None:
+        """Standalone name matching a previous entity's first_name."""
+        ctx = Mock()
+        ctx.compositional_engine.parse_full_name.return_value = ("Marie", None, True)
+
+        prev = Mock()
+        prev.entity_type = "PERSON"
+        prev.first_name = "Marie"
+        prev.pseudonym_first = "Emma"
+        prev.full_name = "Marie Dubois"
+
+        processor = _make_processor()
+        result = processor._check_component_match(ctx, "Marie", [prev])
+        assert result == "Emma"
+
+    def test_matches_last_name_component(self) -> None:
+        """Standalone name matching a previous entity's last_name."""
+        ctx = Mock()
+        ctx.compositional_engine.parse_full_name.return_value = ("Dubois", None, True)
+
+        prev = Mock()
+        prev.entity_type = "PERSON"
+        prev.first_name = "Marie"
+        prev.last_name = "Dubois"
+        prev.pseudonym_last = "Martin"
+        prev.full_name = "Marie Dubois"
+
+        processor = _make_processor()
+        result = processor._check_component_match(ctx, "Dubois", [prev])
+        assert result == "Martin"
+
+    def test_returns_none_on_parse_error(self) -> None:
+        """Returns None if parse_full_name raises."""
+        ctx = Mock()
+        ctx.compositional_engine.parse_full_name.side_effect = ValueError
+
+        processor = _make_processor()
+        result = processor._check_component_match(ctx, "broken", [])
+        assert result is None
+
+
+# ===========================================================================
+# _compute_replacement_prefix
+# ===========================================================================
+
+
+class TestComputeReplacementPrefix:
+    """Tests for _compute_replacement_prefix()."""
+
+    def test_person_title_prefix(self) -> None:
+        """Extracts title prefix for PERSON entities."""
+        ctx = Mock()
+        ctx.compositional_engine.strip_titles.return_value = "Marie Dubois"
+
+        entity = _make_entity("Dr. Marie Dubois", "PERSON")
+        processor = _make_processor()
+        result = processor._compute_replacement_prefix(ctx, entity)
+        assert result == "Dr. "
+
+    def test_location_preposition_prefix(self) -> None:
+        """Extracts preposition prefix for LOCATION entities."""
+        ctx = Mock()
+        ctx.compositional_engine.strip_titles.return_value = "à Paris"
+        ctx.compositional_engine.strip_prepositions.return_value = "Paris"
+
+        entity = _make_entity("à Paris", "LOCATION")
+        processor = _make_processor()
+        result = processor._compute_replacement_prefix(ctx, entity)
+        assert result == "à "
+
+    def test_no_prefix(self) -> None:
+        """Returns empty string when no prefix is present."""
+        ctx = Mock()
+        ctx.compositional_engine.strip_titles.return_value = "Marie"
+
+        entity = _make_entity("Marie", "PERSON")
+        processor = _make_processor()
+        result = processor._compute_replacement_prefix(ctx, entity)
+        assert result == ""
+
+
+# ===========================================================================
+# _resolve_pseudonyms
+# ===========================================================================
+
+
+class TestResolvePseudonyms:
+    """Tests for _resolve_pseudonyms()."""
+
+    def test_reuses_existing_mapping(self) -> None:
+        """Entities with existing DB mappings are reused."""
+        ctx = Mock()
+        ctx.compositional_engine.strip_titles.side_effect = lambda t: t
+        existing = Mock()
+        existing.pseudonym_full = "Jean Dupont"
+        ctx.mapping_repo.find_by_full_name.return_value = existing
+
+        processor = _make_processor()
+        result = processor._resolve_pseudonyms(
+            ctx, [_make_entity("Marie Dubois", "PERSON", 0, 13)]
+        )
+
+        assert result.entities_reused == 1
+        assert result.entities_new == 0
+        assert len(result.replacements) == 1
+        assert result.replacements[0][2] == "Jean Dupont"
+
+    def test_assigns_new_pseudonym(self) -> None:
+        """New entities get pseudonyms assigned via compositional engine."""
+        ctx = Mock()
+        ctx.compositional_engine.strip_titles.side_effect = lambda t: t
+        ctx.mapping_repo.find_by_full_name.return_value = None
+        assignment = Mock()
+        assignment.pseudonym_full = "Jean Dupont"
+        assignment.pseudonym_first = "Jean"
+        assignment.pseudonym_last = "Dupont"
+        assignment.is_ambiguous = False
+        assignment.ambiguity_reason = None
+        ctx.compositional_engine.assign_compositional_pseudonym.return_value = (
+            assignment
+        )
+        ctx.compositional_engine.parse_full_name.return_value = (
+            "Marie",
+            "Dubois",
+            False,
+        )
+
+        processor = _make_processor()
+        result = processor._resolve_pseudonyms(
+            ctx, [_make_entity("Marie Dubois", "PERSON", 0, 13)]
+        )
+
+        assert result.entities_new == 1
+        assert result.entities_reused == 0
+        ctx.mapping_repo.save_batch.assert_called_once()
+
+    def test_empty_entities_returns_zero_counts(self) -> None:
+        """No entities produces empty result."""
+        ctx = Mock()
+
+        processor = _make_processor()
+        result = processor._resolve_pseudonyms(ctx, [])
+
+        assert result.entities_new == 0
+        assert result.entities_reused == 0
+        assert result.replacements == []

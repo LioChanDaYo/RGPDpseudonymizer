@@ -78,6 +78,15 @@ class _ProcessingContext:
     compositional_engine: CompositionalPseudonymEngine
 
 
+@dataclass
+class _ResolveResult:
+    """Result of entity pseudonym resolution."""
+
+    replacements: list[tuple[int, int, str]]
+    entities_new: int
+    entities_reused: int
+
+
 class DocumentProcessor:
     """Orchestrates single-document pseudonymization workflow.
 
@@ -319,6 +328,217 @@ class DocumentProcessor:
             logger.info("validation_cancelled", reason="user_interrupt")
             raise
 
+    def _check_component_match(
+        self,
+        ctx: _ProcessingContext,
+        entity_text_stripped: str,
+        new_entities: list[Entity],
+    ) -> str | None:
+        """Check if a standalone PERSON name matches a component of a previously processed entity.
+
+        For example, if "Dubois" is encountered after "Marie Dubois" was already
+        processed (but not yet saved to DB), this finds the matching component
+        pseudonym from new_entities.
+
+        Args:
+            ctx: Processing context with compositional engine
+            entity_text_stripped: Stripped entity text to match
+            new_entities: Previously processed new entities in this document
+
+        Returns:
+            Matching pseudonym component string, or None if no match found
+        """
+        try:
+            parsed_first, parsed_last, is_ambiguous = (
+                ctx.compositional_engine.parse_full_name(entity_text_stripped)
+            )
+        except (TypeError, ValueError):
+            return None
+
+        if not (is_ambiguous and parsed_first and not parsed_last):
+            return None
+
+        for prev_entity in new_entities:
+            if prev_entity.entity_type != "PERSON":
+                continue
+            if prev_entity.first_name == parsed_first:
+                logger.debug(
+                    "component_matched_in_batch",
+                    component=parsed_first,
+                    component_type="first_name",
+                    matched_entity=prev_entity.full_name,
+                )
+                return prev_entity.pseudonym_first
+            if prev_entity.last_name == parsed_first:
+                logger.debug(
+                    "component_matched_in_batch",
+                    component=parsed_first,
+                    component_type="last_name",
+                    matched_entity=prev_entity.full_name,
+                )
+                return prev_entity.pseudonym_last
+
+        return None
+
+    def _compute_replacement_prefix(
+        self,
+        ctx: _ProcessingContext,
+        entity: DetectedEntity,
+    ) -> str:
+        """Compute the title/preposition prefix to preserve in replacement text.
+
+        Ensures "Dr. Marie Dubois" -> "Dr. Emma Martin" (not "Emma Martin")
+        and "à Paris" -> "à Lyon" (not "Lyon").
+
+        Args:
+            ctx: Processing context with compositional engine
+            entity: Original detected entity
+
+        Returns:
+            Prefix string to prepend to the pseudonym (empty if none)
+        """
+        original_text = entity.text
+        if entity.entity_type == "PERSON":
+            stripped = ctx.compositional_engine.strip_titles(original_text)
+            if stripped != original_text:
+                prefix_end = original_text.find(stripped)
+                if prefix_end > 0:
+                    return original_text[:prefix_end]
+        elif entity.entity_type == "LOCATION":
+            temp_stripped = ctx.compositional_engine.strip_titles(original_text)
+            stripped = ctx.compositional_engine.strip_prepositions(temp_stripped)
+            if stripped != temp_stripped:
+                prefix_end = temp_stripped.find(stripped)
+                if prefix_end > 0:
+                    return temp_stripped[:prefix_end]
+        return ""
+
+    def _resolve_pseudonyms(
+        self,
+        ctx: _ProcessingContext,
+        validated_entities: list[DetectedEntity],
+    ) -> _ResolveResult:
+        """Resolve pseudonyms for all validated entities.
+
+        For each entity: check cache, check DB, check component matches,
+        or assign a new pseudonym. Collects replacements and saves new
+        entities in a single batch transaction.
+
+        Args:
+            ctx: Processing context with repos and engine
+            validated_entities: Entities that passed validation
+
+        Returns:
+            _ResolveResult with replacements list and new/reused counts
+        """
+        logger.info(
+            "starting_entity_processing",
+            validated_count=len(validated_entities),
+        )
+        replacements: list[tuple[int, int, str]] = []
+        new_entities: list[Entity] = []
+        entity_cache: dict[str, str] = {}
+        entities_new = 0
+        entities_reused = 0
+
+        for entity in validated_entities:
+            logger.debug(
+                "processing_entity",
+                entity_text=entity.text,
+                entity_type=entity.entity_type,
+            )
+            entity_text_stripped = ctx.compositional_engine.strip_titles(entity.text)
+            if entity.entity_type == "LOCATION":
+                entity_text_stripped = ctx.compositional_engine.strip_prepositions(
+                    entity_text_stripped
+                )
+
+            if entity_text_stripped in entity_cache:
+                pseudonym = entity_cache[entity_text_stripped]
+                entities_reused += 1
+            else:
+                existing_entity = ctx.mapping_repo.find_by_full_name(
+                    entity_text_stripped
+                )
+                if existing_entity:
+                    pseudonym = existing_entity.pseudonym_full
+                    entity_cache[entity_text_stripped] = pseudonym
+                    entities_reused += 1
+                else:
+                    component_match = (
+                        self._check_component_match(
+                            ctx, entity_text_stripped, new_entities
+                        )
+                        if entity.entity_type == "PERSON"
+                        else None
+                    )
+                    if component_match:
+                        pseudonym = component_match
+                        entity_cache[entity_text_stripped] = pseudonym
+                        entities_reused += 1
+                    else:
+                        assignment = (
+                            ctx.compositional_engine.assign_compositional_pseudonym(
+                                entity_text=entity_text_stripped,
+                                entity_type=entity.entity_type,
+                                gender=None,
+                            )
+                        )
+                        pseudonym = assignment.pseudonym_full
+                        entity_cache[entity_text_stripped] = pseudonym
+
+                        original_first = None
+                        original_last = None
+                        if entity.entity_type == "PERSON":
+                            original_first, original_last, _ = (
+                                ctx.compositional_engine.parse_full_name(
+                                    entity_text_stripped
+                                )
+                            )
+
+                        new_entity = Entity(
+                            entity_type=entity.entity_type,
+                            first_name=original_first,
+                            last_name=original_last,
+                            full_name=entity_text_stripped,
+                            pseudonym_first=assignment.pseudonym_first,
+                            pseudonym_last=assignment.pseudonym_last,
+                            pseudonym_full=assignment.pseudonym_full,
+                            first_seen_timestamp=datetime.now(timezone.utc),
+                            gender=None,
+                            confidence_score=(
+                                entity.confidence
+                                if hasattr(entity, "confidence")
+                                else None
+                            ),
+                            theme=self.theme,
+                            is_ambiguous=assignment.is_ambiguous,
+                            ambiguity_reason=assignment.ambiguity_reason,
+                        )
+                        new_entities.append(new_entity)
+                        entities_new += 1
+
+            prefix = self._compute_replacement_prefix(ctx, entity)
+            replacements.append((entity.start_pos, entity.end_pos, prefix + pseudonym))
+
+        if new_entities:
+            try:
+                ctx.mapping_repo.save_batch(new_entities)
+                logger.info("entities_saved_batch", count=len(new_entities))
+            except Exception as e:
+                logger.error(
+                    "batch_save_failed",
+                    error=str(e),
+                    entity_count=len(new_entities),
+                )
+                raise
+
+        return _ResolveResult(
+            replacements=replacements,
+            entities_new=entities_new,
+            entities_reused=entities_reused,
+        )
+
     def _reset_pseudonym_state(self, ctx: _ProcessingContext) -> None:
         """Reset pseudonym manager after validation preview.
 
@@ -447,237 +667,11 @@ class DocumentProcessor:
                 # Reset pseudonym state after validation preview
                 self._reset_pseudonym_state(ctx)
 
-                # Step 3-5: Process each VALIDATED entity (check for existing, assign, collect for batch save)
-                # Note: pseudonym_manager and compositional_engine already initialized above for validation
-                logger.info(
-                    "starting_entity_processing",
-                    validated_count=len(validated_entities),
-                )
-                replacements: list[tuple[int, int, str]] = []  # (start, end, pseudonym)
-                new_entities: list[Entity] = []  # Collect new entities for batch save
-                entity_cache: dict[str, str] = (
-                    {}
-                )  # In-memory cache for this document (full_name -> pseudonym)
-
-                for entity in validated_entities:
-                    logger.debug(
-                        "processing_entity",
-                        entity_text=entity.text,
-                        entity_type=entity.entity_type,
-                    )
-                    # Step 3: Check for existing mapping (idempotency)
-                    # CRITICAL FIX: Strip titles/prepositions from entity text BEFORE database lookup
-                    # The database stores names WITHOUT titles/prepositions
-                    # (e.g., "Marie Dubois" not "Dr. Marie Dubois", "Paris" not "à Paris")
-                    entity_text_stripped = ctx.compositional_engine.strip_titles(
-                        entity.text
-                    )
-
-                    # Also strip prepositions for LOCATION entities
-                    if entity.entity_type == "LOCATION":
-                        entity_text_stripped = (
-                            ctx.compositional_engine.strip_prepositions(
-                                entity_text_stripped
-                            )
-                        )
-
-                    # Check both database AND in-memory cache for this document
-                    if entity_text_stripped in entity_cache:
-                        # Already processed in this document - reuse from cache
-                        pseudonym = entity_cache[entity_text_stripped]
-                        entities_reused += 1
-                        logger.debug(
-                            "entity_cached",
-                            entity_type=entity.entity_type,
-                            is_cached=True,
-                        )
-                    else:
-                        existing_entity = ctx.mapping_repo.find_by_full_name(
-                            entity_text_stripped
-                        )
-
-                        if existing_entity:
-                            # Step 4a: Reuse existing pseudonym from database
-                            pseudonym = existing_entity.pseudonym_full
-                            entity_cache[entity_text_stripped] = (
-                                pseudonym  # Cache for subsequent occurrences
-                            )
-                            entities_reused += 1
-                            logger.debug(
-                                "entity_reused",
-                                entity_type=entity.entity_type,
-                                is_reused=True,
-                            )
-                        else:
-                            # CRITICAL FIX (Bug 4): Check new_entities list for component matches
-                            # If "Dubois" is being processed but "Marie Dubois" was already processed
-                            # earlier in THIS document (but not yet saved to database), we need to
-                            # check the new_entities list for component matches.
-                            component_match_pseudonym = None
-                            if entity.entity_type == "PERSON":
-                                # Parse to check if this is a standalone component
-                                try:
-                                    (
-                                        parsed_first,
-                                        parsed_last,
-                                        is_ambiguous,
-                                    ) = ctx.compositional_engine.parse_full_name(
-                                        entity_text_stripped
-                                    )
-                                except (TypeError, ValueError):
-                                    # If parse_full_name fails (e.g., mocked in tests), skip component matching
-                                    parsed_first = None
-                                    parsed_last = None
-                                    is_ambiguous = False
-
-                                # If standalone (single word), check new_entities for matches
-                                if is_ambiguous and parsed_first and not parsed_last:
-                                    # Check if this component matches any previously processed entity
-                                    for prev_entity in new_entities:
-                                        if prev_entity.entity_type == "PERSON":
-                                            # Check if matches as first name
-                                            if prev_entity.first_name == parsed_first:
-                                                component_match_pseudonym = (
-                                                    prev_entity.pseudonym_first
-                                                )
-                                                logger.debug(
-                                                    "component_matched_in_batch",
-                                                    component=parsed_first,
-                                                    component_type="first_name",
-                                                    matched_entity=prev_entity.full_name,
-                                                )
-                                                break
-                                            # Check if matches as last name
-                                            if prev_entity.last_name == parsed_first:
-                                                component_match_pseudonym = (
-                                                    prev_entity.pseudonym_last
-                                                )
-                                                logger.debug(
-                                                    "component_matched_in_batch",
-                                                    component=parsed_first,
-                                                    component_type="last_name",
-                                                    matched_entity=prev_entity.full_name,
-                                                )
-                                                break
-
-                            if component_match_pseudonym:
-                                # Reuse component pseudonym from new_entities batch
-                                pseudonym = component_match_pseudonym
-                                entity_cache[entity_text_stripped] = pseudonym
-                                entities_reused += 1
-                                logger.debug(
-                                    "entity_reused_from_batch",
-                                    entity_type=entity.entity_type,
-                                )
-                            else:
-                                # Step 4b: Assign new pseudonym using compositional logic
-                                # Use stripped text (titles already removed above)
-                                assignment = ctx.compositional_engine.assign_compositional_pseudonym(
-                                    entity_text=entity_text_stripped,
-                                    entity_type=entity.entity_type,
-                                    gender=None,  # Could be extracted from NER metadata if available
-                                )
-                                pseudonym = assignment.pseudonym_full
-                                entity_cache[entity_text_stripped] = (
-                                    pseudonym  # Cache for subsequent occurrences
-                                )
-
-                                # CRITICAL FIX: Parse original entity text to extract first/last name components
-                                # for PERSON entities. These are the ORIGINAL names that will be encrypted,
-                                # not the pseudonyms. This enables component-based lookup later.
-                                original_first = None
-                                original_last = None
-                                if entity.entity_type == "PERSON":
-                                    # Parse the STRIPPED entity text to get components
-                                    (
-                                        original_first,
-                                        original_last,
-                                        _,
-                                    ) = ctx.compositional_engine.parse_full_name(
-                                        entity_text_stripped
-                                    )
-
-                                # Step 5: Create new entity (save later in batch)
-                                new_entity = Entity(
-                                    entity_type=entity.entity_type,
-                                    first_name=original_first,  # ✓ ORIGINAL first name (will be encrypted)
-                                    last_name=original_last,  # ✓ ORIGINAL last name (will be encrypted)
-                                    full_name=entity_text_stripped,  # ✓ ORIGINAL text WITHOUT titles (will be encrypted)
-                                    pseudonym_first=assignment.pseudonym_first,
-                                    pseudonym_last=assignment.pseudonym_last,
-                                    pseudonym_full=assignment.pseudonym_full,
-                                    first_seen_timestamp=datetime.now(timezone.utc),
-                                    gender=None,
-                                    confidence_score=(
-                                        entity.confidence
-                                        if hasattr(entity, "confidence")
-                                        else None
-                                    ),
-                                    theme=self.theme,
-                                    is_ambiguous=assignment.is_ambiguous,
-                                    ambiguity_reason=assignment.ambiguity_reason,
-                                )
-                                new_entities.append(new_entity)
-                                entities_new += 1
-                                logger.debug(
-                                    "entity_assigned",
-                                    entity_type=entity.entity_type,
-                                    is_new=True,
-                                )
-
-                    # Collect replacement for later application
-                    # CRITICAL: Preserve titles/prepositions in output text for readability
-                    # Example: "Dr. Marie Dubois" -> "Dr. Emma Martin", not "Emma Martin"
-                    # Example: "à Paris" -> "à Lyon", not "Lyon"
-                    original_text = entity.text
-                    prefix = ""
-
-                    # Extract title prefix for PERSON entities
-                    if entity.entity_type == "PERSON":
-                        # Find how much of the original text is title
-                        stripped = ctx.compositional_engine.strip_titles(original_text)
-                        if stripped != original_text:
-                            # Extract the title prefix
-                            prefix_end = original_text.find(stripped)
-                            if prefix_end > 0:
-                                prefix = original_text[:prefix_end]
-
-                    # Extract preposition prefix for LOCATION entities
-                    elif entity.entity_type == "LOCATION":
-                        # First strip titles (in case location has one, unlikely but possible)
-                        temp_stripped = ctx.compositional_engine.strip_titles(
-                            original_text
-                        )
-                        # Then check for preposition
-                        stripped = ctx.compositional_engine.strip_prepositions(
-                            temp_stripped
-                        )
-                        if stripped != temp_stripped:
-                            # Extract the preposition prefix
-                            prefix_end = temp_stripped.find(stripped)
-                            if prefix_end > 0:
-                                prefix = temp_stripped[:prefix_end]
-
-                    # Prepend prefix to pseudonym for final replacement
-                    pseudonym_with_prefix = prefix + pseudonym
-                    replacements.append(
-                        (entity.start_pos, entity.end_pos, pseudonym_with_prefix)
-                    )
-
-                # Step 5b: Save all new entities in single transaction for data consistency
-                # If this fails, no partial data will be committed to database
-                if new_entities:
-                    try:
-                        ctx.mapping_repo.save_batch(new_entities)
-                        logger.info("entities_saved_batch", count=len(new_entities))
-                    except Exception as e:
-                        # Transaction will be rolled back by SQLAlchemy on exception
-                        logger.error(
-                            "batch_save_failed",
-                            error=str(e),
-                            entity_count=len(new_entities),
-                        )
-                        raise  # Re-raise to trigger outer exception handler
+                # Resolve pseudonyms for all validated entities
+                resolve_result = self._resolve_pseudonyms(ctx, validated_entities)
+                entities_new = resolve_result.entities_new
+                entities_reused = resolve_result.entities_reused
+                replacements = resolve_result.replacements
 
                 # Step 6: Apply replacements (from end to start to preserve positions)
                 # CRITICAL FIX: Deduplicate overlapping replacements before applying
