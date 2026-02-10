@@ -7,15 +7,15 @@ This module implements the EntityDetector interface using the Stanza NLP library
 
 from __future__ import annotations
 
-import logging
 from typing import TYPE_CHECKING
 
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity, EntityDetector
+from gdpr_pseudonymizer.utils.logger import get_logger
 
 if TYPE_CHECKING:
     from stanza.pipeline.core import Pipeline
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class StanzaDetector(EntityDetector):
@@ -42,7 +42,7 @@ class StanzaDetector(EntityDetector):
         try:
             import stanza
 
-            logger.info(f"loading_stanza_model: model={model_name}")
+            logger.info("loading_stanza_model", model=model_name)
             # Load French pipeline with NER processor
             self._nlp = stanza.Pipeline(
                 lang=model_name,
@@ -50,11 +50,9 @@ class StanzaDetector(EntityDetector):
                 logging_level="WARNING",  # Suppress verbose logs
             )
             self._model_name = model_name
-            logger.info(f"stanza_model_loaded: model={model_name}")
+            logger.info("stanza_model_loaded", model=model_name)
         except Exception as e:
-            logger.error(
-                f"stanza_model_load_failed: model={model_name}, error={str(e)}"
-            )
+            logger.error("stanza_model_load_failed", model=model_name, error=str(e))
             raise RuntimeError(
                 f"Stanza model '{model_name}' loading failed. "
                 f"Download with: import stanza; stanza.download('{model_name}')"
@@ -107,13 +105,11 @@ class StanzaDetector(EntityDetector):
                             )
                         )
 
-            logger.info(
-                f"entities_detected: count={len(entities)}, text_length={len(text)}"
-            )
+            logger.info("entities_detected", count=len(entities), text_length=len(text))
             return entities
 
         except Exception as e:
-            logger.error(f"entity_detection_failed: error={str(e)}")
+            logger.error("entity_detection_failed", error=str(e))
             raise RuntimeError(f"Entity detection failed: {str(e)}") from e
 
     def _map_entity_type(self, stanza_label: str) -> str | None:

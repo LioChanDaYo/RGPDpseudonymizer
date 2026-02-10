@@ -449,7 +449,7 @@ class TestExhaustionDetection:
         assert 0.0 < exhaustion < 1.0
 
     def test_check_exhaustion_at_80_percent_triggers_warning(
-        self, caplog: pytest.LogCaptureFixture
+        self, capsys: pytest.CaptureFixture[str]
     ) -> None:
         """Test that exhaustion warning is triggered at 80% threshold."""
         manager = LibraryBasedPseudonymManager()
@@ -471,13 +471,13 @@ class TestExhaustionDetection:
             manager._used_pseudonyms.add(f"Pseudonym-{i}")
 
         # Trigger assignment which checks exhaustion
-        with caplog.at_level("WARNING"):
-            manager.assign_pseudonym(
-                entity_type="PERSON", first_name="Test", last_name="User", gender="male"
-            )
+        manager.assign_pseudonym(
+            entity_type="PERSON", first_name="Test", last_name="User", gender="male"
+        )
 
-        # Verify warning was logged
-        assert any("80% exhausted" in record.message for record in caplog.records)
+        # Verify warning was logged (structlog outputs to stdout)
+        captured = capsys.readouterr()
+        assert "library_near_exhaustion" in captured.out
 
     def test_exhaustion_percentage_in_assignment(self) -> None:
         """Test that exhaustion percentage is included in PseudonymAssignment."""

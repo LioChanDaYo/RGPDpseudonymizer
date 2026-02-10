@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
@@ -11,14 +10,14 @@ from gdpr_pseudonymizer.utils.french_patterns import (
     strip_french_prepositions,
     strip_french_titles,
 )
+from gdpr_pseudonymizer.utils.logger import get_logger
 
 if TYPE_CHECKING:
     from gdpr_pseudonymizer.data.repositories.mapping_repository import (
         MappingRepository,
     )
 
-# Configure structured logging (no sensitive data)
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 @dataclass
@@ -269,9 +268,9 @@ class CompositionalPseudonymEngine:
             assignment.is_ambiguous = True
             assignment.ambiguity_reason = "Multiple word name - parsing uncertain"
             logger.info(
-                "Ambiguous name parsing detected: entity_type=%s, word_count=%d",
-                entity_type,
-                len(entity_text.split()),
+                "ambiguous_name_parsing",
+                entity_type=entity_type,
+                word_count=len(entity_text.split()),
             )
 
         return assignment
@@ -408,10 +407,7 @@ class CompositionalPseudonymEngine:
                 is_ambiguous=True,
                 ambiguity_reason="Standalone component without full name context",
             )
-            logger.info(
-                "Standalone component matched existing first_name: component=%s",
-                component,
-            )
+            logger.info("standalone_component_matched_first_name")
         elif existing_last_pseudonym:
             # Use existing last_name mapping, but flag as ambiguous
             assignment = PseudonymAssignment(
@@ -423,10 +419,7 @@ class CompositionalPseudonymEngine:
                 is_ambiguous=True,
                 ambiguity_reason="Standalone component without full name context",
             )
-            logger.info(
-                "Standalone component matched existing last_name: component=%s",
-                component,
-            )
+            logger.info("standalone_component_matched_last_name")
         else:
             # Assign new pseudonym for standalone component
             assignment = self.pseudonym_manager.assign_pseudonym(
@@ -439,9 +432,6 @@ class CompositionalPseudonymEngine:
             assignment.ambiguity_reason = (
                 "Standalone component without full name context"
             )
-            logger.info(
-                "Standalone component assigned new pseudonym: component=%s",
-                component,
-            )
+            logger.info("standalone_component_new_pseudonym")
 
         return assignment

@@ -7,15 +7,15 @@ with the fr_core_news_lg French language model.
 
 from __future__ import annotations
 
-import logging
 from typing import TYPE_CHECKING
 
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity, EntityDetector
+from gdpr_pseudonymizer.utils.logger import get_logger
 
 if TYPE_CHECKING:
     from spacy.language import Language
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class SpaCyDetector(EntityDetector):
@@ -43,18 +43,18 @@ class SpaCyDetector(EntityDetector):
         try:
             import spacy
 
-            logger.info(f"loading_spacy_model: model={model_name}")
+            logger.info("loading_spacy_model", model=model_name)
             self._nlp = spacy.load(model_name)
             self._model_name = model_name
-            logger.info(f"spacy_model_loaded: model={model_name}")
+            logger.info("spacy_model_loaded", model=model_name)
         except OSError as e:
-            logger.error(f"spacy_model_not_found: model={model_name}, error={str(e)}")
+            logger.error("spacy_model_not_found", model=model_name, error=str(e))
             raise OSError(
                 f"spaCy model '{model_name}' not found. "
                 f"Install with: python -m spacy download {model_name}"
             ) from e
         except Exception as e:
-            logger.error(f"spacy_model_load_failed: model={model_name}, error={str(e)}")
+            logger.error("spacy_model_load_failed", model=model_name, error=str(e))
             raise
 
     def detect_entities(self, text: str) -> list[DetectedEntity]:
@@ -103,13 +103,11 @@ class SpaCyDetector(EntityDetector):
                         )
                     )
 
-            logger.info(
-                f"entities_detected: count={len(entities)}, text_length={len(text)}"
-            )
+            logger.info("entities_detected", count=len(entities), text_length=len(text))
             return entities
 
         except Exception as e:
-            logger.error(f"entity_detection_failed: error={str(e)}")
+            logger.error("entity_detection_failed", error=str(e))
             raise RuntimeError(f"Entity detection failed: {str(e)}") from e
 
     def _map_entity_type(self, spacy_label: str) -> str | None:
