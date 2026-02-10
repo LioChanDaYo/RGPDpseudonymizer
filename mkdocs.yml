@@ -48,6 +48,8 @@ exclude_docs: |
   nlp-benchmark-report.md
   positioning-messaging-*.md
   validation-ui-spec*.md
+  release-announcement-*.md
+  metrics-tracking.md
 
 validation:
   nav:

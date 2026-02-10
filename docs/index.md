@@ -51,14 +51,12 @@ Three built-in themes: **Neutral** (French names), **Star Wars**, and **Lord of 
 ## Quick Start
 
 ```bash
-# Install
-git clone https://github.com/LioChanDaYo/RGPDpseudonymizer.git
-cd RGPDpseudonymizer
-poetry install
-poetry run python scripts/install_spacy_model.py
+# Install from PyPI
+pip install gdpr-pseudonymizer
+python -m spacy download fr_core_news_lg
 
 # Process a document
-poetry run gdpr-pseudo process interview.txt
+gdpr-pseudo process interview.txt
 ```
 
 See the [Installation Guide](installation.md) for detailed platform-specific instructions and the [Tutorial](tutorial.md) for step-by-step workflows.
@@ -98,7 +96,7 @@ GDPR Pseudonymizer supports compliance with Articles 4(5), 25, 30, 32, and 89 of
 
 ## Status
 
-**Current version:** v0.1.0-alpha (seeking early adopter feedback)
+**Current version:** v1.0.0 (Public Release — February 2026)
 
 **Supported:** Python 3.10-3.12 | Windows, macOS, Linux | .txt and .md formats | French language
 
