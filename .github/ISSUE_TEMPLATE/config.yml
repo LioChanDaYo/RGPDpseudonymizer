@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Questions & Help
+    url: https://github.com/LioChanDaYo/RGPDpseudonymizer/discussions
+    about: Ask questions and get help from the community
+  - name: Documentation
+    url: https://liochandayo.github.io/RGPDpseudonymizer/
+    about: Check the documentation for guides and references
