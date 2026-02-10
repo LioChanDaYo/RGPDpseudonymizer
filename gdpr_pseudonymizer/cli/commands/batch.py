@@ -31,11 +31,15 @@ from rich.table import Table
 from rich.text import Text
 
 from gdpr_pseudonymizer.cli.config import load_config
-from gdpr_pseudonymizer.cli.formatters import format_error_message
+from gdpr_pseudonymizer.cli.formatters import format_error_message, rich_notifier
 from gdpr_pseudonymizer.cli.passphrase import resolve_passphrase
 from gdpr_pseudonymizer.cli.progress import ETAColumn, ProgressTracker
+from gdpr_pseudonymizer.cli.validators import (
+    ensure_database,
+    parse_entity_type_filter,
+    validate_theme_or_exit,
+)
 from gdpr_pseudonymizer.core.document_processor import DocumentProcessor
-from gdpr_pseudonymizer.data.database import init_database
 from gdpr_pseudonymizer.utils.logger import configure_logging, get_logger
 
 # Configure logging
@@ -100,6 +104,7 @@ def _process_single_document_worker(
             passphrase=passphrase,
             theme=theme,
             model_name=model,
+            notifier=rich_notifier,
         )
 
         # Process document with validation SKIPPED (parallel mode has no stdin)
@@ -415,25 +420,7 @@ def batch_command(
         )
 
         # Parse entity type filter
-        entity_type_filter: set[str] | None = None
-        if entity_types is not None:
-            valid_types = {"PERSON", "LOCATION", "ORG"}
-            parsed = {t.strip().upper() for t in entity_types.split(",")}
-            invalid = parsed - valid_types
-            if invalid:
-                console.print(
-                    f"[yellow]Warning: Unknown entity type(s): {', '.join(sorted(invalid))}. "
-                    f"Valid types: {', '.join(sorted(valid_types))}[/yellow]"
-                )
-            entity_type_filter = parsed & valid_types
-            if not entity_type_filter:
-                console.print(
-                    "[bold red]Error: No valid entity types specified.[/bold red]"
-                )
-                sys.exit(1)
-            console.print(
-                f"[dim]Filtering entities: {', '.join(sorted(entity_type_filter))}[/dim]"
-            )
+        entity_type_filter = parse_entity_type_filter(entity_types, console)
 
         # Collect files to process
         files = collect_files(input_path, recursive)
@@ -448,14 +435,7 @@ def batch_command(
         console.print(f"\n[bold]Found {len(files)} file(s) to process[/bold]\n")
 
         # Validate theme
-        valid_themes = ["neutral", "star_wars", "lotr"]
-        if effective_theme not in valid_themes:
-            format_error_message(
-                "Invalid Theme",
-                f"Theme '{effective_theme}' is not recognized.",
-                f"Valid themes: {', '.join(valid_themes)}",
-            )
-            sys.exit(1)
+        validate_theme_or_exit(effective_theme)
 
         # Get passphrase
         resolved_passphrase = resolve_passphrase(
@@ -465,23 +445,7 @@ def batch_command(
         )
 
         # Initialize database if needed
-        db_file = Path(effective_db_path)
-        if not db_file.exists():
-            with Progress(
-                SpinnerColumn(),
-                TextColumn("[progress.description]{task.description}"),
-                console=console,
-            ) as progress:
-                task = progress.add_task("Initializing database...", total=None)
-                try:
-                    init_database(effective_db_path, resolved_passphrase)
-                    progress.update(task, description="✓ Database initialized")
-                except ValueError as e:
-                    console.print(
-                        f"\n[bold red]Database initialization failed:[/bold red] {e}"
-                    )
-                    sys.exit(1)
-            console.print()
+        ensure_database(effective_db_path, resolved_passphrase, console)
 
         # Determine processing mode based on workers parameter
         actual_workers = min(cpu_count(), effective_workers, 8)
@@ -534,6 +498,7 @@ def batch_command(
                         passphrase=resolved_passphrase,
                         theme=effective_theme,
                         model_name=effective_model,
+                        notifier=rich_notifier,
                     )
                     init_progress.update(
                         init_task, description="✓ Processor initialized"

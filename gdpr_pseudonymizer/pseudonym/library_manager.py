@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-import logging
 import secrets
 from pathlib import Path
 from typing import Any, TypedDict
@@ -12,9 +11,9 @@ from gdpr_pseudonymizer.pseudonym.assignment_engine import (
     PseudonymAssignment,
     PseudonymManager,
 )
+from gdpr_pseudonymizer.utils.logger import get_logger
 
-# Configure structured logging (no sensitive data)
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class DataSource(TypedDict):
@@ -172,15 +171,37 @@ class LibraryBasedPseudonymManager(PseudonymManager):
         )
 
         logger.info(
-            "Pseudonym library loaded: theme=%s, male_first=%d, female_first=%d, neutral_first=%d, last=%d, locations=%d, organizations=%d",
-            self.theme,
-            len(self.first_names["male"]),
-            len(self.first_names["female"]),
-            len(self.first_names["neutral"]),
-            len(self.last_names),
-            total_locations,
-            total_organizations,
+            "pseudonym_library_loaded",
+            theme=self.theme,
+            male_first=len(self.first_names["male"]),
+            female_first=len(self.first_names["female"]),
+            neutral_first=len(self.first_names["neutral"]),
+            last=len(self.last_names),
+            locations=total_locations,
+            organizations=total_organizations,
         )
+
+    def reset_preview_state(self) -> None:
+        """Reset internal state accumulated during validation preview.
+
+        Clears used pseudonyms and component mappings generated during
+        preview/validation so they don't cause false collision positives
+        during actual processing.
+        """
+        self._used_pseudonyms.clear()
+        self._component_mappings.clear()
+
+    def get_component_mapping(self, component: str, component_type: str) -> str | None:
+        """Look up an in-memory component mapping.
+
+        Args:
+            component: Real component value (e.g., "Dubois")
+            component_type: Component type ("first_name" or "last_name")
+
+        Returns:
+            Pseudonym component if found, None otherwise
+        """
+        return self._component_mappings.get((component, component_type))
 
     def _flatten_location_list(
         self, locations: Locations | dict[Any, Any]
@@ -362,9 +383,9 @@ class LibraryBasedPseudonymManager(PseudonymManager):
         exhaustion = self.check_exhaustion()
         if exhaustion >= 0.8:
             logger.warning(
-                "Library 80%% exhausted (theme=%s, exhaustion=%.2f%%). Consider switching themes or expect fallback naming.",
-                self.theme,
-                exhaustion * 100,
+                "library_near_exhaustion",
+                theme=self.theme,
+                exhaustion_pct=round(exhaustion * 100, 2),
             )
 
         # Compositional logic (Story 2.2) - for now, just interface support
@@ -406,10 +427,9 @@ class LibraryBasedPseudonymManager(PseudonymManager):
         # Check for collision and use fallback if needed
         if pseudonym_full in self._used_pseudonyms:
             logger.warning(
-                "Pseudonym collision detected: %s (entity_type=%s, theme=%s)",
-                pseudonym_full,
-                entity_type,
-                self.theme,
+                "pseudonym_collision",
+                entity_type=entity_type,
+                theme=self.theme,
             )
             # Use fallback naming
             pseudonym_full = self._generate_fallback_name(entity_type)
@@ -592,8 +612,8 @@ class LibraryBasedPseudonymManager(PseudonymManager):
 
         # Library exhausted - use fallback naming (Location-001, Location-002, etc.)
         logger.warning(
-            "Location library exhausted after %d attempts, using fallback naming",
-            max_attempts,
+            "location_library_exhausted",
+            max_attempts=max_attempts,
         )
         return self._generate_fallback_name("LOCATION")
 
@@ -624,8 +644,8 @@ class LibraryBasedPseudonymManager(PseudonymManager):
 
         # Library exhausted - use fallback naming (Org-001, Org-002, etc.)
         logger.warning(
-            "Organization library exhausted after %d attempts, using fallback naming",
-            max_attempts,
+            "org_library_exhausted",
+            max_attempts=max_attempts,
         )
         return self._generate_fallback_name("ORG")
 
@@ -656,8 +676,8 @@ class LibraryBasedPseudonymManager(PseudonymManager):
 
             # Name already used, continue to next counter value
             logger.debug(
-                "Fallback name %s already in use, incrementing counter",
-                fallback_name,
+                "fallback_name_collision",
+                entity_type=entity_type,
             )
 
         # Should never reach here in normal usage
@@ -715,19 +735,18 @@ class LibraryBasedPseudonymManager(PseudonymManager):
                     if counter_value > self._fallback_counters[entity_type_str]:
                         self._fallback_counters[entity_type_str] = counter_value
                         logger.debug(
-                            "Updated fallback counter for %s to %d",
-                            entity_type_str,
-                            counter_value,
+                            "fallback_counter_updated",
+                            entity_type=entity_type_str,
+                            counter=counter_value,
                         )
 
         logger.info(
-            "Loaded %d existing component mappings from database (%d entities processed). "
-            "Fallback counters: PERSON=%d, LOCATION=%d, ORG=%d",
-            loaded_components,
-            len(existing_entities),
-            self._fallback_counters["PERSON"],
-            self._fallback_counters["LOCATION"],
-            self._fallback_counters["ORG"],
+            "existing_mappings_loaded",
+            components=loaded_components,
+            entities=len(existing_entities),
+            fallback_person=self._fallback_counters["PERSON"],
+            fallback_location=self._fallback_counters["LOCATION"],
+            fallback_org=self._fallback_counters["ORG"],
         )
 
     def check_exhaustion(self) -> float:

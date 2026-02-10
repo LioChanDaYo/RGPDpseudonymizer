@@ -5,14 +5,20 @@ This module provides user-friendly validation functions for common CLI inputs.
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 from typing import Optional
 
+from rich.console import Console
+from rich.progress import Progress, SpinnerColumn, TextColumn
+
 from gdpr_pseudonymizer.cli.formatters import (
     ErrorCode,
+    format_error_message,
     format_styled_error,
     format_warning_message,
 )
+from gdpr_pseudonymizer.data.database import init_database
 
 # Valid pseudonym themes
 VALID_THEMES = ["neutral", "star_wars", "lotr"]
@@ -242,3 +248,82 @@ def validate_database_path(
             f"Invalid database path '{db_path}': {e}",
         )
         return False, None
+
+
+# ---------------------------------------------------------------------------
+# Shared CLI command helpers (R6 — factored from process.py / batch.py)
+# ---------------------------------------------------------------------------
+
+VALID_ENTITY_TYPES = {"PERSON", "LOCATION", "ORG"}
+
+
+def parse_entity_type_filter(
+    entity_types: Optional[str], console: Console
+) -> Optional[set[str]]:
+    """Parse and validate an entity-type filter from a CLI argument.
+
+    Args:
+        entity_types: Comma-separated entity types (e.g. "PERSON,ORG") or None
+        console: Rich console for output
+
+    Returns:
+        Set of valid entity types, or None if no filter was requested
+    """
+    if entity_types is None:
+        return None
+
+    parsed = {t.strip().upper() for t in entity_types.split(",")}
+    invalid = parsed - VALID_ENTITY_TYPES
+    if invalid:
+        console.print(
+            f"[yellow]Warning: Unknown entity type(s): {', '.join(sorted(invalid))}. "
+            f"Valid types: {', '.join(sorted(VALID_ENTITY_TYPES))}[/yellow]"
+        )
+    result = parsed & VALID_ENTITY_TYPES
+    if not result:
+        console.print("[bold red]Error: No valid entity types specified.[/bold red]")
+        sys.exit(1)
+    console.print(f"[dim]Filtering entities: {', '.join(sorted(result))}[/dim]")
+    return result
+
+
+def validate_theme_or_exit(theme: str) -> None:
+    """Validate theme and exit(1) if invalid.
+
+    Args:
+        theme: Theme name to check against VALID_THEMES
+    """
+    if theme not in VALID_THEMES:
+        format_error_message(
+            "Invalid Theme",
+            f"Theme '{theme}' is not recognized.",
+            f"Valid themes: {', '.join(VALID_THEMES)}",
+        )
+        sys.exit(1)
+
+
+def ensure_database(db_path: str, passphrase: str, console: Console) -> None:
+    """Initialize the database if it does not exist, with a progress spinner.
+
+    Args:
+        db_path: Path to the SQLite database file
+        passphrase: Encryption passphrase
+        console: Rich console for output
+    """
+    db_file = Path(db_path)
+    if db_file.exists():
+        return
+
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        console=console,
+    ) as progress:
+        task = progress.add_task("Initializing encrypted database...", total=None)
+        try:
+            init_database(db_path, passphrase)
+            progress.update(task, description="✓ Database initialized")
+        except ValueError as e:
+            console.print(f"[bold red]Database initialization failed:[/bold red] {e}")
+            sys.exit(1)
+    console.print("[green]✓ New database created successfully[/green]\n")

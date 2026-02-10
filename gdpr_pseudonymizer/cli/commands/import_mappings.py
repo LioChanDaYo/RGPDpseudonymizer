@@ -18,9 +18,9 @@ from gdpr_pseudonymizer.cli.formatters import format_error_message
 from gdpr_pseudonymizer.cli.passphrase import resolve_passphrase
 from gdpr_pseudonymizer.data.database import open_database
 from gdpr_pseudonymizer.data.repositories.mapping_repository import (
-    DuplicateEntityError,
     SQLiteMappingRepository,
 )
+from gdpr_pseudonymizer.exceptions import DuplicateEntityError
 from gdpr_pseudonymizer.utils.logger import configure_logging, get_logger
 
 # Configure logging

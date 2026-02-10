@@ -28,6 +28,7 @@ class TestParseFullName:
     def test_parse_full_name_two_words(self) -> None:
         """Test parsing two-word PERSON entity into first and last name."""
         mock_manager = Mock()
+        mock_manager.get_component_mapping.return_value = None
         mock_repo = Mock()
         engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
 
@@ -40,6 +41,7 @@ class TestParseFullName:
     def test_parse_full_name_single_word(self) -> None:
         """Test parsing single-word entity returns first name only and ambiguous flag."""
         mock_manager = Mock()
+        mock_manager.get_component_mapping.return_value = None
         mock_repo = Mock()
         engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
 
@@ -52,6 +54,7 @@ class TestParseFullName:
     def test_parse_full_name_three_words(self) -> None:
         """Test parsing three-word entity treats first two as first name."""
         mock_manager = Mock()
+        mock_manager.get_component_mapping.return_value = None
         mock_repo = Mock()
         engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
 
@@ -64,6 +67,7 @@ class TestParseFullName:
     def test_parse_full_name_four_words(self) -> None:
         """Test parsing four-word entity combines all but last as first name."""
         mock_manager = Mock()
+        mock_manager.get_component_mapping.return_value = None
         mock_repo = Mock()
         engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
 
@@ -76,6 +80,7 @@ class TestParseFullName:
     def test_parse_full_name_empty_string(self) -> None:
         """Test parsing empty string returns None and ambiguous flag."""
         mock_manager = Mock()
+        mock_manager.get_component_mapping.return_value = None
         mock_repo = Mock()
         engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
 
@@ -88,6 +93,7 @@ class TestParseFullName:
     def test_parse_full_name_whitespace_only(self) -> None:
         """Test parsing whitespace-only string returns None and ambiguous flag."""
         mock_manager = Mock()
+        mock_manager.get_component_mapping.return_value = None
         mock_repo = Mock()
         engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
 
@@ -104,6 +110,7 @@ class TestParseFullNameWithTitles:
     def test_parse_full_name_with_title_dr(self) -> None:
         """Test parsing name with Dr. title strips title before parsing."""
         mock_manager = Mock()
+        mock_manager.get_component_mapping.return_value = None
         mock_repo = Mock()
         engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
 
@@ -116,6 +123,7 @@ class TestParseFullNameWithTitles:
     def test_parse_full_name_with_title_m(self) -> None:
         """Test parsing name with M. title strips title before parsing."""
         mock_manager = Mock()
+        mock_manager.get_component_mapping.return_value = None
         mock_repo = Mock()
         engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
 
@@ -128,6 +136,7 @@ class TestParseFullNameWithTitles:
     def test_parse_full_name_with_title_mme(self) -> None:
         """Test parsing name with Mme. title strips title before parsing."""
         mock_manager = Mock()
+        mock_manager.get_component_mapping.return_value = None
         mock_repo = Mock()
         engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
 
@@ -140,6 +149,7 @@ class TestParseFullNameWithTitles:
     def test_parse_full_name_with_multiple_titles(self) -> None:
         """Test parsing name with multiple titles strips all titles."""
         mock_manager = Mock()
+        mock_manager.get_component_mapping.return_value = None
         mock_repo = Mock()
         engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
 
@@ -152,6 +162,7 @@ class TestParseFullNameWithTitles:
     def test_parse_full_name_with_title_uppercase(self) -> None:
         """Test parsing name with uppercase title (case-insensitive)."""
         mock_manager = Mock()
+        mock_manager.get_component_mapping.return_value = None
         mock_repo = Mock()
         engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
 
@@ -164,6 +175,7 @@ class TestParseFullNameWithTitles:
     def test_parse_full_name_with_title_no_period(self) -> None:
         """Test parsing name with title without period."""
         mock_manager = Mock()
+        mock_manager.get_component_mapping.return_value = None
         mock_repo = Mock()
         engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
 
@@ -180,6 +192,7 @@ class TestParseFullNameWithCompounds:
     def test_parse_full_name_compound_first_name(self) -> None:
         """Test parsing hyphenated compound first name."""
         mock_manager = Mock()
+        mock_manager.get_component_mapping.return_value = None
         mock_repo = Mock()
         engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
 
@@ -192,6 +205,7 @@ class TestParseFullNameWithCompounds:
     def test_parse_full_name_compound_last_name(self) -> None:
         """Test parsing hyphenated compound last name."""
         mock_manager = Mock()
+        mock_manager.get_component_mapping.return_value = None
         mock_repo = Mock()
         engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
 
@@ -204,6 +218,7 @@ class TestParseFullNameWithCompounds:
     def test_parse_full_name_compound_both(self) -> None:
         """Test parsing both compound first and last names."""
         mock_manager = Mock()
+        mock_manager.get_component_mapping.return_value = None
         mock_repo = Mock()
         engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
 
@@ -216,6 +231,7 @@ class TestParseFullNameWithCompounds:
     def test_parse_full_name_compound_first_only(self) -> None:
         """Test parsing compound first name without last name (ambiguous)."""
         mock_manager = Mock()
+        mock_manager.get_component_mapping.return_value = None
         mock_repo = Mock()
         engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
 
@@ -228,6 +244,7 @@ class TestParseFullNameWithCompounds:
     def test_parse_full_name_multi_hyphen_first(self) -> None:
         """Test parsing multi-hyphen compound first name."""
         mock_manager = Mock()
+        mock_manager.get_component_mapping.return_value = None
         mock_repo = Mock()
         engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
 
@@ -240,6 +257,7 @@ class TestParseFullNameWithCompounds:
     def test_parse_full_name_multi_hyphen_last(self) -> None:
         """Test parsing multi-hyphen compound last name."""
         mock_manager = Mock()
+        mock_manager.get_component_mapping.return_value = None
         mock_repo = Mock()
         engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
 
@@ -252,6 +270,7 @@ class TestParseFullNameWithCompounds:
     def test_parse_full_name_title_and_compound(self) -> None:
         """Test parsing name with title and compound first name."""
         mock_manager = Mock()
+        mock_manager.get_component_mapping.return_value = None
         mock_repo = Mock()
         engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
 
@@ -264,6 +283,7 @@ class TestParseFullNameWithCompounds:
     def test_parse_full_name_multiple_titles_and_compound(self) -> None:
         """Test parsing name with multiple titles and both compound names."""
         mock_manager = Mock()
+        mock_manager.get_component_mapping.return_value = None
         mock_repo = Mock()
         engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
 
@@ -278,6 +298,7 @@ class TestParseFullNameWithCompounds:
     def test_parse_full_name_title_and_compound_first_only(self) -> None:
         """Test parsing title with compound first name only (ambiguous)."""
         mock_manager = Mock()
+        mock_manager.get_component_mapping.return_value = None
         mock_repo = Mock()
         engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
 
@@ -294,6 +315,7 @@ class TestFindStandaloneComponents:
     def test_find_standalone_component_first_name_found(self) -> None:
         """Test finding existing first name component mapping."""
         mock_manager = Mock()
+        mock_manager.get_component_mapping.return_value = None
         mock_repo = Mock()
         engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
 
@@ -318,6 +340,7 @@ class TestFindStandaloneComponents:
     def test_find_standalone_component_last_name_found(self) -> None:
         """Test finding existing last name component mapping."""
         mock_manager = Mock()
+        mock_manager.get_component_mapping.return_value = None
         mock_repo = Mock()
         engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
 
@@ -342,6 +365,7 @@ class TestFindStandaloneComponents:
     def test_find_standalone_component_not_found(self) -> None:
         """Test component lookup returns None when no mapping exists."""
         mock_manager = Mock()
+        mock_manager.get_component_mapping.return_value = None
         mock_repo = Mock()
         engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
 
@@ -355,6 +379,7 @@ class TestFindStandaloneComponents:
     def test_find_standalone_component_multiple_matches_uses_first(self) -> None:
         """Test that multiple component matches use first match for consistency."""
         mock_manager = Mock()
+        mock_manager.get_component_mapping.return_value = None
         mock_repo = Mock()
         engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
 
@@ -393,6 +418,7 @@ class TestCompositionalAssignment:
     def test_assign_compositional_pseudonym_new_full_name(self) -> None:
         """Test assigning pseudonym for new full name with no existing components."""
         mock_manager = Mock()
+        mock_manager.get_component_mapping.return_value = None
         mock_repo = Mock()
         engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
 
@@ -433,6 +459,7 @@ class TestCompositionalAssignment:
     def test_assign_compositional_pseudonym_reuses_first_name(self) -> None:
         """Test compositional logic reuses existing first name mapping."""
         mock_manager = Mock()
+        mock_manager.get_component_mapping.return_value = None
         mock_repo = Mock()
         engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
 
@@ -483,6 +510,7 @@ class TestCompositionalAssignment:
     def test_assign_compositional_pseudonym_reuses_last_name(self) -> None:
         """Test compositional logic reuses existing last name mapping."""
         mock_manager = Mock()
+        mock_manager.get_component_mapping.return_value = None
         mock_repo = Mock()
         engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
 
@@ -533,6 +561,7 @@ class TestCompositionalAssignment:
     def test_assign_compositional_pseudonym_reuses_both_components(self) -> None:
         """Test compositional logic reuses both first and last name mappings."""
         mock_manager = Mock()
+        mock_manager.get_component_mapping.return_value = None
         mock_repo = Mock()
         engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
 
@@ -598,6 +627,7 @@ class TestStandaloneComponentHandling:
     ) -> None:
         """Test standalone component with existing mapping flagged as ambiguous."""
         mock_manager = Mock()
+        mock_manager.get_component_mapping.return_value = None
         mock_repo = Mock()
         mock_manager.theme = "star_wars"
         mock_manager.check_exhaustion.return_value = 0.02
@@ -638,6 +668,7 @@ class TestStandaloneComponentHandling:
     def test_assign_compositional_pseudonym_standalone_component_new(self) -> None:
         """Test standalone component without existing mapping gets new pseudonym."""
         mock_manager = Mock()
+        mock_manager.get_component_mapping.return_value = None
         mock_repo = Mock()
         engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
 
@@ -678,6 +709,7 @@ class TestNonPersonEntities:
     def test_assign_compositional_pseudonym_location(self) -> None:
         """Test LOCATION entity uses simple assignment without compositional logic."""
         mock_manager = Mock()
+        mock_manager.get_component_mapping.return_value = None
         mock_repo = Mock()
         engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
 
@@ -707,6 +739,7 @@ class TestNonPersonEntities:
     def test_assign_compositional_pseudonym_org(self) -> None:
         """Test ORG entity uses simple assignment without compositional logic."""
         mock_manager = Mock()
+        mock_manager.get_component_mapping.return_value = None
         mock_repo = Mock()
         engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
 
@@ -740,6 +773,7 @@ class TestSharedComponentScenarios:
     def test_shared_first_name_different_last_names(self) -> None:
         """Test scenario: Marie Dubois → Leia Organa, Marie Dupont → Leia Skywalker."""
         mock_manager = Mock()
+        mock_manager.get_component_mapping.return_value = None
         mock_repo = Mock()
         engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
 
@@ -807,6 +841,7 @@ class TestSharedComponentScenarios:
     def test_shared_last_name_different_first_names(self) -> None:
         """Test scenario: Marie Dubois → Leia Organa, Jean Dubois → Luke Organa."""
         mock_manager = Mock()
+        mock_manager.get_component_mapping.return_value = None
         mock_repo = Mock()
         engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
 
@@ -858,6 +893,7 @@ class TestAmbiguityDetection:
     def test_assign_compositional_pseudonym_flags_three_word_name(self) -> None:
         """Test three-word name flagged as ambiguous due to parsing uncertainty."""
         mock_manager = Mock()
+        mock_manager.get_component_mapping.return_value = None
         mock_repo = Mock()
         engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
 
@@ -888,6 +924,7 @@ class TestAmbiguityDetection:
     def test_assign_compositional_pseudonym_two_word_not_ambiguous(self) -> None:
         """Test two-word standard name not flagged as ambiguous."""
         mock_manager = Mock()
+        mock_manager.get_component_mapping.return_value = None
         mock_repo = Mock()
         engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
 
@@ -920,6 +957,7 @@ class TestComponentQueryPatterns:
     def test_find_by_component_called_for_first_and_last(self) -> None:
         """Test that find_by_component is called for both first and last name."""
         mock_manager = Mock()
+        mock_manager.get_component_mapping.return_value = None
         mock_repo = Mock()
         engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
 
@@ -951,6 +989,7 @@ class TestComponentQueryPatterns:
     def test_find_by_component_uses_first_match_for_consistency(self) -> None:
         """Test that first match is used when multiple entities share component."""
         mock_manager = Mock()
+        mock_manager.get_component_mapping.return_value = None
         mock_repo = Mock()
         engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
 
@@ -991,6 +1030,7 @@ class TestEdgeCases:
     def test_assign_compositional_pseudonym_with_none_gender(self) -> None:
         """Test assignment with gender=None uses all available names."""
         mock_manager = Mock()
+        mock_manager.get_component_mapping.return_value = None
         mock_repo = Mock()
         engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
 
@@ -1022,6 +1062,7 @@ class TestEdgeCases:
     ) -> None:
         """Test that exhaustion percentage from manager is preserved in assignment."""
         mock_manager = Mock()
+        mock_manager.get_component_mapping.return_value = None
         mock_repo = Mock()
         engine = CompositionalPseudonymEngine(mock_manager, mock_repo)
 

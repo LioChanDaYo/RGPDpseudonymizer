@@ -83,12 +83,10 @@ def test_pseudonym_manager_available() -> None:
     from gdpr_pseudonymizer.pseudonym.assignment_engine import (
         PseudonymAssignment,
         PseudonymManager,
-        SimplePseudonymManager,
     )
 
     assert PseudonymAssignment is not None
     assert PseudonymManager is not None
-    assert SimplePseudonymManager is not None
 
 
 def test_validation_models_available() -> None:
@@ -226,17 +224,6 @@ def test_repository_instantiation(tmp_path: Path) -> None:
         assert repository is not None
         assert repository._session is not None
         assert repository._encryption is not None
-
-
-def test_pseudonym_manager_instantiation() -> None:
-    """Test that SimplePseudonymManager can be instantiated."""
-    from gdpr_pseudonymizer.pseudonym.assignment_engine import (
-        SimplePseudonymManager,
-    )
-
-    manager = SimplePseudonymManager()
-
-    assert manager is not None
 
 
 def test_validation_session_creation() -> None:

@@ -205,6 +205,34 @@
 
 ---
 
+### Story 4.6.1: Codebase Refactoring & Technical Debt Resolution
+
+**As a** developer,
+**I want** to resolve architectural violations, eliminate code duplication, and decompose overgrown methods before adding new features,
+**so that** the codebase remains maintainable, testable, and extensible for launch and beyond.
+
+#### Key References
+
+- **Refactoring Plan:** [docs/refactoring-plan.md](../refactoring-plan.md) — 9 items (R1–R9) identified post-Story 4.6
+- **Story File:** [docs/stories/4.6.1.codebase-refactoring-technical-debt.story.md](../stories/4.6.1.codebase-refactoring-technical-debt.story.md)
+
+#### Acceptance Criteria
+
+1. **AC1:** Zero functionality regression — full test suite passes after each refactoring item. Test count >= 1005, coverage >= 86%.
+2. **AC2:** Layer violation resolved (R1) — `core/` has zero imports from `cli/`. Notification callback replaces direct `console.print()`.
+3. **AC3:** French patterns centralized (R2) — single source of truth in `utils/french_patterns.py`. Zero duplicate definitions.
+4. **AC4:** Divergent preposition bug fixed (R2b) — `entity_grouping.py` pattern aligned with canonical pattern; accuracy tests confirm no regression.
+5. **AC5:** `process_document()` decomposed (R3) — no method exceeds 80 lines; each sub-method has unit tests; public API unchanged.
+6. **AC6:** Encapsulation violations fixed (R4) — public methods replace all private attribute access across module boundaries.
+7. **AC7:** Union-Find factored (R5) — single `UnionFind` class, generic clustering function.
+8. **AC8:** CLI duplication factored (R6) — shared validators for entity types, theme, and DB init.
+9. **AC9:** Dead code removed (R7) — `SimplePseudonymManager` deleted.
+10. **AC10:** Exceptions centralized (R8) — all custom exceptions in `exceptions.py`, inheriting from `PseudonymizerError`.
+11. **AC11:** Logging harmonized (R9) — all modules use structlog.
+12. **AC12:** Each item delivered as atomic commit(s), independently revertible.
+
+---
+
 ### Story 4.7: Final Launch Preparation
 
 **As a** product manager,

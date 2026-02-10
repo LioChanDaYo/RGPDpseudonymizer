@@ -68,3 +68,33 @@ class FileProcessingError(PseudonymizerError):
     """
 
     pass
+
+
+class DatabaseError(PseudonymizerError):
+    """Raised when database operation fails."""
+
+    pass
+
+
+class DuplicateEntityError(DatabaseError):
+    """Raised when attempting to save entity with duplicate full_name."""
+
+    pass
+
+
+class CorruptedDatabaseError(DatabaseError):
+    """Raised when database metadata is missing or invalid."""
+
+    pass
+
+
+class ConfigValidationError(PseudonymizerError):
+    """Raised when configuration validation fails."""
+
+    pass
+
+
+class PassphraseInConfigError(ConfigValidationError):
+    """Raised when passphrase is found in config file (security violation)."""
+
+    pass

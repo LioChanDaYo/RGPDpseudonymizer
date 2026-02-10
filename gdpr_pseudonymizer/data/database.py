@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from gdpr_pseudonymizer.data.encryption import EncryptionService
 from gdpr_pseudonymizer.data.models import Base, Metadata
+from gdpr_pseudonymizer.exceptions import CorruptedDatabaseError
 
 
 class DatabaseSession:
@@ -282,9 +283,3 @@ def open_database(db_path: str, passphrase: str) -> DatabaseSession:
         session.close()
         engine.dispose()
         raise Exception(f"Failed to open database: {e}") from e
-
-
-class CorruptedDatabaseError(Exception):
-    """Raised when database metadata is missing or invalid."""
-
-    pass

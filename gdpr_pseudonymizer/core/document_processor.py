@@ -13,6 +13,7 @@ This is the core workflow implementation for Story 2.6.
 from __future__ import annotations
 
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
@@ -63,6 +64,29 @@ class ProcessingResult:
     error_message: str | None = None
 
 
+@dataclass
+class _ProcessingContext:
+    """Bundle of dependencies initialized per-document processing.
+
+    Groups the repositories and engines that are created once per
+    process_document() call and shared across all sub-methods.
+    """
+
+    mapping_repo: MappingRepository
+    audit_repo: AuditRepository
+    pseudonym_manager: LibraryBasedPseudonymManager
+    compositional_engine: CompositionalPseudonymEngine
+
+
+@dataclass
+class _ResolveResult:
+    """Result of entity pseudonym resolution."""
+
+    replacements: list[tuple[int, int, str]]
+    entities_new: int
+    entities_reused: int
+
+
 class DocumentProcessor:
     """Orchestrates single-document pseudonymization workflow.
 
@@ -87,6 +111,7 @@ class DocumentProcessor:
         passphrase: str,
         theme: str = "neutral",
         model_name: str = "spacy",
+        notifier: Callable[[str], None] | None = None,
     ):
         """Initialize document processor with database and configuration.
 
@@ -95,6 +120,8 @@ class DocumentProcessor:
             passphrase: Encryption passphrase for database access
             theme: Pseudonym library theme (neutral/star_wars/lotr)
             model_name: NLP model name (spacy)
+            notifier: Optional callback for user-facing messages.
+                     Decouples core from CLI presentation layer.
 
         Raises:
             ValueError: If passphrase invalid or database cannot be opened
@@ -104,6 +131,7 @@ class DocumentProcessor:
         self.passphrase = passphrase
         self.theme = theme
         self.model_name = model_name
+        self._notifier = notifier or (lambda msg: None)
 
         # Database session will be created per operation (context manager pattern)
         self._db_session: DatabaseSession | None = None
@@ -124,6 +152,510 @@ class DocumentProcessor:
             self._detector = HybridDetector()
         return self._detector
 
+    def _detect_and_filter_entities(
+        self,
+        document_text: str,
+        entity_type_filter: set[str] | None = None,
+    ) -> list[DetectedEntity]:
+        """Detect entities in document text and apply optional type filter.
+
+        Args:
+            document_text: The document text to analyze
+            entity_type_filter: Optional set of entity types to keep
+
+        Returns:
+            List of detected (and optionally filtered) entities
+        """
+        logger.info("detecting_entities", model=self.model_name)
+        detector = self._get_detector()
+        detected_entities = detector.detect_entities(document_text)
+
+        if entity_type_filter:
+            pre_filter_count = len(detected_entities)
+            detected_entities = [
+                e for e in detected_entities if e.entity_type in entity_type_filter
+            ]
+            logger.info(
+                "entity_type_filter_applied",
+                allowed_types=sorted(entity_type_filter),
+                pre_filter_count=pre_filter_count,
+                post_filter_count=len(detected_entities),
+            )
+
+        logger.info(
+            "entities_detected",
+            count=len(detected_entities),
+            unique_count=len(set(e.text for e in detected_entities)),
+        )
+
+        return detected_entities
+
+    def _build_pseudonym_assigner(
+        self, ctx: _ProcessingContext
+    ) -> Callable[[DetectedEntity], str]:
+        """Build a closure that generates pseudonym previews for validation.
+
+        The returned callable looks up existing mappings first, then generates
+        new pseudonyms via the compositional engine. An internal cache ensures
+        consistent component reuse within a single validation session.
+
+        Args:
+            ctx: Processing context with repos and engine
+
+        Returns:
+            Callable that maps DetectedEntity -> pseudonym preview string
+        """
+        preview_cache: dict[str, str] = {}
+
+        def pseudonym_assigner(entity: DetectedEntity) -> str:
+            entity_text_stripped = ctx.compositional_engine.strip_titles(entity.text)
+            if entity.entity_type == "LOCATION":
+                entity_text_stripped = ctx.compositional_engine.strip_prepositions(
+                    entity_text_stripped
+                )
+
+            existing_entity = ctx.mapping_repo.find_by_full_name(entity_text_stripped)
+            if existing_entity:
+                return existing_entity.pseudonym_full
+
+            if entity_text_stripped in preview_cache:
+                return preview_cache[entity_text_stripped]
+
+            try:
+                assignment = ctx.compositional_engine.assign_compositional_pseudonym(
+                    entity_text=entity_text_stripped,
+                    entity_type=entity.entity_type,
+                    gender=None,
+                )
+                preview_cache[entity_text_stripped] = assignment.pseudonym_full
+                return assignment.pseudonym_full
+            except Exception:
+                return f"[{entity.entity_type}_PREVIEW]"
+
+        return pseudonym_assigner
+
+    def _run_validation(
+        self,
+        ctx: _ProcessingContext,
+        detected_entities: list[DetectedEntity],
+        document_text: str,
+        input_path: str,
+        skip_validation: bool,
+        pseudonym_assigner: Callable[[DetectedEntity], str],
+    ) -> list[DetectedEntity]:
+        """Run entity validation workflow (interactive or auto-accept)."""
+        if skip_validation:
+            logger.info(
+                "validation_skipped",
+                auto_accepted_count=len(detected_entities),
+                reason="parallel_mode",
+            )
+            return detected_entities
+
+        # Separate entities into known (auto-accept) and unknown (need validation)
+        known_entities: list[DetectedEntity] = []
+        unknown_entities: list[DetectedEntity] = []
+
+        for entity in detected_entities:
+            entity_text_stripped = ctx.compositional_engine.strip_titles(entity.text)
+            if entity.entity_type == "LOCATION":
+                entity_text_stripped = ctx.compositional_engine.strip_prepositions(
+                    entity_text_stripped
+                )
+
+            existing = ctx.mapping_repo.find_by_full_name(entity_text_stripped)
+            if existing:
+                known_entities.append(entity)
+            else:
+                unknown_entities.append(entity)
+
+        if known_entities:
+            auto_accept_count = len(known_entities)
+            unique_known = len(set(e.text for e in known_entities))
+            self._notifier(
+                f"Auto-accepted {auto_accept_count} known entities "
+                f"({unique_known} unique) with existing mappings"
+            )
+            logger.info(
+                "auto_accepted_known_entities",
+                auto_accepted_count=auto_accept_count,
+                unique_count=unique_known,
+            )
+
+        try:
+            if unknown_entities:
+                validated_unknown = run_validation_workflow(
+                    entities=unknown_entities,
+                    document_text=document_text,
+                    document_path=input_path,
+                    pseudonym_assigner=pseudonym_assigner,
+                )
+            else:
+                validated_unknown = []
+                self._notifier(
+                    "All entities have existing mappings. Skipping validation."
+                )
+
+            validated_entities = known_entities + validated_unknown
+            logger.info(
+                "validation_complete",
+                validated_count=len(validated_entities),
+                original_count=len(detected_entities),
+                auto_accepted=len(known_entities),
+                user_validated=len(validated_unknown),
+            )
+            return validated_entities
+        except KeyboardInterrupt:
+            logger.info("validation_cancelled", reason="user_interrupt")
+            raise
+
+    def _check_component_match(
+        self,
+        ctx: _ProcessingContext,
+        entity_text_stripped: str,
+        new_entities: list[Entity],
+    ) -> str | None:
+        """Check if a standalone PERSON name matches a component of a previously processed entity.
+
+        For example, if "Dubois" is encountered after "Marie Dubois" was already
+        processed (but not yet saved to DB), this finds the matching component
+        pseudonym from new_entities.
+
+        Args:
+            ctx: Processing context with compositional engine
+            entity_text_stripped: Stripped entity text to match
+            new_entities: Previously processed new entities in this document
+
+        Returns:
+            Matching pseudonym component string, or None if no match found
+        """
+        try:
+            parsed_first, parsed_last, is_ambiguous = (
+                ctx.compositional_engine.parse_full_name(entity_text_stripped)
+            )
+        except (TypeError, ValueError):
+            return None
+
+        if not (is_ambiguous and parsed_first and not parsed_last):
+            return None
+
+        for prev_entity in new_entities:
+            if prev_entity.entity_type != "PERSON":
+                continue
+            if prev_entity.first_name == parsed_first:
+                logger.debug(
+                    "component_matched_in_batch",
+                    component=parsed_first,
+                    component_type="first_name",
+                    matched_entity=prev_entity.full_name,
+                )
+                return prev_entity.pseudonym_first
+            if prev_entity.last_name == parsed_first:
+                logger.debug(
+                    "component_matched_in_batch",
+                    component=parsed_first,
+                    component_type="last_name",
+                    matched_entity=prev_entity.full_name,
+                )
+                return prev_entity.pseudonym_last
+
+        return None
+
+    def _compute_replacement_prefix(
+        self,
+        ctx: _ProcessingContext,
+        entity: DetectedEntity,
+    ) -> str:
+        """Compute the title/preposition prefix to preserve in replacement text.
+
+        Ensures "Dr. Marie Dubois" -> "Dr. Emma Martin" (not "Emma Martin")
+        and "à Paris" -> "à Lyon" (not "Lyon").
+
+        Args:
+            ctx: Processing context with compositional engine
+            entity: Original detected entity
+
+        Returns:
+            Prefix string to prepend to the pseudonym (empty if none)
+        """
+        original_text = entity.text
+        if entity.entity_type == "PERSON":
+            stripped = ctx.compositional_engine.strip_titles(original_text)
+            if stripped != original_text:
+                prefix_end = original_text.find(stripped)
+                if prefix_end > 0:
+                    return original_text[:prefix_end]
+        elif entity.entity_type == "LOCATION":
+            temp_stripped = ctx.compositional_engine.strip_titles(original_text)
+            stripped = ctx.compositional_engine.strip_prepositions(temp_stripped)
+            if stripped != temp_stripped:
+                prefix_end = temp_stripped.find(stripped)
+                if prefix_end > 0:
+                    return temp_stripped[:prefix_end]
+        return ""
+
+    def _assign_new_pseudonym(
+        self,
+        ctx: _ProcessingContext,
+        entity: DetectedEntity,
+        entity_text_stripped: str,
+    ) -> tuple[str, Entity]:
+        """Assign a new compositional pseudonym and create the Entity record."""
+        assignment = ctx.compositional_engine.assign_compositional_pseudonym(
+            entity_text=entity_text_stripped,
+            entity_type=entity.entity_type,
+            gender=None,
+        )
+        original_first = None
+        original_last = None
+        if entity.entity_type == "PERSON":
+            original_first, original_last, _ = ctx.compositional_engine.parse_full_name(
+                entity_text_stripped
+            )
+        new_entity = Entity(
+            entity_type=entity.entity_type,
+            first_name=original_first,
+            last_name=original_last,
+            full_name=entity_text_stripped,
+            pseudonym_first=assignment.pseudonym_first,
+            pseudonym_last=assignment.pseudonym_last,
+            pseudonym_full=assignment.pseudonym_full,
+            first_seen_timestamp=datetime.now(timezone.utc),
+            gender=None,
+            confidence_score=(
+                entity.confidence if hasattr(entity, "confidence") else None
+            ),
+            theme=self.theme,
+            is_ambiguous=assignment.is_ambiguous,
+            ambiguity_reason=assignment.ambiguity_reason,
+        )
+        return assignment.pseudonym_full, new_entity
+
+    def _resolve_pseudonyms(
+        self,
+        ctx: _ProcessingContext,
+        validated_entities: list[DetectedEntity],
+    ) -> _ResolveResult:
+        """Resolve pseudonyms for all validated entities."""
+        logger.info(
+            "starting_entity_processing",
+            validated_count=len(validated_entities),
+        )
+        replacements: list[tuple[int, int, str]] = []
+        new_entities: list[Entity] = []
+        entity_cache: dict[str, str] = {}
+        entities_new = 0
+        entities_reused = 0
+
+        for entity in validated_entities:
+            logger.debug(
+                "processing_entity",
+                entity_text=entity.text,
+                entity_type=entity.entity_type,
+            )
+            entity_text_stripped = ctx.compositional_engine.strip_titles(entity.text)
+            if entity.entity_type == "LOCATION":
+                entity_text_stripped = ctx.compositional_engine.strip_prepositions(
+                    entity_text_stripped
+                )
+
+            if entity_text_stripped in entity_cache:
+                pseudonym = entity_cache[entity_text_stripped]
+                entities_reused += 1
+            else:
+                existing_entity = ctx.mapping_repo.find_by_full_name(
+                    entity_text_stripped
+                )
+                if existing_entity:
+                    pseudonym = existing_entity.pseudonym_full
+                    entity_cache[entity_text_stripped] = pseudonym
+                    entities_reused += 1
+                else:
+                    component_match = (
+                        self._check_component_match(
+                            ctx, entity_text_stripped, new_entities
+                        )
+                        if entity.entity_type == "PERSON"
+                        else None
+                    )
+                    if component_match:
+                        pseudonym = component_match
+                        entity_cache[entity_text_stripped] = pseudonym
+                        entities_reused += 1
+                    else:
+                        pseudonym, new_entity = self._assign_new_pseudonym(
+                            ctx, entity, entity_text_stripped
+                        )
+                        entity_cache[entity_text_stripped] = pseudonym
+                        new_entities.append(new_entity)
+                        entities_new += 1
+
+            prefix = self._compute_replacement_prefix(ctx, entity)
+            replacements.append((entity.start_pos, entity.end_pos, prefix + pseudonym))
+
+        if new_entities:
+            try:
+                ctx.mapping_repo.save_batch(new_entities)
+                logger.info("entities_saved_batch", count=len(new_entities))
+            except Exception as e:
+                logger.error(
+                    "batch_save_failed",
+                    error=str(e),
+                    entity_count=len(new_entities),
+                )
+                raise
+
+        return _ResolveResult(
+            replacements=replacements,
+            entities_new=entities_new,
+            entities_reused=entities_reused,
+        )
+
+    @staticmethod
+    def _apply_replacements(
+        document_text: str,
+        replacements: list[tuple[int, int, str]],
+    ) -> str:
+        """Deduplicate overlapping replacements and apply to document text.
+
+        Overlapping spans are resolved by keeping the first (longest) span
+        in sorted order. Replacements are applied from end to start to
+        preserve character positions.
+
+        Args:
+            document_text: Original document text
+            replacements: List of (start_pos, end_pos, pseudonym) tuples
+
+        Returns:
+            Document text with all replacements applied
+        """
+        # Deduplicate overlapping replacements
+        deduplicated: list[tuple[int, int, str]] = []
+        sorted_repls = sorted(replacements, key=lambda x: (x[0], -x[1]))
+
+        for start, end, pseudo in sorted_repls:
+            overlaps = any(not (end <= ks or start >= ke) for ks, ke, _ in deduplicated)
+            if not overlaps:
+                deduplicated.append((start, end, pseudo))
+
+        logger.debug(
+            "replacements_deduplicated",
+            original_count=len(replacements),
+            deduplicated_count=len(deduplicated),
+        )
+
+        # Apply from end to start to preserve positions
+        result = document_text
+        for start_pos, end_pos, pseudonym in sorted(
+            deduplicated, key=lambda x: x[0], reverse=True
+        ):
+            result = result[:start_pos] + pseudonym + result[end_pos:]
+
+        return result
+
+    def _reset_pseudonym_state(self, ctx: _ProcessingContext) -> None:
+        """Reset pseudonym manager after validation preview.
+
+        The validation preview generates pseudonyms that are never saved.
+        This clears that state and reloads genuine DB mappings to prevent
+        collision false positives during actual processing.
+
+        Args:
+            ctx: Processing context with pseudonym_manager and mapping_repo
+        """
+        ctx.pseudonym_manager.reset_preview_state()
+        existing_entities = ctx.mapping_repo.find_all()
+        ctx.pseudonym_manager.load_existing_mappings(existing_entities)
+        logger.info(
+            "pseudonym_manager_reset_after_validation",
+            existing_mappings_reloaded=len(existing_entities),
+        )
+
+    def _init_processing_context(
+        self, db_session: DatabaseSession
+    ) -> _ProcessingContext:
+        """Initialize repositories and engines for document processing.
+
+        Creates the mapping/audit repositories and the pseudonym
+        manager/engine, loading existing mappings to prevent collisions.
+
+        Args:
+            db_session: Open database session
+
+        Returns:
+            _ProcessingContext with all initialized dependencies
+        """
+        mapping_repo: MappingRepository = SQLiteMappingRepository(db_session)
+        audit_repo = AuditRepository(db_session.session)
+
+        pseudonym_manager = LibraryBasedPseudonymManager()
+        pseudonym_manager.load_library(self.theme)
+
+        existing_entities = mapping_repo.find_all()
+        pseudonym_manager.load_existing_mappings(existing_entities)
+
+        compositional_engine = CompositionalPseudonymEngine(
+            pseudonym_manager=pseudonym_manager,
+            mapping_repository=mapping_repo,
+        )
+
+        return _ProcessingContext(
+            mapping_repo=mapping_repo,
+            audit_repo=audit_repo,
+            pseudonym_manager=pseudonym_manager,
+            compositional_engine=compositional_engine,
+        )
+
+    def _log_success_operation(
+        self,
+        ctx: _ProcessingContext,
+        input_path: str,
+        validated_entities: list[DetectedEntity],
+        processing_time: float,
+    ) -> None:
+        """Log successful processing operation to audit trail."""
+        operation = Operation(
+            operation_type="PROCESS",
+            files_processed=[input_path],
+            model_name=self.model_name,
+            model_version=self._get_model_version(),
+            theme_selected=self.theme,
+            entity_count=len(validated_entities),
+            processing_time_seconds=processing_time,
+            success=True,
+            error_message=None,
+        )
+        ctx.audit_repo.log_operation(operation)
+
+    def _handle_processing_error(
+        self,
+        error: Exception,
+        input_path: str,
+        output_path: str,
+        start_time: float,
+    ) -> ProcessingResult:
+        """Format error, log to audit trail, and return failure result."""
+        processing_time = time.time() - start_time
+        error_message = (
+            str(error)
+            if isinstance(error, FileProcessingError)
+            else f"{type(error).__name__}: {error}"
+        )
+        logger.error("processing_error", error=error_message)
+        self._log_failed_operation(
+            input_path, error_message, processing_time, detected_entities=[]
+        )
+        return ProcessingResult(
+            success=False,
+            input_file=input_path,
+            output_file=output_path,
+            entities_detected=0,
+            entities_new=0,
+            entities_reused=0,
+            processing_time_seconds=processing_time,
+            error_message=error_message,
+        )
+
     def process_document(
         self,
         input_path: str,
@@ -131,593 +663,45 @@ class DocumentProcessor:
         skip_validation: bool = False,
         entity_type_filter: set[str] | None = None,
     ) -> ProcessingResult:
-        """Process single document with complete pseudonymization workflow.
-
-        Workflow:
-        1. FileHandler.read_document() → document_text
-        2. HybridEntityDetector.detect_entities() → List[DetectedEntity]
-        3. Interactive validation workflow → List[ValidatedEntity] (user confirms/rejects each entity)
-           - When skip_validation=True, all entities are auto-accepted (for parallel batch processing)
-        4. For each validated entity, check MappingRepository.find_by_full_name() for existing mapping
-        5. If existing, reuse pseudonym; if new, assign using CompositionalPseudonymEngine
-        6. Save new entities to MappingRepository (encrypted storage)
-        7. Apply replacements to document text (respect exclusion zones)
-        8. FileHandler.write_document() → output file
-        9. AuditRepository.log_operation() with all FR12 fields
-
-        Args:
-            input_path: Path to input document (.txt or .md)
-            output_path: Path to output document
-            skip_validation: If True, skip interactive validation and auto-accept all entities.
-                           Used for parallel batch processing where stdin is unavailable.
-            entity_type_filter: Optional set of entity types to keep (e.g., {"PERSON", "ORG"}).
-                              If None, all entity types are processed.
-
-        Returns:
-            ProcessingResult with processing metadata
-
-        Raises:
-            FileProcessingError: If file I/O fails
-            ValueError: If encryption passphrase invalid
-            Exception: For other unexpected errors
-        """
+        """Process single document with complete pseudonymization workflow."""
         start_time = time.time()
-        entities_new = 0
-        entities_reused = 0
-        error_message = None
-
         try:
-            # Step 1: Read input document
-            logger.info("reading_document", input_file=input_path)
             document_text = read_file(input_path)
-
-            # Step 2: Detect entities using hybrid detector
-            logger.info("detecting_entities", model=self.model_name)
-            detector = self._get_detector()
-            detected_entities = detector.detect_entities(document_text)
-
-            # Step 2b: Apply entity type filter if specified
-            if entity_type_filter:
-                pre_filter_count = len(detected_entities)
-                detected_entities = [
-                    e for e in detected_entities if e.entity_type in entity_type_filter
-                ]
-                logger.info(
-                    "entity_type_filter_applied",
-                    allowed_types=sorted(entity_type_filter),
-                    pre_filter_count=pre_filter_count,
-                    post_filter_count=len(detected_entities),
-                )
-
-            logger.info(
-                "entities_detected",
-                count=len(detected_entities),
-                unique_count=len(set(e.text for e in detected_entities)),
-            )
-
-            # Step 2.5-6: Open database ONCE for validation and processing (prevents Windows SQLite locking)
-            logger.info(
-                "starting_validation_workflow", entity_count=len(detected_entities)
+            detected_entities = self._detect_and_filter_entities(
+                document_text, entity_type_filter
             )
             with open_database(self.db_path, self.passphrase) as db_session:
-                # Initialize repositories (use interface type for maintainability)
-                mapping_repo: MappingRepository = SQLiteMappingRepository(db_session)
-                audit_repo = AuditRepository(db_session.session)
-
-                # Initialize pseudonym manager and engine (used for both validation preview AND processing)
-                pseudonym_manager = LibraryBasedPseudonymManager()
-                pseudonym_manager.load_library(self.theme)
-
-                # Load existing mappings from database to prevent component collisions (Story 2.8)
-                existing_entities = mapping_repo.find_all()
-                pseudonym_manager.load_existing_mappings(existing_entities)
-
-                compositional_engine = CompositionalPseudonymEngine(
-                    pseudonym_manager=pseudonym_manager,
-                    mapping_repository=mapping_repo,
+                ctx = self._init_processing_context(db_session)
+                pseudonym_assigner = self._build_pseudonym_assigner(ctx)
+                validated_entities = self._run_validation(
+                    ctx=ctx,
+                    detected_entities=detected_entities,
+                    document_text=document_text,
+                    input_path=input_path,
+                    skip_validation=skip_validation,
+                    pseudonym_assigner=pseudonym_assigner,
                 )
-
-                # Create pseudonym assigner for validation workflow preview
-                # Local cache for preview-only pseudonyms (ensures consistent component reuse)
-                preview_cache: dict[str, str] = (
-                    {}
-                )  # entity_text_stripped -> pseudonym_full
-
-                def pseudonym_assigner(entity: DetectedEntity) -> str:
-                    """Generate pseudonym preview for validation UI.
-
-                    Uses cached preview pseudonyms to ensure consistent component reuse
-                    during validation (e.g., "Claire Fontaine" and "Fontaine" should
-                    share the "Fontaine" component in their pseudonym previews).
-
-                    Args:
-                        entity: Entity to generate pseudonym for
-
-                    Returns:
-                        Pseudonym string for display in validation UI
-                    """
-                    # Strip titles/prepositions before lookup/assignment
-                    entity_text_stripped = compositional_engine.strip_titles(
-                        entity.text
-                    )
-
-                    # Also strip prepositions for LOCATION entities (à Paris -> Paris)
-                    if entity.entity_type == "LOCATION":
-                        entity_text_stripped = compositional_engine.strip_prepositions(
-                            entity_text_stripped
-                        )
-
-                    # Check if mapping already exists in database
-                    existing_entity = mapping_repo.find_by_full_name(
-                        entity_text_stripped
-                    )
-                    if existing_entity:
-                        return existing_entity.pseudonym_full
-
-                    # Check preview cache for previously generated preview in this session
-                    if entity_text_stripped in preview_cache:
-                        return preview_cache[entity_text_stripped]
-
-                    # Generate new pseudonym preview (not saved yet)
-                    try:
-                        assignment = (
-                            compositional_engine.assign_compositional_pseudonym(
-                                entity_text=entity_text_stripped,
-                                entity_type=entity.entity_type,
-                                gender=None,
-                            )
-                        )
-                        # Cache the preview for consistency within this validation session
-                        preview_cache[entity_text_stripped] = assignment.pseudonym_full
-                        return assignment.pseudonym_full
-                    except Exception:
-                        # Fallback for any assignment errors
-                        return f"[{entity.entity_type}_PREVIEW]"
-
-                # Run validation workflow (interactive or auto-accept)
-                if skip_validation:
-                    # Parallel mode: auto-accept all entities without user interaction
-                    validated_entities = detected_entities
-                    logger.info(
-                        "validation_skipped",
-                        auto_accepted_count=len(validated_entities),
-                        reason="parallel_mode",
-                    )
-                else:
-                    # Interactive mode: run validation workflow with user prompts
-                    # Story 3.4, AC8: Auto-accept entities with existing mappings
-                    # to reduce validation fatigue in batch mode
-
-                    # Separate entities into known (auto-accept) and unknown (need validation)
-                    known_entities: list[DetectedEntity] = []
-                    unknown_entities: list[DetectedEntity] = []
-
-                    for entity in detected_entities:
-                        entity_text_stripped = compositional_engine.strip_titles(
-                            entity.text
-                        )
-                        if entity.entity_type == "LOCATION":
-                            entity_text_stripped = (
-                                compositional_engine.strip_prepositions(
-                                    entity_text_stripped
-                                )
-                            )
-
-                        # Check if mapping exists in database
-                        existing = mapping_repo.find_by_full_name(entity_text_stripped)
-                        if existing:
-                            known_entities.append(entity)
-                        else:
-                            unknown_entities.append(entity)
-
-                    # Import here to avoid circular import (needed for auto-accept messages)
-                    from gdpr_pseudonymizer.cli.formatters import console
-
-                    # Display auto-accepted count (Story 3.4, AC8)
-                    if known_entities:
-                        auto_accept_count = len(known_entities)
-                        unique_known = len(set(e.text for e in known_entities))
-                        console.print(
-                            f"[dim]Auto-accepted {auto_accept_count} known entities "
-                            f"({unique_known} unique) with existing mappings[/dim]"
-                        )
-                        logger.info(
-                            "auto_accepted_known_entities",
-                            auto_accepted_count=auto_accept_count,
-                            unique_count=unique_known,
-                        )
-
-                    try:
-                        # Only validate unknown entities
-                        if unknown_entities:
-                            validated_unknown = run_validation_workflow(
-                                entities=unknown_entities,
-                                document_text=document_text,
-                                document_path=input_path,
-                                pseudonym_assigner=pseudonym_assigner,
-                            )
-                        else:
-                            validated_unknown = []
-                            # No unknown entities - skip validation workflow
-                            console.print(
-                                "[green]All entities have existing mappings. "
-                                "Skipping validation.[/green]"
-                            )
-
-                        # Combine auto-accepted known entities with validated unknown
-                        validated_entities = known_entities + validated_unknown
-
-                        logger.info(
-                            "validation_complete",
-                            validated_count=len(validated_entities),
-                            original_count=len(detected_entities),
-                            auto_accepted=len(known_entities),
-                            user_validated=len(validated_unknown),
-                        )
-                    except KeyboardInterrupt:
-                        # User cancelled validation - abort processing
-                        logger.info("validation_cancelled", reason="user_interrupt")
-                        raise
-
-                # CRITICAL FIX: Reset pseudonym manager state after validation
-                # The validation preview generates pseudonyms and adds them to _used_pseudonyms,
-                # but those previews are never saved. We must clear the state to prevent
-                # collision false positives during actual processing.
-                pseudonym_manager._used_pseudonyms.clear()
-                pseudonym_manager._component_mappings.clear()
-                # Reload existing mappings from database (restores legitimate collision prevention)
-                existing_entities = mapping_repo.find_all()
-                pseudonym_manager.load_existing_mappings(existing_entities)
-                logger.info(
-                    "pseudonym_manager_reset_after_validation",
-                    existing_mappings_reloaded=len(existing_entities),
+                self._reset_pseudonym_state(ctx)
+                resolve_result = self._resolve_pseudonyms(ctx, validated_entities)
+                pseudonymized_text = self._apply_replacements(
+                    document_text, resolve_result.replacements
                 )
-
-                # Step 3-5: Process each VALIDATED entity (check for existing, assign, collect for batch save)
-                # Note: pseudonym_manager and compositional_engine already initialized above for validation
-                logger.info(
-                    "starting_entity_processing",
-                    validated_count=len(validated_entities),
-                )
-                replacements: list[tuple[int, int, str]] = []  # (start, end, pseudonym)
-                new_entities: list[Entity] = []  # Collect new entities for batch save
-                entity_cache: dict[str, str] = (
-                    {}
-                )  # In-memory cache for this document (full_name -> pseudonym)
-
-                for entity in validated_entities:
-                    logger.debug(
-                        "processing_entity",
-                        entity_text=entity.text,
-                        entity_type=entity.entity_type,
-                    )
-                    # Step 3: Check for existing mapping (idempotency)
-                    # CRITICAL FIX: Strip titles/prepositions from entity text BEFORE database lookup
-                    # The database stores names WITHOUT titles/prepositions
-                    # (e.g., "Marie Dubois" not "Dr. Marie Dubois", "Paris" not "à Paris")
-                    entity_text_stripped = compositional_engine.strip_titles(
-                        entity.text
-                    )
-
-                    # Also strip prepositions for LOCATION entities
-                    if entity.entity_type == "LOCATION":
-                        entity_text_stripped = compositional_engine.strip_prepositions(
-                            entity_text_stripped
-                        )
-
-                    # Check both database AND in-memory cache for this document
-                    if entity_text_stripped in entity_cache:
-                        # Already processed in this document - reuse from cache
-                        pseudonym = entity_cache[entity_text_stripped]
-                        entities_reused += 1
-                        logger.debug(
-                            "entity_cached",
-                            entity_type=entity.entity_type,
-                            is_cached=True,
-                        )
-                    else:
-                        existing_entity = mapping_repo.find_by_full_name(
-                            entity_text_stripped
-                        )
-
-                        if existing_entity:
-                            # Step 4a: Reuse existing pseudonym from database
-                            pseudonym = existing_entity.pseudonym_full
-                            entity_cache[entity_text_stripped] = (
-                                pseudonym  # Cache for subsequent occurrences
-                            )
-                            entities_reused += 1
-                            logger.debug(
-                                "entity_reused",
-                                entity_type=entity.entity_type,
-                                is_reused=True,
-                            )
-                        else:
-                            # CRITICAL FIX (Bug 4): Check new_entities list for component matches
-                            # If "Dubois" is being processed but "Marie Dubois" was already processed
-                            # earlier in THIS document (but not yet saved to database), we need to
-                            # check the new_entities list for component matches.
-                            component_match_pseudonym = None
-                            if entity.entity_type == "PERSON":
-                                # Parse to check if this is a standalone component
-                                try:
-                                    (
-                                        parsed_first,
-                                        parsed_last,
-                                        is_ambiguous,
-                                    ) = compositional_engine.parse_full_name(
-                                        entity_text_stripped
-                                    )
-                                except (TypeError, ValueError):
-                                    # If parse_full_name fails (e.g., mocked in tests), skip component matching
-                                    parsed_first = None
-                                    parsed_last = None
-                                    is_ambiguous = False
-
-                                # If standalone (single word), check new_entities for matches
-                                if is_ambiguous and parsed_first and not parsed_last:
-                                    # Check if this component matches any previously processed entity
-                                    for prev_entity in new_entities:
-                                        if prev_entity.entity_type == "PERSON":
-                                            # Check if matches as first name
-                                            if prev_entity.first_name == parsed_first:
-                                                component_match_pseudonym = (
-                                                    prev_entity.pseudonym_first
-                                                )
-                                                logger.debug(
-                                                    "component_matched_in_batch",
-                                                    component=parsed_first,
-                                                    component_type="first_name",
-                                                    matched_entity=prev_entity.full_name,
-                                                )
-                                                break
-                                            # Check if matches as last name
-                                            if prev_entity.last_name == parsed_first:
-                                                component_match_pseudonym = (
-                                                    prev_entity.pseudonym_last
-                                                )
-                                                logger.debug(
-                                                    "component_matched_in_batch",
-                                                    component=parsed_first,
-                                                    component_type="last_name",
-                                                    matched_entity=prev_entity.full_name,
-                                                )
-                                                break
-
-                            if component_match_pseudonym:
-                                # Reuse component pseudonym from new_entities batch
-                                pseudonym = component_match_pseudonym
-                                entity_cache[entity_text_stripped] = pseudonym
-                                entities_reused += 1
-                                logger.debug(
-                                    "entity_reused_from_batch",
-                                    entity_type=entity.entity_type,
-                                )
-                            else:
-                                # Step 4b: Assign new pseudonym using compositional logic
-                                # Use stripped text (titles already removed above)
-                                assignment = compositional_engine.assign_compositional_pseudonym(
-                                    entity_text=entity_text_stripped,
-                                    entity_type=entity.entity_type,
-                                    gender=None,  # Could be extracted from NER metadata if available
-                                )
-                                pseudonym = assignment.pseudonym_full
-                                entity_cache[entity_text_stripped] = (
-                                    pseudonym  # Cache for subsequent occurrences
-                                )
-
-                                # CRITICAL FIX: Parse original entity text to extract first/last name components
-                                # for PERSON entities. These are the ORIGINAL names that will be encrypted,
-                                # not the pseudonyms. This enables component-based lookup later.
-                                original_first = None
-                                original_last = None
-                                if entity.entity_type == "PERSON":
-                                    # Parse the STRIPPED entity text to get components
-                                    (
-                                        original_first,
-                                        original_last,
-                                        _,
-                                    ) = compositional_engine.parse_full_name(
-                                        entity_text_stripped
-                                    )
-
-                                # Step 5: Create new entity (save later in batch)
-                                new_entity = Entity(
-                                    entity_type=entity.entity_type,
-                                    first_name=original_first,  # ✓ ORIGINAL first name (will be encrypted)
-                                    last_name=original_last,  # ✓ ORIGINAL last name (will be encrypted)
-                                    full_name=entity_text_stripped,  # ✓ ORIGINAL text WITHOUT titles (will be encrypted)
-                                    pseudonym_first=assignment.pseudonym_first,
-                                    pseudonym_last=assignment.pseudonym_last,
-                                    pseudonym_full=assignment.pseudonym_full,
-                                    first_seen_timestamp=datetime.now(timezone.utc),
-                                    gender=None,
-                                    confidence_score=(
-                                        entity.confidence
-                                        if hasattr(entity, "confidence")
-                                        else None
-                                    ),
-                                    theme=self.theme,
-                                    is_ambiguous=assignment.is_ambiguous,
-                                    ambiguity_reason=assignment.ambiguity_reason,
-                                )
-                                new_entities.append(new_entity)
-                                entities_new += 1
-                                logger.debug(
-                                    "entity_assigned",
-                                    entity_type=entity.entity_type,
-                                    is_new=True,
-                                )
-
-                    # Collect replacement for later application
-                    # CRITICAL: Preserve titles/prepositions in output text for readability
-                    # Example: "Dr. Marie Dubois" -> "Dr. Emma Martin", not "Emma Martin"
-                    # Example: "à Paris" -> "à Lyon", not "Lyon"
-                    original_text = entity.text
-                    prefix = ""
-
-                    # Extract title prefix for PERSON entities
-                    if entity.entity_type == "PERSON":
-                        # Find how much of the original text is title
-                        stripped = compositional_engine.strip_titles(original_text)
-                        if stripped != original_text:
-                            # Extract the title prefix
-                            prefix_end = original_text.find(stripped)
-                            if prefix_end > 0:
-                                prefix = original_text[:prefix_end]
-
-                    # Extract preposition prefix for LOCATION entities
-                    elif entity.entity_type == "LOCATION":
-                        # First strip titles (in case location has one, unlikely but possible)
-                        temp_stripped = compositional_engine.strip_titles(original_text)
-                        # Then check for preposition
-                        stripped = compositional_engine.strip_prepositions(
-                            temp_stripped
-                        )
-                        if stripped != temp_stripped:
-                            # Extract the preposition prefix
-                            prefix_end = temp_stripped.find(stripped)
-                            if prefix_end > 0:
-                                prefix = temp_stripped[:prefix_end]
-
-                    # Prepend prefix to pseudonym for final replacement
-                    pseudonym_with_prefix = prefix + pseudonym
-                    replacements.append(
-                        (entity.start_pos, entity.end_pos, pseudonym_with_prefix)
-                    )
-
-                # Step 5b: Save all new entities in single transaction for data consistency
-                # If this fails, no partial data will be committed to database
-                if new_entities:
-                    try:
-                        mapping_repo.save_batch(new_entities)
-                        logger.info("entities_saved_batch", count=len(new_entities))
-                    except Exception as e:
-                        # Transaction will be rolled back by SQLAlchemy on exception
-                        logger.error(
-                            "batch_save_failed",
-                            error=str(e),
-                            entity_count=len(new_entities),
-                        )
-                        raise  # Re-raise to trigger outer exception handler
-
-                # Step 6: Apply replacements (from end to start to preserve positions)
-                # CRITICAL FIX: Deduplicate overlapping replacements before applying
-                # If "Dr. Marie Dubois" and "Marie Dubois" are both detected as entities,
-                # applying both causes text corruption. Keep only the longest span.
-                deduplicated_replacements: list[tuple[int, int, str]] = []
-                sorted_replacements = sorted(replacements, key=lambda x: (x[0], -x[1]))
-
-                for start, end, pseudo in sorted_replacements:
-                    # Check if this replacement overlaps with any already kept
-                    overlaps = False
-                    for kept_start, kept_end, _ in deduplicated_replacements:
-                        # Check for any overlap: [start, end) overlaps with [kept_start, kept_end)
-                        if not (end <= kept_start or start >= kept_end):
-                            overlaps = True
-                            break
-
-                    if not overlaps:
-                        deduplicated_replacements.append((start, end, pseudo))
-
-                logger.debug(
-                    "replacements_deduplicated",
-                    original_count=len(replacements),
-                    deduplicated_count=len(deduplicated_replacements),
-                )
-
-                # Apply deduplicated replacements from end to start
-                pseudonymized_text = document_text
-                for start_pos, end_pos, pseudonym in sorted(
-                    deduplicated_replacements, key=lambda x: x[0], reverse=True
-                ):
-                    pseudonymized_text = (
-                        pseudonymized_text[:start_pos]
-                        + pseudonym
-                        + pseudonymized_text[end_pos:]
-                    )
-
-                # Step 7: Write output document
-                logger.info("writing_output", output_file=output_path)
                 write_file(output_path, pseudonymized_text)
-
-                # Step 8: Log operation to audit trail
                 processing_time = time.time() - start_time
-                operation = Operation(
-                    operation_type="PROCESS",
-                    files_processed=[input_path],
-                    model_name=self.model_name,
-                    model_version=self._get_model_version(),
-                    theme_selected=self.theme,
-                    entity_count=len(validated_entities),
-                    processing_time_seconds=processing_time,
-                    success=True,
-                    error_message=None,
+                self._log_success_operation(
+                    ctx, input_path, validated_entities, processing_time
                 )
-                audit_repo.log_operation(operation)
-
-                logger.info(
-                    "processing_complete",
-                    entities_detected=len(detected_entities),
-                    entities_validated=len(validated_entities),
-                    entities_new=entities_new,
-                    entities_reused=entities_reused,
-                    processing_time=processing_time,
-                )
-
                 return ProcessingResult(
                     success=True,
                     input_file=input_path,
                     output_file=output_path,
                     entities_detected=len(validated_entities),
-                    entities_new=entities_new,
-                    entities_reused=entities_reused,
+                    entities_new=resolve_result.entities_new,
+                    entities_reused=resolve_result.entities_reused,
                     processing_time_seconds=processing_time,
                 )
-
-        except FileProcessingError as e:
-            # File I/O errors
-            processing_time = time.time() - start_time
-            error_message = str(e)
-            logger.error("file_processing_error", error=error_message)
-
-            # Log failed operation to audit trail
-            self._log_failed_operation(
-                input_path, error_message, processing_time, detected_entities=[]
-            )
-
-            return ProcessingResult(
-                success=False,
-                input_file=input_path,
-                output_file=output_path,
-                entities_detected=0,
-                entities_new=0,
-                entities_reused=0,
-                processing_time_seconds=processing_time,
-                error_message=error_message,
-            )
-
         except Exception as e:
-            # Unexpected errors
-            processing_time = time.time() - start_time
-            error_message = f"{type(e).__name__}: {str(e)}"
-            logger.error("processing_error", error=error_message)
-
-            # Log failed operation to audit trail
-            self._log_failed_operation(
-                input_path, error_message, processing_time, detected_entities=[]
-            )
-
-            return ProcessingResult(
-                success=False,
-                input_file=input_path,
-                output_file=output_path,
-                entities_detected=0,
-                entities_new=0,
-                entities_reused=0,
-                processing_time_seconds=processing_time,
-                error_message=error_message,
-            )
+            return self._handle_processing_error(e, input_path, output_path, start_time)
 
     def _get_model_version(self) -> str:
         """Get NLP model version string.

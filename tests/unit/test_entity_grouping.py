@@ -3,7 +3,11 @@
 from __future__ import annotations
 
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
-from gdpr_pseudonymizer.nlp.entity_grouping import group_entity_variants
+from gdpr_pseudonymizer.nlp.entity_grouping import (
+    UnionFind,
+    _cluster_by_normalization,
+    group_entity_variants,
+)
 
 
 def _make_entity(text: str, entity_type: str, start: int = 0) -> DetectedEntity:
@@ -154,6 +158,43 @@ class TestLocationGrouping:
         groups = group_entity_variants(entities)
         assert len(groups) == 1
 
+    def test_des_preposition_stripped(self) -> None:
+        """'des Champs-Élysées' + 'Champs-Élysées' → one group."""
+        entities = [
+            _make_entity("des Champs-Élysées", "LOCATION", 0),
+            _make_entity("Champs-Élysées", "LOCATION", 50),
+        ]
+        groups = group_entity_variants(entities)
+        assert len(groups) == 1
+
+    def test_la_article_preserved_in_city_names(self) -> None:
+        """'La Rochelle' must NOT be stripped to 'Rochelle' — article is part of the name."""
+        entities = [
+            _make_entity("La Rochelle", "LOCATION", 0),
+            _make_entity("Rochelle", "LOCATION", 50),
+        ]
+        groups = group_entity_variants(entities)
+        # These should be SEPARATE groups — "La Rochelle" ≠ "Rochelle"
+        assert len(groups) == 2
+
+    def test_le_article_preserved_in_city_names(self) -> None:
+        """'Le Mans' must NOT be stripped to 'Mans' — article is part of the name."""
+        entities = [
+            _make_entity("Le Mans", "LOCATION", 0),
+            _make_entity("Mans", "LOCATION", 50),
+        ]
+        groups = group_entity_variants(entities)
+        assert len(groups) == 2
+
+    def test_les_article_preserved_in_city_names(self) -> None:
+        """'Les Ulis' must NOT be stripped to 'Ulis' — article is part of the name."""
+        entities = [
+            _make_entity("Les Ulis", "LOCATION", 0),
+            _make_entity("Ulis", "LOCATION", 50),
+        ]
+        groups = group_entity_variants(entities)
+        assert len(groups) == 2
+
 
 class TestOrgGrouping:
     """Tests for ORG entity variant grouping."""
@@ -222,3 +263,72 @@ class TestEdgeCases:
         assert len(groups) == 1
         canonical = groups[0][0]
         assert canonical.text == "Marie Dubois"
+
+
+class TestUnionFind:
+    """Tests for the UnionFind data structure."""
+
+    def test_singleton_clusters(self) -> None:
+        """Without any unions, each key is its own cluster."""
+        keys = [("a", "T"), ("b", "T"), ("c", "T")]
+        uf = UnionFind(keys)
+        clusters = uf.clusters()
+        assert len(clusters) == 3
+
+    def test_union_merges_clusters(self) -> None:
+        """Unioning two keys merges their clusters."""
+        keys = [("a", "T"), ("b", "T"), ("c", "T")]
+        uf = UnionFind(keys)
+        uf.union(("a", "T"), ("b", "T"))
+        clusters = uf.clusters()
+        assert len(clusters) == 2
+
+    def test_find_with_path_compression(self) -> None:
+        """Find returns consistent root after chain of unions."""
+        keys = [("a", "T"), ("b", "T"), ("c", "T"), ("d", "T")]
+        uf = UnionFind(keys)
+        uf.union(("a", "T"), ("b", "T"))
+        uf.union(("b", "T"), ("c", "T"))
+        uf.union(("c", "T"), ("d", "T"))
+        # All should share the same root
+        assert uf.find(("a", "T")) == uf.find(("d", "T"))
+        clusters = uf.clusters()
+        assert len(clusters) == 1
+
+    def test_transitive_merging(self) -> None:
+        """Union is transitive: a-b and b-c → a,b,c in one cluster."""
+        keys = [("a", "T"), ("b", "T"), ("c", "T")]
+        uf = UnionFind(keys)
+        uf.union(("a", "T"), ("b", "T"))
+        uf.union(("b", "T"), ("c", "T"))
+        clusters = uf.clusters()
+        assert len(clusters) == 1
+        assert len(clusters[0]) == 3
+
+
+class TestClusterByNormalization:
+    """Tests for _cluster_by_normalization()."""
+
+    def test_groups_by_normalized_equality(self) -> None:
+        """Keys that normalize to the same string are clustered."""
+        keys = [("Paris", "LOC"), ("paris", "LOC"), ("Lyon", "LOC")]
+        clusters = _cluster_by_normalization(keys, lambda t: t.lower())
+        assert len(clusters) == 2
+
+    def test_single_key_returns_singleton(self) -> None:
+        """Single key returns one singleton cluster."""
+        keys = [("Paris", "LOC")]
+        clusters = _cluster_by_normalization(keys, lambda t: t.lower())
+        assert len(clusters) == 1
+        assert clusters[0] == [("Paris", "LOC")]
+
+    def test_empty_keys_returns_empty(self) -> None:
+        """Empty input returns empty output."""
+        clusters = _cluster_by_normalization([], lambda t: t)
+        assert clusters == []
+
+    def test_all_different_no_merging(self) -> None:
+        """When all normalizations differ, no merging occurs."""
+        keys = [("a", "T"), ("b", "T"), ("c", "T")]
+        clusters = _cluster_by_normalization(keys, lambda t: t)
+        assert len(clusters) == 3

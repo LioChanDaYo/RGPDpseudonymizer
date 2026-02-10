@@ -2,34 +2,22 @@
 
 from __future__ import annotations
 
-import logging
-import re
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
+
+from gdpr_pseudonymizer.utils.french_patterns import (
+    strip_french_prepositions,
+    strip_french_titles,
+)
+from gdpr_pseudonymizer.utils.logger import get_logger
 
 if TYPE_CHECKING:
     from gdpr_pseudonymizer.data.repositories.mapping_repository import (
         MappingRepository,
     )
 
-# Configure structured logging (no sensitive data)
-logger = logging.getLogger(__name__)
-
-# French title pattern for preprocessing
-# Matches: Dr./Dr, Docteur, Pr./Pr, Prof./Prof, Professeur, M./M, Mme./Mme, Mlle./Mlle, Madame, Monsieur, Mademoiselle
-# Also matches: Maître (attorney title), Me./Me (abbreviated attorney title)
-# Case-insensitive, with or without periods
-# (?!\w) ensures title is not followed by a word character (prevents matching "Dr" in "Drapeau")
-# \s* consumes optional trailing whitespace
-FRENCH_TITLE_PATTERN = r"\b(?:Docteur|Professeur|Madame|Monsieur|Mademoiselle|Maître|Dr\.?|Pr\.?|Prof\.?|M\.?|Mme\.?|Mlle\.?|Me\.?)(?!\w)\s*"
-
-# French preposition pattern for location preprocessing
-# Matches common French prepositions that precede location names: à, au, aux, en, de, du, des, d', l'
-# Handles contractions and elisions
-# ^[\s]* matches optional leading whitespace
-# \s* consumes trailing whitespace after preposition
-FRENCH_PREPOSITION_PATTERN = r"^[\s]*(?:à|au|aux|en|de|du|des|d'|l'|la|le|les)\s+"
+logger = get_logger(__name__)
 
 
 @dataclass
@@ -116,67 +104,28 @@ class PseudonymManager(ABC):
         """
         pass
 
+    @abstractmethod
+    def reset_preview_state(self) -> None:
+        """Reset internal state accumulated during validation preview.
 
-class SimplePseudonymManager(PseudonymManager):
-    """Stub implementation of PseudonymManager interface.
+        Clears used pseudonyms and component mappings generated during
+        preview/validation so they don't cause false collision positives
+        during actual processing.
+        """
+        pass
 
-    This is a minimal placeholder. Full implementation will be completed
-    in Epic 2 with proper library loading, compositional logic, and
-    exhaustion tracking.
-    """
-
-    def __init__(self) -> None:
-        """Initialize pseudonym manager with empty state."""
-        self._theme: str | None = None
-
-    def load_library(self, theme: str) -> None:
-        """Load library (stub implementation).
+    @abstractmethod
+    def get_component_mapping(self, component: str, component_type: str) -> str | None:
+        """Look up an in-memory component mapping.
 
         Args:
-            theme: Library theme name
-        """
-        # Stub: Full implementation in Epic 2
-        self._theme = theme
-
-    def assign_pseudonym(
-        self,
-        entity_type: str,
-        first_name: str | None = None,
-        last_name: str | None = None,
-        gender: str | None = None,
-        existing_first: str | None = None,
-        existing_last: str | None = None,
-    ) -> PseudonymAssignment:
-        """Assign pseudonym (stub implementation).
-
-        Args:
-            entity_type: Entity type
-            first_name: First name
-            last_name: Last name
-            gender: Gender hint
-            existing_first: Existing first pseudonym
-            existing_last: Existing last pseudonym
+            component: Real component value (e.g., "Dubois")
+            component_type: Component type ("first_name" or "last_name")
 
         Returns:
-            Stub pseudonym assignment
+            Pseudonym component if found, None otherwise
         """
-        # Stub: Full implementation in Epic 2
-        return PseudonymAssignment(
-            pseudonym_full="PLACEHOLDER",
-            pseudonym_first="PLACEHOLDER_FIRST" if entity_type == "PERSON" else None,
-            pseudonym_last="PLACEHOLDER_LAST" if entity_type == "PERSON" else None,
-            theme=self._theme or "neutral",
-            exhaustion_percentage=0.0,
-        )
-
-    def check_exhaustion(self) -> float:
-        """Get exhaustion percentage (stub implementation).
-
-        Returns:
-            0.0 (stub)
-        """
-        # Stub: Full implementation in Epic 2
-        return 0.0
+        pass
 
 
 class CompositionalPseudonymEngine:
@@ -230,16 +179,7 @@ class CompositionalPseudonymEngine:
         Returns:
             Text with titles removed
         """
-        # Strip titles iteratively (handles multiple titles)
-        while True:
-            stripped = re.sub(
-                FRENCH_TITLE_PATTERN, "", text, flags=re.IGNORECASE
-            ).strip()
-            if stripped == text:
-                break
-            text = stripped
-
-        return text
+        return strip_french_titles(text)
 
     def strip_prepositions(self, text: str) -> str:
         """Remove French prepositions from location entity text.
@@ -260,11 +200,7 @@ class CompositionalPseudonymEngine:
         Returns:
             Text with leading prepositions removed
         """
-        # Strip prepositions from the beginning only
-        stripped = re.sub(
-            FRENCH_PREPOSITION_PATTERN, "", text, flags=re.IGNORECASE
-        ).strip()
-        return stripped
+        return strip_french_prepositions(text)
 
     def assign_compositional_pseudonym(
         self,
@@ -332,9 +268,9 @@ class CompositionalPseudonymEngine:
             assignment.is_ambiguous = True
             assignment.ambiguity_reason = "Multiple word name - parsing uncertain"
             logger.info(
-                "Ambiguous name parsing detected: entity_type=%s, word_count=%d",
-                entity_type,
-                len(entity_text.split()),
+                "ambiguous_name_parsing",
+                entity_type=entity_type,
+                word_count=len(entity_text.split()),
             )
 
         return assignment
@@ -409,14 +345,11 @@ class CompositionalPseudonymEngine:
         # This ensures consistent pseudonym component reuse during validation
         # Example: "Claire Fontaine" preview generates ("Fontaine", "last_name") -> "Martin"
         #          Later "Fontaine" standalone should reuse "Martin"
-        if hasattr(self.pseudonym_manager, "_component_mappings"):
-            component_mappings = self.pseudonym_manager._component_mappings
-            # Ensure it's actually a dict (not a Mock in tests)
-            if isinstance(component_mappings, dict):
-                mapping_key = (component, component_type)
-                if mapping_key in component_mappings:
-                    result: str = component_mappings[mapping_key]
-                    return result
+        in_memory = self.pseudonym_manager.get_component_mapping(
+            component, component_type
+        )
+        if in_memory is not None:
+            return in_memory
 
         # SECOND: Query repository for existing component mappings (persisted)
         existing_entities = self.mapping_repository.find_by_component(
@@ -474,10 +407,7 @@ class CompositionalPseudonymEngine:
                 is_ambiguous=True,
                 ambiguity_reason="Standalone component without full name context",
             )
-            logger.info(
-                "Standalone component matched existing first_name: component=%s",
-                component,
-            )
+            logger.info("standalone_component_matched_first_name")
         elif existing_last_pseudonym:
             # Use existing last_name mapping, but flag as ambiguous
             assignment = PseudonymAssignment(
@@ -489,10 +419,7 @@ class CompositionalPseudonymEngine:
                 is_ambiguous=True,
                 ambiguity_reason="Standalone component without full name context",
             )
-            logger.info(
-                "Standalone component matched existing last_name: component=%s",
-                component,
-            )
+            logger.info("standalone_component_matched_last_name")
         else:
             # Assign new pseudonym for standalone component
             assignment = self.pseudonym_manager.assign_pseudonym(
@@ -505,9 +432,6 @@ class CompositionalPseudonymEngine:
             assignment.ambiguity_reason = (
                 "Standalone component without full name context"
             )
-            logger.info(
-                "Standalone component assigned new pseudonym: component=%s",
-                component,
-            )
+            logger.info("standalone_component_new_pseudonym")
 
         return assignment

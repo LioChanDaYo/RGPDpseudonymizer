@@ -135,8 +135,15 @@ This document defines the dependency relationships between modules in the GDPR P
 
 **Purpose**: Pseudonym assignment with compositional logic
 
+**Key Interface Methods** (PseudonymManager ABC):
+- `load_library(theme)` - Load pseudonym library from JSON
+- `assign_pseudonym(entity_type, ...)` - Assign pseudonym with compositional logic
+- `check_exhaustion()` - Get library usage percentage (0.0-1.0)
+- `reset_preview_state()` - Clear preview state after validation (added in R4)
+- `get_component_mapping(component, component_type)` - Look up in-memory component mapping (added in R4)
+
 **Files**:
-- `assignment_engine.py` - Interface (PseudonymAssignment, PseudonymManager)
+- `assignment_engine.py` - Interface (PseudonymAssignment, PseudonymManager, CompositionalPseudonymEngine)
 - `library_manager.py` - JSON library loader (Epic 2)
 - `validators.py` - Pseudonym validation (Epic 2)
 
@@ -184,6 +191,7 @@ This document defines the dependency relationships between modules in the GDPR P
 - `file_handler.py` - File I/O utilities
 - `encryption.py` - Encryption service interface
 - `markdown_parser.py` - Markdown processing (Epic 3)
+- `french_patterns.py` - Centralized French title/preposition patterns (added in R2)
 
 ---
 
@@ -204,6 +212,10 @@ This document defines the dependency relationships between modules in the GDPR P
 - `EncryptionError`
 - `ValidationError`
 - `FileProcessingError`
+- `DatabaseError` (centralized in R8)
+- `CorruptedDatabaseError` (centralized in R8)
+- `DuplicateEntityError` (centralized in R8)
+- `ConfigValidationError` (centralized in R8)
 
 ---
 
@@ -294,7 +306,7 @@ entity_detector = SpaCyDetector()
 entity_detector.load_model(config.model_name)
 
 mapping_repo = SQLiteMappingRepository(config.db_path)
-pseudonym_mgr = SimplePseudonymManager()
+pseudonym_mgr = LibraryBasedPseudonymManager()
 pseudonym_mgr.load_library(config.theme)
 
 # 4. Inject dependencies into core orchestrator
@@ -359,6 +371,6 @@ All extensions integrate without modifying Core layer code due to interface-base
 
 ---
 
-**Document Version**: 1.0
-**Story**: 1.4 - Project Foundation & Module Structure
-**Date**: 2026-01-18
+**Document Version**: 1.1
+**Story**: 1.4 - Project Foundation & Module Structure (updated in Story 4.6.1)
+**Date**: 2026-02-10

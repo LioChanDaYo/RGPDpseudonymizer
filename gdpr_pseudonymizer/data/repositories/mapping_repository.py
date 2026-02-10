@@ -5,6 +5,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 
 from gdpr_pseudonymizer.data.models import Entity
+from gdpr_pseudonymizer.exceptions import DatabaseError, DuplicateEntityError
 
 
 class MappingRepository(ABC):
@@ -402,15 +403,3 @@ class SQLiteMappingRepository(MappingRepository):
             ambiguity_reason=encrypted_entity.ambiguity_reason,
         )
         return decrypted
-
-
-class DuplicateEntityError(Exception):
-    """Raised when attempting to save entity with duplicate full_name."""
-
-    pass
-
-
-class DatabaseError(Exception):
-    """Raised when database operation fails."""
-
-    pass

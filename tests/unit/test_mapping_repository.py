@@ -7,9 +7,9 @@ import pytest
 from gdpr_pseudonymizer.data.database import init_database, open_database
 from gdpr_pseudonymizer.data.models import Entity
 from gdpr_pseudonymizer.data.repositories.mapping_repository import (
-    DuplicateEntityError,
     SQLiteMappingRepository,
 )
+from gdpr_pseudonymizer.exceptions import DuplicateEntityError
 
 
 class TestSQLiteMappingRepository:
