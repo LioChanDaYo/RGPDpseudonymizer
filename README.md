@@ -1,5 +1,11 @@
 # GDPR Pseudonymizer
 
+[![PyPI version](https://img.shields.io/pypi/v/gdpr-pseudonymizer)](https://pypi.org/project/gdpr-pseudonymizer/)
+[![Python versions](https://img.shields.io/pypi/pyversions/gdpr-pseudonymizer)](https://pypi.org/project/gdpr-pseudonymizer/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![CI](https://github.com/LioChanDaYo/RGPDpseudonymizer/actions/workflows/ci.yaml/badge.svg)](https://github.com/LioChanDaYo/RGPDpseudonymizer/actions/workflows/ci.yaml)
+[![Docs](https://img.shields.io/badge/docs-GitHub%20Pages-blue)](https://liochandayo.github.io/RGPDpseudonymizer/)
+
 **AI-Assisted Pseudonymization for French Documents with Human Verification**
 
 Transform sensitive French documents for safe AI analysis with local processing, mandatory human review, and GDPR compliance.
@@ -51,29 +57,7 @@ GDPR Pseudonymizer is a **privacy-first CLI tool** that combines AI efficiency w
 
 ## 🚀 Quick Start
 
-**Status:** 🎉 **Alpha Release v0.1.0** - Seeking 3-5 alpha testers for feedback (see [Installation Guide](docs/installation.md))
-
-### Current Development Stage
-
-We're actively developing v1.0 MVP with an **AI-assisted approach**:
-- ✅ **Epic 1 Complete (9/9 stories):** Foundation & NLP validation operational
-  - Story 1.7: Validation UI with rich CLI interface
-  - Story 1.8: Hybrid detection (35.3% improvement, +52.2% PERSON detection)
-  - Story 1.9: Entity deduplication (66% time reduction for large docs)
-- ✅ **Epic 2 Complete:** Core pseudonymization engine
-  - Story 2.1-2.5: Pseudonym libraries, compositional logic, encryption, audit logging
-  - Story 2.6-2.8: End-to-end workflow, batch processing spike, GDPR 1:1 mapping fix
-  - Story 2.9: Alpha release v0.1.0 preparation
-- ✅ **Epic 3 (Week 8-12):** CLI Interface & Batch Processing
-  - Story 3.0: LOCATION/ORG pseudonym libraries ✅ (themed locations + organizations for all 3 themes)
-  - Story 3.1: Complete CLI command set ✅ (8 new commands: init, batch, list-mappings, validate-mappings, stats, import-mappings, export, destroy-table)
-  - Story 3.2: Progress reporting for large batches ✅ (live entity counts, ETA calculation)
-  - Story 3.3: Configuration file support & parallel batch ✅ (`.gdpr-pseudo.yaml` config files, `config --init`, parallel `--workers` flag)
-  - Story 3.4: CLI UX Polish ✅ (standardized error messages, `config set` command, `destroy-table` security features)
-  - Story 3.5: User documentation & guides ✅ (installation.md, tutorial.md)
-  - Story 3.9: NER & Title Handling Improvements ✅ (Cabinet→ORG detection, Maître/Me title preservation, false positive filtering)
-- 📅 **Week 13-14:** Beta release, launch prep
-- 🎯 **MVP Launch:** Week 14 (estimated Q2 2026)
+**Status:** 🎉 **v1.0.0 — Public Release** (February 2026)
 
 ### Realistic Expectations for v1.0
 
@@ -116,38 +100,50 @@ We're actively developing v1.0 MVP with an **AI-assisted approach**:
 
 ## ⚙️ Installation
 
-**Current status:** v0.1.0-alpha released! See [Installation Guide](docs/installation.md) for detailed installation instructions.
+See [Installation Guide](https://liochandayo.github.io/RGPDpseudonymizer/installation/) for detailed platform-specific instructions.
 
 ### Prerequisites
-- Python 3.10-3.12 (validated in CI/CD, Python 3.13+ not yet tested, Python 3.9 no longer supported)
-- Poetry 1.7+
+- Python 3.10-3.12 (validated in CI/CD)
 
-### Quick Install
+### Install from PyPI (Recommended)
+
+```bash
+pip install gdpr-pseudonymizer
+
+# Download spaCy French model (required - 571MB)
+python -m spacy download fr_core_news_lg
+
+# Verify installation
+gdpr-pseudo --help
+```
+
+### Install from Source (Developer)
 
 ```bash
 # Clone repository
 git clone https://github.com/LioChanDaYo/RGPDpseudonymizer.git
 cd RGPDpseudonymizer
 
-# Install dependencies
+# Install dependencies via Poetry
+pip install poetry>=1.7.0
 poetry install
 
-# Install spaCy French model (required - 571MB download)
-poetry run python scripts/install_spacy_model.py
+# Install spaCy French model
+poetry run python -m spacy download fr_core_news_lg
+
+# Verify installation
+poetry run gdpr-pseudo --help
 ```
 
-### Verify Installation
+### Quick Test
 
 ```bash
-# Run CLI
-poetry run gdpr-pseudo --help
-
-# Test on sample document (output defaults to test_pseudonymized.txt)
+# Test on sample document
 echo "Marie Dubois travaille à Paris pour Acme SA." > test.txt
-poetry run gdpr-pseudo process test.txt
+gdpr-pseudo process test.txt
 
 # Or specify custom output file
-poetry run gdpr-pseudo process test.txt -o output.txt
+gdpr-pseudo process test.txt -o output.txt
 ```
 
 Expected output: "Leia Organa travaille à Coruscant pour Rebel Alliance."
@@ -368,65 +364,24 @@ The validation UI provides an intuitive keyboard-driven interface for reviewing 
 
 ## 🛠️ Development Status
 
-**Current Epic:** Epic 1 - Foundation & NLP Validation (Week 1-5/14)
+**All 4 MVP Epics Complete** — v1.0.0 released February 2026.
 
-### Completed ✅
-- ✅ **Story 0.1-0.2:** Test corpus (25 docs, 1,855 entities) + dev environment
-- ✅ **Story 1.1:** Expanded test corpus with ground truth annotations
-- ✅ **Story 1.2:** NLP benchmark (spaCy selected, contingency plan approved)
-- ✅ **Story 1.3:** CI/CD pipeline setup (GitHub Actions)
-- ✅ **Story 1.4:** Project foundation & module structure
-- ✅ **Story 1.5:** Walking skeleton - basic process command (48 tests passing)
-- ✅ **Story 1.6:** NLP integration with spaCy `fr_core_news_lg` (QA gate: PASS)
-- ✅ **Story 1.7:** Validation UI implementation with rich library (QA gate: PASS)
-- ✅ **Story 1.8:** Hybrid detection strategy (NLP + regex) - 35.3% improvement, 52.2% PERSON detection (QA gate: PASS)
-- ✅ **Story 1.9:** Entity deduplication for validation UI - 66% time reduction for large docs (QA gate: PASS)
-- ✅ **Story 2.0.1:** Integration tests for validation workflow - 19 tests, 80.49% coverage, all quality gates pass (QA gate: PASS)
-- ✅ **Story 2.1:** Pseudonym library system - 3 themed libraries (neutral, Star Wars, LOTR), gender-matching, exhaustion detection, 36 tests, 90.76% coverage (QA gate: PASS, Score: 98/100)
-- ✅ **Story 2.2:** Compositional pseudonymization logic - Component-based matching ("Marie Dubois" → "Leia Organa", "Marie" → "Leia"), 37 tests, 94% coverage (QA gate: PASS, Score: 95/100)
-- ✅ **Story 2.3:** French name preprocessing (titles + compounds) - Title stripping ("Dr. Marie Dubois" → "Marie Dubois"), compound names ("Jean-Pierre" treated as atomic), simple pseudonyms for compounds, 53 tests (31 unit + 15 unit + 7 integration), 94.64% coverage (QA gate: PASS, Score: 100/100)
-- ✅ **Story 2.4:** Encrypted mapping table - Database encryption with AES-256-SIV, passphrase protection, PBKDF2 key derivation (210,000 iterations), column-level encryption, WAL mode for concurrency, 9 integration tests (QA gate: PASS)
-- ✅ **Story 2.5:** Audit logging - Comprehensive audit logs for GDPR Article 30 compliance, operations table tracks all pseudonymization operations, JSON/CSV export functionality, 32 unit tests, 91.41% coverage (QA gate: PASS, Score: 100/100)
-- ✅ **Story 2.6:** Single-document pseudonymization workflow - End-to-end integration of all Epic 2 components, idempotent processing, optional `--output` parameter, 10 tests passing (3 unit + 7 integration), 6 critical bug fixes for consistent pseudonym generation across documents (QA gate: PASS, Ready for Done)
-- ✅ **Story 2.7:** Batch processing scalability spike - Multiprocessing.Pool validated (1.17x speedup on small docs, 2-3x projected for 3000-word docs), mapping consistency verified, architectural validation complete, 1 critical bug discovered (pseudonym component collision - Story 2.8 created), 5 test scripts + findings document (QA gate: PASS with critical bug found)
-- ✅ **Story 2.8:** Pseudonym component collision fix - Component-level collision prevention implemented in LibraryBasedPseudonymManager, `_component_mappings` dict tracks real→pseudonym component assignments, database reconstruction for backwards compatibility, 18 tests passing (13 unit + 5 integration), GDPR Article 4(5) compliance restored, Epic 3 unblocked (QA gate: PASS, Score: 92/100)
-- ✅ **Story 2.9:** Alpha release preparation - Installation verification complete (Windows tested), alpha documentation created (ALPHA-INSTALL.md, ALPHA-QUICKSTART.md, ALPHA-TESTING-PROTOCOL.md), CHANGELOG.md with v0.1.0-alpha release notes, README updated to alpha status, git tag v0.1.0-alpha ready (Alpha Release: 2026-01-30)
-- ✅ **Story 3.0:** LOCATION and ORGANIZATION pseudonym libraries - Extended all 3 themes with 80 locations + 35 organizations each (neutral: French cities/companies, Star Wars: planets/alliances, LOTR: Middle-earth locations/kingdoms), updated LibraryBasedPseudonymManager for atomic LOC/ORG pseudonymization, 8 new unit tests + integration tests, all ACs met (QA gate: PASS, Score: 95/100)
-
-### Completed ✅
-- ✅ **Epic 2 (Week 6-10):** Core pseudonymization engine - 9/9 stories complete, Epic 2 complete, v0.1.0-alpha released
-- ✅ **Story 3.0 (Week 10):** LOCATION/ORG pseudonym libraries - Epic 3 first story, extends pseudonymization to all entity types
-- ✅ **Story 3.1 (Week 10-11):** Complete CLI command set - 8 new commands (init, batch, list-mappings, validate-mappings, stats, import-mappings, export, destroy-table), 155+ tests
-- ✅ **Story 3.2 (Week 11):** Progress reporting for large batches - Live entity counts, ETA calculation, rolling average, 29 tests with 100% module coverage
-- ✅ **Story 3.3 (Week 11):** Configuration file support & parallel batch - `.gdpr-pseudo.yaml` config files, `config --init` template generation, parallel `--workers` flag for batch command, 215 tests
-- ✅ **Story 3.4 (Week 11-12):** CLI UX Polish - Improved help text, standardized error messages, `config set` command, `destroy-table` security features (passphrase verification, SQLite magic check, symlink protection)
-- ✅ **Story 3.9 (Week 12):** NER & Title Handling Improvements - Cabinet pattern→ORG detection, Maître/Me title recognition and preservation, false positive filtering for title-only entities and label words
-
-### In Progress 🚧
-- **Epic 4 (Week 13-14):** Launch Readiness & LLM Validation
-  - Story 4.1: LLM Utility Preservation Testing ✅ **PASSED** (4.27/5.0 = 85.4%, threshold: 80%)
-  - Story 4.2: Cross-Platform Installation Validation ✅ **PASSED** (NFR3: 87.5% > 85%, NFR14: 100%)
-  - Story 4.3: Complete Documentation Package ✅ **DONE** (8 doc pages, MkDocs site, GitHub Pages deployment)
-  - Story 4.4: NER Accuracy Comprehensive Validation ✅ **DONE** (22 tests, F1=29.74%, NFR8/NFR9 baselines documented, quality report + monitoring baselines)
-  - Story 4.5: Performance & Stability Validation ✅ **DONE** (15 tests, all NFR targets PASS — NFR1 <30s, NFR2 <30min, NFR4 <8GB, NFR5 <5s, NFR6 <10%)
-  - Story 4.6: Beta Feedback Integration & Bug Fixes ✅ **DONE** (entity variant grouping, `--entity-types` filter, lazy CLI imports, ORG library expansion 35→196, 2 bugs fixed)
-
-### Upcoming 📅
-- Story 4.7: Final launch preparation
+- ✅ **Epic 1:** Foundation & NLP Validation (9 stories) — spaCy integration, validation UI, hybrid detection, entity deduplication
+- ✅ **Epic 2:** Core Pseudonymization Engine (9 stories) — pseudonym libraries, encryption, audit logging, batch processing, GDPR 1:1 mapping
+- ✅ **Epic 3:** CLI Interface & Batch Processing (7 stories) — 8 CLI commands, progress reporting, config files, parallel batch, UX polish
+- ✅ **Epic 4:** Launch Readiness (8 stories) — LLM utility validation, cross-platform testing, documentation, NER accuracy suite, performance validation, beta feedback integration, codebase refactoring, launch preparation
+- **Total:** 33 stories, 1077+ tests, 86%+ coverage, all quality gates green
 
 ---
 
 ## 🤝 Contributing
 
-**Status:** 🚧 Pre-release development - Not yet accepting contributions
+We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for details on:
+- Bug reports and feature requests
+- Development setup and code quality requirements
+- PR process and commit message format
 
-Once we reach v1.0 MVP (Week 14), we'll welcome:
-- 🐛 Bug reports
-- 📝 Documentation improvements
-- 🌍 Translations (English, Spanish, German)
-- 💡 Feature suggestions
-
-**For now:** Follow development progress via [GitHub Issues](https://github.com/yourusername/RGPDpseudonymizer/issues) and [Discussions](https://github.com/yourusername/RGPDpseudonymizer/discussions).
+Please read our [Code of Conduct](CODE_OF_CONDUCT.md) before participating.
 
 ---
 
@@ -434,18 +389,16 @@ Once we reach v1.0 MVP (Week 14), we'll welcome:
 
 **Project Lead:** Lionel Deveaux - [@LioChanDaYo](https://github.com/LioChanDaYo)
 
-**For questions:**
-- 💬 [GitHub Discussions](https://github.com/yourusername/RGPDpseudonymizer/discussions) - General questions, use cases
-- 🐛 [GitHub Issues](https://github.com/yourusername/RGPDpseudonymizer/issues) - Bug reports (post-launch)
-- 📧 Email: [project-email@example.com](mailto:project-email@example.com) - Private inquiries
+**For questions and support:**
+- 💬 [GitHub Discussions](https://github.com/LioChanDaYo/RGPDpseudonymizer/discussions) — General questions, use cases
+- 🐛 [GitHub Issues](https://github.com/LioChanDaYo/RGPDpseudonymizer/issues) — Bug reports, feature requests
+- 📖 [SUPPORT.md](SUPPORT.md) — Full support process and self-help checklist
 
 ---
 
 ## 📜 License
 
-**TBD** - Will be announced before v1.0 MVP launch (Week 14)
-
-Likely: MIT or Apache 2.0 (open-source, permissive)
+This project is licensed under the [MIT License](LICENSE).
 
 ---
 
@@ -564,7 +517,7 @@ poetry run pytest tests/integration/test_validation_workflow_integration.py -v
 - **Accuracy tests:** 22 tests validating NER accuracy against 25-document ground-truth corpus (Story 4.4)
 - **Performance tests:** 15 tests validating all NFR targets — single-document benchmarks (NFR1), batch performance (NFR2), memory profiling (NFR4), startup time (NFR5), stability/error rate (NFR6), stress testing (Story 4.5)
 - **Current coverage:** 86%+ across all modules (100% for progress module, 91.41% for AuditRepository)
-- **Total tests:** 814 tests (777 unit + 22 accuracy + 15 performance, 12 skipped)
+- **Total tests:** 1077+ tests (post-refactoring baseline)
 - **CI/CD:** Tests run on Python 3.10-3.12 across Windows, macOS, and Linux
 - **Quality gates:** All pass (Black, Ruff, mypy, pytest)
 
@@ -594,12 +547,12 @@ The integration test suite covers:
 
 ---
 
-## 📊 Project Metrics (As of 2026-02-08)
+## 📊 Project Metrics (As of 2026-02-11)
 
 | Metric | Value | Status |
 |--------|-------|--------|
-| **Development Progress** | Week 13/14 | ✅ Epic 3 Complete + Stories 4.1-4.6 Done |
-| **Stories Complete** | 30 (Epic 1 + Epic 2 + Epic 3 + Stories 4.1-4.6) | ✅ Epic 1 (9) + Epic 2 (9) + Stories 3.0-3.5, 3.9 + Stories 4.1-4.6 |
+| **Development Progress** | v1.0.0 Released | ✅ All 4 Epics Complete |
+| **Stories Complete** | 33 (Epic 1-4) | ✅ All stories including 4.6.1 refactoring + 4.7 launch prep |
 | **LLM Utility (NFR10)** | 4.27/5.0 (85.4%) | ✅ PASSED (threshold: 80%) |
 | **Installation Success (NFR3)** | 87.5% (7/8 platforms) | ✅ PASSED (threshold: 85%) |
 | **First Pseudonymization (NFR14)** | 100% within 30 min | ✅ PASSED (threshold: 80%) |
@@ -620,7 +573,7 @@ The integration test suite covers:
 | **Memory Usage (NFR4)** | ~1 GB Python-tracked peak | ✅ PASSED (<8GB threshold) |
 | **CLI Startup (NFR5)** | 0.56s (help), 6.0s (cold start w/ model) | ✅ PASSED (<5s for CLI startup) |
 | **Error Rate (NFR6)** | ~0% unexpected errors | ✅ PASSED (<10% threshold) |
-| **Test Coverage** | 814 tests (777 unit + 22 accuracy + 15 performance), 86%+ coverage | ✅ All Quality Checks Pass |
+| **Test Coverage** | 1077+ tests (post-refactoring baseline), 86%+ coverage | ✅ All Quality Checks Pass |
 | **Quality Gates** | Ruff, mypy, pytest | ✅ All Pass (0 issues) |
 | **Supported Languages** | French | 🇫🇷 v1.0 only |
 | **Supported Formats** | .txt, .md | 📝 v1.0 scope |
@@ -637,6 +590,4 @@ The integration test suite covers:
 
 ---
 
-**Last Updated:** 2026-02-09 (Story 4.6 Beta Feedback Integration & Bug Fixes - entity variant grouping, --entity-types filter, lazy CLI imports, ORG library expansion 35→196)
-
-**Current Focus:** Epic 4 in progress - Stories 4.1-4.6 complete, Story 4.7 (final launch preparation) next
+**Last Updated:** 2026-02-11 (v1.0.0 Public Release — all 4 MVP epics complete)
