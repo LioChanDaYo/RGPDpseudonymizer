@@ -92,6 +92,11 @@ def process_command(
         "-p",
         help="Database passphrase (or use GDPR_PSEUDO_PASSPHRASE env var)",
     ),
+    entity_types: Optional[str] = typer.Option(
+        None,
+        "--entity-types",
+        help="Filter entity types to process (comma-separated). Options: PERSON, LOCATION, ORG. Default: all types.",
+    ),
 ) -> None:
     """Process a single document with complete pseudonymization workflow.
 
@@ -212,11 +217,33 @@ def process_command(
                     )
                 sys.exit(1)
 
+        # Parse entity type filter
+        entity_type_filter: set[str] | None = None
+        if entity_types is not None:
+            valid_types = {"PERSON", "LOCATION", "ORG"}
+            parsed = {t.strip().upper() for t in entity_types.split(",")}
+            invalid = parsed - valid_types
+            if invalid:
+                console.print(
+                    f"[yellow]Warning: Unknown entity type(s): {', '.join(sorted(invalid))}. "
+                    f"Valid types: {', '.join(sorted(valid_types))}[/yellow]"
+                )
+            entity_type_filter = parsed & valid_types
+            if not entity_type_filter:
+                console.print(
+                    "[bold red]Error: No valid entity types specified.[/bold red]"
+                )
+                sys.exit(1)
+            console.print(
+                f"[dim]Filtering entities: {', '.join(sorted(entity_type_filter))}[/dim]"
+            )
+
         # Process document (without progress bar to avoid interfering with interactive validation UI)
         console.print("\n[bold]Processing document...[/bold]")
         result = processor.process_document(
             input_path=str(input_file),
             output_path=str(output_file),
+            entity_type_filter=entity_type_filter,
         )
 
         # Display results

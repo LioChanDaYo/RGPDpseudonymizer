@@ -129,6 +129,7 @@ class DocumentProcessor:
         input_path: str,
         output_path: str,
         skip_validation: bool = False,
+        entity_type_filter: set[str] | None = None,
     ) -> ProcessingResult:
         """Process single document with complete pseudonymization workflow.
 
@@ -149,6 +150,8 @@ class DocumentProcessor:
             output_path: Path to output document
             skip_validation: If True, skip interactive validation and auto-accept all entities.
                            Used for parallel batch processing where stdin is unavailable.
+            entity_type_filter: Optional set of entity types to keep (e.g., {"PERSON", "ORG"}).
+                              If None, all entity types are processed.
 
         Returns:
             ProcessingResult with processing metadata
@@ -172,6 +175,20 @@ class DocumentProcessor:
             logger.info("detecting_entities", model=self.model_name)
             detector = self._get_detector()
             detected_entities = detector.detect_entities(document_text)
+
+            # Step 2b: Apply entity type filter if specified
+            if entity_type_filter:
+                pre_filter_count = len(detected_entities)
+                detected_entities = [
+                    e for e in detected_entities if e.entity_type in entity_type_filter
+                ]
+                logger.info(
+                    "entity_type_filter_applied",
+                    allowed_types=sorted(entity_type_filter),
+                    pre_filter_count=pre_filter_count,
+                    post_filter_count=len(detected_entities),
+                )
+
             logger.info(
                 "entities_detected",
                 count=len(detected_entities),

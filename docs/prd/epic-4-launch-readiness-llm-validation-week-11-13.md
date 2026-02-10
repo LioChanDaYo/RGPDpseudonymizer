@@ -151,6 +151,14 @@
 **I want** to address critical bugs and usability issues discovered during beta testing,
 **so that** the launch version provides a polished user experience.
 
+#### Key References
+
+- **Alpha Feedback Summary:** [docs/qa/alpha-feedback-summary.md](../qa/alpha-feedback-summary.md) — consolidated tester feedback (7 items, 3 new)
+- **Alpha Testing Protocol:** [docs/ALPHA-TESTING-PROTOCOL.md](../ALPHA-TESTING-PROTOCOL.md) — test scenarios and survey structure
+- **Product Backlog:** [docs/BACKLOG.md](../BACKLOG.md) — TD-002, TD-004, FE-006, FE-010 feed into this story
+- **NER Accuracy Report:** [docs/qa/ner-accuracy-report.md](../qa/ner-accuracy-report.md) — accuracy baselines relevant to FB-001 (entity variant grouping)
+- **Performance Report:** [docs/qa/performance-stability-report.md](../qa/performance-stability-report.md) — startup time baseline relevant to FB-007 (slow --help)
+
 #### Acceptance Criteria
 
 1. **AC1:** Beta feedback analyzed: Categorize issues by severity (critical, high, medium, low) and type (bug, usability, feature request).
@@ -173,6 +181,27 @@
     - Target: ≥4/5 satisfaction, <5 min validation time for 50 entities
     - Document feedback and iterate on UX if needed
     - Source: Story 1.7 QA Gate (AC10), deferred from Epic 1 → Epic 2 → Epic 4
+
+#### Completion Status: DONE (2026-02-09)
+
+**Features delivered:**
+- FB-001: Entity variant grouping in validation UI (Union-Find clustering with ambiguous surname isolation)
+- FB-003: `--entity-types` CLI flag for selective entity type processing (process + batch commands)
+- FB-007: Lazy imports for faster `--help` display (~55% import time reduction)
+- AC9: Expanded neutral ORG library from 35 to 196 entries (101 companies, 50 agencies, 45 institutions)
+- FB-006: Python 3.13 evaluation — deferred (blocked by thinc lacking wheels)
+
+**Bugs found and fixed during testing:**
+- Entity variant grouping bridging bug: Union-Find transitive bridging where titled surnames could incorrectly merge different people sharing the same family name
+- `--entity-types` filter not applied in batch mode: `entity_type_filter` not forwarded to `process_document()` in 3 batch call sites
+
+**Deferred items documented:**
+- FB-002 (French docs → FE-010 v1.1), FB-004 (DOCX/PDF → v1.1), FB-005 (GUI → v2.0)
+- FE-014: Extended coreference resolution (v1.1+)
+
+**Testing:** 727 tests passing (686 unit + 41 batch), all quality gates pass (black, ruff, mypy)
+
+**Sign-offs:** Dev (2026-02-09), QA PASS (2026-02-09), PM (2026-02-09)
 
 ---
 

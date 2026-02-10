@@ -715,6 +715,7 @@ class TestWorkerFunction:
                     "testpass",
                     "neutral",
                     "spacy",
+                    None,
                 )
             )
 
@@ -751,6 +752,7 @@ class TestWorkerFunction:
                     "testpass",
                     "neutral",
                     "spacy",
+                    None,
                 )
             )
 
@@ -777,6 +779,7 @@ class TestWorkerFunction:
                     "testpass",
                     "neutral",
                     "spacy",
+                    None,
                 )
             )
 

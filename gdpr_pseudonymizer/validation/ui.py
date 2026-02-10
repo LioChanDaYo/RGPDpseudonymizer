@@ -188,6 +188,7 @@ class ReviewScreen:
         entity_type_filter: str | None = None,
         occurrence_count: int = 1,
         context_index: int = 1,
+        variant_texts: list[str] | None = None,
     ) -> None:
         """Display single entity for review.
 
@@ -200,6 +201,7 @@ class ReviewScreen:
             entity_type_filter: Current entity type being reviewed (optional)
             occurrence_count: Number of occurrences (default 1 for single entities)
             context_index: Current context being displayed (1-based, for cycling)
+            variant_texts: Non-canonical variant text forms (optional, for grouped entities)
         """
         self.console.clear()
         self.console.print()
@@ -225,6 +227,12 @@ class ReviewScreen:
             entity_display = f"⚠️  {entity_display} [yellow](ambiguous)[/yellow]"
 
         table.add_row("Entity:", entity_display)
+
+        # Show variant forms if entity has variants
+        if variant_texts:
+            variants_str = ", ".join(f"[italic]{v}[/italic]" for v in variant_texts)
+            table.add_row("Also appears as:", f"[dim]{variants_str}[/dim]")
+
         table.add_row("Type:", f"[magenta]{entity.entity_type}[/magenta]")
 
         # Confidence score with color coding

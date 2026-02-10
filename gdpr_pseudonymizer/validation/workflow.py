@@ -185,12 +185,13 @@ class ValidationWorkflow:
 
                 # Inner loop for context cycling within a group
                 while True:
-                    # Get representative entity for current context
+                    # Get canonical entity for display and context entity for snippet
                     current_entity = group.get_representative_entity()
+                    context_entity = group.get_current_context_entity()
 
-                    # Get context and pseudonym
+                    # Get context from current cycling entity, pseudonym from canonical
                     context = self.context_precomputer.get_context_for_entity(
-                        current_entity, session.context_cache
+                        context_entity, session.context_cache
                     )
                     pseudonym = self._get_pseudonym(current_entity, pseudonym_assigner)
 
@@ -211,6 +212,9 @@ class ValidationWorkflow:
                         entity_type,
                         occurrence_count=group.count,
                         context_index=group.current_context_index + 1,
+                        variant_texts=(
+                            group.non_canonical_variants if group.has_variants else None
+                        ),
                     )
 
                     # Get user action

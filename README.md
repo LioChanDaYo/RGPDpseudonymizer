@@ -31,12 +31,14 @@ GDPR Pseudonymizer is a **privacy-first CLI tool** that combines AI efficiency w
 - ✅ **Mandatory validation** - You review and confirm all entities (ensures 100% accuracy)
 - ✅ **Fast validation UI** - Rich CLI interface with keyboard shortcuts, <2 min per document
 - ✅ **Smart workflow** - Entity-by-type grouping (PERSON → ORG → LOCATION) with context display
+- ✅ **Entity variant grouping** - Related forms ("Marie Dubois", "Pr. Dubois", "Dubois") merged into one validation item with "Also appears as:" display
 - ✅ **Batch actions** - Confirm/reject multiple entities efficiently
 
 ### 📊 **Batch Processing**
 - ✅ **Consistent pseudonyms** - Same entity = same pseudonym across 10-100+ documents
 - ✅ **Compositional matching** - "Marie Dubois" → "Leia Organa", "Marie" alone → "Leia"
 - ✅ **Smart name handling** - Title stripping ("Dr. Marie Dubois" = "Marie Dubois"), compound names ("Jean-Pierre" treated as atomic)
+- ✅ **Selective entity processing** - `--entity-types` flag to filter by type (e.g., `--entity-types PERSON,LOCATION`)
 - ✅ **50%+ time savings** vs manual redaction (AI pre-detection + validation)
 
 ### 🎭 **Themed Pseudonyms**
@@ -252,6 +254,8 @@ The validation UI provides an intuitive keyboard-driven interface for reviewing 
 
 **Deduplication Feature (Story 1.9):** Duplicate entities grouped together - validate once, apply to all occurrences (66% time reduction for large docs)
 
+**Entity Variant Grouping (Story 4.6):** Related entity forms automatically merged into single validation items. "Marie Dubois", "Pr. Dubois", and "Dubois" appear as one item with "Also appears as:" showing variant forms. Prevents Union-Find transitive bridging for ambiguous surnames shared by different people.
+
 ---
 
 ### Technology Stack
@@ -405,9 +409,10 @@ The validation UI provides an intuitive keyboard-driven interface for reviewing 
   - Story 4.3: Complete Documentation Package ✅ **DONE** (8 doc pages, MkDocs site, GitHub Pages deployment)
   - Story 4.4: NER Accuracy Comprehensive Validation ✅ **DONE** (22 tests, F1=29.74%, NFR8/NFR9 baselines documented, quality report + monitoring baselines)
   - Story 4.5: Performance & Stability Validation ✅ **DONE** (15 tests, all NFR targets PASS — NFR1 <30s, NFR2 <30min, NFR4 <8GB, NFR5 <5s, NFR6 <10%)
+  - Story 4.6: Beta Feedback Integration & Bug Fixes ✅ **DONE** (entity variant grouping, `--entity-types` filter, lazy CLI imports, ORG library expansion 35→196, 2 bugs fixed)
 
 ### Upcoming 📅
-- Stories 4.6-4.7: Beta release, launch readiness
+- Story 4.7: Final launch preparation
 
 ---
 
@@ -593,8 +598,8 @@ The integration test suite covers:
 
 | Metric | Value | Status |
 |--------|-------|--------|
-| **Development Progress** | Week 13/14 | ✅ Epic 3 Complete + Stories 4.1-4.5 Done |
-| **Stories Complete** | 29 (Epic 1 + Epic 2 + Epic 3 + Stories 4.1-4.5) | ✅ Epic 1 (9) + Epic 2 (9) + Stories 3.0-3.5, 3.9 + Stories 4.1-4.5 |
+| **Development Progress** | Week 13/14 | ✅ Epic 3 Complete + Stories 4.1-4.6 Done |
+| **Stories Complete** | 30 (Epic 1 + Epic 2 + Epic 3 + Stories 4.1-4.6) | ✅ Epic 1 (9) + Epic 2 (9) + Stories 3.0-3.5, 3.9 + Stories 4.1-4.6 |
 | **LLM Utility (NFR10)** | 4.27/5.0 (85.4%) | ✅ PASSED (threshold: 80%) |
 | **Installation Success (NFR3)** | 87.5% (7/8 platforms) | ✅ PASSED (threshold: 85%) |
 | **First Pseudonymization (NFR14)** | 100% within 30 min | ✅ PASSED (threshold: 80%) |
@@ -603,7 +608,7 @@ The integration test suite covers:
 | **NLP Accuracy (Baseline)** | 29.5% F1 (spaCy) | ✅ Measured |
 | **Hybrid Accuracy (NLP+Regex)** | 35.3% F1 (+52.2% PERSON) | ✅ Story 1.8 Complete |
 | **Final Accuracy (AI+Human)** | 100% (validated) | 🎯 By Design |
-| **Pseudonym Libraries** | 3 themes (2,426 names + 240 locations + 105 orgs) | ✅ Stories 2.1, 3.0 Complete |
+| **Pseudonym Libraries** | 3 themes (2,426 names + 240 locations + 588 orgs) | ✅ Stories 2.1, 3.0, 4.6 Complete |
 | **Compositional Matching** | Operational (component reuse + title stripping + compound names) | ✅ Stories 2.2, 2.3 Complete |
 | **Batch Processing** | Architecture validated (multiprocessing.Pool, 1.17x-2.5x speedup) | ✅ Story 2.7 Complete |
 | **Encrypted Storage** | AES-256-SIV with passphrase protection (PBKDF2 210K iterations) | ✅ Story 2.4 Complete |
@@ -632,6 +637,6 @@ The integration test suite covers:
 
 ---
 
-**Last Updated:** 2026-02-08 (Story 4.5 Performance & Stability Validation - 15-test performance suite, all NFR targets PASS, CI workflow, performance report)
+**Last Updated:** 2026-02-09 (Story 4.6 Beta Feedback Integration & Bug Fixes - entity variant grouping, --entity-types filter, lazy CLI imports, ORG library expansion 35→196)
 
-**Current Focus:** Epic 4 in progress - Stories 4.1-4.5 complete, remaining launch readiness stories next
+**Current Focus:** Epic 4 in progress - Stories 4.1-4.6 complete, Story 4.7 (final launch preparation) next

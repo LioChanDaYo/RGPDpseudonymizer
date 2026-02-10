@@ -33,11 +33,13 @@ GDPR Pseudonymizer is a **privacy-first CLI tool** that combines AI efficiency w
 - **Hybrid detection** -- AI pre-detects ~40-50% of entities (NLP + regex patterns)
 - **Mandatory validation** -- you review and confirm all entities (ensures 100% accuracy)
 - **Fast validation UI** -- keyboard shortcuts, batch operations, <2 min per document
+- **Entity variant grouping** -- related forms ("Marie Dubois", "Pr. Dubois", "Dubois") merged into one validation item
 
 ### Batch Processing
 
 - **Consistent pseudonyms** -- same entity = same pseudonym across all documents
 - **Compositional matching** -- "Marie Dubois" and "Marie" resolve consistently
+- **Selective entity processing** -- `--entity-types` flag to filter by type (PERSON, LOCATION, ORG)
 - **50%+ time savings** vs manual redaction
 
 ### Themed Pseudonyms

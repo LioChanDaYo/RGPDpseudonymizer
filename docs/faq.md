@@ -22,6 +22,30 @@ Fine-tuning with real-world validation data is planned for v3.0 (targeting 70-85
 
 Because the AI detection misses entities. With ~40-50% recall, roughly half of entities would go undetected without human review. For GDPR compliance, missing even one personal data entity could constitute a data breach. Mandatory validation ensures **zero false negatives**.
 
+### How do I process only specific entity types?
+
+Use the `--entity-types` flag with a comma-separated list of types:
+
+```bash
+# Process only PERSON entities
+gdpr-pseudo process doc.txt --entity-types PERSON
+
+# Process PERSON and LOCATION (skip ORG)
+gdpr-pseudo batch ./documents/ --entity-types PERSON,LOCATION
+```
+
+Valid types are `PERSON`, `LOCATION`, and `ORG`. When omitted, all entity types are processed. This flag works with both `process` and `batch` commands.
+
+### What is entity variant grouping?
+
+Entity variant grouping automatically merges related forms of the same entity into a single validation item. For example, if a document contains "Marie Dubois", "Pr. Dubois", and "Dubois", the validation UI shows them as one item with "Also appears as:" listing the variant forms.
+
+This reduces validation fatigue by eliminating redundant prompts. The grouping is type-aware:
+
+- **PERSON:** Title-stripped surname matching ("Dr. Dubois" = "Dubois"). Different first names stay separate ("Marie Dubois" vs "Jean Dubois").
+- **LOCATION:** French preposition stripping ("a Lyon" = "Lyon").
+- **ORG:** Case-insensitive matching ("ACME Corp" = "acme corp").
+
 ---
 
 ## Document Formats and Languages
