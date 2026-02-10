@@ -8,6 +8,7 @@ validation fatigue.
 from __future__ import annotations
 
 from collections import defaultdict
+from collections.abc import Callable
 
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 from gdpr_pseudonymizer.utils.french_patterns import (
@@ -17,6 +18,39 @@ from gdpr_pseudonymizer.utils.french_patterns import (
 from gdpr_pseudonymizer.utils.logger import get_logger
 
 logger = get_logger(__name__)
+
+K = tuple[str, str]
+
+
+class UnionFind:
+    """Disjoint-set (Union-Find) with path compression.
+
+    Generic over any hashable key type. Used for clustering entity
+    variants that should be merged into a single validation group.
+    """
+
+    def __init__(self, keys: list[K]) -> None:
+        self._parent: dict[K, K] = {k: k for k in keys}
+
+    def find(self, k: K) -> K:
+        """Find root representative with path compression."""
+        while self._parent[k] != k:
+            self._parent[k] = self._parent[self._parent[k]]
+            k = self._parent[k]
+        return k
+
+    def union(self, a: K, b: K) -> None:
+        """Merge the sets containing *a* and *b*."""
+        ra, rb = self.find(a), self.find(b)
+        if ra != rb:
+            self._parent[ra] = rb
+
+    def clusters(self) -> list[list[K]]:
+        """Return all disjoint clusters as lists of keys."""
+        groups: dict[K, list[K]] = defaultdict(list)
+        for k in self._parent:
+            groups[self.find(k)].append(k)
+        return list(groups.values())
 
 
 def _normalize_person(text: str) -> str:
@@ -192,43 +226,60 @@ def group_entity_variants(
     return results
 
 
-def _cluster_person_variants(
-    keys: list[tuple[str, str]],
-) -> list[list[tuple[str, str]]]:
+def _cluster_by_normalization(
+    keys: list[K],
+    normalizer: Callable[[str], str],
+) -> list[list[K]]:
+    """Cluster entity keys by normalized equality.
+
+    Generic clustering: two keys are merged when their text normalizes
+    to the same string.  Used for LOCATION and ORG entity types.
+
+    Args:
+        keys: List of (text, entity_type) keys
+        normalizer: Function that maps raw text → normalized form
+
+    Returns:
+        List of clusters (each cluster is a list of merged keys)
+    """
+    if len(keys) <= 1:
+        return [[k] for k in keys]
+
+    normalized = {k: normalizer(k[0]) for k in keys}
+    uf = UnionFind(keys)
+
+    key_list = list(keys)
+    for i in range(len(key_list)):
+        for j in range(i + 1, len(key_list)):
+            if normalized[key_list[i]] == normalized[key_list[j]]:
+                uf.union(key_list[i], key_list[j])
+
+    return uf.clusters()
+
+
+def _cluster_person_variants(keys: list[K]) -> list[list[K]]:
     """Cluster PERSON entity keys by variant relationship.
 
     Handles ambiguous single-word names: if a surname like "Durand" matches
     multiple full names with different first names (e.g., "Olivier Durand" and
     "Alice Durand"), the surname is kept as its own group to prevent incorrect
     transitive merging via Union-Find.
-
-    Args:
-        keys: List of (text, "PERSON") keys
-
-    Returns:
-        List of clusters (each cluster is a list of keys to merge)
     """
     if len(keys) <= 1:
         return [[k] for k in keys]
 
-    # Normalize all keys
-    normalized: dict[tuple[str, str], str] = {}
-    for key in keys:
-        normalized[key] = _normalize_person(key[0])
-
+    normalized = {k: _normalize_person(k[0]) for k in keys}
     key_list = list(keys)
 
     # Pre-scan: detect ambiguous single-word names that would bridge
     # different people via Union-Find transitivity.
-    # A single-word normalized name is ambiguous if it matches the last name
-    # of >=2 multi-word names that have different first names.
-    last_name_to_full_keys: dict[str, list[tuple[str, str]]] = defaultdict(list)
+    last_name_to_full_keys: dict[str, list[K]] = defaultdict(list)
     for key in key_list:
         parts = normalized[key].split()
         if len(parts) >= 2:
             last_name_to_full_keys[parts[-1].lower()].append(key)
 
-    ambiguous_keys: set[tuple[str, str]] = set()
+    ambiguous_keys: set[K] = set()
     for key in key_list:
         parts = normalized[key].split()
         if len(parts) == 1:
@@ -247,124 +298,23 @@ def _cluster_person_variants(
             ambiguous=[k[0] for k in ambiguous_keys],
         )
 
-    # Union-Find-style clustering
-    parent: dict[tuple[str, str], tuple[str, str]] = {k: k for k in keys}
-
-    def find(k: tuple[str, str]) -> tuple[str, str]:
-        while parent[k] != k:
-            parent[k] = parent[parent[k]]
-            k = parent[k]
-        return k
-
-    def union(a: tuple[str, str], b: tuple[str, str]) -> None:
-        ra, rb = find(a), find(b)
-        if ra != rb:
-            parent[ra] = rb
-
-    # Compare all pairs, skipping ambiguous single-word keys
+    uf = UnionFind(keys)
     for i in range(len(key_list)):
         for j in range(i + 1, len(key_list)):
             ka, kb = key_list[i], key_list[j]
             if ka in ambiguous_keys or kb in ambiguous_keys:
                 continue
             if _is_person_variant(normalized[ka], normalized[kb]):
-                union(ka, kb)
+                uf.union(ka, kb)
 
-    # Build clusters
-    clusters: dict[tuple[str, str], list[tuple[str, str]]] = defaultdict(list)
-    for k in keys:
-        clusters[find(k)].append(k)
-
-    return list(clusters.values())
+    return uf.clusters()
 
 
-def _cluster_location_variants(
-    keys: list[tuple[str, str]],
-) -> list[list[tuple[str, str]]]:
-    """Cluster LOCATION entity keys by variant relationship.
-
-    Args:
-        keys: List of (text, "LOCATION") keys
-
-    Returns:
-        List of clusters
-    """
-    if len(keys) <= 1:
-        return [[k] for k in keys]
-
-    normalized: dict[tuple[str, str], str] = {}
-    for key in keys:
-        normalized[key] = _normalize_location(key[0])
-
-    parent: dict[tuple[str, str], tuple[str, str]] = {k: k for k in keys}
-
-    def find(k: tuple[str, str]) -> tuple[str, str]:
-        while parent[k] != k:
-            parent[k] = parent[parent[k]]
-            k = parent[k]
-        return k
-
-    def union(a: tuple[str, str], b: tuple[str, str]) -> None:
-        ra, rb = find(a), find(b)
-        if ra != rb:
-            parent[ra] = rb
-
-    key_list = list(keys)
-    for i in range(len(key_list)):
-        for j in range(i + 1, len(key_list)):
-            ka, kb = key_list[i], key_list[j]
-            if normalized[ka] == normalized[kb]:
-                union(ka, kb)
-
-    clusters: dict[tuple[str, str], list[tuple[str, str]]] = defaultdict(list)
-    for k in keys:
-        clusters[find(k)].append(k)
-
-    return list(clusters.values())
+def _cluster_location_variants(keys: list[K]) -> list[list[K]]:
+    """Cluster LOCATION entity keys by normalized equality."""
+    return _cluster_by_normalization(keys, _normalize_location)
 
 
-def _cluster_org_variants(
-    keys: list[tuple[str, str]],
-) -> list[list[tuple[str, str]]]:
-    """Cluster ORG entity keys by variant relationship.
-
-    Conservative: only groups exact matches after case normalization.
-
-    Args:
-        keys: List of (text, "ORG") keys
-
-    Returns:
-        List of clusters
-    """
-    if len(keys) <= 1:
-        return [[k] for k in keys]
-
-    normalized: dict[tuple[str, str], str] = {}
-    for key in keys:
-        normalized[key] = _normalize_org(key[0])
-
-    parent: dict[tuple[str, str], tuple[str, str]] = {k: k for k in keys}
-
-    def find(k: tuple[str, str]) -> tuple[str, str]:
-        while parent[k] != k:
-            parent[k] = parent[parent[k]]
-            k = parent[k]
-        return k
-
-    def union(a: tuple[str, str], b: tuple[str, str]) -> None:
-        ra, rb = find(a), find(b)
-        if ra != rb:
-            parent[ra] = rb
-
-    key_list = list(keys)
-    for i in range(len(key_list)):
-        for j in range(i + 1, len(key_list)):
-            ka, kb = key_list[i], key_list[j]
-            if normalized[ka] == normalized[kb]:
-                union(ka, kb)
-
-    clusters: dict[tuple[str, str], list[tuple[str, str]]] = defaultdict(list)
-    for k in keys:
-        clusters[find(k)].append(k)
-
-    return list(clusters.values())
+def _cluster_org_variants(keys: list[K]) -> list[list[K]]:
+    """Cluster ORG entity keys by normalized equality."""
+    return _cluster_by_normalization(keys, _normalize_org)
