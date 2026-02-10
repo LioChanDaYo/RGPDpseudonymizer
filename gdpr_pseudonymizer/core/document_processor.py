@@ -129,6 +129,44 @@ class DocumentProcessor:
             self._detector = HybridDetector()
         return self._detector
 
+    def _detect_and_filter_entities(
+        self,
+        document_text: str,
+        entity_type_filter: set[str] | None = None,
+    ) -> list[DetectedEntity]:
+        """Detect entities in document text and apply optional type filter.
+
+        Args:
+            document_text: The document text to analyze
+            entity_type_filter: Optional set of entity types to keep
+
+        Returns:
+            List of detected (and optionally filtered) entities
+        """
+        logger.info("detecting_entities", model=self.model_name)
+        detector = self._get_detector()
+        detected_entities = detector.detect_entities(document_text)
+
+        if entity_type_filter:
+            pre_filter_count = len(detected_entities)
+            detected_entities = [
+                e for e in detected_entities if e.entity_type in entity_type_filter
+            ]
+            logger.info(
+                "entity_type_filter_applied",
+                allowed_types=sorted(entity_type_filter),
+                pre_filter_count=pre_filter_count,
+                post_filter_count=len(detected_entities),
+            )
+
+        logger.info(
+            "entities_detected",
+            count=len(detected_entities),
+            unique_count=len(set(e.text for e in detected_entities)),
+        )
+
+        return detected_entities
+
     def process_document(
         self,
         input_path: str,
@@ -176,28 +214,9 @@ class DocumentProcessor:
             logger.info("reading_document", input_file=input_path)
             document_text = read_file(input_path)
 
-            # Step 2: Detect entities using hybrid detector
-            logger.info("detecting_entities", model=self.model_name)
-            detector = self._get_detector()
-            detected_entities = detector.detect_entities(document_text)
-
-            # Step 2b: Apply entity type filter if specified
-            if entity_type_filter:
-                pre_filter_count = len(detected_entities)
-                detected_entities = [
-                    e for e in detected_entities if e.entity_type in entity_type_filter
-                ]
-                logger.info(
-                    "entity_type_filter_applied",
-                    allowed_types=sorted(entity_type_filter),
-                    pre_filter_count=pre_filter_count,
-                    post_filter_count=len(detected_entities),
-                )
-
-            logger.info(
-                "entities_detected",
-                count=len(detected_entities),
-                unique_count=len(set(e.text for e in detected_entities)),
+            # Step 2: Detect entities and apply type filter
+            detected_entities = self._detect_and_filter_entities(
+                document_text, entity_type_filter
             )
 
             # Step 2.5-6: Open database ONCE for validation and processing (prevents Windows SQLite locking)
