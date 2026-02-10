@@ -5,7 +5,7 @@ Tests each private method extracted during the process_document() decomposition.
 
 from __future__ import annotations
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 
@@ -111,3 +111,70 @@ class TestDetectAndFilterEntities:
         result = processor._detect_and_filter_entities("empty text")
 
         assert result == []
+
+
+# ===========================================================================
+# _init_processing_context
+# ===========================================================================
+
+
+class TestInitProcessingContext:
+    """Tests for _init_processing_context()."""
+
+    @patch("gdpr_pseudonymizer.core.document_processor.CompositionalPseudonymEngine")
+    @patch("gdpr_pseudonymizer.core.document_processor.LibraryBasedPseudonymManager")
+    @patch("gdpr_pseudonymizer.core.document_processor.AuditRepository")
+    @patch("gdpr_pseudonymizer.core.document_processor.SQLiteMappingRepository")
+    def test_returns_processing_context(
+        self,
+        mock_sqlite_repo: MagicMock,
+        mock_audit_repo: MagicMock,
+        mock_manager_cls: MagicMock,
+        mock_engine_cls: MagicMock,
+    ) -> None:
+        """Returns a _ProcessingContext with all four dependencies."""
+        from gdpr_pseudonymizer.core.document_processor import _ProcessingContext
+
+        mock_db_session = Mock()
+        mock_manager = mock_manager_cls.return_value
+        mock_manager.load_library.return_value = None
+        mock_manager.load_existing_mappings.return_value = None
+        mock_sqlite_repo.return_value.find_all.return_value = []
+
+        processor = _make_processor()
+        ctx = processor._init_processing_context(mock_db_session)
+
+        assert isinstance(ctx, _ProcessingContext)
+        assert ctx.mapping_repo is mock_sqlite_repo.return_value
+        assert ctx.audit_repo is mock_audit_repo.return_value
+        assert ctx.pseudonym_manager is mock_manager
+        assert ctx.compositional_engine is mock_engine_cls.return_value
+
+    @patch("gdpr_pseudonymizer.core.document_processor.CompositionalPseudonymEngine")
+    @patch("gdpr_pseudonymizer.core.document_processor.LibraryBasedPseudonymManager")
+    @patch("gdpr_pseudonymizer.core.document_processor.AuditRepository")
+    @patch("gdpr_pseudonymizer.core.document_processor.SQLiteMappingRepository")
+    def test_loads_theme_and_existing_mappings(
+        self,
+        mock_sqlite_repo: MagicMock,
+        mock_audit_repo: MagicMock,
+        mock_manager_cls: MagicMock,
+        mock_engine_cls: MagicMock,
+    ) -> None:
+        """Loads theme library and existing mappings for collision prevention."""
+        from gdpr_pseudonymizer.core.document_processor import DocumentProcessor
+
+        mock_db_session = Mock()
+        mock_manager = mock_manager_cls.return_value
+        mock_manager.load_library.return_value = None
+        mock_manager.load_existing_mappings.return_value = None
+        existing = [Mock(), Mock()]
+        mock_sqlite_repo.return_value.find_all.return_value = existing
+
+        processor = DocumentProcessor(
+            db_path="test.db", passphrase="test_pass", theme="star_wars"
+        )
+        processor._init_processing_context(mock_db_session)
+
+        mock_manager.load_library.assert_called_once_with("star_wars")
+        mock_manager.load_existing_mappings.assert_called_once_with(existing)

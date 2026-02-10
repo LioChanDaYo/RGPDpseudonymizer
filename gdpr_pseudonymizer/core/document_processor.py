@@ -64,6 +64,20 @@ class ProcessingResult:
     error_message: str | None = None
 
 
+@dataclass
+class _ProcessingContext:
+    """Bundle of dependencies initialized per-document processing.
+
+    Groups the repositories and engines that are created once per
+    process_document() call and shared across all sub-methods.
+    """
+
+    mapping_repo: MappingRepository
+    audit_repo: AuditRepository
+    pseudonym_manager: LibraryBasedPseudonymManager
+    compositional_engine: CompositionalPseudonymEngine
+
+
 class DocumentProcessor:
     """Orchestrates single-document pseudonymization workflow.
 
@@ -167,6 +181,41 @@ class DocumentProcessor:
 
         return detected_entities
 
+    def _init_processing_context(
+        self, db_session: DatabaseSession
+    ) -> _ProcessingContext:
+        """Initialize repositories and engines for document processing.
+
+        Creates the mapping/audit repositories and the pseudonym
+        manager/engine, loading existing mappings to prevent collisions.
+
+        Args:
+            db_session: Open database session
+
+        Returns:
+            _ProcessingContext with all initialized dependencies
+        """
+        mapping_repo: MappingRepository = SQLiteMappingRepository(db_session)
+        audit_repo = AuditRepository(db_session.session)
+
+        pseudonym_manager = LibraryBasedPseudonymManager()
+        pseudonym_manager.load_library(self.theme)
+
+        existing_entities = mapping_repo.find_all()
+        pseudonym_manager.load_existing_mappings(existing_entities)
+
+        compositional_engine = CompositionalPseudonymEngine(
+            pseudonym_manager=pseudonym_manager,
+            mapping_repository=mapping_repo,
+        )
+
+        return _ProcessingContext(
+            mapping_repo=mapping_repo,
+            audit_repo=audit_repo,
+            pseudonym_manager=pseudonym_manager,
+            compositional_engine=compositional_engine,
+        )
+
     def process_document(
         self,
         input_path: str,
@@ -224,22 +273,7 @@ class DocumentProcessor:
                 "starting_validation_workflow", entity_count=len(detected_entities)
             )
             with open_database(self.db_path, self.passphrase) as db_session:
-                # Initialize repositories (use interface type for maintainability)
-                mapping_repo: MappingRepository = SQLiteMappingRepository(db_session)
-                audit_repo = AuditRepository(db_session.session)
-
-                # Initialize pseudonym manager and engine (used for both validation preview AND processing)
-                pseudonym_manager = LibraryBasedPseudonymManager()
-                pseudonym_manager.load_library(self.theme)
-
-                # Load existing mappings from database to prevent component collisions (Story 2.8)
-                existing_entities = mapping_repo.find_all()
-                pseudonym_manager.load_existing_mappings(existing_entities)
-
-                compositional_engine = CompositionalPseudonymEngine(
-                    pseudonym_manager=pseudonym_manager,
-                    mapping_repository=mapping_repo,
-                )
+                ctx = self._init_processing_context(db_session)
 
                 # Create pseudonym assigner for validation workflow preview
                 # Local cache for preview-only pseudonyms (ensures consistent component reuse)
@@ -261,18 +295,20 @@ class DocumentProcessor:
                         Pseudonym string for display in validation UI
                     """
                     # Strip titles/prepositions before lookup/assignment
-                    entity_text_stripped = compositional_engine.strip_titles(
+                    entity_text_stripped = ctx.compositional_engine.strip_titles(
                         entity.text
                     )
 
                     # Also strip prepositions for LOCATION entities (à Paris -> Paris)
                     if entity.entity_type == "LOCATION":
-                        entity_text_stripped = compositional_engine.strip_prepositions(
-                            entity_text_stripped
+                        entity_text_stripped = (
+                            ctx.compositional_engine.strip_prepositions(
+                                entity_text_stripped
+                            )
                         )
 
                     # Check if mapping already exists in database
-                    existing_entity = mapping_repo.find_by_full_name(
+                    existing_entity = ctx.mapping_repo.find_by_full_name(
                         entity_text_stripped
                     )
                     if existing_entity:
@@ -285,7 +321,7 @@ class DocumentProcessor:
                     # Generate new pseudonym preview (not saved yet)
                     try:
                         assignment = (
-                            compositional_engine.assign_compositional_pseudonym(
+                            ctx.compositional_engine.assign_compositional_pseudonym(
                                 entity_text=entity_text_stripped,
                                 entity_type=entity.entity_type,
                                 gender=None,
@@ -317,18 +353,20 @@ class DocumentProcessor:
                     unknown_entities: list[DetectedEntity] = []
 
                     for entity in detected_entities:
-                        entity_text_stripped = compositional_engine.strip_titles(
+                        entity_text_stripped = ctx.compositional_engine.strip_titles(
                             entity.text
                         )
                         if entity.entity_type == "LOCATION":
                             entity_text_stripped = (
-                                compositional_engine.strip_prepositions(
+                                ctx.compositional_engine.strip_prepositions(
                                     entity_text_stripped
                                 )
                             )
 
                         # Check if mapping exists in database
-                        existing = mapping_repo.find_by_full_name(entity_text_stripped)
+                        existing = ctx.mapping_repo.find_by_full_name(
+                            entity_text_stripped
+                        )
                         if existing:
                             known_entities.append(entity)
                         else:
@@ -384,10 +422,10 @@ class DocumentProcessor:
                 # The validation preview generates pseudonyms and adds them to internal state,
                 # but those previews are never saved. We must clear the state to prevent
                 # collision false positives during actual processing.
-                pseudonym_manager.reset_preview_state()
+                ctx.pseudonym_manager.reset_preview_state()
                 # Reload existing mappings from database (restores legitimate collision prevention)
-                existing_entities = mapping_repo.find_all()
-                pseudonym_manager.load_existing_mappings(existing_entities)
+                existing_entities = ctx.mapping_repo.find_all()
+                ctx.pseudonym_manager.load_existing_mappings(existing_entities)
                 logger.info(
                     "pseudonym_manager_reset_after_validation",
                     existing_mappings_reloaded=len(existing_entities),
@@ -415,14 +453,16 @@ class DocumentProcessor:
                     # CRITICAL FIX: Strip titles/prepositions from entity text BEFORE database lookup
                     # The database stores names WITHOUT titles/prepositions
                     # (e.g., "Marie Dubois" not "Dr. Marie Dubois", "Paris" not "à Paris")
-                    entity_text_stripped = compositional_engine.strip_titles(
+                    entity_text_stripped = ctx.compositional_engine.strip_titles(
                         entity.text
                     )
 
                     # Also strip prepositions for LOCATION entities
                     if entity.entity_type == "LOCATION":
-                        entity_text_stripped = compositional_engine.strip_prepositions(
-                            entity_text_stripped
+                        entity_text_stripped = (
+                            ctx.compositional_engine.strip_prepositions(
+                                entity_text_stripped
+                            )
                         )
 
                     # Check both database AND in-memory cache for this document
@@ -436,7 +476,7 @@ class DocumentProcessor:
                             is_cached=True,
                         )
                     else:
-                        existing_entity = mapping_repo.find_by_full_name(
+                        existing_entity = ctx.mapping_repo.find_by_full_name(
                             entity_text_stripped
                         )
 
@@ -465,7 +505,7 @@ class DocumentProcessor:
                                         parsed_first,
                                         parsed_last,
                                         is_ambiguous,
-                                    ) = compositional_engine.parse_full_name(
+                                    ) = ctx.compositional_engine.parse_full_name(
                                         entity_text_stripped
                                     )
                                 except (TypeError, ValueError):
@@ -516,7 +556,7 @@ class DocumentProcessor:
                             else:
                                 # Step 4b: Assign new pseudonym using compositional logic
                                 # Use stripped text (titles already removed above)
-                                assignment = compositional_engine.assign_compositional_pseudonym(
+                                assignment = ctx.compositional_engine.assign_compositional_pseudonym(
                                     entity_text=entity_text_stripped,
                                     entity_type=entity.entity_type,
                                     gender=None,  # Could be extracted from NER metadata if available
@@ -537,7 +577,7 @@ class DocumentProcessor:
                                         original_first,
                                         original_last,
                                         _,
-                                    ) = compositional_engine.parse_full_name(
+                                    ) = ctx.compositional_engine.parse_full_name(
                                         entity_text_stripped
                                     )
 
@@ -579,7 +619,7 @@ class DocumentProcessor:
                     # Extract title prefix for PERSON entities
                     if entity.entity_type == "PERSON":
                         # Find how much of the original text is title
-                        stripped = compositional_engine.strip_titles(original_text)
+                        stripped = ctx.compositional_engine.strip_titles(original_text)
                         if stripped != original_text:
                             # Extract the title prefix
                             prefix_end = original_text.find(stripped)
@@ -589,9 +629,11 @@ class DocumentProcessor:
                     # Extract preposition prefix for LOCATION entities
                     elif entity.entity_type == "LOCATION":
                         # First strip titles (in case location has one, unlikely but possible)
-                        temp_stripped = compositional_engine.strip_titles(original_text)
+                        temp_stripped = ctx.compositional_engine.strip_titles(
+                            original_text
+                        )
                         # Then check for preposition
-                        stripped = compositional_engine.strip_prepositions(
+                        stripped = ctx.compositional_engine.strip_prepositions(
                             temp_stripped
                         )
                         if stripped != temp_stripped:
@@ -610,7 +652,7 @@ class DocumentProcessor:
                 # If this fails, no partial data will be committed to database
                 if new_entities:
                     try:
-                        mapping_repo.save_batch(new_entities)
+                        ctx.mapping_repo.save_batch(new_entities)
                         logger.info("entities_saved_batch", count=len(new_entities))
                     except Exception as e:
                         # Transaction will be rolled back by SQLAlchemy on exception
@@ -674,7 +716,7 @@ class DocumentProcessor:
                     success=True,
                     error_message=None,
                 )
-                audit_repo.log_operation(operation)
+                ctx.audit_repo.log_operation(operation)
 
                 logger.info(
                     "processing_complete",
