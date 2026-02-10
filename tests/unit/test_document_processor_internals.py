@@ -543,3 +543,43 @@ class TestResolvePseudonyms:
         assert result.entities_new == 0
         assert result.entities_reused == 0
         assert result.replacements == []
+
+
+# ===========================================================================
+# _apply_replacements
+# ===========================================================================
+
+
+class TestApplyReplacements:
+    """Tests for _apply_replacements()."""
+
+    def test_applies_single_replacement(self) -> None:
+        """Single replacement is applied correctly."""
+        processor = _make_processor()
+        result = processor._apply_replacements("Hello Marie!", [(6, 11, "Emma")])
+        assert result == "Hello Emma!"
+
+    def test_applies_multiple_non_overlapping(self) -> None:
+        """Multiple non-overlapping replacements are all applied."""
+        processor = _make_processor()
+        result = processor._apply_replacements(
+            "Marie lives in Paris",
+            [(0, 5, "Emma"), (15, 20, "Lyon")],
+        )
+        assert result == "Emma lives in Lyon"
+
+    def test_deduplicates_overlapping(self) -> None:
+        """Overlapping replacements keep only the first (longest span)."""
+        processor = _make_processor()
+        # "Dr. Marie Dubois" (0-16) overlaps with "Marie Dubois" (4-16)
+        result = processor._apply_replacements(
+            "Dr. Marie Dubois works here",
+            [(0, 16, "Dr. Emma Martin"), (4, 16, "Emma Martin")],
+        )
+        assert result == "Dr. Emma Martin works here"
+
+    def test_empty_replacements(self) -> None:
+        """No replacements returns original text."""
+        processor = _make_processor()
+        result = processor._apply_replacements("unchanged text", [])
+        assert result == "unchanged text"

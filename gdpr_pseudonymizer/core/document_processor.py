@@ -539,6 +539,48 @@ class DocumentProcessor:
             entities_reused=entities_reused,
         )
 
+    @staticmethod
+    def _apply_replacements(
+        document_text: str,
+        replacements: list[tuple[int, int, str]],
+    ) -> str:
+        """Deduplicate overlapping replacements and apply to document text.
+
+        Overlapping spans are resolved by keeping the first (longest) span
+        in sorted order. Replacements are applied from end to start to
+        preserve character positions.
+
+        Args:
+            document_text: Original document text
+            replacements: List of (start_pos, end_pos, pseudonym) tuples
+
+        Returns:
+            Document text with all replacements applied
+        """
+        # Deduplicate overlapping replacements
+        deduplicated: list[tuple[int, int, str]] = []
+        sorted_repls = sorted(replacements, key=lambda x: (x[0], -x[1]))
+
+        for start, end, pseudo in sorted_repls:
+            overlaps = any(not (end <= ks or start >= ke) for ks, ke, _ in deduplicated)
+            if not overlaps:
+                deduplicated.append((start, end, pseudo))
+
+        logger.debug(
+            "replacements_deduplicated",
+            original_count=len(replacements),
+            deduplicated_count=len(deduplicated),
+        )
+
+        # Apply from end to start to preserve positions
+        result = document_text
+        for start_pos, end_pos, pseudonym in sorted(
+            deduplicated, key=lambda x: x[0], reverse=True
+        ):
+            result = result[:start_pos] + pseudonym + result[end_pos:]
+
+        return result
+
     def _reset_pseudonym_state(self, ctx: _ProcessingContext) -> None:
         """Reset pseudonym manager after validation preview.
 
@@ -673,41 +715,10 @@ class DocumentProcessor:
                 entities_reused = resolve_result.entities_reused
                 replacements = resolve_result.replacements
 
-                # Step 6: Apply replacements (from end to start to preserve positions)
-                # CRITICAL FIX: Deduplicate overlapping replacements before applying
-                # If "Dr. Marie Dubois" and "Marie Dubois" are both detected as entities,
-                # applying both causes text corruption. Keep only the longest span.
-                deduplicated_replacements: list[tuple[int, int, str]] = []
-                sorted_replacements = sorted(replacements, key=lambda x: (x[0], -x[1]))
-
-                for start, end, pseudo in sorted_replacements:
-                    # Check if this replacement overlaps with any already kept
-                    overlaps = False
-                    for kept_start, kept_end, _ in deduplicated_replacements:
-                        # Check for any overlap: [start, end) overlaps with [kept_start, kept_end)
-                        if not (end <= kept_start or start >= kept_end):
-                            overlaps = True
-                            break
-
-                    if not overlaps:
-                        deduplicated_replacements.append((start, end, pseudo))
-
-                logger.debug(
-                    "replacements_deduplicated",
-                    original_count=len(replacements),
-                    deduplicated_count=len(deduplicated_replacements),
+                # Apply replacements (deduplicate overlaps, apply end-to-start)
+                pseudonymized_text = self._apply_replacements(
+                    document_text, replacements
                 )
-
-                # Apply deduplicated replacements from end to start
-                pseudonymized_text = document_text
-                for start_pos, end_pos, pseudonym in sorted(
-                    deduplicated_replacements, key=lambda x: x[0], reverse=True
-                ):
-                    pseudonymized_text = (
-                        pseudonymized_text[:start_pos]
-                        + pseudonym
-                        + pseudonymized_text[end_pos:]
-                    )
 
                 # Step 7: Write output document
                 logger.info("writing_output", output_file=output_path)
