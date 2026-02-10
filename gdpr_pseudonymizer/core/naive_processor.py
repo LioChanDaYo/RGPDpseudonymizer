@@ -15,7 +15,7 @@ This file will be removed in Epic 2.
 
 from __future__ import annotations
 
-from gdpr_pseudonymizer.cli.naive_data import NAIVE_ENTITIES
+from gdpr_pseudonymizer.data.naive_data import NAIVE_ENTITIES
 
 
 def detect_naive_entities(text: str) -> list[tuple[str, str, int, int, str]]:

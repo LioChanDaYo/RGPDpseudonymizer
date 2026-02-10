@@ -13,6 +13,7 @@ This is the core workflow implementation for Story 2.6.
 from __future__ import annotations
 
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
@@ -87,6 +88,7 @@ class DocumentProcessor:
         passphrase: str,
         theme: str = "neutral",
         model_name: str = "spacy",
+        notifier: Callable[[str], None] | None = None,
     ):
         """Initialize document processor with database and configuration.
 
@@ -95,6 +97,8 @@ class DocumentProcessor:
             passphrase: Encryption passphrase for database access
             theme: Pseudonym library theme (neutral/star_wars/lotr)
             model_name: NLP model name (spacy)
+            notifier: Optional callback for user-facing messages.
+                     Decouples core from CLI presentation layer.
 
         Raises:
             ValueError: If passphrase invalid or database cannot be opened
@@ -104,6 +108,7 @@ class DocumentProcessor:
         self.passphrase = passphrase
         self.theme = theme
         self.model_name = model_name
+        self._notifier = notifier or (lambda msg: None)
 
         # Database session will be created per operation (context manager pattern)
         self._db_session: DatabaseSession | None = None
@@ -310,16 +315,13 @@ class DocumentProcessor:
                         else:
                             unknown_entities.append(entity)
 
-                    # Import here to avoid circular import (needed for auto-accept messages)
-                    from gdpr_pseudonymizer.cli.formatters import console
-
                     # Display auto-accepted count (Story 3.4, AC8)
                     if known_entities:
                         auto_accept_count = len(known_entities)
                         unique_known = len(set(e.text for e in known_entities))
-                        console.print(
-                            f"[dim]Auto-accepted {auto_accept_count} known entities "
-                            f"({unique_known} unique) with existing mappings[/dim]"
+                        self._notifier(
+                            f"Auto-accepted {auto_accept_count} known entities "
+                            f"({unique_known} unique) with existing mappings"
                         )
                         logger.info(
                             "auto_accepted_known_entities",
@@ -339,9 +341,9 @@ class DocumentProcessor:
                         else:
                             validated_unknown = []
                             # No unknown entities - skip validation workflow
-                            console.print(
-                                "[green]All entities have existing mappings. "
-                                "Skipping validation.[/green]"
+                            self._notifier(
+                                "All entities have existing mappings. "
+                                "Skipping validation."
                             )
 
                         # Combine auto-accepted known entities with validated unknown

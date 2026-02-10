@@ -284,3 +284,15 @@ def format_validation_cancelled() -> None:
     console.print()
     console.print("[yellow]X Processing cancelled by user[/yellow]")
     console.print()
+
+
+def rich_notifier(message: str) -> None:
+    """Notifier callback that prints messages via Rich console.
+
+    Used as the notifier for DocumentProcessor in CLI context,
+    decoupling core from direct Rich/console dependency.
+
+    Args:
+        message: Plain text message to display (Rich markup applied here)
+    """
+    console.print(f"[dim]{message}[/dim]")

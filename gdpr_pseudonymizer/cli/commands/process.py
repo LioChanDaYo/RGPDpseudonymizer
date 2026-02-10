@@ -20,7 +20,7 @@ from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
 from gdpr_pseudonymizer.cli.config import load_config
-from gdpr_pseudonymizer.cli.formatters import format_error_message
+from gdpr_pseudonymizer.cli.formatters import format_error_message, rich_notifier
 from gdpr_pseudonymizer.cli.passphrase import resolve_passphrase
 from gdpr_pseudonymizer.core.document_processor import DocumentProcessor
 from gdpr_pseudonymizer.data.database import init_database
@@ -207,6 +207,7 @@ def process_command(
                     passphrase=passphrase,
                     theme=effective_theme,
                     model_name=effective_model,
+                    notifier=rich_notifier,
                 )
                 progress.update(task, description="✓ Processor initialized")
             except ValueError as e:

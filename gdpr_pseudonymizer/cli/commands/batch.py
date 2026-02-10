@@ -31,7 +31,7 @@ from rich.table import Table
 from rich.text import Text
 
 from gdpr_pseudonymizer.cli.config import load_config
-from gdpr_pseudonymizer.cli.formatters import format_error_message
+from gdpr_pseudonymizer.cli.formatters import format_error_message, rich_notifier
 from gdpr_pseudonymizer.cli.passphrase import resolve_passphrase
 from gdpr_pseudonymizer.cli.progress import ETAColumn, ProgressTracker
 from gdpr_pseudonymizer.core.document_processor import DocumentProcessor
@@ -100,6 +100,7 @@ def _process_single_document_worker(
             passphrase=passphrase,
             theme=theme,
             model_name=model,
+            notifier=rich_notifier,
         )
 
         # Process document with validation SKIPPED (parallel mode has no stdin)
@@ -534,6 +535,7 @@ def batch_command(
                         passphrase=resolved_passphrase,
                         theme=effective_theme,
                         model_name=effective_model,
+                        notifier=rich_notifier,
                     )
                     init_progress.update(
                         init_task, description="✓ Processor initialized"
