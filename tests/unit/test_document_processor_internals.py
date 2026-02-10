@@ -583,3 +583,129 @@ class TestApplyReplacements:
         processor = _make_processor()
         result = processor._apply_replacements("unchanged text", [])
         assert result == "unchanged text"
+
+
+# ===========================================================================
+# _assign_new_pseudonym
+# ===========================================================================
+
+
+class TestAssignNewPseudonym:
+    """Tests for _assign_new_pseudonym()."""
+
+    def test_creates_entity_with_correct_fields(self) -> None:
+        """Returns pseudonym string and Entity with all expected fields."""
+        ctx = Mock()
+        assignment = Mock()
+        assignment.pseudonym_full = "Jean Dupont"
+        assignment.pseudonym_first = "Jean"
+        assignment.pseudonym_last = "Dupont"
+        assignment.is_ambiguous = False
+        assignment.ambiguity_reason = None
+        ctx.compositional_engine.assign_compositional_pseudonym.return_value = (
+            assignment
+        )
+        ctx.compositional_engine.parse_full_name.return_value = (
+            "Marie",
+            "Dubois",
+            False,
+        )
+
+        processor = _make_processor()
+        pseudonym, entity = processor._assign_new_pseudonym(
+            ctx, _make_entity("Marie Dubois", "PERSON"), "Marie Dubois"
+        )
+
+        assert pseudonym == "Jean Dupont"
+        assert entity.full_name == "Marie Dubois"
+        assert entity.first_name == "Marie"
+        assert entity.last_name == "Dubois"
+        assert entity.pseudonym_full == "Jean Dupont"
+
+    def test_location_entity_has_no_name_parts(self) -> None:
+        """LOCATION entities have None for first_name and last_name."""
+        ctx = Mock()
+        assignment = Mock()
+        assignment.pseudonym_full = "Lyon"
+        assignment.pseudonym_first = None
+        assignment.pseudonym_last = None
+        assignment.is_ambiguous = False
+        assignment.ambiguity_reason = None
+        ctx.compositional_engine.assign_compositional_pseudonym.return_value = (
+            assignment
+        )
+
+        processor = _make_processor()
+        pseudonym, entity = processor._assign_new_pseudonym(
+            ctx, _make_entity("Paris", "LOCATION"), "Paris"
+        )
+
+        assert pseudonym == "Lyon"
+        assert entity.first_name is None
+        assert entity.last_name is None
+
+
+# ===========================================================================
+# _log_success_operation
+# ===========================================================================
+
+
+class TestLogSuccessOperation:
+    """Tests for _log_success_operation()."""
+
+    def test_logs_operation_to_audit_repo(self) -> None:
+        """Logs a successful PROCESS operation to the audit repository."""
+        ctx = Mock()
+
+        processor = _make_processor()
+        processor._log_success_operation(
+            ctx, "input.txt", [_make_entity("Marie", "PERSON")], 1.5
+        )
+
+        ctx.audit_repo.log_operation.assert_called_once()
+        op = ctx.audit_repo.log_operation.call_args[0][0]
+        assert op.operation_type == "PROCESS"
+        assert op.success is True
+        assert op.entity_count == 1
+        assert op.processing_time_seconds == 1.5
+
+
+# ===========================================================================
+# _handle_processing_error
+# ===========================================================================
+
+
+class TestHandleProcessingError:
+    """Tests for _handle_processing_error()."""
+
+    @patch("gdpr_pseudonymizer.core.document_processor.open_database")
+    def test_returns_failure_result_for_file_error(self, mock_db: MagicMock) -> None:
+        """FileProcessingError is formatted as plain string."""
+        from gdpr_pseudonymizer.exceptions import FileProcessingError
+
+        processor = _make_processor()
+        result = processor._handle_processing_error(
+            FileProcessingError("not found"),
+            "in.txt",
+            "out.txt",
+            0.0,
+        )
+
+        assert result.success is False
+        assert result.error_message == "not found"
+        assert result.input_file == "in.txt"
+
+    @patch("gdpr_pseudonymizer.core.document_processor.open_database")
+    def test_returns_failure_result_for_generic_error(self, mock_db: MagicMock) -> None:
+        """Generic exceptions include type name in error message."""
+        processor = _make_processor()
+        result = processor._handle_processing_error(
+            ValueError("bad value"),
+            "in.txt",
+            "out.txt",
+            0.0,
+        )
+
+        assert result.success is False
+        assert "ValueError" in result.error_message
+        assert "bad value" in result.error_message

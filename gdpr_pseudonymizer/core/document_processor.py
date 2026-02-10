@@ -243,26 +243,7 @@ class DocumentProcessor:
         skip_validation: bool,
         pseudonym_assigner: Callable[[DetectedEntity], str],
     ) -> list[DetectedEntity]:
-        """Run entity validation workflow (interactive or auto-accept).
-
-        In parallel mode (skip_validation=True), all entities are auto-accepted.
-        In interactive mode, known entities (existing DB mappings) are
-        auto-accepted and only unknown entities go through user validation.
-
-        Args:
-            ctx: Processing context with repos and engine
-            detected_entities: Entities detected in the document
-            document_text: Original document text for context display
-            input_path: Document path for validation UI
-            skip_validation: If True, skip interactive validation
-            pseudonym_assigner: Callable for generating pseudonym previews
-
-        Returns:
-            List of validated entities to process
-
-        Raises:
-            KeyboardInterrupt: If user cancels interactive validation
-        """
+        """Run entity validation workflow (interactive or auto-accept)."""
         if skip_validation:
             logger.info(
                 "validation_skipped",
@@ -413,24 +394,49 @@ class DocumentProcessor:
                     return temp_stripped[:prefix_end]
         return ""
 
+    def _assign_new_pseudonym(
+        self,
+        ctx: _ProcessingContext,
+        entity: DetectedEntity,
+        entity_text_stripped: str,
+    ) -> tuple[str, Entity]:
+        """Assign a new compositional pseudonym and create the Entity record."""
+        assignment = ctx.compositional_engine.assign_compositional_pseudonym(
+            entity_text=entity_text_stripped,
+            entity_type=entity.entity_type,
+            gender=None,
+        )
+        original_first = None
+        original_last = None
+        if entity.entity_type == "PERSON":
+            original_first, original_last, _ = ctx.compositional_engine.parse_full_name(
+                entity_text_stripped
+            )
+        new_entity = Entity(
+            entity_type=entity.entity_type,
+            first_name=original_first,
+            last_name=original_last,
+            full_name=entity_text_stripped,
+            pseudonym_first=assignment.pseudonym_first,
+            pseudonym_last=assignment.pseudonym_last,
+            pseudonym_full=assignment.pseudonym_full,
+            first_seen_timestamp=datetime.now(timezone.utc),
+            gender=None,
+            confidence_score=(
+                entity.confidence if hasattr(entity, "confidence") else None
+            ),
+            theme=self.theme,
+            is_ambiguous=assignment.is_ambiguous,
+            ambiguity_reason=assignment.ambiguity_reason,
+        )
+        return assignment.pseudonym_full, new_entity
+
     def _resolve_pseudonyms(
         self,
         ctx: _ProcessingContext,
         validated_entities: list[DetectedEntity],
     ) -> _ResolveResult:
-        """Resolve pseudonyms for all validated entities.
-
-        For each entity: check cache, check DB, check component matches,
-        or assign a new pseudonym. Collects replacements and saves new
-        entities in a single batch transaction.
-
-        Args:
-            ctx: Processing context with repos and engine
-            validated_entities: Entities that passed validation
-
-        Returns:
-            _ResolveResult with replacements list and new/reused counts
-        """
+        """Resolve pseudonyms for all validated entities."""
         logger.info(
             "starting_entity_processing",
             validated_count=len(validated_entities),
@@ -477,44 +483,10 @@ class DocumentProcessor:
                         entity_cache[entity_text_stripped] = pseudonym
                         entities_reused += 1
                     else:
-                        assignment = (
-                            ctx.compositional_engine.assign_compositional_pseudonym(
-                                entity_text=entity_text_stripped,
-                                entity_type=entity.entity_type,
-                                gender=None,
-                            )
+                        pseudonym, new_entity = self._assign_new_pseudonym(
+                            ctx, entity, entity_text_stripped
                         )
-                        pseudonym = assignment.pseudonym_full
                         entity_cache[entity_text_stripped] = pseudonym
-
-                        original_first = None
-                        original_last = None
-                        if entity.entity_type == "PERSON":
-                            original_first, original_last, _ = (
-                                ctx.compositional_engine.parse_full_name(
-                                    entity_text_stripped
-                                )
-                            )
-
-                        new_entity = Entity(
-                            entity_type=entity.entity_type,
-                            first_name=original_first,
-                            last_name=original_last,
-                            full_name=entity_text_stripped,
-                            pseudonym_first=assignment.pseudonym_first,
-                            pseudonym_last=assignment.pseudonym_last,
-                            pseudonym_full=assignment.pseudonym_full,
-                            first_seen_timestamp=datetime.now(timezone.utc),
-                            gender=None,
-                            confidence_score=(
-                                entity.confidence
-                                if hasattr(entity, "confidence")
-                                else None
-                            ),
-                            theme=self.theme,
-                            is_ambiguous=assignment.is_ambiguous,
-                            ambiguity_reason=assignment.ambiguity_reason,
-                        )
                         new_entities.append(new_entity)
                         entities_new += 1
 
@@ -634,6 +606,56 @@ class DocumentProcessor:
             compositional_engine=compositional_engine,
         )
 
+    def _log_success_operation(
+        self,
+        ctx: _ProcessingContext,
+        input_path: str,
+        validated_entities: list[DetectedEntity],
+        processing_time: float,
+    ) -> None:
+        """Log successful processing operation to audit trail."""
+        operation = Operation(
+            operation_type="PROCESS",
+            files_processed=[input_path],
+            model_name=self.model_name,
+            model_version=self._get_model_version(),
+            theme_selected=self.theme,
+            entity_count=len(validated_entities),
+            processing_time_seconds=processing_time,
+            success=True,
+            error_message=None,
+        )
+        ctx.audit_repo.log_operation(operation)
+
+    def _handle_processing_error(
+        self,
+        error: Exception,
+        input_path: str,
+        output_path: str,
+        start_time: float,
+    ) -> ProcessingResult:
+        """Format error, log to audit trail, and return failure result."""
+        processing_time = time.time() - start_time
+        error_message = (
+            str(error)
+            if isinstance(error, FileProcessingError)
+            else f"{type(error).__name__}: {error}"
+        )
+        logger.error("processing_error", error=error_message)
+        self._log_failed_operation(
+            input_path, error_message, processing_time, detected_entities=[]
+        )
+        return ProcessingResult(
+            success=False,
+            input_file=input_path,
+            output_file=output_path,
+            entities_detected=0,
+            entities_new=0,
+            entities_reused=0,
+            processing_time_seconds=processing_time,
+            error_message=error_message,
+        )
+
     def process_document(
         self,
         input_path: str,
@@ -641,62 +663,16 @@ class DocumentProcessor:
         skip_validation: bool = False,
         entity_type_filter: set[str] | None = None,
     ) -> ProcessingResult:
-        """Process single document with complete pseudonymization workflow.
-
-        Workflow:
-        1. FileHandler.read_document() → document_text
-        2. HybridEntityDetector.detect_entities() → List[DetectedEntity]
-        3. Interactive validation workflow → List[ValidatedEntity] (user confirms/rejects each entity)
-           - When skip_validation=True, all entities are auto-accepted (for parallel batch processing)
-        4. For each validated entity, check MappingRepository.find_by_full_name() for existing mapping
-        5. If existing, reuse pseudonym; if new, assign using CompositionalPseudonymEngine
-        6. Save new entities to MappingRepository (encrypted storage)
-        7. Apply replacements to document text (respect exclusion zones)
-        8. FileHandler.write_document() → output file
-        9. AuditRepository.log_operation() with all FR12 fields
-
-        Args:
-            input_path: Path to input document (.txt or .md)
-            output_path: Path to output document
-            skip_validation: If True, skip interactive validation and auto-accept all entities.
-                           Used for parallel batch processing where stdin is unavailable.
-            entity_type_filter: Optional set of entity types to keep (e.g., {"PERSON", "ORG"}).
-                              If None, all entity types are processed.
-
-        Returns:
-            ProcessingResult with processing metadata
-
-        Raises:
-            FileProcessingError: If file I/O fails
-            ValueError: If encryption passphrase invalid
-            Exception: For other unexpected errors
-        """
+        """Process single document with complete pseudonymization workflow."""
         start_time = time.time()
-        entities_new = 0
-        entities_reused = 0
-        error_message = None
-
         try:
-            # Step 1: Read input document
-            logger.info("reading_document", input_file=input_path)
             document_text = read_file(input_path)
-
-            # Step 2: Detect entities and apply type filter
             detected_entities = self._detect_and_filter_entities(
                 document_text, entity_type_filter
             )
-
-            # Step 2.5-6: Open database ONCE for validation and processing (prevents Windows SQLite locking)
-            logger.info(
-                "starting_validation_workflow", entity_count=len(detected_entities)
-            )
             with open_database(self.db_path, self.passphrase) as db_session:
                 ctx = self._init_processing_context(db_session)
-
-                # Build pseudonym assigner for validation preview
                 pseudonym_assigner = self._build_pseudonym_assigner(ctx)
-
-                # Run validation workflow (interactive or auto-accept)
                 validated_entities = self._run_validation(
                     ctx=ctx,
                     detected_entities=detected_entities,
@@ -705,102 +681,27 @@ class DocumentProcessor:
                     skip_validation=skip_validation,
                     pseudonym_assigner=pseudonym_assigner,
                 )
-
-                # Reset pseudonym state after validation preview
                 self._reset_pseudonym_state(ctx)
-
-                # Resolve pseudonyms for all validated entities
                 resolve_result = self._resolve_pseudonyms(ctx, validated_entities)
-                entities_new = resolve_result.entities_new
-                entities_reused = resolve_result.entities_reused
-                replacements = resolve_result.replacements
-
-                # Apply replacements (deduplicate overlaps, apply end-to-start)
                 pseudonymized_text = self._apply_replacements(
-                    document_text, replacements
+                    document_text, resolve_result.replacements
                 )
-
-                # Step 7: Write output document
-                logger.info("writing_output", output_file=output_path)
                 write_file(output_path, pseudonymized_text)
-
-                # Step 8: Log operation to audit trail
                 processing_time = time.time() - start_time
-                operation = Operation(
-                    operation_type="PROCESS",
-                    files_processed=[input_path],
-                    model_name=self.model_name,
-                    model_version=self._get_model_version(),
-                    theme_selected=self.theme,
-                    entity_count=len(validated_entities),
-                    processing_time_seconds=processing_time,
-                    success=True,
-                    error_message=None,
+                self._log_success_operation(
+                    ctx, input_path, validated_entities, processing_time
                 )
-                ctx.audit_repo.log_operation(operation)
-
-                logger.info(
-                    "processing_complete",
-                    entities_detected=len(detected_entities),
-                    entities_validated=len(validated_entities),
-                    entities_new=entities_new,
-                    entities_reused=entities_reused,
-                    processing_time=processing_time,
-                )
-
                 return ProcessingResult(
                     success=True,
                     input_file=input_path,
                     output_file=output_path,
                     entities_detected=len(validated_entities),
-                    entities_new=entities_new,
-                    entities_reused=entities_reused,
+                    entities_new=resolve_result.entities_new,
+                    entities_reused=resolve_result.entities_reused,
                     processing_time_seconds=processing_time,
                 )
-
-        except FileProcessingError as e:
-            # File I/O errors
-            processing_time = time.time() - start_time
-            error_message = str(e)
-            logger.error("file_processing_error", error=error_message)
-
-            # Log failed operation to audit trail
-            self._log_failed_operation(
-                input_path, error_message, processing_time, detected_entities=[]
-            )
-
-            return ProcessingResult(
-                success=False,
-                input_file=input_path,
-                output_file=output_path,
-                entities_detected=0,
-                entities_new=0,
-                entities_reused=0,
-                processing_time_seconds=processing_time,
-                error_message=error_message,
-            )
-
         except Exception as e:
-            # Unexpected errors
-            processing_time = time.time() - start_time
-            error_message = f"{type(e).__name__}: {str(e)}"
-            logger.error("processing_error", error=error_message)
-
-            # Log failed operation to audit trail
-            self._log_failed_operation(
-                input_path, error_message, processing_time, detected_entities=[]
-            )
-
-            return ProcessingResult(
-                success=False,
-                input_file=input_path,
-                output_file=output_path,
-                entities_detected=0,
-                entities_new=0,
-                entities_reused=0,
-                processing_time_seconds=processing_time,
-                error_message=error_message,
-            )
+            return self._handle_processing_error(e, input_path, output_path, start_time)
 
     def _get_model_version(self) -> str:
         """Get NLP model version string.
