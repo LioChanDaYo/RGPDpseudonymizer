@@ -3,10 +3,14 @@
 from __future__ import annotations
 
 import logging
-import re
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
+
+from gdpr_pseudonymizer.utils.french_patterns import (
+    strip_french_prepositions,
+    strip_french_titles,
+)
 
 if TYPE_CHECKING:
     from gdpr_pseudonymizer.data.repositories.mapping_repository import (
@@ -15,23 +19,6 @@ if TYPE_CHECKING:
 
 # Configure structured logging (no sensitive data)
 logger = logging.getLogger(__name__)
-
-# French title pattern for preprocessing
-# Matches: Dr./Dr, Docteur, Pr./Pr, Prof./Prof, Professeur, M./M, Mme./Mme, Mlle./Mlle, Madame, Monsieur, Mademoiselle
-# Also matches: Maître (attorney title), Me./Me (abbreviated attorney title)
-# Case-insensitive, with or without periods
-# (?!\w) ensures title is not followed by a word character (prevents matching "Dr" in "Drapeau")
-# \s* consumes optional trailing whitespace
-FRENCH_TITLE_PATTERN = r"\b(?:Docteur|Professeur|Madame|Monsieur|Mademoiselle|Maître|Dr\.?|Pr\.?|Prof\.?|M\.?|Mme\.?|Mlle\.?|Me\.?)(?!\w)\s*"
-
-# French preposition pattern for location preprocessing
-# Matches common French prepositions that precede location names: à, au, aux, en, de, du, des, d', l'
-# Handles contractions and elisions
-# NOTE: Does NOT include la/le/les — these are articles that form part of city names
-# (e.g., "La Rochelle", "Le Mans", "Les Ulis"). See R2b investigation (Story 4.6.1).
-# ^[\s]* matches optional leading whitespace
-# \s* consumes trailing whitespace after preposition
-FRENCH_PREPOSITION_PATTERN = r"^[\s]*(?:aux|au|des|du|de|à|en|d'|l')\s+"
 
 
 @dataclass
@@ -170,16 +157,7 @@ class CompositionalPseudonymEngine:
         Returns:
             Text with titles removed
         """
-        # Strip titles iteratively (handles multiple titles)
-        while True:
-            stripped = re.sub(
-                FRENCH_TITLE_PATTERN, "", text, flags=re.IGNORECASE
-            ).strip()
-            if stripped == text:
-                break
-            text = stripped
-
-        return text
+        return strip_french_titles(text)
 
     def strip_prepositions(self, text: str) -> str:
         """Remove French prepositions from location entity text.
@@ -200,11 +178,7 @@ class CompositionalPseudonymEngine:
         Returns:
             Text with leading prepositions removed
         """
-        # Strip prepositions from the beginning only
-        stripped = re.sub(
-            FRENCH_PREPOSITION_PATTERN, "", text, flags=re.IGNORECASE
-        ).strip()
-        return stripped
+        return strip_french_prepositions(text)
 
     def assign_compositional_pseudonym(
         self,

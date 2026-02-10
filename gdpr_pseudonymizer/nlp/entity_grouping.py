@@ -7,21 +7,16 @@ validation fatigue.
 
 from __future__ import annotations
 
-import re
 from collections import defaultdict
 
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
+from gdpr_pseudonymizer.utils.french_patterns import (
+    strip_french_prepositions,
+    strip_french_titles,
+)
 from gdpr_pseudonymizer.utils.logger import get_logger
 
 logger = get_logger(__name__)
-
-# French title pattern (reused from hybrid_detector.py for consistency)
-FRENCH_TITLE_PATTERN = r"\b(?:Docteur|Professeur|Madame|Monsieur|Mademoiselle|Maître|Dr\.?|Pr\.?|Prof\.?|M\.?|Mme\.?|Mlle\.?|Me\.?)(?!\w)\s*"
-
-# French prepositions stripped from LOCATION entities before comparison
-# NOTE: Does NOT include la/le/les — these are articles that form part of city names
-# (e.g., "La Rochelle", "Le Mans", "Les Ulis"). See R2b investigation (Story 4.6.1).
-FRENCH_LOCATION_PREPOSITIONS = r"^(?:aux|au|des|du|de|à|en|d'|l')\s*"
 
 
 def _normalize_person(text: str) -> str:
@@ -35,15 +30,7 @@ def _normalize_person(text: str) -> str:
     Returns:
         Normalized text without titles
     """
-    normalized = text
-    while True:
-        stripped = re.sub(
-            FRENCH_TITLE_PATTERN, "", normalized, flags=re.IGNORECASE
-        ).strip()
-        if stripped == normalized:
-            break
-        normalized = stripped
-    return normalized
+    return strip_french_titles(text)
 
 
 def _normalize_location(text: str) -> str:
@@ -57,10 +44,7 @@ def _normalize_location(text: str) -> str:
     Returns:
         Normalized text without prepositions, lowercased
     """
-    stripped = re.sub(
-        FRENCH_LOCATION_PREPOSITIONS, "", text, flags=re.IGNORECASE
-    ).strip()
-    return stripped.lower()
+    return strip_french_prepositions(text).lower()
 
 
 def _normalize_org(text: str) -> str:

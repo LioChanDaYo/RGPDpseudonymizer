@@ -10,19 +10,13 @@ Implements EntityDetector interface using a hybrid approach:
 
 from __future__ import annotations
 
-import re
-
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity, EntityDetector
 from gdpr_pseudonymizer.nlp.regex_matcher import RegexMatcher
 from gdpr_pseudonymizer.nlp.spacy_detector import SpaCyDetector
+from gdpr_pseudonymizer.utils.french_patterns import strip_french_titles
 from gdpr_pseudonymizer.utils.logger import get_logger
 
 logger = get_logger(__name__)
-
-# French title pattern for entity normalization during deduplication
-# Same pattern used in assignment_engine.py to ensure consistency
-# Includes attorney titles: Maître (full form), Me (abbreviated form)
-FRENCH_TITLE_PATTERN = r"\b(?:Docteur|Professeur|Madame|Monsieur|Mademoiselle|Maître|Dr\.?|Pr\.?|Prof\.?|M\.?|Mme\.?|Mlle\.?|Me\.?)(?!\w)\s*"
 
 
 class HybridDetector(EntityDetector):
@@ -348,16 +342,7 @@ class HybridDetector(EntityDetector):
             "Mme Fontaine" → "Fontaine"
             "Marie Dubois" → "Marie Dubois" (unchanged)
         """
-        # Strip titles iteratively (handles multiple titles like "Dr. Pr. Marie Dubois")
-        normalized = text
-        while True:
-            stripped = re.sub(
-                FRENCH_TITLE_PATTERN, "", normalized, flags=re.IGNORECASE
-            ).strip()
-            if stripped == normalized:
-                break
-            normalized = stripped
-        return normalized
+        return strip_french_titles(text)
 
     def _is_exact_match(self, e1: DetectedEntity, e2: DetectedEntity) -> bool:
         """Check if two entities have identical span OR normalized text.

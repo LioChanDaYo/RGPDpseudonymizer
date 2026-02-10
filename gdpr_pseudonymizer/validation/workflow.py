@@ -12,7 +12,7 @@ from collections import defaultdict
 from collections.abc import Callable
 
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
-from gdpr_pseudonymizer.pseudonym.assignment_engine import FRENCH_TITLE_PATTERN
+from gdpr_pseudonymizer.utils.french_patterns import FRENCH_TITLE_PATTERN
 from gdpr_pseudonymizer.validation.context_precomputer import ContextPrecomputer
 from gdpr_pseudonymizer.validation.models import ValidationSession
 from gdpr_pseudonymizer.validation.ui import (
