@@ -188,7 +188,7 @@ class TestBatchCommand:
             patch(
                 "gdpr_pseudonymizer.cli.commands.batch.DocumentProcessor"
             ) as mock_processor,
-            patch("gdpr_pseudonymizer.cli.commands.batch.init_database"),
+            patch("gdpr_pseudonymizer.cli.validators.init_database"),
         ):
             mock_resolve.return_value = "testpassphrase123!"
             mock_processor.return_value.process_document.return_value = mock_result
@@ -242,7 +242,7 @@ class TestBatchCommand:
             patch(
                 "gdpr_pseudonymizer.cli.commands.batch.DocumentProcessor"
             ) as mock_processor,
-            patch("gdpr_pseudonymizer.cli.commands.batch.init_database"),
+            patch("gdpr_pseudonymizer.cli.validators.init_database"),
         ):
             mock_resolve.return_value = "testpassphrase123!"
             mock_processor.return_value.process_document.side_effect = mock_results
@@ -268,7 +268,7 @@ class TestBatchCommand:
             patch(
                 "gdpr_pseudonymizer.cli.commands.batch.DocumentProcessor"
             ) as mock_processor,
-            patch("gdpr_pseudonymizer.cli.commands.batch.init_database"),
+            patch("gdpr_pseudonymizer.cli.validators.init_database"),
         ):
             mock_resolve.return_value = "testpassphrase123!"
             mock_processor.return_value.process_document.return_value = mock_result
@@ -298,7 +298,7 @@ class TestBatchCommand:
             patch(
                 "gdpr_pseudonymizer.cli.commands.batch.DocumentProcessor"
             ) as mock_processor,
-            patch("gdpr_pseudonymizer.cli.commands.batch.init_database"),
+            patch("gdpr_pseudonymizer.cli.validators.init_database"),
         ):
             mock_resolve.return_value = "testpassphrase123!"
             mock_processor.return_value.process_document.return_value = mock_result
@@ -326,7 +326,7 @@ class TestBatchCommand:
             patch(
                 "gdpr_pseudonymizer.cli.commands.batch.DocumentProcessor"
             ) as mock_processor,
-            patch("gdpr_pseudonymizer.cli.commands.batch.init_database"),
+            patch("gdpr_pseudonymizer.cli.validators.init_database"),
         ):
             mock_resolve.return_value = "testpassphrase123!"
             mock_processor.return_value.process_document.return_value = mock_result
@@ -356,7 +356,7 @@ class TestBatchCommand:
             patch(
                 "gdpr_pseudonymizer.cli.commands.batch.DocumentProcessor"
             ) as mock_processor,
-            patch("gdpr_pseudonymizer.cli.commands.batch.init_database"),
+            patch("gdpr_pseudonymizer.cli.validators.init_database"),
         ):
             mock_resolve.return_value = "testpassphrase123!"
             mock_processor.return_value.process_document.return_value = mock_result
@@ -451,7 +451,7 @@ class TestBatchCommandEdgeCases:
             patch(
                 "gdpr_pseudonymizer.cli.commands.batch.DocumentProcessor"
             ) as mock_processor,
-            patch("gdpr_pseudonymizer.cli.commands.batch.init_database"),
+            patch("gdpr_pseudonymizer.cli.validators.init_database"),
         ):
             mock_resolve.return_value = "testpassphrase123!"
             mock_processor.return_value.process_document.side_effect = RuntimeError(
@@ -478,7 +478,7 @@ class TestBatchCommandEdgeCases:
             patch(
                 "gdpr_pseudonymizer.cli.commands.batch.DocumentProcessor"
             ) as mock_processor,
-            patch("gdpr_pseudonymizer.cli.commands.batch.init_database"),
+            patch("gdpr_pseudonymizer.cli.validators.init_database"),
         ):
             mock_resolve.return_value = "testpassphrase123!"
             mock_processor.return_value.process_document.return_value = mock_result
@@ -503,7 +503,7 @@ class TestBatchCommandEdgeCases:
             patch(
                 "gdpr_pseudonymizer.cli.commands.batch.DocumentProcessor"
             ) as mock_processor,
-            patch("gdpr_pseudonymizer.cli.commands.batch.init_database"),
+            patch("gdpr_pseudonymizer.cli.validators.init_database"),
         ):
             mock_resolve.return_value = "testpassphrase123!"
             mock_processor.return_value.process_document.return_value = mock_result
@@ -526,7 +526,7 @@ class TestBatchCommandEdgeCases:
             patch(
                 "gdpr_pseudonymizer.cli.commands.batch.DocumentProcessor"
             ) as mock_processor,
-            patch("gdpr_pseudonymizer.cli.commands.batch.init_database"),
+            patch("gdpr_pseudonymizer.cli.validators.init_database"),
         ):
             mock_resolve.return_value = "wrongpassphrase!!"
             # DocumentProcessor raises ValueError for incorrect passphrase
@@ -550,7 +550,7 @@ class TestBatchCommandEdgeCases:
             patch(
                 "gdpr_pseudonymizer.cli.commands.batch.DocumentProcessor"
             ) as mock_processor,
-            patch("gdpr_pseudonymizer.cli.commands.batch.init_database"),
+            patch("gdpr_pseudonymizer.cli.validators.init_database"),
         ):
             mock_resolve.return_value = "testpassphrase123!"
             # Unexpected exception that's not ValueError
@@ -587,7 +587,7 @@ class TestParallelBatchProcessing:
             patch(
                 "gdpr_pseudonymizer.cli.commands.batch._process_batch_parallel"
             ) as mock_parallel,
-            patch("gdpr_pseudonymizer.cli.commands.batch.init_database"),
+            patch("gdpr_pseudonymizer.cli.validators.init_database"),
         ):
             mock_resolve.return_value = "testpassphrase123!"
             mock_parallel.return_value = BatchResult(total_files=1, successful_files=1)
@@ -611,7 +611,7 @@ class TestParallelBatchProcessing:
             patch(
                 "gdpr_pseudonymizer.cli.commands.batch.DocumentProcessor"
             ) as mock_processor,
-            patch("gdpr_pseudonymizer.cli.commands.batch.init_database"),
+            patch("gdpr_pseudonymizer.cli.validators.init_database"),
         ):
             mock_resolve.return_value = "testpassphrase123!"
             mock_processor.return_value.process_document.return_value = mock_result
@@ -634,7 +634,7 @@ class TestParallelBatchProcessing:
             patch(
                 "gdpr_pseudonymizer.cli.commands.batch._process_batch_parallel"
             ) as mock_parallel,
-            patch("gdpr_pseudonymizer.cli.commands.batch.init_database"),
+            patch("gdpr_pseudonymizer.cli.validators.init_database"),
         ):
             mock_resolve.return_value = "testpassphrase123!"
             mock_parallel.return_value = BatchResult(total_files=1, successful_files=1)
@@ -671,7 +671,7 @@ class TestParallelBatchProcessing:
             patch(
                 "gdpr_pseudonymizer.cli.commands.batch._process_batch_parallel"
             ) as mock_parallel,
-            patch("gdpr_pseudonymizer.cli.commands.batch.init_database"),
+            patch("gdpr_pseudonymizer.cli.validators.init_database"),
             patch("gdpr_pseudonymizer.cli.commands.batch.cpu_count") as mock_cpu,
         ):
             mock_resolve.return_value = "testpassphrase123!"
@@ -823,7 +823,7 @@ pseudonymization:
             patch(
                 "gdpr_pseudonymizer.cli.commands.batch._process_batch_parallel"
             ) as mock_parallel,
-            patch("gdpr_pseudonymizer.cli.commands.batch.init_database"),
+            patch("gdpr_pseudonymizer.cli.validators.init_database"),
         ):
             mock_resolve.return_value = "testpassphrase123!"
             mock_parallel.return_value = BatchResult(total_files=1, successful_files=1)
@@ -867,7 +867,7 @@ batch:
             patch(
                 "gdpr_pseudonymizer.cli.commands.batch._process_batch_parallel"
             ) as mock_parallel,
-            patch("gdpr_pseudonymizer.cli.commands.batch.init_database"),
+            patch("gdpr_pseudonymizer.cli.validators.init_database"),
         ):
             mock_resolve.return_value = "testpassphrase123!"
             mock_parallel.return_value = BatchResult(total_files=1, successful_files=1)
@@ -911,7 +911,7 @@ pseudonymization:
             patch(
                 "gdpr_pseudonymizer.cli.commands.batch._process_batch_parallel"
             ) as mock_parallel,
-            patch("gdpr_pseudonymizer.cli.commands.batch.init_database"),
+            patch("gdpr_pseudonymizer.cli.validators.init_database"),
         ):
             mock_resolve.return_value = "testpassphrase123!"
             mock_parallel.return_value = BatchResult(total_files=1, successful_files=1)
@@ -956,7 +956,7 @@ batch:
             patch(
                 "gdpr_pseudonymizer.cli.commands.batch._process_batch_parallel"
             ) as mock_parallel,
-            patch("gdpr_pseudonymizer.cli.commands.batch.init_database"),
+            patch("gdpr_pseudonymizer.cli.validators.init_database"),
         ):
             mock_resolve.return_value = "testpassphrase123!"
             mock_parallel.return_value = BatchResult(total_files=1, successful_files=1)

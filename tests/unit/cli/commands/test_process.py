@@ -102,7 +102,7 @@ pseudonymization:
             patch(
                 "gdpr_pseudonymizer.cli.commands.process.DocumentProcessor"
             ) as mock_processor,
-            patch("gdpr_pseudonymizer.cli.commands.process.init_database"),
+            patch("gdpr_pseudonymizer.cli.validators.init_database"),
         ):
             mock_passphrase.return_value = "testpassphrase123!"
 
@@ -161,7 +161,7 @@ pseudonymization:
             patch(
                 "gdpr_pseudonymizer.cli.commands.process.DocumentProcessor"
             ) as mock_processor,
-            patch("gdpr_pseudonymizer.cli.commands.process.init_database"),
+            patch("gdpr_pseudonymizer.cli.validators.init_database"),
         ):
             mock_passphrase.return_value = "testpassphrase123!"
 
@@ -220,7 +220,7 @@ database:
             patch(
                 "gdpr_pseudonymizer.cli.commands.process.DocumentProcessor"
             ) as mock_processor,
-            patch("gdpr_pseudonymizer.cli.commands.process.init_database"),
+            patch("gdpr_pseudonymizer.cli.validators.init_database"),
         ):
             mock_passphrase.return_value = "testpassphrase123!"
 
@@ -279,7 +279,7 @@ pseudonymization:
             patch(
                 "gdpr_pseudonymizer.cli.commands.process.DocumentProcessor"
             ) as mock_processor,
-            patch("gdpr_pseudonymizer.cli.commands.process.init_database"),
+            patch("gdpr_pseudonymizer.cli.validators.init_database"),
         ):
             mock_passphrase.return_value = "testpassphrase123!"
 
@@ -339,7 +339,7 @@ database:
             patch(
                 "gdpr_pseudonymizer.cli.commands.process.DocumentProcessor"
             ) as mock_processor,
-            patch("gdpr_pseudonymizer.cli.commands.process.init_database"),
+            patch("gdpr_pseudonymizer.cli.validators.init_database"),
         ):
             mock_passphrase.return_value = "testpassphrase123!"
 

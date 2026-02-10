@@ -3,15 +3,21 @@
 from __future__ import annotations
 
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
+
+import pytest
+from rich.console import Console
 
 from gdpr_pseudonymizer.cli.validators import (
     VALID_LOG_LEVELS,
     VALID_THEMES,
+    ensure_database,
+    parse_entity_type_filter,
     validate_file_path,
     validate_log_level,
     validate_passphrase_strength,
     validate_theme,
+    validate_theme_or_exit,
     validate_workers,
 )
 
@@ -209,3 +215,73 @@ class TestValidatePassphraseStrength:
         assert is_valid is True
         # Should have shown warning about diversity
         assert mock_warn.called
+
+
+# ===========================================================================
+# Shared CLI command helpers (R6)
+# ===========================================================================
+
+
+class TestParseEntityTypeFilter:
+    """Tests for parse_entity_type_filter()."""
+
+    def test_none_returns_none(self) -> None:
+        """No entity_types arg returns None (no filter)."""
+        result = parse_entity_type_filter(None, Console())
+        assert result is None
+
+    def test_valid_types_parsed(self) -> None:
+        """Valid comma-separated types are returned as a set."""
+        result = parse_entity_type_filter("PERSON,ORG", Console())
+        assert result == {"PERSON", "ORG"}
+
+    def test_case_insensitive(self) -> None:
+        """Types are uppercased automatically."""
+        result = parse_entity_type_filter("person,location", Console())
+        assert result == {"PERSON", "LOCATION"}
+
+    def test_invalid_types_exit(self) -> None:
+        """All-invalid types causes sys.exit(1)."""
+        with pytest.raises(SystemExit) as exc_info:
+            parse_entity_type_filter("INVALID", Console())
+        assert exc_info.value.code == 1
+
+    def test_mixed_valid_invalid_keeps_valid(self) -> None:
+        """Mix of valid and invalid keeps only valid types."""
+        result = parse_entity_type_filter("PERSON,INVALID", Console())
+        assert result == {"PERSON"}
+
+
+class TestValidateThemeOrExit:
+    """Tests for validate_theme_or_exit()."""
+
+    def test_valid_theme_passes(self) -> None:
+        """Valid theme does not exit."""
+        validate_theme_or_exit("neutral")  # should not raise
+
+    def test_invalid_theme_exits(self) -> None:
+        """Invalid theme causes sys.exit(1)."""
+        with pytest.raises(SystemExit) as exc_info:
+            validate_theme_or_exit("invalid_theme")
+        assert exc_info.value.code == 1
+
+
+class TestEnsureDatabase:
+    """Tests for ensure_database()."""
+
+    @patch("gdpr_pseudonymizer.cli.validators.init_database")
+    def test_creates_db_when_missing(
+        self, mock_init: MagicMock, tmp_path: Path
+    ) -> None:
+        """Initializes DB when file does not exist."""
+        db_path = str(tmp_path / "new.db")
+        ensure_database(db_path, "test_pass_12345", Console())
+        mock_init.assert_called_once_with(db_path, "test_pass_12345")
+
+    @patch("gdpr_pseudonymizer.cli.validators.init_database")
+    def test_skips_when_exists(self, mock_init: MagicMock, tmp_path: Path) -> None:
+        """Does nothing when DB file already exists."""
+        db_path = tmp_path / "existing.db"
+        db_path.write_text("data")
+        ensure_database(str(db_path), "test_pass_12345", Console())
+        mock_init.assert_not_called()
