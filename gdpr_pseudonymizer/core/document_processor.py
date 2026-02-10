@@ -319,6 +319,24 @@ class DocumentProcessor:
             logger.info("validation_cancelled", reason="user_interrupt")
             raise
 
+    def _reset_pseudonym_state(self, ctx: _ProcessingContext) -> None:
+        """Reset pseudonym manager after validation preview.
+
+        The validation preview generates pseudonyms that are never saved.
+        This clears that state and reloads genuine DB mappings to prevent
+        collision false positives during actual processing.
+
+        Args:
+            ctx: Processing context with pseudonym_manager and mapping_repo
+        """
+        ctx.pseudonym_manager.reset_preview_state()
+        existing_entities = ctx.mapping_repo.find_all()
+        ctx.pseudonym_manager.load_existing_mappings(existing_entities)
+        logger.info(
+            "pseudonym_manager_reset_after_validation",
+            existing_mappings_reloaded=len(existing_entities),
+        )
+
     def _init_processing_context(
         self, db_session: DatabaseSession
     ) -> _ProcessingContext:
@@ -426,18 +444,8 @@ class DocumentProcessor:
                     pseudonym_assigner=pseudonym_assigner,
                 )
 
-                # CRITICAL FIX: Reset pseudonym manager state after validation
-                # The validation preview generates pseudonyms and adds them to internal state,
-                # but those previews are never saved. We must clear the state to prevent
-                # collision false positives during actual processing.
-                ctx.pseudonym_manager.reset_preview_state()
-                # Reload existing mappings from database (restores legitimate collision prevention)
-                existing_entities = ctx.mapping_repo.find_all()
-                ctx.pseudonym_manager.load_existing_mappings(existing_entities)
-                logger.info(
-                    "pseudonym_manager_reset_after_validation",
-                    existing_mappings_reloaded=len(existing_entities),
-                )
+                # Reset pseudonym state after validation preview
+                self._reset_pseudonym_state(ctx)
 
                 # Step 3-5: Process each VALIDATED entity (check for existing, assign, collect for batch save)
                 # Note: pseudonym_manager and compositional_engine already initialized above for validation

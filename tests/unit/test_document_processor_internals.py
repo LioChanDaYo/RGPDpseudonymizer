@@ -352,3 +352,25 @@ class TestRunValidation:
         assert result == [entity]
         mock_workflow.assert_not_called()
         assert any("Skipping validation" in m for m in messages)
+
+
+# ===========================================================================
+# _reset_pseudonym_state
+# ===========================================================================
+
+
+class TestResetPseudonymState:
+    """Tests for _reset_pseudonym_state()."""
+
+    def test_clears_and_reloads_mappings(self) -> None:
+        """Resets preview state and reloads existing mappings from DB."""
+        ctx = Mock()
+        existing = [Mock(), Mock()]
+        ctx.mapping_repo.find_all.return_value = existing
+
+        processor = _make_processor()
+        processor._reset_pseudonym_state(ctx)
+
+        ctx.pseudonym_manager.reset_preview_state.assert_called_once()
+        ctx.mapping_repo.find_all.assert_called_once()
+        ctx.pseudonym_manager.load_existing_mappings.assert_called_once_with(existing)
