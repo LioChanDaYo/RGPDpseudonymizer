@@ -1,5 +1,7 @@
 # Plan de Refactoring — GDPR Pseudonymizer
 
+> **STATUS: COMPLETED** — All 9 refactoring items (R1-R9) implemented in [Story 4.6.1](stories/4.6.1.codebase-refactoring-technical-debt.story.md). 15 atomic commits, 1077+ tests passing.
+
 **Date** : 2026-02-10
 **Version analysee** : v0.1.0-alpha (Epic 3 complete, Stories 4.1-4.6)
 **Codebase** : 8 500+ lignes, 54 fichiers Python, 814 tests (86%+ coverage)

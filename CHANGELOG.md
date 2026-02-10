@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Refactored
+- 🔧 **Codebase Refactoring & Technical Debt Resolution** (Story 4.6.1)
+  - **R1**: Decoupled core/CLI layer violation — replaced direct `console.print()` in `DocumentProcessor` with `ProcessingNotifier` callback protocol
+  - **R2**: Centralized French patterns — unified `FRENCH_TITLE_PATTERN` and `FRENCH_PREPOSITION_PATTERN` into `utils/french_patterns.py` (eliminated 3x duplication)
+  - **R3**: Decomposed `process_document()` god method (~550 lines) into 9 focused sub-methods
+  - **R4**: Fixed encapsulation violations — added `reset_preview_state()` and `get_component_mapping()` to `PseudonymManager` ABC
+  - **R5**: Factored Union-Find into reusable `UnionFind` class in `entity_grouping.py` (eliminated 3x duplication)
+  - **R6**: Extracted shared CLI logic (`parse_entity_type_filter`, `validate_theme`, `ensure_database`) into `cli/validators.py`
+  - **R7**: Removed dead code `SimplePseudonymManager` stub class
+  - **R8**: Centralized 4 scattered exceptions into `exceptions.py` under `PseudonymizerError` hierarchy
+  - **R9**: Harmonized logging — migrated 4 modules from `logging.getLogger()` to `structlog` via `get_logger()`
+  - 15 atomic commits, 1077+ tests passing, all quality gates green
+
 ### Added
 - ✅ **Beta Feedback Integration & Bug Fixes** (Story 4.6)
   - **Entity variant grouping in validation UI** (FB-001): Groups related entity forms (e.g., "Marie Dubois", "Pr. Dubois", "Dubois") into a single validation item. Reduces redundant validation prompts. Shows "Also appears as:" for variant forms.

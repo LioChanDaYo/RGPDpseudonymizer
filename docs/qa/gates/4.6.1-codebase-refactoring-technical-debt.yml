@@ -1,0 +1,56 @@
+schema: 1
+story: '4.6.1'
+story_title: 'Codebase Refactoring & Technical Debt Resolution'
+gate: PASS
+status_reason: 'All 12 ACs verified. 9 refactoring items (R1-R9) correctly implemented. 1077 tests passing (baseline 1005). Dev fixed TEST-001 (capsys->logger mock) and DOC-001 (File List correction). All quality checks pass (black, ruff, mypy).'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-02-10T22:30:00Z'
+
+waiver: { active: false }
+
+top_issues: []
+
+risk_summary:
+  totals: { critical: 0, high: 0, medium: 0, low: 0 }
+  recommendations:
+    must_fix: []
+    monitor:
+      - 'PII in debug-level logs (pre-existing, not introduced by this story)'
+
+quality_score: 100
+expires: '2026-02-24T22:30:00Z'
+
+evidence:
+  tests_reviewed: 178
+  risks_identified: 0
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+    ac_gaps: []
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'No new vulnerabilities. Layer decoupling (R1) reduces attack surface. Pre-existing PII in debug logs noted for future.'
+  performance:
+    status: PASS
+    notes: 'No algorithmic changes. O(n^2) entity clustering bounded by document size (<1000 entities). Benchmark errors pre-existing.'
+  reliability:
+    status: PASS
+    notes: 'Exception hierarchy (R8) improves error handling consistency. All error paths preserved through decomposition.'
+  maintainability:
+    status: PASS
+    notes: 'Significant improvement: eliminated 3 pattern duplicates, 3 CLI duplicates, 1 god method, 3 Union-Find duplicates, 4 scattered exceptions. 15 atomic commits enable precise bisect.'
+
+history:
+  - at: '2026-02-10T22:00:00Z'
+    gate: CONCERNS
+    note: 'Initial review — 1 test failure (TEST-001: capsys vs caplog in structlog exhaustion test), 1 doc issue (DOC-001: File List entry)'
+  - at: '2026-02-10T22:30:00Z'
+    gate: PASS
+    note: 'Dev fixed both issues. TEST-001 resolved with logger mock patch. DOC-001 corrected in File List. All 1077 tests passing, 0 failures.'
+
+recommendations:
+  immediate: []
+  future:
+    - action: 'Consider redacting entity text from debug-level logs for GDPR compliance'
+      refs: ['gdpr_pseudonymizer/core/document_processor.py:453']

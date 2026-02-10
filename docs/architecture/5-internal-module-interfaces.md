@@ -165,6 +165,29 @@ class PseudonymManager(ABC):
     def check_exhaustion(self) -> float:
         """Get library exhaustion percentage."""
         pass
+
+    @abstractmethod
+    def reset_preview_state(self) -> None:
+        """Reset internal state accumulated during validation preview.
+
+        Clears used pseudonyms and component mappings generated during
+        preview/validation so they don't cause false collision positives
+        during actual processing.
+        """
+        pass
+
+    @abstractmethod
+    def get_component_mapping(self, component: str, component_type: str) -> Optional[str]:
+        """Look up an in-memory component mapping.
+
+        Args:
+            component: Real component value (e.g., "Dubois")
+            component_type: Component type ("first_name" or "last_name")
+
+        Returns:
+            Pseudonym component if found, None otherwise
+        """
+        pass
 ```
 
 ---

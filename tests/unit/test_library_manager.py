@@ -448,9 +448,7 @@ class TestExhaustionDetection:
         exhaustion = manager.check_exhaustion()
         assert 0.0 < exhaustion < 1.0
 
-    def test_check_exhaustion_at_80_percent_triggers_warning(
-        self, capsys: pytest.CaptureFixture[str]
-    ) -> None:
+    def test_check_exhaustion_at_80_percent_triggers_warning(self) -> None:
         """Test that exhaustion warning is triggered at 80% threshold."""
         manager = LibraryBasedPseudonymManager()
         manager.load_library("neutral")
@@ -470,14 +468,19 @@ class TestExhaustionDetection:
         for i in range(num_to_use):
             manager._used_pseudonyms.add(f"Pseudonym-{i}")
 
-        # Trigger assignment which checks exhaustion
-        manager.assign_pseudonym(
-            entity_type="PERSON", first_name="Test", last_name="User", gender="male"
-        )
+        # Mock the logger to verify warning call directly
+        # (avoids caplog/capsys fragility with structlog routing)
+        with patch(
+            "gdpr_pseudonymizer.pseudonym.library_manager.logger"
+        ) as mock_logger:
+            manager.assign_pseudonym(
+                entity_type="PERSON", first_name="Test", last_name="User", gender="male"
+            )
 
-        # Verify warning was logged (structlog outputs to stdout)
-        captured = capsys.readouterr()
-        assert "library_near_exhaustion" in captured.out
+        # Verify warning was logged with structlog keyword style
+        mock_logger.warning.assert_called_once()
+        call_args = mock_logger.warning.call_args
+        assert call_args[0][0] == "library_near_exhaustion"
 
     def test_exhaustion_percentage_in_assignment(self) -> None:
         """Test that exhaustion percentage is included in PseudonymAssignment."""
