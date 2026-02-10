@@ -117,68 +117,6 @@ class PseudonymManager(ABC):
         pass
 
 
-class SimplePseudonymManager(PseudonymManager):
-    """Stub implementation of PseudonymManager interface.
-
-    This is a minimal placeholder. Full implementation will be completed
-    in Epic 2 with proper library loading, compositional logic, and
-    exhaustion tracking.
-    """
-
-    def __init__(self) -> None:
-        """Initialize pseudonym manager with empty state."""
-        self._theme: str | None = None
-
-    def load_library(self, theme: str) -> None:
-        """Load library (stub implementation).
-
-        Args:
-            theme: Library theme name
-        """
-        # Stub: Full implementation in Epic 2
-        self._theme = theme
-
-    def assign_pseudonym(
-        self,
-        entity_type: str,
-        first_name: str | None = None,
-        last_name: str | None = None,
-        gender: str | None = None,
-        existing_first: str | None = None,
-        existing_last: str | None = None,
-    ) -> PseudonymAssignment:
-        """Assign pseudonym (stub implementation).
-
-        Args:
-            entity_type: Entity type
-            first_name: First name
-            last_name: Last name
-            gender: Gender hint
-            existing_first: Existing first pseudonym
-            existing_last: Existing last pseudonym
-
-        Returns:
-            Stub pseudonym assignment
-        """
-        # Stub: Full implementation in Epic 2
-        return PseudonymAssignment(
-            pseudonym_full="PLACEHOLDER",
-            pseudonym_first="PLACEHOLDER_FIRST" if entity_type == "PERSON" else None,
-            pseudonym_last="PLACEHOLDER_LAST" if entity_type == "PERSON" else None,
-            theme=self._theme or "neutral",
-            exhaustion_percentage=0.0,
-        )
-
-    def check_exhaustion(self) -> float:
-        """Get exhaustion percentage (stub implementation).
-
-        Returns:
-            0.0 (stub)
-        """
-        # Stub: Full implementation in Epic 2
-        return 0.0
-
-
 class CompositionalPseudonymEngine:
     """Assigns pseudonyms using compositional strict matching logic.
 

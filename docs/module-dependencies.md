@@ -294,7 +294,7 @@ entity_detector = SpaCyDetector()
 entity_detector.load_model(config.model_name)
 
 mapping_repo = SQLiteMappingRepository(config.db_path)
-pseudonym_mgr = SimplePseudonymManager()
+pseudonym_mgr = LibraryBasedPseudonymManager()
 pseudonym_mgr.load_library(config.theme)
 
 # 4. Inject dependencies into core orchestrator
