@@ -225,6 +225,100 @@ class DocumentProcessor:
 
         return pseudonym_assigner
 
+    def _run_validation(
+        self,
+        ctx: _ProcessingContext,
+        detected_entities: list[DetectedEntity],
+        document_text: str,
+        input_path: str,
+        skip_validation: bool,
+        pseudonym_assigner: Callable[[DetectedEntity], str],
+    ) -> list[DetectedEntity]:
+        """Run entity validation workflow (interactive or auto-accept).
+
+        In parallel mode (skip_validation=True), all entities are auto-accepted.
+        In interactive mode, known entities (existing DB mappings) are
+        auto-accepted and only unknown entities go through user validation.
+
+        Args:
+            ctx: Processing context with repos and engine
+            detected_entities: Entities detected in the document
+            document_text: Original document text for context display
+            input_path: Document path for validation UI
+            skip_validation: If True, skip interactive validation
+            pseudonym_assigner: Callable for generating pseudonym previews
+
+        Returns:
+            List of validated entities to process
+
+        Raises:
+            KeyboardInterrupt: If user cancels interactive validation
+        """
+        if skip_validation:
+            logger.info(
+                "validation_skipped",
+                auto_accepted_count=len(detected_entities),
+                reason="parallel_mode",
+            )
+            return detected_entities
+
+        # Separate entities into known (auto-accept) and unknown (need validation)
+        known_entities: list[DetectedEntity] = []
+        unknown_entities: list[DetectedEntity] = []
+
+        for entity in detected_entities:
+            entity_text_stripped = ctx.compositional_engine.strip_titles(entity.text)
+            if entity.entity_type == "LOCATION":
+                entity_text_stripped = ctx.compositional_engine.strip_prepositions(
+                    entity_text_stripped
+                )
+
+            existing = ctx.mapping_repo.find_by_full_name(entity_text_stripped)
+            if existing:
+                known_entities.append(entity)
+            else:
+                unknown_entities.append(entity)
+
+        if known_entities:
+            auto_accept_count = len(known_entities)
+            unique_known = len(set(e.text for e in known_entities))
+            self._notifier(
+                f"Auto-accepted {auto_accept_count} known entities "
+                f"({unique_known} unique) with existing mappings"
+            )
+            logger.info(
+                "auto_accepted_known_entities",
+                auto_accepted_count=auto_accept_count,
+                unique_count=unique_known,
+            )
+
+        try:
+            if unknown_entities:
+                validated_unknown = run_validation_workflow(
+                    entities=unknown_entities,
+                    document_text=document_text,
+                    document_path=input_path,
+                    pseudonym_assigner=pseudonym_assigner,
+                )
+            else:
+                validated_unknown = []
+                self._notifier(
+                    "All entities have existing mappings. Skipping validation."
+                )
+
+            validated_entities = known_entities + validated_unknown
+            logger.info(
+                "validation_complete",
+                validated_count=len(validated_entities),
+                original_count=len(detected_entities),
+                auto_accepted=len(known_entities),
+                user_validated=len(validated_unknown),
+            )
+            return validated_entities
+        except KeyboardInterrupt:
+            logger.info("validation_cancelled", reason="user_interrupt")
+            raise
+
     def _init_processing_context(
         self, db_session: DatabaseSession
     ) -> _ProcessingContext:
@@ -323,88 +417,14 @@ class DocumentProcessor:
                 pseudonym_assigner = self._build_pseudonym_assigner(ctx)
 
                 # Run validation workflow (interactive or auto-accept)
-                if skip_validation:
-                    # Parallel mode: auto-accept all entities without user interaction
-                    validated_entities = detected_entities
-                    logger.info(
-                        "validation_skipped",
-                        auto_accepted_count=len(validated_entities),
-                        reason="parallel_mode",
-                    )
-                else:
-                    # Interactive mode: run validation workflow with user prompts
-                    # Story 3.4, AC8: Auto-accept entities with existing mappings
-                    # to reduce validation fatigue in batch mode
-
-                    # Separate entities into known (auto-accept) and unknown (need validation)
-                    known_entities: list[DetectedEntity] = []
-                    unknown_entities: list[DetectedEntity] = []
-
-                    for entity in detected_entities:
-                        entity_text_stripped = ctx.compositional_engine.strip_titles(
-                            entity.text
-                        )
-                        if entity.entity_type == "LOCATION":
-                            entity_text_stripped = (
-                                ctx.compositional_engine.strip_prepositions(
-                                    entity_text_stripped
-                                )
-                            )
-
-                        # Check if mapping exists in database
-                        existing = ctx.mapping_repo.find_by_full_name(
-                            entity_text_stripped
-                        )
-                        if existing:
-                            known_entities.append(entity)
-                        else:
-                            unknown_entities.append(entity)
-
-                    # Display auto-accepted count (Story 3.4, AC8)
-                    if known_entities:
-                        auto_accept_count = len(known_entities)
-                        unique_known = len(set(e.text for e in known_entities))
-                        self._notifier(
-                            f"Auto-accepted {auto_accept_count} known entities "
-                            f"({unique_known} unique) with existing mappings"
-                        )
-                        logger.info(
-                            "auto_accepted_known_entities",
-                            auto_accepted_count=auto_accept_count,
-                            unique_count=unique_known,
-                        )
-
-                    try:
-                        # Only validate unknown entities
-                        if unknown_entities:
-                            validated_unknown = run_validation_workflow(
-                                entities=unknown_entities,
-                                document_text=document_text,
-                                document_path=input_path,
-                                pseudonym_assigner=pseudonym_assigner,
-                            )
-                        else:
-                            validated_unknown = []
-                            # No unknown entities - skip validation workflow
-                            self._notifier(
-                                "All entities have existing mappings. "
-                                "Skipping validation."
-                            )
-
-                        # Combine auto-accepted known entities with validated unknown
-                        validated_entities = known_entities + validated_unknown
-
-                        logger.info(
-                            "validation_complete",
-                            validated_count=len(validated_entities),
-                            original_count=len(detected_entities),
-                            auto_accepted=len(known_entities),
-                            user_validated=len(validated_unknown),
-                        )
-                    except KeyboardInterrupt:
-                        # User cancelled validation - abort processing
-                        logger.info("validation_cancelled", reason="user_interrupt")
-                        raise
+                validated_entities = self._run_validation(
+                    ctx=ctx,
+                    detected_entities=detected_entities,
+                    document_text=document_text,
+                    input_path=input_path,
+                    skip_validation=skip_validation,
+                    pseudonym_assigner=pseudonym_assigner,
+                )
 
                 # CRITICAL FIX: Reset pseudonym manager state after validation
                 # The validation preview generates pseudonyms and adds them to internal state,

@@ -261,3 +261,94 @@ class TestBuildPseudonymAssigner:
 
         result = assigner(_make_entity("Marie", "PERSON"))
         assert result == "[PERSON_PREVIEW]"
+
+
+# ===========================================================================
+# _run_validation
+# ===========================================================================
+
+
+class TestRunValidation:
+    """Tests for _run_validation()."""
+
+    def test_skip_validation_returns_all_entities(self) -> None:
+        """In parallel mode, all entities are auto-accepted."""
+        ctx = Mock()
+        entities = [
+            _make_entity("Marie", "PERSON"),
+            _make_entity("Paris", "LOCATION"),
+        ]
+        assigner = Mock()
+
+        processor = _make_processor()
+        result = processor._run_validation(
+            ctx=ctx,
+            detected_entities=entities,
+            document_text="text",
+            input_path="in.txt",
+            skip_validation=True,
+            pseudonym_assigner=assigner,
+        )
+
+        assert result == entities
+        assigner.assert_not_called()
+
+    @patch("gdpr_pseudonymizer.core.document_processor.run_validation_workflow")
+    def test_interactive_separates_known_and_unknown(
+        self, mock_workflow: MagicMock
+    ) -> None:
+        """Known entities are auto-accepted; unknown go through workflow."""
+        ctx = Mock()
+        ctx.compositional_engine.strip_titles.side_effect = lambda t: t
+        ctx.compositional_engine.strip_prepositions.side_effect = lambda t: t
+
+        known_entity = _make_entity("Marie", "PERSON")
+        unknown_entity = _make_entity("Pierre", "PERSON")
+
+        # Marie exists in DB, Pierre doesn't
+        ctx.mapping_repo.find_by_full_name.side_effect = lambda name: (
+            Mock() if name == "Marie" else None
+        )
+
+        mock_workflow.return_value = [unknown_entity]
+
+        processor = _make_processor()
+        result = processor._run_validation(
+            ctx=ctx,
+            detected_entities=[known_entity, unknown_entity],
+            document_text="text",
+            input_path="in.txt",
+            skip_validation=False,
+            pseudonym_assigner=Mock(),
+        )
+
+        assert len(result) == 2
+        assert known_entity in result
+        assert unknown_entity in result
+        mock_workflow.assert_called_once()
+
+    @patch("gdpr_pseudonymizer.core.document_processor.run_validation_workflow")
+    def test_all_known_skips_workflow(self, mock_workflow: MagicMock) -> None:
+        """When all entities are known, workflow is not invoked."""
+        ctx = Mock()
+        ctx.compositional_engine.strip_titles.side_effect = lambda t: t
+
+        entity = _make_entity("Marie", "PERSON")
+        ctx.mapping_repo.find_by_full_name.return_value = Mock()
+
+        messages: list[str] = []
+        processor = _make_processor()
+        processor._notifier = messages.append
+
+        result = processor._run_validation(
+            ctx=ctx,
+            detected_entities=[entity],
+            document_text="text",
+            input_path="in.txt",
+            skip_validation=False,
+            pseudonym_assigner=Mock(),
+        )
+
+        assert result == [entity]
+        mock_workflow.assert_not_called()
+        assert any("Skipping validation" in m for m in messages)
