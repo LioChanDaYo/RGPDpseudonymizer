@@ -178,3 +178,86 @@ class TestInitProcessingContext:
 
         mock_manager.load_library.assert_called_once_with("star_wars")
         mock_manager.load_existing_mappings.assert_called_once_with(existing)
+
+
+# ===========================================================================
+# _build_pseudonym_assigner
+# ===========================================================================
+
+
+class TestBuildPseudonymAssigner:
+    """Tests for _build_pseudonym_assigner()."""
+
+    def test_returns_callable(self) -> None:
+        """Returns a callable that accepts a DetectedEntity."""
+
+        ctx = Mock()
+        ctx.mapping_repo.find_by_full_name.return_value = None
+        ctx.compositional_engine.strip_titles.side_effect = lambda t: t
+        ctx.compositional_engine.strip_prepositions.side_effect = lambda t: t
+        assignment = Mock()
+        assignment.pseudonym_full = "Jean Dupont"
+        ctx.compositional_engine.assign_compositional_pseudonym.return_value = (
+            assignment
+        )
+
+        processor = _make_processor()
+        assigner = processor._build_pseudonym_assigner(ctx)
+
+        result = assigner(_make_entity("Marie Dubois", "PERSON"))
+        assert result == "Jean Dupont"
+
+    def test_returns_existing_mapping_if_found(self) -> None:
+        """If entity already mapped in DB, returns existing pseudonym."""
+
+        ctx = Mock()
+        ctx.compositional_engine.strip_titles.side_effect = lambda t: t
+        existing = Mock()
+        existing.pseudonym_full = "Existing Pseudo"
+        ctx.mapping_repo.find_by_full_name.return_value = existing
+
+        processor = _make_processor()
+        assigner = processor._build_pseudonym_assigner(ctx)
+
+        result = assigner(_make_entity("Marie Dubois", "PERSON"))
+        assert result == "Existing Pseudo"
+        ctx.compositional_engine.assign_compositional_pseudonym.assert_not_called()
+
+    def test_caches_preview_for_consistency(self) -> None:
+        """Second call for same entity text returns cached preview."""
+
+        ctx = Mock()
+        ctx.mapping_repo.find_by_full_name.return_value = None
+        ctx.compositional_engine.strip_titles.side_effect = lambda t: t
+        assignment = Mock()
+        assignment.pseudonym_full = "Jean Dupont"
+        ctx.compositional_engine.assign_compositional_pseudonym.return_value = (
+            assignment
+        )
+
+        processor = _make_processor()
+        assigner = processor._build_pseudonym_assigner(ctx)
+
+        entity = _make_entity("Marie Dubois", "PERSON")
+        result1 = assigner(entity)
+        result2 = assigner(entity)
+
+        assert result1 == result2 == "Jean Dupont"
+        # Engine should only be called once (second call uses cache)
+        ctx.compositional_engine.assign_compositional_pseudonym.assert_called_once()
+
+    def test_fallback_on_assignment_error(self) -> None:
+        """Returns fallback preview string when assignment fails."""
+
+        ctx = Mock()
+        ctx.mapping_repo.find_by_full_name.return_value = None
+        ctx.compositional_engine.strip_titles.side_effect = lambda t: t
+        ctx.compositional_engine.assign_compositional_pseudonym.side_effect = (
+            RuntimeError
+        )
+
+        processor = _make_processor()
+        assigner = processor._build_pseudonym_assigner(ctx)
+
+        result = assigner(_make_entity("Marie", "PERSON"))
+        assert result == "[PERSON_PREVIEW]"

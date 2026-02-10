@@ -181,6 +181,50 @@ class DocumentProcessor:
 
         return detected_entities
 
+    def _build_pseudonym_assigner(
+        self, ctx: _ProcessingContext
+    ) -> Callable[[DetectedEntity], str]:
+        """Build a closure that generates pseudonym previews for validation.
+
+        The returned callable looks up existing mappings first, then generates
+        new pseudonyms via the compositional engine. An internal cache ensures
+        consistent component reuse within a single validation session.
+
+        Args:
+            ctx: Processing context with repos and engine
+
+        Returns:
+            Callable that maps DetectedEntity -> pseudonym preview string
+        """
+        preview_cache: dict[str, str] = {}
+
+        def pseudonym_assigner(entity: DetectedEntity) -> str:
+            entity_text_stripped = ctx.compositional_engine.strip_titles(entity.text)
+            if entity.entity_type == "LOCATION":
+                entity_text_stripped = ctx.compositional_engine.strip_prepositions(
+                    entity_text_stripped
+                )
+
+            existing_entity = ctx.mapping_repo.find_by_full_name(entity_text_stripped)
+            if existing_entity:
+                return existing_entity.pseudonym_full
+
+            if entity_text_stripped in preview_cache:
+                return preview_cache[entity_text_stripped]
+
+            try:
+                assignment = ctx.compositional_engine.assign_compositional_pseudonym(
+                    entity_text=entity_text_stripped,
+                    entity_type=entity.entity_type,
+                    gender=None,
+                )
+                preview_cache[entity_text_stripped] = assignment.pseudonym_full
+                return assignment.pseudonym_full
+            except Exception:
+                return f"[{entity.entity_type}_PREVIEW]"
+
+        return pseudonym_assigner
+
     def _init_processing_context(
         self, db_session: DatabaseSession
     ) -> _ProcessingContext:
@@ -275,64 +319,8 @@ class DocumentProcessor:
             with open_database(self.db_path, self.passphrase) as db_session:
                 ctx = self._init_processing_context(db_session)
 
-                # Create pseudonym assigner for validation workflow preview
-                # Local cache for preview-only pseudonyms (ensures consistent component reuse)
-                preview_cache: dict[str, str] = (
-                    {}
-                )  # entity_text_stripped -> pseudonym_full
-
-                def pseudonym_assigner(entity: DetectedEntity) -> str:
-                    """Generate pseudonym preview for validation UI.
-
-                    Uses cached preview pseudonyms to ensure consistent component reuse
-                    during validation (e.g., "Claire Fontaine" and "Fontaine" should
-                    share the "Fontaine" component in their pseudonym previews).
-
-                    Args:
-                        entity: Entity to generate pseudonym for
-
-                    Returns:
-                        Pseudonym string for display in validation UI
-                    """
-                    # Strip titles/prepositions before lookup/assignment
-                    entity_text_stripped = ctx.compositional_engine.strip_titles(
-                        entity.text
-                    )
-
-                    # Also strip prepositions for LOCATION entities (à Paris -> Paris)
-                    if entity.entity_type == "LOCATION":
-                        entity_text_stripped = (
-                            ctx.compositional_engine.strip_prepositions(
-                                entity_text_stripped
-                            )
-                        )
-
-                    # Check if mapping already exists in database
-                    existing_entity = ctx.mapping_repo.find_by_full_name(
-                        entity_text_stripped
-                    )
-                    if existing_entity:
-                        return existing_entity.pseudonym_full
-
-                    # Check preview cache for previously generated preview in this session
-                    if entity_text_stripped in preview_cache:
-                        return preview_cache[entity_text_stripped]
-
-                    # Generate new pseudonym preview (not saved yet)
-                    try:
-                        assignment = (
-                            ctx.compositional_engine.assign_compositional_pseudonym(
-                                entity_text=entity_text_stripped,
-                                entity_type=entity.entity_type,
-                                gender=None,
-                            )
-                        )
-                        # Cache the preview for consistency within this validation session
-                        preview_cache[entity_text_stripped] = assignment.pseudonym_full
-                        return assignment.pseudonym_full
-                    except Exception:
-                        # Fallback for any assignment errors
-                        return f"[{entity.entity_type}_PREVIEW]"
+                # Build pseudonym assigner for validation preview
+                pseudonym_assigner = self._build_pseudonym_assigner(ctx)
 
                 # Run validation workflow (interactive or auto-accept)
                 if skip_validation:
