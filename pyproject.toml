@@ -1,13 +1,29 @@
 [tool.poetry]
 name = "gdpr-pseudonymizer"
-version = "0.1.0"
+version = "1.0.0"
 description = "CLI tool for GDPR-compliant pseudonymization of French text documents using NLP-based entity detection and reversible mapping"
 authors = ["GDPR Pseudonymizer Team"]
 license = "MIT"
 readme = "README.md"
-homepage = "https://github.com/your-org/gdpr-pseudonymizer"
-repository = "https://github.com/your-org/gdpr-pseudonymizer"
+homepage = "https://github.com/LioChanDaYo/RGPDpseudonymizer"
+repository = "https://github.com/LioChanDaYo/RGPDpseudonymizer"
+documentation = "https://liochandayo.github.io/RGPDpseudonymizer/"
 keywords = ["gdpr", "pseudonymization", "nlp", "privacy", "data-protection"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Legal Industry",
+    "Topic :: Text Processing :: Linguistic",
+    "Topic :: Security",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Natural Language :: French",
+    "Operating System :: OS Independent",
+]
 packages = [{include = "gdpr_pseudonymizer"}]
 
 [tool.poetry.dependencies]
