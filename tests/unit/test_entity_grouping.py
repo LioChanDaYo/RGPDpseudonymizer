@@ -154,6 +154,43 @@ class TestLocationGrouping:
         groups = group_entity_variants(entities)
         assert len(groups) == 1
 
+    def test_des_preposition_stripped(self) -> None:
+        """'des Champs-Élysées' + 'Champs-Élysées' → one group."""
+        entities = [
+            _make_entity("des Champs-Élysées", "LOCATION", 0),
+            _make_entity("Champs-Élysées", "LOCATION", 50),
+        ]
+        groups = group_entity_variants(entities)
+        assert len(groups) == 1
+
+    def test_la_article_preserved_in_city_names(self) -> None:
+        """'La Rochelle' must NOT be stripped to 'Rochelle' — article is part of the name."""
+        entities = [
+            _make_entity("La Rochelle", "LOCATION", 0),
+            _make_entity("Rochelle", "LOCATION", 50),
+        ]
+        groups = group_entity_variants(entities)
+        # These should be SEPARATE groups — "La Rochelle" ≠ "Rochelle"
+        assert len(groups) == 2
+
+    def test_le_article_preserved_in_city_names(self) -> None:
+        """'Le Mans' must NOT be stripped to 'Mans' — article is part of the name."""
+        entities = [
+            _make_entity("Le Mans", "LOCATION", 0),
+            _make_entity("Mans", "LOCATION", 50),
+        ]
+        groups = group_entity_variants(entities)
+        assert len(groups) == 2
+
+    def test_les_article_preserved_in_city_names(self) -> None:
+        """'Les Ulis' must NOT be stripped to 'Ulis' — article is part of the name."""
+        entities = [
+            _make_entity("Les Ulis", "LOCATION", 0),
+            _make_entity("Ulis", "LOCATION", 50),
+        ]
+        groups = group_entity_variants(entities)
+        assert len(groups) == 2
+
 
 class TestOrgGrouping:
     """Tests for ORG entity variant grouping."""

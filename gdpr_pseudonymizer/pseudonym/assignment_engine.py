@@ -27,9 +27,11 @@ FRENCH_TITLE_PATTERN = r"\b(?:Docteur|Professeur|Madame|Monsieur|Mademoiselle|Ma
 # French preposition pattern for location preprocessing
 # Matches common French prepositions that precede location names: à, au, aux, en, de, du, des, d', l'
 # Handles contractions and elisions
+# NOTE: Does NOT include la/le/les — these are articles that form part of city names
+# (e.g., "La Rochelle", "Le Mans", "Les Ulis"). See R2b investigation (Story 4.6.1).
 # ^[\s]* matches optional leading whitespace
 # \s* consumes trailing whitespace after preposition
-FRENCH_PREPOSITION_PATTERN = r"^[\s]*(?:à|au|aux|en|de|du|des|d'|l'|la|le|les)\s+"
+FRENCH_PREPOSITION_PATTERN = r"^[\s]*(?:aux|au|des|du|de|à|en|d'|l')\s+"
 
 
 @dataclass

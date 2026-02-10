@@ -19,7 +19,9 @@ logger = get_logger(__name__)
 FRENCH_TITLE_PATTERN = r"\b(?:Docteur|Professeur|Madame|Monsieur|Mademoiselle|Maître|Dr\.?|Pr\.?|Prof\.?|M\.?|Mme\.?|Mlle\.?|Me\.?)(?!\w)\s*"
 
 # French prepositions stripped from LOCATION entities before comparison
-FRENCH_LOCATION_PREPOSITIONS = r"^(?:à|de|du|en|au|aux|d'|l')\s*"
+# NOTE: Does NOT include la/le/les — these are articles that form part of city names
+# (e.g., "La Rochelle", "Le Mans", "Les Ulis"). See R2b investigation (Story 4.6.1).
+FRENCH_LOCATION_PREPOSITIONS = r"^(?:aux|au|des|du|de|à|en|d'|l')\s*"
 
 
 def _normalize_person(text: str) -> str:
