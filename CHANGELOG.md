@@ -9,64 +9,64 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Refactored
-- 🔧 **Codebase Refactoring & Technical Debt Resolution** (Story 4.6.1)
-  - **R1**: Decoupled core/CLI layer violation — replaced direct `console.print()` in `DocumentProcessor` with `ProcessingNotifier` callback protocol
-  - **R2**: Centralized French patterns — unified `FRENCH_TITLE_PATTERN` and `FRENCH_PREPOSITION_PATTERN` into `utils/french_patterns.py` (eliminated 3x duplication)
-  - **R3**: Decomposed `process_document()` god method (~550 lines) into 9 focused sub-methods
-  - **R4**: Fixed encapsulation violations — added `reset_preview_state()` and `get_component_mapping()` to `PseudonymManager` ABC
-  - **R5**: Factored Union-Find into reusable `UnionFind` class in `entity_grouping.py` (eliminated 3x duplication)
-  - **R6**: Extracted shared CLI logic (`parse_entity_type_filter`, `validate_theme`, `ensure_database`) into `cli/validators.py`
-  - **R7**: Removed dead code `SimplePseudonymManager` stub class
-  - **R8**: Centralized 4 scattered exceptions into `exceptions.py` under `PseudonymizerError` hierarchy
-  - **R9**: Harmonized logging — migrated 4 modules from `logging.getLogger()` to `structlog` via `get_logger()`
-  - 15 atomic commits, 1077+ tests passing, all quality gates green
-
-### Added
-- ✅ **Beta Feedback Integration & Bug Fixes** (Story 4.6)
-  - **Entity variant grouping in validation UI** (FB-001): Groups related entity forms (e.g., "Marie Dubois", "Pr. Dubois", "Dubois") into a single validation item. Reduces redundant validation prompts. Shows "Also appears as:" for variant forms.
-  - **Selective entity type processing** (FB-003): New `--entity-types` CLI flag for both `process` and `batch` commands. Filter entities by type (e.g., `--entity-types PERSON,LOCATION`). Valid types: PERSON, LOCATION, ORG.
-  - **Expanded organization pseudonym library** (FE-006): Neutral theme expanded from 35 to 196 organization entries (101 companies, 50 agencies, 45 institutions). Supports batch processing of 50+ documents without library exhaustion.
-  - New backlog item FE-014 for extended coreference resolution (v1.1+)
-
-### Changed
-- 🔄 **Faster `--help` display** (FB-007): Refactored CLI to use lazy imports — heavy dependencies (spaCy, torch, SQLAlchemy, cryptography) only loaded when commands are invoked, not during `--help`. Import time reduced ~55%.
-- 🔄 **Python 3.13 CI evaluation** (FB-006): Evaluated and deferred — blocked by `thinc` (spaCy ML backend) lacking Python 3.13 wheels. CI matrix remains Python 3.10-3.12.
-
-### Fixed
-- 🐛 **Entity variant grouping bridging bug** (FB-001): Fixed Union-Find transitive bridging where a titled surname (e.g., "Mme Durand") could incorrectly merge two different people sharing the same family name (e.g., "M. Olivier Durand" and "Mme Alice Durand"). Ambiguous single-word names are now detected and isolated from Union-Find pairing.
-- 🐛 **`--entity-types` filter not applied in batch mode** (FB-003): Fixed `entity_type_filter` not being forwarded to `process_document()` in batch command — affected sequential mode, parallel worker, and parallel orchestrator call sites.
-- 🐛 **Deferred items documented**: FB-002 (French docs → FE-010 v1.1), FB-004 (DOCX/PDF → v1.1), FB-005 (GUI → v2.0), Python 3.14 (→ MON-005 monitoring)
+_No unreleased changes._
 
 ---
 
-- ✅ **Performance & Stability Validation** (Story 4.5)
+## [1.0.0] - 2026-02-11
+
+**GDPR Pseudonymizer v1.0.0 — First Public Release**
+
+A CLI tool for GDPR-compliant pseudonymization of French text documents using NLP-based entity detection, human-in-the-loop validation, and reversible encrypted mappings. This release completes all four MVP epics: NLP Detection & Validation (Epic 1), Pseudonymization Engine (Epic 2), CLI Polish & Batch Processing (Epic 3), and Launch Readiness (Epic 4).
+
+**Highlights:**
+- Hybrid NLP + regex entity detection for French text (PERSON, LOCATION, ORG)
+- Human-in-the-loop validation UI with keyboard shortcuts and entity variant grouping
+- Themed pseudonym libraries (Neutral, Star Wars, LOTR) for all entity types
+- AES-256-SIV encrypted mapping tables with passphrase protection
+- Batch processing with multiprocessing support
+- 1077+ tests, 86%+ coverage, full CI/CD pipeline
+
+### Added
+- **Beta Feedback Integration & Bug Fixes** (Story 4.6)
+  - Entity variant grouping in validation UI (FB-001)
+  - Selective entity type processing via `--entity-types` flag (FB-003)
+  - Expanded organization pseudonym library: 196 entries (FE-006)
+- **Performance & Stability Validation** (Story 4.5)
   - NFR validation suite with automated performance benchmarks
   - All NFR targets PASS: NFR1 ~6s (<30s), NFR2 ~5min (<30min), NFR4 ~1GB (<8GB), NFR5 0.56s (<5s), NFR6 <1% (<10%)
-  - Monitoring baselines documented: `docs/qa/monitoring-baselines-4.5.md`
-  - Stress testing: 100-document batch, 10K+ word documents, concurrent processing
+  - Stress testing: 100-document batch, 10K+ word documents
+- **NER Accuracy Comprehensive Validation** (Story 4.4)
+  - 22-test automated accuracy validation suite against 25-document annotated corpus
+  - Dedicated CI workflow for accuracy regression detection
+- **LOCATION and ORGANIZATION pseudonym libraries** (Story 3.0)
+  - 80 locations and 35+ organizations per theme (neutral, Star Wars, LOTR)
+  - Collision prevention and 1:1 mapping for all entity types
+- **Documentation site** deployed to GitHub Pages (Story 4.3)
+- **PyPI release workflow** for automated publishing on git tags
+- **Community files**: CONTRIBUTING.md, CODE_OF_CONDUCT.md, SUPPORT.md, SECURITY.md
+- **GitHub Issue Templates** for bug reports and feature requests
 
-- ✅ **NER Accuracy Comprehensive Validation** (Story 4.4)
-  - 22-test automated accuracy validation suite (`tests/accuracy/`)
-  - Validates hybrid detection pipeline against 25-document annotated corpus (1,855 entities)
-  - Overall metrics: F1=29.74%, Precision=25.25%, Recall=36.17%
-  - Per-entity-type breakdown: PERSON F1=33.71%, LOCATION F1=37.05%, ORG F1=9.16%
-  - Edge case analysis: 6 categories (compound names, titles, abbreviations, multi-word ORG, diacritics, Last/First order)
-  - Confidence score analysis (83.8% entities lack confidence — spaCy limitation)
-  - Regression comparison vs Epic 1 baselines (no regression, within 3% tolerance)
-  - Quality report: `docs/qa/ner-accuracy-report.md`
-  - Monitoring baselines review: `docs/qa/monitoring-baselines-4.4.md` (MON-001, MON-003, MON-004)
-  - Dedicated CI workflow: `.github/workflows/accuracy.yaml`
-  - NFR8/NFR9 targets documented as aspirational (validation mode is mitigation)
-  - Backlog items FE-011/012/013 added for future NLP improvements
-- ✅ **LOCATION and ORGANIZATION pseudonym libraries** (Story 3.0)
-  - Added themed pseudonyms for LOCATION entities (cities, regions, planets/countries)
-  - Added themed pseudonyms for ORGANIZATION entities (companies, agencies, institutions)
-  - 80 locations per theme (50 cities, 20 countries/planets, 10 regions)
-  - 35 organizations per theme (20 companies, 10 agencies, 5 institutions)
-  - Available for all 3 themes: neutral (French), Star Wars, LOTR
-  - Collision prevention and 1:1 mapping for LOC/ORG entities
-  - Updated exhaustion calculation to include LOC/ORG pools
+### Changed
+- Faster `--help` display via lazy imports — ~55% import time reduction (FB-007)
+- License changed from GPL-3.0 to MIT
+- Version bumped from 0.1.0-alpha to 1.0.0
+
+### Fixed
+- Entity variant grouping bridging bug — ambiguous single-word names now isolated (FB-001)
+- `--entity-types` filter not applied in batch mode (FB-003)
+
+### Refactored
+- **Codebase Refactoring & Technical Debt Resolution** (Story 4.6.1)
+  - R1: Decoupled core/CLI layer via `ProcessingNotifier` callback protocol
+  - R2: Centralized French patterns into `utils/french_patterns.py`
+  - R3: Decomposed `process_document()` god method into 9 focused sub-methods
+  - R4: Fixed encapsulation violations in `PseudonymManager` ABC
+  - R5: Factored Union-Find into reusable `UnionFind` class
+  - R6: Extracted shared CLI logic into `cli/validators.py`
+  - R7: Removed dead code `SimplePseudonymManager` stub
+  - R8: Centralized exceptions under `PseudonymizerError` hierarchy
+  - R9: Harmonized logging to `structlog` across all modules
 
 ---
 
