@@ -362,11 +362,10 @@ class DocumentProcessor:
                         raise
 
                 # CRITICAL FIX: Reset pseudonym manager state after validation
-                # The validation preview generates pseudonyms and adds them to _used_pseudonyms,
+                # The validation preview generates pseudonyms and adds them to internal state,
                 # but those previews are never saved. We must clear the state to prevent
                 # collision false positives during actual processing.
-                pseudonym_manager._used_pseudonyms.clear()
-                pseudonym_manager._component_mappings.clear()
+                pseudonym_manager.reset_preview_state()
                 # Reload existing mappings from database (restores legitimate collision prevention)
                 existing_entities = mapping_repo.find_all()
                 pseudonym_manager.load_existing_mappings(existing_entities)

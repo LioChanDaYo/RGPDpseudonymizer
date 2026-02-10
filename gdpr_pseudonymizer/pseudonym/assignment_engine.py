@@ -105,6 +105,29 @@ class PseudonymManager(ABC):
         """
         pass
 
+    @abstractmethod
+    def reset_preview_state(self) -> None:
+        """Reset internal state accumulated during validation preview.
+
+        Clears used pseudonyms and component mappings generated during
+        preview/validation so they don't cause false collision positives
+        during actual processing.
+        """
+        pass
+
+    @abstractmethod
+    def get_component_mapping(self, component: str, component_type: str) -> str | None:
+        """Look up an in-memory component mapping.
+
+        Args:
+            component: Real component value (e.g., "Dubois")
+            component_type: Component type ("first_name" or "last_name")
+
+        Returns:
+            Pseudonym component if found, None otherwise
+        """
+        pass
+
 
 class CompositionalPseudonymEngine:
     """Assigns pseudonyms using compositional strict matching logic.
@@ -323,14 +346,11 @@ class CompositionalPseudonymEngine:
         # This ensures consistent pseudonym component reuse during validation
         # Example: "Claire Fontaine" preview generates ("Fontaine", "last_name") -> "Martin"
         #          Later "Fontaine" standalone should reuse "Martin"
-        if hasattr(self.pseudonym_manager, "_component_mappings"):
-            component_mappings = self.pseudonym_manager._component_mappings
-            # Ensure it's actually a dict (not a Mock in tests)
-            if isinstance(component_mappings, dict):
-                mapping_key = (component, component_type)
-                if mapping_key in component_mappings:
-                    result: str = component_mappings[mapping_key]
-                    return result
+        in_memory = self.pseudonym_manager.get_component_mapping(
+            component, component_type
+        )
+        if in_memory is not None:
+            return in_memory
 
         # SECOND: Query repository for existing component mappings (persisted)
         existing_entities = self.mapping_repository.find_by_component(
