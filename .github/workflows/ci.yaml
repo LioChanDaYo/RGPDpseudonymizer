@@ -107,6 +107,13 @@ jobs:
       - name: Install dependencies
         run: poetry install --no-interaction
 
+      # Poetry installs both typer 0.9.4 (our dep) and typer-slim 0.21.1
+      # (spaCy → weasel dep). Both write to the typer/ namespace and
+      # typer-slim can overwrite typer 0.9.4's _typing.py, causing
+      # IndentationError. Re-install typer to ensure 0.9.4 files win.
+      - name: Fix typer/typer-slim namespace conflict
+        run: poetry run pip install --force-reinstall --no-deps typer==0.9.4
+
       - name: Download spaCy model
         if: runner.os != 'Windows'
         run: poetry run python -m spacy download fr_core_news_lg
