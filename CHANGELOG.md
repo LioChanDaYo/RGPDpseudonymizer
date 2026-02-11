@@ -13,6 +13,14 @@ _No unreleased changes._
 
 ---
 
+## [1.0.3] - 2026-02-11
+
+### Fixed
+
+- Pin `click` to `<8.3.0` — typer 0.9.x is incompatible with click 8.3.x, which caused `TypeError: Secondary flag is not valid for non-boolean flag` on fresh pip installs where pip resolved click to 8.3.1.
+
+---
+
 ## [1.0.2] - 2026-02-11
 
 ### Fixed
