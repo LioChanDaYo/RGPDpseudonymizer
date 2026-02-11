@@ -13,6 +13,14 @@ _No unreleased changes._
 
 ---
 
+## [1.0.5] - 2026-02-11
+
+### Added
+
+- Auto-download spaCy model on first use — no more manual `python -m spacy download fr_core_news_lg` step required.
+
+---
+
 ## [1.0.4] - 2026-02-11
 
 ### Fixed
