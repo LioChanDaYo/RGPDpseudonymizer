@@ -40,6 +40,16 @@ jobs:
       - name: Install dependencies
         run: poetry install --no-interaction
 
+      - name: Cache spaCy model
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.spacy
+          key: spacy-model-fr-core-news-lg-ubuntu
+
+      - name: Download spaCy model
+        run: poetry run python -m spacy download fr_core_news_lg
+
       - name: Run unit tests
         run: poetry run pytest tests/unit/ -v --timeout=60
 
