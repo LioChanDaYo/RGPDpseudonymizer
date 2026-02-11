@@ -8,10 +8,10 @@ Tests cover:
 
 from __future__ import annotations
 
-import re
 from pathlib import Path
 
 import typer
+from helpers import strip_ansi
 from typer.testing import CliRunner
 
 from gdpr_pseudonymizer.cli.commands.config_show import (
@@ -21,12 +21,6 @@ from gdpr_pseudonymizer.cli.commands.config_show import (
     _update_sources,
     config_show_command,
 )
-
-
-def strip_ansi(text: str) -> str:
-    """Strip ANSI escape codes from text."""
-    ansi_pattern = re.compile(r"\x1b\[[0-9;]*m")
-    return ansi_pattern.sub("", text)
 
 
 def create_test_app() -> typer.Typer:

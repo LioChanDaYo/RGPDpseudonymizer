@@ -10,20 +10,72 @@ permissions:
   contents: read
 
 jobs:
+  # ── Lint (runs once, fast) ──────────────────────────────────────────
+  lint:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Poetry
+        run: |
+          python -m pip install --upgrade pip
+          pip install poetry>=1.7.0
+
+      - name: Configure in-project virtualenv
+        run: poetry config virtualenvs.in-project true
+
+      - name: Cache virtualenv
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-lint-py3.11-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: venv-lint-py3.11-
+
+      - name: Install dependencies
+        run: poetry install --no-interaction
+
+      - name: Ruff
+        run: poetry run ruff check .
+
+      - name: Black
+        run: poetry run black --check .
+
+      - name: Mypy
+        run: poetry run mypy gdpr_pseudonymizer
+
+  # ── Tests (reduced matrix: 4 jobs instead of 9) ────────────────────
+  # - Ubuntu 3.11: primary (full coverage + Codecov)
+  # - Ubuntu 3.10: oldest supported Python
+  # - macOS 3.12:  cross-platform + newest Python
+  # - Windows 3.12: cross-platform, non-spaCy tests only
   test:
+    needs: lint
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, macos-latest, windows-latest]
-        python-version: ['3.10', '3.11', '3.12']
-        # Note: Windows runs linting + non-spaCy tests only due to access violations
-        # See: https://github.com/explosion/spaCy/issues/12659
+        include:
+          - os: ubuntu-22.04
+            python-version: '3.11'
+            coverage: true
+          - os: ubuntu-22.04
+            python-version: '3.10'
+            coverage: false
+          - os: macos-latest
+            python-version: '3.12'
+            coverage: false
+          - os: windows-latest
+            python-version: '3.12'
+            coverage: false
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Free disk space (Ubuntu)
         if: runner.os == 'Linux'
@@ -32,76 +84,49 @@ jobs:
           sudo rm -rf /usr/local/lib/android
           sudo rm -rf /opt/ghc
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-
-      - name: Cache Poetry installation
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.local/share/pypoetry
-            ~/.local/bin/poetry
-          key: poetry-${{ runner.os }}-${{ matrix.python-version }}
 
       - name: Install Poetry
         run: |
           python -m pip install --upgrade pip
           pip install poetry>=1.7.0
 
-      - name: Cache Poetry dependencies
+      - name: Configure in-project virtualenv
+        run: poetry config virtualenvs.in-project true
+
+      # Cache the full virtualenv (includes spaCy model after first run)
+      - name: Cache virtualenv
         uses: actions/cache@v4
         with:
-          path: |
-            ~/.cache/pypoetry
-            ~/.cache/pip
-          key: poetry-deps-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
-          restore-keys: |
-            poetry-deps-${{ runner.os }}-${{ matrix.python-version }}-
+          path: .venv
+          key: venv-${{ runner.os }}-py${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: venv-${{ runner.os }}-py${{ matrix.python-version }}-
 
       - name: Install dependencies
         run: poetry install --no-interaction
-
-      - name: Cache spaCy models
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.spacy
-          key: spacy-model-fr-core-news-lg-${{ runner.os }}
 
       - name: Download spaCy model
         if: runner.os != 'Windows'
         run: poetry run python -m spacy download fr_core_news_lg
 
-      - name: Run linting and type checks (all platforms)
-        run: |
-          poetry run ruff check .
-          poetry run black --check .
-          poetry run mypy gdpr_pseudonymizer
-
-      - name: Run integration tests (Linux/macOS only)
-        if: runner.os != 'Windows'
-        env:
-          OMP_NUM_THREADS: 1
-        run: |
-          echo "Running integration tests with time limit check..."
-          poetry run pytest tests/integration/ -v --durations=0
-          echo "Integration tests completed successfully"
-
-      - name: Run tests with coverage (Linux/macOS only)
-        if: runner.os != 'Windows'
-        # OMP_NUM_THREADS=1 prevents spaCy/Thinc access violations on Windows
-        # This is also configured in tests/conftest.py for local runs
+      - name: Run tests with coverage
+        if: ${{ matrix.coverage }}
         env:
           OMP_NUM_THREADS: 1
         run: poetry run pytest --cov=gdpr_pseudonymizer --cov-report=xml --cov-report=term --cov-branch -v
 
-      - name: Run non-spaCy tests only (Windows)
+      - name: Run tests (Linux/macOS)
+        if: ${{ !matrix.coverage && runner.os != 'Windows' }}
+        env:
+          OMP_NUM_THREADS: 1
+        run: poetry run pytest -v
+
+      # Windows: skip spaCy-dependent tests due to access violations
+      # See: https://github.com/explosion/spaCy/issues/12659
+      - name: Run non-spaCy tests (Windows)
         if: runner.os == 'Windows'
-        # Skip spaCy-dependent tests on Windows due to access violations
-        # OMP_NUM_THREADS=1 doesn't fully fix the issue
-        # See: https://github.com/explosion/spaCy/issues/12659
         run: |
           poetry run pytest tests/unit/cli/ -v
           poetry run pytest tests/unit/test_benchmark_nlp.py -v
@@ -116,20 +141,22 @@ jobs:
           poetry run pytest tests/unit/test_regex_matcher.py -v
           poetry run pytest tests/unit/test_validation_models.py -v
           poetry run pytest tests/unit/test_validation_stub.py -v
+          poetry run pytest tests/unit/test_mapping_repository_delete.py -v
+          poetry run pytest tests/integration/test_erasure_workflow.py -v
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
-        if: matrix.os == 'ubuntu-22.04' && matrix.python-version == '3.11'
+        if: ${{ matrix.coverage }}
         with:
           file: ./coverage.xml
           flags: unittests
-          name: codecov-${{ matrix.os }}-py${{ matrix.python-version }}
+          name: codecov-ubuntu-py3.11
           fail_ci_if_error: false
 
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v4
-        if: runner.os != 'Windows' && always()
+        if: ${{ matrix.coverage && always() }}
         with:
-          name: coverage-${{ matrix.os }}-py${{ matrix.python-version }}
+          name: coverage-ubuntu-py3.11
           path: coverage.xml
           retention-days: 7

@@ -1,0 +1,45 @@
+schema: 1
+story: "5.1"
+story_title: "GDPR Right to Erasure — delete-mapping CLI Command"
+gate: PASS
+status_reason: "All 8 acceptance criteria met. 38 new tests pass, all quality gates green (Black, Ruff, mypy). Clean architecture following existing patterns, proper GDPR audit trail, no security concerns."
+reviewer: "Quinn (Test Architect)"
+updated: "2026-02-11T23:00:00Z"
+
+waiver: { active: false }
+
+top_issues: []
+
+quality_score: 100
+expires: "2026-02-25T23:00:00Z"
+
+evidence:
+  tests_reviewed: 38
+  risks_identified: 0
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8]
+    ac_gaps: []
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: "Passphrase required for all operations. No PII in application logs. Audit trail preserved. SQLAlchemy ORM prevents injection."
+  performance:
+    status: PASS
+    notes: "Partial UUID matching decrypts all entities (O(n)) — acceptable for CLI usage at expected data sizes."
+  reliability:
+    status: PASS
+    notes: "Proper error handling with rollback on database failures. All error paths tested."
+  maintainability:
+    status: PASS
+    notes: "Follows established patterns (destroy_table, list_mappings). Typer 0.9.x constraints respected. Clean separation of concerns."
+
+recommendations:
+  immediate: []
+  future:
+    - action: "Extract strip_ansi test helper to shared test utility module (duplicated in 3 test files)"
+      refs: ["tests/unit/cli/commands/test_delete_mapping.py", "tests/unit/cli/commands/test_list_entities.py", "tests/integration/test_erasure_workflow.py"]
+    - action: "Add test_mapping_repository_delete.py and test_erasure_workflow.py to Windows CI explicit test list"
+      refs: [".github/workflows/ci.yaml:131-143"]
+    - action: "Document that ERASURE audit log entries contain PII (entity name) for GDPR auditor awareness"
+      refs: ["docs/CLI-REFERENCE.md"]

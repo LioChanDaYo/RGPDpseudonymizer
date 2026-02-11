@@ -15,7 +15,10 @@ This document provides complete reference documentation for the `gdpr-pseudo` co
   - [stats](#stats)
   - [import-mappings](#import-mappings)
   - [export](#export)
+  - [delete-mapping](#delete-mapping)
+  - [list-entities](#list-entities)
   - [destroy-table](#destroy-table)
+- [GDPR Compliance](#gdpr-compliance)
 - [Configuration File](#configuration-file)
 - [Common Workflows](#common-workflows)
 - [Troubleshooting](#troubleshooting)
@@ -437,6 +440,107 @@ gdpr-pseudo export audit.json --success-only
 
 ---
 
+### delete-mapping
+
+Delete an entity mapping from the database (GDPR Article 17 erasure).
+
+Deleting a mapping converts pseudonymization into **anonymization**: without the mapping, the pseudonym cannot be linked to an identifiable individual, placing the data outside GDPR scope.
+
+**Usage:**
+```bash
+gdpr-pseudo delete-mapping [ENTITY_NAME] [OPTIONS]
+```
+
+**Arguments:**
+
+| Argument | Required | Description |
+|----------|----------|-------------|
+| `ENTITY_NAME` | No* | Entity name to delete (*provide either name or `--id`) |
+
+**Options:**
+
+| Option | Short | Default | Description |
+|--------|-------|---------|-------------|
+| `--db PATH` | | `mappings.db` | Database file path |
+| `--passphrase TEXT` | `-p` | (prompt) | Database passphrase |
+| `--id TEXT` | | | Entity UUID to delete (alternative to name) |
+| `--reason TEXT` | `-r` | | Reason for deletion (GDPR request reference) |
+| `--force` | `-f` | | Skip confirmation prompt |
+
+**Examples:**
+```bash
+# Delete by entity name (interactive confirmation)
+gdpr-pseudo delete-mapping "Marie Dupont"
+
+# Delete by entity UUID (from list-entities output)
+gdpr-pseudo delete-mapping --id abc12345
+
+# Delete with reason for audit trail
+gdpr-pseudo delete-mapping "Marie Dupont" --reason "GDPR-REQ-2026-042"
+
+# Delete without confirmation (for automation)
+gdpr-pseudo delete-mapping "Marie Dupont" --force
+
+# Specify database
+gdpr-pseudo delete-mapping "Marie Dupont" --db project.db
+```
+
+**Audit Trail:**
+Every deletion creates an `ERASURE` entry in the operations table with:
+- Entity name, type, and ID
+- Deletion timestamp
+- Optional reason text (from `--reason` flag)
+
+---
+
+### list-entities
+
+List entities with search capability, optimized for the GDPR erasure workflow.
+
+**Usage:**
+```bash
+gdpr-pseudo list-entities [OPTIONS]
+```
+
+**Options:**
+
+| Option | Short | Default | Description |
+|--------|-------|---------|-------------|
+| `--db PATH` | | `mappings.db` | Database file path |
+| `--passphrase TEXT` | `-p` | (prompt) | Database passphrase |
+| `--search TEXT` | `-s` | | Search by entity name (case-insensitive substring) |
+| `--type TEXT` | `-t` | | Filter by entity type (PERSON/LOCATION/ORG) |
+| `--limit INT` | `-l` | | Limit number of results |
+
+**Examples:**
+```bash
+# List all entities
+gdpr-pseudo list-entities
+
+# Search by name
+gdpr-pseudo list-entities --search "Dupont"
+
+# Filter by type
+gdpr-pseudo list-entities --type PERSON
+
+# Combine filters with limit
+gdpr-pseudo list-entities --search "Marie" --type PERSON --limit 10
+```
+
+**Output columns:**
+- **Entity ID** (truncated UUID) — use with `delete-mapping --id`
+- **Entity Name** — original (decrypted) name
+- **Type** — PERSON, LOCATION, or ORG
+- **Pseudonym** — assigned pseudonym
+- **First Seen** — date entity was first detected
+- **Doc Count** — N/A (per-entity document tracking planned for v1.2)
+
+**Difference from `list-mappings`:**
+- `list-mappings` — mapping review workflow (shows theme, confidence, CSV export)
+- `list-entities` — GDPR erasure workflow (shows entity ID for `--id` deletion, first seen date)
+
+---
+
 ### destroy-table
 
 Securely delete the mapping database.
@@ -481,6 +585,57 @@ gdpr-pseudo destroy-table --force --skip-passphrase-check
 4. **3-Pass Secure Wipe:** Data is overwritten before file deletion to prevent recovery.
 
 **⚠️ WARNING:** This operation is irreversible! Use `--skip-passphrase-check` only when you're certain and have no other option.
+
+---
+
+## GDPR Compliance
+
+### Article 17 — Right to Erasure
+
+GDPR Article 17 grants data subjects the right to request deletion of their personal data. The `delete-mapping` command fulfills this requirement.
+
+**How it works:**
+
+1. **Pseudonymization vs Anonymization:** When a document is processed, entity names are replaced with pseudonyms (e.g., "Marie Dupont" becomes "Leia Organa"). The mapping between the real name and the pseudonym is stored in the encrypted database. As long as the mapping exists, the pseudonymized data is still considered personal data under GDPR.
+
+2. **Deletion = Anonymization:** When a mapping is deleted via `delete-mapping`, the link between the pseudonym and the real identity is permanently destroyed. The pseudonymized documents remain unchanged, but they are now **anonymous** — the pseudonym "Leia Organa" can no longer be linked to "Marie Dupont". Anonymous data falls outside GDPR scope.
+
+3. **Audit Trail:** Every deletion creates an `ERASURE` audit log entry recording who was deleted, when, and why. This provides the compliance evidence that the erasure request was fulfilled.
+
+**Erasure Workflow:**
+
+```bash
+# 1. Receive GDPR erasure request for "Marie Dupont"
+# 2. Search for the entity
+gdpr-pseudo list-entities --search "Dupont"
+
+# 3. Delete the mapping with audit reason
+gdpr-pseudo delete-mapping "Marie Dupont" --reason "GDPR-REQ-2026-042"
+
+# 4. Verify deletion
+gdpr-pseudo list-entities --search "Dupont"
+
+# 5. Export audit log for compliance records
+gdpr-pseudo export erasure_audit.json --type ERASURE
+```
+
+**Important notes:**
+- Deletion is **permanent and irreversible** — the mapping cannot be recovered
+- The pseudonymized documents are **not modified** — only the mapping database is affected
+- Other entities in the database are **unaffected** by the deletion
+- The audit log entry persists even after deletion, providing compliance evidence
+
+**PII Retention in Audit Logs:**
+
+The `ERASURE` audit log entry intentionally retains the deleted entity's **name**, **type**, and **internal ID**. This is necessary to prove that a specific erasure request was fulfilled — without this information, there would be no way to verify compliance with the original GDPR request.
+
+This retention is justified under GDPR Article 17(3)(e) (establishment, exercise, or defence of legal claims) and Article 5(2) (accountability principle — the controller must be able to demonstrate compliance). The audit log serves as evidence that the data subject's right to erasure was exercised.
+
+The retained PII in audit logs is:
+- Protected by the same AES-256-SIV encryption as all other database content
+- Accessible only with the database passphrase
+- Minimal (name and type only — no addresses, contact details, or other personal data)
+- Necessary for the legitimate purpose of compliance evidence
 
 ---
 
@@ -570,6 +725,22 @@ gdpr-pseudo validate-mappings --interactive
 
 # 4. Export for review
 gdpr-pseudo list-mappings --export review.csv
+```
+
+### GDPR Erasure Workflow
+
+```bash
+# 1. Find the entity to delete
+gdpr-pseudo list-entities --search "Dupont"
+
+# 2. Delete the mapping (with audit reason)
+gdpr-pseudo delete-mapping "Marie Dupont" --reason "GDPR-REQ-2026-042"
+
+# 3. Verify deletion
+gdpr-pseudo list-entities --search "Dupont"
+
+# 4. Export audit trail for compliance
+gdpr-pseudo export erasure_log.json --type ERASURE
 ```
 
 ### Export Audit Log for Compliance

@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-import re
-
+from helpers import strip_ansi
 from typer.testing import CliRunner
 
 from gdpr_pseudonymizer.cli.main import app
@@ -11,26 +10,19 @@ from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 
 runner = CliRunner()
 
-_ANSI_RE = re.compile(r"\x1b\[[0-9;]*m")
-
-
-def _strip_ansi(text: str) -> str:
-    """Remove ANSI escape codes from text."""
-    return _ANSI_RE.sub("", text)
-
 
 def test_process_help_shows_entity_types_option() -> None:
     """Verify process --help mentions --entity-types."""
     result = runner.invoke(app, ["process", "--help"])
     assert result.exit_code == 0
-    assert "--entity-types" in _strip_ansi(result.output)
+    assert "--entity-types" in strip_ansi(result.output)
 
 
 def test_batch_help_shows_entity_types_option() -> None:
     """Verify batch --help mentions --entity-types."""
     result = runner.invoke(app, ["batch", "--help"])
     assert result.exit_code == 0
-    assert "--entity-types" in _strip_ansi(result.output)
+    assert "--entity-types" in strip_ansi(result.output)
 
 
 class TestEntityTypeFiltering:

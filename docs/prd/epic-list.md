@@ -30,7 +30,13 @@
 
 ---
 
-**Timeline: 14 weeks total (Epics 1-2: Week 1-10, Epic 3: Week 11-13, Epic 4: Week 14)**
+### Epic 5: v1.1 — Quick Wins & GDPR Compliance (Q2 2026)
+
+**Goal:** Address deferred alpha/beta feedback, close the GDPR Article 17 compliance gap, improve pseudonym quality and NER accuracy, translate documentation for the French-speaking primary audience, and add PDF/DOCX format support.
+
+---
+
+**Timeline: Epics 0-4: 14 weeks (v1.0 MVP). Epic 5: 6-7 weeks (v1.1)**
 
 ---
 
@@ -82,8 +88,20 @@
 ### Release Strategy
 
 - **Week 10 (Post-Epic 2):** Alpha release v0.1.0 to 3-5 friendly users for core functionality feedback ✅ COMPLETE (2026-01-30)
-- **Week 13 (Post-Epic 3):** Beta release v0.2.0 to 10-15 early adopters for production workflow validation
-- **Week 14+ (Post-Epic 4):** Public v1.0 MVP release to broader early adopter community (target: 50+ users)
+- **Week 13 (Post-Epic 3):** Beta release v0.2.0 to 10-15 early adopters for production workflow validation ✅ COMPLETE
+- **Week 14+ (Post-Epic 4):** Public v1.0 MVP release to broader early adopter community ✅ COMPLETE (2026-02-09, PyPI published)
+- **Q2 2026 (Epic 5):** v1.1 release — GDPR erasure, gender-aware pseudonyms, PDF/DOCX, French docs, NER accuracy improvements
+
+---
+
+**Epic 5 DoD:**
+- ✓ GDPR Article 17 `delete-mapping` command operational
+- ✓ Gender-matched pseudonyms for ≥90% of common French first names
+- ✓ NER accuracy improved: LOCATION FN <25%, ORG FN <50%
+- ✓ French documentation available for primary user workflows
+- ✓ PDF and DOCX input format support functional
+- ✓ CLI polish and minor enhancements applied
+- ✓ v1.1.0 published on PyPI
 
 ---
 

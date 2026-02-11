@@ -11,21 +11,15 @@ Tests cover:
 
 from __future__ import annotations
 
-import re
 from pathlib import Path
 from unittest.mock import patch
 
 import pytest
 import typer
+from helpers import strip_ansi
 from typer.testing import CliRunner
 
 from gdpr_pseudonymizer.cli.commands.init import init_command
-
-
-def strip_ansi(text: str) -> str:
-    """Strip ANSI escape codes from text for reliable string matching."""
-    ansi_pattern = re.compile(r"\x1b\[[0-9;]*m")
-    return ansi_pattern.sub("", text)
 
 
 def create_test_app() -> typer.Typer:

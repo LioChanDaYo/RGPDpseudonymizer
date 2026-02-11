@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-import re
 from pathlib import Path
 
 import typer
+from helpers import strip_ansi
 from typer.testing import CliRunner
 
 from gdpr_pseudonymizer.cli.commands.destroy_table import (
@@ -27,12 +27,6 @@ def create_fake_sqlite_file(path: Path, size: int = 100) -> None:
     # SQLite magic number is first 16 bytes
     content = SQLITE_MAGIC + (b"\x00" * (size - len(SQLITE_MAGIC)))
     path.write_bytes(content)
-
-
-def strip_ansi(text: str) -> str:
-    """Strip ANSI escape codes from text for reliable string matching."""
-    ansi_pattern = re.compile(r"\x1b\[[0-9;]*m")
-    return ansi_pattern.sub("", text)
 
 
 def create_test_app() -> typer.Typer:

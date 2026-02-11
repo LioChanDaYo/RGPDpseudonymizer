@@ -81,6 +81,47 @@ class MappingRepository(ABC):
         """
         pass
 
+    @abstractmethod
+    def delete_entity_by_full_name(self, full_name: str) -> Entity | None:
+        """Delete entity by full name.
+
+        Args:
+            full_name: Plaintext full name of entity to delete
+
+        Returns:
+            Decrypted entity that was deleted, or None if not found
+        """
+        pass
+
+    @abstractmethod
+    def delete_entity_by_id(self, entity_id: str) -> Entity | None:
+        """Delete entity by UUID.
+
+        Args:
+            entity_id: UUID of entity to delete
+
+        Returns:
+            Decrypted entity that was deleted, or None if not found
+        """
+        pass
+
+    @abstractmethod
+    def search_entities(
+        self,
+        search_term: str | None = None,
+        entity_type: str | None = None,
+    ) -> list[Entity]:
+        """Search entities with optional name and type filters.
+
+        Args:
+            search_term: Case-insensitive substring to match against entity names
+            entity_type: Filter by entity type (PERSON, LOCATION, ORG)
+
+        Returns:
+            List of matching decrypted entities
+        """
+        pass
+
 
 class SQLiteMappingRepository(MappingRepository):
     """SQLite implementation of MappingRepository with column-level encryption.
@@ -343,6 +384,105 @@ class SQLiteMappingRepository(MappingRepository):
 
         # Decrypt and return
         return [self._decrypt_entity(e) for e in db_entities]
+
+    def delete_entity_by_full_name(self, full_name: str) -> Entity | None:
+        """Delete entity by encrypted full name.
+
+        Args:
+            full_name: Plaintext full name of entity to delete
+
+        Returns:
+            Decrypted entity that was deleted, or None if not found
+
+        Raises:
+            DatabaseError: If database operation fails
+        """
+        from sqlalchemy.exc import OperationalError
+
+        encrypted_full_name = self._encryption.encrypt(full_name)
+
+        db_entity = (
+            self._session.query(Entity)
+            .filter(Entity.full_name == encrypted_full_name)
+            .first()
+        )
+
+        if not db_entity:
+            return None
+
+        # Decrypt before deletion (needed for audit log / confirmation)
+        decrypted = self._decrypt_entity(db_entity)
+
+        try:
+            self._session.delete(db_entity)
+            self._session.commit()
+        except OperationalError as e:
+            self._session.rollback()
+            raise DatabaseError(f"Failed to delete entity: {e}") from e
+
+        return decrypted
+
+    def delete_entity_by_id(self, entity_id: str) -> Entity | None:
+        """Delete entity by UUID.
+
+        Args:
+            entity_id: UUID of entity to delete
+
+        Returns:
+            Decrypted entity that was deleted, or None if not found
+
+        Raises:
+            DatabaseError: If database operation fails
+        """
+        from sqlalchemy.exc import OperationalError
+
+        db_entity = self._session.query(Entity).filter(Entity.id == entity_id).first()
+
+        if not db_entity:
+            return None
+
+        decrypted = self._decrypt_entity(db_entity)
+
+        try:
+            self._session.delete(db_entity)
+            self._session.commit()
+        except OperationalError as e:
+            self._session.rollback()
+            raise DatabaseError(f"Failed to delete entity: {e}") from e
+
+        return decrypted
+
+    def search_entities(
+        self,
+        search_term: str | None = None,
+        entity_type: str | None = None,
+    ) -> list[Entity]:
+        """Search entities with optional name and type filters.
+
+        Decrypts all entities then applies case-insensitive substring filtering
+        on the decrypted names (same pattern as list_mappings.py).
+
+        Args:
+            search_term: Case-insensitive substring to match against entity names
+            entity_type: Filter by entity type (PERSON, LOCATION, ORG)
+
+        Returns:
+            List of matching decrypted entities
+        """
+        # Use find_all for base query with type filter
+        entities = self.find_all(entity_type=entity_type)
+
+        # Apply search filter on decrypted names
+        if search_term:
+            search_lower = search_term.lower()
+            entities = [
+                e
+                for e in entities
+                if search_lower in e.full_name.lower()
+                or search_lower in e.pseudonym_full.lower()
+            ]
+
+        return entities
 
     def _encrypt_entity(self, entity: Entity) -> Entity:
         """Create encrypted copy of entity for database storage.

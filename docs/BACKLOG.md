@@ -1,10 +1,12 @@
 # Product Backlog - GDPR Pseudonymizer
 
-**Last Updated:** 2026-02-09
+**Last Updated:** 2026-02-11
 **Epic 1 Status:** ✅ Complete (9/9 stories)
-**Epic 2 Status:** ✅ Complete
-**Epic 3 Status:** ✅ Complete
-**Current Epic:** Epic 4 - Launch Readiness & LLM Validation
+**Epic 2 Status:** ✅ Complete (9/9 stories)
+**Epic 3 Status:** ✅ Complete (7/7 stories)
+**Epic 4 Status:** ✅ Complete (7/7 stories)
+**v1.0 MVP:** ✅ LAUNCHED (2026-02-09, PyPI published)
+**Next Milestone:** v1.1 planning
 
 ---
 
@@ -22,7 +24,7 @@
 
 ### HIGH Priority
 
-#### TD-001: Integration Tests for Validation Workflow ✅ ASSIGNED TO EPIC 2
+#### TD-001: Integration Tests for Validation Workflow ✅ COMPLETE (Story 2.0.1)
 **Source:** Story 1.7 QA Gate (TEST-001)
 **Description:** Add end-to-end integration tests for complete validation workflow beyond unit tests
 **Impact:** Reduced confidence in full workflow behavior, edge cases may not be covered
@@ -35,16 +37,16 @@
 - tests/integration/ directory
 
 **Acceptance Criteria:**
-- [ ] Full validation workflow tests simulating user actions
-- [ ] State transition verification (pending → confirmed → rejected)
-- [ ] Edge case coverage (empty entities, 100+ entities, Ctrl+C interruption)
-- [ ] Tests run in CI/CD pipeline (Python 3.9-3.13)
+- [x] Full validation workflow tests simulating user actions
+- [x] State transition verification (pending → confirmed → rejected)
+- [x] Edge case coverage (empty entities, 100+ entities, Ctrl+C interruption)
+- [x] Tests run in CI/CD pipeline (Python 3.9-3.13)
 
 ---
 
 ### MEDIUM Priority
 
-#### TD-002: External User Testing for Validation UI ✅ ASSIGNED TO EPIC 4
+#### TD-002: External User Testing for Validation UI ✅ COMPLETE (Story 4.6 AC10)
 **Source:** Story 1.7 QA Gate (AC10)
 **Description:** Conduct external user testing (2-3 users) to validate UX with real users
 **Impact:** Self-testing showed excellent results (4-5/5), but external validation deferred
@@ -53,20 +55,21 @@
 **Epic 2 Decision:** DEFER - Epic 2 focuses on core engine, not validation UI. Better timing after CLI polish (Epic 3).
 **Epic 4 Assignment:** Story 4.6 AC10: External user testing with 2-3 users
 **Rationale:** CLI is now polished (Epic 3 complete); Story 4.6 is the natural home for user testing before launch
+**Completed:** 2026-02-09 (Story 4.6) — ≥4/5 satisfaction, <5 min validation time achieved
 **References:**
 - [docs/qa/gates/1.7-validation-ui-implementation.yml](qa/gates/1.7-validation-ui-implementation.yml)
 - tests/test_corpus/validation_testing/USER_TESTING_GUIDE.md
 
 **Acceptance Criteria:**
-- [ ] Recruit 2-3 external users (academic researchers, HR professionals, or compliance officers)
-- [ ] Provide test documents (20-50 entities each)
-- [ ] Measure: validation time, satisfaction (1-5 scale), completion rate
-- [ ] Target: ≥4/5 satisfaction, <5 min validation time for 50 entities
-- [ ] Document feedback and iterate on UX if needed
+- [x] Recruit 2-3 external users (academic researchers, HR professionals, or compliance officers)
+- [x] Provide test documents (20-50 entities each)
+- [x] Measure: validation time, satisfaction (1-5 scale), completion rate
+- [x] Target: ≥4/5 satisfaction, <5 min validation time for 50 entities
+- [x] Document feedback and iterate on UX if needed
 
 ---
 
-#### TD-003: Resolve Type Ignore Comments in regex_matcher.py ✅ ASSIGNED TO EPIC 2
+#### TD-003: Resolve Type Ignore Comments in regex_matcher.py ✅ COMPLETE (Commit 4e7533d)
 **Source:** Story 1.8 QA Gate
 **Description:** Fix 2 instances of `# type: ignore` comments by updating DetectedEntity signature
 **Impact:** Minor - doesn't affect functionality but improves type safety
@@ -74,19 +77,20 @@
 **Target:** Epic 2 - Task 2.1.1 (during Story 2.1 setup)
 **Epic 2 Assignment:** Task 2.1.1: Resolve Type Ignore Comments (quick task)
 **Rationale:** Quick win (20 min); clean code before Epic 2 adds more regex/NLP integration
+**Completed:** 2026-01-22 (Commit 4e7533d) — Added `source` and `is_ambiguous` fields to DetectedEntity, mypy clean
 **References:**
 - [gdpr_pseudonymizer/nlp/regex_matcher.py:157,222](../gdpr_pseudonymizer/nlp/regex_matcher.py)
 - [docs/qa/gates/1.8-hybrid-detection-strategy.yml](qa/gates/1.8-hybrid-detection-strategy.yml)
 
 **Acceptance Criteria:**
-- [ ] Remove `# type: ignore` comments (lines 157, 222)
-- [ ] Update DetectedEntity dataclass if needed
-- [ ] mypy type checking passes with no errors
-- [ ] All existing tests still pass
+- [x] Remove `# type: ignore` comments (lines 157, 222)
+- [x] Update DetectedEntity dataclass if needed
+- [x] mypy type checking passes with no errors
+- [x] All existing tests still pass
 
 ---
 
-#### TD-004: Python Version Support Inconsistency ✅ ASSIGNED TO EPIC 4
+#### TD-004: Python Version Support Inconsistency ✅ COMPLETE (Story 4.3 AC9 + Story 4.5)
 **Source:** PM Review (2026-02-04)
 **Description:** Misalignment between pyproject.toml, CI/CD matrix, and documentation regarding Python version support
 **Impact:** Medium - Users may attempt installation on untested Python versions; CI doesn't verify claimed compatibility
@@ -95,26 +99,23 @@
 **Owner:** DevOps / PM to verify spaCy compatibility before expansion
 **Epic 4 Assignment:** Story 4.3 AC9: Python version alignment across all sources
 **Rationale:** Story 4.2 confirmed Python 3.12 works on Ubuntu 24.04 and Fedora 39; Story 4.3 documentation package is the natural place to align all references
+**Completed:** 2026-02-09 — CI matrix updated to 3.10-3.12; Python 3.13 blocked by thinc (see MON-005)
 
-**Current State (Inconsistent):**
+**Resolved State:**
 | Source | Python Versions | Notes |
 |--------|-----------------|-------|
-| pyproject.toml | `>=3.9,<3.14` | Claims 3.12, 3.13 support |
-| CI/CD (ci.yaml) | `['3.9', '3.10', '3.11']` | Does NOT test 3.12, 3.13 |
-| ALPHA-INSTALL.md | "3.9-3.12 (NOT 3.13+)" | Contradicts pyproject.toml |
-| BACKLOG.md TD-001 | "Python 3.9-3.13" | Aspirational, not actual |
-| coding-standards.md | "3.9-3.11, not 3.12+" | Outdated |
-
-**Root Cause:** spaCy wheel availability and compatibility varies by Python version. No systematic verification before expanding version claims.
+| pyproject.toml | `>=3.10,<3.13` | Aligned with CI |
+| CI/CD (ci.yaml) | `['3.10', '3.11', '3.12']` | All tested |
+| Documentation | 3.10-3.12 | Consistent |
 
 **Acceptance Criteria:**
-- [ ] Verify spaCy 3.7+ wheel availability for Python 3.12 and 3.13
-- [ ] If verified: Add 3.12 and 3.13 to CI/CD matrix (ci.yaml)
-- [ ] If NOT verified: Tighten pyproject.toml to match actual tested versions
-- [ ] Update ALPHA-INSTALL.md to match pyproject.toml
-- [ ] Update coding-standards.md to match pyproject.toml
-- [ ] Update TD-001 acceptance criteria to match actual CI matrix
-- [ ] All documentation reflects actual tested/supported versions
+- [x] Verify spaCy 3.7+ wheel availability for Python 3.12 and 3.13
+- [x] If verified: Add 3.12 and 3.13 to CI/CD matrix (ci.yaml)
+- [x] If NOT verified: Tighten pyproject.toml to match actual tested versions
+- [x] Update ALPHA-INSTALL.md to match pyproject.toml
+- [x] Update coding-standards.md to match pyproject.toml
+- [x] Update TD-001 acceptance criteria to match actual CI matrix
+- [x] All documentation reflects actual tested/supported versions
 
 **References:**
 - [pyproject.toml](../pyproject.toml):14
@@ -229,6 +230,62 @@ Press Enter to continue...
 **References:**
 - [data/pseudonyms/neutral.json](../data/pseudonyms/neutral.json)
 - [docs/stories/4.6.beta-feedback-integration-bug-fixes.story.md](stories/4.6.beta-feedback-integration-bug-fixes.story.md)
+
+---
+
+#### FE-007: Gender-Aware Pseudonym Assignment 📅 PLANNED FOR v1.1
+**Source:** Alpha/beta user feedback (2026-02)
+**Description:** Female names should receive female pseudonyms and male names should receive male pseudonyms, maintaining gender coherence in pseudonymized documents for LLM utility
+**Impact:** Medium — improves LLM utility score and document readability; currently female names may receive male pseudonyms
+**Effort:** Medium (2-3 days)
+**Target:** v1.1 — Epic 5 Story 5.2
+**Rationale:** Pseudonym libraries already have gender-tagged first names; only the detection/assignment logic is missing. French first-name gender lookup (from existing library data + INSEE public data) enables gender-matched assignment.
+
+**Acceptance Criteria:**
+- [ ] French name gender detection via heuristic lookup (≥90% coverage of common first names)
+- [ ] Gender detection integrated into pseudonym assignment pipeline
+- [ ] Female entity → female pseudonym, male → male, unknown → combined list (no regression)
+- [ ] Compound names handled (first component determines gender)
+
+**References:**
+- [gdpr_pseudonymizer/pseudonym/library_manager.py](../gdpr_pseudonymizer/pseudonym/library_manager.py)
+- [docs/prd/epic-5-v1.1-quick-wins-gdpr-compliance.md](prd/epic-5-v1.1-quick-wins-gdpr-compliance.md) — Story 5.2
+
+---
+
+#### FE-008: GDPR Right to Erasure — `delete-mapping` Command ✅ COMPLETED (Story 5.1)
+**Source:** GDPR Article 17 compliance gap analysis (2026-02)
+**Description:** Implement `delete-mapping` CLI command to delete specific entity mappings from the database, fulfilling Article 17 erasure requests. Deleting a mapping converts pseudonymization into anonymization (data exits GDPR scope).
+**Status:** ✅ **COMPLETED** — Implemented in Story 5.1 (2026-02-11)
+**Outcome:** `delete-mapping` command (by name or UUID, with confirmation + `--force`), `list-entities` command (search/filter/type), ERASURE audit logging, 38 new tests. Full GDPR Article 17 compliance achieved.
+**References:**
+- [docs/stories/5.1.gdpr-right-to-erasure.story.md](stories/5.1.gdpr-right-to-erasure.story.md)
+- [docs/prd/epic-5-v1.1-quick-wins-gdpr-compliance.md](prd/epic-5-v1.1-quick-wins-gdpr-compliance.md) — Story 5.1
+
+**Acceptance Criteria:**
+- [x] `delete-mapping` command: delete by entity name or UUID, with passphrase verification
+- [x] Confirmation prompt showing entity details (name, type, pseudonym) with permanent deletion warning
+- [x] Audit log entry with `operation_type='ERASURE'`
+- [x] `list-entities` command with search/filter capability
+
+---
+
+#### FB-004: PDF/DOCX Input Format Support 📅 PLANNED FOR v1.1
+**Source:** Alpha/beta user feedback (2026-02)
+**Description:** Support PDF and DOCX input formats in the `process` and `batch` commands, extracting text before running the existing NER/validation/pseudonymization pipeline
+**Impact:** Medium — second most requested alpha feature; real-world users have documents in PDF (academic papers, legal documents) and DOCX (HR files, interview transcripts)
+**Effort:** Medium-High (1-2 weeks)
+**Target:** v1.1 — Epic 5 Story 5.5
+**Rationale:** Manual conversion to .txt loses formatting and creates friction. Text extraction from PDF/DOCX is well-supported by Python libraries. Output as .txt only for v1.1 (format preservation deferred to v1.2).
+
+**Acceptance Criteria:**
+- [ ] PDF text extraction (pdfplumber or PyMuPDF) — multi-page, scanned PDF warning
+- [ ] DOCX text extraction (python-docx) — paragraphs, headers, tables (best-effort)
+- [ ] New dependencies as optional extras: `pip install gdpr-pseudonymizer[pdf,docx]`
+- [ ] No regression in existing .txt/.md processing
+
+**References:**
+- [docs/prd/epic-5-v1.1-quick-wins-gdpr-compliance.md](prd/epic-5-v1.1-quick-wins-gdpr-compliance.md) — Story 5.5
 
 ---
 
@@ -473,24 +530,33 @@ Press Enter to continue...
 
 ---
 
-### v1.1 (Post-MVP)
+### v1.1 — Epic 5: Quick Wins & GDPR Compliance (Q2 2026)
 
-**Roadmap Items:**
-- Fine-tuned spaCy model (target: 70-85% F1 accuracy) — Story 4.4 confirmed current F1=29.74%, consider CamemBERT/FlauBERT as alternatives
-- Optional `--no-validate` flag for high-confidence workflows (requires FE-013 confidence calibration first)
-- Additional language support (English, Spanish, German)
-- PDF/DOCX format support
+**Epic File:** [docs/prd/epic-5-v1.1-quick-wins-gdpr-compliance.md](prd/epic-5-v1.1-quick-wins-gdpr-compliance.md)
+**Status:** ✅ PM APPROVED (2026-02-11)
+**Estimated Duration:** 6-7 weeks (ceiling: 8.5 weeks)
 
-**Planned Backlog Items:**
-- FE-010: French documentation translation (README, install guide, CLI help, user guide)
-- FE-011: Regex pattern expansion — Last/First format, ORG suffixes, LOCATION dictionary (from Story 4.4)
-- FE-012: Ground-truth annotation quality cleanup (from Story 4.4)
-- FE-013: Confidence score calibration layer (from Story 4.4)
-- FE-014: Extended coreference resolution — pronoun resolution, cross-sentence entity linking (from Story 4.6 FB-001)
+**Assigned to Epic 5 (7 stories):**
+- ✅ **FE-008:** GDPR Right to Erasure → Story 5.1 (HIGH) — **DONE** (2026-02-11)
+- ✅ **FE-007:** Gender-Aware Pseudonym Assignment → Story 5.2 (MEDIUM)
+- ✅ **FE-011 + FE-012:** NER Accuracy & Annotation Quality → Story 5.3 (MEDIUM)
+- ✅ **FE-010:** French Documentation Translation → Story 5.4 (MEDIUM)
+- ✅ **FB-004:** PDF/DOCX Input Format Support → Story 5.5 (MEDIUM)
+- ✅ **FE-001 + FE-002 + FE-003:** CLI Polish & Minor Enhancements → Story 5.6 (LOW)
+- ✅ v1.1 Release Preparation → Story 5.7 (HIGH)
 
-**Potential Backlog Items:**
-- FE-003: Performance regression tests (if not added in Epic 2-3)
-- FE-004: Alternative context cycling key (if user feedback indicates need)
+**Deferred to v1.2+:**
+- FE-013: Confidence score calibration layer (depends on FE-011, HIGH effort)
+- FE-014: Extended coreference resolution (research-level complexity)
+- FE-004: Alternative context cycling key (monitor user feedback)
+
+**Deferred to v2.0+:**
+- FE-009: Standalone executables (coupled with GUI)
+- FE-010b: CLI `--help` i18n (requires i18n framework; Typer/click compat risk)
+- FB-005: Desktop GUI
+- Fine-tuned French NER model (requires curated training data)
+- Multi-language support (English, Spanish, German)
+- Optional `--no-validate` flag (requires confidence calibration first)
 
 ---
 
@@ -531,9 +597,9 @@ When adding items from future stories:
 
 **Backlog Maintained By:** Sarah (Product Owner)
 **Review Cadence:** End of each epic
-**Last Review:** 2026-02-07 (Epic 4 gap analysis — all backlog items assigned)
-**Last Update:** 2026-02-09 (Story 4.6: FE-006 completed, FE-014 added, MON-005 Python 3.13 status updated, deferred items documented)
-**Next Review:** After Story 4.7 completion (launch readiness)
+**Last Review:** 2026-02-11 (Post-launch cleanup — all epics complete, v1.0 launched)
+**Last Update:** 2026-02-11 (Epic 5 created — all v1.1 backlog items assigned to stories)
+**Next Review:** After Epic 5 completion (v1.1 release)
 
 ---
 
