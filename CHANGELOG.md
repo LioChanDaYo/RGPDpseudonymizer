@@ -13,6 +13,15 @@ _No unreleased changes._
 
 ---
 
+## [1.0.1] - 2026-02-11
+
+### Fixed
+
+- CLI crash on newer typer/click versions: `TypeError: Secondary flag is not valid for non-boolean flag` caused by `--success-only/--failures-only` flag pair with `Optional[bool]` type. Split into two separate boolean flags.
+- Release workflow missing spaCy model download, causing test failures in CI.
+
+---
+
 ## [1.0.0] - 2026-02-11
 
 **GDPR Pseudonymizer v1.0.0 — First Public Release**
