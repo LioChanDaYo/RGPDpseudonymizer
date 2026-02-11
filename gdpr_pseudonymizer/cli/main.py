@@ -279,7 +279,7 @@ def _batch(
     ),
     continue_on_error: bool = typer.Option(
         True,
-        "--continue-on-error/--stop-on-error",
+        "--continue-on-error/--no-continue-on-error",
         help="Continue processing on individual file errors (default: continue)",
     ),
     workers: Optional[int] = typer.Option(
@@ -453,7 +453,7 @@ def _import_mappings(
     ),
     skip_duplicates: bool = typer.Option(
         True,
-        "--skip-duplicates/--prompt-duplicates",
+        "--skip-duplicates/--no-skip-duplicates",
         help="Skip duplicate entities (default) or prompt for each",
     ),
 ) -> None:

@@ -13,6 +13,14 @@ _No unreleased changes._
 
 ---
 
+## [1.0.2] - 2026-02-11
+
+### Fixed
+
+- Remaining typer/click flag pair incompatibilities: `--continue-on-error/--stop-on-error` and `--skip-duplicates/--prompt-duplicates` custom secondary names replaced with standard `--flag/--no-flag` pattern that works across all typer versions.
+
+---
+
 ## [1.0.1] - 2026-02-11
 
 ### Fixed

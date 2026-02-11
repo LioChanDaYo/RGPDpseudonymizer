@@ -275,7 +275,7 @@ class TestBatchCommand:
 
             # Use --workers 1 for sequential mode (stop-on-error only applies there)
             result = runner.invoke(
-                app, ["batch", str(tmp_path), "--stop-on-error", "--workers", "1"]
+                app, ["batch", str(tmp_path), "--no-continue-on-error", "--workers", "1"]
             )
 
         assert result.exit_code == 1
@@ -380,8 +380,8 @@ class TestBatchCommand:
         assert "--output" in output
         assert "--theme" in output
         assert "--recursive" in output
-        # Check for truncated version since Rich may truncate long option names
-        assert "--continue-on-e" in output or "--stop-on-error" in output
+        # Check for continue-on-error flag (may be truncated by Rich)
+        assert "--continue-on-e" in output or "--no-continue-on" in output
         assert "--workers" in output  # New in Story 3.3
 
     def test_batch_keyboard_interrupt(self, tmp_path: Path) -> None:

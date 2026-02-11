@@ -58,7 +58,7 @@ def import_mappings_command(
     ),
     skip_duplicates: bool = typer.Option(
         True,
-        "--skip-duplicates/--prompt-duplicates",
+        "--skip-duplicates/--no-skip-duplicates",
         help="Skip duplicate entities (default) or prompt for each",
     ),
 ) -> None:

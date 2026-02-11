@@ -353,7 +353,7 @@ def batch_command(
     ),
     continue_on_error: bool = typer.Option(
         True,
-        "--continue-on-error/--stop-on-error",
+        "--continue-on-error/--no-continue-on-error",
         help="Continue processing on individual file errors (default: continue)",
     ),
     workers: Optional[int] = typer.Option(
