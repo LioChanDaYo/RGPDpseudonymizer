@@ -275,7 +275,8 @@ class TestBatchCommand:
 
             # Use --workers 1 for sequential mode (stop-on-error only applies there)
             result = runner.invoke(
-                app, ["batch", str(tmp_path), "--no-continue-on-error", "--workers", "1"]
+                app,
+                ["batch", str(tmp_path), "--no-continue-on-error", "--workers", "1"],
             )
 
         assert result.exit_code == 1
