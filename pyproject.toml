@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gdpr-pseudonymizer"
-version = "1.0.6"
+version = "1.0.7"
 description = "CLI tool for GDPR-compliant pseudonymization of French text documents using NLP-based entity detection and reversible mapping"
 authors = ["GDPR Pseudonymizer Team"]
 license = "MIT"
@@ -33,7 +33,7 @@ typer = "^0.9.0"
 click = ">=8.0.0,<8.2.0"
 rich = "^13.7.0"
 PyYAML = "^6.0"
-cryptography = "^44.0.1"
+cryptography = "^46.0.5"
 SQLAlchemy = "^2.0.0"
 structlog = "^23.2.0"
 markdown-it-py = "^3.0.0"
