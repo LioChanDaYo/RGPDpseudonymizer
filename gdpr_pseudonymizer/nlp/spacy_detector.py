@@ -47,15 +47,53 @@ class SpaCyDetector(EntityDetector):
             self._nlp = spacy.load(model_name)
             self._model_name = model_name
             logger.info("spacy_model_loaded", model=model_name)
-        except OSError as e:
-            logger.error("spacy_model_not_found", model=model_name, error=str(e))
-            raise OSError(
-                f"spaCy model '{model_name}' not found. "
-                f"Install with: python -m spacy download {model_name}"
-            ) from e
+        except OSError:
+            logger.warning("spacy_model_not_found", model=model_name)
+            self._nlp = self._auto_download_model(model_name)
         except Exception as e:
             logger.error("spacy_model_load_failed", model=model_name, error=str(e))
             raise
+
+    def _auto_download_model(self, model_name: str) -> Language:
+        """Auto-download a missing spaCy model.
+
+        Args:
+            model_name: spaCy model name to download
+
+        Returns:
+            Loaded spaCy Language model
+
+        Raises:
+            OSError: If download or load fails
+        """
+        import subprocess
+        import sys
+
+        import spacy
+        from rich.console import Console
+
+        console = Console(stderr=True)
+        console.print(
+            f"\n[yellow]spaCy model '{model_name}' not found. "
+            f"Downloading automatically (~571 MB)...[/yellow]\n"
+        )
+
+        try:
+            subprocess.check_call(
+                [sys.executable, "-m", "spacy", "download", model_name],
+                stdout=sys.stderr,
+            )
+        except subprocess.CalledProcessError as e:
+            raise OSError(
+                f"Failed to download spaCy model '{model_name}'. "
+                f"Install manually: python -m spacy download {model_name}"
+            ) from e
+
+        logger.info("spacy_model_downloaded", model=model_name)
+        nlp = spacy.load(model_name)
+        self._model_name = model_name
+        logger.info("spacy_model_loaded", model=model_name)
+        return nlp
 
     def detect_entities(self, text: str) -> list[DetectedEntity]:
         """Detect named entities in text using spaCy.
