@@ -167,7 +167,7 @@ poetry run gdpr-pseudo --help
 **How to provide feedback:**
 - Complete alpha feedback survey (link in onboarding email)
 - Report bugs via [GitHub Issues](https://github.com/LioChanDaYo/RGPDpseudonymizer/issues)
-- Email feedback: [your-email@example.com]
+- Feedback via [GitHub Discussions](https://github.com/LioChanDaYo/RGPDpseudonymizer/discussions)
 
 **Feedback deadline:** 1 week after onboarding
 
