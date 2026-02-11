@@ -502,10 +502,15 @@ def _export(
         "--to",
         help="Filter operations before this date (ISO 8601: YYYY-MM-DD)",
     ),
-    success_only: Optional[bool] = typer.Option(
-        None,
-        "--success-only/--failures-only",
-        help="Filter by success status",
+    success_only: bool = typer.Option(
+        False,
+        "--success-only",
+        help="Show only successful operations",
+    ),
+    failures_only: bool = typer.Option(
+        False,
+        "--failures-only",
+        help="Show only failed operations",
     ),
     limit: Optional[int] = typer.Option(
         None,
@@ -517,6 +522,13 @@ def _export(
     """Export audit log to JSON or CSV."""
     from gdpr_pseudonymizer.cli.commands.export import export_command
 
+    # Convert two boolean flags to Optional[bool] tri-state
+    resolved_success: Optional[bool] = None
+    if success_only:
+        resolved_success = True
+    elif failures_only:
+        resolved_success = False
+
     export_command(
         output_path=output_path,
         db_path=db_path,
@@ -524,7 +536,7 @@ def _export(
         operation_type=operation_type,
         from_date=from_date,
         to_date=to_date,
-        success_only=success_only,
+        success_only=resolved_success,
         limit=limit,
     )
 

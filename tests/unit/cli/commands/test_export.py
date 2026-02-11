@@ -11,6 +11,7 @@ import typer
 from typer.testing import CliRunner
 
 from gdpr_pseudonymizer.cli.commands.export import export_command
+from gdpr_pseudonymizer.cli.main import app as main_app
 
 
 def strip_ansi(text: str) -> str:
@@ -306,7 +307,7 @@ class TestExportCommand:
         assert result.exit_code == 0
 
     def test_export_failures_only_filter(self, tmp_path: Path) -> None:
-        """Test export with --failures-only filter."""
+        """Test export with --failures-only filter via main app wrapper."""
         db_path = tmp_path / "test.db"
         db_path.touch()
         output_path = tmp_path / "export.json"
@@ -331,7 +332,7 @@ class TestExportCommand:
             mock_repo.return_value.find_operations.return_value = mock_operations
 
             result = runner.invoke(
-                app,
+                main_app,
                 ["export", str(output_path), "--db", str(db_path), "--failures-only"],
             )
 

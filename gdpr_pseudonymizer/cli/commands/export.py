@@ -61,8 +61,9 @@ def export_command(
     ),
     success_only: Optional[bool] = typer.Option(
         None,
-        "--success-only/--failures-only",
-        help="Filter by success status",
+        "--success-only",
+        help="Filter by success status (True=successes, False=failures, None=all)",
+        hidden=True,
     ),
     limit: Optional[int] = typer.Option(
         None,
