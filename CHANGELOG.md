@@ -13,6 +13,14 @@ _No unreleased changes._
 
 ---
 
+## [1.0.4] - 2026-02-11
+
+### Fixed
+
+- Tighten click pin to `<8.2.0` — click 8.2.x also incompatible with typer 0.9.x (`Parameter.make_metavar()` signature change). Previous pin `<8.3.0` was insufficient.
+
+---
+
 ## [1.0.3] - 2026-02-11
 
 ### Fixed
