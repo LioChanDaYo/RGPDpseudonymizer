@@ -13,6 +13,14 @@ _No unreleased changes._
 
 ---
 
+## [1.0.6] - 2026-02-11
+
+### Fixed
+
+- Bundle data files (detection patterns, name dictionary, pseudonym libraries) inside the package so they are included in pip-installed wheels. Previously these files used CWD-relative paths and were missing from pip installs, causing `FileNotFoundError` on `gdpr-pseudo process`.
+
+---
+
 ## [1.0.5] - 2026-02-11
 
 ### Added

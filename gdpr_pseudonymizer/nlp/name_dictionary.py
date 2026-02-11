@@ -35,7 +35,11 @@ class NameDictionary:
         """
         self.first_names: set[str] = set()
         self.last_names: set[str] = set()
-        self._dictionary_path = dictionary_path or "data/french_names.json"
+        if dictionary_path is None:
+            from gdpr_pseudonymizer.resources import FRENCH_NAMES_PATH
+
+            dictionary_path = str(FRENCH_NAMES_PATH)
+        self._dictionary_path = dictionary_path
 
     def load(self) -> None:
         """Load name dictionary from JSON file.

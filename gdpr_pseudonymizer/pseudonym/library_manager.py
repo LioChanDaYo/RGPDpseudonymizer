@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 import secrets
-from pathlib import Path
 from typing import Any, TypedDict
 
 from gdpr_pseudonymizer.pseudonym.assignment_engine import (
@@ -119,13 +118,10 @@ class LibraryBasedPseudonymManager(PseudonymManager):
             FileNotFoundError: If library file not found
             ValueError: If library format is invalid
         """
-        # Construct path: data/pseudonyms/{theme}.json
-        library_path = (
-            Path(__file__).parent.parent.parent
-            / "data"
-            / "pseudonyms"
-            / f"{theme}.json"
-        )
+        # Load from bundled package resources
+        from gdpr_pseudonymizer.resources import PSEUDONYMS_DIR
+
+        library_path = PSEUDONYMS_DIR / f"{theme}.json"
 
         if not library_path.exists():
             raise FileNotFoundError(f"Pseudonym library not found: {library_path}")

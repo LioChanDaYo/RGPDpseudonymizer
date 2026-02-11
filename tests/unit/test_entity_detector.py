@@ -110,14 +110,21 @@ def test_spacy_detector_load_model_with_mock(mocker: MockerFixture) -> None:
 
 def test_spacy_detector_model_not_found_error(mocker: MockerFixture) -> None:
     """Test error handling when spaCy model is not installed."""
+    import subprocess
+
     # Mock spaCy to raise OSError
     mock_spacy = mocker.Mock()
     mock_spacy.load.side_effect = OSError("Model not found")
     mocker.patch.dict("sys.modules", {"spacy": mock_spacy})
+    # Mock subprocess so auto-download doesn't actually run
+    mocker.patch(
+        "subprocess.check_call",
+        side_effect=subprocess.CalledProcessError(1, "spacy download"),
+    )
 
     detector = SpaCyDetector()
 
-    with pytest.raises(OSError, match="not found"):
+    with pytest.raises(OSError, match="fr_core_news_lg"):
         detector.load_model("fr_core_news_lg")
 
 

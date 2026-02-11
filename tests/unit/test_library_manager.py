@@ -103,12 +103,11 @@ class TestLibraryLoading:
 
         manager = LibraryBasedPseudonymManager()
 
-        # Mock the path resolution
+        # Mock the resource directory to point to our temp directory
         with patch(
-            "gdpr_pseudonymizer.pseudonym.library_manager.Path.__truediv__"
-        ) as mock_div:
-            mock_div.return_value = incomplete_path
-
+            "gdpr_pseudonymizer.resources.PSEUDONYMS_DIR",
+            tmp_path / "pseudonyms",
+        ):
             with pytest.raises(ValueError, match="Missing required field"):
                 manager.load_library("incomplete")
 
@@ -143,10 +142,9 @@ class TestLibraryLoading:
         manager = LibraryBasedPseudonymManager()
 
         with patch(
-            "gdpr_pseudonymizer.pseudonym.library_manager.Path.__truediv__"
-        ) as mock_div:
-            mock_div.return_value = mismatched_path
-
+            "gdpr_pseudonymizer.resources.PSEUDONYMS_DIR",
+            tmp_path / "pseudonyms",
+        ):
             with pytest.raises(ValueError, match="Theme mismatch"):
                 manager.load_library("correct_theme")
 
@@ -180,10 +178,9 @@ class TestLibraryLoading:
         manager = LibraryBasedPseudonymManager()
 
         with patch(
-            "gdpr_pseudonymizer.pseudonym.library_manager.Path.__truediv__"
-        ) as mock_div:
-            mock_div.return_value = insufficient_path
-
+            "gdpr_pseudonymizer.resources.PSEUDONYMS_DIR",
+            tmp_path / "pseudonyms",
+        ):
             with pytest.raises(ValueError, match="Insufficient first names"):
                 manager.load_library("insufficient")
 
@@ -217,10 +214,9 @@ class TestLibraryLoading:
         manager = LibraryBasedPseudonymManager()
 
         with patch(
-            "gdpr_pseudonymizer.pseudonym.library_manager.Path.__truediv__"
-        ) as mock_div:
-            mock_div.return_value = insufficient_path
-
+            "gdpr_pseudonymizer.resources.PSEUDONYMS_DIR",
+            tmp_path / "pseudonyms",
+        ):
             with pytest.raises(ValueError, match="Insufficient last names"):
                 manager.load_library("insufficient")
 

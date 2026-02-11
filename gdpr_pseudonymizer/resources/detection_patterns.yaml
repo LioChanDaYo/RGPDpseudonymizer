@@ -1,0 +1,87 @@
+# Regex Pattern Library for French Entity Detection
+# Each pattern category can be enabled/disabled for hybrid detection
+
+patterns:
+  # High confidence patterns: Titles + Names
+  titles:
+    enabled: true
+    confidence: 0.85
+    entity_type: PERSON
+    patterns:
+      - pattern: '\b(M\.|Mme|Mlle|Dr\.|Pr\.|Maître|Me\.?)\s+([A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][a-zàâäéèêëïîôöùûü]+(?:\s+[A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][a-zàâäéèêëïîôöùûü]+)?)'
+        description: "Matches titles + names: M. Dupont, Dr. Marie Dubois, Mme Laurent, Maître Dupont, Me Mercier"
+        examples:
+          - "M. Dupont"
+          - "Mme Laurent"
+          - "Dr. Marie Dubois"
+          - "Pr. François Martin"
+          - "Maître Dupont"
+          - "Me Mercier"
+          - "Me. Dubois"
+
+  # High confidence patterns: Compound hyphenated names
+  compound_names:
+    enabled: true
+    confidence: 0.80
+    entity_type: PERSON
+    patterns:
+      - pattern: '\b([A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][a-zàâäéèêëïîôöùûü]+-[A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][a-zàâäéèêëïîôöùûü]+)\b'
+        description: "Matches hyphenated first names: Jean-Pierre, Marie-Claire"
+        examples:
+          - "Jean-Pierre"
+          - "Marie-Claire"
+          - "Anne-Sophie"
+          - "Jean-François"
+
+  # Medium confidence patterns: Location indicators
+  location_indicators:
+    enabled: true
+    confidence: 0.65
+    entity_type: LOCATION
+    patterns:
+      - pattern: '\b(à|en|dans|près de|ville de)\s+([A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][a-zàâäéèêëïîôöùûü]+(?:\s+[A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][a-zàâäéèêëïîôöùûü]+)?)'
+        description: "Matches location indicators: à Paris, en France, près de Lyon"
+        examples:
+          - "à Paris"
+          - "en France"
+          - "près de Lyon"
+          - "ville de Marseille"
+          - "dans Toulouse"
+
+  # Medium confidence patterns: Organization suffixes
+  organizations:
+    enabled: true
+    confidence: 0.70
+    entity_type: ORG
+    patterns:
+      - pattern: '\b([A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][A-Za-zàâäéèêëïîôöùûü\s]+?)\s+(SA|SARL|SAS|EURL|SNC|SCM|SCI)\b'
+        description: "Matches organization legal suffixes: Acme SA, Tech Solutions SARL"
+        examples:
+          - "TechCorp SA"
+          - "Solutions Informatiques SARL"
+          - "Conseil Entreprises SAS"
+          - "Cabinet Dubois EURL"
+      - pattern: '\b(Société|Entreprise|Cabinet|Groupe|Compagnie)\s+([A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][A-Za-zàâäéèêëïîôöùûü\s&,]+)'
+        description: "Matches organization prefixes: Société TechCorp, Cabinet Martin, Cabinet Mercier & Associés"
+        examples:
+          - "Société TechCorp"
+          - "Entreprise Dubois"
+          - "Cabinet Martin"
+          - "Groupe Lefebvre"
+          - "Cabinet Mercier & Associés"
+          - "Cabinet Dupont et Martin"
+
+  # Medium confidence patterns: Full names using dictionary
+  full_names:
+    enabled: true
+    confidence: 0.65
+    entity_type: PERSON
+    use_name_dictionary: true
+    description: "Matches [Firstname] [Lastname] combinations using French name dictionary"
+    # Pattern matching is done programmatically in RegexMatcher using name dictionary
+    # Format: [Known First Name] [Known Last Name]
+    examples:
+      - "Marie Dubois"
+      - "Jean Martin"
+      - "François Bernard"
+      - "Sophie Laurent"

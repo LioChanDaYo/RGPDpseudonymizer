@@ -82,8 +82,9 @@ class SpaCyDetector(EntityDetector):
             subprocess.check_call(
                 [sys.executable, "-m", "spacy", "download", model_name],
                 stdout=sys.stderr,
+                timeout=600,
             )
-        except subprocess.CalledProcessError as e:
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
             raise OSError(
                 f"Failed to download spaCy model '{model_name}'. "
                 f"Install manually: python -m spacy download {model_name}"

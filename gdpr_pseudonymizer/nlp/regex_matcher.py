@@ -35,12 +35,17 @@ class RegexMatcher:
         name_dictionary: French name dictionary for full name matching
     """
 
-    def __init__(self, config_path: str = "config/detection_patterns.yaml"):
+    def __init__(self, config_path: str | None = None):
         """Initialize regex matcher.
 
         Args:
-            config_path: Path to detection patterns YAML configuration
+            config_path: Path to detection patterns YAML configuration.
+                        Defaults to bundled resource file.
         """
+        if config_path is None:
+            from gdpr_pseudonymizer.resources import DETECTION_PATTERNS_PATH
+
+            config_path = str(DETECTION_PATTERNS_PATH)
         self.config_path = config_path
         self.patterns: dict[str, list[dict[str, Any]]] = {}
         self.name_dictionary: NameDictionary | None = None

@@ -43,9 +43,14 @@ class TestSpaCyDetector:
 
     def test_load_model_invalid(self, detector):
         """Test loading invalid model raises OSError after auto-download attempt."""
-        with pytest.raises(OSError) as exc_info:
-            detector.load_model("invalid_model_name_xyz")
-        assert "invalid_model_name_xyz" in str(exc_info.value)
+        import subprocess
+        from unittest.mock import patch
+
+        error = subprocess.CalledProcessError(1, "spacy download")
+        with patch("subprocess.check_call", side_effect=error):
+            with pytest.raises(OSError) as exc_info:
+                detector.load_model("invalid_model_name_xyz")
+            assert "invalid_model_name_xyz" in str(exc_info.value)
 
     def test_detect_entities_lazy_loading(self, detector):
         """Test that model loads lazily on first detect_entities call."""
