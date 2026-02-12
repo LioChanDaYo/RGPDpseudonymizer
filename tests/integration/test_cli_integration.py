@@ -92,7 +92,7 @@ class TestGlobalOptions:
         result = runner.invoke(app, ["--version"])
 
         assert result.exit_code == 0
-        assert "0.1.0" in result.stdout
+        assert "gdpr-pseudo version" in result.stdout
 
     def test_config_option_nonexistent(self, tmp_path: Path) -> None:
         """Test --config with non-existent file."""

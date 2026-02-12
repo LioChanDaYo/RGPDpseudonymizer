@@ -512,7 +512,7 @@ def test_process_end_to_end_version() -> None:
     result = runner.invoke(app, ["--version"])
 
     assert result.exit_code == 0
-    assert "0.1.0" in result.stdout
+    assert "gdpr-pseudo version" in result.stdout
 
 
 def test_process_end_to_end_sample_document(tmp_path: Path) -> None:
