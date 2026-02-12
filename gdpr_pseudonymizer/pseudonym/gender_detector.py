@@ -38,7 +38,9 @@ class GenderDetector:
             lookup_path: Path to gender lookup JSON file. If None, uses
                 the bundled package resource.
         """
-        self._lookup_path = Path(lookup_path) if lookup_path else FRENCH_GENDER_LOOKUP_PATH
+        self._lookup_path = (
+            Path(lookup_path) if lookup_path else FRENCH_GENDER_LOOKUP_PATH
+        )
         self._male_names: set[str] = set()
         self._female_names: set[str] = set()
         self._ambiguous_names: set[str] = set()

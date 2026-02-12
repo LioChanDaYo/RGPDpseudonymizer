@@ -415,10 +415,8 @@ class DocumentProcessor:
                 entity_text_stripped
             )
             if ctx.compositional_engine.gender_detector is not None:
-                detected_gender = (
-                    ctx.compositional_engine.gender_detector.detect_gender_from_full_name(
-                        entity_text_stripped, entity.entity_type
-                    )
+                detected_gender = ctx.compositional_engine.gender_detector.detect_gender_from_full_name(
+                    entity_text_stripped, entity.entity_type
                 )
         new_entity = Entity(
             entity_type=entity.entity_type,

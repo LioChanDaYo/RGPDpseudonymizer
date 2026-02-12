@@ -102,7 +102,10 @@ class TestCompositionalEngineGenderAutoDetect:
 
         # Verify assign_pseudonym was called with detected gender="female"
         call_kwargs = mock_manager.assign_pseudonym.call_args
-        assert call_kwargs[1]["gender"] == "female" or call_kwargs.kwargs.get("gender") == "female"
+        assert (
+            call_kwargs[1]["gender"] == "female"
+            or call_kwargs.kwargs.get("gender") == "female"
+        )
 
     def test_engine_without_detector_preserves_none_gender(self) -> None:
         """Engine without gender_detector should preserve gender=None (backward compat)."""
@@ -133,7 +136,9 @@ class TestCompositionalEngineGenderAutoDetect:
 
         # Verify assign_pseudonym was called with gender=None
         call_kwargs = mock_manager.assign_pseudonym.call_args
-        assert call_kwargs[1]["gender"] is None or call_kwargs.kwargs.get("gender") is None
+        assert (
+            call_kwargs[1]["gender"] is None or call_kwargs.kwargs.get("gender") is None
+        )
 
     def test_engine_explicit_gender_not_overridden(self) -> None:
         """When gender is explicitly provided, detector should not override."""
@@ -168,7 +173,10 @@ class TestCompositionalEngineGenderAutoDetect:
 
         # Verify assign_pseudonym was called with explicit gender="male"
         call_kwargs = mock_manager.assign_pseudonym.call_args
-        assert call_kwargs[1]["gender"] == "male" or call_kwargs.kwargs.get("gender") == "male"
+        assert (
+            call_kwargs[1]["gender"] == "male"
+            or call_kwargs.kwargs.get("gender") == "male"
+        )
 
     def test_engine_non_person_no_gender_detection(self) -> None:
         """Non-PERSON entities should not get gender detection."""
@@ -200,7 +208,9 @@ class TestCompositionalEngineGenderAutoDetect:
 
         # For LOCATION, gender should remain None
         call_kwargs = mock_manager.assign_pseudonym.call_args
-        assert call_kwargs[1]["gender"] is None or call_kwargs.kwargs.get("gender") is None
+        assert (
+            call_kwargs[1]["gender"] is None or call_kwargs.kwargs.get("gender") is None
+        )
 
 
 class TestGenderConsistency:

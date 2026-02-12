@@ -129,7 +129,9 @@ class TestGenderDetectorFullName:
     """Tests for gender detection from full entity names."""
 
     def test_person_female_full_name(self, detector: GenderDetector) -> None:
-        assert detector.detect_gender_from_full_name("Marie Dupont", "PERSON") == "female"
+        assert (
+            detector.detect_gender_from_full_name("Marie Dupont", "PERSON") == "female"
+        )
 
     def test_person_male_full_name(self, detector: GenderDetector) -> None:
         assert detector.detect_gender_from_full_name("Jean Martin", "PERSON") == "male"
