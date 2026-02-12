@@ -36,7 +36,9 @@ console = Console()
 def version_callback(value: bool) -> None:
     """Display version information."""
     if value:
-        console.print("gdpr-pseudo version 0.1.0")
+        from importlib.metadata import version
+
+        console.print(f"gdpr-pseudo version {version('gdpr-pseudonymizer')}")
         raise typer.Exit()
 
 

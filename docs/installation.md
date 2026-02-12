@@ -8,20 +8,39 @@ This guide covers installation on Windows, macOS, and Linux.
 
 ## Prerequisites
 
-Before installing, ensure you have:
-
 | Requirement | Version | How to Check |
 |-------------|---------|--------------|
 | **Python** | 3.10, 3.11, or 3.12 | `python --version` |
-| **Poetry** | 1.7+ | `poetry --version` |
-| **Disk Space** | ~1GB free | For spaCy French model |
-| **Internet** | Required for installation | Model download ~571MB |
+| **Disk Space** | ~1GB free | For spaCy French model (auto-downloaded on first use) |
+| **Internet** | Required for installation | Model auto-download ~571MB |
 
-**Important:** Python 3.10-3.11 are validated in CI/CD. Python 3.12 is confirmed working (tested on Ubuntu 24.04 and Fedora 39). Python 3.9 is no longer supported (EOL October 2025). Python 3.13+ is not yet tested.
+**Important:** Python 3.10-3.12 are validated in CI/CD. Python 3.9 is no longer supported (EOL October 2025). Python 3.13+ is not yet tested.
 
 ---
 
-## Quick Install (All Platforms)
+## Install from PyPI (Recommended)
+
+The simplest way to install for end-users:
+
+```bash
+pip install gdpr-pseudonymizer
+
+# Verify installation
+gdpr-pseudo --help
+```
+
+> **Note:** The spaCy French model (~571MB) downloads automatically on first use. To pre-download it:
+> ```bash
+> python -m spacy download fr_core_news_lg
+> ```
+
+---
+
+## Install from Source (Contributors)
+
+For development and contributing, you'll also need [Poetry](https://python-poetry.org/) 1.7+.
+
+### Quick Install (All Platforms)
 
 ```bash
 # 1. Clone repository
@@ -31,12 +50,14 @@ cd RGPDpseudonymizer
 # 2. Install dependencies
 poetry install
 
-# 3. Install spaCy French model (required - ~571MB)
-poetry run python scripts/install_spacy_model.py
-
-# 4. Verify installation
+# 3. Verify installation
 poetry run gdpr-pseudo --help
 ```
+
+> **Note:** The spaCy French model (~571MB) downloads automatically on first use. To pre-download it:
+> ```bash
+> poetry run python scripts/install_spacy_model.py
+> ```
 
 ---
 
@@ -81,29 +102,16 @@ cd RGPDpseudonymizer
 poetry install
 ```
 
-#### Step 4: Install spaCy Model
-
-```powershell
-poetry run python scripts/install_spacy_model.py
-```
-
-Expected output:
-```
-======================================================================
-spaCy French Language Model Installer
-======================================================================
-
-Installing spaCy model: fr_core_news_lg
-This may take a few minutes (model size: ~571MB)...
-
-[SUCCESS] Model 'fr_core_news_lg' installed successfully!
-```
-
-#### Step 5: Verify Installation
+#### Step 4: Verify Installation
 
 ```powershell
 poetry run gdpr-pseudo --help
 ```
+
+> **Note:** The spaCy French model (~571MB) downloads automatically on first use. To pre-download it:
+> ```powershell
+> poetry run python scripts/install_spacy_model.py
+> ```
 
 **Windows Note:** The CLI may appear as `gdpr-pseudo.cmd` - this is normal Poetry behavior.
 
@@ -160,17 +168,16 @@ cd RGPDpseudonymizer
 poetry install
 ```
 
-#### Step 5: Install spaCy Model
-
-```bash
-poetry run python scripts/install_spacy_model.py
-```
-
-#### Step 6: Verify Installation
+#### Step 5: Verify Installation
 
 ```bash
 poetry run gdpr-pseudo --help
 ```
+
+> **Note:** The spaCy French model (~571MB) downloads automatically on first use. To pre-download it:
+> ```bash
+> poetry run python scripts/install_spacy_model.py
+> ```
 
 ---
 
@@ -214,17 +221,16 @@ cd RGPDpseudonymizer
 poetry install
 ```
 
-#### Step 4: Install spaCy Model
-
-```bash
-poetry run python scripts/install_spacy_model.py
-```
-
-#### Step 5: Verify Installation
+#### Step 4: Verify Installation
 
 ```bash
 poetry run gdpr-pseudo --help
 ```
+
+> **Note:** The spaCy French model (~571MB) downloads automatically on first use. To pre-download it:
+> ```bash
+> poetry run python scripts/install_spacy_model.py
+> ```
 
 ---
 
@@ -267,17 +273,16 @@ cd RGPDpseudonymizer
 poetry install
 ```
 
-#### Step 4: Install spaCy Model
-
-```bash
-poetry run python scripts/install_spacy_model.py
-```
-
-#### Step 5: Verify Installation
+#### Step 4: Verify Installation
 
 ```bash
 poetry run gdpr-pseudo --help
 ```
+
+> **Note:** The spaCy French model (~571MB) downloads automatically on first use. To pre-download it:
+> ```bash
+> poetry run python scripts/install_spacy_model.py
+> ```
 
 ---
 
@@ -321,22 +326,27 @@ docker run -v "$(pwd):/data" gdpr-pseudonymizer process /data/input.txt
 
 ---
 
-## Command Usage (Beta Phase)
+## Command Usage
 
-**Important:** During the beta phase, all commands must be prefixed with `poetry run`:
+### Installed via pip
+
+If you installed with `pip install gdpr-pseudonymizer`, commands work directly:
 
 ```bash
-# CORRECT (beta phase)
+gdpr-pseudo --help
+gdpr-pseudo process input.txt
+gdpr-pseudo batch ./documents/
+```
+
+### Installed from source (Poetry)
+
+If you cloned the repository, prefix commands with `poetry run`:
+
+```bash
 poetry run gdpr-pseudo --help
 poetry run gdpr-pseudo process input.txt
 poetry run gdpr-pseudo batch ./documents/
-
-# INCORRECT (will not work until v1.0 pip install)
-gdpr-pseudo --help
-gdpr-pseudo process input.txt
 ```
-
-**After v1.0 PyPI publication:** Direct `gdpr-pseudo` command will be available via `pip install gdpr-pseudonymizer`.
 
 **Alternative:** Activate Poetry shell for session:
 ```bash

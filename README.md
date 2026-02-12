@@ -103,19 +103,21 @@ GDPR Pseudonymizer is a **privacy-first CLI tool** that combines AI efficiency w
 See [Installation Guide](https://liochandayo.github.io/RGPDpseudonymizer/installation/) for detailed platform-specific instructions.
 
 ### Prerequisites
-- Python 3.10-3.12 (validated in CI/CD)
+- **Python 3.10, 3.11, or 3.12** (validated in CI/CD — 3.13+ not yet tested)
 
 ### Install from PyPI (Recommended)
 
 ```bash
 pip install gdpr-pseudonymizer
 
-# Download spaCy French model (required - 571MB)
-python -m spacy download fr_core_news_lg
-
 # Verify installation
 gdpr-pseudo --help
 ```
+
+> **Note:** The spaCy French model (~571MB) downloads automatically on first use. To pre-download it:
+> ```bash
+> python -m spacy download fr_core_news_lg
+> ```
 
 ### Install from Source (Developer)
 
@@ -128,12 +130,14 @@ cd RGPDpseudonymizer
 pip install poetry>=1.7.0
 poetry install
 
-# Install spaCy French model
-poetry run python -m spacy download fr_core_news_lg
-
 # Verify installation
 poetry run gdpr-pseudo --help
 ```
+
+> **Note:** The spaCy French model (~571MB) downloads automatically on first use. To pre-download it:
+> ```bash
+> poetry run python -m spacy download fr_core_news_lg
+> ```
 
 ### Quick Test
 
