@@ -9,26 +9,16 @@ Tests verify:
 
 from __future__ import annotations
 
-import re
 from pathlib import Path
 
 import pytest
+from helpers import strip_ansi
 from typer.testing import CliRunner
 
 from gdpr_pseudonymizer.cli.main import app
 
 # CliRunner for testing CLI commands
 runner = CliRunner(mix_stderr=False)
-
-
-def strip_ansi(text: str) -> str:
-    """Strip ANSI escape codes from text for reliable string matching.
-
-    Rich adds color codes to output, which can break substring assertions.
-    This helper removes those codes so tests can match plain text.
-    """
-    ansi_pattern = re.compile(r"\x1b\[[0-9;]*m")
-    return ansi_pattern.sub("", text)
 
 
 class TestCLICommandRegistration:

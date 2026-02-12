@@ -35,7 +35,7 @@
 | 1.6: NLP Integration | ✅ DONE | CRITICAL | 3-4 days | **COMPLETE - spaCy integration operational** |
 | **1.7: Validation UI (NEW)** | ✅ DONE | 🔴 **CRITICAL** | **4-5 days** | **Moved from Epic 3 - COMPLETE** |
 | **1.8: Hybrid Detection (NEW)** | ✅ DONE | HIGH | **3-4 days** | **COMPLETE - 35.3% improvement achieved** |
-| **1.9: Entity Deduplication (NEW)** | 🔄 IN PROGRESS | 🔴 **CRITICAL** | **2-3 days** | **Follow-up to Story 1.7 QA** |
+| **1.9: Entity Deduplication (NEW)** | ✅ DONE | 🔴 **CRITICAL** | **2-3 days** | **COMPLETE - 66% validation time reduction** |
 
 **Total Epic 1 Duration:** 24-33 days (5-6.5 weeks) → **Recommend 6 weeks with buffer**
 
@@ -667,8 +667,8 @@ class ValidationSession:
 - ✅ spaCy NLP integration functional - **Story 1.6** ⭐ COMPLETE
 - ✅ **Validation UI fully implemented and user-tested** - **Story 1.7** ⭐ CRITICAL COMPLETE
 - ✅ **Hybrid detection (NLP + regex) achieves 35.3% improvement (52.2% PERSON)** - **Story 1.8** ⭐ COMPLETE
-- 🔄 **Entity deduplication enables 100+ entity documents** - **Story 1.9** ⭐ CRITICAL IN PROGRESS
-- ⏳ Can demonstrate AI-assisted pseudonymization with human-in-the-loop validation - **Pending Story 1.9**
+- ✅ **Entity deduplication enables 100+ entity documents** - **Story 1.9** ⭐ COMPLETE
+- ✅ Can demonstrate AI-assisted pseudonymization with human-in-the-loop validation
 - ✅ **PM sign-off on "assisted mode" positioning** - **Contingency plan approved**
 
 ---
@@ -819,8 +819,9 @@ Epic 1 is successful if:
 
 ---
 
-**Document Status:** RESCOPED v2.1 (Post-Story 1.8 Completion)
+**Document Status:** ✅ COMPLETE (All 9 stories done)
 **Date:** 2026-01-22
+**Completed:** 2026-01-23 (Story 1.9 final story completed)
 **Approvals Completed:**
 - [x] PM approval of 5-week Epic 1 timeline
 - [x] Dev lead confirmation of Story 1.7 feasibility (4-5 days) - COMPLETE
@@ -832,4 +833,4 @@ Epic 1 is successful if:
 - ✅ Validation UI moved to Epic 1 (critical path) - COMPLETE
 - ✅ Epic 1 extended to 5 weeks
 - ✅ Hybrid detection added (Story 1.8) to reduce validation burden - COMPLETE (35.3% improvement achieved)
-- 🔄 Entity deduplication (Story 1.9) - IN PROGRESS
+- ✅ Entity deduplication (Story 1.9) - COMPLETE

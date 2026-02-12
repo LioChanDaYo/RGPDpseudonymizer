@@ -541,6 +541,77 @@ def _export(
     )
 
 
+@app.command(
+    name="delete-mapping",
+    help="Delete entity mapping (GDPR Article 17 erasure)",
+)
+def _delete_mapping(
+    entity_name: Optional[str] = typer.Argument(None, help="Entity name to delete"),
+    db_path: str = typer.Option("mappings.db", "--db", help="Database file path"),
+    passphrase: Optional[str] = typer.Option(
+        None,
+        "--passphrase",
+        "-p",
+        help="Database passphrase (or use GDPR_PSEUDO_PASSPHRASE env var)",
+    ),
+    entity_id: Optional[str] = typer.Option(None, "--id", help="Entity UUID to delete"),
+    reason: Optional[str] = typer.Option(
+        None, "--reason", "-r", help="Reason for deletion (GDPR request reference)"
+    ),
+    force: bool = typer.Option(
+        False, "--force/--no-force", "-f", help="Skip confirmation prompt"
+    ),
+) -> None:
+    """Delete entity mapping (GDPR Article 17 erasure)."""
+    from gdpr_pseudonymizer.cli.commands.delete_mapping import delete_mapping_command
+
+    delete_mapping_command(
+        entity_name=entity_name,
+        db_path=db_path,
+        passphrase=passphrase,
+        entity_id=entity_id,
+        reason=reason,
+        force=force,
+    )
+
+
+@app.command(
+    name="list-entities",
+    help="List entities with search (for erasure workflow)",
+)
+def _list_entities(
+    db_path: str = typer.Option("mappings.db", "--db", help="Database file path"),
+    passphrase: Optional[str] = typer.Option(
+        None,
+        "--passphrase",
+        "-p",
+        help="Database passphrase (or use GDPR_PSEUDO_PASSPHRASE env var)",
+    ),
+    search: Optional[str] = typer.Option(
+        None,
+        "--search",
+        "-s",
+        help="Search by entity name (case-insensitive substring match)",
+    ),
+    entity_type: Optional[str] = typer.Option(
+        None, "--type", "-t", help="Filter by type (PERSON/LOCATION/ORG)"
+    ),
+    limit: Optional[int] = typer.Option(
+        None, "--limit", "-l", help="Limit number of results"
+    ),
+) -> None:
+    """List entities with search (for erasure workflow)."""
+    from gdpr_pseudonymizer.cli.commands.list_entities import list_entities_command
+
+    list_entities_command(
+        db_path=db_path,
+        passphrase=passphrase,
+        search=search,
+        entity_type=entity_type,
+        limit=limit,
+    )
+
+
 @app.command(name="destroy-table", help="Securely delete the mapping database")
 def _destroy_table(
     db_path: str = typer.Option(
