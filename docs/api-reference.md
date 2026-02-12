@@ -215,16 +215,48 @@ Dataclass returned by pseudonym assignment:
 | `is_ambiguous` | `bool` | Ambiguity flag |
 | `ambiguity_reason` | `str | None` | Reason for ambiguity |
 
+### GenderDetector
+
+Auto-detects French first name gender from a bundled 945-name INSEE-sourced dictionary. Used by `CompositionalPseudonymEngine` to assign gender-matched pseudonyms automatically.
+
+```python
+from gdpr_pseudonymizer.pseudonym.gender_detector import GenderDetector
+
+detector = GenderDetector()
+detector.load()
+
+detector.detect_gender("Marie")          # "female"
+detector.detect_gender("Jean")           # "male"
+detector.detect_gender("Camille")        # None (ambiguous)
+detector.detect_gender("Xyzabc")         # None (unknown)
+
+# Full name detection (extracts first name, checks entity type)
+detector.detect_gender_from_full_name("Marie Dupont", "PERSON")    # "female"
+detector.detect_gender_from_full_name("Jean-Pierre Martin", "PERSON")  # "male" (compound: uses first component)
+detector.detect_gender_from_full_name("Paris", "LOCATION")         # None (non-PERSON)
+```
+
+Key methods:
+
+| Method | Description |
+|--------|-------------|
+| `load()` | Load gender lookup dictionary from JSON (lazy-loaded on first detect call) |
+| `detect_gender(first_name)` | Detect gender from a single first name. Returns `"male"`, `"female"`, or `None` |
+| `detect_gender_from_full_name(full_name, entity_type)` | Extract first name from full name and detect gender. Non-PERSON entities always return `None` |
+
+Dictionary stats: 470 male, 457 female, 18 ambiguous names. Case-insensitive matching.
+
 ### CompositionalPseudonymEngine
 
-Handles compositional logic: "Marie Dubois" maps to "Leia Organa", and "Marie" alone maps to "Leia" for consistency.
+Handles compositional logic: "Marie Dubois" maps to "Leia Organa", and "Marie" alone maps to "Leia" for consistency. Optionally integrates `GenderDetector` for automatic gender-matched pseudonym assignment.
 
 ```python
 from gdpr_pseudonymizer.pseudonym.assignment_engine import CompositionalPseudonymEngine
 
 engine = CompositionalPseudonymEngine(
     pseudonym_manager=manager,
-    mapping_repository=repo
+    mapping_repository=repo,
+    gender_detector=detector  # Optional: enables auto gender detection
 )
 
 result = engine.assign_compositional_pseudonym(

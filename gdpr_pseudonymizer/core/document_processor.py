@@ -30,6 +30,7 @@ from gdpr_pseudonymizer.nlp.hybrid_detector import HybridDetector
 from gdpr_pseudonymizer.pseudonym.assignment_engine import (
     CompositionalPseudonymEngine,
 )
+from gdpr_pseudonymizer.pseudonym.gender_detector import GenderDetector
 from gdpr_pseudonymizer.pseudonym.library_manager import LibraryBasedPseudonymManager
 from gdpr_pseudonymizer.utils.file_handler import read_file, write_file
 from gdpr_pseudonymizer.utils.logger import get_logger
@@ -408,10 +409,15 @@ class DocumentProcessor:
         )
         original_first = None
         original_last = None
+        detected_gender = None
         if entity.entity_type == "PERSON":
             original_first, original_last, _ = ctx.compositional_engine.parse_full_name(
                 entity_text_stripped
             )
+            if ctx.compositional_engine.gender_detector is not None:
+                detected_gender = ctx.compositional_engine.gender_detector.detect_gender_from_full_name(
+                    entity_text_stripped, entity.entity_type
+                )
         new_entity = Entity(
             entity_type=entity.entity_type,
             first_name=original_first,
@@ -421,7 +427,7 @@ class DocumentProcessor:
             pseudonym_last=assignment.pseudonym_last,
             pseudonym_full=assignment.pseudonym_full,
             first_seen_timestamp=datetime.now(timezone.utc),
-            gender=None,
+            gender=detected_gender,
             confidence_score=(
                 entity.confidence if hasattr(entity, "confidence") else None
             ),
@@ -594,9 +600,13 @@ class DocumentProcessor:
         existing_entities = mapping_repo.find_all()
         pseudonym_manager.load_existing_mappings(existing_entities)
 
+        gender_detector = GenderDetector()
+        gender_detector.load()
+
         compositional_engine = CompositionalPseudonymEngine(
             pseudonym_manager=pseudonym_manager,
             mapping_repository=mapping_repo,
+            gender_detector=gender_detector,
         )
 
         return _ProcessingContext(

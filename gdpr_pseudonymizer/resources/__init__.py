@@ -8,4 +8,5 @@ RESOURCES_DIR = Path(__file__).parent
 
 DETECTION_PATTERNS_PATH = RESOURCES_DIR / "detection_patterns.yaml"
 FRENCH_NAMES_PATH = RESOURCES_DIR / "french_names.json"
+FRENCH_GENDER_LOOKUP_PATH = RESOURCES_DIR / "french_gender_lookup.json"
 PSEUDONYMS_DIR = RESOURCES_DIR / "pseudonyms"

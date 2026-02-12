@@ -6,6 +6,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from gdpr_pseudonymizer.pseudonym.gender_detector import GenderDetector
 from gdpr_pseudonymizer.utils.french_patterns import (
     strip_french_prepositions,
     strip_french_titles,
@@ -151,15 +152,19 @@ class CompositionalPseudonymEngine:
         self,
         pseudonym_manager: PseudonymManager,
         mapping_repository: MappingRepository,
+        gender_detector: GenderDetector | None = None,
     ):
         """Initialize compositional pseudonym engine.
 
         Args:
             pseudonym_manager: Pseudonym manager for library-based selection
             mapping_repository: Repository for querying existing component mappings
+            gender_detector: Optional gender detector for auto-detecting gender
+                from entity text when gender=None is passed
         """
         self.pseudonym_manager = pseudonym_manager
         self.mapping_repository = mapping_repository
+        self.gender_detector = gender_detector
 
     def strip_titles(self, text: str) -> str:
         """Remove French honorific titles from entity text.
@@ -225,6 +230,12 @@ class CompositionalPseudonymEngine:
         Returns:
             PseudonymAssignment with full pseudonym and components
         """
+        # Auto-detect gender when not provided and detector is available
+        if gender is None and self.gender_detector is not None:
+            gender = self.gender_detector.detect_gender_from_full_name(
+                entity_text, entity_type
+            )
+
         # Non-PERSON entities: use simple assignment (no compositional logic)
         if entity_type != "PERSON":
             assignment = self.pseudonym_manager.assign_pseudonym(
