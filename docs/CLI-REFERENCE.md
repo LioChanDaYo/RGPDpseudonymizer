@@ -768,6 +768,36 @@ gdpr-pseudo stats --db new_project.db
 
 ---
 
+## Pseudonymization Methodology
+
+### Gender-Aware Pseudonym Assignment
+
+Starting with v1.1, the pseudonymizer automatically detects the gender of French first names and assigns gender-matched pseudonyms. This preserves gender coherence in pseudonymized documents, improving readability and LLM utility.
+
+**How it works:**
+
+1. **Gender Detection:** When a PERSON entity is detected (e.g., "Marie Dupont"), the first name is looked up in a French gender dictionary (~930 names from INSEE public data).
+
+2. **Gender-Matched Selection:** The pseudonym engine selects a replacement first name from the matching gender pool:
+   - Female name (e.g., "Marie") -> female pseudonym first name (e.g., "Léa")
+   - Male name (e.g., "Jean") -> male pseudonym first name (e.g., "Lucas")
+   - Unknown/ambiguous name -> random from combined male+female list (preserves previous behavior)
+
+3. **Compound Names:** Hyphenated French names use the first component for gender detection:
+   - "Jean-Pierre" -> "Jean" -> male
+   - "Marie-Claire" -> "Marie" -> female
+
+4. **Ambiguous Names:** Names that are genuinely unisex in French (e.g., Camille, Dominique, Claude) are treated as unknown and receive pseudonyms from the combined list.
+
+**Data Sources:**
+- Gender dictionary built from INSEE Fichier des prenoms (Open License 2.0 / Etalab) and existing pseudonym library data
+- ~470 male names, ~457 female names, ~18 ambiguous names
+- Coverage: >=90% of common French first names
+
+**No configuration needed:** Gender-aware assignment is automatic and requires no user action. It works across all pseudonym themes (neutral, star_wars, lotr).
+
+---
+
 ## Troubleshooting
 
 ### Database Not Found
