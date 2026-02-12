@@ -409,10 +409,17 @@ class DocumentProcessor:
         )
         original_first = None
         original_last = None
+        detected_gender = None
         if entity.entity_type == "PERSON":
             original_first, original_last, _ = ctx.compositional_engine.parse_full_name(
                 entity_text_stripped
             )
+            if ctx.compositional_engine.gender_detector is not None:
+                detected_gender = (
+                    ctx.compositional_engine.gender_detector.detect_gender_from_full_name(
+                        entity_text_stripped, entity.entity_type
+                    )
+                )
         new_entity = Entity(
             entity_type=entity.entity_type,
             first_name=original_first,
@@ -422,7 +429,7 @@ class DocumentProcessor:
             pseudonym_last=assignment.pseudonym_last,
             pseudonym_full=assignment.pseudonym_full,
             first_seen_timestamp=datetime.now(timezone.utc),
-            gender=None,
+            gender=detected_gender,
             confidence_score=(
                 entity.confidence if hasattr(entity, "confidence") else None
             ),
