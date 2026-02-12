@@ -30,6 +30,7 @@ from gdpr_pseudonymizer.nlp.hybrid_detector import HybridDetector
 from gdpr_pseudonymizer.pseudonym.assignment_engine import (
     CompositionalPseudonymEngine,
 )
+from gdpr_pseudonymizer.pseudonym.gender_detector import GenderDetector
 from gdpr_pseudonymizer.pseudonym.library_manager import LibraryBasedPseudonymManager
 from gdpr_pseudonymizer.utils.file_handler import read_file, write_file
 from gdpr_pseudonymizer.utils.logger import get_logger
@@ -594,9 +595,13 @@ class DocumentProcessor:
         existing_entities = mapping_repo.find_all()
         pseudonym_manager.load_existing_mappings(existing_entities)
 
+        gender_detector = GenderDetector()
+        gender_detector.load()
+
         compositional_engine = CompositionalPseudonymEngine(
             pseudonym_manager=pseudonym_manager,
             mapping_repository=mapping_repo,
+            gender_detector=gender_detector,
         )
 
         return _ProcessingContext(
