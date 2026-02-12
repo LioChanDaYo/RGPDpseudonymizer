@@ -50,7 +50,7 @@ GDPR Pseudonymizer is a **privacy-first CLI tool** that combines AI efficiency w
 ### 🎭 **Themed Pseudonyms**
 - ✅ **Readable output** - Star Wars, LOTR, or generic French names
 - ✅ **Maintains context** - LLM analysis preserves 85% document utility (validated: 4.27/5.0)
-- ✅ **Gender-preserving** - When NER provides gender classification (PERSON entities)
+- ✅ **Gender-aware** - Auto-detects French first name gender from 945-name dictionary and assigns gender-matched pseudonyms (female names → female pseudonyms, male names → male pseudonyms)
 - ✅ **Full entity support** - PERSON, LOCATION, and ORGANIZATION pseudonyms for all themes
 
 ---
@@ -79,8 +79,8 @@ GDPR Pseudonymizer is a **privacy-first CLI tool** that combines AI efficiency w
 - 100% local processing, encrypted mapping tables, audit trails
 
 **v1.1 (Q2-Q3 2026):** Quick wins & GDPR compliance
-- GDPR Right to Erasure: selective entity deletion (`delete-mapping` command, Article 17)
-- Gender-aware pseudonym assignment for French names
+- ✅ ~~GDPR Right to Erasure: selective entity deletion (`delete-mapping` command, Article 17)~~ (Story 5.1 — done)
+- ✅ ~~Gender-aware pseudonym assignment for French names~~ (Story 5.2 — done)
 - Beta feedback bug fixes and UX improvements
 
 **v2.0 (Q3-Q4 2026):** GUI & broader accessibility

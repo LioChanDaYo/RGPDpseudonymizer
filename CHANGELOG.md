@@ -9,7 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-_No unreleased changes._
+### Added
+
+- **Gender-aware pseudonym assignment** (Story 5.2) — Automatically detects French first name gender from a 945-name dictionary (470 male, 457 female, 18 ambiguous) and assigns gender-matched pseudonyms. Female names get female pseudonyms, male names get male pseudonyms, and ambiguous/unknown names fall back to the combined list. Supports compound names (e.g., "Marie-Claire" detected as female via first component).
+- **GenderDetector module** (`gdpr_pseudonymizer.pseudonym.gender_detector`) — Standalone gender detection class with lazy-loaded INSEE-sourced French name dictionary.
+- **Gender lookup data** (`french_gender_lookup.json`) — Built from neutral.json pseudonym library and french_names.json, licensed under Etalab Open License 2.0 (compatible with MIT).
 
 ---
 
