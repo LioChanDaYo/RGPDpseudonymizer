@@ -351,9 +351,7 @@ class TestRegexMatcher:
             for e in entities
             if "janvier" in e.text.lower() and e.entity_type == "PERSON"
         ]
-        assert (
-            len(bad_matches) == 0
-        ), "janvier, Marie should NOT be detected as PERSON"
+        assert len(bad_matches) == 0, "janvier, Marie should NOT be detected as PERSON"
 
     # Story 5.3: Expanded ORG Suffix Tests (AC2)
     def test_org_suffix_association(self, matcher: RegexMatcher) -> None:
@@ -418,7 +416,9 @@ class TestRegexMatcher:
         orgs = [e for e in entities if e.entity_type == "ORG"]
         org_texts = [e.text for e in orgs]
         assert any("SA" in t for t in org_texts), "TechCorp SA should still be detected"
-        assert any("SARL" in t for t in org_texts), "Solutions SARL should still be detected"
+        assert any(
+            "SARL" in t for t in org_texts
+        ), "Solutions SARL should still be detected"
 
     # Story 5.3: Geography Dictionary Tests (AC3)
     def test_geography_city_paris(self, matcher: RegexMatcher) -> None:
@@ -463,9 +463,7 @@ class TestRegexMatcher:
             for e in entities
             if "Bouches-du-Rhône" in e.text and e.entity_type == "LOCATION"
         ]
-        assert (
-            len(matching) >= 1
-        ), "Bouches-du-Rhône should be detected as LOCATION"
+        assert len(matching) >= 1, "Bouches-du-Rhône should be detected as LOCATION"
 
     def test_geography_negative_random_word(self, matcher: RegexMatcher) -> None:
         """Test geography dictionary: random word NOT detected as location."""
@@ -475,9 +473,7 @@ class TestRegexMatcher:
         matching = [
             e for e in entities if "Xyzqwerty" in e.text and e.entity_type == "LOCATION"
         ]
-        assert (
-            len(matching) == 0
-        ), "Random word should NOT be detected as LOCATION"
+        assert len(matching) == 0, "Random word should NOT be detected as LOCATION"
 
     def test_geography_dictionary_loaded(self, matcher: RegexMatcher) -> None:
         """Test that geography dictionary is loaded by matcher."""
@@ -494,9 +490,7 @@ class TestRegexMatcher:
             for e in entities
             if "Aix-en-Provence" in e.text and e.entity_type == "LOCATION"
         ]
-        assert (
-            len(matching) >= 1
-        ), "Aix-en-Provence should be detected as LOCATION"
+        assert len(matching) >= 1, "Aix-en-Provence should be detected as LOCATION"
 
     def test_geography_confidence_level(self, matcher: RegexMatcher) -> None:
         """Test that geography matches have correct confidence level."""
