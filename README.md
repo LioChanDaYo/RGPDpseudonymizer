@@ -1,3 +1,5 @@
+> 🇬🇧 **English** | 🇫🇷 [Français](README.fr.md)
+
 # GDPR Pseudonymizer
 
 [![PyPI version](https://img.shields.io/pypi/v/gdpr-pseudonymizer)](https://pypi.org/project/gdpr-pseudonymizer/)
