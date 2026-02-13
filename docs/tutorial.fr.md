@@ -43,7 +43,7 @@ export GDPR_PSEUDO_PASSPHRASE="MySecurePassphrase123"
 poetry run gdpr-pseudo process interview.txt
 ```
 
-Vous entrerez dans le **flux de validation interactif** — voir la section [Présentation de l'interface de validation](#présentation-de-linterface-de-validation) ci-dessous.
+Vous entrerez dans le **flux de validation interactif** — voir la section [Présentation de l'interface de validation](#presentation-de-linterface-de-validation) ci-dessous.
 
 ### Étape 4 : Examiner le résultat
 
