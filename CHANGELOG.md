@@ -11,9 +11,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **GDPR Right to Erasure** (Story 5.1) — `delete-mapping` command for GDPR Article 17 compliance. Delete specific entity mappings by name or UUID with passphrase verification, confirmation prompt, and ERASURE audit log entry. New `list-entities` command for erasure workflow (shows entity ID, type, pseudonym, first seen date). Optional `--reason` flag for documenting erasure rationale. `--force` flag to skip confirmation in scripted workflows.
 - **Gender-aware pseudonym assignment** (Story 5.2) — Automatically detects French first name gender from a 945-name dictionary (470 male, 457 female, 18 ambiguous) and assigns gender-matched pseudonyms. Female names get female pseudonyms, male names get male pseudonyms, and ambiguous/unknown names fall back to the combined list. Supports compound names (e.g., "Marie-Claire" detected as female via first component).
 - **GenderDetector module** (`gdpr_pseudonymizer.pseudonym.gender_detector`) — Standalone gender detection class with lazy-loaded INSEE-sourced French name dictionary.
 - **Gender lookup data** (`french_gender_lookup.json`) — Built from neutral.json pseudonym library and french_names.json, licensed under Etalab Open License 2.0 (compatible with MIT).
+- **NER accuracy improvements** (Story 5.3) — F1 score improved from 29.74% to 59.97% (+30.23pp) through annotation cleanup, regex pattern expansion, and French geography dictionary.
+  - Ground-truth annotation cleanup: removed 118 garbage/duplicate annotations, fixed ORG/PERSON mislabeling, aligned title stripping with detection output (1,855 → 1,737 entities)
+  - LastName, FirstName regex pattern for reversed name formats (e.g., "Dubois, Jean-Marc")
+  - Expanded ORG detection: 18 suffixes (SA, SARL, SAS, SASU, EURL, SNC, SCM, SCI, GIE, EI, SCOP, SEL, Association, Fondation, Institut, Groupe, Consortium, Fédération) and 10 prefixes (Société, Entreprise, Cabinet, Groupe, Compagnie, Association, Fondation, Institut, Consortium, Fédération)
+  - French geography dictionary: 100 cities, 18 regions, 101 departments for standalone location detection
+  - PERSON recall: 34.23% → 82.93% (+48.70pp), ORG FN rate: 65.71% → 48.09% (PASS), LOCATION FN rate: 36.59% → 33.06% (improved)
 
 ---
 

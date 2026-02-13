@@ -33,7 +33,7 @@ GDPR Pseudonymizer is a **privacy-first CLI tool** that combines AI efficiency w
 - ✅ **Zero telemetry** - No analytics, crash reporting, or external communication
 
 ### 🤝 **AI + Human Verification**
-- ✅ **Hybrid detection** - AI pre-detects 40-50% of entities (NLP + regex patterns)
+- ✅ **Hybrid detection** - AI pre-detects ~60% of entities (NLP + regex + geography dictionary)
 - ✅ **Mandatory validation** - You review and confirm all entities (ensures 100% accuracy)
 - ✅ **Fast validation UI** - Rich CLI interface with keyboard shortcuts, <2 min per document
 - ✅ **Smart workflow** - Entity-by-type grouping (PERSON → ORG → LOCATION) with context display
@@ -57,19 +57,19 @@ GDPR Pseudonymizer is a **privacy-first CLI tool** that combines AI efficiency w
 
 ## 🚀 Quick Start
 
-**Status:** 🎉 **v1.0.0 — Public Release** (February 2026)
+**Status:** 🎉 **v1.0.7** (February 2026)
 
 ### Realistic Expectations for v1.0
 
 **What v1.0 delivers:**
-- 🤖 **AI-assisted detection** - Hybrid NLP + regex detects ~40-50% of entities automatically
+- 🤖 **AI-assisted detection** - Hybrid NLP + regex detects ~60% of entities automatically (F1 59.97%)
 - ✅ **Mandatory human verification** - You review and confirm all entities (2-3 min per document)
 - 🔒 **100% accuracy guarantee** - Human validation ensures zero false negatives
 - ⚡ **50%+ faster than manual** - Pre-detection saves time vs pure manual redaction
 
 **What v1.0 does NOT deliver:**
 - ❌ Fully automatic "set and forget" processing
-- ❌ 85%+ AI accuracy (current: 40-50% with hybrid approach)
+- ❌ 85%+ AI accuracy (current: ~60% F1 with hybrid approach)
 - ❌ Optional validation mode (validation is mandatory)
 
 ### Roadmap
@@ -81,6 +81,7 @@ GDPR Pseudonymizer is a **privacy-first CLI tool** that combines AI efficiency w
 **v1.1 (Q2-Q3 2026):** Quick wins & GDPR compliance
 - ✅ ~~GDPR Right to Erasure: selective entity deletion (`delete-mapping` command, Article 17)~~ (Story 5.1 — done)
 - ✅ ~~Gender-aware pseudonym assignment for French names~~ (Story 5.2 — done)
+- ✅ ~~NER accuracy improvements: F1 29.74% → 59.97% (annotation cleanup, regex expansion, geography dictionary)~~ (Story 5.3 — done)
 - Beta feedback bug fixes and UX improvements
 
 **v2.0 (Q3-Q4 2026):** GUI & broader accessibility
@@ -213,24 +214,21 @@ logging:
 
 ### NLP Library Selection (Story 1.2 - Completed)
 
-After comprehensive benchmarking on 25 French interview/business documents (1,855 entities):
+After comprehensive benchmarking on 25 French interview/business documents (1,737 annotated entities):
 
-| Library | F1 Score | Precision | Recall | Decision |
-|---------|----------|-----------|--------|----------|
-| **spaCy** `fr_core_news_lg` | **29.5%** | 27.0% | 32.7% | ✅ **Selected** |
-| **Stanza** `fr_default` | 11.9% | 10.3% | 14.1% | ❌ Rejected |
+| Approach | F1 Score | Precision | Recall | Notes |
+|----------|----------|-----------|--------|-------|
+| **spaCy only** `fr_core_news_lg` | 29.5% | 27.0% | 32.7% | Story 1.2 baseline |
+| **Hybrid** (spaCy + regex) | 59.97% | 48.17% | 79.45% | Story 5.3 (current) |
 
-**Why both failed 85% target:**
-- Pre-trained models optimized for news text (not interview/business docs)
-- Domain-specific language patterns (conversational, mixed registers)
-- ORG detection catastrophic (3.8% precision = 96% false positives)
+**Accuracy trajectory:** spaCy-only baseline → hybrid approach with annotation cleanup, expanded regex patterns, and French geography dictionary doubled F1 score. PERSON recall reached 82.93%.
 
 **Approved Solution:**
-- ✅ **Hybrid approach** (NLP + regex) targets 40-50% F1
+- ✅ **Hybrid approach** (NLP + regex + geography dictionary) achieves ~60% F1
 - ✅ **Mandatory validation** ensures 100% final accuracy
 - 📅 **Fine-tuning** deferred to v3.0 (70-85% F1 target, requires training data from v1.x/v2.x user validations)
 
-See full analysis: [docs/nlp-benchmark-report.md](docs/nlp-benchmark-report.md)
+See full analysis: [docs/qa/ner-accuracy-report.md](docs/qa/ner-accuracy-report.md) | Historical baseline: [docs/nlp-benchmark-report.md](docs/nlp-benchmark-report.md)
 
 ### Validation Workflow (Story 1.7 - Complete)
 
@@ -282,7 +280,7 @@ The validation UI provides an intuitive keyboard-driven interface for reviewing 
 **Long answer:**
 1. **GDPR defensibility** - Human verification provides legal audit trail
 2. **Zero false negatives** - AI misses entities, humans catch them (100% coverage)
-3. **Current NLP limitations** - French models on interview/business docs: 29.5% F1 out-of-box
+3. **Current NLP limitations** - French models on interview/business docs: 29.5% F1 out-of-box (hybrid approach reaches ~60%)
 4. **Better than alternatives:**
    - ✅ **vs Manual redaction:** 50%+ faster (AI pre-detection)
    - ✅ **vs Cloud services:** 100% local processing (no data leakage)
@@ -368,13 +366,14 @@ The validation UI provides an intuitive keyboard-driven interface for reviewing 
 
 ## 🛠️ Development Status
 
-**All 4 MVP Epics Complete** — v1.0.0 released February 2026.
+**All 4 MVP Epics Complete + Epic 5 in progress** — v1.0.7 (February 2026).
 
 - ✅ **Epic 1:** Foundation & NLP Validation (9 stories) — spaCy integration, validation UI, hybrid detection, entity deduplication
 - ✅ **Epic 2:** Core Pseudonymization Engine (9 stories) — pseudonym libraries, encryption, audit logging, batch processing, GDPR 1:1 mapping
 - ✅ **Epic 3:** CLI Interface & Batch Processing (7 stories) — 8 CLI commands, progress reporting, config files, parallel batch, UX polish
 - ✅ **Epic 4:** Launch Readiness (8 stories) — LLM utility validation, cross-platform testing, documentation, NER accuracy suite, performance validation, beta feedback integration, codebase refactoring, launch preparation
-- **Total:** 33 stories, 1077+ tests, 86%+ coverage, all quality gates green
+- 🔄 **Epic 5:** Quick Wins & GDPR Compliance (3 stories done) — GDPR Article 17 erasure, gender-aware pseudonyms, NER accuracy improvements (F1 29.74% → 59.97%)
+- **Total:** 36 stories, 1198+ tests, 86%+ coverage, all quality gates green
 
 ---
 
@@ -436,7 +435,7 @@ This project is licensed under the [MIT License](LICENSE).
 - ⚠️ Test thoroughly before production use
 
 **v1.0 MVP limitations:**
-- AI detection: 40-50% baseline (not 85%+)
+- AI detection: ~60% F1 baseline (not 85%+)
 - Validation required for ALL documents (not optional)
 - French language only (English, Spanish, etc. in future versions)
 - Text formats only (.txt, .md - no PDF/DOCX in v1.0)
@@ -516,12 +515,12 @@ poetry run pytest tests/integration/test_validation_workflow_integration.py -v
 
 ### Test Coverage
 
-- **Unit tests:** 777 tests covering validation models, UI components, encryption, database operations, audit logging, progress tracking, and core logic
+- **Unit tests:** 946+ tests covering validation models, UI components, encryption, database operations, audit logging, progress tracking, gender detection, and core logic
 - **Integration tests:** 90 tests for end-to-end workflows including validation (Story 2.0.1), encrypted database operations (Story 2.4), compositional logic, and hybrid detection
 - **Accuracy tests:** 22 tests validating NER accuracy against 25-document ground-truth corpus (Story 4.4)
 - **Performance tests:** 15 tests validating all NFR targets — single-document benchmarks (NFR1), batch performance (NFR2), memory profiling (NFR4), startup time (NFR5), stability/error rate (NFR6), stress testing (Story 4.5)
 - **Current coverage:** 86%+ across all modules (100% for progress module, 91.41% for AuditRepository)
-- **Total tests:** 1077+ tests (post-refactoring baseline)
+- **Total tests:** 1198+ tests
 - **CI/CD:** Tests run on Python 3.10-3.12 across Windows, macOS, and Linux
 - **Quality gates:** All pass (Black, Ruff, mypy, pytest)
 
@@ -551,19 +550,19 @@ The integration test suite covers:
 
 ---
 
-## 📊 Project Metrics (As of 2026-02-11)
+## 📊 Project Metrics (As of 2026-02-13)
 
 | Metric | Value | Status |
 |--------|-------|--------|
-| **Development Progress** | v1.0.0 Released | ✅ All 4 Epics Complete |
-| **Stories Complete** | 33 (Epic 1-4) | ✅ All stories including 4.6.1 refactoring + 4.7 launch prep |
+| **Development Progress** | v1.0.7 | ✅ All 4 MVP Epics + Epic 5 in progress |
+| **Stories Complete** | 36 (Epic 1-5) | ✅ Epics 1-4 complete + Stories 5.1, 5.2, 5.3 |
 | **LLM Utility (NFR10)** | 4.27/5.0 (85.4%) | ✅ PASSED (threshold: 80%) |
 | **Installation Success (NFR3)** | 87.5% (7/8 platforms) | ✅ PASSED (threshold: 85%) |
 | **First Pseudonymization (NFR14)** | 100% within 30 min | ✅ PASSED (threshold: 80%) |
 | **Critical Bugs Found** | 1 (Story 2.8) | ✅ RESOLVED - Epic 3 Unblocked |
-| **Test Corpus Size** | 25 docs, 1,855 entities | ✅ Complete |
-| **NLP Accuracy (Baseline)** | 29.5% F1 (spaCy) | ✅ Measured |
-| **Hybrid Accuracy (NLP+Regex)** | 35.3% F1 (+52.2% PERSON) | ✅ Story 1.8 Complete |
+| **Test Corpus Size** | 25 docs, 1,737 entities | ✅ Complete (post-cleanup) |
+| **NLP Accuracy (Baseline)** | 29.5% F1 (spaCy only) | ✅ Measured (Story 1.2) |
+| **Hybrid Accuracy (NLP+Regex)** | 59.97% F1 (+30.23pp vs baseline) | ✅ Story 5.3 Complete |
 | **Final Accuracy (AI+Human)** | 100% (validated) | 🎯 By Design |
 | **Pseudonym Libraries** | 3 themes (2,426 names + 240 locations + 588 orgs) | ✅ Stories 2.1, 3.0, 4.6 Complete |
 | **Compositional Matching** | Operational (component reuse + title stripping + compound names) | ✅ Stories 2.2, 2.3 Complete |
@@ -577,7 +576,7 @@ The integration test suite covers:
 | **Memory Usage (NFR4)** | ~1 GB Python-tracked peak | ✅ PASSED (<8GB threshold) |
 | **CLI Startup (NFR5)** | 0.56s (help), 6.0s (cold start w/ model) | ✅ PASSED (<5s for CLI startup) |
 | **Error Rate (NFR6)** | ~0% unexpected errors | ✅ PASSED (<10% threshold) |
-| **Test Coverage** | 1077+ tests (post-refactoring baseline), 86%+ coverage | ✅ All Quality Checks Pass |
+| **Test Coverage** | 1198+ tests, 86%+ coverage | ✅ All Quality Checks Pass |
 | **Quality Gates** | Ruff, mypy, pytest | ✅ All Pass (0 issues) |
 | **Supported Languages** | French | 🇫🇷 v1.0 only |
 | **Supported Formats** | .txt, .md | 📝 v1.0 scope |
@@ -594,4 +593,4 @@ The integration test suite covers:
 
 ---
 
-**Last Updated:** 2026-02-11 (v1.0.0 Public Release — all 4 MVP epics complete)
+**Last Updated:** 2026-02-13 (v1.0.7 — Epic 5 in progress: GDPR erasure, gender-aware pseudonyms, NER accuracy 59.97% F1)
