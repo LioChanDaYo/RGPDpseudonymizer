@@ -39,8 +39,8 @@ patterns:
     confidence: 0.80
     entity_type: PERSON
     patterns:
-      - pattern: '\b([A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][a-zàâäéèêëïîôöùûü]+(?:-[A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][a-zàâäéèêëïîôöùûü]+)?)\s*,\s*([A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][a-zàâäéèêëïîôöùûü]+(?:-[A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][a-zàâäéèêëïîôöùûü]+)?)'
-        description: "Last, First format (e.g., Dubois, Jean-Marc)"
+      - pattern: '\b([A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][a-zàâäéèêëïîôöùûü]+(?:-[A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][a-zàâäéèêëïîôöùûü]+)?)\s*,\s*(?!Cabinet|Société|Association|Fondation|Institut|Groupe|Consortium|Fédération|Entreprise|Compagnie|Direction|Service|Département|Commission|Comité)([A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][a-zàâäéèêëïîôöùûü]+(?:-[A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][a-zàâäéèêëïîôöùûü]+)?)'
+        description: "Last, First format (e.g., Dubois, Jean-Marc) with exclusion of ORG/function words"
         examples:
           - "Dubois, Jean-Marc"
           - "Martin, Sophie"
