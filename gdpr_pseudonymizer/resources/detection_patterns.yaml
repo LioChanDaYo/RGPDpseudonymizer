@@ -33,6 +33,19 @@ patterns:
           - "Anne-Sophie"
           - "Jean-François"
 
+  # High confidence patterns: Last, First name order
+  last_first_names:
+    enabled: true
+    confidence: 0.80
+    entity_type: PERSON
+    patterns:
+      - pattern: '\b([A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][a-zàâäéèêëïîôöùûü]+(?:-[A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][a-zàâäéèêëïîôöùûü]+)?)\s*,\s*([A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][a-zàâäéèêëïîôöùûü]+(?:-[A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][a-zàâäéèêëïîôöùûü]+)?)'
+        description: "Last, First format (e.g., Dubois, Jean-Marc)"
+        examples:
+          - "Dubois, Jean-Marc"
+          - "Martin, Sophie"
+          - "Lefèvre, Marie-Claire"
+
   # Medium confidence patterns: Location indicators
   location_indicators:
     enabled: true
