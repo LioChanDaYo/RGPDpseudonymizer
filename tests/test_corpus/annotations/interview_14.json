@@ -8,10 +8,10 @@
       "end_pos": 47
     },
     {
-      "entity_text": "Mme Sophie",
+      "entity_text": "Sophie Laurent",
       "entity_type": "PERSON",
-      "start_pos": 71,
-      "end_pos": 81
+      "start_pos": 75,
+      "end_pos": 89
     },
     {
       "entity_text": "Magasins Mode",
@@ -26,9 +26,9 @@
       "end_pos": 110
     },
     {
-      "entity_text": "Madame Laurent",
+      "entity_text": "Laurent",
       "entity_type": "PERSON",
-      "start_pos": 151,
+      "start_pos": 158,
       "end_pos": 165
     },
     {
@@ -50,9 +50,9 @@
       "end_pos": 299
     },
     {
-      "entity_text": "Mme Laurent",
+      "entity_text": "Laurent",
       "entity_type": "PERSON",
-      "start_pos": 397,
+      "start_pos": 401,
       "end_pos": 408
     },
     {
@@ -68,10 +68,10 @@
       "end_pos": 524
     },
     {
-      "entity_text": "Mme Lucie",
+      "entity_text": "Lucie Renard",
       "entity_type": "PERSON",
-      "start_pos": 532,
-      "end_pos": 541
+      "start_pos": 536,
+      "end_pos": 548
     },
     {
       "entity_text": "Alexandre Jin",
@@ -98,16 +98,10 @@
       "end_pos": 806
     },
     {
-      "entity_text": "Mme Delphine",
+      "entity_text": "Delphine Mallet",
       "entity_type": "PERSON",
-      "start_pos": 858,
-      "end_pos": 870
-    },
-    {
-      "entity_text": "énieur, Dr",
-      "entity_type": "PERSON",
-      "start_pos": 949,
-      "end_pos": 959
+      "start_pos": 862,
+      "end_pos": 877
     },
     {
       "entity_text": "Marc Laperrière",
@@ -116,9 +110,9 @@
       "end_pos": 976
     },
     {
-      "entity_text": "Mme Laurent",
+      "entity_text": "Laurent",
       "entity_type": "PERSON",
-      "start_pos": 1057,
+      "start_pos": 1061,
       "end_pos": 1068
     },
     {
@@ -152,10 +146,10 @@
       "end_pos": 1277
     },
     {
-      "entity_text": "Mme Émilie",
+      "entity_text": "Émilie Bernard",
       "entity_type": "PERSON",
-      "start_pos": 1292,
-      "end_pos": 1302
+      "start_pos": 1296,
+      "end_pos": 1310
     },
     {
       "entity_text": "Et Contentsquare",
@@ -176,10 +170,10 @@
       "end_pos": 1422
     },
     {
-      "entity_text": "Mme Carole",
+      "entity_text": "Carole Petit",
       "entity_type": "PERSON",
-      "start_pos": 1471,
-      "end_pos": 1481
+      "start_pos": 1475,
+      "end_pos": 1487
     },
     {
       "entity_text": "Stéphane Martin",
@@ -200,10 +194,10 @@
       "end_pos": 1550
     },
     {
-      "entity_text": "Mme Nadia",
+      "entity_text": "Nadia Kadem",
       "entity_type": "PERSON",
-      "start_pos": 1552,
-      "end_pos": 1561
+      "start_pos": 1556,
+      "end_pos": 1567
     },
     {
       "entity_text": "François Leroux",
@@ -212,22 +206,22 @@
       "end_pos": 1630
     },
     {
-      "entity_text": "Mme Anne",
+      "entity_text": "Anne Browaeys",
       "entity_type": "PERSON",
-      "start_pos": 1704,
-      "end_pos": 1712
+      "start_pos": 1708,
+      "end_pos": 1721
     },
     {
-      "entity_text": "Mme Laurent",
+      "entity_text": "Laurent",
       "entity_type": "PERSON",
-      "start_pos": 1762,
+      "start_pos": 1766,
       "end_pos": 1773
     },
     {
-      "entity_text": "Mme Clara",
+      "entity_text": "Clara Dumont",
       "entity_type": "PERSON",
-      "start_pos": 1803,
-      "end_pos": 1812
+      "start_pos": 1807,
+      "end_pos": 1819
     },
     {
       "entity_text": "Rémi Babinet",
@@ -236,10 +230,10 @@
       "end_pos": 1886
     },
     {
-      "entity_text": "Mme Mercedes",
+      "entity_text": "Mercedes Erra",
       "entity_type": "PERSON",
-      "start_pos": 1890,
-      "end_pos": 1902
+      "start_pos": 1894,
+      "end_pos": 1907
     },
     {
       "entity_text": "Léna Situations",
@@ -284,10 +278,10 @@
       "end_pos": 2203
     },
     {
-      "entity_text": "Mme Régine",
+      "entity_text": "Régine Ballonad de Printemps",
       "entity_type": "PERSON",
-      "start_pos": 2220,
-      "end_pos": 2230
+      "start_pos": 2224,
+      "end_pos": 2252
     },
     {
       "entity_text": "Marc Lolivier",

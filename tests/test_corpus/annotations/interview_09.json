@@ -14,21 +14,15 @@
       "end_pos": 48
     },
     {
-      "entity_text": "Mme Isabelle",
+      "entity_text": "Isabelle Moreau",
       "entity_type": "PERSON",
-      "start_pos": 54,
-      "end_pos": 66
+      "start_pos": 58,
+      "end_pos": 73
     },
     {
-      "entity_text": "Sud\nNice",
+      "entity_text": "Moreau",
       "entity_type": "PERSON",
-      "start_pos": 95,
-      "end_pos": 103
-    },
-    {
-      "entity_text": "Madame Moreau",
-      "entity_type": "PERSON",
-      "start_pos": 134,
+      "start_pos": 141,
       "end_pos": 147
     },
     {
@@ -62,9 +56,9 @@
       "end_pos": 404
     },
     {
-      "entity_text": "Mme Moreau",
+      "entity_text": "Moreau",
       "entity_type": "PERSON",
-      "start_pos": 443,
+      "start_pos": 447,
       "end_pos": 453
     },
     {
@@ -74,10 +68,10 @@
       "end_pos": 570
     },
     {
-      "entity_text": "Maître Didier",
+      "entity_text": "Didier Martin",
       "entity_type": "PERSON",
-      "start_pos": 573,
-      "end_pos": 586
+      "start_pos": 580,
+      "end_pos": 593
     },
     {
       "entity_text": "Crédit Provençal",
@@ -86,10 +80,10 @@
       "end_pos": 627
     },
     {
-      "entity_text": "Mme Matthieu",
+      "entity_text": "Matthieu Pigasse",
       "entity_type": "PERSON",
-      "start_pos": 657,
-      "end_pos": 669
+      "start_pos": 661,
+      "end_pos": 677
     },
     {
       "entity_text": "August Debouzy",
@@ -116,10 +110,10 @@
       "end_pos": 826
     },
     {
-      "entity_text": "Mme Sophie",
+      "entity_text": "Sophie Duchemin",
       "entity_type": "PERSON",
-      "start_pos": 859,
-      "end_pos": 869
+      "start_pos": 863,
+      "end_pos": 878
     },
     {
       "entity_text": "Laurent Benoist",
@@ -140,9 +134,9 @@
       "end_pos": 1005
     },
     {
-      "entity_text": "Mme Moreau",
+      "entity_text": "Moreau",
       "entity_type": "PERSON",
-      "start_pos": 1035,
+      "start_pos": 1039,
       "end_pos": 1045
     },
     {
@@ -152,16 +146,16 @@
       "end_pos": 1114
     },
     {
-      "entity_text": "Mme Christine",
+      "entity_text": "Christine Lagarde",
       "entity_type": "PERSON",
-      "start_pos": 1160,
-      "end_pos": 1173
+      "start_pos": 1164,
+      "end_pos": 1181
     },
     {
-      "entity_text": "Mme Isabelle",
+      "entity_text": "Isabelle de Silva",
       "entity_type": "PERSON",
-      "start_pos": 1239,
-      "end_pos": 1251
+      "start_pos": 1243,
+      "end_pos": 1260
     },
     {
       "entity_text": "Isabelle Moreau",
@@ -176,10 +170,10 @@
       "end_pos": 1401
     },
     {
-      "entity_text": "Mme Valérie",
+      "entity_text": "Valérie Blanc",
       "entity_type": "PERSON",
-      "start_pos": 1410,
-      "end_pos": 1421
+      "start_pos": 1414,
+      "end_pos": 1427
     },
     {
       "entity_text": "Karim Benzema",
@@ -200,10 +194,10 @@
       "end_pos": 1500
     },
     {
-      "entity_text": "Mme Nathalie",
+      "entity_text": "Nathalie Collin",
       "entity_type": "PERSON",
-      "start_pos": 1502,
-      "end_pos": 1514
+      "start_pos": 1506,
+      "end_pos": 1521
     },
     {
       "entity_text": "Pierre Serve",
@@ -212,9 +206,9 @@
       "end_pos": 1556
     },
     {
-      "entity_text": "Mme Moreau",
+      "entity_text": "Moreau",
       "entity_type": "PERSON",
-      "start_pos": 1606,
+      "start_pos": 1610,
       "end_pos": 1616
     },
     {
@@ -224,10 +218,10 @@
       "end_pos": 1761
     },
     {
-      "entity_text": "Mme Anne",
+      "entity_text": "Anne Marion Chauveau",
       "entity_type": "PERSON",
-      "start_pos": 1783,
-      "end_pos": 1791
+      "start_pos": 1787,
+      "end_pos": 1807
     },
     {
       "entity_text": "Marion Chauveau",
@@ -242,9 +236,9 @@
       "end_pos": 1848
     },
     {
-      "entity_text": "Mme Leroy",
+      "entity_text": "Leroy",
       "entity_type": "PERSON",
-      "start_pos": 1918,
+      "start_pos": 1922,
       "end_pos": 1927
     }
   ]

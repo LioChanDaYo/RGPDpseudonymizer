@@ -26,9 +26,9 @@
       "end_pos": 85
     },
     {
-      "entity_text": "Monsieur Weber",
+      "entity_text": "Weber",
       "entity_type": "PERSON",
-      "start_pos": 123,
+      "start_pos": 132,
       "end_pos": 137
     },
     {
@@ -68,22 +68,16 @@
       "end_pos": 413
     },
     {
-      "entity_text": "Mme Émilie",
+      "entity_text": "Émilie Morel",
       "entity_type": "PERSON",
-      "start_pos": 426,
-      "end_pos": 436
+      "start_pos": 430,
+      "end_pos": 442
     },
     {
       "entity_text": "Julien Sarrazin",
       "entity_type": "PERSON",
       "start_pos": 464,
       "end_pos": 479
-    },
-    {
-      "entity_text": "énergie, Dr",
-      "entity_type": "PERSON",
-      "start_pos": 486,
-      "end_pos": 497
     },
     {
       "entity_text": "Nathalie Perrin-",
@@ -116,10 +110,10 @@
       "end_pos": 757
     },
     {
-      "entity_text": "Mme Patricia",
+      "entity_text": "Patricia Gélébart",
       "entity_type": "PERSON",
-      "start_pos": 803,
-      "end_pos": 815
+      "start_pos": 807,
+      "end_pos": 824
     },
     {
       "entity_text": "Smart Cities",
@@ -140,10 +134,10 @@
       "end_pos": 905
     },
     {
-      "entity_text": "Mme Gwenaëlle",
+      "entity_text": "Gwenaëlle Avice-Huet",
       "entity_type": "PERSON",
-      "start_pos": 938,
-      "end_pos": 951
+      "start_pos": 942,
+      "end_pos": 962
     },
     {
       "entity_text": "Et Enedis",
@@ -164,10 +158,10 @@
       "end_pos": 1130
     },
     {
-      "entity_text": "Mme Sophie",
+      "entity_text": "Sophie Desormière",
       "entity_type": "PERSON",
-      "start_pos": 1178,
-      "end_pos": 1188
+      "start_pos": 1182,
+      "end_pos": 1199
     },
     {
       "entity_text": "Lancey Energy",
@@ -188,10 +182,10 @@
       "end_pos": 1256
     },
     {
-      "entity_text": "Mme Jessica",
+      "entity_text": "Jessica Fino",
       "entity_type": "PERSON",
-      "start_pos": 1272,
-      "end_pos": 1283
+      "start_pos": 1276,
+      "end_pos": 1288
     },
     {
       "entity_text": "Thomas Weber",
@@ -212,10 +206,10 @@
       "end_pos": 1397
     },
     {
-      "entity_text": "Mme Fouziya",
+      "entity_text": "Fouziya Bouzerda",
       "entity_type": "PERSON",
-      "start_pos": 1420,
-      "end_pos": 1431
+      "start_pos": 1424,
+      "end_pos": 1440
     },
     {
       "entity_text": "François Decaux",
@@ -266,10 +260,10 @@
       "end_pos": 1731
     },
     {
-      "entity_text": "Mme Isabelle",
+      "entity_text": "Isabelle Dussauge",
       "entity_type": "PERSON",
-      "start_pos": 1736,
-      "end_pos": 1748
+      "start_pos": 1740,
+      "end_pos": 1757
     },
     {
       "entity_text": "Lionel Brunie",
@@ -308,10 +302,10 @@
       "end_pos": 2157
     },
     {
-      "entity_text": "Mme Audrey",
+      "entity_text": "Audrey Lebel de la French Tech Lyon",
       "entity_type": "PERSON",
-      "start_pos": 2204,
-      "end_pos": 2214
+      "start_pos": 2208,
+      "end_pos": 2243
     },
     {
       "entity_text": "French Tech",

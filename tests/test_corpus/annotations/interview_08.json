@@ -14,22 +14,10 @@
       "end_pos": 47
     },
     {
-      "entity_text": "Éthique\nDr",
-      "entity_type": "PERSON",
-      "start_pos": 51,
-      "end_pos": 61
-    },
-    {
       "entity_text": "Sarah Cohen",
       "entity_type": "PERSON",
       "start_pos": 63,
       "end_pos": 74
-    },
-    {
-      "entity_text": "Saclay\nDate",
-      "entity_type": "PERSON",
-      "start_pos": 82,
-      "end_pos": 93
     },
     {
       "entity_text": "Docteur Cohen",
@@ -44,10 +32,10 @@
       "end_pos": 204
     },
     {
-      "entity_text": "Professeur Raja",
+      "entity_text": "Raja Chatila de Sorbonne Université",
       "entity_type": "PERSON",
-      "start_pos": 322,
-      "end_pos": 337
+      "start_pos": 333,
+      "end_pos": 368
     },
     {
       "entity_text": "Sorbonne Université",
@@ -56,10 +44,10 @@
       "end_pos": 368
     },
     {
-      "entity_text": "Mme Laurence",
+      "entity_text": "Laurence Devillers du CNRS",
       "entity_type": "PERSON",
-      "start_pos": 372,
-      "end_pos": 384
+      "start_pos": 376,
+      "end_pos": 402
     },
     {
       "entity_text": "Sarah Cohen",
@@ -92,10 +80,10 @@
       "end_pos": 574
     },
     {
-      "entity_text": "Mme Virginia",
+      "entity_text": "Virginia Dignum de",
       "entity_type": "PERSON",
-      "start_pos": 587,
-      "end_pos": 599
+      "start_pos": 591,
+      "end_pos": 609
     },
     {
       "entity_text": "Fraunhofer Institute",
@@ -164,10 +152,10 @@
       "end_pos": 1106
     },
     {
-      "entity_text": "Mme Aïcha",
+      "entity_text": "Aïcha Benali",
       "entity_type": "PERSON",
-      "start_pos": 1137,
-      "end_pos": 1146
+      "start_pos": 1141,
+      "end_pos": 1153
     },
     {
       "entity_text": "Marc Dupuis",
@@ -176,10 +164,10 @@
       "end_pos": 1189
     },
     {
-      "entity_text": "Mme Julie",
+      "entity_text": "Julie Petit",
       "entity_type": "PERSON",
-      "start_pos": 1226,
-      "end_pos": 1235
+      "start_pos": 1230,
+      "end_pos": 1241
     },
     {
       "entity_text": "Kevin Zhang",
@@ -194,9 +182,9 @@
       "end_pos": 1280
     },
     {
-      "entity_text": "Mme Marie-",
+      "entity_text": "Marie-",
       "entity_type": "PERSON",
-      "start_pos": 1383,
+      "start_pos": 1387,
       "end_pos": 1393
     },
     {
@@ -242,10 +230,10 @@
       "end_pos": 1689
     },
     {
-      "entity_text": "Mme Gabriela",
+      "entity_text": "Gabriela Ramos",
       "entity_type": "PERSON",
-      "start_pos": 1732,
-      "end_pos": 1744
+      "start_pos": 1736,
+      "end_pos": 1750
     },
     {
       "entity_text": "Institut Montaigne",

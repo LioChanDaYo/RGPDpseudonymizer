@@ -306,3 +306,199 @@ class TestRegexMatcher:
         ]
         assert len(matching) >= 1, "Maître Antoine Mercier should be detected"
         assert all(e.entity_type == "PERSON" for e in matching)
+
+    # Story 5.3: LastName, FirstName Pattern Tests (AC1)
+    def test_last_first_name_simple(self, matcher: RegexMatcher) -> None:
+        """Test LastName, FirstName pattern: 'Dubois, Jean-Marc'."""
+        text = "Le dossier de Dubois, Jean-Marc est en cours."
+        entities = matcher.match_entities(text)
+
+        matching = [
+            e for e in entities if "Dubois" in e.text and e.entity_type == "PERSON"
+        ]
+        assert len(matching) >= 1, "Dubois, Jean-Marc should be detected as PERSON"
+
+    def test_last_first_name_martin_sophie(self, matcher: RegexMatcher) -> None:
+        """Test LastName, FirstName pattern: 'Martin, Sophie'."""
+        text = "Convocation de Martin, Sophie pour le 15 mars."
+        entities = matcher.match_entities(text)
+
+        matching = [
+            e for e in entities if "Martin" in e.text and e.entity_type == "PERSON"
+        ]
+        assert len(matching) >= 1, "Martin, Sophie should be detected as PERSON"
+
+    def test_last_first_name_diacritics_compound(self, matcher: RegexMatcher) -> None:
+        """Test LastName, FirstName with diacritics + compound name."""
+        text = "Le rapport de Lefèvre, Marie-Claire est complet."
+        entities = matcher.match_entities(text)
+
+        matching = [
+            e for e in entities if "Lefèvre" in e.text and e.entity_type == "PERSON"
+        ]
+        assert (
+            len(matching) >= 1
+        ), "Lefèvre, Marie-Claire should be detected as PERSON with diacritics"
+
+    def test_last_first_name_negative_date_comma(self, matcher: RegexMatcher) -> None:
+        """Test that date + name after comma is NOT matched as LastName, FirstName."""
+        text = "le 15 janvier, Marie est arrivée."
+        entities = matcher.match_entities(text)
+
+        # "janvier, Marie" should NOT be matched as a LastName, FirstName PERSON
+        bad_matches = [
+            e
+            for e in entities
+            if "janvier" in e.text.lower() and e.entity_type == "PERSON"
+        ]
+        assert len(bad_matches) == 0, "janvier, Marie should NOT be detected as PERSON"
+
+    # Story 5.3: Expanded ORG Suffix Tests (AC2)
+    def test_org_suffix_association(self, matcher: RegexMatcher) -> None:
+        """Test expanded ORG suffix: Association."""
+        text = "TechCorp Association organise l'événement."
+        entities = matcher.match_entities(text)
+
+        orgs = [e for e in entities if e.entity_type == "ORG"]
+        matching = [e for e in orgs if "Association" in e.text]
+        assert len(matching) >= 1, "TechCorp Association should be detected as ORG"
+
+    def test_org_prefix_fondation(self, matcher: RegexMatcher) -> None:
+        """Test expanded ORG prefix: Fondation."""
+        text = "La Fondation Marie Curie finance la recherche."
+        entities = matcher.match_entities(text)
+
+        orgs = [e for e in entities if e.entity_type == "ORG"]
+        matching = [e for e in orgs if "Fondation" in e.text]
+        assert len(matching) >= 1, "Fondation Marie Curie should be detected as ORG"
+
+    def test_org_prefix_institut(self, matcher: RegexMatcher) -> None:
+        """Test expanded ORG prefix: Institut."""
+        text = "L'Institut Pasteur publie ses résultats."
+        entities = matcher.match_entities(text)
+
+        orgs = [e for e in entities if e.entity_type == "ORG"]
+        matching = [e for e in orgs if "Institut" in e.text]
+        assert len(matching) >= 1, "Institut Pasteur should be detected as ORG"
+
+    def test_org_prefix_groupe(self, matcher: RegexMatcher) -> None:
+        """Test expanded ORG prefix: Groupe."""
+        text = "Le Groupe Renault annonce ses résultats."
+        entities = matcher.match_entities(text)
+
+        orgs = [e for e in entities if e.entity_type == "ORG"]
+        matching = [e for e in orgs if "Groupe" in e.text]
+        assert len(matching) >= 1, "Groupe Renault should be detected as ORG"
+
+    def test_org_suffix_sasu(self, matcher: RegexMatcher) -> None:
+        """Test expanded ORG suffix: SASU."""
+        text = "DataSoft SASU développe des logiciels."
+        entities = matcher.match_entities(text)
+
+        orgs = [e for e in entities if e.entity_type == "ORG"]
+        matching = [e for e in orgs if "SASU" in e.text]
+        assert len(matching) >= 1, "DataSoft SASU should be detected as ORG"
+
+    def test_org_suffix_scop(self, matcher: RegexMatcher) -> None:
+        """Test expanded ORG suffix: SCOP."""
+        text = "Solutions SCOP est une coopérative."
+        entities = matcher.match_entities(text)
+
+        orgs = [e for e in entities if e.entity_type == "ORG"]
+        matching = [e for e in orgs if "SCOP" in e.text]
+        assert len(matching) >= 1, "Solutions SCOP should be detected as ORG"
+
+    def test_org_existing_suffixes_still_work(self, matcher: RegexMatcher) -> None:
+        """Verify existing ORG suffixes (SA, SARL) still work after expansion."""
+        text = "TechCorp SA et Solutions SARL sont partenaires."
+        entities = matcher.match_entities(text)
+
+        orgs = [e for e in entities if e.entity_type == "ORG"]
+        org_texts = [e.text for e in orgs]
+        assert any("SA" in t for t in org_texts), "TechCorp SA should still be detected"
+        assert any(
+            "SARL" in t for t in org_texts
+        ), "Solutions SARL should still be detected"
+
+    # Story 5.3: Geography Dictionary Tests (AC3)
+    def test_geography_city_paris(self, matcher: RegexMatcher) -> None:
+        """Test geography dictionary: Paris detected as LOCATION."""
+        text = "Le siège est situé à Paris."
+        entities = matcher.match_entities(text)
+
+        matching = [
+            e for e in entities if e.text == "Paris" and e.entity_type == "LOCATION"
+        ]
+        assert len(matching) >= 1, "Paris should be detected as LOCATION"
+
+    def test_geography_city_marseille(self, matcher: RegexMatcher) -> None:
+        """Test geography dictionary: Marseille detected as LOCATION."""
+        text = "La succursale de Marseille est ouverte."
+        entities = matcher.match_entities(text)
+
+        matching = [
+            e for e in entities if e.text == "Marseille" and e.entity_type == "LOCATION"
+        ]
+        assert len(matching) >= 1, "Marseille should be detected as LOCATION"
+
+    def test_geography_region_ile_de_france(self, matcher: RegexMatcher) -> None:
+        """Test geography dictionary: Île-de-France region detected."""
+        text = "L'entreprise opère en Île-de-France."
+        entities = matcher.match_entities(text)
+
+        matching = [
+            e
+            for e in entities
+            if "Île-de-France" in e.text and e.entity_type == "LOCATION"
+        ]
+        assert len(matching) >= 1, "Île-de-France should be detected as LOCATION"
+
+    def test_geography_department_bouches_du_rhone(self, matcher: RegexMatcher) -> None:
+        """Test geography dictionary: Bouches-du-Rhône department detected."""
+        text = "Le bureau des Bouches-du-Rhône traite le dossier."
+        entities = matcher.match_entities(text)
+
+        matching = [
+            e
+            for e in entities
+            if "Bouches-du-Rhône" in e.text and e.entity_type == "LOCATION"
+        ]
+        assert len(matching) >= 1, "Bouches-du-Rhône should be detected as LOCATION"
+
+    def test_geography_negative_random_word(self, matcher: RegexMatcher) -> None:
+        """Test geography dictionary: random word NOT detected as location."""
+        text = "Le Xyzqwerty est un mot inventé."
+        entities = matcher.match_entities(text)
+
+        matching = [
+            e for e in entities if "Xyzqwerty" in e.text and e.entity_type == "LOCATION"
+        ]
+        assert len(matching) == 0, "Random word should NOT be detected as LOCATION"
+
+    def test_geography_dictionary_loaded(self, matcher: RegexMatcher) -> None:
+        """Test that geography dictionary is loaded by matcher."""
+        stats = matcher.get_pattern_stats()
+        assert stats["has_geography_dictionary"] is True
+
+    def test_geography_city_with_hyphen(self, matcher: RegexMatcher) -> None:
+        """Test geography dictionary: hyphenated city name (Aix-en-Provence)."""
+        text = "Le festival d'Aix-en-Provence attire les visiteurs."
+        entities = matcher.match_entities(text)
+
+        matching = [
+            e
+            for e in entities
+            if "Aix-en-Provence" in e.text and e.entity_type == "LOCATION"
+        ]
+        assert len(matching) >= 1, "Aix-en-Provence should be detected as LOCATION"
+
+    def test_geography_confidence_level(self, matcher: RegexMatcher) -> None:
+        """Test that geography matches have correct confidence level."""
+        text = "Le bureau de Toulouse est fermé."
+        entities = matcher.match_entities(text)
+
+        matching = [
+            e for e in entities if e.text == "Toulouse" and e.entity_type == "LOCATION"
+        ]
+        assert len(matching) >= 1
+        assert matching[0].confidence >= 0.60

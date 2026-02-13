@@ -20,10 +20,10 @@
       "end_pos": 292
     },
     {
-      "entity_text": "Mme Laura",
+      "entity_text": "Laura Martin",
       "entity_type": "PERSON",
-      "start_pos": 694,
-      "end_pos": 703
+      "start_pos": 698,
+      "end_pos": 710
     },
     {
       "entity_text": "Martin, Analyste",
@@ -44,10 +44,10 @@
       "end_pos": 830
     },
     {
-      "entity_text": "Mme Catherine",
+      "entity_text": "Catherine Rousseau",
       "entity_type": "PERSON",
-      "start_pos": 851,
-      "end_pos": 864
+      "start_pos": 855,
+      "end_pos": 873
     },
     {
       "entity_text": "Rousseau, Responsable",
@@ -104,10 +104,10 @@
       "end_pos": 1280
     },
     {
-      "entity_text": "Mme Isabelle",
+      "entity_text": "Isabelle Moreau",
       "entity_type": "PERSON",
-      "start_pos": 1296,
-      "end_pos": 1308
+      "start_pos": 1300,
+      "end_pos": 1315
     },
     {
       "entity_text": "Philippe Arnaud",
@@ -122,12 +122,6 @@
       "end_pos": 1384
     },
     {
-      "entity_text": "Directeur Juridique",
-      "entity_type": "PERSON",
-      "start_pos": 1386,
-      "end_pos": 1405
-    },
-    {
       "entity_text": "Kevin Zhang",
       "entity_type": "PERSON",
       "start_pos": 1473,
@@ -140,10 +134,10 @@
       "end_pos": 1519
     },
     {
-      "entity_text": "Mme Laure",
+      "entity_text": "Laure Bertholom",
       "entity_type": "PERSON",
-      "start_pos": 1558,
-      "end_pos": 1567
+      "start_pos": 1562,
+      "end_pos": 1577
     },
     {
       "entity_text": "Partner Cyber",
@@ -158,16 +152,10 @@
       "end_pos": 1643
     },
     {
-      "entity_text": "Mme Nadia",
+      "entity_text": "Nadia Amrani",
       "entity_type": "PERSON",
-      "start_pos": 1647,
-      "end_pos": 1656
-    },
-    {
-      "entity_text": "Amrani\n        Aucune",
-      "entity_type": "PERSON",
-      "start_pos": 1657,
-      "end_pos": 1678
+      "start_pos": 1651,
+      "end_pos": 1663
     },
     {
       "entity_text": "Vincent Chen",
@@ -176,16 +164,10 @@
       "end_pos": 1747
     },
     {
-      "entity_text": "Mme Moreau",
+      "entity_text": "Moreau",
       "entity_type": "PERSON",
-      "start_pos": 1766,
+      "start_pos": 1770,
       "end_pos": 1776
-    },
-    {
-      "entity_text": "Arnaud, Dr",
-      "entity_type": "PERSON",
-      "start_pos": 1781,
-      "end_pos": 1791
     },
     {
       "entity_text": "Thomas Weber",
@@ -200,10 +182,10 @@
       "end_pos": 1897
     },
     {
-      "entity_text": "Me Sarah",
+      "entity_text": "Sarah Cohen",
       "entity_type": "PERSON",
-      "start_pos": 1933,
-      "end_pos": 1941
+      "start_pos": 1936,
+      "end_pos": 1947
     },
     {
       "entity_text": "France",
@@ -254,10 +236,10 @@
       "end_pos": 2736
     },
     {
-      "entity_text": "Mme Laura",
+      "entity_text": "Laura Martin",
       "entity_type": "PERSON",
-      "start_pos": 2782,
-      "end_pos": 2791
+      "start_pos": 2786,
+      "end_pos": 2798
     },
     {
       "entity_text": "Martin, Analyste",
@@ -266,10 +248,10 @@
       "end_pos": 2808
     },
     {
-      "entity_text": "Mme Catherine",
+      "entity_text": "Catherine Rousseau",
       "entity_type": "PERSON",
-      "start_pos": 2827,
-      "end_pos": 2840
+      "start_pos": 2831,
+      "end_pos": 2849
     },
     {
       "entity_text": "Rousseau, Responsable",
@@ -320,10 +302,10 @@
       "end_pos": 3134
     },
     {
-      "entity_text": "Mme Nadia",
+      "entity_text": "Nadia Amrani",
       "entity_type": "PERSON",
-      "start_pos": 3151,
-      "end_pos": 3160
+      "start_pos": 3155,
+      "end_pos": 3167
     },
     {
       "entity_text": "Amrani, Dev",
@@ -338,22 +320,16 @@
       "end_pos": 3220
     },
     {
-      "entity_text": "Directeur Juridique",
+      "entity_text": "Sarah Cohen",
       "entity_type": "PERSON",
-      "start_pos": 3222,
-      "end_pos": 3241
+      "start_pos": 3264,
+      "end_pos": 3275
     },
     {
-      "entity_text": "Me Sarah",
+      "entity_text": "Caroline Marchal",
       "entity_type": "PERSON",
-      "start_pos": 3261,
-      "end_pos": 3269
-    },
-    {
-      "entity_text": "Mme Caroline",
-      "entity_type": "PERSON",
-      "start_pos": 3308,
-      "end_pos": 3320
+      "start_pos": 3312,
+      "end_pos": 3328
     },
     {
       "entity_text": "Marchal, Dircom",
@@ -362,10 +338,10 @@
       "end_pos": 3336
     },
     {
-      "entity_text": "Mme Laure",
+      "entity_text": "Laure Bertholom",
       "entity_type": "PERSON",
-      "start_pos": 3405,
-      "end_pos": 3414
+      "start_pos": 3409,
+      "end_pos": 3424
     },
     {
       "entity_text": "Matthieu Bonenfant",
@@ -422,10 +398,10 @@
       "end_pos": 3672
     },
     {
-      "entity_text": "Mme Sophie",
+      "entity_text": "Sophie Bernard",
       "entity_type": "PERSON",
-      "start_pos": 3675,
-      "end_pos": 3685
+      "start_pos": 3679,
+      "end_pos": 3693
     },
     {
       "entity_text": "Palo Alto",
@@ -434,10 +410,10 @@
       "end_pos": 3718
     },
     {
-      "entity_text": "Mme Jennifer",
+      "entity_text": "Jennifer Smith",
       "entity_type": "PERSON",
-      "start_pos": 3729,
-      "end_pos": 3741
+      "start_pos": 3733,
+      "end_pos": 3747
     },
     {
       "entity_text": "Support Engineer",
@@ -452,10 +428,10 @@
       "end_pos": 3821
     },
     {
-      "entity_text": "Maître François",
+      "entity_text": "François Chambardon",
       "entity_type": "PERSON",
-      "start_pos": 3823,
-      "end_pos": 3838
+      "start_pos": 3830,
+      "end_pos": 3849
     },
     {
       "entity_text": "Marc Bideau",
@@ -500,9 +476,9 @@
       "end_pos": 4071
     },
     {
-      "entity_text": "Mme Marie-",
+      "entity_text": "Marie-",
       "entity_type": "PERSON",
-      "start_pos": 4086,
+      "start_pos": 4090,
       "end_pos": 4096
     },
     {
@@ -530,34 +506,34 @@
       "end_pos": 4322
     },
     {
-      "entity_text": "Mme Laura",
+      "entity_text": "Laura Martin",
       "entity_type": "PERSON",
-      "start_pos": 4358,
-      "end_pos": 4367
+      "start_pos": 4362,
+      "end_pos": 4374
     },
     {
-      "entity_text": "Mme Catherine",
+      "entity_text": "Catherine Rousseau",
       "entity_type": "PERSON",
-      "start_pos": 4403,
-      "end_pos": 4416
+      "start_pos": 4407,
+      "end_pos": 4425
     },
     {
-      "entity_text": "Me Sarah",
+      "entity_text": "Sarah Cohen",
       "entity_type": "PERSON",
-      "start_pos": 4466,
-      "end_pos": 4474
+      "start_pos": 4469,
+      "end_pos": 4480
     },
     {
-      "entity_text": "Mme Caroline",
+      "entity_text": "Caroline Marchal",
       "entity_type": "PERSON",
-      "start_pos": 4507,
-      "end_pos": 4519
+      "start_pos": 4511,
+      "end_pos": 4527
     },
     {
-      "entity_text": "Mme Isabelle",
+      "entity_text": "Isabelle Moreau",
       "entity_type": "PERSON",
-      "start_pos": 4547,
-      "end_pos": 4559
+      "start_pos": 4551,
+      "end_pos": 4566
     },
     {
       "entity_text": "Charles Le",
@@ -596,16 +572,10 @@
       "end_pos": 4923
     },
     {
-      "entity_text": "éel\n   Responsable",
+      "entity_text": "Nadia Amrani",
       "entity_type": "PERSON",
-      "start_pos": 4932,
-      "end_pos": 4950
-    },
-    {
-      "entity_text": "Mme Nadia",
-      "entity_type": "PERSON",
-      "start_pos": 4956,
-      "end_pos": 4965
+      "start_pos": 4960,
+      "end_pos": 4972
     },
     {
       "entity_text": "Devrait être",
@@ -638,16 +608,16 @@
       "end_pos": 5367
     },
     {
-      "entity_text": "Mme Nadia",
+      "entity_text": "Nadia Amrani",
       "entity_type": "PERSON",
-      "start_pos": 5403,
-      "end_pos": 5412
+      "start_pos": 5407,
+      "end_pos": 5419
     },
     {
-      "entity_text": "Mme Laura",
+      "entity_text": "Laura Martin",
       "entity_type": "PERSON",
-      "start_pos": 5458,
-      "end_pos": 5467
+      "start_pos": 5462,
+      "end_pos": 5474
     },
     {
       "entity_text": "Marc Dubois",
@@ -662,10 +632,10 @@
       "end_pos": 5556
     },
     {
-      "entity_text": "Mme Jennifer",
+      "entity_text": "Jennifer Smith",
       "entity_type": "PERSON",
-      "start_pos": 5558,
-      "end_pos": 5570
+      "start_pos": 5562,
+      "end_pos": 5576
     },
     {
       "entity_text": "Laurent Benoit",
@@ -680,10 +650,10 @@
       "end_pos": 5677
     },
     {
-      "entity_text": "Mme Laure",
+      "entity_text": "Laure Bertholom",
       "entity_type": "PERSON",
-      "start_pos": 5747,
-      "end_pos": 5756
+      "start_pos": 5751,
+      "end_pos": 5766
     },
     {
       "entity_text": "Philippe Arnaud",
@@ -740,10 +710,10 @@
       "end_pos": 6260
     },
     {
-      "entity_text": "Mme Isabelle",
+      "entity_text": "Isabelle Moreau",
       "entity_type": "PERSON",
-      "start_pos": 6294,
-      "end_pos": 6306
+      "start_pos": 6298,
+      "end_pos": 6313
     },
     {
       "entity_text": "Charles Le",
@@ -770,10 +740,10 @@
       "end_pos": 6558
     },
     {
-      "entity_text": "Me Sarah",
+      "entity_text": "Sarah Cohen",
       "entity_type": "PERSON",
-      "start_pos": 6681,
-      "end_pos": 6689
+      "start_pos": 6684,
+      "end_pos": 6695
     },
     {
       "entity_text": "Heures équipe",
@@ -800,10 +770,10 @@
       "end_pos": 7129
     },
     {
-      "entity_text": "Mme Laura",
+      "entity_text": "Laura Martin",
       "entity_type": "PERSON",
-      "start_pos": 7304,
-      "end_pos": 7313
+      "start_pos": 7308,
+      "end_pos": 7320
     },
     {
       "entity_text": "Coordination équipes",
@@ -818,9 +788,9 @@
       "end_pos": 7429
     },
     {
-      "entity_text": "Mme Bernard",
+      "entity_text": "Bernard",
       "entity_type": "PERSON",
-      "start_pos": 7449,
+      "start_pos": 7453,
       "end_pos": 7460
     },
     {
@@ -830,16 +800,10 @@
       "end_pos": 7690
     },
     {
-      "entity_text": "Mme Catherine",
+      "entity_text": "Catherine Rousseau",
       "entity_type": "PERSON",
-      "start_pos": 7711,
-      "end_pos": 7724
-    },
-    {
-      "entity_text": "Rousseau\n   Solution",
-      "entity_type": "PERSON",
-      "start_pos": 7725,
-      "end_pos": 7745
+      "start_pos": 7715,
+      "end_pos": 7733
     },
     {
       "entity_text": "Alto Cortex",
@@ -878,22 +842,10 @@
       "end_pos": 7985
     },
     {
-      "entity_text": "Champions\n   Pilote",
-      "entity_type": "PERSON",
-      "start_pos": 7986,
-      "end_pos": 8005
-    },
-    {
       "entity_text": "Kevin Zhang",
       "entity_type": "PERSON",
       "start_pos": 8010,
       "end_pos": 8021
-    },
-    {
-      "entity_text": "Jin, Mme",
-      "entity_type": "PERSON",
-      "start_pos": 8049,
-      "end_pos": 8057
     },
     {
       "entity_text": "Romain Duval",
@@ -920,10 +872,10 @@
       "end_pos": 8196
     },
     {
-      "entity_text": "Mme Isabelle",
+      "entity_text": "Isabelle Moreau",
       "entity_type": "PERSON",
-      "start_pos": 8216,
-      "end_pos": 8228
+      "start_pos": 8220,
+      "end_pos": 8235
     },
     {
       "entity_text": "Philippe Arnaud",
@@ -938,28 +890,16 @@
       "end_pos": 8298
     },
     {
-      "entity_text": "Directeur Juridique",
-      "entity_type": "PERSON",
-      "start_pos": 8300,
-      "end_pos": 8319
-    },
-    {
       "entity_text": "Charles Le",
       "entity_type": "PERSON",
       "start_pos": 8330,
       "end_pos": 8340
     },
     {
-      "entity_text": "Goff, Président",
+      "entity_text": "Sarah Cohen",
       "entity_type": "PERSON",
-      "start_pos": 8341,
-      "end_pos": 8356
-    },
-    {
-      "entity_text": "Me Sarah",
-      "entity_type": "PERSON",
-      "start_pos": 8370,
-      "end_pos": 8378
+      "start_pos": 8373,
+      "end_pos": 8384
     },
     {
       "entity_text": "Thomas Weber",
@@ -974,10 +914,10 @@
       "end_pos": 8429
     },
     {
-      "entity_text": "Mme Sophie",
+      "entity_text": "Sophie Laurent",
       "entity_type": "PERSON",
-      "start_pos": 8432,
-      "end_pos": 8442
+      "start_pos": 8436,
+      "end_pos": 8450
     }
   ]
 }

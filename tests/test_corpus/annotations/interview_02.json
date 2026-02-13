@@ -38,10 +38,10 @@
       "end_pos": 386
     },
     {
-      "entity_text": "Mme Isabelle",
+      "entity_text": "Isabelle Moreau de la DRH",
       "entity_type": "PERSON",
-      "start_pos": 402,
-      "end_pos": 414
+      "start_pos": 406,
+      "end_pos": 431
     },
     {
       "entity_text": "On était",
@@ -86,12 +86,6 @@
       "end_pos": 1015
     },
     {
-      "entity_text": "était Sophie",
-      "entity_type": "PERSON",
-      "start_pos": 1043,
-      "end_pos": 1055
-    },
-    {
       "entity_text": "Peugeot Citroën",
       "entity_type": "PERSON",
       "start_pos": 1116,
@@ -104,22 +98,10 @@
       "end_pos": 1216
     },
     {
-      "entity_text": "ègues Pierre",
-      "entity_type": "PERSON",
-      "start_pos": 1251,
-      "end_pos": 1263
-    },
-    {
       "entity_text": "Anne Petit",
       "entity_type": "PERSON",
       "start_pos": 1281,
       "end_pos": 1291
-    },
-    {
-      "entity_text": "ême été",
-      "entity_type": "PERSON",
-      "start_pos": 1297,
-      "end_pos": 1304
     },
     {
       "entity_text": "Strasbourg",

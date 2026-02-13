@@ -26,22 +26,16 @@
       "end_pos": 195
     },
     {
-      "entity_text": "Mme Isabelle",
+      "entity_text": "Isabelle Moreau",
       "entity_type": "PERSON",
-      "start_pos": 224,
-      "end_pos": 236
+      "start_pos": 228,
+      "end_pos": 243
     },
     {
       "entity_text": "François Leclerc",
       "entity_type": "PERSON",
       "start_pos": 264,
       "end_pos": 280
-    },
-    {
-      "entity_text": "Directeur Juridique",
-      "entity_type": "PERSON",
-      "start_pos": 282,
-      "end_pos": 301
     },
     {
       "entity_text": "GlobalTech Industries",
@@ -80,10 +74,10 @@
       "end_pos": 522
     },
     {
-      "entity_text": "Mme Isabelle",
+      "entity_text": "Isabelle Moreau",
       "entity_type": "PERSON",
-      "start_pos": 644,
-      "end_pos": 656
+      "start_pos": 648,
+      "end_pos": 663
     },
     {
       "entity_text": "Marie Dubois",
@@ -116,10 +110,10 @@
       "end_pos": 922
     },
     {
-      "entity_text": "Mme Sarah",
+      "entity_text": "Sarah McDonald",
       "entity_type": "PERSON",
-      "start_pos": 932,
-      "end_pos": 941
+      "start_pos": 936,
+      "end_pos": 950
     },
     {
       "entity_text": "VP Europe",
@@ -128,10 +122,10 @@
       "end_pos": 961
     },
     {
-      "entity_text": "Mme Isabelle",
+      "entity_text": "Isabelle Moreau",
       "entity_type": "PERSON",
-      "start_pos": 1190,
-      "end_pos": 1202
+      "start_pos": 1194,
+      "end_pos": 1209
     },
     {
       "entity_text": "Marie Dubois",
@@ -158,10 +152,10 @@
       "end_pos": 1397
     },
     {
-      "entity_text": "Mme Julie",
+      "entity_text": "Julie Marchand",
       "entity_type": "PERSON",
-      "start_pos": 1416,
-      "end_pos": 1425
+      "start_pos": 1420,
+      "end_pos": 1434
     },
     {
       "entity_text": "Directrice Produit",
@@ -170,16 +164,10 @@
       "end_pos": 1454
     },
     {
-      "entity_text": "Blanc, Chef",
+      "entity_text": "Caroline Petit",
       "entity_type": "PERSON",
-      "start_pos": 1470,
-      "end_pos": 1481
-    },
-    {
-      "entity_text": "Mme Caroline",
-      "entity_type": "PERSON",
-      "start_pos": 1507,
-      "end_pos": 1519
+      "start_pos": 1511,
+      "end_pos": 1525
     },
     {
       "entity_text": "Robert Chen",
@@ -188,10 +176,10 @@
       "end_pos": 1572
     },
     {
-      "entity_text": "Mme Sarah",
+      "entity_text": "Sarah McDonald",
       "entity_type": "PERSON",
-      "start_pos": 1599,
-      "end_pos": 1608
+      "start_pos": 1603,
+      "end_pos": 1617
     },
     {
       "entity_text": "VP Europe",
@@ -230,10 +218,10 @@
       "end_pos": 1782
     },
     {
-      "entity_text": "Mme Émilie",
+      "entity_text": "Émilie Rousseau",
       "entity_type": "PERSON",
-      "start_pos": 1797,
-      "end_pos": 1807
+      "start_pos": 1801,
+      "end_pos": 1816
     },
     {
       "entity_text": "Director Product",
@@ -260,12 +248,6 @@
       "end_pos": 1888
     },
     {
-      "entity_text": "TERRITOIRES\n\nFrance",
-      "entity_type": "ORG",
-      "start_pos": 1928,
-      "end_pos": 1947
-    },
-    {
       "entity_text": "Thomas Weber",
       "entity_type": "PERSON",
       "start_pos": 1999,
@@ -278,10 +260,10 @@
       "end_pos": 2044
     },
     {
-      "entity_text": "Mme Sarah",
+      "entity_text": "Sarah McDonald",
       "entity_type": "PERSON",
-      "start_pos": 2101,
-      "end_pos": 2110
+      "start_pos": 2105,
+      "end_pos": 2119
     },
     {
       "entity_text": "Pierre Fontaine",
@@ -290,10 +272,10 @@
       "end_pos": 2166
     },
     {
-      "entity_text": "Mme Sarah",
+      "entity_text": "Sarah McDonald",
       "entity_type": "PERSON",
-      "start_pos": 2230,
-      "end_pos": 2239
+      "start_pos": 2234,
+      "end_pos": 2248
     },
     {
       "entity_text": "Kevin Zhang",
@@ -308,16 +290,16 @@
       "end_pos": 2403
     },
     {
-      "entity_text": "Mme Julie",
+      "entity_text": "Julie Marchand",
       "entity_type": "PERSON",
-      "start_pos": 2433,
-      "end_pos": 2442
+      "start_pos": 2437,
+      "end_pos": 2451
     },
     {
-      "entity_text": "Mme Émilie",
+      "entity_text": "Émilie Rousseau",
       "entity_type": "PERSON",
-      "start_pos": 2469,
-      "end_pos": 2479
+      "start_pos": 2473,
+      "end_pos": 2488
     },
     {
       "entity_text": "Philippe Arnaud",
@@ -326,10 +308,10 @@
       "end_pos": 2784
     },
     {
-      "entity_text": "Mme Isabelle",
+      "entity_text": "Isabelle Blanchet",
       "entity_type": "PERSON",
-      "start_pos": 2792,
-      "end_pos": 2804
+      "start_pos": 2796,
+      "end_pos": 2813
     },
     {
       "entity_text": "John Smith",
@@ -338,10 +320,10 @@
       "end_pos": 2863
     },
     {
-      "entity_text": "Mme Laura",
+      "entity_text": "Laura Johnson",
       "entity_type": "PERSON",
-      "start_pos": 2871,
-      "end_pos": 2880
+      "start_pos": 2875,
+      "end_pos": 2888
     },
     {
       "entity_text": "VP Finance Europe",
@@ -356,16 +338,16 @@
       "end_pos": 3067
     },
     {
-      "entity_text": "Mme Sarah",
+      "entity_text": "Sarah McDonald",
       "entity_type": "PERSON",
-      "start_pos": 3086,
-      "end_pos": 3095
+      "start_pos": 3090,
+      "end_pos": 3104
     },
     {
-      "entity_text": "Mme Isabelle",
+      "entity_text": "Isabelle Moreau",
       "entity_type": "PERSON",
-      "start_pos": 3146,
-      "end_pos": 3158
+      "start_pos": 3150,
+      "end_pos": 3165
     },
     {
       "entity_text": "Robert Chen",
@@ -374,10 +356,10 @@
       "end_pos": 3183
     },
     {
-      "entity_text": "Mme Isabelle",
+      "entity_text": "Isabelle Moreau",
       "entity_type": "PERSON",
-      "start_pos": 3281,
-      "end_pos": 3293
+      "start_pos": 3285,
+      "end_pos": 3300
     },
     {
       "entity_text": "Marie Dubois",
@@ -398,10 +380,10 @@
       "end_pos": 3369
     },
     {
-      "entity_text": "Mme Sarah",
+      "entity_text": "Sarah McDonald",
       "entity_type": "PERSON",
-      "start_pos": 3385,
-      "end_pos": 3394
+      "start_pos": 3389,
+      "end_pos": 3403
     },
     {
       "entity_text": "VP Europe",
@@ -440,22 +422,22 @@
       "end_pos": 3587
     },
     {
-      "entity_text": "Mme Julie",
+      "entity_text": "Julie Marchand",
       "entity_type": "PERSON",
-      "start_pos": 3629,
-      "end_pos": 3638
+      "start_pos": 3633,
+      "end_pos": 3647
     },
     {
-      "entity_text": "Mme Caroline",
+      "entity_text": "Caroline Petit",
       "entity_type": "PERSON",
-      "start_pos": 3649,
-      "end_pos": 3661
+      "start_pos": 3653,
+      "end_pos": 3667
     },
     {
-      "entity_text": "Mme Émilie",
+      "entity_text": "Émilie Rousseau",
       "entity_type": "PERSON",
-      "start_pos": 3705,
-      "end_pos": 3715
+      "start_pos": 3709,
+      "end_pos": 3724
     },
     {
       "entity_text": "Alexandre Blanc",
@@ -488,28 +470,16 @@
       "end_pos": 3969
     },
     {
-      "entity_text": "Mme Nadia",
+      "entity_text": "Nadia Amrani",
       "entity_type": "PERSON",
-      "start_pos": 3971,
-      "end_pos": 3980
-    },
-    {
-      "entity_text": "Amrani\n\nBudget",
-      "entity_type": "PERSON",
-      "start_pos": 3981,
-      "end_pos": 3995
+      "start_pos": 3975,
+      "end_pos": 3987
     },
     {
       "entity_text": "Marie Dubois",
       "entity_type": "PERSON",
       "start_pos": 4019,
       "end_pos": 4031
-    },
-    {
-      "entity_text": "GLOBALTECH\n\nÉquipe Europe",
-      "entity_type": "ORG",
-      "start_pos": 4037,
-      "end_pos": 4062
     },
     {
       "entity_text": "Regional Manager",
@@ -560,22 +530,16 @@
       "end_pos": 4226
     },
     {
-      "entity_text": "Mme Sophie",
+      "entity_text": "Sophie Bernard",
       "entity_type": "PERSON",
-      "start_pos": 4228,
-      "end_pos": 4238
+      "start_pos": 4232,
+      "end_pos": 4246
     },
     {
-      "entity_text": "ée Londres",
+      "entity_text": "Sarah McDonald",
       "entity_type": "PERSON",
-      "start_pos": 4251,
-      "end_pos": 4261
-    },
-    {
-      "entity_text": "Mme Sarah",
-      "entity_type": "PERSON",
-      "start_pos": 4290,
-      "end_pos": 4299
+      "start_pos": 4294,
+      "end_pos": 4308
     },
     {
       "entity_text": "Secteur Bancaire",
@@ -608,10 +572,10 @@
       "end_pos": 4528
     },
     {
-      "entity_text": "Mme Julie",
+      "entity_text": "Julie Marchand",
       "entity_type": "PERSON",
-      "start_pos": 4551,
-      "end_pos": 4560
+      "start_pos": 4555,
+      "end_pos": 4569
     },
     {
       "entity_text": "Crédit Agricole",
@@ -722,9 +686,9 @@
       "end_pos": 5072
     },
     {
-      "entity_text": "Mme Mc",
+      "entity_text": "Mc",
       "entity_type": "PERSON",
-      "start_pos": 5159,
+      "start_pos": 5163,
       "end_pos": 5165
     },
     {
@@ -740,22 +704,22 @@
       "end_pos": 5273
     },
     {
-      "entity_text": "Mme Catherine",
+      "entity_text": "Catherine Rousseau",
       "entity_type": "PERSON",
-      "start_pos": 5276,
-      "end_pos": 5289
+      "start_pos": 5280,
+      "end_pos": 5298
     },
     {
-      "entity_text": "Mme Sarah",
+      "entity_text": "Sarah McDonald",
       "entity_type": "PERSON",
-      "start_pos": 5325,
-      "end_pos": 5334
+      "start_pos": 5329,
+      "end_pos": 5343
     },
     {
-      "entity_text": "Mme Émilie",
+      "entity_text": "Émilie Rousseau",
       "entity_type": "PERSON",
-      "start_pos": 5361,
-      "end_pos": 5371
+      "start_pos": 5365,
+      "end_pos": 5380
     },
     {
       "entity_text": "Alexandre Blanc",
@@ -872,10 +836,10 @@
       "end_pos": 6516
     },
     {
-      "entity_text": "Maître Didier",
+      "entity_text": "Didier Martin",
       "entity_type": "PERSON",
-      "start_pos": 6543,
-      "end_pos": 6556
+      "start_pos": 6550,
+      "end_pos": 6563
     },
     {
       "entity_text": "Bredin Prat",
@@ -896,16 +860,16 @@
       "end_pos": 6631
     },
     {
-      "entity_text": "Mme Isabelle",
+      "entity_text": "Isabelle Moreau",
       "entity_type": "PERSON",
-      "start_pos": 6770,
-      "end_pos": 6782
+      "start_pos": 6774,
+      "end_pos": 6789
     },
     {
-      "entity_text": "Mme Sarah",
+      "entity_text": "Sarah McDonald",
       "entity_type": "PERSON",
-      "start_pos": 6807,
-      "end_pos": 6816
+      "start_pos": 6811,
+      "end_pos": 6825
     },
     {
       "entity_text": "Paris",
@@ -914,16 +878,16 @@
       "end_pos": 6874
     },
     {
-      "entity_text": "Me Sarah",
+      "entity_text": "Sarah Cohen",
       "entity_type": "PERSON",
-      "start_pos": 6935,
-      "end_pos": 6943
+      "start_pos": 6938,
+      "end_pos": 6949
     },
     {
-      "entity_text": "Mme Emer",
+      "entity_text": "Emer Cooke",
       "entity_type": "PERSON",
-      "start_pos": 6992,
-      "end_pos": 7000
+      "start_pos": 6996,
+      "end_pos": 7006
     },
     {
       "entity_text": "Vincent Chen",
@@ -932,10 +896,10 @@
       "end_pos": 7111
     },
     {
-      "entity_text": "Mme Sarah",
+      "entity_text": "Sarah Benoit",
       "entity_type": "PERSON",
-      "start_pos": 7123,
-      "end_pos": 7132
+      "start_pos": 7127,
+      "end_pos": 7139
     },
     {
       "entity_text": "Chris Roberts",
@@ -956,10 +920,10 @@
       "end_pos": 7359
     },
     {
-      "entity_text": "Mme Caroline",
+      "entity_text": "Caroline Marchal",
       "entity_type": "PERSON",
-      "start_pos": 7516,
-      "end_pos": 7528
+      "start_pos": 7520,
+      "end_pos": 7536
     },
     {
       "entity_text": "Tom Anderson",
@@ -980,10 +944,10 @@
       "end_pos": 7615
     },
     {
-      "entity_text": "Mme Anne",
+      "entity_text": "Anne Méaux",
       "entity_type": "PERSON",
-      "start_pos": 7617,
-      "end_pos": 7625
+      "start_pos": 7621,
+      "end_pos": 7631
     },
     {
       "entity_text": "Brunswick Group",
@@ -1004,10 +968,10 @@
       "end_pos": 7731
     },
     {
-      "entity_text": "Mme Isabelle",
+      "entity_text": "Isabelle Moreau",
       "entity_type": "PERSON",
-      "start_pos": 7759,
-      "end_pos": 7771
+      "start_pos": 7763,
+      "end_pos": 7778
     },
     {
       "entity_text": "Robert Chen",
@@ -1016,16 +980,16 @@
       "end_pos": 7795
     },
     {
-      "entity_text": "Mme Catherine",
+      "entity_text": "Catherine Rousseau",
       "entity_type": "PERSON",
-      "start_pos": 7824,
-      "end_pos": 7837
+      "start_pos": 7828,
+      "end_pos": 7846
     },
     {
-      "entity_text": "Mme Catherine",
+      "entity_text": "Catherine Rousseau",
       "entity_type": "PERSON",
-      "start_pos": 7941,
-      "end_pos": 7954
+      "start_pos": 7945,
+      "end_pos": 7963
     },
     {
       "entity_text": "Directrice Marketing",
@@ -1034,10 +998,10 @@
       "end_pos": 7985
     },
     {
-      "entity_text": "Mme Émilie",
+      "entity_text": "Émilie Rousseau",
       "entity_type": "PERSON",
-      "start_pos": 8001,
-      "end_pos": 8011
+      "start_pos": 8005,
+      "end_pos": 8020
     },
     {
       "entity_text": "Director Product",
@@ -1082,10 +1046,10 @@
       "end_pos": 8621
     },
     {
-      "entity_text": "Mme Julie",
+      "entity_text": "Julie Marchand",
       "entity_type": "PERSON",
-      "start_pos": 8766,
-      "end_pos": 8775
+      "start_pos": 8770,
+      "end_pos": 8784
     },
     {
       "entity_text": "Ahmed Mansour",
@@ -1130,12 +1094,6 @@
       "end_pos": 9168
     },
     {
-      "entity_text": "çais\nJuridiction",
-      "entity_type": "PERSON",
-      "start_pos": 9383,
-      "end_pos": 9399
-    },
-    {
       "entity_text": "Paris",
       "entity_type": "LOCATION",
       "start_pos": 9414,
@@ -1154,10 +1112,10 @@
       "end_pos": 9523
     },
     {
-      "entity_text": "Mme Isabelle",
+      "entity_text": "Isabelle Moreau",
       "entity_type": "PERSON",
-      "start_pos": 9567,
-      "end_pos": 9579
+      "start_pos": 9571,
+      "end_pos": 9586
     },
     {
       "entity_text": "François Leclerc",
@@ -1166,16 +1124,10 @@
       "end_pos": 9663
     },
     {
-      "entity_text": "Directeur Juridique",
+      "entity_text": "Sarah McDonald",
       "entity_type": "PERSON",
-      "start_pos": 9665,
-      "end_pos": 9684
-    },
-    {
-      "entity_text": "Mme Sarah",
-      "entity_type": "PERSON",
-      "start_pos": 9755,
-      "end_pos": 9764
+      "start_pos": 9759,
+      "end_pos": 9773
     },
     {
       "entity_text": "VP Europe",
@@ -1238,40 +1190,34 @@
       "end_pos": 10183
     },
     {
-      "entity_text": "Dubois, Dr",
-      "entity_type": "PERSON",
-      "start_pos": 10247,
-      "end_pos": 10257
-    },
-    {
       "entity_text": "Lisa Wong",
       "entity_type": "PERSON",
       "start_pos": 10259,
       "end_pos": 10268
     },
     {
-      "entity_text": "Mme Catherine",
+      "entity_text": "Catherine Rousseau",
       "entity_type": "PERSON",
-      "start_pos": 10309,
-      "end_pos": 10322
+      "start_pos": 10313,
+      "end_pos": 10331
     },
     {
-      "entity_text": "Mme Émilie",
+      "entity_text": "Émilie Rousseau",
       "entity_type": "PERSON",
-      "start_pos": 10333,
-      "end_pos": 10343
+      "start_pos": 10337,
+      "end_pos": 10352
     },
     {
-      "entity_text": "Mme Isabelle",
+      "entity_text": "Isabelle Moreau",
       "entity_type": "PERSON",
-      "start_pos": 10394,
-      "end_pos": 10406
+      "start_pos": 10398,
+      "end_pos": 10413
     },
     {
-      "entity_text": "Mme Sarah",
+      "entity_text": "Sarah McDonald",
       "entity_type": "PERSON",
-      "start_pos": 10447,
-      "end_pos": 10456
+      "start_pos": 10451,
+      "end_pos": 10465
     },
     {
       "entity_text": "Cabinet Bredin",
@@ -1280,10 +1226,10 @@
       "end_pos": 10522
     },
     {
-      "entity_text": "Maître Didier",
+      "entity_text": "Didier Martin",
       "entity_type": "PERSON",
-      "start_pos": 10529,
-      "end_pos": 10542
+      "start_pos": 10536,
+      "end_pos": 10549
     },
     {
       "entity_text": "Cabinet Wilson",

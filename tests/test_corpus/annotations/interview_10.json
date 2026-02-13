@@ -8,27 +8,15 @@
       "end_pos": 31
     },
     {
-      "entity_text": "Tech\nAgriculteur",
-      "entity_type": "PERSON",
-      "start_pos": 39,
-      "end_pos": 55
-    },
-    {
       "entity_text": "Leclerc, Ferme",
       "entity_type": "PERSON",
       "start_pos": 78,
       "end_pos": 92
     },
     {
-      "entity_text": "Beauce\nChartres",
+      "entity_text": "Leclerc",
       "entity_type": "PERSON",
-      "start_pos": 96,
-      "end_pos": 111
-    },
-    {
-      "entity_text": "Monsieur Leclerc",
-      "entity_type": "PERSON",
-      "start_pos": 143,
+      "start_pos": 152,
       "end_pos": 159
     },
     {
@@ -56,12 +44,6 @@
       "end_pos": 516
     },
     {
-      "entity_text": "énieur, Dr",
-      "entity_type": "PERSON",
-      "start_pos": 526,
-      "end_pos": 536
-    },
-    {
       "entity_text": "Klaus Müller",
       "entity_type": "PERSON",
       "start_pos": 538,
@@ -86,10 +68,10 @@
       "end_pos": 894
     },
     {
-      "entity_text": "Mme Julien",
+      "entity_text": "Julien Denormandie",
       "entity_type": "PERSON",
-      "start_pos": 958,
-      "end_pos": 968
+      "start_pos": 962,
+      "end_pos": 980
     },
     {
       "entity_text": "François Leclerc",
@@ -102,12 +84,6 @@
       "entity_type": "LOCATION",
       "start_pos": 1122,
       "end_pos": 1127
-    },
-    {
-      "entity_text": "étaient Mme",
-      "entity_type": "PERSON",
-      "start_pos": 1148,
-      "end_pos": 1159
     },
     {
       "entity_text": "Geneviève Fioraso",
@@ -140,10 +116,10 @@
       "end_pos": 1472
     },
     {
-      "entity_text": "Mme Amandine",
+      "entity_text": "Amandine Muret",
       "entity_type": "PERSON",
-      "start_pos": 1487,
-      "end_pos": 1499
+      "start_pos": 1491,
+      "end_pos": 1505
     },
     {
       "entity_text": "On échange",
@@ -158,10 +134,10 @@
       "end_pos": 1554
     },
     {
-      "entity_text": "Mme Sophie",
+      "entity_text": "Sophie Rousseau",
       "entity_type": "PERSON",
-      "start_pos": 1566,
-      "end_pos": 1576
+      "start_pos": 1570,
+      "end_pos": 1585
     },
     {
       "entity_text": "Jean Dupont",
@@ -182,16 +158,10 @@
       "end_pos": 1687
     },
     {
-      "entity_text": "Mme Marie",
+      "entity_text": "Marie Cheval",
       "entity_type": "PERSON",
-      "start_pos": 1744,
-      "end_pos": 1753
-    },
-    {
-      "entity_text": "érative Axéréal",
-      "entity_type": "PERSON",
-      "start_pos": 1777,
-      "end_pos": 1792
+      "start_pos": 1748,
+      "end_pos": 1760
     },
     {
       "entity_text": "François Loiseau",
@@ -218,10 +188,10 @@
       "end_pos": 2035
     },
     {
-      "entity_text": "Mme Agnès",
+      "entity_text": "Agnès Pannier-Runacher",
       "entity_type": "PERSON",
-      "start_pos": 2120,
-      "end_pos": 2129
+      "start_pos": 2124,
+      "end_pos": 2146
     }
   ]
 }

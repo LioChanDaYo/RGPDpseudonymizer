@@ -33,6 +33,19 @@ patterns:
           - "Anne-Sophie"
           - "Jean-François"
 
+  # High confidence patterns: Last, First name order
+  last_first_names:
+    enabled: true
+    confidence: 0.80
+    entity_type: PERSON
+    patterns:
+      - pattern: '\b([A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][a-zàâäéèêëïîôöùûü]+(?:-[A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][a-zàâäéèêëïîôöùûü]+)?)\s*,\s*(?!Cabinet|Société|Association|Fondation|Institut|Groupe|Consortium|Fédération|Entreprise|Compagnie|Direction|Service|Département|Commission|Comité)([A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][a-zàâäéèêëïîôöùûü]+(?:-[A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][a-zàâäéèêëïîôöùûü]+)?)'
+        description: "Last, First format (e.g., Dubois, Jean-Marc) with exclusion of ORG/function words"
+        examples:
+          - "Dubois, Jean-Marc"
+          - "Martin, Sophie"
+          - "Lefèvre, Marie-Claire"
+
   # Medium confidence patterns: Location indicators
   location_indicators:
     enabled: true
@@ -54,22 +67,45 @@ patterns:
     confidence: 0.70
     entity_type: ORG
     patterns:
-      - pattern: '\b([A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][A-Za-zàâäéèêëïîôöùûü\s]+?)\s+(SA|SARL|SAS|EURL|SNC|SCM|SCI)\b'
-        description: "Matches organization legal suffixes: Acme SA, Tech Solutions SARL"
+      - pattern: '\b([A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][A-Za-zàâäéèêëïîôöùûü\s&,''\.\-]+?)\s+(SA|SARL|SAS|SASU|EURL|SNC|SCM|SCI|GIE|EI|SCOP|SEL|Association|Fondation|Institut|Groupe|Consortium|Fédération)\b'
+        description: "Organization with legal form suffix (15+ forms)"
         examples:
           - "TechCorp SA"
           - "Solutions Informatiques SARL"
           - "Conseil Entreprises SAS"
+          - "DataSoft SASU"
           - "Cabinet Dubois EURL"
-      - pattern: '\b(Société|Entreprise|Cabinet|Groupe|Compagnie)\s+([A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][A-Za-zàâäéèêëïîôöùûü\s&,]+)'
-        description: "Matches organization prefixes: Société TechCorp, Cabinet Martin, Cabinet Mercier & Associés"
+          - "Solutions SCOP"
+          - "TechCorp Association"
+          - "Marie Curie Fondation"
+      - pattern: '\b(Société|Entreprise|Cabinet|Groupe|Compagnie|Association|Fondation|Institut|Consortium|Fédération)\s+([A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][A-Za-zàâäéèêëïîôöùûü\s&,\-]+)'
+        description: "Organization with prefix keyword"
         examples:
           - "Société TechCorp"
           - "Entreprise Dubois"
           - "Cabinet Martin"
           - "Groupe Lefebvre"
+          - "Association Française"
+          - "Fondation Marie Curie"
+          - "Institut Pasteur"
+          - "Consortium Européen"
+          - "Fédération Nationale"
           - "Cabinet Mercier & Associés"
-          - "Cabinet Dupont et Martin"
+
+  # Low confidence patterns: Geography dictionary
+  geography_dictionary:
+    enabled: true
+    confidence: 0.60
+    entity_type: LOCATION
+    use_geography_dictionary: true
+    description: "Match known French cities, regions, and departments"
+    # Matching is done programmatically in RegexMatcher using geography dictionary
+    examples:
+      - "Paris"
+      - "Marseille"
+      - "Île-de-France"
+      - "Bouches-du-Rhône"
+      - "Toulouse"
 
   # Medium confidence patterns: Full names using dictionary
   full_names:

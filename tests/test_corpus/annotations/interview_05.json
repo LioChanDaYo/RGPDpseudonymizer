@@ -14,10 +14,10 @@
       "end_pos": 39
     },
     {
-      "entity_text": "Me Antoine",
+      "entity_text": "Antoine Mercier",
       "entity_type": "PERSON",
-      "start_pos": 40,
-      "end_pos": 50
+      "start_pos": 43,
+      "end_pos": 58
     },
     {
       "entity_text": "Cabinet Mercier",
@@ -32,16 +32,16 @@
       "end_pos": 92
     },
     {
-      "entity_text": "Maître Mercier",
+      "entity_text": "Mercier",
       "entity_type": "PERSON",
-      "start_pos": 138,
+      "start_pos": 145,
       "end_pos": 152
     },
     {
-      "entity_text": "Me Antoine",
+      "entity_text": "Antoine Mercier",
       "entity_type": "PERSON",
-      "start_pos": 233,
-      "end_pos": 243
+      "start_pos": 236,
+      "end_pos": 251
     },
     {
       "entity_text": "SoftTech Industries",
@@ -62,16 +62,10 @@
       "end_pos": 376
     },
     {
-      "entity_text": "était Soft",
+      "entity_text": "Nathalie Rousseau",
       "entity_type": "PERSON",
-      "start_pos": 389,
-      "end_pos": 399
-    },
-    {
-      "entity_text": "Mme Nathalie",
-      "entity_type": "PERSON",
-      "start_pos": 430,
-      "end_pos": 442
+      "start_pos": 434,
+      "end_pos": 451
     },
     {
       "entity_text": "Qui était",
@@ -92,10 +86,10 @@
       "end_pos": 529
     },
     {
-      "entity_text": "Maître Sarah",
+      "entity_text": "Sarah Goldman du",
       "entity_type": "PERSON",
-      "start_pos": 544,
-      "end_pos": 556
+      "start_pos": 551,
+      "end_pos": 567
     },
     {
       "entity_text": "Clifford Chance",
@@ -122,9 +116,9 @@
       "end_pos": 705
     },
     {
-      "entity_text": "Me Mercier",
+      "entity_text": "Mercier",
       "entity_type": "PERSON",
-      "start_pos": 776,
+      "start_pos": 779,
       "end_pos": 786
     },
     {
@@ -140,10 +134,10 @@
       "end_pos": 867
     },
     {
-      "entity_text": "Professeur Marc",
+      "entity_text": "Marc Durand de",
       "entity_type": "PERSON",
-      "start_pos": 914,
-      "end_pos": 929
+      "start_pos": 925,
+      "end_pos": 939
     },
     {
       "entity_text": "Business School",
@@ -152,10 +146,10 @@
       "end_pos": 963
     },
     {
-      "entity_text": "Mme Christine",
+      "entity_text": "Christine Lagarde",
       "entity_type": "PERSON",
-      "start_pos": 967,
-      "end_pos": 980
+      "start_pos": 971,
+      "end_pos": 988
     },
     {
       "entity_text": "Antoine Mercier",
@@ -164,22 +158,16 @@
       "end_pos": 1103
     },
     {
-      "entity_text": "ère Me",
-      "entity_type": "PERSON",
-      "start_pos": 1114,
-      "end_pos": 1120
-    },
-    {
       "entity_text": "Pierre Blanc",
       "entity_type": "PERSON",
       "start_pos": 1121,
       "end_pos": 1133
     },
     {
-      "entity_text": "Me Isabella",
+      "entity_text": "Isabella Ferrari de Milan",
       "entity_type": "PERSON",
-      "start_pos": 1190,
-      "end_pos": 1201
+      "start_pos": 1193,
+      "end_pos": 1218
     },
     {
       "entity_text": "François Molins",
@@ -188,9 +176,9 @@
       "end_pos": 1287
     },
     {
-      "entity_text": "Me Mercier",
+      "entity_text": "Mercier",
       "entity_type": "PERSON",
-      "start_pos": 1352,
+      "start_pos": 1355,
       "end_pos": 1362
     },
     {
@@ -198,12 +186,6 @@
       "entity_type": "PERSON",
       "start_pos": 1383,
       "end_pos": 1393
-    },
-    {
-      "entity_text": "Tech, Mme",
-      "entity_type": "PERSON",
-      "start_pos": 1421,
-      "end_pos": 1430
     },
     {
       "entity_text": "France",
@@ -230,10 +212,10 @@
       "end_pos": 1584
     },
     {
-      "entity_text": "Mme Elena",
+      "entity_text": "Elena Popescu",
       "entity_type": "PERSON",
-      "start_pos": 1588,
-      "end_pos": 1597
+      "start_pos": 1592,
+      "end_pos": 1605
     },
     {
       "entity_text": "Antoine Mercier",
@@ -242,10 +224,10 @@
       "end_pos": 1657
     },
     {
-      "entity_text": "Mme Françoise",
+      "entity_text": "Françoise Barré",
       "entity_type": "PERSON",
-      "start_pos": 1705,
-      "end_pos": 1718
+      "start_pos": 1709,
+      "end_pos": 1724
     },
     {
       "entity_text": "Paris",

@@ -8,16 +8,10 @@
       "end_pos": 41
     },
     {
-      "entity_text": "Mme Caroline",
+      "entity_text": "Caroline Petit",
       "entity_type": "PERSON",
-      "start_pos": 86,
-      "end_pos": 98
-    },
-    {
-      "entity_text": "Petit, Chef",
-      "entity_type": "PERSON",
-      "start_pos": 99,
-      "end_pos": 110
+      "start_pos": 90,
+      "end_pos": 104
     },
     {
       "entity_text": "Marie Dubois",
@@ -38,10 +32,10 @@
       "end_pos": 257
     },
     {
-      "entity_text": "Mme Caroline",
+      "entity_text": "Caroline Petit",
       "entity_type": "PERSON",
-      "start_pos": 433,
-      "end_pos": 445
+      "start_pos": 437,
+      "end_pos": 451
     },
     {
       "entity_text": "Marie Dubois",
@@ -68,10 +62,10 @@
       "end_pos": 558
     },
     {
-      "entity_text": "Mme Nadia",
+      "entity_text": "Nadia Amrani",
       "entity_type": "PERSON",
-      "start_pos": 569,
-      "end_pos": 578
+      "start_pos": 573,
+      "end_pos": 585
     },
     {
       "entity_text": "Alexandre Blanc",
@@ -80,10 +74,10 @@
       "end_pos": 610
     },
     {
-      "entity_text": "Mme Julie",
+      "entity_text": "Julie Marchand",
       "entity_type": "PERSON",
-      "start_pos": 622,
-      "end_pos": 631
+      "start_pos": 626,
+      "end_pos": 640
     },
     {
       "entity_text": "Maxime Dubois",
@@ -98,10 +92,10 @@
       "end_pos": 712
     },
     {
-      "entity_text": "Mme Sophie",
+      "entity_text": "Sophie Bernard",
       "entity_type": "PERSON",
-      "start_pos": 733,
-      "end_pos": 743
+      "start_pos": 737,
+      "end_pos": 751
     },
     {
       "entity_text": "David Park",
@@ -110,16 +104,16 @@
       "end_pos": 791
     },
     {
-      "entity_text": "Mme Émilie",
+      "entity_text": "Émilie Rousseau",
       "entity_type": "PERSON",
-      "start_pos": 828,
-      "end_pos": 838
+      "start_pos": 832,
+      "end_pos": 847
     },
     {
-      "entity_text": "Mme Laure",
+      "entity_text": "Laure Bertholom",
       "entity_type": "PERSON",
-      "start_pos": 872,
-      "end_pos": 881
+      "start_pos": 876,
+      "end_pos": 891
     },
     {
       "entity_text": "Matthieu Bonenfant",
@@ -128,10 +122,10 @@
       "end_pos": 914
     },
     {
-      "entity_text": "Mme Isabelle",
+      "entity_text": "Isabelle Moreau",
       "entity_type": "PERSON",
-      "start_pos": 949,
-      "end_pos": 961
+      "start_pos": 953,
+      "end_pos": 968
     },
     {
       "entity_text": "Philippe Arnaud",
@@ -176,10 +170,10 @@
       "end_pos": 1423
     },
     {
-      "entity_text": "Mme Nadia",
+      "entity_text": "Nadia Amrani",
       "entity_type": "PERSON",
-      "start_pos": 1456,
-      "end_pos": 1465
+      "start_pos": 1460,
+      "end_pos": 1472
     },
     {
       "entity_text": "Alexandre Blanc",
@@ -188,10 +182,10 @@
       "end_pos": 1527
     },
     {
-      "entity_text": "Mme Lucie",
+      "entity_text": "Lucie Renard",
       "entity_type": "PERSON",
-      "start_pos": 1574,
-      "end_pos": 1583
+      "start_pos": 1578,
+      "end_pos": 1590
     },
     {
       "entity_text": "Microsoft France ",
@@ -200,10 +194,10 @@
       "end_pos": 1714
     },
     {
-      "entity_text": "Mme Sophie",
+      "entity_text": "Sophie Bernard",
       "entity_type": "PERSON",
-      "start_pos": 1734,
-      "end_pos": 1744
+      "start_pos": 1738,
+      "end_pos": 1752
     },
     {
       "entity_text": "Philippe Courtois",
@@ -224,10 +218,10 @@
       "end_pos": 1900
     },
     {
-      "entity_text": "Mme Émilie",
+      "entity_text": "Émilie Morel",
       "entity_type": "PERSON",
-      "start_pos": 1977,
-      "end_pos": 1987
+      "start_pos": 1981,
+      "end_pos": 1993
     },
     {
       "entity_text": "Julien Sarrazin",
@@ -236,10 +230,10 @@
       "end_pos": 2013
     },
     {
-      "entity_text": "Mme Laure",
+      "entity_text": "Laure Bertholom",
       "entity_type": "PERSON",
-      "start_pos": 2089,
-      "end_pos": 2098
+      "start_pos": 2093,
+      "end_pos": 2108
     },
     {
       "entity_text": "Matthieu Bonenfant",
@@ -260,10 +254,10 @@
       "end_pos": 2585
     },
     {
-      "entity_text": "Mme Laure",
+      "entity_text": "Laure Bertholom",
       "entity_type": "PERSON",
-      "start_pos": 2651,
-      "end_pos": 2660
+      "start_pos": 2655,
+      "end_pos": 2670
     },
     {
       "entity_text": "Kevin Zhang",
@@ -272,22 +266,16 @@
       "end_pos": 2747
     },
     {
-      "entity_text": "Jin, Mme",
+      "entity_text": "Sarah Cohen",
       "entity_type": "PERSON",
-      "start_pos": 2776,
-      "end_pos": 2784
+      "start_pos": 2821,
+      "end_pos": 2832
     },
     {
-      "entity_text": "Me Sarah",
+      "entity_text": "Julie Legrand",
       "entity_type": "PERSON",
-      "start_pos": 2818,
-      "end_pos": 2826
-    },
-    {
-      "entity_text": "Maître Julie",
-      "entity_type": "PERSON",
-      "start_pos": 2875,
-      "end_pos": 2887
+      "start_pos": 2882,
+      "end_pos": 2895
     },
     {
       "entity_text": "Luc Moreau",
@@ -320,10 +308,10 @@
       "end_pos": 3259
     },
     {
-      "entity_text": "Mme Laure",
+      "entity_text": "Laure Bertholom",
       "entity_type": "PERSON",
-      "start_pos": 3268,
-      "end_pos": 3277
+      "start_pos": 3272,
+      "end_pos": 3287
     },
     {
       "entity_text": "Formation équipes",
@@ -344,10 +332,10 @@
       "end_pos": 3407
     },
     {
-      "entity_text": "Mme Isabelle",
+      "entity_text": "Isabelle Moreau",
       "entity_type": "PERSON",
-      "start_pos": 3434,
-      "end_pos": 3446
+      "start_pos": 3438,
+      "end_pos": 3453
     },
     {
       "entity_text": "François Leclerc",
@@ -368,10 +356,10 @@
       "end_pos": 3591
     },
     {
-      "entity_text": "Mme Sophie",
+      "entity_text": "Sophie Laurent",
       "entity_type": "PERSON",
-      "start_pos": 3642,
-      "end_pos": 3652
+      "start_pos": 3646,
+      "end_pos": 3660
     },
     {
       "entity_text": "Marc Durand",
@@ -392,16 +380,16 @@
       "end_pos": 3854
     },
     {
-      "entity_text": "Mme Amrani",
+      "entity_text": "Amrani",
       "entity_type": "PERSON",
-      "start_pos": 3857,
+      "start_pos": 3861,
       "end_pos": 3867
     },
     {
-      "entity_text": "Mme Laura",
+      "entity_text": "Laura Martin",
       "entity_type": "PERSON",
-      "start_pos": 3934,
-      "end_pos": 3943
+      "start_pos": 3938,
+      "end_pos": 3950
     },
     {
       "entity_text": "Ahmed Mansour",
@@ -410,34 +398,16 @@
       "end_pos": 4044
     },
     {
-      "entity_text": "Mme Caroline",
+      "entity_text": "Caroline Petit",
       "entity_type": "PERSON",
-      "start_pos": 4126,
-      "end_pos": 4138
+      "start_pos": 4130,
+      "end_pos": 4144
     },
     {
-      "entity_text": "Petit, Chef",
+      "entity_text": "Moreau",
       "entity_type": "PERSON",
-      "start_pos": 4139,
-      "end_pos": 4150
-    },
-    {
-      "entity_text": "Projet\nDiffusion",
-      "entity_type": "PERSON",
-      "start_pos": 4154,
-      "end_pos": 4170
-    },
-    {
-      "entity_text": "Mme Moreau",
-      "entity_type": "PERSON",
-      "start_pos": 4200,
+      "start_pos": 4204,
       "end_pos": 4210
-    },
-    {
-      "entity_text": "Arnaud, Dr",
-      "entity_type": "PERSON",
-      "start_pos": 4215,
-      "end_pos": 4225
     }
   ]
 }

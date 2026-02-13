@@ -8,16 +8,10 @@
       "end_pos": 41
     },
     {
-      "entity_text": "Digital\nBénéficiaire",
+      "entity_text": "Julie Bertrand",
       "entity_type": "PERSON",
-      "start_pos": 50,
-      "end_pos": 70
-    },
-    {
-      "entity_text": "Mme Julie",
-      "entity_type": "PERSON",
-      "start_pos": 72,
-      "end_pos": 81
+      "start_pos": 76,
+      "end_pos": 90
     },
     {
       "entity_text": "Paris",
@@ -26,9 +20,9 @@
       "end_pos": 133
     },
     {
-      "entity_text": "Madame Bertrand",
+      "entity_text": "Bertrand",
       "entity_type": "PERSON",
-      "start_pos": 166,
+      "start_pos": 173,
       "end_pos": 181
     },
     {
@@ -50,16 +44,16 @@
       "end_pos": 367
     },
     {
-      "entity_text": "Mme Bertrand",
+      "entity_text": "Bertrand",
       "entity_type": "PERSON",
-      "start_pos": 447,
+      "start_pos": 451,
       "end_pos": 459
     },
     {
-      "entity_text": "Mme Sophie",
+      "entity_text": "Sophie Durand",
       "entity_type": "PERSON",
-      "start_pos": 471,
-      "end_pos": 481
+      "start_pos": 475,
+      "end_pos": 488
     },
     {
       "entity_text": "Leur directeur France",
@@ -72,12 +66,6 @@
       "entity_type": "PERSON",
       "start_pos": 576,
       "end_pos": 590
-    },
-    {
-      "entity_text": "éré Open",
-      "entity_type": "PERSON",
-      "start_pos": 620,
-      "end_pos": 628
     },
     {
       "entity_text": "Julie Bertrand",
@@ -98,12 +86,6 @@
       "end_pos": 769
     },
     {
-      "entity_text": "Ruby, Mme",
-      "entity_type": "PERSON",
-      "start_pos": 775,
-      "end_pos": 784
-    },
-    {
       "entity_text": "Kevin Soltani",
       "entity_type": "PERSON",
       "start_pos": 826,
@@ -122,15 +104,15 @@
       "end_pos": 910
     },
     {
-      "entity_text": "Mme Léa",
+      "entity_text": "Léa Fontaine",
       "entity_type": "PERSON",
-      "start_pos": 915,
-      "end_pos": 922
+      "start_pos": 919,
+      "end_pos": 931
     },
     {
-      "entity_text": "Mme Bertrand",
+      "entity_text": "Bertrand",
       "entity_type": "PERSON",
-      "start_pos": 983,
+      "start_pos": 987,
       "end_pos": 995
     },
     {
@@ -138,12 +120,6 @@
       "entity_type": "PERSON",
       "start_pos": 1019,
       "end_pos": 1030
-    },
-    {
-      "entity_text": "ère Mme",
-      "entity_type": "PERSON",
-      "start_pos": 1047,
-      "end_pos": 1054
     },
     {
       "entity_text": "Nathalie Legrand",
@@ -158,10 +134,10 @@
       "end_pos": 1108
     },
     {
-      "entity_text": "Mme Valérie",
+      "entity_text": "Valérie Pécresse",
       "entity_type": "PERSON",
-      "start_pos": 1115,
-      "end_pos": 1126
+      "start_pos": 1119,
+      "end_pos": 1135
     },
     {
       "entity_text": "Julie Bertrand",
@@ -182,10 +158,10 @@
       "end_pos": 1310
     },
     {
-      "entity_text": "Mme Sarah",
+      "entity_text": "Sarah Hassan",
       "entity_type": "PERSON",
-      "start_pos": 1314,
-      "end_pos": 1323
+      "start_pos": 1318,
+      "end_pos": 1330
     },
     {
       "entity_text": "Romain Dufort",
@@ -194,9 +170,9 @@
       "end_pos": 1365
     },
     {
-      "entity_text": "Mme Bertrand",
+      "entity_text": "Bertrand",
       "entity_type": "PERSON",
-      "start_pos": 1446,
+      "start_pos": 1450,
       "end_pos": 1458
     },
     {
@@ -206,10 +182,10 @@
       "end_pos": 1510
     },
     {
-      "entity_text": "Mme Caroline",
+      "entity_text": "Caroline Blanc",
       "entity_type": "PERSON",
-      "start_pos": 1523,
-      "end_pos": 1535
+      "start_pos": 1527,
+      "end_pos": 1541
     },
     {
       "entity_text": "Youssef Amrani",
@@ -218,10 +194,10 @@
       "end_pos": 1575
     },
     {
-      "entity_text": "Mme Emma",
+      "entity_text": "Emma Rodriguez",
       "entity_type": "PERSON",
-      "start_pos": 1608,
-      "end_pos": 1616
+      "start_pos": 1612,
+      "end_pos": 1626
     },
     {
       "entity_text": "Lucas Moreau",
@@ -230,10 +206,10 @@
       "end_pos": 1645
     },
     {
-      "entity_text": "Mme Isabelle",
+      "entity_text": "Isabelle Dumont",
       "entity_type": "PERSON",
-      "start_pos": 1673,
-      "end_pos": 1685
+      "start_pos": 1677,
+      "end_pos": 1692
     },
     {
       "entity_text": "Julie Bertrand",
@@ -266,10 +242,10 @@
       "end_pos": 1851
     },
     {
-      "entity_text": "Mme Marcy",
+      "entity_text": "Marcy Ericka Charollois",
       "entity_type": "PERSON",
-      "start_pos": 1863,
-      "end_pos": 1872
+      "start_pos": 1867,
+      "end_pos": 1890
     },
     {
       "entity_text": "Ericka Charollois",
@@ -278,21 +254,15 @@
       "end_pos": 1890
     },
     {
-      "entity_text": "éseau Social",
+      "entity_text": "Emmanuelle Larroque",
       "entity_type": "PERSON",
-      "start_pos": 1912,
-      "end_pos": 1924
+      "start_pos": 1947,
+      "end_pos": 1966
     },
     {
-      "entity_text": "Mme Emmanuelle",
+      "entity_text": "Bertrand",
       "entity_type": "PERSON",
-      "start_pos": 1943,
-      "end_pos": 1957
-    },
-    {
-      "entity_text": "Mme Bertrand",
-      "entity_type": "PERSON",
-      "start_pos": 2036,
+      "start_pos": 2040,
       "end_pos": 2048
     },
     {
@@ -308,9 +278,9 @@
       "end_pos": 2199
     },
     {
-      "entity_text": "Mme Anne-",
+      "entity_text": "Anne-",
       "entity_type": "PERSON",
-      "start_pos": 2203,
+      "start_pos": 2207,
       "end_pos": 2212
     },
     {
