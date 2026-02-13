@@ -92,6 +92,21 @@ patterns:
           - "Fédération Nationale"
           - "Cabinet Mercier & Associés"
 
+  # Low confidence patterns: Geography dictionary
+  geography_dictionary:
+    enabled: true
+    confidence: 0.60
+    entity_type: LOCATION
+    use_geography_dictionary: true
+    description: "Match known French cities, regions, and departments"
+    # Matching is done programmatically in RegexMatcher using geography dictionary
+    examples:
+      - "Paris"
+      - "Marseille"
+      - "Île-de-France"
+      - "Bouches-du-Rhône"
+      - "Toulouse"
+
   # Medium confidence patterns: Full names using dictionary
   full_names:
     enabled: true

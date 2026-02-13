@@ -14,6 +14,7 @@ from typing import Any
 import yaml
 
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
+from gdpr_pseudonymizer.nlp.geography_dictionary import GeographyDictionary
 from gdpr_pseudonymizer.nlp.name_dictionary import NameDictionary
 from gdpr_pseudonymizer.utils.logger import get_logger
 
@@ -33,6 +34,7 @@ class RegexMatcher:
     Attributes:
         patterns: Dictionary of compiled regex patterns by category
         name_dictionary: French name dictionary for full name matching
+        geography_dictionary: French geography dictionary for location matching
     """
 
     def __init__(self, config_path: str | None = None):
@@ -49,6 +51,7 @@ class RegexMatcher:
         self.config_path = config_path
         self.patterns: dict[str, list[dict[str, Any]]] = {}
         self.name_dictionary: NameDictionary | None = None
+        self.geography_dictionary: GeographyDictionary | None = None
         self._config: dict[str, Any] = {}
 
     def load_patterns(self, config_path: str | None = None) -> None:
@@ -80,10 +83,16 @@ class RegexMatcher:
                 self.name_dictionary = NameDictionary()
                 self.name_dictionary.load()
 
+            # Load geography dictionary if needed
+            if self._needs_geography_dictionary():
+                self.geography_dictionary = GeographyDictionary()
+                self.geography_dictionary.load()
+
             logger.info(
                 "patterns_loaded",
                 categories_count=len(self.patterns),
                 has_name_dictionary=self.name_dictionary is not None,
+                has_geography_dictionary=self.geography_dictionary is not None,
             )
 
         except yaml.YAMLError as e:
@@ -98,8 +107,8 @@ class RegexMatcher:
             if not config.get("enabled", True):
                 continue
 
-            # Skip full_names category (handled separately with dictionary)
-            if category == "full_names":
+            # Skip dictionary-based categories (handled separately)
+            if category in ("full_names", "geography_dictionary"):
                 continue
 
             category_patterns = []
@@ -131,6 +140,14 @@ class RegexMatcher:
         full_names_config: dict[str, Any] = pattern_config.get("full_names", {})
         enabled = bool(full_names_config.get("enabled", False))
         use_dict = bool(full_names_config.get("use_name_dictionary", False))
+        return enabled and use_dict
+
+    def _needs_geography_dictionary(self) -> bool:
+        """Check if geography dictionary is required by configuration."""
+        pattern_config = self._config.get("patterns", {})
+        geo_config: dict[str, Any] = pattern_config.get("geography_dictionary", {})
+        enabled = bool(geo_config.get("enabled", False))
+        use_dict = bool(geo_config.get("use_geography_dictionary", False))
         return enabled and use_dict
 
     def match_entities(self, text: str) -> list[DetectedEntity]:
@@ -167,6 +184,10 @@ class RegexMatcher:
         # Apply name dictionary matching if enabled
         if self.name_dictionary and self._is_full_names_enabled():
             entities.extend(self._match_full_names(text))
+
+        # Apply geography dictionary matching if enabled
+        if self.geography_dictionary and self._is_geography_enabled():
+            entities.extend(self._match_geography(text))
 
         # Remove duplicates (same span)
         entities = self._deduplicate_entities(entities)
@@ -232,6 +253,62 @@ class RegexMatcher:
 
         return entities
 
+    def _is_geography_enabled(self) -> bool:
+        """Check if geography dictionary matching is enabled."""
+        pattern_config = self._config.get("patterns", {})
+        geo_config: dict[str, Any] = pattern_config.get("geography_dictionary", {})
+        return bool(geo_config.get("enabled", False))
+
+    def _match_geography(self, text: str) -> list[DetectedEntity]:
+        """Match locations using geography dictionary.
+
+        Scans text for tokens that match known French cities, regions,
+        or departments using O(1) set lookups.
+
+        Args:
+            text: Document text to process
+
+        Returns:
+            List of DetectedEntity objects for locations
+        """
+        entities: list[DetectedEntity] = []
+
+        if not self.geography_dictionary:
+            return entities
+
+        confidence = (
+            self._config.get("patterns", {})
+            .get("geography_dictionary", {})
+            .get("confidence", 0.60)
+        )
+
+        # Match multi-word and single-word location names
+        # Pattern: capitalized word(s) potentially with hyphens, apostrophes,
+        # and prepositions (e.g., "Aix-en-Provence", "Val-d'Oise")
+        token_pattern = re.compile(
+            r"\b([A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][a-zàâäéèêëïîôöùûü]*"
+            r"(?:[-'][A-Za-zàâäéèêëïîôöùûü]+)*"
+            r"(?:\s+(?:de|du|des|d'|en|et|la|le|les|sur)\s+"
+            r"[A-ZÀÂÄÉÈÊËÏÎÔÙÛÜa-zàâäéèêëïîôöùûü]"
+            r"[a-zàâäéèêëïîôöùûü]*(?:[-'][A-Za-zàâäéèêëïîôöùûü]+)*)*)",
+            re.UNICODE,
+        )
+
+        for match in token_pattern.finditer(text):
+            candidate = match.group(0)
+            if self.geography_dictionary.is_location(candidate):
+                entity = DetectedEntity(
+                    text=candidate,
+                    entity_type="LOCATION",
+                    start_pos=match.start(),
+                    end_pos=match.end(),
+                    confidence=confidence,
+                    source="regex",
+                )
+                entities.append(entity)
+
+        return entities
+
     def _deduplicate_entities(
         self, entities: list[DetectedEntity]
     ) -> list[DetectedEntity]:
@@ -275,5 +352,6 @@ class RegexMatcher:
             "categories_loaded": len(self.patterns),
             "total_patterns": sum(len(plist) for plist in self.patterns.values()),
             "has_name_dictionary": self.name_dictionary is not None,
+            "has_geography_dictionary": self.geography_dictionary is not None,
         }
         return stats
