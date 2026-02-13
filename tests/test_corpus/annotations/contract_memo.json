@@ -2,12 +2,6 @@
   "document_name": "contract_memo.txt",
   "entities": [
     {
-      "entity_text": "Managers\nDe",
-      "entity_type": "PERSON",
-      "start_pos": 43,
-      "end_pos": 54
-    },
-    {
       "entity_text": "Direction Générale",
       "entity_type": "PERSON",
       "start_pos": 56,
@@ -44,16 +38,10 @@
       "end_pos": 278
     },
     {
-      "entity_text": "ésentée par leur VP Europe",
-      "entity_type": "ORG",
-      "start_pos": 284,
-      "end_pos": 310
-    },
-    {
-      "entity_text": "Mme Sarah",
+      "entity_text": "Sarah McDonald",
       "entity_type": "PERSON",
-      "start_pos": 312,
-      "end_pos": 321
+      "start_pos": 316,
+      "end_pos": 330
     },
     {
       "entity_text": "Luc Moreau",
@@ -62,16 +50,16 @@
       "end_pos": 423
     },
     {
-      "entity_text": "Maître François",
+      "entity_text": "François Durand",
       "entity_type": "PERSON",
-      "start_pos": 488,
-      "end_pos": 503
+      "start_pos": 495,
+      "end_pos": 510
     },
     {
-      "entity_text": "Mme Caroline",
+      "entity_text": "Caroline Petit",
       "entity_type": "PERSON",
-      "start_pos": 566,
-      "end_pos": 578
+      "start_pos": 570,
+      "end_pos": 584
     },
     {
       "entity_text": "Direction Juridique",
@@ -98,10 +86,10 @@
       "end_pos": 700
     },
     {
-      "entity_text": "Mme Sophie",
+      "entity_text": "Sophie Laurent",
       "entity_type": "PERSON",
-      "start_pos": 730,
-      "end_pos": 740
+      "start_pos": 734,
+      "end_pos": 748
     },
     {
       "entity_text": "GlobalTech Industries",
@@ -128,10 +116,10 @@
       "end_pos": 869
     },
     {
-      "entity_text": "Mme Sarah",
+      "entity_text": "Sarah McDonald",
       "entity_type": "PERSON",
-      "start_pos": 871,
-      "end_pos": 880
+      "start_pos": 875,
+      "end_pos": 889
     },
     {
       "entity_text": "Legal Counsel",
@@ -164,10 +152,10 @@
       "end_pos": 1017
     },
     {
-      "entity_text": "Mme Isabelle",
+      "entity_text": "Isabelle Blanchet",
       "entity_type": "PERSON",
-      "start_pos": 1031,
-      "end_pos": 1043
+      "start_pos": 1035,
+      "end_pos": 1052
     },
     {
       "entity_text": "Paris",
@@ -176,15 +164,15 @@
       "end_pos": 1108
     },
     {
-      "entity_text": "Mme Petit",
+      "entity_text": "Petit",
       "entity_type": "PERSON",
-      "start_pos": 1136,
+      "start_pos": 1140,
       "end_pos": 1145
     },
     {
-      "entity_text": "Mme Mc",
+      "entity_text": "Mc",
       "entity_type": "PERSON",
-      "start_pos": 1156,
+      "start_pos": 1160,
       "end_pos": 1162
     },
     {
@@ -200,10 +188,10 @@
       "end_pos": 1239
     },
     {
-      "entity_text": "Mme Julie",
+      "entity_text": "Julie Marchand",
       "entity_type": "PERSON",
-      "start_pos": 1256,
-      "end_pos": 1265
+      "start_pos": 1260,
+      "end_pos": 1274
     },
     {
       "entity_text": "Paris",
@@ -218,10 +206,10 @@
       "end_pos": 1361
     },
     {
-      "entity_text": "Mme Nathalie",
+      "entity_text": "Nathalie Rousseau",
       "entity_type": "PERSON",
-      "start_pos": 1363,
-      "end_pos": 1375
+      "start_pos": 1367,
+      "end_pos": 1384
     },
     {
       "entity_text": "Toulouse",
@@ -248,10 +236,10 @@
       "end_pos": 1509
     },
     {
-      "entity_text": "Mme Caroline",
+      "entity_text": "Caroline Petit",
       "entity_type": "PERSON",
-      "start_pos": 1564,
-      "end_pos": 1576
+      "start_pos": 1568,
+      "end_pos": 1582
     },
     {
       "entity_text": "Philippe Arnaud",
@@ -282,12 +270,6 @@
       "entity_type": "LOCATION",
       "start_pos": 1798,
       "end_pos": 1803
-    },
-    {
-      "entity_text": "ème\nContact",
-      "entity_type": "PERSON",
-      "start_pos": 1806,
-      "end_pos": 1817
     }
   ]
 }

@@ -14,10 +14,10 @@
       "end_pos": 50
     },
     {
-      "entity_text": "Mme Claire",
+      "entity_text": "Claire Fontaine",
       "entity_type": "PERSON",
-      "start_pos": 64,
-      "end_pos": 74
+      "start_pos": 68,
+      "end_pos": 83
     },
     {
       "entity_text": "Fontaine, Directrice",
@@ -32,9 +32,9 @@
       "end_pos": 117
     },
     {
-      "entity_text": "Madame Fontaine",
+      "entity_text": "Fontaine",
       "entity_type": "PERSON",
-      "start_pos": 150,
+      "start_pos": 157,
       "end_pos": 165
     },
     {
@@ -62,9 +62,9 @@
       "end_pos": 371
     },
     {
-      "entity_text": "Mme Fontaine",
+      "entity_text": "Fontaine",
       "entity_type": "PERSON",
-      "start_pos": 449,
+      "start_pos": 453,
       "end_pos": 461
     },
     {
@@ -74,10 +74,10 @@
       "end_pos": 517
     },
     {
-      "entity_text": "Mme Sarah",
+      "entity_text": "Sarah Cohen",
       "entity_type": "PERSON",
-      "start_pos": 543,
-      "end_pos": 552
+      "start_pos": 547,
+      "end_pos": 558
     },
     {
       "entity_text": "Yves Girard",
@@ -116,9 +116,9 @@
       "end_pos": 956
     },
     {
-      "entity_text": "Mme Fontaine",
+      "entity_text": "Fontaine",
       "entity_type": "PERSON",
-      "start_pos": 1048,
+      "start_pos": 1052,
       "end_pos": 1060
     },
     {
@@ -170,10 +170,10 @@
       "end_pos": 1397
     },
     {
-      "entity_text": "Mme Léa",
+      "entity_text": "Léa Rodriguez",
       "entity_type": "PERSON",
-      "start_pos": 1453,
-      "end_pos": 1460
+      "start_pos": 1457,
+      "end_pos": 1470
     },
     {
       "entity_text": "France",
@@ -194,9 +194,9 @@
       "end_pos": 1575
     },
     {
-      "entity_text": "Mme Fontaine",
+      "entity_text": "Fontaine",
       "entity_type": "PERSON",
-      "start_pos": 1578,
+      "start_pos": 1582,
       "end_pos": 1590
     },
     {

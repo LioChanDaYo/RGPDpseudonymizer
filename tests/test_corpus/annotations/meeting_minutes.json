@@ -14,16 +14,16 @@
       "end_pos": 144
     },
     {
-      "entity_text": "Mme Isabelle",
+      "entity_text": "Isabelle Moreau",
       "entity_type": "PERSON",
-      "start_pos": 166,
-      "end_pos": 178
+      "start_pos": 170,
+      "end_pos": 185
     },
     {
-      "entity_text": "Mme Isabelle",
+      "entity_text": "Isabelle Moreau",
       "entity_type": "PERSON",
-      "start_pos": 208,
-      "end_pos": 220
+      "start_pos": 212,
+      "end_pos": 227
     },
     {
       "entity_text": "François Leclerc",
@@ -38,10 +38,10 @@
       "end_pos": 278
     },
     {
-      "entity_text": "Mme Sophie",
+      "entity_text": "Sophie Laurent",
       "entity_type": "PERSON",
-      "start_pos": 286,
-      "end_pos": 296
+      "start_pos": 290,
+      "end_pos": 304
     },
     {
       "entity_text": "Thomas Weber",
@@ -56,10 +56,10 @@
       "end_pos": 349
     },
     {
-      "entity_text": "Mme Catherine",
+      "entity_text": "Catherine Rousseau",
       "entity_type": "PERSON",
-      "start_pos": 352,
-      "end_pos": 365
+      "start_pos": 356,
+      "end_pos": 374
     },
     {
       "entity_text": "Rousseau, Directrice",
@@ -80,10 +80,10 @@
       "end_pos": 439
     },
     {
-      "entity_text": "Mme Julie",
+      "entity_text": "Julie Bertrand",
       "entity_type": "PERSON",
-      "start_pos": 442,
-      "end_pos": 451
+      "start_pos": 446,
+      "end_pos": 460
     },
     {
       "entity_text": "Directrice Qualité",
@@ -98,22 +98,10 @@
       "end_pos": 519
     },
     {
-      "entity_text": "Directeur Juridique",
+      "entity_text": "Sarah Cohen",
       "entity_type": "PERSON",
-      "start_pos": 521,
-      "end_pos": 540
-    },
-    {
-      "entity_text": "éplacement Luxembourg",
-      "entity_type": "PERSON",
-      "start_pos": 546,
-      "end_pos": 567
-    },
-    {
-      "entity_text": "Mme Sarah",
-      "entity_type": "PERSON",
-      "start_pos": 571,
-      "end_pos": 580
+      "start_pos": 575,
+      "end_pos": 586
     },
     {
       "entity_text": "Cohen, Directrice",
@@ -134,16 +122,10 @@
       "end_pos": 686
     },
     {
-      "entity_text": "Mme Caroline",
+      "entity_text": "Caroline Petit",
       "entity_type": "PERSON",
-      "start_pos": 699,
-      "end_pos": 711
-    },
-    {
-      "entity_text": "Petit, Chef",
-      "entity_type": "PERSON",
-      "start_pos": 712,
-      "end_pos": 723
+      "start_pos": 703,
+      "end_pos": 717
     },
     {
       "entity_text": "François Leclerc",
@@ -152,9 +134,9 @@
       "end_pos": 868
     },
     {
-      "entity_text": "Mme Moreau",
+      "entity_text": "Moreau",
       "entity_type": "PERSON",
-      "start_pos": 1084,
+      "start_pos": 1088,
       "end_pos": 1094
     },
     {
@@ -170,9 +152,9 @@
       "end_pos": 1165
     },
     {
-      "entity_text": "Mme Laurent",
+      "entity_text": "Laurent",
       "entity_type": "PERSON",
-      "start_pos": 1209,
+      "start_pos": 1213,
       "end_pos": 1220
     },
     {
@@ -194,10 +176,10 @@
       "end_pos": 1416
     },
     {
-      "entity_text": "Mme Laura",
+      "entity_text": "Laura Martin",
       "entity_type": "PERSON",
-      "start_pos": 1445,
-      "end_pos": 1454
+      "start_pos": 1449,
+      "end_pos": 1461
     },
     {
       "entity_text": "Kevin Zhang",
@@ -212,10 +194,10 @@
       "end_pos": 1537
     },
     {
-      "entity_text": "Mme Nadia",
+      "entity_text": "Nadia Amrani",
       "entity_type": "PERSON",
-      "start_pos": 1544,
-      "end_pos": 1553
+      "start_pos": 1548,
+      "end_pos": 1560
     },
     {
       "entity_text": "Senior Product",
@@ -224,9 +206,9 @@
       "end_pos": 1581
     },
     {
-      "entity_text": "Mme Laurent",
+      "entity_text": "Laurent",
       "entity_type": "PERSON",
-      "start_pos": 1603,
+      "start_pos": 1607,
       "end_pos": 1614
     },
     {
@@ -236,9 +218,9 @@
       "end_pos": 1700
     },
     {
-      "entity_text": "Mme Bertrand",
+      "entity_text": "Bertrand",
       "entity_type": "PERSON",
-      "start_pos": 1803,
+      "start_pos": 1807,
       "end_pos": 1815
     },
     {
@@ -254,27 +236,27 @@
       "end_pos": 1939
     },
     {
-      "entity_text": "Mme Sophie",
+      "entity_text": "Sophie Durand",
       "entity_type": "PERSON",
-      "start_pos": 1978,
-      "end_pos": 1988
+      "start_pos": 1982,
+      "end_pos": 1995
     },
     {
-      "entity_text": "Mme Rousseau",
+      "entity_text": "Rousseau",
       "entity_type": "PERSON",
-      "start_pos": 2064,
+      "start_pos": 2068,
       "end_pos": 2076
     },
     {
-      "entity_text": "Mme Laurent",
+      "entity_text": "Laurent",
       "entity_type": "PERSON",
-      "start_pos": 2162,
+      "start_pos": 2166,
       "end_pos": 2173
     },
     {
-      "entity_text": "Mme Bertrand",
+      "entity_text": "Bertrand",
       "entity_type": "PERSON",
-      "start_pos": 2187,
+      "start_pos": 2191,
       "end_pos": 2199
     },
     {
@@ -284,16 +266,16 @@
       "end_pos": 2330
     },
     {
-      "entity_text": "Mme Petit",
+      "entity_text": "Petit",
       "entity_type": "PERSON",
-      "start_pos": 2444,
+      "start_pos": 2448,
       "end_pos": 2453
     },
     {
-      "entity_text": "Mme Caroline",
+      "entity_text": "Caroline Petit",
       "entity_type": "PERSON",
-      "start_pos": 2456,
-      "end_pos": 2468
+      "start_pos": 2460,
+      "end_pos": 2474
     },
     {
       "entity_text": "France",
@@ -350,10 +332,10 @@
       "end_pos": 2813
     },
     {
-      "entity_text": "Mme Émilie",
+      "entity_text": "Émilie Morel",
       "entity_type": "PERSON",
-      "start_pos": 2827,
-      "end_pos": 2837
+      "start_pos": 2831,
+      "end_pos": 2843
     },
     {
       "entity_text": "SAP S",
@@ -368,15 +350,15 @@
       "end_pos": 2940
     },
     {
-      "entity_text": "Mme Petit",
+      "entity_text": "Petit",
       "entity_type": "PERSON",
-      "start_pos": 2955,
+      "start_pos": 2959,
       "end_pos": 2964
     },
     {
-      "entity_text": "Mme Morel",
+      "entity_text": "Morel",
       "entity_type": "PERSON",
-      "start_pos": 3064,
+      "start_pos": 3068,
       "end_pos": 3073
     },
     {
@@ -386,15 +368,15 @@
       "end_pos": 3153
     },
     {
-      "entity_text": "Mme Sophie",
+      "entity_text": "Sophie Bernard",
       "entity_type": "PERSON",
-      "start_pos": 3155,
-      "end_pos": 3165
+      "start_pos": 3159,
+      "end_pos": 3173
     },
     {
-      "entity_text": "Mme Rousseau",
+      "entity_text": "Rousseau",
       "entity_type": "PERSON",
-      "start_pos": 3218,
+      "start_pos": 3222,
       "end_pos": 3230
     },
     {
@@ -404,10 +386,10 @@
       "end_pos": 3293
     },
     {
-      "entity_text": "Mme Clara",
+      "entity_text": "Clara Dumont",
       "entity_type": "PERSON",
-      "start_pos": 3320,
-      "end_pos": 3329
+      "start_pos": 3324,
+      "end_pos": 3336
     },
     {
       "entity_text": "Marc Feuillée",
@@ -416,10 +398,10 @@
       "end_pos": 3433
     },
     {
-      "entity_text": "Mme Sophie",
+      "entity_text": "Sophie Pedder",
       "entity_type": "PERSON",
-      "start_pos": 3456,
-      "end_pos": 3466
+      "start_pos": 3460,
+      "end_pos": 3473
     },
     {
       "entity_text": "In Ads",
@@ -434,15 +416,15 @@
       "end_pos": 3520
     },
     {
-      "entity_text": "Mme Rousseau",
+      "entity_text": "Rousseau",
       "entity_type": "PERSON",
-      "start_pos": 3535,
+      "start_pos": 3539,
       "end_pos": 3547
     },
     {
-      "entity_text": "Mme Dumont",
+      "entity_text": "Dumont",
       "entity_type": "PERSON",
-      "start_pos": 3579,
+      "start_pos": 3583,
       "end_pos": 3589
     },
     {
@@ -458,22 +440,22 @@
       "end_pos": 3775
     },
     {
-      "entity_text": "Mme Valérie",
+      "entity_text": "Valérie Martin",
       "entity_type": "PERSON",
-      "start_pos": 3908,
-      "end_pos": 3919
+      "start_pos": 3912,
+      "end_pos": 3926
     },
     {
-      "entity_text": "Mme Moreau",
+      "entity_text": "Moreau",
       "entity_type": "PERSON",
-      "start_pos": 3930,
+      "start_pos": 3934,
       "end_pos": 3940
     },
     {
-      "entity_text": "Mme Nathalie",
+      "entity_text": "Nathalie Rousseau",
       "entity_type": "PERSON",
-      "start_pos": 4034,
-      "end_pos": 4046
+      "start_pos": 4038,
+      "end_pos": 4055
     },
     {
       "entity_text": "Rousseau, Assistante",
@@ -482,16 +464,10 @@
       "end_pos": 4067
     },
     {
-      "entity_text": "Direction\nApprobation",
+      "entity_text": "Isabelle Moreau",
       "entity_type": "PERSON",
-      "start_pos": 4071,
-      "end_pos": 4092
-    },
-    {
-      "entity_text": "Mme Isabelle",
-      "entity_type": "PERSON",
-      "start_pos": 4094,
-      "end_pos": 4106
+      "start_pos": 4098,
+      "end_pos": 4113
     }
   ]
 }

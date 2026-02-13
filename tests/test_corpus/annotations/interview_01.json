@@ -2,9 +2,9 @@
   "document_name": "interview_01.txt",
   "entities": [
     {
-      "entity_text": "Dr. Marie Dubois",
+      "entity_text": "Marie Dubois",
       "entity_type": "PERSON",
-      "start_pos": 15,
+      "start_pos": 19,
       "end_pos": 31
     },
     {
@@ -20,15 +20,15 @@
       "end_pos": 116
     },
     {
-      "entity_text": "Dr. Dubois",
+      "entity_text": "Dubois",
       "entity_type": "PERSON",
-      "start_pos": 131,
-      "end_pos": 141
+      "start_pos": 143,
+      "end_pos": 149
     },
     {
-      "entity_text": "Dr. Marie Dubois",
+      "entity_text": "Marie Dubois",
       "entity_type": "PERSON",
-      "start_pos": 189,
+      "start_pos": 193,
       "end_pos": 205
     },
     {
@@ -38,10 +38,10 @@
       "end_pos": 284
     },
     {
-      "entity_text": "Dr. Dubois",
+      "entity_text": "Dubois",
       "entity_type": "PERSON",
-      "start_pos": 341,
-      "end_pos": 351
+      "start_pos": 348,
+      "end_pos": 354
     },
     {
       "entity_text": "Lyon",
@@ -52,8 +52,8 @@
     {
       "entity_text": "Université Claude Bernard",
       "entity_type": "ORG",
-      "start_pos": 450,
-      "end_pos": 475
+      "start_pos": 448,
+      "end_pos": 473
     },
     {
       "entity_text": "Microsoft France",
@@ -74,21 +74,21 @@
       "end_pos": 649
     },
     {
-      "entity_text": "Dr. Dubois",
-      "entity_type": "PERSON",
-      "start_pos": 664,
-      "end_pos": 674
-    },
-    {
       "entity_text": "TechCorp",
       "entity_type": "ORG",
-      "start_pos": 680,
-      "end_pos": 688
+      "start_pos": 641,
+      "end_pos": 649
     },
     {
-      "entity_text": "M. Jean-Pierre Martin",
+      "entity_text": "Dubois",
       "entity_type": "PERSON",
-      "start_pos": 750,
+      "start_pos": 656,
+      "end_pos": 662
+    },
+    {
+      "entity_text": "Jean-Pierre Martin",
+      "entity_type": "PERSON",
+      "start_pos": 753,
       "end_pos": 771
     },
     {
@@ -106,13 +106,13 @@
     {
       "entity_text": "INRIA",
       "entity_type": "ORG",
-      "start_pos": 901,
-      "end_pos": 906
+      "start_pos": 899,
+      "end_pos": 904
     },
     {
-      "entity_text": "Dr. Dubois",
+      "entity_text": "Dubois",
       "entity_type": "PERSON",
-      "start_pos": 1033,
+      "start_pos": 1037,
       "end_pos": 1043
     },
     {
@@ -134,28 +134,28 @@
       "end_pos": 1171
     },
     {
-      "entity_text": "Mme Catherine Rousseau",
+      "entity_text": "Catherine Rousseau",
       "entity_type": "PERSON",
-      "start_pos": 1176,
+      "start_pos": 1180,
       "end_pos": 1198
     },
     {
-      "entity_text": "Professeur Ahmed Ben Ali",
+      "entity_text": "Ahmed Ben Ali",
       "entity_type": "PERSON",
-      "start_pos": 1258,
+      "start_pos": 1269,
       "end_pos": 1282
     },
     {
       "entity_text": "École Polytechnique",
       "entity_type": "ORG",
-      "start_pos": 1290,
-      "end_pos": 1309
+      "start_pos": 1288,
+      "end_pos": 1307
     },
     {
-      "entity_text": "Dr. Dubois",
+      "entity_text": "Dubois",
       "entity_type": "PERSON",
-      "start_pos": 1363,
-      "end_pos": 1373
+      "start_pos": 1352,
+      "end_pos": 1358
     },
     {
       "entity_text": "Paris",
@@ -188,16 +188,16 @@
       "end_pos": 1606
     },
     {
-      "entity_text": "Dr. Marie Dubois",
+      "entity_text": "Marie Dubois",
       "entity_type": "PERSON",
-      "start_pos": 1609,
+      "start_pos": 1613,
       "end_pos": 1625
     },
     {
       "entity_text": "Défense",
       "entity_type": "LOCATION",
-      "start_pos": 1670,
-      "end_pos": 1677
+      "start_pos": 1688,
+      "end_pos": 1695
     }
   ]
 }

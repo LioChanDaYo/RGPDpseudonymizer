@@ -20,9 +20,9 @@
       "end_pos": 87
     },
     {
-      "entity_text": "Professeur Martin",
+      "entity_text": "Martin",
       "entity_type": "PERSON",
-      "start_pos": 121,
+      "start_pos": 132,
       "end_pos": 138
     },
     {
@@ -74,16 +74,16 @@
       "end_pos": 527
     },
     {
-      "entity_text": "Mme Sylvie",
+      "entity_text": "Sylvie van",
       "entity_type": "PERSON",
-      "start_pos": 531,
-      "end_pos": 541
+      "start_pos": 535,
+      "end_pos": 545
     },
     {
-      "entity_text": "Professeur Yazdan",
+      "entity_text": "Yazdan Yazdanpanah",
       "entity_type": "PERSON",
-      "start_pos": 606,
-      "end_pos": 623
+      "start_pos": 617,
+      "end_pos": 635
     },
     {
       "entity_text": "Paris",
@@ -110,10 +110,10 @@
       "end_pos": 871
     },
     {
-      "entity_text": "Professeur Didier",
+      "entity_text": "Didier Raoult",
       "entity_type": "PERSON",
-      "start_pos": 905,
-      "end_pos": 922
+      "start_pos": 916,
+      "end_pos": 929
     },
     {
       "entity_text": "Nice",
@@ -122,9 +122,9 @@
       "end_pos": 1003
     },
     {
-      "entity_text": "Mme Anne-",
+      "entity_text": "Anne-",
       "entity_type": "PERSON",
-      "start_pos": 1018,
+      "start_pos": 1022,
       "end_pos": 1027
     },
     {
@@ -176,10 +176,10 @@
       "end_pos": 1438
     },
     {
-      "entity_text": "Mme Emer",
+      "entity_text": "Emer Cooke",
       "entity_type": "PERSON",
-      "start_pos": 1473,
-      "end_pos": 1481
+      "start_pos": 1477,
+      "end_pos": 1487
     },
     {
       "entity_text": "ANSM en France",
@@ -194,10 +194,10 @@
       "end_pos": 1544
     },
     {
-      "entity_text": "Mme Julie",
+      "entity_text": "Julie Bertrand",
       "entity_type": "PERSON",
-      "start_pos": 1607,
-      "end_pos": 1616
+      "start_pos": 1611,
+      "end_pos": 1625
     },
     {
       "entity_text": "Lille",
@@ -230,10 +230,10 @@
       "end_pos": 1776
     },
     {
-      "entity_text": "Mme Caroline",
+      "entity_text": "Caroline Lacoste",
       "entity_type": "PERSON",
-      "start_pos": 1803,
-      "end_pos": 1815
+      "start_pos": 1807,
+      "end_pos": 1823
     },
     {
       "entity_text": "François Trottier",

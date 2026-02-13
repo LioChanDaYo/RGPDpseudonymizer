@@ -8,12 +8,6 @@
       "end_pos": 78
     },
     {
-      "entity_text": "CEO\n                  Banque",
-      "entity_type": "ORG",
-      "start_pos": 80,
-      "end_pos": 108
-    },
-    {
       "entity_text": "Marseille",
       "entity_type": "LOCATION",
       "start_pos": 179,
@@ -50,28 +44,16 @@
       "end_pos": 306
     },
     {
-      "entity_text": "Général,\n\nSuite",
-      "entity_type": "PERSON",
-      "start_pos": 384,
-      "end_pos": 399
-    },
-    {
-      "entity_text": "ême, Mme",
-      "entity_type": "PERSON",
-      "start_pos": 447,
-      "end_pos": 455
-    },
-    {
       "entity_text": "Olivier Roussel",
       "entity_type": "PERSON",
       "start_pos": 490,
       "end_pos": 505
     },
     {
-      "entity_text": "Mme Valérie",
+      "entity_text": "Valérie Blanc DRH",
       "entity_type": "PERSON",
-      "start_pos": 761,
-      "end_pos": 772
+      "start_pos": 765,
+      "end_pos": 782
     },
     {
       "entity_text": "Thierry Lecomte",
@@ -84,12 +66,6 @@
       "entity_type": "PERSON",
       "start_pos": 827,
       "end_pos": 840
-    },
-    {
-      "entity_text": "ée\n\nVous",
-      "entity_type": "PERSON",
-      "start_pos": 1008,
-      "end_pos": 1016
     },
     {
       "entity_text": "DataCorp Europe",
@@ -116,10 +92,10 @@
       "end_pos": 1296
     },
     {
-      "entity_text": "Mme Julie",
+      "entity_text": "Julie Marchand",
       "entity_type": "PERSON",
-      "start_pos": 1318,
-      "end_pos": 1327
+      "start_pos": 1322,
+      "end_pos": 1336
     },
     {
       "entity_text": "Account Manager",
@@ -146,22 +122,16 @@
       "end_pos": 1511
     },
     {
-      "entity_text": "Mme Sarah",
+      "entity_text": "Sarah Benoit",
       "entity_type": "PERSON",
-      "start_pos": 1534,
-      "end_pos": 1543
+      "start_pos": 1538,
+      "end_pos": 1550
     },
     {
-      "entity_text": "Blanc, Chef",
+      "entity_text": "Nadia Amrani",
       "entity_type": "PERSON",
-      "start_pos": 1598,
-      "end_pos": 1609
-    },
-    {
-      "entity_text": "Mme Nadia",
-      "entity_type": "PERSON",
-      "start_pos": 1622,
-      "end_pos": 1631
+      "start_pos": 1626,
+      "end_pos": 1638
     },
     {
       "entity_text": "Product Owner",
@@ -182,10 +152,10 @@
       "end_pos": 1691
     },
     {
-      "entity_text": "Mme Caroline",
+      "entity_text": "Caroline Petit",
       "entity_type": "PERSON",
-      "start_pos": 1694,
-      "end_pos": 1706
+      "start_pos": 1698,
+      "end_pos": 1712
     },
     {
       "entity_text": "France",
@@ -200,10 +170,10 @@
       "end_pos": 1794
     },
     {
-      "entity_text": "Mme Sophie",
+      "entity_text": "Sophie Bernard",
       "entity_type": "PERSON",
-      "start_pos": 1815,
-      "end_pos": 1825
+      "start_pos": 1819,
+      "end_pos": 1833
     },
     {
       "entity_text": "Octave Klaba",
@@ -230,16 +200,16 @@
       "end_pos": 2015
     },
     {
-      "entity_text": "Mme Laure",
+      "entity_text": "Laure Bertholom",
       "entity_type": "PERSON",
-      "start_pos": 2066,
-      "end_pos": 2075
+      "start_pos": 2070,
+      "end_pos": 2085
     },
     {
-      "entity_text": "Mme Sarah",
+      "entity_text": "Sarah Benoit",
       "entity_type": "PERSON",
-      "start_pos": 2120,
-      "end_pos": 2129
+      "start_pos": 2124,
+      "end_pos": 2136
     },
     {
       "entity_text": "Luc Moreau",
@@ -254,10 +224,10 @@
       "end_pos": 2243
     },
     {
-      "entity_text": "Maître Julie",
+      "entity_text": "Julie Legrand",
       "entity_type": "PERSON",
-      "start_pos": 2270,
-      "end_pos": 2282
+      "start_pos": 2277,
+      "end_pos": 2290
     },
     {
       "entity_text": "Société Générale",
@@ -308,10 +278,10 @@
       "end_pos": 2981
     },
     {
-      "entity_text": "Mme Sarah",
+      "entity_text": "Sarah Benoit",
       "entity_type": "PERSON",
-      "start_pos": 3407,
-      "end_pos": 3416
+      "start_pos": 3411,
+      "end_pos": 3423
     },
     {
       "entity_text": "Salesforce Financial",
@@ -320,16 +290,10 @@
       "end_pos": 3496
     },
     {
-      "entity_text": "étier\nResponsables",
+      "entity_text": "Nadia Amrani",
       "entity_type": "PERSON",
-      "start_pos": 3551,
-      "end_pos": 3569
-    },
-    {
-      "entity_text": "Mme Nadia",
-      "entity_type": "PERSON",
-      "start_pos": 3587,
-      "end_pos": 3596
+      "start_pos": 3591,
+      "end_pos": 3603
     },
     {
       "entity_text": "Émilie Rousseau",
@@ -342,18 +306,6 @@
       "entity_type": "PERSON",
       "start_pos": 3738,
       "end_pos": 3750
-    },
-    {
-      "entity_text": "Hypercare\nResponsables",
-      "entity_type": "PERSON",
-      "start_pos": 3828,
-      "end_pos": 3850
-    },
-    {
-      "entity_text": "Blanc, Mme",
-      "entity_type": "PERSON",
-      "start_pos": 3865,
-      "end_pos": 3875
     },
     {
       "entity_text": "Nicolas Dufourcq",
@@ -384,12 +336,6 @@
       "entity_type": "PERSON",
       "start_pos": 4448,
       "end_pos": 4463
-    },
-    {
-      "entity_text": "Weber, Mme",
-      "entity_type": "PERSON",
-      "start_pos": 4845,
-      "end_pos": 4855
     },
     {
       "entity_text": "Marie Dubois",
@@ -446,10 +392,10 @@
       "end_pos": 5630
     },
     {
-      "entity_text": "Mme Isabelle",
+      "entity_text": "Isabelle Moreau",
       "entity_type": "PERSON",
-      "start_pos": 5641,
-      "end_pos": 5653
+      "start_pos": 5645,
+      "end_pos": 5660
     },
     {
       "entity_text": "Marie Dubois",
@@ -464,10 +410,10 @@
       "end_pos": 5707
     },
     {
-      "entity_text": "Mme Isabelle",
+      "entity_text": "Isabelle Moreau",
       "entity_type": "PERSON",
-      "start_pos": 5753,
-      "end_pos": 5765
+      "start_pos": 5757,
+      "end_pos": 5772
     },
     {
       "entity_text": "Olivier Roussel",
@@ -482,16 +428,10 @@
       "end_pos": 5981
     },
     {
-      "entity_text": "Maître Didier",
+      "entity_text": "Didier Martin",
       "entity_type": "PERSON",
-      "start_pos": 5983,
-      "end_pos": 5996
-    },
-    {
-      "entity_text": "Général,\n\nTech",
-      "entity_type": "PERSON",
-      "start_pos": 6113,
-      "end_pos": 6127
+      "start_pos": 5990,
+      "end_pos": 6003
     },
     {
       "entity_text": "France",
@@ -500,10 +440,10 @@
       "end_pos": 6143
     },
     {
-      "entity_text": "Mme Isabelle",
+      "entity_text": "Isabelle Moreau",
       "entity_type": "PERSON",
-      "start_pos": 6176,
-      "end_pos": 6188
+      "start_pos": 6180,
+      "end_pos": 6195
     },
     {
       "entity_text": "Société Générale",
@@ -518,22 +458,16 @@
       "end_pos": 6325
     },
     {
-      "entity_text": "Mme Julie",
+      "entity_text": "Julie Marchand",
       "entity_type": "PERSON",
-      "start_pos": 6435,
-      "end_pos": 6444
+      "start_pos": 6439,
+      "end_pos": 6453
     },
     {
       "entity_text": "Marie Dubois",
       "entity_type": "PERSON",
       "start_pos": 6479,
       "end_pos": 6491
-    },
-    {
-      "entity_text": "éer, Monsieur",
-      "entity_type": "PERSON",
-      "start_pos": 6586,
-      "end_pos": 6599
     },
     {
       "entity_text": "Directeur Général",
@@ -560,10 +494,10 @@
       "end_pos": 6725
     },
     {
-      "entity_text": "Mme Isabelle",
+      "entity_text": "Isabelle Moreau",
       "entity_type": "PERSON",
-      "start_pos": 6792,
-      "end_pos": 6804
+      "start_pos": 6796,
+      "end_pos": 6811
     },
     {
       "entity_text": "Marie Dubois",

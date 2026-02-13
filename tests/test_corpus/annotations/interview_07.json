@@ -8,12 +8,6 @@
       "end_pos": 34
     },
     {
-      "entity_text": "Entreprise\nResponsable",
-      "entity_type": "PERSON",
-      "start_pos": 38,
-      "end_pos": 60
-    },
-    {
       "entity_text": "Pierre Fontaine",
       "entity_type": "PERSON",
       "start_pos": 69,
@@ -26,15 +20,9 @@
       "end_pos": 103
     },
     {
-      "entity_text": "Normandie\nLieu",
+      "entity_text": "Fontaine",
       "entity_type": "PERSON",
-      "start_pos": 104,
-      "end_pos": 118
-    },
-    {
-      "entity_text": "Monsieur Fontaine",
-      "entity_type": "PERSON",
-      "start_pos": 158,
+      "start_pos": 167,
       "end_pos": 175
     },
     {
@@ -68,12 +56,6 @@
       "end_pos": 453
     },
     {
-      "entity_text": "ême, Mme",
-      "entity_type": "PERSON",
-      "start_pos": 484,
-      "end_pos": 492
-    },
-    {
       "entity_text": "Julien Leroy",
       "entity_type": "PERSON",
       "start_pos": 542,
@@ -86,10 +68,10 @@
       "end_pos": 587
     },
     {
-      "entity_text": "Professeur Jean",
+      "entity_text": "Jean Jouzel",
       "entity_type": "PERSON",
-      "start_pos": 644,
-      "end_pos": 659
+      "start_pos": 655,
+      "end_pos": 666
     },
     {
       "entity_text": "EDF France",
@@ -98,10 +80,10 @@
       "end_pos": 751
     },
     {
-      "entity_text": "Mme Catherine",
+      "entity_text": "Catherine Dupont",
       "entity_type": "PERSON",
-      "start_pos": 788,
-      "end_pos": 801
+      "start_pos": 792,
+      "end_pos": 808
     },
     {
       "entity_text": "Total Energies",
@@ -134,10 +116,10 @@
       "end_pos": 1106
     },
     {
-      "entity_text": "Mme Hervé",
+      "entity_text": "Hervé Morin",
       "entity_type": "PERSON",
-      "start_pos": 1164,
-      "end_pos": 1173
+      "start_pos": 1168,
+      "end_pos": 1179
     },
     {
       "entity_text": "Hervé Morin",
@@ -152,10 +134,10 @@
       "end_pos": 1279
     },
     {
-      "entity_text": "Mme Alice",
+      "entity_text": "Alice Martin",
       "entity_type": "PERSON",
-      "start_pos": 1395,
-      "end_pos": 1404
+      "start_pos": 1399,
+      "end_pos": 1411
     },
     {
       "entity_text": "Luc Bernard",
@@ -194,22 +176,16 @@
       "end_pos": 1757
     },
     {
-      "entity_text": "Mme Florent",
+      "entity_text": "Florent Menegaux",
       "entity_type": "PERSON",
-      "start_pos": 1791,
-      "end_pos": 1802
+      "start_pos": 1795,
+      "end_pos": 1811
     },
     {
-      "entity_text": "éseau Ep",
+      "entity_text": "Élisabeth Laville",
       "entity_type": "PERSON",
-      "start_pos": 1871,
-      "end_pos": 1879
-    },
-    {
-      "entity_text": "Mme Élisabeth",
-      "entity_type": "PERSON",
-      "start_pos": 1893,
-      "end_pos": 1906
+      "start_pos": 1897,
+      "end_pos": 1914
     }
   ]
 }
