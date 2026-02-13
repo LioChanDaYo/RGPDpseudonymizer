@@ -7,19 +7,19 @@ This directory contains ground truth annotations for the GDPR Pseudonymizer test
 ## Statistics
 
 - **Total Documents**: 25 (15 interview transcripts + 10 business documents)
-- **Total Entities**: 3,230
+- **Total Entities**: 1,737
 - **Entity Distribution**:
-  - PERSON: 2,927 entities
-  - LOCATION: 165 entities
-  - ORG: 138 entities
+  - PERSON: 1,482 entities
+  - LOCATION: 124 entities
+  - ORG: 131 entities
 
 ## Acceptance Criteria Verification
 
 | Entity Type | Required | Actual | Status |
 |-------------|----------|--------|--------|
-| PERSON      | 100      | 2,927  | ✓ PASS |
-| LOCATION    | 50       | 165    | ✓ PASS |
-| ORG         | 30       | 138    | ✓ PASS |
+| PERSON      | 100      | 1,482  | ✓ PASS |
+| LOCATION    | 50       | 124    | ✓ PASS |
+| ORG         | 30       | 131    | ✓ PASS |
 
 ## Annotation Schema
 
