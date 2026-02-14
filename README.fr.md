@@ -1,6 +1,6 @@
 > 🇬🇧 [English](README.md) | 🇫🇷 **Français**
 
-# RGPD Pseudonymizer
+# GDPR Pseudonymizer
 
 [![Version PyPI](https://img.shields.io/pypi/v/gdpr-pseudonymizer)](https://pypi.org/project/gdpr-pseudonymizer/)
 [![Versions Python](https://img.shields.io/pypi/pyversions/gdpr-pseudonymizer)](https://pypi.org/project/gdpr-pseudonymizer/)
@@ -16,7 +16,7 @@ Préparez vos documents sensibles pour l'analyse par IA en toute sérénité : t
 
 ## 🎯 Présentation
 
-RGPD Pseudonymizer est un **outil en ligne de commande conçu pour la confidentialité**. Il associe la rapidité de l'IA à la rigueur de la relecture humaine pour pseudonymiser des documents en français. Contrairement aux solutions entièrement automatiques ou aux services cloud, il mise sur l'**absence totale de faux négatifs** et sur la **solidité juridique** grâce à un processus de validation obligatoire.
+GDPR Pseudonymizer est un **outil en ligne de commande conçu pour la confidentialité**. Il associe la rapidité de l'IA à la rigueur de la relecture humaine pour pseudonymiser des documents en français. Contrairement aux solutions entièrement automatiques ou aux services cloud, il mise sur l'**absence totale de faux négatifs** et sur la **solidité juridique** grâce à un processus de validation obligatoire.
 
 **Pour qui ?**
 - 🏛️ **Organisations sensibles à la protection des données** ayant besoin d'analyses IA conformes au RGPD
@@ -193,12 +193,12 @@ logging:
 **Site de documentation :** [https://liochandayo.github.io/RGPDpseudonymizer/](https://liochandayo.github.io/RGPDpseudonymizer/)
 
 **Pour les utilisateurs :**
-- 📘 [Guide d'installation](docs/installation.md) — Instructions d'installation selon votre plateforme
-- 📗 [Tutoriel](docs/tutorial.md) — Guides pas à pas
+- 📘 [Guide d'installation](docs/installation.fr.md) — Instructions d'installation selon votre plateforme
+- 📗 [Tutoriel](docs/tutorial.fr.md) — Guides pas à pas
 - 📕 [Référence CLI](docs/CLI-REFERENCE.md) — Documentation complète des commandes
 - 📕 [Méthodologie et citation académique](docs/methodology.md) — Approche technique et conformité RGPD
-- ❓ [FAQ](docs/faq.md) — Questions fréquentes
-- 🔧 [Dépannage](docs/troubleshooting.md) — Erreurs courantes et solutions
+- ❓ [FAQ](docs/faq.fr.md) — Questions fréquentes
+- 🔧 [Dépannage](docs/troubleshooting.fr.md) — Erreurs courantes et solutions
 
 **Pour les développeurs :**
 - 📚 [Référence API](docs/api-reference.md) — Documentation des modules et points d'extension
@@ -298,12 +298,12 @@ L'interface de validation offre un parcours intuitif piloté au clavier pour pas
 ### 1. **Recherche universitaire et conformité éthique**
 **Contexte :** Un chercheur doit pseudonymiser 50 transcriptions d'entretiens pour obtenir l'aval de son comité d'éthique.
 
-**Sans RGPD Pseudonymizer :**
+**Sans GDPR Pseudonymizer :**
 - ❌ Rédaction manuelle : 16-25 heures
 - ❌ Perte de la cohérence du document pour l'analyse
 - ❌ Risque d'erreur dû à la fatigue
 
-**Avec RGPD Pseudonymizer :**
+**Avec GDPR Pseudonymizer :**
 - ✅ Détection préalable par l'IA : environ 30 min de traitement
 - ✅ Relecture humaine : environ 90 min (50 documents × environ 2 min chacun)
 - ✅ Total : **2-3 heures** (plus de 85 % de temps gagné)
@@ -314,11 +314,11 @@ L'interface de validation offre un parcours intuitif piloté au clavier pour pas
 ### 2. **Analyse de documents RH**
 **Contexte :** Une équipe RH souhaite analyser les retours de ses collaborateurs avec ChatGPT.
 
-**Sans RGPD Pseudonymizer :**
+**Sans GDPR Pseudonymizer :**
 - ❌ Impossible d'utiliser ChatGPT (violation du RGPD — les noms des employés seraient exposés)
 - ❌ Analyse manuelle uniquement (lente, perspectives limitées)
 
-**Avec RGPD Pseudonymizer :**
+**Avec GDPR Pseudonymizer :**
 - ✅ Pseudonymisation en local (noms des employés → pseudonymes)
 - ✅ Transmission à ChatGPT en toute sécurité (aucune donnée personnelle exposée)
 - ✅ Analyses IA obtenues dans le respect du RGPD
@@ -328,11 +328,11 @@ L'interface de validation offre un parcours intuitif piloté au clavier pour pas
 ### 3. **Préparation de documents juridiques**
 **Contexte :** Un cabinet d'avocats prépare des pièces pour une recherche juridique assistée par IA.
 
-**Sans RGPD Pseudonymizer :**
+**Sans GDPR Pseudonymizer :**
 - ❌ Service de pseudonymisation cloud (risque lié au tiers)
 - ❌ Rédaction manuelle (heures facturées coûteuses)
 
-**Avec RGPD Pseudonymizer :**
+**Avec GDPR Pseudonymizer :**
 - ✅ Traitement 100 % local (secret professionnel préservé)
 - ✅ Précision vérifiée par l'humain (solidité juridique)
 - ✅ Correspondances réversibles (dé-pseudonymisation possible si nécessaire)
@@ -341,7 +341,7 @@ L'interface de validation offre un parcours intuitif piloté au clavier pour pas
 
 ## ⚖️ Conformité RGPD
 
-### Comment RGPD Pseudonymizer contribue à la conformité
+### Comment GDPR Pseudonymizer contribue à la conformité
 
 | Exigence RGPD | Mise en œuvre |
 |----------------|---------------|
@@ -356,7 +356,7 @@ L'interface de validation offre un parcours intuitif piloté au clavier pour pas
 **Selon l'article 4(5) du RGPD :**
 > « La pseudonymisation désigne le traitement de données à caractère personnel de telle façon que celles-ci ne puissent plus être attribuées à une personne concernée précise **sans avoir recours à des informations supplémentaires**, pour autant que ces informations supplémentaires soient conservées séparément. »
 
-**L'approche de RGPD Pseudonymizer :**
+**L'approche de GDPR Pseudonymizer :**
 - ✅ **Remplacement des données personnelles :** Noms, lieux, organisations → pseudonymes
 - ✅ **Stockage séparé :** Table de correspondance chiffrée par mot de passe, distincte des documents
 - ✅ **Réversibilité :** Les utilisateurs autorisés peuvent dé-pseudonymiser grâce au mot de passe
@@ -427,7 +427,7 @@ Ce projet est distribué sous la [licence MIT](LICENSE).
 
 ## ⚠️ Avertissement
 
-**RGPD Pseudonymizer est un outil d'aide à la conformité RGPD. Il ne constitue en aucun cas un conseil juridique.**
+**GDPR Pseudonymizer est un outil d'aide à la conformité RGPD. Il ne constitue en aucun cas un conseil juridique.**
 
 **Points importants :**
 - ⚠️ La pseudonymisation réduit le risque mais n'est pas une anonymisation

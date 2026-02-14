@@ -119,7 +119,7 @@ exit
 **Erreur :** `Incorrect passphrase. Please check your passphrase and try again.`
 
 **Solution :**
-- Vérifiez que vous utilisez exactement la même mot de passe que celle utilisée lors de la création de la base de données
+- Vérifiez que vous utilisez exactement le même mot de passe que celui utilisé lors de la création de la base de données
 - Vérifiez la présence d'espaces à la fin ou de caractères invisibles
 - Si vous utilisez une variable d'environnement, vérifiez : `echo $GDPR_PSEUDO_PASSPHRASE` (Linux/macOS) ou `echo $env:GDPR_PSEUDO_PASSPHRASE` (PowerShell)
 
