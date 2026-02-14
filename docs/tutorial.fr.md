@@ -23,7 +23,7 @@ echo "Marie Dubois travaille a Paris pour Acme SA. Elle collabore avec Jean Mart
 
 ### Étape 2 : Définir votre mot de passe
 
-L'outil chiffre tous les appariements d'entités. Définissez une mot de passe (minimum 12 caractères) :
+L'outil chiffre tous les appariements d'entités. Définissez un mot de passe (minimum 12 caractères) :
 
 **Windows (PowerShell) :**
 ```powershell
@@ -35,7 +35,7 @@ $env:GDPR_PSEUDO_PASSPHRASE = "MySecurePassphrase123"
 export GDPR_PSEUDO_PASSPHRASE="MySecurePassphrase123"
 ```
 
-**Important :** Stockez cette mot de passe en sécurité. Sans elle, vous ne pourrez pas inverser la pseudonymisation.
+**Important :** Stockez ce mot de passe en sécurité. Sans lui, vous ne pourrez pas inverser la pseudonymisation.
 
 ### Étape 3 : Lancer la pseudonymisation
 
@@ -87,7 +87,7 @@ echo "Acme SA organise une reunion a Lyon avec Marie Dubois." > documents/doc3.t
 poetry run gdpr-pseudo init --db project.db
 ```
 
-Saisissez une mot de passe quand vous y êtes invité (ou utilisez la variable d'environnement).
+Saisissez un mot de passe quand vous y êtes invité (ou utilisez la variable d'environnement).
 
 ### Étape 3 : Traiter tous les documents
 
@@ -417,7 +417,7 @@ poetry run gdpr-pseudo list-mappings --search "Luke"
 ### Domaine juridique : Préparation de documents judiciaires
 
 ```bash
-# Initialiser avec une mot de passe robuste
+# Initialiser avec un mot de passe robuste
 poetry run gdpr-pseudo init --db case_12345.db
 
 # Traiter les documents du dossier
@@ -468,12 +468,12 @@ Quand un projet est terminé et les appariements ne sont plus nécessaires :
 # Destruction interactif (plus sûr - demande confirmation et mot de passe)
 poetry run gdpr-pseudo destroy-table --db project.db
 
-# Forcer la destruction (ignore la confirmation, vérifie toujours la mot de passe)
+# Forcer la destruction (ignore la confirmation, vérifie toujours le mot de passe)
 poetry run gdpr-pseudo destroy-table --db project.db --force
 ```
 
 **Fonctionnalités de sécurité :**
-- Vérification de la mot de passe prévient une suppression accidentelle de mauvaise base de données
+- Vérification du mot de passe prévient une suppression accidentelle de mauvaise base de données
 - Vérification du numéro magique SQLite prévient la suppression de fichiers non-base de données
 - Protection contre les symlinks prévient les attaques par redirection
 - Nettoyage sécurisé 3 passes écrase les données avant la suppression du fichier
@@ -508,8 +508,8 @@ poetry run gdpr-pseudo destroy-table --db project.db --force
 
 - **Français uniquement** — pas d'autres langues en v1.0
 - **Formats texte uniquement** — `.txt` et `.md` (pas de PDF/DOCX)
-- **Validation obligatoire** — chaque entité doit être examinée (détection IA ~40-50% de recall)
-- **La mot de passe est irrécupérable** — si perdue, les appariements existants ne peuvent pas être déchiffrés
+- **Validation obligatoire** — chaque entité doit être examinée (détection IA ~60 % F1)
+- **Le mot de passe est irrécupérable** — si perdu, les appariements existants ne peuvent pas être déchiffrés
 
 ---
 

@@ -8,19 +8,19 @@
 
 ### Quelle précision puis-je attendre de la détection automatique ?
 
-Le pipeline hybride de détection (NLP + expressions régulières) identifie automatiquement environ 40-50 % des entités dans un texte français. Cette étape sert de pré-filtrage -- **vous vérifiez et validez chaque entité** au cours du processus de validation obligatoire.
+Le pipeline hybride de détection (NLP + expressions régulières) identifie automatiquement environ 60 % des entités dans un texte français. Cette étape sert de pré-filtrage -- **vous vérifiez et validez chaque entité** au cours du processus de validation obligatoire.
 
 Après validation humaine, la précision atteint **100 %** puisque vous contrôlez la décision finale pour chaque entité.
 
 ### Pourquoi la précision du NER est-elle si faible ?
 
-Le modèle spaCy `fr_core_news_lg` a été entraîné principalement sur des textes journalistiques, pas sur des transcriptions d'entretiens ou des documents commerciaux. Les modèles linguistiques spécifiques à un domaine (registres conversationnels, formalité mixte) réduisent la précision en utilisation directe. Un test d'évaluation portant sur 25 documents français contenant 1 855 entités a mesuré un F1 de 29,5 % pour spaCy seul, amélioré à environ 40-50 % avec l'approche hybride.
+Le modèle spaCy `fr_core_news_lg` a été entraîné principalement sur des textes journalistiques, pas sur des transcriptions d'entretiens ou des documents commerciaux. Les modèles linguistiques spécifiques à un domaine (registres conversationnels, formalité mixte) réduisent la précision en utilisation directe. Un test d'évaluation portant sur 25 documents français contenant 1 855 entités a mesuré un F1 de 29,5 % pour spaCy seul, amélioré à environ 60 % (F1 59,97 %) avec l'approche hybride.
 
 Un affinage basé sur des données de validation du monde réel est prévu pour la v3.0 (ciblant un F1 de 70-85 %).
 
 ### Pourquoi la validation est-elle obligatoire ?
 
-Parce que la détection IA rate des entités. Avec un rappel d'environ 40-50 %, à peu près la moitié des entités ne seraient pas détectées sans examen humain. Pour la conformité RGPD, manquer ne serait-ce qu'une entité de données personnelles pourrait constituer une violation de données. La validation obligatoire garantit **aucun faux négatif**.
+Parce que la détection IA rate des entités. Avec un rappel d'environ 80 %, environ un cinquième des entités ne seraient pas détectées sans examen humain. Pour la conformité RGPD, manquer ne serait-ce qu'une entité de données personnelles pourrait constituer une violation de données. La validation obligatoire garantit **aucun faux négatif**.
 
 ### Comment traiter uniquement certains types d'entités ?
 
@@ -87,7 +87,7 @@ Consultez la [Méthodologie](methodology.md) pour la cartographie complète de c
 
 ### La pseudo-anonymisation est-elle la même chose que l'anonymisation ?
 
-Non. La **pseudo-anonymisation** remplace les informations d'identification par des pseudonymes mais reste réversible (avec la table de correspondance et la mot de passe). Les données pseudo-anonymisées restent des données personnelles au sens du RGPD.
+Non. La **pseudo-anonymisation** remplace les informations d'identification par des pseudonymes mais reste réversible (avec la table de correspondance et le mot de passe). Les données pseudo-anonymisées restent des données personnelles au sens du RGPD.
 
 L'**anonymisation** supprime de manière irréversible toute information d'identification afin que la ré-identification soit impossible. Le RGPD ne s'applique pas aux données véritablement anonymes.
 
@@ -178,11 +178,11 @@ spaCy `fr_core_news_lg` (version 3.8.0), un grand modèle de langue française (
 
 ### Comment la base de données de correspondance est-elle chiffrée ?
 
-AES-256-SIV (chiffrement authentifié déterministe selon RFC 5297) avec dérivation de clé PBKDF2-HMAC-SHA256 (210 000 itérations). Chaque base de données possède un salt aléatoire cryptographiquement unique de 32 octets. La mot de passe n'est jamais stockée sur le disque.
+AES-256-SIV (chiffrement authentifié déterministe selon RFC 5297) avec dérivation de clé PBKDF2-HMAC-SHA256 (210 000 itérations). Chaque base de données possède un salt aléatoire cryptographiquement unique de 32 octets. Le mot de passe n'est jamais stocké sur le disque.
 
-### Que se passe-t-il si j'oublie ma mot de passe ?
+### Que se passe-t-il si j'oublie mon mot de passe ?
 
-La base de données de correspondance ne peut pas être déchiffrée sans la mot de passe correcte. Cela signifie :
+La base de données de correspondance ne peut pas être déchiffrée sans le mot de passe correct. Cela signifie :
 - Les mappings de pseudonymes existants sont définitivement inaccessibles
 - Vous ne pouvez pas inverser la pseudo-anonymisation sur les documents précédemment traités
 - Vous devez créer une nouvelle base de données (`poetry run gdpr-pseudo init --force`)

@@ -94,7 +94,7 @@ RGPD Pseudonymizer est un **outil en ligne de commande conçu pour la confidenti
 - Public visé : utilisateurs non techniques (équipes RH, juridiques, conformité)
 
 **v3.0 (2027+) :** Précision NLP et automatisation
-- Modèle NER français affiné (objectif F1 70-85 %, contre 40-50 % actuellement)
+- Modèle NER français affiné (objectif F1 70-85 %, contre ~60 % actuellement)
 - Option `--no-validate` pour les traitements à haute confiance
 - Traitement automatique à partir d'un seuil de confiance (objectif F1 85 %+)
 - Prise en charge multilingue (anglais, espagnol, allemand)
@@ -184,7 +184,7 @@ logging:
   level: INFO
 ```
 
-**Remarque :** La mot de passe n'est jamais stockée dans les fichiers de configuration (par sécurité). Utilisez la variable d'environnement `GDPR_PSEUDO_PASSPHRASE` ou la saisie interactive. Minimum 12 caractères requis (NFR12).
+**Remarque :** Le mot de passe n'est jamais stocké dans les fichiers de configuration (par sécurité). Utilisez la variable d'environnement `GDPR_PSEUDO_PASSPHRASE` ou la saisie interactive. Minimum 12 caractères requis (NFR12).
 
 ---
 
@@ -359,7 +359,7 @@ L'interface de validation offre un parcours intuitif piloté au clavier pour pas
 **L'approche de RGPD Pseudonymizer :**
 - ✅ **Remplacement des données personnelles :** Noms, lieux, organisations → pseudonymes
 - ✅ **Stockage séparé :** Table de correspondance chiffrée par mot de passe, distincte des documents
-- ✅ **Réversibilité :** Les utilisateurs autorisés peuvent dé-pseudonymiser grâce à la mot de passe
+- ✅ **Réversibilité :** Les utilisateurs autorisés peuvent dé-pseudonymiser grâce au mot de passe
 - ⚠️ **Attention :** La pseudonymisation réduit le risque mais ne rend **pas** les données anonymes
 
 **Recommandation :** Consultez votre délégué à la protection des données (DPD) pour des conseils de conformité adaptés à votre situation.

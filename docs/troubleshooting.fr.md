@@ -104,8 +104,8 @@ exit
 **Cause :** Exigence de sécurité -- les phrases de passe doivent contenir au moins 12 caractères.
 
 **Solution :**
-1. Utilisez une mot de passe d'au moins 12 caractères
-2. Ou définissez-la via une variable d'environnement :
+1. Utilisez un mot de passe d'au moins 12 caractères
+2. Ou définissez-le via une variable d'environnement :
    ```bash
    # macOS/Linux
    export GDPR_PSEUDO_PASSPHRASE="your-secure-passphrase-here"

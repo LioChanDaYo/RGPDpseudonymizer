@@ -388,7 +388,7 @@ Afficher la configuration actuelle effective :
 poetry run gdpr-pseudo config
 ```
 
-**Remarque de sécurité :** La mot de passe n'est jamais stockée dans les fichiers de configuration. Utilisez :
+**Remarque de sécurité :** Le mot de passe n'est jamais stocké dans les fichiers de configuration. Utilisez :
 - Variable d'environnement : `GDPR_PSEUDO_PASSPHRASE`
 - Invite interactive (par défaut)
 
@@ -437,8 +437,8 @@ poetry env info
 **Cause :** Exigence de sécurité. Les phrases de passe doivent comporter au moins 12 caractères.
 
 **Solution :**
-1. Utilisez une mot de passe d'au moins 12 caractères
-2. Ou définissez-la via une variable d'environnement :
+1. Utilisez un mot de passe d'au moins 12 caractères
+2. Ou définissez-le via une variable d'environnement :
    ```bash
    export GDPR_PSEUDO_PASSPHRASE="votre-phrase-de-passe-securisee"
    ```
