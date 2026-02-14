@@ -508,7 +508,7 @@ poetry run gdpr-pseudo destroy-table --db project.db --force
 
 - **French only** — no other languages in v1.0
 - **Text formats only** — `.txt` and `.md` (no PDF/DOCX)
-- **Validation is mandatory** — every entity must be reviewed (AI detection ~40-50% recall)
+- **Validation is mandatory** — every entity must be reviewed (AI detection ~60% F1)
 - **Passphrase is irrecoverable** — if lost, existing mappings cannot be decrypted
 
 ---

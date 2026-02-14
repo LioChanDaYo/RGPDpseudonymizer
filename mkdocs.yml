@@ -59,6 +59,29 @@ validation:
 
 plugins:
   - search
+  - i18n:
+      docs_structure: suffix
+      languages:
+        - locale: en
+          default: true
+          name: English
+          build: true
+        - locale: fr
+          name: Français
+          build: true
+          nav_translations:
+            Home: Accueil
+            Getting Started: Premiers Pas
+            Installation: Installation
+            Quick Start: Guide Rapide
+            User Guide: Guide Utilisateur
+            CLI Reference: Référence CLI
+            FAQ: FAQ
+            Troubleshooting: Dépannage
+            Methodology: Méthodologie
+            Technical Approach & GDPR Compliance: Approche Technique & Conformité RGPD
+            Developer Guide: Guide Développeur
+            API Reference: Référence API
 
 nav:
   - Home: index.md

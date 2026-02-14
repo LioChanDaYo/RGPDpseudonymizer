@@ -8,19 +8,19 @@
 
 ### What accuracy should I expect from the automatic detection?
 
-The hybrid detection pipeline (NLP + regex) automatically identifies approximately 40-50% of entities in French text. This is a pre-filtering step -- **you review and confirm every entity** during the mandatory validation workflow.
+The hybrid detection pipeline (NLP + regex + geography dictionary) automatically identifies approximately 60% of entities in French text (F1 59.97%). This is a pre-filtering step -- **you review and confirm every entity** during the mandatory validation workflow.
 
 After human validation, accuracy is **100%** because you control the final decision for every entity.
 
 ### Why is the NER accuracy so low?
 
-The spaCy `fr_core_news_lg` model was trained primarily on news text, not interview transcripts or business documents. Domain-specific language patterns (conversational registers, mixed formality) reduce out-of-the-box accuracy. A benchmark on 25 French documents with 1,855 entities measured 29.5% F1 for spaCy alone, improving to ~40-50% with the hybrid approach.
+The spaCy `fr_core_news_lg` model was trained primarily on news text, not interview transcripts or business documents. Domain-specific language patterns (conversational registers, mixed formality) reduce out-of-the-box accuracy. A benchmark on 25 French documents with 1,855 entities measured 29.5% F1 for spaCy alone, improving to ~60% with the hybrid approach (F1 59.97%) after annotation cleanup, expanded regex patterns, and a French geography dictionary (Story 5.3).
 
 Fine-tuning with real-world validation data is planned for v3.0 (targeting 70-85% F1).
 
 ### Why is validation mandatory?
 
-Because the AI detection misses entities. With ~40-50% recall, roughly half of entities would go undetected without human review. For GDPR compliance, missing even one personal data entity could constitute a data breach. Mandatory validation ensures **zero false negatives**.
+Because the AI detection misses entities. With ~80% recall, roughly one in five entities would go undetected without human review. For GDPR compliance, missing even one personal data entity could constitute a data breach. Mandatory validation ensures **zero false negatives**.
 
 ### How do I process only specific entity types?
 
@@ -144,8 +144,10 @@ No. All processing happens locally. There are no cloud dependencies, API calls, 
 - French language, .txt/.md formats
 
 **v1.1 (Q2-Q3 2026):** Quick wins and GDPR compliance
-- GDPR Right to Erasure: selective entity deletion (`delete-mapping` command, Article 17)
-- Gender-aware pseudonym assignment for French names
+- ~~GDPR Right to Erasure: selective entity deletion (`delete-mapping` command, Article 17)~~ (Story 5.1 — done)
+- ~~Gender-aware pseudonym assignment for French names~~ (Story 5.2 — done)
+- ~~NER accuracy improvements: F1 29.5% → 59.97%~~ (Story 5.3 — done)
+- ~~French documentation translation (MkDocs i18n)~~ (Story 5.4 — done)
 - Beta feedback bug fixes and UX improvements
 
 **v2.0 (Q3-Q4 2026):** Desktop GUI
