@@ -144,9 +144,11 @@ Non. Tout le traitement se fait localement. Il n'y a aucune dépendance cloud, a
 - Langue française, formats .txt/.md
 
 **v1.1 (Q2-Q3 2026) :** Améliorations rapides et conformité RGPD
-- Droit à l'oubli RGPD : suppression sélective des entités (commande `delete-mapping`, Article 17)
-- Attribution de pseudonymes consciente du genre pour les noms français
-- Correctifs de commentaires bêta et améliorations UX
+- ~~Droit à l'oubli RGPD : suppression sélective des entités (commande `delete-mapping`, Article 17)~~ (Story 5.1 — terminé)
+- ~~Attribution de pseudonymes consciente du genre pour les noms français~~ (Story 5.2 — terminé)
+- ~~Améliorations de la précision NER : F1 29,5 % → 59,97 %~~ (Story 5.3 — terminé)
+- ~~Traduction française de la documentation (MkDocs i18n)~~ (Story 5.4 — terminé)
+- Correctifs de bugs et améliorations UX issues des retours bêta
 
 **v2.0 (Q3-Q4 2026) :** Interface graphique de bureau
 - Interface graphique enveloppant le noyau CLI (glisser-déposer, révision visuelle des entités)

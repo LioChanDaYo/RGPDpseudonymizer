@@ -84,6 +84,7 @@ GDPR Pseudonymizer est un **outil en ligne de commande conçu pour la confidenti
 - ✅ ~~Droit à l'effacement RGPD : suppression sélective d'entités (commande `delete-mapping`, article 17)~~ (Story 5.1 — terminé)
 - ✅ ~~Attribution de pseudonymes tenant compte du genre pour les prénoms français~~ (Story 5.2 — terminé)
 - ✅ ~~Améliorations de la précision NER : F1 29,74 % → 59,97 % (nettoyage des annotations, enrichissement des expressions régulières, dictionnaire géographique)~~ (Story 5.3 — terminé)
+- ✅ ~~Traduction française de la documentation (MkDocs i18n, 6 documents traduits)~~ (Story 5.4 — terminé)
 - Corrections de bugs et améliorations UX issues des retours bêta
 
 **v2.0 (T3-T4 2026) :** Interface graphique
@@ -374,7 +375,7 @@ L'interface de validation offre un parcours intuitif piloté au clavier pour pas
 - ✅ **Epic 2 :** Moteur de pseudonymisation (9 stories) — Bibliothèques de pseudonymes, chiffrement, journaux d'audit, traitement par lot, correspondance 1:1 RGPD
 - ✅ **Epic 3 :** Interface CLI et traitement par lot (7 stories) — 8 commandes CLI, suivi de progression, fichiers de configuration, traitement parallèle, perfectionnement UX
 - ✅ **Epic 4 :** Préparation au lancement (8 stories) — Validation de l'utilité LLM, tests multi-plateformes, documentation, suite de précision NER, validation des performances, intégration des retours bêta, refactorisation, préparation au lancement
-- 🔄 **Epic 5 :** Améliorations et conformité RGPD (3 stories terminées) — Effacement article 17 RGPD, pseudonymes tenant compte du genre, amélioration de la précision NER (F1 29,74 % → 59,97 %)
+- 🔄 **Epic 5 :** Améliorations et conformité RGPD (4 stories terminées) — Effacement article 17 RGPD, pseudonymes tenant compte du genre, amélioration de la précision NER (F1 29,74 % → 59,97 %), traduction française de la documentation
 - **Total :** 36 stories, 1 198+ tests, 86 %+ de couverture, tous les contrôles qualité au vert
 
 ---
@@ -557,7 +558,7 @@ La suite de tests d'intégration couvre :
 | Métrique | Valeur | Statut |
 |----------|--------|--------|
 | **Avancement** | v1.0.7 | ✅ Les 4 Epics MVP + Epic 5 en cours |
-| **Stories terminées** | 36 (Epic 1-5) | ✅ Epics 1-4 terminés + Stories 5.1, 5.2, 5.3 |
+| **Stories terminées** | 37 (Epic 1-5) | ✅ Epics 1-4 terminés + Stories 5.1, 5.2, 5.3, 5.4 |
 | **Utilité LLM (NFR10)** | 4,27/5,0 (85,4 %) | ✅ VALIDÉ (seuil : 80 %) |
 | **Succès d'installation (NFR3)** | 87,5 % (7/8 plateformes) | ✅ VALIDÉ (seuil : 85 %) |
 | **Première pseudonymisation (NFR14)** | 100 % en moins de 30 min | ✅ VALIDÉ (seuil : 80 %) |
@@ -595,4 +596,4 @@ La suite de tests d'intégration couvre :
 
 ---
 
-**Dernière mise à jour :** 2026-02-13 (v1.0.7 — Epic 5 en cours : effacement RGPD, pseudonymes tenant compte du genre, précision NER 59,97 % F1)
+**Dernière mise à jour :** 2026-02-14 (v1.0.7 — Epic 5 en cours : effacement RGPD, pseudonymes tenant compte du genre, précision NER 59,97 % F1, documentation française)

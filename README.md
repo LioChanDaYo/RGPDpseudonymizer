@@ -84,6 +84,7 @@ GDPR Pseudonymizer is a **privacy-first CLI tool** that combines AI efficiency w
 - ✅ ~~GDPR Right to Erasure: selective entity deletion (`delete-mapping` command, Article 17)~~ (Story 5.1 — done)
 - ✅ ~~Gender-aware pseudonym assignment for French names~~ (Story 5.2 — done)
 - ✅ ~~NER accuracy improvements: F1 29.74% → 59.97% (annotation cleanup, regex expansion, geography dictionary)~~ (Story 5.3 — done)
+- ✅ ~~French documentation translation (MkDocs i18n, 6 docs translated)~~ (Story 5.4 — done)
 - Beta feedback bug fixes and UX improvements
 
 **v2.0 (Q3-Q4 2026):** GUI & broader accessibility
@@ -94,7 +95,7 @@ GDPR Pseudonymizer is a **privacy-first CLI tool** that combines AI efficiency w
 - Target: Non-technical users (HR, legal, compliance teams)
 
 **v3.0 (2027+):** NLP accuracy & automation
-- Fine-tuned French NER model (70-85% F1 target, up from 40-50%)
+- Fine-tuned French NER model (70-85% F1 target, up from ~60%)
 - Optional `--no-validate` flag for high-confidence workflows
 - Confidence-based auto-processing (85%+ F1 target)
 - Multi-language support (English, Spanish, German)
@@ -374,7 +375,7 @@ The validation UI provides an intuitive keyboard-driven interface for reviewing 
 - ✅ **Epic 2:** Core Pseudonymization Engine (9 stories) — pseudonym libraries, encryption, audit logging, batch processing, GDPR 1:1 mapping
 - ✅ **Epic 3:** CLI Interface & Batch Processing (7 stories) — 8 CLI commands, progress reporting, config files, parallel batch, UX polish
 - ✅ **Epic 4:** Launch Readiness (8 stories) — LLM utility validation, cross-platform testing, documentation, NER accuracy suite, performance validation, beta feedback integration, codebase refactoring, launch preparation
-- 🔄 **Epic 5:** Quick Wins & GDPR Compliance (3 stories done) — GDPR Article 17 erasure, gender-aware pseudonyms, NER accuracy improvements (F1 29.74% → 59.97%)
+- 🔄 **Epic 5:** Quick Wins & GDPR Compliance (4 stories done) — GDPR Article 17 erasure, gender-aware pseudonyms, NER accuracy improvements (F1 29.74% → 59.97%), French documentation translation
 - **Total:** 36 stories, 1198+ tests, 86%+ coverage, all quality gates green
 
 ---
@@ -557,7 +558,7 @@ The integration test suite covers:
 | Metric | Value | Status |
 |--------|-------|--------|
 | **Development Progress** | v1.0.7 | ✅ All 4 MVP Epics + Epic 5 in progress |
-| **Stories Complete** | 36 (Epic 1-5) | ✅ Epics 1-4 complete + Stories 5.1, 5.2, 5.3 |
+| **Stories Complete** | 37 (Epic 1-5) | ✅ Epics 1-4 complete + Stories 5.1, 5.2, 5.3, 5.4 |
 | **LLM Utility (NFR10)** | 4.27/5.0 (85.4%) | ✅ PASSED (threshold: 80%) |
 | **Installation Success (NFR3)** | 87.5% (7/8 platforms) | ✅ PASSED (threshold: 85%) |
 | **First Pseudonymization (NFR14)** | 100% within 30 min | ✅ PASSED (threshold: 80%) |
@@ -595,4 +596,4 @@ The integration test suite covers:
 
 ---
 
-**Last Updated:** 2026-02-13 (v1.0.7 — Epic 5 in progress: GDPR erasure, gender-aware pseudonyms, NER accuracy 59.97% F1)
+**Last Updated:** 2026-02-14 (v1.0.7 — Epic 5 in progress: GDPR erasure, gender-aware pseudonyms, NER accuracy 59.97% F1, French documentation)
