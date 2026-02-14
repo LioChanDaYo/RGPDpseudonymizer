@@ -8,107 +8,107 @@
 [![CI](https://github.com/LioChanDaYo/RGPDpseudonymizer/actions/workflows/ci.yaml/badge.svg)](https://github.com/LioChanDaYo/RGPDpseudonymizer/actions/workflows/ci.yaml)
 [![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue)](https://liochandayo.github.io/RGPDpseudonymizer/)
 
-**Pseudonymisation assistée par IA pour documents francophones avec vérification humaine**
+**Pseudonymisez vos documents français grâce à l'IA, avec relecture humaine obligatoire**
 
-Transformez vos documents sensibles en français pour une analyse IA sécurisée grâce au traitement local, à la relecture humaine obligatoire et à la conformité RGPD.
-
----
-
-## 🎯 Aperçu
-
-RGPD Pseudonymizer est un **outil CLI axé sur la confidentialité** qui combine l'efficacité de l'IA avec la précision humaine pour pseudonymiser des documents textuels en français. Contrairement aux outils entièrement automatiques ou aux services cloud, nous privilégions le **zéro faux négatif** et la **défendabilité juridique** grâce à des flux de validation obligatoires.
-
-**Idéal pour :**
-- 🏛️ **Les organisations soucieuses de la vie privée** ayant besoin d'analyses IA conformes au RGPD
-- 🎓 **Les chercheurs universitaires** soumis à des exigences de comités d'éthique
-- ⚖️ **Les équipes juridiques et RH** nécessitant une pseudonymisation défendable
-- 🤖 **Les utilisateurs de LLM** souhaitant analyser des documents confidentiels en toute sécurité
+Préparez vos documents sensibles pour l'analyse par IA en toute sérénité : traitement entièrement local, relecture humaine systématique, conformité RGPD.
 
 ---
 
-## ✨ Fonctionnalités clés
+## 🎯 Présentation
 
-### 🔒 **Architecture axée sur la confidentialité**
+RGPD Pseudonymizer est un **outil en ligne de commande conçu pour la confidentialité**. Il associe la rapidité de l'IA à la rigueur de la relecture humaine pour pseudonymiser des documents en français. Contrairement aux solutions entièrement automatiques ou aux services cloud, il mise sur l'**absence totale de faux négatifs** et sur la **solidité juridique** grâce à un processus de validation obligatoire.
+
+**Pour qui ?**
+- 🏛️ **Organisations sensibles à la protection des données** ayant besoin d'analyses IA conformes au RGPD
+- 🎓 **Chercheurs universitaires** soumis aux exigences des comités d'éthique
+- ⚖️ **Équipes juridiques et RH** qui ont besoin d'une pseudonymisation opposable
+- 🤖 **Utilisateurs de LLM** souhaitant exploiter des documents confidentiels en toute sécurité
+
+---
+
+## ✨ Fonctionnalités principales
+
+### 🔒 **Confidentialité au cœur de l'architecture**
 - ✅ **Traitement 100 % local** — Vos données ne quittent jamais votre machine
 - ✅ **Aucune dépendance cloud** — Fonctionne entièrement hors ligne après installation
-- ✅ **Tables de correspondance chiffrées** — Chiffrement AES-256-SIV avec dérivation de clé PBKDF2 (210K itérations), pseudonymisation réversible protégée par phrase secrète
-- ✅ **Zéro télémétrie** — Aucune collecte analytique, aucun rapport d'erreur, aucune communication externe
+- ✅ **Tables de correspondance chiffrées** — Chiffrement AES-256-SIV, dérivation de clé PBKDF2 (210 000 itérations), pseudonymisation réversible protégée par mot de passe
+- ✅ **Aucune télémétrie** — Ni collecte analytique, ni rapport d'erreur, ni communication externe
 
-### 🤝 **IA + Vérification humaine**
-- ✅ **Détection hybride** — L'IA pré-détecte environ 60 % des entités (NLP + regex + dictionnaire géographique)
-- ✅ **Validation obligatoire** — Vous vérifiez et confirmez toutes les entités (garantit une précision de 100 %)
+### 🤝 **IA + relecture humaine**
+- ✅ **Détection hybride** — L'IA repère environ 60 % des entités (NLP + expressions régulières + dictionnaire géographique)
+- ✅ **Validation obligatoire** — Vous vérifiez et confirmez chaque entité (précision finale de 100 %)
 - ✅ **Interface de validation rapide** — Interface CLI enrichie avec raccourcis clavier, moins de 2 min par document
-- ✅ **Flux intelligent** — Regroupement des entités par type (PERSON → ORG → LOCATION) avec affichage du contexte
-- ✅ **Regroupement de variantes d'entités** — Les formes apparentées (« Marie Dubois », « Pr. Dubois », « Dubois ») sont fusionnées en un seul élément de validation avec un affichage « Apparaît aussi sous : »
-- ✅ **Actions par lot** — Confirmation/rejet de plusieurs entités en une seule opération
+- ✅ **Parcours intelligent** — Regroupement des entités par type (PERSON → ORG → LOCATION) avec affichage du contexte
+- ✅ **Regroupement des variantes** — Les formes apparentées (« Marie Dubois », « Pr. Dubois », « Dubois ») sont fusionnées en un seul élément à valider, avec mention « Apparaît aussi sous : »
+- ✅ **Actions groupées** — Confirmation ou rejet de plusieurs entités en une seule opération
 
 ### 📊 **Traitement par lot**
-- ✅ **Pseudonymes cohérents** — Même entité = même pseudonyme sur 10 à 100+ documents
-- ✅ **Correspondance compositionnelle** — « Marie Dubois » → « Leia Organa », « Marie » seule → « Leia »
-- ✅ **Gestion intelligente des noms** — Suppression des titres (« Dr. Marie Dubois » = « Marie Dubois »), noms composés (« Jean-Pierre » traité comme unité atomique)
-- ✅ **Traitement sélectif des entités** — Option `--entity-types` pour filtrer par type (ex. : `--entity-types PERSON,LOCATION`)
-- ✅ **Gain de temps de 50 %+** par rapport à la rédaction manuelle (pré-détection IA + validation)
+- ✅ **Pseudonymes cohérents** — Une même entité reçoit le même pseudonyme sur 10, 50 ou 100+ documents
+- ✅ **Résolution par composition** — « Marie Dubois » → « Leia Organa », « Marie » seule → « Leia »
+- ✅ **Gestion intelligente des noms** — Suppression des titres (« Dr. Marie Dubois » = « Marie Dubois »), noms composés (« Jean-Pierre » traité comme un tout)
+- ✅ **Traitement sélectif** — Option `--entity-types` pour ne traiter que certains types (ex. : `--entity-types PERSON,LOCATION`)
+- ✅ **Gain de temps de plus de 50 %** par rapport à la rédaction manuelle, grâce à la détection préalable par l'IA
 
 ### 🎭 **Pseudonymes thématiques**
-- ✅ **Résultat lisible** — Star Wars, Le Seigneur des Anneaux ou prénoms français génériques
-- ✅ **Préservation du contexte** — L'analyse par LLM conserve 85 % de l'utilité du document (validé : 4,27/5,0)
-- ✅ **Sensibilité au genre** — Détection automatique du genre des prénoms français à partir d'un dictionnaire de 945 prénoms et attribution de pseudonymes correspondants (prénoms féminins → pseudonymes féminins, prénoms masculins → pseudonymes masculins)
-- ✅ **Prise en charge complète des entités** — Pseudonymes PERSON, LOCATION et ORGANIZATION pour tous les thèmes
+- ✅ **Résultat lisible** — Thèmes Star Wars, Le Seigneur des Anneaux, ou prénoms français génériques
+- ✅ **Utilité préservée** — L'analyse par LLM conserve 85 % de la valeur du document (score validé : 4,27/5,0)
+- ✅ **Respect du genre** — Détection automatique du genre des prénoms français à partir d'un dictionnaire de 945 prénoms, avec attribution de pseudonymes correspondants (prénom féminin → pseudonyme féminin, prénom masculin → pseudonyme masculin)
+- ✅ **Tous les types d'entités couverts** — Pseudonymes PERSON, LOCATION et ORGANIZATION pour chaque thème
 
 ---
 
-## 🚀 Démarrage rapide
+## 🚀 Prise en main rapide
 
-**Statut :** 🎉 **v1.0.7** (février 2026)
+**Version actuelle :** 🎉 **v1.0.7** (février 2026)
 
-### Attentes réalistes pour la v1.0
+### Ce que la v1.0 permet — et ce qu'elle ne permet pas
 
-**Ce que la v1.0 offre :**
-- 🤖 **Détection assistée par IA** — La détection hybride NLP + regex identifie environ 60 % des entités automatiquement (F1 59,97 %)
-- ✅ **Vérification humaine obligatoire** — Vous relisez et confirmez toutes les entités (2-3 min par document)
-- 🔒 **Garantie de précision à 100 %** — La validation humaine assure zéro faux négatif
-- ⚡ **50 %+ plus rapide que le traitement manuel** — La pré-détection fait gagner du temps par rapport à la rédaction manuelle
+**Ce qu'elle offre :**
+- 🤖 **Détection assistée par IA** — La détection hybride NLP + expressions régulières repère environ 60 % des entités automatiquement (F1 59,97 %)
+- ✅ **Relecture humaine obligatoire** — Vous passez en revue toutes les entités (2-3 min par document)
+- 🔒 **Précision garantie à 100 %** — La validation humaine élimine tout faux négatif
+- ⚡ **Plus de 50 % de temps gagné** par rapport à la rédaction manuelle
 
-**Ce que la v1.0 ne propose PAS :**
+**Ce qu'elle ne propose pas :**
 - ❌ Un traitement entièrement automatique sans intervention
 - ❌ Une précision IA supérieure à 85 % (actuellement : environ 60 % F1 avec l'approche hybride)
-- ❌ Un mode de validation optionnel (la validation est obligatoire)
+- ❌ Un mode sans validation (la relecture est obligatoire)
 
 ### Feuille de route
 
 **v1.0 (MVP — T2 2026) :** CLI assisté par IA avec validation obligatoire
-- Cible : Utilisateurs précoces soucieux de la vie privée, valorisant la supervision humaine
-- Traitement 100 % local, tables de correspondance chiffrées, pistes d'audit
+- Public visé : utilisateurs soucieux de la confidentialité, attachés au contrôle humain
+- Traitement 100 % local, tables de correspondance chiffrées, journaux d'audit
 
-**v1.1 (T2-T3 2026) :** Améliorations rapides et conformité RGPD
+**v1.1 (T2-T3 2026) :** Améliorations et conformité RGPD
 - ✅ ~~Droit à l'effacement RGPD : suppression sélective d'entités (commande `delete-mapping`, article 17)~~ (Story 5.1 — terminé)
-- ✅ ~~Attribution de pseudonymes sensible au genre pour les prénoms français~~ (Story 5.2 — terminé)
-- ✅ ~~Améliorations de la précision NER : F1 29,74 % → 59,97 % (nettoyage des annotations, extension des regex, dictionnaire géographique)~~ (Story 5.3 — terminé)
-- Corrections de bugs suite aux retours bêta et améliorations de l'expérience utilisateur
+- ✅ ~~Attribution de pseudonymes tenant compte du genre pour les prénoms français~~ (Story 5.2 — terminé)
+- ✅ ~~Améliorations de la précision NER : F1 29,74 % → 59,97 % (nettoyage des annotations, enrichissement des expressions régulières, dictionnaire géographique)~~ (Story 5.3 — terminé)
+- Corrections de bugs et améliorations UX issues des retours bêta
 
-**v2.0 (T3-T4 2026) :** Interface graphique et accessibilité élargie
-- Interface graphique de bureau encapsulant le noyau CLI (glisser-déposer, revue visuelle des entités)
+**v2.0 (T3-T4 2026) :** Interface graphique
+- Application de bureau encapsulant le noyau CLI (glisser-déposer, revue visuelle des entités)
 - Exécutables autonomes (.exe pour Windows, .app pour macOS) — Python non requis
-- Interface utilisateur francophone avec architecture d'internationalisation (prête pour le multilingue)
+- Interface francophone avec architecture d'internationalisation (prête pour le multilingue)
 - Accessibilité WCAG AA pour les contextes professionnels et universitaires
-- Cible : Utilisateurs non techniques (équipes RH, juridiques, conformité)
+- Public visé : utilisateurs non techniques (équipes RH, juridiques, conformité)
 
 **v3.0 (2027+) :** Précision NLP et automatisation
 - Modèle NER français affiné (objectif F1 70-85 %, contre 40-50 % actuellement)
-- Option `--no-validate` pour les flux de travail à haute confiance
-- Traitement automatique basé sur la confiance (objectif F1 85 %+)
+- Option `--no-validate` pour les traitements à haute confiance
+- Traitement automatique à partir d'un seuil de confiance (objectif F1 85 %+)
 - Prise en charge multilingue (anglais, espagnol, allemand)
 
 ---
 
 ## ⚙️ Installation
 
-Consultez le [Guide d'installation](https://liochandayo.github.io/RGPDpseudonymizer/installation/) pour des instructions détaillées par plateforme.
+Consultez le [guide d'installation](https://liochandayo.github.io/RGPDpseudonymizer/installation/) pour des instructions détaillées selon votre plateforme.
 
 ### Prérequis
 - **Python 3.10, 3.11 ou 3.12** (validé en CI/CD — 3.13+ pas encore testé)
 
-### Installation depuis PyPI (recommandé)
+### Depuis PyPI (recommandé)
 
 ```bash
 pip install gdpr-pseudonymizer
@@ -122,7 +122,7 @@ gdpr-pseudo --help
 > python -m spacy download fr_core_news_lg
 > ```
 
-### Installation depuis les sources (développeur)
+### Depuis les sources (développeurs)
 
 ```bash
 # Cloner le dépôt
@@ -145,25 +145,25 @@ poetry run gdpr-pseudo --help
 ### Test rapide
 
 ```bash
-# Tester sur un document exemple
+# Tester sur un document d'exemple
 echo "Marie Dubois travaille à Paris pour Acme SA." > test.txt
 gdpr-pseudo process test.txt
 
-# Ou spécifier un fichier de sortie personnalisé
+# Ou préciser un fichier de sortie
 gdpr-pseudo process test.txt -o output.txt
 ```
 
 Résultat attendu : "Leia Organa travaille à Coruscant pour Rebel Alliance."
 
-### Fichier de configuration (optionnel)
+### Fichier de configuration (facultatif)
 
-Générez un modèle de configuration pour personnaliser les paramètres par défaut :
+Générez un modèle de configuration pour personnaliser le comportement par défaut :
 
 ```bash
 # Générer un modèle .gdpr-pseudo.yaml dans le répertoire courant
 poetry run gdpr-pseudo config --init
 
-# Afficher la configuration effective actuelle
+# Afficher la configuration en vigueur
 poetry run gdpr-pseudo config
 ```
 
@@ -177,14 +177,14 @@ pseudonymization:
   model: spacy
 
 batch:
-  workers: 4          # 1-8 (use 1 for interactive validation)
+  workers: 4          # 1-8 (utiliser 1 pour la validation interactive)
   output_dir: null
 
 logging:
   level: INFO
 ```
 
-**Remarque :** La phrase secrète n'est jamais stockée dans les fichiers de configuration (sécurité). Utilisez la variable d'environnement `GDPR_PSEUDO_PASSPHRASE` ou la saisie interactive. Minimum 12 caractères requis (NFR12).
+**Remarque :** La mot de passe n'est jamais stockée dans les fichiers de configuration (par sécurité). Utilisez la variable d'environnement `GDPR_PSEUDO_PASSPHRASE` ou la saisie interactive. Minimum 12 caractères requis (NFR12).
 
 ---
 
@@ -193,18 +193,18 @@ logging:
 **Site de documentation :** [https://liochandayo.github.io/RGPDpseudonymizer/](https://liochandayo.github.io/RGPDpseudonymizer/)
 
 **Pour les utilisateurs :**
-- 📘 [Guide d'installation](docs/installation.md) — Instructions d'installation par plateforme
-- 📗 [Tutoriel d'utilisation](docs/tutorial.md) — Tutoriels pas à pas
+- 📘 [Guide d'installation](docs/installation.md) — Instructions d'installation selon votre plateforme
+- 📗 [Tutoriel](docs/tutorial.md) — Guides pas à pas
 - 📕 [Référence CLI](docs/CLI-REFERENCE.md) — Documentation complète des commandes
 - 📕 [Méthodologie et citation académique](docs/methodology.md) — Approche technique et conformité RGPD
-- ❓ [FAQ](docs/faq.md) — Questions fréquentes et réponses
-- 🔧 [Dépannage](docs/troubleshooting.md) — Référence des erreurs et solutions
+- ❓ [FAQ](docs/faq.md) — Questions fréquentes
+- 🔧 [Dépannage](docs/troubleshooting.md) — Erreurs courantes et solutions
 
 **Pour les développeurs :**
 - 📚 [Référence API](docs/api-reference.md) — Documentation des modules et points d'extension
-- 🏗️ [Documentation d'architecture](docs/architecture/) — Conception technique
+- 🏗️ [Architecture](docs/architecture/) — Conception technique
 - 📊 [Rapport de benchmark NLP](docs/nlp-benchmark-report.md) — Analyse de la précision NER
-- 📊 [Rapport de performance](docs/qa/performance-stability-report.md) — Résultats de validation des performances NFR
+- 📊 [Rapport de performance](docs/qa/performance-stability-report.md) — Résultats de validation des exigences non fonctionnelles
 
 **Pour les parties prenantes :**
 - 🎨 [Positionnement et messages clés](docs/positioning-messaging-v2-assisted.md)
@@ -214,179 +214,179 @@ logging:
 
 ## 🔬 Détails techniques
 
-### Sélection de la bibliothèque NLP (Story 1.2 — Terminé)
+### Choix de la bibliothèque NLP (Story 1.2 — terminé)
 
-Après un benchmark complet sur 25 documents français d'entretiens et documents professionnels (1 737 entités annotées) :
+Après un benchmark approfondi sur 25 documents français (entretiens et documents professionnels, 1 737 entités annotées) :
 
 | Approche | Score F1 | Précision | Rappel | Notes |
 |----------|----------|-----------|--------|-------|
-| **spaCy seul** `fr_core_news_lg` | 29,5 % | 27,0 % | 32,7 % | Référence Story 1.2 |
+| **spaCy seul** `fr_core_news_lg` | 29,5 % | 27,0 % | 32,7 % | Ligne de base (Story 1.2) |
 | **Hybride** (spaCy + regex) | 59,97 % | 48,17 % | 79,45 % | Story 5.3 (actuel) |
 
-**Trajectoire de précision :** De la référence spaCy seul à l'approche hybride avec nettoyage des annotations, extension des patterns regex et dictionnaire géographique français — le score F1 a doublé. Le rappel PERSON a atteint 82,93 %.
+**Progression de la précision :** En passant de spaCy seul à l'approche hybride — avec nettoyage des annotations, enrichissement des expressions régulières et ajout d'un dictionnaire géographique français — le score F1 a doublé. Le rappel sur les entités PERSON atteint 82,93 %.
 
 **Solution retenue :**
-- ✅ **Approche hybride** (NLP + regex + dictionnaire géographique) atteint environ 60 % de F1
-- ✅ **Validation obligatoire** garantit une précision finale de 100 %
-- 📅 **Affinage du modèle** reporté à la v3.0 (objectif F1 70-85 %, nécessite des données d'entraînement issues des validations utilisateurs v1.x/v2.x)
+- ✅ **Approche hybride** (NLP + regex + dictionnaire géographique) : environ 60 % de F1
+- ✅ **Validation obligatoire** pour une précision finale de 100 %
+- 📅 **Affinage du modèle** reporté à la v3.0 (objectif F1 70-85 %, nécessite des données d'entraînement issues des validations en v1.x/v2.x)
 
-Voir l'analyse complète : [docs/qa/ner-accuracy-report.md](docs/qa/ner-accuracy-report.md) | Référence historique : [docs/nlp-benchmark-report.md](docs/nlp-benchmark-report.md)
+Analyse complète : [docs/qa/ner-accuracy-report.md](docs/qa/ner-accuracy-report.md) | Ligne de base historique : [docs/nlp-benchmark-report.md](docs/nlp-benchmark-report.md)
 
-### Flux de validation (Story 1.7 — Terminé)
+### Processus de validation (Story 1.7 — terminé)
 
-L'interface de validation offre une interface intuitive pilotée au clavier pour relire les entités détectées :
+L'interface de validation offre un parcours intuitif piloté au clavier pour passer en revue les entités détectées :
 
 **Fonctionnalités :**
-- ✅ **Regroupement par type d'entité** — Relecture PERSON → ORG → LOCATION dans un ordre logique
-- ✅ **Affichage du contexte** — 10 mots avant/après chaque entité avec mise en surbrillance
-- ✅ **Scores de confiance** — Code couleur de la confiance spaCy NER (vert > 80 %, jaune 60-80 %, rouge < 60 %)
+- ✅ **Regroupement par type** — Les entités sont présentées dans un ordre logique : PERSON → ORG → LOCATION
+- ✅ **Affichage du contexte** — 10 mots avant et après chaque entité, avec mise en surbrillance
+- ✅ **Scores de confiance** — Code couleur selon la confiance du modèle spaCy (vert > 80 %, jaune 60-80 %, rouge < 60 %)
 - ✅ **Raccourcis clavier** — Actions à une touche : [Espace] Confirmer, [R] Rejeter, [E] Modifier, [A] Ajouter, [C] Changer le pseudonyme
-- ✅ **Opérations par lot** — Accepter/rejeter toutes les entités d'un type en une fois (Maj+A/R)
-- ✅ **Panneau d'aide** — Appuyez sur [H] pour la référence complète des commandes
-- ✅ **Performance** — Moins de 2 minutes pour un document typique de 20-30 entités
+- ✅ **Actions groupées** — Accepter ou rejeter toutes les entités d'un type en une fois (Maj+A/R)
+- ✅ **Aide intégrée** — Appuyez sur [H] pour afficher tous les raccourcis
+- ✅ **Performance** — Moins de 2 minutes pour un document type de 20-30 entités
 
-**Étapes du flux :**
-1. Écran de synthèse (décompte des entités par type)
-2. Revue des entités par type avec contexte
+**Étapes du processus :**
+1. Écran récapitulatif (nombre d'entités par type)
+2. Revue des entités type par type, avec contexte
 3. Signalement des entités ambiguës pour examen attentif
 4. Confirmation finale avec résumé des modifications
 5. Traitement du document avec les entités validées
 
-**Fonctionnalité de déduplication (Story 1.9) :** Les entités en double sont regroupées — validez une fois, appliquez à toutes les occurrences (réduction de 66 % du temps pour les documents volumineux).
+**Déduplication (Story 1.9) :** Les entités en double sont regroupées — vous validez une fois, la décision s'applique à toutes les occurrences (réduction de 66 % du temps pour les documents longs).
 
-**Regroupement de variantes d'entités (Story 4.6) :** Les formes apparentées d'une entité sont automatiquement fusionnées en un seul élément de validation. « Marie Dubois », « Pr. Dubois » et « Dubois » apparaissent comme un seul élément avec « Apparaît aussi sous : » affichant les formes variantes. Empêche le pontage transitif Union-Find pour les noms de famille ambigus partagés par des personnes différentes.
+**Regroupement des variantes (Story 4.6) :** Les différentes formes d'une même entité sont automatiquement fusionnées en un seul élément à valider. « Marie Dubois », « Pr. Dubois » et « Dubois » apparaissent comme un seul élément, avec la mention « Apparaît aussi sous : ». Ce regroupement évite le pontage transitif Union-Find lorsque des noms de famille sont partagés par des personnes différentes.
 
 ---
 
-### Pile technologique
+### Technologies utilisées
 
 | Composant | Technologie | Version | Rôle |
 |-----------|------------|---------|------|
 | **Environnement d'exécution** | Python | 3.10-3.12 | Validé en CI/CD (3.13+ pas encore testé) |
 | **Bibliothèque NLP** | spaCy | 3.8.0 | Détection d'entités en français (fr_core_news_lg) |
-| **Framework CLI** | Typer | 0.9+ | Interface en ligne de commande |
-| **Base de données** | SQLite | 3.35+ | Stockage local des tables de correspondance en mode WAL |
-| **Chiffrement** | cryptography (AESSIV) | 44.0+ | Chiffrement AES-256-SIV pour les champs sensibles (dérivation de clé PBKDF2, protégé par phrase secrète) |
-| **ORM** | SQLAlchemy | 2.0+ | Abstraction de la base de données et gestion des sessions |
+| **CLI** | Typer | 0.9+ | Interface en ligne de commande |
+| **Base de données** | SQLite | 3.35+ | Stockage local des tables de correspondance (mode WAL) |
+| **Chiffrement** | cryptography (AESSIV) | 44.0+ | Chiffrement AES-256-SIV des champs sensibles (dérivation PBKDF2, protégé par mot de passe) |
+| **ORM** | SQLAlchemy | 2.0+ | Couche d'abstraction base de données et gestion des sessions |
 | **Interface de validation** | rich | 13.7+ | Revue interactive des entités en CLI |
-| **Saisie clavier** | readchar | 4.2+ | Capture de touche unique pour l'interface de validation |
+| **Saisie clavier** | readchar | 4.2+ | Capture de touche unique pour la validation |
 | **Tests** | pytest | 7.4+ | Tests unitaires et d'intégration |
 | **CI/CD** | GitHub Actions | N/A | Tests automatisés (Windows/Mac/Linux) |
 
 ---
 
-## 🤔 Pourquoi l'assistance IA plutôt que l'automatisation complète ?
+## 🤔 Pourquoi une assistance IA plutôt qu'une automatisation complète ?
 
-**Réponse courte :** La confidentialité et la conformité exigent une supervision humaine.
+**En bref :** La confidentialité et la conformité exigent un contrôle humain.
 
-**Réponse détaillée :**
-1. **Défendabilité RGPD** — La vérification humaine fournit une piste d'audit juridique
-2. **Zéro faux négatif** — L'IA manque des entités, les humains les rattrapent (couverture à 100 %)
-3. **Limites actuelles du NLP** — Les modèles français sur des documents d'entretiens/professionnels : 29,5 % F1 nativement (l'approche hybride atteint environ 60 %)
-4. **Meilleur que les alternatives :**
-   - ✅ **vs Rédaction manuelle :** 50 %+ plus rapide (pré-détection IA)
-   - ✅ **vs Services cloud :** Traitement 100 % local (aucune fuite de données)
-   - ✅ **vs Outils entièrement automatiques :** Précision de 100 % (vérification humaine)
+**En détail :**
+1. **Solidité juridique au regard du RGPD** — La relecture humaine fournit une piste d'audit opposable
+2. **Aucun faux négatif** — L'IA laisse passer des entités ; l'humain les rattrape (couverture à 100 %)
+3. **Limites actuelles du NLP** — Les modèles français sur des documents d'entretiens ou professionnels : 29,5 % F1 de base (l'approche hybride atteint environ 60 %)
+4. **Mieux que les alternatives :**
+   - ✅ **vs rédaction manuelle :** Plus de 50 % de temps gagné grâce à la détection préalable
+   - ✅ **vs services cloud :** Traitement 100 % local, aucune fuite de données
+   - ✅ **vs outils entièrement automatiques :** Précision de 100 % grâce à la relecture humaine
 
-**Point de vue utilisateur :**
-> « Je VEUX une relecture humaine pour des raisons de conformité. L'IA me fait gagner du temps en pré-identifiant les entités, mais je garde le contrôle sur la décision finale. » — Responsable conformité
+**Témoignage :**
+> « Je TIENS à la relecture humaine pour des raisons de conformité. L'IA me fait gagner du temps en repérant les entités à l'avance, mais c'est moi qui garde la main sur la décision finale. » — Responsable conformité
 
 ---
 
-## 🎯 Cas d'usage
+## 🎯 Exemples d'utilisation
 
-### 1. **Conformité éthique en recherche**
-**Scénario :** Chercheur universitaire avec 50 transcriptions d'entretiens nécessitant l'approbation d'un comité d'éthique
+### 1. **Recherche universitaire et conformité éthique**
+**Contexte :** Un chercheur doit pseudonymiser 50 transcriptions d'entretiens pour obtenir l'aval de son comité d'éthique.
 
 **Sans RGPD Pseudonymizer :**
 - ❌ Rédaction manuelle : 16-25 heures
-- ❌ Détruit la cohérence du document pour l'analyse
-- ❌ Sujet aux erreurs (fatigue humaine)
+- ❌ Perte de la cohérence du document pour l'analyse
+- ❌ Risque d'erreur dû à la fatigue
 
 **Avec RGPD Pseudonymizer :**
-- ✅ Pré-détection IA : environ 30 min de traitement
-- ✅ Validation humaine : environ 90 min de relecture (50 docs × environ 2 min chacun)
-- ✅ Total : **2-3 heures** (gain de temps de 85 %+)
-- ✅ Piste d'audit pour le comité d'éthique
+- ✅ Détection préalable par l'IA : environ 30 min de traitement
+- ✅ Relecture humaine : environ 90 min (50 documents × environ 2 min chacun)
+- ✅ Total : **2-3 heures** (plus de 85 % de temps gagné)
+- ✅ Journal d'audit pour le comité d'éthique
 
 ---
 
 ### 2. **Analyse de documents RH**
-**Scénario :** Équipe RH analysant les retours des employés avec ChatGPT
+**Contexte :** Une équipe RH souhaite analyser les retours de ses collaborateurs avec ChatGPT.
 
 **Sans RGPD Pseudonymizer :**
-- ❌ Impossible d'utiliser ChatGPT (violation du RGPD — noms des employés exposés)
+- ❌ Impossible d'utiliser ChatGPT (violation du RGPD — les noms des employés seraient exposés)
 - ❌ Analyse manuelle uniquement (lente, perspectives limitées)
 
 **Avec RGPD Pseudonymizer :**
-- ✅ Pseudonymisation locale (noms des employés → pseudonymes)
-- ✅ Envoi à ChatGPT en toute sécurité (aucune donnée personnelle exposée)
-- ✅ Obtenir des analyses IA tout en restant conforme au RGPD
+- ✅ Pseudonymisation en local (noms des employés → pseudonymes)
+- ✅ Transmission à ChatGPT en toute sécurité (aucune donnée personnelle exposée)
+- ✅ Analyses IA obtenues dans le respect du RGPD
 
 ---
 
 ### 3. **Préparation de documents juridiques**
-**Scénario :** Cabinet d'avocats préparant des dossiers pour une recherche juridique assistée par IA
+**Contexte :** Un cabinet d'avocats prépare des pièces pour une recherche juridique assistée par IA.
 
 **Sans RGPD Pseudonymizer :**
-- ❌ Service de pseudonymisation cloud (risque tiers)
-- ❌ Rédaction manuelle (heures facturables coûteuses)
+- ❌ Service de pseudonymisation cloud (risque lié au tiers)
+- ❌ Rédaction manuelle (heures facturées coûteuses)
 
 **Avec RGPD Pseudonymizer :**
-- ✅ Traitement 100 % local (confidentialité client)
-- ✅ Précision vérifiée par l'humain (défendabilité juridique)
+- ✅ Traitement 100 % local (secret professionnel préservé)
+- ✅ Précision vérifiée par l'humain (solidité juridique)
 - ✅ Correspondances réversibles (dé-pseudonymisation possible si nécessaire)
 
 ---
 
 ## ⚖️ Conformité RGPD
 
-### Comment RGPD Pseudonymizer soutient la conformité
+### Comment RGPD Pseudonymizer contribue à la conformité
 
 | Exigence RGPD | Mise en œuvre |
 |----------------|---------------|
 | **Art. 25 — Protection des données dès la conception** | Traitement local, aucune dépendance cloud, stockage chiffré |
-| **Art. 30 — Registre des traitements** | Journaux d'audit complets (Story 2.5) : table d'opérations suivant horodatage, fichiers traités, nombre d'entités, version du modèle, thème, succès/échec, temps de traitement ; export JSON/CSV pour le reporting de conformité |
-| **Art. 32 — Mesures de sécurité** | Chiffrement AES-256-SIV avec dérivation de clé PBKDF2 (210 000 itérations), stockage protégé par phrase secrète, chiffrement au niveau des colonnes pour les champs sensibles |
-| **Art. 35 — Analyse d'impact sur la protection des données** | Méthodologie transparente, approche citable pour la documentation AIPD |
-| **Considérant 26 — Pseudonymisation** | Correspondance cohérente des pseudonymes, réversibilité avec phrase secrète |
+| **Art. 30 — Registre des traitements** | Journaux d'audit complets (Story 2.5) : table d'opérations traçant horodatage, fichiers traités, nombre d'entités, version du modèle, thème, succès/échec, durée de traitement ; export JSON/CSV pour le reporting de conformité |
+| **Art. 32 — Mesures de sécurité** | Chiffrement AES-256-SIV avec dérivation de clé PBKDF2 (210 000 itérations), stockage protégé par mot de passe, chiffrement au niveau des colonnes pour les champs sensibles |
+| **Art. 35 — Analyse d'impact** | Méthodologie transparente, approche citable pour la documentation d'une AIPD |
+| **Considérant 26 — Pseudonymisation** | Correspondance cohérente des pseudonymes, réversibilité par mot de passe |
 
-### Ce que signifie la pseudonymisation (juridiquement)
+### Ce que signifie la pseudonymisation au sens juridique
 
 **Selon l'article 4(5) du RGPD :**
 > « La pseudonymisation désigne le traitement de données à caractère personnel de telle façon que celles-ci ne puissent plus être attribuées à une personne concernée précise **sans avoir recours à des informations supplémentaires**, pour autant que ces informations supplémentaires soient conservées séparément. »
 
-**Approche de RGPD Pseudonymizer :**
-- ✅ **Données personnelles remplacées :** Noms, lieux, organisations → pseudonymes
-- ✅ **Stockage séparé :** Table de correspondance chiffrée avec phrase secrète (séparée des documents)
-- ✅ **Réversibilité :** Les utilisateurs autorisés peuvent dé-pseudonymiser avec la phrase secrète
-- ⚠️ **Note :** La pseudonymisation réduit le risque mais ne rend **PAS** les données anonymes
+**L'approche de RGPD Pseudonymizer :**
+- ✅ **Remplacement des données personnelles :** Noms, lieux, organisations → pseudonymes
+- ✅ **Stockage séparé :** Table de correspondance chiffrée par mot de passe, distincte des documents
+- ✅ **Réversibilité :** Les utilisateurs autorisés peuvent dé-pseudonymiser grâce à la mot de passe
+- ⚠️ **Attention :** La pseudonymisation réduit le risque mais ne rend **pas** les données anonymes
 
-**Recommandation :** Consultez votre Délégué à la Protection des Données (DPD) pour des conseils de conformité spécifiques.
+**Recommandation :** Consultez votre délégué à la protection des données (DPD) pour des conseils de conformité adaptés à votre situation.
 
 ---
 
 ## 🛠️ État du développement
 
-**Les 4 Epics MVP terminés + Epic 5 en cours** — v1.0.7 (février 2026).
+**Les 4 Epics MVP sont terminés + Epic 5 en cours** — v1.0.7 (février 2026).
 
 - ✅ **Epic 1 :** Fondations et validation NLP (9 stories) — Intégration spaCy, interface de validation, détection hybride, déduplication des entités
-- ✅ **Epic 2 :** Moteur de pseudonymisation principal (9 stories) — Bibliothèques de pseudonymes, chiffrement, journalisation d'audit, traitement par lot, correspondance 1:1 RGPD
-- ✅ **Epic 3 :** Interface CLI et traitement par lot (7 stories) — 8 commandes CLI, suivi de progression, fichiers de configuration, traitement parallèle par lot, perfectionnement UX
-- ✅ **Epic 4 :** Préparation au lancement (8 stories) — Validation de l'utilité LLM, tests multi-plateformes, documentation, suite de précision NER, validation des performances, intégration des retours bêta, refactorisation du code, préparation au lancement
-- 🔄 **Epic 5 :** Améliorations rapides et conformité RGPD (3 stories terminées) — Effacement article 17 RGPD, pseudonymes sensibles au genre, améliorations de la précision NER (F1 29,74 % → 59,97 %)
-- **Total :** 36 stories, 1198+ tests, 86 %+ de couverture, tous les critères qualité au vert
+- ✅ **Epic 2 :** Moteur de pseudonymisation (9 stories) — Bibliothèques de pseudonymes, chiffrement, journaux d'audit, traitement par lot, correspondance 1:1 RGPD
+- ✅ **Epic 3 :** Interface CLI et traitement par lot (7 stories) — 8 commandes CLI, suivi de progression, fichiers de configuration, traitement parallèle, perfectionnement UX
+- ✅ **Epic 4 :** Préparation au lancement (8 stories) — Validation de l'utilité LLM, tests multi-plateformes, documentation, suite de précision NER, validation des performances, intégration des retours bêta, refactorisation, préparation au lancement
+- 🔄 **Epic 5 :** Améliorations et conformité RGPD (3 stories terminées) — Effacement article 17 RGPD, pseudonymes tenant compte du genre, amélioration de la précision NER (F1 29,74 % → 59,97 %)
+- **Total :** 36 stories, 1 198+ tests, 86 %+ de couverture, tous les contrôles qualité au vert
 
 ---
 
 ## 🤝 Contribuer
 
-Les contributions sont les bienvenues ! Consultez [CONTRIBUTING.md](CONTRIBUTING.md) pour plus de détails sur :
+Les contributions sont les bienvenues ! Consultez [CONTRIBUTING.md](CONTRIBUTING.md) pour en savoir plus sur :
 - Les signalements de bugs et demandes de fonctionnalités
-- La configuration de l'environnement de développement et les exigences de qualité du code
-- Le processus de PR et le format des messages de commit
+- La mise en place de l'environnement de développement et les exigences qualité
+- Le processus de pull request et le format des messages de commit
 
-Veuillez lire notre [Code de conduite](CODE_OF_CONDUCT.md) avant de participer.
+Merci de lire notre [code de conduite](CODE_OF_CONDUCT.md) avant de participer.
 
 ---
 
@@ -395,9 +395,9 @@ Veuillez lire notre [Code de conduite](CODE_OF_CONDUCT.md) avant de participer.
 **Responsable du projet :** Lionel Deveaux — [@LioChanDaYo](https://github.com/LioChanDaYo)
 
 **Pour vos questions et demandes de support :**
-- 💬 [GitHub Discussions](https://github.com/LioChanDaYo/RGPDpseudonymizer/discussions) — Questions générales, cas d'usage
-- 🐛 [GitHub Issues](https://github.com/LioChanDaYo/RGPDpseudonymizer/issues) — Signalements de bugs, demandes de fonctionnalités
-- 📖 [SUPPORT.md](SUPPORT.md) — Processus de support complet et checklist d'auto-diagnostic
+- 💬 [GitHub Discussions](https://github.com/LioChanDaYo/RGPDpseudonymizer/discussions) — Questions générales, retours d'expérience
+- 🐛 [GitHub Issues](https://github.com/LioChanDaYo/RGPDpseudonymizer/issues) — Signalements de bugs, suggestions de fonctionnalités
+- 📖 [SUPPORT.md](SUPPORT.md) — Processus de support et aide au diagnostic
 
 ---
 
@@ -412,12 +412,12 @@ Ce projet est distribué sous la [licence MIT](LICENSE).
 **Construit avec :**
 - [spaCy](https://spacy.io/) — Bibliothèque NLP de niveau industriel
 - [Typer](https://typer.tiangolo.com/) — Framework CLI moderne
-- [rich](https://rich.readthedocs.io/) — Mise en forme CLI élégante
+- [rich](https://rich.readthedocs.io/) — Mise en forme élégante en terminal
 
-**Inspiré par :**
-- Les principes de protection de la vie privée dès la conception du RGPD
+**Sources d'inspiration :**
+- Les principes de protection des données dès la conception du RGPD
 - Les exigences éthiques de la recherche universitaire
-- Le besoin concret d'analyse sécurisée de documents par IA
+- Le besoin concret d'analyser des documents par IA sans compromettre la confidentialité
 
 **Méthodologie :**
 - Développé avec le framework [BMAD-METHOD™](https://bmad.ai)
@@ -427,52 +427,52 @@ Ce projet est distribué sous la [licence MIT](LICENSE).
 
 ## ⚠️ Avertissement
 
-**RGPD Pseudonymizer est un outil d'aide à la conformité RGPD. Il ne fournit PAS de conseils juridiques.**
+**RGPD Pseudonymizer est un outil d'aide à la conformité RGPD. Il ne constitue en aucun cas un conseil juridique.**
 
-**Notes importantes :**
-- ⚠️ La pseudonymisation réduit le risque mais n'est PAS de l'anonymisation
-- ⚠️ Vous restez le responsable du traitement au sens du RGPD
-- ⚠️ Consultez votre DPD ou votre conseil juridique pour des orientations de conformité
-- ⚠️ La validation humaine est OBLIGATOIRE — ne sautez pas les étapes de relecture
-- ⚠️ Testez rigoureusement avant toute utilisation en production
+**Points importants :**
+- ⚠️ La pseudonymisation réduit le risque mais n'est pas une anonymisation
+- ⚠️ Vous restez responsable du traitement au sens du RGPD
+- ⚠️ Consultez votre DPD ou votre conseil juridique pour toute question de conformité
+- ⚠️ La relecture humaine est OBLIGATOIRE — ne sautez pas les étapes de validation
+- ⚠️ Testez rigoureusement avant toute mise en production
 
-**Limitations du MVP v1.0 :**
-- Détection IA : environ 60 % F1 de référence (pas 85 %+)
-- Validation requise pour TOUS les documents (pas optionnelle)
-- Langue française uniquement (anglais, espagnol, etc. dans les versions futures)
-- Formats textuels uniquement (.txt, .md — pas de PDF/DOCX en v1.0)
+**Limites de la v1.0 :**
+- Détection IA : environ 60 % F1 (pas 85 %+)
+- Validation requise pour TOUS les documents (pas facultative)
+- Français uniquement (anglais, espagnol, etc. dans les versions futures)
+- Formats textuels uniquement (.txt, .md — ni PDF ni DOCX en v1.0)
 
 ---
 
 ## 🧪 Tests
 
-### Exécution des tests
+### Lancer les tests
 
-Le projet comprend des tests unitaires et d'intégration complets couvrant le flux de validation, la détection NLP et les fonctionnalités principales.
+Le projet comprend des tests unitaires et d'intégration couvrant le processus de validation, la détection NLP et les fonctionnalités principales.
 
-**Note pour les utilisateurs Windows :** En raison de violations d'accès connues avec spaCy sous Windows ([spaCy issue #12659](https://github.com/explosion/spaCy/issues/12659)), la CI Windows n'exécute que les tests indépendants de spaCy. La suite complète de tests s'exécute sous Linux/macOS.
+**Note pour les utilisateurs Windows :** En raison de violations d'accès connues avec spaCy sous Windows ([spaCy issue #12659](https://github.com/explosion/spaCy/issues/12659)), la CI Windows n'exécute que les tests indépendants de spaCy. La suite complète tourne sous Linux/macOS.
 
-**Exécuter tous les tests :**
+**Lancer tous les tests :**
 ```bash
 poetry run pytest -v
 ```
 
-**Exécuter uniquement les tests unitaires :**
+**Tests unitaires uniquement :**
 ```bash
 poetry run pytest tests/unit/ -v
 ```
 
-**Exécuter uniquement les tests d'intégration :**
+**Tests d'intégration uniquement :**
 ```bash
 poetry run pytest tests/integration/ -v
 ```
 
-**Exécuter les tests de validation de précision (nécessite le modèle spaCy) :**
+**Tests de validation de la précision (nécessite le modèle spaCy) :**
 ```bash
 poetry run pytest tests/accuracy/ -v -m accuracy -s
 ```
 
-**Exécuter les tests de performance et de stabilité (nécessite le modèle spaCy) :**
+**Tests de performance et de stabilité (nécessite le modèle spaCy) :**
 ```bash
 # Tous les tests de performance (stabilité, mémoire, démarrage, stress)
 poetry run pytest tests/performance/ -v -s -p no:benchmark --timeout=600
@@ -481,22 +481,22 @@ poetry run pytest tests/performance/ -v -s -p no:benchmark --timeout=600
 poetry run pytest tests/performance/ --benchmark-only -v -s
 ```
 
-**Exécuter avec rapport de couverture :**
+**Avec rapport de couverture :**
 ```bash
 poetry run pytest --cov=gdpr_pseudonymizer --cov-report=term-missing --cov-report=html
 ```
 
-**Exécuter spécifiquement les tests d'intégration du flux de validation :**
+**Tests d'intégration du processus de validation :**
 ```bash
 poetry run pytest tests/integration/test_validation_workflow_integration.py -v
 ```
 
-**Exécuter les vérifications qualité :**
+**Contrôles qualité :**
 ```bash
-# Vérification du formatage du code
+# Vérification du formatage
 poetry run black --check gdpr_pseudonymizer tests
 
-# Formatage automatique du code
+# Formatage automatique
 poetry run black gdpr_pseudonymizer tests
 
 # Vérification du linting
@@ -506,49 +506,49 @@ poetry run ruff check gdpr_pseudonymizer tests
 poetry run mypy gdpr_pseudonymizer
 ```
 
-**Exécuter uniquement les tests compatibles Windows (excluant les tests dépendants de spaCy) :**
+**Tests compatibles Windows uniquement (sans dépendance à spaCy) :**
 ```bash
-# Exécuter les tests unitaires sans spaCy (selon le modèle CI Windows)
+# Tests unitaires sans spaCy (reproduit la CI Windows)
 poetry run pytest tests/unit/test_benchmark_nlp.py tests/unit/test_config_manager.py tests/unit/test_data_models.py tests/unit/test_file_handler.py tests/unit/test_logger.py tests/unit/test_naive_processor.py tests/unit/test_name_dictionary.py tests/unit/test_process_command.py tests/unit/test_project_config.py tests/unit/test_regex_matcher.py tests/unit/test_validation_models.py tests/unit/test_validation_stub.py -v
 
-# Exécuter les tests d'intégration du flux de validation (compatibles Windows)
+# Tests d'intégration du processus de validation (compatibles Windows)
 poetry run pytest tests/integration/test_validation_workflow_integration.py -v
 ```
 
 ### Couverture des tests
 
-- **Tests unitaires :** 946+ tests couvrant les modèles de validation, les composants d'interface, le chiffrement, les opérations de base de données, la journalisation d'audit, le suivi de progression, la détection de genre et la logique principale
-- **Tests d'intégration :** 90 tests pour les flux de bout en bout incluant la validation (Story 2.0.1), les opérations de base de données chiffrée (Story 2.4), la logique compositionnelle et la détection hybride
-- **Tests de précision :** 22 tests validant la précision NER contre un corpus de référence de 25 documents (Story 4.4)
-- **Tests de performance :** 15 tests validant tous les objectifs NFR — benchmarks par document (NFR1), performance par lot (NFR2), profilage mémoire (NFR4), temps de démarrage (NFR5), stabilité/taux d'erreur (NFR6), tests de stress (Story 4.5)
-- **Couverture actuelle :** 86 %+ sur tous les modules (100 % pour le module de progression, 91,41 % pour AuditRepository)
-- **Total des tests :** 1198+
-- **CI/CD :** Tests exécutés sur Python 3.10-3.12 sous Windows, macOS et Linux
-- **Critères qualité :** Tous validés (Black, Ruff, mypy, pytest)
+- **Tests unitaires :** 946+ tests couvrant les modèles de validation, les composants d'interface, le chiffrement, les opérations de base de données, les journaux d'audit, le suivi de progression, la détection de genre et la logique métier
+- **Tests d'intégration :** 90 tests couvrant les parcours de bout en bout, dont la validation (Story 2.0.1), les opérations sur base chiffrée (Story 2.4), la logique de composition et la détection hybride
+- **Tests de précision :** 22 tests mesurant la précision NER sur un corpus de référence de 25 documents (Story 4.4)
+- **Tests de performance :** 15 tests validant toutes les exigences non fonctionnelles — benchmarks par document (NFR1), traitement par lot (NFR2), profilage mémoire (NFR4), temps de démarrage (NFR5), stabilité et taux d'erreur (NFR6), tests de charge (Story 4.5)
+- **Couverture actuelle :** 86 %+ sur l'ensemble des modules (100 % pour le module de progression, 91,41 % pour AuditRepository)
+- **Total :** 1 198+ tests
+- **CI/CD :** Tests exécutés sur Python 3.10-3.12, sous Windows, macOS et Linux
+- **Contrôles qualité :** Tous validés (Black, Ruff, mypy, pytest)
 
-### Scénarios clés des tests d'intégration
+### Principaux scénarios des tests d'intégration
 
 La suite de tests d'intégration couvre :
 
-**Flux de validation (19 tests) :**
-- ✅ Flux complet : détection d'entités → synthèse → revue → confirmation
-- ✅ Actions utilisateur : confirmer (Espace), rejeter (R), modifier (E), ajouter une entité (A), changer le pseudonyme (C), navigation dans le contexte (X)
+**Processus de validation (19 tests) :**
+- ✅ Parcours complet : détection des entités → récapitulatif → revue → confirmation
+- ✅ Actions utilisateur : confirmer (Espace), rejeter (R), modifier (E), ajouter une entité (A), changer le pseudonyme (C), parcourir les contextes (X)
 - ✅ Transitions d'état : PENDING → CONFIRMED/REJECTED/MODIFIED
-- ✅ Déduplication d'entités avec revue groupée
+- ✅ Déduplication des entités avec revue groupée
 - ✅ Cas limites : documents vides, documents volumineux (320+ entités), interruption Ctrl+C, saisie invalide
-- ✅ Opérations par lot : Accepter tout le type (Maj+A), Rejeter tout le type (Maj+R) avec invites de confirmation
-- ✅ Simulation d'entrée utilisateur : Simulation complète des interactions clavier et des invites
+- ✅ Actions groupées : Accepter tout le type (Maj+A), Rejeter tout le type (Maj+R), avec demande de confirmation
+- ✅ Simulation d'interactions : simulation complète des saisies clavier et des invites
 
 **Base de données chiffrée (9 tests) :**
-- ✅ Flux de bout en bout : init → open → save → query → close
-- ✅ Cohérence inter-sessions : Même phrase secrète retrouve les mêmes données
-- ✅ Idempotence : Requêtes multiples retournant les mêmes résultats
-- ✅ Données chiffrées au repos : Champs sensibles stockés chiffrés dans SQLite
-- ✅ Intégration de la logique compositionnelle : Requêtes de composants chiffrés
-- ✅ Intégration des dépôts : Tous les dépôts (correspondance, audit, métadonnées) fonctionnent avec la session chiffrée
-- ✅ Lectures concurrentes : Le mode WAL permet plusieurs lecteurs simultanés
-- ✅ Index de la base de données : Optimisation des performances de requête vérifiée
-- ✅ Rollback de sauvegarde par lot : Intégrité transactionnelle en cas d'erreur
+- ✅ Parcours complet : init → open → save → query → close
+- ✅ Cohérence inter-sessions : une même mot de passe retrouve les mêmes données
+- ✅ Idempotence : des requêtes multiples retournent les mêmes résultats
+- ✅ Données chiffrées au repos : les champs sensibles sont stockés chiffrés dans SQLite
+- ✅ Logique de composition intégrée : requêtes sur les composants chiffrés
+- ✅ Intégration des dépôts : tous les dépôts (correspondance, audit, métadonnées) fonctionnent avec la session chiffrée
+- ✅ Lectures concurrentes : le mode WAL permet plusieurs lecteurs simultanés
+- ✅ Index : vérification de l'optimisation des performances de requête
+- ✅ Rollback en traitement par lot : intégrité transactionnelle en cas d'erreur
 
 ---
 
@@ -556,43 +556,43 @@ La suite de tests d'intégration couvre :
 
 | Métrique | Valeur | Statut |
 |----------|--------|--------|
-| **Progression du développement** | v1.0.7 | ✅ Les 4 Epics MVP + Epic 5 en cours |
+| **Avancement** | v1.0.7 | ✅ Les 4 Epics MVP + Epic 5 en cours |
 | **Stories terminées** | 36 (Epic 1-5) | ✅ Epics 1-4 terminés + Stories 5.1, 5.2, 5.3 |
 | **Utilité LLM (NFR10)** | 4,27/5,0 (85,4 %) | ✅ VALIDÉ (seuil : 80 %) |
 | **Succès d'installation (NFR3)** | 87,5 % (7/8 plateformes) | ✅ VALIDÉ (seuil : 85 %) |
 | **Première pseudonymisation (NFR14)** | 100 % en moins de 30 min | ✅ VALIDÉ (seuil : 80 %) |
 | **Bugs critiques trouvés** | 1 (Story 2.8) | ✅ RÉSOLU — Epic 3 débloqué |
-| **Taille du corpus de test** | 25 docs, 1 737 entités | ✅ Complet (après nettoyage) |
-| **Précision NLP (référence)** | 29,5 % F1 (spaCy seul) | ✅ Mesuré (Story 1.2) |
-| **Précision hybride (NLP+Regex)** | 59,97 % F1 (+30,23pp vs référence) | ✅ Story 5.3 terminé |
+| **Corpus de test** | 25 documents, 1 737 entités | ✅ Complet (après nettoyage) |
+| **Précision NLP (ligne de base)** | 29,5 % F1 (spaCy seul) | ✅ Mesuré (Story 1.2) |
+| **Précision hybride (NLP+Regex)** | 59,97 % F1 (+30,23 pp vs ligne de base) | ✅ Story 5.3 terminé |
 | **Précision finale (IA+Humain)** | 100 % (validé) | 🎯 Par conception |
 | **Bibliothèques de pseudonymes** | 3 thèmes (2 426 noms + 240 lieux + 588 organisations) | ✅ Stories 2.1, 3.0, 4.6 terminées |
-| **Correspondance compositionnelle** | Opérationnel (réutilisation de composants + suppression des titres + noms composés) | ✅ Stories 2.2, 2.3 terminées |
+| **Résolution par composition** | Opérationnelle (réutilisation des composants + suppression des titres + noms composés) | ✅ Stories 2.2, 2.3 terminées |
 | **Traitement par lot** | Architecture validée (multiprocessing.Pool, accélération 1,17x-2,5x) | ✅ Story 2.7 terminé |
-| **Stockage chiffré** | AES-256-SIV avec protection par phrase secrète (PBKDF2 210K itérations) | ✅ Story 2.4 terminé |
-| **Journalisation d'audit** | Conformité article 30 RGPD (table d'opérations + export JSON/CSV) | ✅ Story 2.5 terminé |
+| **Stockage chiffré** | AES-256-SIV avec protection par mot de passe (PBKDF2 210 000 itérations) | ✅ Story 2.4 terminé |
+| **Journaux d'audit** | Conformité article 30 RGPD (table d'opérations + export JSON/CSV) | ✅ Story 2.5 terminé |
 | **Interface de validation** | Opérationnelle avec déduplication | ✅ Stories 1.7, 1.9 terminées |
 | **Temps de validation** | < 2 min (20-30 entités), < 5 min (100 entités) | ✅ Objectifs atteints |
-| **Performance mono-document (NFR1)** | environ 6s en moyenne pour 3,5K mots | ✅ VALIDÉ (seuil < 30s, marge de 80 %) |
-| **Performance par lot (NFR2)** | environ 5 min pour 50 docs | ✅ VALIDÉ (seuil < 30min, marge de 83 %) |
-| **Utilisation mémoire (NFR4)** | environ 1 Go pic mesuré par Python | ✅ VALIDÉ (seuil < 8 Go) |
-| **Démarrage CLI (NFR5)** | 0,56s (help), 6,0s (démarrage à froid avec modèle) | ✅ VALIDÉ (< 5s pour le démarrage CLI) |
+| **Performance mono-document (NFR1)** | environ 6 s en moyenne pour 3 500 mots | ✅ VALIDÉ (seuil < 30 s, marge de 80 %) |
+| **Performance par lot (NFR2)** | environ 5 min pour 50 documents | ✅ VALIDÉ (seuil < 30 min, marge de 83 %) |
+| **Utilisation mémoire (NFR4)** | environ 1 Go de pic mesuré par Python | ✅ VALIDÉ (seuil < 8 Go) |
+| **Démarrage CLI (NFR5)** | 0,56 s (help), 6,0 s (démarrage à froid avec modèle) | ✅ VALIDÉ (< 5 s pour le démarrage CLI) |
 | **Taux d'erreur (NFR6)** | environ 0 % d'erreurs inattendues | ✅ VALIDÉ (seuil < 10 %) |
-| **Couverture de test** | 1198+ tests, 86 %+ de couverture | ✅ Tous les contrôles qualité validés |
-| **Critères qualité** | Ruff, mypy, pytest | ✅ Tous validés (0 problème) |
-| **Langues prises en charge** | Français | 🇫🇷 v1.0 uniquement |
-| **Formats pris en charge** | .txt, .md | 📝 Périmètre v1.0 |
+| **Couverture de test** | 1 198+ tests, 86 %+ de couverture | ✅ Tous les contrôles qualité validés |
+| **Contrôles qualité** | Ruff, mypy, pytest | ✅ Tous validés (0 problème) |
+| **Langues** | Français | 🇫🇷 v1.0 uniquement |
+| **Formats** | .txt, .md | 📝 Périmètre v1.0 |
 
 ---
 
 ## 🔗 Liens rapides
 
-- 📘 [PRD complet](docs/.ignore/prd.md) — Exigences produit complètes
+- 📘 [PRD complet](docs/.ignore/prd.md) — Exigences produit détaillées
 - 📊 [Rapport de benchmark](docs/nlp-benchmark-report.md) — Analyse de la précision NLP
-- 🎨 [Stratégie de positionnement](docs/positioning-messaging-v2-assisted.md) — Marketing et messages clés
-- 🏗️ [Documentation d'architecture](docs/architecture/) — Conception technique
+- 🎨 [Positionnement](docs/positioning-messaging-v2-assisted.md) — Stratégie marketing et messages clés
+- 🏗️ [Architecture](docs/architecture/) — Conception technique
 - 📋 [Checklist d'approbation](docs/PM-APPROVAL-CHECKLIST.md) — Suivi des décisions PM
 
 ---
 
-**Dernière mise à jour :** 2026-02-13 (v1.0.7 — Epic 5 en cours : effacement RGPD, pseudonymes sensibles au genre, précision NER 59,97 % F1)
+**Dernière mise à jour :** 2026-02-13 (v1.0.7 — Epic 5 en cours : effacement RGPD, pseudonymes tenant compte du genre, précision NER 59,97 % F1)

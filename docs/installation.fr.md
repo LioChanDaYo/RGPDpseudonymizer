@@ -1,6 +1,6 @@
 # Guide d'installation
 
-**GDPR Pseudonymizer** - Pseudonymisation assistée par IA pour les documents en français
+**GDPR Pseudonymizer** - Pseudonymisation assistée par IA pour documents français
 
 Ce guide couvre l'installation sur Windows, macOS et Linux.
 
@@ -8,19 +8,19 @@ Ce guide couvre l'installation sur Windows, macOS et Linux.
 
 ## Prérequis
 
-| Exigence | Version | Comment vérifier |
-|----------|---------|------------------|
+| Prérequis | Version | Comment vérifier |
+|-------------|---------|--------------|
 | **Python** | 3.10, 3.11 ou 3.12 | `python --version` |
-| **Espace disque** | ~1 Go libre | Pour le modèle français spaCy (téléchargé automatiquement à la première utilisation) |
-| **Internet** | Requis pour l'installation | Téléchargement automatique du modèle ~571 Mo |
+| **Espace disque** | ~1 Go disponible | Pour le modèle spaCy français (téléchargé automatiquement au premier lancement) |
+| **Connexion Internet** | Requise pour l'installation | Téléchargement du modèle : ~571 Mo |
 
-**Important :** Les versions Python 3.10 à 3.12 sont validées en CI/CD. Python 3.9 n'est plus pris en charge (fin de vie en octobre 2025). Python 3.13+ n'est pas encore testé.
+**Important :** Python 3.10-3.12 sont validés dans les tests CI/CD. Python 3.9 n'est plus pris en charge (fin de vie en octobre 2025). Python 3.13+ n'a pas encore été testé.
 
 ---
 
-## Installation depuis PyPI (recommandée)
+## Installation via PyPI (recommandé)
 
-La méthode la plus simple pour les utilisateurs finaux :
+La solution la plus simple pour les utilisateurs finaux :
 
 ```bash
 pip install gdpr-pseudonymizer
@@ -29,7 +29,7 @@ pip install gdpr-pseudonymizer
 gdpr-pseudo --help
 ```
 
-> **Remarque :** Le modèle français spaCy (~571 Mo) se télécharge automatiquement à la première utilisation. Pour le pré-télécharger :
+> **Note :** Le modèle spaCy français (~571 Mo) se télécharge automatiquement au premier lancement. Pour le pré-télécharger :
 > ```bash
 > python -m spacy download fr_core_news_lg
 > ```
@@ -38,9 +38,9 @@ gdpr-pseudo --help
 
 ## Installation depuis les sources (contributeurs)
 
-Pour le développement et la contribution, vous aurez également besoin de [Poetry](https://python-poetry.org/) 1.7+.
+Pour contribuer au développement, vous aurez également besoin de [Poetry](https://python-poetry.org/) 1.7+.
 
-### Installation rapide (toutes plateformes)
+### Installation rapide (toutes les plates-formes)
 
 ```bash
 # 1. Cloner le dépôt
@@ -54,22 +54,22 @@ poetry install
 poetry run gdpr-pseudo --help
 ```
 
-> **Remarque :** Le modèle français spaCy (~571 Mo) se télécharge automatiquement à la première utilisation. Pour le pré-télécharger :
+> **Note :** Le modèle spaCy français (~571 Mo) se télécharge automatiquement au premier lancement. Pour le pré-télécharger :
 > ```bash
 > poetry run python scripts/install_spacy_model.py
 > ```
 
 ---
 
-## Instructions par plateforme
+## Instructions par plate-forme
 
 ### Windows 11
 
 #### Étape 1 : Installer Python
 
 1. Téléchargez Python 3.11 depuis [python.org](https://www.python.org/downloads/)
-2. Lancez l'installateur, cochez **"Add Python to PATH"**
-3. Vérifiez : ouvrez PowerShell et exécutez :
+2. Lancez le programme d'installation et cochez **« Add Python to PATH »**
+3. Vérifiez en ouvrant PowerShell et en exécutant :
    ```powershell
    python --version
    # Attendu : Python 3.11.x
@@ -82,9 +82,9 @@ Ouvrez PowerShell et exécutez :
 (Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | python -
 ```
 
-Ajoutez Poetry au PATH si introuvable :
+Ajoutez Poetry au PATH s'il n'est pas trouvé :
 ```powershell
-# Ajoutez à votre profil PowerShell ou exécutez à chaque session
+# À ajouter à votre profil PowerShell ou à exécuter à chaque session
 $env:PATH += ";$env:APPDATA\Python\Scripts"
 ```
 
@@ -108,20 +108,20 @@ poetry install
 poetry run gdpr-pseudo --help
 ```
 
-> **Remarque :** Le modèle français spaCy (~571 Mo) se télécharge automatiquement à la première utilisation. Pour le pré-télécharger :
+> **Note :** Le modèle spaCy français (~571 Mo) se télécharge automatiquement au premier lancement. Pour le pré-télécharger :
 > ```powershell
 > poetry run python scripts/install_spacy_model.py
 > ```
 
-**Note Windows :** Le CLI peut apparaître sous le nom `gdpr-pseudo.cmd` -- c'est un comportement normal de Poetry.
+**Remarque Windows :** L'interface en ligne de commande peut apparaître sous la forme `gdpr-pseudo.cmd`. C'est un comportement normal de Poetry.
 
 ---
 
-### macOS (Intel et Apple Silicon)
+### macOS (Intel & Apple Silicon)
 
 #### Étape 1 : Installer Python
 
-**Option A : Avec Homebrew (recommandée)**
+**Option A : Via Homebrew (recommandé)**
 ```bash
 brew install python@3.11
 ```
@@ -135,11 +135,11 @@ python3 --version
 # Attendu : Python 3.11.x
 ```
 
-**Apple Silicon (M1/M2/M3) :** Python 3.9+ dispose du support natif ARM.
+**Apple Silicon (M1/M2/M3) :** Python 3.9+ bénéficie d'un support ARM natif.
 
-#### Étape 2 : Installer les outils en ligne de commande Xcode
+#### Étape 2 : Installer les outils de ligne de commande Xcode
 
-Nécessaires pour la compilation de certaines dépendances :
+Nécessaires pour compiler certaines dépendances :
 ```bash
 xcode-select --install
 ```
@@ -150,7 +150,7 @@ xcode-select --install
 curl -sSL https://install.python-poetry.org | python3 -
 ```
 
-Ajoutez au PATH (ajoutez à `~/.zshrc` pour rendre permanent) :
+Ajoutez au PATH (à ajouter à `~/.zshrc` de façon permanente) :
 ```bash
 export PATH="$HOME/.local/bin:$PATH"
 ```
@@ -174,7 +174,7 @@ poetry install
 poetry run gdpr-pseudo --help
 ```
 
-> **Remarque :** Le modèle français spaCy (~571 Mo) se télécharge automatiquement à la première utilisation. Pour le pré-télécharger :
+> **Note :** Le modèle spaCy français (~571 Mo) se télécharge automatiquement au premier lancement. Pour le pré-télécharger :
 > ```bash
 > poetry run python scripts/install_spacy_model.py
 > ```
@@ -202,7 +202,7 @@ python3.11 --version
 curl -sSL https://install.python-poetry.org | python3 -
 ```
 
-Ajoutez au PATH (ajoutez à `~/.bashrc` pour rendre permanent) :
+Ajoutez au PATH (à ajouter à `~/.bashrc` de façon permanente) :
 ```bash
 export PATH="$HOME/.local/bin:$PATH"
 source ~/.bashrc
@@ -227,7 +227,7 @@ poetry install
 poetry run gdpr-pseudo --help
 ```
 
-> **Remarque :** Le modèle français spaCy (~571 Mo) se télécharge automatiquement à la première utilisation. Pour le pré-télécharger :
+> **Note :** Le modèle spaCy français (~571 Mo) se télécharge automatiquement au premier lancement. Pour le pré-télécharger :
 > ```bash
 > poetry run python scripts/install_spacy_model.py
 > ```
@@ -254,7 +254,7 @@ python3.11 --version
 curl -sSL https://install.python-poetry.org | python3 -
 ```
 
-Ajoutez au PATH (ajoutez à `~/.bashrc` pour rendre permanent) :
+Ajoutez au PATH (à ajouter à `~/.bashrc` de façon permanente) :
 ```bash
 export PATH="$HOME/.local/bin:$PATH"
 source ~/.bashrc
@@ -279,7 +279,7 @@ poetry install
 poetry run gdpr-pseudo --help
 ```
 
-> **Remarque :** Le modèle français spaCy (~571 Mo) se télécharge automatiquement à la première utilisation. Pour le pré-télécharger :
+> **Note :** Le modèle spaCy français (~571 Mo) se télécharge automatiquement au premier lancement. Pour le pré-télécharger :
 > ```bash
 > poetry run python scripts/install_spacy_model.py
 > ```
@@ -288,9 +288,9 @@ poetry run gdpr-pseudo --help
 
 ### Docker (alternative)
 
-Docker offre une méthode d'installation indépendante de la plateforme. Un Dockerfile n'est pas encore inclus dans le dépôt (prévu pour l'après-MVP), mais vous pouvez exécuter l'outil dans un conteneur Docker manuellement.
+Docker offre une méthode d'installation indépendante de la plate-forme. Un Dockerfile ne figure pas encore dans le dépôt (prévu après la version MVP), mais vous pouvez exécuter l'outil dans un conteneur Docker manuellement.
 
-#### Installation rapide avec Docker
+#### Configuration rapide avec Docker
 
 ```bash
 # Démarrer un conteneur Python interactif
@@ -304,29 +304,29 @@ poetry config virtualenvs.create false
 poetry install
 python -m spacy download fr_core_news_lg
 
-# Traiter un document depuis le répertoire /data monté
+# Traiter un document du répertoire monté /data
 gdpr-pseudo process /data/input.txt -o /data/output.txt
 ```
 
 #### Remarques
 
-- Montez votre répertoire de documents avec `-v` afin que les fichiers de sortie persistent après l'arrêt du conteneur
+- Montez votre répertoire de documents avec `-v` pour que les fichiers de sortie persistent après la fermeture du conteneur
 - Utilisez `poetry config virtualenvs.create false` pour installer directement dans le conteneur (pas besoin d'environnement virtuel dans Docker)
-- L'option `--rm` nettoie le conteneur après sa fermeture ; omettez-la si vous souhaitez réutiliser le conteneur
+- L'option `--rm` nettoie le conteneur après sa fermeture. Omettez-la si vous souhaitez réutiliser le conteneur
 - **Testé sur :** Docker Desktop 29.2.0 (Windows), conteneur Ubuntu 24.04, conteneur Debian 12, conteneur Fedora 39
 
 #### Améliorations prévues
 
-Un Dockerfile pré-construit et une image Docker publiée sont prévus pour une version future, ce qui simplifiera l'utilisation à :
+Un Dockerfile pré-construit et une image Docker publiée sont prévus pour une version future, ce qui simplifiera l'utilisation à ceci :
 
 ```bash
-# Futur (pas encore disponible)
+# Version future (pas encore disponible)
 docker run -v "$(pwd):/data" gdpr-pseudonymizer process /data/input.txt
 ```
 
 ---
 
-## Utilisation des commandes
+## Utilisation de la ligne de commande
 
 ### Installation via pip
 
@@ -351,15 +351,15 @@ poetry run gdpr-pseudo batch ./documents/
 **Alternative :** Activez le shell Poetry pour la session :
 ```bash
 poetry shell
-gdpr-pseudo --help  # Fonctionne dans le shell
-exit                # Retour au shell normal
+gdpr-pseudo --help  # Fonctionne dans ce shell
+exit                # Retourner au shell normal
 ```
 
 ---
 
 ## Configuration (optionnelle)
 
-Générez un modèle de fichier de configuration :
+Générez un fichier de configuration modèle :
 
 ```bash
 poetry run gdpr-pseudo config --init
@@ -376,19 +376,19 @@ pseudonymization:
   model: spacy
 
 batch:
-  workers: 4        # 1-8 (utilisez 1 pour la validation interactive)
+  workers: 4        # 1-8 (utiliser 1 pour la validation interactive)
   output_dir: null
 
 logging:
   level: INFO
 ```
 
-Affichez la configuration effective actuelle :
+Afficher la configuration actuelle effective :
 ```bash
 poetry run gdpr-pseudo config
 ```
 
-**Note de sécurité :** La phrase de passe n'est jamais stockée dans les fichiers de configuration. Utilisez :
+**Remarque de sécurité :** La mot de passe n'est jamais stockée dans les fichiers de configuration. Utilisez :
 - Variable d'environnement : `GDPR_PSEUDO_PASSPHRASE`
 - Invite interactive (par défaut)
 
@@ -401,16 +401,16 @@ poetry run gdpr-pseudo config
 **Cause :** Poetry n'est pas dans le PATH.
 
 **Solution :**
-1. Vérifiez l'emplacement de l'installation :
+1. Vérifiez l'emplacement d'installation :
    - Windows : `%APPDATA%\Python\Scripts`
    - macOS/Linux : `~/.local/bin`
-2. Ajoutez au PATH (voir les instructions par plateforme ci-dessus)
-3. Redémarrez le terminal
-4. Alternative : utilisez `python -m poetry` au lieu de `poetry`
+2. Ajoutez au PATH (voir les instructions spécifiques à votre plate-forme ci-dessus)
+3. Redémarrez votre terminal
+4. Alternative : utilisez `python -m poetry` à la place de `poetry`
 
 ---
 
-### Version de Python non prise en charge
+### Version Python non prise en charge
 
 **Erreur :** `The currently activated Python version X.Y.Z is not supported`
 
@@ -422,25 +422,25 @@ poetry run gdpr-pseudo config
    poetry install
    ```
 
-**Remarque :** Si votre système dispose de Python 3.13+ mais que Poetry utilise 3.10-3.12, l'outil fonctionne correctement. Poetry gère son propre environnement virtuel indépendamment du Python système. Vérifiez avec :
+**Note :** Si votre système a Python 3.13+ mais que Poetry utilise 3.10-3.12, l'outil fonctionne correctement. Poetry gère son propre environnement virtuel indépendamment de Python au niveau système. Vérifiez avec :
 ```bash
 poetry env info
-# Cherchez "Virtualenv Python: 3.11.x" (doit être 3.10-3.12)
+# Recherchez « Virtualenv Python: 3.11.x » (doit être 3.10-3.12)
 ```
 
 ---
 
-### Exigences relatives à la phrase de passe
+### Exigences de mot de passe
 
 **Erreur :** `Passphrase must be at least 12 characters`
 
-**Cause :** Exigence de sécurité -- les phrases de passe doivent comporter au moins 12 caractères.
+**Cause :** Exigence de sécurité. Les phrases de passe doivent comporter au moins 12 caractères.
 
 **Solution :**
-1. Utilisez une phrase de passe d'au moins 12 caractères
+1. Utilisez une mot de passe d'au moins 12 caractères
 2. Ou définissez-la via une variable d'environnement :
    ```bash
-   export GDPR_PSEUDO_PASSPHRASE="your-secure-passphrase-here"
+   export GDPR_PSEUDO_PASSPHRASE="votre-phrase-de-passe-securisee"
    ```
 
 ---
@@ -449,7 +449,7 @@ poetry env info
 
 **Causes possibles :**
 - Problèmes réseau
-- Espace disque insuffisant (~1 Go nécessaire)
+- Espace disque insuffisant (~1 Go requis)
 - Pare-feu bloquant le téléchargement
 
 **Solutions :**
@@ -468,20 +468,20 @@ poetry env info
    poetry run python -m spacy download fr_core_news_lg
    ```
 
-3. **Derrière un pare-feu d'entreprise :** Contactez votre service informatique pour la configuration du proxy
+3. **Derrière un pare-feu d'entreprise :** Contactez votre équipe informatique pour la configuration du proxy
 
-4. **Réessayez avec une sortie détaillée :**
+4. **Réessayez avec sortie détaillée :**
    ```bash
    poetry run python -m spacy download fr_core_news_lg --verbose
    ```
 
 ---
 
-### Échec de `poetry install` avec des conflits de dépendances
+### `poetry install` échoue avec des conflits de dépendances
 
 **Solution :**
-1. Vérifiez la version de Python (doit être 3.10-3.12)
-2. Supprimez l'environnement virtuel et réinstallez :
+1. Vérifiez la version Python (doit être 3.10-3.12)
+2. Videz l'environnement virtuel et réinstallez :
    ```bash
    poetry env remove python
    poetry install
@@ -510,7 +510,7 @@ gdpr-pseudo --help
 
 ### Windows : violations d'accès spaCy
 
-**Symptôme :** Plantage ou erreurs de violation d'accès lors de l'exécution de spaCy.
+**Symptôme :** Crash ou erreurs de violation d'accès lors de l'exécution de spaCy.
 
 **Solutions :**
 1. Utilisez Windows Subsystem for Linux (WSL) à la place
@@ -525,30 +525,30 @@ gdpr-pseudo --help
 
 **Solutions :**
 - **macOS/Linux :** Vérifiez les permissions avec `ls -la`
-- **Windows :** Exécutez PowerShell en tant qu'administrateur pour l'installation
-- Assurez-vous d'avoir les droits d'écriture sur le répertoire du projet
+- **Windows :** Lancez PowerShell en tant qu'administrateur pour l'installation
+- Assurez-vous d'avoir accès en écriture au répertoire du projet
 
 ---
 
-## Vérification complète de l'installation
+## Vérifier l'installation complète
 
 Exécutez ces commandes pour vérifier que tout fonctionne :
 
 ```bash
-# 1. Vérifier le CLI
+# 1. Vérifier l'interface en ligne de commande
 poetry run gdpr-pseudo --help
 
 # 2. Vérifier la version
 poetry run gdpr-pseudo --version
 
-# 3. Tester le traitement (crée un fichier de test)
+# 3. Test de traitement (crée un fichier de test)
 echo "Marie Dubois travaille a Paris." > test_install.txt
 poetry run gdpr-pseudo process test_install.txt
 
-# 4. Vérifier la sortie
+# 4. Vérifier le résultat
 cat test_install_pseudonymized.txt
 
-# 5. Nettoyer
+# 5. Nettoyage
 rm test_install.txt test_install_pseudonymized.txt mappings.db
 ```
 
@@ -558,17 +558,17 @@ rm test_install.txt test_install_pseudonymized.txt mappings.db
 
 Après l'installation :
 
-1. **Tutoriel de démarrage rapide :** [tutorial.md](tutorial.md) - Votre première pseudonymisation en 5 minutes
+1. **Prise en main rapide :** [tutorial.md](tutorial.md) - Votre première pseudonymisation en 5 minutes
 2. **Référence CLI :** [CLI-REFERENCE.md](CLI-REFERENCE.md) - Documentation complète des commandes
-3. **FAQ :** [faq.md](faq.md) - Questions fréquentes et réponses
+3. **FAQ :** [faq.md](faq.md) - Questions fréquemment posées et réponses
 
 ---
 
 ## Obtenir de l'aide
 
 **Problèmes d'installation :**
-- GitHub Issues : https://github.com/LioChanDaYo/RGPDpseudonymizer/issues
-- Incluez : la version de l'OS, la version de Python, le message d'erreur complet
+- Problèmes GitHub : https://github.com/LioChanDaYo/RGPDpseudonymizer/issues
+- Incluez : version de l'OS, version de Python, message d'erreur complet
 
 **Documentation :**
 - [Référence CLI](CLI-REFERENCE.md)

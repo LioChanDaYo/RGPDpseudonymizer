@@ -1,6 +1,6 @@
 # Guide de dépannage
 
-**GDPR Pseudonymizer** - Référence des erreurs et solutions
+**Pseudonymiseur RGPD** - Référence des erreurs et solutions
 
 ---
 
@@ -8,19 +8,19 @@
 
 ### `poetry: command not found`
 
-**Cause :** Poetry n'est pas dans le PATH de votre système.
+**Cause :** Poetry n'est pas présent dans votre PATH système.
 
 **Solution :**
-1. Vérifiez l'emplacement de l'installation :
+1. Vérifiez le répertoire d'installation :
    - Windows : `%APPDATA%\Python\Scripts`
    - macOS/Linux : `~/.local/bin`
-2. Ajoutez au PATH :
+2. Ajoutez à votre PATH :
    - **Windows (PowerShell) :** `$env:PATH += ";$env:APPDATA\Python\Scripts"`
-   - **macOS/Linux :** `export PATH="$HOME/.local/bin:$PATH"` (ajoutez dans `~/.bashrc` ou `~/.zshrc`)
+   - **macOS/Linux :** `export PATH="$HOME/.local/bin:$PATH"` (ajoutez à `~/.bashrc` ou `~/.zshrc`)
 3. Redémarrez votre terminal
-4. Alternative : utilisez `python -m poetry` au lieu de `poetry`
+4. Alternative : utilisez `python -m poetry` à la place de `poetry`
 
-### Version de Python non supportée
+### Version Python non prise en charge
 
 **Erreur :** `The currently activated Python version X.Y.Z is not supported`
 
@@ -33,11 +33,11 @@
    ```
 3. Vérifiez avec `poetry env info` (recherchez « Python: 3.10.x », « 3.11.x » ou « 3.12.x »)
 
-**Remarque :** Python 3.9 n'est plus supporté (fin de vie en octobre 2025). Python 3.13+ n'a pas encore été testé.
+**Remarque :** Python 3.9 n'est plus pris en charge (fin de vie en octobre 2025). Python 3.13 et supérieur n'ont pas encore été testés.
 
-### Échec du téléchargement du modèle spaCy
+### Le téléchargement du modèle spaCy échoue
 
-**Causes possibles :** Problèmes réseau, espace disque insuffisant (~1 Go nécessaire), pare-feu bloquant la connexion.
+**Causes possibles :** Problèmes de réseau, espace disque insuffisant (~1 Go nécessaire), pare-feu bloquant.
 
 **Solutions :**
 
@@ -54,17 +54,17 @@
    poetry run python -m spacy download fr_core_news_lg
    ```
 
-3. **Réessayez avec une sortie détaillée :**
+3. **Réessayez avec sortie détaillée :**
    ```bash
    poetry run python -m spacy download fr_core_news_lg --verbose
    ```
 
-4. **Derrière un pare-feu d'entreprise :** Contactez votre service informatique pour la configuration du proxy ou téléchargez le modèle manuellement depuis https://github.com/explosion/spacy-models
+4. **Derrière un pare-feu d'entreprise :** Contactez votre service informatique pour configurer un proxy ou téléchargez le paquet du modèle manuellement depuis https://github.com/explosion/spacy-models
 
-### Échec de `poetry install` avec des conflits de dépendances
+### `poetry install` échoue avec des conflits de dépendances
 
 **Solution :**
-1. Vérifiez la version de Python (doit être 3.10-3.12)
+1. Vérifiez la version Python (doit être 3.10-3.12)
 2. Supprimez l'environnement virtuel et réinstallez :
    ```bash
    poetry env remove python
@@ -77,7 +77,7 @@
 
 ### `gdpr-pseudo: command not found`
 
-**Cause :** La CLI nécessite le préfixe `poetry run` en mode développement.
+**Cause :** L'interface en ligne de commande requiert le préfixe `poetry run` pendant le développement.
 
 **Solution :** Utilisez toujours `poetry run` :
 ```bash
@@ -88,7 +88,7 @@ poetry run gdpr-pseudo --help
 gdpr-pseudo --help
 ```
 
-**Alternative :** Activez le shell Poetry :
+**Alternative :** Activez l'interpréteur Poetry :
 ```bash
 poetry shell
 gdpr-pseudo --help
@@ -97,14 +97,14 @@ exit
 
 ---
 
-## Problèmes de phrase de passe
+## Problèmes de mot de passe
 
 ### `Passphrase must be at least 12 characters`
 
-**Cause :** Exigence de sécurité -- les phrases de passe doivent comporter au moins 12 caractères.
+**Cause :** Exigence de sécurité -- les phrases de passe doivent contenir au moins 12 caractères.
 
 **Solution :**
-1. Utilisez une phrase de passe d'au moins 12 caractères
+1. Utilisez une mot de passe d'au moins 12 caractères
 2. Ou définissez-la via une variable d'environnement :
    ```bash
    # macOS/Linux
@@ -119,29 +119,29 @@ exit
 **Erreur :** `Incorrect passphrase. Please check your passphrase and try again.`
 
 **Solution :**
-- Vérifiez que vous utilisez exactement la phrase de passe employée lors de la création de la base de données
-- Vérifiez l'absence d'espaces en fin de chaîne ou de caractères invisibles
+- Vérifiez que vous utilisez exactement la même mot de passe que celle utilisée lors de la création de la base de données
+- Vérifiez la présence d'espaces à la fin ou de caractères invisibles
 - Si vous utilisez une variable d'environnement, vérifiez : `echo $GDPR_PSEUDO_PASSPHRASE` (Linux/macOS) ou `echo $env:GDPR_PSEUDO_PASSPHRASE` (PowerShell)
 
 ### Phrase de passe oubliée
 
-**Conséquence :** La base de données de correspondances ne peut pas être déchiffrée. Les correspondances existantes sont définitivement inaccessibles et la pseudonymisation ne peut pas être inversée.
+**Conséquence :** La base de données de correspondance ne peut pas être déchiffrée. Les correspondances existantes sont définitivement inaccessibles et la pseudonymisation ne peut pas être annulée.
 
-**Récupération :** Créez une nouvelle base de données (les correspondances précédentes sont perdues) :
+**Récupération :** Créez une nouvelle base de données (les correspondances précédentes seront perdues) :
 ```bash
 poetry run gdpr-pseudo init --force
 ```
 
-**Prévention :** Conservez vos phrases de passe dans un gestionnaire de mots de passe sécurisé.
+**Prévention :** Stockez vos phrases de passe dans un gestionnaire de mots de passe sécurisé.
 
 ### `Passphrase in config file is forbidden`
 
-**Cause :** Un champ `passphrase` a été trouvé dans `.gdpr-pseudo.yaml`. Le stockage d'identifiants en clair est interdit pour des raisons de sécurité.
+**Cause :** Un champ `passphrase` a été trouvé dans `.gdpr-pseudo.yaml`. Le stockage de données d'identification en texte brut est bloqué pour des raisons de sécurité.
 
-**Solution :** Supprimez le champ `passphrase` de votre fichier de configuration. Utilisez l'une des méthodes suivantes :
-- **Variable d'environnement :** `GDPR_PSEUDO_PASSPHRASE` (recommandé pour l'automatisation)
-- **Saisie interactive** (la plus sécurisée -- comportement par défaut)
-- **Option CLI :** `--passphrase` (déconseillé -- visible dans l'historique du shell)
+**Solution :** Supprimez le champ `passphrase` de votre fichier de configuration. Utilisez l'une des options suivantes :
+- **Variable d'environnement :** `GDPR_PSEUDO_PASSPHRASE` (recommandée pour l'automatisation)
+- **Invite interactive** (plus sûr -- comportement par défaut)
+- **Option en ligne de commande :** `--passphrase` (non recommandée -- visible dans l'historique du shell)
 
 ---
 
@@ -163,9 +163,9 @@ poetry run gdpr-pseudo init
 2. Essayez d'exporter les données : `poetry run gdpr-pseudo export backup.json`
 3. Créez une nouvelle base de données : `poetry run gdpr-pseudo init --force`
 
-### Pseudonymes incohérents entre les documents
+### Pseudonymes incohérents dans les documents
 
-**Cause :** Utilisation de fichiers de base de données différents pour des documents liés.
+**Cause :** Utilisation de fichiers de base de données différents pour des documents connexes.
 
 **Solution :** Spécifiez toujours la même base de données :
 ```bash
@@ -182,13 +182,13 @@ poetry run gdpr-pseudo process doc2.txt --db shared.db
 **Causes possibles :**
 - Le document ne contient pas de texte français reconnaissable
 - L'encodage du fichier n'est pas UTF-8
-- Le format de fichier n'est pas supporté
+- Le format de fichier n'est pas pris en charge
 
 **Solutions :**
-1. Assurez-vous que le texte est en français avec un encodage correct (UTF-8 avec accents : é, è, à)
+1. Assurez-vous que le texte est en français avec le bon encodage (UTF-8 avec accents : é, è, à)
 2. Vérifiez que le document contient des noms, des lieux ou des organisations
 3. Vérifiez que le fichier est au format `.txt` ou `.md`
-4. Testez avec un exemple connu :
+4. Testez avec un exemple connu et valide :
    ```bash
    echo "Marie Dubois travaille a Paris pour Acme SA." > test.txt
    poetry run gdpr-pseudo process test.txt
@@ -204,32 +204,32 @@ poetry run gdpr-pseudo process doc.txt --theme neutral
 
 ---
 
-## Problèmes de l'interface de validation
+## Problèmes d'interface de validation
 
 ### L'interface de validation ne répond pas
 
-**Cause :** Problème de compatibilité du terminal avec la capture des entrées clavier.
+**Cause :** Problème de compatibilité du terminal avec la capture d'entrée clavier.
 
 **Solutions :**
 1. Utilisez un terminal standard (PowerShell, Terminal.app, bash)
-2. Évitez les terminaux intégrés des IDE (VS Code, PyCharm -- peuvent poser des problèmes de saisie)
+2. Évitez d'exécuter dans les terminaux intégrés des IDE (VS Code, PyCharm -- peuvent avoir des problèmes d'entrée)
 3. Essayez `poetry shell` puis exécutez la commande directement
 4. Sous Windows, essayez Windows Terminal au lieu de l'ancien cmd.exe
 
 ### Les raccourcis clavier ne fonctionnent pas
 
-**Solution :** Appuyez sur `H` ou `?` pendant la validation pour afficher l'aide complète avec tous les raccourcis disponibles. Certains raccourcis (opérations par lot comme `Shift+A`, `Shift+R`) sont masqués par défaut.
+**Solution :** Appuyez sur `H` ou `?` durant le processus de validation pour voir l'aide complète avec tous les raccourcis disponibles. Certains raccourcis (opérations par lot comme `Shift+A`, `Shift+R`) sont masqués par défaut.
 
 ---
 
-## Problèmes spécifiques aux plateformes
+## Problèmes spécifiques à la plateforme
 
 ### Windows : violations d'accès spaCy
 
-**Symptôme :** Plantage ou erreurs de violation d'accès lors de l'exécution de spaCy sous Windows.
+**Symptôme :** Crash ou erreurs de violation d'accès lors de l'exécution de spaCy sous Windows.
 
 **Solutions :**
-1. **Utilisez WSL (recommandé) :** Installez le Sous-système Windows pour Linux et exécutez l'outil dans cet environnement
+1. **Utilisez WSL (recommandé) :** Installez le sous-système Windows pour Linux et exécutez l'outil dedans
 2. **Limitez les threads :** Définissez `OMP_NUM_THREADS=1` dans l'environnement :
    ```powershell
    $env:OMP_NUM_THREADS = 1
@@ -238,7 +238,7 @@ poetry run gdpr-pseudo process doc.txt --theme neutral
    - Mettez à jour Windows vers la dernière version
    - Mettez à jour Visual C++ Redistributable
 
-**Remarque :** Il s'agit d'un problème connu de spaCy sous Windows ([spaCy #12659](https://github.com/explosion/spaCy/issues/12659)). L'intégration continue ignore les tests dépendant de spaCy sous Windows pour cette raison.
+**Remarque :** Il s'agit d'un problème connu de spaCy sous Windows ([spaCy #12659](https://github.com/explosion/spaCy/issues/12659)). L'intégration continue ignore les tests qui dépendent de spaCy sous Windows pour cette raison.
 
 ### macOS : Xcode Command Line Tools requis
 
@@ -256,7 +256,7 @@ Python 3.10+ dispose du support natif ARM. Si vous utilisez Homebrew :
 brew install python@3.11
 ```
 
-### Linux : outils de compilation manquants
+### Linux : Outils de compilation manquants
 
 **Erreur :** Erreurs de compilation lors de `poetry install`
 
@@ -275,49 +275,49 @@ sudo dnf install python3-devel gcc
 ### Erreurs de permission refusée
 
 **Solutions :**
-- **macOS/Linux :** Vérifiez les permissions des fichiers avec `ls -la`, assurez-vous d'avoir les droits en écriture
+- **macOS/Linux :** Vérifiez les permissions des fichiers avec `ls -la`, assurez-vous d'avoir accès en écriture
 - **Windows :** Exécutez PowerShell en tant qu'administrateur pour les étapes d'installation
-- Assurez-vous d'avoir les droits en écriture sur le répertoire du projet et les chemins de sortie
+- Assurez-vous d'avoir accès en écriture au répertoire du projet et aux chemins de sortie
 
 ---
 
 ## Problèmes de performance
 
-### Le traitement ralentit ou plante sur de grands lots
+### Le traitement ralentit ou plante sur de gros lots
 
 **Solutions :**
-- Traitez les fichiers par lots plus petits
+- Traitez les fichiers par petits lots
 - Réduisez le nombre de workers parallèles : `--workers 1`
-- Fermez les autres applications pour libérer de la mémoire (le modèle spaCy utilise environ 1,5 Go par worker)
+- Fermez les autres applications pour libérer de la mémoire (le modèle spaCy utilise ~1,5 Go par worker)
 - Surveillez l'utilisation de la mémoire -- l'outil nécessite jusqu'à 8 Go de RAM avec 4 workers
 
 ### Le chargement du modèle spaCy est lent
 
-**Cause :** Le modèle `fr_core_news_lg` pèse environ 571 Mo et nécessite quelques secondes pour se charger lors de la première utilisation.
+**Cause :** Le modèle `fr_core_news_lg` pèse environ 571 Mo et prend quelques secondes à charger lors de la première utilisation.
 
-**Atténuation :** Le modèle est mis en cache en mémoire après le premier chargement. Les documents suivants dans une session de traitement par lots sont traités plus rapidement.
+**Mitigation :** Le modèle est mis en cache en mémoire après le premier chargement. Les documents suivants dans une session de traitement par lot se traitent plus rapidement.
 
 ---
 
 ## Quand signaler un bug
 
-Créez un rapport de bug sur GitHub si vous rencontrez :
+Signalez un bug sur GitHub si vous rencontrez :
 
-1. **Des plantages** qui ne sont pas expliqués par les entrées de dépannage ci-dessus
-2. **Une pseudonymisation incorrecte** (entité remplacée par un mauvais type de pseudonyme)
-3. **Une perte de données** (corruption de la base de données, correspondances manquantes)
-4. **Des problèmes de sécurité** (exposition de la phrase de passe, problèmes de chiffrement)
+1. **Des plantages** non expliqués par les entrées de dépannage ci-dessus
+2. **Une pseudonymisation incorrecte** (entité remplacée par le mauvais type de pseudonyme)
+3. **Une perte de données** (corruption de base de données, correspondances manquantes)
+4. **Des problèmes de sécurité** (exposition de mot de passe, problèmes de chiffrement)
 
 **Comment signaler :**
 - GitHub Issues : https://github.com/LioChanDaYo/RGPDpseudonymizer/issues
-- Incluez : version du système d'exploitation, version de Python, message d'erreur complet, étapes pour reproduire le problème
-- **N'incluez PAS** de données sensibles (vrais noms, contenu de documents) dans les rapports de bugs
+- Incluez : version du système d'exploitation, version Python, message d'erreur complet, étapes pour reproduire
+- **N'incluez PAS** de données sensibles (vrais noms, contenu de documents) dans vos signalements de bugs
 
 ---
 
-## Documentation associée
+## Documentation connexe
 
-- [Guide d'installation](installation.md) - Configuration spécifique à chaque plateforme
+- [Guide d'installation](installation.md) - Configuration spécifique à la plateforme
 - [Référence CLI](CLI-REFERENCE.md) - Documentation complète des commandes
-- [FAQ](faq.md) - Questions fréquentes
+- [FAQ](faq.md) - Questions fréquemment posées
 - [Tutoriel](tutorial.md) - Guides d'utilisation pas à pas
