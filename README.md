@@ -14,6 +14,19 @@ Transform sensitive French documents for safe AI analysis with local processing,
 
 ---
 
+## What's New in v1.1
+
+- **GDPR Article 17 Right to Erasure** — `delete-mapping` and `list-entities` commands for selective entity deletion with audit trail
+- **Gender-aware pseudonym assignment** — 945-name French dictionary automatically matches pseudonym gender to detected name gender
+- **NER accuracy doubled** — F1 score improved from 29.74% to 59.97% (+30.23pp) via annotation cleanup, regex expansion, and geography dictionary
+- **PDF/DOCX input support** — Process PDF and DOCX files directly: `pip install gdpr-pseudonymizer[formats]`
+- **French documentation** — Full French translation of README and user guides, MkDocs FR/EN toggle
+- **Validation UI improvements** — Context cycling dot indicator, batch feedback with entity counts, CI benchmark regression gate
+
+**Upgrade:** `pip install --upgrade gdpr-pseudonymizer`
+
+---
+
 ## 🎯 Overview
 
 GDPR Pseudonymizer is a **privacy-first CLI tool** that combines AI efficiency with human accuracy to pseudonymize French text documents. Unlike fully automatic tools or cloud services, we prioritize **zero false negatives** and **legal defensibility** through mandatory validation workflows.
@@ -59,35 +72,37 @@ GDPR Pseudonymizer is a **privacy-first CLI tool** that combines AI efficiency w
 
 ## 🚀 Quick Start
 
-**Status:** 🎉 **v1.0.7** (February 2026)
+**Status:** 🎉 **v1.1.0** (February 2026)
 
-### Realistic Expectations for v1.0
+### Realistic Expectations for v1.1
 
-**What v1.0 delivers:**
-- 🤖 **AI-assisted detection** - Hybrid NLP + regex detects ~60% of entities automatically (F1 59.97%)
-- ✅ **Mandatory human verification** - You review and confirm all entities (2-3 min per document)
-- 🔒 **100% accuracy guarantee** - Human validation ensures zero false negatives
-- ⚡ **50%+ faster than manual** - Pre-detection saves time vs pure manual redaction
+**What v1.1 delivers:**
+- 🤖 **AI-assisted detection** — Hybrid NLP + regex detects ~60% of entities automatically (F1 59.97%)
+- ✅ **Mandatory human verification** — You review and confirm all entities (2-3 min per document)
+- 🔒 **100% accuracy guarantee** — Human validation ensures zero false negatives
+- ⚡ **50%+ faster than manual** — Pre-detection saves time vs pure manual redaction
+- 🗑️ **GDPR Article 17 erasure** — Selectively delete entity mappings with audit trail
+- 📄 **PDF/DOCX support** — Process PDF and DOCX files directly (optional extras)
+- 🇫🇷 **French documentation** — Full French translation of docs and user guides
 
-**What v1.0 does NOT deliver:**
+**What v1.1 does NOT deliver:**
 - ❌ Fully automatic "set and forget" processing
 - ❌ 85%+ AI accuracy (current: ~60% F1 with hybrid approach)
 - ❌ Optional validation mode (validation is mandatory)
 
 ### Roadmap
 
-**v1.0 (MVP - Q2 2026):** AI-assisted CLI with mandatory validation
+**v1.0 (MVP - Q1 2026):** AI-assisted CLI with mandatory validation
 - Target: Privacy-conscious early adopters who value human oversight
 - 100% local processing, encrypted mapping tables, audit trails
 
-**v1.1 (Q2-Q3 2026):** Quick wins & GDPR compliance
-- ✅ ~~GDPR Right to Erasure: selective entity deletion (`delete-mapping` command, Article 17)~~ (Story 5.1 — done)
-- ✅ ~~Gender-aware pseudonym assignment for French names~~ (Story 5.2 — done)
-- ✅ ~~NER accuracy improvements: F1 29.74% → 59.97% (annotation cleanup, regex expansion, geography dictionary)~~ (Story 5.3 — done)
-- ✅ ~~French documentation translation (MkDocs i18n, 6 docs translated)~~ (Story 5.4 — done)
-- ✅ ~~PDF/DOCX input format support (optional extras, text extraction)~~ (Story 5.5 — done)
-- ✅ ~~CLI polish & minor enhancements (context cycling indicator, batch feedback, CI benchmarks)~~ (Story 5.6 — done)
-- Beta feedback bug fixes and UX improvements
+**v1.1 (Q1 2026) — CURRENT RELEASE:**
+- ✅ GDPR Right to Erasure: selective entity deletion (`delete-mapping` command, Article 17)
+- ✅ Gender-aware pseudonym assignment for French names (945-name dictionary)
+- ✅ NER accuracy improvements: F1 29.74% → 59.97% (+30.23pp)
+- ✅ French documentation translation (MkDocs i18n, 6 docs translated)
+- ✅ PDF/DOCX input format support (optional extras, text extraction)
+- ✅ CLI polish & minor enhancements (context cycling indicator, batch feedback, CI benchmarks)
 
 **v2.0 (Q3-Q4 2026):** GUI & broader accessibility
 - Desktop GUI wrapping CLI core (drag-and-drop, visual entity review)
@@ -372,14 +387,14 @@ The validation UI provides an intuitive keyboard-driven interface for reviewing 
 
 ## 🛠️ Development Status
 
-**All 4 MVP Epics Complete + Epic 5 in progress** — v1.0.7 (February 2026).
+**All 5 Epics Complete** — v1.1.0 (February 2026).
 
 - ✅ **Epic 1:** Foundation & NLP Validation (9 stories) — spaCy integration, validation UI, hybrid detection, entity deduplication
 - ✅ **Epic 2:** Core Pseudonymization Engine (9 stories) — pseudonym libraries, encryption, audit logging, batch processing, GDPR 1:1 mapping
 - ✅ **Epic 3:** CLI Interface & Batch Processing (7 stories) — 8 CLI commands, progress reporting, config files, parallel batch, UX polish
 - ✅ **Epic 4:** Launch Readiness (8 stories) — LLM utility validation, cross-platform testing, documentation, NER accuracy suite, performance validation, beta feedback integration, codebase refactoring, launch preparation
-- 🔄 **Epic 5:** Quick Wins & GDPR Compliance (6 stories done) — GDPR Article 17 erasure, gender-aware pseudonyms, NER accuracy improvements (F1 29.74% → 59.97%), French documentation translation, PDF/DOCX support, CLI polish & benchmarks
-- **Total:** 39 stories, 1267+ tests, 86%+ coverage, all quality gates green
+- ✅ **Epic 5:** Quick Wins & GDPR Compliance (7 stories) — GDPR Article 17 erasure, gender-aware pseudonyms, NER accuracy improvements (F1 29.74% → 59.97%), French documentation translation, PDF/DOCX support, CLI polish & benchmarks, v1.1 release
+- **Total:** 40 stories, 1267+ tests, 86%+ coverage, all quality gates green
 
 ---
 
@@ -560,8 +575,8 @@ The integration test suite covers:
 
 | Metric | Value | Status |
 |--------|-------|--------|
-| **Development Progress** | v1.0.7 | ✅ All 4 MVP Epics + Epic 5 in progress |
-| **Stories Complete** | 39 (Epic 1-5) | ✅ Epics 1-4 complete + Stories 5.1-5.6 |
+| **Development Progress** | v1.1.0 | ✅ All 5 Epics Complete |
+| **Stories Complete** | 40 (Epic 1-5) | ✅ Epics 1-5 complete |
 | **LLM Utility (NFR10)** | 4.27/5.0 (85.4%) | ✅ PASSED (threshold: 80%) |
 | **Installation Success (NFR3)** | 87.5% (7/8 platforms) | ✅ PASSED (threshold: 85%) |
 | **First Pseudonymization (NFR14)** | 100% within 30 min | ✅ PASSED (threshold: 80%) |
@@ -599,4 +614,4 @@ The integration test suite covers:
 
 ---
 
-**Last Updated:** 2026-02-15 (v1.0.7 — Epic 5 in progress: GDPR erasure, gender-aware pseudonyms, NER accuracy 59.97% F1, French docs, PDF/DOCX support, CLI polish)
+**Last Updated:** 2026-02-15 (v1.1.0 — Epic 5 complete: GDPR Article 17 erasure, gender-aware pseudonyms, NER accuracy 59.97% F1, French docs, PDF/DOCX support, CLI polish)
