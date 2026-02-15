@@ -206,6 +206,30 @@ poetry run pytest -k "test_entity_detection" -v
 poetry run pytest tests/performance/ --benchmark-only
 ```
 
+### Performance Benchmarks in CI
+
+The primary CI job (Ubuntu 3.11) runs performance benchmarks alongside the test suite:
+
+- **Benchmark JSON output:** `--benchmark-json=benchmark-results.json` captures benchmark results
+- **Time guard:** `--benchmark-max-time=60` limits benchmark duration to prevent CI timeouts
+- **Artifact upload:** Benchmark JSON is uploaded as a build artifact with 30-day retention for tracking
+
+**Benchmark groups:**
+
+| Group | File | Measures |
+|-------|------|----------|
+| `single-document` | `test_single_document_benchmark.py` | Full pipeline (NLP + DB + file I/O) for 2K/3.5K/5K word docs |
+| `entity-detection` | `test_single_document_benchmark.py` | Hybrid NLP+regex detection only (isolates NLP regressions) |
+| `batch` | `test_batch_performance.py` | 50-document batch processing throughput |
+
+**Thresholds:**
+- NFR1: Single document processing <30 seconds
+- NFR2: 50-document batch <30 minutes (1800s)
+
+Benchmarks are **not** run on Windows (spaCy segfault) or macOS — only on the primary Ubuntu 3.11 job.
+
+See [tests/performance/README.md](../tests/performance/README.md) for local usage.
+
 ---
 
 ## Common CI Failures and Troubleshooting
@@ -551,11 +575,16 @@ poetry run pytest --log-cli-level=DEBUG
 
 ## Future Enhancements
 
-### Planned for Epic 2-4
+### Implemented (Epics 2-5)
 
-- **Integration Tests:** Expand test suite to include integration tests
-- **Performance Tests:** Add pytest-benchmark tests for NFR validation
-- **Release Workflow:** Automate PyPI publishing (`release.yaml`)
+- **Integration Tests:** 90+ integration tests covering validation, encryption, and hybrid detection
+- **Performance Benchmarks:** pytest-benchmark tests for NFR1/NFR2 validation with JSON artifact upload (Story 5.6)
+- **Entity Detection Benchmark:** Isolated NLP+regex benchmark to detect regressions in detection pipeline
+- **Release Workflow:** Automated PyPI publishing via `release.yaml` on git tags
+- **Accuracy Tests:** 22-test NER accuracy suite against 25-document annotated corpus
+
+### Planned
+
 - **Docker CI:** Add Docker image build and test
 - **Security Scanning:** Add Snyk or Dependabot for vulnerability scanning
 - **Pre-commit Hooks:** Automate local quality checks
@@ -582,7 +611,7 @@ poetry run pytest --log-cli-level=DEBUG
 
 ---
 
-**Last Updated:** 2026-01-16
-**Version:** 1.0
-**Epic:** 1
-**Story:** 1.3
+**Last Updated:** 2026-02-15
+**Version:** 1.1
+**Epic:** 1-5
+**Story:** 1.3, 4.5, 5.6

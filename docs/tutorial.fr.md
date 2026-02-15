@@ -340,14 +340,14 @@ Proposed pseudonym: [Sophie Martin] (theme: neutral)
 |-----|--------|-------------|
 | `N` / `Right Arrow` | Next | Aller à l'entité suivante |
 | `P` / `Left Arrow` | Previous | Aller à l'entité précédente |
-| `X` | Cycle contexts | Afficher les autres occurrences de l'entité |
+| `X` | Cycle contexts | Afficher les autres occurrences de l'entité (indicateur à points : `● ○ ○`) |
 | `Q` | Quit | Quitter la validation (avec confirmation) |
 
 **Actions groupées (masquées - appuyez sur H pour voir) :**
 | Touche | Action | Description |
 |-----|--------|-------------|
-| `Shift+A` | Accept All Type | Accepter toutes les entités du type actuel |
-| `Shift+R` | Reject All Type | Rejeter toutes les entités du type actuel |
+| `Shift+A` | Accept All Type | Accepter toutes les entités du type actuel (affiche le décompte : `✓ Accepted all 15 PERSON entities`) |
+| `Shift+R` | Reject All Type | Rejeter toutes les entités du type actuel (affiche le décompte : `✗ Rejected all 8 LOCATION entities`) |
 
 **Aide :**
 | Touche | Action |
@@ -378,7 +378,7 @@ Accepter ou rejeter cet élément applique la décision à toutes les formes var
 
 1. **Appuyez sur H pour tous les raccourcis :** De nombreux raccourcis (comme Shift+A/Shift+R) ne sont pas affichés sur l'écran principal
 2. **Utilisez les actions groupées :** Appuyez sur `Shift+A` pour accepter toutes les entités PERSON si elles semblent correctes
-3. **Faites défiler les contextes :** Appuyez sur `X` pour voir toutes les occurrences d'une entité avant de décider
+3. **Faites défiler les contextes :** Appuyez sur `X` pour voir toutes les occurrences d'une entité avant de décider — un indicateur à points (`● ○ ○ ○`) montre votre position ; pour plus de 10 contextes, un format tronqué (`○ ○ … ● … ○ ○`) est utilisé
 4. **Faites confiance aux hautes confiances :** Les entités avec >90% de confiance sont généralement correctes
 5. **Examinez les basses confiances :** Les scores jaunes/rouges exigent un examen prudent
 

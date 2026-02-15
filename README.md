@@ -85,6 +85,8 @@ GDPR Pseudonymizer is a **privacy-first CLI tool** that combines AI efficiency w
 - ✅ ~~Gender-aware pseudonym assignment for French names~~ (Story 5.2 — done)
 - ✅ ~~NER accuracy improvements: F1 29.74% → 59.97% (annotation cleanup, regex expansion, geography dictionary)~~ (Story 5.3 — done)
 - ✅ ~~French documentation translation (MkDocs i18n, 6 docs translated)~~ (Story 5.4 — done)
+- ✅ ~~PDF/DOCX input format support (optional extras, text extraction)~~ (Story 5.5 — done)
+- ✅ ~~CLI polish & minor enhancements (context cycling indicator, batch feedback, CI benchmarks)~~ (Story 5.6 — done)
 - Beta feedback bug fixes and UX improvements
 
 **v2.0 (Q3-Q4 2026):** GUI & broader accessibility
@@ -242,7 +244,8 @@ The validation UI provides an intuitive keyboard-driven interface for reviewing 
 - ✅ **Context display** - See 10 words before/after each entity with highlighting
 - ✅ **Confidence scores** - Color-coded confidence from spaCy NER (green >80%, yellow 60-80%, red <60%)
 - ✅ **Keyboard shortcuts** - Single-key actions: [Space] Confirm, [R] Reject, [E] Modify, [A] Add, [C] Change pseudonym
-- ✅ **Batch operations** - Accept/reject all entities of a type at once (Shift+A/R)
+- ✅ **Batch operations** - Accept/reject all entities of a type at once (Shift+A/R) with entity count feedback
+- ✅ **Context cycling indicator** - Dot indicator (`● ○ ○ ○ ○`) shows current context position; `[Press X to cycle]` hint improves discoverability
 - ✅ **Help overlay** - Press [H] for full command reference
 - ✅ **Performance** - <2 minutes for typical 20-30 entity documents
 
@@ -375,8 +378,8 @@ The validation UI provides an intuitive keyboard-driven interface for reviewing 
 - ✅ **Epic 2:** Core Pseudonymization Engine (9 stories) — pseudonym libraries, encryption, audit logging, batch processing, GDPR 1:1 mapping
 - ✅ **Epic 3:** CLI Interface & Batch Processing (7 stories) — 8 CLI commands, progress reporting, config files, parallel batch, UX polish
 - ✅ **Epic 4:** Launch Readiness (8 stories) — LLM utility validation, cross-platform testing, documentation, NER accuracy suite, performance validation, beta feedback integration, codebase refactoring, launch preparation
-- 🔄 **Epic 5:** Quick Wins & GDPR Compliance (4 stories done) — GDPR Article 17 erasure, gender-aware pseudonyms, NER accuracy improvements (F1 29.74% → 59.97%), French documentation translation
-- **Total:** 36 stories, 1198+ tests, 86%+ coverage, all quality gates green
+- 🔄 **Epic 5:** Quick Wins & GDPR Compliance (6 stories done) — GDPR Article 17 erasure, gender-aware pseudonyms, NER accuracy improvements (F1 29.74% → 59.97%), French documentation translation, PDF/DOCX support, CLI polish & benchmarks
+- **Total:** 39 stories, 1267+ tests, 86%+ coverage, all quality gates green
 
 ---
 
@@ -518,12 +521,12 @@ poetry run pytest tests/integration/test_validation_workflow_integration.py -v
 
 ### Test Coverage
 
-- **Unit tests:** 946+ tests covering validation models, UI components, encryption, database operations, audit logging, progress tracking, gender detection, and core logic
+- **Unit tests:** 977+ tests covering validation models, UI components, encryption, database operations, audit logging, progress tracking, gender detection, context cycling indicator, and core logic
 - **Integration tests:** 90 tests for end-to-end workflows including validation (Story 2.0.1), encrypted database operations (Story 2.4), compositional logic, and hybrid detection
 - **Accuracy tests:** 22 tests validating NER accuracy against 25-document ground-truth corpus (Story 4.4)
-- **Performance tests:** 15 tests validating all NFR targets — single-document benchmarks (NFR1), batch performance (NFR2), memory profiling (NFR4), startup time (NFR5), stability/error rate (NFR6), stress testing (Story 4.5)
+- **Performance tests:** 19 tests validating all NFR targets — single-document benchmarks (NFR1), entity-detection benchmarks, batch performance (NFR2), memory profiling (NFR4), startup time (NFR5), stability/error rate (NFR6), stress testing (Story 4.5)
 - **Current coverage:** 86%+ across all modules (100% for progress module, 91.41% for AuditRepository)
-- **Total tests:** 1198+ tests
+- **Total tests:** 1267+ tests
 - **CI/CD:** Tests run on Python 3.10-3.12 across Windows, macOS, and Linux
 - **Quality gates:** All pass (Black, Ruff, mypy, pytest)
 
@@ -553,12 +556,12 @@ The integration test suite covers:
 
 ---
 
-## 📊 Project Metrics (As of 2026-02-13)
+## 📊 Project Metrics (As of 2026-02-15)
 
 | Metric | Value | Status |
 |--------|-------|--------|
 | **Development Progress** | v1.0.7 | ✅ All 4 MVP Epics + Epic 5 in progress |
-| **Stories Complete** | 37 (Epic 1-5) | ✅ Epics 1-4 complete + Stories 5.1, 5.2, 5.3, 5.4 |
+| **Stories Complete** | 39 (Epic 1-5) | ✅ Epics 1-4 complete + Stories 5.1-5.6 |
 | **LLM Utility (NFR10)** | 4.27/5.0 (85.4%) | ✅ PASSED (threshold: 80%) |
 | **Installation Success (NFR3)** | 87.5% (7/8 platforms) | ✅ PASSED (threshold: 85%) |
 | **First Pseudonymization (NFR14)** | 100% within 30 min | ✅ PASSED (threshold: 80%) |
@@ -579,7 +582,7 @@ The integration test suite covers:
 | **Memory Usage (NFR4)** | ~1 GB Python-tracked peak | ✅ PASSED (<8GB threshold) |
 | **CLI Startup (NFR5)** | 0.56s (help), 6.0s (cold start w/ model) | ✅ PASSED (<5s for CLI startup) |
 | **Error Rate (NFR6)** | ~0% unexpected errors | ✅ PASSED (<10% threshold) |
-| **Test Coverage** | 1198+ tests, 86%+ coverage | ✅ All Quality Checks Pass |
+| **Test Coverage** | 1267+ tests, 86%+ coverage | ✅ All Quality Checks Pass |
 | **Quality Gates** | Ruff, mypy, pytest | ✅ All Pass (0 issues) |
 | **Supported Languages** | French | 🇫🇷 v1.0 only |
 | **Supported Formats** | .txt, .md, .pdf, .docx | 📝 PDF/DOCX via optional extras |
@@ -596,4 +599,4 @@ The integration test suite covers:
 
 ---
 
-**Last Updated:** 2026-02-14 (v1.0.7 — Epic 5 in progress: GDPR erasure, gender-aware pseudonyms, NER accuracy 59.97% F1, French documentation)
+**Last Updated:** 2026-02-15 (v1.0.7 — Epic 5 in progress: GDPR erasure, gender-aware pseudonyms, NER accuracy 59.97% F1, French docs, PDF/DOCX support, CLI polish)

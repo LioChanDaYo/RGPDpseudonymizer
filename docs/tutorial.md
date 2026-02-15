@@ -340,14 +340,14 @@ Proposed pseudonym: [Sophie Martin] (theme: neutral)
 |-----|--------|-------------|
 | `N` / `Right Arrow` | Next | Go to next entity |
 | `P` / `Left Arrow` | Previous | Go to previous entity |
-| `X` | Cycle contexts | Show other occurrences of entity |
+| `X` | Cycle contexts | Show other occurrences of entity (dot indicator shows position: `● ○ ○`) |
 | `Q` | Quit | Exit validation (with confirmation) |
 
 **Batch Operations (hidden - press H to see):**
 | Key | Action | Description |
 |-----|--------|-------------|
-| `Shift+A` | Accept All Type | Accept all entities of current type |
-| `Shift+R` | Reject All Type | Reject all entities of current type |
+| `Shift+A` | Accept All Type | Accept all entities of current type (shows count: `✓ Accepted all 15 PERSON entities`) |
+| `Shift+R` | Reject All Type | Reject all entities of current type (shows count: `✗ Rejected all 8 LOCATION entities`) |
 
 **Help:**
 | Key | Action |
@@ -378,7 +378,7 @@ Accepting or rejecting this item applies the decision to all variant forms. This
 
 1. **Press H for all shortcuts:** Many shortcuts (like Shift+A/Shift+R) aren't shown on the main screen
 2. **Use batch operations:** Press `Shift+A` to accept all PERSON entities if they look correct
-3. **Cycle contexts:** Press `X` to see all occurrences of an entity before deciding
+3. **Cycle contexts:** Press `X` to see all occurrences of an entity before deciding — a dot indicator (`● ○ ○ ○`) shows your position; for >10 contexts, a truncated format (`○ ○ … ● … ○ ○`) is used
 4. **Trust high-confidence:** Entities with >90% confidence are usually correct
 5. **Review low-confidence:** Yellow/red confidence scores need careful review
 

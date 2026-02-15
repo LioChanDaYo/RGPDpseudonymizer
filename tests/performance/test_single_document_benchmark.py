@@ -4,6 +4,7 @@ Validates that processing 2-5K word documents completes in <30 seconds
 on standard hardware (4-core CPU, 8GB RAM).
 
 Story 4.5 - AC1, AC7
+Story 5.6 - AC3: entity-detection-only benchmark added
 """
 
 from __future__ import annotations
@@ -18,6 +19,7 @@ from gdpr_pseudonymizer.core.document_processor import (
     ProcessingResult,
 )
 from gdpr_pseudonymizer.data.database import init_database
+from gdpr_pseudonymizer.nlp.hybrid_detector import HybridDetector
 
 NFR1_THRESHOLD_SECONDS = 30.0
 
@@ -189,3 +191,49 @@ class TestSingleDocumentTimingBreakdown:
         assert (
             result.processing_time_seconds < NFR1_THRESHOLD_SECONDS
         ), f"NFR1 FAIL: {result.processing_time_seconds:.2f}s > {NFR1_THRESHOLD_SECONDS}s"
+
+
+@pytest.mark.slow
+@pytest.mark.benchmark(group="entity-detection")
+class TestEntityDetectionBenchmark:
+    """Entity detection-only benchmark to isolate NLP performance.
+
+    Story 5.6 AC3: Catches NLP-specific regressions independent of
+    database operations, file I/O, and pseudonym assignment.
+    """
+
+    @pytest.fixture(scope="class")
+    def detector(self) -> HybridDetector:
+        """Session-scoped hybrid detector (model loaded once)."""
+        det = HybridDetector()
+        det.load_model("fr_core_news_lg")
+        return det
+
+    def test_entity_detection_3k_words(
+        self,
+        benchmark,  # type: ignore[no-untyped-def]
+        detector: HybridDetector,
+        performance_test_docs: dict[str, Path],
+    ) -> None:
+        """Benchmark hybrid NLP+regex detection on ~3500-word document."""
+        input_path = performance_test_docs["3500"]
+        assert input_path.exists(), f"Test document not found: {input_path}"
+        text = input_path.read_text(encoding="utf-8")
+
+        benchmark.extra_info["document_words"] = "~3500"
+        benchmark.extra_info["component"] = "hybrid_detection_only"
+
+        entities = benchmark.pedantic(
+            detector.detect_entities,
+            args=(text,),
+            warmup_rounds=1,
+            rounds=10,
+            iterations=1,
+        )
+
+        assert len(entities) > 0, "Detection returned no entities"
+        # Detection alone should be well under the full pipeline threshold
+        assert benchmark.stats["mean"] < NFR1_THRESHOLD_SECONDS, (
+            f"Detection-only mean {benchmark.stats['mean']:.2f}s "
+            f"exceeds {NFR1_THRESHOLD_SECONDS}s threshold"
+        )

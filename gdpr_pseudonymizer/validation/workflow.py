@@ -21,6 +21,7 @@ from gdpr_pseudonymizer.validation.ui import (
     ReviewScreen,
     SummaryScreen,
     display_info_message,
+    display_success_message,
     display_warning_message,
     get_confirmation,
     get_text_input,
@@ -310,15 +311,20 @@ class ValidationWorkflow:
                             f"Accept all {len(entity_groups)} unique {entity_type} entities "
                             f"({total_occurrences} total occurrences)?"
                         ):
-                            # Accept all groups
+                            # Accept all groups, counting affected entities
+                            decided = [
+                                d.original_entity for d in session.user_decisions
+                            ]
+                            affected = 0
                             for eg in entity_groups:
                                 for e in eg.occurrences:
-                                    if e not in [
-                                        d.original_entity
-                                        for d in session.user_decisions
-                                    ]:
+                                    if e not in decided:
                                         session.mark_confirmed(e)
-                            display_info_message(f"Accepted all {entity_type} entities")
+                                        affected += 1
+                            display_success_message(
+                                f"Accepted all {affected} {entity_type} entities "
+                                f"({total_occurrences} total occurrences)"
+                            )
                             # Exit current entity type review, continue to next type
                             group_index = len(entity_groups)  # Force exit of group loop
                             break
@@ -331,15 +337,20 @@ class ValidationWorkflow:
                             f"Reject all {len(entity_groups)} unique {entity_type} entities "
                             f"({total_occurrences} total occurrences)?"
                         ):
-                            # Reject all groups
+                            # Reject all groups, counting affected entities
+                            decided = [
+                                d.original_entity for d in session.user_decisions
+                            ]
+                            affected = 0
                             for eg in entity_groups:
                                 for e in eg.occurrences:
-                                    if e not in [
-                                        d.original_entity
-                                        for d in session.user_decisions
-                                    ]:
+                                    if e not in decided:
                                         session.mark_rejected(e)
-                            display_info_message(f"Rejected all {entity_type} entities")
+                                        affected += 1
+                            display_info_message(
+                                f"✗ Rejected all {affected} {entity_type} entities "
+                                f"({total_occurrences} total occurrences)"
+                            )
                             # Exit current entity type review, continue to next type
                             group_index = len(entity_groups)  # Force exit of group loop
                             break

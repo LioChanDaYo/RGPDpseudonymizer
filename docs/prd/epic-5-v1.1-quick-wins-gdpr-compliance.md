@@ -23,11 +23,11 @@
 | Story | Priority | Est. Duration | Backlog Source | Status |
 |-------|----------|---------------|----------------|--------|
 | 5.1: GDPR Right to Erasure | 🔴 **HIGH** | 2-3 days | FE-008 | ✅ DONE |
-| 5.2: Gender-Aware Pseudonym Assignment | 🟡 **MEDIUM** | 2-3 days | FE-007 | 📋 PENDING |
-| 5.3: NER Accuracy & Annotation Quality | 🟡 **MEDIUM** | 2-3 days | FE-011 + FE-012 | 📋 PENDING |
-| 5.4: French Documentation Translation | 🟡 **MEDIUM** | 1-2 weeks | FE-010 / FB-002 | 📋 PENDING |
-| 5.5: PDF/DOCX Input Format Support | 🟡 **MEDIUM** | 1-2 weeks | FB-004 | 📋 PENDING |
-| 5.6: CLI Polish & Minor Enhancements | 🟢 **LOW** | 2-3 days | FE-001/002/003 + bugs | 📋 PENDING |
+| 5.2: Gender-Aware Pseudonym Assignment | 🟡 **MEDIUM** | 2-3 days | FE-007 | ✅ DONE |
+| 5.3: NER Accuracy & Annotation Quality | 🟡 **MEDIUM** | 2-3 days | FE-011 + FE-012 | ✅ DONE |
+| 5.4: French Documentation Translation | 🟡 **MEDIUM** | 1-2 weeks | FE-010 / FB-002 | ✅ DONE |
+| 5.5: PDF/DOCX Input Format Support | 🟡 **MEDIUM** | 1-2 weeks | FB-004 | ✅ DONE |
+| 5.6: CLI Polish & Minor Enhancements | 🟢 **LOW** | 2-3 days | FE-001/002/003 + bugs | ✅ DONE |
 | 5.7: v1.1 Release Preparation | 🔴 **HIGH** | 1-2 days | — | 📋 PENDING |
 
 **Total Estimated Duration:** 25-39 days (5-8 weeks, target: 6-7 weeks)
