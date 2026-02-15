@@ -1,0 +1,2725 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="AI-Assisted Pseudonymization for French Documents with Human Verification">
+      
+      
+      
+        <link rel="canonical" href="https://liochandayo.github.io/RGPDpseudonymizer/api-reference/">
+      
+      
+        <link rel="prev" href="../methodology/">
+      
+      
+      
+        
+          <link rel="alternate" href="./" hreflang="en">
+        
+          <link rel="alternate" href="../fr/api-reference/" hreflang="fr">
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>API Reference - GDPR Pseudonymizer</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#api-reference" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="GDPR Pseudonymizer" class="md-header__button md-logo" aria-label="GDPR Pseudonymizer" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            GDPR Pseudonymizer
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              API Reference
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="Select language">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../fr/api-reference/" hreflang="fr" class="md-select__link">
+              Français
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/LioChanDaYo/RGPDpseudonymizer" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    LioChanDaYo/RGPDpseudonymizer
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="GDPR Pseudonymizer" class="md-nav__button md-logo" aria-label="GDPR Pseudonymizer" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    GDPR Pseudonymizer
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/LioChanDaYo/RGPDpseudonymizer" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    LioChanDaYo/RGPDpseudonymizer
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorial/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Guide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    User Guide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CLI-REFERENCE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FAQ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Methodology
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Methodology
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../methodology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Technical Approach & GDPR Compliance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Developer Guide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Developer Guide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#core-module-gdpr_pseudonymizercore" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core Module (gdpr_pseudonymizer.core)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Core Module (gdpr_pseudonymizer.core)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#documentprocessor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DocumentProcessor
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#processingresult" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ProcessingResult
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#nlp-module-gdpr_pseudonymizernlp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NLP Module (gdpr_pseudonymizer.nlp)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="NLP Module (gdpr_pseudonymizer.nlp)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#detectedentity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DetectedEntity
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#entitydetector-abstract-base-class" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        EntityDetector (Abstract Base Class)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hybriddetector" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        HybridDetector
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#spacydetector" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SpaCyDetector
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#regexmatcher" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RegexMatcher
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#namedictionary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NameDictionary
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#entitygrouping-entity_grouping-module" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        EntityGrouping (entity_grouping module)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pseudonym-module-gdpr_pseudonymizerpseudonym" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pseudonym Module (gdpr_pseudonymizer.pseudonym)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Pseudonym Module (gdpr_pseudonymizer.pseudonym)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#librarybasedpseudonymmanager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LibraryBasedPseudonymManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pseudonymassignment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PseudonymAssignment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genderdetector" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GenderDetector
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#compositionalpseudonymengine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CompositionalPseudonymEngine
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-module-gdpr_pseudonymizerdata" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data Module (gdpr_pseudonymizer.data)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Data Module (gdpr_pseudonymizer.data)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#database-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Database Functions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sqlalchemy-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SQLAlchemy Models
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="SQLAlchemy Models">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#entity-entities-table" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Entity (entities table)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#operation-operations-table" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Operation (operations table)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#repositories" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Repositories
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Repositories">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mappingrepository-abstract" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MappingRepository (Abstract)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#auditrepository" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AuditRepository
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#encryptionservice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        EncryptionService
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validation-module-gdpr_pseudonymizervalidation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validation Module (gdpr_pseudonymizer.validation)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Validation Module (gdpr_pseudonymizer.validation)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#validation-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validation Workflow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#review-states" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Review States
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#user-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        User Actions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#utils-module-gdpr_pseudonymizerutils" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Utils Module (gdpr_pseudonymizer.utils)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Utils Module (gdpr_pseudonymizer.utils)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#file-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File Handling
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Logging
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#exceptions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Exceptions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#extension-points" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Extension Points
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Extension Points">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#custom-pseudonym-libraries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom Pseudonym Libraries
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-nlp-detector" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom NLP Detector
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#programmatic-usage-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Programmatic Usage Example
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related Documentation
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#core-module-gdpr_pseudonymizercore" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core Module (gdpr_pseudonymizer.core)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Core Module (gdpr_pseudonymizer.core)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#documentprocessor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DocumentProcessor
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#processingresult" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ProcessingResult
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#nlp-module-gdpr_pseudonymizernlp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NLP Module (gdpr_pseudonymizer.nlp)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="NLP Module (gdpr_pseudonymizer.nlp)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#detectedentity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DetectedEntity
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#entitydetector-abstract-base-class" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        EntityDetector (Abstract Base Class)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hybriddetector" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        HybridDetector
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#spacydetector" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SpaCyDetector
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#regexmatcher" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RegexMatcher
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#namedictionary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NameDictionary
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#entitygrouping-entity_grouping-module" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        EntityGrouping (entity_grouping module)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pseudonym-module-gdpr_pseudonymizerpseudonym" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pseudonym Module (gdpr_pseudonymizer.pseudonym)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Pseudonym Module (gdpr_pseudonymizer.pseudonym)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#librarybasedpseudonymmanager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LibraryBasedPseudonymManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pseudonymassignment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PseudonymAssignment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genderdetector" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GenderDetector
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#compositionalpseudonymengine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CompositionalPseudonymEngine
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-module-gdpr_pseudonymizerdata" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data Module (gdpr_pseudonymizer.data)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Data Module (gdpr_pseudonymizer.data)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#database-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Database Functions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sqlalchemy-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SQLAlchemy Models
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="SQLAlchemy Models">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#entity-entities-table" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Entity (entities table)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#operation-operations-table" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Operation (operations table)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#repositories" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Repositories
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Repositories">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mappingrepository-abstract" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MappingRepository (Abstract)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#auditrepository" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AuditRepository
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#encryptionservice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        EncryptionService
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validation-module-gdpr_pseudonymizervalidation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validation Module (gdpr_pseudonymizer.validation)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Validation Module (gdpr_pseudonymizer.validation)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#validation-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validation Workflow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#review-states" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Review States
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#user-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        User Actions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#utils-module-gdpr_pseudonymizerutils" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Utils Module (gdpr_pseudonymizer.utils)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Utils Module (gdpr_pseudonymizer.utils)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#file-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File Handling
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Logging
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#exceptions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Exceptions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#extension-points" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Extension Points
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Extension Points">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#custom-pseudonym-libraries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom Pseudonym Libraries
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-nlp-detector" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom NLP Detector
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#programmatic-usage-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Programmatic Usage Example
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related Documentation
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="api-reference">API Reference<a class="headerlink" href="#api-reference" title="Permanent link">&para;</a></h1>
+<p><strong>GDPR Pseudonymizer</strong> - Module documentation for developers</p>
+<hr />
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>The <code>gdpr_pseudonymizer</code> package is organized into the following subpackages:</p>
+<table>
+<thead>
+<tr>
+<th>Package</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>core</code></td>
+<td>Document processing orchestration</td>
+</tr>
+<tr>
+<td><code>nlp</code></td>
+<td>Named Entity Recognition (NER) pipeline</td>
+</tr>
+<tr>
+<td><code>pseudonym</code></td>
+<td>Pseudonym assignment and library management</td>
+</tr>
+<tr>
+<td><code>data</code></td>
+<td>Database, models, encryption, and repositories</td>
+</tr>
+<tr>
+<td><code>validation</code></td>
+<td>Interactive human-in-the-loop validation workflow</td>
+</tr>
+<tr>
+<td><code>cli</code></td>
+<td>Command-line interface (Typer-based)</td>
+</tr>
+<tr>
+<td><code>utils</code></td>
+<td>File handling, configuration, and logging</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="core-module-gdpr_pseudonymizercore">Core Module (<code>gdpr_pseudonymizer.core</code>)<a class="headerlink" href="#core-module-gdpr_pseudonymizercore" title="Permanent link">&para;</a></h2>
+<h3 id="documentprocessor">DocumentProcessor<a class="headerlink" href="#documentprocessor" title="Permanent link">&para;</a></h3>
+<p>Orchestrates the single-document pseudonymization workflow: entity detection, validation, pseudonym assignment, and file output.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">gdpr_pseudonymizer.core.document_processor</span><span class="w"> </span><span class="kn">import</span> <span class="n">DocumentProcessor</span>
+
+<span class="n">processor</span> <span class="o">=</span> <span class="n">DocumentProcessor</span><span class="p">(</span>
+    <span class="n">db_path</span><span class="o">=</span><span class="s2">&quot;mappings.db&quot;</span><span class="p">,</span>
+    <span class="n">passphrase</span><span class="o">=</span><span class="s2">&quot;your-secure-passphrase&quot;</span><span class="p">,</span>
+    <span class="n">theme</span><span class="o">=</span><span class="s2">&quot;neutral&quot;</span><span class="p">,</span>        <span class="c1"># neutral | star_wars | lotr</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;spacy&quot;</span>
+<span class="p">)</span>
+
+<span class="n">result</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">process_document</span><span class="p">(</span>
+    <span class="n">input_path</span><span class="o">=</span><span class="s2">&quot;input.txt&quot;</span><span class="p">,</span>
+    <span class="n">output_path</span><span class="o">=</span><span class="s2">&quot;output.txt&quot;</span><span class="p">,</span>
+    <span class="n">skip_validation</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>    <span class="c1"># Set True for programmatic use (no UI)</span>
+    <span class="n">entity_type_filter</span><span class="o">=</span><span class="kc">None</span>   <span class="c1"># Optional: set of types e.g. {&quot;PERSON&quot;, &quot;LOCATION&quot;}</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="processingresult">ProcessingResult<a class="headerlink" href="#processingresult" title="Permanent link">&para;</a></h3>
+<p>Dataclass returned by <code>DocumentProcessor.process_document()</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>success</code></td>
+<td><code>bool</code></td>
+<td>Whether processing completed successfully</td>
+</tr>
+<tr>
+<td><code>input_file</code></td>
+<td><code>str</code></td>
+<td>Input file path</td>
+</tr>
+<tr>
+<td><code>output_file</code></td>
+<td><code>str</code></td>
+<td>Output file path</td>
+</tr>
+<tr>
+<td><code>entities_detected</code></td>
+<td><code>int</code></td>
+<td>Total entities detected</td>
+</tr>
+<tr>
+<td><code>entities_new</code></td>
+<td><code>int</code></td>
+<td>Newly assigned pseudonyms</td>
+</tr>
+<tr>
+<td><code>entities_reused</code></td>
+<td><code>int</code></td>
+<td>Reused pseudonyms (idempotency)</td>
+</tr>
+<tr>
+<td><code>processing_time_seconds</code></td>
+<td><code>float</code></td>
+<td>Total processing time</td>
+</tr>
+<tr>
+<td><code>error_message</code></td>
+<td><code>str | None</code></td>
+<td>Error description if failed</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="nlp-module-gdpr_pseudonymizernlp">NLP Module (<code>gdpr_pseudonymizer.nlp</code>)<a class="headerlink" href="#nlp-module-gdpr_pseudonymizernlp" title="Permanent link">&para;</a></h2>
+<h3 id="detectedentity">DetectedEntity<a class="headerlink" href="#detectedentity" title="Permanent link">&para;</a></h3>
+<p>Dataclass representing a detected named entity:</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>text</code></td>
+<td><code>str</code></td>
+<td>Original entity text</td>
+</tr>
+<tr>
+<td><code>entity_type</code></td>
+<td><code>str</code></td>
+<td>Classification: <code>PERSON</code>, <code>LOCATION</code>, <code>ORG</code></td>
+</tr>
+<tr>
+<td><code>start_pos</code></td>
+<td><code>int</code></td>
+<td>Character offset start position</td>
+</tr>
+<tr>
+<td><code>end_pos</code></td>
+<td><code>int</code></td>
+<td>Character offset end position</td>
+</tr>
+<tr>
+<td><code>confidence</code></td>
+<td><code>float | None</code></td>
+<td>NER confidence score (0.0-1.0)</td>
+</tr>
+<tr>
+<td><code>gender</code></td>
+<td><code>str | None</code></td>
+<td>Gender: <code>male</code>, <code>female</code>, <code>neutral</code>, <code>unknown</code></td>
+</tr>
+<tr>
+<td><code>is_ambiguous</code></td>
+<td><code>bool</code></td>
+<td>Whether flagged as ambiguous</td>
+</tr>
+<tr>
+<td><code>source</code></td>
+<td><code>str</code></td>
+<td>Detection source: <code>spacy</code>, <code>regex</code>, or <code>hybrid</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="entitydetector-abstract-base-class">EntityDetector (Abstract Base Class)<a class="headerlink" href="#entitydetector-abstract-base-class" title="Permanent link">&para;</a></h3>
+<p>Interface for NER implementations. All detectors must implement:</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">EntityDetector</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">detect_entities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">DetectedEntity</span><span class="p">]:</span> <span class="o">...</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_model_info</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span> <span class="o">...</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">supports_gender_classification</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span> <span class="o">...</span>
+</code></pre></div>
+<h3 id="hybriddetector">HybridDetector<a class="headerlink" href="#hybriddetector" title="Permanent link">&para;</a></h3>
+<p>Default detector combining spaCy NER with regex pattern matching. This is the detector used by <code>DocumentProcessor</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">gdpr_pseudonymizer.nlp.hybrid_detector</span><span class="w"> </span><span class="kn">import</span> <span class="n">HybridDetector</span>
+
+<span class="n">detector</span> <span class="o">=</span> <span class="n">HybridDetector</span><span class="p">()</span>
+<span class="n">detector</span><span class="o">.</span><span class="n">load_model</span><span class="p">(</span><span class="s2">&quot;fr_core_news_lg&quot;</span><span class="p">)</span>
+<span class="n">entities</span> <span class="o">=</span> <span class="n">detector</span><span class="o">.</span><span class="n">detect_entities</span><span class="p">(</span><span class="s2">&quot;Marie Dubois travaille a Paris.&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="spacydetector">SpaCyDetector<a class="headerlink" href="#spacydetector" title="Permanent link">&para;</a></h3>
+<p>Pure spaCy NER implementation:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">gdpr_pseudonymizer.nlp.spacy_detector</span><span class="w"> </span><span class="kn">import</span> <span class="n">SpaCyDetector</span>
+
+<span class="n">detector</span> <span class="o">=</span> <span class="n">SpaCyDetector</span><span class="p">()</span>
+<span class="n">detector</span><span class="o">.</span><span class="n">load_model</span><span class="p">(</span><span class="s2">&quot;fr_core_news_lg&quot;</span><span class="p">)</span>
+<span class="n">entities</span> <span class="o">=</span> <span class="n">detector</span><span class="o">.</span><span class="n">detect_entities</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="regexmatcher">RegexMatcher<a class="headerlink" href="#regexmatcher" title="Permanent link">&para;</a></h3>
+<p>Pattern-based entity matcher using French title patterns, compound names, name dictionaries, and organization suffixes:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">gdpr_pseudonymizer.nlp.regex_matcher</span><span class="w"> </span><span class="kn">import</span> <span class="n">RegexMatcher</span>
+
+<span class="n">matcher</span> <span class="o">=</span> <span class="n">RegexMatcher</span><span class="p">()</span>
+<span class="n">matcher</span><span class="o">.</span><span class="n">load_patterns</span><span class="p">()</span>  <span class="c1"># Loads from config/detection_patterns.yaml</span>
+<span class="n">entities</span> <span class="o">=</span> <span class="n">matcher</span><span class="o">.</span><span class="n">match_entities</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+<span class="n">stats</span> <span class="o">=</span> <span class="n">matcher</span><span class="o">.</span><span class="n">get_pattern_stats</span><span class="p">()</span>
+</code></pre></div>
+<h3 id="namedictionary">NameDictionary<a class="headerlink" href="#namedictionary" title="Permanent link">&para;</a></h3>
+<p>French name dictionary for pattern-based detection:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">gdpr_pseudonymizer.nlp.name_dictionary</span><span class="w"> </span><span class="kn">import</span> <span class="n">NameDictionary</span>
+
+<span class="n">names</span> <span class="o">=</span> <span class="n">NameDictionary</span><span class="p">()</span>
+<span class="n">names</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+<span class="n">names</span><span class="o">.</span><span class="n">is_first_name</span><span class="p">(</span><span class="s2">&quot;Marie&quot;</span><span class="p">)</span>  <span class="c1"># True</span>
+<span class="n">names</span><span class="o">.</span><span class="n">is_last_name</span><span class="p">(</span><span class="s2">&quot;Dubois&quot;</span><span class="p">)</span>  <span class="c1"># True</span>
+</code></pre></div>
+<h3 id="entitygrouping-entity_grouping-module">EntityGrouping (<code>entity_grouping</code> module)<a class="headerlink" href="#entitygrouping-entity_grouping-module" title="Permanent link">&para;</a></h3>
+<p>Groups variant forms of the same real-world entity into single validation items, reducing user validation fatigue. For example, "Marie Dubois", "Pr. Dubois", and "Dubois" are grouped as one item.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">gdpr_pseudonymizer.nlp.entity_grouping</span><span class="w"> </span><span class="kn">import</span> <span class="n">group_entity_variants</span>
+
+<span class="n">groups</span> <span class="o">=</span> <span class="n">group_entity_variants</span><span class="p">(</span><span class="n">detected_entities</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">canonical</span><span class="p">,</span> <span class="n">occurrences</span><span class="p">,</span> <span class="n">variant_texts</span> <span class="ow">in</span> <span class="n">groups</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">canonical</span><span class="o">.</span><span class="n">text</span><span class="si">}</span><span class="s2"> (appears as: </span><span class="si">{</span><span class="n">variant_texts</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p><strong>Return type:</strong> <code>list[tuple[DetectedEntity, list[DetectedEntity], set[str]]]</code></p>
+<p>Each tuple contains:</p>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>canonical</code></td>
+<td><code>DetectedEntity</code></td>
+<td>Representative entity (longest text form)</td>
+</tr>
+<tr>
+<td><code>occurrences</code></td>
+<td><code>list[DetectedEntity]</code></td>
+<td>All entity instances in the group</td>
+</tr>
+<tr>
+<td><code>variant_texts</code></td>
+<td><code>set[str]</code></td>
+<td>Unique text forms in the group</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Grouping rules by entity type:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Rule</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>PERSON</code></td>
+<td>Title stripping + surname matching. "Marie Dubois" and "Dubois" group together. Different first names stay separate ("Marie Dubois" vs "Jean Dubois"). Ambiguous single-word surnames matching multiple people are isolated.</td>
+</tr>
+<tr>
+<td><code>LOCATION</code></td>
+<td>French preposition stripping. "a Lyon" and "Lyon" group together.</td>
+</tr>
+<tr>
+<td><code>ORG</code></td>
+<td>Case-insensitive matching. "ACME Corp" and "acme corp" group together.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="pseudonym-module-gdpr_pseudonymizerpseudonym">Pseudonym Module (<code>gdpr_pseudonymizer.pseudonym</code>)<a class="headerlink" href="#pseudonym-module-gdpr_pseudonymizerpseudonym" title="Permanent link">&para;</a></h2>
+<h3 id="librarybasedpseudonymmanager">LibraryBasedPseudonymManager<a class="headerlink" href="#librarybasedpseudonymmanager" title="Permanent link">&para;</a></h3>
+<p>Loads pseudonym libraries from JSON files and assigns pseudonyms with gender matching:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">gdpr_pseudonymizer.pseudonym.library_manager</span><span class="w"> </span><span class="kn">import</span> <span class="n">LibraryBasedPseudonymManager</span>
+
+<span class="n">manager</span> <span class="o">=</span> <span class="n">LibraryBasedPseudonymManager</span><span class="p">()</span>
+<span class="n">manager</span><span class="o">.</span><span class="n">load_library</span><span class="p">(</span><span class="s2">&quot;star_wars&quot;</span><span class="p">)</span>
+
+<span class="n">assignment</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">assign_pseudonym</span><span class="p">(</span>
+    <span class="n">entity_type</span><span class="o">=</span><span class="s2">&quot;PERSON&quot;</span><span class="p">,</span>
+    <span class="n">first_name</span><span class="o">=</span><span class="s2">&quot;Marie&quot;</span><span class="p">,</span>
+    <span class="n">last_name</span><span class="o">=</span><span class="s2">&quot;Dubois&quot;</span><span class="p">,</span>
+    <span class="n">gender</span><span class="o">=</span><span class="s2">&quot;female&quot;</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">assignment</span><span class="o">.</span><span class="n">pseudonym_full</span><span class="p">)</span>  <span class="c1"># e.g., &quot;Leia Organa&quot;</span>
+</code></pre></div>
+<h3 id="pseudonymassignment">PseudonymAssignment<a class="headerlink" href="#pseudonymassignment" title="Permanent link">&para;</a></h3>
+<p>Dataclass returned by pseudonym assignment:</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>pseudonym_full</code></td>
+<td><code>str</code></td>
+<td>Complete pseudonym string</td>
+</tr>
+<tr>
+<td><code>pseudonym_first</code></td>
+<td><code>str | None</code></td>
+<td>First name component (PERSON only)</td>
+</tr>
+<tr>
+<td><code>pseudonym_last</code></td>
+<td><code>str | None</code></td>
+<td>Last name component (PERSON only)</td>
+</tr>
+<tr>
+<td><code>theme</code></td>
+<td><code>str</code></td>
+<td>Library theme used</td>
+</tr>
+<tr>
+<td><code>exhaustion_percentage</code></td>
+<td><code>float</code></td>
+<td>Library usage (0.0-1.0)</td>
+</tr>
+<tr>
+<td><code>is_ambiguous</code></td>
+<td><code>bool</code></td>
+<td>Ambiguity flag</td>
+</tr>
+<tr>
+<td><code>ambiguity_reason</code></td>
+<td><code>str | None</code></td>
+<td>Reason for ambiguity</td>
+</tr>
+</tbody>
+</table>
+<h3 id="genderdetector">GenderDetector<a class="headerlink" href="#genderdetector" title="Permanent link">&para;</a></h3>
+<p>Auto-detects French first name gender from a bundled 945-name INSEE-sourced dictionary. Used by <code>CompositionalPseudonymEngine</code> to assign gender-matched pseudonyms automatically.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">gdpr_pseudonymizer.pseudonym.gender_detector</span><span class="w"> </span><span class="kn">import</span> <span class="n">GenderDetector</span>
+
+<span class="n">detector</span> <span class="o">=</span> <span class="n">GenderDetector</span><span class="p">()</span>
+<span class="n">detector</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+
+<span class="n">detector</span><span class="o">.</span><span class="n">detect_gender</span><span class="p">(</span><span class="s2">&quot;Marie&quot;</span><span class="p">)</span>          <span class="c1"># &quot;female&quot;</span>
+<span class="n">detector</span><span class="o">.</span><span class="n">detect_gender</span><span class="p">(</span><span class="s2">&quot;Jean&quot;</span><span class="p">)</span>           <span class="c1"># &quot;male&quot;</span>
+<span class="n">detector</span><span class="o">.</span><span class="n">detect_gender</span><span class="p">(</span><span class="s2">&quot;Camille&quot;</span><span class="p">)</span>        <span class="c1"># None (ambiguous)</span>
+<span class="n">detector</span><span class="o">.</span><span class="n">detect_gender</span><span class="p">(</span><span class="s2">&quot;Xyzabc&quot;</span><span class="p">)</span>         <span class="c1"># None (unknown)</span>
+
+<span class="c1"># Full name detection (extracts first name, checks entity type)</span>
+<span class="n">detector</span><span class="o">.</span><span class="n">detect_gender_from_full_name</span><span class="p">(</span><span class="s2">&quot;Marie Dupont&quot;</span><span class="p">,</span> <span class="s2">&quot;PERSON&quot;</span><span class="p">)</span>    <span class="c1"># &quot;female&quot;</span>
+<span class="n">detector</span><span class="o">.</span><span class="n">detect_gender_from_full_name</span><span class="p">(</span><span class="s2">&quot;Jean-Pierre Martin&quot;</span><span class="p">,</span> <span class="s2">&quot;PERSON&quot;</span><span class="p">)</span>  <span class="c1"># &quot;male&quot; (compound: uses first component)</span>
+<span class="n">detector</span><span class="o">.</span><span class="n">detect_gender_from_full_name</span><span class="p">(</span><span class="s2">&quot;Paris&quot;</span><span class="p">,</span> <span class="s2">&quot;LOCATION&quot;</span><span class="p">)</span>         <span class="c1"># None (non-PERSON)</span>
+</code></pre></div>
+<p>Key methods:</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>load()</code></td>
+<td>Load gender lookup dictionary from JSON (lazy-loaded on first detect call)</td>
+</tr>
+<tr>
+<td><code>detect_gender(first_name)</code></td>
+<td>Detect gender from a single first name. Returns <code>"male"</code>, <code>"female"</code>, or <code>None</code></td>
+</tr>
+<tr>
+<td><code>detect_gender_from_full_name(full_name, entity_type)</code></td>
+<td>Extract first name from full name and detect gender. Non-PERSON entities always return <code>None</code></td>
+</tr>
+</tbody>
+</table>
+<p>Dictionary stats: 470 male, 457 female, 18 ambiguous names. Case-insensitive matching.</p>
+<h3 id="compositionalpseudonymengine">CompositionalPseudonymEngine<a class="headerlink" href="#compositionalpseudonymengine" title="Permanent link">&para;</a></h3>
+<p>Handles compositional logic: "Marie Dubois" maps to "Leia Organa", and "Marie" alone maps to "Leia" for consistency. Optionally integrates <code>GenderDetector</code> for automatic gender-matched pseudonym assignment.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">gdpr_pseudonymizer.pseudonym.assignment_engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">CompositionalPseudonymEngine</span>
+
+<span class="n">engine</span> <span class="o">=</span> <span class="n">CompositionalPseudonymEngine</span><span class="p">(</span>
+    <span class="n">pseudonym_manager</span><span class="o">=</span><span class="n">manager</span><span class="p">,</span>
+    <span class="n">mapping_repository</span><span class="o">=</span><span class="n">repo</span><span class="p">,</span>
+    <span class="n">gender_detector</span><span class="o">=</span><span class="n">detector</span>  <span class="c1"># Optional: enables auto gender detection</span>
+<span class="p">)</span>
+
+<span class="n">result</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">assign_compositional_pseudonym</span><span class="p">(</span>
+    <span class="n">entity_text</span><span class="o">=</span><span class="s2">&quot;Marie Dubois&quot;</span><span class="p">,</span>
+    <span class="n">entity_type</span><span class="o">=</span><span class="s2">&quot;PERSON&quot;</span><span class="p">,</span>
+    <span class="n">gender</span><span class="o">=</span><span class="s2">&quot;female&quot;</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>Key methods:</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>assign_compositional_pseudonym(entity_text, entity_type, gender)</code></td>
+<td>Assign pseudonym with component reuse</td>
+</tr>
+<tr>
+<td><code>strip_titles(text)</code></td>
+<td>Remove French honorifics (Dr., Mme, Maitre)</td>
+</tr>
+<tr>
+<td><code>strip_prepositions(text)</code></td>
+<td>Remove French prepositions from locations</td>
+</tr>
+<tr>
+<td><code>parse_full_name(entity_text)</code></td>
+<td>Split into (first, last, is_compound)</td>
+</tr>
+<tr>
+<td><code>find_standalone_components(component, component_type)</code></td>
+<td>Look up existing component mapping</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="data-module-gdpr_pseudonymizerdata">Data Module (<code>gdpr_pseudonymizer.data</code>)<a class="headerlink" href="#data-module-gdpr_pseudonymizerdata" title="Permanent link">&para;</a></h2>
+<h3 id="database-functions">Database Functions<a class="headerlink" href="#database-functions" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">gdpr_pseudonymizer.data.database</span><span class="w"> </span><span class="kn">import</span> <span class="n">init_database</span><span class="p">,</span> <span class="n">open_database</span>
+
+<span class="c1"># Initialize a new encrypted database</span>
+<span class="n">init_database</span><span class="p">(</span><span class="s2">&quot;mappings.db&quot;</span><span class="p">,</span> <span class="s2">&quot;your-passphrase&quot;</span><span class="p">)</span>
+
+<span class="c1"># Open existing database (context manager)</span>
+<span class="k">with</span> <span class="n">open_database</span><span class="p">(</span><span class="s2">&quot;mappings.db&quot;</span><span class="p">,</span> <span class="s2">&quot;your-passphrase&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">db_session</span><span class="p">:</span>
+    <span class="c1"># Use repositories with db_session</span>
+    <span class="k">pass</span>
+</code></pre></div>
+<h3 id="sqlalchemy-models">SQLAlchemy Models<a class="headerlink" href="#sqlalchemy-models" title="Permanent link">&para;</a></h3>
+<h4 id="entity-entities-table">Entity (<code>entities</code> table)<a class="headerlink" href="#entity-entities-table" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td><code>str</code> (UUID)</td>
+<td>Primary key</td>
+</tr>
+<tr>
+<td><code>entity_type</code></td>
+<td><code>str</code></td>
+<td>PERSON, LOCATION, ORG</td>
+</tr>
+<tr>
+<td><code>first_name</code></td>
+<td><code>str | None</code></td>
+<td>Original first name (encrypted)</td>
+</tr>
+<tr>
+<td><code>last_name</code></td>
+<td><code>str | None</code></td>
+<td>Original last name (encrypted)</td>
+</tr>
+<tr>
+<td><code>full_name</code></td>
+<td><code>str</code></td>
+<td>Original entity text (encrypted, unique)</td>
+</tr>
+<tr>
+<td><code>pseudonym_first</code></td>
+<td><code>str | None</code></td>
+<td>Assigned first name pseudonym</td>
+</tr>
+<tr>
+<td><code>pseudonym_last</code></td>
+<td><code>str | None</code></td>
+<td>Assigned last name pseudonym</td>
+</tr>
+<tr>
+<td><code>pseudonym_full</code></td>
+<td><code>str</code></td>
+<td>Complete pseudonym</td>
+</tr>
+<tr>
+<td><code>gender</code></td>
+<td><code>str | None</code></td>
+<td>Gender classification</td>
+</tr>
+<tr>
+<td><code>confidence_score</code></td>
+<td><code>float | None</code></td>
+<td>NER confidence</td>
+</tr>
+<tr>
+<td><code>theme</code></td>
+<td><code>str</code></td>
+<td>Library theme used</td>
+</tr>
+<tr>
+<td><code>first_seen_timestamp</code></td>
+<td><code>datetime</code></td>
+<td>First detection time</td>
+</tr>
+</tbody>
+</table>
+<h4 id="operation-operations-table">Operation (<code>operations</code> table)<a class="headerlink" href="#operation-operations-table" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td><code>str</code> (UUID)</td>
+<td>Primary key</td>
+</tr>
+<tr>
+<td><code>timestamp</code></td>
+<td><code>datetime</code></td>
+<td>Operation timestamp</td>
+</tr>
+<tr>
+<td><code>operation_type</code></td>
+<td><code>str</code></td>
+<td>PROCESS, BATCH, VALIDATE, etc.</td>
+</tr>
+<tr>
+<td><code>files_processed</code></td>
+<td><code>list[str]</code></td>
+<td>JSON array of file paths</td>
+</tr>
+<tr>
+<td><code>entity_count</code></td>
+<td><code>int</code></td>
+<td>Entities processed</td>
+</tr>
+<tr>
+<td><code>processing_time_seconds</code></td>
+<td><code>float</code></td>
+<td>Duration</td>
+</tr>
+<tr>
+<td><code>success</code></td>
+<td><code>bool</code></td>
+<td>Outcome</td>
+</tr>
+</tbody>
+</table>
+<h3 id="repositories">Repositories<a class="headerlink" href="#repositories" title="Permanent link">&para;</a></h3>
+<h4 id="mappingrepository-abstract">MappingRepository (Abstract)<a class="headerlink" href="#mappingrepository-abstract" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MappingRepository</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">find_by_full_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">full_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Entity</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">find_by_component</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">component</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">component_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Entity</span><span class="p">]:</span> <span class="o">...</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity</span><span class="p">:</span> <span class="n">Entity</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Entity</span><span class="p">:</span> <span class="o">...</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entities</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Entity</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Entity</span><span class="p">]:</span> <span class="o">...</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">find_all</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">is_ambiguous</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Entity</span><span class="p">]:</span> <span class="o">...</span>
+</code></pre></div>
+<h4 id="auditrepository">AuditRepository<a class="headerlink" href="#auditrepository" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">gdpr_pseudonymizer.data.repositories.audit_repository</span><span class="w"> </span><span class="kn">import</span> <span class="n">AuditRepository</span>
+
+<span class="n">repo</span> <span class="o">=</span> <span class="n">AuditRepository</span><span class="p">(</span><span class="n">session</span><span class="p">)</span>
+<span class="n">repo</span><span class="o">.</span><span class="n">log_operation</span><span class="p">(</span><span class="n">operation</span><span class="p">)</span>
+<span class="n">operations</span> <span class="o">=</span> <span class="n">repo</span><span class="o">.</span><span class="n">find_operations</span><span class="p">(</span><span class="n">operation_type</span><span class="o">=</span><span class="s2">&quot;PROCESS&quot;</span><span class="p">,</span> <span class="n">success</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">repo</span><span class="o">.</span><span class="n">export_to_csv</span><span class="p">(</span><span class="s2">&quot;audit_log.csv&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="encryptionservice">EncryptionService<a class="headerlink" href="#encryptionservice" title="Permanent link">&para;</a></h3>
+<p>AES-256-SIV deterministic authenticated encryption:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">gdpr_pseudonymizer.data.encryption</span><span class="w"> </span><span class="kn">import</span> <span class="n">EncryptionService</span>
+
+<span class="n">salt</span> <span class="o">=</span> <span class="n">EncryptionService</span><span class="o">.</span><span class="n">generate_salt</span><span class="p">()</span>
+<span class="n">valid</span><span class="p">,</span> <span class="n">msg</span> <span class="o">=</span> <span class="n">EncryptionService</span><span class="o">.</span><span class="n">validate_passphrase</span><span class="p">(</span><span class="s2">&quot;my-passphrase&quot;</span><span class="p">)</span>
+
+<span class="n">service</span> <span class="o">=</span> <span class="n">EncryptionService</span><span class="p">(</span><span class="n">passphrase</span><span class="o">=</span><span class="s2">&quot;...&quot;</span><span class="p">,</span> <span class="n">salt</span><span class="o">=</span><span class="n">salt</span><span class="p">)</span>
+<span class="n">ciphertext</span> <span class="o">=</span> <span class="n">service</span><span class="o">.</span><span class="n">encrypt</span><span class="p">(</span><span class="s2">&quot;Marie Dubois&quot;</span><span class="p">)</span>
+<span class="n">plaintext</span> <span class="o">=</span> <span class="n">service</span><span class="o">.</span><span class="n">decrypt</span><span class="p">(</span><span class="n">ciphertext</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h2 id="validation-module-gdpr_pseudonymizervalidation">Validation Module (<code>gdpr_pseudonymizer.validation</code>)<a class="headerlink" href="#validation-module-gdpr_pseudonymizervalidation" title="Permanent link">&para;</a></h2>
+<h3 id="validation-workflow">Validation Workflow<a class="headerlink" href="#validation-workflow" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">gdpr_pseudonymizer.validation.workflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_validation_workflow</span>
+
+<span class="n">validated_entities</span> <span class="o">=</span> <span class="n">run_validation_workflow</span><span class="p">(</span>
+    <span class="n">entities</span><span class="o">=</span><span class="n">detected_entities</span><span class="p">,</span>
+    <span class="n">document_text</span><span class="o">=</span><span class="n">text</span><span class="p">,</span>
+    <span class="n">document_path</span><span class="o">=</span><span class="s2">&quot;input.txt&quot;</span><span class="p">,</span>
+    <span class="n">pseudonym_assigner</span><span class="o">=</span><span class="n">my_assigner_fn</span>  <span class="c1"># Optional callback</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="review-states">Review States<a class="headerlink" href="#review-states" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>State</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>PENDING</code></td>
+<td>Awaiting user review</td>
+</tr>
+<tr>
+<td><code>CONFIRMED</code></td>
+<td>Confirmed as correct entity</td>
+</tr>
+<tr>
+<td><code>REJECTED</code></td>
+<td>Rejected as false positive</td>
+</tr>
+<tr>
+<td><code>MODIFIED</code></td>
+<td>Entity text modified by user</td>
+</tr>
+<tr>
+<td><code>ADDED</code></td>
+<td>Manually added by user</td>
+</tr>
+</tbody>
+</table>
+<h3 id="user-actions">User Actions<a class="headerlink" href="#user-actions" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Action Class</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ConfirmAction(entity)</code></td>
+<td>Accept entity and pseudonym</td>
+</tr>
+<tr>
+<td><code>RejectAction(entity)</code></td>
+<td>Mark as false positive</td>
+</tr>
+<tr>
+<td><code>ModifyAction(entity, new_text)</code></td>
+<td>Change entity text</td>
+</tr>
+<tr>
+<td><code>AddAction(text, entity_type, start_pos, end_pos)</code></td>
+<td>Add missed entity</td>
+</tr>
+<tr>
+<td><code>ChangePseudonymAction(entity, new_pseudonym)</code></td>
+<td>Override pseudonym</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="utils-module-gdpr_pseudonymizerutils">Utils Module (<code>gdpr_pseudonymizer.utils</code>)<a class="headerlink" href="#utils-module-gdpr_pseudonymizerutils" title="Permanent link">&para;</a></h2>
+<h3 id="file-handling">File Handling<a class="headerlink" href="#file-handling" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">gdpr_pseudonymizer.utils.file_handler</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_file</span><span class="p">,</span> <span class="n">write_file</span><span class="p">,</span> <span class="n">validate_file_path</span>
+
+<span class="n">text</span> <span class="o">=</span> <span class="n">read_file</span><span class="p">(</span><span class="s2">&quot;input.txt&quot;</span><span class="p">)</span>
+<span class="n">write_file</span><span class="p">(</span><span class="s2">&quot;output.txt&quot;</span><span class="p">,</span> <span class="n">pseudonymized_text</span><span class="p">)</span>
+<span class="n">validate_file_path</span><span class="p">(</span><span class="s2">&quot;doc.txt&quot;</span><span class="p">,</span> <span class="n">allowed_extensions</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;.txt&quot;</span><span class="p">,</span> <span class="s2">&quot;.md&quot;</span><span class="p">])</span>
+</code></pre></div>
+<h3 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">gdpr_pseudonymizer.utils.config_manager</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_config</span><span class="p">,</span> <span class="n">Config</span>
+
+<span class="n">config</span> <span class="o">=</span> <span class="n">load_config</span><span class="p">(</span><span class="s2">&quot;config.yaml&quot;</span><span class="p">)</span>  <span class="c1"># Or None for defaults</span>
+<span class="c1"># config.theme, config.model_name, config.db_path, etc.</span>
+</code></pre></div>
+<h3 id="logging">Logging<a class="headerlink" href="#logging" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">gdpr_pseudonymizer.utils.logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">configure_logging</span><span class="p">,</span> <span class="n">get_logger</span>
+
+<span class="n">configure_logging</span><span class="p">(</span><span class="s2">&quot;INFO&quot;</span><span class="p">)</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="s2">&quot;my_module&quot;</span><span class="p">)</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;entity_detected&quot;</span><span class="p">,</span> <span class="n">entity_type</span><span class="o">=</span><span class="s2">&quot;PERSON&quot;</span><span class="p">,</span> <span class="n">confidence</span><span class="o">=</span><span class="mf">0.92</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h2 id="exceptions">Exceptions<a class="headerlink" href="#exceptions" title="Permanent link">&para;</a></h2>
+<p>All exceptions inherit from <code>PseudonymizerError</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Exception</th>
+<th>When Raised</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ConfigurationError</code></td>
+<td>Invalid or missing configuration</td>
+</tr>
+<tr>
+<td><code>ModelNotFoundError</code></td>
+<td>NLP model cannot be loaded</td>
+</tr>
+<tr>
+<td><code>EncryptionError</code></td>
+<td>Encryption or decryption fails</td>
+</tr>
+<tr>
+<td><code>ValidationError</code></td>
+<td>Validation workflow error</td>
+</tr>
+<tr>
+<td><code>FileProcessingError</code></td>
+<td>File I/O operation fails</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">gdpr_pseudonymizer.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">PseudonymizerError</span><span class="p">,</span>
+    <span class="n">ConfigurationError</span><span class="p">,</span>
+    <span class="n">ModelNotFoundError</span><span class="p">,</span>
+    <span class="n">EncryptionError</span><span class="p">,</span>
+    <span class="n">ValidationError</span><span class="p">,</span>
+    <span class="n">FileProcessingError</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
+<hr />
+<h2 id="extension-points">Extension Points<a class="headerlink" href="#extension-points" title="Permanent link">&para;</a></h2>
+<h3 id="custom-pseudonym-libraries">Custom Pseudonym Libraries<a class="headerlink" href="#custom-pseudonym-libraries" title="Permanent link">&para;</a></h3>
+<p>Create a JSON file in <code>data/pseudonyms/</code> following this schema:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;theme&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;my_theme&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;data_sources&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;source_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Description&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://...&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;license&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;License type&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;usage_justification&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Why this source&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;extraction_date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-01-01&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;extraction_method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;How data was collected&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;first_names&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;male&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Name1&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Name2&quot;</span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;female&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Name3&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Name4&quot;</span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;neutral&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Name5&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Name6&quot;</span><span class="p">]</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;last_names&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;LastName1&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;LastName2&quot;</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;locations&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;cities&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;City1&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;City2&quot;</span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;regions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Region1&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Region2&quot;</span><span class="p">]</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;organizations&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;companies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Company1&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Company2&quot;</span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;agencies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Agency1&quot;</span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;institutions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Institute1&quot;</span><span class="p">]</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>Minimum requirements:</strong> 500+ first names, 500+ last names, 80+ locations, 35+ organizations.</p>
+<p><strong>Usage:</strong>
+<div class="highlight"><pre><span></span><code><span class="n">manager</span> <span class="o">=</span> <span class="n">LibraryBasedPseudonymManager</span><span class="p">()</span>
+<span class="n">manager</span><span class="o">.</span><span class="n">load_library</span><span class="p">(</span><span class="s2">&quot;my_theme&quot;</span><span class="p">)</span>
+</code></pre></div></p>
+<p>Or via CLI:
+<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>process<span class="w"> </span>doc.txt<span class="w"> </span>--theme<span class="w"> </span>my_theme
+</code></pre></div></p>
+<h3 id="custom-nlp-detector">Custom NLP Detector<a class="headerlink" href="#custom-nlp-detector" title="Permanent link">&para;</a></h3>
+<p>Extend the <code>EntityDetector</code> abstract base class:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">gdpr_pseudonymizer.nlp.entity_detector</span><span class="w"> </span><span class="kn">import</span> <span class="n">EntityDetector</span><span class="p">,</span> <span class="n">DetectedEntity</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">MyDetector</span><span class="p">(</span><span class="n">EntityDetector</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Load your model</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">detect_entities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">DetectedEntity</span><span class="p">]:</span>
+        <span class="c1"># Return detected entities</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_model_info</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;my_model&quot;</span><span class="p">,</span> <span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="s2">&quot;1.0&quot;</span><span class="p">}</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">supports_gender_classification</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+</code></pre></div>
+<hr />
+<h2 id="programmatic-usage-example">Programmatic Usage Example<a class="headerlink" href="#programmatic-usage-example" title="Permanent link">&para;</a></h2>
+<p>Complete example of pseudonymizing a document programmatically:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">gdpr_pseudonymizer.core.document_processor</span><span class="w"> </span><span class="kn">import</span> <span class="n">DocumentProcessor</span>
+
+<span class="c1"># Initialize processor</span>
+<span class="n">processor</span> <span class="o">=</span> <span class="n">DocumentProcessor</span><span class="p">(</span>
+    <span class="n">db_path</span><span class="o">=</span><span class="s2">&quot;project.db&quot;</span><span class="p">,</span>
+    <span class="n">passphrase</span><span class="o">=</span><span class="s2">&quot;MySecurePassphrase123&quot;</span><span class="p">,</span>
+    <span class="n">theme</span><span class="o">=</span><span class="s2">&quot;neutral&quot;</span><span class="p">,</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;spacy&quot;</span>
+<span class="p">)</span>
+
+<span class="c1"># Process document (skip_validation=True for non-interactive use)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">process_document</span><span class="p">(</span>
+    <span class="n">input_path</span><span class="o">=</span><span class="s2">&quot;interview.txt&quot;</span><span class="p">,</span>
+    <span class="n">output_path</span><span class="o">=</span><span class="s2">&quot;interview_pseudonymized.txt&quot;</span><span class="p">,</span>
+    <span class="n">skip_validation</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">entity_type_filter</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;PERSON&quot;</span><span class="p">,</span> <span class="s2">&quot;LOCATION&quot;</span><span class="p">}</span>  <span class="c1"># Optional: only process these types</span>
+<span class="p">)</span>
+
+<span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">success</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processed </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">entities_detected</span><span class="si">}</span><span class="s2"> entities&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;New: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">entities_new</span><span class="si">}</span><span class="s2">, Reused: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">entities_reused</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Time: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">processing_time_seconds</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s&quot;</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">error_message</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h2 id="related-documentation">Related Documentation<a class="headerlink" href="#related-documentation" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../CLI-REFERENCE/">CLI Reference</a> - Command-line interface documentation</li>
+<li><a href="../methodology/">Methodology</a> - Technical approach and GDPR compliance</li>
+<li><a href="../installation/">Installation Guide</a> - Setup instructions</li>
+<li><a href="../tutorial/">Tutorial</a> - Usage tutorials</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

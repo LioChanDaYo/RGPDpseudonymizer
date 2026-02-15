@@ -1,0 +1,2050 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="AI-Assisted Pseudonymization for French Documents with Human Verification">
+      
+      
+      
+        <link rel="canonical" href="https://liochandayo.github.io/RGPDpseudonymizer/refactoring-plan/">
+      
+      
+      
+      
+        
+          <link rel="alternate" href="./" hreflang="en">
+        
+          <link rel="alternate" href="../fr/refactoring-plan/" hreflang="fr">
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Plan de Refactoring — GDPR Pseudonymizer - GDPR Pseudonymizer</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#plan-de-refactoring-gdpr-pseudonymizer" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="GDPR Pseudonymizer" class="md-header__button md-logo" aria-label="GDPR Pseudonymizer" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            GDPR Pseudonymizer
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Plan de Refactoring — GDPR Pseudonymizer
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="Select language">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../fr/refactoring-plan/" hreflang="fr" class="md-select__link">
+              Français
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/LioChanDaYo/RGPDpseudonymizer" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    LioChanDaYo/RGPDpseudonymizer
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="GDPR Pseudonymizer" class="md-nav__button md-logo" aria-label="GDPR Pseudonymizer" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    GDPR Pseudonymizer
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/LioChanDaYo/RGPDpseudonymizer" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    LioChanDaYo/RGPDpseudonymizer
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorial/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Guide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    User Guide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CLI-REFERENCE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FAQ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Methodology
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Methodology
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../methodology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Technical Approach & GDPR Compliance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Developer Guide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Developer Guide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#contexte" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Contexte
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#r1-violation-de-couche-core-importe-cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        R1 — Violation de couche : core importe CLI
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="R1 — Violation de couche : core importe CLI">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#probleme" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Probleme
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#solution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Solution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tests-a-mettre-a-jour" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tests a mettre a jour
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#r2-centraliser-les-patterns-et-fonctions-utilitaires-francais" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        R2 — Centraliser les patterns et fonctions utilitaires francais
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="R2 — Centraliser les patterns et fonctions utilitaires francais">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#probleme_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Probleme
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Probleme">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#2a-french_title_pattern-defini-3-fois-copier-coller-exact" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2a. FRENCH_TITLE_PATTERN defini 3 fois (copier-coller exact)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2b-pattern-de-preposition-defini-2-fois-variantes-divergentes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2b. Pattern de preposition defini 2 fois (variantes divergentes)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2c-logique-de-stripping-de-titres-dupliquee-3-fois" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2c. Logique de stripping de titres dupliquee 3 fois
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#solution_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Solution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tests-a-mettre-a-jour_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tests a mettre a jour
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#r3-decouper-process_document-god-method" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        R3 — Decouper process_document() (God Method)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="R3 — Decouper process_document() (God Method)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#probleme_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Probleme
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#solution_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Solution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#points-dattention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Points d'attention
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tests-a-mettre-a-jour_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tests a mettre a jour
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#r4-corriger-les-violations-dencapsulation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        R4 — Corriger les violations d'encapsulation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="R4 — Corriger les violations d&#39;encapsulation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#probleme_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Probleme
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Probleme">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#4a-document_processorpy-accede-aux-attributs-prives-de-librarybasedpseudonymmanager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4a. document_processor.py accede aux attributs prives de LibraryBasedPseudonymManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4b-assignment_enginepy-accede-aux-attributs-prives-via-hasattr" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4b. assignment_engine.py accede aux attributs prives via hasattr
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#solution_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Solution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tests-a-mettre-a-jour_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tests a mettre a jour
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#r5-factoriser-union-find-dans-entity_groupingpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        R5 — Factoriser Union-Find dans entity_grouping.py
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="R5 — Factoriser Union-Find dans entity_grouping.py">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#probleme_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Probleme
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#solution_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Solution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tests-a-mettre-a-jour_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tests a mettre a jour
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#r6-factoriser-le-code-duplique-entre-process-et-batch-cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        R6 — Factoriser le code duplique entre process et batch (CLI)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="R6 — Factoriser le code duplique entre process et batch (CLI)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#probleme_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Probleme
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Probleme">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#6a-parsing-du-filtre-entity_types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6a. Parsing du filtre entity_types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6b-initialisation-de-la-base-de-donnees" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6b. Initialisation de la base de donnees
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6c-validation-du-theme" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6c. Validation du theme
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#solution_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Solution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tests-a-mettre-a-jour_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tests a mettre a jour
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#r7-supprimer-simplepseudonymmanager-code-mort" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        R7 — Supprimer SimplePseudonymManager (code mort)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="R7 — Supprimer SimplePseudonymManager (code mort)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#probleme_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Probleme
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#solution_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Solution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#risque" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Risque
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#r8-centraliser-les-exceptions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        R8 — Centraliser les exceptions
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="R8 — Centraliser les exceptions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#probleme_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Probleme
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#solution_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Solution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tests-a-mettre-a-jour_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tests a mettre a jour
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#r9-harmoniser-le-logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        R9 — Harmoniser le logging
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="R9 — Harmoniser le logging">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#probleme_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Probleme
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#solution_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Solution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tests-a-mettre-a-jour_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tests a mettre a jour
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resume-et-ordre-dexecution-recommande" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resume et ordre d'execution recommande
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Resume et ordre d&#39;execution recommande">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ordre-dexecution-recommande" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ordre d'execution recommande
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#points-de-vigilance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Points de vigilance
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="plan-de-refactoring-gdpr-pseudonymizer">Plan de Refactoring — GDPR Pseudonymizer<a class="headerlink" href="#plan-de-refactoring-gdpr-pseudonymizer" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p><strong>STATUS: COMPLETED</strong> — All 9 refactoring items (R1-R9) implemented in <a href="../stories/4.6.1.codebase-refactoring-technical-debt.story/">Story 4.6.1</a>. 15 atomic commits, 1077+ tests passing.</p>
+</blockquote>
+<p><strong>Date</strong> : 2026-02-10
+<strong>Version analysee</strong> : v0.1.0-alpha (Epic 3 complete, Stories 4.1-4.6)
+<strong>Codebase</strong> : 8 500+ lignes, 54 fichiers Python, 814 tests (86%+ coverage)</p>
+<hr />
+<h2 id="contexte">Contexte<a class="headerlink" href="#contexte" title="Permanent link">&para;</a></h2>
+<p>Le projet est architecturalement solide : bonne separation en modules (NLP, Pseudonym, Data, Validation, CLI, Core), interfaces abstraites, tests, chiffrement AES-256-SIV. Cependant, la croissance organique au fil des stories a introduit de la duplication, une methode monolithique, et quelques violations architecturales qu'il faut corriger <strong>avant d'ajouter de nouvelles fonctionnalites</strong>.</p>
+<hr />
+<h2 id="r1-violation-de-couche-core-importe-cli">R1 — Violation de couche : core importe CLI<a class="headerlink" href="#r1-violation-de-couche-core-importe-cli" title="Permanent link">&para;</a></h2>
+<p><strong>Priorite : CRITIQUE</strong>
+<strong>Effort : Faible</strong>
+<strong>Fichiers concernes :</strong>
+- <code>gdpr_pseudonymizer/core/document_processor.py:314</code>
+- <code>gdpr_pseudonymizer/core/naive_processor.py:18</code></p>
+<h3 id="probleme">Probleme<a class="headerlink" href="#probleme" title="Permanent link">&para;</a></h3>
+<p>Le module <code>core</code> (couche metier) importe directement la couche de presentation :</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># document_processor.py:314</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">gdpr_pseudonymizer.cli.formatters</span><span class="w"> </span><span class="kn">import</span> <span class="n">console</span>
+<span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[dim]Auto-accepted </span><span class="si">{</span><span class="n">auto_accept_count</span><span class="si">}</span><span class="s2"> known entities...&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p>Cela couple le processeur de documents au terminal Rich. Si le processeur est utilise via une API REST, une lib Python, ou des tests headless, cet import provoquera des effets de bord ou des erreurs.</p>
+<h3 id="solution">Solution<a class="headerlink" href="#solution" title="Permanent link">&para;</a></h3>
+<p>Injecter un callback de notification dans <code>DocumentProcessor.__init__()</code> :</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Type du callback</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Protocol</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">ProcessingNotifier</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">notify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;info&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span>
+
+<span class="c1"># Dans DocumentProcessor.__init__:</span>
+<span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span> <span class="n">notifier</span><span class="p">:</span> <span class="n">ProcessingNotifier</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_notifier</span> <span class="o">=</span> <span class="n">notifier</span> <span class="ow">or</span> <span class="n">NullNotifier</span><span class="p">()</span>
+
+<span class="c1"># Usage dans process_document:</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">_notifier</span><span class="o">.</span><span class="n">notify</span><span class="p">(</span>
+    <span class="sa">f</span><span class="s2">&quot;Auto-accepted </span><span class="si">{</span><span class="n">auto_accept_count</span><span class="si">}</span><span class="s2"> known entities (</span><span class="si">{</span><span class="n">unique_known</span><span class="si">}</span><span class="s2"> unique)&quot;</span><span class="p">,</span>
+    <span class="n">level</span><span class="o">=</span><span class="s2">&quot;info&quot;</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>L'implementation CLI fournit un <code>RichNotifier</code> qui appelle <code>console.print()</code>. Les tests utilisent <code>NullNotifier</code> (no-op).</p>
+<h3 id="tests-a-mettre-a-jour">Tests a mettre a jour<a class="headerlink" href="#tests-a-mettre-a-jour" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Tous les tests de <code>document_processor.py</code> qui mockent ou dependent de la sortie console</li>
+<li>Verifier que <code>naive_processor.py:18</code> (<code>from gdpr_pseudonymizer.cli.naive_data import NAIVE_ENTITIES</code>) est egalement decouple, ou deplacer <code>NAIVE_ENTITIES</code> vers un module <code>data/</code> ou <code>core/</code></li>
+</ul>
+<hr />
+<h2 id="r2-centraliser-les-patterns-et-fonctions-utilitaires-francais">R2 — Centraliser les patterns et fonctions utilitaires francais<a class="headerlink" href="#r2-centraliser-les-patterns-et-fonctions-utilitaires-francais" title="Permanent link">&para;</a></h2>
+<p><strong>Priorite : HAUTE</strong>
+<strong>Effort : Faible</strong>
+<strong>Fichiers concernes :</strong>
+- <code>gdpr_pseudonymizer/nlp/hybrid_detector.py:25</code>
+- <code>gdpr_pseudonymizer/pseudonym/assignment_engine.py:25, 32</code>
+- <code>gdpr_pseudonymizer/nlp/entity_grouping.py:19, 22</code>
+- <code>gdpr_pseudonymizer/validation/workflow.py:15</code> (import)</p>
+<h3 id="probleme_1">Probleme<a class="headerlink" href="#probleme_1" title="Permanent link">&para;</a></h3>
+<h4 id="2a-french_title_pattern-defini-3-fois-copier-coller-exact">2a. <code>FRENCH_TITLE_PATTERN</code> defini 3 fois (copier-coller exact)<a class="headerlink" href="#2a-french_title_pattern-defini-3-fois-copier-coller-exact" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code>nlp/hybrid_detector.py:25       → FRENCH_TITLE_PATTERN = r&quot;\b(?:Docteur|Professeur|...&quot;
+pseudonym/assignment_engine.py:25 → FRENCH_TITLE_PATTERN = r&quot;\b(?:Docteur|Professeur|...&quot;  (identique)
+nlp/entity_grouping.py:19       → FRENCH_TITLE_PATTERN = r&quot;\b(?:Docteur|Professeur|...&quot;  (identique)
+</code></pre></div>
+<p>Preuve du risque : la Story 3.9 a du modifier ce pattern dans 3 fichiers pour ajouter <code>Maitre|Me\.?</code> (cf. <code>docs/stories/3.9.ner-title-handling-improvements.story.md:121-122</code>).</p>
+<h4 id="2b-pattern-de-preposition-defini-2-fois-variantes-divergentes">2b. Pattern de preposition defini 2 fois (variantes divergentes)<a class="headerlink" href="#2b-pattern-de-preposition-defini-2-fois-variantes-divergentes" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code>assignment_engine.py:32  → r&quot;^[\s]*(?:a|au|aux|en|de|du|des|d&#39;|l&#39;|la|le|les)\s+&quot;
+entity_grouping.py:22    → r&quot;^(?:a|de|du|en|au|aux|d&#39;|l&#39;)\s*&quot;
+</code></pre></div>
+<p>Les deux patterns ne matchent <strong>pas les memes prepositions</strong> (<code>des</code>, <code>la</code>, <code>le</code>, <code>les</code> manquent dans le 2e). C'est un bug latent.</p>
+<h4 id="2c-logique-de-stripping-de-titres-dupliquee-3-fois">2c. Logique de stripping de titres dupliquee 3 fois<a class="headerlink" href="#2c-logique-de-stripping-de-titres-dupliquee-3-fois" title="Permanent link">&para;</a></h4>
+<p>La meme boucle <code>while True: stripped = re.sub(PATTERN, ...); if stripped == text: break</code> existe dans :</p>
+<ul>
+<li><code>hybrid_detector.py:_normalize_entity_text()</code> (lignes 351-360)</li>
+<li><code>assignment_engine.py:strip_titles()</code> (lignes 234-242)</li>
+<li><code>entity_grouping.py:_normalize_person()</code> (lignes 37-44)</li>
+</ul>
+<h3 id="solution_1">Solution<a class="headerlink" href="#solution_1" title="Permanent link">&para;</a></h3>
+<p>Creer un module <code>gdpr_pseudonymizer/utils/french_patterns.py</code> :</p>
+<div class="highlight"><pre><span></span><code><span class="sd">&quot;&quot;&quot;Patterns et fonctions utilitaires pour le traitement du francais.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+
+<span class="n">FRENCH_TITLE_PATTERN</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;\b(?:Docteur|Professeur|Madame|Monsieur|Mademoiselle|Maitre|Dr\.?|Pr\.?|Prof\.?|M\.?|Mme\.?|Mlle\.?|Me\.?)(?!\w)\s*&quot;</span>
+
+<span class="n">FRENCH_PREPOSITION_PATTERN</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;^[\s]*(?:a|au|aux|en|de|du|des|d&#39;|l&#39;|la|le|les)\s+&quot;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">strip_french_titles</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Supprime iterativement les titres honorifiques francais.&quot;&quot;&quot;</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">stripped</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">FRENCH_TITLE_PATTERN</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">stripped</span> <span class="o">==</span> <span class="n">text</span><span class="p">:</span>
+            <span class="k">break</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">stripped</span>
+    <span class="k">return</span> <span class="n">text</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">strip_french_prepositions</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Supprime les prepositions francaises en debut de texte.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">FRENCH_PREPOSITION_PATTERN</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</code></pre></div>
+<p>Puis remplacer les 3 definitions par des imports dans <code>hybrid_detector.py</code>, <code>assignment_engine.py</code>, <code>entity_grouping.py</code>, et <code>validation/workflow.py</code>.</p>
+<h3 id="tests-a-mettre-a-jour_1">Tests a mettre a jour<a class="headerlink" href="#tests-a-mettre-a-jour_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Ajouter des tests unitaires pour <code>french_patterns.py</code></li>
+<li>Les tests existants des 4 modules ne changent pas (meme comportement)</li>
+<li>Verifier que le pattern de preposition unifie ne cause pas de regressions dans les tests d'accuracy</li>
+</ul>
+<hr />
+<h2 id="r3-decouper-process_document-god-method">R3 — Decouper <code>process_document()</code> (God Method)<a class="headerlink" href="#r3-decouper-process_document-god-method" title="Permanent link">&para;</a></h2>
+<p><strong>Priorite : HAUTE</strong>
+<strong>Effort : Moyen</strong>
+<strong>Fichier concerne :</strong> <code>gdpr_pseudonymizer/core/document_processor.py:127-720</code></p>
+<h3 id="probleme_2">Probleme<a class="headerlink" href="#probleme_2" title="Permanent link">&para;</a></h3>
+<p>La methode <code>process_document()</code> fait ~550 lignes et gere 10+ responsabilites :</p>
+<ol>
+<li>Lecture fichier (L171-172)</li>
+<li>Detection NLP (L176-177)</li>
+<li>Filtrage par type (L180-190)</li>
+<li>Ouverture DB + init repositories (L202-218)</li>
+<li>Construction du <code>pseudonym_assigner</code> closure (L226-275)</li>
+<li>Separation entites connues/inconnues (L292-311)</li>
+<li>Affichage auto-accept + workflow validation (L317-356)</li>
+<li>Reset etat pseudonym manager (L362-374)</li>
+<li>Boucle de traitement par entite avec cache, component matching, stripping (L388-587)</li>
+<li>Deduplication des remplacements (L608-627)</li>
+<li>Application des remplacements textuels (L630-638)</li>
+<li>Ecriture fichier + audit log (L641-676)</li>
+<li>Gestion d'erreurs (L678-720)</li>
+</ol>
+<p>Les commentaires <code># CRITICAL FIX</code> (lignes 362, 395, 436, 509) temoignent d'une accumulation de patches.</p>
+<h3 id="solution_2">Solution<a class="headerlink" href="#solution_2" title="Permanent link">&para;</a></h3>
+<p>Extraire en sous-methodes privees. Voici le decoupage recommande :</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">process_document</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_path</span><span class="p">,</span> <span class="n">output_path</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ProcessingResult</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Methode principale simplifiee.&quot;&quot;&quot;</span>
+    <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">document_text</span> <span class="o">=</span> <span class="n">read_file</span><span class="p">(</span><span class="n">input_path</span><span class="p">)</span>
+        <span class="n">detected_entities</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_detect_and_filter_entities</span><span class="p">(</span><span class="n">document_text</span><span class="p">,</span> <span class="n">entity_type_filter</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">open_database</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">db_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">passphrase</span><span class="p">)</span> <span class="k">as</span> <span class="n">db_session</span><span class="p">:</span>
+            <span class="n">context</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_init_processing_context</span><span class="p">(</span><span class="n">db_session</span><span class="p">)</span>
+            <span class="n">validated_entities</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_run_validation</span><span class="p">(</span>
+                <span class="n">detected_entities</span><span class="p">,</span> <span class="n">document_text</span><span class="p">,</span> <span class="n">input_path</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">skip_validation</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_reset_pseudonym_state</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+            <span class="n">replacements</span><span class="p">,</span> <span class="n">entities_new</span><span class="p">,</span> <span class="n">entities_reused</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_pseudonyms</span><span class="p">(</span>
+                <span class="n">validated_entities</span><span class="p">,</span> <span class="n">context</span>
+            <span class="p">)</span>
+            <span class="n">pseudonymized_text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_replacements</span><span class="p">(</span><span class="n">document_text</span><span class="p">,</span> <span class="n">replacements</span><span class="p">)</span>
+            <span class="n">write_file</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="n">pseudonymized_text</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_log_audit</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">input_path</span><span class="p">,</span> <span class="n">validated_entities</span><span class="p">,</span> <span class="n">start_time</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ProcessingResult</span><span class="p">(</span><span class="n">success</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+
+    <span class="k">except</span> <span class="o">...</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_handle_error</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+</code></pre></div>
+<p>Sous-methodes a extraire :</p>
+<table>
+<thead>
+<tr>
+<th>Methode</th>
+<th>Lignes actuelles</th>
+<th>Responsabilite</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>_detect_and_filter_entities()</code></td>
+<td>171-196</td>
+<td>Detection NLP + filtre de types</td>
+</tr>
+<tr>
+<td><code>_init_processing_context()</code></td>
+<td>204-218</td>
+<td>Init repositories + engine + manager</td>
+</tr>
+<tr>
+<td><code>_build_pseudonym_assigner()</code></td>
+<td>226-275</td>
+<td>Construction de la closure de preview</td>
+</tr>
+<tr>
+<td><code>_run_validation()</code></td>
+<td>278-356</td>
+<td>Separation known/unknown + workflow</td>
+</tr>
+<tr>
+<td><code>_reset_pseudonym_state()</code></td>
+<td>362-374</td>
+<td>Reset manager apres validation</td>
+</tr>
+<tr>
+<td><code>_resolve_pseudonyms()</code></td>
+<td>376-587</td>
+<td>Boucle entites, cache, component matching, replacements</td>
+</tr>
+<tr>
+<td><code>_apply_replacements()</code></td>
+<td>604-638</td>
+<td>Deduplication + application texte</td>
+</tr>
+<tr>
+<td><code>_normalize_entity_text()</code></td>
+<td>(repete 3x)</td>
+<td>Strip titres + prepositions</td>
+</tr>
+<tr>
+<td><code>_build_replacement_with_prefix()</code></td>
+<td>556-587</td>
+<td>Extraction prefix titre/preposition</td>
+</tr>
+</tbody>
+</table>
+<p>La methode <code>_resolve_pseudonyms()</code> est elle-meme trop longue (~200 lignes). Envisager d'en extraire <code>_resolve_single_entity()</code> et <code>_check_component_match()</code>.</p>
+<h3 id="points-dattention">Points d'attention<a class="headerlink" href="#points-dattention" title="Permanent link">&para;</a></h3>
+<ul>
+<li>La logique de stripping titres/prepositions est executee a <strong>3 endroits differents</strong> dans cette methode (lignes 240-248, 296-304, 398-406). Extraire une methode <code>_normalize_entity_text(entity: DetectedEntity) -&gt; str</code> et l'appeler une seule fois.</li>
+<li>La closure <code>pseudonym_assigner</code> (lignes 226-275) capture <code>preview_cache</code>, <code>compositional_engine</code>, et <code>mapping_repo</code> par cloture. Apres extraction, passer ces dependances explicitement ou les encapsuler dans un objet <code>ProcessingContext</code>.</li>
+</ul>
+<h3 id="tests-a-mettre-a-jour_2">Tests a mettre a jour<a class="headerlink" href="#tests-a-mettre-a-jour_2" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Les tests unitaires de <code>DocumentProcessor</code> testent <code>process_document()</code> comme boite noire via ses resultats. Le refactoring interne ne devrait <strong>pas</strong> casser ces tests tant que la signature et le comportement de <code>process_document()</code> ne changent pas.</li>
+<li>Ajouter des tests unitaires pour chaque sous-methode extraite.</li>
+</ul>
+<hr />
+<h2 id="r4-corriger-les-violations-dencapsulation">R4 — Corriger les violations d'encapsulation<a class="headerlink" href="#r4-corriger-les-violations-dencapsulation" title="Permanent link">&para;</a></h2>
+<p><strong>Priorite : MOYENNE</strong>
+<strong>Effort : Faible</strong>
+<strong>Fichiers concernes :</strong>
+- <code>gdpr_pseudonymizer/core/document_processor.py:366-370</code>
+- <code>gdpr_pseudonymizer/pseudonym/assignment_engine.py:412-418</code></p>
+<h3 id="probleme_3">Probleme<a class="headerlink" href="#probleme_3" title="Permanent link">&para;</a></h3>
+<h4 id="4a-document_processorpy-accede-aux-attributs-prives-de-librarybasedpseudonymmanager">4a. <code>document_processor.py</code> accede aux attributs prives de <code>LibraryBasedPseudonymManager</code><a class="headerlink" href="#4a-document_processorpy-accede-aux-attributs-prives-de-librarybasedpseudonymmanager" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="c1"># document_processor.py:366-367</span>
+<span class="n">pseudonym_manager</span><span class="o">.</span><span class="n">_used_pseudonyms</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+<span class="n">pseudonym_manager</span><span class="o">.</span><span class="n">_component_mappings</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+</code></pre></div>
+<h4 id="4b-assignment_enginepy-accede-aux-attributs-prives-via-hasattr">4b. <code>assignment_engine.py</code> accede aux attributs prives via <code>hasattr</code><a class="headerlink" href="#4b-assignment_enginepy-accede-aux-attributs-prives-via-hasattr" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="c1"># assignment_engine.py:412-413</span>
+<span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pseudonym_manager</span><span class="p">,</span> <span class="s2">&quot;_component_mappings&quot;</span><span class="p">):</span>
+    <span class="n">component_mappings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pseudonym_manager</span><span class="o">.</span><span class="n">_component_mappings</span>
+</code></pre></div>
+<p>Le <code>CompositionalPseudonymEngine</code> est couple a l'implementation interne de <code>LibraryBasedPseudonymManager</code> alors qu'il est type comme <code>PseudonymManager</code> (interface abstraite).</p>
+<h3 id="solution_3">Solution<a class="headerlink" href="#solution_3" title="Permanent link">&para;</a></h3>
+<p>Ajouter des methodes publiques sur <code>PseudonymManager</code> (interface) et <code>LibraryBasedPseudonymManager</code> (implementation) :</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Sur PseudonymManager (ABC) — ajouter au contrat d&#39;interface :</span>
+<span class="nd">@abstractmethod</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">reset_preview_state</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Reinitialise l&#39;etat de preview (apres validation).&quot;&quot;&quot;</span>
+    <span class="k">pass</span>
+
+<span class="nd">@abstractmethod</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_component_mapping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">component</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">component_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Retourne le pseudonyme mappe pour un composant donne, ou None.&quot;&quot;&quot;</span>
+    <span class="k">pass</span>
+
+<span class="c1"># Implementation dans LibraryBasedPseudonymManager :</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">reset_preview_state</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_used_pseudonyms</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_component_mappings</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">get_component_mapping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">component</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">component_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_component_mappings</span><span class="o">.</span><span class="n">get</span><span class="p">((</span><span class="n">component</span><span class="p">,</span> <span class="n">component_type</span><span class="p">))</span>
+</code></pre></div>
+<p>Puis dans <code>document_processor.py:366</code> :
+<div class="highlight"><pre><span></span><code><span class="n">pseudonym_manager</span><span class="o">.</span><span class="n">reset_preview_state</span><span class="p">()</span>
+</code></pre></div></p>
+<p>Et dans <code>assignment_engine.py:412</code> :
+<div class="highlight"><pre><span></span><code><span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pseudonym_manager</span><span class="o">.</span><span class="n">get_component_mapping</span><span class="p">(</span><span class="n">component</span><span class="p">,</span> <span class="n">component_type</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">result</span>
+</code></pre></div></p>
+<h3 id="tests-a-mettre-a-jour_3">Tests a mettre a jour<a class="headerlink" href="#tests-a-mettre-a-jour_3" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Ajouter des tests pour <code>reset_preview_state()</code> et <code>get_component_mapping()</code></li>
+<li>Mettre a jour <code>SimplePseudonymManager</code> (si conserve, cf. R7) pour implementer les nouvelles methodes abstraites</li>
+<li>Verifier que les tests existants qui mockent <code>PseudonymManager</code> continuent de passer</li>
+</ul>
+<hr />
+<h2 id="r5-factoriser-union-find-dans-entity_groupingpy">R5 — Factoriser Union-Find dans <code>entity_grouping.py</code><a class="headerlink" href="#r5-factoriser-union-find-dans-entity_groupingpy" title="Permanent link">&para;</a></h2>
+<p><strong>Priorite : MOYENNE</strong>
+<strong>Effort : Faible</strong>
+<strong>Fichier concerne :</strong> <code>gdpr_pseudonymizer/nlp/entity_grouping.py</code></p>
+<h3 id="probleme_4">Probleme<a class="headerlink" href="#probleme_4" title="Permanent link">&para;</a></h3>
+<p>Les fonctions <code>find()</code> et <code>union()</code> sont definies localement dans <strong>3 fonctions</strong> :</p>
+<ul>
+<li><code>_cluster_person_variants()</code> (lignes 267-276)</li>
+<li><code>_cluster_location_variants()</code> (lignes 315-324)</li>
+<li><code>_cluster_org_variants()</code> (lignes 362-371)</li>
+</ul>
+<p>De plus, <code>_cluster_location_variants</code> et <code>_cluster_org_variants</code> sont quasi-identiques (seule la fonction de normalisation differe).</p>
+<h3 id="solution_4">Solution<a class="headerlink" href="#solution_4" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">UnionFind</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Structure Union-Find avec compression de chemin.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">keys</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">find</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
+        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">!=</span> <span class="n">k</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="p">[</span><span class="n">k</span><span class="p">]]</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">k</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">union</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ra</span><span class="p">,</span> <span class="n">rb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">a</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ra</span> <span class="o">!=</span> <span class="n">rb</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="p">[</span><span class="n">ra</span><span class="p">]</span> <span class="o">=</span> <span class="n">rb</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">clusters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">]:</span>
+        <span class="n">groups</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="p">:</span>
+            <span class="n">groups</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">k</span><span class="p">)]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">groups</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_cluster_by_normalization</span><span class="p">(</span>
+    <span class="n">keys</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]],</span>
+    <span class="n">normalize_fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">],</span>
+    <span class="n">variant_fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Clustering generique par normalisation + comparaison optionnelle.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">]</span>
+
+    <span class="n">normalized</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">normalize_fn</span><span class="p">(</span><span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">}</span>
+    <span class="n">uf</span> <span class="o">=</span> <span class="n">UnionFind</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span>
+
+    <span class="n">compare</span> <span class="o">=</span> <span class="n">variant_fn</span> <span class="ow">or</span> <span class="p">(</span><span class="k">lambda</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">a</span> <span class="o">==</span> <span class="n">b</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ka</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">keys</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">kb</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">:]:</span>
+            <span class="k">if</span> <span class="n">compare</span><span class="p">(</span><span class="n">normalized</span><span class="p">[</span><span class="n">ka</span><span class="p">],</span> <span class="n">normalized</span><span class="p">[</span><span class="n">kb</span><span class="p">]):</span>
+                <span class="n">uf</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">ka</span><span class="p">,</span> <span class="n">kb</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">uf</span><span class="o">.</span><span class="n">clusters</span><span class="p">()</span>
+</code></pre></div>
+<p><code>_cluster_location_variants</code> et <code>_cluster_org_variants</code> deviennent des one-liners. <code>_cluster_person_variants</code> conserve sa logique speciale pour les noms ambigus mais utilise <code>UnionFind</code> au lieu de redefinir <code>find/union</code>.</p>
+<h3 id="tests-a-mettre-a-jour_4">Tests a mettre a jour<a class="headerlink" href="#tests-a-mettre-a-jour_4" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Les tests unitaires de <code>entity_grouping.py</code> existants doivent passer sans modification (refactoring interne)</li>
+<li>Ajouter des tests unitaires pour <code>UnionFind</code> et <code>_cluster_by_normalization</code></li>
+</ul>
+<hr />
+<h2 id="r6-factoriser-le-code-duplique-entre-process-et-batch-cli">R6 — Factoriser le code duplique entre process et batch (CLI)<a class="headerlink" href="#r6-factoriser-le-code-duplique-entre-process-et-batch-cli" title="Permanent link">&para;</a></h2>
+<p><strong>Priorite : MOYENNE</strong>
+<strong>Effort : Faible</strong>
+<strong>Fichiers concernes :</strong>
+- <code>gdpr_pseudonymizer/cli/commands/process.py</code>
+- <code>gdpr_pseudonymizer/cli/commands/batch.py</code></p>
+<h3 id="probleme_5">Probleme<a class="headerlink" href="#probleme_5" title="Permanent link">&para;</a></h3>
+<p>Trois blocs de logique sont dupliques entre ces deux commandes :</p>
+<h4 id="6a-parsing-du-filtre-entity_types">6a. Parsing du filtre <code>entity_types</code><a class="headerlink" href="#6a-parsing-du-filtre-entity_types" title="Permanent link">&para;</a></h4>
+<ul>
+<li><code>process.py:221-239</code></li>
+<li><code>batch.py:418-436</code></li>
+</ul>
+<p>Meme code : split par virgule, validation contre <code>{"PERSON", "LOCATION", "ORG"}</code>, warning pour types invalides.</p>
+<h4 id="6b-initialisation-de-la-base-de-donnees">6b. Initialisation de la base de donnees<a class="headerlink" href="#6b-initialisation-de-la-base-de-donnees" title="Permanent link">&para;</a></h4>
+<ul>
+<li><code>process.py:168-186</code></li>
+<li><code>batch.py:468-484</code></li>
+</ul>
+<p>Meme pattern : verifier si le fichier DB existe, sinon <code>init_database()</code> avec spinner Rich.</p>
+<h4 id="6c-validation-du-theme">6c. Validation du theme<a class="headerlink" href="#6c-validation-du-theme" title="Permanent link">&para;</a></h4>
+<ul>
+<li><code>process.py:155-163</code></li>
+<li><code>batch.py:451-458</code></li>
+</ul>
+<p>Meme validation contre <code>["neutral", "star_wars", "lotr"]</code>.</p>
+<h3 id="solution_5">Solution<a class="headerlink" href="#solution_5" title="Permanent link">&para;</a></h3>
+<p>Extraire dans des fonctions utilitaires CLI :</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># gdpr_pseudonymizer/cli/validators.py (existant, l&#39;enrichir)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">parse_entity_type_filter</span><span class="p">(</span><span class="n">entity_types</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">console</span><span class="p">:</span> <span class="n">Console</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse et valide le filtre de types d&#39;entites depuis un argument CLI.&quot;&quot;&quot;</span>
+    <span class="o">...</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">validate_theme</span><span class="p">(</span><span class="n">theme</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">console</span><span class="p">:</span> <span class="n">Console</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Valide le theme et exit(1) si invalide.&quot;&quot;&quot;</span>
+    <span class="o">...</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">ensure_database</span><span class="p">(</span><span class="n">db_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">passphrase</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">console</span><span class="p">:</span> <span class="n">Console</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialise la BDD si elle n&#39;existe pas, avec spinner de progression.&quot;&quot;&quot;</span>
+    <span class="o">...</span>
+</code></pre></div>
+<h3 id="tests-a-mettre-a-jour_5">Tests a mettre a jour<a class="headerlink" href="#tests-a-mettre-a-jour_5" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Ajouter des tests unitaires pour les fonctions extraites</li>
+<li>Les tests d'integration CLI existants ne changent pas</li>
+</ul>
+<hr />
+<h2 id="r7-supprimer-simplepseudonymmanager-code-mort">R7 — Supprimer <code>SimplePseudonymManager</code> (code mort)<a class="headerlink" href="#r7-supprimer-simplepseudonymmanager-code-mort" title="Permanent link">&para;</a></h2>
+<p><strong>Priorite : BASSE</strong>
+<strong>Effort : Trivial</strong>
+<strong>Fichiers concernes :</strong>
+- <code>gdpr_pseudonymizer/pseudonym/assignment_engine.py:120-179</code>
+- <code>tests/integration/test_module_loading.py:86, 91, 232-237</code></p>
+<h3 id="probleme_6">Probleme<a class="headerlink" href="#probleme_6" title="Permanent link">&para;</a></h3>
+<p><code>SimplePseudonymManager</code> est un stub qui retourne <code>"PLACEHOLDER"</code>. Les commentaires disent "Full implementation in Epic 2" mais <code>LibraryBasedPseudonymManager</code> est l'implementation de production depuis Epic 2.</p>
+<p>Seuls 2 tests le referencent : un test d'import et un test d'instanciation.</p>
+<h3 id="solution_6">Solution<a class="headerlink" href="#solution_6" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Supprimer la classe <code>SimplePseudonymManager</code></li>
+<li>Mettre a jour les tests dans <code>test_module_loading.py</code> pour ne plus la referencer</li>
+<li>Mettre a jour <code>docs/module-dependencies.md:297</code> si applicable</li>
+</ul>
+<h3 id="risque">Risque<a class="headerlink" href="#risque" title="Permanent link">&para;</a></h3>
+<p>Aucun code de production ne l'utilise. Risque zero.</p>
+<hr />
+<h2 id="r8-centraliser-les-exceptions">R8 — Centraliser les exceptions<a class="headerlink" href="#r8-centraliser-les-exceptions" title="Permanent link">&para;</a></h2>
+<p><strong>Priorite : BASSE</strong>
+<strong>Effort : Trivial</strong>
+<strong>Fichiers concernes :</strong>
+- <code>gdpr_pseudonymizer/exceptions.py</code> (centralise)
+- <code>gdpr_pseudonymizer/data/database.py:287</code> — <code>CorruptedDatabaseError</code>
+- <code>gdpr_pseudonymizer/data/repositories/mapping_repository.py:407-416</code> — <code>DuplicateEntityError</code>, <code>DatabaseError</code>
+- <code>gdpr_pseudonymizer/cli/config.py:65</code> — <code>ConfigValidationError</code></p>
+<h3 id="probleme_7">Probleme<a class="headerlink" href="#probleme_7" title="Permanent link">&para;</a></h3>
+<p>Quatre exceptions sont definies en dehors de <code>exceptions.py</code>, qui est sense etre le module centralise pour toutes les exceptions custom.</p>
+<p>De plus, <code>CorruptedDatabaseError</code>, <code>DuplicateEntityError</code> et <code>DatabaseError</code> heritent directement de <code>Exception</code> au lieu de <code>PseudonymizerError</code>.</p>
+<h3 id="solution_7">Solution<a class="headerlink" href="#solution_7" title="Permanent link">&para;</a></h3>
+<p>Deplacer dans <code>exceptions.py</code> et les faire heriter de <code>PseudonymizerError</code> :</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># exceptions.py — ajouter :</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">DatabaseError</span><span class="p">(</span><span class="n">PseudonymizerError</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised when database operation fails.&quot;&quot;&quot;</span>
+    <span class="k">pass</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">CorruptedDatabaseError</span><span class="p">(</span><span class="n">DatabaseError</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised when database metadata is missing or invalid.&quot;&quot;&quot;</span>
+    <span class="k">pass</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">DuplicateEntityError</span><span class="p">(</span><span class="n">DatabaseError</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised when attempting to save entity with duplicate full_name.&quot;&quot;&quot;</span>
+    <span class="k">pass</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">ConfigValidationError</span><span class="p">(</span><span class="n">PseudonymizerError</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised when config file validation fails.&quot;&quot;&quot;</span>
+    <span class="k">pass</span>
+</code></pre></div>
+<p>Dans les fichiers d'origine, remplacer par des re-exports ou des imports directs.</p>
+<h3 id="tests-a-mettre-a-jour_6">Tests a mettre a jour<a class="headerlink" href="#tests-a-mettre-a-jour_6" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Grep pour tous les <code>from ... import CorruptedDatabaseError</code> etc. et mettre a jour les imports</li>
+<li>Les <code>except</code> blocks existants continuent de fonctionner (heritage compatible)</li>
+</ul>
+<hr />
+<h2 id="r9-harmoniser-le-logging">R9 — Harmoniser le logging<a class="headerlink" href="#r9-harmoniser-le-logging" title="Permanent link">&para;</a></h2>
+<p><strong>Priorite : BASSE</strong>
+<strong>Effort : Faible</strong>
+<strong>Fichiers concernes :</strong>
+- <code>gdpr_pseudonymizer/pseudonym/assignment_engine.py:17</code>
+- <code>gdpr_pseudonymizer/pseudonym/library_manager.py:17</code>
+- <code>gdpr_pseudonymizer/nlp/spacy_detector.py:18</code>
+- <code>gdpr_pseudonymizer/nlp/stanza_detector.py:18</code></p>
+<h3 id="probleme_8">Probleme<a class="headerlink" href="#probleme_8" title="Permanent link">&para;</a></h3>
+<p>Le projet utilise <code>structlog</code> via <code>get_logger()</code> (defini dans <code>utils/logger.py</code>) dans la majorite des modules. Mais <strong>4 modules</strong> utilisent <code>logging.getLogger()</code> de la stdlib :</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Ces 4 fichiers :</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="c1"># Tous les autres fichiers :</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">gdpr_pseudonymizer.utils.logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+</code></pre></div>
+<p>Cela cree une incoherence dans le format des logs : les 4 modules produisent des logs en format texte classique tandis que le reste produit du structured logging.</p>
+<h3 id="solution_8">Solution<a class="headerlink" href="#solution_8" title="Permanent link">&para;</a></h3>
+<p>Remplacer dans les 4 fichiers :</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Avant :</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="c1"># Apres :</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">gdpr_pseudonymizer.utils.logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+</code></pre></div>
+<p>Verifier que les appels <code>logger.info("message: %s", var)</code> (style %-formatting) dans <code>library_manager.py</code> et <code>assignment_engine.py</code> sont convertis en style structlog <code>logger.info("event_name", key=var)</code>.</p>
+<h3 id="tests-a-mettre-a-jour_7">Tests a mettre a jour<a class="headerlink" href="#tests-a-mettre-a-jour_7" title="Permanent link">&para;</a></h3>
+<p>Aucun changement fonctionnel. Les tests qui capturent des logs pourraient necessiter un ajustement du format attendu.</p>
+<hr />
+<h2 id="resume-et-ordre-dexecution-recommande">Resume et ordre d'execution recommande<a class="headerlink" href="#resume-et-ordre-dexecution-recommande" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Refactoring</th>
+<th>Priorite</th>
+<th>Effort</th>
+<th>Risque regression</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>R1</td>
+<td>Decouplage core/CLI (violation de couche)</td>
+<td>CRITIQUE</td>
+<td>Faible</td>
+<td>Faible</td>
+</tr>
+<tr>
+<td>R2</td>
+<td>Centralisation patterns/fonctions francais</td>
+<td>HAUTE</td>
+<td>Faible</td>
+<td>Faible</td>
+</tr>
+<tr>
+<td>R3</td>
+<td>Decoupage <code>process_document()</code></td>
+<td>HAUTE</td>
+<td>Moyen</td>
+<td>Moyen</td>
+</tr>
+<tr>
+<td>R4</td>
+<td>Encapsulation <code>_used_pseudonyms</code> / <code>_component_mappings</code></td>
+<td>MOYENNE</td>
+<td>Faible</td>
+<td>Faible</td>
+</tr>
+<tr>
+<td>R5</td>
+<td>Factorisation Union-Find</td>
+<td>MOYENNE</td>
+<td>Faible</td>
+<td>Faible</td>
+</tr>
+<tr>
+<td>R6</td>
+<td>Factorisation CLI process/batch</td>
+<td>MOYENNE</td>
+<td>Faible</td>
+<td>Faible</td>
+</tr>
+<tr>
+<td>R7</td>
+<td>Suppression <code>SimplePseudonymManager</code></td>
+<td>BASSE</td>
+<td>Trivial</td>
+<td>Nul</td>
+</tr>
+<tr>
+<td>R8</td>
+<td>Centralisation exceptions</td>
+<td>BASSE</td>
+<td>Trivial</td>
+<td>Faible</td>
+</tr>
+<tr>
+<td>R9</td>
+<td>Harmonisation logging</td>
+<td>BASSE</td>
+<td>Faible</td>
+<td>Faible</td>
+</tr>
+</tbody>
+</table>
+<h3 id="ordre-dexecution-recommande">Ordre d'execution recommande<a class="headerlink" href="#ordre-dexecution-recommande" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>R7</strong> en premier (suppression code mort, zero risque, quick win)</li>
+<li><strong>R2</strong> ensuite (centralisation patterns, elimine de la duplication, peu risque)</li>
+<li><strong>R1</strong> (decouplage core/CLI, changement structurel mais localise)</li>
+<li><strong>R4</strong> (encapsulation, prerecquis pour R3)</li>
+<li><strong>R3</strong> (decoupage process_document, le plus gros chantier)</li>
+<li><strong>R5, R6, R8, R9</strong> dans n'importe quel ordre</li>
+</ol>
+<h3 id="points-de-vigilance">Points de vigilance<a class="headerlink" href="#points-de-vigilance" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Faire tourner la suite de tests complete apres chaque refactoring (<code>pytest</code> + <code>black</code> + <code>ruff</code> + <code>mypy</code>)</li>
+<li>Les refactorings R1-R4 doivent etre faits <strong>avant</strong> d'ajouter de nouvelles features pour eviter d'amplifier la dette</li>
+<li>R3 est le plus risque : bien tester les cas limites (entites avec titres + prepositions, component matching cross-document, deduplication d'overlaps)</li>
+<li>Le pattern de preposition divergent (R2b) est potentiellement un <strong>bug en production</strong> : verifier avec les tests d'accuracy si <code>des</code>, <code>la</code>, <code>le</code>, <code>les</code> sont effectivement des prepositions a stripper pour les entites LOCATION dans <code>entity_grouping.py</code></li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

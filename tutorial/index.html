@@ -1,0 +1,2532 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="AI-Assisted Pseudonymization for French Documents with Human Verification">
+      
+      
+      
+        <link rel="canonical" href="https://liochandayo.github.io/RGPDpseudonymizer/tutorial/">
+      
+      
+        <link rel="prev" href="../installation/">
+      
+      
+        <link rel="next" href="../CLI-REFERENCE/">
+      
+      
+        
+          <link rel="alternate" href="./" hreflang="en">
+        
+          <link rel="alternate" href="../fr/tutorial/" hreflang="fr">
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Quick Start - GDPR Pseudonymizer</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#usage-tutorial" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="GDPR Pseudonymizer" class="md-header__button md-logo" aria-label="GDPR Pseudonymizer" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            GDPR Pseudonymizer
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Quick Start
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="Select language">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../fr/tutorial/" hreflang="fr" class="md-select__link">
+              Français
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/LioChanDaYo/RGPDpseudonymizer" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    LioChanDaYo/RGPDpseudonymizer
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="GDPR Pseudonymizer" class="md-nav__button md-logo" aria-label="GDPR Pseudonymizer" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    GDPR Pseudonymizer
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/LioChanDaYo/RGPDpseudonymizer" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    LioChanDaYo/RGPDpseudonymizer
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#tutorial-1-single-document-pseudonymization-5-minutes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tutorial 1: Single Document Pseudonymization (5 minutes)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tutorial 1: Single Document Pseudonymization (5 minutes)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-create-a-test-document" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Create a Test Document
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-set-your-passphrase" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Set Your Passphrase
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-run-pseudonymization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Run Pseudonymization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-review-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Review Output
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-5-view-mapping-database" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: View Mapping Database
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tutorial-2-batch-processing-multiple-documents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tutorial 2: Batch Processing Multiple Documents
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tutorial 2: Batch Processing Multiple Documents">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-create-test-documents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Create Test Documents
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-initialize-database" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Initialize Database
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-process-all-documents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Process All Documents
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-verify-consistency" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Verify Consistency
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-5-view-statistics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: View Statistics
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#filtering-by-entity-type" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filtering by Entity Type
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tutorial-3-using-configuration-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tutorial 3: Using Configuration Files
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tutorial 3: Using Configuration Files">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-generate-config-template" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Generate Config Template
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-edit-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Edit Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-view-effective-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: View Effective Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-update-config-via-cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Update Config via CLI
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration-priority" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration Priority
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tutorial-4-choosing-a-pseudonym-theme" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tutorial 4: Choosing a Pseudonym Theme
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tutorial 4: Choosing a Pseudonym Theme">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#theme-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Theme Comparison
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#neutral-theme-default" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Neutral Theme (Default)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#star-wars-theme" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Star Wars Theme
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lord-of-the-rings-theme" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lord of the Rings Theme
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#switching-themes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Switching Themes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validation-ui-walkthrough" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validation UI Walkthrough
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Validation UI Walkthrough">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-validation-screen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Validation Screen
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#keyboard-shortcuts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Keyboard Shortcuts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#entity-variant-grouping" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Entity Variant Grouping
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validation-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validation Workflow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tips-for-efficient-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tips for Efficient Validation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-workflows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Workflows
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Workflows">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#academic-research-interview-transcripts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Academic Research: Interview Transcripts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hr-analysis-employee-feedback" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        HR Analysis: Employee Feedback
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#legal-case-document-preparation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Legal: Case Document Preparation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tutorial-5-managing-mappings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tutorial 5: Managing Mappings
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tutorial 5: Managing Mappings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#validate-existing-mappings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validate Existing Mappings
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#import-mappings-from-another-project" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Import Mappings from Another Project
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#securely-destroy-a-database" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Securely Destroy a Database
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tips-and-best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tips and Best Practices
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tips and Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#security" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#workflow-efficiency" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Workflow Efficiency
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#organization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Organization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#known-limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Known Limitations
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#no-entities-detected" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        No entities detected
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#inconsistent-pseudonyms-across-documents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inconsistent pseudonyms across documents
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validation-ui-not-responding" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validation UI not responding
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#forgot-passphrase" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Forgot passphrase
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next Steps
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Guide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    User Guide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CLI-REFERENCE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FAQ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Methodology
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Methodology
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../methodology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Technical Approach & GDPR Compliance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Developer Guide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Developer Guide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#tutorial-1-single-document-pseudonymization-5-minutes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tutorial 1: Single Document Pseudonymization (5 minutes)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tutorial 1: Single Document Pseudonymization (5 minutes)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-create-a-test-document" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Create a Test Document
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-set-your-passphrase" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Set Your Passphrase
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-run-pseudonymization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Run Pseudonymization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-review-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Review Output
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-5-view-mapping-database" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: View Mapping Database
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tutorial-2-batch-processing-multiple-documents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tutorial 2: Batch Processing Multiple Documents
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tutorial 2: Batch Processing Multiple Documents">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-create-test-documents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Create Test Documents
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-initialize-database" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Initialize Database
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-process-all-documents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Process All Documents
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-verify-consistency" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Verify Consistency
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-5-view-statistics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: View Statistics
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#filtering-by-entity-type" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filtering by Entity Type
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tutorial-3-using-configuration-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tutorial 3: Using Configuration Files
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tutorial 3: Using Configuration Files">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-generate-config-template" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Generate Config Template
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-edit-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Edit Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-view-effective-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: View Effective Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-update-config-via-cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Update Config via CLI
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration-priority" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration Priority
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tutorial-4-choosing-a-pseudonym-theme" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tutorial 4: Choosing a Pseudonym Theme
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tutorial 4: Choosing a Pseudonym Theme">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#theme-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Theme Comparison
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#neutral-theme-default" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Neutral Theme (Default)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#star-wars-theme" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Star Wars Theme
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lord-of-the-rings-theme" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lord of the Rings Theme
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#switching-themes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Switching Themes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validation-ui-walkthrough" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validation UI Walkthrough
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Validation UI Walkthrough">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-validation-screen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Validation Screen
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#keyboard-shortcuts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Keyboard Shortcuts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#entity-variant-grouping" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Entity Variant Grouping
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validation-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validation Workflow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tips-for-efficient-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tips for Efficient Validation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-workflows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Workflows
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Workflows">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#academic-research-interview-transcripts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Academic Research: Interview Transcripts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hr-analysis-employee-feedback" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        HR Analysis: Employee Feedback
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#legal-case-document-preparation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Legal: Case Document Preparation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tutorial-5-managing-mappings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tutorial 5: Managing Mappings
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tutorial 5: Managing Mappings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#validate-existing-mappings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validate Existing Mappings
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#import-mappings-from-another-project" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Import Mappings from Another Project
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#securely-destroy-a-database" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Securely Destroy a Database
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tips-and-best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tips and Best Practices
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tips and Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#security" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#workflow-efficiency" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Workflow Efficiency
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#organization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Organization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#known-limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Known Limitations
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#no-entities-detected" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        No entities detected
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#inconsistent-pseudonyms-across-documents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inconsistent pseudonyms across documents
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validation-ui-not-responding" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validation UI not responding
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#forgot-passphrase" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Forgot passphrase
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next Steps
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="usage-tutorial">Usage Tutorial<a class="headerlink" href="#usage-tutorial" title="Permanent link">&para;</a></h1>
+<p><strong>GDPR Pseudonymizer</strong> - Step-by-step tutorials for common workflows.</p>
+<hr />
+<h2 id="tutorial-1-single-document-pseudonymization-5-minutes">Tutorial 1: Single Document Pseudonymization (5 minutes)<a class="headerlink" href="#tutorial-1-single-document-pseudonymization-5-minutes" title="Permanent link">&para;</a></h2>
+<p>Learn the basics by pseudonymizing a single French document.</p>
+<h3 id="step-1-create-a-test-document">Step 1: Create a Test Document<a class="headerlink" href="#step-1-create-a-test-document" title="Permanent link">&para;</a></h3>
+<p>Create a file with French text containing personal information:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Marie Dubois travaille a Paris pour Acme SA. Elle collabore avec Jean Martin de Lyon.&quot;</span><span class="w"> </span>&gt;<span class="w"> </span>interview.txt
+</code></pre></div>
+<p><strong>Entities in this text:</strong>
+- <strong>PERSON:</strong> Marie Dubois, Jean Martin
+- <strong>LOCATION:</strong> Paris, Lyon
+- <strong>ORGANIZATION:</strong> Acme SA</p>
+<h3 id="step-2-set-your-passphrase">Step 2: Set Your Passphrase<a class="headerlink" href="#step-2-set-your-passphrase" title="Permanent link">&para;</a></h3>
+<p>The tool encrypts all entity mappings. Set a passphrase (minimum 12 characters):</p>
+<p><strong>Windows (PowerShell):</strong>
+<div class="highlight"><pre><span></span><code><span class="nv">$env:GDPR_PSEUDO_PASSPHRASE</span> <span class="p">=</span> <span class="s2">&quot;MySecurePassphrase123&quot;</span>
+</code></pre></div></p>
+<p><strong>macOS/Linux:</strong>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">GDPR_PSEUDO_PASSPHRASE</span><span class="o">=</span><span class="s2">&quot;MySecurePassphrase123&quot;</span>
+</code></pre></div></p>
+<p><strong>Important:</strong> Store this passphrase securely. Without it, you cannot reverse pseudonymization.</p>
+<h3 id="step-3-run-pseudonymization">Step 3: Run Pseudonymization<a class="headerlink" href="#step-3-run-pseudonymization" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>process<span class="w"> </span>interview.txt
+</code></pre></div>
+<p>You'll enter the <strong>interactive validation workflow</strong> - see <a href="#validation-ui-walkthrough">Validation UI Walkthrough</a> below.</p>
+<h3 id="step-4-review-output">Step 4: Review Output<a class="headerlink" href="#step-4-review-output" title="Permanent link">&para;</a></h3>
+<p>After validation, check the pseudonymized file:</p>
+<div class="highlight"><pre><span></span><code>cat<span class="w"> </span>interview_pseudonymized.txt
+</code></pre></div>
+<p><strong>Example output (with neutral theme):</strong>
+<div class="highlight"><pre><span></span><code>Sophie Martin travaille a Marseille pour TechnoPlus SARL. Elle collabore avec Pierre Laurent de Bordeaux.
+</code></pre></div></p>
+<h3 id="step-5-view-mapping-database">Step 5: View Mapping Database<a class="headerlink" href="#step-5-view-mapping-database" title="Permanent link">&para;</a></h3>
+<p>See the entity mappings stored in the encrypted database:</p>
+<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>list-mappings
+</code></pre></div>
+<hr />
+<h2 id="tutorial-2-batch-processing-multiple-documents">Tutorial 2: Batch Processing Multiple Documents<a class="headerlink" href="#tutorial-2-batch-processing-multiple-documents" title="Permanent link">&para;</a></h2>
+<p>Process multiple documents with consistent pseudonyms across all files.</p>
+<h3 id="step-1-create-test-documents">Step 1: Create Test Documents<a class="headerlink" href="#step-1-create-test-documents" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>documents
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Marie Dubois est directrice chez Acme SA.&quot;</span><span class="w"> </span>&gt;<span class="w"> </span>documents/doc1.txt
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Jean Martin collabore avec Marie Dubois a Paris.&quot;</span><span class="w"> </span>&gt;<span class="w"> </span>documents/doc2.txt
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Acme SA organise une reunion a Lyon avec Marie Dubois.&quot;</span><span class="w"> </span>&gt;<span class="w"> </span>documents/doc3.txt
+</code></pre></div>
+<h3 id="step-2-initialize-database">Step 2: Initialize Database<a class="headerlink" href="#step-2-initialize-database" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>init<span class="w"> </span>--db<span class="w"> </span>project.db
+</code></pre></div>
+<p>Enter a passphrase when prompted (or use environment variable).</p>
+<h3 id="step-3-process-all-documents">Step 3: Process All Documents<a class="headerlink" href="#step-3-process-all-documents" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>batch<span class="w"> </span>documents/<span class="w"> </span>--db<span class="w"> </span>project.db<span class="w"> </span>-o<span class="w"> </span>output/
+</code></pre></div>
+<p><strong>What happens:</strong>
+- Each document enters validation workflow
+- Same entities receive <strong>same pseudonyms</strong> across all documents
+- Progress bar shows completion status</p>
+<h3 id="step-4-verify-consistency">Step 4: Verify Consistency<a class="headerlink" href="#step-4-verify-consistency" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>cat<span class="w"> </span>output/doc1_pseudonymized.txt
+cat<span class="w"> </span>output/doc2_pseudonymized.txt
+cat<span class="w"> </span>output/doc3_pseudonymized.txt
+</code></pre></div>
+<p>"Marie Dubois" should have the same pseudonym in all three documents.</p>
+<h3 id="step-5-view-statistics">Step 5: View Statistics<a class="headerlink" href="#step-5-view-statistics" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>stats<span class="w"> </span>--db<span class="w"> </span>project.db
+</code></pre></div>
+<p>Shows entity counts, themes used, and processing history.</p>
+<h3 id="filtering-by-entity-type">Filtering by Entity Type<a class="headerlink" href="#filtering-by-entity-type" title="Permanent link">&para;</a></h3>
+<p>If you only need to pseudonymize certain entity types, use the <code>--entity-types</code> flag:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Process only PERSON entities (skip LOCATION and ORG)</span>
+poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>batch<span class="w"> </span>documents/<span class="w"> </span>--db<span class="w"> </span>project.db<span class="w"> </span>--entity-types<span class="w"> </span>PERSON
+
+<span class="c1"># Process PERSON and LOCATION entities (skip ORG)</span>
+poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>batch<span class="w"> </span>documents/<span class="w"> </span>--db<span class="w"> </span>project.db<span class="w"> </span>--entity-types<span class="w"> </span>PERSON,LOCATION
+</code></pre></div>
+<p>This is useful when:
+- You only need to anonymize people's names but want to keep real locations
+- You want to process entity types in separate passes for review efficiency
+- Your documents contain many irrelevant ORG detections you want to skip</p>
+<p>The <code>--entity-types</code> flag also works with the <code>process</code> command for single documents.</p>
+<hr />
+<h2 id="tutorial-3-using-configuration-files">Tutorial 3: Using Configuration Files<a class="headerlink" href="#tutorial-3-using-configuration-files" title="Permanent link">&para;</a></h2>
+<p>Create a configuration file to set default options.</p>
+<h3 id="step-1-generate-config-template">Step 1: Generate Config Template<a class="headerlink" href="#step-1-generate-config-template" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>config<span class="w"> </span>--init
+</code></pre></div>
+<p>This creates <code>.gdpr-pseudo.yaml</code> in the current directory.</p>
+<h3 id="step-2-edit-configuration">Step 2: Edit Configuration<a class="headerlink" href="#step-2-edit-configuration" title="Permanent link">&para;</a></h3>
+<p>Open <code>.gdpr-pseudo.yaml</code> and customize:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">database</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">project_mappings.db</span>
+
+<span class="nt">pseudonymization</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">theme</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">star_wars</span><span class="w">    </span><span class="c1"># neutral | star_wars | lotr</span>
+<span class="w">  </span><span class="nt">model</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">spacy</span>
+
+<span class="nt">batch</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">workers</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span><span class="w">          </span><span class="c1"># 1-8 (use 1 for interactive validation)</span>
+<span class="w">  </span><span class="nt">output_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pseudonymized_output</span>
+
+<span class="nt">logging</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">INFO</span>
+</code></pre></div>
+<h3 id="step-3-view-effective-configuration">Step 3: View Effective Configuration<a class="headerlink" href="#step-3-view-effective-configuration" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>config
+</code></pre></div>
+<p>Shows merged configuration from all sources.</p>
+<h3 id="step-4-update-config-via-cli">Step 4: Update Config via CLI<a class="headerlink" href="#step-4-update-config-via-cli" title="Permanent link">&para;</a></h3>
+<p>Change settings without editing the file:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Change theme</span>
+poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>config<span class="w"> </span><span class="nb">set</span><span class="w"> </span>pseudonymization.theme<span class="w"> </span>lotr
+
+<span class="c1"># Change database path</span>
+poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>config<span class="w"> </span><span class="nb">set</span><span class="w"> </span>database.path<span class="w"> </span>my_mappings.db
+
+<span class="c1"># View updated config</span>
+poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>config
+</code></pre></div>
+<h3 id="configuration-priority">Configuration Priority<a class="headerlink" href="#configuration-priority" title="Permanent link">&para;</a></h3>
+<p>Settings are applied in this order (highest to lowest priority):</p>
+<ol>
+<li>CLI flags (e.g., <code>--theme star_wars</code>)</li>
+<li>Custom config file (<code>--config /path/to/config.yaml</code>)</li>
+<li>Project config (<code>./.gdpr-pseudo.yaml</code>)</li>
+<li>Home config (<code>~/.gdpr-pseudo.yaml</code>)</li>
+<li>Default values</li>
+</ol>
+<p><strong>Example:</strong> CLI flag overrides config file:
+<div class="highlight"><pre><span></span><code><span class="c1"># Uses lotr theme even if config says neutral</span>
+poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>process<span class="w"> </span>doc.txt<span class="w"> </span>--theme<span class="w"> </span>lotr
+</code></pre></div></p>
+<hr />
+<h2 id="tutorial-4-choosing-a-pseudonym-theme">Tutorial 4: Choosing a Pseudonym Theme<a class="headerlink" href="#tutorial-4-choosing-a-pseudonym-theme" title="Permanent link">&para;</a></h2>
+<p>Compare the three available themes to pick the best one for your use case.</p>
+<h3 id="theme-comparison">Theme Comparison<a class="headerlink" href="#theme-comparison" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Entity Type</th>
+<th>Neutral</th>
+<th>Star Wars</th>
+<th>Lord of the Rings</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>PERSON</strong></td>
+<td>Sophie Martin</td>
+<td>Leia Organa</td>
+<td>Arwen Evenstar</td>
+</tr>
+<tr>
+<td><strong>LOCATION</strong></td>
+<td>Marseille</td>
+<td>Coruscant</td>
+<td>Rivendell</td>
+</tr>
+<tr>
+<td><strong>ORGANIZATION</strong></td>
+<td>TechnoPlus SARL</td>
+<td>Rebel Alliance</td>
+<td>House of Elrond</td>
+</tr>
+</tbody>
+</table>
+<h3 id="neutral-theme-default">Neutral Theme (Default)<a class="headerlink" href="#neutral-theme-default" title="Permanent link">&para;</a></h3>
+<p>Best for: Professional documents, legal compliance, realistic output.</p>
+<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>process<span class="w"> </span>doc.txt<span class="w"> </span>--theme<span class="w"> </span>neutral
+</code></pre></div>
+<p><strong>Example transformation:</strong>
+<div class="highlight"><pre><span></span><code>Input:  Marie Dubois travaille a Paris pour Acme SA.
+Output: Sophie Martin travaille a Marseille pour TechnoPlus SARL.
+</code></pre></div></p>
+<p><strong>Characteristics:</strong>
+- French-sounding names
+- Real French cities and regions
+- Realistic company names with proper suffixes (SA, SARL, SAS)</p>
+<h3 id="star-wars-theme">Star Wars Theme<a class="headerlink" href="#star-wars-theme" title="Permanent link">&para;</a></h3>
+<p>Best for: Easy identification of pseudonymized content, fun testing.</p>
+<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>process<span class="w"> </span>doc.txt<span class="w"> </span>--theme<span class="w"> </span>star_wars
+</code></pre></div>
+<p><strong>Example transformation:</strong>
+<div class="highlight"><pre><span></span><code>Input:  Marie Dubois travaille a Paris pour Acme SA.
+Output: Leia Organa travaille a Coruscant pour Rebel Alliance.
+</code></pre></div></p>
+<p><strong>Characteristics:</strong>
+- Iconic Star Wars character names
+- Planets and locations from the Star Wars universe
+- Factions and organizations (Rebel Alliance, Galactic Empire, etc.)</p>
+<h3 id="lord-of-the-rings-theme">Lord of the Rings Theme<a class="headerlink" href="#lord-of-the-rings-theme" title="Permanent link">&para;</a></h3>
+<p>Best for: Literary projects, distinctive pseudonymization, fantasy enthusiasts.</p>
+<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>process<span class="w"> </span>doc.txt<span class="w"> </span>--theme<span class="w"> </span>lotr
+</code></pre></div>
+<p><strong>Example transformation:</strong>
+<div class="highlight"><pre><span></span><code>Input:  Marie Dubois travaille a Paris pour Acme SA.
+Output: Arwen Evenstar travaille a Rivendell pour House of Elrond.
+</code></pre></div></p>
+<p><strong>Characteristics:</strong>
+- Characters from Tolkien's Middle-earth
+- Locations: Rivendell, Gondor, The Shire, etc.
+- Organizations: Kingdoms, houses, and alliances</p>
+<h3 id="switching-themes">Switching Themes<a class="headerlink" href="#switching-themes" title="Permanent link">&para;</a></h3>
+<p><strong>Important:</strong> Once you've processed documents with a theme, stick with it for consistency. Changing themes mid-project creates inconsistent pseudonyms.</p>
+<p>If you must switch:
+<div class="highlight"><pre><span></span><code><span class="c1"># Create new database for new theme</span>
+poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>init<span class="w"> </span>--db<span class="w"> </span>star_wars_project.db<span class="w"> </span>--force
+poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>batch<span class="w"> </span>documents/<span class="w"> </span>--db<span class="w"> </span>star_wars_project.db<span class="w"> </span>--theme<span class="w"> </span>star_wars
+</code></pre></div></p>
+<hr />
+<h2 id="validation-ui-walkthrough">Validation UI Walkthrough<a class="headerlink" href="#validation-ui-walkthrough" title="Permanent link">&para;</a></h2>
+<p>Every document goes through interactive validation to ensure 100% accuracy.</p>
+<h3 id="the-validation-screen">The Validation Screen<a class="headerlink" href="#the-validation-screen" title="Permanent link">&para;</a></h3>
+<p>When you process a document, you'll see:</p>
+<div class="highlight"><pre><span></span><code>================================================================================
+Entity Validation Session
+================================================================================
+Total entities detected: 5
+Unique entities to validate: 3 (2 duplicates grouped)
+
+Processing entity 1 of 3
+--------------------------------------------------------------------------------
+Entity: Marie Dubois
+Type: PERSON (detected by spaCy NER)
+Confidence: High (92%)
+
+Context:
+  &quot;...travaille avec Marie Dubois depuis trois ans. Elle dirige...&quot;
+                      ^^^^^^^^^^^^
+
+Proposed pseudonym: [Sophie Martin] (theme: neutral)
+--------------------------------------------------------------------------------
+[Space] Accept  [R] Reject  [E] Edit  [C] Change pseudonym  [H] Help
+</code></pre></div>
+<h3 id="keyboard-shortcuts">Keyboard Shortcuts<a class="headerlink" href="#keyboard-shortcuts" title="Permanent link">&para;</a></h3>
+<p><strong>Core Actions:</strong>
+| Key | Action | Description |
+|-----|--------|-------------|
+| <code>Space</code> | Accept | Confirm entity and pseudonym |
+| <code>R</code> | Reject | Mark as false positive (keep original) |
+| <code>E</code> | Edit | Modify entity text |
+| <code>A</code> | Add | Add a missed entity manually |
+| <code>C</code> | Change | Choose different pseudonym |</p>
+<p><strong>Navigation:</strong>
+| Key | Action | Description |
+|-----|--------|-------------|
+| <code>N</code> / <code>Right Arrow</code> | Next | Go to next entity |
+| <code>P</code> / <code>Left Arrow</code> | Previous | Go to previous entity |
+| <code>X</code> | Cycle contexts | Show other occurrences of entity (dot indicator shows position: <code>● ○ ○</code>) |
+| <code>Q</code> | Quit | Exit validation (with confirmation) |</p>
+<p><strong>Batch Operations (hidden - press H to see):</strong>
+| Key | Action | Description |
+|-----|--------|-------------|
+| <code>Shift+A</code> | Accept All Type | Accept all entities of current type (shows count: <code>✓ Accepted all 15 PERSON entities</code>) |
+| <code>Shift+R</code> | Reject All Type | Reject all entities of current type (shows count: <code>✗ Rejected all 8 LOCATION entities</code>) |</p>
+<p><strong>Help:</strong>
+| Key | Action |
+|-----|--------|
+| <code>H</code> / <code>?</code> | Show help overlay (displays all shortcuts including batch operations) |</p>
+<h3 id="entity-variant-grouping">Entity Variant Grouping<a class="headerlink" href="#entity-variant-grouping" title="Permanent link">&para;</a></h3>
+<p>The validation UI automatically groups related entity forms into single validation items. For example, if a document contains "Marie Dubois", "Pr. Dubois", and "Dubois", these are shown as one item:</p>
+<div class="highlight"><pre><span></span><code>Entity: Marie Dubois
+Type: PERSON
+Also appears as: Pr. Dubois, Dubois
+</code></pre></div>
+<p>Accepting or rejecting this item applies the decision to all variant forms. This reduces validation fatigue when documents use multiple forms to refer to the same person (titles, surnames, abbreviations).</p>
+<h3 id="validation-workflow">Validation Workflow<a class="headerlink" href="#validation-workflow" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Summary Screen:</strong> See entity counts by type (PERSON, LOCATION, ORG)</li>
+<li><strong>Review Entities:</strong> Go through each entity with context (variants grouped)</li>
+<li><strong>Make Decisions:</strong> Accept, reject, edit, or change pseudonym</li>
+<li><strong>Final Confirmation:</strong> Review summary of changes</li>
+<li><strong>Process Document:</strong> Pseudonymization applied</li>
+</ol>
+<h3 id="tips-for-efficient-validation">Tips for Efficient Validation<a class="headerlink" href="#tips-for-efficient-validation" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Press H for all shortcuts:</strong> Many shortcuts (like Shift+A/Shift+R) aren't shown on the main screen</li>
+<li><strong>Use batch operations:</strong> Press <code>Shift+A</code> to accept all PERSON entities if they look correct</li>
+<li><strong>Cycle contexts:</strong> Press <code>X</code> to see all occurrences of an entity before deciding — a dot indicator (<code>● ○ ○ ○</code>) shows your position; for &gt;10 contexts, a truncated format (<code>○ ○ … ● … ○ ○</code>) is used</li>
+<li><strong>Trust high-confidence:</strong> Entities with &gt;90% confidence are usually correct</li>
+<li><strong>Review low-confidence:</strong> Yellow/red confidence scores need careful review</li>
+</ol>
+<hr />
+<h2 id="common-workflows">Common Workflows<a class="headerlink" href="#common-workflows" title="Permanent link">&para;</a></h2>
+<h3 id="academic-research-interview-transcripts">Academic Research: Interview Transcripts<a class="headerlink" href="#academic-research-interview-transcripts" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Set up project</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">GDPR_PSEUDO_PASSPHRASE</span><span class="o">=</span><span class="s2">&quot;AcademicResearch2026!&quot;</span>
+poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>init<span class="w"> </span>--db<span class="w"> </span>research_project.db
+
+<span class="c1"># Process all interviews</span>
+poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>batch<span class="w"> </span>interviews/<span class="w"> </span>--db<span class="w"> </span>research_project.db<span class="w"> </span>-o<span class="w"> </span>anonymized/
+
+<span class="c1"># Export audit log for ethics board</span>
+poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span><span class="nb">export</span><span class="w"> </span>audit_log.json<span class="w"> </span>--db<span class="w"> </span>research_project.db
+
+<span class="c1"># Share anonymized files (keep mappings.db secure!)</span>
+</code></pre></div>
+<h3 id="hr-analysis-employee-feedback">HR Analysis: Employee Feedback<a class="headerlink" href="#hr-analysis-employee-feedback" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Pseudonymize for ChatGPT analysis</span>
+poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>process<span class="w"> </span>feedback_report.txt<span class="w"> </span>--theme<span class="w"> </span>star_wars
+
+<span class="c1"># Upload pseudonymized version to ChatGPT</span>
+<span class="c1"># Analyze output (references &quot;Luke Skywalker&quot; instead of real names)</span>
+<span class="c1"># Map insights back using list-mappings</span>
+poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>list-mappings<span class="w"> </span>--search<span class="w"> </span><span class="s2">&quot;Luke&quot;</span>
+</code></pre></div>
+<h3 id="legal-case-document-preparation">Legal: Case Document Preparation<a class="headerlink" href="#legal-case-document-preparation" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Initialize with strong passphrase</span>
+poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>init<span class="w"> </span>--db<span class="w"> </span>case_12345.db
+
+<span class="c1"># Process case documents</span>
+poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>batch<span class="w"> </span>case_documents/<span class="w"> </span>--db<span class="w"> </span>case_12345.db<span class="w"> </span>--theme<span class="w"> </span>neutral
+
+<span class="c1"># Export mappings for reference</span>
+poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>list-mappings<span class="w"> </span>--db<span class="w"> </span>case_12345.db<span class="w"> </span>--export<span class="w"> </span>mappings.csv
+</code></pre></div>
+<hr />
+<h2 id="tutorial-5-managing-mappings">Tutorial 5: Managing Mappings<a class="headerlink" href="#tutorial-5-managing-mappings" title="Permanent link">&para;</a></h2>
+<p>Review and manage your entity-to-pseudonym mappings.</p>
+<h3 id="validate-existing-mappings">Validate Existing Mappings<a class="headerlink" href="#validate-existing-mappings" title="Permanent link">&para;</a></h3>
+<p>Review stored mappings without processing documents:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># View all mappings with metadata</span>
+poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>validate-mappings
+
+<span class="c1"># Interactive review mode</span>
+poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>validate-mappings<span class="w"> </span>--interactive
+
+<span class="c1"># Filter by entity type</span>
+poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>validate-mappings<span class="w"> </span>--type<span class="w"> </span>PERSON
+</code></pre></div>
+<h3 id="import-mappings-from-another-project">Import Mappings from Another Project<a class="headerlink" href="#import-mappings-from-another-project" title="Permanent link">&para;</a></h3>
+<p>Combine mappings from multiple databases:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Import from old project to new</span>
+poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>import-mappings<span class="w"> </span>old_project.db<span class="w"> </span>--db<span class="w"> </span>new_project.db
+
+<span class="c1"># Prompt for each duplicate (instead of auto-skipping)</span>
+poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>import-mappings<span class="w"> </span>old_project.db<span class="w"> </span>--prompt-duplicates
+</code></pre></div>
+<h3 id="securely-destroy-a-database">Securely Destroy a Database<a class="headerlink" href="#securely-destroy-a-database" title="Permanent link">&para;</a></h3>
+<p>When a project is complete and mappings are no longer needed:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Interactive destruction (safest - prompts for confirmation and passphrase)</span>
+poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>destroy-table<span class="w"> </span>--db<span class="w"> </span>project.db
+
+<span class="c1"># Force destruction (skips confirmation, still verifies passphrase)</span>
+poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>destroy-table<span class="w"> </span>--db<span class="w"> </span>project.db<span class="w"> </span>--force
+</code></pre></div>
+<p><strong>Security features:</strong>
+- Passphrase verification prevents accidental deletion of wrong database
+- SQLite magic number check prevents deletion of non-database files
+- Symlink protection prevents redirect attacks
+- 3-pass secure wipe overwrites data before file deletion</p>
+<hr />
+<h2 id="tips-and-best-practices">Tips and Best Practices<a class="headerlink" href="#tips-and-best-practices" title="Permanent link">&para;</a></h2>
+<h3 id="security">Security<a class="headerlink" href="#security" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Use environment variables for passphrases</strong> rather than <code>--passphrase</code> flag (which appears in shell history)</li>
+<li><strong>Store mapping databases separately</strong> from pseudonymized documents — the combination allows re-identification</li>
+<li><strong>Use strong passphrases</strong> (12+ characters, mix of letters, numbers, symbols)</li>
+<li><strong>Back up your mapping database</strong> before batch operations — you cannot reverse pseudonymization without it</li>
+</ol>
+<h3 id="workflow-efficiency">Workflow Efficiency<a class="headerlink" href="#workflow-efficiency" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Press H during validation</strong> to see all keyboard shortcuts (batch operations are hidden by default)</li>
+<li><strong>Use batch accept/reject</strong> (<code>Shift+A</code> / <code>Shift+R</code>) for entity types where detection is reliable</li>
+<li><strong>Process a small test file first</strong> to verify settings before running batch jobs</li>
+<li><strong>Use the same database</strong> for all related documents to ensure consistent pseudonyms</li>
+<li><strong>Choose your theme upfront</strong> — switching themes mid-project creates inconsistent pseudonyms</li>
+</ol>
+<h3 id="organization">Organization<a class="headerlink" href="#organization" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>One database per project</strong> — keep separate mapping databases for unrelated projects</li>
+<li><strong>Use <code>--output</code> or <code>-o</code></strong> to keep pseudonymized files in a separate directory</li>
+<li><strong>Export audit logs regularly</strong> for compliance documentation: <code>poetry run gdpr-pseudo export audit.json</code></li>
+<li><strong>Use <code>stats</code> command</strong> to monitor processing history and entity counts</li>
+</ol>
+<h3 id="known-limitations">Known Limitations<a class="headerlink" href="#known-limitations" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>French only</strong> — no other languages in v1.0</li>
+<li><strong>Text-based formats</strong> — <code>.txt</code>, <code>.md</code>, <code>.pdf</code>, and <code>.docx</code> (PDF/DOCX require optional extras: <code>pip install gdpr-pseudonymizer[formats]</code>)</li>
+<li><strong>Validation is mandatory</strong> — every entity must be reviewed (AI detection ~60% F1)</li>
+<li><strong>Passphrase is irrecoverable</strong> — if lost, existing mappings cannot be decrypted</li>
+</ul>
+<hr />
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
+<h3 id="no-entities-detected">No entities detected<a class="headerlink" href="#no-entities-detected" title="Permanent link">&para;</a></h3>
+<p><strong>Cause:</strong> Document may not contain recognizable French text.</p>
+<p><strong>Solutions:</strong>
+1. Ensure text is in French with proper encoding (UTF-8)
+2. Check for French names, locations, or organizations
+3. Verify file is <code>.txt</code> or <code>.md</code> format</p>
+<h3 id="inconsistent-pseudonyms-across-documents">Inconsistent pseudonyms across documents<a class="headerlink" href="#inconsistent-pseudonyms-across-documents" title="Permanent link">&para;</a></h3>
+<p><strong>Cause:</strong> Using different database files.</p>
+<p><strong>Solution:</strong> Always specify the same database:
+<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>process<span class="w"> </span>doc1.txt<span class="w"> </span>--db<span class="w"> </span>shared.db
+poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>process<span class="w"> </span>doc2.txt<span class="w"> </span>--db<span class="w"> </span>shared.db
+</code></pre></div></p>
+<h3 id="validation-ui-not-responding">Validation UI not responding<a class="headerlink" href="#validation-ui-not-responding" title="Permanent link">&para;</a></h3>
+<p><strong>Cause:</strong> Terminal compatibility issue.</p>
+<p><strong>Solutions:</strong>
+1. Use a standard terminal (PowerShell, Terminal.app, bash)
+2. Avoid running in IDE terminals (may have input issues)
+3. Try <code>poetry shell</code> then run command directly</p>
+<h3 id="forgot-passphrase">Forgot passphrase<a class="headerlink" href="#forgot-passphrase" title="Permanent link">&para;</a></h3>
+<p><strong>Consequence:</strong> Cannot access existing mappings or reverse pseudonymization.</p>
+<p><strong>Solution:</strong> Create new database (previous mappings are lost):
+<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>init<span class="w"> </span>--force
+</code></pre></div></p>
+<hr />
+<h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../CLI-REFERENCE/">CLI Reference</a> - Complete command documentation</li>
+<li><a href="../installation/">Installation Guide</a> - Detailed setup instructions</li>
+<li><a href="../faq/">FAQ</a> - Common questions and answers</li>
+<li><a href="../troubleshooting/">Troubleshooting Guide</a> - Comprehensive error reference</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

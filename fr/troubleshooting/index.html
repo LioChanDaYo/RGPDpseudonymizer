@@ -1,0 +1,2093 @@
+
+<!doctype html>
+<html lang="fr" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="AI-Assisted Pseudonymization for French Documents with Human Verification">
+      
+      
+      
+        <link rel="canonical" href="https://liochandayo.github.io/RGPDpseudonymizer/fr/troubleshooting/">
+      
+      
+        <link rel="prev" href="../faq/">
+      
+      
+        <link rel="next" href="../methodology/">
+      
+      
+        
+          <link rel="alternate" href="../../troubleshooting/" hreflang="en">
+        
+          <link rel="alternate" href="./" hreflang="fr">
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Dépannage - GDPR Pseudonymizer</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#guide-de-depannage" class="md-skip">
+          Aller au contenu
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="En-tête">
+    <a href="../" title="GDPR Pseudonymizer" class="md-header__button md-logo" aria-label="GDPR Pseudonymizer" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            GDPR Pseudonymizer
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Dépannage
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="Sélectionner la langue">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="../../troubleshooting/" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="fr" class="md-select__link">
+              Français
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Rechercher" placeholder="Rechercher" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Recherche">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Effacer" aria-label="Effacer" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initialisation de la recherche
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/LioChanDaYo/RGPDpseudonymizer" title="Aller au dépôt" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    LioChanDaYo/RGPDpseudonymizer
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../" title="GDPR Pseudonymizer" class="md-nav__button md-logo" aria-label="GDPR Pseudonymizer" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    GDPR Pseudonymizer
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/LioChanDaYo/RGPDpseudonymizer" title="Aller au dépôt" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    LioChanDaYo/RGPDpseudonymizer
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Accueil
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Premiers Pas
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Premiers Pas
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorial/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guide Rapide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guide Utilisateur
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guide Utilisateur
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CLI-REFERENCE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Référence CLI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FAQ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dépannage
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dépannage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table des matières">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table des matières
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#problemes-dinstallation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problèmes d'installation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Problèmes d&#39;installation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#poetry-command-not-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        poetry: command not found
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#version-python-non-prise-en-charge" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Version Python non prise en charge
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#le-telechargement-du-modele-spacy-echoue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Le téléchargement du modèle spaCy échoue
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#poetry-install-echoue-avec-des-conflits-de-dependances" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        poetry install échoue avec des conflits de dépendances
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gdpr-pseudo-command-not-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        gdpr-pseudo: command not found
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#problemes-de-mot-de-passe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problèmes de mot de passe
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Problèmes de mot de passe">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#passphrase-must-be-at-least-12-characters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Passphrase must be at least 12 characters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#incorrect-passphrase" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Incorrect passphrase
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phrase-de-passe-oubliee" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phrase de passe oubliée
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#passphrase-in-config-file-is-forbidden" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Passphrase in config file is forbidden
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#erreurs-de-base-de-donnees" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Erreurs de base de données
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Erreurs de base de données">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#database-file-not-found-mappingsdb" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Database file not found: mappings.db
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#database-may-be-corrupted" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Database may be corrupted
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pseudonymes-incoherents-dans-les-documents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pseudonymes incohérents dans les documents
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#erreurs-de-traitement-nlp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Erreurs de traitement NLP
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Erreurs de traitement NLP">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#aucune-entite-detectee" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Aucune entité détectée
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#invalid-theme-xyz" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Invalid theme 'xyz'
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#problemes-dinterface-de-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problèmes d'interface de validation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Problèmes d&#39;interface de validation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#linterface-de-validation-ne-repond-pas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        L'interface de validation ne répond pas
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#les-raccourcis-clavier-ne-fonctionnent-pas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Les raccourcis clavier ne fonctionnent pas
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#problemes-specifiques-a-la-plateforme" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problèmes spécifiques à la plateforme
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Problèmes spécifiques à la plateforme">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#windows-violations-dacces-spacy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Windows : violations d'accès spaCy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#macos-xcode-command-line-tools-requis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        macOS : Xcode Command Line Tools requis
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#macos-apple-silicon-m1m2m3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        macOS : Apple Silicon (M1/M2/M3)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#linux-outils-de-compilation-manquants" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Linux : Outils de compilation manquants
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#erreurs-de-permission-refusee" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Erreurs de permission refusée
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#problemes-de-performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problèmes de performance
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Problèmes de performance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#le-traitement-ralentit-ou-plante-sur-de-gros-lots" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Le traitement ralentit ou plante sur de gros lots
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#le-chargement-du-modele-spacy-est-lent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Le chargement du modèle spaCy est lent
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#problemes-de-traitement-pdfdocx" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problèmes de traitement PDF/DOCX
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Problèmes de traitement PDF/DOCX">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pdf-support-requires-pdfplumber" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PDF support requires 'pdfplumber'
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docx-support-requires-python-docx" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DOCX support requires 'python-docx'
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#this-pdf-appears-to-be-scannedimage-based" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        « This PDF appears to be scanned/image-based »
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#le-pdf-est-protege-par-mot-de-passe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Le PDF est protégé par mot de passe
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#le-fichier-de-sortie-a-lextension-txt-pour-une-entree-pdfdocx" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Le fichier de sortie a l'extension .txt pour une entrée PDF/DOCX
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quand-signaler-un-bug" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quand signaler un bug
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#documentation-connexe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Documentation connexe
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Méthodologie
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Méthodologie
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../methodology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Approche Technique & Conformité RGPD
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guide Développeur
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guide Développeur
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Référence API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table des matières">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table des matières
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#problemes-dinstallation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problèmes d'installation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Problèmes d&#39;installation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#poetry-command-not-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        poetry: command not found
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#version-python-non-prise-en-charge" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Version Python non prise en charge
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#le-telechargement-du-modele-spacy-echoue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Le téléchargement du modèle spaCy échoue
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#poetry-install-echoue-avec-des-conflits-de-dependances" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        poetry install échoue avec des conflits de dépendances
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gdpr-pseudo-command-not-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        gdpr-pseudo: command not found
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#problemes-de-mot-de-passe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problèmes de mot de passe
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Problèmes de mot de passe">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#passphrase-must-be-at-least-12-characters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Passphrase must be at least 12 characters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#incorrect-passphrase" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Incorrect passphrase
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phrase-de-passe-oubliee" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phrase de passe oubliée
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#passphrase-in-config-file-is-forbidden" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Passphrase in config file is forbidden
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#erreurs-de-base-de-donnees" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Erreurs de base de données
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Erreurs de base de données">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#database-file-not-found-mappingsdb" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Database file not found: mappings.db
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#database-may-be-corrupted" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Database may be corrupted
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pseudonymes-incoherents-dans-les-documents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pseudonymes incohérents dans les documents
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#erreurs-de-traitement-nlp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Erreurs de traitement NLP
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Erreurs de traitement NLP">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#aucune-entite-detectee" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Aucune entité détectée
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#invalid-theme-xyz" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Invalid theme 'xyz'
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#problemes-dinterface-de-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problèmes d'interface de validation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Problèmes d&#39;interface de validation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#linterface-de-validation-ne-repond-pas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        L'interface de validation ne répond pas
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#les-raccourcis-clavier-ne-fonctionnent-pas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Les raccourcis clavier ne fonctionnent pas
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#problemes-specifiques-a-la-plateforme" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problèmes spécifiques à la plateforme
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Problèmes spécifiques à la plateforme">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#windows-violations-dacces-spacy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Windows : violations d'accès spaCy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#macos-xcode-command-line-tools-requis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        macOS : Xcode Command Line Tools requis
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#macos-apple-silicon-m1m2m3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        macOS : Apple Silicon (M1/M2/M3)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#linux-outils-de-compilation-manquants" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Linux : Outils de compilation manquants
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#erreurs-de-permission-refusee" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Erreurs de permission refusée
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#problemes-de-performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problèmes de performance
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Problèmes de performance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#le-traitement-ralentit-ou-plante-sur-de-gros-lots" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Le traitement ralentit ou plante sur de gros lots
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#le-chargement-du-modele-spacy-est-lent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Le chargement du modèle spaCy est lent
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#problemes-de-traitement-pdfdocx" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problèmes de traitement PDF/DOCX
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Problèmes de traitement PDF/DOCX">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pdf-support-requires-pdfplumber" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PDF support requires 'pdfplumber'
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docx-support-requires-python-docx" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DOCX support requires 'python-docx'
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#this-pdf-appears-to-be-scannedimage-based" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        « This PDF appears to be scanned/image-based »
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#le-pdf-est-protege-par-mot-de-passe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Le PDF est protégé par mot de passe
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#le-fichier-de-sortie-a-lextension-txt-pour-une-entree-pdfdocx" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Le fichier de sortie a l'extension .txt pour une entrée PDF/DOCX
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quand-signaler-un-bug" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quand signaler un bug
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#documentation-connexe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Documentation connexe
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="guide-de-depannage">Guide de dépannage<a class="headerlink" href="#guide-de-depannage" title="Permanent link">&para;</a></h1>
+<p><strong>Pseudonymiseur RGPD</strong> - Référence des erreurs et solutions</p>
+<hr />
+<h2 id="problemes-dinstallation">Problèmes d'installation<a class="headerlink" href="#problemes-dinstallation" title="Permanent link">&para;</a></h2>
+<h3 id="poetry-command-not-found"><code>poetry: command not found</code><a class="headerlink" href="#poetry-command-not-found" title="Permanent link">&para;</a></h3>
+<p><strong>Cause :</strong> Poetry n'est pas présent dans votre PATH système.</p>
+<p><strong>Solution :</strong>
+1. Vérifiez le répertoire d'installation :
+   - Windows : <code>%APPDATA%\Python\Scripts</code>
+   - macOS/Linux : <code>~/.local/bin</code>
+2. Ajoutez à votre PATH :
+   - <strong>Windows (PowerShell) :</strong> <code>$env:PATH += ";$env:APPDATA\Python\Scripts"</code>
+   - <strong>macOS/Linux :</strong> <code>export PATH="$HOME/.local/bin:$PATH"</code> (ajoutez à <code>~/.bashrc</code> ou <code>~/.zshrc</code>)
+3. Redémarrez votre terminal
+4. Alternative : utilisez <code>python -m poetry</code> à la place de <code>poetry</code></p>
+<h3 id="version-python-non-prise-en-charge">Version Python non prise en charge<a class="headerlink" href="#version-python-non-prise-en-charge" title="Permanent link">&para;</a></h3>
+<p><strong>Erreur :</strong> <code>The currently activated Python version X.Y.Z is not supported</code></p>
+<p><strong>Solution :</strong>
+1. Installez Python 3.10, 3.11 ou 3.12
+2. Configurez Poetry pour utiliser la bonne version :
+   <div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>env<span class="w"> </span>use<span class="w"> </span>python3.11
+poetry<span class="w"> </span>install
+</code></pre></div>
+3. Vérifiez avec <code>poetry env info</code> (recherchez « Python: 3.10.x », « 3.11.x » ou « 3.12.x »)</p>
+<p><strong>Remarque :</strong> Python 3.9 n'est plus pris en charge (fin de vie en octobre 2025). Python 3.13 et supérieur n'ont pas encore été testés.</p>
+<h3 id="le-telechargement-du-modele-spacy-echoue">Le téléchargement du modèle spaCy échoue<a class="headerlink" href="#le-telechargement-du-modele-spacy-echoue" title="Permanent link">&para;</a></h3>
+<p><strong>Causes possibles :</strong> Problèmes de réseau, espace disque insuffisant (~1 Go nécessaire), pare-feu bloquant.</p>
+<p><strong>Solutions :</strong></p>
+<ol>
+<li>
+<p><strong>Vérifiez l'espace disque :</strong>
+   <div class="highlight"><pre><span></span><code><span class="c1"># macOS/Linux</span>
+df<span class="w"> </span>-h
+<span class="c1"># Windows PowerShell</span>
+Get-PSDrive<span class="w"> </span>C
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Installation manuelle :</strong>
+   <div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>-m<span class="w"> </span>spacy<span class="w"> </span>download<span class="w"> </span>fr_core_news_lg
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Réessayez avec sortie détaillée :</strong>
+   <div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>-m<span class="w"> </span>spacy<span class="w"> </span>download<span class="w"> </span>fr_core_news_lg<span class="w"> </span>--verbose
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Derrière un pare-feu d'entreprise :</strong> Contactez votre service informatique pour configurer un proxy ou téléchargez le paquet du modèle manuellement depuis https://github.com/explosion/spacy-models</p>
+</li>
+</ol>
+<h3 id="poetry-install-echoue-avec-des-conflits-de-dependances"><code>poetry install</code> échoue avec des conflits de dépendances<a class="headerlink" href="#poetry-install-echoue-avec-des-conflits-de-dependances" title="Permanent link">&para;</a></h3>
+<p><strong>Solution :</strong>
+1. Vérifiez la version Python (doit être 3.10-3.12)
+2. Supprimez l'environnement virtuel et réinstallez :
+   <div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>env<span class="w"> </span>remove<span class="w"> </span>python
+poetry<span class="w"> </span>install
+</code></pre></div>
+3. Mettez à jour Poetry :
+   <div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>self<span class="w"> </span>update
+</code></pre></div></p>
+<h3 id="gdpr-pseudo-command-not-found"><code>gdpr-pseudo: command not found</code><a class="headerlink" href="#gdpr-pseudo-command-not-found" title="Permanent link">&para;</a></h3>
+<p><strong>Cause :</strong> L'interface en ligne de commande requiert le préfixe <code>poetry run</code> pendant le développement.</p>
+<p><strong>Solution :</strong> Utilisez toujours <code>poetry run</code> :
+<div class="highlight"><pre><span></span><code><span class="c1"># CORRECT</span>
+poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>--help
+
+<span class="c1"># INCORRECT</span>
+gdpr-pseudo<span class="w"> </span>--help
+</code></pre></div></p>
+<p><strong>Alternative :</strong> Activez l'interpréteur Poetry :
+<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>shell
+gdpr-pseudo<span class="w"> </span>--help
+<span class="nb">exit</span>
+</code></pre></div></p>
+<hr />
+<h2 id="problemes-de-mot-de-passe">Problèmes de mot de passe<a class="headerlink" href="#problemes-de-mot-de-passe" title="Permanent link">&para;</a></h2>
+<h3 id="passphrase-must-be-at-least-12-characters"><code>Passphrase must be at least 12 characters</code><a class="headerlink" href="#passphrase-must-be-at-least-12-characters" title="Permanent link">&para;</a></h3>
+<p><strong>Cause :</strong> Exigence de sécurité -- les phrases de passe doivent contenir au moins 12 caractères.</p>
+<p><strong>Solution :</strong>
+1. Utilisez un mot de passe d'au moins 12 caractères
+2. Ou définissez-le via une variable d'environnement :
+   <div class="highlight"><pre><span></span><code><span class="c1"># macOS/Linux</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">GDPR_PSEUDO_PASSPHRASE</span><span class="o">=</span><span class="s2">&quot;your-secure-passphrase-here&quot;</span>
+
+<span class="c1"># Windows PowerShell</span>
+<span class="nv">$env</span>:GDPR_PSEUDO_PASSPHRASE<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;your-secure-passphrase-here&quot;</span>
+</code></pre></div></p>
+<h3 id="incorrect-passphrase"><code>Incorrect passphrase</code><a class="headerlink" href="#incorrect-passphrase" title="Permanent link">&para;</a></h3>
+<p><strong>Erreur :</strong> <code>Incorrect passphrase. Please check your passphrase and try again.</code></p>
+<p><strong>Solution :</strong>
+- Vérifiez que vous utilisez exactement le même mot de passe que celui utilisé lors de la création de la base de données
+- Vérifiez la présence d'espaces à la fin ou de caractères invisibles
+- Si vous utilisez une variable d'environnement, vérifiez : <code>echo $GDPR_PSEUDO_PASSPHRASE</code> (Linux/macOS) ou <code>echo $env:GDPR_PSEUDO_PASSPHRASE</code> (PowerShell)</p>
+<h3 id="phrase-de-passe-oubliee">Phrase de passe oubliée<a class="headerlink" href="#phrase-de-passe-oubliee" title="Permanent link">&para;</a></h3>
+<p><strong>Conséquence :</strong> La base de données de correspondance ne peut pas être déchiffrée. Les correspondances existantes sont définitivement inaccessibles et la pseudonymisation ne peut pas être annulée.</p>
+<p><strong>Récupération :</strong> Créez une nouvelle base de données (les correspondances précédentes seront perdues) :
+<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>init<span class="w"> </span>--force
+</code></pre></div></p>
+<p><strong>Prévention :</strong> Stockez vos phrases de passe dans un gestionnaire de mots de passe sécurisé.</p>
+<h3 id="passphrase-in-config-file-is-forbidden"><code>Passphrase in config file is forbidden</code><a class="headerlink" href="#passphrase-in-config-file-is-forbidden" title="Permanent link">&para;</a></h3>
+<p><strong>Cause :</strong> Un champ <code>passphrase</code> a été trouvé dans <code>.gdpr-pseudo.yaml</code>. Le stockage de données d'identification en texte brut est bloqué pour des raisons de sécurité.</p>
+<p><strong>Solution :</strong> Supprimez le champ <code>passphrase</code> de votre fichier de configuration. Utilisez l'une des options suivantes :
+- <strong>Variable d'environnement :</strong> <code>GDPR_PSEUDO_PASSPHRASE</code> (recommandée pour l'automatisation)
+- <strong>Invite interactive</strong> (plus sûr -- comportement par défaut)
+- <strong>Option en ligne de commande :</strong> <code>--passphrase</code> (non recommandée -- visible dans l'historique du shell)</p>
+<hr />
+<h2 id="erreurs-de-base-de-donnees">Erreurs de base de données<a class="headerlink" href="#erreurs-de-base-de-donnees" title="Permanent link">&para;</a></h2>
+<h3 id="database-file-not-found-mappingsdb"><code>Database file not found: mappings.db</code><a class="headerlink" href="#database-file-not-found-mappingsdb" title="Permanent link">&para;</a></h3>
+<p><strong>Cause :</strong> Aucune base de données n'a encore été créée.</p>
+<p><strong>Solution :</strong> Initialisez une base de données :
+<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>init
+</code></pre></div></p>
+<h3 id="database-may-be-corrupted"><code>Database may be corrupted</code><a class="headerlink" href="#database-may-be-corrupted" title="Permanent link">&para;</a></h3>
+<p><strong>Solution :</strong>
+1. Si vous disposez d'une sauvegarde, restaurez-la
+2. Essayez d'exporter les données : <code>poetry run gdpr-pseudo export backup.json</code>
+3. Créez une nouvelle base de données : <code>poetry run gdpr-pseudo init --force</code></p>
+<h3 id="pseudonymes-incoherents-dans-les-documents">Pseudonymes incohérents dans les documents<a class="headerlink" href="#pseudonymes-incoherents-dans-les-documents" title="Permanent link">&para;</a></h3>
+<p><strong>Cause :</strong> Utilisation de fichiers de base de données différents pour des documents connexes.</p>
+<p><strong>Solution :</strong> Spécifiez toujours la même base de données :
+<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>process<span class="w"> </span>doc1.txt<span class="w"> </span>--db<span class="w"> </span>shared.db
+poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>process<span class="w"> </span>doc2.txt<span class="w"> </span>--db<span class="w"> </span>shared.db
+</code></pre></div></p>
+<hr />
+<h2 id="erreurs-de-traitement-nlp">Erreurs de traitement NLP<a class="headerlink" href="#erreurs-de-traitement-nlp" title="Permanent link">&para;</a></h2>
+<h3 id="aucune-entite-detectee">Aucune entité détectée<a class="headerlink" href="#aucune-entite-detectee" title="Permanent link">&para;</a></h3>
+<p><strong>Causes possibles :</strong>
+- Le document ne contient pas de texte français reconnaissable
+- L'encodage du fichier n'est pas UTF-8
+- Le format de fichier n'est pas pris en charge</p>
+<p><strong>Solutions :</strong>
+1. Assurez-vous que le texte est en français avec le bon encodage (UTF-8 avec accents : é, è, à)
+2. Vérifiez que le document contient des noms, des lieux ou des organisations
+3. Vérifiez que le fichier est au format <code>.txt</code>, <code>.md</code>, <code>.pdf</code> ou <code>.docx</code>
+4. Pour les PDF/DOCX, assurez-vous que les extras optionnels sont installés : <code>pip install gdpr-pseudonymizer[formats]</code>
+5. Testez avec un exemple connu et valide :
+   <div class="highlight"><pre><span></span><code><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Marie Dubois travaille a Paris pour Acme SA.&quot;</span><span class="w"> </span>&gt;<span class="w"> </span>test.txt
+poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>process<span class="w"> </span>test.txt
+</code></pre></div></p>
+<h3 id="invalid-theme-xyz"><code>Invalid theme 'xyz'</code><a class="headerlink" href="#invalid-theme-xyz" title="Permanent link">&para;</a></h3>
+<p><strong>Solution :</strong> Utilisez l'un des thèmes valides : <code>neutral</code>, <code>star_wars</code>, <code>lotr</code></p>
+<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>process<span class="w"> </span>doc.txt<span class="w"> </span>--theme<span class="w"> </span>neutral
+</code></pre></div>
+<hr />
+<h2 id="problemes-dinterface-de-validation">Problèmes d'interface de validation<a class="headerlink" href="#problemes-dinterface-de-validation" title="Permanent link">&para;</a></h2>
+<h3 id="linterface-de-validation-ne-repond-pas">L'interface de validation ne répond pas<a class="headerlink" href="#linterface-de-validation-ne-repond-pas" title="Permanent link">&para;</a></h3>
+<p><strong>Cause :</strong> Problème de compatibilité du terminal avec la capture d'entrée clavier.</p>
+<p><strong>Solutions :</strong>
+1. Utilisez un terminal standard (PowerShell, Terminal.app, bash)
+2. Évitez d'exécuter dans les terminaux intégrés des IDE (VS Code, PyCharm -- peuvent avoir des problèmes d'entrée)
+3. Essayez <code>poetry shell</code> puis exécutez la commande directement
+4. Sous Windows, essayez Windows Terminal au lieu de l'ancien cmd.exe</p>
+<h3 id="les-raccourcis-clavier-ne-fonctionnent-pas">Les raccourcis clavier ne fonctionnent pas<a class="headerlink" href="#les-raccourcis-clavier-ne-fonctionnent-pas" title="Permanent link">&para;</a></h3>
+<p><strong>Solution :</strong> Appuyez sur <code>H</code> ou <code>?</code> durant le processus de validation pour voir l'aide complète avec tous les raccourcis disponibles. Certains raccourcis (opérations par lot comme <code>Shift+A</code>, <code>Shift+R</code>) sont masqués par défaut.</p>
+<hr />
+<h2 id="problemes-specifiques-a-la-plateforme">Problèmes spécifiques à la plateforme<a class="headerlink" href="#problemes-specifiques-a-la-plateforme" title="Permanent link">&para;</a></h2>
+<h3 id="windows-violations-dacces-spacy">Windows : violations d'accès spaCy<a class="headerlink" href="#windows-violations-dacces-spacy" title="Permanent link">&para;</a></h3>
+<p><strong>Symptôme :</strong> Crash ou erreurs de violation d'accès lors de l'exécution de spaCy sous Windows.</p>
+<p><strong>Solutions :</strong>
+1. <strong>Utilisez WSL (recommandé) :</strong> Installez le sous-système Windows pour Linux et exécutez l'outil dedans
+2. <strong>Limitez les threads :</strong> Définissez <code>OMP_NUM_THREADS=1</code> dans l'environnement :
+   <div class="highlight"><pre><span></span><code><span class="nv">$env:OMP_NUM_THREADS</span> <span class="p">=</span> <span class="n">1</span>
+</code></pre></div>
+3. <strong>Mettez à jour les dépendances :</strong>
+   - Mettez à jour Windows vers la dernière version
+   - Mettez à jour Visual C++ Redistributable</p>
+<p><strong>Remarque :</strong> Il s'agit d'un problème connu de spaCy sous Windows (<a href="https://github.com/explosion/spaCy/issues/12659">spaCy #12659</a>). L'intégration continue ignore les tests qui dépendent de spaCy sous Windows pour cette raison.</p>
+<h3 id="macos-xcode-command-line-tools-requis">macOS : Xcode Command Line Tools requis<a class="headerlink" href="#macos-xcode-command-line-tools-requis" title="Permanent link">&para;</a></h3>
+<p><strong>Erreur :</strong> Erreurs de compilation lors de <code>poetry install</code></p>
+<p><strong>Solution :</strong>
+<div class="highlight"><pre><span></span><code>xcode-select<span class="w"> </span>--install
+</code></pre></div></p>
+<h3 id="macos-apple-silicon-m1m2m3">macOS : Apple Silicon (M1/M2/M3)<a class="headerlink" href="#macos-apple-silicon-m1m2m3" title="Permanent link">&para;</a></h3>
+<p>Python 3.10+ dispose du support natif ARM. Si vous utilisez Homebrew :
+<div class="highlight"><pre><span></span><code>brew<span class="w"> </span>install<span class="w"> </span>python@3.11
+</code></pre></div></p>
+<h3 id="linux-outils-de-compilation-manquants">Linux : Outils de compilation manquants<a class="headerlink" href="#linux-outils-de-compilation-manquants" title="Permanent link">&para;</a></h3>
+<p><strong>Erreur :</strong> Erreurs de compilation lors de <code>poetry install</code></p>
+<p><strong>Solution :</strong></p>
+<p>Ubuntu/Debian :
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>python3-dev<span class="w"> </span>build-essential
+</code></pre></div></p>
+<p>Fedora :
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>python3-devel<span class="w"> </span>gcc
+</code></pre></div></p>
+<h3 id="erreurs-de-permission-refusee">Erreurs de permission refusée<a class="headerlink" href="#erreurs-de-permission-refusee" title="Permanent link">&para;</a></h3>
+<p><strong>Solutions :</strong>
+- <strong>macOS/Linux :</strong> Vérifiez les permissions des fichiers avec <code>ls -la</code>, assurez-vous d'avoir accès en écriture
+- <strong>Windows :</strong> Exécutez PowerShell en tant qu'administrateur pour les étapes d'installation
+- Assurez-vous d'avoir accès en écriture au répertoire du projet et aux chemins de sortie</p>
+<hr />
+<h2 id="problemes-de-performance">Problèmes de performance<a class="headerlink" href="#problemes-de-performance" title="Permanent link">&para;</a></h2>
+<h3 id="le-traitement-ralentit-ou-plante-sur-de-gros-lots">Le traitement ralentit ou plante sur de gros lots<a class="headerlink" href="#le-traitement-ralentit-ou-plante-sur-de-gros-lots" title="Permanent link">&para;</a></h3>
+<p><strong>Solutions :</strong>
+- Traitez les fichiers par petits lots
+- Réduisez le nombre de workers parallèles : <code>--workers 1</code>
+- Fermez les autres applications pour libérer de la mémoire (le modèle spaCy utilise ~1,5 Go par worker)
+- Surveillez l'utilisation de la mémoire -- l'outil nécessite jusqu'à 8 Go de RAM avec 4 workers</p>
+<h3 id="le-chargement-du-modele-spacy-est-lent">Le chargement du modèle spaCy est lent<a class="headerlink" href="#le-chargement-du-modele-spacy-est-lent" title="Permanent link">&para;</a></h3>
+<p><strong>Cause :</strong> Le modèle <code>fr_core_news_lg</code> pèse environ 571 Mo et prend quelques secondes à charger lors de la première utilisation.</p>
+<p><strong>Mitigation :</strong> Le modèle est mis en cache en mémoire après le premier chargement. Les documents suivants dans une session de traitement par lot se traitent plus rapidement.</p>
+<hr />
+<h2 id="problemes-de-traitement-pdfdocx">Problèmes de traitement PDF/DOCX<a class="headerlink" href="#problemes-de-traitement-pdfdocx" title="Permanent link">&para;</a></h2>
+<h3 id="pdf-support-requires-pdfplumber"><code>PDF support requires 'pdfplumber'</code><a class="headerlink" href="#pdf-support-requires-pdfplumber" title="Permanent link">&para;</a></h3>
+<p><strong>Cause :</strong> La dépendance optionnelle pour le PDF n'est pas installée.</p>
+<p><strong>Solution :</strong>
+<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>gdpr-pseudonymizer<span class="o">[</span>pdf<span class="o">]</span>
+<span class="c1"># Ou installez le support PDF et DOCX :</span>
+pip<span class="w"> </span>install<span class="w"> </span>gdpr-pseudonymizer<span class="o">[</span>formats<span class="o">]</span>
+</code></pre></div></p>
+<h3 id="docx-support-requires-python-docx"><code>DOCX support requires 'python-docx'</code><a class="headerlink" href="#docx-support-requires-python-docx" title="Permanent link">&para;</a></h3>
+<p><strong>Cause :</strong> La dépendance optionnelle pour le DOCX n'est pas installée.</p>
+<p><strong>Solution :</strong>
+<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>gdpr-pseudonymizer<span class="o">[</span>docx<span class="o">]</span>
+<span class="c1"># Ou installez le support PDF et DOCX :</span>
+pip<span class="w"> </span>install<span class="w"> </span>gdpr-pseudonymizer<span class="o">[</span>formats<span class="o">]</span>
+</code></pre></div></p>
+<h3 id="this-pdf-appears-to-be-scannedimage-based">« This PDF appears to be scanned/image-based »<a class="headerlink" href="#this-pdf-appears-to-be-scannedimage-based" title="Permanent link">&para;</a></h3>
+<p><strong>Cause :</strong> Le PDF contient des images au lieu de texte (document numérisé). <code>pdfplumber</code> ne peut extraire que le texte intégré, pas effectuer de reconnaissance optique de caractères (OCR).</p>
+<p><strong>Solutions :</strong>
+1. Utilisez un outil OCR (par ex. Adobe Acrobat, Tesseract) pour convertir le PDF numérisé en PDF textuel au préalable
+2. Exportez le PDF numérisé en <code>.txt</code> manuellement, puis traitez le fichier texte
+3. Si du texte partiel a été extrait, vérifiez la sortie -- elle peut encore contenir du contenu utile</p>
+<p><strong>Remarque :</strong> Le support OCR n'est pas prévu pour la version actuelle.</p>
+<h3 id="le-pdf-est-protege-par-mot-de-passe">Le PDF est protégé par mot de passe<a class="headerlink" href="#le-pdf-est-protege-par-mot-de-passe" title="Permanent link">&para;</a></h3>
+<p><strong>Erreur :</strong> <code>PDF is password-protected: &lt;fichier&gt;. Please provide an unprotected PDF.</code></p>
+<p><strong>Solution :</strong> Supprimez la protection par mot de passe du PDF avant le traitement. La plupart des éditeurs PDF (Adobe Acrobat, Aperçu sur macOS) peuvent supprimer les mots de passe si vous connaissez le mot de passe original.</p>
+<h3 id="le-fichier-de-sortie-a-lextension-txt-pour-une-entree-pdfdocx">Le fichier de sortie a l'extension <code>.txt</code> pour une entrée PDF/DOCX<a class="headerlink" href="#le-fichier-de-sortie-a-lextension-txt-pour-une-entree-pdfdocx" title="Permanent link">&para;</a></h3>
+<p><strong>C'est le comportement attendu.</strong> Les entrées PDF/DOCX produisent une sortie en texte brut <code>.txt</code> car l'outil extrait uniquement le contenu textuel. La sortie avec préservation du format (PDF vers PDF, DOCX vers DOCX) est prévue pour la version 1.2+.</p>
+<hr />
+<h2 id="quand-signaler-un-bug">Quand signaler un bug<a class="headerlink" href="#quand-signaler-un-bug" title="Permanent link">&para;</a></h2>
+<p>Signalez un bug sur GitHub si vous rencontrez :</p>
+<ol>
+<li><strong>Des plantages</strong> non expliqués par les entrées de dépannage ci-dessus</li>
+<li><strong>Une pseudonymisation incorrecte</strong> (entité remplacée par le mauvais type de pseudonyme)</li>
+<li><strong>Une perte de données</strong> (corruption de base de données, correspondances manquantes)</li>
+<li><strong>Des problèmes de sécurité</strong> (exposition de mot de passe, problèmes de chiffrement)</li>
+</ol>
+<p><strong>Comment signaler :</strong>
+- GitHub Issues : https://github.com/LioChanDaYo/RGPDpseudonymizer/issues
+- Incluez : version du système d'exploitation, version Python, message d'erreur complet, étapes pour reproduire
+- <strong>N'incluez PAS</strong> de données sensibles (vrais noms, contenu de documents) dans vos signalements de bugs</p>
+<hr />
+<h2 id="documentation-connexe">Documentation connexe<a class="headerlink" href="#documentation-connexe" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../installation/">Guide d'installation</a> - Configuration spécifique à la plateforme</li>
+<li><a href="../CLI-REFERENCE/">Référence CLI</a> - Documentation complète des commandes</li>
+<li><a href="../faq/">FAQ</a> - Questions fréquemment posées</li>
+<li><a href="../tutorial/">Tutoriel</a> - Guides d'utilisation pas à pas</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Retour en haut de la page
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copi\u00e9 dans le presse-papier", "clipboard.copy": "Copier dans le presse-papier", "search.result.more.one": "1 de plus sur cette page", "search.result.more.other": "# de plus sur cette page", "search.result.none": "Aucun document trouv\u00e9", "search.result.one": "1 document trouv\u00e9", "search.result.other": "# documents trouv\u00e9s", "search.result.placeholder": "Taper pour d\u00e9marrer la recherche", "search.result.term.missing": "Non trouv\u00e9", "select.version": "S\u00e9lectionner la version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

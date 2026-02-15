@@ -1,0 +1,2493 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="AI-Assisted Pseudonymization for French Documents with Human Verification">
+      
+      
+      
+        <link rel="canonical" href="https://liochandayo.github.io/RGPDpseudonymizer/installation/">
+      
+      
+        <link rel="prev" href="..">
+      
+      
+        <link rel="next" href="../tutorial/">
+      
+      
+        
+          <link rel="alternate" href="./" hreflang="en">
+        
+          <link rel="alternate" href="../fr/installation/" hreflang="fr">
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Installation - GDPR Pseudonymizer</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#installation-guide" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="GDPR Pseudonymizer" class="md-header__button md-logo" aria-label="GDPR Pseudonymizer" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            GDPR Pseudonymizer
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Installation
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="Select language">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../fr/installation/" hreflang="fr" class="md-select__link">
+              Français
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/LioChanDaYo/RGPDpseudonymizer" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    LioChanDaYo/RGPDpseudonymizer
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="GDPR Pseudonymizer" class="md-nav__button md-logo" aria-label="GDPR Pseudonymizer" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    GDPR Pseudonymizer
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/LioChanDaYo/RGPDpseudonymizer" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    LioChanDaYo/RGPDpseudonymizer
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#install-from-pypi-recommended" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install from PyPI (Recommended)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Install from PyPI (Recommended)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#optional-pdfdocx-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Optional: PDF/DOCX Support
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#install-from-source-contributors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install from Source (Contributors)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Install from Source (Contributors)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#quick-install-all-platforms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick Install (All Platforms)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#platform-specific-instructions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Platform-Specific Instructions
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Platform-Specific Instructions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#windows-11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Windows 11
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Windows 11">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-install-python" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Install Python
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-install-poetry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Install Poetry
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-clone-and-install" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Clone and Install
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-verify-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Verify Installation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#macos-intel-apple-silicon" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        macOS (Intel &amp; Apple Silicon)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="macOS (Intel &amp; Apple Silicon)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-install-python_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Install Python
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-install-xcode-command-line-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Install Xcode Command Line Tools
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-install-poetry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Install Poetry
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-clone-and-install" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Clone and Install
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-5-verify-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: Verify Installation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#linux-ubuntu-2204-debian" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Linux (Ubuntu 22.04 / Debian)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Linux (Ubuntu 22.04 / Debian)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-install-python-and-build-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Install Python and Build Tools
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-install-poetry_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Install Poetry
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-clone-and-install_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Clone and Install
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-verify-installation_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Verify Installation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#linux-fedora-39" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Linux (Fedora 39+)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Linux (Fedora 39+)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-install-python-and-build-tools_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Install Python and Build Tools
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-install-poetry_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Install Poetry
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-clone-and-install_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Clone and Install
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-verify-installation_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Verify Installation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docker-alternative" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Docker (Alternative)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Docker (Alternative)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#quick-docker-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick Docker Setup
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Notes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#planned-improvements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Planned Improvements
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#command-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Command Usage
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Command Usage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#installed-via-pip" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installed via pip
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#installed-from-source-poetry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installed from source (Poetry)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration (Optional)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#poetry-command-not-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        poetry: command not found
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#python-version-not-supported" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Python version not supported
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#passphrase-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Passphrase requirements
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#spacy-model-download-fails" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        spaCy model download fails
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#poetry-install-fails-with-dependency-conflicts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        poetry install fails with dependency conflicts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cli-command-not-working" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CLI command not working
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#windows-spacy-access-violations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Windows: spaCy access violations
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#permission-denied-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Permission denied errors
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verify-complete-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify Complete Installation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next Steps
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getting-help" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Getting Help
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorial/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Guide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    User Guide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CLI-REFERENCE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FAQ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Methodology
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Methodology
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../methodology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Technical Approach & GDPR Compliance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Developer Guide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Developer Guide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#install-from-pypi-recommended" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install from PyPI (Recommended)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Install from PyPI (Recommended)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#optional-pdfdocx-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Optional: PDF/DOCX Support
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#install-from-source-contributors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install from Source (Contributors)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Install from Source (Contributors)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#quick-install-all-platforms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick Install (All Platforms)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#platform-specific-instructions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Platform-Specific Instructions
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Platform-Specific Instructions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#windows-11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Windows 11
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Windows 11">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-install-python" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Install Python
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-install-poetry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Install Poetry
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-clone-and-install" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Clone and Install
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-verify-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Verify Installation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#macos-intel-apple-silicon" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        macOS (Intel &amp; Apple Silicon)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="macOS (Intel &amp; Apple Silicon)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-install-python_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Install Python
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-install-xcode-command-line-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Install Xcode Command Line Tools
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-install-poetry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Install Poetry
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-clone-and-install" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Clone and Install
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-5-verify-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: Verify Installation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#linux-ubuntu-2204-debian" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Linux (Ubuntu 22.04 / Debian)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Linux (Ubuntu 22.04 / Debian)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-install-python-and-build-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Install Python and Build Tools
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-install-poetry_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Install Poetry
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-clone-and-install_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Clone and Install
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-verify-installation_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Verify Installation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#linux-fedora-39" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Linux (Fedora 39+)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Linux (Fedora 39+)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-install-python-and-build-tools_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Install Python and Build Tools
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-install-poetry_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Install Poetry
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-clone-and-install_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Clone and Install
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-verify-installation_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Verify Installation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docker-alternative" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Docker (Alternative)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Docker (Alternative)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#quick-docker-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick Docker Setup
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Notes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#planned-improvements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Planned Improvements
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#command-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Command Usage
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Command Usage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#installed-via-pip" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installed via pip
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#installed-from-source-poetry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installed from source (Poetry)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration (Optional)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#poetry-command-not-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        poetry: command not found
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#python-version-not-supported" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Python version not supported
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#passphrase-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Passphrase requirements
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#spacy-model-download-fails" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        spaCy model download fails
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#poetry-install-fails-with-dependency-conflicts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        poetry install fails with dependency conflicts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cli-command-not-working" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CLI command not working
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#windows-spacy-access-violations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Windows: spaCy access violations
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#permission-denied-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Permission denied errors
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verify-complete-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify Complete Installation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next Steps
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getting-help" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Getting Help
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="installation-guide">Installation Guide<a class="headerlink" href="#installation-guide" title="Permanent link">&para;</a></h1>
+<p><strong>GDPR Pseudonymizer</strong> - AI-Assisted Pseudonymization for French Documents</p>
+<p>This guide covers installation on Windows, macOS, and Linux.</p>
+<hr />
+<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Requirement</th>
+<th>Version</th>
+<th>How to Check</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Python</strong></td>
+<td>3.10, 3.11, or 3.12</td>
+<td><code>python --version</code></td>
+</tr>
+<tr>
+<td><strong>Disk Space</strong></td>
+<td>~1GB free</td>
+<td>For spaCy French model (auto-downloaded on first use)</td>
+</tr>
+<tr>
+<td><strong>Internet</strong></td>
+<td>Required for installation</td>
+<td>Model auto-download ~571MB</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Important:</strong> Python 3.10-3.12 are validated in CI/CD. Python 3.9 is no longer supported (EOL October 2025). Python 3.13+ is not yet tested.</p>
+<hr />
+<h2 id="install-from-pypi-recommended">Install from PyPI (Recommended)<a class="headerlink" href="#install-from-pypi-recommended" title="Permanent link">&para;</a></h2>
+<p>The simplest way to install for end-users:</p>
+<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>gdpr-pseudonymizer
+
+<span class="c1"># Verify installation</span>
+gdpr-pseudo<span class="w"> </span>--help
+</code></pre></div>
+<h3 id="optional-pdfdocx-support">Optional: PDF/DOCX Support<a class="headerlink" href="#optional-pdfdocx-support" title="Permanent link">&para;</a></h3>
+<p>To process PDF and DOCX documents, install the optional format extras:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># PDF support only</span>
+pip<span class="w"> </span>install<span class="w"> </span>gdpr-pseudonymizer<span class="o">[</span>pdf<span class="o">]</span>
+
+<span class="c1"># DOCX support only</span>
+pip<span class="w"> </span>install<span class="w"> </span>gdpr-pseudonymizer<span class="o">[</span>docx<span class="o">]</span>
+
+<span class="c1"># Both PDF and DOCX support</span>
+pip<span class="w"> </span>install<span class="w"> </span>gdpr-pseudonymizer<span class="o">[</span>formats<span class="o">]</span>
+</code></pre></div>
+<blockquote>
+<p><strong>Note:</strong> The base install remains lightweight. PDF/DOCX libraries are only needed if you process those formats.</p>
+<p><strong>Note:</strong> The spaCy French model (~571MB) downloads automatically on first use. To pre-download it:
+<div class="highlight"><pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>spacy<span class="w"> </span>download<span class="w"> </span>fr_core_news_lg
+</code></pre></div></p>
+</blockquote>
+<hr />
+<h2 id="install-from-source-contributors">Install from Source (Contributors)<a class="headerlink" href="#install-from-source-contributors" title="Permanent link">&para;</a></h2>
+<p>For development and contributing, you'll also need <a href="https://python-poetry.org/">Poetry</a> 1.7+.</p>
+<h3 id="quick-install-all-platforms">Quick Install (All Platforms)<a class="headerlink" href="#quick-install-all-platforms" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># 1. Clone repository</span>
+git<span class="w"> </span>clone<span class="w"> </span>https://github.com/LioChanDaYo/RGPDpseudonymizer.git
+<span class="nb">cd</span><span class="w"> </span>RGPDpseudonymizer
+
+<span class="c1"># 2. Install dependencies</span>
+poetry<span class="w"> </span>install
+
+<span class="c1"># 3. Verify installation</span>
+poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>--help
+</code></pre></div>
+<blockquote>
+<p><strong>Note:</strong> The spaCy French model (~571MB) downloads automatically on first use. To pre-download it:
+<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/install_spacy_model.py
+</code></pre></div></p>
+</blockquote>
+<hr />
+<h2 id="platform-specific-instructions">Platform-Specific Instructions<a class="headerlink" href="#platform-specific-instructions" title="Permanent link">&para;</a></h2>
+<h3 id="windows-11">Windows 11<a class="headerlink" href="#windows-11" title="Permanent link">&para;</a></h3>
+<h4 id="step-1-install-python">Step 1: Install Python<a class="headerlink" href="#step-1-install-python" title="Permanent link">&para;</a></h4>
+<ol>
+<li>Download Python 3.11 from <a href="https://www.python.org/downloads/">python.org</a></li>
+<li>Run installer, check <strong>"Add Python to PATH"</strong></li>
+<li>Verify: Open PowerShell and run:
+   <div class="highlight"><pre><span></span><code><span class="n">python</span> <span class="p">-</span><span class="n">-version</span>
+<span class="c"># Expected: Python 3.11.x</span>
+</code></pre></div></li>
+</ol>
+<h4 id="step-2-install-poetry">Step 2: Install Poetry<a class="headerlink" href="#step-2-install-poetry" title="Permanent link">&para;</a></h4>
+<p>Open PowerShell and run:
+<div class="highlight"><pre><span></span><code><span class="p">(</span><span class="nb">Invoke-WebRequest</span> <span class="n">-Uri</span> <span class="n">https</span><span class="p">://</span><span class="n">install</span><span class="p">.</span><span class="n">python-poetry</span><span class="p">.</span><span class="n">org</span> <span class="n">-UseBasicParsing</span><span class="p">).</span><span class="n">Content</span> <span class="p">|</span> <span class="n">python</span> <span class="p">-</span>
+</code></pre></div></p>
+<p>Add Poetry to PATH if not found:
+<div class="highlight"><pre><span></span><code><span class="c"># Add to your PowerShell profile or run each session</span>
+<span class="nv">$env:PATH</span> <span class="p">+=</span> <span class="s2">&quot;;$env:APPDATA\Python\Scripts&quot;</span>
+</code></pre></div></p>
+<p>Verify:
+<div class="highlight"><pre><span></span><code><span class="n">poetry</span> <span class="p">-</span><span class="n">-version</span>
+<span class="c"># Expected: Poetry (version 1.7.0 or higher)</span>
+</code></pre></div></p>
+<h4 id="step-3-clone-and-install">Step 3: Clone and Install<a class="headerlink" href="#step-3-clone-and-install" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">://</span><span class="n">github</span><span class="p">.</span><span class="n">com</span><span class="p">/</span><span class="n">LioChanDaYo</span><span class="p">/</span><span class="n">RGPDpseudonymizer</span><span class="p">.</span><span class="n">git</span>
+<span class="nb">cd </span><span class="n">RGPDpseudonymizer</span>
+<span class="n">poetry</span> <span class="n">install</span>
+</code></pre></div>
+<h4 id="step-4-verify-installation">Step 4: Verify Installation<a class="headerlink" href="#step-4-verify-installation" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="n">poetry</span> <span class="n">run</span> <span class="n">gdpr-pseudo</span> <span class="p">-</span><span class="n">-help</span>
+</code></pre></div>
+<blockquote>
+<p><strong>Note:</strong> The spaCy French model (~571MB) downloads automatically on first use. To pre-download it:
+<div class="highlight"><pre><span></span><code><span class="n">poetry</span> <span class="n">run</span> <span class="n">python</span> <span class="n">scripts</span><span class="p">/</span><span class="n">install_spacy_model</span><span class="p">.</span><span class="n">py</span>
+</code></pre></div></p>
+</blockquote>
+<p><strong>Windows Note:</strong> The CLI may appear as <code>gdpr-pseudo.cmd</code> - this is normal Poetry behavior.</p>
+<hr />
+<h3 id="macos-intel-apple-silicon">macOS (Intel &amp; Apple Silicon)<a class="headerlink" href="#macos-intel-apple-silicon" title="Permanent link">&para;</a></h3>
+<h4 id="step-1-install-python_1">Step 1: Install Python<a class="headerlink" href="#step-1-install-python_1" title="Permanent link">&para;</a></h4>
+<p><strong>Option A: Using Homebrew (Recommended)</strong>
+<div class="highlight"><pre><span></span><code>brew<span class="w"> </span>install<span class="w"> </span>python@3.11
+</code></pre></div></p>
+<p><strong>Option B: From python.org</strong>
+Download from <a href="https://www.python.org/downloads/macos/">python.org</a></p>
+<p>Verify:
+<div class="highlight"><pre><span></span><code>python3<span class="w"> </span>--version
+<span class="c1"># Expected: Python 3.11.x</span>
+</code></pre></div></p>
+<p><strong>Apple Silicon (M1/M2/M3):</strong> Python 3.9+ has native ARM support.</p>
+<h4 id="step-2-install-xcode-command-line-tools">Step 2: Install Xcode Command Line Tools<a class="headerlink" href="#step-2-install-xcode-command-line-tools" title="Permanent link">&para;</a></h4>
+<p>Required for compiling some dependencies:
+<div class="highlight"><pre><span></span><code>xcode-select<span class="w"> </span>--install
+</code></pre></div></p>
+<h4 id="step-3-install-poetry">Step 3: Install Poetry<a class="headerlink" href="#step-3-install-poetry" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-sSL<span class="w"> </span>https://install.python-poetry.org<span class="w"> </span><span class="p">|</span><span class="w"> </span>python3<span class="w"> </span>-
+</code></pre></div>
+<p>Add to PATH (add to <code>~/.zshrc</code> for persistence):
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$HOME</span><span class="s2">/.local/bin:</span><span class="nv">$PATH</span><span class="s2">&quot;</span>
+</code></pre></div></p>
+<p>Verify:
+<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>--version
+</code></pre></div></p>
+<h4 id="step-4-clone-and-install">Step 4: Clone and Install<a class="headerlink" href="#step-4-clone-and-install" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/LioChanDaYo/RGPDpseudonymizer.git
+<span class="nb">cd</span><span class="w"> </span>RGPDpseudonymizer
+poetry<span class="w"> </span>install
+</code></pre></div>
+<h4 id="step-5-verify-installation">Step 5: Verify Installation<a class="headerlink" href="#step-5-verify-installation" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>--help
+</code></pre></div>
+<blockquote>
+<p><strong>Note:</strong> The spaCy French model (~571MB) downloads automatically on first use. To pre-download it:
+<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/install_spacy_model.py
+</code></pre></div></p>
+</blockquote>
+<hr />
+<h3 id="linux-ubuntu-2204-debian">Linux (Ubuntu 22.04 / Debian)<a class="headerlink" href="#linux-ubuntu-2204-debian" title="Permanent link">&para;</a></h3>
+<h4 id="step-1-install-python-and-build-tools">Step 1: Install Python and Build Tools<a class="headerlink" href="#step-1-install-python-and-build-tools" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>update
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>python3.11<span class="w"> </span>python3.11-dev<span class="w"> </span>python3-pip<span class="w"> </span>build-essential
+</code></pre></div>
+<p>Verify:
+<div class="highlight"><pre><span></span><code>python3.11<span class="w"> </span>--version
+<span class="c1"># Expected: Python 3.11.x</span>
+</code></pre></div></p>
+<h4 id="step-2-install-poetry_1">Step 2: Install Poetry<a class="headerlink" href="#step-2-install-poetry_1" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-sSL<span class="w"> </span>https://install.python-poetry.org<span class="w"> </span><span class="p">|</span><span class="w"> </span>python3<span class="w"> </span>-
+</code></pre></div>
+<p>Add to PATH (add to <code>~/.bashrc</code> for persistence):
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$HOME</span><span class="s2">/.local/bin:</span><span class="nv">$PATH</span><span class="s2">&quot;</span>
+<span class="nb">source</span><span class="w"> </span>~/.bashrc
+</code></pre></div></p>
+<p>Verify:
+<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>--version
+</code></pre></div></p>
+<h4 id="step-3-clone-and-install_1">Step 3: Clone and Install<a class="headerlink" href="#step-3-clone-and-install_1" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/LioChanDaYo/RGPDpseudonymizer.git
+<span class="nb">cd</span><span class="w"> </span>RGPDpseudonymizer
+poetry<span class="w"> </span>install
+</code></pre></div>
+<h4 id="step-4-verify-installation_1">Step 4: Verify Installation<a class="headerlink" href="#step-4-verify-installation_1" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>--help
+</code></pre></div>
+<blockquote>
+<p><strong>Note:</strong> The spaCy French model (~571MB) downloads automatically on first use. To pre-download it:
+<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/install_spacy_model.py
+</code></pre></div></p>
+</blockquote>
+<hr />
+<h3 id="linux-fedora-39">Linux (Fedora 39+)<a class="headerlink" href="#linux-fedora-39" title="Permanent link">&para;</a></h3>
+<h4 id="step-1-install-python-and-build-tools_1">Step 1: Install Python and Build Tools<a class="headerlink" href="#step-1-install-python-and-build-tools_1" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>python3.11<span class="w"> </span>python3.11-devel<span class="w"> </span>gcc<span class="w"> </span>git<span class="w"> </span>curl
+</code></pre></div>
+<p>Verify:
+<div class="highlight"><pre><span></span><code>python3.11<span class="w"> </span>--version
+<span class="c1"># Expected: Python 3.11.x</span>
+</code></pre></div></p>
+<h4 id="step-2-install-poetry_2">Step 2: Install Poetry<a class="headerlink" href="#step-2-install-poetry_2" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-sSL<span class="w"> </span>https://install.python-poetry.org<span class="w"> </span><span class="p">|</span><span class="w"> </span>python3<span class="w"> </span>-
+</code></pre></div>
+<p>Add to PATH (add to <code>~/.bashrc</code> for persistence):
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$HOME</span><span class="s2">/.local/bin:</span><span class="nv">$PATH</span><span class="s2">&quot;</span>
+<span class="nb">source</span><span class="w"> </span>~/.bashrc
+</code></pre></div></p>
+<p>Verify:
+<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>--version
+</code></pre></div></p>
+<h4 id="step-3-clone-and-install_2">Step 3: Clone and Install<a class="headerlink" href="#step-3-clone-and-install_2" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/LioChanDaYo/RGPDpseudonymizer.git
+<span class="nb">cd</span><span class="w"> </span>RGPDpseudonymizer
+poetry<span class="w"> </span>install
+</code></pre></div>
+<h4 id="step-4-verify-installation_2">Step 4: Verify Installation<a class="headerlink" href="#step-4-verify-installation_2" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>--help
+</code></pre></div>
+<blockquote>
+<p><strong>Note:</strong> The spaCy French model (~571MB) downloads automatically on first use. To pre-download it:
+<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/install_spacy_model.py
+</code></pre></div></p>
+</blockquote>
+<hr />
+<h3 id="docker-alternative">Docker (Alternative)<a class="headerlink" href="#docker-alternative" title="Permanent link">&para;</a></h3>
+<p>Docker provides a platform-independent installation method. A Dockerfile is not yet included in the repository (planned for post-MVP), but you can run the tool in a Docker container manually.</p>
+<h4 id="quick-docker-setup">Quick Docker Setup<a class="headerlink" href="#quick-docker-setup" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="c1"># Start an interactive Python container</span>
+docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>--rm<span class="w"> </span>-v<span class="w"> </span><span class="s2">&quot;</span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span><span class="s2">/documents:/data&quot;</span><span class="w"> </span>python:3.11<span class="w"> </span>bash
+
+<span class="c1"># Inside the container:</span>
+pip<span class="w"> </span>install<span class="w"> </span>poetry
+git<span class="w"> </span>clone<span class="w"> </span>https://github.com/LioChanDaYo/RGPDpseudonymizer.git
+<span class="nb">cd</span><span class="w"> </span>RGPDpseudonymizer
+poetry<span class="w"> </span>config<span class="w"> </span>virtualenvs.create<span class="w"> </span><span class="nb">false</span>
+poetry<span class="w"> </span>install
+python<span class="w"> </span>-m<span class="w"> </span>spacy<span class="w"> </span>download<span class="w"> </span>fr_core_news_lg
+
+<span class="c1"># Process a document from mounted /data directory</span>
+gdpr-pseudo<span class="w"> </span>process<span class="w"> </span>/data/input.txt<span class="w"> </span>-o<span class="w"> </span>/data/output.txt
+</code></pre></div>
+<h4 id="notes">Notes<a class="headerlink" href="#notes" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Mount your documents directory with <code>-v</code> so output files persist after the container exits</li>
+<li>Use <code>poetry config virtualenvs.create false</code> to install directly in the container (no need for a virtual environment inside Docker)</li>
+<li>The <code>--rm</code> flag cleans up the container after exit; omit it if you want to reuse the container</li>
+<li><strong>Tested on:</strong> Docker Desktop 29.2.0 (Windows), Ubuntu 24.04 container, Debian 12 container, Fedora 39 container</li>
+</ul>
+<h4 id="planned-improvements">Planned Improvements<a class="headerlink" href="#planned-improvements" title="Permanent link">&para;</a></h4>
+<p>A pre-built Dockerfile and published Docker image are planned for a future release, which will simplify this to:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Future (not yet available)</span>
+docker<span class="w"> </span>run<span class="w"> </span>-v<span class="w"> </span><span class="s2">&quot;</span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span><span class="s2">:/data&quot;</span><span class="w"> </span>gdpr-pseudonymizer<span class="w"> </span>process<span class="w"> </span>/data/input.txt
+</code></pre></div>
+<hr />
+<h2 id="command-usage">Command Usage<a class="headerlink" href="#command-usage" title="Permanent link">&para;</a></h2>
+<h3 id="installed-via-pip">Installed via pip<a class="headerlink" href="#installed-via-pip" title="Permanent link">&para;</a></h3>
+<p>If you installed with <code>pip install gdpr-pseudonymizer</code>, commands work directly:</p>
+<div class="highlight"><pre><span></span><code>gdpr-pseudo<span class="w"> </span>--help
+gdpr-pseudo<span class="w"> </span>process<span class="w"> </span>input.txt
+gdpr-pseudo<span class="w"> </span>batch<span class="w"> </span>./documents/
+</code></pre></div>
+<h3 id="installed-from-source-poetry">Installed from source (Poetry)<a class="headerlink" href="#installed-from-source-poetry" title="Permanent link">&para;</a></h3>
+<p>If you cloned the repository, prefix commands with <code>poetry run</code>:</p>
+<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>--help
+poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>process<span class="w"> </span>input.txt
+poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>batch<span class="w"> </span>./documents/
+</code></pre></div>
+<p><strong>Alternative:</strong> Activate Poetry shell for session:
+<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>shell
+gdpr-pseudo<span class="w"> </span>--help<span class="w">  </span><span class="c1"># Works within shell</span>
+<span class="nb">exit</span><span class="w">                </span><span class="c1"># Return to normal shell</span>
+</code></pre></div></p>
+<hr />
+<h2 id="configuration-optional">Configuration (Optional)<a class="headerlink" href="#configuration-optional" title="Permanent link">&para;</a></h2>
+<p>Generate a configuration file template:</p>
+<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>config<span class="w"> </span>--init
+</code></pre></div>
+<p>This creates <code>.gdpr-pseudo.yaml</code> in the current directory:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">database</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mappings.db</span>
+
+<span class="nt">pseudonymization</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">theme</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">neutral</span><span class="w">    </span><span class="c1"># neutral | star_wars | lotr</span>
+<span class="w">  </span><span class="nt">model</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">spacy</span>
+
+<span class="nt">batch</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">workers</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span><span class="w">        </span><span class="c1"># 1-8 (use 1 for interactive validation)</span>
+<span class="w">  </span><span class="nt">output_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+
+<span class="nt">logging</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">INFO</span>
+</code></pre></div>
+<p>View current effective configuration:
+<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>config
+</code></pre></div></p>
+<p><strong>Security Note:</strong> Passphrase is never stored in config files. Use:
+- Environment variable: <code>GDPR_PSEUDO_PASSPHRASE</code>
+- Interactive prompt (default)</p>
+<hr />
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
+<h3 id="poetry-command-not-found"><code>poetry: command not found</code><a class="headerlink" href="#poetry-command-not-found" title="Permanent link">&para;</a></h3>
+<p><strong>Cause:</strong> Poetry not in PATH.</p>
+<p><strong>Solution:</strong>
+1. Check installation location:
+   - Windows: <code>%APPDATA%\Python\Scripts</code>
+   - macOS/Linux: <code>~/.local/bin</code>
+2. Add to PATH (see platform-specific instructions above)
+3. Restart terminal
+4. Alternative: <code>python -m poetry</code> instead of <code>poetry</code></p>
+<hr />
+<h3 id="python-version-not-supported">Python version not supported<a class="headerlink" href="#python-version-not-supported" title="Permanent link">&para;</a></h3>
+<p><strong>Error:</strong> <code>The currently activated Python version X.Y.Z is not supported</code></p>
+<p><strong>Solution:</strong>
+1. Install Python 3.10, 3.11, or 3.12
+2. Configure Poetry to use correct version:
+   <div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>env<span class="w"> </span>use<span class="w"> </span>python3.11
+poetry<span class="w"> </span>install
+</code></pre></div></p>
+<p><strong>Note:</strong> If your system has Python 3.13+ but Poetry uses 3.10-3.12, the tool works correctly. Poetry manages its own virtual environment independently of system Python. Check with:
+<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>env<span class="w"> </span>info
+<span class="c1"># Look for &quot;Virtualenv Python: 3.11.x&quot; (should be 3.10-3.12)</span>
+</code></pre></div></p>
+<hr />
+<h3 id="passphrase-requirements">Passphrase requirements<a class="headerlink" href="#passphrase-requirements" title="Permanent link">&para;</a></h3>
+<p><strong>Error:</strong> <code>Passphrase must be at least 12 characters</code></p>
+<p><strong>Cause:</strong> Security requirement - passphrases must be 12+ characters.</p>
+<p><strong>Solution:</strong>
+1. Use a passphrase with at least 12 characters
+2. Or set via environment variable:
+   <div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">GDPR_PSEUDO_PASSPHRASE</span><span class="o">=</span><span class="s2">&quot;your-secure-passphrase-here&quot;</span>
+</code></pre></div></p>
+<hr />
+<h3 id="spacy-model-download-fails">spaCy model download fails<a class="headerlink" href="#spacy-model-download-fails" title="Permanent link">&para;</a></h3>
+<p><strong>Possible causes:</strong>
+- Network issues
+- Insufficient disk space (~1GB needed)
+- Firewall blocking download</p>
+<p><strong>Solutions:</strong></p>
+<ol>
+<li>
+<p><strong>Check disk space:</strong>
+   <div class="highlight"><pre><span></span><code><span class="c1"># macOS/Linux</span>
+df<span class="w"> </span>-h
+
+<span class="c1"># Windows</span>
+dir
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Manual installation:</strong>
+   <div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>-m<span class="w"> </span>spacy<span class="w"> </span>download<span class="w"> </span>fr_core_news_lg
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Behind corporate firewall:</strong> Contact IT for proxy configuration</p>
+</li>
+<li>
+<p><strong>Retry with verbose output:</strong>
+   <div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>-m<span class="w"> </span>spacy<span class="w"> </span>download<span class="w"> </span>fr_core_news_lg<span class="w"> </span>--verbose
+</code></pre></div></p>
+</li>
+</ol>
+<hr />
+<h3 id="poetry-install-fails-with-dependency-conflicts"><code>poetry install</code> fails with dependency conflicts<a class="headerlink" href="#poetry-install-fails-with-dependency-conflicts" title="Permanent link">&para;</a></h3>
+<p><strong>Solution:</strong>
+1. Verify Python version (must be 3.10-3.12)
+2. Clear virtual environment and reinstall:
+   <div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>env<span class="w"> </span>remove<span class="w"> </span>python
+poetry<span class="w"> </span>install
+</code></pre></div>
+3. Update Poetry:
+   <div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>self<span class="w"> </span>update
+</code></pre></div></p>
+<hr />
+<h3 id="cli-command-not-working">CLI command not working<a class="headerlink" href="#cli-command-not-working" title="Permanent link">&para;</a></h3>
+<p><strong>Error:</strong> <code>gdpr-pseudo: command not found</code></p>
+<p><strong>Solution:</strong> Always use <code>poetry run</code> prefix:
+<div class="highlight"><pre><span></span><code><span class="c1"># CORRECT</span>
+poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>--help
+
+<span class="c1"># INCORRECT</span>
+gdpr-pseudo<span class="w"> </span>--help
+</code></pre></div></p>
+<hr />
+<h3 id="windows-spacy-access-violations">Windows: spaCy access violations<a class="headerlink" href="#windows-spacy-access-violations" title="Permanent link">&para;</a></h3>
+<p><strong>Symptom:</strong> Crash or access violation errors when running spaCy.</p>
+<p><strong>Solutions:</strong>
+1. Use Windows Subsystem for Linux (WSL) instead
+2. Limit threads: Set <code>OMP_NUM_THREADS=1</code> environment variable
+3. Update Windows and Visual C++ Redistributable</p>
+<hr />
+<h3 id="permission-denied-errors">Permission denied errors<a class="headerlink" href="#permission-denied-errors" title="Permanent link">&para;</a></h3>
+<p><strong>Cause:</strong> Insufficient file permissions.</p>
+<p><strong>Solutions:</strong>
+- <strong>macOS/Linux:</strong> Check permissions with <code>ls -la</code>
+- <strong>Windows:</strong> Run PowerShell as Administrator for installation
+- Ensure write access to project directory</p>
+<hr />
+<h2 id="verify-complete-installation">Verify Complete Installation<a class="headerlink" href="#verify-complete-installation" title="Permanent link">&para;</a></h2>
+<p>Run these commands to verify everything works:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 1. Check CLI</span>
+poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>--help
+
+<span class="c1"># 2. Check version</span>
+poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>--version
+
+<span class="c1"># 3. Test processing (creates test file)</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Marie Dubois travaille a Paris.&quot;</span><span class="w"> </span>&gt;<span class="w"> </span>test_install.txt
+poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span>process<span class="w"> </span>test_install.txt
+
+<span class="c1"># 4. Check output</span>
+cat<span class="w"> </span>test_install_pseudonymized.txt
+
+<span class="c1"># 5. Clean up</span>
+rm<span class="w"> </span>test_install.txt<span class="w"> </span>test_install_pseudonymized.txt<span class="w"> </span>mappings.db
+</code></pre></div>
+<hr />
+<h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
+<p>After installation:</p>
+<ol>
+<li><strong>Quick Start Tutorial:</strong> <a href="../tutorial/">tutorial.md</a> - First pseudonymization in 5 minutes</li>
+<li><strong>CLI Reference:</strong> <a href="../CLI-REFERENCE/">CLI-REFERENCE.md</a> - Complete command documentation</li>
+<li><strong>FAQ:</strong> <a href="../faq/">faq.md</a> - Common questions and answers</li>
+</ol>
+<hr />
+<h2 id="getting-help">Getting Help<a class="headerlink" href="#getting-help" title="Permanent link">&para;</a></h2>
+<p><strong>Installation Issues:</strong>
+- GitHub Issues: https://github.com/LioChanDaYo/RGPDpseudonymizer/issues
+- Include: OS version, Python version, full error message</p>
+<p><strong>Documentation:</strong>
+- <a href="../CLI-REFERENCE/">CLI Reference</a>
+- <a href="../tutorial/">Tutorial</a>
+- <a href="../faq/">FAQ</a>
+- <a href="../troubleshooting/">Troubleshooting</a></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

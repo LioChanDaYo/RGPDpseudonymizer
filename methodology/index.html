@@ -1,0 +1,2040 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="AI-Assisted Pseudonymization for French Documents with Human Verification">
+      
+      
+      
+        <link rel="canonical" href="https://liochandayo.github.io/RGPDpseudonymizer/methodology/">
+      
+      
+        <link rel="prev" href="../troubleshooting/">
+      
+      
+        <link rel="next" href="../api-reference/">
+      
+      
+        
+          <link rel="alternate" href="./" hreflang="en">
+        
+          <link rel="alternate" href="../fr/methodology/" hreflang="fr">
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Technical Approach & GDPR Compliance - GDPR Pseudonymizer</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#methodology-gdpr-compliant-pseudonymization-of-french-text" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="GDPR Pseudonymizer" class="md-header__button md-logo" aria-label="GDPR Pseudonymizer" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            GDPR Pseudonymizer
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Technical Approach & GDPR Compliance
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="Select language">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../fr/methodology/" hreflang="fr" class="md-select__link">
+              Français
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/LioChanDaYo/RGPDpseudonymizer" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    LioChanDaYo/RGPDpseudonymizer
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="GDPR Pseudonymizer" class="md-nav__button md-logo" aria-label="GDPR Pseudonymizer" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    GDPR Pseudonymizer
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/LioChanDaYo/RGPDpseudonymizer" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    LioChanDaYo/RGPDpseudonymizer
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorial/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Guide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    User Guide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CLI-REFERENCE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FAQ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Methodology
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Methodology
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Technical Approach & GDPR Compliance
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Technical Approach & GDPR Compliance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-introduction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Introduction
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Introduction">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-design-philosophy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Design Philosophy
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-technical-approach" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Technical Approach
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Technical Approach">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-ner-library-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 NER Library Selection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-hybrid-detection-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Hybrid Detection Strategy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-pseudonymization-algorithm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Pseudonymization Algorithm
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-encryption-scheme" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 Encryption Scheme
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-validation-procedures-and-quality-controls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Validation Procedures and Quality Controls
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Validation Procedures and Quality Controls">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-interactive-validation-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Interactive Validation Workflow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-ner-accuracy-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 NER Accuracy Metrics
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-llm-utility-preservation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 LLM Utility Preservation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-limitations-and-edge-cases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Limitations and Edge Cases
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Limitations and Edge Cases">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-ner-accuracy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 NER Accuracy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-language-and-format-limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Language and Format Limitations
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-entity-detection-edge-cases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Entity Detection Edge Cases
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-operational-constraints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.4 Operational Constraints
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-gdpr-compliance-mapping" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. GDPR Compliance Mapping
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. GDPR Compliance Mapping">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-pseudonymization-definition-article-45" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Pseudonymization Definition (Article 4(5))
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-pseudonymization-vs-anonymization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Pseudonymization vs. Anonymization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-gdpr-article-compliance-matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 GDPR Article Compliance Matrix
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54-audit-trail" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 Audit Trail
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-academic-citation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Academic Citation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Academic Citation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-how-to-cite" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 How to Cite
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 References
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-related-documents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Related Documents
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Developer Guide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Developer Guide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-introduction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Introduction
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Introduction">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-design-philosophy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Design Philosophy
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-technical-approach" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Technical Approach
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Technical Approach">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-ner-library-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 NER Library Selection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-hybrid-detection-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Hybrid Detection Strategy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-pseudonymization-algorithm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Pseudonymization Algorithm
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-encryption-scheme" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 Encryption Scheme
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-validation-procedures-and-quality-controls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Validation Procedures and Quality Controls
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Validation Procedures and Quality Controls">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-interactive-validation-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Interactive Validation Workflow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-ner-accuracy-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 NER Accuracy Metrics
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-llm-utility-preservation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 LLM Utility Preservation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-limitations-and-edge-cases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Limitations and Edge Cases
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Limitations and Edge Cases">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-ner-accuracy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 NER Accuracy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-language-and-format-limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Language and Format Limitations
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-entity-detection-edge-cases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Entity Detection Edge Cases
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-operational-constraints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.4 Operational Constraints
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-gdpr-compliance-mapping" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. GDPR Compliance Mapping
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. GDPR Compliance Mapping">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-pseudonymization-definition-article-45" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Pseudonymization Definition (Article 4(5))
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-pseudonymization-vs-anonymization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Pseudonymization vs. Anonymization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-gdpr-article-compliance-matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 GDPR Article Compliance Matrix
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54-audit-trail" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 Audit Trail
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-academic-citation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Academic Citation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Academic Citation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-how-to-cite" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 How to Cite
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 References
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-related-documents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Related Documents
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="methodology-gdpr-compliant-pseudonymization-of-french-text">Methodology: GDPR-Compliant Pseudonymization of French Text<a class="headerlink" href="#methodology-gdpr-compliant-pseudonymization-of-french-text" title="Permanent link">&para;</a></h1>
+<p><strong>GDPR Pseudonymizer</strong> - Technical Methodology and Academic Reference</p>
+<p><strong>Version:</strong> 1.0
+<strong>Date:</strong> 2026-02-08
+<strong>Suitable for:</strong> Ethics board review, DPIA documentation, academic citation</p>
+<hr />
+<h2 id="1-introduction">1. Introduction<a class="headerlink" href="#1-introduction" title="Permanent link">&para;</a></h2>
+<p>GDPR Pseudonymizer is an AI-assisted pseudonymization tool designed for French-language text documents. It combines automated Named Entity Recognition (NER) with mandatory human validation to achieve 100% pseudonymization accuracy while maintaining document utility for downstream analysis.</p>
+<p>This document describes the technical methodology, validation procedures, quality controls, and GDPR compliance mapping for use in academic research, ethics board submissions, and Data Protection Impact Assessments (DPIAs).</p>
+<h3 id="11-design-philosophy">1.1 Design Philosophy<a class="headerlink" href="#11-design-philosophy" title="Permanent link">&para;</a></h3>
+<p>The tool follows a <strong>human-in-the-loop</strong> approach to pseudonymization:</p>
+<ol>
+<li><strong>AI pre-detection</strong> identifies candidate entities using hybrid NLP + regex techniques</li>
+<li><strong>Mandatory human validation</strong> ensures every entity is reviewed before replacement</li>
+<li><strong>Consistent pseudonymization</strong> maintains document coherence across multi-document corpora</li>
+<li><strong>Local-only processing</strong> ensures no data leaves the user's machine</li>
+</ol>
+<p>This approach prioritizes <strong>zero false negatives</strong> (no missed entities) over full automation, recognizing that current NLP accuracy on French interview and business documents does not meet the threshold required for unsupervised pseudonymization.</p>
+<hr />
+<h2 id="2-technical-approach">2. Technical Approach<a class="headerlink" href="#2-technical-approach" title="Permanent link">&para;</a></h2>
+<h3 id="21-ner-library-selection">2.1 NER Library Selection<a class="headerlink" href="#21-ner-library-selection" title="Permanent link">&para;</a></h3>
+<p>The NER component was selected through a controlled benchmark on a 25-document test corpus containing 1,855 manually annotated entities (PERSON, LOCATION, ORGANIZATION) drawn from French interview transcripts and business documents.</p>
+<p><strong>Benchmark Results (Story 1.2, 2026-01-16):</strong></p>
+<table>
+<thead>
+<tr>
+<th>Library</th>
+<th>Model</th>
+<th>Precision</th>
+<th>Recall</th>
+<th>F1 Score</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>spaCy</strong></td>
+<td><code>fr_core_news_lg</code> 3.8.0</td>
+<td>27.0%</td>
+<td>32.7%</td>
+<td><strong>29.5%</strong></td>
+</tr>
+<tr>
+<td>Stanza</td>
+<td><code>fr_default</code></td>
+<td>10.3%</td>
+<td>14.1%</td>
+<td>11.9%</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Per-Entity Type Performance (spaCy):</strong></p>
+<table>
+<thead>
+<tr>
+<th>Entity Type</th>
+<th>Ground Truth</th>
+<th>Precision</th>
+<th>Recall</th>
+<th>F1</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PERSON</td>
+<td>1,627</td>
+<td>37.8%</td>
+<td>31.3%</td>
+<td>34.2%</td>
+</tr>
+<tr>
+<td>LOCATION</td>
+<td>123</td>
+<td>29.6%</td>
+<td>58.5%</td>
+<td>39.3%</td>
+</tr>
+<tr>
+<td>ORGANIZATION</td>
+<td>105</td>
+<td>3.8%</td>
+<td>27.6%</td>
+<td>6.7%</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Selection rationale:</strong> spaCy was selected for its 2.5x better F1 score, faster inference speed, larger community, and better documentation. Both libraries failed the initial 85% F1 target, leading to the adoption of a hybrid detection strategy with mandatory human validation.</p>
+<p><strong>Reference:</strong> Full benchmark analysis available in <code>docs/nlp-benchmark-report.md</code>.</p>
+<h3 id="22-hybrid-detection-strategy">2.2 Hybrid Detection Strategy<a class="headerlink" href="#22-hybrid-detection-strategy" title="Permanent link">&para;</a></h3>
+<p>To compensate for baseline NER limitations, a hybrid approach combines NLP with rule-based pattern matching (Story 1.8, 2026-01-22):</p>
+<p><strong>Detection pipeline:</strong></p>
+<div class="highlight"><pre><span></span><code>Input Text
+    ├── spaCy NER (fr_core_news_lg)  →  NLP-detected entities
+    ├── Regex Pattern Matcher         →  Pattern-detected entities
+    │   ├── French title patterns (M., Mme, Dr., Maître/Me)
+    │   ├── Compound name patterns (Jean-Pierre, Marie-Claire)
+    │   ├── French name dictionary matching
+    │   ├── Organization suffix patterns (SA, SARL, SAS, Cabinet)
+    │   └── False positive filtering (title-only, label words)
+    └── Entity Deduplication          →  Merged, deduplicated entity set
+</code></pre></div>
+<p><strong>Hybrid performance improvement:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>spaCy Only</th>
+<th>Hybrid (NLP + Regex)</th>
+<th>Improvement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Total entities detected</td>
+<td>2,679</td>
+<td>3,625</td>
+<td>+35.3%</td>
+</tr>
+<tr>
+<td>PERSON entities</td>
+<td>1,612</td>
+<td>2,454</td>
+<td>+52.2%</td>
+</tr>
+<tr>
+<td>Processing time per doc</td>
+<td>0.07s</td>
+<td>0.07s</td>
+<td>No overhead</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Reference:</strong> Full hybrid benchmark in <code>docs/hybrid-benchmark-report.md</code>.</p>
+<h3 id="23-pseudonymization-algorithm">2.3 Pseudonymization Algorithm<a class="headerlink" href="#23-pseudonymization-algorithm" title="Permanent link">&para;</a></h3>
+<p>The pseudonymization engine uses a <strong>compositional approach</strong> to maintain internal consistency:</p>
+<p><strong>Core principles:</strong></p>
+<ol>
+<li>
+<p><strong>Component-based mapping:</strong> Full names are decomposed into components (e.g., "Marie Dubois" → ["Marie", "Dubois"]), each mapped to a pseudonym component. Partial references ("Marie" alone) resolve to the same pseudonym component ("Leia").</p>
+</li>
+<li>
+<p><strong>Themed pseudonym libraries:</strong> Three libraries provide culturally distinct pseudonym sets:</p>
+</li>
+<li><strong>Neutral:</strong> French-sounding names, real French cities, realistic company names</li>
+<li><strong>Star Wars:</strong> Characters, planets, and factions from the Star Wars universe</li>
+<li>
+<p><strong>Lord of the Rings:</strong> Characters and locations from Tolkien's Middle-earth</p>
+</li>
+<li>
+<p><strong>Entity type coverage:</strong></p>
+</li>
+<li>PERSON: First name + last name with gender matching (when NER provides classification)</li>
+<li>LOCATION: Cities, regions, countries</li>
+<li>
+<p>ORGANIZATION: Companies, institutions, agencies</p>
+</li>
+<li>
+<p><strong>French name preprocessing:</strong></p>
+</li>
+<li>Title stripping: "Dr. Marie Dubois" → "Marie Dubois" (title preserved in output)</li>
+<li>Compound name handling: "Jean-Pierre" treated as atomic unit</li>
+<li>Deduplication: Identical entities validated once, applied to all occurrences</li>
+</ol>
+<h3 id="24-encryption-scheme">2.4 Encryption Scheme<a class="headerlink" href="#24-encryption-scheme" title="Permanent link">&para;</a></h3>
+<p>Entity mappings are stored in an encrypted SQLite database using industry-standard cryptographic primitives:</p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Implementation</th>
+<th>Standard</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Encryption</strong></td>
+<td>AES-256-SIV (deterministic AEAD)</td>
+<td>RFC 5297, NIST approved</td>
+</tr>
+<tr>
+<td><strong>Key Derivation</strong></td>
+<td>PBKDF2-HMAC-SHA256</td>
+<td>NIST SP 800-132</td>
+</tr>
+<tr>
+<td><strong>Iterations</strong></td>
+<td>210,000</td>
+<td>OWASP 2023 recommendation</td>
+</tr>
+<tr>
+<td><strong>Salt</strong></td>
+<td>32 bytes, cryptographically random</td>
+<td>Per-database unique</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Deterministic encryption rationale:</strong> AES-256-SIV is used to enable encrypted field queries (e.g., looking up existing mappings for compositional pseudonymization). This is an industry-standard trade-off used by AWS DynamoDB, Google Tink, and MongoDB for searchable encrypted fields.</p>
+<p><strong>Security model:</strong> The database is local-only (no network exposure). An attacker requires both physical access to the machine and knowledge of the passphrase to decrypt mappings.</p>
+<hr />
+<h2 id="3-validation-procedures-and-quality-controls">3. Validation Procedures and Quality Controls<a class="headerlink" href="#3-validation-procedures-and-quality-controls" title="Permanent link">&para;</a></h2>
+<h3 id="31-interactive-validation-workflow">3.1 Interactive Validation Workflow<a class="headerlink" href="#31-interactive-validation-workflow" title="Permanent link">&para;</a></h3>
+<p>Every document undergoes mandatory human validation before pseudonymization is applied:</p>
+<ol>
+<li><strong>Entity detection:</strong> Hybrid NLP + regex pipeline identifies candidate entities</li>
+<li><strong>Summary screen:</strong> Validator sees entity counts by type (PERSON, LOCATION, ORG)</li>
+<li><strong>Entity-by-entity review:</strong> Each entity displayed with:</li>
+<li>Surrounding context (10 words before/after with highlighting)</li>
+<li>Entity type and detection source (NLP or regex)</li>
+<li>Confidence score (color-coded: green &gt;80%, yellow 60-80%, red &lt;60%)</li>
+<li>Proposed pseudonym from themed library</li>
+<li><strong>Validator actions:</strong> Accept, reject (false positive), edit entity text, add missed entity, change pseudonym</li>
+<li><strong>Batch operations:</strong> Accept/reject all entities of a given type</li>
+<li><strong>Final confirmation:</strong> Summary of all decisions before processing</li>
+</ol>
+<p><strong>Validation performance:</strong> &lt;2 minutes for typical documents (20-30 entities). Entity deduplication reduces validation time by ~66% for large documents with repeated entities.</p>
+<h3 id="32-ner-accuracy-metrics">3.2 NER Accuracy Metrics<a class="headerlink" href="#32-ner-accuracy-metrics" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Stage</th>
+<th>Detection Rate</th>
+<th>False Positives</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>spaCy baseline</td>
+<td>29.5% F1</td>
+<td>High</td>
+<td>Pre-trained on news text</td>
+</tr>
+<tr>
+<td>Hybrid (NLP + regex)</td>
+<td>~40-50% F1</td>
+<td>Moderate</td>
+<td>+35.3% recall improvement</td>
+</tr>
+<tr>
+<td>Post-validation</td>
+<td>100% accuracy</td>
+<td>0%</td>
+<td>Human review catches all errors</td>
+</tr>
+</tbody>
+</table>
+<h3 id="33-llm-utility-preservation">3.3 LLM Utility Preservation<a class="headerlink" href="#33-llm-utility-preservation" title="Permanent link">&para;</a></h3>
+<p>Pseudonymized documents were validated for downstream utility using LLM-as-judge methodology (Story 4.1, 2026-02-06):</p>
+<p><strong>Test design:</strong> A/B comparison of LLM responses on original vs. pseudonymized versions of 10 representative documents (5 interview transcripts, 5 business documents).</p>
+<p><strong>Evaluation dimensions (1-5 scale):</strong></p>
+<table>
+<thead>
+<tr>
+<th>Dimension</th>
+<th>Mean Score</th>
+<th>Interpretation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Thematic Accuracy</td>
+<td>4.27/5.0</td>
+<td>Themes fully preserved</td>
+</tr>
+<tr>
+<td>Relationship Coherence</td>
+<td>4.27/5.0</td>
+<td>Entity relationships maintained</td>
+</tr>
+<tr>
+<td>Factual Preservation</td>
+<td>4.27/5.0</td>
+<td>Facts accurately extracted</td>
+</tr>
+<tr>
+<td><strong>Overall Utility</strong></td>
+<td><strong>4.27/5.0 (85.4%)</strong></td>
+<td><strong>Exceeds 80% threshold</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Conclusion:</strong> Pseudonymized documents retain sufficient utility for LLM-based analysis (summarization, theme extraction, relationship mapping).</p>
+<p><strong>Reference:</strong> Full validation report in <code>docs/llm-validation-report.md</code>.</p>
+<hr />
+<h2 id="4-limitations-and-edge-cases">4. Limitations and Edge Cases<a class="headerlink" href="#4-limitations-and-edge-cases" title="Permanent link">&para;</a></h2>
+<h3 id="41-ner-accuracy">4.1 NER Accuracy<a class="headerlink" href="#41-ner-accuracy" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Baseline NER accuracy is 29.5% F1 (below the 85% target for unsupervised processing)</li>
+<li>Hybrid detection improves to ~40-50% F1 but still requires mandatory human validation</li>
+<li>ORG detection is particularly weak (3.8% precision = 96% false positive rate)</li>
+<li>Pre-trained models optimized for news text, not interview/business documents</li>
+<li>Fine-tuning with user validation data is planned for v3.0</li>
+</ul>
+<h3 id="42-language-and-format-limitations">4.2 Language and Format Limitations<a class="headerlink" href="#42-language-and-format-limitations" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>French only</strong> in v1.0 (English, Spanish, German planned for future versions)</li>
+<li><strong>Text formats only:</strong> <code>.txt</code> and <code>.md</code> (no PDF, DOCX, or HTML support in v1.0)</li>
+<li>Text must use proper French encoding (UTF-8 with accents: é, è, à, etc.)</li>
+</ul>
+<h3 id="43-entity-detection-edge-cases">4.3 Entity Detection Edge Cases<a class="headerlink" href="#43-entity-detection-edge-cases" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Uncommon French names</strong> not in spaCy's training data may be missed by NLP (caught during validation)</li>
+<li><strong>Compound names</strong> ("Jean-Pierre") treated as atomic units (not split)</li>
+<li><strong>Titles</strong> ("Dr.", "Maître", "Me") are stripped for matching, preserved in output</li>
+<li><strong>Abbreviations</strong> may not be detected by NLP or regex patterns</li>
+<li><strong>Gender-aware pseudonym assignment</strong> not yet implemented for all cases (FE-007, planned for v1.1)</li>
+</ul>
+<h3 id="44-operational-constraints">4.4 Operational Constraints<a class="headerlink" href="#44-operational-constraints" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Passphrase is irrecoverable:</strong> If lost, existing mappings cannot be decrypted and pseudonymization cannot be reversed</li>
+<li><strong>Theme consistency:</strong> Switching themes mid-project creates inconsistent pseudonyms</li>
+<li><strong>Single-user design:</strong> No multi-user access control in v1.0 (SQLite with WAL mode supports concurrent reads)</li>
+</ul>
+<hr />
+<h2 id="5-gdpr-compliance-mapping">5. GDPR Compliance Mapping<a class="headerlink" href="#5-gdpr-compliance-mapping" title="Permanent link">&para;</a></h2>
+<h3 id="51-pseudonymization-definition-article-45">5.1 Pseudonymization Definition (Article 4(5))<a class="headerlink" href="#51-pseudonymization-definition-article-45" title="Permanent link">&para;</a></h3>
+<blockquote>
+<p>"Pseudonymisation means the processing of personal data in such a manner that the personal data can no longer be attributed to a specific data subject without the use of additional information, provided that such additional information is kept separately and is subject to technical and organisational measures to ensure that the personal data are not attributed to an identified or identifiable natural person."</p>
+<p>-- GDPR Article 4(5)</p>
+</blockquote>
+<p><strong>GDPR Pseudonymizer compliance:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Requirement</th>
+<th>Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Personal data replaced with pseudonyms</td>
+<td>PERSON, LOCATION, ORG entities replaced with themed pseudonyms</td>
+</tr>
+<tr>
+<td>Additional information kept separately</td>
+<td>Mapping database stored separately from pseudonymized documents</td>
+</tr>
+<tr>
+<td>Technical measures for separation</td>
+<td>AES-256-SIV encryption with passphrase protection</td>
+</tr>
+<tr>
+<td>Reversibility</td>
+<td>Authorized users can de-pseudonymize with correct passphrase</td>
+</tr>
+</tbody>
+</table>
+<h3 id="52-pseudonymization-vs-anonymization">5.2 Pseudonymization vs. Anonymization<a class="headerlink" href="#52-pseudonymization-vs-anonymization" title="Permanent link">&para;</a></h3>
+<p><strong>Important distinction:</strong> Pseudonymized data is still personal data under GDPR (Recital 26). The mapping table allows re-identification, which means:</p>
+<ul>
+<li>GDPR obligations still apply to pseudonymized data</li>
+<li>The mapping database must be protected with appropriate security measures</li>
+<li>Pseudonymization is a <strong>risk reduction measure</strong>, not an exemption from GDPR</li>
+</ul>
+<p><strong>Anonymization</strong> (irreversible removal of all identifying information) is outside the scope of this tool. GDPR Pseudonymizer specifically preserves reversibility for use cases requiring it (academic research, legal proceedings, audit requirements).</p>
+<h3 id="53-gdpr-article-compliance-matrix">5.3 GDPR Article Compliance Matrix<a class="headerlink" href="#53-gdpr-article-compliance-matrix" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>GDPR Article</th>
+<th>Requirement</th>
+<th>Implementation</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Art. 4(5)</strong></td>
+<td>Pseudonymization definition</td>
+<td>Consistent replacement with separate encrypted mapping</td>
+<td>Compliant</td>
+</tr>
+<tr>
+<td><strong>Art. 25</strong></td>
+<td>Data protection by design</td>
+<td>100% local processing, no cloud dependencies, encrypted storage</td>
+<td>Compliant</td>
+</tr>
+<tr>
+<td><strong>Art. 32</strong></td>
+<td>Security of processing</td>
+<td>AES-256-SIV encryption, PBKDF2 key derivation (210K iterations), passphrase protection</td>
+<td>Compliant</td>
+</tr>
+<tr>
+<td><strong>Art. 30</strong></td>
+<td>Records of processing</td>
+<td>Comprehensive audit logs with timestamp, entity count, model version, success/failure; JSON/CSV export</td>
+<td>Compliant</td>
+</tr>
+<tr>
+<td><strong>Art. 35</strong></td>
+<td>Privacy Impact Assessment</td>
+<td>Transparent methodology (this document), auditable processing pipeline</td>
+<td>Supports DPIA</td>
+</tr>
+<tr>
+<td><strong>Art. 89</strong></td>
+<td>Research safeguards</td>
+<td>Pseudonymization as technical safeguard for research/statistical purposes</td>
+<td>Compliant</td>
+</tr>
+<tr>
+<td><strong>Recital 26</strong></td>
+<td>Pseudonymized data scope</td>
+<td>Tool documentation clearly states pseudonymized data remains personal data</td>
+<td>Acknowledged</td>
+</tr>
+<tr>
+<td><strong>Recital 28</strong></td>
+<td>Technical safeguard</td>
+<td>Pseudonymization applied as organizational/technical measure</td>
+<td>Compliant</td>
+</tr>
+</tbody>
+</table>
+<h3 id="54-audit-trail">5.4 Audit Trail<a class="headerlink" href="#54-audit-trail" title="Permanent link">&para;</a></h3>
+<p>Every pseudonymization operation is logged in an operations table:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Timestamp</td>
+<td>When the operation occurred</td>
+</tr>
+<tr>
+<td>Operation type</td>
+<td>PROCESS, BATCH, IMPORT, etc.</td>
+</tr>
+<tr>
+<td>Input file(s)</td>
+<td>Source document path(s)</td>
+</tr>
+<tr>
+<td>Entity count</td>
+<td>Number of entities processed</td>
+</tr>
+<tr>
+<td>Model version</td>
+<td>NLP model used (spaCy fr_core_news_lg version)</td>
+</tr>
+<tr>
+<td>Theme</td>
+<td>Pseudonym library theme</td>
+</tr>
+<tr>
+<td>Success/failure</td>
+<td>Operation outcome</td>
+</tr>
+<tr>
+<td>Processing time</td>
+<td>Duration in seconds</td>
+</tr>
+</tbody>
+</table>
+<p>Audit logs can be exported in JSON or CSV format for compliance reporting:</p>
+<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>gdpr-pseudo<span class="w"> </span><span class="nb">export</span><span class="w"> </span>audit_log.json
+</code></pre></div>
+<hr />
+<h2 id="6-academic-citation">6. Academic Citation<a class="headerlink" href="#6-academic-citation" title="Permanent link">&para;</a></h2>
+<h3 id="61-how-to-cite">6.1 How to Cite<a class="headerlink" href="#61-how-to-cite" title="Permanent link">&para;</a></h3>
+<p>When referencing this tool in academic publications, ethics board submissions, or DPIAs:</p>
+<blockquote>
+<p>Deveaux, L. (2026). <em>GDPR Pseudonymizer: AI-Assisted Pseudonymization for French Documents with Human Verification</em> (Version 1.0) [Computer software]. GitHub. https://github.com/LioChanDaYo/RGPDpseudonymizer</p>
+</blockquote>
+<p><strong>BibTeX:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nc">@software</span><span class="p">{</span><span class="nl">deveaux2026gdpr</span><span class="p">,</span>
+<span class="w">  </span><span class="na">author</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Deveaux, Lionel}</span><span class="p">,</span>
+<span class="w">  </span><span class="na">title</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{{GDPR Pseudonymizer: AI-Assisted Pseudonymization for French Documents with Human Verification}}</span><span class="p">,</span>
+<span class="w">  </span><span class="na">year</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{2026}</span><span class="p">,</span>
+<span class="w">  </span><span class="na">version</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{1.0}</span><span class="p">,</span>
+<span class="w">  </span><span class="na">url</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{https://github.com/LioChanDaYo/RGPDpseudonymizer}</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="62-references">6.2 References<a class="headerlink" href="#62-references" title="Permanent link">&para;</a></h3>
+<ol>
+<li>
+<p>European Parliament and Council. (2016). <em>Regulation (EU) 2016/679 (General Data Protection Regulation)</em>. Official Journal of the European Union, L 119, 1-88.</p>
+</li>
+<li>
+<p>Honnibal, M., &amp; Montani, I. (2017). <em>spaCy 2: Natural language understanding with Bloom embeddings, convolutional neural networks and incremental parsing</em>. https://spacy.io</p>
+</li>
+<li>
+<p>Harkins, P. (2023). <em>RFC 5297: Synthetic Initialization Vector (SIV) Authenticated Encryption Using the Advanced Encryption Standard (AES)</em>. IETF.</p>
+</li>
+<li>
+<p>OWASP Foundation. (2023). <em>Password Storage Cheat Sheet</em>. https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html</p>
+</li>
+<li>
+<p>NIST. (2010). <em>SP 800-132: Recommendation for Password-Based Key Derivation</em>. National Institute of Standards and Technology.</p>
+</li>
+</ol>
+<hr />
+<h2 id="7-related-documents">7. Related Documents<a class="headerlink" href="#7-related-documents" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../nlp-benchmark-report/">NLP Benchmark Report</a> - Full NER library evaluation</li>
+<li><a href="../hybrid-benchmark-report/">Hybrid Detection Report</a> - Hybrid approach performance analysis</li>
+<li><a href="../llm-validation-report/">LLM Validation Report</a> - Utility preservation testing</li>
+<li><a href="../installation/">Installation Guide</a> - Setup instructions</li>
+<li><a href="../CLI-REFERENCE/">CLI Reference</a> - Command documentation</li>
+<li><a href="../faq/">FAQ</a> - Common questions</li>
+</ul>
+<hr />
+<p><strong>Disclaimer:</strong> This tool assists with GDPR compliance but does not constitute legal advice. Consult your Data Protection Officer (DPO) or legal counsel for specific compliance guidance applicable to your context.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
