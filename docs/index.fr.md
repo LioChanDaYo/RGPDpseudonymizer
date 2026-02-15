@@ -96,7 +96,7 @@ GDPR Pseudonymizer contribue à la conformité avec les articles 4(5), 25, 30, 3
 
 ## Statut
 
-**Version actuelle :** v1.0.7 (février 2026)
+**Version actuelle :** v1.1.0 (février 2026)
 
 **Environnements pris en charge :** Python 3.10-3.12 | Windows, macOS, Linux | Formats .txt, .md, .pdf, .docx | Français
 
