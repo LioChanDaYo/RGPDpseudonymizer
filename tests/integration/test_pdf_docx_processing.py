@@ -71,10 +71,10 @@ class MockHybridDetector:
             entities.append(
                 DetectedEntity(
                     text="Jean Dupont",
-                    label="PER",
-                    start=start,
-                    end=start + 11,
-                    score=0.95,
+                    entity_type="PERSON",
+                    start_pos=start,
+                    end_pos=start + 11,
+                    confidence=0.95,
                     source="mock",
                 )
             )
@@ -83,10 +83,10 @@ class MockHybridDetector:
             entities.append(
                 DetectedEntity(
                     text="Paris",
-                    label="LOC",
-                    start=start,
-                    end=start + 5,
-                    score=0.90,
+                    entity_type="LOCATION",
+                    start_pos=start,
+                    end_pos=start + 5,
+                    confidence=0.90,
                     source="mock",
                 )
             )
@@ -95,10 +95,10 @@ class MockHybridDetector:
             entities.append(
                 DetectedEntity(
                     text="Marie Martin",
-                    label="PER",
-                    start=start,
-                    end=start + 12,
-                    score=0.92,
+                    entity_type="PERSON",
+                    start_pos=start,
+                    end_pos=start + 12,
+                    confidence=0.92,
                     source="mock",
                 )
             )
@@ -107,10 +107,10 @@ class MockHybridDetector:
             entities.append(
                 DetectedEntity(
                     text="Lyon",
-                    label="LOC",
-                    start=start,
-                    end=start + 4,
-                    score=0.88,
+                    entity_type="LOCATION",
+                    start_pos=start,
+                    end_pos=start + 4,
+                    confidence=0.88,
                     source="mock",
                 )
             )
