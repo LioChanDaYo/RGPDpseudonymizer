@@ -1,0 +1,65 @@
+schema: 1
+story: "5.5"
+story_title: "PDF/DOCX Input Format Support"
+gate: PASS
+status_reason: >-
+  All 9 acceptance criteria fully met. Clean implementation follows existing patterns.
+  37 new tests (30 unit + 7 integration), total 1235 tests passing. Optional dependencies
+  correctly isolated. Only minor improvements identified (docstring update, test strengthening).
+reviewer: "Quinn (Test Architect)"
+updated: "2026-02-15T12:00:00Z"
+
+waiver: { active: false }
+
+top_issues:
+  - id: "DOC-001"
+    severity: low
+    finding: "batch_command docstring says 'Processes all .txt and .md files' but now supports .pdf and .docx"
+    suggested_action: "Update docstring to include all supported formats"
+    suggested_owner: dev
+  - id: "TEST-001"
+    severity: low
+    finding: "test_empty_pdf_warns_scanned does not verify warning log was emitted"
+    suggested_action: "Add assertion that logger.warning('scanned_pdf_detected', ...) was called"
+    suggested_owner: dev
+
+quality_score: 90
+expires: "2026-03-01T00:00:00Z"
+
+evidence:
+  tests_reviewed: 37
+  risks_identified: 0
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+    ac_gaps: []
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: "Read-only file extraction, no new attack surface, MIT-licensed dependencies"
+  performance:
+    status: PASS
+    notes: "Acceptable memory profile for document-sized files, potential large-PDF concern documented"
+  reliability:
+    status: PASS
+    notes: "Good exception handling with proper chaining, scanned PDF detection prevents silent empty output"
+  maintainability:
+    status: PASS
+    notes: "Clean separation, follows existing patterns, well-documented conditional imports"
+
+risk_summary:
+  totals: { critical: 0, high: 0, medium: 0, low: 2 }
+  recommendations:
+    must_fix: []
+    monitor:
+      - "Memory usage with large PDFs in parallel batch mode (many workers)"
+
+recommendations:
+  immediate: []
+  future:
+    - action: "Update batch_command docstring to include .pdf and .docx"
+      refs: ["gdpr_pseudonymizer/cli/commands/batch.py:377"]
+    - action: "Strengthen scanned PDF warning test to verify log emission"
+      refs: ["tests/unit/test_file_handler_formats.py:106-116"]
+    - action: "Add composite DOCX test (header + footer + table + paragraphs)"
+      refs: ["tests/unit/test_file_handler_formats.py"]

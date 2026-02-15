@@ -100,7 +100,7 @@ gdpr-pseudo process INPUT_FILE [OPTIONS]
 
 | Argument | Required | Description |
 |----------|----------|-------------|
-| `INPUT_FILE` | Yes | Input file path (.txt or .md) |
+| `INPUT_FILE` | Yes | Input file path (.txt, .md, .pdf, or .docx) |
 
 **Options:**
 
@@ -129,7 +129,18 @@ gdpr-pseudo process input.txt --db project.db
 
 # Process only PERSON and LOCATION entities (skip ORG)
 gdpr-pseudo process input.txt --entity-types PERSON,LOCATION
+
+# Process a PDF document (requires: pip install gdpr-pseudonymizer[pdf])
+gdpr-pseudo process report.pdf
+
+# Process a DOCX document (requires: pip install gdpr-pseudonymizer[docx])
+gdpr-pseudo process interview.docx -o interview_pseudonymized.txt
 ```
+
+**PDF/DOCX Notes:**
+- PDF and DOCX support requires optional dependencies. Install with `pip install gdpr-pseudonymizer[formats]`.
+- Output is always `.txt` (plaintext) for PDF/DOCX inputs. Format preservation is planned for v1.2+.
+- Scanned/image-based PDFs will produce a warning if little text is extracted. OCR is not supported.
 
 ---
 
@@ -188,7 +199,12 @@ gdpr-pseudo batch ./documents/ --entity-types PERSON
 
 # Process PERSON and ORG entities in parallel
 gdpr-pseudo batch ./documents/ --entity-types PERSON,ORG --workers 4
+
+# Process directory with mixed formats (.txt, .pdf, .docx)
+gdpr-pseudo batch ./documents/ --recursive
 ```
+
+**Supported formats:** `.txt`, `.md`, `.pdf`, `.docx`. PDF/DOCX require optional extras (`pip install gdpr-pseudonymizer[formats]`). Output files from PDF/DOCX inputs use `.txt` extension.
 
 ---
 

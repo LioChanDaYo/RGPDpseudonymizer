@@ -187,8 +187,9 @@ poetry run gdpr-pseudo process doc2.txt --db shared.db
 **Solutions:**
 1. Ensure text is in French with proper encoding (UTF-8 with accents: é, è, à)
 2. Verify the document contains names, locations, or organizations
-3. Verify file is `.txt` or `.md` format
-4. Test with a known-good sample:
+3. Verify file is `.txt`, `.md`, `.pdf`, or `.docx` format
+4. For PDF/DOCX, ensure optional extras are installed: `pip install gdpr-pseudonymizer[formats]`
+5. Test with a known-good sample:
    ```bash
    echo "Marie Dubois travaille a Paris pour Acme SA." > test.txt
    poetry run gdpr-pseudo process test.txt
@@ -296,6 +297,53 @@ sudo dnf install python3-devel gcc
 **Cause:** The `fr_core_news_lg` model is ~571MB and takes a few seconds to load on first use.
 
 **Mitigation:** The model is cached in memory after first load. Subsequent documents in a batch session process faster.
+
+---
+
+## PDF/DOCX Processing Issues
+
+### `PDF support requires 'pdfplumber'`
+
+**Cause:** The optional PDF dependency is not installed.
+
+**Solution:**
+```bash
+pip install gdpr-pseudonymizer[pdf]
+# Or install both PDF and DOCX support:
+pip install gdpr-pseudonymizer[formats]
+```
+
+### `DOCX support requires 'python-docx'`
+
+**Cause:** The optional DOCX dependency is not installed.
+
+**Solution:**
+```bash
+pip install gdpr-pseudonymizer[docx]
+# Or install both PDF and DOCX support:
+pip install gdpr-pseudonymizer[formats]
+```
+
+### "This PDF appears to be scanned/image-based"
+
+**Cause:** The PDF contains images instead of text (scanned document). `pdfplumber` can only extract embedded text, not perform OCR.
+
+**Solutions:**
+1. Use an OCR tool (e.g., Adobe Acrobat, Tesseract) to convert the scanned PDF to a text-based PDF first
+2. Export the scanned PDF to `.txt` manually, then process the text file
+3. If partial text was extracted, review the output -- it may still contain useful content
+
+**Note:** OCR support is not planned for the current version.
+
+### PDF is password-protected
+
+**Error:** `PDF is password-protected: <file>. Please provide an unprotected PDF.`
+
+**Solution:** Remove the password protection from the PDF before processing. Most PDF editors (Adobe Acrobat, Preview on macOS) can remove passwords if you know the original password.
+
+### Output file has `.txt` extension for PDF/DOCX input
+
+**This is expected behavior.** PDF/DOCX inputs produce plaintext `.txt` output because the tool extracts text content only. Format-preserving output (PDF-to-PDF, DOCX-to-DOCX) is planned for v1.2+.
 
 ---
 

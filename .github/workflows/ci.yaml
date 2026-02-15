@@ -37,7 +37,7 @@ jobs:
           restore-keys: venv-lint-py3.11-
 
       - name: Install dependencies
-        run: poetry install --no-interaction
+        run: poetry install --no-interaction --extras formats
 
       - name: Ruff
         run: poetry run ruff check .
@@ -105,7 +105,7 @@ jobs:
           restore-keys: venv-${{ runner.os }}-py${{ matrix.python-version }}-
 
       - name: Install dependencies
-        run: poetry install --no-interaction
+        run: poetry install --no-interaction --extras formats
 
       # Poetry installs both typer 0.9.4 (our dep) and typer-slim 0.21.1
       # (spaCy → weasel dep). Both write to the typer/ namespace and
@@ -140,6 +140,7 @@ jobs:
           poetry run pytest tests/unit/test_config_manager.py -v
           poetry run pytest tests/unit/test_data_models.py -v
           poetry run pytest tests/unit/test_file_handler.py -v
+          poetry run pytest tests/unit/test_file_handler_formats.py -v
           poetry run pytest tests/unit/test_logger.py -v
           poetry run pytest tests/unit/test_naive_processor.py -v
           poetry run pytest tests/unit/test_name_dictionary.py -v
@@ -150,6 +151,7 @@ jobs:
           poetry run pytest tests/unit/test_validation_stub.py -v
           poetry run pytest tests/unit/test_mapping_repository_delete.py -v
           poetry run pytest tests/integration/test_erasure_workflow.py -v
+          poetry run pytest tests/integration/test_pdf_docx_processing.py -v
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3

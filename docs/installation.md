@@ -29,6 +29,23 @@ pip install gdpr-pseudonymizer
 gdpr-pseudo --help
 ```
 
+### Optional: PDF/DOCX Support
+
+To process PDF and DOCX documents, install the optional format extras:
+
+```bash
+# PDF support only
+pip install gdpr-pseudonymizer[pdf]
+
+# DOCX support only
+pip install gdpr-pseudonymizer[docx]
+
+# Both PDF and DOCX support
+pip install gdpr-pseudonymizer[formats]
+```
+
+> **Note:** The base install remains lightweight. PDF/DOCX libraries are only needed if you process those formats.
+
 > **Note:** The spaCy French model (~571MB) downloads automatically on first use. To pre-download it:
 > ```bash
 > python -m spacy download fr_core_news_lg

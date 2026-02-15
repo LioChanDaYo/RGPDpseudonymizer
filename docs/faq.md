@@ -52,11 +52,30 @@ This reduces validation fatigue by eliminating redundant prompts. The grouping i
 
 ### What document formats are supported?
 
-v1.0 supports:
+v1.1 supports:
 - **Plain text** (`.txt`)
 - **Markdown** (`.md`)
+- **PDF** (`.pdf`) -- requires optional dependency
+- **Microsoft Word** (`.docx`) -- requires optional dependency
 
-PDF, DOCX, HTML, and other formats are not supported in v1.0. Convert files to plain text before processing.
+HTML and other formats are not yet supported. Convert those files to plain text before processing.
+
+### How do I process PDF or DOCX files?
+
+Install the optional format extras and process as usual:
+
+```bash
+# Install PDF/DOCX support
+pip install gdpr-pseudonymizer[formats]
+
+# Process a PDF
+gdpr-pseudo process report.pdf
+
+# Process a DOCX
+gdpr-pseudo process interview.docx
+```
+
+Output is always plaintext (`.txt`). The default output filename for `report.pdf` would be `report_pseudonymized.txt`. Format preservation (PDF-to-PDF, DOCX-to-DOCX) is planned for v1.2+.
 
 ### Can I use this for non-French documents?
 

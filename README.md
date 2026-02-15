@@ -441,7 +441,7 @@ This project is licensed under the [MIT License](LICENSE).
 - AI detection: ~60% F1 baseline (not 85%+)
 - Validation required for ALL documents (not optional)
 - French language only (English, Spanish, etc. in future versions)
-- Text formats only (.txt, .md - no PDF/DOCX in v1.0)
+- Text-based formats: .txt, .md, .pdf, .docx (PDF/DOCX require optional extras: `pip install gdpr-pseudonymizer[formats]`)
 
 ---
 
@@ -582,7 +582,7 @@ The integration test suite covers:
 | **Test Coverage** | 1198+ tests, 86%+ coverage | ✅ All Quality Checks Pass |
 | **Quality Gates** | Ruff, mypy, pytest | ✅ All Pass (0 issues) |
 | **Supported Languages** | French | 🇫🇷 v1.0 only |
-| **Supported Formats** | .txt, .md | 📝 v1.0 scope |
+| **Supported Formats** | .txt, .md, .pdf, .docx | 📝 PDF/DOCX via optional extras |
 
 ---
 

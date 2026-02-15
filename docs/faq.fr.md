@@ -52,11 +52,30 @@ Cela réduit la fatigue de validation en éliminant les demandes redondantes. Le
 
 ### Quels formats de documents sont pris en charge ?
 
-La v1.0 prend en charge :
+La v1.1 prend en charge :
 - **Texte brut** (`.txt`)
 - **Markdown** (`.md`)
+- **PDF** (`.pdf`) -- nécessite une dépendance optionnelle
+- **Microsoft Word** (`.docx`) -- nécessite une dépendance optionnelle
 
-Les formats PDF, DOCX, HTML et autres ne sont pas pris en charge dans la v1.0. Convertissez les fichiers en texte brut avant le traitement.
+Les formats HTML et autres ne sont pas encore pris en charge. Convertissez ces fichiers en texte brut avant le traitement.
+
+### Comment traiter des fichiers PDF ou DOCX ?
+
+Installez les extras de format optionnels et traitez comme d'habitude :
+
+```bash
+# Installer le support PDF/DOCX
+pip install gdpr-pseudonymizer[formats]
+
+# Traiter un PDF
+gdpr-pseudo process rapport.pdf
+
+# Traiter un DOCX
+gdpr-pseudo process entretien.docx
+```
+
+La sortie est toujours en texte brut (`.txt`). Le nom de fichier de sortie par défaut pour `rapport.pdf` serait `rapport_pseudonymized.txt`. La préservation du format (PDF vers PDF, DOCX vers DOCX) est prévue pour la v1.2+.
 
 ### Puis-je utiliser cet outil pour des documents non français ?
 

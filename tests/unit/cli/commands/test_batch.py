@@ -81,10 +81,10 @@ class TestCollectFiles:
 
     def test_skip_unsupported_extension(self, tmp_path: Path) -> None:
         """Test that unsupported extensions are skipped."""
-        pdf_file = tmp_path / "test.pdf"
-        pdf_file.write_text("content")
+        csv_file = tmp_path / "test.csv"
+        csv_file.write_text("content")
 
-        files = collect_files(pdf_file)
+        files = collect_files(csv_file)
 
         assert len(files) == 0
 
@@ -92,7 +92,7 @@ class TestCollectFiles:
         """Test collecting files from directory."""
         (tmp_path / "file1.txt").write_text("content")
         (tmp_path / "file2.md").write_text("content")
-        (tmp_path / "file3.pdf").write_text("content")  # Should be skipped
+        (tmp_path / "file3.csv").write_text("content")  # Should be skipped
 
         files = collect_files(tmp_path)
 
@@ -194,7 +194,7 @@ class TestBatchCommand:
     def test_batch_no_files_found(self, tmp_path: Path) -> None:
         """Test batch command with no supported files."""
         # Create only unsupported file
-        (tmp_path / "file.pdf").write_text("content")
+        (tmp_path / "file.csv").write_text("content")
 
         result = runner.invoke(app, ["batch", str(tmp_path)])
 

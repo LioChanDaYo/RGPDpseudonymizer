@@ -441,7 +441,7 @@ Ce projet est distribué sous la [licence MIT](LICENSE).
 - Détection IA : environ 60 % F1 (pas 85 %+)
 - Validation requise pour TOUS les documents (pas facultative)
 - Français uniquement (anglais, espagnol, etc. dans les versions futures)
-- Formats textuels uniquement (.txt, .md — ni PDF ni DOCX en v1.0)
+- Formats textuels : .txt, .md, .pdf, .docx (PDF/DOCX nécessitent des extras optionnels : `pip install gdpr-pseudonymizer[formats]`)
 
 ---
 
@@ -582,7 +582,7 @@ La suite de tests d'intégration couvre :
 | **Couverture de test** | 1 198+ tests, 86 %+ de couverture | ✅ Tous les contrôles qualité validés |
 | **Contrôles qualité** | Ruff, mypy, pytest | ✅ Tous validés (0 problème) |
 | **Langues** | Français | 🇫🇷 v1.0 uniquement |
-| **Formats** | .txt, .md | 📝 Périmètre v1.0 |
+| **Formats** | .txt, .md, .pdf, .docx | 📝 PDF/DOCX via extras optionnels |
 
 ---
 

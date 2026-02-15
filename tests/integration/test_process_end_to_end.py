@@ -311,7 +311,7 @@ def test_process_end_to_end_file_not_found(tmp_path: Path) -> None:
 
 def test_process_end_to_end_invalid_file_format(tmp_path: Path) -> None:
     """Test error handling for invalid file format."""
-    input_file = tmp_path / "test.docx"
+    input_file = tmp_path / "test.csv"
     input_file.write_text("Test content.")
 
     output_file = tmp_path / "output.txt"
