@@ -38,7 +38,9 @@ jobs:
             poetry-deps-ubuntu-3.11-
 
       - name: Install dependencies
-        run: poetry install --no-interaction
+        run: |
+          poetry install --no-interaction --extras formats
+          poetry run pip install --force-reinstall --no-deps typer==0.9.4
 
       - name: Cache spaCy model
         uses: actions/cache@v4
