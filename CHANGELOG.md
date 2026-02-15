@@ -9,13 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+_No changes yet._
+
+---
+
+## [1.1.0] - 2026-02-15
+
 ### Added
 
-- **PDF/DOCX input format support** (Story 5.5) — Process PDF and DOCX documents directly without manual conversion. Text extraction via `pdfplumber` (PDF) and `python-docx` (DOCX) as optional extras. Install with `pip install gdpr-pseudonymizer[formats]` (or `[pdf]`/`[docx]` individually). Output is always `.txt` (plaintext); format preservation planned for v1.2+. Scanned/image-based PDFs produce a warning; OCR is not supported. Both `process` and `batch` commands accept `.pdf` and `.docx` files with auto-detection from extension.
-- **CLI polish & minor enhancements** (Story 5.6):
-  - Context cycling dot indicator in validation UI: displays `● ○ ○ ○ ○` dots showing current context position with `[Press X to cycle]` hint. Truncated format (`○ ○ … ● … ○ ○`) for >10 contexts.
-  - Batch operations feedback with entity count: after Shift+A/R, displays count of affected entities and total occurrences (e.g., `✓ Accepted all 15 PERSON entities (42 total occurrences)`). Accept uses green highlight, reject uses cyan.
-  - CI benchmark regression gate: `pytest-benchmark` entity-detection benchmark added to CI pipeline with `--benchmark-json` artifact upload (30-day retention) and `--benchmark-max-time=60` guard.
 - **GDPR Right to Erasure** (Story 5.1) — `delete-mapping` command for GDPR Article 17 compliance. Delete specific entity mappings by name or UUID with passphrase verification, confirmation prompt, and ERASURE audit log entry. New `list-entities` command for erasure workflow (shows entity ID, type, pseudonym, first seen date). Optional `--reason` flag for documenting erasure rationale. `--force` flag to skip confirmation in scripted workflows.
 - **Gender-aware pseudonym assignment** (Story 5.2) — Automatically detects French first name gender from a 945-name dictionary (470 male, 457 female, 18 ambiguous) and assigns gender-matched pseudonyms. Female names get female pseudonyms, male names get male pseudonyms, and ambiguous/unknown names fall back to the combined list. Supports compound names (e.g., "Marie-Claire" detected as female via first component).
 - **GenderDetector module** (`gdpr_pseudonymizer.pseudonym.gender_detector`) — Standalone gender detection class with lazy-loaded INSEE-sourced French name dictionary.
@@ -26,6 +27,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Expanded ORG detection: 18 suffixes (SA, SARL, SAS, SASU, EURL, SNC, SCM, SCI, GIE, EI, SCOP, SEL, Association, Fondation, Institut, Groupe, Consortium, Fédération) and 10 prefixes (Société, Entreprise, Cabinet, Groupe, Compagnie, Association, Fondation, Institut, Consortium, Fédération)
   - French geography dictionary: 100 cities, 18 regions, 101 departments for standalone location detection
   - PERSON recall: 34.23% → 82.93% (+48.70pp), ORG FN rate: 65.71% → 48.09% (PASS), LOCATION FN rate: 36.59% → 33.06% (improved)
+- **French documentation translation** (Story 5.4) — `README.fr.md` with full French translation and language toggle. French user guides: `installation.fr.md`, `tutorial.fr.md`, `faq.fr.md`, `troubleshooting.fr.md`. MkDocs i18n via `mkdocs-static-i18n` plugin with FR/EN toggle on documentation site.
+- **PDF/DOCX input format support** (Story 5.5) — Process PDF and DOCX documents directly without manual conversion. Text extraction via `pdfplumber` (PDF) and `python-docx` (DOCX) as optional extras. Install with `pip install gdpr-pseudonymizer[formats]` (or `[pdf]`/`[docx]` individually). Output is always `.txt` (plaintext); format preservation planned for v1.2+. Scanned/image-based PDFs produce a warning; OCR is not supported. Both `process` and `batch` commands accept `.pdf` and `.docx` files with auto-detection from extension.
+- **CLI polish & minor enhancements** (Story 5.6):
+  - Context cycling dot indicator in validation UI: displays `● ○ ○ ○ ○` dots showing current context position with `[Press X to cycle]` hint. Truncated format (`○ ○ … ● … ○ ○`) for >10 contexts.
+  - Batch operations feedback with entity count: after Shift+A/R, displays count of affected entities and total occurrences (e.g., `✓ Accepted all 15 PERSON entities (42 total occurrences)`). Accept uses green highlight, reject uses cyan.
+  - CI benchmark regression gate: `pytest-benchmark` entity-detection benchmark added to CI pipeline with `--benchmark-json` artifact upload (30-day retention) and `--benchmark-max-time=60` guard.
+
+### Changed
+
+- Version bumped from 1.0.7 to 1.1.0
 
 ---
 
