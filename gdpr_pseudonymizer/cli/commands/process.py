@@ -65,7 +65,7 @@ def process_command(
         file_okay=True,
         dir_okay=False,
         readable=True,
-        help="Input file path (.txt or .md)",
+        help="Input file path (.txt, .md, .pdf, or .docx)",
     ),
     output_file: Optional[Path] = typer.Option(
         None,
@@ -138,7 +138,7 @@ def process_command(
         effective_model = model if model is not None else config.pseudonymization.model
         effective_db_path = db_path if db_path is not None else config.database.path
         # Validate file extension
-        allowed_extensions = [".txt", ".md"]
+        allowed_extensions = [".txt", ".md", ".pdf", ".docx"]
         if input_file.suffix.lower() not in allowed_extensions:
             format_error_message(
                 "Invalid File Format",
@@ -149,9 +149,12 @@ def process_command(
 
         # Generate default output filename if not provided
         if output_file is None:
+            # PDF/DOCX produce plaintext output, so default to .txt
+            output_suffix = input_file.suffix
+            if input_file.suffix.lower() in [".pdf", ".docx"]:
+                output_suffix = ".txt"
             output_file = (
-                input_file.parent
-                / f"{input_file.stem}_pseudonymized{input_file.suffix}"
+                input_file.parent / f"{input_file.stem}_pseudonymized{output_suffix}"
             )
             logger.info("using_default_output", output_file=str(output_file))
 

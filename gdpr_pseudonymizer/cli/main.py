@@ -183,7 +183,7 @@ def _process(
         file_okay=True,
         dir_okay=False,
         readable=True,
-        help="Input file path (.txt or .md)",
+        help="Input file path (.txt, .md, .pdf, or .docx)",
     ),
     output_file: Optional[Path] = typer.Option(
         None,

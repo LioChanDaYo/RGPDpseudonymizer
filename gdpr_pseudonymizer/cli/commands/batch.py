@@ -50,7 +50,7 @@ logger = get_logger(__name__)
 console = Console()
 
 # Supported file extensions
-SUPPORTED_EXTENSIONS = [".txt", ".md"]
+SUPPORTED_EXTENSIONS = [".txt", ".md", ".pdf", ".docx"]
 
 
 @dataclass
@@ -183,12 +183,14 @@ def _process_batch_parallel(
 
     args_list: list[tuple[str, str, str, str, str, str, Optional[str]]] = []
     for file_path in files:
+        # PDF/DOCX produce plaintext output, so default to .txt
+        out_suffix = file_path.suffix
+        if file_path.suffix.lower() in [".pdf", ".docx"]:
+            out_suffix = ".txt"
         if output_dir:
-            out_file = output_dir / f"{file_path.stem}_pseudonymized{file_path.suffix}"
+            out_file = output_dir / f"{file_path.stem}_pseudonymized{out_suffix}"
         else:
-            out_file = (
-                file_path.parent / f"{file_path.stem}_pseudonymized{file_path.suffix}"
-            )
+            out_file = file_path.parent / f"{file_path.stem}_pseudonymized{out_suffix}"
         args_list.append(
             (
                 str(file_path),
@@ -372,7 +374,7 @@ def batch_command(
 ) -> None:
     """Process multiple documents with pseudonymization.
 
-    Processes all .txt and .md files in the specified directory or file list.
+    Processes all .txt, .md, .pdf, and .docx files in the specified directory or file list.
 
     With --workers 1 (sequential mode): Files are processed one at a time with
     interactive validation prompts for each entity detected.
@@ -567,16 +569,20 @@ def batch_command(
                     live.update(make_progress_group())
 
                     # Generate output path
+                    # PDF/DOCX produce plaintext output, so default to .txt
+                    out_suffix = file_path.suffix
+                    if file_path.suffix.lower() in [".pdf", ".docx"]:
+                        out_suffix = ".txt"
                     if effective_output_dir:
                         effective_output_dir.mkdir(parents=True, exist_ok=True)
                         output_file = (
                             effective_output_dir
-                            / f"{file_path.stem}_pseudonymized{file_path.suffix}"
+                            / f"{file_path.stem}_pseudonymized{out_suffix}"
                         )
                     else:
                         output_file = (
                             file_path.parent
-                            / f"{file_path.stem}_pseudonymized{file_path.suffix}"
+                            / f"{file_path.stem}_pseudonymized{out_suffix}"
                         )
 
                     try:

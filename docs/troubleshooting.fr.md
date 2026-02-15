@@ -187,8 +187,9 @@ poetry run gdpr-pseudo process doc2.txt --db shared.db
 **Solutions :**
 1. Assurez-vous que le texte est en français avec le bon encodage (UTF-8 avec accents : é, è, à)
 2. Vérifiez que le document contient des noms, des lieux ou des organisations
-3. Vérifiez que le fichier est au format `.txt` ou `.md`
-4. Testez avec un exemple connu et valide :
+3. Vérifiez que le fichier est au format `.txt`, `.md`, `.pdf` ou `.docx`
+4. Pour les PDF/DOCX, assurez-vous que les extras optionnels sont installés : `pip install gdpr-pseudonymizer[formats]`
+5. Testez avec un exemple connu et valide :
    ```bash
    echo "Marie Dubois travaille a Paris pour Acme SA." > test.txt
    poetry run gdpr-pseudo process test.txt
@@ -296,6 +297,53 @@ sudo dnf install python3-devel gcc
 **Cause :** Le modèle `fr_core_news_lg` pèse environ 571 Mo et prend quelques secondes à charger lors de la première utilisation.
 
 **Mitigation :** Le modèle est mis en cache en mémoire après le premier chargement. Les documents suivants dans une session de traitement par lot se traitent plus rapidement.
+
+---
+
+## Problèmes de traitement PDF/DOCX
+
+### `PDF support requires 'pdfplumber'`
+
+**Cause :** La dépendance optionnelle pour le PDF n'est pas installée.
+
+**Solution :**
+```bash
+pip install gdpr-pseudonymizer[pdf]
+# Ou installez le support PDF et DOCX :
+pip install gdpr-pseudonymizer[formats]
+```
+
+### `DOCX support requires 'python-docx'`
+
+**Cause :** La dépendance optionnelle pour le DOCX n'est pas installée.
+
+**Solution :**
+```bash
+pip install gdpr-pseudonymizer[docx]
+# Ou installez le support PDF et DOCX :
+pip install gdpr-pseudonymizer[formats]
+```
+
+### « This PDF appears to be scanned/image-based »
+
+**Cause :** Le PDF contient des images au lieu de texte (document numérisé). `pdfplumber` ne peut extraire que le texte intégré, pas effectuer de reconnaissance optique de caractères (OCR).
+
+**Solutions :**
+1. Utilisez un outil OCR (par ex. Adobe Acrobat, Tesseract) pour convertir le PDF numérisé en PDF textuel au préalable
+2. Exportez le PDF numérisé en `.txt` manuellement, puis traitez le fichier texte
+3. Si du texte partiel a été extrait, vérifiez la sortie -- elle peut encore contenir du contenu utile
+
+**Remarque :** Le support OCR n'est pas prévu pour la version actuelle.
+
+### Le PDF est protégé par mot de passe
+
+**Erreur :** `PDF is password-protected: <fichier>. Please provide an unprotected PDF.`
+
+**Solution :** Supprimez la protection par mot de passe du PDF avant le traitement. La plupart des éditeurs PDF (Adobe Acrobat, Aperçu sur macOS) peuvent supprimer les mots de passe si vous connaissez le mot de passe original.
+
+### Le fichier de sortie a l'extension `.txt` pour une entrée PDF/DOCX
+
+**C'est le comportement attendu.** Les entrées PDF/DOCX produisent une sortie en texte brut `.txt` car l'outil extrait uniquement le contenu textuel. La sortie avec préservation du format (PDF vers PDF, DOCX vers DOCX) est prévue pour la version 1.2+.
 
 ---
 

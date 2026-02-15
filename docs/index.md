@@ -98,6 +98,6 @@ GDPR Pseudonymizer supports compliance with Articles 4(5), 25, 30, 32, and 89 of
 
 **Current version:** v1.0.7 (February 2026)
 
-**Supported:** Python 3.10-3.12 | Windows, macOS, Linux | .txt and .md formats | French language
+**Supported:** Python 3.10-3.12 | Windows, macOS, Linux | .txt, .md, .pdf, .docx formats | French language
 
 See the [FAQ](faq.md) for the product roadmap.
