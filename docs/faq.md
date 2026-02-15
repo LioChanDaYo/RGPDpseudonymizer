@@ -167,6 +167,8 @@ No. All processing happens locally. There are no cloud dependencies, API calls, 
 - ~~Gender-aware pseudonym assignment for French names~~ (Story 5.2 — done)
 - ~~NER accuracy improvements: F1 29.5% → 59.97%~~ (Story 5.3 — done)
 - ~~French documentation translation (MkDocs i18n)~~ (Story 5.4 — done)
+- ~~PDF/DOCX input format support (optional extras)~~ (Story 5.5 — done)
+- ~~CLI polish & minor enhancements (context cycling indicator, batch feedback, CI benchmarks)~~ (Story 5.6 — done)
 - Beta feedback bug fixes and UX improvements
 
 **v2.0 (Q3-Q4 2026):** Desktop GUI

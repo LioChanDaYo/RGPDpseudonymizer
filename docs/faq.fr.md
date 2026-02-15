@@ -167,6 +167,8 @@ Non. Tout le traitement se fait localement. Il n'y a aucune dépendance cloud, a
 - ~~Attribution de pseudonymes consciente du genre pour les noms français~~ (Story 5.2 — terminé)
 - ~~Améliorations de la précision NER : F1 29,5 % → 59,97 %~~ (Story 5.3 — terminé)
 - ~~Traduction française de la documentation (MkDocs i18n)~~ (Story 5.4 — terminé)
+- ~~Support des formats PDF/DOCX en entrée (extras optionnels)~~ (Story 5.5 — terminé)
+- ~~Perfectionnement CLI et améliorations mineures (indicateur de défilement des contextes, retour visuel des actions groupées, benchmarks CI)~~ (Story 5.6 — terminé)
 - Correctifs de bugs et améliorations UX issues des retours bêta
 
 **v2.0 (Q3-Q4 2026) :** Interface graphique de bureau

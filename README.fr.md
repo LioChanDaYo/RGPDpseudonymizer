@@ -85,6 +85,8 @@ GDPR Pseudonymizer est un **outil en ligne de commande conçu pour la confidenti
 - ✅ ~~Attribution de pseudonymes tenant compte du genre pour les prénoms français~~ (Story 5.2 — terminé)
 - ✅ ~~Améliorations de la précision NER : F1 29,74 % → 59,97 % (nettoyage des annotations, enrichissement des expressions régulières, dictionnaire géographique)~~ (Story 5.3 — terminé)
 - ✅ ~~Traduction française de la documentation (MkDocs i18n, 6 documents traduits)~~ (Story 5.4 — terminé)
+- ✅ ~~Support des formats PDF/DOCX en entrée (extras optionnels, extraction de texte)~~ (Story 5.5 — terminé)
+- ✅ ~~Perfectionnement CLI et améliorations mineures (indicateur de défilement des contextes, retour visuel des actions groupées, benchmarks CI)~~ (Story 5.6 — terminé)
 - Corrections de bugs et améliorations UX issues des retours bêta
 
 **v2.0 (T3-T4 2026) :** Interface graphique
@@ -242,7 +244,8 @@ L'interface de validation offre un parcours intuitif piloté au clavier pour pas
 - ✅ **Affichage du contexte** — 10 mots avant et après chaque entité, avec mise en surbrillance
 - ✅ **Scores de confiance** — Code couleur selon la confiance du modèle spaCy (vert > 80 %, jaune 60-80 %, rouge < 60 %)
 - ✅ **Raccourcis clavier** — Actions à une touche : [Espace] Confirmer, [R] Rejeter, [E] Modifier, [A] Ajouter, [C] Changer le pseudonyme
-- ✅ **Actions groupées** — Accepter ou rejeter toutes les entités d'un type en une fois (Maj+A/R)
+- ✅ **Actions groupées** — Accepter ou rejeter toutes les entités d'un type en une fois (Maj+A/R) avec affichage du nombre d'entités traitées
+- ✅ **Indicateur de défilement des contextes** — Points indicateurs (`● ○ ○ ○ ○`) montrant la position courante ; mention `[Press X to cycle]` pour faciliter la découverte de la touche X
 - ✅ **Aide intégrée** — Appuyez sur [H] pour afficher tous les raccourcis
 - ✅ **Performance** — Moins de 2 minutes pour un document type de 20-30 entités
 
@@ -375,8 +378,8 @@ L'interface de validation offre un parcours intuitif piloté au clavier pour pas
 - ✅ **Epic 2 :** Moteur de pseudonymisation (9 stories) — Bibliothèques de pseudonymes, chiffrement, journaux d'audit, traitement par lot, correspondance 1:1 RGPD
 - ✅ **Epic 3 :** Interface CLI et traitement par lot (7 stories) — 8 commandes CLI, suivi de progression, fichiers de configuration, traitement parallèle, perfectionnement UX
 - ✅ **Epic 4 :** Préparation au lancement (8 stories) — Validation de l'utilité LLM, tests multi-plateformes, documentation, suite de précision NER, validation des performances, intégration des retours bêta, refactorisation, préparation au lancement
-- 🔄 **Epic 5 :** Améliorations et conformité RGPD (4 stories terminées) — Effacement article 17 RGPD, pseudonymes tenant compte du genre, amélioration de la précision NER (F1 29,74 % → 59,97 %), traduction française de la documentation
-- **Total :** 36 stories, 1 198+ tests, 86 %+ de couverture, tous les contrôles qualité au vert
+- 🔄 **Epic 5 :** Améliorations et conformité RGPD (6 stories terminées) — Effacement article 17 RGPD, pseudonymes tenant compte du genre, amélioration de la précision NER (F1 29,74 % → 59,97 %), traduction française de la documentation, support PDF/DOCX, perfectionnement CLI et benchmarks
+- **Total :** 39 stories, 1 267+ tests, 86 %+ de couverture, tous les contrôles qualité au vert
 
 ---
 
@@ -518,12 +521,12 @@ poetry run pytest tests/integration/test_validation_workflow_integration.py -v
 
 ### Couverture des tests
 
-- **Tests unitaires :** 946+ tests couvrant les modèles de validation, les composants d'interface, le chiffrement, les opérations de base de données, les journaux d'audit, le suivi de progression, la détection de genre et la logique métier
+- **Tests unitaires :** 977+ tests couvrant les modèles de validation, les composants d'interface, le chiffrement, les opérations de base de données, les journaux d'audit, le suivi de progression, la détection de genre, l'indicateur de défilement des contextes et la logique métier
 - **Tests d'intégration :** 90 tests couvrant les parcours de bout en bout, dont la validation (Story 2.0.1), les opérations sur base chiffrée (Story 2.4), la logique de composition et la détection hybride
 - **Tests de précision :** 22 tests mesurant la précision NER sur un corpus de référence de 25 documents (Story 4.4)
-- **Tests de performance :** 15 tests validant toutes les exigences non fonctionnelles — benchmarks par document (NFR1), traitement par lot (NFR2), profilage mémoire (NFR4), temps de démarrage (NFR5), stabilité et taux d'erreur (NFR6), tests de charge (Story 4.5)
+- **Tests de performance :** 19 tests validant toutes les exigences non fonctionnelles — benchmarks par document (NFR1), benchmarks de détection d'entités, traitement par lot (NFR2), profilage mémoire (NFR4), temps de démarrage (NFR5), stabilité et taux d'erreur (NFR6), tests de charge (Story 4.5)
 - **Couverture actuelle :** 86 %+ sur l'ensemble des modules (100 % pour le module de progression, 91,41 % pour AuditRepository)
-- **Total :** 1 198+ tests
+- **Total :** 1 267+ tests
 - **CI/CD :** Tests exécutés sur Python 3.10-3.12, sous Windows, macOS et Linux
 - **Contrôles qualité :** Tous validés (Black, Ruff, mypy, pytest)
 
@@ -553,12 +556,12 @@ La suite de tests d'intégration couvre :
 
 ---
 
-## 📊 Métriques du projet (au 2026-02-13)
+## 📊 Métriques du projet (au 2026-02-15)
 
 | Métrique | Valeur | Statut |
 |----------|--------|--------|
 | **Avancement** | v1.0.7 | ✅ Les 4 Epics MVP + Epic 5 en cours |
-| **Stories terminées** | 37 (Epic 1-5) | ✅ Epics 1-4 terminés + Stories 5.1, 5.2, 5.3, 5.4 |
+| **Stories terminées** | 39 (Epic 1-5) | ✅ Epics 1-4 terminés + Stories 5.1-5.6 |
 | **Utilité LLM (NFR10)** | 4,27/5,0 (85,4 %) | ✅ VALIDÉ (seuil : 80 %) |
 | **Succès d'installation (NFR3)** | 87,5 % (7/8 plateformes) | ✅ VALIDÉ (seuil : 85 %) |
 | **Première pseudonymisation (NFR14)** | 100 % en moins de 30 min | ✅ VALIDÉ (seuil : 80 %) |
@@ -579,7 +582,7 @@ La suite de tests d'intégration couvre :
 | **Utilisation mémoire (NFR4)** | environ 1 Go de pic mesuré par Python | ✅ VALIDÉ (seuil < 8 Go) |
 | **Démarrage CLI (NFR5)** | 0,56 s (help), 6,0 s (démarrage à froid avec modèle) | ✅ VALIDÉ (< 5 s pour le démarrage CLI) |
 | **Taux d'erreur (NFR6)** | environ 0 % d'erreurs inattendues | ✅ VALIDÉ (seuil < 10 %) |
-| **Couverture de test** | 1 198+ tests, 86 %+ de couverture | ✅ Tous les contrôles qualité validés |
+| **Couverture de test** | 1 267+ tests, 86 %+ de couverture | ✅ Tous les contrôles qualité validés |
 | **Contrôles qualité** | Ruff, mypy, pytest | ✅ Tous validés (0 problème) |
 | **Langues** | Français | 🇫🇷 v1.0 uniquement |
 | **Formats** | .txt, .md, .pdf, .docx | 📝 PDF/DOCX via extras optionnels |
@@ -596,4 +599,4 @@ La suite de tests d'intégration couvre :
 
 ---
 
-**Dernière mise à jour :** 2026-02-14 (v1.0.7 — Epic 5 en cours : effacement RGPD, pseudonymes tenant compte du genre, précision NER 59,97 % F1, documentation française)
+**Dernière mise à jour :** 2026-02-15 (v1.0.7 — Epic 5 en cours : effacement RGPD, pseudonymes tenant compte du genre, précision NER 59,97 % F1, documentation française, support PDF/DOCX, perfectionnement CLI)

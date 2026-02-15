@@ -18,6 +18,44 @@ from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 console = Console()
 
 
+def generate_context_dots(current_index: int, total: int) -> str:
+    """Generate dot indicator string for context cycling.
+
+    Args:
+        current_index: Current context position (1-based)
+        total: Total number of contexts
+
+    Returns:
+        Dot indicator string, e.g., "○ ● ○ ○ ○".
+        Empty string when total <= 1.
+        Truncated format for total > 10.
+    """
+    if total <= 1:
+        return ""
+
+    if total <= 10:
+        return " ".join("●" if i == current_index else "○" for i in range(1, total + 1))
+
+    # Truncated format for >10 contexts to avoid line wrapping
+    visible_start = [1, 2, 3]
+    visible_end = [total - 1, total]
+
+    if current_index in visible_start or current_index in visible_end:
+        parts = []
+        for i in visible_start:
+            parts.append("●" if i == current_index else "○")
+        parts.append("…")
+        for i in visible_end:
+            parts.append("●" if i == current_index else "○")
+        return " ".join(parts)
+
+    # Current position is in the middle — show it explicitly
+    parts = ["○", "○", "…", "●", "…"]
+    for i in visible_end:
+        parts.append("●" if i == current_index else "○")
+    return " ".join(parts)
+
+
 def get_user_action() -> str:
     """Capture single keypress for user action.
 
@@ -256,7 +294,8 @@ class ReviewScreen:
         # Context with cycling indicator for groups
         context_label = "Context:"
         if occurrence_count > 1:
-            context_label = f"Context ({context_index}/{occurrence_count}):"
+            dots = generate_context_dots(context_index, occurrence_count)
+            context_label = f"Context ({context_index}/{occurrence_count}): {dots}"
         table.add_row(context_label, f"[dim]{context}[/dim]")
 
         self.console.print(table)
@@ -264,9 +303,7 @@ class ReviewScreen:
 
         # Context cycling hint for groups
         if occurrence_count > 1:
-            self.console.print(
-                f"[dim]Press [bold]X[/bold] to cycle through {occurrence_count} contexts[/dim]"
-            )
+            self.console.print("[dim]\\[Press X to cycle][/dim]")
             self.console.print()
 
         # Action hints
