@@ -14,6 +14,19 @@ Préparez vos documents sensibles pour l'analyse par IA en toute sérénité : t
 
 ---
 
+## Nouveautés de la v1.1
+
+- **Droit à l'effacement RGPD (article 17)** — Commandes `delete-mapping` et `list-entities` pour la suppression sélective d'entités avec piste d'audit
+- **Pseudonymes tenant compte du genre** — Dictionnaire de 945 prénoms français attribuant automatiquement des pseudonymes du même genre
+- **Précision NER doublée** — Score F1 amélioré de 29,74 % à 59,97 % (+30,23 pp) grâce au nettoyage des annotations, à l'enrichissement des expressions régulières et au dictionnaire géographique
+- **Support PDF/DOCX** — Traitez directement les fichiers PDF et DOCX : `pip install gdpr-pseudonymizer[formats]`
+- **Documentation française** — Traduction complète du README et des guides utilisateur, bascule FR/EN sur MkDocs
+- **Améliorations de l'interface de validation** — Indicateur de défilement des contextes, retour visuel des actions groupées avec compteurs, benchmark CI de régression
+
+**Mise à jour :** `pip install --upgrade gdpr-pseudonymizer`
+
+---
+
 ## 🎯 Présentation
 
 GDPR Pseudonymizer est un **outil en ligne de commande conçu pour la confidentialité**. Il associe la rapidité de l'IA à la rigueur de la relecture humaine pour pseudonymiser des documents en français. Contrairement aux solutions entièrement automatiques ou aux services cloud, il mise sur l'**absence totale de faux négatifs** et sur la **solidité juridique** grâce à un processus de validation obligatoire.
@@ -59,15 +72,18 @@ GDPR Pseudonymizer est un **outil en ligne de commande conçu pour la confidenti
 
 ## 🚀 Prise en main rapide
 
-**Version actuelle :** 🎉 **v1.0.7** (février 2026)
+**Version actuelle :** 🎉 **v1.1.0** (février 2026)
 
-### Ce que la v1.0 permet — et ce qu'elle ne permet pas
+### Ce que la v1.1 permet — et ce qu'elle ne permet pas
 
 **Ce qu'elle offre :**
 - 🤖 **Détection assistée par IA** — La détection hybride NLP + expressions régulières repère environ 60 % des entités automatiquement (F1 59,97 %)
 - ✅ **Relecture humaine obligatoire** — Vous passez en revue toutes les entités (2-3 min par document)
 - 🔒 **Précision garantie à 100 %** — La validation humaine élimine tout faux négatif
 - ⚡ **Plus de 50 % de temps gagné** par rapport à la rédaction manuelle
+- 🗑️ **Effacement RGPD article 17** — Suppression sélective des correspondances d'entités avec piste d'audit
+- 📄 **Support PDF/DOCX** — Traitement direct des fichiers PDF et DOCX (extras optionnels)
+- 🇫🇷 **Documentation française** — Traduction complète des guides et du README
 
 **Ce qu'elle ne propose pas :**
 - ❌ Un traitement entièrement automatique sans intervention
@@ -76,18 +92,17 @@ GDPR Pseudonymizer est un **outil en ligne de commande conçu pour la confidenti
 
 ### Feuille de route
 
-**v1.0 (MVP — T2 2026) :** CLI assisté par IA avec validation obligatoire
+**v1.0 (MVP — T1 2026) :** CLI assisté par IA avec validation obligatoire
 - Public visé : utilisateurs soucieux de la confidentialité, attachés au contrôle humain
 - Traitement 100 % local, tables de correspondance chiffrées, journaux d'audit
 
-**v1.1 (T2-T3 2026) :** Améliorations et conformité RGPD
-- ✅ ~~Droit à l'effacement RGPD : suppression sélective d'entités (commande `delete-mapping`, article 17)~~ (Story 5.1 — terminé)
-- ✅ ~~Attribution de pseudonymes tenant compte du genre pour les prénoms français~~ (Story 5.2 — terminé)
-- ✅ ~~Améliorations de la précision NER : F1 29,74 % → 59,97 % (nettoyage des annotations, enrichissement des expressions régulières, dictionnaire géographique)~~ (Story 5.3 — terminé)
-- ✅ ~~Traduction française de la documentation (MkDocs i18n, 6 documents traduits)~~ (Story 5.4 — terminé)
-- ✅ ~~Support des formats PDF/DOCX en entrée (extras optionnels, extraction de texte)~~ (Story 5.5 — terminé)
-- ✅ ~~Perfectionnement CLI et améliorations mineures (indicateur de défilement des contextes, retour visuel des actions groupées, benchmarks CI)~~ (Story 5.6 — terminé)
-- Corrections de bugs et améliorations UX issues des retours bêta
+**v1.1 (T1 2026) — VERSION ACTUELLE :**
+- ✅ Droit à l'effacement RGPD : suppression sélective d'entités (commande `delete-mapping`, article 17)
+- ✅ Attribution de pseudonymes tenant compte du genre (dictionnaire de 945 prénoms)
+- ✅ Améliorations de la précision NER : F1 29,74 % → 59,97 % (+30,23 pp)
+- ✅ Traduction française de la documentation (MkDocs i18n, 6 documents traduits)
+- ✅ Support des formats PDF/DOCX en entrée (extras optionnels, extraction de texte)
+- ✅ Perfectionnement CLI et améliorations mineures (indicateur de défilement des contextes, retour visuel des actions groupées, benchmarks CI)
 
 **v2.0 (T3-T4 2026) :** Interface graphique
 - Application de bureau encapsulant le noyau CLI (glisser-déposer, revue visuelle des entités)
@@ -372,14 +387,14 @@ L'interface de validation offre un parcours intuitif piloté au clavier pour pas
 
 ## 🛠️ État du développement
 
-**Les 4 Epics MVP sont terminés + Epic 5 en cours** — v1.0.7 (février 2026).
+**Les 5 Epics sont terminés** — v1.1.0 (février 2026).
 
 - ✅ **Epic 1 :** Fondations et validation NLP (9 stories) — Intégration spaCy, interface de validation, détection hybride, déduplication des entités
 - ✅ **Epic 2 :** Moteur de pseudonymisation (9 stories) — Bibliothèques de pseudonymes, chiffrement, journaux d'audit, traitement par lot, correspondance 1:1 RGPD
 - ✅ **Epic 3 :** Interface CLI et traitement par lot (7 stories) — 8 commandes CLI, suivi de progression, fichiers de configuration, traitement parallèle, perfectionnement UX
 - ✅ **Epic 4 :** Préparation au lancement (8 stories) — Validation de l'utilité LLM, tests multi-plateformes, documentation, suite de précision NER, validation des performances, intégration des retours bêta, refactorisation, préparation au lancement
-- 🔄 **Epic 5 :** Améliorations et conformité RGPD (6 stories terminées) — Effacement article 17 RGPD, pseudonymes tenant compte du genre, amélioration de la précision NER (F1 29,74 % → 59,97 %), traduction française de la documentation, support PDF/DOCX, perfectionnement CLI et benchmarks
-- **Total :** 39 stories, 1 267+ tests, 86 %+ de couverture, tous les contrôles qualité au vert
+- ✅ **Epic 5 :** Améliorations et conformité RGPD (7 stories) — Effacement article 17 RGPD, pseudonymes tenant compte du genre, amélioration de la précision NER (F1 29,74 % → 59,97 %), traduction française de la documentation, support PDF/DOCX, perfectionnement CLI et benchmarks, release v1.1
+- **Total :** 40 stories, 1 267+ tests, 86 %+ de couverture, tous les contrôles qualité au vert
 
 ---
 
@@ -560,8 +575,8 @@ La suite de tests d'intégration couvre :
 
 | Métrique | Valeur | Statut |
 |----------|--------|--------|
-| **Avancement** | v1.0.7 | ✅ Les 4 Epics MVP + Epic 5 en cours |
-| **Stories terminées** | 39 (Epic 1-5) | ✅ Epics 1-4 terminés + Stories 5.1-5.6 |
+| **Avancement** | v1.1.0 | ✅ Les 5 Epics terminés |
+| **Stories terminées** | 40 (Epic 1-5) | ✅ Epics 1-5 terminés |
 | **Utilité LLM (NFR10)** | 4,27/5,0 (85,4 %) | ✅ VALIDÉ (seuil : 80 %) |
 | **Succès d'installation (NFR3)** | 87,5 % (7/8 plateformes) | ✅ VALIDÉ (seuil : 85 %) |
 | **Première pseudonymisation (NFR14)** | 100 % en moins de 30 min | ✅ VALIDÉ (seuil : 80 %) |
@@ -599,4 +614,4 @@ La suite de tests d'intégration couvre :
 
 ---
 
-**Dernière mise à jour :** 2026-02-15 (v1.0.7 — Epic 5 en cours : effacement RGPD, pseudonymes tenant compte du genre, précision NER 59,97 % F1, documentation française, support PDF/DOCX, perfectionnement CLI)
+**Dernière mise à jour :** 2026-02-15 (v1.1.0 — Epic 5 terminé : effacement RGPD article 17, pseudonymes tenant compte du genre, précision NER 59,97 % F1, documentation française, support PDF/DOCX, perfectionnement CLI)
