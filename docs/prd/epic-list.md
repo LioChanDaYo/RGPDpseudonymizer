@@ -30,13 +30,19 @@
 
 ---
 
-### Epic 5: v1.1 — Quick Wins & GDPR Compliance (Q2 2026)
+### Epic 5: v1.1 — Quick Wins & GDPR Compliance ✅ COMPLETE (2026-02-15)
 
 **Goal:** Address deferred alpha/beta feedback, close the GDPR Article 17 compliance gap, improve pseudonym quality and NER accuracy, translate documentation for the French-speaking primary audience, and add PDF/DOCX format support.
 
 ---
 
-**Timeline: Epics 0-4: 14 weeks (v1.0 MVP). Epic 5: 6-7 weeks (v1.1)**
+### Epic 6: v2.0 — Desktop GUI & Broader Accessibility
+
+**Goal:** Expand beyond CLI-only users to the primary growth market — non-technical professionals who need GDPR-compliant pseudonymization but lack command-line comfort — by delivering a cross-platform desktop GUI, standalone executables, French-first internationalization, and WCAG AA accessibility.
+
+---
+
+**Timeline: Epics 0-4: 14 weeks (v1.0 MVP). Epic 5: 6-7 weeks (v1.1). Epic 6: 10-14 weeks (v2.0)**
 
 ---
 
@@ -90,7 +96,8 @@
 - **Week 10 (Post-Epic 2):** Alpha release v0.1.0 to 3-5 friendly users for core functionality feedback ✅ COMPLETE (2026-01-30)
 - **Week 13 (Post-Epic 3):** Beta release v0.2.0 to 10-15 early adopters for production workflow validation ✅ COMPLETE
 - **Week 14+ (Post-Epic 4):** Public v1.0 MVP release to broader early adopter community ✅ COMPLETE (2026-02-09, PyPI published)
-- **Q2 2026 (Epic 5):** v1.1 release — GDPR erasure, gender-aware pseudonyms, PDF/DOCX, French docs, NER accuracy improvements
+- **Q2 2026 (Epic 5):** v1.1 release — GDPR erasure, gender-aware pseudonyms, PDF/DOCX, French docs, NER accuracy improvements ✅ COMPLETE (2026-02-15)
+- **Epic 6:** v2.0 release — Desktop GUI, standalone executables, French-first i18n, WCAG AA accessibility
 
 ---
 
@@ -102,6 +109,15 @@
 - ✓ PDF and DOCX input format support functional
 - ✓ CLI polish and minor enhancements applied
 - ✓ v1.1.0 published on PyPI
+
+**Epic 6 DoD:**
+- [ ] Desktop GUI functional on Windows 10/11 and macOS 13+
+- [ ] Standalone executables (.exe, .app) tested on target platforms
+- [ ] Visual entity validation interface operational
+- [ ] French GUI translation complete and reviewed
+- [ ] WCAG AA accessibility checklist passed
+- [ ] CLI functionality fully preserved (no regressions)
+- [ ] v2.0.0 published on PyPI and standalone downloads on GitHub Releases
 
 ---
 
