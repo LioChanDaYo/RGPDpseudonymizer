@@ -1,0 +1,48 @@
+schema: 1
+story: '5.7'
+story_title: 'v1.1 Release Preparation'
+gate: PASS
+status_reason: 'All 9 ACs verified. Clean release engineering story: version bumped, CHANGELOG finalized, READMEs updated (EN+FR), quality gates passed, package built and published to PyPI, MkDocs deployed, release announcement drafted. Release workflow proactively fixed during execution.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-02-15T23:30:00Z'
+
+waiver: { active: false }
+
+top_issues: []
+
+risk_summary:
+  totals: { critical: 0, high: 0, medium: 0, low: 0 }
+  recommendations:
+    must_fix: []
+    monitor:
+      - 'README.md "v1.0 MVP limitations" section header could be updated to "Current limitations" — cosmetic'
+
+quality_score: 100
+expires: '2026-03-01T00:00:00Z'
+
+evidence:
+  tests_reviewed: 0
+  risks_identified: 0
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+    ac_gaps: []
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'No security-relevant changes. PYPI_TOKEN correctly scoped via GitHub environment.'
+  performance:
+    status: PASS
+    notes: 'No performance-relevant changes. Documentation and CI only.'
+  reliability:
+    status: PASS
+    notes: 'Release workflow fixed to include --extras formats and typer-slim namespace fix, matching CI workflow pattern.'
+  maintainability:
+    status: PASS
+    notes: 'Well-structured documentation. CHANGELOG follows Keep a Changelog. Release announcement comprehensive.'
+
+recommendations:
+  immediate: []
+  future:
+    - action: 'Update README.md "v1.0 MVP limitations" header to "Current limitations"'
+      refs: ['README.md:458']

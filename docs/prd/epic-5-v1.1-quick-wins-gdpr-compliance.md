@@ -2,7 +2,7 @@
 
 **Epic Goal:** Address deferred alpha/beta feedback, close the GDPR Article 17 compliance gap, improve pseudonym quality and NER accuracy, translate documentation for the French-speaking primary audience, and add PDF/DOCX format support — all without architectural changes to the v1.0 foundation.
 
-**Target Release:** v1.1.0 (Q2 2026)
+**Target Release:** v1.1.0 — **Released 2026-02-15**
 **Duration:** 6-7 weeks (ceiling: 8.5 weeks)
 **Predecessor:** Epic 4 (v1.0 MVP launched 2026-02-09)
 
@@ -28,7 +28,7 @@
 | 5.4: French Documentation Translation | 🟡 **MEDIUM** | 1-2 weeks | FE-010 / FB-002 | ✅ DONE |
 | 5.5: PDF/DOCX Input Format Support | 🟡 **MEDIUM** | 1-2 weeks | FB-004 | ✅ DONE |
 | 5.6: CLI Polish & Minor Enhancements | 🟢 **LOW** | 2-3 days | FE-001/002/003 + bugs | ✅ DONE |
-| 5.7: v1.1 Release Preparation | 🔴 **HIGH** | 1-2 days | — | 📋 PENDING |
+| 5.7: v1.1 Release Preparation | 🔴 **HIGH** | 1-2 days | — | ✅ DONE |
 
 **Total Estimated Duration:** 25-39 days (5-8 weeks, target: 6-7 weeks)
 
@@ -368,6 +368,7 @@ Story 5.7 (Release Prep)         ─── Week 6-7 ── Release gate
 | Python 3.13 support | FB-006 | Blocked by thinc wheels | Monitoring (MON-005) |
 | Fine-tuned French NER model | — | Requires curated training data from v1.x users | v3.0 |
 | CLI `--help` i18n (French) | FE-010b | Requires i18n framework; Typer/click compat risk | v2.0 |
+| French docs: CLI Ref, API Ref, Methodology | FE-010c | 3 pages serve EN under `/fr/` — UX gap ([Story 5.4.1](../stories/5.4.1.french-docs-complete-translation-coverage.story.md)) | v2.0 |
 | Output format preservation (PDF→PDF) | — | Complex; v1.1 outputs .txt from PDF/DOCX input | v1.2 |
 
 ---
@@ -381,14 +382,14 @@ Story 5.7 (Release Prep)         ─── Week 6-7 ── Release gate
 
 ## Definition of Done
 
-- [ ] All 7 stories completed with acceptance criteria met
-- [ ] Existing v1.0 functionality verified (full test suite passing)
-- [ ] All quality gates green: black, ruff, mypy, pytest
-- [ ] Test count ≥ v1.0 baseline (1077+), coverage ≥ 86%
-- [ ] No regression in existing `.txt`/`.md` processing workflows
-- [ ] Documentation updated (EN + FR) for all new features
-- [ ] v1.1.0 published on PyPI
-- [ ] CHANGELOG and README reflect all v1.1 changes
+- [x] All 7 stories completed with acceptance criteria met
+- [x] Existing v1.0 functionality verified (full test suite passing)
+- [x] All quality gates green: black, ruff, mypy, pytest
+- [x] Test count ≥ v1.0 baseline (1077+), coverage ≥ 86% — 1267+ tests, 86%+ coverage
+- [x] No regression in existing `.txt`/`.md` processing workflows
+- [x] Documentation updated (EN + FR) for all new features
+- [x] v1.1.0 published on PyPI (2026-02-15)
+- [x] CHANGELOG and README reflect all v1.1 changes
 
 ---
 
@@ -420,9 +421,10 @@ The epic should maintain system integrity while delivering GDPR compliance, accu
 
 ---
 
-**Document Status:** ✅ PM APPROVED
+**Document Status:** ✅ EPIC COMPLETE
 **Created:** 2026-02-11
 **Approved:** 2026-02-11
+**Completed:** 2026-02-15
 **Author:** Sarah (Product Owner)
 **PM Reviewer:** John (Product Manager)
-**Next Action:** Story creation (SM/Dev agent)
+**Outcome:** v1.1.0 published to PyPI — all 7 stories delivered, all QA gates passed
