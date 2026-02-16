@@ -68,7 +68,7 @@ This is a new Python CLI application built from scratch without starter template
 **Architectural Constraint:** Process-based parallelism with shared SQLite creates database locking that limits future service decomposition. This is acceptable for MVP (single-user, local-only tool) but Phase 3+ distributed architecture would require migration to client-server database (PostgreSQL) or message queue pattern. **We are optimizing for MVP success, not hypothetical enterprise scale.**
 
 **Key Assumptions:**
-- Users have Python 3.9+ installed or can install it (target platforms: Windows 10/11, macOS 11+, Linux)
+- Users have Python 3.10+ installed or can install it (target platforms: Windows 10/11, macOS 11+, Linux)
 - NLP library (spaCy or Stanza) achieves ≥85% F1 score on French NER (validated in Epic 0-1 benchmark)
 - Consumer hardware sufficient (8GB RAM, dual-core 2.0GHz+ CPU)
 - Users accept CLI interaction for MVP; GUI demanded for broader adoption in Phase 2

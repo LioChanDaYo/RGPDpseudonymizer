@@ -1,9 +1,8 @@
-"""Validation stub for entity review (placeholder for Story 1.7).
+"""Validation stub for entity review.
 
 This module provides a simple validation interface for the walking skeleton.
 It displays detected entities in a table and prompts for confirmation.
-
-TODO: Replace with full validation UI in Story 1.7 (Epic 1 AC11).
+Full validation UI implemented in Story 1.7 (Epic 1 AC11).
 """
 
 from __future__ import annotations
@@ -23,9 +22,6 @@ def present_entities_for_validation(
 
     This function presents entities to the user for review before
     pseudonymization. It shows entity text, type, and suggested pseudonym.
-
-    NOTE: This is a simplified placeholder. Story 1.7 will implement
-    full validation UI with entity editing, context display, and batch actions.
 
     Args:
         entities: List of detected entities (entity_text, entity_type,
@@ -64,9 +60,6 @@ def confirm_processing() -> bool:
 
     This function asks the user to confirm whether to proceed with
     pseudonymization after reviewing detected entities.
-
-    NOTE: This is a simplified placeholder. Story 1.7 will implement
-    full validation workflow with entity modification capabilities.
 
     Returns:
         True if user confirms, False if user rejects

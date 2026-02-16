@@ -29,7 +29,7 @@ This is the **DEFINITIVE** technology selection table. All development must use 
 | **Markdown Parsing** | markdown-it-py | 3.0+ | Format-aware processing (FR21) | CommonMark compliant, AST access for exclusion zones (code blocks, URLs). Pure Python (no C deps). |
 
 **Version Strategy:**
-- Specify minimum versions (e.g., `3.9+`, `1.7+`) to allow security patches
+- Specify minimum versions (e.g., `3.10+`, `1.7+`) to allow security patches
 - Lock exact versions in `poetry.lock` for reproducible builds
 - Update dependencies quarterly, test on CI matrix before release
 - Pin major versions for stability (e.g., SQLAlchemy `2.x`, not `^2.0`)

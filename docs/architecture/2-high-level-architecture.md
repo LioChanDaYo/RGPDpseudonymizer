@@ -7,7 +7,7 @@ This section establishes the foundation with multiple subsections presented toge
 The GDPR Pseudonymizer follows a **modular monolithic architecture** with clear layered separation:
 
 - **Architectural Style:** Local-first CLI application with modular monolithic structure, optimized for single-user batch processing workflows
-- **Technology Stack:** Python 3.9+ runtime with spaCy/Stanza NLP engine, SQLite persistence with Fernet encryption, Typer CLI framework
+- **Technology Stack:** Python 3.10+ runtime with spaCy/Stanza NLP engine, SQLite persistence with Fernet encryption, Typer CLI framework
 - **Key Integration Points:**
   - CLI layer → Core orchestrator (command routing, workflow coordination)
   - Core → NLP engine (entity detection via abstracted interface)
@@ -23,7 +23,7 @@ The GDPR Pseudonymizer follows a **modular monolithic architecture** with clear 
 Since this is a **local-first CLI tool** rather than a cloud-hosted application, the "platform" concept differs from typical web architectures:
 
 **Primary Platform:** **Local User Machine (Consumer Hardware)**
-- **Runtime Environment:** Python 3.9+ interpreter
+- **Runtime Environment:** Python 3.10+ interpreter
 - **Operating Systems:** Windows 10/11, macOS 11+ (Intel & Apple Silicon), Linux (Ubuntu 20.04+, Debian 11+, Fedora 35+)
 - **Hardware Requirements:** 8GB RAM, dual-core 2.0GHz+ CPU, 2GB disk space (including NLP models)
 

@@ -455,7 +455,7 @@ This project is licensed under the [MIT License](LICENSE).
 - ⚠️ Human validation is MANDATORY - do not skip review steps
 - ⚠️ Test thoroughly before production use
 
-**v1.0 MVP limitations:**
+**Current limitations:**
 - AI detection: ~60% F1 baseline (not 85%+)
 - Validation required for ALL documents (not optional)
 - French language only (English, Spanish, etc. in future versions)

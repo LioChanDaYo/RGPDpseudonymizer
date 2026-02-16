@@ -455,7 +455,7 @@ Ce projet est distribué sous la [licence MIT](LICENSE).
 - ⚠️ La relecture humaine est OBLIGATOIRE — ne sautez pas les étapes de validation
 - ⚠️ Testez rigoureusement avant toute mise en production
 
-**Limites de la v1.0 :**
+**Limitations actuelles :**
 - Détection IA : environ 60 % F1 (pas 85 %+)
 - Validation requise pour TOUS les documents (pas facultative)
 - Français uniquement (anglais, espagnol, etc. dans les versions futures)
