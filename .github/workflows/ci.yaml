@@ -84,6 +84,10 @@ jobs:
           sudo rm -rf /usr/local/lib/android
           sudo rm -rf /opt/ghc
 
+      - name: Install Qt system dependencies (Ubuntu)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libegl1 libxkbcommon0
+
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
