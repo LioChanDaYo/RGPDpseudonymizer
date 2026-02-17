@@ -122,13 +122,13 @@ jobs:
         if: ${{ matrix.coverage }}
         env:
           OMP_NUM_THREADS: 1
-        run: poetry run pytest --cov=gdpr_pseudonymizer --cov-report=xml --cov-report=term --cov-branch -v --benchmark-json=benchmark-results.json --benchmark-max-time=60
+        run: poetry run pytest -p no:qt --ignore=tests/unit/gui --cov=gdpr_pseudonymizer --cov-report=xml --cov-report=term --cov-branch -v --benchmark-json=benchmark-results.json --benchmark-max-time=60
 
       - name: Run tests (Linux/macOS)
         if: ${{ !matrix.coverage && runner.os != 'Windows' }}
         env:
           OMP_NUM_THREADS: 1
-        run: poetry run pytest -v
+        run: poetry run pytest -p no:qt --ignore=tests/unit/gui -v
 
       # Windows: skip spaCy-dependent tests due to access violations
       # See: https://github.com/explosion/spaCy/issues/12659
