@@ -53,7 +53,7 @@ jobs:
             poetry-deps-ubuntu-3.11-
 
       - name: Install dependencies
-        run: poetry install --no-interaction --extras formats
+        run: poetry install --no-interaction --extras "formats gui"
 
       - name: Check code formatting with Black
         run: poetry run black --check gdpr_pseudonymizer/ tests/ scripts/
