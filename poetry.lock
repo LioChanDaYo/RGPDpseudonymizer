@@ -1363,7 +1363,7 @@ description = "Powerful and Pythonic XML processing library combining libxml2/li
 optional = true
 python-versions = ">=3.8"
 groups = ["main"]
-markers = "extra == \"docx\" or extra == \"formats\""
+markers = "extra == \"docx\" or extra == \"formats\" or extra == \"all\""
 files = [
     {file = "lxml-6.0.2-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:e77dd455b9a16bbd2a5036a63ddbd479c19572af81b624e79ef422f929eef388"},
     {file = "lxml-6.0.2-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:5d444858b9f07cefff6455b983aea9a67f7462ba1f6cbe4a21e8bf6791bf2153"},
@@ -2258,7 +2258,7 @@ description = "PDF parser and analyzer"
 optional = true
 python-versions = ">=3.10"
 groups = ["main"]
-markers = "extra == \"pdf\" or extra == \"formats\""
+markers = "extra == \"pdf\" or extra == \"formats\" or extra == \"all\""
 files = [
     {file = "pdfminer_six-20251230-py3-none-any.whl", hash = "sha256:9ff2e3466a7dfc6de6fd779478850b6b7c2d9e9405aa2a5869376a822771f485"},
     {file = "pdfminer_six-20251230.tar.gz", hash = "sha256:e8f68a14c57e00c2d7276d26519ea64be1b48f91db1cdc776faa80528ca06c1e"},
@@ -2278,7 +2278,7 @@ description = "Plumb a PDF for detailed information about each char, rectangle, 
 optional = true
 python-versions = ">=3.8"
 groups = ["main"]
-markers = "extra == \"pdf\" or extra == \"formats\""
+markers = "extra == \"pdf\" or extra == \"formats\" or extra == \"all\""
 files = [
     {file = "pdfplumber-0.11.9-py3-none-any.whl", hash = "sha256:33ec5580959ba524e9100138746e090879504c42955df1b8a997604dd326c443"},
     {file = "pdfplumber-0.11.9.tar.gz", hash = "sha256:481224b678b2bbdbf376e2c39bf914144eef7c3d301b4a28eebf0f7f6109d6dc"},
@@ -2389,7 +2389,7 @@ files = [
     {file = "pillow-12.1.1-pp311-pypy311_pp73-win_amd64.whl", hash = "sha256:cb9bb857b2d057c6dfc72ac5f3b44836924ba15721882ef103cecb40d002d80e"},
     {file = "pillow-12.1.1.tar.gz", hash = "sha256:9ad8fa5937ab05218e2b6a4cff30295ad35afd2f83ac592e68c0d871bb0fdbc4"},
 ]
-markers = {main = "extra == \"pdf\" or extra == \"formats\""}
+markers = {main = "extra == \"pdf\" or extra == \"formats\" or extra == \"all\""}
 
 [package.extras]
 docs = ["furo", "olefile", "sphinx (>=8.2)", "sphinx-autobuild", "sphinx-copybutton", "sphinx-inline-tabs", "sphinxext-opengraph"]
@@ -2721,7 +2721,7 @@ description = "Python bindings to PDFium"
 optional = true
 python-versions = ">=3.6"
 groups = ["main"]
-markers = "extra == \"pdf\" or extra == \"formats\""
+markers = "extra == \"pdf\" or extra == \"formats\" or extra == \"all\""
 files = [
     {file = "pypdfium2-5.4.0-py3-none-android_23_arm64_v8a.whl", hash = "sha256:8bc51a12a8c8eabbdbd7499d3e5ec47bcf56ba18e07b52bdd07d321cc1252c90"},
     {file = "pypdfium2-5.4.0-py3-none-android_23_armeabi_v7a.whl", hash = "sha256:a414ef5b685824cc6c7acbe19b7dbc735de2023cf473321a8ebfe8d7f5d8a41f"},
@@ -2746,6 +2746,24 @@ files = [
     {file = "pypdfium2-5.4.0-py3-none-win_arm64.whl", hash = "sha256:2b78ea216fb92e7709b61c46241ebf2cc0c60cf18ad2fb4633af665d7b4e21e6"},
     {file = "pypdfium2-5.4.0.tar.gz", hash = "sha256:7219e55048fb3999fc8adcaea467088507207df4676ff9e521a3ae15a67d99c4"},
 ]
+
+[[package]]
+name = "pyside6-essentials"
+version = "6.7.3"
+description = "Python bindings for the Qt cross-platform application and UI framework (Essentials)"
+optional = true
+python-versions = "<3.13,>=3.9"
+groups = ["main"]
+markers = "python_version < \"3.13\" and (extra == \"gui\" or extra == \"all\")"
+files = [
+    {file = "PySide6_Essentials-6.7.3-cp39-abi3-macosx_11_0_universal2.whl", hash = "sha256:f9e08a4e9e7dc7b5ab72fde20abce8c97df7af1b802d9743f098f577dfe1f649"},
+    {file = "PySide6_Essentials-6.7.3-cp39-abi3-manylinux_2_28_x86_64.whl", hash = "sha256:cda6fd26aead48f32e57f044d18aa75dc39265b49d7957f515ce7ac3989e7029"},
+    {file = "PySide6_Essentials-6.7.3-cp39-abi3-manylinux_2_31_aarch64.whl", hash = "sha256:acdde06b74f26e7d26b4ae1461081b32a6cb17fcaa2a580050b5e0f0f12236c9"},
+    {file = "PySide6_Essentials-6.7.3-cp39-abi3-win_amd64.whl", hash = "sha256:f0950fcdcbcd4f2443336dc6a5fe692172adc225f876839583503ded0ab2f2a7"},
+]
+
+[package.dependencies]
+shiboken6 = "6.7.3"
 
 [[package]]
 name = "pytest"
@@ -2829,6 +2847,27 @@ pytest = ">=6.2.5"
 dev = ["pre-commit", "pytest-asyncio", "tox"]
 
 [[package]]
+name = "pytest-qt"
+version = "4.5.0"
+description = "pytest support for PyQt and PySide applications"
+optional = false
+python-versions = ">=3.9"
+groups = ["dev"]
+files = [
+    {file = "pytest_qt-4.5.0-py3-none-any.whl", hash = "sha256:ed21ea9b861247f7d18090a26bfbda8fb51d7a8a7b6f776157426ff2ccf26eff"},
+    {file = "pytest_qt-4.5.0.tar.gz", hash = "sha256:51620e01c488f065d2036425cbc1cbcf8a6972295105fd285321eb47e66a319f"},
+]
+
+[package.dependencies]
+pluggy = ">=1.1"
+pytest = "*"
+typing_extensions = "*"
+
+[package.extras]
+dev = ["pre-commit", "tox"]
+doc = ["sphinx", "sphinx_rtd_theme"]
+
+[[package]]
 name = "pytest-timeout"
 version = "2.4.0"
 description = "pytest plugin to abort hanging tests"
@@ -2865,7 +2904,7 @@ description = "Create, read, and update Microsoft Word .docx files."
 optional = true
 python-versions = ">=3.9"
 groups = ["main"]
-markers = "extra == \"docx\" or extra == \"formats\""
+markers = "extra == \"docx\" or extra == \"formats\" or extra == \"all\""
 files = [
     {file = "python_docx-1.2.0-py3-none-any.whl", hash = "sha256:3fd478f3250fbbbfd3b94fe1e985955737c145627498896a8a6bf81f4baf66c7"},
     {file = "python_docx-1.2.0.tar.gz", hash = "sha256:7bc9d7b7d8a69c9c02ca09216118c86552704edc23bac179283f2e38f86220ce"},
@@ -3090,6 +3129,21 @@ doc = ["furo", "jaraco.packaging (>=9.3)", "jaraco.tidelift (>=1.4)", "pygments-
 enabler = ["pytest-enabler (>=2.2)"]
 test = ["build[virtualenv] (>=1.0.3)", "filelock (>=3.4.0)", "ini2toml[lite] (>=0.14)", "jaraco.develop (>=7.21) ; python_version >= \"3.9\" and sys_platform != \"cygwin\"", "jaraco.envs (>=2.2)", "jaraco.path (>=3.7.2)", "jaraco.test (>=5.5)", "packaging (>=24.2)", "pip (>=19.1)", "pyproject-hooks (!=1.1)", "pytest (>=6,!=8.1.*)", "pytest-home (>=0.5)", "pytest-perf ; sys_platform != \"cygwin\"", "pytest-subprocess", "pytest-timeout", "pytest-xdist (>=3)", "tomli-w (>=1.0.0)", "virtualenv (>=13.0.0)", "wheel (>=0.44.0)"]
 type = ["importlib_metadata (>=7.0.2) ; python_version < \"3.10\"", "jaraco.develop (>=7.21) ; sys_platform != \"cygwin\"", "mypy (==1.14.*)", "pytest-mypy"]
+
+[[package]]
+name = "shiboken6"
+version = "6.7.3"
+description = "Python/C++ bindings helper module"
+optional = true
+python-versions = "<3.13,>=3.9"
+groups = ["main"]
+markers = "python_version < \"3.13\" and (extra == \"gui\" or extra == \"all\")"
+files = [
+    {file = "shiboken6-6.7.3-cp39-abi3-macosx_11_0_universal2.whl", hash = "sha256:285fe3cf79be3135fe1ad1e2b9ff6db3a48698887425af6aa6ed7a05a9abc3d6"},
+    {file = "shiboken6-6.7.3-cp39-abi3-manylinux_2_28_x86_64.whl", hash = "sha256:f0852e5781de78be5b13c140ec4c7fb9734e2aaf2986eb2d6a224363e03efccc"},
+    {file = "shiboken6-6.7.3-cp39-abi3-manylinux_2_31_aarch64.whl", hash = "sha256:f0dd635178e64a45be2f84c9f33dd79ac30328da87f834f21a0baf69ae210e6e"},
+    {file = "shiboken6-6.7.3-cp39-abi3-win_amd64.whl", hash = "sha256:5f29325dfa86fde0274240f1f38e421303749d3174ce3ada178715b5f4719db9"},
+]
 
 [[package]]
 name = "six"
@@ -3975,11 +4029,13 @@ files = [
 dev = ["pytest", "setuptools"]
 
 [extras]
+all = ["PySide6-Essentials", "pdfplumber", "python-docx"]
 docx = ["python-docx"]
 formats = ["pdfplumber", "python-docx"]
+gui = ["PySide6-Essentials"]
 pdf = ["pdfplumber"]
 
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.14"
-content-hash = "11abd2b98b643e72d791ae35e8183ff9ca550c6ebd321a2c3f961335828c671c"
+content-hash = "0f2711dfed82fa133861c451c83751c217488e2c2862eba0fa40892f14204737"

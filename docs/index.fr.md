@@ -8,7 +8,7 @@ Préparez vos documents sensibles pour l'analyse par IA en toute sérénité : t
 
 ## Qu'est-ce que GDPR Pseudonymizer ?
 
-GDPR Pseudonymizer est un **outil en ligne de commande conçu pour la confidentialité**. Il associe la rapidité de l'IA à la rigueur de la relecture humaine pour pseudonymiser des documents en français. Contrairement aux solutions entièrement automatiques ou aux services cloud, il mise sur l'**absence totale de faux négatifs** et sur la **solidité juridique** grâce à un processus de validation obligatoire.
+GDPR Pseudonymizer est un **outil conçu pour la confidentialité**. Il associe la rapidité de l'IA à la rigueur de la relecture humaine pour pseudonymiser des documents en français. Disponible en **ligne de commande (CLI)** et en **application de bureau** (v2.0 en développement). Contrairement aux solutions entièrement automatiques ou aux services cloud, il mise sur l'**absence totale de faux négatifs** et sur la **solidité juridique** grâce à un processus de validation obligatoire.
 
 **Pour qui ?**
 
@@ -96,8 +96,8 @@ GDPR Pseudonymizer contribue à la conformité avec les articles 4(5), 25, 30, 3
 
 ## Statut
 
-**Version actuelle :** v1.1.0 (février 2026)
+**Version publiée :** v1.1.0 (février 2026) | **En développement :** v2.0 Interface graphique (Epic 6)
 
-**Environnements pris en charge :** Python 3.10-3.12 | Windows, macOS, Linux | Formats .txt, .md, .pdf, .docx | Français
+**Environnements pris en charge :** Python 3.10-3.12 | Windows, macOS, Linux | Formats .txt, .md, .pdf, .docx | Français | Interface graphique : `pip install gdpr-pseudonymizer[gui]`
 
 Consultez la [FAQ](faq.fr.md) pour la feuille de route du produit.
