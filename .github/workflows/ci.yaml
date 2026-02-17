@@ -37,7 +37,7 @@ jobs:
           restore-keys: venv-lint-py3.11-
 
       - name: Install dependencies
-        run: poetry install --no-interaction --extras formats
+        run: poetry install --no-interaction --extras "formats gui"
 
       - name: Ruff
         run: poetry run ruff check .
@@ -105,7 +105,7 @@ jobs:
           restore-keys: venv-${{ runner.os }}-py${{ matrix.python-version }}-
 
       - name: Install dependencies
-        run: poetry install --no-interaction --extras formats
+        run: poetry install --no-interaction --extras "formats gui"
 
       # Poetry installs both typer 0.9.4 (our dep) and typer-slim 0.21.1
       # (spaCy → weasel dep). Both write to the typer/ namespace and
@@ -122,20 +122,25 @@ jobs:
         if: ${{ matrix.coverage }}
         env:
           OMP_NUM_THREADS: 1
-        run: poetry run pytest -p no:qt --ignore=tests/unit/gui --cov=gdpr_pseudonymizer --cov-report=xml --cov-report=term --cov-branch -v --benchmark-json=benchmark-results.json --benchmark-max-time=60
+          QT_QPA_PLATFORM: offscreen
+        run: poetry run pytest --cov=gdpr_pseudonymizer --cov-report=xml --cov-report=term --cov-branch -v --benchmark-json=benchmark-results.json --benchmark-max-time=60
 
       - name: Run tests (Linux/macOS)
         if: ${{ !matrix.coverage && runner.os != 'Windows' }}
         env:
           OMP_NUM_THREADS: 1
-        run: poetry run pytest -p no:qt --ignore=tests/unit/gui -v
+          QT_QPA_PLATFORM: offscreen
+        run: poetry run pytest -v
 
       # Windows: skip spaCy-dependent tests due to access violations
       # See: https://github.com/explosion/spaCy/issues/12659
       - name: Run non-spaCy tests (Windows)
         if: runner.os == 'Windows'
+        env:
+          QT_QPA_PLATFORM: offscreen
         run: |
           poetry run pytest tests/unit/cli/ -v
+          poetry run pytest tests/unit/gui/ -v
           poetry run pytest tests/unit/test_benchmark_nlp.py -v
           poetry run pytest tests/unit/test_config_manager.py -v
           poetry run pytest tests/unit/test_data_models.py -v
