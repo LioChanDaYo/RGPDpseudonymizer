@@ -6,33 +6,35 @@ Run with: poetry run python scripts/generate_icon.py
 
 from __future__ import annotations
 
+import struct
 import sys
 from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from PySide6.QtGui import QImage
 
 
 def main() -> None:
     try:
-        from PySide6.QtCore import QRect, QSize, Qt
-        from PySide6.QtGui import (
-            QColor,
-            QFont,
-            QImage,
-            QPainter,
-            QPainterPath,
-            QPen,
-        )
+        from PySide6.QtGui import QImage  # noqa: F401
     except ImportError:
         print("PySide6 required. Install with: poetry install --extras gui")
         sys.exit(1)
 
-    # Need QGuiApplication for font metrics
     from PySide6.QtWidgets import QApplication
 
     app = QApplication.instance()
     if app is None:
         app = QApplication([])
 
-    out_dir = Path(__file__).parent.parent / "gdpr_pseudonymizer" / "gui" / "resources" / "icons"
+    out_dir = (
+        Path(__file__).parent.parent
+        / "gdpr_pseudonymizer"
+        / "gui"
+        / "resources"
+        / "icons"
+    )
     out_dir.mkdir(parents=True, exist_ok=True)
 
     sizes = [16, 32, 48, 256, 512]
@@ -49,17 +51,16 @@ def main() -> None:
         [img for s, img in images if s in (16, 32, 48, 256)],
         out_dir / "app.ico",
     )
-    print(f"  Generated app.ico")
+    print("  Generated app.ico")
 
     print("Icon generation complete.")
 
 
-def _render_icon(size: int) -> "QImage":
+def _render_icon(size: int) -> QImage:
     """Render the icon at a given size."""
-    from PySide6.QtCore import QPoint, QRect, QRectF, Qt
+    from PySide6.QtCore import QPoint, Qt
     from PySide6.QtGui import (
         QColor,
-        QFont,
         QImage,
         QLinearGradient,
         QPainter,
@@ -139,15 +140,10 @@ def _save_ico(images: list, path: Path) -> None:
 
     ICO format: header + directory entries + image data (as embedded PNGs).
     """
-    import struct
-    from io import BytesIO
+    from PySide6.QtCore import QBuffer, QIODevice
 
     png_data_list: list[bytes] = []
     for img in images:
-        buf = BytesIO()
-        # Save as PNG to bytes
-        from PySide6.QtCore import QBuffer, QIODevice
-
         qbuf = QBuffer()
         qbuf.open(QIODevice.OpenModeFlag.WriteOnly)
         img.save(qbuf, "PNG")
@@ -165,9 +161,14 @@ def _save_ico(images: list, path: Path) -> None:
         png_bytes = png_data_list[i]
         entry = struct.pack(
             "<BBBBHHII",
-            w, h, 0, 0,  # width, height, palette, reserved
-            1, 32,       # planes, bpp
-            len(png_bytes), dir_offset,
+            w,
+            h,
+            0,
+            0,  # width, height, palette, reserved
+            1,
+            32,  # planes, bpp
+            len(png_bytes),
+            dir_offset,
         )
         directory += entry
         dir_offset += len(png_bytes)
