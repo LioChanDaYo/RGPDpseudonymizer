@@ -5,7 +5,7 @@
    WCAG AA: 4.5:1 minimum contrast for text
 */
 
-QMainWindow {
+QMainWindow, QDialog {
     background-color: #1E1E1E;
 }
 
@@ -245,6 +245,36 @@ QFrame#dropZone[dragInvalid="true"] {
     background-color: #4E342E;
 }
 
+/* Progress bar */
+QProgressBar {
+    background-color: #424242;
+    border: 1px solid #616161;
+    border-radius: 4px;
+    height: 20px;
+    text-align: center;
+    color: #E0E0E0;
+    font-size: 11px;
+}
+
+QProgressBar::chunk {
+    background-color: #64B5F6;
+    border-radius: 3px;
+}
+
+/* Containers — prevent dark bleed-through */
+QStackedWidget {
+    background-color: #1E1E1E;
+}
+
+QFrame {
+    background-color: transparent;
+}
+
+QScrollArea {
+    background-color: transparent;
+    border: none;
+}
+
 /* Toast notifications */
 QLabel#toast {
     background-color: #616161;
@@ -258,6 +288,24 @@ QLabel#toast {
 QWidget#stepIndicator {
     background-color: #2D2D2D;
     border-bottom: 1px solid #424242;
+}
+
+/* Processing screen — warning panel */
+QWidget#warningPanel {
+    background-color: #4E342E;
+    border: 1px solid #FF8A65;
+    border-radius: 8px;
+}
+
+QLabel#warningLabel {
+    color: #FFA726;
+    font-size: 13px;
+}
+
+/* Results screen — summary panel */
+QWidget#resultsSummary {
+    background-color: #2D2D2D;
+    border-radius: 8px;
 }
 
 /* Confirm dialog */

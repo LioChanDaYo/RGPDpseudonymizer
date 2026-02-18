@@ -11,6 +11,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Document Processing Workflow** (Story 6.3) — Full single-document pseudonymization pipeline in the GUI:
+  - PassphraseDialog with auto-detect of existing `.gdpr-pseudo.db` files, session caching, and "Create new" option
+  - ProcessingWorker running in background thread (QRunnable + WorkerSignals bridge) — GUI stays responsive
+  - Three-phase progress display: file reading (0-10%), model loading (10-40%), NLP detection (40-100%)
+  - spaCy model auto-detection and download with progress indicator (ModelManager + ModelDownloadWorker)
+  - Processing screen with entity summary, zero-entity warning, time estimate, and step indicator integration
+  - Results screen with pseudonymized document preview, entity type breakdown (PERSON/LOCATION/ORG with color indicators), pseudonym highlighting, and "Enregistrer sous..." save dialog
+  - Error handling: corrupt files, unsupported formats, empty documents, password-protected PDFs, incorrect passphrase
+  - 45 new GUI tests across 5 test files (122 total GUI tests); all quality gates pass
+
 - **GUI Application Foundation** (Story 6.2) — PySide6-based desktop application shell for v2.0:
   - Main window with menu bar (Fichier, Affichage, Outils, Aide), status bar, and keyboard shortcuts (Ctrl+O, Ctrl+Q, Ctrl+,, F1, F11)
   - Light/dark theme system with QSS stylesheets and persistent preference
@@ -22,6 +32,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Application icon set (16/32/48/256/512 PNG + ICO), splash screen
   - `gdpr-pseudo-gui` entry point, PySide6-Essentials ~6.7.0 as optional dep (`pip install gdpr-pseudonymizer[gui]`)
   - 77 GUI unit tests (pytest-qt) across 9 test files; startup time 1.706s (<5s threshold)
+
+### Fixed
+
+- **QSS theme rendering** — Fixed black stripes in light mode on Settings and Home screens caused by QScrollArea forcing `autoFillBackground(True)` on content widgets when QSS overrides the native palette. Added QProgressBar, QStackedWidget, QFrame, and QScrollArea container styles to both light and dark QSS theme files.
 
 ---
 

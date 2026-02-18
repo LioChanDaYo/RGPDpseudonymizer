@@ -6,7 +6,7 @@
    WCAG AA: 4.5:1 minimum contrast for text
 */
 
-QMainWindow {
+QMainWindow, QDialog {
     background-color: #FFFFFF;
 }
 
@@ -144,6 +144,13 @@ QComboBox::drop-down {
     width: 24px;
 }
 
+QComboBox QAbstractItemView {
+    background-color: #FFFFFF;
+    border: 1px solid #E0E0E0;
+    color: #212121;
+    selection-background-color: #E3F2FD;
+}
+
 /* Check boxes and radio buttons */
 QCheckBox, QRadioButton {
     color: #212121;
@@ -238,6 +245,36 @@ QFrame#dropZone[dragInvalid="true"] {
     background-color: #FFEBEE;
 }
 
+/* Progress bar */
+QProgressBar {
+    background-color: #E0E0E0;
+    border: 1px solid #BDBDBD;
+    border-radius: 4px;
+    height: 20px;
+    text-align: center;
+    color: #212121;
+    font-size: 11px;
+}
+
+QProgressBar::chunk {
+    background-color: #1565C0;
+    border-radius: 3px;
+}
+
+/* Containers — prevent dark bleed-through */
+QStackedWidget {
+    background-color: #FFFFFF;
+}
+
+QFrame {
+    background-color: transparent;
+}
+
+QScrollArea {
+    background-color: transparent;
+    border: none;
+}
+
 /* Toast notifications */
 QLabel#toast {
     background-color: #424242;
@@ -251,6 +288,24 @@ QLabel#toast {
 QWidget#stepIndicator {
     background-color: #FAFAFA;
     border-bottom: 1px solid #E0E0E0;
+}
+
+/* Processing screen — warning panel */
+QWidget#warningPanel {
+    background-color: #FFF3E0;
+    border: 1px solid #FFB74D;
+    border-radius: 8px;
+}
+
+QLabel#warningLabel {
+    color: #E65100;
+    font-size: 13px;
+}
+
+/* Results screen — summary panel */
+QWidget#resultsSummary {
+    background-color: #F5F5F5;
+    border-radius: 8px;
 }
 
 /* Confirm dialog */

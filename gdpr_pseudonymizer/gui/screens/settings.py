@@ -59,6 +59,7 @@ class SettingsScreen(QWidget):
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.setFrameShape(QScrollArea.Shape.NoFrame)
+        scroll.viewport().setAutoFillBackground(False)
 
         content = QWidget()
         layout = QVBoxLayout(content)
@@ -202,6 +203,9 @@ class SettingsScreen(QWidget):
 
         layout.addStretch()
         scroll.setWidget(content)
+        # QScrollArea.setWidget() forces autoFillBackground(True) on content,
+        # which paints black when QSS overrides the native palette. Disable it.
+        content.setAutoFillBackground(False)
         outer.addWidget(scroll)
 
     def _load_values(self) -> None:

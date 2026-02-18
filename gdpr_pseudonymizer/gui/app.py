@@ -136,14 +136,16 @@ def _create_splash_pixmap() -> QPixmap:
 def _register_screens(window: MainWindow) -> None:
     """Register all screen widgets with the main window."""
     from gdpr_pseudonymizer.gui.screens.home import HomeScreen
+    from gdpr_pseudonymizer.gui.screens.processing import ProcessingScreen
+    from gdpr_pseudonymizer.gui.screens.results import ResultsScreen
     from gdpr_pseudonymizer.gui.screens.settings import SettingsScreen
     from gdpr_pseudonymizer.gui.screens.stub import StubScreen
 
     window.add_screen("home", HomeScreen(window))
     window.add_screen("settings", SettingsScreen(window))
-    window.add_screen("processing", StubScreen("Traitement", window))
+    window.add_screen("processing", ProcessingScreen(window))
     window.add_screen("validation", StubScreen("Validation", window))
-    window.add_screen("results", StubScreen("Résultats", window))
+    window.add_screen("results", ResultsScreen(window))
     window.add_screen("batch", StubScreen("Traitement par lot", window))
     window.add_screen("database", StubScreen("Base de correspondances", window))
 

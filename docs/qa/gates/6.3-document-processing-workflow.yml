@@ -1,0 +1,86 @@
+schema: 1
+story: "6.3"
+story_title: "Document Processing Workflow"
+gate: CONCERNS
+status_reason: >-
+  All 10 ACs met with 45 new tests passing. Two non-blocking concerns:
+  entity type counts query returns cumulative DB totals instead of per-document counts (DATA-001),
+  and processing worker lacks cancellation mechanism (THREAD-001).
+reviewer: "Quinn (Test Architect)"
+updated: "2026-02-18T18:00:00Z"
+
+waiver: { active: false }
+
+top_issues:
+  - id: "DATA-001"
+    severity: medium
+    finding: >-
+      Entity type counts in ProcessingWorker query find_all() which returns
+      all entities in the database, not just those from the current document.
+      Results screen may show inflated counts when reusing an existing DB.
+    suggested_action: >-
+      Filter entity type query to current-document entities only, or add
+      per-type counts to core ProcessingResult.
+    suggested_owner: dev
+  - id: "THREAD-001"
+    severity: low
+    finding: >-
+      ProcessingWorker has no cancellation mechanism. Cancel button navigates
+      away but worker continues running in background thread.
+    suggested_action: >-
+      Add a threading.Event cancel flag to ProcessingWorker, checked between
+      processing phases. Required before Story 6.5 batch processing.
+    suggested_owner: dev
+  - id: "RESOURCE-001"
+    severity: low
+    finding: >-
+      Temp output file not cleaned up on processing error path.
+    suggested_action: >-
+      Add temp file cleanup in ProcessingScreen._on_error or ProcessingWorker
+      error handler.
+    suggested_owner: dev
+
+quality_score: 80
+
+expires: "2026-03-04T18:00:00Z"
+
+evidence:
+  tests_reviewed: 45
+  risks_identified: 3
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    ac_gaps: []
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: >-
+      Passphrase in-memory only, not logged, not persisted.
+      Temp files contain pseudonymized content only.
+  performance:
+    status: PASS
+    notes: >-
+      Background threading via QThreadPool. Lazy imports preserve startup.
+      Highlighting O(n*m) acceptable for typical documents.
+  reliability:
+    status: CONCERNS
+    notes: >-
+      No worker cancellation mechanism. Temp file leak on error.
+      Both are low-severity and non-blocking.
+  maintainability:
+    status: PASS
+    notes: >-
+      Clean separation of concerns. Private attribute access across modules
+      is minor coupling (advisory DESIGN-001).
+
+recommendations:
+  immediate:
+    - action: "Fix entity type count query to return per-document counts"
+      refs: ["gdpr_pseudonymizer/gui/workers/processing_worker.py:169-179"]
+  future:
+    - action: "Add cancel flag to ProcessingWorker"
+      refs: ["gdpr_pseudonymizer/gui/workers/processing_worker.py"]
+    - action: "Clean up temp file on error path"
+      refs: ["gdpr_pseudonymizer/gui/screens/processing.py:285-299"]
+    - action: "Expose get_screen() and cached_passphrase on MainWindow public API"
+      refs: ["gdpr_pseudonymizer/gui/main_window.py"]

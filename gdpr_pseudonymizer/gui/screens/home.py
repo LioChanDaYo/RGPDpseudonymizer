@@ -88,6 +88,7 @@ class HomeScreen(QWidget):
         self._recent_area = QScrollArea()
         self._recent_area.setWidgetResizable(True)
         self._recent_area.setFrameShape(QFrame.Shape.NoFrame)
+        self._recent_area.viewport().setAutoFillBackground(False)
         self._recent_area.setMaximumHeight(200)
 
         self._recent_container = QWidget()
@@ -191,8 +192,49 @@ class HomeScreen(QWidget):
         add_recent_file(filepath, self._config)
         save_gui_config(self._config)
         self._rebuild_recent_list()
-        # Navigate to processing (stub for now)
+
+        # Check session passphrase cache
+        cached = self._main_window._cached_passphrase
+        file_dir = str(Path(filepath).parent)
+
+        if cached is not None:
+            db_path, passphrase = cached
+            self._start_processing(filepath, db_path, passphrase)
+            return
+
+        # Show passphrase dialog
+        from gdpr_pseudonymizer.gui.widgets.passphrase_dialog import PassphraseDialog
+
+        dialog = PassphraseDialog(
+            file_directory=file_dir,
+            config=self._config,
+            parent=self._main_window,
+        )
+        if dialog.exec() != dialog.DialogCode.Accepted:
+            return
+
+        result = dialog.get_result()
+        if result is None:
+            return
+
+        db_path, passphrase, remember = result
+        if remember:
+            self._main_window._cached_passphrase = (db_path, passphrase)
+
+        self._start_processing(filepath, db_path, passphrase)
+
+    def _start_processing(self, filepath: str, db_path: str, passphrase: str) -> None:
+        """Navigate to processing screen and start processing."""
         self._main_window.navigate_to("processing")
+
+        # Get the processing screen and start processing
+        proc_idx = self._main_window._screens.get("processing")
+        if proc_idx is not None:
+            widget = self._main_window.stack.widget(proc_idx)
+            from gdpr_pseudonymizer.gui.screens.processing import ProcessingScreen
+
+            if isinstance(widget, ProcessingScreen):
+                widget.start_processing(filepath, db_path, passphrase)
 
     def _on_folder_selected(self, folder_path: str) -> None:
         """Handle folder drop — redirect to batch flow."""

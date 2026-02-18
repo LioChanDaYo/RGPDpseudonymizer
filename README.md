@@ -398,7 +398,8 @@ The validation UI provides an intuitive keyboard-driven interface for reviewing 
 - 🚧 **Epic 6:** v2.0 Desktop GUI & Broader Accessibility (9 stories) — PySide6 desktop application, visual entity validation, batch GUI, i18n, WCAG AA, standalone executables
   - ✅ Story 6.1: UX Architecture & GUI Framework Selection
   - ✅ Story 6.2: GUI Application Foundation (main window, theming, home screen, settings, 77 GUI tests)
-- **Total:** 42 stories, 1344+ tests, 86%+ coverage, all quality gates green
+  - ✅ Story 6.3: Document Processing Workflow (passphrase dialog, processing worker, results screen, 45 new GUI tests)
+- **Total:** 43 stories, 1389+ tests, 86%+ coverage, all quality gates green
 
 ---
 
@@ -575,12 +576,12 @@ The integration test suite covers:
 
 ---
 
-## 📊 Project Metrics (As of 2026-02-17)
+## 📊 Project Metrics (As of 2026-02-18)
 
 | Metric | Value | Status |
 |--------|-------|--------|
-| **Development Progress** | v2.0-dev | 🚧 Epic 6 in progress (Stories 6.1-6.2 complete) |
-| **Stories Complete** | 42 (Epic 1-5 + 6.1-6.2) | ✅ Epics 1-5, 🚧 Epic 6 |
+| **Development Progress** | v2.0-dev | 🚧 Epic 6 in progress (Stories 6.1-6.3 complete) |
+| **Stories Complete** | 43 (Epic 1-5 + 6.1-6.3) | ✅ Epics 1-5, 🚧 Epic 6 |
 | **LLM Utility (NFR10)** | 4.27/5.0 (85.4%) | ✅ PASSED (threshold: 80%) |
 | **Installation Success (NFR3)** | 87.5% (7/8 platforms) | ✅ PASSED (threshold: 85%) |
 | **First Pseudonymization (NFR14)** | 100% within 30 min | ✅ PASSED (threshold: 80%) |
@@ -601,7 +602,7 @@ The integration test suite covers:
 | **Memory Usage (NFR4)** | ~1 GB Python-tracked peak | ✅ PASSED (<8GB threshold) |
 | **CLI Startup (NFR5)** | 0.56s (help), 6.0s (cold start w/ model) | ✅ PASSED (<5s for CLI startup) |
 | **Error Rate (NFR6)** | ~0% unexpected errors | ✅ PASSED (<10% threshold) |
-| **Test Coverage** | 1344+ tests (incl. 77 GUI), 86%+ coverage | ✅ All Quality Checks Pass |
+| **Test Coverage** | 1389+ tests (incl. 122 GUI), 86%+ coverage | ✅ All Quality Checks Pass |
 | **Quality Gates** | Ruff, mypy, pytest | ✅ All Pass (0 issues) |
 | **Supported Languages** | French | 🇫🇷 v1.0 only |
 | **Supported Formats** | .txt, .md, .pdf, .docx | 📝 PDF/DOCX via optional extras |
@@ -618,4 +619,4 @@ The integration test suite covers:
 
 ---
 
-**Last Updated:** 2026-02-17 (v2.0-dev — Epic 6 Story 6.2 complete: GUI application foundation with PySide6 desktop shell, theming, drag-and-drop, settings, 77 GUI tests)
+**Last Updated:** 2026-02-18 (v2.0-dev — Epic 6 Story 6.3 complete: document processing workflow with passphrase dialog, background processing worker, results screen, QSS theme fixes, 122 GUI tests)
