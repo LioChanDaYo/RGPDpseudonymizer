@@ -60,6 +60,9 @@ class MainWindow(QMainWindow):
         self._build_menu_bar()
         self._build_status_bar()
 
+        # Session passphrase cache: (db_path, passphrase) — cleared on exit
+        self._cached_passphrase: tuple[str, str] | None = None
+
         # Screens added later via add_screen()
         self._screens: dict[str, int] = {}
 
@@ -290,12 +293,21 @@ class MainWindow(QMainWindow):
             self.navigate_to("batch")
 
     def _notify_file_selected(self, filepath: str) -> None:
-        """Notify the home screen that a file was selected."""
+        """Route file selection through the home screen's processing flow."""
         from gdpr_pseudonymizer.gui.config import add_recent_file
 
         add_recent_file(filepath, self._config)
         self._save_config(self._config)
         self._rebuild_recent_menu()
+
+        # Delegate to home screen's file selection handler
+        home_idx = self._screens.get("home")
+        if home_idx is not None:
+            widget = self._stack.widget(home_idx)
+            from gdpr_pseudonymizer.gui.screens.home import HomeScreen
+
+            if isinstance(widget, HomeScreen):
+                widget._on_file_selected(filepath)
 
     def _toggle_fullscreen(self) -> None:
         if self.isFullScreen():

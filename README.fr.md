@@ -398,7 +398,8 @@ L'interface de validation offre un parcours intuitif piloté au clavier pour pas
 - 🚧 **Epic 6 :** v2.0 Interface graphique et accessibilité (9 stories) — Application de bureau PySide6, validation visuelle, traitement par lot GUI, i18n, WCAG AA, exécutables autonomes
   - ✅ Story 6.1 : Architecture UX et sélection du framework GUI
   - ✅ Story 6.2 : Fondations de l'application GUI (fenêtre principale, thèmes, écran d'accueil, paramètres, 77 tests GUI)
-- **Total :** 42 stories, 1 344+ tests, 86 %+ de couverture, tous les contrôles qualité au vert
+  - ✅ Story 6.3 : Workflow de traitement de documents (dialogue de phrase secrète, worker de traitement, écran de résultats, 45 nouveaux tests GUI)
+- **Total :** 43 stories, 1 389+ tests, 86 %+ de couverture, tous les contrôles qualité au vert
 
 ---
 
@@ -575,12 +576,12 @@ La suite de tests d'intégration couvre :
 
 ---
 
-## 📊 Métriques du projet (au 2026-02-17)
+## 📊 Métriques du projet (au 2026-02-18)
 
 | Métrique | Valeur | Statut |
 |----------|--------|--------|
-| **Avancement** | v2.0-dev | 🚧 Epic 6 en cours (Stories 6.1-6.2 terminées) |
-| **Stories terminées** | 42 (Epic 1-5 + 6.1-6.2) | ✅ Epics 1-5, 🚧 Epic 6 |
+| **Avancement** | v2.0-dev | 🚧 Epic 6 en cours (Stories 6.1-6.3 terminées) |
+| **Stories terminées** | 43 (Epic 1-5 + 6.1-6.3) | ✅ Epics 1-5, 🚧 Epic 6 |
 | **Utilité LLM (NFR10)** | 4,27/5,0 (85,4 %) | ✅ VALIDÉ (seuil : 80 %) |
 | **Succès d'installation (NFR3)** | 87,5 % (7/8 plateformes) | ✅ VALIDÉ (seuil : 85 %) |
 | **Première pseudonymisation (NFR14)** | 100 % en moins de 30 min | ✅ VALIDÉ (seuil : 80 %) |
@@ -601,7 +602,7 @@ La suite de tests d'intégration couvre :
 | **Utilisation mémoire (NFR4)** | environ 1 Go de pic mesuré par Python | ✅ VALIDÉ (seuil < 8 Go) |
 | **Démarrage CLI (NFR5)** | 0,56 s (help), 6,0 s (démarrage à froid avec modèle) | ✅ VALIDÉ (< 5 s pour le démarrage CLI) |
 | **Taux d'erreur (NFR6)** | environ 0 % d'erreurs inattendues | ✅ VALIDÉ (seuil < 10 %) |
-| **Couverture de test** | 1 344+ tests (dont 77 GUI), 86 %+ de couverture | ✅ Tous les contrôles qualité validés |
+| **Couverture de test** | 1 389+ tests (dont 122 GUI), 86 %+ de couverture | ✅ Tous les contrôles qualité validés |
 | **Contrôles qualité** | Ruff, mypy, pytest | ✅ Tous validés (0 problème) |
 | **Langues** | Français | 🇫🇷 v1.0 uniquement |
 | **Formats** | .txt, .md, .pdf, .docx | 📝 PDF/DOCX via extras optionnels |
@@ -618,4 +619,4 @@ La suite de tests d'intégration couvre :
 
 ---
 
-**Dernière mise à jour :** 2026-02-17 (v2.0-dev — Epic 6 Story 6.2 terminé : fondations de l'application GUI avec PySide6, thèmes, glisser-déposer, paramètres, 77 tests GUI)
+**Dernière mise à jour :** 2026-02-18 (v2.0-dev — Epic 6 Story 6.3 terminé : workflow de traitement de documents avec dialogue de phrase secrète, worker de traitement en arrière-plan, écran de résultats, corrections de thèmes QSS, 122 tests GUI)

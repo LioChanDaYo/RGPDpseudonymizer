@@ -29,12 +29,15 @@ def main_window(qtbot, gui_config: dict[str, Any]) -> MainWindow:  # type: ignor
 
     # Register screens
     from gdpr_pseudonymizer.gui.screens.home import HomeScreen
+    from gdpr_pseudonymizer.gui.screens.processing import ProcessingScreen
+    from gdpr_pseudonymizer.gui.screens.results import ResultsScreen
     from gdpr_pseudonymizer.gui.screens.settings import SettingsScreen
     from gdpr_pseudonymizer.gui.screens.stub import StubScreen
 
     window.add_screen("home", HomeScreen(window))
     window.add_screen("settings", SettingsScreen(window))
-    window.add_screen("processing", StubScreen("Traitement", window))
+    window.add_screen("processing", ProcessingScreen(window))
+    window.add_screen("results", ResultsScreen(window))
     window.add_screen("batch", StubScreen("Traitement par lot", window))
     window.navigate_to("home")
     return window
