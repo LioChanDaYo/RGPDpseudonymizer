@@ -14,6 +14,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from gdpr_pseudonymizer.nlp.stanza_detector import StanzaDetector
 
+pytestmark = pytest.mark.spacy
+
 
 class TestStanzaDetector:
     """Test suite for StanzaDetector class."""

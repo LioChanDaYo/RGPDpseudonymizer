@@ -158,6 +158,7 @@ markers = [
     "benchmark: mark test as a benchmark test",
     "integration: mark test as an integration test",
     "slow: mark test as slow running",
+    "spacy: mark test as requiring the spaCy fr_core_news_lg model at runtime",
 ]
 filterwarnings = [
     "error",

@@ -4,6 +4,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
+pytestmark = pytest.mark.spacy
+
 
 def test_import_all_modules() -> None:
     """Test that all modules can be imported without errors."""

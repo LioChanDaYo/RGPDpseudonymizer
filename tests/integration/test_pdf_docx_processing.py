@@ -21,11 +21,13 @@ from typer.testing import CliRunner
 from gdpr_pseudonymizer.cli.main import app
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 
-# Skip all tests on Windows due to spaCy segfault
-pytestmark = pytest.mark.skipif(
-    sys.platform == "win32",
-    reason="spaCy segfaults on Windows (access violation in staticvectors)",
-)
+pytestmark = [
+    pytest.mark.spacy,
+    pytest.mark.skipif(
+        sys.platform == "win32",
+        reason="spaCy segfaults on Windows (access violation in staticvectors)",
+    ),
+]
 
 runner = CliRunner()
 

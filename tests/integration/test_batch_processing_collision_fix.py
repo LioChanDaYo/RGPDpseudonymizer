@@ -23,6 +23,8 @@ from sqlalchemy import text
 from gdpr_pseudonymizer.core.document_processor import DocumentProcessor
 from gdpr_pseudonymizer.data.database import init_database, open_database
 
+pytestmark = pytest.mark.spacy
+
 
 class TestBatchProcessingCollisionFix:
     """Integration tests for batch processing with collision fix."""
