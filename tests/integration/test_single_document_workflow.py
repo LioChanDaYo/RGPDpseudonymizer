@@ -20,6 +20,8 @@ from gdpr_pseudonymizer.data.repositories.mapping_repository import (
     SQLiteMappingRepository,
 )
 
+pytestmark = pytest.mark.spacy
+
 
 class TestSingleDocumentWorkflow:
     """Integration tests for complete single-document workflow."""

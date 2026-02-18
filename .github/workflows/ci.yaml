@@ -138,31 +138,12 @@ jobs:
 
       # Windows: skip spaCy-dependent tests due to access violations
       # See: https://github.com/explosion/spaCy/issues/12659
+      # Tests marked with @pytest.mark.spacy are excluded automatically.
       - name: Run non-spaCy tests (Windows)
         if: runner.os == 'Windows'
         env:
           QT_QPA_PLATFORM: offscreen
-        run: |
-          poetry run pytest tests/unit/cli/ -v
-          poetry run pytest tests/unit/gui/ -v
-          poetry run pytest tests/unit/test_benchmark_nlp.py -v
-          poetry run pytest tests/unit/test_config_manager.py -v
-          poetry run pytest tests/unit/test_data_models.py -v
-          poetry run pytest tests/unit/test_file_handler.py -v
-          poetry run pytest tests/unit/test_file_handler_formats.py -v
-          poetry run pytest tests/unit/test_logger.py -v
-          poetry run pytest tests/unit/test_naive_processor.py -v
-          poetry run pytest tests/unit/test_name_dictionary.py -v
-          poetry run pytest tests/unit/test_process_command.py -v
-          poetry run pytest tests/unit/test_project_config.py -v
-          poetry run pytest tests/unit/test_regex_matcher.py -v
-          poetry run pytest tests/unit/test_validation_models.py -v
-          poetry run pytest tests/unit/test_validation_stub.py -v
-          poetry run pytest tests/unit/test_validation_ui.py -v
-          poetry run pytest tests/unit/test_validation_workflow.py -v
-          poetry run pytest tests/unit/test_mapping_repository_delete.py -v
-          poetry run pytest tests/integration/test_erasure_workflow.py -v
-          poetry run pytest tests/integration/test_pdf_docx_processing.py -v
+        run: poetry run pytest -m "not spacy" -v
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3

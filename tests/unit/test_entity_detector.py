@@ -8,6 +8,8 @@ from pytest_mock import MockerFixture
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity, EntityDetector
 from gdpr_pseudonymizer.nlp.spacy_detector import SpaCyDetector
 
+pytestmark = pytest.mark.spacy
+
 
 def test_detected_entity_initialization() -> None:
     """Test DetectedEntity dataclass initialization and field validation."""
