@@ -39,7 +39,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          poetry install --no-interaction --extras formats
+          poetry install --no-interaction --extras "formats gui"
           poetry run pip install --force-reinstall --no-deps typer==0.9.4
 
       - name: Cache spaCy model
@@ -53,6 +53,8 @@ jobs:
         run: poetry run python -m spacy download fr_core_news_lg
 
       - name: Run unit tests
+        env:
+          QT_QPA_PLATFORM: offscreen
         run: poetry run pytest tests/unit/ -v --timeout=60
 
   publish:

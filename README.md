@@ -29,7 +29,7 @@ Transform sensitive French documents for safe AI analysis with local processing,
 
 ## 🎯 Overview
 
-GDPR Pseudonymizer is a **privacy-first CLI tool** that combines AI efficiency with human accuracy to pseudonymize French text documents. Unlike fully automatic tools or cloud services, we prioritize **zero false negatives** and **legal defensibility** through mandatory validation workflows.
+GDPR Pseudonymizer is a **privacy-first tool** that combines AI efficiency with human accuracy to pseudonymize French text documents. Available as a **CLI tool** and a **desktop GUI** (v2.0 in development). Unlike fully automatic tools or cloud services, we prioritize **zero false negatives** and **legal defensibility** through mandatory validation workflows.
 
 **Perfect for:**
 - 🏛️ **Privacy-conscious organizations** needing GDPR-compliant AI analysis
@@ -287,6 +287,7 @@ The validation UI provides an intuitive keyboard-driven interface for reviewing 
 | **Database** | SQLite | 3.35+ | Local mapping table storage with WAL mode |
 | **Encryption** | cryptography (AESSIV) | 44.0+ | AES-256-SIV encryption for sensitive fields (PBKDF2 key derivation, passphrase-protected) |
 | **ORM** | SQLAlchemy | 2.0+ | Database abstraction and session management |
+| **Desktop GUI** | PySide6 | 6.7+ | Desktop application (optional: `pip install gdpr-pseudonymizer[gui]`) |
 | **Validation UI** | rich | 13.7+ | Interactive CLI entity review |
 | **Keyboard Input** | readchar | 4.2+ | Single-keypress capture for validation UI |
 | **Testing** | pytest | 7.4+ | Unit & integration testing |
@@ -387,14 +388,17 @@ The validation UI provides an intuitive keyboard-driven interface for reviewing 
 
 ## 🛠️ Development Status
 
-**All 5 Epics Complete** — v1.1.0 (February 2026).
+**Epics 1-5 Complete** — v1.1.0 (February 2026). **Epic 6 in progress** — v2.0 Desktop GUI.
 
 - ✅ **Epic 1:** Foundation & NLP Validation (9 stories) — spaCy integration, validation UI, hybrid detection, entity deduplication
 - ✅ **Epic 2:** Core Pseudonymization Engine (9 stories) — pseudonym libraries, encryption, audit logging, batch processing, GDPR 1:1 mapping
 - ✅ **Epic 3:** CLI Interface & Batch Processing (7 stories) — 8 CLI commands, progress reporting, config files, parallel batch, UX polish
 - ✅ **Epic 4:** Launch Readiness (8 stories) — LLM utility validation, cross-platform testing, documentation, NER accuracy suite, performance validation, beta feedback integration, codebase refactoring, launch preparation
 - ✅ **Epic 5:** Quick Wins & GDPR Compliance (7 stories) — GDPR Article 17 erasure, gender-aware pseudonyms, NER accuracy improvements (F1 29.74% → 59.97%), French documentation translation, PDF/DOCX support, CLI polish & benchmarks, v1.1 release
-- **Total:** 40 stories, 1267+ tests, 86%+ coverage, all quality gates green
+- 🚧 **Epic 6:** v2.0 Desktop GUI & Broader Accessibility (9 stories) — PySide6 desktop application, visual entity validation, batch GUI, i18n, WCAG AA, standalone executables
+  - ✅ Story 6.1: UX Architecture & GUI Framework Selection
+  - ✅ Story 6.2: GUI Application Foundation (main window, theming, home screen, settings, 77 GUI tests)
+- **Total:** 42 stories, 1344+ tests, 86%+ coverage, all quality gates green
 
 ---
 
@@ -571,12 +575,12 @@ The integration test suite covers:
 
 ---
 
-## 📊 Project Metrics (As of 2026-02-15)
+## 📊 Project Metrics (As of 2026-02-17)
 
 | Metric | Value | Status |
 |--------|-------|--------|
-| **Development Progress** | v1.1.0 | ✅ All 5 Epics Complete |
-| **Stories Complete** | 40 (Epic 1-5) | ✅ Epics 1-5 complete |
+| **Development Progress** | v2.0-dev | 🚧 Epic 6 in progress (Stories 6.1-6.2 complete) |
+| **Stories Complete** | 42 (Epic 1-5 + 6.1-6.2) | ✅ Epics 1-5, 🚧 Epic 6 |
 | **LLM Utility (NFR10)** | 4.27/5.0 (85.4%) | ✅ PASSED (threshold: 80%) |
 | **Installation Success (NFR3)** | 87.5% (7/8 platforms) | ✅ PASSED (threshold: 85%) |
 | **First Pseudonymization (NFR14)** | 100% within 30 min | ✅ PASSED (threshold: 80%) |
@@ -597,7 +601,7 @@ The integration test suite covers:
 | **Memory Usage (NFR4)** | ~1 GB Python-tracked peak | ✅ PASSED (<8GB threshold) |
 | **CLI Startup (NFR5)** | 0.56s (help), 6.0s (cold start w/ model) | ✅ PASSED (<5s for CLI startup) |
 | **Error Rate (NFR6)** | ~0% unexpected errors | ✅ PASSED (<10% threshold) |
-| **Test Coverage** | 1267+ tests, 86%+ coverage | ✅ All Quality Checks Pass |
+| **Test Coverage** | 1344+ tests (incl. 77 GUI), 86%+ coverage | ✅ All Quality Checks Pass |
 | **Quality Gates** | Ruff, mypy, pytest | ✅ All Pass (0 issues) |
 | **Supported Languages** | French | 🇫🇷 v1.0 only |
 | **Supported Formats** | .txt, .md, .pdf, .docx | 📝 PDF/DOCX via optional extras |
@@ -614,4 +618,4 @@ The integration test suite covers:
 
 ---
 
-**Last Updated:** 2026-02-15 (v1.1.0 — Epic 5 complete: GDPR Article 17 erasure, gender-aware pseudonyms, NER accuracy 59.97% F1, French docs, PDF/DOCX support, CLI polish)
+**Last Updated:** 2026-02-17 (v2.0-dev — Epic 6 Story 6.2 complete: GUI application foundation with PySide6 desktop shell, theming, drag-and-drop, settings, 77 GUI tests)

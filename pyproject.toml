@@ -40,11 +40,14 @@ markdown-it-py = "^3.0.0"
 readchar = "^4.2.0"
 pdfplumber = {version = "^0.11.0", optional = true}
 python-docx = {version = "^1.1.0", optional = true}
+PySide6-Essentials = {version = "~6.7.0", optional = true, python = ">=3.10,<3.13"}
 
 [tool.poetry.extras]
 pdf = ["pdfplumber"]
 docx = ["python-docx"]
 formats = ["pdfplumber", "python-docx"]
+gui = ["PySide6-Essentials"]
+all = ["PySide6-Essentials", "pdfplumber", "python-docx"]
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.0"
@@ -63,9 +66,11 @@ mkdocs = "^1.5.0"
 mkdocs-material = "^9.5.0"
 mkdocs-static-i18n = "^1.2"
 fpdf2 = "^2.8.5"
+pytest-qt = "^4.4.0"
 
 [tool.poetry.scripts]
 gdpr-pseudo = "gdpr_pseudonymizer.cli.main:cli_main"
+gdpr-pseudo-gui = "gdpr_pseudonymizer.gui.app:main"
 
 [build-system]
 requires = ["poetry-core"]
@@ -134,6 +139,7 @@ ignore = [
 "scripts/*.py" = ["E402"]  # Allow imports after sys.path modification
 "tests/unit/test_*.py" = ["E402"]  # Allow imports after sys.path modification
 "gdpr_pseudonymizer/cli/**/*.py" = ["UP007"]  # Typer 0.9.x requires Optional[] syntax
+"gdpr_pseudonymizer/gui/**/*.py" = ["N802"]  # Qt method overrides use camelCase
 
 # pytest configuration
 [tool.pytest.ini_options]
@@ -214,5 +220,7 @@ module = [
     "pdfplumber.*",
     "docx",
     "docx.*",
+    "PySide6",
+    "PySide6.*",
 ]
 ignore_missing_imports = true

@@ -29,7 +29,7 @@ Préparez vos documents sensibles pour l'analyse par IA en toute sérénité : t
 
 ## 🎯 Présentation
 
-GDPR Pseudonymizer est un **outil en ligne de commande conçu pour la confidentialité**. Il associe la rapidité de l'IA à la rigueur de la relecture humaine pour pseudonymiser des documents en français. Contrairement aux solutions entièrement automatiques ou aux services cloud, il mise sur l'**absence totale de faux négatifs** et sur la **solidité juridique** grâce à un processus de validation obligatoire.
+GDPR Pseudonymizer est un **outil conçu pour la confidentialité**. Il associe la rapidité de l'IA à la rigueur de la relecture humaine pour pseudonymiser des documents en français. Disponible en **ligne de commande (CLI)** et en **application de bureau** (v2.0 en développement). Contrairement aux solutions entièrement automatiques ou aux services cloud, il mise sur l'**absence totale de faux négatifs** et sur la **solidité juridique** grâce à un processus de validation obligatoire.
 
 **Pour qui ?**
 - 🏛️ **Organisations sensibles à la protection des données** ayant besoin d'analyses IA conformes au RGPD
@@ -287,6 +287,7 @@ L'interface de validation offre un parcours intuitif piloté au clavier pour pas
 | **Base de données** | SQLite | 3.35+ | Stockage local des tables de correspondance (mode WAL) |
 | **Chiffrement** | cryptography (AESSIV) | 44.0+ | Chiffrement AES-256-SIV des champs sensibles (dérivation PBKDF2, protégé par mot de passe) |
 | **ORM** | SQLAlchemy | 2.0+ | Couche d'abstraction base de données et gestion des sessions |
+| **Interface graphique** | PySide6 | 6.7+ | Application de bureau (optionnel : `pip install gdpr-pseudonymizer[gui]`) |
 | **Interface de validation** | rich | 13.7+ | Revue interactive des entités en CLI |
 | **Saisie clavier** | readchar | 4.2+ | Capture de touche unique pour la validation |
 | **Tests** | pytest | 7.4+ | Tests unitaires et d'intégration |
@@ -387,14 +388,17 @@ L'interface de validation offre un parcours intuitif piloté au clavier pour pas
 
 ## 🛠️ État du développement
 
-**Les 5 Epics sont terminés** — v1.1.0 (février 2026).
+**Epics 1-5 terminés** — v1.1.0 (février 2026). **Epic 6 en cours** — v2.0 Interface graphique.
 
 - ✅ **Epic 1 :** Fondations et validation NLP (9 stories) — Intégration spaCy, interface de validation, détection hybride, déduplication des entités
 - ✅ **Epic 2 :** Moteur de pseudonymisation (9 stories) — Bibliothèques de pseudonymes, chiffrement, journaux d'audit, traitement par lot, correspondance 1:1 RGPD
 - ✅ **Epic 3 :** Interface CLI et traitement par lot (7 stories) — 8 commandes CLI, suivi de progression, fichiers de configuration, traitement parallèle, perfectionnement UX
 - ✅ **Epic 4 :** Préparation au lancement (8 stories) — Validation de l'utilité LLM, tests multi-plateformes, documentation, suite de précision NER, validation des performances, intégration des retours bêta, refactorisation, préparation au lancement
 - ✅ **Epic 5 :** Améliorations et conformité RGPD (7 stories) — Effacement article 17 RGPD, pseudonymes tenant compte du genre, amélioration de la précision NER (F1 29,74 % → 59,97 %), traduction française de la documentation, support PDF/DOCX, perfectionnement CLI et benchmarks, release v1.1
-- **Total :** 40 stories, 1 267+ tests, 86 %+ de couverture, tous les contrôles qualité au vert
+- 🚧 **Epic 6 :** v2.0 Interface graphique et accessibilité (9 stories) — Application de bureau PySide6, validation visuelle, traitement par lot GUI, i18n, WCAG AA, exécutables autonomes
+  - ✅ Story 6.1 : Architecture UX et sélection du framework GUI
+  - ✅ Story 6.2 : Fondations de l'application GUI (fenêtre principale, thèmes, écran d'accueil, paramètres, 77 tests GUI)
+- **Total :** 42 stories, 1 344+ tests, 86 %+ de couverture, tous les contrôles qualité au vert
 
 ---
 
@@ -571,12 +575,12 @@ La suite de tests d'intégration couvre :
 
 ---
 
-## 📊 Métriques du projet (au 2026-02-15)
+## 📊 Métriques du projet (au 2026-02-17)
 
 | Métrique | Valeur | Statut |
 |----------|--------|--------|
-| **Avancement** | v1.1.0 | ✅ Les 5 Epics terminés |
-| **Stories terminées** | 40 (Epic 1-5) | ✅ Epics 1-5 terminés |
+| **Avancement** | v2.0-dev | 🚧 Epic 6 en cours (Stories 6.1-6.2 terminées) |
+| **Stories terminées** | 42 (Epic 1-5 + 6.1-6.2) | ✅ Epics 1-5, 🚧 Epic 6 |
 | **Utilité LLM (NFR10)** | 4,27/5,0 (85,4 %) | ✅ VALIDÉ (seuil : 80 %) |
 | **Succès d'installation (NFR3)** | 87,5 % (7/8 plateformes) | ✅ VALIDÉ (seuil : 85 %) |
 | **Première pseudonymisation (NFR14)** | 100 % en moins de 30 min | ✅ VALIDÉ (seuil : 80 %) |
@@ -597,7 +601,7 @@ La suite de tests d'intégration couvre :
 | **Utilisation mémoire (NFR4)** | environ 1 Go de pic mesuré par Python | ✅ VALIDÉ (seuil < 8 Go) |
 | **Démarrage CLI (NFR5)** | 0,56 s (help), 6,0 s (démarrage à froid avec modèle) | ✅ VALIDÉ (< 5 s pour le démarrage CLI) |
 | **Taux d'erreur (NFR6)** | environ 0 % d'erreurs inattendues | ✅ VALIDÉ (seuil < 10 %) |
-| **Couverture de test** | 1 267+ tests, 86 %+ de couverture | ✅ Tous les contrôles qualité validés |
+| **Couverture de test** | 1 344+ tests (dont 77 GUI), 86 %+ de couverture | ✅ Tous les contrôles qualité validés |
 | **Contrôles qualité** | Ruff, mypy, pytest | ✅ Tous validés (0 problème) |
 | **Langues** | Français | 🇫🇷 v1.0 uniquement |
 | **Formats** | .txt, .md, .pdf, .docx | 📝 PDF/DOCX via extras optionnels |
@@ -614,4 +618,4 @@ La suite de tests d'intégration couvre :
 
 ---
 
-**Dernière mise à jour :** 2026-02-15 (v1.1.0 — Epic 5 terminé : effacement RGPD article 17, pseudonymes tenant compte du genre, précision NER 59,97 % F1, documentation française, support PDF/DOCX, perfectionnement CLI)
+**Dernière mise à jour :** 2026-02-17 (v2.0-dev — Epic 6 Story 6.2 terminé : fondations de l'application GUI avec PySide6, thèmes, glisser-déposer, paramètres, 77 tests GUI)

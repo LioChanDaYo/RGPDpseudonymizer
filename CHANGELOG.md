@@ -9,7 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-_No changes yet._
+### Added
+
+- **GUI Application Foundation** (Story 6.2) — PySide6-based desktop application shell for v2.0:
+  - Main window with menu bar (Fichier, Affichage, Outils, Aide), status bar, and keyboard shortcuts (Ctrl+O, Ctrl+Q, Ctrl+,, F1, F11)
+  - Light/dark theme system with QSS stylesheets and persistent preference
+  - Home screen with drag-and-drop zone (.txt, .md, .pdf, .docx), recent files list, batch processing card
+  - Settings screen with auto-save: theme, language, processing defaults, batch options, shortcuts reference
+  - 4-step progress indicator widget (single/batch modes) with custom QPainter rendering
+  - Toast notification system, confirmation dialogs (destructive/proceeding/informational)
+  - Global exception handler with structlog logging and user-friendly error dialog
+  - Application icon set (16/32/48/256/512 PNG + ICO), splash screen
+  - `gdpr-pseudo-gui` entry point, PySide6-Essentials ~6.7.0 as optional dep (`pip install gdpr-pseudonymizer[gui]`)
+  - 77 GUI unit tests (pytest-qt) across 9 test files; startup time 1.706s (<5s threshold)
 
 ---
 

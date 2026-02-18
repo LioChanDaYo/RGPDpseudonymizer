@@ -8,7 +8,7 @@ Transform sensitive French documents for safe AI analysis with local processing,
 
 ## What is GDPR Pseudonymizer?
 
-GDPR Pseudonymizer is a **privacy-first CLI tool** that combines AI efficiency with human accuracy to pseudonymize French text documents. Unlike fully automatic tools or cloud services, it prioritizes **zero false negatives** and **legal defensibility** through mandatory validation workflows.
+GDPR Pseudonymizer is a **privacy-first tool** that combines AI efficiency with human accuracy to pseudonymize French text documents. Available as a **CLI tool** and a **desktop GUI** (v2.0 in development). Unlike fully automatic tools or cloud services, it prioritizes **zero false negatives** and **legal defensibility** through mandatory validation workflows.
 
 **Perfect for:**
 
@@ -96,8 +96,8 @@ GDPR Pseudonymizer supports compliance with Articles 4(5), 25, 30, 32, and 89 of
 
 ## Status
 
-**Current version:** v1.1.0 (February 2026)
+**Current release:** v1.1.0 (February 2026) | **In development:** v2.0 Desktop GUI (Epic 6)
 
-**Supported:** Python 3.10-3.12 | Windows, macOS, Linux | .txt, .md, .pdf, .docx formats | French language
+**Supported:** Python 3.10-3.12 | Windows, macOS, Linux | .txt, .md, .pdf, .docx formats | French language | Desktop GUI: `pip install gdpr-pseudonymizer[gui]`
 
 See the [FAQ](faq.md) for the product roadmap.
