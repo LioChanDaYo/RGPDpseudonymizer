@@ -51,22 +51,35 @@ class TestProcessingScreenProgress:
 
 
 class TestProcessingScreenResults:
-    """Test entity summary display after processing."""
+    """Test entity summary display after detection."""
 
     def test_entity_summary_shown(self, processing_screen):  # type: ignore[no-untyped-def]
-        from gdpr_pseudonymizer.gui.workers.processing_worker import GUIProcessingResult
+        from gdpr_pseudonymizer.gui.workers.detection_worker import DetectionResult
+        from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 
-        result = GUIProcessingResult(
-            success=True,
-            input_file="test.txt",
-            output_file="out.txt",
-            entities_detected=5,
-            entities_new=3,
-            entities_reused=2,
-            processing_time_seconds=2.5,
-            pseudonymized_content="Content",
+        entities = [
+            DetectedEntity(text="Jean", entity_type="PERSON", start_pos=0, end_pos=4),
+            DetectedEntity(
+                text="Marie", entity_type="PERSON", start_pos=10, end_pos=15
+            ),
+            DetectedEntity(
+                text="Paris", entity_type="LOCATION", start_pos=20, end_pos=25
+            ),
+            DetectedEntity(
+                text="Lyon", entity_type="LOCATION", start_pos=30, end_pos=34
+            ),
+            DetectedEntity(text="ACME", entity_type="ORG", start_pos=40, end_pos=44),
+        ]
+        result = DetectionResult(
+            document_text="Test document text",
+            detected_entities=entities,
+            pseudonym_previews={},
             entity_type_counts={"PERSON": 2, "LOCATION": 2, "ORG": 1},
-            entity_mappings=[],
+            db_path="test.db",
+            passphrase="test_pass_secure",
+            theme="neutral",
+            input_file="test.txt",
+            detection_time_seconds=2.5,
         )
 
         processing_screen._on_finished(result)
@@ -80,19 +93,18 @@ class TestProcessingScreenResults:
         assert "1 organisations" in processing_screen.summary_label.text()
 
     def test_zero_entity_warning(self, processing_screen):  # type: ignore[no-untyped-def]
-        from gdpr_pseudonymizer.gui.workers.processing_worker import GUIProcessingResult
+        from gdpr_pseudonymizer.gui.workers.detection_worker import DetectionResult
 
-        result = GUIProcessingResult(
-            success=True,
-            input_file="test.txt",
-            output_file="out.txt",
-            entities_detected=0,
-            entities_new=0,
-            entities_reused=0,
-            processing_time_seconds=1.0,
-            pseudonymized_content="Content",
+        result = DetectionResult(
+            document_text="Empty document",
+            detected_entities=[],
+            pseudonym_previews={},
             entity_type_counts={},
-            entity_mappings=[],
+            db_path="test.db",
+            passphrase="test_pass_secure",
+            theme="neutral",
+            input_file="test.txt",
+            detection_time_seconds=1.0,
         )
 
         processing_screen._on_finished(result)
@@ -110,25 +122,28 @@ class TestProcessingScreenNavigation:
         processing_screen._on_cancel()
         assert main_window.current_screen_name() == "home"
 
-    def test_continue_navigates_to_results(self, processing_screen, main_window):  # type: ignore[no-untyped-def]
-        from gdpr_pseudonymizer.gui.workers.processing_worker import GUIProcessingResult
+    def test_continue_navigates_to_validation(self, processing_screen, main_window):  # type: ignore[no-untyped-def]
+        from gdpr_pseudonymizer.gui.workers.detection_worker import DetectionResult
+        from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 
-        result = GUIProcessingResult(
-            success=True,
+        entities = [
+            DetectedEntity(text="Jean", entity_type="PERSON", start_pos=0, end_pos=4),
+        ]
+        result = DetectionResult(
+            document_text="Le contrat avec Jean.",
+            detected_entities=entities,
+            pseudonym_previews={"Jean_0": "Pierre"},
+            entity_type_counts={"PERSON": 1},
+            db_path="test.db",
+            passphrase="test_pass_secure",
+            theme="neutral",
             input_file="test.txt",
-            output_file="out.txt",
-            entities_detected=3,
-            entities_new=2,
-            entities_reused=1,
-            processing_time_seconds=1.5,
-            pseudonymized_content="Pseudonymized content",
-            entity_type_counts={"PERSON": 2, "LOCATION": 1},
-            entity_mappings=[("Jean Martin", "PERSON")],
+            detection_time_seconds=1.0,
         )
 
         processing_screen._on_finished(result)
         processing_screen._on_continue()
-        assert main_window.current_screen_name() == "results"
+        assert main_window.current_screen_name() == "validation"
 
 
 class TestProcessingScreenStartProcessing:

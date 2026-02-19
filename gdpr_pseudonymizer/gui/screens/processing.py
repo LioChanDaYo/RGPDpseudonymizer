@@ -24,6 +24,7 @@ from gdpr_pseudonymizer.utils.logger import get_logger
 
 if TYPE_CHECKING:
     from gdpr_pseudonymizer.gui.main_window import MainWindow
+    from gdpr_pseudonymizer.gui.workers.detection_worker import DetectionResult
     from gdpr_pseudonymizer.gui.workers.processing_worker import GUIProcessingResult
 
 logger = get_logger(__name__)
@@ -36,6 +37,7 @@ class ProcessingScreen(QWidget):
         super().__init__(main_window)
         self._main_window = main_window
         self._result: GUIProcessingResult | None = None
+        self._detection_result: DetectionResult | None = None
         self._file_path = ""
         self._db_path = ""
         self._passphrase = ""
@@ -218,10 +220,10 @@ class ProcessingScreen(QWidget):
         self._main_window.navigate_to("home")
 
     def _start_processing_worker(self) -> None:
-        """Launch the document processing worker."""
-        from gdpr_pseudonymizer.gui.workers.processing_worker import ProcessingWorker
+        """Launch the detection worker (Phase 1 only)."""
+        from gdpr_pseudonymizer.gui.workers.detection_worker import DetectionWorker
 
-        worker = ProcessingWorker(
+        worker = DetectionWorker(
             file_path=self._file_path,
             db_path=self._db_path,
             passphrase=self._passphrase,
@@ -243,23 +245,24 @@ class ProcessingScreen(QWidget):
         self._phase_label.setText(phase)
 
     def _on_finished(self, result: object) -> None:
-        """Processing completed successfully."""
-        from gdpr_pseudonymizer.gui.workers.processing_worker import GUIProcessingResult
+        """Detection completed successfully."""
+        from gdpr_pseudonymizer.gui.workers.detection_worker import DetectionResult
 
-        if not isinstance(result, GUIProcessingResult):
+        if not isinstance(result, DetectionResult):
             return
 
-        self._result = result
+        self._detection_result = result
         self._is_processing = False
 
         # Update progress to 100%
         self._progress_bar.setMaximum(100)
         self._progress_bar.setValue(100)
-        self._phase_label.setText("Traitement terminé")
+        self._phase_label.setText("Analyse terminée")
         self._time_estimate_label.setText("")
 
         # Show entity summary
-        if result.entities_detected == 0:
+        n_entities = len(result.detected_entities)
+        if n_entities == 0:
             self._warning_panel.setVisible(True)
         else:
             counts = result.entity_type_counts
@@ -276,9 +279,6 @@ class ProcessingScreen(QWidget):
         # Show continue button
         self._continue_btn.setVisible(True)
         self._cancel_btn.setEnabled(True)
-
-        # Update step indicator
-        self._main_window.step_indicator.set_step(2)
 
     def _on_error(self, error_msg: str) -> None:
         """Processing failed — show error and return to home."""
@@ -303,27 +303,19 @@ class ProcessingScreen(QWidget):
         self._main_window.step_indicator.set_step(0)
 
     def _on_continue(self) -> None:
-        """Navigate to results screen with processing result."""
-        if self._result is None:
+        """Navigate to validation screen with detection result."""
+        if self._detection_result is None:
             return
 
-        self._main_window.step_indicator.set_step(3)
+        # Get the validation screen and start validation
+        val_idx = self._main_window._screens.get("validation")
+        if val_idx is not None:
+            widget = self._main_window.stack.widget(val_idx)
+            from gdpr_pseudonymizer.gui.screens.validation import ValidationScreen
 
-        # Get the results screen and show results
-        results_idx = self._main_window._screens.get("results")
-        if results_idx is not None:
-            widget = self._main_window.stack.widget(results_idx)
-            from gdpr_pseudonymizer.gui.screens.results import ResultsScreen
-
-            if isinstance(widget, ResultsScreen):
-                widget.show_results(
-                    result=self._result,
-                    content=self._result.pseudonymized_content,
-                    entity_mappings=self._result.entity_mappings,
-                    original_path=self._file_path,
-                    temp_path=self._result.output_file,
-                )
-        self._main_window.navigate_to("results")
+            if isinstance(widget, ValidationScreen):
+                widget.start_validation(self._detection_result)
+        self._main_window.navigate_to("validation")
 
     # -- Test accessors --
 

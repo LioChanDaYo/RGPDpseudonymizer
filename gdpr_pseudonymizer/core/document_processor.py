@@ -666,6 +666,99 @@ class DocumentProcessor:
             error_message=error_message,
         )
 
+    def detect_entities(
+        self,
+        input_path: str,
+        entity_type_filter: set[str] | None = None,
+    ) -> tuple[str, list[DetectedEntity]]:
+        """Phase 1: Read file and run NLP detection only.
+
+        Returns document text and detected entities without performing
+        pseudonymization. Used by GUI DetectionWorker to split the pipeline.
+
+        Args:
+            input_path: Path to document to process
+            entity_type_filter: Optional set of entity types to keep
+
+        Returns:
+            Tuple of (document_text, detected_entities)
+
+        Raises:
+            FileProcessingError: If file cannot be read
+            OSError: If NLP model not available
+        """
+        document_text = read_file(input_path)
+        detected_entities = self._detect_and_filter_entities(
+            document_text, entity_type_filter
+        )
+        return document_text, detected_entities
+
+    def build_pseudonym_previews(
+        self,
+        detected_entities: list[DetectedEntity],
+    ) -> dict[str, str]:
+        """Generate pseudonym previews for detected entities.
+
+        Opens a database session to look up existing mappings and generate
+        new pseudonyms via the compositional engine.
+
+        Args:
+            detected_entities: Entities from detect_entities()
+
+        Returns:
+            Dict mapping entity_key (text_startpos) to pseudonym preview string
+        """
+        with open_database(self.db_path, self.passphrase) as db_session:
+            ctx = self._init_processing_context(db_session)
+            assigner = self._build_pseudonym_assigner(ctx)
+            previews: dict[str, str] = {}
+            for entity in detected_entities:
+                key = f"{entity.text}_{entity.start_pos}"
+                previews[key] = assigner(entity)
+            return previews
+
+    def finalize_document(
+        self,
+        document_text: str,
+        validated_entities: list[DetectedEntity],
+        output_path: str,
+    ) -> ProcessingResult:
+        """Phase 2: Resolve pseudonyms, apply replacements, write output.
+
+        Takes validated entities (after user review) and produces the
+        pseudonymized document. Used by GUI FinalizationWorker.
+
+        Args:
+            document_text: Original document text
+            validated_entities: Entities approved by user (rejected excluded)
+            output_path: Path to write pseudonymized output
+
+        Returns:
+            ProcessingResult with success/failure details
+        """
+        start_time = time.time()
+        try:
+            with open_database(self.db_path, self.passphrase) as db_session:
+                ctx = self._init_processing_context(db_session)
+                self._reset_pseudonym_state(ctx)
+                resolve_result = self._resolve_pseudonyms(ctx, validated_entities)
+                pseudonymized_text = self._apply_replacements(
+                    document_text, resolve_result.replacements
+                )
+                write_file(output_path, pseudonymized_text)
+                processing_time = time.time() - start_time
+                return ProcessingResult(
+                    success=True,
+                    input_file="",
+                    output_file=output_path,
+                    entities_detected=len(validated_entities),
+                    entities_new=resolve_result.entities_new,
+                    entities_reused=resolve_result.entities_reused,
+                    processing_time_seconds=processing_time,
+                )
+        except Exception as e:
+            return self._handle_processing_error(e, "", output_path, start_time)
+
     def process_document(
         self,
         input_path: str,

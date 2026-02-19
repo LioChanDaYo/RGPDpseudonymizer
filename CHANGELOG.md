@@ -11,6 +11,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Visual Entity Validation Interface** (Story 6.4) — Full visual entity review and validation workflow in the GUI:
+  - Split processing pipeline: DetectionWorker (NLP detection phase) + FinalizationWorker (pseudonymization phase) for two-phase workflow with validation in between
+  - EntityEditor (QTextEdit subclass): color-coded entity highlights by type (PERSON=blue, LOCATION=green, ORG=orange), pseudonym tooltips, binary search O(log n) click detection, context menus (accept/reject/edit/change type/change pseudonym), "Add as Entity" via text selection, keyboard navigation mode (Enter/Tab/Shift+Tab/Delete/Escape), zoom support (Ctrl+/-), hide-rejected toggle
+  - EntityPanel sidebar: entities grouped by type with section headers, status icons (pending/accepted/rejected/modified), checkbox multi-selection, bulk actions (accept/reject selection, accept all of type, accept known), pending counter with live updates, "deja connu" badge for known entities, text filter (Ctrl+F)
+  - GUIValidationState adapter: wraps core ValidationSession with QUndoStack integration for full undo/redo (Ctrl+Z/Ctrl+Shift+Z), supports individual and composite bulk undo, entity state tracking (pending/confirmed/rejected/modified/added)
+  - ValidationScreen with QSplitter layout (65% editor / 35% panel), bidirectional editor-panel sync, toolbar with hide-rejected toggle and find bar, bottom action bar (Retour with confirmation dialog, Finaliser with validation summary), status bar integration
+  - First-use contextual hints overlay (3 callout bubbles, dismissible, stored in config)
+  - DocumentProcessor public API: `detect_entities()`, `build_pseudonym_previews()`, `finalize_document()` methods for split-phase processing
+  - 72 new tests (66 unit + 6 integration) across 7 test files; all quality gates pass
+
 - **Document Processing Workflow** (Story 6.3) — Full single-document pseudonymization pipeline in the GUI:
   - PassphraseDialog with auto-detect of existing `.gdpr-pseudo.db` files, session caching, and "Create new" option
   - ProcessingWorker running in background thread (QRunnable + WorkerSignals bridge) — GUI stays responsive
@@ -35,6 +45,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **DATA-001**: Entity type counts in ProcessingWorker now count from detected entities list instead of querying entire DB, showing accurate per-document counts instead of cumulative DB totals
+- **THREAD-001**: Added cancellation flags to DetectionWorker and FinalizationWorker; cancel buttons now stop workers early between processing phases
 - **QSS theme rendering** — Fixed black stripes in light mode on Settings and Home screens caused by QScrollArea forcing `autoFillBackground(True)` on content widgets when QSS overrides the native palette. Added QProgressBar, QStackedWidget, QFrame, and QScrollArea container styles to both light and dark QSS theme files.
 
 ---
