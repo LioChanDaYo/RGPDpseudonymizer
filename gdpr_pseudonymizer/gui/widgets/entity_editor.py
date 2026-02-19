@@ -189,6 +189,16 @@ class EntityEditor(QTextEdit):
             if is_rejected:
                 fmt.setFontStrikeOut(True)
 
+            # BUG-UX-003 fix: Add green underline for accepted/known entities
+            is_accepted = review.state in (
+                EntityReviewState.CONFIRMED,
+                EntityReviewState.ADDED,
+            )
+            if (is_accepted or is_known) and not is_rejected:
+                underline_color = "#2E7D32" if not self._dark_theme else "#66BB6A"
+                fmt.setUnderlineStyle(QTextCharFormat.UnderlineStyle.SingleUnderline)
+                fmt.setUnderlineColor(QColor(underline_color))
+
             # Tooltip: pseudonym + type + confidence
             pseudonym = self._validation_state.get_pseudonym(entity_id)
             confidence = review.entity.confidence

@@ -702,19 +702,40 @@ class DocumentProcessor:
         Opens a database session to look up existing mappings and generate
         new pseudonyms via the compositional engine.
 
+        Preserves title prefixes in pseudonyms to match entity.text
+        (e.g., "Dr. Jean Dupont" → "Dr. Luke Skywalker").
+
         Args:
             detected_entities: Entities from detect_entities()
 
         Returns:
             Dict mapping entity_key (text_startpos) to pseudonym preview string
         """
+        import re
+
+        from gdpr_pseudonymizer.utils.french_patterns import FRENCH_TITLE_PATTERN
+
         with open_database(self.db_path, self.passphrase) as db_session:
             ctx = self._init_processing_context(db_session)
             assigner = self._build_pseudonym_assigner(ctx)
             previews: dict[str, str] = {}
             for entity in detected_entities:
                 key = f"{entity.text}_{entity.start_pos}"
-                previews[key] = assigner(entity)
+                base_pseudonym = assigner(entity)
+
+                # Preserve title prefix for PERSON entities (same logic as CLI)
+                if entity.entity_type == "PERSON":
+                    title_match = re.match(
+                        FRENCH_TITLE_PATTERN, entity.text, re.IGNORECASE
+                    )
+                    if title_match:
+                        title_prefix = title_match.group(0).rstrip()
+                        previews[key] = f"{title_prefix} {base_pseudonym}"
+                    else:
+                        previews[key] = base_pseudonym
+                else:
+                    previews[key] = base_pseudonym
+
             return previews
 
     def finalize_document(

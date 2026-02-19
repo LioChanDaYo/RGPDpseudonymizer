@@ -135,6 +135,17 @@ class DetectionWorker(QRunnable):
             document_text, detected_entities = processor.detect_entities(
                 input_path=self._file_path,
             )
+
+            # Apply variant grouping (same as CLI) to deduplicate entities like
+            # "Jean Dupont" and "Dr. Jean Dupont" into a single canonical entity
+            from gdpr_pseudonymizer.nlp.entity_grouping import group_entity_variants
+
+            self.signals.progress.emit(60, "Regroupement des variantes...")
+            variant_groups = group_entity_variants(detected_entities)
+
+            # Extract canonical entities (longest form) for display
+            detected_entities = [canonical for canonical, _, _ in variant_groups]
+
         except FileProcessingError as e:
             error_msg = str(e)
             if "protégé" in error_msg.lower() or "password" in error_msg.lower():
