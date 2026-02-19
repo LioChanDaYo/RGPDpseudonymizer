@@ -20,8 +20,10 @@ def main() -> None:
         from PySide6.QtWidgets import QApplication
     except ImportError:
         print(
-            "PySide6 is required for the GUI. "
-            "Install with: pip install gdpr-pseudonymizer[gui]",
+            "PySide6 is required for the GUI.\n"
+            "Install with:\n"
+            "  - Poetry (development): poetry install --extras gui\n"
+            "  - pip (PyPI):          pip install gdpr-pseudonymizer[gui]",
             file=sys.stderr,
         )
         raise SystemExit(1)

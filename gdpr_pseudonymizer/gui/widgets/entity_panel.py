@@ -115,6 +115,8 @@ class EntityPanel(QWidget):
         self._list_widget.setSelectionMode(QAbstractItemView.SelectionMode.NoSelection)
         self._list_widget.itemClicked.connect(self._on_item_clicked)
         self._list_widget.setSpacing(2)
+        # BUG-UX-002 fix: Checkbox styling now in global theme files
+        # (resources/themes/light.qss and dark.qss)
         layout.addWidget(self._list_widget, stretch=1)
 
         # Bulk actions bar
@@ -346,6 +348,13 @@ class EntityPanel(QWidget):
         self._accept_sel_btn.setEnabled(n > 0)
         self._reject_sel_btn.setEnabled(n > 0)
 
+    def _clear_all_checkboxes(self) -> None:
+        """Uncheck all entity checkboxes in the list."""
+        for i in range(self._list_widget.count()):
+            item = self._list_widget.item(i)
+            if item and item.flags() & Qt.ItemFlag.ItemIsUserCheckable:
+                item.setCheckState(Qt.CheckState.Unchecked)
+
     # ------------------------------------------------------------------
     # Bulk action slots
     # ------------------------------------------------------------------
@@ -355,6 +364,7 @@ class EntityPanel(QWidget):
         if ids:
             self.bulk_action_requested.emit("accept", ids)
             self._checked_ids.clear()
+            self._clear_all_checkboxes()
             self._update_bulk_button_counts()
 
     def _on_bulk_reject(self) -> None:
@@ -362,6 +372,7 @@ class EntityPanel(QWidget):
         if ids:
             self.bulk_action_requested.emit("reject", ids)
             self._checked_ids.clear()
+            self._clear_all_checkboxes()
             self._update_bulk_button_counts()
 
     def _on_accept_all_type(self) -> None:

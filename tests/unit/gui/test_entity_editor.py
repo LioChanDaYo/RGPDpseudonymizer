@@ -74,6 +74,69 @@ class TestEntityHighlighting:
         tooltip = selections[0].format.toolTip()
         assert "PERSON" in tooltip or "LOCATION" in tooltip or "ORG" in tooltip
 
+    def test_accepted_entity_has_green_underline(
+        self, editor_with_state: tuple[EntityEditor, GUIValidationState]
+    ) -> None:
+        """Test BUG-UX-003 fix: accepted entities show green underline."""
+        from PySide6.QtGui import QTextCharFormat
+
+        editor, state = editor_with_state
+        reviews = state.get_all_entities()
+        eid = reviews[0].entity_id
+        state.accept_entity(eid)
+        editor.refresh_entity(eid)
+
+        selections = editor.extraSelections()
+        # Find selection for accepted entity
+        has_underline = any(
+            sel.format.underlineStyle()
+            == QTextCharFormat.UnderlineStyle.SingleUnderline
+            for sel in selections
+        )
+        assert has_underline
+
+    def test_pending_entity_has_no_underline(
+        self, editor_with_state: tuple[EntityEditor, GUIValidationState]
+    ) -> None:
+        """Test pending entities do not have green underline."""
+        from PySide6.QtGui import QTextCharFormat
+
+        editor, state = editor_with_state
+        reviews = state.get_all_entities()
+        # Ensure all entities are pending (no accepts/rejects yet)
+        assert all(r.state.value == "pending" for r in reviews)
+
+        selections = editor.extraSelections()
+        # When all entities are pending, NONE should have underline
+        has_any_underline = any(
+            sel.format.underlineStyle()
+            == QTextCharFormat.UnderlineStyle.SingleUnderline
+            for sel in selections
+        )
+        assert not has_any_underline
+
+    def test_known_entity_has_green_underline(
+        self, editor_with_state: tuple[EntityEditor, GUIValidationState]
+    ) -> None:
+        """Test known (auto-accepted) entities show green underline."""
+        from PySide6.QtGui import QTextCharFormat
+
+        editor, state = editor_with_state
+        reviews = state.get_all_entities()
+        eid = reviews[0].entity_id
+        # Mark as known
+        state._known_entity_ids.add(eid)
+        editor.refresh_entity(eid)
+
+        selections = editor.extraSelections()
+        # Find selection for known entity
+        has_underline = any(
+            sel.format.underlineStyle()
+            == QTextCharFormat.UnderlineStyle.SingleUnderline
+            for sel in selections
+        )
+        assert has_underline
+
 
 class TestClickDetection:
     """Test click on entity detection."""

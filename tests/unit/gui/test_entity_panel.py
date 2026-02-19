@@ -178,6 +178,65 @@ class TestBulkActions:
         assert len(signals) == 1
         assert signals[0][0] == "accept_known"
 
+    def test_bulk_accept_clears_checkboxes(
+        self, qtbot, panel_with_state: tuple[EntityPanel, GUIValidationState]  # type: ignore[no-untyped-def]
+    ) -> None:
+        """Test that bulk accept clears all checkboxes."""
+        from PySide6.QtCore import Qt
+
+        panel, state = panel_with_state
+
+        # Check first two entities
+        for idx in [1, 2]:
+            item = panel.list_widget.item(idx)
+            if item:
+                item.setCheckState(Qt.CheckState.Checked)
+                panel._on_item_clicked(item)
+
+        # Verify checkboxes are checked
+        checked_count = sum(
+            1
+            for i in range(panel.list_widget.count())
+            if (item := panel.list_widget.item(i))
+            and item.checkState() == Qt.CheckState.Checked
+        )
+        assert checked_count == 2
+
+        # Perform bulk accept
+        panel._on_bulk_accept()
+
+        # Verify all checkboxes are now unchecked
+        checked_count = sum(
+            1
+            for i in range(panel.list_widget.count())
+            if (item := panel.list_widget.item(i))
+            and item.checkState() == Qt.CheckState.Checked
+        )
+        assert checked_count == 0
+
+    def test_bulk_reject_clears_checkboxes(
+        self, qtbot, panel_with_state: tuple[EntityPanel, GUIValidationState]  # type: ignore[no-untyped-def]
+    ) -> None:
+        """Test that bulk reject clears all checkboxes."""
+        from PySide6.QtCore import Qt
+
+        panel, state = panel_with_state
+
+        # Check first entity
+        item = panel.list_widget.item(1)
+        if item:
+            item.setCheckState(Qt.CheckState.Checked)
+            panel._on_item_clicked(item)
+
+        # Verify checkbox is checked
+        assert item.checkState() == Qt.CheckState.Checked
+
+        # Perform bulk reject
+        panel._on_bulk_reject()
+
+        # Verify checkbox is now unchecked
+        assert item.checkState() == Qt.CheckState.Unchecked
+
 
 class TestPendingCounter:
     """Test pending counter updates."""
@@ -238,3 +297,21 @@ class TestFilter:
         panel.find_field.setText("Jean")
         # Should show only matching entities
         assert panel.list_widget.count() < initial_count
+
+
+class TestCheckboxStyling:
+    """Test checkbox functionality (BUG-UX-002 fix)."""
+
+    def test_checkbox_items_are_checkable(
+        self, panel_with_state: tuple[EntityPanel, GUIValidationState]
+    ) -> None:
+        """Test that entity list items have checkboxes enabled."""
+        from PySide6.QtCore import Qt
+
+        panel, state = panel_with_state
+        # Verify entity items (not section headers) are checkable
+        for i in range(panel.list_widget.count()):
+            item = panel.list_widget.item(i)
+            if item and "──" not in item.text():  # Skip section headers
+                # Entity items should have ItemIsUserCheckable flag
+                assert item.flags() & Qt.ItemFlag.ItemIsUserCheckable

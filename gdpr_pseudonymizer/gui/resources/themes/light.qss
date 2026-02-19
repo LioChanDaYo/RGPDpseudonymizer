@@ -162,6 +162,23 @@ QCheckBox::indicator, QRadioButton::indicator {
     height: 18px;
 }
 
+/* QListWidget checkboxes (Entity Panel) — BUG-UX-002 fix */
+QListWidget::indicator:unchecked {
+    border: 2px solid #666;
+    background: white;
+    width: 16px;
+    height: 16px;
+    border-radius: 2px;
+}
+
+QListWidget::indicator:checked {
+    border: 2px solid #1976D2;
+    background: #1976D2;
+    width: 16px;
+    height: 16px;
+    border-radius: 2px;
+}
+
 /* Labels */
 QLabel {
     color: #212121;
