@@ -11,6 +11,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Batch Processing & Configuration Management** (Story 6.5) — Batch document processing and database management in the GUI:
+  - Batch processing screen with 3-phase workflow (selection → progress → summary):
+    - Folder and multi-file selection with file discovery (.txt/.md/.pdf/.docx), excludes `*_pseudonymized*`
+    - Output directory field with config default or `{input}/_pseudonymized/` fallback
+    - Real-time progress dashboard: overall QProgressBar, per-document QTableWidget with status transitions (En attente → En cours → Traité/Erreur), estimated time remaining
+    - Pause/resume and cancel controls with confirmation dialog
+    - Summary cards (documents, entities, new/reused, errors) and per-document results table
+    - Export batch report as `.txt`
+  - Database management screen (Article 17 RGPD compliance):
+    - Entity listing with search, type filter (PERSON/LOCATION/ORG), checkbox multi-selection
+    - Entity deletion with confirmation dialog and ERASURE audit logging
+    - CSV export (entity_id, entity_type, full_name, pseudonym_full, first_seen)
+    - Recent databases dropdown (max 5, persisted in config)
+    - Database info summary (creation date, entity count, last operation)
+  - BatchWorker (QRunnable) with pause/cancel via QMutex/QWaitCondition, continue-on-error mode
+  - Settings enhancements: workers spinner (1-8), default theme selector (neutral/star_wars/lotr)
+  - `set_context()` navigation pattern for screen-to-screen data passing
+  - 40 new tests (31 unit + 2 integration for batch/database, 7 settings tests); 1365+ total tests
+
 - **Visual Entity Validation Interface** (Story 6.4) — Full visual entity review and validation workflow in the GUI:
   - Split processing pipeline: DetectionWorker (NLP detection phase) + FinalizationWorker (pseudonymization phase) for two-phase workflow with validation in between
   - EntityEditor (QTextEdit subclass): color-coded entity highlights by type (PERSON=blue, LOCATION=green, ORG=orange), pseudonym tooltips, binary search O(log n) click detection, context menus (accept/reject/edit/change type/change pseudonym), "Add as Entity" via text selection, keyboard navigation mode (Enter/Tab/Shift+Tab/Delete/Escape), zoom support (Ctrl+/-), hide-rejected toggle
@@ -45,6 +64,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Wrong passphrase locks out retry**: Cached passphrase was stored before validation — entering a wrong passphrase with "Mémoriser" checked caused all subsequent attempts to silently reuse the bad passphrase. Fixed by clearing cache on `ValueError` (database screen) and on auth-related worker errors (batch screen).
+- **Naive/aware datetime mismatch**: `datetime.now(timezone.utc)` (aware) subtracted from naive DB timestamps caused `TypeError`. Fixed by making naive timestamps aware before subtraction.
+- **QTableWidget checkboxes invisible in light mode**: `QTableWidget::indicator` styles were missing from both QSS themes (only `QListWidget::indicator` was styled). Added indicator styles for both light and dark themes.
+- **QSpinBox invisible text in light mode**: Workers spinner had no explicit QSS styling, inheriting a dark fill. Added `QSpinBox` to input field selectors in both themes.
 - **DATA-001**: Entity type counts in ProcessingWorker now count from detected entities list instead of querying entire DB, showing accurate per-document counts instead of cumulative DB totals
 - **THREAD-001**: Added cancellation flags to DetectionWorker and FinalizationWorker; cancel buttons now stop workers early between processing phases
 - **QSS theme rendering** — Fixed black stripes in light mode on Settings and Home screens caused by QScrollArea forcing `autoFillBackground(True)` on content widgets when QSS overrides the native palette. Added QProgressBar, QStackedWidget, QFrame, and QScrollArea container styles to both light and dark QSS theme files.

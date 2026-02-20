@@ -53,8 +53,8 @@ The v1.0/v1.1 CLI tool has validated the core value proposition (local GDPR-comp
 | 6.1: UX Architecture & GUI Framework Selection | 🔴 **HIGH** | 1-2 weeks | Roadmap v2.0 | ✅ COMPLETE |
 | 6.2: GUI Application Foundation | 🔴 **HIGH** | 1-2 weeks | Roadmap v2.0 | ✅ COMPLETE |
 | 6.3: Document Processing Workflow | 🔴 **HIGH** | 1-2 weeks | Roadmap v2.0 | ✅ COMPLETE |
-| 6.4: Visual Entity Validation Interface | 🔴 **HIGH** | 2-3 weeks | Roadmap v2.0 | 📋 PENDING |
-| 6.5: Batch Processing & Configuration Management | 🟡 **MEDIUM** | 1-2 weeks | Roadmap v2.0 | 📋 PENDING |
+| 6.4: Visual Entity Validation Interface | 🔴 **HIGH** | 2-3 weeks | Roadmap v2.0 | ✅ COMPLETE |
+| 6.5: Batch Processing & Configuration Management | 🟡 **MEDIUM** | 1-2 weeks | Roadmap v2.0 | ✅ COMPLETE |
 | 6.6: Internationalization & French UI | 🟡 **MEDIUM** | 1-2 weeks | FE-010b + 5.4.1 | 📋 PENDING |
 | 6.7: Accessibility (WCAG AA) | 🟡 **MEDIUM** | 1 week | Roadmap v2.0 | 📋 PENDING |
 | 6.8: Standalone Executables & Distribution | 🔴 **HIGH** | 2-3 weeks | FE-009 | 📋 PENDING |
@@ -395,13 +395,25 @@ Professional and academic environments increasingly require accessibility compli
 4. **AC4:** High contrast mode support (follows OS setting)
 5. **AC5:** Accessibility audit checklist documented and passed
 6. **AC6:** Unit tests for focus management, keyboard navigation paths
+7. **AC7 (FE-021):** Database operations on background thread:
+   - Entity listing, search, filter, Article 17 deletion, and CSV export in `DatabaseScreen` run on a background thread via the existing `QRunnable + WorkerSignals` pattern
+   - Main thread remains responsive with progress indication during long operations
+   - **Source:** Story 6.5 QA Gate (PERF-001)
+8. **AC8 (FE-022):** Batch validation workflow:
+   - Batch processing optionally integrates with the validation screen
+   - After entity detection for each document, the user can validate/reject entities before pseudonymization proceeds
+   - A "Skip validation" option remains available (default) for fully automated batch runs
+   - **Source:** Story 6.5 AC3 (DEFERRED-001)
 
 ### Integration Points
 
 - `gdpr_pseudonymizer/gui/` — accessibility attributes on all components
 - Entity color scheme — updated for color-blind safety
+- `gdpr_pseudonymizer/gui/screens/database.py` — background thread migration (AC7)
+- `gdpr_pseudonymizer/gui/screens/batch.py` — optional validation step (AC8)
+- `gdpr_pseudonymizer/gui/workers/` — reuse `WorkerSignals` pattern (AC7)
 
-### Estimated Effort: 1 week
+### Estimated Effort: 1.5-2 weeks
 
 ---
 

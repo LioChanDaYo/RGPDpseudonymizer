@@ -1,12 +1,12 @@
 # Product Backlog - GDPR Pseudonymizer
 
-**Last Updated:** 2026-02-11
+**Last Updated:** 2026-02-20
 **Epic 1 Status:** ✅ Complete (9/9 stories)
 **Epic 2 Status:** ✅ Complete (9/9 stories)
 **Epic 3 Status:** ✅ Complete (7/7 stories)
 **Epic 4 Status:** ✅ Complete (7/7 stories)
 **v1.0 MVP:** ✅ LAUNCHED (2026-02-09, PyPI published)
-**Next Milestone:** v1.1 planning
+**Next Milestone:** v2.0 Desktop GUI (Epic 6 — Stories 6.1-6.5 complete)
 
 ---
 
@@ -408,6 +408,234 @@ Press Enter to continue...
 - [ ] User guide translated into French
 - [ ] Language toggle or clear navigation between EN/FR versions
 - [ ] Native French speaker review for quality
+
+---
+
+#### FE-015: Excel and Google Sheets Format Support 📅 POST-v2.0 (v2.1+)
+**Source:** User inquiry (2026-02-19)
+**Description:** Support Excel (.xlsx, .xls) and CSV formats for structured data pseudonymization. Google Sheets require export-to-Excel workflow (local-only architecture constraint).
+**Impact:** Medium — HR/compliance professionals (GUI target audience) heavily use Excel for employee data, case management, research datasets
+**Effort:** Medium (1-2 weeks)
+**Target:** v2.1 or v2.2 (after v2.0 GUI ships)
+**Rationale:** Natural extension after v2.0 GUI launch. Can leverage existing DOCX parser patterns. Structural preservation (formulas, formatting) adds complexity vs plain text extraction.
+
+**Scope:**
+- **Simple approach:** Process spreadsheet cells as plain text (flatten structure)
+- **Advanced approach:** Preserve structure (columns, formulas, formatting) while pseudonymizing specific cells
+
+**Acceptance Criteria:**
+- [ ] Excel file loading (.xlsx, .xls) via openpyxl or xlrd
+- [ ] CSV file support for simple tabular data
+- [ ] Cell-by-cell entity detection and pseudonymization
+- [ ] Output format options: Excel (preserve structure) or text (flattened)
+- [ ] Google Sheets workflow documented (export → Excel → process)
+- [ ] No regression in existing format support
+
+**References:**
+- v2.0 GUI target audience (HR professionals, compliance officers)
+- Epic 5 Story 5.5 (PDF/DOCX format support — similar pattern)
+
+---
+
+#### FE-016: Neutral/Generic Pseudonym Theme 📅 v2.0 or v2.1
+**Source:** User request (2026-02-19)
+**Description:** Add a "neutral" pseudonym theme option that uses generic identifiers (PER-001, PER-002, LOC-001, ORG-001, etc.) instead of named pseudonyms. Alternative to existing themes (french, lotr, star_wars).
+**Impact:** Medium — useful for formal/legal contexts where themed names feel inappropriate, maximum anonymity (no cultural associations), simpler for automated data processing
+**Effort:** Low (1-2 days)
+**Target:** v2.0 (GUI) or v2.1
+**Rationale:** Low implementation effort, clear use case. Can be added alongside GUI theme selector. No pseudonym library needed (counter-based generation).
+
+**Use Cases:**
+- Legal/compliance documentation requiring maximum formality
+- Research datasets where cultural/thematic associations are undesirable
+- Automated processing pipelines that prefer generic IDs
+- Users who want pure anonymization without character-based pseudonyms
+
+**Implementation Notes:**
+- Counter-based generation per entity type (PERSON-001, LOCATION-001, ORGANIZATION-001)
+- Or shorter format: PER-001, LOC-001, ORG-001
+- Should support compositional logic (if "Marie Dubois" → PER-001, then "Marie" → PER-001-F, "Dubois" → PER-001-L)
+- No library files needed — purely algorithmic
+
+**Acceptance Criteria:**
+- [ ] New theme option: `--theme neutral` (CLI) or "Neutral/Generic" (GUI dropdown)
+- [ ] Generates identifiers: PER-{n}, LOC-{n}, ORG-{n} (or PERSON-{n} format, TBD)
+- [ ] Compositional pseudonymization works (first/last name components)
+- [ ] Mapping table stores neutral pseudonyms like any other theme
+- [ ] Documentation updated (theme comparison table)
+- [ ] No regression in existing theme functionality
+
+**References:**
+- Existing themes: data/pseudonyms/{french,lotr,star_wars}.json
+- Theme selection: CLI `--theme` flag, GUI settings (Story 6.2)
+
+---
+
+#### FE-017: Persist Last-Used Database Across App Restarts 📅 v2.0
+**Source:** User feedback (2026-02-20)
+**Description:** After selecting a database in the PassphraseDialog, persist that choice so it becomes the default on next app launch. Currently the app auto-detects databases but never remembers which one was last used — users must re-select every session.
+**Impact:** Low-Medium — reduces friction for users who always work with the same database; especially important for single-project workflows
+**Effort:** Low (1-2 hours)
+**Target:** v2.0 (next GUI story)
+**Rationale:** Config infrastructure already exists (`default_db_path` in `.gdpr-pseudo.yaml`, `save_gui_config()`). Only needs a `save_gui_config()` call after successful passphrase validation in `PassphraseDialog` or `HomeScreen._start_processing()`.
+
+**Implementation Notes:**
+- After successful DB selection + passphrase entry, save `config["default_db_path"] = db_path` via `save_gui_config()`
+- On next launch, `PassphraseDialog._populate_db_paths()` already checks `config["default_db_path"]` — just needs to pre-select it in the combo box
+- Consider: should "Create a new base" reset the default? Probably yes (new DB becomes default)
+
+**Acceptance Criteria:**
+- [ ] After selecting a database, the choice is persisted in `.gdpr-pseudo.yaml` as `default_db_path`
+- [ ] On next app launch, the previously used database is pre-selected in the PassphraseDialog combo box
+- [ ] Creating a new database also persists it as the new default
+- [ ] User can still override by selecting a different database (choice updates the default)
+- [ ] No regression in existing database detection or passphrase flow
+
+**References:**
+- `gdpr_pseudonymizer/gui/config.py` — `load_gui_config()`, `save_gui_config()`
+- `gdpr_pseudonymizer/gui/widgets/passphrase_dialog.py` — `_populate_db_paths()`
+- `gdpr_pseudonymizer/gui/screens/home.py` — `_start_processing()`
+
+---
+
+#### FE-018: Show Validation Keyboard Shortcuts in Help Menu 📅 v2.0
+**Source:** User feedback (2026-02-20)
+**Description:** The F1 keyboard shortcuts dialog and the Settings screen shortcuts section only show 6 global shortcuts. The powerful keyboard navigation mode (Enter, Tab, Delete, Escape) and validation shortcuts (Ctrl+Z, Ctrl+F) are completely undocumented in the UI — users can only discover them by accident.
+**Impact:** Medium — expert mode is a key productivity feature but zero discoverability makes it effectively invisible to most users
+**Effort:** Low (1-2 hours)
+**Target:** v2.0 (next GUI story)
+**Rationale:** No code logic changes needed — just update the help dialog text and Settings shortcuts section to include all shortcuts.
+
+**Missing Shortcuts (to add):**
+- **Navigation mode:** Enter (activate), Tab/Shift+Tab (next/prev entity), Enter (accept), Delete (reject), Shift+F10 (context menu), Escape (exit mode)
+- **Validation screen:** Ctrl+Z (undo), Ctrl+Shift+Z / Ctrl+Y (redo), Ctrl+F (filter entities)
+- **Editor:** Ctrl++ (zoom in), Ctrl+- (zoom out)
+
+**Acceptance Criteria:**
+- [ ] F1 help dialog lists all keyboard shortcuts grouped by context (Global, Validation, Navigation Mode, Editor)
+- [ ] Settings screen shortcuts section updated to match
+- [ ] Navigation mode section clearly explains how to activate/deactivate (Enter to start, Escape to exit)
+- [ ] Shortcuts displayed in French (consistent with existing UI language)
+- [ ] No regression in existing help/settings functionality
+
+**References:**
+- `gdpr_pseudonymizer/gui/main_window.py:166-176` — `_show_shortcuts()` help dialog
+- `gdpr_pseudonymizer/gui/screens/settings.py:181-202` — shortcuts section
+- `gdpr_pseudonymizer/gui/widgets/entity_editor.py:369-527` — navigation mode implementation
+- `gdpr_pseudonymizer/gui/screens/validation.py:133-148` — validation shortcuts
+
+---
+
+#### FE-019: "Masquer les validées" Toggle — Hide Confirmed Entities 📅 v2.0
+**Source:** User feedback (2026-02-20)
+**Description:** Add a "Masquer les validées" checkbox next to the existing "Masquer les rejetées" toggle. When enabled, confirmed/accepted entities are hidden from the document view, letting users focus on remaining pending entities. Mirrors the existing hide-rejected pattern exactly.
+**Impact:** Medium — significantly improves focus during validation of large documents where many entities are already confirmed; complementary to existing "masquer les rejetées"
+**Effort:** Low (1-2 hours)
+**Target:** v2.0 (next GUI story)
+**Rationale:** Exact mirror of existing hide-rejected implementation. Same architecture: checkbox → signal → `set_hide_confirmed()` → skip in `_apply_highlights()`.
+
+**Implementation Notes:**
+- Add `_hide_confirmed_cb = QCheckBox("Masquer les validées")` in `EntityPanel._build_ui()` next to existing `_hide_rejected_cb`
+- Add `set_hide_confirmed(hide: bool)` method to `EntityEditor` (mirrors `set_hide_rejected`)
+- Add skip logic in `_apply_highlights()`: `if is_confirmed and self._hide_confirmed: continue`
+- Connect signal in `ValidationScreen._connect_signals()`
+- Consider: should this also hide known/auto-accepted entities? Probably yes (same visual state)
+
+**Acceptance Criteria:**
+- [ ] "Masquer les validées" checkbox visible next to "Masquer les rejetées" in the entity panel
+- [ ] When toggled on, confirmed and known entities are hidden from document highlights
+- [ ] Pending and rejected entities remain visible
+- [ ] Toggle state does not persist across sessions (same behavior as hide-rejected)
+- [ ] No regression in existing hide-rejected functionality
+- [ ] Works correctly in both light and dark themes
+
+**References:**
+- `gdpr_pseudonymizer/gui/widgets/entity_panel.py:101-103` — existing `_hide_rejected_cb` pattern
+- `gdpr_pseudonymizer/gui/widgets/entity_editor.py:98-101, 166-168` — existing `set_hide_rejected` + skip logic
+- `gdpr_pseudonymizer/gui/screens/validation.py:128-131` — existing signal connection
+
+---
+
+#### FE-020: Validate-Once-Per-Entity — Group Occurrences on Accept/Reject 📅 v2.0
+**Source:** User feedback (2026-02-20)
+**Description:** When a user accepts or rejects an entity (e.g., "Marie Dupont"), ALL occurrences of that same entity in the document should be accepted/rejected at once. Currently each occurrence has its own `entity_id` and must be validated individually — "Marie Dupont" appearing 8 times requires 8 separate validations.
+**Impact:** High — this is the single biggest friction point in the validation workflow for documents with repeated entities; directly reduces validation time proportionally to entity repetition count
+**Effort:** Medium (3-4 hours)
+**Target:** v2.0 (next GUI story)
+**Rationale:** The `bulk_accept(entity_ids)` infrastructure already exists in `GUIValidationState`. The missing piece is grouping reviews by canonical entity text and dispatching a bulk action when any single occurrence is accepted/rejected.
+
+**Implementation Notes:**
+- `GUIValidationState` already stores all `EntityReview` objects; need a reverse index from entity text → list of entity_ids
+- When `accept_entity(entity_id)` is called, look up all other reviews with the same `entity.text` (or canonical form) and call `bulk_accept()` on all of them
+- Use existing `_BulkActionCommand` for undo/redo support (undoing groups all occurrences back)
+- Edge case: should this apply to keyboard navigation (Enter) and context menu accept equally? Yes — all accept/reject actions should propagate
+- Edge case: partial names — "Marie" vs "Marie Dupont" should NOT group together (different entity text)
+- Consider: make this opt-out via a setting? Probably not — validate-once is the expected default behavior
+
+**Acceptance Criteria:**
+- [ ] Accepting one occurrence of "Marie Dupont" confirms all occurrences in the document
+- [ ] Rejecting one occurrence rejects all occurrences
+- [ ] Undo reverses the group action (all occurrences revert to previous state)
+- [ ] Sidebar list updates immediately for all affected occurrences
+- [ ] Document highlights update immediately for all affected occurrences
+- [ ] Different entity texts are NOT grouped (e.g., "Marie" and "Marie Dupont" remain independent)
+- [ ] Works from keyboard navigation (Enter/Delete), context menu, and bulk selection
+- [ ] No regression in existing bulk accept/reject by type or checkbox selection
+
+**References:**
+- `gdpr_pseudonymizer/gui/widgets/validation_state.py:112-115` — `accept_entity()` current single-id logic
+- `gdpr_pseudonymizer/gui/widgets/validation_state.py:156-164` — `bulk_accept()` existing infrastructure
+- `gdpr_pseudonymizer/gui/widgets/validation_state.py:144` — `EntityReview` with unique `entity_id` per occurrence
+- `gdpr_pseudonymizer/gui/screens/validation.py:291-295` — `_on_entity_state_changed()` refresh logic
+
+---
+
+#### FE-021: Database Operations on Background Thread 📅 v2.0 → Story 6.7
+**Source:** Story 6.5 QA Gate (PERF-001)
+**Description:** `DatabaseScreen` performs all database operations (entity listing, search/filter, Article 17 deletion, CSV export) on the main GUI thread. Large databases will freeze the UI during these operations, blocking assistive technologies and violating WCAG 2.1 Principle 2 (Operable).
+**Impact:** Medium — UI responsiveness degrades with large mapping databases; blocks screen reader interaction during operations
+**Effort:** Medium (2-3 days)
+**Target:** v2.0 — Story 6.7 (Accessibility / WCAG AA)
+**Rationale:** The `QRunnable + WorkerSignals` pattern is already established in `ProcessingWorker` and `BatchWorker`. Applying it to `DatabaseScreen` operations is architectural consistency and directly addresses WCAG AA responsive UI requirements.
+
+**Acceptance Criteria:**
+- [ ] Entity listing, search, and filter operations run on a background thread via `QRunnable + WorkerSignals`
+- [ ] Article 17 deletion runs on a background thread with progress indication
+- [ ] CSV export runs on a background thread with progress indication
+- [ ] Main thread remains responsive during all database operations
+- [ ] Error handling displays user-friendly messages on failure
+- [ ] No regression in existing `DatabaseScreen` functionality
+
+**References:**
+- `gdpr_pseudonymizer/gui/screens/database.py` — current main-thread implementation
+- `gdpr_pseudonymizer/gui/workers/processing_worker.py` — established `QRunnable + WorkerSignals` pattern
+- `gdpr_pseudonymizer/gui/workers/batch_worker.py` — established `QRunnable + WorkerSignals` pattern
+- `docs/qa/gates/6.5-batch-processing-and-configuration-management.yml` — PERF-001
+
+---
+
+#### FE-022: Batch Validation Workflow 📅 v2.0 → Story 6.7
+**Source:** Story 6.5 AC3 (DEFERRED-001)
+**Description:** Batch processing currently forces `skip_validation=True`, removing user control over entity decisions for multi-document workflows. An optional validation step between documents would allow users to review and confirm/reject detected entities before pseudonymization proceeds, maintaining the same level of control available in single-document mode.
+**Impact:** Medium — users who need entity review in batch mode currently have no option; reduces trust in batch output quality
+**Effort:** Medium (3-4 days)
+**Target:** v2.0 — Story 6.7 (Accessibility / WCAG AA)
+**Rationale:** WCAG Principle 2 (Operable) requires that users maintain control over functionality. Batch mode removing validation choice is an operability gap. Groups naturally with FE-020 (Validate-Once-Per-Entity) — both are about user control during validation workflows.
+
+**Acceptance Criteria:**
+- [ ] Batch processing offers an optional "Validate entities" mode (checkbox or toggle in batch config)
+- [ ] When enabled, after entity detection for each document, the validation screen is presented
+- [ ] User can accept/reject entities before pseudonymization of that document proceeds
+- [ ] "Skip validation" remains the default for fully automated batch runs
+- [ ] Validation decisions persist across documents in the same batch (via shared mapping database)
+- [ ] Progress tracking accounts for validation time (not just processing time)
+- [ ] No regression in existing skip-validation batch mode
+
+**References:**
+- `gdpr_pseudonymizer/gui/screens/batch.py` — current batch workflow (skip_validation=True)
+- `gdpr_pseudonymizer/gui/screens/validation.py` — existing validation screen
+- `gdpr_pseudonymizer/gui/workers/batch_worker.py` — `BatchWorker` document loop
+- `docs/qa/gates/6.5-batch-processing-and-configuration-management.yml` — DEFERRED-001
 
 ---
 
