@@ -16,6 +16,7 @@ from PySide6.QtWidgets import (
     QPushButton,
     QRadioButton,
     QScrollArea,
+    QSpinBox,
     QVBoxLayout,
     QWidget,
 )
@@ -132,6 +133,17 @@ class SettingsScreen(QWidget):
         db_row.addWidget(db_browse)
         processing_layout.addRow("Base de données :", db_row)
 
+        self._default_theme_combo = QComboBox()
+        self._default_theme_combo.addItem("Neutre (INSEE)", "neutral")
+        self._default_theme_combo.addItem("Star Wars", "star_wars")
+        self._default_theme_combo.addItem("Le Seigneur des Anneaux", "lotr")
+        self._default_theme_combo.currentIndexChanged.connect(
+            self._on_default_theme_changed
+        )
+        processing_layout.addRow(
+            "Thème de pseudonymes par défaut :", self._default_theme_combo
+        )
+
         layout.addWidget(processing_group)
 
         # -- Traitement par lot --
@@ -157,6 +169,17 @@ class SettingsScreen(QWidget):
             lambda c: self._save("continue_on_error", c)
         )
         batch_layout.addRow("", self._continue_on_error)
+
+        self._workers_spinner = QSpinBox()
+        self._workers_spinner.setMinimum(1)
+        self._workers_spinner.setMaximum(8)
+        self._workers_spinner.setToolTip(
+            "Nombre de workers pour le traitement en ligne de commande"
+        )
+        self._workers_spinner.valueChanged.connect(
+            lambda v: self._save("batch_workers", v)
+        )
+        batch_layout.addRow("Nombre de workers :", self._workers_spinner)
 
         layout.addWidget(batch_group)
 
@@ -233,6 +256,14 @@ class SettingsScreen(QWidget):
             self._validation_per_doc.setChecked(True)
 
         self._continue_on_error.setChecked(self._config.get("continue_on_error", True))
+
+        self._workers_spinner.setValue(self._config.get("batch_workers", 4))
+
+        default_theme = self._config.get("default_theme", "neutral")
+        theme_idx = self._default_theme_combo.findData(default_theme)
+        if theme_idx >= 0:
+            self._default_theme_combo.setCurrentIndex(theme_idx)
+
         self._welcome_toggle.setChecked(not self._config.get("welcome_shown", False))
         self._hints_toggle.setChecked(
             not self._config.get("validation_hints_shown", False)
@@ -246,6 +277,11 @@ class SettingsScreen(QWidget):
         # Apply theme change immediately
         if key == "theme":
             self._main_window._set_theme(str(value))
+
+    def _on_default_theme_changed(self, index: int) -> None:
+        theme_value = self._default_theme_combo.itemData(index)
+        if theme_value:
+            self._save("default_theme", theme_value)
 
     def _on_language_changed(self, index: int) -> None:
         lang = self._language_combo.itemData(index)

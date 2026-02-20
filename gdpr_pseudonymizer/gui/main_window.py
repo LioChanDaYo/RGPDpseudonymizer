@@ -75,10 +75,14 @@ class MainWindow(QMainWindow):
         idx = self._stack.addWidget(widget)
         self._screens[name] = idx
 
-    def navigate_to(self, name: str) -> None:
-        """Switch to a named screen."""
+    def navigate_to(self, name: str, **kwargs: Any) -> None:
+        """Switch to a named screen, optionally passing context data."""
         if name in self._screens:
-            self._stack.setCurrentIndex(self._screens[name])
+            idx = self._screens[name]
+            widget = self._stack.widget(idx)
+            if kwargs and hasattr(widget, "set_context"):
+                widget.set_context(**kwargs)
+            self._stack.setCurrentIndex(idx)
 
     def current_screen_name(self) -> str:
         """Return the name of the currently displayed screen."""
@@ -103,6 +107,15 @@ class MainWindow(QMainWindow):
     def config(self) -> dict[str, Any]:
         """Access current config."""
         return self._config
+
+    @property
+    def cached_passphrase(self) -> tuple[str, str] | None:
+        """Session passphrase cache: (db_path, passphrase)."""
+        return self._cached_passphrase
+
+    @cached_passphrase.setter
+    def cached_passphrase(self, value: tuple[str, str] | None) -> None:
+        self._cached_passphrase = value
 
     # ------------------------------------------------------------------
     # Menu bar
@@ -290,7 +303,7 @@ class MainWindow(QMainWindow):
             "Ouvrir un dossier",
         )
         if folder:
-            self.navigate_to("batch")
+            self.navigate_to("batch", folder_path=folder)
 
     def _notify_file_selected(self, filepath: str) -> None:
         """Route file selection through the home screen's processing flow."""

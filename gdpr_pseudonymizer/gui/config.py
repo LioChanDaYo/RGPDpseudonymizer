@@ -16,11 +16,14 @@ _DEFAULT_CONFIG: dict[str, Any] = {
     "language": "fr",
     "default_output_dir": "",
     "default_db_path": "",
+    "default_theme": "neutral",
     "batch_validation_mode": "per_document",
+    "batch_workers": 4,
     "continue_on_error": True,
     "welcome_shown": False,
     "validation_hints_shown": False,
     "recent_files": [],
+    "recent_databases": [],
 }
 
 _CONFIG_FILENAME = ".gdpr-pseudo.yaml"
@@ -85,3 +88,13 @@ def add_recent_file(filepath: str, config: dict[str, Any]) -> None:
     recent = [f for f in recent if f != filepath]
     recent.insert(0, filepath)
     config["recent_files"] = recent[:10]
+
+
+def add_recent_database(db_path: str, config: dict[str, Any]) -> None:
+    """Add a database path to recent databases list (max 5, most recent first)."""
+    recent: list[str] = config.get("recent_databases", [])
+    if not isinstance(recent, list):
+        recent = []
+    recent = [p for p in recent if p != db_path]
+    recent.insert(0, db_path)
+    config["recent_databases"] = recent[:5]

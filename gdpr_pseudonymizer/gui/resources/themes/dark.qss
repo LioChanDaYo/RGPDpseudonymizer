@@ -114,7 +114,7 @@ QToolButton:hover {
 }
 
 /* Input fields */
-QLineEdit, QTextEdit, QPlainTextEdit {
+QLineEdit, QTextEdit, QPlainTextEdit, QSpinBox {
     background-color: #2D2D2D;
     border: 1px solid #424242;
     border-radius: 4px;
@@ -122,7 +122,7 @@ QLineEdit, QTextEdit, QPlainTextEdit {
     color: #E0E0E0;
 }
 
-QLineEdit:focus, QTextEdit:focus, QPlainTextEdit:focus {
+QLineEdit:focus, QTextEdit:focus, QPlainTextEdit:focus, QSpinBox:focus {
     border: 2px solid #64B5F6;
 }
 
@@ -162,8 +162,9 @@ QCheckBox::indicator, QRadioButton::indicator {
     height: 18px;
 }
 
-/* QListWidget checkboxes (Entity Panel) — BUG-UX-002 fix */
-QListWidget::indicator:unchecked {
+/* QListWidget & QTableWidget checkboxes — BUG-UX-002 fix */
+QListWidget::indicator:unchecked,
+QTableWidget::indicator:unchecked {
     border: 2px solid #999;
     background: #2D2D2D;
     width: 16px;
@@ -171,7 +172,8 @@ QListWidget::indicator:unchecked {
     border-radius: 2px;
 }
 
-QListWidget::indicator:checked {
+QListWidget::indicator:checked,
+QTableWidget::indicator:checked {
     border: 2px solid #64B5F6;
     background: #1976D2;
     width: 16px;

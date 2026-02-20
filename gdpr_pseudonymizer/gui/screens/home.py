@@ -194,7 +194,7 @@ class HomeScreen(QWidget):
         self._rebuild_recent_list()
 
         # Check session passphrase cache
-        cached = self._main_window._cached_passphrase
+        cached = self._main_window.cached_passphrase
         file_dir = str(Path(filepath).parent)
 
         if cached is not None:
@@ -219,7 +219,7 @@ class HomeScreen(QWidget):
 
         db_path, passphrase, remember = result
         if remember:
-            self._main_window._cached_passphrase = (db_path, passphrase)
+            self._main_window.cached_passphrase = (db_path, passphrase)
 
         self._start_processing(filepath, db_path, passphrase)
 
@@ -242,7 +242,7 @@ class HomeScreen(QWidget):
             "Ouverture du traitement par lot...",
             self._main_window,
         )
-        self._main_window.navigate_to("batch")
+        self._main_window.navigate_to("batch", folder_path=folder_path)
 
     def _on_multi_file_dropped(self) -> None:
         """Handle multi-file drop — only first file is processed."""

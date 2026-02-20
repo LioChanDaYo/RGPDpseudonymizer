@@ -26,11 +26,12 @@ def integration_window(qtbot, gui_config: dict[str, Any]) -> MainWindow:  # type
     window = MainWindow(config=gui_config)
     qtbot.addWidget(window)
 
+    from gdpr_pseudonymizer.gui.screens.batch import BatchScreen
+    from gdpr_pseudonymizer.gui.screens.database import DatabaseScreen
     from gdpr_pseudonymizer.gui.screens.home import HomeScreen
     from gdpr_pseudonymizer.gui.screens.processing import ProcessingScreen
     from gdpr_pseudonymizer.gui.screens.results import ResultsScreen
     from gdpr_pseudonymizer.gui.screens.settings import SettingsScreen
-    from gdpr_pseudonymizer.gui.screens.stub import StubScreen
     from gdpr_pseudonymizer.gui.screens.validation import ValidationScreen
 
     window.add_screen("home", HomeScreen(window))
@@ -38,7 +39,8 @@ def integration_window(qtbot, gui_config: dict[str, Any]) -> MainWindow:  # type
     window.add_screen("processing", ProcessingScreen(window))
     window.add_screen("validation", ValidationScreen(window))
     window.add_screen("results", ResultsScreen(window))
-    window.add_screen("batch", StubScreen("Traitement par lot", window))
+    window.add_screen("batch", BatchScreen(window))
+    window.add_screen("database", DatabaseScreen(window))
     window.navigate_to("home")
     return window
 
