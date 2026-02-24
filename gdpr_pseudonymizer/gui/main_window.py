@@ -5,6 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+from PySide6.QtCore import QEvent
 from PySide6.QtGui import QAction, QKeySequence
 from PySide6.QtWidgets import (
     QFileDialog,
@@ -60,7 +61,10 @@ class MainWindow(QMainWindow):
         self._build_menu_bar()
         self._build_status_bar()
 
-        # Session passphrase cache: (db_path, passphrase) — cleared on exit
+        # Set translatable text (after all widgets are created)
+        self.retranslateUi()
+
+        # Session passphrase cache: (db_path, passphrase) -- cleared on exit
         self._cached_passphrase: tuple[str, str] | None = None
 
         # Screens added later via add_screen()
@@ -125,74 +129,113 @@ class MainWindow(QMainWindow):
         menu_bar: QMenuBar = self.menuBar()
 
         # -- Fichier --
-        file_menu = menu_bar.addMenu("Fichier")
+        self._file_menu = menu_bar.addMenu("")
 
-        self._action_open = QAction("Ouvrir un document...", self)
+        self._action_open = QAction(self)
         self._action_open.setShortcut(QKeySequence("Ctrl+O"))
         self._action_open.triggered.connect(self._on_open_file)
-        file_menu.addAction(self._action_open)
+        self._file_menu.addAction(self._action_open)
 
-        self._action_open_folder = QAction("Ouvrir un dossier...", self)
+        self._action_open_folder = QAction(self)
         self._action_open_folder.setShortcut(QKeySequence("Ctrl+Shift+O"))
         self._action_open_folder.triggered.connect(self._on_open_folder)
-        file_menu.addAction(self._action_open_folder)
+        self._file_menu.addAction(self._action_open_folder)
 
-        self._recent_menu = file_menu.addMenu("Fichiers récents")
+        self._recent_menu = self._file_menu.addMenu("")
         self._rebuild_recent_menu()
 
-        file_menu.addSeparator()
+        self._file_menu.addSeparator()
 
-        action_quit = QAction("Quitter", self)
-        action_quit.setShortcut(QKeySequence("Ctrl+Q"))
-        action_quit.triggered.connect(self.close)
-        file_menu.addAction(action_quit)
+        self._action_quit = QAction(self)
+        self._action_quit.setShortcut(QKeySequence("Ctrl+Q"))
+        self._action_quit.triggered.connect(self.close)
+        self._file_menu.addAction(self._action_quit)
 
         # -- Affichage --
-        view_menu = menu_bar.addMenu("Affichage")
+        self._view_menu = menu_bar.addMenu("")
 
-        self._action_theme_light = QAction("Thème clair", self)
+        self._action_theme_light = QAction(self)
         self._action_theme_light.triggered.connect(lambda: self._set_theme("light"))
-        view_menu.addAction(self._action_theme_light)
+        self._view_menu.addAction(self._action_theme_light)
 
-        self._action_theme_dark = QAction("Thème sombre", self)
+        self._action_theme_dark = QAction(self)
         self._action_theme_dark.triggered.connect(lambda: self._set_theme("dark"))
-        view_menu.addAction(self._action_theme_dark)
+        self._view_menu.addAction(self._action_theme_dark)
 
-        view_menu.addSeparator()
+        self._view_menu.addSeparator()
 
-        self._action_entity_panel = QAction("Panneau des entités", self)
+        self._action_entity_panel = QAction(self)
         self._action_entity_panel.setEnabled(False)
-        view_menu.addAction(self._action_entity_panel)
+        self._view_menu.addAction(self._action_entity_panel)
 
         # -- Outils --
-        tools_menu = menu_bar.addMenu("Outils")
+        self._tools_menu = menu_bar.addMenu("")
 
-        action_db = QAction("Base de correspondances...", self)
-        action_db.triggered.connect(lambda: self.navigate_to("database"))
-        tools_menu.addAction(action_db)
+        self._action_db = QAction(self)
+        self._action_db.triggered.connect(lambda: self.navigate_to("database"))
+        self._tools_menu.addAction(self._action_db)
 
-        action_settings = QAction("Paramètres...", self)
-        action_settings.setShortcut(QKeySequence("Ctrl+,"))
-        action_settings.triggered.connect(lambda: self.navigate_to("settings"))
-        tools_menu.addAction(action_settings)
+        self._action_settings = QAction(self)
+        self._action_settings.setShortcut(QKeySequence("Ctrl+,"))
+        self._action_settings.triggered.connect(lambda: self.navigate_to("settings"))
+        self._tools_menu.addAction(self._action_settings)
 
         # -- Aide --
-        help_menu = menu_bar.addMenu("Aide")
+        self._help_menu = menu_bar.addMenu("")
 
-        action_shortcuts = QAction("Raccourcis clavier...", self)
-        action_shortcuts.setShortcut(QKeySequence("F1"))
-        action_shortcuts.triggered.connect(self._show_shortcuts)
-        help_menu.addAction(action_shortcuts)
+        self._action_shortcuts = QAction(self)
+        self._action_shortcuts.setShortcut(QKeySequence("F1"))
+        self._action_shortcuts.triggered.connect(self._show_shortcuts)
+        self._help_menu.addAction(self._action_shortcuts)
 
-        action_about = QAction("À propos", self)
-        action_about.triggered.connect(self._show_about)
-        help_menu.addAction(action_about)
+        self._action_about = QAction(self)
+        self._action_about.triggered.connect(self._show_about)
+        self._help_menu.addAction(self._action_about)
 
         # -- Global shortcuts --
-        self._action_fullscreen = QAction("Plein écran", self)
+        self._action_fullscreen = QAction(self)
         self._action_fullscreen.setShortcut(QKeySequence("F11"))
         self._action_fullscreen.triggered.connect(self._toggle_fullscreen)
         self.addAction(self._action_fullscreen)
+
+    def retranslateUi(self) -> None:
+        """Re-set all translatable static UI text."""
+        # Menus
+        self._file_menu.setTitle(self.tr("Fichier"))
+        self._view_menu.setTitle(self.tr("Affichage"))
+        self._tools_menu.setTitle(self.tr("Outils"))
+        self._help_menu.setTitle(self.tr("Aide"))
+
+        # Fichier actions
+        self._action_open.setText(self.tr("Ouvrir un document..."))
+        self._action_open_folder.setText(self.tr("Ouvrir un dossier..."))
+        self._recent_menu.setTitle(self.tr("Fichiers récents"))
+        self._action_quit.setText(self.tr("Quitter"))
+
+        # Affichage actions
+        self._action_theme_light.setText(self.tr("Thème clair"))
+        self._action_theme_dark.setText(self.tr("Thème sombre"))
+        self._action_entity_panel.setText(self.tr("Panneau des entités"))
+
+        # Outils actions
+        self._action_db.setText(self.tr("Base de correspondances..."))
+        self._action_settings.setText(self.tr("Paramètres..."))
+
+        # Aide actions
+        self._action_shortcuts.setText(self.tr("Raccourcis clavier..."))
+        self._action_about.setText(self.tr("À propos"))
+
+        # Global
+        self._action_fullscreen.setText(self.tr("Plein écran"))
+
+        # Status bar
+        self.statusBar().showMessage(self.tr("Prêt"))
+        self._update_theme_toggle_icon()
+
+    def changeEvent(self, event: QEvent) -> None:
+        if event.type() == QEvent.Type.LanguageChange:
+            self.retranslateUi()
+        super().changeEvent(event)
 
     # ------------------------------------------------------------------
     # Status bar
@@ -200,7 +243,7 @@ class MainWindow(QMainWindow):
 
     def _build_status_bar(self) -> None:
         status_bar: QStatusBar = self.statusBar()
-        status_bar.showMessage("Prêt")
+        status_bar.showMessage(self.tr("Prêt"))
 
         self._theme_toggle_btn = QToolButton()
         self._theme_toggle_btn.setObjectName("themeToggleButton")
@@ -211,11 +254,11 @@ class MainWindow(QMainWindow):
     def _update_theme_toggle_icon(self) -> None:
         current = self._config.get("theme", "system")
         if current == "dark":
-            self._theme_toggle_btn.setText("\u2600")  # ☀ sun
-            self._theme_toggle_btn.setToolTip("Passer au thème clair")
+            self._theme_toggle_btn.setText("\u2600")  # sun
+            self._theme_toggle_btn.setToolTip(self.tr("Passer au thème clair"))
         else:
-            self._theme_toggle_btn.setText("\U0001f319")  # 🌙 moon
-            self._theme_toggle_btn.setToolTip("Passer au thème sombre")
+            self._theme_toggle_btn.setText("\U0001f319")  # moon
+            self._theme_toggle_btn.setToolTip(self.tr("Passer au thème sombre"))
 
     # ------------------------------------------------------------------
     # Theme management
@@ -264,7 +307,7 @@ class MainWindow(QMainWindow):
         self._recent_menu.clear()
         recent = self._config.get("recent_files", [])
         if not recent:
-            action = QAction("(aucun fichier récent)", self)
+            action = QAction(self.tr("(aucun fichier récent)"), self)
             action.setEnabled(False)
             self._recent_menu.addAction(action)
             return
@@ -290,9 +333,9 @@ class MainWindow(QMainWindow):
     def _on_open_file(self) -> None:
         filepath, _ = QFileDialog.getOpenFileName(
             self,
-            "Ouvrir un document",
+            self.tr("Ouvrir un document"),
             "",
-            "Documents (*.txt *.md *.pdf *.docx);;Tous (*)",
+            self.tr("Documents (*.txt *.md *.pdf *.docx);;Tous (*)"),
         )
         if filepath:
             self._notify_file_selected(filepath)
@@ -300,7 +343,7 @@ class MainWindow(QMainWindow):
     def _on_open_folder(self) -> None:
         folder = QFileDialog.getExistingDirectory(
             self,
-            "Ouvrir un dossier",
+            self.tr("Ouvrir un dossier"),
         )
         if folder:
             self.navigate_to("batch", folder_path=folder)
@@ -332,26 +375,43 @@ class MainWindow(QMainWindow):
         from PySide6.QtWidgets import QMessageBox
 
         shortcuts = (
-            "Raccourcis clavier\n\n"
-            "Ctrl+O\tOuvrir un document\n"
-            "Ctrl+Shift+O\tOuvrir un dossier\n"
-            "Ctrl+,\tParamètres\n"
-            "Ctrl+Q\tQuitter\n"
-            "F1\tRaccourcis clavier\n"
-            "F11\tPlein écran\n"
+            self.tr("Raccourcis clavier")
+            + "\n\n"
+            + "Ctrl+O\t"
+            + self.tr("Ouvrir un document")
+            + "\n"
+            + "Ctrl+Shift+O\t"
+            + self.tr("Ouvrir un dossier")
+            + "\n"
+            + "Ctrl+,\t"
+            + self.tr("Paramètres")
+            + "\n"
+            + "Ctrl+Q\t"
+            + self.tr("Quitter")
+            + "\n"
+            + "F1\t"
+            + self.tr("Raccourcis clavier")
+            + "\n"
+            + "F11\t"
+            + self.tr("Plein écran")
+            + "\n"
         )
-        QMessageBox.information(self, "Raccourcis clavier", shortcuts)
+        QMessageBox.information(self, self.tr("Raccourcis clavier"), shortcuts)
 
     def _show_about(self) -> None:
         from PySide6.QtWidgets import QMessageBox
 
         QMessageBox.about(
             self,
-            "À propos",
+            self.tr("À propos"),
             "<h3>GDPR Pseudonymizer</h3>"
             "<p>Version 2.0.0</p>"
-            "<p>Outil de pseudonymisation conforme au RGPD "
-            "pour les documents en français.</p>"
+            "<p>"
+            + self.tr(
+                "Outil de pseudonymisation conforme au RGPD "
+                "pour les documents en français."
+            )
+            + "</p>"
             "<p>Licence MIT</p>"
             '<p><a href="https://github.com/LioChanDaYo/RGPDpseudonymizer">'
             "GitHub</a></p>",

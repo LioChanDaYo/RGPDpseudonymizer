@@ -55,7 +55,7 @@ The v1.0/v1.1 CLI tool has validated the core value proposition (local GDPR-comp
 | 6.3: Document Processing Workflow | 🔴 **HIGH** | 1-2 weeks | Roadmap v2.0 | ✅ COMPLETE |
 | 6.4: Visual Entity Validation Interface | 🔴 **HIGH** | 2-3 weeks | Roadmap v2.0 | ✅ COMPLETE |
 | 6.5: Batch Processing & Configuration Management | 🟡 **MEDIUM** | 1-2 weeks | Roadmap v2.0 | ✅ COMPLETE |
-| 6.6: Internationalization & French UI | 🟡 **MEDIUM** | 1-2 weeks | FE-010b + 5.4.1 | 📋 PENDING |
+| 6.6: Internationalization & French UI | 🟡 **MEDIUM** | 1-2 weeks | FE-010b + 5.4.1 | ✅ COMPLETE |
 | 6.7: Accessibility (WCAG AA) | 🟡 **MEDIUM** | 1 week | Roadmap v2.0 | 📋 PENDING |
 | 6.8: Standalone Executables & Distribution | 🔴 **HIGH** | 2-3 weeks | FE-009 | 📋 PENDING |
 | 6.9: v2.0 Release Preparation | 🔴 **HIGH** | 1-2 days | — | 📋 PENDING |

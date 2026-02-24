@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from enum import Enum
 
-from PySide6.QtCore import QRect, Qt
+from PySide6.QtCore import QEvent, QRect, Qt
 from PySide6.QtGui import QColor, QFont, QPainter, QPen
 from PySide6.QtWidgets import QWidget
 
@@ -193,10 +193,29 @@ class StepIndicator(QWidget):
         painter.drawText(text_rect, Qt.AlignmentFlag.AlignCenter, label)
 
     # ------------------------------------------------------------------
+    # i18n
+    # ------------------------------------------------------------------
+
+    def changeEvent(self, event: QEvent) -> None:
+        if event.type() == QEvent.Type.LanguageChange:
+            self.update()
+        super().changeEvent(event)
+
+    # ------------------------------------------------------------------
     # Internal
     # ------------------------------------------------------------------
 
     def _steps(self) -> list[str]:
         if self._mode == StepMode.BATCH:
-            return BATCH_STEPS
-        return SINGLE_STEPS
+            return [
+                self.tr("S\u00e9lection"),
+                self.tr("Traitement"),
+                self.tr("Validation"),
+                self.tr("R\u00e9sum\u00e9"),
+            ]
+        return [
+            self.tr("S\u00e9lection"),
+            self.tr("Analyse"),
+            self.tr("Validation"),
+            self.tr("R\u00e9sultat"),
+        ]

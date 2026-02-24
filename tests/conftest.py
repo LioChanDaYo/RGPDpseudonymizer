@@ -2,12 +2,17 @@
 Pytest configuration and shared fixtures.
 
 This conftest.py file sets up environment variables to prevent
-spaCy/Thinc access violations on Windows systems.
+spaCy/Thinc access violations on Windows systems and ensure
+a deterministic English locale for CLI tests.
 """
 
 import os
 
 import pytest
+
+# Set CLI language to English BEFORE any CLI module imports.
+# The cli.i18n module reads GDPR_PSEUDO_LANG at import time.
+os.environ.setdefault("GDPR_PSEUDO_LANG", "en")
 
 
 @pytest.fixture(scope="session", autouse=True)

@@ -24,6 +24,7 @@ from gdpr_pseudonymizer.cli.formatters import (
     ErrorCode,
     format_styled_error,
 )
+from gdpr_pseudonymizer.cli.i18n import _
 from gdpr_pseudonymizer.cli.validators import (
     validate_log_level,
     validate_theme,
@@ -200,13 +201,13 @@ def config_show_command(
     init: bool = typer.Option(
         False,
         "--init",
-        help="Generate a template .gdpr-pseudo.yaml in current directory",
+        help=_("Generate a template .gdpr-pseudo.yaml in current directory"),
     ),
     force: bool = typer.Option(
         False,
         "--force",
         "-f",
-        help="Overwrite existing config file when using --init",
+        help=_("Overwrite existing config file when using --init"),
     ),
 ) -> None:
     """Display the current effective configuration or generate a template.
@@ -356,8 +357,8 @@ def _set_nested_value(config: dict[str, Any], key: str, value: Any) -> None:
 
 
 def config_set_command(
-    key: str = typer.Argument(..., help="Config key (e.g., pseudonymization.theme)"),
-    value: str = typer.Argument(..., help="Value to set"),
+    key: str = typer.Argument(..., help=_("Config key (e.g., pseudonymization.theme)")),
+    value: str = typer.Argument(..., help=_("Value to set")),
 ) -> None:
     """Set a configuration value.
 
@@ -453,7 +454,7 @@ def config_set_command(
 # Create config sub-app for subcommands
 config_app = typer.Typer(
     name="config",
-    help="View or modify configuration settings",
+    help=_("View or modify configuration settings"),
     no_args_is_help=False,
     invoke_without_command=True,
 )
@@ -465,13 +466,13 @@ def config_callback(
     init: bool = typer.Option(
         False,
         "--init",
-        help="Generate a template .gdpr-pseudo.yaml in current directory",
+        help=_("Generate a template .gdpr-pseudo.yaml in current directory"),
     ),
     force: bool = typer.Option(
         False,
         "--force",
         "-f",
-        help="Overwrite existing config file when using --init",
+        help=_("Overwrite existing config file when using --init"),
     ),
 ) -> None:
     """Display the current effective configuration or generate a template.

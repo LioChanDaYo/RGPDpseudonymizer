@@ -12,7 +12,7 @@ import time
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from PySide6.QtCore import Qt, QThreadPool
+from PySide6.QtCore import QEvent, Qt, QThreadPool
 from PySide6.QtWidgets import (
     QFileDialog,
     QHBoxLayout,
@@ -28,6 +28,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from gdpr_pseudonymizer.gui.i18n import qarg
 from gdpr_pseudonymizer.gui.widgets.step_indicator import StepMode
 from gdpr_pseudonymizer.gui.widgets.toast import Toast
 from gdpr_pseudonymizer.gui.workers.batch_worker import (
@@ -85,6 +86,9 @@ class BatchScreen(QWidget):
         self._phases.addWidget(self._build_summary_phase())
         layout.addWidget(self._phases)
 
+        # Set translatable text
+        self.retranslateUi()
+
     # -- Phase 0: Selection --
 
     def _build_selection_phase(self) -> QWidget:
@@ -95,37 +99,38 @@ class BatchScreen(QWidget):
 
         # Header
         header = QHBoxLayout()
-        back_btn = QPushButton("\u25c0 Retour")
-        back_btn.setObjectName("secondaryButton")
-        back_btn.clicked.connect(lambda: self._main_window.navigate_to("home"))
-        header.addWidget(back_btn)
+        self._sel_back_btn = QPushButton()
+        self._sel_back_btn.setObjectName("secondaryButton")
+        self._sel_back_btn.clicked.connect(
+            lambda: self._main_window.navigate_to("home")
+        )
+        header.addWidget(self._sel_back_btn)
         header.addStretch()
-        title = QLabel("Traitement par lot")
-        title.setStyleSheet("font-size: 20px; font-weight: bold;")
-        header.addWidget(title)
+        self._sel_title = QLabel()
+        self._sel_title.setStyleSheet("font-size: 20px; font-weight: bold;")
+        header.addWidget(self._sel_title)
         header.addStretch()
         layout.addLayout(header)
 
         # Folder input
         folder_row = QHBoxLayout()
-        folder_label = QLabel("Dossier source :")
-        folder_label.setStyleSheet("font-weight: bold;")
-        folder_row.addWidget(folder_label)
+        self._folder_label = QLabel()
+        self._folder_label.setStyleSheet("font-weight: bold;")
+        folder_row.addWidget(self._folder_label)
 
         self._folder_input = QLineEdit()
-        self._folder_input.setPlaceholderText("Sélectionnez un dossier...")
         self._folder_input.textChanged.connect(lambda _: self._discover_files())
         folder_row.addWidget(self._folder_input, stretch=1)
 
-        browse_btn = QPushButton("Parcourir...")
-        browse_btn.setObjectName("secondaryButton")
-        browse_btn.clicked.connect(self._browse_folder)
-        folder_row.addWidget(browse_btn)
+        self._browse_folder_btn = QPushButton()
+        self._browse_folder_btn.setObjectName("secondaryButton")
+        self._browse_folder_btn.clicked.connect(self._browse_folder)
+        folder_row.addWidget(self._browse_folder_btn)
 
-        add_files_btn = QPushButton("Ajouter des fichiers")
-        add_files_btn.setObjectName("secondaryButton")
-        add_files_btn.clicked.connect(self._add_files)
-        folder_row.addWidget(add_files_btn)
+        self._add_files_btn = QPushButton()
+        self._add_files_btn.setObjectName("secondaryButton")
+        self._add_files_btn.clicked.connect(self._add_files)
+        folder_row.addWidget(self._add_files_btn)
 
         layout.addLayout(folder_row)
 
@@ -136,7 +141,6 @@ class BatchScreen(QWidget):
 
         # File list table
         self._file_table = QTableWidget(0, 3)
-        self._file_table.setHorizontalHeaderLabels(["Fichier", "Taille", "Format"])
         self._file_table.horizontalHeader().setSectionResizeMode(
             0, QHeaderView.ResizeMode.Stretch
         )
@@ -152,24 +156,23 @@ class BatchScreen(QWidget):
 
         # Output directory
         output_row = QHBoxLayout()
-        output_label = QLabel("Dossier de sortie :")
-        output_label.setStyleSheet("font-weight: bold;")
-        output_row.addWidget(output_label)
+        self._output_label = QLabel()
+        self._output_label.setStyleSheet("font-weight: bold;")
+        output_row.addWidget(self._output_label)
 
         self._output_input = QLineEdit()
-        self._output_input.setPlaceholderText("_pseudonymized/ (par défaut)")
         output_row.addWidget(self._output_input, stretch=1)
 
-        output_browse = QPushButton("Parcourir...")
-        output_browse.setObjectName("secondaryButton")
-        output_browse.clicked.connect(self._browse_output)
-        output_row.addWidget(output_browse)
+        self._output_browse_btn = QPushButton()
+        self._output_browse_btn.setObjectName("secondaryButton")
+        self._output_browse_btn.clicked.connect(self._browse_output)
+        output_row.addWidget(self._output_browse_btn)
         layout.addLayout(output_row)
 
         # Start button
         btn_row = QHBoxLayout()
         btn_row.addStretch()
-        self._start_btn = QPushButton("Démarrer le traitement")
+        self._start_btn = QPushButton()
         self._start_btn.setEnabled(False)
         self._start_btn.clicked.connect(self._start_batch)
         btn_row.addWidget(self._start_btn)
@@ -186,10 +189,10 @@ class BatchScreen(QWidget):
         layout.setSpacing(16)
 
         # Title
-        title = QLabel("Traitement en cours")
-        title.setStyleSheet("font-size: 20px; font-weight: bold;")
-        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(title)
+        self._proc_title = QLabel()
+        self._proc_title.setStyleSheet("font-size: 20px; font-weight: bold;")
+        self._proc_title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self._proc_title)
 
         # Overall progress
         self._progress_label = QLabel("0/0 (0%)")
@@ -209,7 +212,6 @@ class BatchScreen(QWidget):
 
         # Per-document table
         self._doc_table = QTableWidget(0, 4)
-        self._doc_table.setHorizontalHeaderLabels(["#", "Fichier", "Entités", "Statut"])
         self._doc_table.horizontalHeader().setSectionResizeMode(
             0, QHeaderView.ResizeMode.ResizeToContents
         )
@@ -230,12 +232,12 @@ class BatchScreen(QWidget):
         ctrl_row = QHBoxLayout()
         ctrl_row.addStretch()
 
-        self._pause_btn = QPushButton("Suspendre")
+        self._pause_btn = QPushButton()
         self._pause_btn.setObjectName("secondaryButton")
         self._pause_btn.clicked.connect(self._toggle_pause)
         ctrl_row.addWidget(self._pause_btn)
 
-        self._cancel_btn = QPushButton("Annuler le lot")
+        self._cancel_btn = QPushButton()
         self._cancel_btn.setObjectName("secondaryButton")
         self._cancel_btn.clicked.connect(self._cancel_batch)
         ctrl_row.addWidget(self._cancel_btn)
@@ -252,18 +254,18 @@ class BatchScreen(QWidget):
         layout.setContentsMargins(40, 24, 40, 24)
         layout.setSpacing(16)
 
-        title = QLabel("Résumé du traitement")
-        title.setStyleSheet("font-size: 20px; font-weight: bold;")
-        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(title)
+        self._summary_title = QLabel()
+        self._summary_title.setStyleSheet("font-size: 20px; font-weight: bold;")
+        self._summary_title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self._summary_title)
 
         # Summary cards
         cards = QHBoxLayout()
-        self._card_docs = self._make_card("Documents", "0")
-        self._card_entities = self._make_card("Entités", "0")
-        self._card_new = self._make_card("Nouvelles", "0")
-        self._card_reused = self._make_card("Réutilisées", "0")
-        self._card_errors = self._make_card("Erreurs", "0")
+        self._card_docs, self._card_docs_label = self._make_card("0")
+        self._card_entities, self._card_entities_label = self._make_card("0")
+        self._card_new, self._card_new_label = self._make_card("0")
+        self._card_reused, self._card_reused_label = self._make_card("0")
+        self._card_errors, self._card_errors_label = self._make_card("0")
         cards.addWidget(self._card_docs)
         cards.addWidget(self._card_entities)
         cards.addWidget(self._card_new)
@@ -273,9 +275,6 @@ class BatchScreen(QWidget):
 
         # Per-document results table
         self._summary_table = QTableWidget(0, 4)
-        self._summary_table.setHorizontalHeaderLabels(
-            ["Fichier", "Entités", "Temps", "Statut"]
-        )
         self._summary_table.horizontalHeader().setSectionResizeMode(
             0, QHeaderView.ResizeMode.Stretch
         )
@@ -286,21 +285,21 @@ class BatchScreen(QWidget):
         btn_row = QHBoxLayout()
         btn_row.addStretch()
 
-        self._export_btn = QPushButton("Exporter le rapport")
+        self._export_btn = QPushButton()
         self._export_btn.setObjectName("secondaryButton")
         self._export_btn.clicked.connect(self._export_report)
         btn_row.addWidget(self._export_btn)
 
-        home_btn = QPushButton("Retour à l'accueil")
-        home_btn.clicked.connect(self._go_home)
-        btn_row.addWidget(home_btn)
+        self._home_btn = QPushButton()
+        self._home_btn.clicked.connect(self._go_home)
+        btn_row.addWidget(self._home_btn)
 
         layout.addLayout(btn_row)
 
         return page
 
-    @staticmethod
-    def _make_card(label: str, value: str) -> QWidget:
+    def _make_card(self, value: str) -> tuple[QWidget, QLabel]:
+        """Create a summary card widget and return (card, label_widget)."""
         card = QWidget()
         card_layout = QVBoxLayout(card)
         card_layout.setContentsMargins(16, 12, 16, 12)
@@ -309,27 +308,82 @@ class BatchScreen(QWidget):
         val.setStyleSheet("font-size: 24px; font-weight: bold;")
         val.setAlignment(Qt.AlignmentFlag.AlignCenter)
         card_layout.addWidget(val)
-        lbl = QLabel(label)
+        lbl = QLabel("")
         lbl.setObjectName("secondaryLabel")
         lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         card_layout.addWidget(lbl)
-        return card
+        return card, lbl
+
+    def retranslateUi(self) -> None:
+        """Re-set all translatable static UI text."""
+        # Phase 0: Selection
+        self._sel_back_btn.setText(self.tr("\u25c0 Retour"))
+        self._sel_title.setText(self.tr("Traitement par lot"))
+        self._folder_label.setText(self.tr("Dossier source :"))
+        self._folder_input.setPlaceholderText(self.tr("Sélectionnez un dossier..."))
+        self._browse_folder_btn.setText(self.tr("Parcourir..."))
+        self._add_files_btn.setText(self.tr("Ajouter des fichiers"))
+        self._file_table.setHorizontalHeaderLabels(
+            [self.tr("Fichier"), self.tr("Taille"), self.tr("Format")]
+        )
+        self._output_label.setText(self.tr("Dossier de sortie :"))
+        self._output_input.setPlaceholderText(self.tr("_pseudonymized/ (par défaut)"))
+        self._output_browse_btn.setText(self.tr("Parcourir..."))
+        self._start_btn.setText(self.tr("Démarrer le traitement"))
+
+        # Phase 1: Processing
+        self._proc_title.setText(self.tr("Traitement en cours"))
+        self._doc_table.setHorizontalHeaderLabels(
+            [
+                self.tr("#"),
+                self.tr("Fichier"),
+                self.tr("Entités"),
+                self.tr("Statut"),
+            ]
+        )
+        self._pause_btn.setText(self.tr("Suspendre"))
+        self._cancel_btn.setText(self.tr("Annuler le lot"))
+
+        # Phase 2: Summary
+        self._summary_title.setText(self.tr("Résumé du traitement"))
+        self._card_docs_label.setText(self.tr("Documents"))
+        self._card_entities_label.setText(self.tr("Entités"))
+        self._card_new_label.setText(self.tr("Nouvelles"))
+        self._card_reused_label.setText(self.tr("Réutilisées"))
+        self._card_errors_label.setText(self.tr("Erreurs"))
+        self._summary_table.setHorizontalHeaderLabels(
+            [
+                self.tr("Fichier"),
+                self.tr("Entités"),
+                self.tr("Temps"),
+                self.tr("Statut"),
+            ]
+        )
+        self._export_btn.setText(self.tr("Exporter le rapport"))
+        self._home_btn.setText(self.tr("Retour à l'accueil"))
+
+    def changeEvent(self, event: QEvent) -> None:
+        if event.type() == QEvent.Type.LanguageChange:
+            self.retranslateUi()
+        super().changeEvent(event)
 
     # ------------------------------------------------------------------
     # Selection Phase Logic
     # ------------------------------------------------------------------
 
     def _browse_folder(self) -> None:
-        folder = QFileDialog.getExistingDirectory(self, "Sélectionner un dossier")
+        folder = QFileDialog.getExistingDirectory(
+            self, self.tr("Sélectionner un dossier")
+        )
         if folder:
             self._folder_input.setText(folder)
 
     def _add_files(self) -> None:
         files, _ = QFileDialog.getOpenFileNames(
             self,
-            "Ajouter des fichiers",
+            self.tr("Ajouter des fichiers"),
             "",
-            "Documents (*.txt *.md *.pdf *.docx);;Tous (*)",
+            self.tr("Documents (*.txt *.md *.pdf *.docx);;Tous (*)"),
         )
         if files:
             for f in files:
@@ -340,7 +394,7 @@ class BatchScreen(QWidget):
             self._start_btn.setEnabled(len(self._files) > 0)
 
     def _browse_output(self) -> None:
-        folder = QFileDialog.getExistingDirectory(self, "Dossier de sortie")
+        folder = QFileDialog.getExistingDirectory(self, self.tr("Dossier de sortie"))
         if folder:
             self._output_input.setText(folder)
 
@@ -377,11 +431,11 @@ class BatchScreen(QWidget):
             try:
                 size = fp.stat().st_size
                 if size < 1024:
-                    size_str = f"{size} o"
+                    size_str = qarg(self.tr("%1 o"), str(size))
                 elif size < 1024 * 1024:
-                    size_str = f"{size / 1024:.1f} Ko"
+                    size_str = qarg(self.tr("%1 Ko"), f"{size / 1024:.1f}")
                 else:
-                    size_str = f"{size / (1024 * 1024):.1f} Mo"
+                    size_str = qarg(self.tr("%1 Mo"), f"{size / (1024 * 1024):.1f}")
             except OSError:
                 size_str = "?"
             size_item = QTableWidgetItem(size_str)
@@ -392,7 +446,9 @@ class BatchScreen(QWidget):
             self._file_table.setItem(row, 2, fmt_item)
             supported_count += 1
 
-        self._file_count_label.setText(f"{supported_count} fichier(s) supporté(s)")
+        self._file_count_label.setText(
+            qarg(self.tr("%1 fichier(s) supporté(s)"), str(supported_count))
+        )
 
     # ------------------------------------------------------------------
     # Processing Phase Logic
@@ -459,14 +515,16 @@ class BatchScreen(QWidget):
             self._doc_table.setItem(row, 0, QTableWidgetItem(str(row + 1)))
             self._doc_table.setItem(row, 1, QTableWidgetItem(fp.name))
             self._doc_table.setItem(row, 2, QTableWidgetItem(""))
-            status_item = QTableWidgetItem("En attente")
+            status_item = QTableWidgetItem(self.tr("En attente"))
             status_item.setForeground(Qt.GlobalColor.gray)
             self._doc_table.setItem(row, 3, status_item)
 
         self._progress_bar.setValue(0)
-        self._progress_label.setText(f"0/{len(self._files)} (0%)")
+        self._progress_label.setText(
+            qarg(self.tr("%1/%2 (%3%)"), "0", str(len(self._files)), "0")
+        )
         self._eta_label.setText("")
-        self._pause_btn.setText("Suspendre")
+        self._pause_btn.setText(self.tr("Suspendre"))
         self._is_paused = False
 
         # Create and start worker
@@ -494,7 +552,14 @@ class BatchScreen(QWidget):
             idx = int(message.split(":")[1])
             self._docs_completed = idx + 1
             total = len(self._files)
-            self._progress_label.setText(f"{self._docs_completed}/{total} ({percent}%)")
+            self._progress_label.setText(
+                qarg(
+                    self.tr("%1/%2 (%3%)"),
+                    str(self._docs_completed),
+                    str(total),
+                    str(percent),
+                )
+            )
 
             # Update ETA
             elapsed = time.time() - self._batch_start_time
@@ -502,26 +567,28 @@ class BatchScreen(QWidget):
                 avg_per_doc = elapsed / self._docs_completed
                 remaining = (total - self._docs_completed) * avg_per_doc
                 if remaining < 60:
-                    eta_str = f"~{int(remaining)} secondes"
+                    eta_str = qarg(self.tr("~%1 secondes"), str(int(remaining)))
                 else:
-                    eta_str = f"~{int(remaining / 60)} minutes"
-                self._eta_label.setText(f"Temps estimé restant : {eta_str}")
+                    eta_str = qarg(self.tr("~%1 minutes"), str(int(remaining / 60)))
+                self._eta_label.setText(
+                    qarg(self.tr("Temps estimé restant : %1"), eta_str)
+                )
 
             # Update document table row
             if self._worker is not None:
-                status_item = QTableWidgetItem("Traité")
+                status_item = QTableWidgetItem(self.tr("Traité"))
                 status_item.setForeground(Qt.GlobalColor.darkGreen)
                 self._doc_table.setItem(idx, 3, status_item)
 
             # Mark next document as "En cours"
             if self._docs_completed < total:
-                status_item = QTableWidgetItem("En cours")
+                status_item = QTableWidgetItem(self.tr("En cours"))
                 status_item.setForeground(Qt.GlobalColor.blue)
                 self._doc_table.setItem(self._docs_completed, 3, status_item)
         else:
             # Pre-processing message (e.g., loading model)
             if self._docs_completed == 0 and self._files:
-                status_item = QTableWidgetItem("En cours")
+                status_item = QTableWidgetItem(self.tr("En cours"))
                 status_item.setForeground(Qt.GlobalColor.blue)
                 self._doc_table.setItem(0, 3, status_item)
 
@@ -538,16 +605,17 @@ class BatchScreen(QWidget):
             if doc_res.success:
                 entities = str(doc_res.entities_detected)
                 self._doc_table.setItem(doc_res.index, 2, QTableWidgetItem(entities))
-                status_item = QTableWidgetItem("Traité")
+                status_item = QTableWidgetItem(self.tr("Traité"))
                 status_item.setForeground(Qt.GlobalColor.darkGreen)
             else:
-                status_item = QTableWidgetItem("Erreur")
+                status_item = QTableWidgetItem(self.tr("Erreur"))
                 status_item.setForeground(Qt.GlobalColor.red)
                 status_item.setToolTip(doc_res.error_message)
             self._doc_table.setItem(doc_res.index, 3, status_item)
 
         self._progress_bar.setValue(100)
-        self._progress_label.setText(f"{len(self._files)}/{len(self._files)} (100%)")
+        total = str(len(self._files))
+        self._progress_label.setText(qarg(self.tr("%1/%2 (%3%)"), total, total, "100"))
         self._eta_label.setText("")
 
         # Show summary
@@ -564,7 +632,7 @@ class BatchScreen(QWidget):
         from gdpr_pseudonymizer.gui.widgets.confirm_dialog import ConfirmDialog
 
         ConfirmDialog.informational(
-            "Erreur de traitement",
+            self.tr("Erreur de traitement"),
             error_msg,
             parent=self._main_window,
         ).exec()
@@ -578,21 +646,21 @@ class BatchScreen(QWidget):
         if not self._is_paused:
             self._worker.pause()
             self._is_paused = True
-            self._pause_btn.setText("Reprendre")
-            self._eta_label.setText("Traitement suspendu")
+            self._pause_btn.setText(self.tr("Reprendre"))
+            self._eta_label.setText(self.tr("Traitement suspendu"))
         else:
             self._worker.resume()
             self._is_paused = False
-            self._pause_btn.setText("Suspendre")
+            self._pause_btn.setText(self.tr("Suspendre"))
             self._eta_label.setText("")
 
     def _cancel_batch(self) -> None:
         from gdpr_pseudonymizer.gui.widgets.confirm_dialog import ConfirmDialog
 
         dlg = ConfirmDialog.destructive(
-            "Annuler le traitement",
-            "Les documents déjà traités seront conservés.",
-            "Annuler le lot",
+            self.tr("Annuler le traitement"),
+            self.tr("Les documents déjà traités seront conservés."),
+            self.tr("Annuler le lot"),
             parent=self._main_window,
         )
         if dlg.exec():
@@ -626,10 +694,10 @@ class BatchScreen(QWidget):
             self._summary_table.setItem(row, 2, QTableWidgetItem(time_str))
 
             if doc_res.success:
-                status_item = QTableWidgetItem("Traité")
+                status_item = QTableWidgetItem(self.tr("Traité"))
                 status_item.setForeground(Qt.GlobalColor.darkGreen)
             else:
-                status_item = QTableWidgetItem("Erreur")
+                status_item = QTableWidgetItem(self.tr("Erreur"))
                 status_item.setForeground(Qt.GlobalColor.red)
                 status_item.setToolTip(doc_res.error_message)
             self._summary_table.setItem(row, 3, status_item)
@@ -646,51 +714,62 @@ class BatchScreen(QWidget):
 
         filepath, _ = QFileDialog.getSaveFileName(
             self,
-            "Exporter le rapport",
+            self.tr("Exporter le rapport"),
             "batch_report.txt",
-            "Texte (*.txt);;Tous (*)",
+            self.tr("Texte (*.txt);;Tous (*)"),
         )
         if not filepath:
             return
 
         result = self._batch_result
         lines = [
-            "GDPR Pseudonymizer — Rapport de traitement par lot",
+            self.tr("GDPR Pseudonymizer — Rapport de traitement par lot"),
             "=" * 50,
             "",
-            f"Documents traités : {result.successful_files}/{result.total_files}",
-            f"Entités détectées : {result.total_entities}",
-            f"  - Nouvelles : {result.new_entities}",
-            f"  - Réutilisées : {result.reused_entities}",
-            f"Erreurs : {result.failed_files}",
-            f"Temps total : {result.total_time_seconds:.1f}s",
+            qarg(
+                self.tr("Documents traités : %1/%2"),
+                str(result.successful_files),
+                str(result.total_files),
+            ),
+            qarg(self.tr("Entités détectées : %1"), str(result.total_entities)),
+            qarg(self.tr("  - Nouvelles : %1"), str(result.new_entities)),
+            qarg(self.tr("  - Réutilisées : %1"), str(result.reused_entities)),
+            qarg(self.tr("Erreurs : %1"), str(result.failed_files)),
+            qarg(
+                self.tr("Temps total : %1s"),
+                f"{result.total_time_seconds:.1f}",
+            ),
             "",
-            "Détails par document :",
+            self.tr("Détails par document :"),
             "-" * 40,
         ]
 
         for doc_res in result.per_document_results:
-            status = "OK" if doc_res.success else "ERREUR"
-            line = (
-                f"  {doc_res.filename}: {status} | "
-                f"{doc_res.entities_detected} entités | "
-                f"{doc_res.processing_time:.1f}s"
+            status = "OK" if doc_res.success else self.tr("ERREUR")
+            line = qarg(
+                self.tr("  %1: %2 | %3 entités | %4s"),
+                doc_res.filename,
+                status,
+                str(doc_res.entities_detected),
+                f"{doc_res.processing_time:.1f}",
             )
             if not doc_res.success:
                 line += f" | {doc_res.error_message}"
             lines.append(line)
 
         if result.errors:
-            lines.extend(["", "Erreurs :", "-" * 40])
+            lines.extend(["", self.tr("Erreurs :"), "-" * 40])
             for err in result.errors:
-                lines.append(f"  • {err}")
+                lines.append(f"  \u2022 {err}")
 
         try:
             Path(filepath).write_text("\n".join(lines), encoding="utf-8")
-            Toast.show_message("Rapport exporté.", self._main_window)
+            Toast.show_message(self.tr("Rapport exporté."), self._main_window)
         except OSError:
             Toast.show_message(
-                "Erreur lors de l'export.", self._main_window, duration_ms=4000
+                self.tr("Erreur lors de l'export."),
+                self._main_window,
+                duration_ms=4000,
             )
 
     def _go_home(self) -> None:

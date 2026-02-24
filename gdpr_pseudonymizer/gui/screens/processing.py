@@ -9,7 +9,7 @@ from __future__ import annotations
 import os
 from typing import TYPE_CHECKING
 
-from PySide6.QtCore import Qt, QThreadPool
+from PySide6.QtCore import QEvent, Qt, QThreadPool
 from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
@@ -19,6 +19,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from gdpr_pseudonymizer.gui.i18n import qarg
 from gdpr_pseudonymizer.gui.widgets.step_indicator import StepMode
 from gdpr_pseudonymizer.utils.logger import get_logger
 
@@ -71,7 +72,7 @@ class ProcessingScreen(QWidget):
         self._progress_bar.setTextVisible(True)
         layout.addWidget(self._progress_bar)
 
-        self._phase_label = QLabel("En attente...")
+        self._phase_label = QLabel()
         self._phase_label.setObjectName("secondaryLabel")
         self._phase_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self._phase_label)
@@ -104,15 +105,11 @@ class ProcessingScreen(QWidget):
         warning_layout = QVBoxLayout(self._warning_panel)
         warning_layout.setContentsMargins(16, 16, 16, 16)
 
-        warning_label = QLabel(
-            "Aucune entité détectée. Le document ne contient peut-être pas "
-            "de données personnelles, ou le format n'est pas supporté pour "
-            "l'analyse NLP."
-        )
-        warning_label.setWordWrap(True)
-        warning_label.setObjectName("warningLabel")
-        warning_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        warning_layout.addWidget(warning_label)
+        self._warning_label = QLabel()
+        self._warning_label.setWordWrap(True)
+        self._warning_label.setObjectName("warningLabel")
+        self._warning_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        warning_layout.addWidget(self._warning_label)
 
         self._warning_panel.setVisible(False)
         layout.addWidget(self._warning_panel)
@@ -123,17 +120,38 @@ class ProcessingScreen(QWidget):
         btn_layout = QHBoxLayout()
         btn_layout.addStretch()
 
-        self._cancel_btn = QPushButton("Annuler")
+        self._cancel_btn = QPushButton()
         self._cancel_btn.setObjectName("secondaryButton")
         self._cancel_btn.clicked.connect(self._on_cancel)
         btn_layout.addWidget(self._cancel_btn)
 
-        self._continue_btn = QPushButton("Continuer \u25b6")
+        self._continue_btn = QPushButton()
         self._continue_btn.clicked.connect(self._on_continue)
         self._continue_btn.setVisible(False)
         btn_layout.addWidget(self._continue_btn)
 
         layout.addLayout(btn_layout)
+
+        # Set all translatable text
+        self.retranslateUi()
+
+    def retranslateUi(self) -> None:
+        """Re-set all translatable UI text."""
+        self._phase_label.setText(self.tr("En attente..."))
+        self._warning_label.setText(
+            self.tr(
+                "Aucune entité détectée. Le document ne contient peut-être pas "
+                "de données personnelles, ou le format n'est pas supporté pour "
+                "l'analyse NLP."
+            )
+        )
+        self._cancel_btn.setText(self.tr("Annuler"))
+        self._continue_btn.setText(self.tr("Continuer \u25b6"))
+
+    def changeEvent(self, event: QEvent) -> None:
+        if event.type() == QEvent.Type.LanguageChange:
+            self.retranslateUi()
+        super().changeEvent(event)
 
     def start_processing(
         self,
@@ -156,7 +174,7 @@ class ProcessingScreen(QWidget):
 
         # Reset UI
         self._progress_bar.setValue(0)
-        self._phase_label.setText("Initialisation...")
+        self._phase_label.setText(self.tr("Initialisation..."))
         self._summary_panel.setVisible(False)
         self._warning_panel.setVisible(False)
         self._continue_btn.setVisible(False)
@@ -171,7 +189,9 @@ class ProcessingScreen(QWidget):
             size_str = _format_file_size(size_bytes)
             time_est = max(1, size_bytes // 5000)
             self._file_info.setText(f"{size_str}")
-            self._time_estimate_label.setText(f"Temps estimé : ~{time_est}s")
+            self._time_estimate_label.setText(
+                qarg(self.tr("Temps estimé : ~%1s"), str(time_est))
+            )
         except OSError:
             self._file_info.setText("")
             self._time_estimate_label.setText("")
@@ -213,7 +233,7 @@ class ProcessingScreen(QWidget):
         from gdpr_pseudonymizer.gui.widgets.confirm_dialog import ConfirmDialog
 
         ConfirmDialog.informational(
-            "Erreur de téléchargement",
+            self.tr("Erreur de téléchargement"),
             error_msg,
             parent=self._main_window,
         ).exec()
@@ -257,7 +277,7 @@ class ProcessingScreen(QWidget):
         # Update progress to 100%
         self._progress_bar.setMaximum(100)
         self._progress_bar.setValue(100)
-        self._phase_label.setText("Analyse terminée")
+        self._phase_label.setText(self.tr("Analyse terminée"))
         self._time_estimate_label.setText("")
 
         # Show entity summary
@@ -270,9 +290,16 @@ class ProcessingScreen(QWidget):
             locations = counts.get("LOCATION", 0)
             orgs = counts.get("ORG", 0)
             self._summary_label.setText(
-                f"Nous avons trouvé <b>{persons} noms de personnes</b>, "
-                f"<b>{locations} lieux</b> et "
-                f"<b>{orgs} organisations</b> dans votre document."
+                qarg(
+                    self.tr(
+                        "Nous avons trouvé <b>%1 noms de personnes</b>, "
+                        "<b>%2 lieux</b> et "
+                        "<b>%3 organisations</b> dans votre document."
+                    ),
+                    str(persons),
+                    str(locations),
+                    str(orgs),
+                )
             )
             self._summary_panel.setVisible(True)
 
@@ -285,12 +312,12 @@ class ProcessingScreen(QWidget):
         self._is_processing = False
         self._progress_bar.setMaximum(100)
         self._progress_bar.setValue(0)
-        self._phase_label.setText("Erreur")
+        self._phase_label.setText(self.tr("Erreur"))
 
         from gdpr_pseudonymizer.gui.widgets.confirm_dialog import ConfirmDialog
 
         ConfirmDialog.informational(
-            "Erreur de traitement",
+            self.tr("Erreur de traitement"),
             error_msg,
             parent=self._main_window,
         ).exec()

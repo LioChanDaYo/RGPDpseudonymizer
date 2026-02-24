@@ -1,0 +1,229 @@
+# French translations for GDPR Pseudonymizer CLI
+# Copyright (C) 2026 GDPR Pseudonymizer
+# This file is distributed under the same license as the gdpr-pseudonymizer package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: gdpr-pseudonymizer 2.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-02-23 00:00+0000\n"
+"PO-Revision-Date: 2026-02-23 00:00+0000\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+# --- App-level ---
+
+msgid "GDPR-compliant pseudonymization tool for French text documents"
+msgstr "Outil de pseudonymisation conforme au RGPD pour documents en français"
+
+# --- Global options ---
+
+msgid "Show version and exit"
+msgstr "Afficher la version et quitter"
+
+msgid "Path to config file (default: ~/.gdpr-pseudo.yaml or ./.gdpr-pseudo.yaml)"
+msgstr "Chemin du fichier de configuration (par défaut : ~/.gdpr-pseudo.yaml ou ./.gdpr-pseudo.yaml)"
+
+msgid "Enable verbose logging (DEBUG level)"
+msgstr "Activer la journalisation détaillée (niveau DEBUG)"
+
+msgid "Suppress non-error output"
+msgstr "Supprimer les sorties non essentielles"
+
+msgid "Language for CLI help text (fr/en)"
+msgstr "Langue du texte d'aide CLI (fr/en)"
+
+# --- init command ---
+
+msgid "Initialize a new encrypted mapping database"
+msgstr "Initialiser une nouvelle base de correspondances chiffrée"
+
+msgid "Database file path (default: mappings.db)"
+msgstr "Chemin du fichier de base de données (par défaut : mappings.db)"
+
+msgid "Database passphrase (or use GDPR_PSEUDO_PASSPHRASE env var)"
+msgstr "Phrase secrète de la base de données (ou variable d'environnement GDPR_PSEUDO_PASSPHRASE)"
+
+msgid "Overwrite existing database if it exists"
+msgstr "Écraser la base de données existante si elle existe"
+
+# --- process command ---
+
+msgid "Process a single document with pseudonymization"
+msgstr "Traiter un document avec pseudonymisation"
+
+msgid "Input file path (.txt, .md, .pdf, or .docx)"
+msgstr "Chemin du fichier d'entrée (.txt, .md, .pdf ou .docx)"
+
+msgid "Output file path (defaults to <input>_pseudonymized.ext)"
+msgstr "Chemin du fichier de sortie (par défaut : <entrée>_pseudonymized.ext)"
+
+msgid "Pseudonym library theme (neutral/star_wars/lotr). Default from config."
+msgstr "Thème de la bibliothèque de pseudonymes (neutral/star_wars/lotr). Par défaut depuis la configuration."
+
+msgid "NLP model name (spacy). Default from config."
+msgstr "Nom du modèle NLP (spacy). Par défaut depuis la configuration."
+
+msgid "Database file path. Default from config."
+msgstr "Chemin du fichier de base de données. Par défaut depuis la configuration."
+
+msgid "Filter entity types to process (comma-separated). Options: PERSON, LOCATION, ORG. Default: all types."
+msgstr "Filtrer les types d'entités à traiter (séparés par des virgules). Options : PERSON, LOCATION, ORG. Par défaut : tous les types."
+
+# --- batch command ---
+
+msgid "Process multiple documents in a directory"
+msgstr "Traiter plusieurs documents dans un répertoire"
+
+msgid "Input directory or file path"
+msgstr "Chemin du répertoire ou fichier d'entrée"
+
+msgid "Output directory (defaults to same directory as input with _pseudonymized suffix)"
+msgstr "Répertoire de sortie (par défaut : même répertoire avec suffixe _pseudonymized)"
+
+msgid "Process subdirectories recursively"
+msgstr "Traiter les sous-répertoires récursivement"
+
+msgid "Continue processing on individual file errors (default: continue)"
+msgstr "Continuer le traitement en cas d'erreur sur un fichier (par défaut : continuer)"
+
+msgid "Number of parallel workers (1=sequential with validation, 2-8=parallel without validation). Default from config."
+msgstr "Nombre de travailleurs parallèles (1=séquentiel avec validation, 2-8=parallèle sans validation). Par défaut depuis la configuration."
+
+# --- list-mappings command ---
+
+msgid "View entity-to-pseudonym mappings"
+msgstr "Afficher les correspondances entité-pseudonyme"
+
+msgid "Database file path"
+msgstr "Chemin du fichier de base de données"
+
+msgid "Filter by entity type (PERSON/LOCATION/ORG)"
+msgstr "Filtrer par type d'entité (PERSON/LOCATION/ORG)"
+
+msgid "Search by entity name (case-insensitive substring match)"
+msgstr "Rechercher par nom d'entité (correspondance insensible à la casse)"
+
+msgid "Export mappings to CSV file"
+msgstr "Exporter les correspondances vers un fichier CSV"
+
+msgid "Limit number of results"
+msgstr "Limiter le nombre de résultats"
+
+# --- validate-mappings command ---
+
+msgid "Review existing mappings without processing"
+msgstr "Examiner les correspondances existantes sans traitement"
+
+msgid "Interactive mode to review each mapping"
+msgstr "Mode interactif pour examiner chaque correspondance"
+
+# --- stats command ---
+
+msgid "Show database statistics and usage information"
+msgstr "Afficher les statistiques et informations d'utilisation de la base de données"
+
+# --- import-mappings command ---
+
+msgid "Import mappings from another database"
+msgstr "Importer des correspondances depuis une autre base de données"
+
+msgid "Source database file to import from"
+msgstr "Fichier source de base de données à importer"
+
+msgid "Target database file path"
+msgstr "Chemin du fichier de base de données cible"
+
+msgid "Target database passphrase (or use GDPR_PSEUDO_PASSPHRASE env var)"
+msgstr "Phrase secrète de la base cible (ou variable d'environnement GDPR_PSEUDO_PASSPHRASE)"
+
+msgid "Source database passphrase (prompts if not provided)"
+msgstr "Phrase secrète de la base source (demandée si non fournie)"
+
+msgid "Skip duplicate entities (default) or prompt for each"
+msgstr "Ignorer les entités en double (par défaut) ou demander pour chacune"
+
+# --- export command ---
+
+msgid "Export audit log to JSON or CSV"
+msgstr "Exporter le journal d'audit en JSON ou CSV"
+
+msgid "Output file path (.json or .csv)"
+msgstr "Chemin du fichier de sortie (.json ou .csv)"
+
+msgid "Filter by operation type (PROCESS/BATCH/VALIDATE/etc.)"
+msgstr "Filtrer par type d'opération (PROCESS/BATCH/VALIDATE/etc.)"
+
+msgid "Filter operations after this date (ISO 8601: YYYY-MM-DD)"
+msgstr "Filtrer les opérations après cette date (ISO 8601 : AAAA-MM-JJ)"
+
+msgid "Filter operations before this date (ISO 8601: YYYY-MM-DD)"
+msgstr "Filtrer les opérations avant cette date (ISO 8601 : AAAA-MM-JJ)"
+
+msgid "Show only successful operations"
+msgstr "Afficher uniquement les opérations réussies"
+
+msgid "Show only failed operations"
+msgstr "Afficher uniquement les opérations échouées"
+
+# --- delete-mapping command ---
+
+msgid "Delete entity mapping (GDPR Article 17 erasure)"
+msgstr "Supprimer une correspondance (effacement Article 17 du RGPD)"
+
+msgid "Entity name to delete"
+msgstr "Nom de l'entité à supprimer"
+
+msgid "Entity UUID to delete"
+msgstr "UUID de l'entité à supprimer"
+
+msgid "Reason for deletion (GDPR request reference)"
+msgstr "Motif de la suppression (référence de la demande RGPD)"
+
+msgid "Skip confirmation prompt"
+msgstr "Ignorer la demande de confirmation"
+
+# --- list-entities command ---
+
+msgid "List entities with search (for erasure workflow)"
+msgstr "Lister les entités avec recherche (pour le flux d'effacement)"
+
+msgid "Filter by type (PERSON/LOCATION/ORG)"
+msgstr "Filtrer par type (PERSON/LOCATION/ORG)"
+
+# --- destroy-table command ---
+
+msgid "Securely delete the mapping database"
+msgstr "Supprimer de manière sécurisée la base de correspondances"
+
+msgid "Database file path to destroy"
+msgstr "Chemin du fichier de base de données à détruire"
+
+msgid "Skip confirmation prompt (use with caution)"
+msgstr "Ignorer la demande de confirmation (à utiliser avec précaution)"
+
+msgid "Passphrase to verify database ownership (recommended for safety)"
+msgstr "Phrase secrète pour vérifier la propriété de la base (recommandé)"
+
+msgid "Skip passphrase verification (not recommended)"
+msgstr "Ignorer la vérification de la phrase secrète (non recommandé)"
+
+# --- config command ---
+
+msgid "View or modify configuration settings"
+msgstr "Afficher ou modifier les paramètres de configuration"
+
+msgid "Generate a template .gdpr-pseudo.yaml in current directory"
+msgstr "Générer un modèle .gdpr-pseudo.yaml dans le répertoire courant"
+
+msgid "Overwrite existing config file when using --init"
+msgstr "Écraser le fichier de configuration existant avec --init"
+
+msgid "Config key (e.g., pseudonymization.theme)"
+msgstr "Clé de configuration (ex : pseudonymization.theme)"
+
+msgid "Value to set"
+msgstr "Valeur à définir"

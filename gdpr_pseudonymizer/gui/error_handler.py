@@ -11,8 +11,14 @@ import traceback
 from types import TracebackType
 from typing import TYPE_CHECKING
 
+from PySide6.QtCore import QCoreApplication
+
+from gdpr_pseudonymizer.gui.i18n import qarg
+
 if TYPE_CHECKING:
     from gdpr_pseudonymizer.gui.main_window import MainWindow
+
+_tr = QCoreApplication.translate
 
 
 def install_exception_handler(main_window: MainWindow) -> None:
@@ -40,10 +46,16 @@ def install_exception_handler(main_window: MainWindow) -> None:
 
             QMessageBox.critical(
                 main_window,
-                "Erreur inattendue",
-                "Une erreur inattendue s'est produite.\n\n"
-                f"Type : {exc_type.__name__}\n"
-                "L'application va revenir à l'écran d'accueil.",
+                _tr("ErrorHandler", "Erreur inattendue"),
+                qarg(
+                    _tr(
+                        "ErrorHandler",
+                        "Une erreur inattendue s'est produite.\n\n"
+                        "Type : %1\n"
+                        "L'application va revenir à l'écran d'accueil.",
+                    ),
+                    exc_type.__name__,
+                ),
             )
             main_window.navigate_to("home")
         except Exception:

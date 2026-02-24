@@ -14,6 +14,7 @@ from rich.console import Console
 
 from gdpr_pseudonymizer.cli.commands.config_show import config_app
 from gdpr_pseudonymizer.cli.config import load_config
+from gdpr_pseudonymizer.cli.i18n import _, set_language
 from gdpr_pseudonymizer.exceptions import (
     ConfigValidationError,
     PassphraseInConfigError,
@@ -24,7 +25,7 @@ from gdpr_pseudonymizer.exceptions import (
 # The prog_name is set via context_settings to fix Windows display bug (shows .cmd extension)
 app = typer.Typer(
     name="gdpr-pseudo",
-    help="GDPR-compliant pseudonymization tool for French text documents",
+    help=_("GDPR-compliant pseudonymization tool for French text documents"),
     add_completion=False,
     context_settings={"help_option_names": ["--help", "-h"]},
 )
@@ -42,33 +43,48 @@ def version_callback(value: bool) -> None:
         raise typer.Exit()
 
 
+def _lang_callback(value: Optional[str]) -> None:
+    """Set CLI language via --lang flag (eager — runs before help)."""
+    if value is not None:
+        set_language(value)
+
+
 @app.callback()
 def main(
     version: bool = typer.Option(
         False,
         "--version",
-        help="Show version and exit",
+        help=_("Show version and exit"),
         callback=version_callback,
+        is_eager=True,
+    ),
+    lang: Optional[str] = typer.Option(
+        None,
+        "--lang",
+        help=_("Language for CLI help text (fr/en)"),
+        callback=_lang_callback,
         is_eager=True,
     ),
     config: Optional[Path] = typer.Option(
         None,
         "--config",
         "-c",
-        help="Path to config file (default: ~/.gdpr-pseudo.yaml or ./.gdpr-pseudo.yaml)",
+        help=_(
+            "Path to config file (default: ~/.gdpr-pseudo.yaml or ./.gdpr-pseudo.yaml)"
+        ),
         exists=False,  # Allow non-existent paths for error handling
     ),
     verbose: bool = typer.Option(
         False,
         "--verbose",
         "-v",
-        help="Enable verbose logging (DEBUG level)",
+        help=_("Enable verbose logging (DEBUG level)"),
     ),
     quiet: bool = typer.Option(
         False,
         "--quiet",
         "-q",
-        help="Suppress non-error output",
+        help=_("Suppress non-error output"),
     ),
 ) -> None:
     """GDPR-compliant pseudonymization tool for French text documents.
@@ -99,6 +115,7 @@ def main(
         --config, -c    Path to config file
         --verbose, -v   Enable verbose logging
         --quiet, -q     Suppress non-error output
+        --lang          Language for help text (fr/en)
 
     Configuration Priority:
         1. CLI flags (highest)
@@ -149,24 +166,24 @@ def main(
 # ---------------------------------------------------------------------------
 
 
-@app.command(name="init", help="Initialize a new encrypted mapping database")
+@app.command(name="init", help=_("Initialize a new encrypted mapping database"))
 def _init(
     db_path: str = typer.Option(
         "mappings.db",
         "--db",
-        help="Database file path (default: mappings.db)",
+        help=_("Database file path (default: mappings.db)"),
     ),
     passphrase: Optional[str] = typer.Option(
         None,
         "--passphrase",
         "-p",
-        help="Database passphrase (or use GDPR_PSEUDO_PASSPHRASE env var)",
+        help=_("Database passphrase (or use GDPR_PSEUDO_PASSPHRASE env var)"),
     ),
     force: bool = typer.Option(
         False,
         "--force",
         "-f",
-        help="Overwrite existing database if it exists",
+        help=_("Overwrite existing database if it exists"),
     ),
 ) -> None:
     """Initialize a new encrypted mapping database."""
@@ -175,7 +192,7 @@ def _init(
     init_command(db_path=db_path, passphrase=passphrase, force=force)
 
 
-@app.command(name="process", help="Process a single document with pseudonymization")
+@app.command(name="process", help=_("Process a single document with pseudonymization"))
 def _process(
     input_file: Path = typer.Argument(
         ...,
@@ -183,41 +200,46 @@ def _process(
         file_okay=True,
         dir_okay=False,
         readable=True,
-        help="Input file path (.txt, .md, .pdf, or .docx)",
+        help=_("Input file path (.txt, .md, .pdf, or .docx)"),
     ),
     output_file: Optional[Path] = typer.Option(
         None,
         "--output",
         "-o",
-        help="Output file path (defaults to <input>_pseudonymized.ext)",
+        help=_("Output file path (defaults to <input>_pseudonymized.ext)"),
     ),
     theme: Optional[str] = typer.Option(
         None,
         "--theme",
         "-t",
-        help="Pseudonym library theme (neutral/star_wars/lotr). Default from config.",
+        help=_(
+            "Pseudonym library theme (neutral/star_wars/lotr). Default from config."
+        ),
     ),
     model: Optional[str] = typer.Option(
         None,
         "--model",
         "-m",
-        help="NLP model name (spacy). Default from config.",
+        help=_("NLP model name (spacy). Default from config."),
     ),
     db_path: Optional[str] = typer.Option(
         None,
         "--db",
-        help="Database file path. Default from config.",
+        help=_("Database file path. Default from config."),
     ),
     passphrase: Optional[str] = typer.Option(
         None,
         "--passphrase",
         "-p",
-        help="Database passphrase (or use GDPR_PSEUDO_PASSPHRASE env var)",
+        help=_("Database passphrase (or use GDPR_PSEUDO_PASSPHRASE env var)"),
     ),
     entity_types: Optional[str] = typer.Option(
         None,
         "--entity-types",
-        help="Filter entity types to process (comma-separated). Options: PERSON, LOCATION, ORG. Default: all types.",
+        help=_(
+            "Filter entity types to process (comma-separated). "
+            "Options: PERSON, LOCATION, ORG. Default: all types."
+        ),
     ),
 ) -> None:
     """Process a single document with pseudonymization."""
@@ -234,7 +256,7 @@ def _process(
     )
 
 
-@app.command(name="batch", help="Process multiple documents in a directory")
+@app.command(name="batch", help=_("Process multiple documents in a directory"))
 def _batch(
     input_path: Path = typer.Argument(
         ...,
@@ -242,47 +264,52 @@ def _batch(
         file_okay=True,
         dir_okay=True,
         readable=True,
-        help="Input directory or file path",
+        help=_("Input directory or file path"),
     ),
     output_dir: Optional[Path] = typer.Option(
         None,
         "--output",
         "-o",
-        help="Output directory (defaults to same directory as input with _pseudonymized suffix)",
+        help=_(
+            "Output directory (defaults to same directory as input "
+            "with _pseudonymized suffix)"
+        ),
     ),
     theme: Optional[str] = typer.Option(
         None,
         "--theme",
         "-t",
-        help="Pseudonym library theme (neutral/star_wars/lotr). Default from config.",
+        help=_(
+            "Pseudonym library theme (neutral/star_wars/lotr). Default from config."
+        ),
     ),
     model: Optional[str] = typer.Option(
         None,
         "--model",
         "-m",
-        help="NLP model name (spacy). Default from config.",
+        help=_("NLP model name (spacy). Default from config."),
     ),
     db_path: Optional[str] = typer.Option(
         None,
         "--db",
-        help="Database file path. Default from config.",
+        help=_("Database file path. Default from config."),
     ),
     passphrase: Optional[str] = typer.Option(
         None,
         "--passphrase",
         "-p",
-        help="Database passphrase (or use GDPR_PSEUDO_PASSPHRASE env var)",
+        help=_("Database passphrase (or use GDPR_PSEUDO_PASSPHRASE env var)"),
     ),
     recursive: bool = typer.Option(
         False,
         "--recursive",
         "-r",
-        help="Process subdirectories recursively",
+        help=_("Process subdirectories recursively"),
     ),
     continue_on_error: bool = typer.Option(
         True,
         "--continue-on-error/--no-continue-on-error",
-        help="Continue processing on individual file errors (default: continue)",
+        help=_("Continue processing on individual file errors (default: continue)"),
     ),
     workers: Optional[int] = typer.Option(
         None,
@@ -290,12 +317,18 @@ def _batch(
         "-w",
         min=1,
         max=8,
-        help="Number of parallel workers (1=sequential with validation, 2-8=parallel without validation). Default from config.",
+        help=_(
+            "Number of parallel workers (1=sequential with validation, "
+            "2-8=parallel without validation). Default from config."
+        ),
     ),
     entity_types: Optional[str] = typer.Option(
         None,
         "--entity-types",
-        help="Filter entity types to process (comma-separated). Options: PERSON, LOCATION, ORG. Default: all types.",
+        help=_(
+            "Filter entity types to process (comma-separated). "
+            "Options: PERSON, LOCATION, ORG. Default: all types."
+        ),
     ),
 ) -> None:
     """Process multiple documents in a directory."""
@@ -315,42 +348,42 @@ def _batch(
     )
 
 
-@app.command(name="list-mappings", help="View entity-to-pseudonym mappings")
+@app.command(name="list-mappings", help=_("View entity-to-pseudonym mappings"))
 def _list_mappings(
     db_path: str = typer.Option(
         "mappings.db",
         "--db",
-        help="Database file path",
+        help=_("Database file path"),
     ),
     passphrase: Optional[str] = typer.Option(
         None,
         "--passphrase",
         "-p",
-        help="Database passphrase (or use GDPR_PSEUDO_PASSPHRASE env var)",
+        help=_("Database passphrase (or use GDPR_PSEUDO_PASSPHRASE env var)"),
     ),
     entity_type: Optional[str] = typer.Option(
         None,
         "--type",
         "-t",
-        help="Filter by entity type (PERSON/LOCATION/ORG)",
+        help=_("Filter by entity type (PERSON/LOCATION/ORG)"),
     ),
     search: Optional[str] = typer.Option(
         None,
         "--search",
         "-s",
-        help="Search by entity name (case-insensitive substring match)",
+        help=_("Search by entity name (case-insensitive substring match)"),
     ),
     export_path: Optional[Path] = typer.Option(
         None,
         "--export",
         "-e",
-        help="Export mappings to CSV file",
+        help=_("Export mappings to CSV file"),
     ),
     limit: Optional[int] = typer.Option(
         None,
         "--limit",
         "-l",
-        help="Limit number of results",
+        help=_("Limit number of results"),
     ),
 ) -> None:
     """View entity-to-pseudonym mappings."""
@@ -367,31 +400,32 @@ def _list_mappings(
 
 
 @app.command(
-    name="validate-mappings", help="Review existing mappings without processing"
+    name="validate-mappings",
+    help=_("Review existing mappings without processing"),
 )
 def _validate_mappings(
     db_path: str = typer.Option(
         "mappings.db",
         "--db",
-        help="Database file path",
+        help=_("Database file path"),
     ),
     passphrase: Optional[str] = typer.Option(
         None,
         "--passphrase",
         "-p",
-        help="Database passphrase (or use GDPR_PSEUDO_PASSPHRASE env var)",
+        help=_("Database passphrase (or use GDPR_PSEUDO_PASSPHRASE env var)"),
     ),
     interactive: bool = typer.Option(
         False,
         "--interactive",
         "-i",
-        help="Interactive mode to review each mapping",
+        help=_("Interactive mode to review each mapping"),
     ),
     entity_type: Optional[str] = typer.Option(
         None,
         "--type",
         "-t",
-        help="Filter by entity type (PERSON/LOCATION/ORG)",
+        help=_("Filter by entity type (PERSON/LOCATION/ORG)"),
     ),
 ) -> None:
     """Review existing mappings without processing."""
@@ -407,18 +441,18 @@ def _validate_mappings(
     )
 
 
-@app.command(name="stats", help="Show database statistics and usage information")
+@app.command(name="stats", help=_("Show database statistics and usage information"))
 def _stats(
     db_path: str = typer.Option(
         "mappings.db",
         "--db",
-        help="Database file path",
+        help=_("Database file path"),
     ),
     passphrase: Optional[str] = typer.Option(
         None,
         "--passphrase",
         "-p",
-        help="Database passphrase (or use GDPR_PSEUDO_PASSPHRASE env var)",
+        help=_("Database passphrase (or use GDPR_PSEUDO_PASSPHRASE env var)"),
     ),
 ) -> None:
     """Show database statistics and usage information."""
@@ -427,7 +461,10 @@ def _stats(
     stats_command(db_path=db_path, passphrase=passphrase)
 
 
-@app.command(name="import-mappings", help="Import mappings from another database")
+@app.command(
+    name="import-mappings",
+    help=_("Import mappings from another database"),
+)
 def _import_mappings(
     source_db: Path = typer.Argument(
         ...,
@@ -435,28 +472,28 @@ def _import_mappings(
         file_okay=True,
         dir_okay=False,
         readable=True,
-        help="Source database file to import from",
+        help=_("Source database file to import from"),
     ),
     db_path: str = typer.Option(
         "mappings.db",
         "--db",
-        help="Target database file path",
+        help=_("Target database file path"),
     ),
     passphrase: Optional[str] = typer.Option(
         None,
         "--passphrase",
         "-p",
-        help="Target database passphrase (or use GDPR_PSEUDO_PASSPHRASE env var)",
+        help=_("Target database passphrase (or use GDPR_PSEUDO_PASSPHRASE env var)"),
     ),
     source_passphrase: Optional[str] = typer.Option(
         None,
         "--source-passphrase",
-        help="Source database passphrase (prompts if not provided)",
+        help=_("Source database passphrase (prompts if not provided)"),
     ),
     skip_duplicates: bool = typer.Option(
         True,
         "--skip-duplicates/--no-skip-duplicates",
-        help="Skip duplicate entities (default) or prompt for each",
+        help=_("Skip duplicate entities (default) or prompt for each"),
     ),
 ) -> None:
     """Import mappings from another database."""
@@ -471,54 +508,54 @@ def _import_mappings(
     )
 
 
-@app.command(name="export", help="Export audit log to JSON or CSV")
+@app.command(name="export", help=_("Export audit log to JSON or CSV"))
 def _export(
     output_path: Path = typer.Argument(
         ...,
-        help="Output file path (.json or .csv)",
+        help=_("Output file path (.json or .csv)"),
     ),
     db_path: str = typer.Option(
         "mappings.db",
         "--db",
-        help="Database file path",
+        help=_("Database file path"),
     ),
     passphrase: Optional[str] = typer.Option(
         None,
         "--passphrase",
         "-p",
-        help="Database passphrase (or use GDPR_PSEUDO_PASSPHRASE env var)",
+        help=_("Database passphrase (or use GDPR_PSEUDO_PASSPHRASE env var)"),
     ),
     operation_type: Optional[str] = typer.Option(
         None,
         "--type",
         "-t",
-        help="Filter by operation type (PROCESS/BATCH/VALIDATE/etc.)",
+        help=_("Filter by operation type (PROCESS/BATCH/VALIDATE/etc.)"),
     ),
     from_date: Optional[str] = typer.Option(
         None,
         "--from",
-        help="Filter operations after this date (ISO 8601: YYYY-MM-DD)",
+        help=_("Filter operations after this date (ISO 8601: YYYY-MM-DD)"),
     ),
     to_date: Optional[str] = typer.Option(
         None,
         "--to",
-        help="Filter operations before this date (ISO 8601: YYYY-MM-DD)",
+        help=_("Filter operations before this date (ISO 8601: YYYY-MM-DD)"),
     ),
     success_only: bool = typer.Option(
         False,
         "--success-only",
-        help="Show only successful operations",
+        help=_("Show only successful operations"),
     ),
     failures_only: bool = typer.Option(
         False,
         "--failures-only",
-        help="Show only failed operations",
+        help=_("Show only failed operations"),
     ),
     limit: Optional[int] = typer.Option(
         None,
         "--limit",
         "-l",
-        help="Limit number of results",
+        help=_("Limit number of results"),
     ),
 ) -> None:
     """Export audit log to JSON or CSV."""
@@ -545,23 +582,31 @@ def _export(
 
 @app.command(
     name="delete-mapping",
-    help="Delete entity mapping (GDPR Article 17 erasure)",
+    help=_("Delete entity mapping (GDPR Article 17 erasure)"),
 )
 def _delete_mapping(
-    entity_name: Optional[str] = typer.Argument(None, help="Entity name to delete"),
-    db_path: str = typer.Option("mappings.db", "--db", help="Database file path"),
+    entity_name: Optional[str] = typer.Argument(None, help=_("Entity name to delete")),
+    db_path: str = typer.Option("mappings.db", "--db", help=_("Database file path")),
     passphrase: Optional[str] = typer.Option(
         None,
         "--passphrase",
         "-p",
-        help="Database passphrase (or use GDPR_PSEUDO_PASSPHRASE env var)",
+        help=_("Database passphrase (or use GDPR_PSEUDO_PASSPHRASE env var)"),
     ),
-    entity_id: Optional[str] = typer.Option(None, "--id", help="Entity UUID to delete"),
+    entity_id: Optional[str] = typer.Option(
+        None, "--id", help=_("Entity UUID to delete")
+    ),
     reason: Optional[str] = typer.Option(
-        None, "--reason", "-r", help="Reason for deletion (GDPR request reference)"
+        None,
+        "--reason",
+        "-r",
+        help=_("Reason for deletion (GDPR request reference)"),
     ),
     force: bool = typer.Option(
-        False, "--force/--no-force", "-f", help="Skip confirmation prompt"
+        False,
+        "--force/--no-force",
+        "-f",
+        help=_("Skip confirmation prompt"),
     ),
 ) -> None:
     """Delete entity mapping (GDPR Article 17 erasure)."""
@@ -579,27 +624,30 @@ def _delete_mapping(
 
 @app.command(
     name="list-entities",
-    help="List entities with search (for erasure workflow)",
+    help=_("List entities with search (for erasure workflow)"),
 )
 def _list_entities(
-    db_path: str = typer.Option("mappings.db", "--db", help="Database file path"),
+    db_path: str = typer.Option("mappings.db", "--db", help=_("Database file path")),
     passphrase: Optional[str] = typer.Option(
         None,
         "--passphrase",
         "-p",
-        help="Database passphrase (or use GDPR_PSEUDO_PASSPHRASE env var)",
+        help=_("Database passphrase (or use GDPR_PSEUDO_PASSPHRASE env var)"),
     ),
     search: Optional[str] = typer.Option(
         None,
         "--search",
         "-s",
-        help="Search by entity name (case-insensitive substring match)",
+        help=_("Search by entity name (case-insensitive substring match)"),
     ),
     entity_type: Optional[str] = typer.Option(
-        None, "--type", "-t", help="Filter by type (PERSON/LOCATION/ORG)"
+        None,
+        "--type",
+        "-t",
+        help=_("Filter by type (PERSON/LOCATION/ORG)"),
     ),
     limit: Optional[int] = typer.Option(
-        None, "--limit", "-l", help="Limit number of results"
+        None, "--limit", "-l", help=_("Limit number of results")
     ),
 ) -> None:
     """List entities with search (for erasure workflow)."""
@@ -614,29 +662,32 @@ def _list_entities(
     )
 
 
-@app.command(name="destroy-table", help="Securely delete the mapping database")
+@app.command(
+    name="destroy-table",
+    help=_("Securely delete the mapping database"),
+)
 def _destroy_table(
     db_path: str = typer.Option(
         "mappings.db",
         "--db",
-        help="Database file path to destroy",
+        help=_("Database file path to destroy"),
     ),
     force: bool = typer.Option(
         False,
         "--force",
         "-f",
-        help="Skip confirmation prompt (use with caution)",
+        help=_("Skip confirmation prompt (use with caution)"),
     ),
     passphrase: Optional[str] = typer.Option(
         None,
         "--passphrase",
         "-p",
-        help="Passphrase to verify database ownership (recommended for safety)",
+        help=_("Passphrase to verify database ownership (recommended for safety)"),
     ),
     skip_passphrase_check: bool = typer.Option(
         False,
         "--skip-passphrase-check",
-        help="Skip passphrase verification (not recommended)",
+        help=_("Skip passphrase verification (not recommended)"),
     ),
 ) -> None:
     """Securely delete the mapping database."""
@@ -651,7 +702,9 @@ def _destroy_table(
 
 
 # Register config sub-app (lightweight — no heavy deps)
-app.add_typer(config_app, name="config", help="View or modify configuration settings")
+app.add_typer(
+    config_app, name="config", help=_("View or modify configuration settings")
+)
 
 
 def cli_main() -> None:

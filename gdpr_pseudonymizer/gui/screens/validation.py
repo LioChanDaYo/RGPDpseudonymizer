@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from PySide6.QtCore import Qt, QThreadPool
+from PySide6.QtCore import QEvent, Qt, QThreadPool
 from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QHBoxLayout,
@@ -22,6 +22,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from gdpr_pseudonymizer.gui.i18n import qarg
 from gdpr_pseudonymizer.gui.models.validation_state import GUIValidationState
 from gdpr_pseudonymizer.gui.widgets.entity_editor import EntityEditor
 from gdpr_pseudonymizer.gui.widgets.entity_panel import EntityPanel
@@ -85,7 +86,7 @@ class ValidationScreen(QWidget):
         action_layout = QHBoxLayout(action_bar)
         action_layout.setContentsMargins(16, 8, 16, 8)
 
-        self._back_btn = QPushButton("\u25c0 Retour")
+        self._back_btn = QPushButton()
         self._back_btn.setObjectName("secondaryButton")
         self._back_btn.clicked.connect(self._on_back)
         action_layout.addWidget(self._back_btn)
@@ -99,7 +100,7 @@ class ValidationScreen(QWidget):
 
         action_layout.addStretch()
 
-        self._finalize_btn = QPushButton("Finaliser \u25b6")
+        self._finalize_btn = QPushButton()
         self._finalize_btn.clicked.connect(self._on_finalize)
         action_layout.addWidget(self._finalize_btn)
 
@@ -107,6 +108,19 @@ class ValidationScreen(QWidget):
 
         # Wire signals
         self._connect_signals()
+
+        # Set translatable text
+        self.retranslateUi()
+
+    def retranslateUi(self) -> None:
+        """Re-set all translatable static UI text."""
+        self._back_btn.setText(self.tr("\u25c0 Retour"))
+        self._finalize_btn.setText(self.tr("Finaliser \u25b6"))
+
+    def changeEvent(self, event: QEvent) -> None:
+        if event.type() == QEvent.Type.LanguageChange:
+            self.retranslateUi()
+        super().changeEvent(event)
 
     def _connect_signals(self) -> None:
         """Wire bidirectional sync between editor and panel."""
@@ -261,26 +275,26 @@ class ValidationScreen(QWidget):
         if action == "accept":
             self._validation_state.bulk_accept(entity_ids)
             Toast.show_message(
-                f"{len(entity_ids)} entités acceptées",
+                qarg(self.tr("%1 entités acceptées"), str(len(entity_ids))),
                 self._main_window,
             )
         elif action == "reject":
             self._validation_state.bulk_reject(entity_ids)
             Toast.show_message(
-                f"{len(entity_ids)} entités rejetées",
+                qarg(self.tr("%1 entités rejetées"), str(len(entity_ids))),
                 self._main_window,
             )
         elif action.startswith("accept_type:"):
             entity_type = action.split(":", 1)[1]
             self._validation_state.accept_all_of_type(entity_type)
             Toast.show_message(
-                f"Toutes les entités {entity_type} acceptées",
+                qarg(self.tr("Toutes les entités %1 acceptées"), entity_type),
                 self._main_window,
             )
         elif action == "accept_known":
             self._validation_state.accept_all_known()
             Toast.show_message(
-                "Entités déjà connues acceptées",
+                self.tr("Entités déjà connues acceptées"),
                 self._main_window,
             )
 
@@ -319,10 +333,19 @@ class ValidationScreen(QWidget):
             + summary["added"]
         )
         self._status_label.setText(
-            f"{reviewed}/{total} entités traitées | "
-            f"{summary['accepted']} acceptées, "
-            f"{summary['rejected']} rejetées, "
-            f"{summary['modified']} modifiées"
+            qarg(
+                self.tr(
+                    "%1/%2 entités traitées | "
+                    "%3 acceptées, "
+                    "%4 rejetées, "
+                    "%5 modifiées"
+                ),
+                str(reviewed),
+                str(total),
+                str(summary["accepted"]),
+                str(summary["rejected"]),
+                str(summary["modified"]),
+            )
         )
 
     # ------------------------------------------------------------------
@@ -339,8 +362,8 @@ class ValidationScreen(QWidget):
 
         text, ok = QInputDialog.getText(
             self,
-            "Modifier le texte de l'entité",
-            "Nouveau texte :",
+            self.tr("Modifier le texte de l'entité"),
+            self.tr("Nouveau texte :"),
             text=review.entity.text,
         )
         if ok and text and text != review.entity.text:
@@ -367,8 +390,8 @@ class ValidationScreen(QWidget):
         current = self._validation_state.get_pseudonym(entity_id)
         text, ok = QInputDialog.getText(
             self,
-            "Changer le pseudonyme",
-            "Nouveau pseudonyme :",
+            self.tr("Changer le pseudonyme"),
+            self.tr("Nouveau pseudonyme :"),
             text=current,
         )
         if ok and text:
@@ -383,14 +406,14 @@ class ValidationScreen(QWidget):
             self._validation_state.undo_stack.undo()
             from gdpr_pseudonymizer.gui.widgets.toast import Toast
 
-            Toast.show_message("Annulé", self._main_window, duration_ms=1500)
+            Toast.show_message(self.tr("Annulé"), self._main_window, duration_ms=1500)
 
     def _on_redo(self) -> None:
         if self._validation_state:
             self._validation_state.undo_stack.redo()
             from gdpr_pseudonymizer.gui.widgets.toast import Toast
 
-            Toast.show_message("Rétabli", self._main_window, duration_ms=1500)
+            Toast.show_message(self.tr("Rétabli"), self._main_window, duration_ms=1500)
 
     # ------------------------------------------------------------------
     # Find
@@ -410,9 +433,9 @@ class ValidationScreen(QWidget):
         from gdpr_pseudonymizer.gui.widgets.confirm_dialog import ConfirmDialog
 
         dlg = ConfirmDialog.proceeding(
-            "Retour à l'analyse",
-            "Vos modifications de validation seront perdues. Continuer ?",
-            "Continuer",
+            self.tr("Retour à l'analyse"),
+            self.tr("Vos modifications de validation seront perdues. Continuer ?"),
+            self.tr("Continuer"),
             parent=self._main_window,
         )
         if dlg.exec():
@@ -427,18 +450,24 @@ class ValidationScreen(QWidget):
         from gdpr_pseudonymizer.gui.widgets.confirm_dialog import ConfirmDialog
 
         summary = self._validation_state.get_summary()
-        msg = (
-            f"Vous avez accepté {summary['accepted']} entités, "
-            f"rejeté {summary['rejected']}, "
-            f"ajouté {summary['added']} manuellement "
-            f"et modifié {summary['modified']} pseudonymes.\n\n"
-            "Continuer avec la pseudonymisation ?"
+        msg = qarg(
+            self.tr(
+                "Vous avez accepté %1 entités, "
+                "rejeté %2, "
+                "ajouté %3 manuellement "
+                "et modifié %4 pseudonymes.\n\n"
+                "Continuer avec la pseudonymisation ?"
+            ),
+            str(summary["accepted"]),
+            str(summary["rejected"]),
+            str(summary["added"]),
+            str(summary["modified"]),
         )
 
         dlg = ConfirmDialog.proceeding(
-            "Résumé de validation",
+            self.tr("Résumé de validation"),
             msg,
-            "Confirmer",
+            self.tr("Confirmer"),
             parent=self._main_window,
         )
         if not dlg.exec():
@@ -463,7 +492,7 @@ class ValidationScreen(QWidget):
         self._finalize_progress.setVisible(True)
         self._finalize_progress.setValue(0)
         self._finalize_label.setVisible(True)
-        self._finalize_label.setText("Pseudonymisation en cours...")
+        self._finalize_label.setText(self.tr("Pseudonymisation en cours..."))
 
         worker = FinalizationWorker(
             validated_entities=validated,
@@ -526,7 +555,7 @@ class ValidationScreen(QWidget):
         from gdpr_pseudonymizer.gui.widgets.confirm_dialog import ConfirmDialog
 
         ConfirmDialog.informational(
-            "Erreur de pseudonymisation",
+            self.tr("Erreur de pseudonymisation"),
             error_msg,
             parent=self._main_window,
         ).exec()
@@ -543,16 +572,16 @@ class ValidationScreen(QWidget):
 
         from gdpr_pseudonymizer.gui.widgets.confirm_dialog import ConfirmDialog
 
-        msg = (
+        msg = self.tr(
             "• Les entités sont surlignées en couleur dans votre document\n"
             "• Vérifiez chaque entité dans le panneau à droite : "
             "accepter, rejeter ou modifier\n"
             "• Cliquez 'Finaliser' quand vous avez terminé la vérification"
         )
         dlg = ConfirmDialog.informational(
-            "Bienvenue dans la validation",
+            self.tr("Bienvenue dans la validation"),
             msg,
-            dismiss_label="Compris",
+            dismiss_label=self.tr("Compris"),
             parent=self._main_window,
         )
         dlg.exec()
