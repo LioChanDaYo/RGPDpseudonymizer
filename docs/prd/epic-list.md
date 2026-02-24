@@ -40,7 +40,7 @@
 
 **Goal:** Expand beyond CLI-only users to the primary growth market — non-technical professionals who need GDPR-compliant pseudonymization but lack command-line comfort — by delivering a cross-platform desktop GUI, standalone executables, French-first internationalization, and WCAG AA accessibility.
 
-**Progress:** Stories 6.1 (UX Architecture), 6.2 (GUI Application Foundation), and 6.3 (Document Processing Workflow) complete. PySide6 desktop app with full single-document pseudonymization pipeline, theming, drag-and-drop, settings, 122 GUI tests.
+**Progress:** Stories 6.1-6.6 complete. PySide6 desktop app with full single-document pseudonymization pipeline, visual entity validation, batch processing, database management, internationalization (FR/EN with live switching), theming, drag-and-drop, settings, 301 GUI tests.
 
 ---
 

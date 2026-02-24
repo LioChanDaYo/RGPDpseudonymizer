@@ -52,8 +52,9 @@ coverage.xml
 cover/
 
 # Translations
-*.mo
 *.pot
+# Note: *.mo (gettext) and *.qm (Qt) are tracked — they are compiled
+# translations needed at runtime by CLI and GUI respectively.
 
 # Django stuff:
 *.log

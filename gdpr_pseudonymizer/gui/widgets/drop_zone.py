@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import QEvent, Qt, Signal
 from PySide6.QtGui import QDragEnterEvent, QDragLeaveEvent, QDropEvent, QMouseEvent
 from PySide6.QtWidgets import (
     QFileDialog,
@@ -38,6 +38,7 @@ class DropZone(QFrame):
         self.setCursor(Qt.CursorShape.PointingHandCursor)
 
         self._build_ui()
+        self.retranslateUi()
 
     def _build_ui(self) -> None:
         layout = QVBoxLayout(self)
@@ -51,7 +52,7 @@ class DropZone(QFrame):
         layout.addWidget(self._icon_label)
 
         # Main text
-        self._text_label = QLabel("Glissez un fichier ici\nou cliquez pour ouvrir")
+        self._text_label = QLabel()
         self._text_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._text_label.setStyleSheet("font-size: 15px; font-weight: bold;")
         layout.addWidget(self._text_label)
@@ -69,6 +70,21 @@ class DropZone(QFrame):
             badge.setAlignment(Qt.AlignmentFlag.AlignCenter)
             badge_layout.addWidget(badge)
         layout.addLayout(badge_layout)
+
+    # ------------------------------------------------------------------
+    # i18n
+    # ------------------------------------------------------------------
+
+    def retranslateUi(self) -> None:
+        """Re-set all translatable UI text."""
+        self._text_label.setText(
+            self.tr("Glissez un fichier ici\nou cliquez pour ouvrir")
+        )
+
+    def changeEvent(self, event: QEvent) -> None:
+        if event.type() == QEvent.Type.LanguageChange:
+            self.retranslateUi()
+        super().changeEvent(event)
 
     # ------------------------------------------------------------------
     # Drag & drop
@@ -136,9 +152,9 @@ class DropZone(QFrame):
     def _open_file_dialog(self) -> None:
         filepath, _ = QFileDialog.getOpenFileName(
             self,
-            "Ouvrir un document",
+            self.tr("Ouvrir un document"),
             "",
-            "Documents (*.txt *.md *.pdf *.docx);;Tous (*)",
+            self.tr("Documents (*.txt *.md *.pdf *.docx);;Tous (*)"),
         )
         if filepath:
             self.file_selected.emit(filepath)

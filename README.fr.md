@@ -107,7 +107,7 @@ GDPR Pseudonymizer est un **outil conçu pour la confidentialité**. Il associe 
 **v2.0 (T3-T4 2026) :** Interface graphique
 - Application de bureau encapsulant le noyau CLI (glisser-déposer, revue visuelle des entités)
 - Exécutables autonomes (.exe pour Windows, .app pour macOS) — Python non requis
-- Interface francophone avec architecture d'internationalisation (prête pour le multilingue)
+- ✅ Interface francophone avec architecture d'internationalisation (prête pour le multilingue) — **implémentée dans la Story 6.6**
 - Accessibilité WCAG AA pour les contextes professionnels et universitaires
 - Public visé : utilisateurs non techniques (équipes RH, juridiques, conformité)
 
@@ -213,13 +213,13 @@ logging:
 **Pour les utilisateurs :**
 - 📘 [Guide d'installation](docs/installation.fr.md) — Instructions d'installation selon votre plateforme
 - 📗 [Tutoriel](docs/tutorial.fr.md) — Guides pas à pas
-- 📕 [Référence CLI](docs/CLI-REFERENCE.md) — Documentation complète des commandes
-- 📕 [Méthodologie et citation académique](docs/methodology.md) — Approche technique et conformité RGPD
+- 📕 [Référence CLI](docs/CLI-REFERENCE.fr.md) — Documentation complète des commandes
+- 📕 [Méthodologie et citation académique](docs/methodology.fr.md) — Approche technique et conformité RGPD
 - ❓ [FAQ](docs/faq.fr.md) — Questions fréquentes
 - 🔧 [Dépannage](docs/troubleshooting.fr.md) — Erreurs courantes et solutions
 
 **Pour les développeurs :**
-- 📚 [Référence API](docs/api-reference.md) — Documentation des modules et points d'extension
+- 📚 [Référence API](docs/api-reference.fr.md) — Documentation des modules et points d'extension
 - 🏗️ [Architecture](docs/architecture/) — Conception technique
 - 📊 [Rapport de benchmark NLP](docs/nlp-benchmark-report.md) — Analyse de la précision NER
 - 📊 [Rapport de performance](docs/qa/performance-stability-report.md) — Résultats de validation des exigences non fonctionnelles
@@ -227,6 +227,35 @@ logging:
 **Pour les parties prenantes :**
 - 🎨 [Positionnement et messages clés](docs/positioning-messaging-v2-assisted.md)
 - 📋 [Synthèse des livrables](docs/DELIVERABLES-SUMMARY-2026-01-16.md)
+
+---
+
+## 🌐 Langues de l'interface
+
+L'interface graphique et la CLI sont disponibles en **français** (par défaut) et en **anglais**, avec changement de langue en temps réel.
+
+### Changement de langue dans l'interface graphique
+
+Sélectionnez votre langue dans **Paramètres > Apparence > Langue**. Le changement prend effet immédiatement — aucun redémarrage nécessaire.
+
+### Langue de la CLI
+
+```bash
+# Aide en français (par défaut sur les systèmes francophones)
+gdpr-pseudo --lang fr --help
+
+# Aide en anglais (par défaut sur les systèmes non francophones)
+gdpr-pseudo --lang en --help
+
+# Via variable d'environnement
+GDPR_PSEUDO_LANG=fr gdpr-pseudo --help
+```
+
+**Ordre de priorité pour la détection de la langue :**
+1. Option `--lang` (explicite)
+2. Variable d'environnement `GDPR_PSEUDO_LANG`
+3. Détection automatique de la locale système
+4. Anglais (défaut CLI) / Français (défaut GUI)
 
 ---
 
@@ -401,7 +430,8 @@ L'interface de validation offre un parcours intuitif piloté au clavier pour pas
   - ✅ Story 6.3 : Workflow de traitement de documents (dialogue de phrase secrète, worker de traitement, écran de résultats, 45 nouveaux tests GUI)
   - ✅ Story 6.4 : Interface visuelle de validation des entités (éditeur d'entités, panneau latéral, état de validation avec annuler/rétablir, 72 nouveaux tests GUI)
   - ✅ Story 6.5 : Traitement par lot et gestion de configuration (écran de traitement par lot, gestion de la base de données, améliorations des paramètres, 40 nouveaux tests)
-- **Total :** 45 stories, 1 365+ tests, 86 %+ de couverture, tous les contrôles qualité au vert
+  - ✅ Story 6.6 : Internationalisation et interface française (i18n double voie : Qt Linguist + gettext, 267 chaînes GUI, ~50 chaînes CLI, changement de langue en temps réel, 53 nouveaux tests)
+- **Total :** 46 stories, 1 418+ tests, 86 %+ de couverture, tous les contrôles qualité au vert
 
 ---
 
@@ -465,7 +495,7 @@ Ce projet est distribué sous la [licence MIT](LICENSE).
 **Limitations actuelles :**
 - Détection IA : environ 60 % F1 (pas 85 %+)
 - Validation requise pour TOUS les documents (pas facultative)
-- Français uniquement (anglais, espagnol, etc. dans les versions futures)
+- Documents en français uniquement (anglais, espagnol, etc. dans les versions futures)
 - Formats textuels : .txt, .md, .pdf, .docx (PDF/DOCX nécessitent des extras optionnels : `pip install gdpr-pseudonymizer[formats]`)
 
 ---
@@ -548,7 +578,7 @@ poetry run pytest tests/integration/test_validation_workflow_integration.py -v
 - **Tests de précision :** 22 tests mesurant la précision NER sur un corpus de référence de 25 documents (Story 4.4)
 - **Tests de performance :** 19 tests validant toutes les exigences non fonctionnelles — benchmarks par document (NFR1), benchmarks de détection d'entités, traitement par lot (NFR2), profilage mémoire (NFR4), temps de démarrage (NFR5), stabilité et taux d'erreur (NFR6), tests de charge (Story 4.5)
 - **Couverture actuelle :** 86 %+ sur l'ensemble des modules (100 % pour le module de progression, 91,41 % pour AuditRepository)
-- **Total :** 1 267+ tests
+- **Total :** 1 418+ tests
 - **CI/CD :** Tests exécutés sur Python 3.10-3.12, sous Windows, macOS et Linux
 - **Contrôles qualité :** Tous validés (Black, Ruff, mypy, pytest)
 
@@ -582,8 +612,8 @@ La suite de tests d'intégration couvre :
 
 | Métrique | Valeur | Statut |
 |----------|--------|--------|
-| **Avancement** | v2.0-dev | 🚧 Epic 6 en cours (Stories 6.1-6.5 terminées) |
-| **Stories terminées** | 45 (Epic 1-5 + 6.1-6.5) | ✅ Epics 1-5, 🚧 Epic 6 |
+| **Avancement** | v2.0-dev | 🚧 Epic 6 en cours (Stories 6.1-6.6 terminées) |
+| **Stories terminées** | 46 (Epic 1-5 + 6.1-6.6) | ✅ Epics 1-5, 🚧 Epic 6 |
 | **Utilité LLM (NFR10)** | 4,27/5,0 (85,4 %) | ✅ VALIDÉ (seuil : 80 %) |
 | **Succès d'installation (NFR3)** | 87,5 % (7/8 plateformes) | ✅ VALIDÉ (seuil : 85 %) |
 | **Première pseudonymisation (NFR14)** | 100 % en moins de 30 min | ✅ VALIDÉ (seuil : 80 %) |
@@ -604,9 +634,10 @@ La suite de tests d'intégration couvre :
 | **Utilisation mémoire (NFR4)** | environ 1 Go de pic mesuré par Python | ✅ VALIDÉ (seuil < 8 Go) |
 | **Démarrage CLI (NFR5)** | 0,56 s (help), 6,0 s (démarrage à froid avec modèle) | ✅ VALIDÉ (< 5 s pour le démarrage CLI) |
 | **Taux d'erreur (NFR6)** | environ 0 % d'erreurs inattendues | ✅ VALIDÉ (seuil < 10 %) |
-| **Couverture de test** | 1 365+ tests (dont 248 GUI), 86 %+ de couverture | ✅ Tous les contrôles qualité validés |
+| **Couverture de test** | 1 418+ tests (dont 301 GUI), 86 %+ de couverture | ✅ Tous les contrôles qualité validés |
 | **Contrôles qualité** | Ruff, mypy, pytest | ✅ Tous validés (0 problème) |
-| **Langues** | Français | 🇫🇷 v1.0 uniquement |
+| **Langues GUI/CLI** | Français (défaut), Anglais | 🌐 Changement en temps réel (Story 6.6) |
+| **Langues de documents** | Français | 🇫🇷 v1.0 uniquement |
 | **Formats** | .txt, .md, .pdf, .docx | 📝 PDF/DOCX via extras optionnels |
 
 ---
@@ -621,4 +652,4 @@ La suite de tests d'intégration couvre :
 
 ---
 
-**Dernière mise à jour :** 2026-02-20 (v2.0-dev — Epic 6 Story 6.5 terminé : écran de traitement par lot, gestion de la base de correspondances, améliorations des paramètres, 248 tests GUI)
+**Dernière mise à jour :** 2026-02-23 (v2.0-dev — Epic 6 Story 6.6 terminée : internationalisation et interface française, i18n double voie avec changement de langue en temps réel, 301 tests GUI, 1 418+ tests au total)

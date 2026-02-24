@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import QEvent, Qt
 from PySide6.QtWidgets import QLabel, QPushButton, QVBoxLayout, QWidget
 
 
@@ -15,21 +15,33 @@ class StubScreen(QWidget):
         layout = QVBoxLayout(self)
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        title = QLabel(screen_name)
-        title.setStyleSheet("font-size: 24px; font-weight: bold;")
-        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(title)
+        self._title = QLabel(screen_name)
+        self._title.setStyleSheet("font-size: 24px; font-weight: bold;")
+        self._title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self._title)
 
-        message = QLabel("En cours de développement")
-        message.setObjectName("secondaryLabel")
-        message.setStyleSheet("font-size: 14px;")
-        message.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(message)
+        self._message = QLabel()
+        self._message.setObjectName("secondaryLabel")
+        self._message.setStyleSheet("font-size: 14px;")
+        self._message.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self._message)
 
-        back_btn = QPushButton("← Retour à l'accueil")
-        back_btn.setObjectName("secondaryButton")
-        back_btn.clicked.connect(self._go_home)
-        layout.addWidget(back_btn, alignment=Qt.AlignmentFlag.AlignCenter)
+        self._back_btn = QPushButton()
+        self._back_btn.setObjectName("secondaryButton")
+        self._back_btn.clicked.connect(self._go_home)
+        layout.addWidget(self._back_btn, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        self.retranslateUi()
+
+    def retranslateUi(self) -> None:
+        """Re-set all translatable UI text."""
+        self._message.setText(self.tr("En cours de développement"))
+        self._back_btn.setText(self.tr("\u2190 Retour à l'accueil"))
+
+    def changeEvent(self, event: QEvent) -> None:
+        if event.type() == QEvent.Type.LanguageChange:
+            self.retranslateUi()
+        super().changeEvent(event)
 
     def _go_home(self) -> None:
         """Navigate back to home screen."""

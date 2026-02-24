@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import QEvent, Qt, Signal
 from PySide6.QtGui import QColor, QFont
 from PySide6.QtWidgets import (
     QAbstractItemView,
@@ -23,6 +23,8 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+
+from gdpr_pseudonymizer.gui.i18n import qarg
 
 if TYPE_CHECKING:
     from gdpr_pseudonymizer.gui.models.validation_state import GUIValidationState
@@ -74,6 +76,7 @@ class EntityPanel(QWidget):
         self._filter_text = ""
 
         self._build_ui()
+        self.retranslateUi()
 
     def _build_ui(self) -> None:
         layout = QVBoxLayout(self)
@@ -85,26 +88,25 @@ class EntityPanel(QWidget):
         header_layout = QHBoxLayout(header)
         header_layout.setContentsMargins(8, 8, 8, 4)
 
-        self._title_label = QLabel("Entités (0)")
+        self._title_label = QLabel()
         self._title_label.setStyleSheet("font-size: 14px; font-weight: bold;")
         header_layout.addWidget(self._title_label)
 
         header_layout.addStretch()
 
-        self._pending_label = QLabel("Reste : 0")
+        self._pending_label = QLabel()
         self._pending_label.setObjectName("pendingLabel")
         header_layout.addWidget(self._pending_label)
 
         layout.addWidget(header)
 
         # Hide rejected checkbox
-        self._hide_rejected_cb = QCheckBox("Masquer les rejetées")
+        self._hide_rejected_cb = QCheckBox()
         self._hide_rejected_cb.setContentsMargins(8, 0, 8, 0)
         layout.addWidget(self._hide_rejected_cb)
 
         # Find field
         self._find_field = QLineEdit()
-        self._find_field.setPlaceholderText("Filtrer les entités...")
         self._find_field.setClearButtonEnabled(True)
         self._find_field.textChanged.connect(self._on_filter_changed)
         self._find_field.setContentsMargins(8, 0, 8, 0)
@@ -125,26 +127,55 @@ class EntityPanel(QWidget):
         bulk_layout.setContentsMargins(8, 4, 8, 8)
         bulk_layout.setSpacing(4)
 
-        self._accept_sel_btn = QPushButton("Accepter la sélection (0)")
+        self._accept_sel_btn = QPushButton()
         self._accept_sel_btn.clicked.connect(self._on_bulk_accept)
         bulk_layout.addWidget(self._accept_sel_btn)
 
-        self._reject_sel_btn = QPushButton("Rejeter la sélection (0)")
+        self._reject_sel_btn = QPushButton()
         self._reject_sel_btn.setObjectName("secondaryButton")
         self._reject_sel_btn.clicked.connect(self._on_bulk_reject)
         bulk_layout.addWidget(self._reject_sel_btn)
 
-        self._accept_type_btn = QPushButton("Tout accepter: PERSONNES")
+        self._accept_type_btn = QPushButton()
         self._accept_type_btn.clicked.connect(self._on_accept_all_type)
         self._accept_type_btn.setObjectName("secondaryButton")
         bulk_layout.addWidget(self._accept_type_btn)
 
-        self._accept_known_btn = QPushButton("Accepter les déjà connues")
+        self._accept_known_btn = QPushButton()
         self._accept_known_btn.clicked.connect(self._on_accept_known)
         self._accept_known_btn.setObjectName("secondaryButton")
         bulk_layout.addWidget(self._accept_known_btn)
 
         layout.addWidget(bulk_bar)
+
+    # ------------------------------------------------------------------
+    # i18n
+    # ------------------------------------------------------------------
+
+    def _type_display(self, entity_type: str) -> str:
+        """Return translated display name for an entity type."""
+        return {
+            "PERSON": self.tr("PERSONNES"),
+            "LOCATION": self.tr("LIEUX"),
+            "ORG": self.tr("ORGANISATIONS"),
+        }.get(entity_type, entity_type)
+
+    def retranslateUi(self) -> None:
+        """Re-set all translatable UI text."""
+        self._title_label.setText(self.tr("Entit\u00e9s (0)"))
+        self._pending_label.setText(self.tr("Reste : 0"))
+        self._hide_rejected_cb.setText(self.tr("Masquer les rejet\u00e9es"))
+        self._find_field.setPlaceholderText(self.tr("Filtrer les entit\u00e9s..."))
+        self._accept_known_btn.setText(self.tr("Accepter les d\u00e9j\u00e0 connues"))
+        self._accept_type_btn.setText(
+            qarg(self.tr("Tout accepter : %1"), self.tr("PERSONNES"))
+        )
+        self._update_bulk_button_counts()
+
+    def changeEvent(self, event: QEvent) -> None:
+        if event.type() == QEvent.Type.LanguageChange:
+            self.retranslateUi()
+        super().changeEvent(event)
 
     # ------------------------------------------------------------------
     # Public API
@@ -185,8 +216,10 @@ class EntityPanel(QWidget):
             total += len(reviews)
 
             # Section header
-            display = _TYPE_DISPLAY.get(entity_type, entity_type)
-            header_item = QListWidgetItem(f"── {display} ({len(reviews)}) ──")
+            display = self._type_display(entity_type)
+            header_item = QListWidgetItem(
+                f"\u2500\u2500 {display} ({len(reviews)}) \u2500\u2500"
+            )
             header_item.setFlags(Qt.ItemFlag.NoItemFlags)
             header_font = QFont()
             header_font.setBold(True)
@@ -202,7 +235,7 @@ class EntityPanel(QWidget):
                 self._row_entity_map[row_idx] = review.entity_id
                 self._entity_row_map[review.entity_id] = row_idx
 
-        self._title_label.setText(f"Entités ({total})")
+        self._title_label.setText(qarg(self.tr("Entit\u00e9s (%1)"), str(total)))
         self._update_pending_counter()
         self._update_bulk_button_counts()
 
@@ -228,10 +261,10 @@ class EntityPanel(QWidget):
             status_icon = _STATUS_ICONS.get(review.state.value, "?")
             pseudonym = self._validation_state.get_pseudonym(entity_id)
             is_known = self._validation_state.is_entity_known(entity_id)
-            known_badge = "  déjà connu" if is_known else ""
+            known_badge = "  " + self.tr("d\u00e9j\u00e0 connu") if is_known else ""
             text = (
                 f"{status_icon} {review.entity.text}{known_badge}\n"
-                f"      → {pseudonym}"
+                f"      \u2192 {pseudonym}"
             )
             item.setText(text)
         self._update_pending_counter()
@@ -288,10 +321,11 @@ class EntityPanel(QWidget):
             if self._validation_state
             else False
         )
-        known_badge = "  déjà connu" if is_known else ""
+        known_badge = "  " + self.tr("d\u00e9j\u00e0 connu") if is_known else ""
 
         text = (
-            f"{status_icon} {review.entity.text}{known_badge}\n" f"      → {pseudonym}"
+            f"{status_icon} {review.entity.text}{known_badge}\n"
+            f"      \u2192 {pseudonym}"
         )
 
         item = QListWidgetItem(text)
@@ -334,17 +368,21 @@ class EntityPanel(QWidget):
             return
         pending = self._validation_state.get_pending_count()
         if pending == 0:
-            self._pending_label.setText("Toutes vérifiées")
+            self._pending_label.setText(self.tr("Toutes v\u00e9rifi\u00e9es"))
             self._pending_label.setStyleSheet("color: #2E7D32; font-weight: bold;")
         else:
-            self._pending_label.setText(f"Reste : {pending}")
+            self._pending_label.setText(qarg(self.tr("Reste : %1"), str(pending)))
             self._pending_label.setStyleSheet("")
 
     def _update_bulk_button_counts(self) -> None:
         """Update bulk action button labels with current counts."""
         n = len(self._checked_ids)
-        self._accept_sel_btn.setText(f"Accepter la sélection ({n})")
-        self._reject_sel_btn.setText(f"Rejeter la sélection ({n})")
+        self._accept_sel_btn.setText(
+            qarg(self.tr("Accepter la s\u00e9lection (%1)"), str(n))
+        )
+        self._reject_sel_btn.setText(
+            qarg(self.tr("Rejeter la s\u00e9lection (%1)"), str(n))
+        )
         self._accept_sel_btn.setEnabled(n > 0)
         self._reject_sel_btn.setEnabled(n > 0)
 

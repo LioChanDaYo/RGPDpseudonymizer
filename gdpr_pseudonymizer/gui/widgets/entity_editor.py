@@ -20,6 +20,8 @@ from PySide6.QtGui import (
 )
 from PySide6.QtWidgets import QMenu, QTextEdit
 
+from gdpr_pseudonymizer.gui.i18n import qarg
+
 if TYPE_CHECKING:
     from gdpr_pseudonymizer.gui.models.validation_state import GUIValidationState
     from gdpr_pseudonymizer.validation.models import EntityReview
@@ -60,9 +62,11 @@ class EntityEditor(QTextEdit):
         self.setReadOnly(True)
         self.setMinimumWidth(400)
         self.setFont(QFont("Consolas", 11))
-        self.setAccessibleName("Éditeur de document")
+        self.setAccessibleName(self.tr("\u00c9diteur de document"))
         self.setAccessibleDescription(
-            "Affiche le document avec les entités surlignées en couleur"
+            self.tr(
+                "Affiche le document avec les entit\u00e9s surlign\u00e9es en couleur"
+            )
         )
 
         self._validation_state: GUIValidationState | None = None
@@ -205,8 +209,7 @@ class EntityEditor(QTextEdit):
             conf_str = f"{confidence:.0%}" if confidence is not None else "N/A"
             tooltip = (
                 f"{review.entity.entity_type}: {review.entity.text}\n"
-                f"→ {pseudonym}\n"
-                f"Confiance: {conf_str}"
+                f"\u2192 {pseudonym}\n" + qarg(self.tr("Confiance : %1"), conf_str)
             )
             fmt.setToolTip(tooltip)
 
@@ -306,34 +309,34 @@ class EntityEditor(QTextEdit):
         self, menu: QMenu, entity_id: str, review: EntityReview
     ) -> None:
         """Populate context menu for an existing entity."""
-        action_accept = menu.addAction("Accepter")
+        action_accept = menu.addAction(self.tr("Accepter"))
         action_accept.triggered.connect(
             lambda: self.entity_action_requested.emit(entity_id, "accept")
         )
 
-        action_reject = menu.addAction("Rejeter")
+        action_reject = menu.addAction(self.tr("Rejeter"))
         action_reject.triggered.connect(
             lambda: self.entity_action_requested.emit(entity_id, "reject")
         )
 
         menu.addSeparator()
 
-        action_modify = menu.addAction("Modifier le texte...")
+        action_modify = menu.addAction(self.tr("Modifier le texte..."))
         action_modify.triggered.connect(
             lambda: self.entity_action_requested.emit(entity_id, "modify_text")
         )
 
-        action_pseudo = menu.addAction("Changer le pseudonyme")
+        action_pseudo = menu.addAction(self.tr("Changer le pseudonyme"))
         action_pseudo.triggered.connect(
             lambda: self.entity_action_requested.emit(entity_id, "change_pseudonym")
         )
 
         # Change type submenu
-        type_menu = menu.addMenu("Changer le type")
+        type_menu = menu.addMenu(self.tr("Changer le type"))
         for type_label, type_val in [
-            ("Personne", "PERSON"),
-            ("Lieu", "LOCATION"),
-            ("Organisation", "ORG"),
+            (self.tr("Personne"), "PERSON"),
+            (self.tr("Lieu"), "LOCATION"),
+            (self.tr("Organisation"), "ORG"),
         ]:
             if type_val != review.entity.entity_type:
                 action = type_menu.addAction(type_label)
@@ -345,11 +348,11 @@ class EntityEditor(QTextEdit):
 
     def _build_add_entity_menu(self, menu: QMenu, sel_start: int, sel_end: int) -> None:
         """Populate 'Add as entity' submenu for selected text."""
-        add_menu = menu.addMenu("Ajouter comme entité")
+        add_menu = menu.addMenu(self.tr("Ajouter comme entit\u00e9"))
         for type_label, type_val in [
-            ("Personne", "PERSON"),
-            ("Lieu", "LOCATION"),
-            ("Organisation", "ORG"),
+            (self.tr("Personne"), "PERSON"),
+            (self.tr("Lieu"), "LOCATION"),
+            (self.tr("Organisation"), "ORG"),
         ]:
             action = add_menu.addAction(type_label)
             action.triggered.connect(

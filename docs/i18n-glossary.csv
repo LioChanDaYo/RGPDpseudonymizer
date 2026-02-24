@@ -1,0 +1,41 @@
+English,French,Context
+entity,entité,NLP detected named entity
+pseudonym,pseudonyme,Fake name replacing real entity
+mapping,correspondance,Link between entity and pseudonym
+passphrase,phrase secrète,Encryption key for database
+processing,traitement,Document analysis workflow
+validation,validation,Human review of detected entities
+detection,détection,NLP entity detection phase
+database,base de données,SQLite mapping storage
+save,enregistrer,Save file to disk
+pseudonymization,pseudonymisation,Process of replacing entities
+batch,traitement par lot,Multiple document processing
+entity type,type d'entité,"Category: PERSON/LOCATION/ORG"
+person,personne,Entity type for human names
+location,lieu,Entity type for places
+organization,organisation,Entity type for companies/groups
+confidence,confiance,NLP detection confidence score
+review,examen,Manual validation step
+accept,accepter,Approve a detected entity
+reject,rejeter,Dismiss a detected entity
+modify,modifier,Edit entity text
+finalize,finaliser,Complete validation phase
+document,document,Input text file
+output,sortie,Pseudonymized result file
+settings,paramètres,Application configuration
+appearance,apparence,UI visual settings
+theme,thème,Pseudonym naming theme
+language,langue,UI display language
+file,fichier,Input/output file
+search,rechercher,Search entities/mappings
+delete,supprimer,Remove entity/mapping (GDPR erasure)
+export,exporter,Export data to CSV/JSON
+import,importer,Import mappings from other database
+statistics,statistiques,Database usage summary
+about,à propos,Application information dialog
+help,aide,Help/documentation
+keyboard shortcuts,raccourcis clavier,Application keybindings
+loading,chargement,Splash screen/progress text
+error,erreur,Error message
+warning,avertissement,Warning message
+success,succès/réussi,Operation completed OK

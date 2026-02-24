@@ -59,14 +59,19 @@ def main() -> None:
     if not icon.isNull():
         app.setWindowIcon(icon)
 
+    # -- Load config & install translator before splash --
+    config = load_gui_config()
+
+    from gdpr_pseudonymizer.gui.i18n import detect_language, install_translator
+
+    language = detect_language(config)
+    install_translator(app, language)
+
     # -- Splash screen --
     splash_pixmap = _create_splash_pixmap()
     splash = QSplashScreen(splash_pixmap)
     splash.show()
     app.processEvents()
-
-    # -- Build main window while splash is shown --
-    config = load_gui_config()
 
     from gdpr_pseudonymizer.gui.main_window import MainWindow
 
@@ -97,8 +102,10 @@ def main() -> None:
 
 def _create_splash_pixmap() -> QPixmap:
     """Create a simple splash screen pixmap programmatically."""
-    from PySide6.QtCore import Qt
+    from PySide6.QtCore import QCoreApplication, Qt
     from PySide6.QtGui import QColor, QFont, QLinearGradient, QPainter, QPixmap
+
+    _tr = QCoreApplication.translate
 
     width, height = 400, 300
     pixmap = QPixmap(width, height)
@@ -129,7 +136,14 @@ def _create_splash_pixmap() -> QPixmap:
     loading_font = QFont("Segoe UI", 10)
     painter.setFont(loading_font)
     painter.setPen(QColor("#B3D4FC"))
-    painter.drawText(0, 250, width, 30, Qt.AlignmentFlag.AlignCenter, "Chargement...")
+    painter.drawText(
+        0,
+        250,
+        width,
+        30,
+        Qt.AlignmentFlag.AlignCenter,
+        _tr("App", "Chargement..."),
+    )
 
     painter.end()
     return pixmap

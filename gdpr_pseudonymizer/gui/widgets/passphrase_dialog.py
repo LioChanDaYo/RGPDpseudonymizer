@@ -10,7 +10,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import QEvent, Qt
 from PySide6.QtWidgets import (
     QCheckBox,
     QComboBox,
@@ -50,11 +50,11 @@ class PassphraseDialog(QDialog):
         self._config = config or {}
         self._result: tuple[str, str, bool] | None = None
 
-        self.setWindowTitle("Phrase secrète")
         self.setMinimumWidth(450)
         self.setModal(True)
 
         self._build_ui()
+        self.retranslateUi()
         self._populate_db_paths()
 
     def _build_ui(self) -> None:
@@ -63,8 +63,8 @@ class PassphraseDialog(QDialog):
         layout.setContentsMargins(24, 24, 24, 24)
 
         # DB path section
-        db_label = QLabel("Base de correspondances :")
-        layout.addWidget(db_label)
+        self._db_label = QLabel()
+        layout.addWidget(self._db_label)
 
         self._db_combo = QComboBox()
         self._db_combo.activated.connect(self._on_db_combo_changed)
@@ -76,39 +76,37 @@ class PassphraseDialog(QDialog):
         layout.addWidget(self._db_hint)
 
         # Passphrase section
-        pass_label = QLabel("Phrase secrète :")
-        layout.addWidget(pass_label)
+        self._pass_label = QLabel()
+        layout.addWidget(self._pass_label)
 
         pass_row = QHBoxLayout()
         self._passphrase_edit = QLineEdit()
         self._passphrase_edit.setEchoMode(QLineEdit.EchoMode.Password)
-        self._passphrase_edit.setPlaceholderText("Entrez votre phrase secrète")
         pass_row.addWidget(self._passphrase_edit)
 
-        self._visibility_btn = QPushButton("\U0001f441")  # 👁 eye
+        self._visibility_btn = QPushButton("\U0001f441")  # eye
         self._visibility_btn.setFixedWidth(36)
         self._visibility_btn.setObjectName("secondaryButton")
         self._visibility_btn.setCheckable(True)
         self._visibility_btn.toggled.connect(self._toggle_visibility)
-        self._visibility_btn.setToolTip("Afficher/masquer la phrase secrète")
         pass_row.addWidget(self._visibility_btn)
         layout.addLayout(pass_row)
 
         # Remember checkbox
-        self._remember_check = QCheckBox("Mémoriser pour cette session")
+        self._remember_check = QCheckBox()
         self._remember_check.setChecked(True)
         layout.addWidget(self._remember_check)
 
-        # Buttons — Cancel left, Confirm right (French convention)
+        # Buttons -- Cancel left, Confirm right (French convention)
         btn_layout = QHBoxLayout()
         btn_layout.addStretch()
 
-        self._cancel_btn = QPushButton("Annuler")
+        self._cancel_btn = QPushButton()
         self._cancel_btn.setObjectName("secondaryButton")
         self._cancel_btn.clicked.connect(self.reject)
         btn_layout.addWidget(self._cancel_btn)
 
-        self._confirm_btn = QPushButton("Continuer \u25b6")
+        self._confirm_btn = QPushButton()
         self._confirm_btn.clicked.connect(self._on_confirm)
         self._confirm_btn.setEnabled(False)
         btn_layout.addWidget(self._confirm_btn)
@@ -120,6 +118,30 @@ class PassphraseDialog(QDialog):
 
         # Enable confirm when passphrase is non-empty
         self._passphrase_edit.textChanged.connect(self._update_confirm_state)
+
+    # ------------------------------------------------------------------
+    # i18n
+    # ------------------------------------------------------------------
+
+    def retranslateUi(self) -> None:
+        """Re-set all translatable UI text."""
+        self.setWindowTitle(self.tr("Phrase secr\u00e8te"))
+        self._db_label.setText(self.tr("Base de correspondances :"))
+        self._pass_label.setText(self.tr("Phrase secr\u00e8te :"))
+        self._passphrase_edit.setPlaceholderText(
+            self.tr("Entrez votre phrase secr\u00e8te")
+        )
+        self._visibility_btn.setToolTip(
+            self.tr("Afficher/masquer la phrase secr\u00e8te")
+        )
+        self._remember_check.setText(self.tr("M\u00e9moriser pour cette session"))
+        self._cancel_btn.setText(self.tr("Annuler"))
+        self._confirm_btn.setText(self.tr("Continuer \u25b6"))
+
+    def changeEvent(self, event: QEvent) -> None:
+        if event.type() == QEvent.Type.LanguageChange:
+            self.retranslateUi()
+        super().changeEvent(event)
 
     def _populate_db_paths(self) -> None:
         """Detect and populate DB paths in the combo box."""
@@ -152,14 +174,16 @@ class PassphraseDialog(QDialog):
             self._db_combo.addItem(db_path, db_path)
 
         # Special items
-        self._db_combo.addItem("Parcourir...", _BROWSE_ITEM)
-        self._db_combo.addItem("Créer une nouvelle base", _CREATE_ITEM)
+        self._db_combo.addItem(self.tr("Parcourir..."), _BROWSE_ITEM)
+        self._db_combo.addItem(self.tr("Créer une nouvelle base"), _CREATE_ITEM)
 
         # Update hint
         if detected:
-            self._db_hint.setText("Base existante détectée")
+            self._db_hint.setText(self.tr("Base existante détectée"))
         else:
-            self._db_hint.setText("Aucune base détectée — créez-en une nouvelle")
+            self._db_hint.setText(
+                self.tr("Aucune base détectée \u2014 créez-en une nouvelle")
+            )
             # Default to "Create new" if no existing DB found
             create_idx = self._db_combo.findData(_CREATE_ITEM)
             if create_idx >= 0:
@@ -173,9 +197,9 @@ class PassphraseDialog(QDialog):
         if data == _BROWSE_ITEM:
             filepath, _ = QFileDialog.getOpenFileName(
                 self,
-                "Sélectionner une base de correspondances",
+                self.tr("Sélectionner une base de correspondances"),
                 "",
-                "SQLite (*.db);;Tous (*)",
+                self.tr("SQLite (*.db);;Tous (*)"),
             )
             if filepath:
                 # Insert before special items and select it
@@ -184,7 +208,7 @@ class PassphraseDialog(QDialog):
                 self._db_combo.insertItem(insert_idx, filepath, filepath)
                 self._db_combo.setCurrentIndex(insert_idx)
                 self._db_combo.blockSignals(False)
-                self._db_hint.setText("Base sélectionnée")
+                self._db_hint.setText(self.tr("Base sélectionnée"))
             else:
                 # Revert to first item
                 self._db_combo.blockSignals(True)
@@ -193,9 +217,9 @@ class PassphraseDialog(QDialog):
         elif data == _CREATE_ITEM:
             filepath, _ = QFileDialog.getSaveFileName(
                 self,
-                "Créer une nouvelle base de correspondances",
+                self.tr("Créer une nouvelle base de correspondances"),
                 str(Path(self._file_directory or Path.home()) / DB_FILENAME),
-                "SQLite (*.db);;Tous (*)",
+                self.tr("SQLite (*.db);;Tous (*)"),
             )
             if filepath:
                 insert_idx = max(0, self._db_combo.count() - 2)
@@ -203,7 +227,7 @@ class PassphraseDialog(QDialog):
                 self._db_combo.insertItem(insert_idx, filepath, filepath)
                 self._db_combo.setCurrentIndex(insert_idx)
                 self._db_combo.blockSignals(False)
-                self._db_hint.setText("Nouvelle base sera créée")
+                self._db_hint.setText(self.tr("Nouvelle base sera créée"))
             else:
                 self._db_combo.blockSignals(True)
                 self._db_combo.setCurrentIndex(0)

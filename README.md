@@ -107,7 +107,7 @@ GDPR Pseudonymizer is a **privacy-first tool** that combines AI efficiency with 
 **v2.0 (Q3-Q4 2026):** GUI & broader accessibility
 - Desktop GUI wrapping CLI core (drag-and-drop, visual entity review)
 - Standalone executables (.exe for Windows, .app for macOS) — no Python required
-- French-first UI with i18n architecture (multi-language ready)
+- ✅ French-first UI with i18n architecture (multi-language ready) — **implemented in Story 6.6**
 - WCAG AA accessibility for professional/academic contexts
 - Target: Non-technical users (HR, legal, compliance teams)
 
@@ -227,6 +227,35 @@ logging:
 **For Stakeholders:**
 - 🎨 [Positioning & Messaging](docs/positioning-messaging-v2-assisted.md)
 - 📋 [Deliverables Summary](docs/DELIVERABLES-SUMMARY-2026-01-16.md)
+
+---
+
+## 🌐 Language Support
+
+The GUI and CLI are available in **French** (default) and **English**, with live language switching.
+
+### GUI Language Switching
+
+Select your language in **Settings > Appearance > Language**. The change takes effect immediately — no restart required.
+
+### CLI Language
+
+```bash
+# French help (default on French systems)
+gdpr-pseudo --lang fr --help
+
+# English help (default on non-French systems)
+gdpr-pseudo --lang en --help
+
+# Via environment variable
+GDPR_PSEUDO_LANG=fr gdpr-pseudo --help
+```
+
+**Language detection priority:**
+1. `--lang` flag (explicit)
+2. `GDPR_PSEUDO_LANG` environment variable
+3. System locale auto-detection
+4. English (CLI default) / French (GUI default)
 
 ---
 
@@ -401,7 +430,8 @@ The validation UI provides an intuitive keyboard-driven interface for reviewing 
   - ✅ Story 6.3: Document Processing Workflow (passphrase dialog, processing worker, results screen, 45 new GUI tests)
   - ✅ Story 6.4: Visual Entity Validation Interface (entity editor, entity panel, validation state with undo/redo, 72 new GUI tests)
   - ✅ Story 6.5: Batch Processing & Configuration Management (batch screen, database management, settings enhancements, 40 new tests)
-- **Total:** 45 stories, 1365+ tests, 86%+ coverage, all quality gates green
+  - ✅ Story 6.6: Internationalization & French UI (dual-track i18n: Qt Linguist + gettext, 267 GUI strings, ~50 CLI strings, live language switching, 53 new tests)
+- **Total:** 46 stories, 1418+ tests, 86%+ coverage, all quality gates green
 
 ---
 
@@ -465,7 +495,7 @@ This project is licensed under the [MIT License](LICENSE).
 **Current limitations:**
 - AI detection: ~60% F1 baseline (not 85%+)
 - Validation required for ALL documents (not optional)
-- French language only (English, Spanish, etc. in future versions)
+- French documents only (English, Spanish, etc. in future versions)
 - Text-based formats: .txt, .md, .pdf, .docx (PDF/DOCX require optional extras: `pip install gdpr-pseudonymizer[formats]`)
 
 ---
@@ -543,12 +573,12 @@ poetry run pytest tests/integration/test_validation_workflow_integration.py -v
 
 ### Test Coverage
 
-- **Unit tests:** 977+ tests covering validation models, UI components, encryption, database operations, audit logging, progress tracking, gender detection, context cycling indicator, and core logic
+- **Unit tests:** 1030+ tests covering validation models, UI components, encryption, database operations, audit logging, progress tracking, gender detection, context cycling indicator, i18n (GUI + CLI), and core logic
 - **Integration tests:** 90 tests for end-to-end workflows including validation (Story 2.0.1), encrypted database operations (Story 2.4), compositional logic, and hybrid detection
 - **Accuracy tests:** 22 tests validating NER accuracy against 25-document ground-truth corpus (Story 4.4)
 - **Performance tests:** 19 tests validating all NFR targets — single-document benchmarks (NFR1), entity-detection benchmarks, batch performance (NFR2), memory profiling (NFR4), startup time (NFR5), stability/error rate (NFR6), stress testing (Story 4.5)
 - **Current coverage:** 86%+ across all modules (100% for progress module, 91.41% for AuditRepository)
-- **Total tests:** 1267+ tests
+- **Total tests:** 1418+ tests
 - **CI/CD:** Tests run on Python 3.10-3.12 across Windows, macOS, and Linux
 - **Quality gates:** All pass (Black, Ruff, mypy, pytest)
 
@@ -582,8 +612,8 @@ The integration test suite covers:
 
 | Metric | Value | Status |
 |--------|-------|--------|
-| **Development Progress** | v2.0-dev | 🚧 Epic 6 in progress (Stories 6.1-6.5 complete) |
-| **Stories Complete** | 45 (Epic 1-5 + 6.1-6.5) | ✅ Epics 1-5, 🚧 Epic 6 |
+| **Development Progress** | v2.0-dev | 🚧 Epic 6 in progress (Stories 6.1-6.6 complete) |
+| **Stories Complete** | 46 (Epic 1-5 + 6.1-6.6) | ✅ Epics 1-5, 🚧 Epic 6 |
 | **LLM Utility (NFR10)** | 4.27/5.0 (85.4%) | ✅ PASSED (threshold: 80%) |
 | **Installation Success (NFR3)** | 87.5% (7/8 platforms) | ✅ PASSED (threshold: 85%) |
 | **First Pseudonymization (NFR14)** | 100% within 30 min | ✅ PASSED (threshold: 80%) |
@@ -604,9 +634,10 @@ The integration test suite covers:
 | **Memory Usage (NFR4)** | ~1 GB Python-tracked peak | ✅ PASSED (<8GB threshold) |
 | **CLI Startup (NFR5)** | 0.56s (help), 6.0s (cold start w/ model) | ✅ PASSED (<5s for CLI startup) |
 | **Error Rate (NFR6)** | ~0% unexpected errors | ✅ PASSED (<10% threshold) |
-| **Test Coverage** | 1365+ tests (incl. 248 GUI), 86%+ coverage | ✅ All Quality Checks Pass |
+| **Test Coverage** | 1418+ tests (incl. 301 GUI), 86%+ coverage | ✅ All Quality Checks Pass |
 | **Quality Gates** | Ruff, mypy, pytest | ✅ All Pass (0 issues) |
-| **Supported Languages** | French | 🇫🇷 v1.0 only |
+| **GUI/CLI Languages** | French (default), English | 🌐 Live switching (Story 6.6) |
+| **Supported Document Languages** | French | 🇫🇷 v1.0 only |
 | **Supported Formats** | .txt, .md, .pdf, .docx | 📝 PDF/DOCX via optional extras |
 
 ---
@@ -621,4 +652,4 @@ The integration test suite covers:
 
 ---
 
-**Last Updated:** 2026-02-20 (v2.0-dev — Epic 6 Story 6.5 complete: batch processing screen, database management screen, settings enhancements, 248 GUI tests)
+**Last Updated:** 2026-02-23 (v2.0-dev — Epic 6 Story 6.6 complete: internationalization & French UI, dual-track i18n with live language switching, 301 GUI tests, 1418+ total tests)

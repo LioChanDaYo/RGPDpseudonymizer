@@ -10,6 +10,7 @@ import shutil
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from PySide6.QtCore import QEvent
 from PySide6.QtGui import QColor, QFont, QTextCharFormat, QTextCursor
 from PySide6.QtWidgets import (
     QFileDialog,
@@ -22,6 +23,7 @@ from PySide6.QtWidgets import (
 )
 
 from gdpr_pseudonymizer.gui.config import add_recent_file, save_gui_config
+from gdpr_pseudonymizer.gui.i18n import qarg
 from gdpr_pseudonymizer.gui.widgets.step_indicator import StepMode
 from gdpr_pseudonymizer.gui.widgets.toast import Toast
 from gdpr_pseudonymizer.utils.logger import get_logger
@@ -62,9 +64,9 @@ class ResultsScreen(QWidget):
         summary_layout.setContentsMargins(16, 12, 16, 12)
         self._summary_widget.setObjectName("resultsSummary")
 
-        self._person_label = _create_type_label("PERSON", "Personnes")
-        self._location_label = _create_type_label("LOCATION", "Lieux")
-        self._org_label = _create_type_label("ORG", "Organisations")
+        self._person_label = _create_type_label("PERSON")
+        self._location_label = _create_type_label("LOCATION")
+        self._org_label = _create_type_label("ORG")
 
         summary_layout.addWidget(self._person_label)
         summary_layout.addWidget(self._location_label)
@@ -79,9 +81,9 @@ class ResultsScreen(QWidget):
         layout.addWidget(self._summary_widget)
 
         # Document preview
-        preview_label = QLabel("Aperçu du document pseudonymisé")
-        preview_label.setStyleSheet("font-size: 14px; font-weight: bold;")
-        layout.addWidget(preview_label)
+        self._preview_label = QLabel()
+        self._preview_label.setStyleSheet("font-size: 14px; font-weight: bold;")
+        layout.addWidget(self._preview_label)
 
         self._preview = QTextEdit()
         self._preview.setReadOnly(True)
@@ -92,16 +94,43 @@ class ResultsScreen(QWidget):
         btn_layout = QHBoxLayout()
         btn_layout.addStretch()
 
-        self._new_doc_btn = QPushButton("Nouveau document")
+        self._new_doc_btn = QPushButton()
         self._new_doc_btn.setObjectName("secondaryButton")
         self._new_doc_btn.clicked.connect(self._on_new_document)
         btn_layout.addWidget(self._new_doc_btn)
 
-        self._save_btn = QPushButton("Enregistrer sous...")
+        self._save_btn = QPushButton()
         self._save_btn.clicked.connect(self._on_save)
         btn_layout.addWidget(self._save_btn)
 
         layout.addLayout(btn_layout)
+
+        # Set all translatable text
+        self.retranslateUi()
+
+    def retranslateUi(self) -> None:
+        """Re-set all translatable UI text."""
+        color_p = ENTITY_COLORS["PERSON"]
+        color_l = ENTITY_COLORS["LOCATION"]
+        color_o = ENTITY_COLORS["ORG"]
+        self._person_label.setText(
+            f'<span style="color:{color_p};">\u25cf</span> ' f'0 {self.tr("Personnes")}'
+        )
+        self._location_label.setText(
+            f'<span style="color:{color_l};">\u25cf</span> ' f'0 {self.tr("Lieux")}'
+        )
+        self._org_label.setText(
+            f'<span style="color:{color_o};">\u25cf</span> '
+            f'0 {self.tr("Organisations")}'
+        )
+        self._preview_label.setText(self.tr("Aperçu du document pseudonymisé"))
+        self._new_doc_btn.setText(self.tr("Nouveau document"))
+        self._save_btn.setText(self.tr("Enregistrer sous..."))
+
+    def changeEvent(self, event: QEvent) -> None:
+        if event.type() == QEvent.Type.LanguageChange:
+            self.retranslateUi()
+        super().changeEvent(event)
 
     def show_results(
         self,
@@ -125,23 +154,34 @@ class ResultsScreen(QWidget):
 
         # Update entity summary
         counts = result.entity_type_counts
+        person_count = counts.get("PERSON", 0)
+        location_count = counts.get("LOCATION", 0)
+        org_count = counts.get("ORG", 0)
+
+        color_p = ENTITY_COLORS["PERSON"]
+        color_l = ENTITY_COLORS["LOCATION"]
+        color_o = ENTITY_COLORS["ORG"]
+
         self._person_label.setText(
-            f'<span style="color:{ENTITY_COLORS["PERSON"]};">\u25cf</span> '
-            f'{counts.get("PERSON", 0)} Personnes'
+            f'<span style="color:{color_p};">\u25cf</span> '
+            f'{person_count} {self.tr("Personnes")}'
         )
         self._location_label.setText(
-            f'<span style="color:{ENTITY_COLORS["LOCATION"]};">\u25cf</span> '
-            f'{counts.get("LOCATION", 0)} Lieux'
+            f'<span style="color:{color_l};">\u25cf</span> '
+            f'{location_count} {self.tr("Lieux")}'
         )
         self._org_label.setText(
-            f'<span style="color:{ENTITY_COLORS["ORG"]};">\u25cf</span> '
-            f'{counts.get("ORG", 0)} Organisations'
+            f'<span style="color:{color_o};">\u25cf</span> '
+            f'{org_count} {self.tr("Organisations")}'
         )
 
         self._stats_label.setText(
-            f"{result.entities_new} nouvelles | "
-            f"{result.entities_reused} réutilisées | "
-            f"{result.processing_time_seconds:.1f}s"
+            qarg(
+                self.tr("%1 nouvelles | %2 réutilisées | %3s"),
+                str(result.entities_new),
+                str(result.entities_reused),
+                f"{result.processing_time_seconds:.1f}",
+            )
         )
 
         # Set document content
@@ -194,9 +234,9 @@ class ResultsScreen(QWidget):
 
         filepath, _ = QFileDialog.getSaveFileName(
             self,
-            "Enregistrer le document pseudonymisé",
+            self.tr("Enregistrer le document pseudonymisé"),
             os.path.join(default_dir, default_name),
-            "Texte (*.txt);;Tous (*)",
+            self.tr("Texte (*.txt);;Tous (*)"),
         )
 
         if not filepath:
@@ -209,14 +249,14 @@ class ResultsScreen(QWidget):
             save_gui_config(self._main_window.config)
 
             Toast.show_message(
-                "Document enregistré avec succès.",
+                self.tr("Document enregistré avec succès."),
                 self._main_window,
             )
             logger.info("document_saved", output_path=filepath)
         except OSError as e:
             logger.error("document_save_failed", error=str(e))
             Toast.show_message(
-                "Erreur lors de l'enregistrement.",
+                self.tr("Erreur lors de l'enregistrement."),
                 self._main_window,
                 duration_ms=4000,
             )
@@ -273,9 +313,9 @@ class ResultsScreen(QWidget):
         return self._new_doc_btn
 
 
-def _create_type_label(entity_type: str, display_name: str) -> QLabel:
+def _create_type_label(entity_type: str) -> QLabel:
     """Create a styled label for an entity type count."""
     color = ENTITY_COLORS.get(entity_type, "#757575")
-    label = QLabel(f'<span style="color:{color};">\u25cf</span> 0 {display_name}')
+    label = QLabel(f'<span style="color:{color};">\u25cf</span> 0')
     label.setStyleSheet("font-size: 13px; padding: 0 8px;")
     return label

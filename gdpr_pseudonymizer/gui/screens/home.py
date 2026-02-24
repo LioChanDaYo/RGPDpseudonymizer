@@ -6,7 +6,7 @@ import time
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import QCoreApplication, QEvent, Qt
 from PySide6.QtWidgets import (
     QFrame,
     QHBoxLayout,
@@ -18,6 +18,7 @@ from PySide6.QtWidgets import (
 )
 
 from gdpr_pseudonymizer.gui.config import add_recent_file, save_gui_config
+from gdpr_pseudonymizer.gui.i18n import qarg
 from gdpr_pseudonymizer.gui.widgets.drop_zone import DropZone
 from gdpr_pseudonymizer.gui.widgets.toast import Toast
 
@@ -41,17 +42,15 @@ class HomeScreen(QWidget):
         layout.setSpacing(20)
 
         # Title
-        title = QLabel("GDPR Pseudonymizer")
-        title.setStyleSheet("font-size: 24px; font-weight: bold;")
-        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(title)
+        self._title = QLabel()
+        self._title.setStyleSheet("font-size: 24px; font-weight: bold;")
+        self._title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self._title)
 
-        subtitle = QLabel(
-            "Pseudonymisation conforme au RGPD pour vos documents en français"
-        )
-        subtitle.setObjectName("secondaryLabel")
-        subtitle.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(subtitle)
+        self._subtitle = QLabel()
+        self._subtitle.setObjectName("secondaryLabel")
+        self._subtitle.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self._subtitle)
 
         # Drop zone
         self._drop_zone = DropZone(self)
@@ -67,23 +66,23 @@ class HomeScreen(QWidget):
             "QFrame { border: 1px solid #E0E0E0; border-radius: 8px; padding: 12px; }"
         )
         batch_layout = QHBoxLayout(batch_card)
-        batch_label = QLabel("Traitement par lot")
-        batch_label.setStyleSheet("font-weight: bold;")
-        batch_layout.addWidget(batch_label)
-        batch_desc = QLabel("Traiter plusieurs documents d'un dossier")
-        batch_desc.setObjectName("secondaryLabel")
-        batch_layout.addWidget(batch_desc)
+        self._batch_label = QLabel()
+        self._batch_label.setStyleSheet("font-weight: bold;")
+        batch_layout.addWidget(self._batch_label)
+        self._batch_desc = QLabel()
+        self._batch_desc.setObjectName("secondaryLabel")
+        batch_layout.addWidget(self._batch_desc)
         batch_layout.addStretch()
-        batch_btn = QPushButton("Ouvrir un dossier")
-        batch_btn.setObjectName("secondaryButton")
-        batch_btn.clicked.connect(lambda: self._main_window.navigate_to("batch"))
-        batch_layout.addWidget(batch_btn)
+        self._batch_btn = QPushButton()
+        self._batch_btn.setObjectName("secondaryButton")
+        self._batch_btn.clicked.connect(lambda: self._main_window.navigate_to("batch"))
+        batch_layout.addWidget(self._batch_btn)
         layout.addWidget(batch_card)
 
         # Recent files section
-        recent_header = QLabel("Fichiers récents")
-        recent_header.setStyleSheet("font-size: 15px; font-weight: bold;")
-        layout.addWidget(recent_header)
+        self._recent_header = QLabel()
+        self._recent_header.setStyleSheet("font-size: 15px; font-weight: bold;")
+        layout.addWidget(self._recent_header)
 
         self._recent_area = QScrollArea()
         self._recent_area.setWidgetResizable(True)
@@ -102,6 +101,26 @@ class HomeScreen(QWidget):
 
         self._rebuild_recent_list()
 
+        # Set all translatable text
+        self.retranslateUi()
+
+    def retranslateUi(self) -> None:
+        """Re-set all translatable UI text."""
+        self._title.setText(self.tr("GDPR Pseudonymizer"))
+        self._subtitle.setText(
+            self.tr("Pseudonymisation conforme au RGPD pour vos documents en français")
+        )
+        self._batch_label.setText(self.tr("Traitement par lot"))
+        self._batch_desc.setText(self.tr("Traiter plusieurs documents d'un dossier"))
+        self._batch_btn.setText(self.tr("Ouvrir un dossier"))
+        self._recent_header.setText(self.tr("Fichiers récents"))
+
+    def changeEvent(self, event: QEvent) -> None:
+        if event.type() == QEvent.Type.LanguageChange:
+            self.retranslateUi()
+            self._rebuild_recent_list()
+        super().changeEvent(event)
+
     # ------------------------------------------------------------------
     # Recent files
     # ------------------------------------------------------------------
@@ -116,7 +135,7 @@ class HomeScreen(QWidget):
 
         recent = self._config.get("recent_files", [])
         if not recent:
-            empty = QLabel("Aucun fichier récent")
+            empty = QLabel(self.tr("Aucun fichier récent"))
             empty.setObjectName("secondaryLabel")
             empty.setAlignment(Qt.AlignmentFlag.AlignCenter)
             self._recent_layout.addWidget(empty)
@@ -162,11 +181,11 @@ class HomeScreen(QWidget):
             row.setCursor(Qt.CursorShape.PointingHandCursor)
             row.mousePressEvent = lambda e, fp=filepath: self._on_file_selected(fp)  # type: ignore[method-assign,misc]
         else:
-            missing = QLabel("Fichier introuvable")
+            missing = QLabel(self.tr("Fichier introuvable"))
             missing.setStyleSheet("color: #C62828; font-size: 11px;")
             layout.addWidget(missing)
 
-            remove_btn = QPushButton("Retirer")
+            remove_btn = QPushButton(self.tr("Retirer"))
             remove_btn.setObjectName("secondaryButton")
             remove_btn.setStyleSheet("font-size: 11px; padding: 2px 8px;")
             remove_btn.clicked.connect(
@@ -239,7 +258,7 @@ class HomeScreen(QWidget):
     def _on_folder_selected(self, folder_path: str) -> None:
         """Handle folder drop — redirect to batch flow."""
         Toast.show_message(
-            "Ouverture du traitement par lot...",
+            self.tr("Ouverture du traitement par lot..."),
             self._main_window,
         )
         self._main_window.navigate_to("batch", folder_path=folder_path)
@@ -247,7 +266,7 @@ class HomeScreen(QWidget):
     def _on_multi_file_dropped(self) -> None:
         """Handle multi-file drop — only first file is processed."""
         Toast.show_message(
-            "Un seul fichier à la fois — seul le premier sera traité.",
+            self.tr("Un seul fichier à la fois — seul le premier sera traité."),
             self._main_window,
             duration_ms=4000,
         )
@@ -255,7 +274,10 @@ class HomeScreen(QWidget):
     def _on_invalid_drop(self) -> None:
         """Handle invalid file type drop."""
         Toast.show_message(
-            "Format non pris en charge. " "Formats acceptés : .txt, .md, .pdf, .docx",
+            self.tr(
+                "Format non pris en charge. "
+                "Formats acceptés : .txt, .md, .pdf, .docx"
+            ),
             self._main_window,
             duration_ms=4000,
         )
@@ -266,20 +288,23 @@ class HomeScreen(QWidget):
         return self._drop_zone
 
 
+_tr = QCoreApplication.translate
+
+
 def _relative_time_fr(timestamp: float) -> str:
     """Convert a timestamp to a French relative time string."""
     delta = time.time() - timestamp
     if delta < 60:
-        return "À l'instant"
+        return _tr("HomeScreen", "À l'instant")
     if delta < 3600:
         minutes = int(delta / 60)
-        return f"Il y a {minutes} min"
+        return qarg(_tr("HomeScreen", "Il y a %1 min"), str(minutes))
     if delta < 86400:
         hours = int(delta / 3600)
-        return f"Il y a {hours} h"
+        return qarg(_tr("HomeScreen", "Il y a %1 h"), str(hours))
     days = int(delta / 86400)
     if days == 1:
-        return "Hier"
+        return _tr("HomeScreen", "Hier")
     if days < 30:
-        return f"Il y a {days} jours"
-    return "Il y a plus d'un mois"
+        return qarg(_tr("HomeScreen", "Il y a %1 jours"), str(days))
+    return _tr("HomeScreen", "Il y a plus d'un mois")

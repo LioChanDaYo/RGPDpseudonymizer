@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import QEvent, Qt
 from PySide6.QtWidgets import (
     QComboBox,
     QFileDialog,
@@ -29,6 +29,7 @@ from gdpr_pseudonymizer.gui.config import (
     add_recent_database,
     save_gui_config,
 )
+from gdpr_pseudonymizer.gui.i18n import qarg
 from gdpr_pseudonymizer.gui.widgets.toast import Toast
 from gdpr_pseudonymizer.utils.logger import get_logger
 
@@ -80,37 +81,36 @@ class DatabaseScreen(QWidget):
 
         # Header
         header = QHBoxLayout()
-        back_btn = QPushButton("\u25c0 Retour")
-        back_btn.setObjectName("secondaryButton")
-        back_btn.clicked.connect(lambda: self._main_window.navigate_to("home"))
-        header.addWidget(back_btn)
+        self._back_btn = QPushButton()
+        self._back_btn.setObjectName("secondaryButton")
+        self._back_btn.clicked.connect(lambda: self._main_window.navigate_to("home"))
+        header.addWidget(self._back_btn)
         header.addStretch()
-        title = QLabel("Base de correspondances")
-        title.setStyleSheet("font-size: 20px; font-weight: bold;")
-        header.addWidget(title)
+        self._title = QLabel()
+        self._title.setStyleSheet("font-size: 20px; font-weight: bold;")
+        header.addWidget(self._title)
         header.addStretch()
         layout.addLayout(header)
 
         # Database path
         db_row = QHBoxLayout()
-        db_label = QLabel("Base de données :")
-        db_label.setStyleSheet("font-weight: bold;")
-        db_row.addWidget(db_label)
+        self._db_label = QLabel()
+        self._db_label.setStyleSheet("font-weight: bold;")
+        db_row.addWidget(self._db_label)
 
         self._db_combo = QComboBox()
         self._db_combo.setEditable(True)
         self._db_combo.setMinimumWidth(300)
         db_row.addWidget(self._db_combo, stretch=1)
 
-        browse_btn = QPushButton("Parcourir...")
-        browse_btn.setObjectName("secondaryButton")
-        browse_btn.clicked.connect(self._browse_db)
-        db_row.addWidget(browse_btn)
+        self._browse_btn = QPushButton()
+        self._browse_btn.setObjectName("secondaryButton")
+        self._browse_btn.clicked.connect(self._browse_db)
+        db_row.addWidget(self._browse_btn)
 
-        open_btn = QPushButton("Ouvrir")
-        open_btn.clicked.connect(self._open_database)
-        db_row.addWidget(open_btn)
-        self._open_btn = open_btn
+        self._open_btn = QPushButton()
+        self._open_btn.clicked.connect(self._open_database)
+        db_row.addWidget(self._open_btn)
 
         layout.addLayout(db_row)
 
@@ -122,17 +122,14 @@ class DatabaseScreen(QWidget):
         # Search + filter row
         filter_row = QHBoxLayout()
         self._search_field = QLineEdit()
-        self._search_field.setPlaceholderText(
-            "Rechercher une entité ou un pseudonyme..."
-        )
         self._search_field.textChanged.connect(self._on_search_changed)
         filter_row.addWidget(self._search_field, stretch=1)
 
         self._type_filter = QComboBox()
-        self._type_filter.addItem("Tous les types", "")
-        self._type_filter.addItem("\U0001f464 PERSON", "PERSON")
-        self._type_filter.addItem("\U0001f4cd LOCATION", "LOCATION")
-        self._type_filter.addItem("\U0001f3e2 ORG", "ORG")
+        self._type_filter.addItem("", "")
+        self._type_filter.addItem("", "PERSON")
+        self._type_filter.addItem("", "LOCATION")
+        self._type_filter.addItem("", "ORG")
         self._type_filter.currentIndexChanged.connect(self._on_filter_changed)
         filter_row.addWidget(self._type_filter)
 
@@ -140,9 +137,6 @@ class DatabaseScreen(QWidget):
 
         # Entity table
         self._entity_table = QTableWidget(0, 4)
-        self._entity_table.setHorizontalHeaderLabels(
-            ["", "Type", "Entité originale", "Pseudonyme"]
-        )
         self._entity_table.horizontalHeader().setSectionResizeMode(
             0, QHeaderView.ResizeMode.ResizeToContents
         )
@@ -163,19 +157,19 @@ class DatabaseScreen(QWidget):
         # Status + action bar
         action_row = QHBoxLayout()
 
-        self._status_label = QLabel("0 correspondances")
+        self._status_label = QLabel("")
         self._status_label.setObjectName("secondaryLabel")
         action_row.addWidget(self._status_label)
 
         action_row.addStretch()
 
-        self._delete_btn = QPushButton("Supprimer la sélection (0)")
+        self._delete_btn = QPushButton()
         self._delete_btn.setObjectName("secondaryButton")
         self._delete_btn.setEnabled(False)
         self._delete_btn.clicked.connect(self._delete_selected)
         action_row.addWidget(self._delete_btn)
 
-        self._export_btn = QPushButton("Exporter")
+        self._export_btn = QPushButton()
         self._export_btn.setObjectName("secondaryButton")
         self._export_btn.setEnabled(False)
         self._export_btn.clicked.connect(self._export_csv)
@@ -185,6 +179,40 @@ class DatabaseScreen(QWidget):
 
         # Populate recent databases
         self._populate_recent_databases()
+
+        # Set translatable text
+        self.retranslateUi()
+
+    def retranslateUi(self) -> None:
+        """Re-set all translatable static UI text."""
+        self._back_btn.setText(self.tr("\u25c0 Retour"))
+        self._title.setText(self.tr("Base de correspondances"))
+        self._db_label.setText(self.tr("Base de données :"))
+        self._browse_btn.setText(self.tr("Parcourir..."))
+        self._open_btn.setText(self.tr("Ouvrir"))
+        self._search_field.setPlaceholderText(
+            self.tr("Rechercher une entité ou un pseudonyme...")
+        )
+        self._type_filter.setItemText(0, self.tr("Tous les types"))
+        self._type_filter.setItemText(1, "\U0001f464 PERSON")
+        self._type_filter.setItemText(2, "\U0001f4cd LOCATION")
+        self._type_filter.setItemText(3, "\U0001f3e2 ORG")
+        self._entity_table.setHorizontalHeaderLabels(
+            [
+                "",
+                self.tr("Type"),
+                self.tr("Entité originale"),
+                self.tr("Pseudonyme"),
+            ]
+        )
+        self._status_label.setText(self.tr("0 correspondances"))
+        self._delete_btn.setText(self.tr("Supprimer la sélection (0)"))
+        self._export_btn.setText(self.tr("Exporter"))
+
+    def changeEvent(self, event: QEvent) -> None:
+        if event.type() == QEvent.Type.LanguageChange:
+            self.retranslateUi()
+        super().changeEvent(event)
 
     # ------------------------------------------------------------------
     # Database Connection
@@ -203,9 +231,9 @@ class DatabaseScreen(QWidget):
     def _browse_db(self) -> None:
         filepath, _ = QFileDialog.getOpenFileName(
             self,
-            "Sélectionner une base de correspondances",
+            self.tr("Sélectionner une base de correspondances"),
             "",
-            "SQLite (*.db);;Tous (*)",
+            self.tr("SQLite (*.db);;Tous (*)"),
         )
         if filepath:
             self._db_combo.setCurrentText(filepath)
@@ -214,7 +242,7 @@ class DatabaseScreen(QWidget):
         db_path = self._db_combo.currentText().strip()
         if not db_path:
             Toast.show_message(
-                "Veuillez sélectionner une base de données.",
+                self.tr("Veuillez sélectionner une base de données."),
                 self._main_window,
                 duration_ms=3000,
             )
@@ -222,7 +250,7 @@ class DatabaseScreen(QWidget):
 
         if not Path(db_path).exists():
             Toast.show_message(
-                "La base de données n'existe pas.",
+                self.tr("La base de données n'existe pas."),
                 self._main_window,
                 duration_ms=3000,
             )
@@ -295,18 +323,21 @@ class DatabaseScreen(QWidget):
                         last_op_time = last_op_time.replace(tzinfo=timezone.utc)
                     delta = datetime.now(timezone.utc) - last_op_time
                     if delta.days == 0:
-                        last_op_str = "aujourd'hui"
+                        last_op_str = self.tr("aujourd'hui")
                     elif delta.days == 1:
-                        last_op_str = "hier"
+                        last_op_str = self.tr("hier")
                     else:
-                        last_op_str = f"il y a {delta.days} jours"
+                        last_op_str = qarg(self.tr("il y a %1 jours"), str(delta.days))
                 else:
-                    last_op_str = "aucune"
+                    last_op_str = self.tr("aucune")
 
             self._info_label.setText(
-                f"Créée le {created_str} — "
-                f"{len(self._entities)} entités — "
-                f"Dernière opération : {last_op_str}"
+                qarg(
+                    self.tr("Créée le %1 — %2 entités — Dernière opération : %3"),
+                    created_str,
+                    str(len(self._entities)),
+                    last_op_str,
+                )
             )
             self._export_btn.setEnabled(len(self._entities) > 0)
             self._populate_entity_table()
@@ -319,14 +350,14 @@ class DatabaseScreen(QWidget):
             ):
                 self._main_window.cached_passphrase = None
             Toast.show_message(
-                "Phrase secrète incorrecte.",
+                self.tr("Phrase secrète incorrecte."),
                 self._main_window,
                 duration_ms=4000,
             )
         except Exception as e:
             logger.error("db_load_failed", error=str(e))
             Toast.show_message(
-                "Impossible d'ouvrir la base de données.",
+                self.tr("Impossible d'ouvrir la base de données."),
                 self._main_window,
                 duration_ms=4000,
             )
@@ -421,9 +452,15 @@ class DatabaseScreen(QWidget):
         total = self._entity_table.rowCount()
         selected = len(self._selected_ids)
         self._status_label.setText(
-            f"{total} correspondances — {selected} sélectionnées"
+            qarg(
+                self.tr("%1 correspondances — %2 sélectionnées"),
+                str(total),
+                str(selected),
+            )
         )
-        self._delete_btn.setText(f"Supprimer la sélection ({selected})")
+        self._delete_btn.setText(
+            qarg(self.tr("Supprimer la sélection (%1)"), str(selected))
+        )
         self._delete_btn.setEnabled(selected > 0)
 
     # ------------------------------------------------------------------
@@ -437,18 +474,24 @@ class DatabaseScreen(QWidget):
         # Build confirmation list
         selected_entities = [e for e in self._entities if e.id in self._selected_ids]
         entity_lines = "\n".join(
-            f"  • {e.full_name} → {e.pseudonym_full}" for e in selected_entities
+            f"  \u2022 {e.full_name} \u2192 {e.pseudonym_full}"
+            for e in selected_entities
         )
         count = len(selected_entities)
 
         from gdpr_pseudonymizer.gui.widgets.confirm_dialog import ConfirmDialog
 
         dlg = ConfirmDialog.destructive(
-            f"Supprimer {count} correspondances ?",
-            f"Les correspondances suivantes seront supprimées "
-            f"de façon irréversible (Article 17 RGPD) :\n\n"
-            f"{entity_lines}",
-            f"Supprimer ({count})",
+            qarg(self.tr("Supprimer %1 correspondances ?"), str(count)),
+            qarg(
+                self.tr(
+                    "Les correspondances suivantes seront supprimées "
+                    "de façon irréversible (Article 17 RGPD) :\n\n"
+                    "%1"
+                ),
+                entity_lines,
+            ),
+            qarg(self.tr("Supprimer (%1)"), str(count)),
             parent=self._main_window,
         )
         if not dlg.exec():
@@ -490,7 +533,10 @@ class DatabaseScreen(QWidget):
                 )
 
             Toast.show_message(
-                f"{deleted_count} correspondance(s) supprimée(s)",
+                qarg(
+                    self.tr("%1 correspondance(s) supprimée(s)"),
+                    str(deleted_count),
+                ),
                 self._main_window,
             )
 
@@ -500,7 +546,7 @@ class DatabaseScreen(QWidget):
         except Exception as e:
             logger.error("entity_deletion_failed", error=str(e))
             Toast.show_message(
-                "Erreur lors de la suppression.",
+                self.tr("Erreur lors de la suppression."),
                 self._main_window,
                 duration_ms=4000,
             )
@@ -512,9 +558,9 @@ class DatabaseScreen(QWidget):
     def _export_csv(self) -> None:
         filepath, _ = QFileDialog.getSaveFileName(
             self,
-            "Exporter les entités",
+            self.tr("Exporter les entités"),
             "entities_export.csv",
-            "CSV (*.csv);;Tous (*)",
+            self.tr("CSV (*.csv);;Tous (*)"),
         )
         if not filepath:
             return
@@ -545,12 +591,14 @@ class DatabaseScreen(QWidget):
                         ]
                     )
 
-            Toast.show_message("Export CSV terminé.", self._main_window)
+            Toast.show_message(self.tr("Export CSV terminé."), self._main_window)
 
         except OSError as e:
             logger.error("csv_export_failed", error=str(e))
             Toast.show_message(
-                "Erreur lors de l'export.", self._main_window, duration_ms=4000
+                self.tr("Erreur lors de l'export."),
+                self._main_window,
+                duration_ms=4000,
             )
 
     # -- Test accessors --

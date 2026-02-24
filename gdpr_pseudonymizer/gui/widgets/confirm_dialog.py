@@ -7,7 +7,7 @@ Default focus: Cancel (safe action). Escape always dismisses.
 
 from __future__ import annotations
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import QCoreApplication, Qt
 from PySide6.QtWidgets import QDialog, QHBoxLayout, QLabel, QPushButton, QVBoxLayout
 
 
@@ -118,10 +118,12 @@ class ConfirmDialog(QDialog):
         cls,
         title: str,
         message: str,
-        dismiss_label: str = "Fermer",
+        dismiss_label: str = "",
         parent: object = None,
     ) -> ConfirmDialog:
         """Create an informational dialog (grey dismiss)."""
+        if not dismiss_label:
+            dismiss_label = QCoreApplication.translate("ConfirmDialog", "Fermer")
         dlg = cls(
             title=title,
             message=message,
