@@ -32,6 +32,9 @@ exclude_docs: |
   architecture/
   prd/
   stories/
+  backlog.md
+  refactoring-plan.md
+  v2.0-release-checklist.md
   qa/
   ALPHA-INSTALL.md
   ALPHA-QUICKSTART.md
