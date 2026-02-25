@@ -26,18 +26,18 @@ if TYPE_CHECKING:
     from gdpr_pseudonymizer.gui.models.validation_state import GUIValidationState
     from gdpr_pseudonymizer.validation.models import EntityReview
 
-# ── Entity color scheme ──────────────────────────────────────────────
+# ── Entity color scheme (color-blind safe palette - AC3) ──────────────
 
 _LIGHT_COLORS: dict[str, tuple[str, str]] = {
-    "PERSON": ("#BBDEFB", "#0D47A1"),
-    "LOCATION": ("#C8E6C9", "#1B5E20"),
-    "ORG": ("#FFE0B2", "#E65100"),
+    "PERSON": ("#BBDEFB", "#0D47A1"),  # Blue - unchanged
+    "LOCATION": ("#FFE0B2", "#E65100"),  # Orange (was green) - color-blind safe
+    "ORG": ("#E1BEE7", "#6A1B9A"),  # Purple (was orange) - color-blind safe
 }
 
 _DARK_COLORS: dict[str, tuple[str, str]] = {
-    "PERSON": ("#1A237E", "#90CAF9"),
-    "LOCATION": ("#1B5E20", "#A5D6A7"),
-    "ORG": ("#BF360C", "#FFCC80"),
+    "PERSON": ("#1A237E", "#90CAF9"),  # Blue - unchanged
+    "LOCATION": ("#BF360C", "#FFCC80"),  # Orange (was green) - color-blind safe
+    "ORG": ("#4A148C", "#CE93D8"),  # Purple (was orange) - color-blind safe
 }
 
 _REJECTED_LIGHT = ("#FFCDD2", "#B71C1C")
@@ -126,6 +126,58 @@ class EntityEditor(QTextEdit):
     @property
     def nav_mode(self) -> bool:
         return self._nav_mode
+
+    # ------------------------------------------------------------------
+    # Accessibility Support (AC2)
+    # ------------------------------------------------------------------
+
+    def _announce_current_entity(self) -> None:
+        """Announce current entity to screen readers (AC2 - Task 3.1)."""
+        if not self._nav_mode or not (0 <= self._nav_index < len(self._entity_ranges)):
+            return
+
+        _start, _end, entity_id = self._entity_ranges[self._nav_index]
+        if not self._validation_state:
+            return
+
+        review = self._validation_state.get_review(entity_id)
+        if not review:
+            return
+
+        # Build accessible announcement
+        entity_text = review.entity.text
+        entity_type = review.entity.entity_type
+        state_str = review.state.value
+
+        # Translate entity type and state for announcements
+        type_name = {
+            "PERSON": self.tr("Personne"),
+            "LOCATION": self.tr("Lieu"),
+            "ORG": self.tr("Organisation"),
+        }.get(entity_type, entity_type)
+
+        state_name = {
+            "pending": self.tr("en attente"),
+            "confirmed": self.tr("accepté"),
+            "rejected": self.tr("rejeté"),
+            "modified": self.tr("modifié"),
+            "added": self.tr("ajouté"),
+        }.get(state_str, state_str)
+
+        # Format: "Type: Name (Status)"
+        announcement = f"{type_name}: {entity_text} ({state_name})"
+
+        # Update accessible description for screen reader
+        self.setAccessibleDescription(announcement)
+
+        # Trigger accessibility update event
+        try:
+            from PySide6.QtGui import QAccessible, QAccessibleEvent
+
+            event = QAccessibleEvent(self, QAccessible.Event.NameChanged)
+            QAccessible.updateAccessibility(event)
+        except ImportError:
+            pass  # Qt < 6.5
 
     # ------------------------------------------------------------------
     # Highlight engine
@@ -474,6 +526,7 @@ class EntityEditor(QTextEdit):
             self.setTextCursor(cursor)
             self.ensureCursorVisible()
             self.entity_selected.emit(entity_id)
+            self._announce_current_entity()  # AC2 - announce to screen readers
 
     def _nav_accept_current(self) -> None:
         """Accept focused entity and advance to next pending."""

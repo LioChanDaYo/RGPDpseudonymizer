@@ -17,6 +17,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from gdpr_pseudonymizer.gui.accessibility.focus_manager import setup_focus_order_home
 from gdpr_pseudonymizer.gui.config import add_recent_file, save_gui_config
 from gdpr_pseudonymizer.gui.i18n import qarg
 from gdpr_pseudonymizer.gui.widgets.drop_zone import DropZone
@@ -76,6 +77,13 @@ class HomeScreen(QWidget):
         self._batch_btn = QPushButton()
         self._batch_btn.setObjectName("secondaryButton")
         self._batch_btn.clicked.connect(lambda: self._main_window.navigate_to("batch"))
+        # Accessibility support (AC2 - Task 4.2)
+        self._batch_btn.setAccessibleName(self.tr("Ouvrir le traitement par lot"))
+        self._batch_btn.setAccessibleDescription(
+            self.tr(
+                "Ouvre l'écran de traitement par lot pour traiter plusieurs fichiers"
+            )
+        )
         batch_layout.addWidget(self._batch_btn)
         layout.addWidget(batch_card)
 
@@ -103,6 +111,9 @@ class HomeScreen(QWidget):
 
         # Set all translatable text
         self.retranslateUi()
+
+        # Configure keyboard navigation
+        setup_focus_order_home(self)
 
     def retranslateUi(self) -> None:
         """Re-set all translatable UI text."""

@@ -22,6 +22,9 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from gdpr_pseudonymizer.gui.accessibility.focus_manager import (
+    setup_focus_order_validation,
+)
 from gdpr_pseudonymizer.gui.i18n import qarg
 from gdpr_pseudonymizer.gui.models.validation_state import GUIValidationState
 from gdpr_pseudonymizer.gui.widgets.entity_editor import EntityEditor
@@ -74,6 +77,15 @@ class ValidationScreen(QWidget):
         self._finalize_progress = QProgressBar()
         self._finalize_progress.setMaximum(100)
         self._finalize_progress.setVisible(False)
+        # Accessibility support (AC2 - Task 3.5)
+        self._finalize_progress.setAccessibleName(
+            self.tr("Progression de la finalisation")
+        )
+        self._finalize_progress.setAccessibleDescription(
+            self.tr(
+                "Barre de progression indiquant l'avancement de la génération du document final"
+            )
+        )
         layout.addWidget(self._finalize_progress)
 
         self._finalize_label = QLabel("")
@@ -89,6 +101,11 @@ class ValidationScreen(QWidget):
         self._back_btn = QPushButton()
         self._back_btn.setObjectName("secondaryButton")
         self._back_btn.clicked.connect(self._on_back)
+        # Accessibility support (AC2 - Task 4.2)
+        self._back_btn.setAccessibleName(self.tr("Retour à l'analyse"))
+        self._back_btn.setAccessibleDescription(
+            self.tr("Retourne à l'écran d'analyse (les modifications seront perdues)")
+        )
         action_layout.addWidget(self._back_btn)
 
         action_layout.addStretch()
@@ -102,6 +119,11 @@ class ValidationScreen(QWidget):
 
         self._finalize_btn = QPushButton()
         self._finalize_btn.clicked.connect(self._on_finalize)
+        # Accessibility support (AC2 - Task 4.2)
+        self._finalize_btn.setAccessibleName(self.tr("Finaliser la pseudonymisation"))
+        self._finalize_btn.setAccessibleDescription(
+            self.tr("Lance la pseudonymisation du document avec les entités validées")
+        )
         action_layout.addWidget(self._finalize_btn)
 
         layout.addWidget(action_bar)
@@ -111,6 +133,9 @@ class ValidationScreen(QWidget):
 
         # Set translatable text
         self.retranslateUi()
+
+        # Configure keyboard navigation
+        setup_focus_order_validation(self)
 
     def retranslateUi(self) -> None:
         """Re-set all translatable static UI text."""
@@ -159,6 +184,14 @@ class ValidationScreen(QWidget):
         # Find
         self._find_shortcut = QShortcut(QKeySequence("Ctrl+F"), self)
         self._find_shortcut.activated.connect(self._on_find)
+
+        # Bulk actions (AC1)
+        # Note: Tab/Shift+Tab, Enter, Delete handled by EntityEditor navigation mode
+        self._accept_all_shortcut = QShortcut(QKeySequence("Ctrl+Shift+A"), self)
+        self._accept_all_shortcut.activated.connect(self._on_accept_all)
+
+        self._reject_all_shortcut = QShortcut(QKeySequence("Ctrl+Shift+R"), self)
+        self._reject_all_shortcut.activated.connect(self._on_reject_all)
 
     # ------------------------------------------------------------------
     # Public API
@@ -423,6 +456,48 @@ class ValidationScreen(QWidget):
         """Focus the panel's find field."""
         self._panel.find_field.setFocus()
         self._panel.find_field.selectAll()
+
+    # ------------------------------------------------------------------
+    # Bulk entity actions
+    # ------------------------------------------------------------------
+
+    def _on_accept_all(self) -> None:
+        """Accept all pending entities (Ctrl+Shift+A)."""
+        if self._validation_state is None:
+            return
+
+        from gdpr_pseudonymizer.validation.models import EntityReviewState
+
+        # Get all pending entity IDs
+        pending_ids = [
+            review.entity_id
+            for review in self._validation_state.get_all_entities()
+            if review.state == EntityReviewState.PENDING
+        ]
+
+        if not pending_ids:
+            return
+
+        self._handle_bulk_action("accept", pending_ids)
+
+    def _on_reject_all(self) -> None:
+        """Reject all pending entities (Ctrl+Shift+R)."""
+        if self._validation_state is None:
+            return
+
+        from gdpr_pseudonymizer.validation.models import EntityReviewState
+
+        # Get all pending entity IDs
+        pending_ids = [
+            review.entity_id
+            for review in self._validation_state.get_all_entities()
+            if review.state == EntityReviewState.PENDING
+        ]
+
+        if not pending_ids:
+            return
+
+        self._handle_bulk_action("reject", pending_ids)
 
     # ------------------------------------------------------------------
     # Navigation

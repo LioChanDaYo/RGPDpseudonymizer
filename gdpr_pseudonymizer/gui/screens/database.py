@@ -25,6 +25,9 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from gdpr_pseudonymizer.gui.accessibility.focus_manager import (
+    setup_focus_order_database,
+)
 from gdpr_pseudonymizer.gui.config import (
     add_recent_database,
     save_gui_config,
@@ -101,15 +104,34 @@ class DatabaseScreen(QWidget):
         self._db_combo = QComboBox()
         self._db_combo.setEditable(True)
         self._db_combo.setMinimumWidth(300)
+        # Accessibility (AC2 - Task 4.2)
+        self._db_combo.setAccessibleName(self.tr("Chemin de la base de données"))
+        self._db_combo.setAccessibleDescription(
+            self.tr(
+                "Sélectionner ou saisir le chemin vers le fichier de base de données"
+            )
+        )
         db_row.addWidget(self._db_combo, stretch=1)
 
         self._browse_btn = QPushButton()
         self._browse_btn.setObjectName("secondaryButton")
         self._browse_btn.clicked.connect(self._browse_db)
+        # Accessibility (AC2 - Task 4.2)
+        self._browse_btn.setAccessibleName(self.tr("Parcourir les fichiers"))
+        self._browse_btn.setAccessibleDescription(
+            self.tr(
+                "Ouvrir un dialogue pour sélectionner un fichier de base de données"
+            )
+        )
         db_row.addWidget(self._browse_btn)
 
         self._open_btn = QPushButton()
         self._open_btn.clicked.connect(self._open_database)
+        # Accessibility (AC2 - Task 4.2)
+        self._open_btn.setAccessibleName(self.tr("Ouvrir la base de données"))
+        self._open_btn.setAccessibleDescription(
+            self.tr("Charger et afficher le contenu de la base de données sélectionnée")
+        )
         db_row.addWidget(self._open_btn)
 
         layout.addLayout(db_row)
@@ -123,6 +145,11 @@ class DatabaseScreen(QWidget):
         filter_row = QHBoxLayout()
         self._search_field = QLineEdit()
         self._search_field.textChanged.connect(self._on_search_changed)
+        # Accessibility (AC2 - Task 4.2)
+        self._search_field.setAccessibleName(self.tr("Recherche dans la base"))
+        self._search_field.setAccessibleDescription(
+            self.tr("Filtrer les entités par nom ou pseudonyme")
+        )
         filter_row.addWidget(self._search_field, stretch=1)
 
         self._type_filter = QComboBox()
@@ -131,6 +158,11 @@ class DatabaseScreen(QWidget):
         self._type_filter.addItem("", "LOCATION")
         self._type_filter.addItem("", "ORG")
         self._type_filter.currentIndexChanged.connect(self._on_filter_changed)
+        # Accessibility (AC2 - Task 4.2)
+        self._type_filter.setAccessibleName(self.tr("Filtre par type d'entité"))
+        self._type_filter.setAccessibleDescription(
+            self.tr("Filtrer les entités par type: Personne, Lieu, ou Organisation")
+        )
         filter_row.addWidget(self._type_filter)
 
         layout.addLayout(filter_row)
@@ -152,6 +184,11 @@ class DatabaseScreen(QWidget):
         self._entity_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self._entity_table.setSelectionMode(QTableWidget.SelectionMode.NoSelection)
         self._entity_table.cellChanged.connect(self._on_cell_changed)
+        # Accessibility (AC2 - Task 4.2)
+        self._entity_table.setAccessibleName(self.tr("Table des correspondances"))
+        self._entity_table.setAccessibleDescription(
+            self.tr("Affiche les entités stockées avec leurs pseudonymes")
+        )
         layout.addWidget(self._entity_table, stretch=1)
 
         # Status + action bar
@@ -167,12 +204,26 @@ class DatabaseScreen(QWidget):
         self._delete_btn.setObjectName("secondaryButton")
         self._delete_btn.setEnabled(False)
         self._delete_btn.clicked.connect(self._delete_selected)
+        # Accessibility (AC2 - Task 4.2)
+        self._delete_btn.setAccessibleName(
+            self.tr("Supprimer les entités sélectionnées")
+        )
+        self._delete_btn.setAccessibleDescription(
+            self.tr(
+                "Supprimer définitivement les entités cochées de la base de données"
+            )
+        )
         action_row.addWidget(self._delete_btn)
 
         self._export_btn = QPushButton()
         self._export_btn.setObjectName("secondaryButton")
         self._export_btn.setEnabled(False)
         self._export_btn.clicked.connect(self._export_csv)
+        # Accessibility (AC2 - Task 4.2)
+        self._export_btn.setAccessibleName(self.tr("Exporter en CSV"))
+        self._export_btn.setAccessibleDescription(
+            self.tr("Exporter toutes les correspondances dans un fichier CSV")
+        )
         action_row.addWidget(self._export_btn)
 
         layout.addLayout(action_row)
@@ -182,6 +233,9 @@ class DatabaseScreen(QWidget):
 
         # Set translatable text
         self.retranslateUi()
+
+        # Configure keyboard navigation
+        setup_focus_order_database(self)
 
     def retranslateUi(self) -> None:
         """Re-set all translatable static UI text."""

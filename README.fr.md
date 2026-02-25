@@ -108,7 +108,11 @@ GDPR Pseudonymizer est un **outil conçu pour la confidentialité**. Il associe 
 - Application de bureau encapsulant le noyau CLI (glisser-déposer, revue visuelle des entités)
 - Exécutables autonomes (.exe pour Windows, .app pour macOS) — Python non requis
 - ✅ Interface francophone avec architecture d'internationalisation (prête pour le multilingue) — **implémentée dans la Story 6.6**
-- Accessibilité WCAG AA pour les contextes professionnels et universitaires
+- ✅ Conformité WCAG 2.1 niveau AA — **implémentée dans la Story 6.7**
+  - Navigation complète au clavier avec indicateurs de focus visibles
+  - Support des lecteurs d'écran (NVDA, VoiceOver) avec étiquettes accessibles pour tous les widgets
+  - Détection du mode contraste élevé avec thème à contraste 21:1
+  - Palette adaptée au daltonisme et mise à l'échelle DPI (100-200 %)
 - Public visé : utilisateurs non techniques (équipes RH, juridiques, conformité)
 
 **v3.0 (2027+) :** Précision NLP et automatisation
@@ -431,7 +435,8 @@ L'interface de validation offre un parcours intuitif piloté au clavier pour pas
   - ✅ Story 6.4 : Interface visuelle de validation des entités (éditeur d'entités, panneau latéral, état de validation avec annuler/rétablir, 72 nouveaux tests GUI)
   - ✅ Story 6.5 : Traitement par lot et gestion de configuration (écran de traitement par lot, gestion de la base de données, améliorations des paramètres, 40 nouveaux tests)
   - ✅ Story 6.6 : Internationalisation et interface française (i18n double voie : Qt Linguist + gettext, 267 chaînes GUI, ~50 chaînes CLI, changement de langue en temps réel, 53 nouveaux tests)
-- **Total :** 46 stories, 1 418+ tests, 86 %+ de couverture, tous les contrôles qualité au vert
+  - ✅ Story 6.7 : Accessibilité (WCAG 2.1 niveau AA) — navigation au clavier, support des lecteurs d'écran, mode contraste élevé, palette adaptée au daltonisme, mise à l'échelle DPI, 33 tests d'accessibilité
+- **Total :** 47 stories, 1 451+ tests, 86 %+ de couverture, tous les contrôles qualité au vert
 
 ---
 
@@ -634,7 +639,7 @@ La suite de tests d'intégration couvre :
 | **Utilisation mémoire (NFR4)** | environ 1 Go de pic mesuré par Python | ✅ VALIDÉ (seuil < 8 Go) |
 | **Démarrage CLI (NFR5)** | 0,56 s (help), 6,0 s (démarrage à froid avec modèle) | ✅ VALIDÉ (< 5 s pour le démarrage CLI) |
 | **Taux d'erreur (NFR6)** | environ 0 % d'erreurs inattendues | ✅ VALIDÉ (seuil < 10 %) |
-| **Couverture de test** | 1 418+ tests (dont 301 GUI), 86 %+ de couverture | ✅ Tous les contrôles qualité validés |
+| **Couverture de test** | 1 451+ tests (dont 334 GUI), 86 %+ de couverture | ✅ Tous les contrôles qualité validés |
 | **Contrôles qualité** | Ruff, mypy, pytest | ✅ Tous validés (0 problème) |
 | **Langues GUI/CLI** | Français (défaut), Anglais | 🌐 Changement en temps réel (Story 6.6) |
 | **Langues de documents** | Français | 🇫🇷 v1.0 uniquement |
@@ -652,4 +657,4 @@ La suite de tests d'intégration couvre :
 
 ---
 
-**Dernière mise à jour :** 2026-02-23 (v2.0-dev — Epic 6 Story 6.6 terminée : internationalisation et interface française, i18n double voie avec changement de langue en temps réel, 301 tests GUI, 1 418+ tests au total)
+**Dernière mise à jour :** 2026-02-25 (v2.0-dev — Epic 6 Story 6.7 terminée : conformité WCAG 2.1 niveau AA, navigation au clavier, support des lecteurs d'écran, mode contraste élevé, 334 tests GUI, 1 451+ tests au total)

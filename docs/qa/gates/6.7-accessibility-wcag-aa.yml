@@ -1,0 +1,156 @@
+# Quality Gate Decision — Story 6.7: Accessibility (WCAG AA)
+schema: 1
+story: "6.7"
+story_title: "Accessibility (WCAG AA)"
+gate: CONCERNS
+status_reason: "Excellent quality for implemented features (AC1-4), but only 50% complete. Blocking gaps: manual NVDA testing not performed (AC2 requirement), database threading not implemented (AC7 critical UX), integration tests missing (Tasks 14-15)."
+reviewer: "Quinn (Test Architect)"
+updated: "2026-02-24T00:00:00Z"
+
+waiver: { active: false }
+
+# Critical Issues Requiring Resolution
+top_issues:
+  - id: "TEST-001"
+    severity: high
+    finding: "Manual NVDA screen reader testing not performed (AC2 explicit requirement for v2.0)"
+    suggested_action: "Complete Task 5 — test all screens with NVDA on Windows, document results in accessibility-testing.md"
+    suggested_owner: dev
+    refs: ["AC2", "Task 5"]
+
+  - id: "PERF-001"
+    severity: high
+    finding: "Database operations run on GUI thread causing freezes with 1000+ entities (AC7 not implemented)"
+    suggested_action: "Consider splitting AC7 (Database Threading) into separate story 6.7.1 for phased delivery"
+    suggested_owner: po
+    refs: ["AC7", "Task 12", "FE-021"]
+
+  - id: "TEST-002"
+    severity: medium
+    finding: "AC6 accessibility unit tests incomplete — missing keyboard shortcut, accessible label, and high contrast mode tests"
+    suggested_action: "Complete Task 11 — add 15-20 unit tests for keyboard shortcuts, accessible labels, high contrast mode detection"
+    suggested_owner: dev
+    refs: ["AC6", "Task 11"]
+
+  - id: "TEST-003"
+    severity: medium
+    finding: "DPI scaling tests not performed (AC3 requirement)"
+    suggested_action: "Complete Task 8 — test at 100%/125%/150%/200% DPI scaling, verify layouts don't break"
+    suggested_owner: dev
+    refs: ["AC3", "Task 8"]
+
+  - id: "TEST-004"
+    severity: medium
+    finding: "Integration tests and regression testing not performed (Tasks 14-15)"
+    suggested_action: "Write keyboard-only workflow integration test, run full CLI/GUI test suites, verify coverage ≥86%"
+    suggested_owner: dev
+    refs: ["Tasks 14-15"]
+
+  - id: "SCOPE-001"
+    severity: medium
+    finding: "AC8 (Batch Validation Workflow) not started — 7 subtasks, ~12-16 hours estimated"
+    suggested_action: "Consider splitting AC8 into separate story 6.7.2 for phased delivery (deferred from Story 6.5 DEFERRED-001)"
+    suggested_owner: po
+    refs: ["AC8", "Task 13", "FE-022"]
+
+# No risk_summary generated (risk-profile task not run for this review)
+risk_summary:
+  totals: { critical: 0, high: 2, medium: 4, low: 0 }
+  recommendations:
+    must_fix:
+      - "Complete manual NVDA testing (TEST-001) — blocks v2.0 WCAG AA compliance claim"
+      - "Implement database threading (PERF-001) or defer to v2.1 — critical UX issue at scale"
+    monitor:
+      - "Complete AC6 unit tests (TEST-002) before merging to main"
+      - "Perform DPI scaling tests (TEST-003) before v2.0 release"
+      - "Complete integration/regression testing (TEST-004) before merging to main"
+
+# Quality score based on work completed vs total scope
+quality_score: 70
+quality_score_notes: |
+  - Implemented features (AC1-4 core): 90/100 (excellent architecture, clean code)
+  - Overall story completion: 50/100 (7 of 15 tasks complete, ~47%)
+  - Weighted score: (90 × 0.5) + (50 × 0.5) = 70/100
+  - Deductions: -20 for incomplete scope, -10 for missing manual testing
+
+expires: "2026-03-10T00:00:00Z"  # 2 weeks from review (re-review needed if not completed)
+
+evidence:
+  tests_reviewed: 6
+  tests_passing: 6
+  risks_identified: 6
+  trace:
+    ac_covered: [1, 3, 4]  # AC1 (keyboard nav), AC3 (visual), AC4 (high contrast) fully implemented
+    ac_partial: [2]  # AC2 (screen reader) implemented but manual testing pending
+    ac_gaps: [5, 6, 7, 8]  # AC5 (audit incomplete), AC6 (tests incomplete), AC7 (not started), AC8 (not started)
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: "No accessibility code logs sensitive data, no new security vulnerabilities introduced"
+  performance:
+    status: CONCERNS
+    notes: "AC7 (database threading) not implemented — GUI freezes with 1000+ entities on main thread"
+  reliability:
+    status: PASS
+    notes: "Defensive hasattr() checks prevent crashes, no regressions in 272 GUI tests"
+  maintainability:
+    status: PASS
+    notes: "Excellent modular design, clear separation of concerns, well-documented"
+
+recommendations:
+  immediate:  # Must fix before production
+    - action: "Complete manual NVDA screen reader testing on Windows (AC2 blocker for v2.0 WCAG AA compliance)"
+      refs: ["Task 5", "docs/qa/accessibility-testing.md"]
+    - action: "Decide scope split: Complete AC7+AC8 (~30-40hrs) OR split into stories 6.7.1 (Database Threading) + 6.7.2 (Batch Validation)"
+      refs: ["AC7", "AC8", "Epic 6 planning"]
+    - action: "Complete AC6 accessibility unit tests (keyboard shortcuts, accessible labels, high contrast mode — ~15-20 tests)"
+      refs: ["Task 11", "tests/unit/gui/test_accessibility.py"]
+    - action: "Perform DPI scaling tests at 100%/125%/150%/200% (AC3 requirement)"
+      refs: ["Task 8", "docs/qa/accessibility-audit.md"]
+    - action: "Write integration tests and run full regression suite (Tasks 14-15)"
+      refs: ["tests/integration/gui/", "pytest CLI/GUI suites"]
+
+  future:  # Can be addressed later (if AC7/AC8 deferred)
+    - action: "Implement database background threading (AC7 — FE-021) to prevent GUI freezes with large datasets"
+      refs: ["Task 12", "gui/workers/database_worker.py", "Story 6.7.1 candidate"]
+    - action: "Implement batch validation workflow (AC8 — FE-022) for per-document entity validation in batch mode"
+      refs: ["Task 13", "Story 6.7.2 candidate"]
+
+# Completion estimates (based on task analysis)
+completion_estimates:
+  accessibility_core_ac1_to_6: "20-26 hours (AC5-6 completion + manual testing)"
+  database_threading_ac7: "16-20 hours (8 subtasks)"
+  batch_validation_ac8: "12-16 hours (7 subtasks)"
+  total_remaining_current_story: "50-62 hours"
+  total_if_split_to_3_stories: "20-26 hours for 6.7 core, ~30-40 hours for 6.7.1+6.7.2"
+
+# Highlights of excellent work
+highlights:
+  - "Focus management architecture: Functional design with defensive hasattr() checks demonstrates mature engineering"
+  - "High contrast theme: 21:1 contrast ratios exceed WCAG AAA (7:1) by 3x — outstanding accessibility commitment"
+  - "Keyboard shortcuts system: Centralized module prevents conflicts, help dialog is production-ready UX"
+  - "Color-blind safety: Research-backed palette (Coblis simulation) + icons alongside colors shows user-centered design"
+  - "Documentation: accessibility-audit.md with 17 measured contrast ratios demonstrates professional QA rigor"
+  - "Code quality: Clean, maintainable, excellent type hints, follows all coding standards"
+
+# Development notes for stakeholders
+stakeholder_summary: |
+  Story 6.7 is ~50% complete with EXCELLENT quality for implemented accessibility core (AC1-4).
+
+  COMPLETED (production-ready):
+  ✅ AC1: Keyboard navigation with focus management
+  ✅ AC3: Visual accessibility with color-blind safe palette
+  ✅ AC4: High contrast mode (21:1 ratios)
+  ⚠️ AC2: Screen reader support implemented, manual NVDA testing REQUIRED
+
+  NOT STARTED (~30-40 hours):
+  ❌ AC7: Database background threading (FE-021) — critical UX issue at scale
+  ❌ AC8: Batch validation workflow (FE-022) — deferred from Story 6.5
+
+  RECOMMENDATION: Split into 3 stories for phased delivery:
+  1. Story 6.7 (Accessibility Core): AC1-6 + testing (~20-26hrs) → v2.0 BLOCKER
+  2. Story 6.7.1 (Database Performance): AC7 (~16-20hrs) → v2.1 target
+  3. Story 6.7.2 (Batch Validation): AC8 (~12-16hrs) → v2.1 target
+
+  This unblocks v2.0 WCAG AA compliance while deferring performance enhancements.

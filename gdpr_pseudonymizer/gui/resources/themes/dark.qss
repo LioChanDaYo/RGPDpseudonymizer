@@ -3,7 +3,14 @@
    Text Primary: #E0E0E0 | Text Secondary: #9E9E9E | Text Disabled: #616161
    Success: #66BB6A | Warning: #FFA726 | Error: #EF5350
    WCAG AA: 4.5:1 minimum contrast for text
+   Accessibility: 2px focus indicators for keyboard navigation (AC1)
 */
+
+/* Global focus indicator for all interactive elements */
+*:focus {
+    outline: 2px solid #64B5F6;
+    outline-offset: 1px;
+}
 
 QMainWindow, QDialog {
     background-color: #1E1E1E;
