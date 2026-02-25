@@ -48,6 +48,10 @@ class StepIndicator(QWidget):
         self._mode = StepMode.SINGLE
         self._current_step = 0  # 0-indexed
 
+        # Accessibility support (AC2 - Task 3.3)
+        self.setAccessibleName(self.tr("Indicateur de progression"))
+        self._update_accessible_text()
+
     # ------------------------------------------------------------------
     # Public API
     # ------------------------------------------------------------------
@@ -56,12 +60,14 @@ class StepIndicator(QWidget):
         """Switch between single-doc and batch modes."""
         self._mode = mode
         self._current_step = 0
+        self._update_accessible_text()
         self.update()
 
     def set_step(self, index: int) -> None:
         """Set the active step (0-indexed)."""
         steps = self._steps()
         self._current_step = max(0, min(index, len(steps) - 1))
+        self._update_accessible_text()
         self.update()
 
     def current_step(self) -> int:
@@ -204,6 +210,16 @@ class StepIndicator(QWidget):
     # ------------------------------------------------------------------
     # Internal
     # ------------------------------------------------------------------
+
+    def _update_accessible_text(self) -> None:
+        """Update accessible description for screen readers (AC2 - Task 3.3)."""
+        steps = self._steps()
+        if 0 <= self._current_step < len(steps):
+            current_label = steps[self._current_step]
+            accessible_desc = self.tr("Étape {step} sur {total}: {label}").format(
+                step=self._current_step + 1, total=len(steps), label=current_label
+            )
+            self.setAccessibleDescription(accessible_desc)
 
     def _steps(self) -> list[str]:
         if self._mode == StepMode.BATCH:

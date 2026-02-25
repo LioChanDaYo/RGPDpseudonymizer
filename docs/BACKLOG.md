@@ -125,6 +125,134 @@
 
 ---
 
+## 📋 Deferred from Story 6.7: Accessibility (WCAG AA)
+
+### Story 6.7.1: Database Performance Threading (AC7 - FE-021)
+
+**Priority:** HIGH (Critical UX issue for production databases)
+**Estimated Effort:** 16-20 hours
+**Target Release:** v2.1
+**Source:** Story 6.5 QA Gate (PERF-001), deferred from Story 6.7 as AC7
+
+**Description:**
+Migrate all DatabaseScreen operations to background threads to prevent GUI freezing when working with large entity databases (1000+ entities). Currently all database operations run on the main GUI thread.
+
+**Impact:** GUI freezes with 1000+ entities until implemented. Violates WCAG AA responsive UI requirements.
+
+**Acceptance Criteria:**
+- [ ] Entity listing query runs on background thread via QThreadPool + WorkerSignals
+- [ ] Search/filter operations run on background thread
+- [ ] Article 17 deletion operations run on background thread
+- [ ] CSV export runs on background thread
+- [ ] Main GUI thread remains responsive with progress indication during long operations
+- [ ] No UI freezing when database contains 1000+ entities
+
+**Tasks:**
+- [ ] Create `gui/workers/database_worker.py` — QRunnable subclass with WorkerSignals
+- [ ] Implement `list_entities()` worker — runs `repo.find_all()` on background thread
+- [ ] Implement `search_entities()` worker — runs search query on background thread
+- [ ] Implement `delete_entity()` worker — runs Article 17 deletion on background thread
+- [ ] Implement `export_csv()` worker — runs CSV export on background thread
+- [ ] Update DatabaseScreen methods to use QThreadPool.globalInstance().start(worker)
+- [ ] Connect worker signals to UI updates (progress bars, table refresh, toast notifications)
+- [ ] Test with 1000+ entity database — verify no UI freezing
+
+**Files to Create/Modify:**
+- `gdpr_pseudonymizer/gui/workers/database_worker.py` (NEW)
+- `gdpr_pseudonymizer/gui/screens/database.py` (update to use workers)
+- `gdpr_pseudonymizer/gui/workers/__init__.py` (export DatabaseWorker)
+- `tests/unit/gui/test_database_worker.py` (NEW - unit tests)
+
+**Rationale for Deferral:**
+- Not required for WCAG AA compliance (accessibility requirement)
+- Performance enhancement that affects scalability but not core functionality
+- Allows Story 6.7 accessibility work to be released independently
+- QA flagged as HIGH priority for v2.1 due to user experience impact at scale
+
+---
+
+### Story 6.7.2: Batch Validation Workflow (AC8 - FE-022)
+
+**Priority:** MEDIUM (Workflow enhancement, not critical for v2.0)
+**Estimated Effort:** 12-16 hours
+**Target Release:** v2.1
+**Source:** Story 6.5 AC3 (DEFERRED-001), deferred from Story 6.7 as AC8
+
+**Description:**
+Add optional per-document validation to batch processing workflow. Currently, batch processing pseudonymizes all documents without user validation. This enhancement allows users to review and validate detected entities for each document before pseudonymization.
+
+**Impact:** Users who need entity review in batch mode currently have no option. Reduces trust in batch output quality.
+
+**Acceptance Criteria:**
+- [ ] Batch processing optionally integrates with validation screen
+- [ ] After entity detection for each document, user can validate/reject entities before pseudonymization proceeds
+- [ ] A "Skip validation" toggle remains available (default) for fully automated batch runs
+- [ ] Validation screen shows "Document X of Y" indicator in batch mode
+- [ ] Navigation between documents in batch validation via Next/Previous buttons
+
+**Tasks:**
+- [ ] Add "Validate entities per document" toggle to BatchScreen setup UI
+- [ ] Update BatchWorker to emit `validation_required` signal after detection phase (if toggle enabled)
+- [ ] Pause batch processing when validation_required emitted → navigate to ValidationScreen
+- [ ] Add "Document X of Y" indicator to ValidationScreen in batch mode (detect batch context via `set_context()`)
+- [ ] Add Next/Previous document buttons to ValidationScreen in batch mode
+- [ ] Resume batch processing after validation complete (user clicks "Finaliser" → emit `validation_complete` signal)
+- [ ] Test batch validation workflow end-to-end (5 documents, validate each)
+
+**Files to Modify:**
+- `gdpr_pseudonymizer/gui/screens/batch.py` (add validation toggle, emit signals)
+- `gdpr_pseudonymizer/gui/screens/validation.py` (add batch mode UI, doc X/Y indicator)
+- `gdpr_pseudonymizer/gui/workers/batch_worker.py` (emit validation_required signal)
+- `tests/integration/gui/test_batch_validation.py` (NEW - integration tests)
+
+**Rationale for Deferral:**
+- Not required for WCAG AA compliance (accessibility requirement)
+- Workflow enhancement that adds user control but is not essential for v2.0
+- "Skip validation" default maintains backward compatibility
+- Allows Story 6.7 accessibility work to be released independently
+
+---
+
+### Story 6.7.3: Accessibility Integration Tests (AC6, Tasks 14 partial)
+
+**Priority:** LOW (Testing enhancement, not blocking for v2.0)
+**Estimated Effort:** 6-8 hours
+**Target Release:** v2.1
+**Source:** Story 6.7 Task 14 (integration tests for AC7/AC8)
+
+**Description:**
+Write integration tests for database background threading and batch validation workflow features. Current story has unit tests for accessibility features, but integration tests for AC7/AC8 workflows are deferred pending implementation of those features.
+
+**Impact:** Reduced test coverage for performance features until implemented.
+
+**Acceptance Criteria:**
+- [ ] Integration test for keyboard-only document processing workflow (Home → open file → validation → save via keyboard only)
+- [ ] Integration test for batch validation workflow (batch setup → detect → validate → next doc → finalize)
+- [ ] Integration test for database background threading (open DB with 1000 entities → search → delete → verify responsive)
+- [ ] Full GUI regression suite passes with new tests
+
+**Tasks:**
+- [ ] Write integration test for keyboard-only document processing workflow (Task 14.1)
+- [ ] Write integration test for batch validation workflow (Task 14.2 - depends on Story 6.7.2)
+- [ ] Write integration test for database background threading (Task 14.3 - depends on Story 6.7.1)
+- [ ] Run full GUI regression suite — verify no existing tests break
+
+**Files to Create:**
+- `tests/integration/gui/test_keyboard_navigation.py` (NEW - Task 14.1)
+- `tests/integration/gui/test_batch_validation.py` (NEW - Task 14.2)
+- `tests/integration/gui/test_database_threading.py` (NEW - Task 14.3)
+
+**Dependencies:**
+- **Story 6.7.1** (Database Performance Threading) — Task 14.3 depends on this
+- **Story 6.7.2** (Batch Validation Workflow) — Task 14.2 depends on this
+
+**Rationale for Deferral:**
+- Depends on completion of Stories 6.7.1 and 6.7.2
+- Integration tests cannot be written until features are implemented
+- Manual testing procedures already documented in `docs/qa/accessibility-testing.md`
+
+---
+
 ## 🌟 Future Enhancements
 
 ### LOW Priority

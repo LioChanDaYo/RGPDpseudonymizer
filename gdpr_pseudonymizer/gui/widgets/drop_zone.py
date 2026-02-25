@@ -37,6 +37,15 @@ class DropZone(QFrame):
         self.setMinimumHeight(200)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
 
+        # Accessibility support (AC2 - Task 3.4)
+        self.setAccessibleName(self.tr("Zone de dépôt de fichier"))
+        self.setAccessibleDescription(
+            self.tr(
+                "Glissez un fichier ou cliquez pour ouvrir. "
+                "Formats supportés: TXT, MD, PDF, DOCX"
+            )
+        )
+
         self._build_ui()
         self.retranslateUi()
 

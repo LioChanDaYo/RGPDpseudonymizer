@@ -276,10 +276,22 @@ class MainWindow(QMainWindow):
         self._set_theme(new_theme)
 
     def _apply_theme(self) -> None:
-        """Load and apply QSS theme file."""
-        theme = self._config.get("theme", "system")
-        if theme == "system":
-            theme = "light"
+        """Load and apply QSS theme file.
+
+        Automatically switches to high-contrast theme if OS high contrast mode
+        is detected (AC4 - Task 9.2, 9.4).
+        """
+        # Check for OS high contrast mode (Qt 6.5+)
+        high_contrast_detected = self._detect_high_contrast_mode()
+
+        if high_contrast_detected:
+            # Override user theme preference with high-contrast theme
+            theme = "high-contrast"
+        else:
+            theme = self._config.get("theme", "system")
+            if theme == "system":
+                theme = "light"
+
         themes_dir = Path(__file__).parent / "resources" / "themes"
         qss_file = themes_dir / f"{theme}.qss"
         if qss_file.exists():
@@ -298,6 +310,42 @@ class MainWindow(QMainWindow):
         from PySide6.QtWidgets import QApplication
 
         return QApplication.instance()
+
+    def _detect_high_contrast_mode(self) -> bool:
+        """Detect if OS high contrast mode is enabled (AC4 - Task 9.2).
+
+        Uses QStyleHints.colorScheme() available in Qt 6.5+.
+        Returns True if high contrast is detected, False otherwise.
+        """
+        try:
+            from PySide6.QtCore import Qt
+
+            app = self._get_app()
+            if app is None:
+                return False
+
+            style_hints = app.styleHints()
+
+            # Qt 6.5+ provides colorScheme()
+            if hasattr(style_hints, "colorScheme"):
+                # Check for Unknown color scheme which Qt uses for high contrast
+                color_scheme = style_hints.colorScheme()
+                # Qt.ColorScheme.Unknown is used for high contrast modes
+                if hasattr(Qt, "ColorScheme"):
+                    if color_scheme == Qt.ColorScheme.Unknown:
+                        return True
+
+            # Fallback: Check for high contrast via platform-specific hints
+            # Windows: Check for high contrast theme name
+            if hasattr(style_hints, "highContrastModeEnabled"):
+                result: bool = bool(style_hints.highContrastModeEnabled())
+                return result
+
+        except (ImportError, AttributeError):
+            # Qt version too old or API not available
+            pass
+
+        return False
 
     # ------------------------------------------------------------------
     # Recent files
@@ -372,31 +420,11 @@ class MainWindow(QMainWindow):
             self.showFullScreen()
 
     def _show_shortcuts(self) -> None:
-        from PySide6.QtWidgets import QMessageBox
+        """Show keyboard shortcuts help dialog (AC1)."""
+        from gdpr_pseudonymizer.gui.dialogs.shortcuts_help import ShortcutsHelpDialog
 
-        shortcuts = (
-            self.tr("Raccourcis clavier")
-            + "\n\n"
-            + "Ctrl+O\t"
-            + self.tr("Ouvrir un document")
-            + "\n"
-            + "Ctrl+Shift+O\t"
-            + self.tr("Ouvrir un dossier")
-            + "\n"
-            + "Ctrl+,\t"
-            + self.tr("Paramètres")
-            + "\n"
-            + "Ctrl+Q\t"
-            + self.tr("Quitter")
-            + "\n"
-            + "F1\t"
-            + self.tr("Raccourcis clavier")
-            + "\n"
-            + "F11\t"
-            + self.tr("Plein écran")
-            + "\n"
-        )
-        QMessageBox.information(self, self.tr("Raccourcis clavier"), shortcuts)
+        dialog = ShortcutsHelpDialog(self)
+        dialog.exec()
 
     def _show_about(self) -> None:
         from PySide6.QtWidgets import QMessageBox

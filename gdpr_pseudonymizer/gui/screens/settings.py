@@ -22,6 +22,9 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from gdpr_pseudonymizer.gui.accessibility.focus_manager import (
+    setup_focus_order_settings,
+)
 from gdpr_pseudonymizer.gui.config import save_gui_config
 
 if TYPE_CHECKING:
@@ -96,6 +99,11 @@ class SettingsScreen(QWidget):
         self._language_combo.addItem("Français", "fr")
         self._language_combo.addItem("English", "en")
         self._language_combo.currentIndexChanged.connect(self._on_language_changed)
+        # Accessibility (AC2 - Task 4.2, 4.3)
+        self._language_combo.setAccessibleName(self.tr("Langue de l'interface"))
+        self._language_combo.setAccessibleDescription(
+            self.tr("Choisir la langue d'affichage de l'application")
+        )
         lang_row.addWidget(self._language_combo)
         lang_row.addStretch()
         self._lang_label = QLabel()
@@ -138,6 +146,11 @@ class SettingsScreen(QWidget):
         self._default_theme_combo.currentIndexChanged.connect(
             self._on_default_theme_changed
         )
+        # Accessibility (AC2 - Task 4.2, 4.3)
+        self._default_theme_combo.setAccessibleName(self.tr("Thème de pseudonymes"))
+        self._default_theme_combo.setAccessibleDescription(
+            self.tr("Choisir le thème pour la génération des pseudonymes")
+        )
         self._default_theme_label = QLabel()
         processing_layout.addRow(self._default_theme_label, self._default_theme_combo)
 
@@ -166,6 +179,13 @@ class SettingsScreen(QWidget):
         self._continue_on_error.toggled.connect(
             lambda c: self._save("continue_on_error", c)
         )
+        # Accessibility (AC2 - Task 4.2)
+        self._continue_on_error.setAccessibleName(self.tr("Continuer en cas d'erreur"))
+        self._continue_on_error.setAccessibleDescription(
+            self.tr(
+                "Poursuivre le traitement des fichiers suivants si un fichier échoue"
+            )
+        )
         batch_layout.addRow("", self._continue_on_error)
 
         self._workers_spinner = QSpinBox()
@@ -173,6 +193,13 @@ class SettingsScreen(QWidget):
         self._workers_spinner.setMaximum(8)
         self._workers_spinner.valueChanged.connect(
             lambda v: self._save("batch_workers", v)
+        )
+        # Accessibility (AC2 - Task 4.2, 4.3)
+        self._workers_spinner.setAccessibleName(
+            self.tr("Nombre de processus parallèles")
+        )
+        self._workers_spinner.setAccessibleDescription(
+            self.tr("Nombre de fichiers à traiter simultanément (1-8)")
         )
         self._workers_label = QLabel()
         batch_layout.addRow(self._workers_label, self._workers_spinner)
@@ -234,6 +261,9 @@ class SettingsScreen(QWidget):
 
         # Set translatable text
         self.retranslateUi()
+
+        # Configure keyboard navigation
+        setup_focus_order_settings(self)
 
     def retranslateUi(self) -> None:
         """Re-set all translatable static UI text."""

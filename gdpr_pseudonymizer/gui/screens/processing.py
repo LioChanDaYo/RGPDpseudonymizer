@@ -19,6 +19,9 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from gdpr_pseudonymizer.gui.accessibility.focus_manager import (
+    setup_focus_order_processing,
+)
 from gdpr_pseudonymizer.gui.i18n import qarg
 from gdpr_pseudonymizer.gui.widgets.step_indicator import StepMode
 from gdpr_pseudonymizer.utils.logger import get_logger
@@ -70,6 +73,13 @@ class ProcessingScreen(QWidget):
         self._progress_bar.setMaximum(100)
         self._progress_bar.setValue(0)
         self._progress_bar.setTextVisible(True)
+        # Accessibility support (AC2 - Task 3.5)
+        self._progress_bar.setAccessibleName(self.tr("Progression de l'analyse"))
+        self._progress_bar.setAccessibleDescription(
+            self.tr(
+                "Barre de progression indiquant l'avancement de la détection des entités"
+            )
+        )
         layout.addWidget(self._progress_bar)
 
         self._phase_label = QLabel()
@@ -123,17 +133,30 @@ class ProcessingScreen(QWidget):
         self._cancel_btn = QPushButton()
         self._cancel_btn.setObjectName("secondaryButton")
         self._cancel_btn.clicked.connect(self._on_cancel)
+        # Accessibility support (AC2 - Task 4.2)
+        self._cancel_btn.setAccessibleName(self.tr("Annuler le traitement"))
+        self._cancel_btn.setAccessibleDescription(
+            self.tr("Annule le traitement en cours et retourne à l'écran d'accueil")
+        )
         btn_layout.addWidget(self._cancel_btn)
 
         self._continue_btn = QPushButton()
         self._continue_btn.clicked.connect(self._on_continue)
         self._continue_btn.setVisible(False)
+        # Accessibility support (AC2 - Task 4.2)
+        self._continue_btn.setAccessibleName(self.tr("Continuer vers la validation"))
+        self._continue_btn.setAccessibleDescription(
+            self.tr("Passe à l'étape de validation des entités détectées")
+        )
         btn_layout.addWidget(self._continue_btn)
 
         layout.addLayout(btn_layout)
 
         # Set all translatable text
         self.retranslateUi()
+
+        # Configure keyboard navigation
+        setup_focus_order_processing(self)
 
     def retranslateUi(self) -> None:
         """Re-set all translatable UI text."""

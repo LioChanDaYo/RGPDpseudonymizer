@@ -108,7 +108,11 @@ GDPR Pseudonymizer is a **privacy-first tool** that combines AI efficiency with 
 - Desktop GUI wrapping CLI core (drag-and-drop, visual entity review)
 - Standalone executables (.exe for Windows, .app for macOS) — no Python required
 - ✅ French-first UI with i18n architecture (multi-language ready) — **implemented in Story 6.6**
-- WCAG AA accessibility for professional/academic contexts
+- ✅ WCAG 2.1 Level AA accessibility compliance — **implemented in Story 6.7**
+  - Full keyboard navigation with visible focus indicators
+  - Screen reader support (NVDA, VoiceOver) with accessible labels for all widgets
+  - High contrast mode detection with 21:1 contrast theme
+  - Color-blind safe palette and DPI scaling (100-200%)
 - Target: Non-technical users (HR, legal, compliance teams)
 
 **v3.0 (2027+):** NLP accuracy & automation
@@ -431,7 +435,8 @@ The validation UI provides an intuitive keyboard-driven interface for reviewing 
   - ✅ Story 6.4: Visual Entity Validation Interface (entity editor, entity panel, validation state with undo/redo, 72 new GUI tests)
   - ✅ Story 6.5: Batch Processing & Configuration Management (batch screen, database management, settings enhancements, 40 new tests)
   - ✅ Story 6.6: Internationalization & French UI (dual-track i18n: Qt Linguist + gettext, 267 GUI strings, ~50 CLI strings, live language switching, 53 new tests)
-- **Total:** 46 stories, 1418+ tests, 86%+ coverage, all quality gates green
+  - ✅ Story 6.7: Accessibility (WCAG 2.1 Level AA) — keyboard navigation, screen reader support, high contrast mode, color-blind safe palette, DPI scaling, 33 accessibility tests
+- **Total:** 47 stories, 1451+ tests, 86%+ coverage, all quality gates green
 
 ---
 
@@ -634,7 +639,7 @@ The integration test suite covers:
 | **Memory Usage (NFR4)** | ~1 GB Python-tracked peak | ✅ PASSED (<8GB threshold) |
 | **CLI Startup (NFR5)** | 0.56s (help), 6.0s (cold start w/ model) | ✅ PASSED (<5s for CLI startup) |
 | **Error Rate (NFR6)** | ~0% unexpected errors | ✅ PASSED (<10% threshold) |
-| **Test Coverage** | 1418+ tests (incl. 301 GUI), 86%+ coverage | ✅ All Quality Checks Pass |
+| **Test Coverage** | 1451+ tests (incl. 334 GUI), 86%+ coverage | ✅ All Quality Checks Pass |
 | **Quality Gates** | Ruff, mypy, pytest | ✅ All Pass (0 issues) |
 | **GUI/CLI Languages** | French (default), English | 🌐 Live switching (Story 6.6) |
 | **Supported Document Languages** | French | 🇫🇷 v1.0 only |
@@ -652,4 +657,4 @@ The integration test suite covers:
 
 ---
 
-**Last Updated:** 2026-02-23 (v2.0-dev — Epic 6 Story 6.6 complete: internationalization & French UI, dual-track i18n with live language switching, 301 GUI tests, 1418+ total tests)
+**Last Updated:** 2026-02-25 (v2.0-dev — Epic 6 Story 6.7 complete: WCAG 2.1 Level AA accessibility compliance, keyboard navigation, screen reader support, high contrast mode, 334 GUI tests, 1451+ total tests)

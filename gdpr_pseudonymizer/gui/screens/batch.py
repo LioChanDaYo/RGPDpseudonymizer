@@ -28,6 +28,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from gdpr_pseudonymizer.gui.accessibility.focus_manager import setup_focus_order_batch
 from gdpr_pseudonymizer.gui.i18n import qarg
 from gdpr_pseudonymizer.gui.widgets.step_indicator import StepMode
 from gdpr_pseudonymizer.gui.widgets.toast import Toast
@@ -89,6 +90,9 @@ class BatchScreen(QWidget):
         # Set translatable text
         self.retranslateUi()
 
+        # Configure keyboard navigation
+        setup_focus_order_batch(self)
+
     # -- Phase 0: Selection --
 
     def _build_selection_phase(self) -> QWidget:
@@ -120,16 +124,35 @@ class BatchScreen(QWidget):
 
         self._folder_input = QLineEdit()
         self._folder_input.textChanged.connect(lambda _: self._discover_files())
+        # Accessibility support (AC2 - Task 4.2)
+        self._folder_input.setAccessibleName(self.tr("Dossier source"))
+        self._folder_input.setAccessibleDescription(
+            self.tr("Chemin du dossier contenant les fichiers à traiter")
+        )
         folder_row.addWidget(self._folder_input, stretch=1)
 
         self._browse_folder_btn = QPushButton()
         self._browse_folder_btn.setObjectName("secondaryButton")
         self._browse_folder_btn.clicked.connect(self._browse_folder)
+        # Accessibility support (AC2 - Task 4.2)
+        self._browse_folder_btn.setAccessibleName(self.tr("Parcourir les dossiers"))
+        self._browse_folder_btn.setAccessibleDescription(
+            self.tr(
+                "Ouvre un explorateur de fichiers pour sélectionner le dossier source"
+            )
+        )
         folder_row.addWidget(self._browse_folder_btn)
 
         self._add_files_btn = QPushButton()
         self._add_files_btn.setObjectName("secondaryButton")
         self._add_files_btn.clicked.connect(self._add_files)
+        # Accessibility support (AC2 - Task 4.2)
+        self._add_files_btn.setAccessibleName(self.tr("Ajouter des fichiers"))
+        self._add_files_btn.setAccessibleDescription(
+            self.tr(
+                "Ouvre un sélecteur pour ajouter des fichiers individuels à traiter"
+            )
+        )
         folder_row.addWidget(self._add_files_btn)
 
         layout.addLayout(folder_row)
@@ -152,6 +175,11 @@ class BatchScreen(QWidget):
         )
         self._file_table.setSelectionMode(QTableWidget.SelectionMode.NoSelection)
         self._file_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        # Accessibility support (AC2 - Task 4.2)
+        self._file_table.setAccessibleName(self.tr("Liste des fichiers à traiter"))
+        self._file_table.setAccessibleDescription(
+            self.tr("Affiche les fichiers sélectionnés avec leur taille et format")
+        )
         layout.addWidget(self._file_table, stretch=1)
 
         # Output directory
@@ -161,11 +189,23 @@ class BatchScreen(QWidget):
         output_row.addWidget(self._output_label)
 
         self._output_input = QLineEdit()
+        # Accessibility support (AC2 - Task 4.2)
+        self._output_input.setAccessibleName(self.tr("Dossier de sortie"))
+        self._output_input.setAccessibleDescription(
+            self.tr("Chemin du dossier où enregistrer les fichiers pseudonymisés")
+        )
         output_row.addWidget(self._output_input, stretch=1)
 
         self._output_browse_btn = QPushButton()
         self._output_browse_btn.setObjectName("secondaryButton")
         self._output_browse_btn.clicked.connect(self._browse_output)
+        # Accessibility support (AC2 - Task 4.2)
+        self._output_browse_btn.setAccessibleName(
+            self.tr("Parcourir le dossier de sortie")
+        )
+        self._output_browse_btn.setAccessibleDescription(
+            self.tr("Ouvre un explorateur pour sélectionner le dossier de sortie")
+        )
         output_row.addWidget(self._output_browse_btn)
         layout.addLayout(output_row)
 
@@ -175,6 +215,11 @@ class BatchScreen(QWidget):
         self._start_btn = QPushButton()
         self._start_btn.setEnabled(False)
         self._start_btn.clicked.connect(self._start_batch)
+        # Accessibility support (AC2 - Task 4.2)
+        self._start_btn.setAccessibleName(self.tr("Démarrer le traitement par lot"))
+        self._start_btn.setAccessibleDescription(
+            self.tr("Lance le traitement de tous les fichiers sélectionnés")
+        )
         btn_row.addWidget(self._start_btn)
         layout.addLayout(btn_row)
 
@@ -202,6 +247,13 @@ class BatchScreen(QWidget):
 
         self._progress_bar = QProgressBar()
         self._progress_bar.setMaximum(100)
+        # Accessibility support (AC2 - Task 3.5)
+        self._progress_bar.setAccessibleName(
+            self.tr("Progression du traitement par lot")
+        )
+        self._progress_bar.setAccessibleDescription(
+            self.tr("Barre de progression indiquant le nombre de fichiers traités")
+        )
         layout.addWidget(self._progress_bar)
 
         # ETA
@@ -226,6 +278,11 @@ class BatchScreen(QWidget):
         )
         self._doc_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self._doc_table.setSelectionMode(QTableWidget.SelectionMode.NoSelection)
+        # Accessibility support (AC2 - Task 4.2)
+        self._doc_table.setAccessibleName(self.tr("Progression par document"))
+        self._doc_table.setAccessibleDescription(
+            self.tr("Affiche l'état du traitement pour chaque document du lot")
+        )
         layout.addWidget(self._doc_table, stretch=1)
 
         # Controls
@@ -235,11 +292,21 @@ class BatchScreen(QWidget):
         self._pause_btn = QPushButton()
         self._pause_btn.setObjectName("secondaryButton")
         self._pause_btn.clicked.connect(self._toggle_pause)
+        # Accessibility support (AC2 - Task 4.2)
+        self._pause_btn.setAccessibleName(self.tr("Suspendre le traitement"))
+        self._pause_btn.setAccessibleDescription(
+            self.tr("Met en pause ou reprend le traitement du lot")
+        )
         ctrl_row.addWidget(self._pause_btn)
 
         self._cancel_btn = QPushButton()
         self._cancel_btn.setObjectName("secondaryButton")
         self._cancel_btn.clicked.connect(self._cancel_batch)
+        # Accessibility support (AC2 - Task 4.2)
+        self._cancel_btn.setAccessibleName(self.tr("Annuler le traitement par lot"))
+        self._cancel_btn.setAccessibleDescription(
+            self.tr("Annule le traitement en conservant les documents déjà traités")
+        )
         ctrl_row.addWidget(self._cancel_btn)
 
         layout.addLayout(ctrl_row)
@@ -279,6 +346,11 @@ class BatchScreen(QWidget):
             0, QHeaderView.ResizeMode.Stretch
         )
         self._summary_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        # Accessibility support (AC2 - Task 4.2)
+        self._summary_table.setAccessibleName(self.tr("Résultats par document"))
+        self._summary_table.setAccessibleDescription(
+            self.tr("Affiche le résumé du traitement pour chaque document du lot")
+        )
         layout.addWidget(self._summary_table, stretch=1)
 
         # Buttons
@@ -288,10 +360,18 @@ class BatchScreen(QWidget):
         self._export_btn = QPushButton()
         self._export_btn.setObjectName("secondaryButton")
         self._export_btn.clicked.connect(self._export_report)
+        # Accessibility support (AC2 - Task 4.2)
+        self._export_btn.setAccessibleName(self.tr("Exporter le rapport"))
+        self._export_btn.setAccessibleDescription(
+            self.tr("Exporte un rapport texte détaillé du traitement par lot")
+        )
         btn_row.addWidget(self._export_btn)
 
         self._home_btn = QPushButton()
         self._home_btn.clicked.connect(self._go_home)
+        # Accessibility support (AC2 - Task 4.2)
+        self._home_btn.setAccessibleName(self.tr("Retour à l'accueil"))
+        self._home_btn.setAccessibleDescription(self.tr("Retourne à l'écran d'accueil"))
         btn_row.addWidget(self._home_btn)
 
         layout.addLayout(btn_row)

@@ -22,6 +22,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from gdpr_pseudonymizer.gui.accessibility.focus_manager import setup_focus_order_results
 from gdpr_pseudonymizer.gui.config import add_recent_file, save_gui_config
 from gdpr_pseudonymizer.gui.i18n import qarg
 from gdpr_pseudonymizer.gui.widgets.step_indicator import StepMode
@@ -34,11 +35,11 @@ if TYPE_CHECKING:
 
 logger = get_logger(__name__)
 
-# Entity type colors (from UX spec)
+# Entity type colors (color-blind safe palette - AC3)
 ENTITY_COLORS: dict[str, str] = {
-    "PERSON": "#1565C0",
-    "LOCATION": "#2E7D32",
-    "ORG": "#E65100",
+    "PERSON": "#1565C0",  # Blue - unchanged
+    "LOCATION": "#E65100",  # Orange (was green) - color-blind safe
+    "ORG": "#6A1B9A",  # Purple (was orange) - color-blind safe
 }
 
 
@@ -88,6 +89,13 @@ class ResultsScreen(QWidget):
         self._preview = QTextEdit()
         self._preview.setReadOnly(True)
         self._preview.setFont(QFont("Consolas", 10))
+        # Accessibility support (AC2 - Task 4.2)
+        self._preview.setAccessibleName(self.tr("Aperçu du document pseudonymisé"))
+        self._preview.setAccessibleDescription(
+            self.tr(
+                "Affiche le contenu du document après pseudonymisation avec les entités surlignées"
+            )
+        )
         layout.addWidget(self._preview, stretch=1)
 
         # Action buttons
@@ -97,16 +105,29 @@ class ResultsScreen(QWidget):
         self._new_doc_btn = QPushButton()
         self._new_doc_btn.setObjectName("secondaryButton")
         self._new_doc_btn.clicked.connect(self._on_new_document)
+        # Accessibility support (AC2 - Task 4.2)
+        self._new_doc_btn.setAccessibleName(self.tr("Nouveau document"))
+        self._new_doc_btn.setAccessibleDescription(
+            self.tr("Retourne à l'écran d'accueil pour traiter un nouveau document")
+        )
         btn_layout.addWidget(self._new_doc_btn)
 
         self._save_btn = QPushButton()
         self._save_btn.clicked.connect(self._on_save)
+        # Accessibility support (AC2 - Task 4.2)
+        self._save_btn.setAccessibleName(self.tr("Enregistrer le document"))
+        self._save_btn.setAccessibleDescription(
+            self.tr("Enregistre le document pseudonymisé sur le disque")
+        )
         btn_layout.addWidget(self._save_btn)
 
         layout.addLayout(btn_layout)
 
         # Set all translatable text
         self.retranslateUi()
+
+        # Configure keyboard navigation
+        setup_focus_order_results(self)
 
     def retranslateUi(self) -> None:
         """Re-set all translatable UI text."""

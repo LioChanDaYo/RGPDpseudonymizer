@@ -117,6 +117,11 @@ class EntityPanel(QWidget):
         self._list_widget.setSelectionMode(QAbstractItemView.SelectionMode.NoSelection)
         self._list_widget.itemClicked.connect(self._on_item_clicked)
         self._list_widget.setSpacing(2)
+        # Accessibility support (AC2 - Task 3.2)
+        self._list_widget.setAccessibleName(self.tr("Liste des entités détectées"))
+        self._list_widget.setAccessibleDescription(
+            self.tr("Groupées par type: personnes, lieux, organisations")
+        )
         # BUG-UX-002 fix: Checkbox styling now in global theme files
         # (resources/themes/light.qss and dark.qss)
         layout.addWidget(self._list_widget, stretch=1)
@@ -338,6 +343,30 @@ class EntityPanel(QWidget):
         item.setCheckState(
             Qt.CheckState.Checked if checked else Qt.CheckState.Unchecked
         )
+
+        # Accessibility support (AC2 - Task 3.2): screen reader-friendly text
+        entity_type = review.entity.entity_type
+        type_name = {
+            "PERSON": self.tr("Personne"),
+            "LOCATION": self.tr("Lieu"),
+            "ORG": self.tr("Organisation"),
+        }.get(entity_type, entity_type)
+
+        state_name = {
+            "pending": self.tr("en attente"),
+            "confirmed": self.tr("accepté"),
+            "rejected": self.tr("rejeté"),
+            "modified": self.tr("modifié"),
+            "added": self.tr("ajouté"),
+        }.get(review.state.value, review.state.value)
+
+        known_text = self.tr(", déjà connu") if is_known else ""
+        accessible_text = (
+            f"{type_name}: {review.entity.text}{known_text}, "
+            f"{state_name}, pseudonyme: {pseudonym}"
+        )
+        item.setData(Qt.ItemDataRole.AccessibleTextRole, accessible_text)
+
         return item
 
     def _on_item_clicked(self, item: QListWidgetItem) -> None:
