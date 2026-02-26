@@ -1,0 +1,65 @@
+schema: 1
+story: "6.7.2"
+story_title: "Database Background Threading (FE-021)"
+gate: PASS
+status_reason: "Solid implementation with thorough test coverage (38 tests). All QA items resolved: CODE-001 (passphrase flag), TEST-001/002/003 (6 new tests). Runtime bugs fixed post-QA: catch-all exception handlers, empty-string decrypt guard, UX improvements."
+reviewer: "Quinn (Test Architect)"
+updated: "2026-02-26T00:00:00Z"
+
+waiver: { active: false }
+
+top_issues:
+  - id: "CODE-001"
+    severity: medium
+    finding: "_on_db_error uses string matching ('secrète' in message) for passphrase cache clearing — violates CODE-003 pattern (no UI text for state logic)"
+    suggested_action: "Add passphrase_error flag to DatabaseWorker, check before _finish_operation clears worker ref"
+    suggested_owner: dev
+  - id: "TEST-001"
+    severity: low
+    finding: "No test for passphrase cache clearing behavior in _on_db_error"
+    suggested_action: "Add screen-level test validating cached_passphrase is cleared on passphrase error"
+    suggested_owner: dev
+  - id: "TEST-002"
+    severity: low
+    finding: "Background search threshold (>200 entities) not tested"
+    suggested_action: "Add test verifying _apply_filters_background is called when entities exceed threshold"
+    suggested_owner: dev
+  - id: "TEST-003"
+    severity: low
+    finding: "Cancel-and-replace pattern untested at screen level"
+    suggested_action: "Add test for _cancel_current_worker replacing an in-flight worker with signal disconnection"
+    suggested_owner: dev
+
+quality_score: 95
+expires: "2026-03-12T00:00:00Z"
+
+evidence:
+  tests_reviewed: 38
+  risks_identified: 1
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8]
+    ac_gaps: []
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: "Passphrase cache clearing uses typed is_passphrase_error flag (CODE-001 resolved). Each worker opens its own DB session, no shared secrets across threads."
+  performance:
+    status: PASS
+    notes: "All DB operations backgrounded, debounced search, threshold-based routing, thread-safe list copies"
+  reliability:
+    status: PASS
+    notes: "Comprehensive error handling for all project exceptions, thread-safe cancellation, signal disconnection on worker replacement"
+  maintainability:
+    status: PASS
+    notes: "Follows established QRunnable + WorkerSignals pattern, clean structure, accessibility and i18n compliant"
+
+recommendations:
+  immediate: []
+  future:
+    - action: "Refactor passphrase error detection from string matching to typed flag on DatabaseWorker"
+      refs: ["gdpr_pseudonymizer/gui/screens/database.py:487"]
+    - action: "Add missing test coverage for threshold routing, cancel-and-replace, and passphrase cache clearing"
+      refs: ["tests/unit/gui/test_database_screen.py"]
+    - action: "Consider using DB metadata timestamp instead of Path.stat().st_ctime for cross-platform creation date"
+      refs: ["gdpr_pseudonymizer/gui/workers/database_worker.py:128"]

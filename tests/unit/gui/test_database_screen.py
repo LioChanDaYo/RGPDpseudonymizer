@@ -58,7 +58,10 @@ class TestEntityTable:
         db_screen._entities = entities
         db_screen._populate_entity_table()
 
+        # Set search text, then trigger the debounced filter directly
+        # (small dataset <200 uses inline path, but debounce timer delays execution)
         db_screen.search_field.setText("Jean")
+        db_screen._apply_filters()
         assert db_screen.entity_table.rowCount() == 1
 
     def test_type_filter(self, db_screen, qtbot):  # type: ignore[no-untyped-def]
@@ -128,7 +131,7 @@ class TestDeletion:
             staticmethod(lambda *a, **kw: MagicMock(exec=MagicMock(return_value=True))),
         )
 
-        # Mock database
+        # Mock database operations at the source module level
         mock_session = MagicMock()
         mock_repo = MagicMock()
         mock_repo.delete_entity_by_id.return_value = entities[0]
@@ -137,6 +140,10 @@ class TestDeletion:
         mock_open_db = MagicMock()
         mock_open_db.return_value.__enter__ = MagicMock(return_value=mock_session)
         mock_open_db.return_value.__exit__ = MagicMock(return_value=False)
+
+        # Mock QThreadPool.start to run the worker synchronously
+        def run_worker_sync(worker):
+            worker.run()
 
         with (
             patch(
@@ -150,6 +157,10 @@ class TestDeletion:
             patch(
                 "gdpr_pseudonymizer.data.repositories.audit_repository.AuditRepository",
                 return_value=mock_audit,
+            ),
+            patch(
+                "PySide6.QtCore.QThreadPool.start",
+                side_effect=run_worker_sync,
             ),
         ):
             db_screen._delete_selected()
@@ -173,7 +184,15 @@ class TestCsvExport:
             lambda *a, **kw: (output_file, ""),
         )
 
-        db_screen._export_csv()
+        # Mock QThreadPool.start to run the worker synchronously
+        def run_worker_sync(worker):
+            worker.run()
+
+        with patch(
+            "PySide6.QtCore.QThreadPool.start",
+            side_effect=run_worker_sync,
+        ):
+            db_screen._export_csv()
 
         content = Path(output_file).read_text(encoding="utf-8")
         assert "entity_id" in content
@@ -189,3 +208,123 @@ class TestDatabaseInfo:
 
     def test_export_disabled_without_entities(self, db_screen):  # type: ignore[no-untyped-def]
         assert not db_screen.export_button.isEnabled()
+
+    def test_progress_bar_hidden_initially(self, db_screen):  # type: ignore[no-untyped-def]
+        assert not db_screen.progress_bar.isVisible()
+
+
+class TestPassphraseCacheClearing:
+    """TEST-001: Passphrase cache clearing on passphrase errors."""
+
+    def test_passphrase_error_clears_cache(self, db_screen, qtbot):  # type: ignore[no-untyped-def]
+        """Passphrase error from worker clears cached passphrase."""
+        db_screen._db_path = "/test.db"
+        db_screen._passphrase = "wrong"
+        db_screen._main_window.cached_passphrase = ("/test.db", "wrong")
+
+        # Create a worker with is_passphrase_error flag set
+        from gdpr_pseudonymizer.gui.workers.database_worker import DatabaseWorker
+
+        worker = DatabaseWorker("list", "/test.db", "wrong")
+        worker.is_passphrase_error = True
+        db_screen._current_worker = worker
+
+        # Simulate error handler call
+        db_screen._on_db_error("Phrase secrète incorrecte.")
+
+        assert db_screen._main_window.cached_passphrase is None
+
+    def test_non_passphrase_error_keeps_cache(self, db_screen, qtbot):  # type: ignore[no-untyped-def]
+        """Non-passphrase errors do not clear cached passphrase."""
+        db_screen._db_path = "/test.db"
+        db_screen._main_window.cached_passphrase = ("/test.db", "correct")
+
+        from gdpr_pseudonymizer.gui.workers.database_worker import DatabaseWorker
+
+        worker = DatabaseWorker("list", "/test.db", "correct")
+        # is_passphrase_error remains False (default)
+        db_screen._current_worker = worker
+
+        db_screen._on_db_error("La base de données est corrompue ou invalide.")
+
+        # Cache should NOT be cleared
+        assert db_screen._main_window.cached_passphrase == ("/test.db", "correct")
+
+
+class TestSearchThresholdRouting:
+    """TEST-002: Background vs inline search routing based on entity count."""
+
+    def test_small_dataset_uses_inline(self, db_screen, qtbot):  # type: ignore[no-untyped-def]
+        """Datasets <= 200 entities use inline filtering (no worker)."""
+        entities = [
+            _make_entity(f"id{i}", "PERSON", f"Name {i}", f"Pseudo {i}")
+            for i in range(100)
+        ]
+        db_screen._entities = entities
+        db_screen._populate_entity_table()
+
+        with patch.object(db_screen, "_apply_filters_background") as mock_bg:
+            db_screen.search_field.setText("Name 5")
+            db_screen._apply_filters()
+
+            mock_bg.assert_not_called()
+        # Inline filter ran — should show filtered results
+        assert db_screen.entity_table.rowCount() < 100
+
+    def test_large_dataset_uses_background(self, db_screen, qtbot):  # type: ignore[no-untyped-def]
+        """Datasets > 200 entities route through background worker."""
+        entities = [
+            _make_entity(f"id{i}", "PERSON", f"Name {i}", f"Pseudo {i}")
+            for i in range(250)
+        ]
+        db_screen._entities = entities
+        db_screen._populate_entity_table()
+
+        with patch.object(db_screen, "_apply_filters_background") as mock_bg:
+            db_screen.search_field.setText("Name 5")
+            db_screen._apply_filters()
+
+            mock_bg.assert_called_once_with("Name 5", "")
+
+
+class TestCancelAndReplace:
+    """TEST-003: Cancel-and-replace pattern at the screen level."""
+
+    def test_new_worker_cancels_previous(self, db_screen, qtbot):  # type: ignore[no-untyped-def]
+        """Starting a new worker cancels and replaces the previous one."""
+        from gdpr_pseudonymizer.gui.workers.database_worker import DatabaseWorker
+
+        old_worker = DatabaseWorker("list", "/test.db", "pass")
+        # Connect dummy slots so disconnect() in _cancel_current_worker succeeds
+        old_worker.signals.finished.connect(lambda r: None)
+        old_worker.signals.error.connect(lambda m: None)
+        old_worker.signals.progress.connect(lambda p, m: None)
+        db_screen._current_worker = old_worker
+
+        # Calling _cancel_current_worker should set the cancelled flag
+        db_screen._cancel_current_worker()
+
+        assert old_worker._cancelled.is_set()
+        assert db_screen._current_worker is None
+
+    def test_start_worker_replaces_inflight(self, db_screen, qtbot):  # type: ignore[no-untyped-def]
+        """_start_worker cancels in-flight worker before starting new one."""
+        from gdpr_pseudonymizer.gui.workers.database_worker import DatabaseWorker
+
+        old_worker = DatabaseWorker("search", entities=[], search_text="old")
+        # Connect dummy slots so disconnect() in _cancel_current_worker succeeds
+        old_worker.signals.finished.connect(lambda r: None)
+        old_worker.signals.error.connect(lambda m: None)
+        old_worker.signals.progress.connect(lambda p, m: None)
+        db_screen._current_worker = old_worker
+
+        new_worker = DatabaseWorker("search", entities=[], search_text="new")
+
+        def run_worker_sync(worker):
+            worker.run()
+
+        with patch("PySide6.QtCore.QThreadPool.start", side_effect=run_worker_sync):
+            db_screen._start_worker(new_worker)
+
+        assert old_worker._cancelled.is_set()
+        assert db_screen._current_worker is new_worker
