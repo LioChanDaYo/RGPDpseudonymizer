@@ -120,6 +120,105 @@ class TestProcessingWorkerSuccess:
         assert any("Détection" in p or "entités" in p.lower() for p in progress_phases)
 
 
+class TestProcessingWorkerEntityCounts:
+    """Test DATA-001 fix: per-document entity type counts from ProcessingResult."""
+
+    @patch("gdpr_pseudonymizer.data.database.init_database")
+    @patch("gdpr_pseudonymizer.core.document_processor.DocumentProcessor")
+    def test_entity_type_counts_come_from_result_not_db(
+        self, mock_dp_cls, mock_init_db, qtbot, tmp_path
+    ):  # type: ignore[no-untyped-def]
+        """Verify entity_type_counts in GUIProcessingResult come from ProcessingResult,
+        not from a separate DB query (DATA-001 fix)."""
+        from gdpr_pseudonymizer.core.document_processor import ProcessingResult
+
+        input_file = tmp_path / "test.txt"
+        input_file.write_text("Marie Dubois habite à Paris.", encoding="utf-8")
+
+        expected_counts = {"PERSON": 1, "LOCATION": 1}
+        output_content = "Leia Organa habite à Coruscant."
+
+        def mock_process(input_path, output_path, skip_validation=False):
+            with open(output_path, "w", encoding="utf-8") as f:
+                f.write(output_content)
+            return ProcessingResult(
+                success=True,
+                input_file=input_path,
+                output_file=output_path,
+                entities_detected=2,
+                entities_new=2,
+                entities_reused=0,
+                processing_time_seconds=0.5,
+                entity_type_counts=expected_counts,
+            )
+
+        mock_processor = MagicMock()
+        mock_processor.process_document = mock_process
+        mock_dp_cls.return_value = mock_processor
+
+        worker = ProcessingWorker(
+            file_path=str(input_file),
+            db_path=str(tmp_path / "test.db"),
+            passphrase="test_pass",
+        )
+
+        finished_results = []
+        worker.signals.finished.connect(lambda r: finished_results.append(r))
+
+        worker.run()
+
+        assert len(finished_results) == 1
+        result = finished_results[0]
+        assert isinstance(result, GUIProcessingResult)
+        assert result.entity_type_counts == expected_counts
+        assert result.entity_type_counts.get("PERSON") == 1
+        assert result.entity_type_counts.get("LOCATION") == 1
+
+    @patch("gdpr_pseudonymizer.data.database.init_database")
+    @patch("gdpr_pseudonymizer.core.document_processor.DocumentProcessor")
+    def test_entity_type_counts_none_fallback(
+        self, mock_dp_cls, mock_init_db, qtbot, tmp_path
+    ):  # type: ignore[no-untyped-def]
+        """Verify graceful fallback when entity_type_counts is None (CLI path)."""
+        from gdpr_pseudonymizer.core.document_processor import ProcessingResult
+
+        input_file = tmp_path / "test.txt"
+        input_file.write_text("Some text.", encoding="utf-8")
+
+        def mock_process(input_path, output_path, skip_validation=False):
+            with open(output_path, "w", encoding="utf-8") as f:
+                f.write("output")
+            return ProcessingResult(
+                success=True,
+                input_file=input_path,
+                output_file=output_path,
+                entities_detected=0,
+                entities_new=0,
+                entities_reused=0,
+                processing_time_seconds=0.1,
+                # entity_type_counts not set => None
+            )
+
+        mock_processor = MagicMock()
+        mock_processor.process_document = mock_process
+        mock_dp_cls.return_value = mock_processor
+
+        worker = ProcessingWorker(
+            file_path=str(input_file),
+            db_path=str(tmp_path / "test.db"),
+            passphrase="test_pass",
+        )
+
+        finished_results = []
+        worker.signals.finished.connect(lambda r: finished_results.append(r))
+
+        worker.run()
+
+        assert len(finished_results) == 1
+        result = finished_results[0]
+        assert result.entity_type_counts == {}
+
+
 class TestProcessingWorkerFailure:
     """Test processing failure scenarios."""
 

@@ -680,7 +680,7 @@ class TestHandleProcessingError:
 
     @patch("gdpr_pseudonymizer.core.document_processor.open_database")
     def test_returns_failure_result_for_file_error(self, mock_db: MagicMock) -> None:
-        """FileProcessingError is formatted as plain string."""
+        """FileProcessingError is sanitized like all other errors."""
         from gdpr_pseudonymizer.exceptions import FileProcessingError
 
         processor = _make_processor()
@@ -692,7 +692,7 @@ class TestHandleProcessingError:
         )
 
         assert result.success is False
-        assert result.error_message == "not found"
+        assert result.error_message == "FileProcessingError: not found"
         assert result.input_file == "in.txt"
 
     @patch("gdpr_pseudonymizer.core.document_processor.open_database")

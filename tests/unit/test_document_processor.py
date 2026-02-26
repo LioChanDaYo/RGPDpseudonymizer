@@ -388,10 +388,712 @@ class TestDocumentProcessor:
         # Assert: Processing failed
         assert result.success is False
         assert result.entities_detected == 0
-        assert result.error_message == "File not found: input.txt"
+        assert result.error_message == "FileProcessingError: File not found: input.txt"
 
         # Assert: Failure logged to audit trail
         mock_audit_repo.log_operation.assert_called_once()
         logged_operation = mock_audit_repo.log_operation.call_args[0][0]
         assert logged_operation.success is False
         assert logged_operation.error_message is not None
+
+
+class TestSanitizeErrorMessage:
+    """Tests for DocumentProcessor._sanitize_error_message (SEC-001)."""
+
+    def test_strips_single_quoted_entity_names(self) -> None:
+        error = ValueError("Cannot parse entity 'Jean Dupont'")
+        result = DocumentProcessor._sanitize_error_message(error)
+        assert "Jean Dupont" not in result
+        assert "'[REDACTED]'" in result
+        assert result.startswith("ValueError: ")
+
+    def test_strips_double_quoted_entity_names(self) -> None:
+        error = RuntimeError('Failed to process "Marie Dubois"')
+        result = DocumentProcessor._sanitize_error_message(error)
+        assert "Marie Dubois" not in result
+        assert '"[REDACTED]"' in result
+        assert result.startswith("RuntimeError: ")
+
+    def test_strips_capitalized_name_sequences(self) -> None:
+        error = ValueError("Entity Jean Pierre Dupont could not be resolved")
+        result = DocumentProcessor._sanitize_error_message(error)
+        assert "Jean Pierre Dupont" not in result
+        assert "[REDACTED]" in result
+
+    def test_strips_french_accented_names(self) -> None:
+        error = ValueError("Cannot find entity 'Éloïse Béranger'")
+        result = DocumentProcessor._sanitize_error_message(error)
+        assert "Éloïse Béranger" not in result
+        assert "'[REDACTED]'" in result
+
+    def test_strips_organization_names(self) -> None:
+        error = RuntimeError("Duplicate entry for 'Société Générale'")
+        result = DocumentProcessor._sanitize_error_message(error)
+        assert "Société Générale" not in result
+
+    def test_strips_address_fragments(self) -> None:
+        error = ValueError("Cannot geocode 'Rue de la Paix, Paris'")
+        result = DocumentProcessor._sanitize_error_message(error)
+        assert "Rue de la Paix" not in result
+        assert "Paris" not in result
+
+    def test_preserves_exception_type(self) -> None:
+        error = OSError("Permission denied")
+        result = DocumentProcessor._sanitize_error_message(error)
+        assert result.startswith("OSError: ")
+
+    def test_preserves_generic_error_structure(self) -> None:
+        error = RuntimeError("database connection failed")
+        result = DocumentProcessor._sanitize_error_message(error)
+        assert "database connection failed" in result
+
+    def test_handles_empty_message(self) -> None:
+        error = ValueError("")
+        result = DocumentProcessor._sanitize_error_message(error)
+        assert result == "ValueError: "
+
+    def test_multiple_quoted_strings(self) -> None:
+        error = ValueError("'Jean Dupont' conflicts with 'Marie Dubois'")
+        result = DocumentProcessor._sanitize_error_message(error)
+        assert "Jean Dupont" not in result
+        assert "Marie Dubois" not in result
+        assert result.count("[REDACTED]") == 2
+
+
+class TestDetectEntities:
+    """Tests for DocumentProcessor.detect_entities() (GUI phase 1)."""
+
+    @pytest.fixture
+    def processor(self, tmp_path: Path) -> DocumentProcessor:
+        return DocumentProcessor(
+            db_path=str(tmp_path / "test.db"),
+            passphrase="test_passphrase_12345",
+        )
+
+    @patch("gdpr_pseudonymizer.core.document_processor.HybridDetector")
+    @patch("gdpr_pseudonymizer.core.document_processor.read_file")
+    def test_happy_path(
+        self,
+        mock_read_file: Mock,
+        mock_detector_class: Mock,
+        processor: DocumentProcessor,
+    ) -> None:
+        mock_read_file.return_value = "Marie Dubois habite à Paris."
+        entities = [
+            DetectedEntity(
+                text="Marie Dubois", entity_type="PERSON", start_pos=0, end_pos=12
+            ),
+            DetectedEntity(
+                text="Paris", entity_type="LOCATION", start_pos=23, end_pos=28
+            ),
+        ]
+        mock_detector = Mock()
+        mock_detector.detect_entities.return_value = entities
+        mock_detector_class.return_value = mock_detector
+
+        text, detected = processor.detect_entities("input.txt")
+
+        assert text == "Marie Dubois habite à Paris."
+        assert len(detected) == 2
+        mock_read_file.assert_called_once_with("input.txt")
+
+    @patch("gdpr_pseudonymizer.core.document_processor.HybridDetector")
+    @patch("gdpr_pseudonymizer.core.document_processor.read_file")
+    def test_empty_document(
+        self,
+        mock_read_file: Mock,
+        mock_detector_class: Mock,
+        processor: DocumentProcessor,
+    ) -> None:
+        mock_read_file.return_value = ""
+        mock_detector = Mock()
+        mock_detector.detect_entities.return_value = []
+        mock_detector_class.return_value = mock_detector
+
+        text, detected = processor.detect_entities("empty.txt")
+
+        assert text == ""
+        assert detected == []
+
+    @patch("gdpr_pseudonymizer.core.document_processor.HybridDetector")
+    @patch("gdpr_pseudonymizer.core.document_processor.read_file")
+    def test_entity_type_filter(
+        self,
+        mock_read_file: Mock,
+        mock_detector_class: Mock,
+        processor: DocumentProcessor,
+    ) -> None:
+        mock_read_file.return_value = "Marie Dubois habite à Paris."
+        entities = [
+            DetectedEntity(
+                text="Marie Dubois", entity_type="PERSON", start_pos=0, end_pos=12
+            ),
+            DetectedEntity(
+                text="Paris", entity_type="LOCATION", start_pos=23, end_pos=28
+            ),
+        ]
+        mock_detector = Mock()
+        mock_detector.detect_entities.return_value = entities
+        mock_detector_class.return_value = mock_detector
+
+        _, detected = processor.detect_entities(
+            "input.txt", entity_type_filter={"PERSON"}
+        )
+
+        assert len(detected) == 1
+        assert detected[0].entity_type == "PERSON"
+
+    @patch("gdpr_pseudonymizer.core.document_processor.read_file")
+    def test_file_read_error(
+        self,
+        mock_read_file: Mock,
+        processor: DocumentProcessor,
+    ) -> None:
+        from gdpr_pseudonymizer.exceptions import FileProcessingError
+
+        mock_read_file.side_effect = FileProcessingError("Cannot read file")
+
+        with pytest.raises(FileProcessingError, match="Cannot read file"):
+            processor.detect_entities("bad_file.txt")
+
+
+class TestBuildPseudonymPreviews:
+    """Tests for DocumentProcessor.build_pseudonym_previews() (GUI phase)."""
+
+    @pytest.fixture
+    def processor(self, tmp_path: Path) -> DocumentProcessor:
+        return DocumentProcessor(
+            db_path=str(tmp_path / "test.db"),
+            passphrase="test_passphrase_12345",
+            theme="neutral",
+        )
+
+    @patch("gdpr_pseudonymizer.core.document_processor.GenderDetector")
+    @patch("gdpr_pseudonymizer.core.document_processor.CompositionalPseudonymEngine")
+    @patch("gdpr_pseudonymizer.core.document_processor.LibraryBasedPseudonymManager")
+    @patch("gdpr_pseudonymizer.core.document_processor.open_database")
+    def test_happy_path_new_entities(
+        self,
+        mock_open_db: Mock,
+        mock_manager_class: Mock,
+        mock_engine_class: Mock,
+        mock_gender_class: Mock,
+        processor: DocumentProcessor,
+    ) -> None:
+        # Setup DB session mock
+        mock_session = MagicMock()
+        mock_session.__enter__ = Mock(return_value=mock_session)
+        mock_session.__exit__ = Mock(return_value=None)
+        mock_open_db.return_value = mock_session
+
+        mock_manager = Mock()
+        mock_manager_class.return_value = mock_manager
+
+        mock_engine = Mock()
+        mock_engine.strip_titles.side_effect = lambda x: x
+        mock_engine.strip_prepositions.side_effect = lambda x: x
+        mock_engine.assign_compositional_pseudonym.return_value = PseudonymAssignment(
+            pseudonym_full="Leia Organa",
+            pseudonym_first="Leia",
+            pseudonym_last="Organa",
+            theme="neutral",
+            exhaustion_percentage=0.1,
+            is_ambiguous=False,
+        )
+        mock_engine_class.return_value = mock_engine
+
+        mock_gender = Mock()
+        mock_gender_class.return_value = mock_gender
+
+        mock_mapping_repo = Mock()
+        mock_mapping_repo.find_by_full_name.return_value = None
+        mock_mapping_repo.find_all.return_value = []
+
+        with (
+            patch(
+                "gdpr_pseudonymizer.core.document_processor.SQLiteMappingRepository",
+                return_value=mock_mapping_repo,
+            ),
+            patch(
+                "gdpr_pseudonymizer.core.document_processor.AuditRepository",
+            ),
+        ):
+            entities = [
+                DetectedEntity(
+                    text="Marie Dubois", entity_type="PERSON", start_pos=0, end_pos=12
+                ),
+            ]
+            previews = processor.build_pseudonym_previews(entities)
+
+        assert "Marie Dubois_0" in previews
+        assert previews["Marie Dubois_0"] == "Leia Organa"
+
+    @patch("gdpr_pseudonymizer.core.document_processor.GenderDetector")
+    @patch("gdpr_pseudonymizer.core.document_processor.CompositionalPseudonymEngine")
+    @patch("gdpr_pseudonymizer.core.document_processor.LibraryBasedPseudonymManager")
+    @patch("gdpr_pseudonymizer.core.document_processor.open_database")
+    def test_existing_mapping(
+        self,
+        mock_open_db: Mock,
+        mock_manager_class: Mock,
+        mock_engine_class: Mock,
+        mock_gender_class: Mock,
+        processor: DocumentProcessor,
+    ) -> None:
+        mock_session = MagicMock()
+        mock_session.__enter__ = Mock(return_value=mock_session)
+        mock_session.__exit__ = Mock(return_value=None)
+        mock_open_db.return_value = mock_session
+
+        mock_manager = Mock()
+        mock_manager_class.return_value = mock_manager
+
+        existing = Entity(
+            id="e1",
+            entity_type="PERSON",
+            full_name="Marie Dubois",
+            pseudonym_full="Leia Organa",
+            pseudonym_first="Leia",
+            pseudonym_last="Organa",
+            first_seen_timestamp=datetime.now(timezone.utc),
+            theme="neutral",
+        )
+
+        mock_engine = Mock()
+        mock_engine.strip_titles.side_effect = lambda x: x
+        mock_engine.strip_prepositions.side_effect = lambda x: x
+        mock_engine_class.return_value = mock_engine
+
+        mock_gender = Mock()
+        mock_gender_class.return_value = mock_gender
+
+        mock_mapping_repo = Mock()
+        mock_mapping_repo.find_by_full_name.return_value = existing
+        mock_mapping_repo.find_all.return_value = [existing]
+
+        with (
+            patch(
+                "gdpr_pseudonymizer.core.document_processor.SQLiteMappingRepository",
+                return_value=mock_mapping_repo,
+            ),
+            patch(
+                "gdpr_pseudonymizer.core.document_processor.AuditRepository",
+            ),
+        ):
+            entities = [
+                DetectedEntity(
+                    text="Marie Dubois", entity_type="PERSON", start_pos=0, end_pos=12
+                ),
+            ]
+            previews = processor.build_pseudonym_previews(entities)
+
+        assert previews["Marie Dubois_0"] == "Leia Organa"
+
+    @patch("gdpr_pseudonymizer.core.document_processor.GenderDetector")
+    @patch("gdpr_pseudonymizer.core.document_processor.CompositionalPseudonymEngine")
+    @patch("gdpr_pseudonymizer.core.document_processor.LibraryBasedPseudonymManager")
+    @patch("gdpr_pseudonymizer.core.document_processor.open_database")
+    def test_title_preservation(
+        self,
+        mock_open_db: Mock,
+        mock_manager_class: Mock,
+        mock_engine_class: Mock,
+        mock_gender_class: Mock,
+        processor: DocumentProcessor,
+    ) -> None:
+        mock_session = MagicMock()
+        mock_session.__enter__ = Mock(return_value=mock_session)
+        mock_session.__exit__ = Mock(return_value=None)
+        mock_open_db.return_value = mock_session
+
+        mock_manager = Mock()
+        mock_manager_class.return_value = mock_manager
+
+        mock_engine = Mock()
+        mock_engine.strip_titles.side_effect = lambda x: x.replace("Dr. ", "").replace(
+            "Dr ", ""
+        )
+        mock_engine.strip_prepositions.side_effect = lambda x: x
+        mock_engine.assign_compositional_pseudonym.return_value = PseudonymAssignment(
+            pseudonym_full="Leia Organa",
+            pseudonym_first="Leia",
+            pseudonym_last="Organa",
+            theme="neutral",
+            exhaustion_percentage=0.1,
+            is_ambiguous=False,
+        )
+        mock_engine_class.return_value = mock_engine
+
+        mock_gender = Mock()
+        mock_gender_class.return_value = mock_gender
+
+        mock_mapping_repo = Mock()
+        mock_mapping_repo.find_by_full_name.return_value = None
+        mock_mapping_repo.find_all.return_value = []
+
+        with (
+            patch(
+                "gdpr_pseudonymizer.core.document_processor.SQLiteMappingRepository",
+                return_value=mock_mapping_repo,
+            ),
+            patch(
+                "gdpr_pseudonymizer.core.document_processor.AuditRepository",
+            ),
+        ):
+            entities = [
+                DetectedEntity(
+                    text="Dr. Marie Dubois",
+                    entity_type="PERSON",
+                    start_pos=0,
+                    end_pos=16,
+                ),
+            ]
+            previews = processor.build_pseudonym_previews(entities)
+
+        key = "Dr. Marie Dubois_0"
+        assert key in previews
+        assert previews[key].startswith("Dr.")
+
+
+class TestFinalizeDocument:
+    """Tests for DocumentProcessor.finalize_document() (GUI phase 2)."""
+
+    @pytest.fixture
+    def processor(self, tmp_path: Path) -> DocumentProcessor:
+        return DocumentProcessor(
+            db_path=str(tmp_path / "test.db"),
+            passphrase="test_passphrase_12345",
+        )
+
+    @patch("gdpr_pseudonymizer.core.document_processor.GenderDetector")
+    @patch("gdpr_pseudonymizer.core.document_processor.CompositionalPseudonymEngine")
+    @patch("gdpr_pseudonymizer.core.document_processor.LibraryBasedPseudonymManager")
+    @patch("gdpr_pseudonymizer.core.document_processor.write_file")
+    @patch("gdpr_pseudonymizer.core.document_processor.open_database")
+    def test_happy_path(
+        self,
+        mock_open_db: Mock,
+        mock_write_file: Mock,
+        mock_manager_class: Mock,
+        mock_engine_class: Mock,
+        mock_gender_class: Mock,
+        processor: DocumentProcessor,
+    ) -> None:
+        mock_session = MagicMock()
+        mock_session.__enter__ = Mock(return_value=mock_session)
+        mock_session.__exit__ = Mock(return_value=None)
+        mock_open_db.return_value = mock_session
+
+        mock_manager = Mock()
+        mock_manager_class.return_value = mock_manager
+
+        mock_engine = Mock()
+        mock_engine.strip_titles.side_effect = lambda x: x
+        mock_engine.strip_prepositions.side_effect = lambda x: x
+        mock_engine.parse_full_name.return_value = ("Marie", "Dubois", False)
+        mock_engine.gender_detector = None
+        mock_engine.assign_compositional_pseudonym.return_value = PseudonymAssignment(
+            pseudonym_full="Leia Organa",
+            pseudonym_first="Leia",
+            pseudonym_last="Organa",
+            theme="neutral",
+            exhaustion_percentage=0.1,
+            is_ambiguous=False,
+        )
+        mock_engine_class.return_value = mock_engine
+
+        mock_gender = Mock()
+        mock_gender_class.return_value = mock_gender
+
+        mock_mapping_repo = Mock()
+        mock_mapping_repo.find_by_full_name.return_value = None
+        mock_mapping_repo.find_all.return_value = []
+        mock_mapping_repo.save_batch.return_value = []
+
+        with (
+            patch(
+                "gdpr_pseudonymizer.core.document_processor.SQLiteMappingRepository",
+                return_value=mock_mapping_repo,
+            ),
+            patch(
+                "gdpr_pseudonymizer.core.document_processor.AuditRepository",
+            ),
+        ):
+            entities = [
+                DetectedEntity(
+                    text="Marie Dubois", entity_type="PERSON", start_pos=0, end_pos=12
+                ),
+            ]
+            result = processor.finalize_document(
+                "Marie Dubois habite ici.", entities, "output.txt"
+            )
+
+        assert result.success is True
+        assert result.entities_new == 1
+        mock_write_file.assert_called_once()
+        written_text = mock_write_file.call_args[0][1]
+        assert "Leia Organa" in written_text
+
+    @patch("gdpr_pseudonymizer.core.document_processor.open_database")
+    def test_error_during_processing(
+        self,
+        mock_open_db: Mock,
+        processor: DocumentProcessor,
+    ) -> None:
+        mock_open_db.side_effect = RuntimeError("DB connection failed")
+
+        # Mock _log_failed_operation to avoid secondary DB access
+        with patch.object(processor, "_log_failed_operation"):
+            result = processor.finalize_document("some text", [], "output.txt")
+
+        assert result.success is False
+        assert "RuntimeError" in (result.error_message or "")
+
+    @patch("gdpr_pseudonymizer.core.document_processor.GenderDetector")
+    @patch("gdpr_pseudonymizer.core.document_processor.CompositionalPseudonymEngine")
+    @patch("gdpr_pseudonymizer.core.document_processor.LibraryBasedPseudonymManager")
+    @patch("gdpr_pseudonymizer.core.document_processor.write_file")
+    @patch("gdpr_pseudonymizer.core.document_processor.open_database")
+    def test_empty_entity_list(
+        self,
+        mock_open_db: Mock,
+        mock_write_file: Mock,
+        mock_manager_class: Mock,
+        mock_engine_class: Mock,
+        mock_gender_class: Mock,
+        processor: DocumentProcessor,
+    ) -> None:
+        mock_session = MagicMock()
+        mock_session.__enter__ = Mock(return_value=mock_session)
+        mock_session.__exit__ = Mock(return_value=None)
+        mock_open_db.return_value = mock_session
+
+        mock_manager = Mock()
+        mock_manager_class.return_value = mock_manager
+
+        mock_engine = Mock()
+        mock_engine_class.return_value = mock_engine
+
+        mock_gender = Mock()
+        mock_gender_class.return_value = mock_gender
+
+        mock_mapping_repo = Mock()
+        mock_mapping_repo.find_all.return_value = []
+
+        with (
+            patch(
+                "gdpr_pseudonymizer.core.document_processor.SQLiteMappingRepository",
+                return_value=mock_mapping_repo,
+            ),
+            patch(
+                "gdpr_pseudonymizer.core.document_processor.AuditRepository",
+            ),
+        ):
+            result = processor.finalize_document(
+                "Document text here.", [], "output.txt"
+            )
+
+        assert result.success is True
+        assert result.entities_detected == 0
+        mock_write_file.assert_called_once()
+        written_text = mock_write_file.call_args[0][1]
+        assert written_text == "Document text here."
+
+
+class TestErrorCases:
+    """Error case tests for DocumentProcessor (TEST-002)."""
+
+    @pytest.fixture
+    def processor(self, tmp_path: Path) -> DocumentProcessor:
+        return DocumentProcessor(
+            db_path=str(tmp_path / "test.db"),
+            passphrase="test_passphrase_12345",
+        )
+
+    @patch("gdpr_pseudonymizer.core.document_processor.HybridDetector")
+    @patch("gdpr_pseudonymizer.core.document_processor.read_file")
+    @patch("gdpr_pseudonymizer.core.document_processor.open_database")
+    def test_encryption_error_during_processing(
+        self,
+        mock_open_db: Mock,
+        mock_read_file: Mock,
+        mock_detector_class: Mock,
+        processor: DocumentProcessor,
+    ) -> None:
+        """Test process_document with EncryptionError (database corruption)."""
+        from gdpr_pseudonymizer.exceptions import EncryptionError
+
+        mock_read_file.return_value = "Some text"
+        mock_detector = Mock()
+        mock_detector.detect_entities.return_value = []
+        mock_detector_class.return_value = mock_detector
+
+        mock_open_db.side_effect = EncryptionError("Decryption failed: corrupt data")
+
+        # Mock _log_failed_operation to avoid secondary DB access
+        with patch.object(processor, "_log_failed_operation"):
+            result = processor.process_document("input.txt", "output.txt")
+
+        assert result.success is False
+        assert "EncryptionError" in (result.error_message or "")
+
+    @patch("gdpr_pseudonymizer.core.document_processor.GenderDetector")
+    @patch("gdpr_pseudonymizer.core.document_processor.CompositionalPseudonymEngine")
+    @patch("gdpr_pseudonymizer.core.document_processor.LibraryBasedPseudonymManager")
+    @patch("gdpr_pseudonymizer.core.document_processor.HybridDetector")
+    @patch("gdpr_pseudonymizer.core.document_processor.read_file")
+    @patch("gdpr_pseudonymizer.core.document_processor.open_database")
+    def test_save_batch_failure(
+        self,
+        mock_open_db: Mock,
+        mock_read_file: Mock,
+        mock_detector_class: Mock,
+        mock_manager_class: Mock,
+        mock_engine_class: Mock,
+        mock_gender_class: Mock,
+        processor: DocumentProcessor,
+    ) -> None:
+        """Test process_document with save_batch database write error."""
+        from gdpr_pseudonymizer.exceptions import DatabaseError
+
+        mock_read_file.return_value = "Marie Dubois"
+        entities = [
+            DetectedEntity(
+                text="Marie Dubois", entity_type="PERSON", start_pos=0, end_pos=12
+            ),
+        ]
+        mock_detector = Mock()
+        mock_detector.detect_entities.return_value = entities
+        mock_detector_class.return_value = mock_detector
+
+        mock_session = MagicMock()
+        mock_session.__enter__ = Mock(return_value=mock_session)
+        mock_session.__exit__ = Mock(return_value=None)
+        mock_open_db.return_value = mock_session
+
+        mock_manager = Mock()
+        mock_manager_class.return_value = mock_manager
+
+        mock_engine = Mock()
+        mock_engine.strip_titles.side_effect = lambda x: x
+        mock_engine.strip_prepositions.side_effect = lambda x: x
+        mock_engine.parse_full_name.return_value = ("Marie", "Dubois", False)
+        mock_engine.gender_detector = None
+        mock_engine.assign_compositional_pseudonym.return_value = PseudonymAssignment(
+            pseudonym_full="Leia Organa",
+            pseudonym_first="Leia",
+            pseudonym_last="Organa",
+            theme="neutral",
+            exhaustion_percentage=0.1,
+            is_ambiguous=False,
+        )
+        mock_engine_class.return_value = mock_engine
+
+        mock_gender = Mock()
+        mock_gender_class.return_value = mock_gender
+
+        mock_mapping_repo = Mock()
+        mock_mapping_repo.find_by_full_name.return_value = None
+        mock_mapping_repo.find_all.return_value = []
+        mock_mapping_repo.save_batch.side_effect = DatabaseError("disk I/O error")
+
+        with (
+            patch(
+                "gdpr_pseudonymizer.core.document_processor.SQLiteMappingRepository",
+                return_value=mock_mapping_repo,
+            ),
+            patch(
+                "gdpr_pseudonymizer.core.document_processor.AuditRepository",
+            ),
+            patch.object(processor, "_log_failed_operation"),
+        ):
+            result = processor.process_document(
+                "input.txt", "output.txt", skip_validation=True
+            )
+
+        assert result.success is False
+        assert "DatabaseError" in (result.error_message or "")
+
+    @patch("gdpr_pseudonymizer.core.document_processor.run_validation_workflow")
+    @patch("gdpr_pseudonymizer.core.document_processor.GenderDetector")
+    @patch("gdpr_pseudonymizer.core.document_processor.CompositionalPseudonymEngine")
+    @patch("gdpr_pseudonymizer.core.document_processor.LibraryBasedPseudonymManager")
+    @patch("gdpr_pseudonymizer.core.document_processor.HybridDetector")
+    @patch("gdpr_pseudonymizer.core.document_processor.read_file")
+    @patch("gdpr_pseudonymizer.core.document_processor.open_database")
+    def test_keyboard_interrupt_during_validation(
+        self,
+        mock_open_db: Mock,
+        mock_read_file: Mock,
+        mock_detector_class: Mock,
+        mock_manager_class: Mock,
+        mock_engine_class: Mock,
+        mock_gender_class: Mock,
+        mock_validation_workflow: Mock,
+        processor: DocumentProcessor,
+    ) -> None:
+        """Test KeyboardInterrupt during validation propagates correctly."""
+        mock_read_file.return_value = "Marie Dubois"
+        entities = [
+            DetectedEntity(
+                text="Marie Dubois", entity_type="PERSON", start_pos=0, end_pos=12
+            ),
+        ]
+        mock_detector = Mock()
+        mock_detector.detect_entities.return_value = entities
+        mock_detector_class.return_value = mock_detector
+
+        mock_session = MagicMock()
+        mock_session.__enter__ = Mock(return_value=mock_session)
+        mock_session.__exit__ = Mock(return_value=None)
+        mock_open_db.return_value = mock_session
+
+        mock_manager = Mock()
+        mock_manager_class.return_value = mock_manager
+
+        mock_engine = Mock()
+        mock_engine.strip_titles.side_effect = lambda x: x
+        mock_engine.strip_prepositions.side_effect = lambda x: x
+        mock_engine_class.return_value = mock_engine
+
+        mock_gender = Mock()
+        mock_gender_class.return_value = mock_gender
+
+        mock_mapping_repo = Mock()
+        mock_mapping_repo.find_by_full_name.return_value = None
+        mock_mapping_repo.find_all.return_value = []
+
+        mock_validation_workflow.side_effect = KeyboardInterrupt()
+
+        with (
+            patch(
+                "gdpr_pseudonymizer.core.document_processor.SQLiteMappingRepository",
+                return_value=mock_mapping_repo,
+            ),
+            patch(
+                "gdpr_pseudonymizer.core.document_processor.AuditRepository",
+            ),
+        ):
+            with pytest.raises(KeyboardInterrupt):
+                processor.process_document(
+                    "input.txt", "output.txt", skip_validation=False
+                )
+
+    @patch("gdpr_pseudonymizer.core.document_processor.read_file")
+    @patch("gdpr_pseudonymizer.core.document_processor.open_database")
+    def test_invalid_passphrase(
+        self,
+        mock_open_db: Mock,
+        mock_read_file: Mock,
+        processor: DocumentProcessor,
+    ) -> None:
+        """Test process_document with invalid passphrase (ValueError)."""
+        mock_read_file.return_value = "Some text"
+
+        mock_open_db.side_effect = ValueError("Invalid passphrase: canary mismatch")
+
+        with patch.object(processor, "_log_failed_operation"):
+            result = processor.process_document("input.txt", "output.txt")
+
+        assert result.success is False
+        assert "ValueError" in (result.error_message or "")

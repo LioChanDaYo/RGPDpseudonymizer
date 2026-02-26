@@ -62,6 +62,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `gdpr-pseudo-gui` entry point, PySide6-Essentials ~6.7.0 as optional dep (`pip install gdpr-pseudonymizer[gui]`)
   - 77 GUI unit tests (pytest-qt) across 9 test files; startup time 1.706s (<5s threshold)
 
+### Changed
+
+- **Core Processing Hardening & Security** (Story 6.7.1) — Security and quality improvements to the core processing pipeline:
+  - **PII sanitization (SEC-001):** New `_sanitize_error_message()` strips quoted strings and capitalized name sequences (French accent-aware) from exception messages before logging/audit. Applied to all 3 PII leak vectors in `document_processor.py`
+  - **Typed exception handling (EXC-001):** Replaced bare `except Exception` with typed catches — `(ValueError, RuntimeError)` in `_build_pseudonym_assigner`, `(OSError, AttributeError, ImportError)` in `_get_model_version` — with `logger.warning` instead of silent fallback
+  - **DRY refactoring (DRY-001):** Extracted `_normalize_entity_text()` static method, eliminating 3 identical strip_titles/strip_prepositions code blocks
+  - **Per-document entity type counts:** Added `entity_type_counts` field to `ProcessingResult` and `_ResolveResult`, populated during entity resolution
+  - 26 new tests (10 sanitization, 10 GUI-phase methods, 4 error cases, 2 integration with real SQLite)
+
 ### Fixed
 
 - **Wrong passphrase locks out retry**: Cached passphrase was stored before validation — entering a wrong passphrase with "Mémoriser" checked caused all subsequent attempts to silently reuse the bad passphrase. Fixed by clearing cache on `ValueError` (database screen) and on auth-related worker errors (batch screen).

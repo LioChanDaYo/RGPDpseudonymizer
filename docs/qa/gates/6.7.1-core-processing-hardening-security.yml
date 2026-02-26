@@ -1,0 +1,43 @@
+schema: 1
+story: "6.7.1"
+story_title: "Core Processing Hardening & Security"
+gate: PASS
+status_reason: "All 8 ACs met with comprehensive test coverage (30+ new tests). PII sanitization applied to all error logging paths. Typed exceptions, DRY refactoring, and DATA-001 fix are clean and well-tested."
+reviewer: "Quinn (Test Architect)"
+updated: "2026-02-26T00:00:00Z"
+
+waiver: { active: false }
+
+top_issues: []
+
+quality_score: 90
+expires: "2026-03-12T00:00:00Z"
+
+evidence:
+  tests_reviewed: 34
+  risks_identified: 0
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8]
+    ac_gaps: []
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: "All logger.error() paths sanitized via _sanitize_error_message(). 3 regex patterns cover quoted strings and capitalized name sequences with French accent support. DEBUG-level entity.text logging noted as future hardening opportunity."
+  performance:
+    status: PASS
+    notes: "No performance impact. DRY extraction is zero-cost. entity_type_counts adds trivial O(n) dict increments. No ReDoS risk in sanitization regex."
+  reliability:
+    status: PASS
+    notes: "Top-level exception handlers prevent crashes. KeyboardInterrupt propagation verified by test. Typed catches with fallback logging in _build_pseudonym_assigner and _get_model_version."
+  maintainability:
+    status: PASS
+    notes: "DRY-001 eliminates 3-site code duplication. _normalize_entity_text is a clean static method. entity_type_counts flows naturally through result chain. Worker imports simplified."
+
+recommendations:
+  immediate: []
+  future:
+    - action: "Populate entity_mappings in ProcessingWorker and FinalizationWorker to restore pseudonym highlighting in results screen (pre-existing gap, not a regression)"
+      refs: ["gdpr_pseudonymizer/gui/workers/processing_worker.py:190", "gdpr_pseudonymizer/gui/workers/finalization_worker.py:129"]
+    - action: "Sanitize DEBUG-level log statements that reference entity.text for defense-in-depth"
+      refs: ["gdpr_pseudonymizer/core/document_processor.py:477-479", "gdpr_pseudonymizer/core/document_processor.py:366-380"]

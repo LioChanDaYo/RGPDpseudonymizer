@@ -84,10 +84,6 @@ class ProcessingWorker(QRunnable):
         )
         from gdpr_pseudonymizer.data.database import (
             init_database,
-            open_database,
-        )
-        from gdpr_pseudonymizer.data.repositories.mapping_repository import (
-            SQLiteMappingRepository,
         )
         from gdpr_pseudonymizer.exceptions import FileProcessingError
 
@@ -189,23 +185,9 @@ class ProcessingWorker(QRunnable):
         # Read pseudonymized content
         pseudonymized_content = Path(self._output_path).read_text(encoding="utf-8")
 
-        # Query entity type breakdown from mapping repo
-        entity_type_counts: dict[str, int] = {}
+        # Use per-document entity type counts from ProcessingResult (DATA-001 fix)
+        entity_type_counts = result.entity_type_counts or {}
         entity_mappings: list[tuple[str, str]] = []
-        try:
-            with open_database(self._db_path, self._passphrase) as db_session:
-                repo = SQLiteMappingRepository(db_session)
-                for entity_type in ("PERSON", "LOCATION", "ORG"):
-                    entities = repo.find_all(entity_type=entity_type)
-                    if entities:
-                        entity_type_counts[entity_type] = len(entities)
-                        for ent in entities:
-                            entity_mappings.append(
-                                (ent.pseudonym_full, ent.entity_type)
-                            )
-        except Exception:
-            # Non-fatal: counts may be inaccurate but processing succeeded
-            logger.warning("entity_type_query_failed")
 
         self.signals.progress.emit(100, "Terminé")
 
