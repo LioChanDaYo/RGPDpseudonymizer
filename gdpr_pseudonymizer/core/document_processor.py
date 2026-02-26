@@ -12,6 +12,7 @@ This is the core workflow implementation for Story 2.6.
 
 from __future__ import annotations
 
+import re
 import time
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -24,7 +25,6 @@ from gdpr_pseudonymizer.data.repositories.mapping_repository import (
     MappingRepository,
     SQLiteMappingRepository,
 )
-from gdpr_pseudonymizer.exceptions import FileProcessingError
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 from gdpr_pseudonymizer.nlp.hybrid_detector import HybridDetector
 from gdpr_pseudonymizer.pseudonym.assignment_engine import (
@@ -53,6 +53,7 @@ class ProcessingResult:
         entities_reused: Number of reused pseudonyms (idempotency)
         processing_time_seconds: Total processing time in seconds
         error_message: Error description if processing failed
+        entity_type_counts: Per-type entity counts from this document
     """
 
     success: bool
@@ -63,6 +64,7 @@ class ProcessingResult:
     entities_reused: int
     processing_time_seconds: float
     error_message: str | None = None
+    entity_type_counts: dict[str, int] | None = None
 
 
 @dataclass
@@ -86,6 +88,7 @@ class _ResolveResult:
     replacements: list[tuple[int, int, str]]
     entities_new: int
     entities_reused: int
+    entity_type_counts: dict[str, int]
 
 
 class DocumentProcessor:
@@ -191,6 +194,25 @@ class DocumentProcessor:
 
         return detected_entities
 
+    @staticmethod
+    def _normalize_entity_text(ctx: _ProcessingContext, entity: DetectedEntity) -> str:
+        """Normalize entity text by stripping titles and prepositions.
+
+        Applies strip_titles for all entities, then strip_prepositions
+        for LOCATION entities. Used for DB lookups and pseudonym assignment.
+
+        Args:
+            ctx: Processing context with compositional engine
+            entity: Detected entity to normalize
+
+        Returns:
+            Stripped entity text ready for lookup/assignment
+        """
+        text = ctx.compositional_engine.strip_titles(entity.text)
+        if entity.entity_type == "LOCATION":
+            text = ctx.compositional_engine.strip_prepositions(text)
+        return text
+
     def _build_pseudonym_assigner(
         self, ctx: _ProcessingContext
     ) -> Callable[[DetectedEntity], str]:
@@ -209,11 +231,7 @@ class DocumentProcessor:
         preview_cache: dict[str, str] = {}
 
         def pseudonym_assigner(entity: DetectedEntity) -> str:
-            entity_text_stripped = ctx.compositional_engine.strip_titles(entity.text)
-            if entity.entity_type == "LOCATION":
-                entity_text_stripped = ctx.compositional_engine.strip_prepositions(
-                    entity_text_stripped
-                )
+            entity_text_stripped = DocumentProcessor._normalize_entity_text(ctx, entity)
 
             existing_entity = ctx.mapping_repo.find_by_full_name(entity_text_stripped)
             if existing_entity:
@@ -230,7 +248,12 @@ class DocumentProcessor:
                 )
                 preview_cache[entity_text_stripped] = assignment.pseudonym_full
                 return assignment.pseudonym_full
-            except Exception:
+            except (ValueError, RuntimeError) as e:
+                logger.warning(
+                    "pseudonym_preview_fallback",
+                    entity_type=entity.entity_type,
+                    error_type=type(e).__name__,
+                )
                 return f"[{entity.entity_type}_PREVIEW]"
 
         return pseudonym_assigner
@@ -258,11 +281,7 @@ class DocumentProcessor:
         unknown_entities: list[DetectedEntity] = []
 
         for entity in detected_entities:
-            entity_text_stripped = ctx.compositional_engine.strip_titles(entity.text)
-            if entity.entity_type == "LOCATION":
-                entity_text_stripped = ctx.compositional_engine.strip_prepositions(
-                    entity_text_stripped
-                )
+            entity_text_stripped = self._normalize_entity_text(ctx, entity)
 
             existing = ctx.mapping_repo.find_by_full_name(entity_text_stripped)
             if existing:
@@ -452,6 +471,7 @@ class DocumentProcessor:
         entity_cache: dict[str, str] = {}
         entities_new = 0
         entities_reused = 0
+        type_counts: dict[str, int] = {}
 
         for entity in validated_entities:
             logger.debug(
@@ -459,11 +479,8 @@ class DocumentProcessor:
                 entity_text=entity.text,
                 entity_type=entity.entity_type,
             )
-            entity_text_stripped = ctx.compositional_engine.strip_titles(entity.text)
-            if entity.entity_type == "LOCATION":
-                entity_text_stripped = ctx.compositional_engine.strip_prepositions(
-                    entity_text_stripped
-                )
+            entity_text_stripped = self._normalize_entity_text(ctx, entity)
+            type_counts[entity.entity_type] = type_counts.get(entity.entity_type, 0) + 1
 
             if entity_text_stripped in entity_cache:
                 pseudonym = entity_cache[entity_text_stripped]
@@ -506,7 +523,7 @@ class DocumentProcessor:
             except Exception as e:
                 logger.error(
                     "batch_save_failed",
-                    error=str(e),
+                    error=self._sanitize_error_message(e),
                     entity_count=len(new_entities),
                 )
                 raise
@@ -515,6 +532,7 @@ class DocumentProcessor:
             replacements=replacements,
             entities_new=entities_new,
             entities_reused=entities_reused,
+            entity_type_counts=type_counts,
         )
 
     @staticmethod
@@ -637,6 +655,37 @@ class DocumentProcessor:
         )
         ctx.audit_repo.log_operation(operation)
 
+    @staticmethod
+    def _sanitize_error_message(error: Exception) -> str:
+        """Sanitize exception message to strip potential PII before logging.
+
+        Removes quoted strings and entity-like patterns (capitalized word
+        sequences) from the error text while preserving the exception type
+        name and generic error structure for diagnostics.
+
+        Args:
+            error: The caught exception
+
+        Returns:
+            Sanitized string safe for logging and audit storage
+        """
+        error_type = type(error).__name__
+        message = str(error)
+
+        # Strip single-quoted strings (e.g., 'Jean Dupont')
+        message = re.sub(r"'[^']*'", "'[REDACTED]'", message)
+        # Strip double-quoted strings (e.g., "Jean Dupont")
+        message = re.sub(r'"[^"]*"', '"[REDACTED]"', message)
+        # Strip sequences of 2+ capitalized words that look like names
+        # (e.g., "Jean Pierre Dupont" but not "Cannot parse")
+        message = re.sub(
+            r"\b[A-ZÀ-Ÿ][a-zà-ÿ]+(?:\s+[A-ZÀ-Ÿ][a-zà-ÿ]+){1,}\b",
+            "[REDACTED]",
+            message,
+        )
+
+        return f"{error_type}: {message}"
+
     def _handle_processing_error(
         self,
         error: Exception,
@@ -646,11 +695,7 @@ class DocumentProcessor:
     ) -> ProcessingResult:
         """Format error, log to audit trail, and return failure result."""
         processing_time = time.time() - start_time
-        error_message = (
-            str(error)
-            if isinstance(error, FileProcessingError)
-            else f"{type(error).__name__}: {error}"
-        )
+        error_message = self._sanitize_error_message(error)
         logger.error("processing_error", error=error_message)
         self._log_failed_operation(
             input_path, error_message, processing_time, detected_entities=[]
@@ -776,6 +821,7 @@ class DocumentProcessor:
                     entities_new=resolve_result.entities_new,
                     entities_reused=resolve_result.entities_reused,
                     processing_time_seconds=processing_time,
+                    entity_type_counts=resolve_result.entity_type_counts,
                 )
         except Exception as e:
             return self._handle_processing_error(e, "", output_path, start_time)
@@ -823,6 +869,7 @@ class DocumentProcessor:
                     entities_new=resolve_result.entities_new,
                     entities_reused=resolve_result.entities_reused,
                     processing_time_seconds=processing_time,
+                    entity_type_counts=resolve_result.entity_type_counts,
                 )
         except Exception as e:
             return self._handle_processing_error(e, input_path, output_path, start_time)
@@ -842,8 +889,11 @@ class DocumentProcessor:
                     return (
                         f"{meta.get('name', 'unknown')}-{meta.get('version', '0.0.0')}"
                     )
-            except Exception:
-                pass
+            except (OSError, AttributeError, ImportError) as e:
+                logger.warning(
+                    "model_version_unavailable",
+                    error_type=type(e).__name__,
+                )
         return f"{self.model_name}-unknown"
 
     def _log_failed_operation(
@@ -878,4 +928,4 @@ class DocumentProcessor:
                 audit_repo.log_operation(operation)
         except Exception as e:
             # Audit logging failed - log to application logger but don't propagate
-            logger.error("audit_logging_failed", error=str(e))
+            logger.error("audit_logging_failed", error=self._sanitize_error_message(e))

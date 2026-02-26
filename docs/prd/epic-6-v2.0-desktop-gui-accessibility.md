@@ -57,10 +57,13 @@ The v1.0/v1.1 CLI tool has validated the core value proposition (local GDPR-comp
 | 6.5: Batch Processing & Configuration Management | 🟡 **MEDIUM** | 1-2 weeks | Roadmap v2.0 | ✅ COMPLETE |
 | 6.6: Internationalization & French UI | 🟡 **MEDIUM** | 1-2 weeks | FE-010b + 5.4.1 | ✅ COMPLETE |
 | 6.7: Accessibility (WCAG AA) | 🟡 **MEDIUM** | 1 week | Roadmap v2.0 | ✅ COMPLETE |
+| 6.7.1: Core Processing Hardening & Security | 🔴 **HIGH** | 1-2 weeks | Code review feedback + DATA-001 | ✅ COMPLETE |
+| 6.7.2: Database Background Threading (FE-021) | 🔴 **HIGH** | 1-2 weeks | Story 6.5 PERF-001 / Story 6.7 AC7 | 📋 PENDING |
+| 6.7.3: Batch Validation Workflow (FE-022) | 🟡 **MEDIUM** | 1-2 weeks | Story 6.5 DEFERRED-001 / Story 6.7 AC8 | 📋 PENDING |
 | 6.8: Standalone Executables & Distribution | 🔴 **HIGH** | 2-3 weeks | FE-009 | 📋 PENDING |
 | 6.9: v2.0 Release Preparation | 🔴 **HIGH** | 1-2 days | — | 📋 PENDING |
 
-**Total Estimated Duration:** 10-16 weeks (target: 10-14 weeks)
+**Total Estimated Duration:** 13-19 weeks (target: 14-16 weeks)
 
 ---
 
@@ -515,8 +518,11 @@ Story 6.4 (Entity Validation)     ─── Week 6-8 ───── Key feature
 Story 6.5 (Batch + Config)        ─── Week 8-9 ───── Production features
 Story 6.6 (i18n + French)         ─── Week 9-10 ──── Parallelizable with 6.5
 Story 6.7 (Accessibility)         ─── Week 10-11 ─── Parallelizable with 6.8
-Story 6.8 (Executables)           ─── Week 10-12 ─── Distribution
-Story 6.9 (Release Prep)          ─── Week 12-13 ─── Release gate
+Story 6.7.1 (Hardening/Security)  ─── Week 11-12 ─── Core quality + DATA-001
+Story 6.7.2 (DB Threading)        ─── Week 12-13 ─── Performance (FE-021)
+Story 6.7.3 (Batch Validation)    ─── Week 13-14 ─── Feature (FE-022), parallelizable with 6.8
+Story 6.8 (Executables)           ─── Week 13-15 ─── Distribution
+Story 6.9 (Release Prep)          ─── Week 15-16 ─── Release gate
 ```
 
 **Parallelization Opportunities:**
@@ -590,7 +596,7 @@ These decisions are **open** and will be resolved during Story 6.1:
 
 ## Definition of Done
 
-- [ ] All 9 stories completed with acceptance criteria met
+- [ ] All 12 stories completed with acceptance criteria met
 - [ ] Existing CLI functionality verified (full test suite passing)
 - [ ] All quality gates green: black, ruff, mypy, pytest
 - [ ] Test count ≥ v1.1 baseline (1267+), coverage ≥ 86%
