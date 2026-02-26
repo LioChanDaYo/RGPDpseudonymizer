@@ -11,6 +11,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Database Background Threading** (Story 6.7.2) — All database operations run on background threads for responsive GUI:
+  - DatabaseWorker (QRunnable) for list, search, delete, and export operations via QThreadPool
+  - Cancel-and-replace strategy for cancellable operations (load, search); non-cancellable operations (delete, export) disable interactive controls
+  - Debounced search with persistent QTimer (300ms); threshold-based routing (inline <200 entities, background >200)
+  - Thread-safe list passing via shallow copy to search worker
+  - ListEntitiesResult dataclass bundles entities + DB metadata in single signal payload
+  - Loading indicator (QProgressBar) with accessibility labels and i18n integration
+  - Browse button auto-opens database; passphrase dialog pre-selects known DB path
+  - Comprehensive error handling with French user-facing messages for all project exception types
+  - Performance seed script (`tests/fixtures/seed_large_db.py`) for 1200-entity test databases
+  - 38 new tests (22 worker + 16 screen); all quality gates pass
+
 - **Batch Processing & Configuration Management** (Story 6.5) — Batch document processing and database management in the GUI:
   - Batch processing screen with 3-phase workflow (selection → progress → summary):
     - Folder and multi-file selection with file discovery (.txt/.md/.pdf/.docx), excludes `*_pseudonymized*`
@@ -80,6 +92,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **DATA-001**: Entity type counts in ProcessingWorker now count from detected entities list instead of querying entire DB, showing accurate per-document counts instead of cumulative DB totals
 - **THREAD-001**: Added cancellation flags to DetectionWorker and FinalizationWorker; cancel buttons now stop workers early between processing phases
 - **QSS theme rendering** — Fixed black stripes in light mode on Settings and Home screens caused by QScrollArea forcing `autoFillBackground(True)` on content widgets when QSS overrides the native palette. Added QProgressBar, QStackedWidget, QFrame, and QScrollArea container styles to both light and dark QSS theme files.
+- **Empty-string decrypt crash** (Story 6.7.2): `EncryptionService.decrypt("")` now returns `""` instead of crashing with `InvalidTag` from `AESSIV.decrypt(b"", None)`. Affects databases with raw empty strings in encrypted fields.
+- **Silent exception swallowing** (Story 6.7.2): `DatabaseWorker` catch-all handlers now log `repr(e)` and `type(e).__name__` instead of empty `str(e)` for exceptions like `cryptography.exceptions.InvalidTag` that have no message.
 
 ---
 

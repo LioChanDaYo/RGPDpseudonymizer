@@ -131,6 +131,9 @@ class EncryptionService:
         if ciphertext is None:
             return None
 
+        if ciphertext == "":
+            return ""
+
         # Decode base64
         ciphertext_bytes = base64.b64decode(ciphertext.encode("ascii"))
 

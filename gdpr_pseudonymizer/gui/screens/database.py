@@ -1,16 +1,15 @@
 """Database management screen for entity listing, search, deletion, and export.
 
 Provides Article 17 RGPD-compliant entity deletion with audit logging.
+All database operations run on background threads via DatabaseWorker.
 """
 
 from __future__ import annotations
 
-import csv
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from PySide6.QtCore import QEvent, Qt
+from PySide6.QtCore import QEvent, Qt, QTimer
 from PySide6.QtWidgets import (
     QComboBox,
     QFileDialog,
@@ -18,6 +17,7 @@ from PySide6.QtWidgets import (
     QHeaderView,
     QLabel,
     QLineEdit,
+    QProgressBar,
     QPushButton,
     QTableWidget,
     QTableWidgetItem,
@@ -39,6 +39,7 @@ from gdpr_pseudonymizer.utils.logger import get_logger
 if TYPE_CHECKING:
     from gdpr_pseudonymizer.data.models import Entity
     from gdpr_pseudonymizer.gui.main_window import MainWindow
+    from gdpr_pseudonymizer.gui.workers.database_worker import DatabaseWorker
 
 logger = get_logger(__name__)
 
@@ -48,6 +49,9 @@ ENTITY_TYPE_LABELS: dict[str, str] = {
     "LOCATION": "\U0001f4cd",  # 📍
     "ORG": "\U0001f3e2",  # 🏢
 }
+
+# Threshold: use background thread for search/filter above this count
+_SEARCH_BACKGROUND_THRESHOLD = 200
 
 
 class DatabaseScreen(QWidget):
@@ -63,7 +67,17 @@ class DatabaseScreen(QWidget):
         self._passphrase = ""
         self._selected_ids: set[str] = set()
 
+        # Worker lifecycle
+        self._current_worker: DatabaseWorker | None = None
+        self._is_non_cancellable_op = False
+
         self._build_ui()
+
+        # Debounced search timer (persistent, restartable)
+        self._search_timer = QTimer()
+        self._search_timer.setSingleShot(True)
+        self._search_timer.setInterval(300)
+        self._search_timer.timeout.connect(self._apply_filters)
 
     # ------------------------------------------------------------------
     # Public API
@@ -104,7 +118,6 @@ class DatabaseScreen(QWidget):
         self._db_combo = QComboBox()
         self._db_combo.setEditable(True)
         self._db_combo.setMinimumWidth(300)
-        # Accessibility (AC2 - Task 4.2)
         self._db_combo.setAccessibleName(self.tr("Chemin de la base de données"))
         self._db_combo.setAccessibleDescription(
             self.tr(
@@ -116,7 +129,6 @@ class DatabaseScreen(QWidget):
         self._browse_btn = QPushButton()
         self._browse_btn.setObjectName("secondaryButton")
         self._browse_btn.clicked.connect(self._browse_db)
-        # Accessibility (AC2 - Task 4.2)
         self._browse_btn.setAccessibleName(self.tr("Parcourir les fichiers"))
         self._browse_btn.setAccessibleDescription(
             self.tr(
@@ -127,7 +139,6 @@ class DatabaseScreen(QWidget):
 
         self._open_btn = QPushButton()
         self._open_btn.clicked.connect(self._open_database)
-        # Accessibility (AC2 - Task 4.2)
         self._open_btn.setAccessibleName(self.tr("Ouvrir la base de données"))
         self._open_btn.setAccessibleDescription(
             self.tr("Charger et afficher le contenu de la base de données sélectionnée")
@@ -141,11 +152,20 @@ class DatabaseScreen(QWidget):
         self._info_label.setObjectName("secondaryLabel")
         layout.addWidget(self._info_label)
 
+        # Loading indicator (hidden by default)
+        self._progress_bar = QProgressBar()
+        self._progress_bar.setRange(0, 0)  # indeterminate by default
+        self._progress_bar.setVisible(False)
+        self._progress_bar.setAccessibleName(self.tr("Indicateur de chargement"))
+        self._progress_bar.setAccessibleDescription(
+            self.tr("Opération en cours sur la base de données")
+        )
+        layout.addWidget(self._progress_bar)
+
         # Search + filter row
         filter_row = QHBoxLayout()
         self._search_field = QLineEdit()
         self._search_field.textChanged.connect(self._on_search_changed)
-        # Accessibility (AC2 - Task 4.2)
         self._search_field.setAccessibleName(self.tr("Recherche dans la base"))
         self._search_field.setAccessibleDescription(
             self.tr("Filtrer les entités par nom ou pseudonyme")
@@ -158,7 +178,6 @@ class DatabaseScreen(QWidget):
         self._type_filter.addItem("", "LOCATION")
         self._type_filter.addItem("", "ORG")
         self._type_filter.currentIndexChanged.connect(self._on_filter_changed)
-        # Accessibility (AC2 - Task 4.2)
         self._type_filter.setAccessibleName(self.tr("Filtre par type d'entité"))
         self._type_filter.setAccessibleDescription(
             self.tr("Filtrer les entités par type: Personne, Lieu, ou Organisation")
@@ -184,7 +203,6 @@ class DatabaseScreen(QWidget):
         self._entity_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self._entity_table.setSelectionMode(QTableWidget.SelectionMode.NoSelection)
         self._entity_table.cellChanged.connect(self._on_cell_changed)
-        # Accessibility (AC2 - Task 4.2)
         self._entity_table.setAccessibleName(self.tr("Table des correspondances"))
         self._entity_table.setAccessibleDescription(
             self.tr("Affiche les entités stockées avec leurs pseudonymes")
@@ -204,7 +222,6 @@ class DatabaseScreen(QWidget):
         self._delete_btn.setObjectName("secondaryButton")
         self._delete_btn.setEnabled(False)
         self._delete_btn.clicked.connect(self._delete_selected)
-        # Accessibility (AC2 - Task 4.2)
         self._delete_btn.setAccessibleName(
             self.tr("Supprimer les entités sélectionnées")
         )
@@ -219,7 +236,6 @@ class DatabaseScreen(QWidget):
         self._export_btn.setObjectName("secondaryButton")
         self._export_btn.setEnabled(False)
         self._export_btn.clicked.connect(self._export_csv)
-        # Accessibility (AC2 - Task 4.2)
         self._export_btn.setAccessibleName(self.tr("Exporter en CSV"))
         self._export_btn.setAccessibleDescription(
             self.tr("Exporter toutes les correspondances dans un fichier CSV")
@@ -262,11 +278,92 @@ class DatabaseScreen(QWidget):
         self._status_label.setText(self.tr("0 correspondances"))
         self._delete_btn.setText(self.tr("Supprimer la sélection (0)"))
         self._export_btn.setText(self.tr("Exporter"))
+        # Loading indicator i18n
+        self._progress_bar.setAccessibleName(self.tr("Indicateur de chargement"))
+        self._progress_bar.setAccessibleDescription(
+            self.tr("Opération en cours sur la base de données")
+        )
 
     def changeEvent(self, event: QEvent) -> None:
         if event.type() == QEvent.Type.LanguageChange:
             self.retranslateUi()
         super().changeEvent(event)
+
+    # ------------------------------------------------------------------
+    # Worker Lifecycle
+    # ------------------------------------------------------------------
+
+    def _cancel_current_worker(self) -> None:
+        """Cancel the in-flight worker and discard its signals."""
+        if self._current_worker is not None:
+            self._current_worker.cancel()
+            try:
+                self._current_worker.signals.finished.disconnect()
+            except (RuntimeError, SystemError):
+                pass
+            try:
+                self._current_worker.signals.error.disconnect()
+            except (RuntimeError, SystemError):
+                pass
+            try:
+                self._current_worker.signals.progress.disconnect()
+            except (RuntimeError, SystemError):
+                pass
+            self._current_worker = None
+
+    def _start_worker(
+        self,
+        worker: DatabaseWorker,
+        *,
+        non_cancellable: bool = False,
+    ) -> None:
+        """Submit a worker to the global thread pool.
+
+        Args:
+            worker: The DatabaseWorker to run.
+            non_cancellable: If True, disable interactive controls during operation.
+        """
+        from PySide6.QtCore import QThreadPool
+
+        self._cancel_current_worker()
+        self._current_worker = worker
+        self._is_non_cancellable_op = non_cancellable
+
+        # Show loading indicator
+        self._progress_bar.setRange(0, 0)
+        self._progress_bar.setVisible(True)
+
+        # Connect progress to update the bar
+        worker.signals.progress.connect(self._on_progress)
+
+        if non_cancellable:
+            self._search_field.setEnabled(False)
+            self._type_filter.setEnabled(False)
+            self._delete_btn.setEnabled(False)
+            self._export_btn.setEnabled(False)
+
+        QThreadPool.globalInstance().start(worker)
+
+    def _on_progress(self, percent: int, message: str) -> None:
+        """Update progress bar from worker signal."""
+        if percent >= 0:
+            self._progress_bar.setRange(0, 100)
+            self._progress_bar.setValue(percent)
+        else:
+            self._progress_bar.setRange(0, 0)
+
+    def _finish_operation(self) -> None:
+        """Common cleanup after a worker operation completes."""
+        self._progress_bar.setVisible(False)
+        self._current_worker = None
+
+        if self._is_non_cancellable_op:
+            self._search_field.setEnabled(True)
+            self._type_filter.setEnabled(True)
+            # Re-enable buttons based on state
+            self._update_status()
+            self._export_btn.setEnabled(len(self._entities) > 0)
+            self._is_non_cancellable_op = False
 
     # ------------------------------------------------------------------
     # Database Connection
@@ -291,6 +388,7 @@ class DatabaseScreen(QWidget):
         )
         if filepath:
             self._db_combo.setCurrentText(filepath)
+            self._open_database()
 
     def _open_database(self) -> None:
         db_path = self._db_combo.currentText().strip()
@@ -326,6 +424,14 @@ class DatabaseScreen(QWidget):
             config=self._config,
             parent=self._main_window,
         )
+        # Pre-select the known database path so the user only enters passphrase
+        combo = dialog.db_combo
+        insert_idx = max(0, combo.count() - 2)  # before special items
+        combo.blockSignals(True)
+        combo.insertItem(insert_idx, db_path, db_path)
+        combo.setCurrentIndex(insert_idx)
+        combo.blockSignals(False)
+
         if dialog.exec() != dialog.DialogCode.Accepted:
             return
 
@@ -347,74 +453,60 @@ class DatabaseScreen(QWidget):
 
         self._load_entities()
 
+    # ------------------------------------------------------------------
+    # Load Entities (Background)
+    # ------------------------------------------------------------------
+
     def _load_entities(self) -> None:
-        """Load all entities from the database."""
-        try:
-            from gdpr_pseudonymizer.data.database import open_database
-            from gdpr_pseudonymizer.data.repositories.mapping_repository import (
-                SQLiteMappingRepository,
+        """Load all entities from the database on a background thread."""
+        from gdpr_pseudonymizer.gui.workers.database_worker import DatabaseWorker
+
+        worker = DatabaseWorker("list", self._db_path, self._passphrase)
+        worker.signals.finished.connect(self._on_entities_loaded)
+        worker.signals.error.connect(self._on_db_error)
+        self._start_worker(worker)
+
+    def _on_entities_loaded(self, result: Any) -> None:
+        """Handle successful entity load from background worker."""
+        from gdpr_pseudonymizer.gui.workers.database_worker import ListEntitiesResult
+
+        self._finish_operation()
+
+        if not isinstance(result, ListEntitiesResult):
+            return
+
+        self._entities = result.entities
+
+        self._info_label.setText(
+            qarg(
+                self.tr("Créée le %1 — %2 entités — Dernière opération : %3"),
+                result.db_created_str,
+                str(result.entity_count),
+                result.last_op_str,
             )
+        )
+        self._export_btn.setEnabled(len(self._entities) > 0)
+        self._populate_entity_table()
 
-            with open_database(self._db_path, self._passphrase) as db_session:
-                repo = SQLiteMappingRepository(db_session)
-                self._entities = repo.find_all()
+    def _on_db_error(self, message: str) -> None:
+        """Handle error from any background database worker."""
+        # Check passphrase flag before _finish_operation clears the worker ref
+        is_passphrase_error = (
+            self._current_worker is not None
+            and self._current_worker.is_passphrase_error
+        )
 
-                # Get DB info
-                db_file = Path(self._db_path)
-                created = datetime.fromtimestamp(db_file.stat().st_ctime)
-                created_str = created.strftime("%d/%m/%Y")
+        self._finish_operation()
 
-                from gdpr_pseudonymizer.data.repositories.audit_repository import (
-                    AuditRepository,
-                )
-
-                audit_repo = AuditRepository(db_session.session)
-                last_ops = audit_repo.find_operations(limit=1)
-                if last_ops:
-                    last_op_time = last_ops[0].timestamp
-                    # DB stores naive UTC timestamps; make aware for subtraction
-                    if last_op_time.tzinfo is None:
-                        last_op_time = last_op_time.replace(tzinfo=timezone.utc)
-                    delta = datetime.now(timezone.utc) - last_op_time
-                    if delta.days == 0:
-                        last_op_str = self.tr("aujourd'hui")
-                    elif delta.days == 1:
-                        last_op_str = self.tr("hier")
-                    else:
-                        last_op_str = qarg(self.tr("il y a %1 jours"), str(delta.days))
-                else:
-                    last_op_str = self.tr("aucune")
-
-            self._info_label.setText(
-                qarg(
-                    self.tr("Créée le %1 — %2 entités — Dernière opération : %3"),
-                    created_str,
-                    str(len(self._entities)),
-                    last_op_str,
-                )
-            )
-            self._export_btn.setEnabled(len(self._entities) > 0)
-            self._populate_entity_table()
-
-        except ValueError:
-            # Clear cached passphrase so user can retry
+        # Clear cached passphrase on passphrase errors (flag-based, not string)
+        if is_passphrase_error:
             if (
                 self._main_window.cached_passphrase is not None
                 and self._main_window.cached_passphrase[0] == self._db_path
             ):
                 self._main_window.cached_passphrase = None
-            Toast.show_message(
-                self.tr("Phrase secrète incorrecte."),
-                self._main_window,
-                duration_ms=4000,
-            )
-        except Exception as e:
-            logger.error("db_load_failed", error=str(e))
-            Toast.show_message(
-                self.tr("Impossible d'ouvrir la base de données."),
-                self._main_window,
-                duration_ms=4000,
-            )
+
+        Toast.show_message(message, self._main_window, duration_ms=4000)
 
     def _populate_entity_table(self, entities: list[Entity] | None = None) -> None:
         """Fill the entity table with (filtered) entities."""
@@ -454,7 +546,7 @@ class DatabaseScreen(QWidget):
     # ------------------------------------------------------------------
 
     def _on_search_changed(self, text: str) -> None:
-        self._apply_filters()
+        self._search_timer.start()  # restart the 300ms countdown
 
     def _on_filter_changed(self, _index: int) -> None:
         self._apply_filters()
@@ -467,6 +559,14 @@ class DatabaseScreen(QWidget):
             self._populate_entity_table()
             return
 
+        # Use background worker for large datasets
+        if len(self._entities) > _SEARCH_BACKGROUND_THRESHOLD:
+            self._apply_filters_background(search, type_filter)
+        else:
+            self._apply_filters_inline(search, type_filter)
+
+    def _apply_filters_inline(self, search: str, type_filter: str) -> None:
+        """In-memory filtering for small datasets (GUI thread)."""
         filtered = self._entities
         if type_filter:
             filtered = [e for e in filtered if e.entity_type == type_filter]
@@ -478,8 +578,27 @@ class DatabaseScreen(QWidget):
                 if search_lower in e.full_name.lower()
                 or search_lower in e.pseudonym_full.lower()
             ]
-
         self._populate_entity_table(filtered)
+
+    def _apply_filters_background(self, search: str, type_filter: str) -> None:
+        """Background filtering for large datasets (worker thread)."""
+        from gdpr_pseudonymizer.gui.workers.database_worker import DatabaseWorker
+
+        worker = DatabaseWorker(
+            "search",
+            entities=list(self._entities),  # shallow copy for thread safety
+            search_text=search,
+            type_filter=type_filter,
+        )
+        worker.signals.finished.connect(self._on_search_complete)
+        worker.signals.error.connect(self._on_db_error)
+        self._start_worker(worker)
+
+    def _on_search_complete(self, filtered_entities: Any) -> None:
+        """Handle search results from background worker."""
+        self._finish_operation()
+        if isinstance(filtered_entities, list):
+            self._populate_entity_table(filtered_entities)
 
     # ------------------------------------------------------------------
     # Selection
@@ -518,7 +637,7 @@ class DatabaseScreen(QWidget):
         self._delete_btn.setEnabled(selected > 0)
 
     # ------------------------------------------------------------------
-    # Deletion (Article 17 RGPD)
+    # Deletion (Article 17 RGPD) — Background
     # ------------------------------------------------------------------
 
     def _delete_selected(self) -> None:
@@ -551,62 +670,34 @@ class DatabaseScreen(QWidget):
         if not dlg.exec():
             return
 
-        # Perform deletion
-        try:
-            from gdpr_pseudonymizer.data.database import open_database
-            from gdpr_pseudonymizer.data.models import Operation
-            from gdpr_pseudonymizer.data.repositories.audit_repository import (
-                AuditRepository,
-            )
-            from gdpr_pseudonymizer.data.repositories.mapping_repository import (
-                SQLiteMappingRepository,
-            )
+        # Submit deletion to background worker
+        from gdpr_pseudonymizer.gui.workers.database_worker import DatabaseWorker
 
-            deleted_count = 0
-            with open_database(self._db_path, self._passphrase) as db_session:
-                repo = SQLiteMappingRepository(db_session)
-                audit_repo = AuditRepository(db_session.session)
+        worker = DatabaseWorker(
+            "delete",
+            self._db_path,
+            self._passphrase,
+            entity_ids=list(self._selected_ids),
+        )
+        worker.signals.finished.connect(self._on_delete_complete)
+        worker.signals.error.connect(self._on_db_error)
+        self._start_worker(worker, non_cancellable=True)
 
-                for entity_id in list(self._selected_ids):
-                    deleted = repo.delete_entity_by_id(entity_id)
-                    if deleted:
-                        deleted_count += 1
-
-                # Log ERASURE operation
-                audit_repo.log_operation(
-                    Operation(
-                        operation_type="ERASURE",
-                        files_processed=[],
-                        model_name="gui",
-                        model_version="1.0",
-                        theme_selected="",
-                        entity_count=deleted_count,
-                        processing_time_seconds=0.0,
-                        success=True,
-                    )
-                )
-
-            Toast.show_message(
-                qarg(
-                    self.tr("%1 correspondance(s) supprimée(s)"),
-                    str(deleted_count),
-                ),
-                self._main_window,
-            )
-
-            # Reload entities
-            self._load_entities()
-
-        except Exception as e:
-            logger.error("entity_deletion_failed", error=str(e))
-            Toast.show_message(
-                self.tr("Erreur lors de la suppression."),
-                self._main_window,
-                duration_ms=4000,
-            )
+    def _on_delete_complete(self, deleted_count: Any) -> None:
+        """Handle deletion completion from background worker."""
+        self._finish_operation()
+        Toast.show_message(
+            qarg(
+                self.tr("%1 correspondance(s) supprimée(s)"),
+                str(deleted_count),
+            ),
+            self._main_window,
+        )
+        # Reload entities
+        self._load_entities()
 
     # ------------------------------------------------------------------
-    # Export
+    # Export — Background
     # ------------------------------------------------------------------
 
     def _export_csv(self) -> None:
@@ -619,41 +710,21 @@ class DatabaseScreen(QWidget):
         if not filepath:
             return
 
-        try:
-            with open(filepath, "w", encoding="utf-8", newline="") as f:
-                writer = csv.writer(f)
-                writer.writerow(
-                    [
-                        "entity_id",
-                        "entity_type",
-                        "full_name",
-                        "pseudonym_full",
-                        "first_seen",
-                    ]
-                )
-                for entity in self._entities:
-                    ts = ""
-                    if entity.first_seen_timestamp:
-                        ts = entity.first_seen_timestamp.isoformat()
-                    writer.writerow(
-                        [
-                            entity.id[:8] if entity.id else "",
-                            entity.entity_type,
-                            entity.full_name,
-                            entity.pseudonym_full,
-                            ts,
-                        ]
-                    )
+        from gdpr_pseudonymizer.gui.workers.database_worker import DatabaseWorker
 
-            Toast.show_message(self.tr("Export CSV terminé."), self._main_window)
+        worker = DatabaseWorker(
+            "export",
+            filepath=filepath,
+            entities=list(self._entities),
+        )
+        worker.signals.finished.connect(self._on_export_complete)
+        worker.signals.error.connect(self._on_db_error)
+        self._start_worker(worker, non_cancellable=True)
 
-        except OSError as e:
-            logger.error("csv_export_failed", error=str(e))
-            Toast.show_message(
-                self.tr("Erreur lors de l'export."),
-                self._main_window,
-                duration_ms=4000,
-            )
+    def _on_export_complete(self, _result: Any) -> None:
+        """Handle CSV export completion."""
+        self._finish_operation()
+        Toast.show_message(self.tr("Export CSV terminé."), self._main_window)
 
     # -- Test accessors --
 
@@ -692,3 +763,7 @@ class DatabaseScreen(QWidget):
     @property
     def info_label(self) -> QLabel:
         return self._info_label
+
+    @property
+    def progress_bar(self) -> QProgressBar:
+        return self._progress_bar

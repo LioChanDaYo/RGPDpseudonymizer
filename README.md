@@ -437,7 +437,8 @@ The validation UI provides an intuitive keyboard-driven interface for reviewing 
   - ✅ Story 6.6: Internationalization & French UI (dual-track i18n: Qt Linguist + gettext, 267 GUI strings, ~50 CLI strings, live language switching, 53 new tests)
   - ✅ Story 6.7: Accessibility (WCAG 2.1 Level AA) — keyboard navigation, screen reader support, high contrast mode, color-blind safe palette, DPI scaling, 33 accessibility tests
   - ✅ Story 6.7.1: Core Processing Hardening & Security — PII sanitization in error messages, typed exception handling, DRY refactoring, per-document entity type counts (DATA-001 fix), 26 new tests
-- **Total:** 48 stories, 1613+ tests, 86%+ coverage, all quality gates green
+  - ✅ Story 6.7.2: Database Background Threading — All DB operations on background threads (list, search, delete, export), cancel-and-replace strategy, debounced search, 38 new tests
+- **Total:** 49 stories, 1650+ tests, 86%+ coverage, all quality gates green
 
 ---
 
@@ -618,8 +619,8 @@ The integration test suite covers:
 
 | Metric | Value | Status |
 |--------|-------|--------|
-| **Development Progress** | v2.0-dev | 🚧 Epic 6 in progress (Stories 6.1-6.7.1 complete) |
-| **Stories Complete** | 48 (Epic 1-5 + 6.1-6.7.1) | ✅ Epics 1-5, 🚧 Epic 6 |
+| **Development Progress** | v2.0-dev | 🚧 Epic 6 in progress (Stories 6.1-6.7.2 complete) |
+| **Stories Complete** | 49 (Epic 1-5 + 6.1-6.7.2) | ✅ Epics 1-5, 🚧 Epic 6 |
 | **LLM Utility (NFR10)** | 4.27/5.0 (85.4%) | ✅ PASSED (threshold: 80%) |
 | **Installation Success (NFR3)** | 87.5% (7/8 platforms) | ✅ PASSED (threshold: 85%) |
 | **First Pseudonymization (NFR14)** | 100% within 30 min | ✅ PASSED (threshold: 80%) |
@@ -640,7 +641,7 @@ The integration test suite covers:
 | **Memory Usage (NFR4)** | ~1 GB Python-tracked peak | ✅ PASSED (<8GB threshold) |
 | **CLI Startup (NFR5)** | 0.56s (help), 6.0s (cold start w/ model) | ✅ PASSED (<5s for CLI startup) |
 | **Error Rate (NFR6)** | ~0% unexpected errors | ✅ PASSED (<10% threshold) |
-| **Test Coverage** | 1613+ tests (incl. 334 GUI), 86%+ coverage | ✅ All Quality Checks Pass |
+| **Test Coverage** | 1650+ tests (incl. 372 GUI), 86%+ coverage | ✅ All Quality Checks Pass |
 | **Quality Gates** | Ruff, mypy, pytest | ✅ All Pass (0 issues) |
 | **GUI/CLI Languages** | French (default), English | 🌐 Live switching (Story 6.6) |
 | **Supported Document Languages** | French | 🇫🇷 v1.0 only |
@@ -658,4 +659,4 @@ The integration test suite covers:
 
 ---
 
-**Last Updated:** 2026-02-26 (v2.0-dev — Epic 6 Story 6.7.1 complete: PII sanitization, typed exception handling, DRY refactoring, DATA-001 fix, 1613+ total tests)
+**Last Updated:** 2026-02-26 (v2.0-dev — Epic 6 Story 6.7.2 complete: Database background threading, cancel-and-replace, debounced search, 1650+ total tests)

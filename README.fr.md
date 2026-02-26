@@ -437,7 +437,8 @@ L'interface de validation offre un parcours intuitif piloté au clavier pour pas
   - ✅ Story 6.6 : Internationalisation et interface française (i18n double voie : Qt Linguist + gettext, 267 chaînes GUI, ~50 chaînes CLI, changement de langue en temps réel, 53 nouveaux tests)
   - ✅ Story 6.7 : Accessibilité (WCAG 2.1 niveau AA) — navigation au clavier, support des lecteurs d'écran, mode contraste élevé, palette adaptée au daltonisme, mise à l'échelle DPI, 33 tests d'accessibilité
   - ✅ Story 6.7.1 : Renforcement du traitement et sécurité — Assainissement des DCP dans les messages d'erreur, gestion typée des exceptions, refactorisation DRY, comptage d'entités par document (correctif DATA-001), 26 nouveaux tests
-- **Total :** 48 stories, 1 613+ tests, 86 %+ de couverture, tous les contrôles qualité au vert
+  - ✅ Story 6.7.2 : Opérations base de données en arrière-plan — DatabaseWorker (QRunnable) pour les opérations liste/recherche/suppression/export, stratégie d'annulation-remplacement, recherche anti-rebond 300 ms, routage par seuil, indicateur de chargement, 38 nouveaux tests
+- **Total :** 49 stories, 1 650+ tests, 86 %+ de couverture, tous les contrôles qualité au vert
 
 ---
 
@@ -584,7 +585,7 @@ poetry run pytest tests/integration/test_validation_workflow_integration.py -v
 - **Tests de précision :** 22 tests mesurant la précision NER sur un corpus de référence de 25 documents (Story 4.4)
 - **Tests de performance :** 19 tests validant toutes les exigences non fonctionnelles — benchmarks par document (NFR1), benchmarks de détection d'entités, traitement par lot (NFR2), profilage mémoire (NFR4), temps de démarrage (NFR5), stabilité et taux d'erreur (NFR6), tests de charge (Story 4.5)
 - **Couverture actuelle :** 86 %+ sur l'ensemble des modules (100 % pour le module de progression, 91,41 % pour AuditRepository)
-- **Total :** 1 613+ tests
+- **Total :** 1 650+ tests
 - **CI/CD :** Tests exécutés sur Python 3.10-3.12, sous Windows, macOS et Linux
 - **Contrôles qualité :** Tous validés (Black, Ruff, mypy, pytest)
 
@@ -618,8 +619,8 @@ La suite de tests d'intégration couvre :
 
 | Métrique | Valeur | Statut |
 |----------|--------|--------|
-| **Avancement** | v2.0-dev | 🚧 Epic 6 en cours (Stories 6.1-6.7.1 terminées) |
-| **Stories terminées** | 48 (Epic 1-5 + 6.1-6.7.1) | ✅ Epics 1-5, 🚧 Epic 6 |
+| **Avancement** | v2.0-dev | 🚧 Epic 6 en cours (Stories 6.1-6.7.2 terminées) |
+| **Stories terminées** | 49 (Epic 1-5 + 6.1-6.7.2) | ✅ Epics 1-5, 🚧 Epic 6 |
 | **Utilité LLM (NFR10)** | 4,27/5,0 (85,4 %) | ✅ VALIDÉ (seuil : 80 %) |
 | **Succès d'installation (NFR3)** | 87,5 % (7/8 plateformes) | ✅ VALIDÉ (seuil : 85 %) |
 | **Première pseudonymisation (NFR14)** | 100 % en moins de 30 min | ✅ VALIDÉ (seuil : 80 %) |
@@ -640,7 +641,7 @@ La suite de tests d'intégration couvre :
 | **Utilisation mémoire (NFR4)** | environ 1 Go de pic mesuré par Python | ✅ VALIDÉ (seuil < 8 Go) |
 | **Démarrage CLI (NFR5)** | 0,56 s (help), 6,0 s (démarrage à froid avec modèle) | ✅ VALIDÉ (< 5 s pour le démarrage CLI) |
 | **Taux d'erreur (NFR6)** | environ 0 % d'erreurs inattendues | ✅ VALIDÉ (seuil < 10 %) |
-| **Couverture de test** | 1 613+ tests (dont 334 GUI), 86 %+ de couverture | ✅ Tous les contrôles qualité validés |
+| **Couverture de test** | 1 650+ tests (dont 372 GUI), 86 %+ de couverture | ✅ Tous les contrôles qualité validés |
 | **Contrôles qualité** | Ruff, mypy, pytest | ✅ Tous validés (0 problème) |
 | **Langues GUI/CLI** | Français (défaut), Anglais | 🌐 Changement en temps réel (Story 6.6) |
 | **Langues de documents** | Français | 🇫🇷 v1.0 uniquement |
@@ -658,4 +659,4 @@ La suite de tests d'intégration couvre :
 
 ---
 
-**Dernière mise à jour :** 2026-02-26 (v2.0-dev — Epic 6 Story 6.7.1 terminée : assainissement des DCP dans les erreurs, gestion typée des exceptions, refactorisation DRY, correctif DATA-001, 1 613+ tests au total)
+**Dernière mise à jour :** 2026-02-26 (v2.0-dev — Epic 6 Story 6.7.2 terminée : opérations DB en arrière-plan, annulation-remplacement, recherche anti-rebond, indicateur de chargement, 1 650+ tests au total)
