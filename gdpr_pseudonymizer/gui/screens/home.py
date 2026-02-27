@@ -76,7 +76,9 @@ class HomeScreen(QWidget):
         batch_layout.addStretch()
         self._batch_btn = QPushButton()
         self._batch_btn.setObjectName("secondaryButton")
-        self._batch_btn.clicked.connect(lambda: self._main_window.navigate_to("batch"))
+        self._batch_btn.clicked.connect(
+            lambda: self._main_window.navigate_to("batch", reset=True)
+        )
         # Accessibility support (AC2 - Task 4.2)
         self._batch_btn.setAccessibleName(self.tr("Ouvrir le traitement par lot"))
         self._batch_btn.setAccessibleDescription(

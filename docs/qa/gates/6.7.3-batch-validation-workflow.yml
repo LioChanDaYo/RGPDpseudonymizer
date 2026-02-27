@@ -1,0 +1,76 @@
+schema: 1
+story: '6.7.3'
+story_title: 'Batch Validation Workflow (FE-022)'
+gate: PASS
+status_reason: >-
+  All acceptance criteria met. Both medium-severity issues from initial review
+  (FUNC-001, BUG-001) and one low-severity issue (A11Y-001) have been resolved.
+  One low-severity typing issue (TYPE-001) remains as accepted future tech debt.
+  Core happy path, cancel-during-validation cleanup, Précédent/Suivant navigation,
+  and signal management are all correct. Thread safety is properly implemented.
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-02-26T13:00:00Z'
+
+top_issues:
+  - id: 'TYPE-001'
+    severity: low
+    finding: >-
+      _validated_entities typed as list[object] | None instead of
+      list[DetectedEntity] | None. Relies on runtime correctness through signal chain.
+    suggested_action: >-
+      Use TYPE_CHECKING import for DetectedEntity and tighten the annotation.
+    suggested_owner: dev
+    refs:
+      - 'gdpr_pseudonymizer/gui/workers/batch_worker.py:128'
+
+waiver: { active: false }
+
+quality_score: 90
+expires: '2026-03-12T00:00:00Z'
+
+evidence:
+  tests_reviewed: 21
+  risks_identified: 1
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8]
+    ac_gaps: []
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: >-
+      Passphrase handling follows established patterns. No sensitive data logged.
+      Per-document DB sessions via open_database context manager.
+  performance:
+    status: PASS
+    notes: >-
+      Minor: new DocumentProcessor created per-document for preview generation.
+      Low impact due to spaCy-level caching. No blocking concern.
+  reliability:
+    status: PASS
+    notes: >-
+      Thread safety via QWaitCondition+QMutex. Cancel cleanup is best-effort with
+      warning logging. Worker correctly checks _cancelled after wait.
+  maintainability:
+    status: PASS
+    notes: >-
+      Signal disconnect-before-connect pattern (BUG-001 fix) prevents accumulation.
+      Loose typing (TYPE-001) is minor — accepted as future tech debt.
+
+history:
+  - at: '2026-02-26T12:00:00Z'
+    gate: CONCERNS
+    note: >-
+      Initial review — FUNC-001 (Précédent/Suivant incomplete) and BUG-001
+      (signal double-connection) identified as medium issues.
+  - at: '2026-02-26T13:00:00Z'
+    gate: PASS
+    note: >-
+      Re-review after dev fixes — FUNC-001, BUG-001, A11Y-001 all resolved.
+      TYPE-001 (low) accepted as future tech debt.
+
+recommendations:
+  immediate: []
+  future:
+    - action: 'Tighten _validated_entities type to list[DetectedEntity] (TYPE-001)'
+      refs: ['gdpr_pseudonymizer/gui/workers/batch_worker.py:128']

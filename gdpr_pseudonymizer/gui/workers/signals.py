@@ -25,3 +25,14 @@ class WorkerSignals(QObject):
     progress = Signal(int, str)
     finished = Signal(object)
     error = Signal(str)
+
+
+class BatchValidationSignals(WorkerSignals):
+    """Extended signals for batch workers with per-document validation.
+
+    Attributes:
+        validation_required: Emitted when a document needs user validation.
+            Parameters: (entities, document_text, doc_index, total_docs)
+    """
+
+    validation_required = Signal(object, str, int, int)
