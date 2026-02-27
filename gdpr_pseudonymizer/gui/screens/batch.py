@@ -983,9 +983,7 @@ class BatchScreen(QWidget):
 
             if doc_res is not None:
                 time_str = f"{doc_res.processing_time:.1f}s"
-                self._summary_table.setItem(
-                    row, 0, QTableWidgetItem(doc_res.filename)
-                )
+                self._summary_table.setItem(row, 0, QTableWidgetItem(doc_res.filename))
                 self._summary_table.setItem(
                     row, 1, QTableWidgetItem(str(doc_res.entities_detected))
                 )
