@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from PySide6.QtCore import QEvent, Qt, QThreadPool
+from PySide6.QtCore import QEvent, Qt, QThreadPool, Signal
 from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QHBoxLayout,
@@ -42,11 +42,20 @@ logger = get_logger(__name__)
 class ValidationScreen(QWidget):
     """Screen for interactive entity validation before pseudonymization."""
 
+    # Signals for batch mode orchestration
+    validation_complete = Signal(object)
+    batch_cancel_requested = Signal()
+
     def __init__(self, main_window: MainWindow) -> None:
         super().__init__(main_window)
         self._main_window = main_window
         self._validation_state: GUIValidationState | None = None
         self._detection_result: DetectionResult | None = None
+
+        # Batch mode state
+        self._batch_mode = False
+        self._doc_index = 0
+        self._total_docs = 0
 
         self._build_ui()
         self._connect_shortcuts()
@@ -59,6 +68,45 @@ class ValidationScreen(QWidget):
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
+
+        # Batch mode header bar (hidden in single-doc mode)
+        self._batch_header = QWidget()
+        batch_header_layout = QHBoxLayout(self._batch_header)
+        batch_header_layout.setContentsMargins(16, 8, 16, 8)
+
+        self._prev_btn = QPushButton()
+        self._prev_btn.setObjectName("secondaryButton")
+        self._prev_btn.clicked.connect(self._on_prev_doc)
+        self._prev_btn.setAccessibleName(self.tr("Document précédent"))
+        self._prev_btn.setAccessibleDescription(
+            self.tr("Affiche le document précédemment validé")
+        )
+        batch_header_layout.addWidget(self._prev_btn)
+
+        batch_header_layout.addStretch()
+
+        self._doc_indicator = QLabel("")
+        self._doc_indicator.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._doc_indicator.setStyleSheet("font-size: 14px; font-weight: bold;")
+        self._doc_indicator.setAccessibleName(self.tr("Indicateur de document"))
+        self._doc_indicator.setAccessibleDescription(
+            self.tr("Affiche le numéro du document en cours dans le lot")
+        )
+        batch_header_layout.addWidget(self._doc_indicator)
+
+        batch_header_layout.addStretch()
+
+        self._next_btn = QPushButton()
+        self._next_btn.setObjectName("secondaryButton")
+        self._next_btn.clicked.connect(self._on_next_doc)
+        self._next_btn.setAccessibleName(self.tr("Document suivant"))
+        self._next_btn.setAccessibleDescription(
+            self.tr("Affiche le document suivant déjà validé")
+        )
+        batch_header_layout.addWidget(self._next_btn)
+
+        self._batch_header.setVisible(False)
+        layout.addWidget(self._batch_header)
 
         # Splitter: editor | panel
         self._splitter = QSplitter(Qt.Orientation.Horizontal)
@@ -97,6 +145,17 @@ class ValidationScreen(QWidget):
         action_bar = QWidget()
         action_layout = QHBoxLayout(action_bar)
         action_layout.setContentsMargins(16, 8, 16, 8)
+
+        # "Annuler le lot" button — batch mode only (Task 3.6)
+        self._batch_cancel_btn = QPushButton()
+        self._batch_cancel_btn.setObjectName("secondaryButton")
+        self._batch_cancel_btn.clicked.connect(self._on_batch_cancel)
+        self._batch_cancel_btn.setAccessibleName(self.tr("Annuler le lot"))
+        self._batch_cancel_btn.setAccessibleDescription(
+            self.tr("Annule l'ensemble du traitement par lot")
+        )
+        self._batch_cancel_btn.setVisible(False)
+        action_layout.addWidget(self._batch_cancel_btn)
 
         self._back_btn = QPushButton()
         self._back_btn.setObjectName("secondaryButton")
@@ -140,7 +199,20 @@ class ValidationScreen(QWidget):
     def retranslateUi(self) -> None:
         """Re-set all translatable static UI text."""
         self._back_btn.setText(self.tr("\u25c0 Retour"))
-        self._finalize_btn.setText(self.tr("Finaliser \u25b6"))
+
+        # Batch mode navigation buttons
+        self._prev_btn.setText(self.tr("\u25c0 Précédent"))
+        self._next_btn.setText(self.tr("Suivant \u25b6"))
+        self._batch_cancel_btn.setText(self.tr("Annuler le lot"))
+
+        # Finalize button text depends on batch mode state (CODE-003)
+        if self._batch_mode:
+            if self._doc_index >= self._total_docs - 1:
+                self._finalize_btn.setText(self.tr("Valider et terminer \u25b6"))
+            else:
+                self._finalize_btn.setText(self.tr("Valider et continuer \u25b6"))
+        else:
+            self._finalize_btn.setText(self.tr("Finaliser \u25b6"))
 
     def changeEvent(self, event: QEvent) -> None:
         if event.type() == QEvent.Type.LanguageChange:
@@ -239,6 +311,66 @@ class ValidationScreen(QWidget):
         # First-use hints
         self._maybe_show_hints()
 
+    def set_context(self, **kwargs: object) -> None:
+        """Accept navigation context for batch mode validation.
+
+        Supported kwargs:
+            entities: list[DetectedEntity]
+            document_text: str
+            document_path: str
+            pseudonym_previews: dict[str, str]
+            db_path: str
+            passphrase: str
+            batch_mode: bool (default False)
+            doc_index: int (0-based)
+            total_docs: int
+        """
+        from typing import Any
+
+        kw: dict[str, Any] = dict(kwargs)
+
+        self._batch_mode = bool(kw.get("batch_mode", False))
+        self._doc_index = int(kw.get("doc_index", 0))
+        self._total_docs = int(kw.get("total_docs", 0))
+
+        # Update batch mode widget visibility
+        self._batch_header.setVisible(self._batch_mode)
+        self._batch_cancel_btn.setVisible(self._batch_mode)
+        self._back_btn.setVisible(not self._batch_mode)
+
+        if self._batch_mode:
+            # Update doc indicator and navigation button visibility
+            self._update_batch_nav_state()
+
+        # Update finalize button text
+        self.retranslateUi()
+
+        # Build a DetectionResult-like object for start_validation
+        entities = kw.get("entities", [])
+        document_text = str(kw.get("document_text", ""))
+        document_path = str(kw.get("document_path", ""))
+        pseudonym_previews = kw.get("pseudonym_previews", {})
+        db_path = str(kw.get("db_path", ""))
+        passphrase = str(kw.get("passphrase", ""))
+
+        from gdpr_pseudonymizer.gui.workers.detection_worker import DetectionResult
+
+        detection_result = DetectionResult(
+            detected_entities=entities,
+            document_text=document_text,
+            input_file=document_path,
+            db_path=db_path,
+            passphrase=passphrase,
+            theme="neutral",
+            pseudonym_previews=pseudonym_previews,
+            entity_type_counts={},
+            detection_time_seconds=0.0,
+        )
+        self.start_validation(detection_result)
+
+        # Reconfigure focus order with batch widgets
+        setup_focus_order_validation(self)
+
     @property
     def editor(self) -> EntityEditor:
         return self._editor
@@ -266,6 +398,38 @@ class ValidationScreen(QWidget):
     @property
     def status_label(self) -> QLabel:
         return self._status_label
+
+    @property
+    def batch_mode(self) -> bool:
+        return self._batch_mode
+
+    @property
+    def doc_index(self) -> int:
+        return self._doc_index
+
+    @property
+    def total_docs(self) -> int:
+        return self._total_docs
+
+    @property
+    def doc_indicator(self) -> QLabel:
+        return self._doc_indicator
+
+    @property
+    def prev_button(self) -> QPushButton:
+        return self._prev_btn
+
+    @property
+    def next_button(self) -> QPushButton:
+        return self._next_btn
+
+    @property
+    def batch_cancel_button(self) -> QPushButton:
+        return self._batch_cancel_btn
+
+    @property
+    def batch_header(self) -> QWidget:
+        return self._batch_header
 
     # ------------------------------------------------------------------
     # Action handling
@@ -517,9 +681,97 @@ class ValidationScreen(QWidget):
             self._main_window.step_indicator.set_step(1)
             self._main_window.navigate_to("processing")
 
+    def _on_prev_doc(self) -> None:
+        """Navigate to previously validated document (batch mode).
+
+        Reloads the full cached context (entities, document text, previews)
+        into the editor/panel via set_context().
+        """
+        if not self._batch_mode or self._doc_index <= 0:
+            return
+
+        batch_idx = self._main_window._screens.get("batch")
+        if batch_idx is not None:
+            widget = self._main_window.stack.widget(batch_idx)
+            from gdpr_pseudonymizer.gui.screens.batch import BatchScreen
+
+            if isinstance(widget, BatchScreen):
+                prev_idx = self._doc_index - 1
+                cached_ctx = widget._validation_contexts.get(prev_idx)
+                if cached_ctx is not None:
+                    self.set_context(**cached_ctx)
+
+    def _on_next_doc(self) -> None:
+        """Navigate forward through already-validated documents (batch mode).
+
+        Reloads the full cached context (entities, document text, previews)
+        into the editor/panel via set_context().
+        """
+        if not self._batch_mode:
+            return
+
+        batch_idx = self._main_window._screens.get("batch")
+        if batch_idx is not None:
+            widget = self._main_window.stack.widget(batch_idx)
+            from gdpr_pseudonymizer.gui.screens.batch import BatchScreen
+
+            if isinstance(widget, BatchScreen):
+                next_idx = self._doc_index + 1
+                cached_ctx = widget._validation_contexts.get(next_idx)
+                if cached_ctx is not None:
+                    self.set_context(**cached_ctx)
+
+    def _on_batch_cancel(self) -> None:
+        """Cancel entire batch from ValidationScreen."""
+        from gdpr_pseudonymizer.gui.widgets.confirm_dialog import ConfirmDialog
+
+        dlg = ConfirmDialog.destructive(
+            self.tr("Annuler le lot"),
+            self.tr(
+                "Tous les documents traités seront annulés. "
+                "Aucun fichier de sortie ne sera conservé."
+            ),
+            self.tr("Annuler le lot"),
+            parent=self._main_window,
+        )
+        if dlg.exec():
+            self.batch_cancel_requested.emit()
+
+    def _update_batch_nav_state(self) -> None:
+        """Update doc indicator and button visibility for current batch position."""
+        self._doc_indicator.setText(
+            qarg(
+                self.tr("Document %1 de %2"),
+                str(self._doc_index + 1),
+                str(self._total_docs),
+            )
+        )
+        self._prev_btn.setVisible(self._doc_index > 0)
+
+        # Suivant is visible only if next doc has cached context (navigated backward)
+        batch_idx = self._main_window._screens.get("batch")
+        next_has_cache = False
+        if batch_idx is not None:
+            widget = self._main_window.stack.widget(batch_idx)
+            from gdpr_pseudonymizer.gui.screens.batch import BatchScreen
+
+            if isinstance(widget, BatchScreen):
+                next_has_cache = (self._doc_index + 1) in widget._validation_contexts
+
+        self._next_btn.setVisible(next_has_cache)
+
+        # Update finalize button text
+        self.retranslateUi()
+
     def _on_finalize(self) -> None:
-        """Trigger finalization flow with summary confirmation."""
+        """Trigger finalization flow or emit validation_complete in batch mode."""
         if self._validation_state is None:
+            return
+
+        if self._batch_mode:
+            # In batch mode: emit validated entities for BatchScreen orchestration
+            validated = self._validation_state.get_validated_entities()
+            self.validation_complete.emit(validated)
             return
 
         from gdpr_pseudonymizer.gui.widgets.confirm_dialog import ConfirmDialog

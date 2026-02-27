@@ -14,6 +14,7 @@ from typing import TYPE_CHECKING, Any
 
 from PySide6.QtCore import QEvent, Qt, QThreadPool
 from PySide6.QtWidgets import (
+    QCheckBox,
     QFileDialog,
     QHBoxLayout,
     QHeaderView,
@@ -40,6 +41,7 @@ from gdpr_pseudonymizer.utils.logger import get_logger
 
 if TYPE_CHECKING:
     from gdpr_pseudonymizer.gui.main_window import MainWindow
+    from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 
 logger = get_logger(__name__)
 
@@ -55,6 +57,7 @@ class BatchScreen(QWidget):
         self._files: list[Path] = []
         self._worker: Any = None
         self._batch_start_time: float = 0.0
+        self._cumulative_validation_time: float = 0.0
         self._docs_completed: int = 0
         self._is_paused: bool = False
 
@@ -65,12 +68,32 @@ class BatchScreen(QWidget):
     # ------------------------------------------------------------------
 
     def set_context(self, **kwargs: Any) -> None:
-        """Accept navigation context (e.g., folder_path from home screen)."""
+        """Accept navigation context (e.g., folder_path from home screen).
+
+        Kwargs:
+            folder_path: Pre-populate the folder input and discover files.
+            reset: If True, clear all selection state for a fresh start.
+        """
+        if kwargs.get("reset"):
+            self._reset_selection()
+
         folder_path = kwargs.get("folder_path")
         if folder_path:
             self._folder_input.setText(str(folder_path))
             self._discover_files()
+
         self._phases.setCurrentIndex(0)
+
+    def _reset_selection(self) -> None:
+        """Clear all selection state for a fresh batch run."""
+        self._folder_input.blockSignals(True)
+        self._folder_input.clear()
+        self._folder_input.blockSignals(False)
+        self._output_input.clear()
+        self._files = []
+        self._update_file_table()
+        self._start_btn.setEnabled(False)
+        self._worker = None
 
     # ------------------------------------------------------------------
     # UI Construction
@@ -181,6 +204,23 @@ class BatchScreen(QWidget):
             self.tr("Affiche les fichiers sélectionnés avec leur taille et format")
         )
         layout.addWidget(self._file_table, stretch=1)
+
+        # Per-document validation toggle (AC1, AC5)
+        self._validate_checkbox = QCheckBox()
+        self._validate_checkbox.setChecked(
+            self._config.get("batch_validate_per_document", False)
+        )
+        self._validate_checkbox.setAccessibleName(
+            self.tr("Valider les entités par document")
+        )
+        self._validate_checkbox.setAccessibleDescription(
+            self.tr(
+                "Lorsque activé, permet de vérifier les entités détectées "
+                "dans chaque document avant la pseudonymisation"
+            )
+        )
+        self._validate_checkbox.toggled.connect(self._on_validate_toggle_changed)
+        layout.addWidget(self._validate_checkbox)
 
         # Output directory
         output_row = QHBoxLayout()
@@ -410,6 +450,7 @@ class BatchScreen(QWidget):
         self._output_input.setPlaceholderText(self.tr("_pseudonymized/ (par défaut)"))
         self._output_browse_btn.setText(self.tr("Parcourir..."))
         self._start_btn.setText(self.tr("Démarrer le traitement"))
+        self._validate_checkbox.setText(self.tr("Valider les entités par document"))
 
         # Phase 1: Processing
         self._proc_title.setText(self.tr("Traitement en cours"))
@@ -477,6 +518,13 @@ class BatchScreen(QWidget):
         folder = QFileDialog.getExistingDirectory(self, self.tr("Dossier de sortie"))
         if folder:
             self._output_input.setText(folder)
+
+    def _on_validate_toggle_changed(self, checked: bool) -> None:
+        """Persist validation toggle state to config."""
+        self._config["batch_validate_per_document"] = checked
+        from gdpr_pseudonymizer.gui.config import save_gui_config
+
+        save_gui_config(self._config)
 
     def _discover_files(self) -> None:
         folder_text = self._folder_input.text().strip()
@@ -570,6 +618,10 @@ class BatchScreen(QWidget):
     def _launch_worker(self, db_path: str, passphrase: str) -> None:
         from gdpr_pseudonymizer.gui.workers.batch_worker import BatchWorker
 
+        # Store for validation flow (Task 5.2)
+        self._db_path = db_path
+        self._passphrase = passphrase
+
         # Determine output dir
         output_text = self._output_input.text().strip()
         if output_text:
@@ -581,6 +633,7 @@ class BatchScreen(QWidget):
         theme = self._config.get("default_theme", "neutral")
         continue_on_error = self._config.get("continue_on_error", True)
         validation_mode = self._config.get("batch_validation_mode", "per_document")
+        validate_per_document = self._validate_checkbox.isChecked()
 
         # Switch to processing phase
         self._phases.setCurrentIndex(1)
@@ -590,6 +643,10 @@ class BatchScreen(QWidget):
         # Initialize progress table
         self._docs_completed = 0
         self._batch_start_time = time.time()
+        self._cumulative_validation_time = 0.0
+        self._validation_pause_start: float | None = None
+        self._validation_results: dict[int, list[DetectedEntity]] = {}
+        self._validation_contexts: dict[int, dict[str, Any]] = {}
         self._doc_table.setRowCount(len(self._files))
         for row, fp in enumerate(self._files):
             self._doc_table.setItem(row, 0, QTableWidgetItem(str(row + 1)))
@@ -616,10 +673,41 @@ class BatchScreen(QWidget):
             theme=theme,
             continue_on_error=continue_on_error,
             validation_mode=validation_mode,
+            validate_per_document=validate_per_document,
         )
         self._worker.signals.progress.connect(self._on_progress)
         self._worker.signals.finished.connect(self._on_finished)
         self._worker.signals.error.connect(self._on_error)
+
+        # Connect validation signals if enabled
+        if validate_per_document:
+            from gdpr_pseudonymizer.gui.workers.signals import BatchValidationSignals
+
+            assert isinstance(self._worker.signals, BatchValidationSignals)
+            self._worker.signals.validation_required.connect(
+                self._on_validation_required
+            )
+
+            # Connect ValidationScreen signals (disconnect first to prevent
+            # duplicate connections across multiple batch runs — BUG-001)
+            val_idx = self._main_window._screens.get("validation")
+            if val_idx is not None:
+                val_widget = self._main_window.stack.widget(val_idx)
+                from gdpr_pseudonymizer.gui.screens.validation import ValidationScreen
+
+                if isinstance(val_widget, ValidationScreen):
+                    try:
+                        val_widget.validation_complete.disconnect(
+                            self._on_validation_complete
+                        )
+                    except RuntimeError:
+                        pass  # Not connected yet
+                    try:
+                        val_widget.batch_cancel_requested.disconnect(self._do_cancel)
+                    except RuntimeError:
+                        pass  # Not connected yet
+                    val_widget.validation_complete.connect(self._on_validation_complete)
+                    val_widget.batch_cancel_requested.connect(self._do_cancel)
 
         QThreadPool.globalInstance().start(self._worker)
 
@@ -641,8 +729,10 @@ class BatchScreen(QWidget):
                 )
             )
 
-            # Update ETA
-            elapsed = time.time() - self._batch_start_time
+            # Update ETA (exclude cumulative validation pause time)
+            elapsed = (
+                time.time() - self._batch_start_time - self._cumulative_validation_time
+            )
             if self._docs_completed > 0:
                 avg_per_doc = elapsed / self._docs_completed
                 remaining = (total - self._docs_completed) * avg_per_doc
@@ -681,17 +771,31 @@ class BatchScreen(QWidget):
         self._batch_result = result
 
         # Update doc table with final results
+        processed_indices: set[int] = set()
         for doc_res in result.per_document_results:
+            processed_indices.add(doc_res.index)
             if doc_res.success:
                 entities = str(doc_res.entities_detected)
                 self._doc_table.setItem(doc_res.index, 2, QTableWidgetItem(entities))
-                status_item = QTableWidgetItem(self.tr("Traité"))
-                status_item.setForeground(Qt.GlobalColor.darkGreen)
+                if result.cancelled:
+                    status_item = QTableWidgetItem(self.tr("Annulé"))
+                    status_item.setForeground(Qt.GlobalColor.darkYellow)
+                else:
+                    status_item = QTableWidgetItem(self.tr("Traité"))
+                    status_item.setForeground(Qt.GlobalColor.darkGreen)
             else:
                 status_item = QTableWidgetItem(self.tr("Erreur"))
                 status_item.setForeground(Qt.GlobalColor.red)
                 status_item.setToolTip(doc_res.error_message)
             self._doc_table.setItem(doc_res.index, 3, status_item)
+
+        # Mark unprocessed docs when cancelled
+        if result.cancelled:
+            for idx in range(len(self._files)):
+                if idx not in processed_indices:
+                    status_item = QTableWidgetItem(self.tr("Non traité"))
+                    status_item.setForeground(Qt.GlobalColor.gray)
+                    self._doc_table.setItem(idx, 3, status_item)
 
         self._progress_bar.setValue(100)
         total = str(len(self._files))
@@ -739,13 +843,113 @@ class BatchScreen(QWidget):
 
         dlg = ConfirmDialog.destructive(
             self.tr("Annuler le traitement"),
-            self.tr("Les documents déjà traités seront conservés."),
+            self.tr("Aucun fichier de sortie ne sera conservé."),
             self.tr("Annuler le lot"),
             parent=self._main_window,
         )
         if dlg.exec():
-            if self._worker is not None:
-                self._worker.cancel()
+            self._do_cancel()
+
+    def _do_cancel(self) -> None:
+        """Shared cancel handler for BatchScreen and ValidationScreen cancel buttons."""
+        if self._worker is not None:
+            self._worker.cancel()
+        # If we're on the validation screen, navigate back to batch
+        if self._main_window.current_screen_name() == "validation":
+            self._main_window.navigate_to("batch")
+
+    # ------------------------------------------------------------------
+    # Batch Validation Orchestration (AC2, AC3, AC4, AC6)
+    # ------------------------------------------------------------------
+
+    def _on_validation_required(
+        self,
+        entities: object,
+        document_text: str,
+        doc_index: int,
+        total_docs: int,
+    ) -> None:
+        """Handle validation_required signal from BatchWorker.
+
+        Generates pseudonym previews, then navigates to ValidationScreen
+        in batch mode.
+        """
+        from gdpr_pseudonymizer.core.document_processor import DocumentProcessor
+
+        entity_list: list[DetectedEntity] = entities  # type: ignore[assignment]
+
+        # Track validation pause time for ETA exclusion
+        self._validation_pause_start = time.time()
+
+        # Update progress table to show "En attente de validation"
+        if doc_index < self._doc_table.rowCount():
+            status_item = QTableWidgetItem(self.tr("En attente de validation"))
+            status_item.setForeground(Qt.GlobalColor.darkYellow)
+            self._doc_table.setItem(doc_index, 3, status_item)
+
+        # Generate pseudonym previews
+        try:
+            processor = DocumentProcessor(
+                db_path=self._db_path,
+                passphrase=self._passphrase,
+            )
+            previews = processor.build_pseudonym_previews(entity_list)
+        except Exception:
+            previews = {}
+            logger.warning("batch_preview_generation_failed", doc_index=doc_index)
+
+        # Cache full context for prev/next navigation (FUNC-001)
+        doc_path = str(self._files[doc_index]) if doc_index < len(self._files) else ""
+        context = {
+            "entities": entity_list,
+            "document_text": document_text,
+            "document_path": doc_path,
+            "pseudonym_previews": previews,
+            "db_path": self._db_path,
+            "passphrase": self._passphrase,
+            "batch_mode": True,
+            "doc_index": doc_index,
+            "total_docs": total_docs,
+        }
+        self._validation_contexts[doc_index] = context
+
+        # Navigate to ValidationScreen in batch mode
+        self._main_window.navigate_to("validation", **context)
+
+    def _on_validation_complete(self, validated_entities: object) -> None:
+        """Handle validation_complete signal from ValidationScreen.
+
+        Stores validated entities, submits them to the worker, and navigates
+        back to the batch processing phase.
+        """
+        entity_list: list[DetectedEntity] = validated_entities  # type: ignore[assignment]
+
+        # Track which doc was validated (current awaiting index)
+        current_doc_idx = self._docs_completed
+        self._validation_results[current_doc_idx] = entity_list
+
+        # Update cached context with validated entities (FUNC-001)
+        if current_doc_idx in self._validation_contexts:
+            self._validation_contexts[current_doc_idx]["entities"] = entity_list
+
+        # Exclude validation pause time from ETA calculation
+        if self._validation_pause_start is not None:
+            self._cumulative_validation_time += (
+                time.time() - self._validation_pause_start
+            )
+            self._validation_pause_start = None
+
+        # Update progress table
+        if current_doc_idx < self._doc_table.rowCount():
+            status_item = QTableWidgetItem(self.tr("Pseudonymisation"))
+            status_item.setForeground(Qt.GlobalColor.blue)
+            self._doc_table.setItem(current_doc_idx, 3, status_item)
+
+        # Submit to worker and navigate back
+        if self._worker is not None:
+            self._worker.submit_validation_result(entity_list)
+
+        self._main_window.navigate_to("batch")
 
     # ------------------------------------------------------------------
     # Summary Phase Logic
@@ -755,6 +959,9 @@ class BatchScreen(QWidget):
         self._phases.setCurrentIndex(2)
         self._main_window.step_indicator.set_step(3)
 
+        if result.cancelled:
+            self._summary_title.setText(self.tr("Traitement annulé"))
+
         # Update cards
         self._update_card(self._card_docs, str(result.successful_files))
         self._update_card(self._card_entities, str(result.total_entities))
@@ -762,24 +969,49 @@ class BatchScreen(QWidget):
         self._update_card(self._card_reused, str(result.reused_entities))
         self._update_card(self._card_errors, str(result.failed_files))
 
-        # Update summary table
-        self._summary_table.setRowCount(len(result.per_document_results))
-        for row, doc_res in enumerate(result.per_document_results):
-            time_str = f"{doc_res.processing_time:.1f}s"
+        # Build lookup for per-document results by index
+        doc_results_by_idx = {dr.index: dr for dr in result.per_document_results}
 
-            self._summary_table.setItem(row, 0, QTableWidgetItem(doc_res.filename))
-            self._summary_table.setItem(
-                row, 1, QTableWidgetItem(str(doc_res.entities_detected))
-            )
-            self._summary_table.setItem(row, 2, QTableWidgetItem(time_str))
+        # Show all files when cancelled, otherwise only processed ones
+        total_rows = (
+            result.total_files if result.cancelled else len(result.per_document_results)
+        )
+        self._summary_table.setRowCount(total_rows)
 
-            if doc_res.success:
-                status_item = QTableWidgetItem(self.tr("Traité"))
-                status_item.setForeground(Qt.GlobalColor.darkGreen)
+        for row in range(total_rows):
+            doc_res = doc_results_by_idx.get(row)
+
+            if doc_res is not None:
+                time_str = f"{doc_res.processing_time:.1f}s"
+                self._summary_table.setItem(row, 0, QTableWidgetItem(doc_res.filename))
+                self._summary_table.setItem(
+                    row, 1, QTableWidgetItem(str(doc_res.entities_detected))
+                )
+                self._summary_table.setItem(row, 2, QTableWidgetItem(time_str))
+
+                if result.cancelled and doc_res.success:
+                    status_item = QTableWidgetItem(self.tr("Annulé"))
+                    status_item.setForeground(Qt.GlobalColor.darkYellow)
+                elif doc_res.success:
+                    status_item = QTableWidgetItem(self.tr("Traité"))
+                    status_item.setForeground(Qt.GlobalColor.darkGreen)
+                else:
+                    status_item = QTableWidgetItem(self.tr("Erreur"))
+                    status_item.setForeground(Qt.GlobalColor.red)
+                    status_item.setToolTip(doc_res.error_message)
             else:
-                status_item = QTableWidgetItem(self.tr("Erreur"))
-                status_item.setForeground(Qt.GlobalColor.red)
-                status_item.setToolTip(doc_res.error_message)
+                # Unprocessed file (cancelled before reaching it)
+                filename = (
+                    self._files[row].name
+                    if row < len(self._files)
+                    else f"Document {row + 1}"
+                )
+                self._summary_table.setItem(row, 0, QTableWidgetItem(filename))
+                self._summary_table.setItem(row, 1, QTableWidgetItem("\u2014"))
+                self._summary_table.setItem(row, 2, QTableWidgetItem("\u2014"))
+                status_item = QTableWidgetItem(self.tr("Non traité"))
+                status_item.setForeground(Qt.GlobalColor.gray)
+
             self._summary_table.setItem(row, 3, status_item)
 
     @staticmethod
@@ -913,3 +1145,7 @@ class BatchScreen(QWidget):
     @property
     def file_count_label(self) -> QLabel:
         return self._file_count_label
+
+    @property
+    def validate_checkbox(self) -> QCheckBox:
+        return self._validate_checkbox

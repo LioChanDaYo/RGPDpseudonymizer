@@ -54,14 +54,23 @@ def setup_focus_order_processing(screen: ProcessingScreen) -> None:
 def setup_focus_order_validation(screen: ValidationScreen) -> None:
     """Configure tab order for Validation screen.
 
-    Order: EntityEditor -> EntityPanel -> Back button -> Finalize button
+    Single mode: EntityEditor -> EntityPanel -> Back button -> Finalize button
+    Batch mode: Prev -> Next -> Cancel lot -> EntityEditor -> EntityPanel -> Finalize
     """
     from PySide6.QtWidgets import QWidget
 
-    # Primary workflow order
-    QWidget.setTabOrder(screen._editor, screen._panel)
-    QWidget.setTabOrder(screen._panel, screen._back_btn)
-    QWidget.setTabOrder(screen._back_btn, screen._finalize_btn)
+    if screen._batch_mode:
+        # Batch mode focus order includes navigation buttons
+        QWidget.setTabOrder(screen._prev_btn, screen._next_btn)
+        QWidget.setTabOrder(screen._next_btn, screen._batch_cancel_btn)
+        QWidget.setTabOrder(screen._batch_cancel_btn, screen._editor)
+        QWidget.setTabOrder(screen._editor, screen._panel)
+        QWidget.setTabOrder(screen._panel, screen._finalize_btn)
+    else:
+        # Primary workflow order
+        QWidget.setTabOrder(screen._editor, screen._panel)
+        QWidget.setTabOrder(screen._panel, screen._back_btn)
+        QWidget.setTabOrder(screen._back_btn, screen._finalize_btn)
 
 
 def setup_focus_order_results(screen: ResultsScreen) -> None:
@@ -94,18 +103,18 @@ def setup_focus_order_batch(screen: BatchScreen) -> None:
     from PySide6.QtWidgets import QWidget
 
     # Phase 0: Selection
-    # Folder input -> Browse button -> Add files button -> File table -> Start button
+    # Folder input -> Browse -> Add files -> File table -> Validate checkbox -> Start
     if hasattr(screen, "_folder_input"):
         QWidget.setTabOrder(screen._folder_input, screen._browse_folder_btn)
         QWidget.setTabOrder(screen._browse_folder_btn, screen._add_files_btn)
+        last: QWidget = screen._add_files_btn
         if hasattr(screen, "_file_table"):
-            QWidget.setTabOrder(screen._add_files_btn, screen._file_table)
+            QWidget.setTabOrder(last, screen._file_table)
+            last = screen._file_table
+        if hasattr(screen, "_validate_checkbox"):
+            QWidget.setTabOrder(last, screen._validate_checkbox)
+            last = screen._validate_checkbox
         if hasattr(screen, "_start_btn"):
-            last = (
-                screen._file_table
-                if hasattr(screen, "_file_table")
-                else screen._add_files_btn
-            )
             QWidget.setTabOrder(last, screen._start_btn)
 
     # Phase 1: Processing (pause/cancel buttons)

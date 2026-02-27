@@ -11,6 +11,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Batch Validation Workflow** (Story 6.7.3) — Per-document entity validation during batch processing:
+  - Validation toggle checkbox ("Valider les entités par document") on batch selection screen, persisted in config
+  - BatchWorker validation pause/resume via QWaitCondition — worker pauses after entity detection, waits for user validation, then finalizes with validated entities
+  - ValidationScreen batch mode: "Document X de Y" indicator, Précédent/Suivant navigation (hidden when unavailable), "Annuler le lot" button, "Valider et continuer" / "Valider et terminer" context-aware button text
+  - Batch cancel shows proper statuses: "Annulé" for processed docs (output files cleaned up), "Non traité" for unprocessed docs, "Traitement annulé" summary title
+  - Pseudonym preview generation per document for validation display
+  - Cached validation contexts for prev/next document navigation without re-triggering detection
+  - ETA calculation excludes cumulative validation pause time
+  - Batch screen reset on re-entry from home screen ("Ouvrir un dossier")
+  - 19 unit tests + 2 integration tests; all quality gates pass
+
 - **Database Background Threading** (Story 6.7.2) — All database operations run on background threads for responsive GUI:
   - DatabaseWorker (QRunnable) for list, search, delete, and export operations via QThreadPool
   - Cancel-and-replace strategy for cancellable operations (load, search); non-cancellable operations (delete, export) disable interactive controls

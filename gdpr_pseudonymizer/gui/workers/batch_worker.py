@@ -10,11 +10,19 @@ from __future__ import annotations
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from PySide6.QtCore import QMutex, QRunnable, QWaitCondition
 
-from gdpr_pseudonymizer.gui.workers.signals import WorkerSignals
+from gdpr_pseudonymizer.gui.workers.signals import BatchValidationSignals, WorkerSignals
 from gdpr_pseudonymizer.utils.logger import get_logger
+
+if TYPE_CHECKING:
+    from gdpr_pseudonymizer.core.document_processor import (
+        DocumentProcessor,
+        ProcessingResult,
+    )
+    from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 
 logger = get_logger(__name__)
 
@@ -33,6 +41,7 @@ class BatchResult:
     new_entities: int = 0
     reused_entities: int = 0
     total_time_seconds: float = 0.0
+    cancelled: bool = False
     errors: list[str] = field(default_factory=list)
     per_document_results: list[DocumentResult] = field(default_factory=list)
 
@@ -95,9 +104,13 @@ class BatchWorker(QRunnable):
         theme: str = "neutral",
         continue_on_error: bool = True,
         validation_mode: str = "per_document",
+        validate_per_document: bool = False,
     ) -> None:
         super().__init__()
-        self.signals = WorkerSignals()
+        self._validate_per_document = validate_per_document
+        self.signals: WorkerSignals = (
+            BatchValidationSignals() if validate_per_document else WorkerSignals()
+        )
         self._files = files
         self._output_dir = output_dir
         self._db_path = db_path
@@ -110,6 +123,14 @@ class BatchWorker(QRunnable):
         self._paused = False
         self._mutex = QMutex()
         self._pause_condition = QWaitCondition()
+
+        # Validation pause support (Task 1.3–1.5)
+        self._validation_condition = QWaitCondition()
+        self._waiting_for_validation = False
+        self._validated_entities: list[DetectedEntity] | None = None
+
+        # Track written output files for cancel cleanup (Task 1.8)
+        self._written_files: list[Path] = []
 
         self.setAutoDelete(True)
 
@@ -131,6 +152,22 @@ class BatchWorker(QRunnable):
         self._cancelled = True
         # Also wake from pause so cancel takes effect
         self.resume()
+        # Also wake from validation wait so cancel takes effect
+        self._validation_condition.wakeAll()
+
+    def submit_validation_result(self, entities: list[DetectedEntity]) -> None:
+        """Submit validated entities from the GUI thread to unblock the worker.
+
+        Called from the GUI thread after the user finishes validation.
+        Thread-safe: uses the shared mutex with _validation_condition.
+
+        Args:
+            entities: User-validated entity list to use for finalization.
+        """
+        self._mutex.lock()
+        self._validated_entities = entities
+        self._validation_condition.wakeAll()
+        self._mutex.unlock()
 
     def run(self) -> None:
         """Execute batch processing in background thread."""
@@ -217,11 +254,20 @@ class BatchWorker(QRunnable):
             doc_result = DocumentResult(index=idx, filename=filename, success=False)
 
             try:
-                result = processor.process_document(
-                    input_path=str(file_path),
-                    output_path=str(output_file),
-                    skip_validation=True,
-                )
+                if self._validate_per_document:
+                    result = self._process_with_validation(
+                        processor, file_path, output_file, idx
+                    )
+                else:
+                    result = processor.process_document(
+                        input_path=str(file_path),
+                        output_path=str(output_file),
+                        skip_validation=True,
+                    )
+
+                if result is None:
+                    # Validation was cancelled (or cancel during validation)
+                    break
 
                 doc_time = time.time() - doc_start
 
@@ -236,6 +282,10 @@ class BatchWorker(QRunnable):
                     batch_result.total_entities += result.entities_detected
                     batch_result.new_entities += result.entities_new
                     batch_result.reused_entities += result.entities_reused
+
+                    # Track written file for cancel cleanup
+                    if output_file.exists():
+                        self._written_files.append(output_file)
                 else:
                     doc_result.error_message = result.error_message or "Erreur inconnue"
                     batch_result.failed_files += 1
@@ -269,5 +319,76 @@ class BatchWorker(QRunnable):
             if not doc_result.success and not self._continue_on_error:
                 break
 
+        # If cancelled during validation, clean up written files
+        if self._cancelled and self._written_files:
+            self._cleanup_written_files()
+
         batch_result.total_time_seconds = time.time() - start_time
+        batch_result.cancelled = self._cancelled
         self.signals.finished.emit(batch_result)
+
+    def _process_with_validation(
+        self,
+        processor: DocumentProcessor,
+        file_path: Path,
+        output_file: Path,
+        doc_index: int,
+    ) -> ProcessingResult | None:
+        """Process a single document with validation pause.
+
+        Detects entities, emits validation_required, waits for user validation,
+        then finalizes with validated entities.
+
+        Returns:
+            ProcessingResult on success, None if cancelled during validation.
+        """
+        from gdpr_pseudonymizer.utils.file_handler import read_file
+
+        # Phase 1: Detect entities
+        document_text = read_file(str(file_path))
+        detected_entities = processor._detect_and_filter_entities(document_text)
+
+        if self._cancelled:
+            return None
+
+        # Emit validation_required signal
+        signals = self.signals
+        signals.validation_required.emit(  # type: ignore[attr-defined]
+            detected_entities, document_text, doc_index, len(self._files)
+        )
+
+        # Wait for validation result
+        self._mutex.lock()
+        self._waiting_for_validation = True
+        self._validated_entities = None
+        self._validation_condition.wait(self._mutex)
+        self._waiting_for_validation = False
+        validated = self._validated_entities
+        self._mutex.unlock()
+
+        if self._cancelled:
+            return None
+
+        if validated is None:
+            return None
+
+        # Phase 2: Finalize with validated entities
+        result = processor.finalize_document(
+            document_text=document_text,
+            validated_entities=validated,
+            output_path=str(output_file),
+        )
+        return result
+
+    def _cleanup_written_files(self) -> None:
+        """Best-effort cleanup of output files written during this batch run."""
+        for fp in self._written_files:
+            try:
+                if fp.exists():
+                    fp.unlink()
+                    logger.info("batch_cancel_cleanup", file=str(fp))
+            except OSError as e:
+                logger.warning(
+                    "batch_cancel_cleanup_failed", file=str(fp), error=str(e)
+                )
+        self._written_files.clear()
