@@ -1,0 +1,470 @@
+name: Build Standalone Executables
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+# ---------------------------------------------------------------------------
+# Code Signing Secrets (AC8 — documented here, configured in GitHub Settings)
+#
+# Windows Authenticode:
+#   WINDOWS_CERT_BASE64   — Base64-encoded .pfx certificate
+#   WINDOWS_CERT_PASSWORD  — Certificate password
+#
+# macOS Notarization:
+#   APPLE_DEVELOPER_ID    — "Developer ID Application: ..." identity (for codesign)
+#   APPLE_ID_EMAIL        — Apple ID email address (for notarytool --apple-id)
+#   APPLE_TEAM_ID         — Apple Team ID
+#   APPLE_APP_PASSWORD    — App-specific password for notarytool
+#   APPLE_CERT_BASE64     — Base64-encoded .p12 signing certificate
+#   APPLE_CERT_PASSWORD   — Certificate password
+#
+# All signing steps are conditional — unsigned builds are produced when
+# secrets are not available (beta testing).
+# ---------------------------------------------------------------------------
+
+jobs:
+  # =========================================================================
+  # Windows
+  # =========================================================================
+  build-windows:
+    runs-on: windows-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Poetry
+        run: |
+          python -m pip install --upgrade pip
+          pip install "poetry>=1.7.0"
+
+      - name: Cache Poetry dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~\AppData\Local\pypoetry\Cache
+            ~\AppData\Local\pip\Cache
+          key: poetry-deps-windows-3.11-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            poetry-deps-windows-3.11-
+
+      - name: Install dependencies
+        run: |
+          poetry install --no-interaction --extras "formats gui"
+          poetry run pip install --force-reinstall --no-deps typer==0.9.4
+
+      - name: Cache spaCy model
+        uses: actions/cache@v4
+        with:
+          path: ~\.spacy
+          key: spacy-model-fr-core-news-lg-windows
+
+      - name: Download spaCy model
+        run: poetry run python -m spacy download fr_core_news_lg
+
+      - name: Build with PyInstaller
+        run: poetry run pyinstaller gdpr-pseudo-gui.spec --noconfirm
+
+      - name: Smoke test — CLI help
+        run: dist\gdpr-pseudonymizer\gdpr-pseudo.exe --cli --help
+
+      # -- Code Signing (conditional) --
+      - name: Sign executable (Authenticode)
+        if: ${{ secrets.WINDOWS_CERT_BASE64 != '' }}
+        env:
+          WINDOWS_CERT_BASE64: ${{ secrets.WINDOWS_CERT_BASE64 }}
+          WINDOWS_CERT_PASSWORD: ${{ secrets.WINDOWS_CERT_PASSWORD }}
+        run: |
+          $certBytes = [Convert]::FromBase64String($env:WINDOWS_CERT_BASE64)
+          $certPath = "$env:RUNNER_TEMP\cert.pfx"
+          [IO.File]::WriteAllBytes($certPath, $certBytes)
+          & signtool sign /f $certPath /p $env:WINDOWS_CERT_PASSWORD /tr http://timestamp.digicert.com /td sha256 /fd sha256 "dist\gdpr-pseudonymizer\gdpr-pseudonymizer.exe"
+          & signtool sign /f $certPath /p $env:WINDOWS_CERT_PASSWORD /tr http://timestamp.digicert.com /td sha256 /fd sha256 "dist\gdpr-pseudonymizer\gdpr-pseudo.exe"
+          Remove-Item $certPath
+        shell: pwsh
+
+      # -- NSIS Installer --
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: Build NSIS installer
+        run: makensis /DVERSION=${{ steps.version.outputs.VERSION }} installer\windows\installer.nsi
+
+      - name: Upload Windows installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer
+          path: dist/gdpr-pseudonymizer-${{ steps.version.outputs.VERSION }}-windows-setup.exe
+          if-no-files-found: error
+
+  # =========================================================================
+  # macOS — Apple Silicon (arm64)
+  # =========================================================================
+  build-macos-arm64:
+    runs-on: macos-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Poetry
+        run: |
+          python -m pip install --upgrade pip
+          pip install "poetry>=1.7.0"
+
+      - name: Cache Poetry dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/Library/Caches/pypoetry
+            ~/Library/Caches/pip
+          key: poetry-deps-macos-arm64-3.11-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            poetry-deps-macos-arm64-3.11-
+
+      - name: Install dependencies
+        run: |
+          poetry install --no-interaction --extras "formats gui"
+          poetry run pip install --force-reinstall --no-deps typer==0.9.4
+
+      - name: Cache spaCy model
+        uses: actions/cache@v4
+        with:
+          path: ~/.spacy
+          key: spacy-model-fr-core-news-lg-macos-arm64
+
+      - name: Download spaCy model
+        run: poetry run python -m spacy download fr_core_news_lg
+
+      - name: Build with PyInstaller
+        run: poetry run pyinstaller gdpr-pseudo-gui.spec --noconfirm
+
+      - name: Smoke test — CLI help
+        run: dist/gdpr-pseudonymizer/gdpr-pseudo --cli --help
+
+      # -- Code Signing (conditional) --
+      - name: Import signing certificate
+        if: ${{ secrets.APPLE_CERT_BASE64 != '' }}
+        env:
+          APPLE_CERT_BASE64: ${{ secrets.APPLE_CERT_BASE64 }}
+          APPLE_CERT_PASSWORD: ${{ secrets.APPLE_CERT_PASSWORD }}
+        run: |
+          echo "$APPLE_CERT_BASE64" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+          security create-keychain -p actions build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p actions build.keychain
+          security import "$RUNNER_TEMP/cert.p12" -k build.keychain -P "$APPLE_CERT_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k actions build.keychain
+          rm "$RUNNER_TEMP/cert.p12"
+
+      - name: Sign .app bundle
+        if: ${{ secrets.APPLE_DEVELOPER_ID != '' }}
+        env:
+          APPLE_DEVELOPER_ID: ${{ secrets.APPLE_DEVELOPER_ID }}
+        run: |
+          codesign --deep --force --verify --verbose \
+            --sign "$APPLE_DEVELOPER_ID" \
+            "dist/GDPR Pseudonymizer.app"
+
+      - name: Notarize .app bundle
+        if: ${{ secrets.APPLE_ID_EMAIL != '' }}
+        env:
+          APPLE_ID_EMAIL: ${{ secrets.APPLE_ID_EMAIL }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+        run: |
+          ditto -c -k --keepParent "dist/GDPR Pseudonymizer.app" "$RUNNER_TEMP/app.zip"
+          xcrun notarytool submit "$RUNNER_TEMP/app.zip" \
+            --apple-id "$APPLE_ID_EMAIL" \
+            --team-id "$APPLE_TEAM_ID" \
+            --password "$APPLE_APP_PASSWORD" \
+            --wait
+          xcrun stapler staple "dist/GDPR Pseudonymizer.app"
+
+      # -- DMG --
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Create DMG
+        run: |
+          chmod +x installer/macos/create_dmg.sh
+          ./installer/macos/create_dmg.sh "${{ steps.version.outputs.VERSION }}" arm64
+
+      - name: Upload macOS DMG (arm64)
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-arm64-dmg
+          path: dist/gdpr-pseudonymizer-${{ steps.version.outputs.VERSION }}-macos-arm64.dmg
+          if-no-files-found: error
+
+  # =========================================================================
+  # macOS — Intel (x86_64)
+  # =========================================================================
+  build-macos-x86_64:
+    runs-on: macos-13
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Poetry
+        run: |
+          python -m pip install --upgrade pip
+          pip install "poetry>=1.7.0"
+
+      - name: Cache Poetry dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/Library/Caches/pypoetry
+            ~/Library/Caches/pip
+          key: poetry-deps-macos-x86_64-3.11-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            poetry-deps-macos-x86_64-3.11-
+
+      - name: Install dependencies
+        run: |
+          poetry install --no-interaction --extras "formats gui"
+          poetry run pip install --force-reinstall --no-deps typer==0.9.4
+
+      - name: Cache spaCy model
+        uses: actions/cache@v4
+        with:
+          path: ~/.spacy
+          key: spacy-model-fr-core-news-lg-macos-x86_64
+
+      - name: Download spaCy model
+        run: poetry run python -m spacy download fr_core_news_lg
+
+      - name: Build with PyInstaller
+        run: poetry run pyinstaller gdpr-pseudo-gui.spec --noconfirm
+
+      - name: Smoke test — CLI help
+        run: dist/gdpr-pseudonymizer/gdpr-pseudo --cli --help
+
+      # -- Code Signing (conditional — same as arm64) --
+      - name: Import signing certificate
+        if: ${{ secrets.APPLE_CERT_BASE64 != '' }}
+        env:
+          APPLE_CERT_BASE64: ${{ secrets.APPLE_CERT_BASE64 }}
+          APPLE_CERT_PASSWORD: ${{ secrets.APPLE_CERT_PASSWORD }}
+        run: |
+          echo "$APPLE_CERT_BASE64" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+          security create-keychain -p actions build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p actions build.keychain
+          security import "$RUNNER_TEMP/cert.p12" -k build.keychain -P "$APPLE_CERT_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k actions build.keychain
+          rm "$RUNNER_TEMP/cert.p12"
+
+      - name: Sign .app bundle
+        if: ${{ secrets.APPLE_DEVELOPER_ID != '' }}
+        env:
+          APPLE_DEVELOPER_ID: ${{ secrets.APPLE_DEVELOPER_ID }}
+        run: |
+          codesign --deep --force --verify --verbose \
+            --sign "$APPLE_DEVELOPER_ID" \
+            "dist/GDPR Pseudonymizer.app"
+
+      - name: Notarize .app bundle
+        if: ${{ secrets.APPLE_ID_EMAIL != '' }}
+        env:
+          APPLE_ID_EMAIL: ${{ secrets.APPLE_ID_EMAIL }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+        run: |
+          ditto -c -k --keepParent "dist/GDPR Pseudonymizer.app" "$RUNNER_TEMP/app.zip"
+          xcrun notarytool submit "$RUNNER_TEMP/app.zip" \
+            --apple-id "$APPLE_ID_EMAIL" \
+            --team-id "$APPLE_TEAM_ID" \
+            --password "$APPLE_APP_PASSWORD" \
+            --wait
+          xcrun stapler staple "dist/GDPR Pseudonymizer.app"
+
+      # -- DMG --
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Create DMG
+        run: |
+          chmod +x installer/macos/create_dmg.sh
+          ./installer/macos/create_dmg.sh "${{ steps.version.outputs.VERSION }}" x86_64
+
+      - name: Upload macOS DMG (x86_64)
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-x86_64-dmg
+          path: dist/gdpr-pseudonymizer-${{ steps.version.outputs.VERSION }}-macos-x86_64.dmg
+          if-no-files-found: error
+
+  # =========================================================================
+  # Linux
+  # =========================================================================
+  build-linux:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Qt system dependencies
+        run: sudo apt-get update && sudo apt-get install -y libegl1 libxkbcommon0
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Poetry
+        run: |
+          python -m pip install --upgrade pip
+          pip install "poetry>=1.7.0"
+
+      - name: Cache Poetry dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pypoetry
+            ~/.cache/pip
+          key: poetry-deps-ubuntu-3.11-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            poetry-deps-ubuntu-3.11-
+
+      - name: Install dependencies
+        run: |
+          poetry install --no-interaction --extras "formats gui"
+          poetry run pip install --force-reinstall --no-deps typer==0.9.4
+
+      - name: Cache spaCy model
+        uses: actions/cache@v4
+        with:
+          path: ~/.spacy
+          key: spacy-model-fr-core-news-lg-ubuntu
+
+      - name: Download spaCy model
+        run: poetry run python -m spacy download fr_core_news_lg
+
+      - name: Build with PyInstaller
+        run: poetry run pyinstaller gdpr-pseudo-gui.spec --noconfirm
+
+      - name: Smoke test — CLI help
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: dist/gdpr-pseudonymizer/gdpr-pseudo --cli --help
+
+      # -- AppImage --
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Install FUSE (required by appimagetool)
+        run: sudo apt-get install -y fuse libfuse2
+
+      - name: Create AppImage
+        run: |
+          chmod +x installer/linux/create_appimage.sh
+          chmod +x installer/linux/AppRun
+          ./installer/linux/create_appimage.sh "${{ steps.version.outputs.VERSION }}"
+
+      - name: Upload Linux AppImage
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-appimage
+          path: dist/gdpr-pseudonymizer-${{ steps.version.outputs.VERSION }}-linux.AppImage
+          if-no-files-found: error
+
+  # =========================================================================
+  # Upload to GitHub Release
+  # =========================================================================
+  upload-release:
+    needs: [build-windows, build-macos-arm64, build-macos-x86_64, build-linux]
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+
+      - name: List downloaded artifacts
+        run: find artifacts/ -type f -ls
+
+      - name: Wait for GitHub Release to exist
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          echo "Waiting for release ${TAG} to be created by release.yaml..."
+          for i in $(seq 1 20); do
+            if gh release view "$TAG" --json id >/dev/null 2>&1; then
+              echo "Release found, uploading assets..."
+              exit 0
+            fi
+            echo "Release not found yet, waiting 30s... (attempt $i/20)"
+            sleep 30
+          done
+          echo "ERROR: Release ${TAG} not found after 10 minutes."
+          exit 1
+
+      - name: Upload assets to GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          VERSION="${{ steps.version.outputs.VERSION }}"
+
+          # Windows installer
+          gh release upload "$TAG" \
+            "artifacts/windows-installer/gdpr-pseudonymizer-${VERSION}-windows-setup.exe" \
+            --clobber
+
+          # macOS DMGs
+          gh release upload "$TAG" \
+            "artifacts/macos-arm64-dmg/gdpr-pseudonymizer-${VERSION}-macos-arm64.dmg" \
+            --clobber
+          gh release upload "$TAG" \
+            "artifacts/macos-x86_64-dmg/gdpr-pseudonymizer-${VERSION}-macos-x86_64.dmg" \
+            --clobber
+
+          # Linux AppImage
+          gh release upload "$TAG" \
+            "artifacts/linux-appimage/gdpr-pseudonymizer-${VERSION}-linux.AppImage" \
+            --clobber
+
+          echo "All assets uploaded to release ${TAG}"

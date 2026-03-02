@@ -812,7 +812,9 @@ class ValidationScreen(QWidget):
             FinalizationWorker,
         )
 
-        validated = self._validation_state.get_validated_entities()
+        # Expand canonical entities back to ALL variant occurrences so
+        # every position in the document gets pseudonymized (not just canonical).
+        validated = self._validation_state.expand_validated_entities()
 
         self._finalize_btn.setEnabled(False)
         self._back_btn.setEnabled(False)

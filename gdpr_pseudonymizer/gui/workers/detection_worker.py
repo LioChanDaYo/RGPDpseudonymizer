@@ -35,6 +35,9 @@ class DetectionResult:
     theme: str
     input_file: str
     detection_time_seconds: float
+    # Maps canonical entity key ("{text}_{start_pos}") to ALL occurrences
+    # in that variant group — used to expand back during finalization.
+    variant_occurrences: dict[str, list[DetectedEntity]] | None = None
 
 
 class DetectionWorker(QRunnable):
@@ -72,9 +75,12 @@ class DetectionWorker(QRunnable):
         try:
             self._run_detection()
         except Exception as e:
-            logger.error("detection_worker_unexpected", error=str(e))
+            logger.error(
+                "detection_worker_unexpected", error=str(e), exc_type=type(e).__name__
+            )
             self.signals.error.emit(
-                "Une erreur inattendue s'est produite lors de l'analyse."
+                f"Une erreur inattendue s'est produite lors de l'analyse.\n\n"
+                f"Détail : {type(e).__name__}: {e}"
             )
 
     def _run_detection(self) -> None:
@@ -143,6 +149,13 @@ class DetectionWorker(QRunnable):
             self.signals.progress.emit(60, "Regroupement des variantes...")
             variant_groups = group_entity_variants(detected_entities)
 
+            # Build variant occurrence map: canonical key → all occurrences
+            # so finalization can expand back to every position in the document.
+            variant_occurrences: dict[str, list[DetectedEntity]] = {}
+            for canonical, all_occ, _ in variant_groups:
+                key = f"{canonical.text}_{canonical.start_pos}"
+                variant_occurrences[key] = all_occ
+
             # Extract canonical entities (longest form) for display
             detected_entities = [canonical for canonical, _, _ in variant_groups]
 
@@ -167,8 +180,13 @@ class DetectionWorker(QRunnable):
                     "Phrase secrète incorrecte. Veuillez réessayer."
                 )
             else:
-                logger.error("detection_failed", error=error_str)
-                self.signals.error.emit("Une erreur s'est produite lors de l'analyse.")
+                logger.error(
+                    "detection_failed", error=error_str, exc_type=type(e).__name__
+                )
+                self.signals.error.emit(
+                    f"Une erreur s'est produite lors de l'analyse.\n\n"
+                    f"Détail : {type(e).__name__}: {error_str}"
+                )
             return
 
         if self._cancelled:
@@ -207,5 +225,6 @@ class DetectionWorker(QRunnable):
             theme=self._theme,
             input_file=self._file_path,
             detection_time_seconds=detection_time,
+            variant_occurrences=variant_occurrences,
         )
         self.signals.finished.emit(result)

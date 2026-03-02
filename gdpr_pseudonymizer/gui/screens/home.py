@@ -91,16 +91,20 @@ class HomeScreen(QWidget):
 
         # Recent files section
         self._recent_header = QLabel()
-        self._recent_header.setStyleSheet("font-size: 15px; font-weight: bold;")
+        header_font = self._recent_header.font()
+        header_font.setPointSizeF(header_font.pointSizeF() * 1.15)
+        header_font.setBold(True)
+        self._recent_header.setFont(header_font)
         layout.addWidget(self._recent_header)
 
         self._recent_area = QScrollArea()
+        self._recent_area.setObjectName("recentFilesArea")
         self._recent_area.setWidgetResizable(True)
         self._recent_area.setFrameShape(QFrame.Shape.NoFrame)
-        self._recent_area.viewport().setAutoFillBackground(False)
         self._recent_area.setMaximumHeight(200)
 
         self._recent_container = QWidget()
+        self._recent_container.setObjectName("recentFilesContainer")
         self._recent_layout = QVBoxLayout(self._recent_container)
         self._recent_layout.setContentsMargins(0, 0, 0, 0)
         self._recent_layout.setSpacing(4)
@@ -161,10 +165,7 @@ class HomeScreen(QWidget):
     def _create_recent_row(self, filepath: str) -> QWidget:
         """Create a row widget for a recent file."""
         row = QFrame()
-        row.setStyleSheet(
-            "QFrame { border-radius: 4px; padding: 4px; }"
-            "QFrame:hover { background-color: rgba(21, 101, 192, 0.08); }"
-        )
+        row.setObjectName("recentFileRow")
         layout = QHBoxLayout(row)
         layout.setContentsMargins(8, 4, 8, 4)
 
@@ -172,12 +173,16 @@ class HomeScreen(QWidget):
         exists = p.exists()
 
         name_label = QLabel(p.name)
-        name_label.setStyleSheet("font-weight: bold;")
+        bold_font = name_label.font()
+        bold_font.setBold(True)
+        name_label.setFont(bold_font)
         layout.addWidget(name_label)
 
         path_label = QLabel(str(p.parent))
         path_label.setObjectName("secondaryLabel")
-        path_label.setStyleSheet("font-size: 11px;")
+        small_font = path_label.font()
+        small_font.setPointSizeF(small_font.pointSizeF() * 0.85)
+        path_label.setFont(small_font)
         layout.addWidget(path_label)
 
         layout.addStretch()
@@ -188,19 +193,23 @@ class HomeScreen(QWidget):
             age = _relative_time_fr(mtime)
             time_label = QLabel(age)
             time_label.setObjectName("secondaryLabel")
-            time_label.setStyleSheet("font-size: 11px;")
+            time_font = time_label.font()
+            time_font.setPointSizeF(time_font.pointSizeF() * 0.85)
+            time_label.setFont(time_font)
             layout.addWidget(time_label)
 
             row.setCursor(Qt.CursorShape.PointingHandCursor)
             row.mousePressEvent = lambda e, fp=filepath: self._on_file_selected(fp)  # type: ignore[method-assign,misc]
         else:
             missing = QLabel(self.tr("Fichier introuvable"))
-            missing.setStyleSheet("color: #C62828; font-size: 11px;")
+            missing.setObjectName("errorLabel")
+            missing_font = missing.font()
+            missing_font.setPointSizeF(missing_font.pointSizeF() * 0.85)
+            missing.setFont(missing_font)
             layout.addWidget(missing)
 
             remove_btn = QPushButton(self.tr("Retirer"))
             remove_btn.setObjectName("secondaryButton")
-            remove_btn.setStyleSheet("font-size: 11px; padding: 2px 8px;")
             remove_btn.clicked.connect(
                 lambda checked=False, fp=filepath: self._remove_recent(fp)
             )

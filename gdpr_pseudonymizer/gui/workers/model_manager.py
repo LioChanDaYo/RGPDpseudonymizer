@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import subprocess
 import sys
+from pathlib import Path
 
 from PySide6.QtCore import QRunnable
 
@@ -19,6 +20,11 @@ logger = get_logger(__name__)
 SPACY_MODEL = "fr_core_news_lg"
 
 
+def _is_frozen() -> bool:
+    """Return True when running inside a PyInstaller bundle."""
+    return getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS")
+
+
 class ModelManager:
     """Utility class for spaCy model detection."""
 
@@ -26,12 +32,20 @@ class ModelManager:
     def is_model_installed(model_name: str = SPACY_MODEL) -> bool:
         """Check if a spaCy model is installed.
 
+        In frozen (PyInstaller) bundles the model is pre-bundled — check for
+        its directory inside ``sys._MEIPASS``.  In normal Python environments
+        fall back to ``spacy.util.is_package()``.
+
         Args:
             model_name: spaCy model package name.
 
         Returns:
             True if the model is installed.
         """
+        if _is_frozen():
+            bundle_dir = Path(sys._MEIPASS)  # type: ignore[attr-defined]
+            return (bundle_dir / model_name / "meta.json").exists()
+
         try:
             import spacy.util
 
@@ -45,6 +59,10 @@ class ModelDownloadWorker(QRunnable):
 
     Emits progress signals during download. On failure, emits an error signal
     with a user-friendly French message.
+
+    In frozen (PyInstaller) bundles, downloading is impossible because
+    ``sys.executable`` is the bundled exe, not a Python interpreter. The
+    model must be pre-bundled; if it is missing the worker emits an error.
     """
 
     def __init__(self, model_name: str = SPACY_MODEL) -> None:
@@ -55,6 +73,14 @@ class ModelDownloadWorker(QRunnable):
 
     def run(self) -> None:
         """Execute model download in background thread."""
+        if _is_frozen():
+            logger.error("spacy_model_missing_in_frozen_bundle", model=self._model_name)
+            self.signals.error.emit(
+                "Le modèle linguistique n'est pas inclus dans cette "
+                "distribution. Veuillez réinstaller l'application."
+            )
+            return
+
         self.signals.progress.emit(
             -1,
             "Première utilisation : téléchargement du modèle "

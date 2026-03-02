@@ -42,6 +42,8 @@ class GUIValidationState(QObject):
         self._pseudonym_previews: dict[str, str] = {}
         # Map entity_id -> EntityReview for fast lookup
         self._reviews_by_id: dict[str, EntityReview] = {}
+        # Variant occurrence map: canonical key → all DetectedEntity instances
+        self._variant_occurrences: dict[str, list[DetectedEntity]] = {}
 
     @property
     def undo_stack(self) -> QUndoStack:
@@ -66,6 +68,7 @@ class GUIValidationState(QObject):
             document_text=detection_result.document_text,
         )
         self._pseudonym_previews = dict(detection_result.pseudonym_previews)
+        self._variant_occurrences = dict(detection_result.variant_occurrences or {})
         self._reviews_by_id.clear()
         self._known_entity_ids.clear()
         self._undo_stack.clear()
@@ -275,6 +278,48 @@ class GUIValidationState(QObject):
             else:
                 result.append(review.entity)
         return result
+
+    def expand_validated_entities(self) -> list[DetectedEntity]:
+        """Expand validated canonical entities to include all variant occurrences.
+
+        For CONFIRMED entities whose canonical key exists in the variant map,
+        replaces the single canonical with ALL occurrences (at all positions)
+        so every instance in the document gets pseudonymized.
+
+        MODIFIED and ADDED entities are kept as-is (single position).
+        """
+        validated = self.get_validated_entities()
+        if not self._variant_occurrences:
+            return validated
+
+        expanded: list[DetectedEntity] = []
+        for entity in validated:
+            key = f"{entity.text}_{entity.start_pos}"
+            if key in self._variant_occurrences:
+                expanded.extend(self._variant_occurrences[key])
+            else:
+                expanded.append(entity)
+        return expanded
+
+    def get_all_entity_ranges(self) -> list[tuple[int, int, str]]:
+        """Return (start, end, entity_id) for all entities including variant occurrences.
+
+        Variant occurrences share the same entity_id as their canonical entity,
+        so highlights/clicks on any occurrence map back to the same review row.
+        """
+        ranges: list[tuple[int, int, str]] = []
+        for review in self._session._entity_reviews:
+            canonical = review.entity
+            key = f"{canonical.text}_{canonical.start_pos}"
+
+            if key in self._variant_occurrences:
+                for occ in self._variant_occurrences[key]:
+                    ranges.append((occ.start_pos, occ.end_pos, review.entity_id))
+            else:
+                ranges.append(
+                    (canonical.start_pos, canonical.end_pos, review.entity_id)
+                )
+        return ranges
 
     def is_entity_known(self, entity_id: str) -> bool:
         """Whether entity was found in the mapping DB."""

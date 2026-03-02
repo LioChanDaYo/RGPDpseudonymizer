@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=GDPR Pseudonymizer
+Comment=GDPR-compliant pseudonymization tool for French text documents
+Exec=gdpr-pseudonymizer
+Icon=gdpr-pseudonymizer
+Categories=Utility;TextTools;Security;
+Terminal=false
+StartupNotify=true

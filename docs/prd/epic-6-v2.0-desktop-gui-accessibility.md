@@ -67,7 +67,7 @@ The v1.0/v1.1 CLI tool has validated the core value proposition (local GDPR-comp
 
 ---
 
-## Story 6.1: UX Architecture & GUI Framework Selection
+## Story 6.1: UX Architecture & GUI Framework Selection — **Done**
 
 **As a** product team,
 **I want** a validated UX design and GUI framework recommendation,
@@ -126,7 +126,7 @@ The GUI must feel native and professional for the target audience (French-speaki
 
 ---
 
-## Story 6.2: GUI Application Foundation
+## Story 6.2: GUI Application Foundation — **Done**
 
 **As a** developer,
 **I want** a working GUI application shell with navigation, theming, and core infrastructure,
@@ -163,7 +163,7 @@ Implements the selected framework from Story 6.1. Delivers a launchable applicat
 
 ---
 
-## Story 6.3: Document Processing Workflow
+## Story 6.3: Document Processing Workflow — **Done**
 
 **As a** non-technical user,
 **I want** to select a document (or drag-and-drop it) and see it processed with a clear progress indicator,
@@ -207,7 +207,7 @@ This is the primary single-document workflow: open file → process → see resu
 
 ---
 
-## Story 6.4: Visual Entity Validation Interface
+## Story 6.4: Visual Entity Validation Interface — **Done**
 
 **As a** user reviewing detected entities,
 **I want** a visual interface to see entities highlighted in context, accept/reject/edit them with mouse clicks, and add missed entities by selecting text,
@@ -265,7 +265,7 @@ The validation logic (`validation/` module) stays unchanged — only the present
 
 ---
 
-## Story 6.5: Batch Processing & Configuration Management
+## Story 6.5: Batch Processing & Configuration Management — **Done**
 
 **As a** user with multiple documents to process,
 **I want** to select a folder or multiple files and process them as a batch with a visual progress dashboard,
@@ -318,7 +318,7 @@ Batch processing already works via CLI (`gdpr-pseudo batch`). This story wraps t
 
 ---
 
-## Story 6.6: Internationalization & French UI
+## Story 6.6: Internationalization & French UI — **Done**
 
 **As a** French-speaking user,
 **I want** the GUI interface, CLI help text, and all documentation available in French,
@@ -366,7 +366,7 @@ This story implements the i18n architecture designed in Story 6.1 and delivers F
 
 ---
 
-## Story 6.7: Accessibility (WCAG AA)
+## Story 6.7: Accessibility (WCAG AA) — **Done**
 
 **As a** user with visual or motor impairments,
 **I want** the GUI to meet WCAG AA accessibility standards,
@@ -420,7 +420,7 @@ Professional and academic environments increasingly require accessibility compli
 
 ---
 
-## Story 6.8: Standalone Executables & Distribution
+## Story 6.8: Standalone Executables & Distribution — **Done**
 
 **As a** non-technical user,
 **I want** to download and run a single installer (.exe on Windows, .app on macOS),
@@ -511,17 +511,17 @@ Currently, installation requires Python, pip, and a `pip install` command — a 
 **Recommended Story Order:**
 
 ```
-Story 6.1 (UX/Architecture)      ─── Week 1-2 ───── Design gate (blocks all)
-Story 6.2 (GUI Foundation)        ─── Week 3-4 ───── Foundation
-Story 6.3 (Doc Processing)        ─── Week 5-6 ───── Core workflow
-Story 6.4 (Entity Validation)     ─── Week 6-8 ───── Key feature (can overlap 6.3)
-Story 6.5 (Batch + Config)        ─── Week 8-9 ───── Production features
-Story 6.6 (i18n + French)         ─── Week 9-10 ──── Parallelizable with 6.5
-Story 6.7 (Accessibility)         ─── Week 10-11 ─── Parallelizable with 6.8
-Story 6.7.1 (Hardening/Security)  ─── Week 11-12 ─── Core quality + DATA-001
-Story 6.7.2 (DB Threading)        ─── Week 12-13 ─── Performance (FE-021)
-Story 6.7.3 (Batch Validation)    ─── Week 13-14 ─── Feature (FE-022), parallelizable with 6.8
-Story 6.8 (Executables)           ─── Week 13-15 ─── Distribution
+Story 6.1 (UX/Architecture)      ─── Week 1-2 ───── Design gate (blocks all)       ✅ Done
+Story 6.2 (GUI Foundation)        ─── Week 3-4 ───── Foundation                     ✅ Done
+Story 6.3 (Doc Processing)        ─── Week 5-6 ───── Core workflow                  ✅ Done
+Story 6.4 (Entity Validation)     ─── Week 6-8 ───── Key feature (can overlap 6.3)  ✅ Done
+Story 6.5 (Batch + Config)        ─── Week 8-9 ───── Production features            ✅ Done
+Story 6.6 (i18n + French)         ─── Week 9-10 ──── Parallelizable with 6.5        ✅ Done
+Story 6.7 (Accessibility)         ─── Week 10-11 ─── Parallelizable with 6.8        ✅ Done
+Story 6.7.1 (Hardening/Security)  ─── Week 11-12 ─── Core quality + DATA-001        ✅ Done
+Story 6.7.2 (DB Threading)        ─── Week 12-13 ─── Performance (FE-021)           ✅ Done
+Story 6.7.3 (Batch Validation)    ─── Week 13-14 ─── Feature (FE-022)               ✅ Done
+Story 6.8 (Executables)           ─── Week 13-15 ─── Distribution                   ✅ Done
 Story 6.9 (Release Prep)          ─── Week 15-16 ─── Release gate
 ```
 
@@ -556,7 +556,7 @@ These decisions are **open** and will be resolved during Story 6.1:
 - [x] Existing mapping database schema unchanged (no migration needed)
 - [x] Existing pseudonym libraries unchanged
 - [x] PyPI installation path (`pip install gdpr-pseudonymizer`) continues to work (CLI-only)
-- [ ] GUI available as separate install path (standalone executable) or via `pip install gdpr-pseudonymizer[gui]`
+- [x] GUI available as separate install path (standalone executable) or via `pip install gdpr-pseudonymizer[gui]`
 - [ ] Configuration file (`.gdpr-pseudo.yaml`) shared between CLI and GUI
 
 ---

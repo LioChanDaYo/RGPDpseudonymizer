@@ -184,19 +184,15 @@ class EntityEditor(QTextEdit):
     # ------------------------------------------------------------------
 
     def _rebuild_entity_ranges(self) -> None:
-        """Rebuild sorted entity ranges from validation state."""
+        """Rebuild sorted entity ranges from validation state.
+
+        Includes variant occurrences so ALL instances of grouped entities
+        are highlighted, not just the canonical form.
+        """
         if self._validation_state is None:
             self._entity_ranges = []
             return
-        ranges: list[tuple[int, int, str]] = []
-        for review in self._validation_state.get_all_entities():
-            ranges.append(
-                (
-                    review.entity.start_pos,
-                    review.entity.end_pos,
-                    review.entity_id,
-                )
-            )
+        ranges = self._validation_state.get_all_entity_ranges()
         ranges.sort(key=lambda r: r[0])
         self._entity_ranges = ranges
         self._nav_entity_ids = [r[2] for r in ranges]
