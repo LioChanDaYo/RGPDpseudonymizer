@@ -362,6 +362,29 @@ QWidget#resultsSummary {
     border: 2px solid #FFFFFF;
 }
 
+/* Recent files section */
+QScrollArea#recentFilesArea {
+    background-color: #000000;
+}
+
+QWidget#recentFilesContainer {
+    background-color: #000000;
+}
+
+QFrame#recentFileRow {
+    border-radius: 4px;
+    padding: 4px;
+}
+
+QFrame#recentFileRow:hover {
+    background-color: #333300;
+    border: 2px solid #FFFF00;
+}
+
+QLabel#errorLabel {
+    color: #FF6666;
+}
+
 /* Toast notifications */
 QLabel#toast {
     background-color: #FFFFFF;

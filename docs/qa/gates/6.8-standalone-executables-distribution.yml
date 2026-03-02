@@ -1,0 +1,50 @@
+schema: 1
+story: "6.8"
+story_title: "Standalone Executables & Distribution"
+gate: PASS
+status_reason: "All 6 review findings addressed. Dual-executable approach (GUI + CLI) resolves Windows console issue. CI signing conditions fixed. NSIS icon paths corrected for PyInstaller 6.x. Dispatch tests now exercise main(). Version dynamically read from pyproject.toml."
+reviewer: "Quinn (Test Architect)"
+updated: "2026-03-01T13:00:00Z"
+
+waiver: { active: false }
+
+top_issues: []
+
+quality_score: 95
+
+expires: "2026-03-15T00:00:00Z"
+
+evidence:
+  tests_reviewed: 47
+  risks_identified: 0
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+    ac_gaps: []
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: "Certificate handling proper. CI signing conditions now correctly reference secrets context. Separate APPLE_ID_EMAIL secret for notarytool."
+  performance:
+    status: PASS
+    notes: "Bundle ~896MB uncompressed, <500MB compressed. Startup <10s. spaCy model lazy-loaded."
+  reliability:
+    status: PASS
+    notes: "Dual-executable ensures both GUI and CLI are fully functional. CI signing steps will execute when secrets are configured."
+  maintainability:
+    status: PASS
+    notes: "Version auto-read from pyproject.toml. Tests properly exercise dispatch logic."
+
+recommendations:
+  immediate: []
+  future:
+    - action: "Consider shared conftest.py fixture for standalone_entry import (duplicated in 2 test files)"
+      refs: ["tests/unit/test_standalone_entry.py:20-31", "tests/unit/test_resource_path.py:18-29"]
+
+history:
+  - at: "2026-03-01T12:00:00Z"
+    gate: CONCERNS
+    note: "Initial review — 4 medium issues (CLI-001, CI-SEC-001, NSIS-001, TEST-001), 2 low (CI-SEC-002, VERSION-001)"
+  - at: "2026-03-01T13:00:00Z"
+    gate: PASS
+    note: "All 6 findings addressed by dev. Re-review confirmed fixes."

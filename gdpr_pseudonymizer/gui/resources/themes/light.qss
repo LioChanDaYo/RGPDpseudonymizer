@@ -301,6 +301,28 @@ QScrollArea {
     border: none;
 }
 
+/* Recent files section */
+QScrollArea#recentFilesArea {
+    background-color: #FFFFFF;
+}
+
+QWidget#recentFilesContainer {
+    background-color: #FFFFFF;
+}
+
+QFrame#recentFileRow {
+    border-radius: 4px;
+    padding: 4px;
+}
+
+QFrame#recentFileRow:hover {
+    background-color: rgba(21, 101, 192, 0.08);
+}
+
+QLabel#errorLabel {
+    color: #C62828;
+}
+
 /* Toast notifications */
 QLabel#toast {
     background-color: #424242;

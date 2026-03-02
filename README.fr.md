@@ -123,7 +123,35 @@ GDPR Pseudonymizer est un **outil conçu pour la confidentialité**. Il associe 
 
 ---
 
-## ⚙️ Installation
+## Téléchargement — Exécutables autonomes (sans Python)
+
+Des exécutables autonomes pré-compilés sont disponibles pour Windows, macOS et Linux. Aucune installation de Python requise.
+
+**[Télécharger la dernière version](https://github.com/LioChanDaYo/RGPDpseudonymizer/releases/latest)**
+
+| Plateforme | Fichier | Notes |
+|------------|---------|-------|
+| **Windows** | `gdpr-pseudonymizer-*-windows-setup.exe` | Lancer l'installeur. Ajoute un raccourci au menu Démarrer. |
+| **macOS (Apple Silicon)** | `gdpr-pseudonymizer-*-macos-arm64.dmg` | Ouvrir le DMG, glisser vers Applications. |
+| **macOS (Intel)** | `gdpr-pseudonymizer-*-macos-x86_64.dmg` | Ouvrir le DMG, glisser vers Applications. |
+| **Linux** | `gdpr-pseudonymizer-*-linux.AppImage` | `chmod +x` puis exécuter. |
+
+### Notes par plateforme
+
+- **Windows :** Si SmartScreen affiche « Windows a protégé votre PC », cliquez sur « Informations complémentaires » puis « Exécuter quand même ». Cela apparaît car l'exécutable n'est pas encore signé numériquement.
+- **macOS :** Si Gatekeeper bloque l'application, faites un clic droit sur l'app et sélectionnez « Ouvrir ».
+- **Linux :** Rendre le fichier exécutable : `chmod +x gdpr-pseudonymizer-*.AppImage`. Si le lancement échoue, installer les dépendances Qt : `sudo apt-get install libegl1 libxkbcommon0`.
+
+### Dépannage (exécutables autonomes)
+
+- **Faux positifs antivirus (Windows) :** Windows Defender ou Norton peuvent signaler les applications compilées avec PyInstaller. Il s'agit d'un faux positif connu.
+- **Avertissements Gatekeeper (macOS) :** Faites un clic droit et « Ouvrir » pour contourner l'avertissement.
+- **Premier lancement lent :** Le premier lancement peut prendre ~10-15s pendant que le système met en cache les fichiers. Les lancements suivants seront plus rapides.
+- **Bibliothèques système manquantes (Linux) :** `sudo apt-get install -y libegl1 libxkbcommon0`
+
+---
+
+## ⚙️ Installation (Python / PyPI)
 
 Consultez le [guide d'installation](https://liochandayo.github.io/RGPDpseudonymizer/installation/) pour des instructions détaillées selon votre plateforme.
 

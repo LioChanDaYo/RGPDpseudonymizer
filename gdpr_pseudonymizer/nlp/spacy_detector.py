@@ -33,6 +33,10 @@ class SpaCyDetector(EntityDetector):
     def load_model(self, model_name: str = "fr_core_news_lg") -> None:
         """Load spaCy NLP model into memory.
 
+        In frozen (PyInstaller) bundles, the model is loaded by direct path
+        because PyInstaller's frozen importer does not resolve packages added
+        to ``sys.path`` at runtime.
+
         Args:
             model_name: spaCy model name (default: fr_core_news_lg)
 
@@ -41,10 +45,34 @@ class SpaCyDetector(EntityDetector):
             Exception: If model loading fails
         """
         try:
+            import sys
+
             import spacy
 
             logger.info("loading_spacy_model", model=model_name)
-            self._nlp = spacy.load(model_name)
+
+            # In frozen bundles, load by path — the frozen importer ignores sys.path
+            if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+                from pathlib import Path
+
+                model_pkg = Path(getattr(sys, "_MEIPASS")) / model_name
+                if not model_pkg.exists():
+                    raise OSError(
+                        f"spaCy model '{model_name}' not found at {model_pkg}"
+                    )
+                # The bundled model package has a versioned data subdirectory
+                # (e.g. fr_core_news_lg-3.8.0/) that contains config.cfg.
+                # spacy.load(path) expects the data dir, not the package dir.
+                data_path = model_pkg
+                if not (model_pkg / "config.cfg").exists():
+                    for subdir in model_pkg.iterdir():
+                        if subdir.is_dir() and subdir.name.startswith(model_name):
+                            data_path = subdir
+                            break
+                self._nlp = spacy.load(str(data_path))
+            else:
+                self._nlp = spacy.load(model_name)
+
             self._model_name = model_name
             logger.info("spacy_model_loaded", model=model_name)
         except OSError:
@@ -56,6 +84,10 @@ class SpaCyDetector(EntityDetector):
 
     def _auto_download_model(self, model_name: str) -> Language:
         """Auto-download a missing spaCy model.
+
+        In frozen (PyInstaller) bundles, ``sys.executable`` is the bundled exe,
+        not a Python interpreter — downloading is impossible.  The model must
+        be pre-bundled; raise immediately if it is missing.
 
         Args:
             model_name: spaCy model name to download
@@ -70,6 +102,14 @@ class SpaCyDetector(EntityDetector):
         import sys
 
         import spacy
+
+        # In frozen bundles sys.executable is the exe — cannot run pip/spacy CLI
+        if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+            raise OSError(
+                f"spaCy model '{model_name}' not found in frozen bundle. "
+                f"The model should be pre-bundled with the application."
+            )
+
         from rich.console import Console
 
         console = Console(stderr=True)
