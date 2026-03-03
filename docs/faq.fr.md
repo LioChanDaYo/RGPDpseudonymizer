@@ -52,7 +52,7 @@ Cela réduit la fatigue de validation en éliminant les demandes redondantes. Le
 
 ### Quels formats de documents sont pris en charge ?
 
-La v1.1 prend en charge :
+Formats pris en charge :
 - **Texte brut** (`.txt`)
 - **Markdown** (`.md`)
 - **PDF** (`.pdf`) -- nécessite une dépendance optionnelle
@@ -154,36 +154,44 @@ Non. Tout le traitement se fait localement. Il n'y a aucune dépendance cloud, a
 
 ---
 
+## Interface graphique (application de bureau)
+
+### Comment passer en mode sombre ?
+
+Ouvrez le menu **Affichage** dans la barre de menus et sélectionnez le thème **Sombre**. Vous pouvez aussi le modifier dans **Paramètres > Apparence > Thème**. Trois thèmes sont disponibles : Clair, Sombre et Contraste élevé. La préférence est sauvegardée automatiquement.
+
+### Puis-je utiliser l'interface graphique sans souris ?
+
+Oui. L'interface respecte les normes d'accessibilité WCAG 2.1 niveau AA avec une navigation complète au clavier. Appuyez sur **Entrée** dans l'éditeur de validation pour démarrer le mode navigation, puis utilisez **Tab/Maj+Tab** pour naviguer entre les entités. Consultez le [Guide de l'interface graphique](gui-guide.fr.md) pour la référence complète des raccourcis clavier.
+
+### Quelle est la différence entre la CLI et l'interface graphique ?
+
+Les deux utilisent le même moteur de traitement. La CLI est en mode texte (terminal) et idéale pour le scripting et l'automatisation. L'interface graphique offre une interface visuelle avec glisser-déposer, validation colorée des entités, tableau de bord de progression par lot et gestion de base de données. Choisissez selon votre préférence de travail.
+
+### Ai-je besoin de Python pour l'interface graphique ?
+
+Non. Des exécutables autonomes sont disponibles pour Windows (installeur .exe), macOS (.dmg) et Linux (.AppImage). Téléchargez depuis les [versions GitHub](https://github.com/LioChanDaYo/RGPDpseudonymizer/releases/latest). Si vous préférez PyPI : `pip install gdpr-pseudonymizer[gui]`.
+
+---
+
 ## Feuille de route
 
 ### Qu'est-ce qui est prévu pour les versions futures ?
 
-**v1.0 (Actuelle - Q2 2026) :** CLI assistée par IA avec validation obligatoire
-- Traitement 100 % local, tables de correspondance chiffrées, pistes d'audit
-- Langue française, formats .txt/.md
+**v1.0 (T1 2026) :** CLI assistée par IA avec validation obligatoire
 
-**v1.1 (Q2-Q3 2026) :** Améliorations rapides et conformité RGPD
-- ~~Droit à l'oubli RGPD : suppression sélective des entités (commande `delete-mapping`, Article 17)~~ (Story 5.1 — terminé)
-- ~~Attribution de pseudonymes consciente du genre pour les noms français~~ (Story 5.2 — terminé)
-- ~~Améliorations de la précision NER : F1 29,5 % → 59,97 %~~ (Story 5.3 — terminé)
-- ~~Traduction française de la documentation (MkDocs i18n)~~ (Story 5.4 — terminé)
-- ~~Support des formats PDF/DOCX en entrée (extras optionnels)~~ (Story 5.5 — terminé)
-- ~~Perfectionnement CLI et améliorations mineures (indicateur de défilement des contextes, retour visuel des actions groupées, benchmarks CI)~~ (Story 5.6 — terminé)
-- Correctifs de bugs et améliorations UX issues des retours bêta
+**v1.1 (T1 2026) :** Effacement RGPD, pseudonymes genrés, amélioration NER, support PDF/DOCX, documentation française
 
-**v2.0 (Q3-Q4 2026) :** Interface graphique de bureau
-- Interface graphique enveloppant le noyau CLI (glisser-déposer, révision visuelle des entités)
-- Exécutables autonomes (.exe, .app) -- Python non requis
-- Interface prioritairement en français avec architecture d'internationalisation
+**v2.0 (T1 2026 — Actuelle) :** Interface graphique, exécutables autonomes, accessibilité WCAG AA, interface française, validation par lot
 
-**v3.0 (2027+) :** Précision NLP et automation
-- Modèle NER français affinage (cible F1 de 70-85 %)
+**v3.0 (2027+) :** Précision NLP et automatisation
+- Modèle NER français affiné (cible F1 de 70-85 %)
 - Option `--no-validate` facultative pour les workflows haute confiance
 - Prise en charge multilingue (anglais, espagnol, allemand)
 
-### Aura-t-il une version avec interface graphique ?
+### Existe-t-il une version avec interface graphique ?
 
-Oui. La v2.0 (prévue pour Q3-Q4 2026) inclura une interface graphique de bureau avec traitement de documents par glisser-déposer, révision visuelle des entités et exécutables autonomes qui ne nécessitent pas l'installation de Python. Le public cible est constitué d'utilisateurs non techniques (RH, juridique, conformité).
+Oui ! La v2.0 inclut une interface graphique complète avec traitement de documents par glisser-déposer, validation visuelle des entités, tableau de bord de traitement par lot et exécutables autonomes sans Python. Consultez le [Guide de l'interface graphique](gui-guide.fr.md) pour les détails.
 
 ### Puis-je contribuer ?
 

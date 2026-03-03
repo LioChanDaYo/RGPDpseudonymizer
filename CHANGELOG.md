@@ -9,7 +9,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [2.0.0] - 2026-03-03
+
+**GDPR Pseudonymizer v2.0.0 — Desktop GUI, Standalone Executables & Accessibility**
+
 ### Added
+
+- **Standalone Executables & Distribution** (Story 6.8) — PyInstaller `--onedir` builds for all desktop platforms:
+  - Windows: NSIS installer (`gdpr-pseudo-setup-2.0.0.exe`) with Start Menu shortcuts and uninstaller
+  - macOS: DMG disk images for both Apple Silicon (arm64) and Intel (x86_64)
+  - Linux: AppImage portable executable
+  - CI/CD workflow (`build-executables.yaml`) triggered on `v*` tags, uploads assets to GitHub Release
+  - Unified entry point (`scripts/standalone_entry.py`) for frozen bundle detection
+  - Code signing infrastructure ready for future certificate integration
+  - Bundle size ~896MB uncompressed, <500MB compressed
+
+- **Internationalization & French UI** (Story 6.6) — Complete i18n framework for the GUI:
+  - `.qm` compiled translation files for French and English
+  - FR/EN language switching in settings with immediate UI update
+  - System locale auto-detection on first launch
+  - All GUI screens, dialogs, tooltips, and status messages fully translated
+
+- **WCAG 2.1 Level AA Accessibility** (Story 6.7) — Comprehensive accessibility support:
+  - Full keyboard navigation across all screens and controls
+  - Screen reader support with ARIA-equivalent Qt accessibility labels
+  - 4.5:1 minimum contrast ratios verified across all themes
+  - High contrast mode theme option
+  - Visible focus indicators on all interactive elements
+  - Accessibility audit checklist completed
 
 - **Batch Validation Workflow** (Story 6.7.3) — Per-document entity validation during batch processing:
   - Validation toggle checkbox ("Valider les entités par document") on batch selection screen, persisted in config
@@ -105,6 +134,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **QSS theme rendering** — Fixed black stripes in light mode on Settings and Home screens caused by QScrollArea forcing `autoFillBackground(True)` on content widgets when QSS overrides the native palette. Added QProgressBar, QStackedWidget, QFrame, and QScrollArea container styles to both light and dark QSS theme files.
 - **Empty-string decrypt crash** (Story 6.7.2): `EncryptionService.decrypt("")` now returns `""` instead of crashing with `InvalidTag` from `AESSIV.decrypt(b"", None)`. Affects databases with raw empty strings in encrypted fields.
 - **Silent exception swallowing** (Story 6.7.2): `DatabaseWorker` catch-all handlers now log `repr(e)` and `type(e).__name__` instead of empty `str(e)` for exceptions like `cryptography.exceptions.InvalidTag` that have no message.
+
+### Known Limitations
+
+- **UI-001**: Minor layout issues at 200% DPI scaling (all functionality accessible)
+
+### Breaking Changes
+
+None. v2.0.0 is fully backwards compatible with v1.x. Existing mapping databases, configuration files, and CLI workflows continue to work without modification.
 
 ---
 

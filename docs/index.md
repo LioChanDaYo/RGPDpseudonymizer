@@ -8,7 +8,7 @@ Transform sensitive French documents for safe AI analysis with local processing,
 
 ## What is GDPR Pseudonymizer?
 
-GDPR Pseudonymizer is a **privacy-first tool** that combines AI efficiency with human accuracy to pseudonymize French text documents. Available as a **CLI tool** and a **desktop GUI** (v2.0 in development). Unlike fully automatic tools or cloud services, it prioritizes **zero false negatives** and **legal defensibility** through mandatory validation workflows.
+GDPR Pseudonymizer is a **privacy-first tool** that combines AI efficiency with human accuracy to pseudonymize French text documents. Available as a **CLI tool** and **desktop GUI application**, with **standalone executables** for users who don't have Python installed. Unlike fully automatic tools or cloud services, it prioritizes **zero false negatives** and **legal defensibility** through mandatory validation workflows.
 
 **Perfect for:**
 
@@ -70,6 +70,7 @@ See the [Installation Guide](installation.md) for detailed platform-specific ins
 | [Installation](installation.md) | Platform-specific setup (Windows, macOS, Linux, Docker) |
 | [Tutorial](tutorial.md) | Step-by-step usage tutorials and workflows |
 | [CLI Reference](CLI-REFERENCE.md) | Complete command documentation |
+| [GUI Guide](gui-guide.md) | Desktop application user guide |
 | [FAQ](faq.md) | Common questions and answers |
 | [Troubleshooting](troubleshooting.md) | Error reference and solutions |
 | [Methodology](methodology.md) | Technical approach, GDPR compliance, academic citation |
@@ -96,7 +97,7 @@ GDPR Pseudonymizer supports compliance with Articles 4(5), 25, 30, 32, and 89 of
 
 ## Status
 
-**Current release:** v1.1.0 (February 2026) | **In development:** v2.0 Desktop GUI (Epic 6)
+**Current release:** v2.0.0 (March 2026) — Desktop GUI, Standalone Executables & WCAG AA Accessibility
 
 **Supported:** Python 3.10-3.12 | Windows, macOS, Linux | .txt, .md, .pdf, .docx formats | French language | Desktop GUI: `pip install gdpr-pseudonymizer[gui]`
 
