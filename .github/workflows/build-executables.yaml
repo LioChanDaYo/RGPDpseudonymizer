@@ -35,6 +35,8 @@ jobs:
   build-windows:
     runs-on: windows-latest
     timeout-minutes: 45
+    env:
+      HAS_WINDOWS_CERT: ${{ secrets.WINDOWS_CERT_BASE64 != '' }}
 
     steps:
       - name: Checkout code
@@ -82,7 +84,7 @@ jobs:
 
       # -- Code Signing (conditional) --
       - name: Sign executable (Authenticode)
-        if: ${{ secrets.WINDOWS_CERT_BASE64 != '' }}
+        if: env.HAS_WINDOWS_CERT == 'true'
         env:
           WINDOWS_CERT_BASE64: ${{ secrets.WINDOWS_CERT_BASE64 }}
           WINDOWS_CERT_PASSWORD: ${{ secrets.WINDOWS_CERT_PASSWORD }}
@@ -117,6 +119,10 @@ jobs:
   build-macos-arm64:
     runs-on: macos-latest
     timeout-minutes: 45
+    env:
+      HAS_APPLE_CERT: ${{ secrets.APPLE_CERT_BASE64 != '' }}
+      HAS_APPLE_DEV_ID: ${{ secrets.APPLE_DEVELOPER_ID != '' }}
+      HAS_APPLE_ID: ${{ secrets.APPLE_ID_EMAIL != '' }}
 
     steps:
       - name: Checkout code
@@ -164,7 +170,7 @@ jobs:
 
       # -- Code Signing (conditional) --
       - name: Import signing certificate
-        if: ${{ secrets.APPLE_CERT_BASE64 != '' }}
+        if: env.HAS_APPLE_CERT == 'true'
         env:
           APPLE_CERT_BASE64: ${{ secrets.APPLE_CERT_BASE64 }}
           APPLE_CERT_PASSWORD: ${{ secrets.APPLE_CERT_PASSWORD }}
@@ -178,7 +184,7 @@ jobs:
           rm "$RUNNER_TEMP/cert.p12"
 
       - name: Sign .app bundle
-        if: ${{ secrets.APPLE_DEVELOPER_ID != '' }}
+        if: env.HAS_APPLE_DEV_ID == 'true'
         env:
           APPLE_DEVELOPER_ID: ${{ secrets.APPLE_DEVELOPER_ID }}
         run: |
@@ -187,7 +193,7 @@ jobs:
             "dist/GDPR Pseudonymizer.app"
 
       - name: Notarize .app bundle
-        if: ${{ secrets.APPLE_ID_EMAIL != '' }}
+        if: env.HAS_APPLE_ID == 'true'
         env:
           APPLE_ID_EMAIL: ${{ secrets.APPLE_ID_EMAIL }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
@@ -224,6 +230,10 @@ jobs:
   build-macos-x86_64:
     runs-on: macos-13
     timeout-minutes: 45
+    env:
+      HAS_APPLE_CERT: ${{ secrets.APPLE_CERT_BASE64 != '' }}
+      HAS_APPLE_DEV_ID: ${{ secrets.APPLE_DEVELOPER_ID != '' }}
+      HAS_APPLE_ID: ${{ secrets.APPLE_ID_EMAIL != '' }}
 
     steps:
       - name: Checkout code
@@ -271,7 +281,7 @@ jobs:
 
       # -- Code Signing (conditional -- same as arm64) --
       - name: Import signing certificate
-        if: ${{ secrets.APPLE_CERT_BASE64 != '' }}
+        if: env.HAS_APPLE_CERT == 'true'
         env:
           APPLE_CERT_BASE64: ${{ secrets.APPLE_CERT_BASE64 }}
           APPLE_CERT_PASSWORD: ${{ secrets.APPLE_CERT_PASSWORD }}
@@ -285,7 +295,7 @@ jobs:
           rm "$RUNNER_TEMP/cert.p12"
 
       - name: Sign .app bundle
-        if: ${{ secrets.APPLE_DEVELOPER_ID != '' }}
+        if: env.HAS_APPLE_DEV_ID == 'true'
         env:
           APPLE_DEVELOPER_ID: ${{ secrets.APPLE_DEVELOPER_ID }}
         run: |
@@ -294,7 +304,7 @@ jobs:
             "dist/GDPR Pseudonymizer.app"
 
       - name: Notarize .app bundle
-        if: ${{ secrets.APPLE_ID_EMAIL != '' }}
+        if: env.HAS_APPLE_ID == 'true'
         env:
           APPLE_ID_EMAIL: ${{ secrets.APPLE_ID_EMAIL }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
