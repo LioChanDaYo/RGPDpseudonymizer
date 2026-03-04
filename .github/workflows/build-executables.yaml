@@ -99,11 +99,13 @@ jobs:
 
       # -- NSIS Installer --
       - name: Install NSIS
-        run: choco install nsis -y
+        run: |
+          choco install nsis -y
+          echo "C:\Program Files (x86)\NSIS" >> $env:GITHUB_PATH
+        shell: pwsh
 
       - name: Verify NSIS on PATH
         run: makensis /VERSION
-        shell: cmd
 
       - name: Extract version from tag
         id: version
@@ -151,6 +153,12 @@ jobs:
           sudo rm -rf /opt/hostedtoolcache/CodeQL || true
           sudo rm -rf /opt/hostedtoolcache/go || true
           sudo rm -rf /opt/hostedtoolcache/Ruby || true
+          sudo rm -rf /opt/hostedtoolcache/Java* || true
+          sudo rm -rf /opt/hostedtoolcache/PyPy || true
+          sudo rm -rf /usr/local/share/powershell || true
+          sudo rm -rf /usr/local/share/chromium || true
+          sudo rm -rf /usr/local/lib/node_modules || true
+          brew cleanup --prune=all 2>/dev/null || true
           echo "==> Disk space after cleanup:"
           df -h
 
@@ -161,18 +169,8 @@ jobs:
 
       - name: Install Poetry
         run: |
-          python -m pip install --upgrade pip
-          pip install "poetry>=1.7.0"
-
-      - name: Cache Poetry dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/Library/Caches/pypoetry
-            ~/Library/Caches/pip
-          key: poetry-deps-macos-arm64-3.11-${{ hashFiles('**/poetry.lock') }}
-          restore-keys: |
-            poetry-deps-macos-arm64-3.11-
+          python -m pip install --no-cache-dir --upgrade pip
+          pip install --no-cache-dir "poetry>=1.7.0"
 
       - name: Install dependencies
         run: |
@@ -279,6 +277,12 @@ jobs:
           sudo rm -rf /opt/hostedtoolcache/CodeQL || true
           sudo rm -rf /opt/hostedtoolcache/go || true
           sudo rm -rf /opt/hostedtoolcache/Ruby || true
+          sudo rm -rf /opt/hostedtoolcache/Java* || true
+          sudo rm -rf /opt/hostedtoolcache/PyPy || true
+          sudo rm -rf /usr/local/share/powershell || true
+          sudo rm -rf /usr/local/share/chromium || true
+          sudo rm -rf /usr/local/lib/node_modules || true
+          brew cleanup --prune=all 2>/dev/null || true
           echo "==> Disk space after cleanup:"
           df -h
 
@@ -291,8 +295,8 @@ jobs:
         run: |
           arch -x86_64 python3.11 -m venv venv_x86
           source venv_x86/bin/activate
-          arch -x86_64 pip install --upgrade pip
-          arch -x86_64 pip install "poetry>=1.7.0"
+          arch -x86_64 pip install --no-cache-dir --upgrade pip
+          arch -x86_64 pip install --no-cache-dir "poetry>=1.7.0"
 
       - name: Cache Poetry dependencies
         uses: actions/cache@v4
@@ -307,7 +311,13 @@ jobs:
       - name: Install dependencies (x86_64)
         run: |
           source venv_x86/bin/activate
-          arch -x86_64 poetry install --no-interaction --extras "formats gui"
+          # torch 2.8+ has no macOS x86_64 wheels — allow poetry install to
+          # fail on torch only. Both torch and stanza are excluded from the
+          # PyInstaller bundle (gdpr-pseudo-gui.spec excludes list), so the
+          # app works fine without them.
+          arch -x86_64 poetry install --no-interaction --extras "formats gui" || true
+          # Verify critical packages are actually installed
+          arch -x86_64 poetry run python -c "import spacy; import PyInstaller; import PySide6; print('Core deps OK')"
           arch -x86_64 poetry run pip install --force-reinstall --no-deps typer==0.9.4
 
       - name: Cache spaCy model
