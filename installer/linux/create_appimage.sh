@@ -43,7 +43,7 @@ chmod +x "${APPDIR}/AppRun"
 cp "${SCRIPT_DIR}/gdpr-pseudonymizer.desktop" "${APPDIR}/gdpr-pseudonymizer.desktop"
 
 # Copy icon (use 256px PNG as the AppImage icon)
-ICON_SRC="${PYINSTALLER_OUTPUT}/gdpr_pseudonymizer/gui/resources/icons/icon_256.png"
+ICON_SRC="${PYINSTALLER_OUTPUT}/_internal/gdpr_pseudonymizer/gui/resources/icons/icon_256.png"
 if [ -f "${ICON_SRC}" ]; then
     cp "${ICON_SRC}" "${APPDIR}/gdpr-pseudonymizer.png"
 else

@@ -98,9 +98,22 @@ jobs:
         shell: pwsh
 
       # -- NSIS Installer --
+      - name: Install NSIS
+        run: choco install nsis -y
+
+      - name: Verify NSIS on PATH
+        run: makensis /VERSION
+        shell: cmd
+
       - name: Extract version from tag
         id: version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+        run: |
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          # Fallback for workflow_dispatch (no tag ref)
+          if [ "$VERSION" = "$GITHUB_REF" ] || [ -z "$VERSION" ]; then
+            VERSION="dev"
+          fi
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
         shell: bash
 
       - name: Build NSIS installer
@@ -117,7 +130,7 @@ jobs:
   # macOS -- Apple Silicon (arm64)
   # =========================================================================
   build-macos-arm64:
-    runs-on: macos-latest
+    runs-on: macos-14
     timeout-minutes: 45
     env:
       HAS_APPLE_CERT: ${{ secrets.APPLE_CERT_BASE64 != '' }}
@@ -127,6 +140,19 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Free disk space
+        run: |
+          echo "==> Disk space before cleanup:"
+          df -h
+          # Remove pre-installed tools that aren't needed for the build (best-effort)
+          sudo rm -rf /usr/local/share/dotnet || true
+          sudo rm -rf /usr/local/lib/android || true
+          sudo rm -rf /opt/hostedtoolcache/CodeQL || true
+          sudo rm -rf /opt/hostedtoolcache/go || true
+          sudo rm -rf /opt/hostedtoolcache/Ruby || true
+          echo "==> Disk space after cleanup:"
+          df -h
 
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
@@ -210,7 +236,12 @@ jobs:
       # -- DMG --
       - name: Extract version from tag
         id: version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+        run: |
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          if [ "$VERSION" = "$GITHUB_REF" ] || [ -z "$VERSION" ]; then
+            VERSION="dev"
+          fi
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Create DMG
         run: |
@@ -225,10 +256,10 @@ jobs:
           if-no-files-found: error
 
   # =========================================================================
-  # macOS -- Intel (x86_64)
+  # macOS -- Intel (x86_64) via Rosetta 2 cross-compilation
   # =========================================================================
   build-macos-x86_64:
-    runs-on: macos-13
+    runs-on: macos-14
     timeout-minutes: 45
     env:
       HAS_APPLE_CERT: ${{ secrets.APPLE_CERT_BASE64 != '' }}
@@ -239,15 +270,29 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Free disk space
+        run: |
+          echo "==> Disk space before cleanup:"
+          df -h
+          sudo rm -rf /usr/local/share/dotnet || true
+          sudo rm -rf /usr/local/lib/android || true
+          sudo rm -rf /opt/hostedtoolcache/CodeQL || true
+          sudo rm -rf /opt/hostedtoolcache/go || true
+          sudo rm -rf /opt/hostedtoolcache/Ruby || true
+          echo "==> Disk space after cleanup:"
+          df -h
+
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: Install Poetry
+      - name: Create x86_64 virtual environment
         run: |
-          python -m pip install --upgrade pip
-          pip install "poetry>=1.7.0"
+          arch -x86_64 python3.11 -m venv venv_x86
+          source venv_x86/bin/activate
+          arch -x86_64 pip install --upgrade pip
+          arch -x86_64 pip install "poetry>=1.7.0"
 
       - name: Cache Poetry dependencies
         uses: actions/cache@v4
@@ -259,10 +304,11 @@ jobs:
           restore-keys: |
             poetry-deps-macos-x86_64-3.11-
 
-      - name: Install dependencies
+      - name: Install dependencies (x86_64)
         run: |
-          poetry install --no-interaction --extras "formats gui"
-          poetry run pip install --force-reinstall --no-deps typer==0.9.4
+          source venv_x86/bin/activate
+          arch -x86_64 poetry install --no-interaction --extras "formats gui"
+          arch -x86_64 poetry run pip install --force-reinstall --no-deps typer==0.9.4
 
       - name: Cache spaCy model
         uses: actions/cache@v4
@@ -271,13 +317,17 @@ jobs:
           key: spacy-model-fr-core-news-lg-macos-x86_64
 
       - name: Download spaCy model
-        run: poetry run python -m spacy download fr_core_news_lg
+        run: |
+          source venv_x86/bin/activate
+          arch -x86_64 poetry run python -m spacy download fr_core_news_lg
 
-      - name: Build with PyInstaller
-        run: poetry run pyinstaller gdpr-pseudo-gui.spec --noconfirm
+      - name: Build with PyInstaller (x86_64)
+        run: |
+          source venv_x86/bin/activate
+          arch -x86_64 poetry run pyinstaller gdpr-pseudo-gui.spec --noconfirm
 
       - name: Smoke test -- CLI help
-        run: dist/gdpr-pseudonymizer/gdpr-pseudo --cli --help
+        run: arch -x86_64 dist/gdpr-pseudonymizer/gdpr-pseudo --cli --help
 
       # -- Code Signing (conditional -- same as arm64) --
       - name: Import signing certificate
@@ -321,7 +371,12 @@ jobs:
       # -- DMG --
       - name: Extract version from tag
         id: version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+        run: |
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          if [ "$VERSION" = "$GITHUB_REF" ] || [ -z "$VERSION" ]; then
+            VERSION="dev"
+          fi
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Create DMG
         run: |
@@ -394,7 +449,12 @@ jobs:
       # -- AppImage --
       - name: Extract version from tag
         id: version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+        run: |
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          if [ "$VERSION" = "$GITHUB_REF" ] || [ -z "$VERSION" ]; then
+            VERSION="dev"
+          fi
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Install FUSE (required by appimagetool)
         run: sudo apt-get install -y fuse libfuse2
@@ -416,6 +476,7 @@ jobs:
   # Upload to GitHub Release
   # =========================================================================
   upload-release:
+    if: startsWith(github.ref, 'refs/tags/')
     needs: [build-windows, build-macos-arm64, build-macos-x86_64, build-linux]
     runs-on: ubuntu-22.04
     timeout-minutes: 15
@@ -426,7 +487,12 @@ jobs:
 
       - name: Extract version from tag
         id: version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+        run: |
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          if [ "$VERSION" = "$GITHUB_REF" ] || [ -z "$VERSION" ]; then
+            VERSION="dev"
+          fi
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Download all build artifacts
         uses: actions/download-artifact@v4

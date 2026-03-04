@@ -62,6 +62,7 @@ The v1.0/v1.1 CLI tool has validated the core value proposition (local GDPR-comp
 | 6.7.3: Batch Validation Workflow (FE-022) | 🟡 **MEDIUM** | 1-2 weeks | Story 6.5 DEFERRED-001 / Story 6.7 AC8 | ✅ COMPLETE |
 | 6.8: Standalone Executables & Distribution | 🔴 **HIGH** | 2-3 weeks | FE-009 | ✅ COMPLETE |
 | 6.9: v2.0 Release Preparation | 🔴 **HIGH** | 1-2 days | — | ✅ COMPLETE |
+| 6.10: Build Executables Infrastructure Fixes | 🔴 **HIGH** | 1-2 days | Story 6.9 post-release | ✅ APPROVED |
 
 **Total Estimated Duration:** 13-19 weeks (target: 14-16 weeks)
 
