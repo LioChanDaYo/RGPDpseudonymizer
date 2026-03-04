@@ -4,26 +4,27 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
 
 permissions:
   contents: write
 
 # ---------------------------------------------------------------------------
-# Code Signing Secrets (AC8 — documented here, configured in GitHub Settings)
+# Code Signing Secrets (AC8 -- documented here, configured in GitHub Settings)
 #
 # Windows Authenticode:
-#   WINDOWS_CERT_BASE64   — Base64-encoded .pfx certificate
-#   WINDOWS_CERT_PASSWORD  — Certificate password
+#   WINDOWS_CERT_BASE64   -- Base64-encoded .pfx certificate
+#   WINDOWS_CERT_PASSWORD  -- Certificate password
 #
 # macOS Notarization:
-#   APPLE_DEVELOPER_ID    — "Developer ID Application: ..." identity (for codesign)
-#   APPLE_ID_EMAIL        — Apple ID email address (for notarytool --apple-id)
-#   APPLE_TEAM_ID         — Apple Team ID
-#   APPLE_APP_PASSWORD    — App-specific password for notarytool
-#   APPLE_CERT_BASE64     — Base64-encoded .p12 signing certificate
-#   APPLE_CERT_PASSWORD   — Certificate password
+#   APPLE_DEVELOPER_ID    -- "Developer ID Application: ..." identity (for codesign)
+#   APPLE_ID_EMAIL        -- Apple ID email address (for notarytool --apple-id)
+#   APPLE_TEAM_ID         -- Apple Team ID
+#   APPLE_APP_PASSWORD    -- App-specific password for notarytool
+#   APPLE_CERT_BASE64     -- Base64-encoded .p12 signing certificate
+#   APPLE_CERT_PASSWORD   -- Certificate password
 #
-# All signing steps are conditional — unsigned builds are produced when
+# All signing steps are conditional -- unsigned builds are produced when
 # secrets are not available (beta testing).
 # ---------------------------------------------------------------------------
 
@@ -76,7 +77,7 @@ jobs:
       - name: Build with PyInstaller
         run: poetry run pyinstaller gdpr-pseudo-gui.spec --noconfirm
 
-      - name: Smoke test — CLI help
+      - name: Smoke test -- CLI help
         run: dist\gdpr-pseudonymizer\gdpr-pseudo.exe --cli --help
 
       # -- Code Signing (conditional) --
@@ -111,7 +112,7 @@ jobs:
           if-no-files-found: error
 
   # =========================================================================
-  # macOS — Apple Silicon (arm64)
+  # macOS -- Apple Silicon (arm64)
   # =========================================================================
   build-macos-arm64:
     runs-on: macos-latest
@@ -158,7 +159,7 @@ jobs:
       - name: Build with PyInstaller
         run: poetry run pyinstaller gdpr-pseudo-gui.spec --noconfirm
 
-      - name: Smoke test — CLI help
+      - name: Smoke test -- CLI help
         run: dist/gdpr-pseudonymizer/gdpr-pseudo --cli --help
 
       # -- Code Signing (conditional) --
@@ -218,7 +219,7 @@ jobs:
           if-no-files-found: error
 
   # =========================================================================
-  # macOS — Intel (x86_64)
+  # macOS -- Intel (x86_64)
   # =========================================================================
   build-macos-x86_64:
     runs-on: macos-13
@@ -265,10 +266,10 @@ jobs:
       - name: Build with PyInstaller
         run: poetry run pyinstaller gdpr-pseudo-gui.spec --noconfirm
 
-      - name: Smoke test — CLI help
+      - name: Smoke test -- CLI help
         run: dist/gdpr-pseudonymizer/gdpr-pseudo --cli --help
 
-      # -- Code Signing (conditional — same as arm64) --
+      # -- Code Signing (conditional -- same as arm64) --
       - name: Import signing certificate
         if: ${{ secrets.APPLE_CERT_BASE64 != '' }}
         env:
@@ -375,7 +376,7 @@ jobs:
       - name: Build with PyInstaller
         run: poetry run pyinstaller gdpr-pseudo-gui.spec --noconfirm
 
-      - name: Smoke test — CLI help
+      - name: Smoke test -- CLI help
         env:
           QT_QPA_PLATFORM: offscreen
         run: dist/gdpr-pseudonymizer/gdpr-pseudo --cli --help
