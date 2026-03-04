@@ -85,6 +85,7 @@ plugins:
             Technical Approach & GDPR Compliance: Approche Technique & Conformité RGPD
             Developer Guide: Guide Développeur
             API Reference: Référence API
+            GUI Guide: Guide Interface Graphique
 
 nav:
   - Home: index.md
@@ -93,6 +94,7 @@ nav:
     - Quick Start: tutorial.md
   - User Guide:
     - CLI Reference: CLI-REFERENCE.md
+    - GUI Guide: gui-guide.md
     - FAQ: faq.md
     - Troubleshooting: troubleshooting.md
   - Methodology:

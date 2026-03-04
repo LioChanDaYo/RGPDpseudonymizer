@@ -52,7 +52,7 @@ This reduces validation fatigue by eliminating redundant prompts. The grouping i
 
 ### What document formats are supported?
 
-v1.1 supports:
+Supported formats:
 - **Plain text** (`.txt`)
 - **Markdown** (`.md`)
 - **PDF** (`.pdf`) -- requires optional dependency
@@ -118,6 +118,26 @@ No. All processing happens locally. There are no cloud dependencies, API calls, 
 
 ---
 
+## GUI (Desktop Application)
+
+### How do I switch to dark mode?
+
+Open **View** menu in the menu bar and select **Dark** theme. You can also change it in **Settings > Appearance > Theme**. Three themes are available: Light, Dark, and High Contrast. The preference is saved automatically.
+
+### Can I use the GUI without a mouse?
+
+Yes. The GUI meets WCAG 2.1 Level AA accessibility standards with full keyboard navigation. Press **Enter** in the validation editor to start navigation mode, then use **Tab/Shift+Tab** to move between entities. See the [GUI Guide](gui-guide.md) for the complete keyboard shortcuts reference.
+
+### What's the difference between CLI and GUI?
+
+Both use the same core processing engine. The CLI is text-based (terminal/command prompt) and ideal for scripting and automation. The GUI provides a visual interface with drag-and-drop, color-coded entity validation, batch progress dashboard, and database management. Choose based on your workflow preference.
+
+### Do I need Python for the GUI?
+
+No. Standalone executables are available for Windows (.exe installer), macOS (.dmg), and Linux (.AppImage). Download from [GitHub Releases](https://github.com/LioChanDaYo/RGPDpseudonymizer/releases/latest). If you prefer PyPI: `pip install gdpr-pseudonymizer[gui]`.
+
+---
+
 ## Comparison with Alternatives
 
 ### How does this compare to manual redaction?
@@ -158,32 +178,20 @@ No. All processing happens locally. There are no cloud dependencies, API calls, 
 
 ### What's planned for future versions?
 
-**v1.0 (Current - Q2 2026):** AI-assisted CLI with mandatory validation
-- 100% local processing, encrypted mapping tables, audit trails
-- French language, .txt/.md formats
+**v1.0 (Q1 2026):** AI-assisted CLI with mandatory validation
 
-**v1.1 (Q2-Q3 2026):** Quick wins and GDPR compliance
-- ~~GDPR Right to Erasure: selective entity deletion (`delete-mapping` command, Article 17)~~ (Story 5.1 — done)
-- ~~Gender-aware pseudonym assignment for French names~~ (Story 5.2 — done)
-- ~~NER accuracy improvements: F1 29.5% → 59.97%~~ (Story 5.3 — done)
-- ~~French documentation translation (MkDocs i18n)~~ (Story 5.4 — done)
-- ~~PDF/DOCX input format support (optional extras)~~ (Story 5.5 — done)
-- ~~CLI polish & minor enhancements (context cycling indicator, batch feedback, CI benchmarks)~~ (Story 5.6 — done)
-- Beta feedback bug fixes and UX improvements
+**v1.1 (Q1 2026):** GDPR erasure, gender-aware pseudonyms, NER accuracy improvements, PDF/DOCX support, French docs
 
-**v2.0 (Q3-Q4 2026):** Desktop GUI
-- Graphical interface wrapping CLI core (drag-and-drop, visual entity review)
-- Standalone executables (.exe, .app) -- no Python required
-- French-first UI with internationalization architecture
+**v2.0 (Q1 2026 — Current):** Desktop GUI, standalone executables, WCAG AA accessibility, French UI, batch validation
 
 **v3.0 (2027+):** NLP accuracy and automation
 - Fine-tuned French NER model (70-85% F1 target)
 - Optional `--no-validate` flag for high-confidence workflows
 - Multi-language support (English, Spanish, German)
 
-### Will there be a GUI version?
+### Is there a GUI version?
 
-Yes. v2.0 (planned Q3-Q4 2026) will include a desktop GUI with drag-and-drop document processing, visual entity review, and standalone executables that don't require Python installation. The target audience is non-technical users (HR, legal, compliance teams).
+Yes! v2.0 includes a full desktop GUI with drag-and-drop document processing, visual entity validation, batch processing dashboard, and standalone executables that don't require Python. See the [GUI Guide](gui-guide.md) for details.
 
 ### Can I contribute?
 

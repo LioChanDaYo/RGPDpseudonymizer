@@ -14,22 +14,53 @@ Préparez vos documents sensibles pour l'analyse par IA en toute sérénité : t
 
 ---
 
-## Nouveautés de la v1.1
+## Nouveautés de la v2.0
 
-- **Droit à l'effacement RGPD (article 17)** — Commandes `delete-mapping` et `list-entities` pour la suppression sélective d'entités avec piste d'audit
-- **Pseudonymes tenant compte du genre** — Dictionnaire de 945 prénoms français attribuant automatiquement des pseudonymes du même genre
-- **Précision NER doublée** — Score F1 amélioré de 29,74 % à 59,97 % (+30,23 pp) grâce au nettoyage des annotations, à l'enrichissement des expressions régulières et au dictionnaire géographique
-- **Support PDF/DOCX** — Traitez directement les fichiers PDF et DOCX : `pip install gdpr-pseudonymizer[formats]`
-- **Documentation française** — Traduction complète du README et des guides utilisateur, bascule FR/EN sur MkDocs
-- **Améliorations de l'interface de validation** — Indicateur de défilement des contextes, retour visuel des actions groupées avec compteurs, benchmark CI de régression
+- **Application de bureau** — Interface graphique PySide6 complète avec validation visuelle des entités, glisser-déposer et tableau de bord de progression en temps réel
+- **Exécutables autonomes** — Installeur Windows (.exe), DMG macOS (arm64 + Intel) et AppImage Linux — Python non requis
+- **Accessibilité WCAG 2.1 niveau AA** — Navigation au clavier, lecteurs d'écran, contrastes 4,5:1, mode contraste élevé
+- **Interface française avec changement de langue** — Interface GUI FR/EN complète avec changement de langue en temps réel et détection automatique de la locale système
+- **Traitement par lot avec validation par document** — Validation interactive des entités document par document avec navigation Précédent/Suivant
+- **Gestion de base de données en arrière-plan** — Interface réactive avec toutes les opérations de base de données sur des threads séparés
+- **Renforcement du traitement** — Assainissement des DCP dans les messages d'erreur, gestion typée des exceptions, comptage d'entités par document
 
-**Mise à jour :** `pip install --upgrade gdpr-pseudonymizer`
+<!-- TODO: Ajouter une capture d'écran de l'interface graphique -->
+
+**Mise à jour :** `pip install --upgrade gdpr-pseudonymizer[gui]`
+
+---
+
+## Téléchargement — Exécutables autonomes (sans Python)
+
+Des exécutables autonomes v2.0 pré-compilés sont disponibles pour Windows, macOS et Linux. Aucune installation de Python requise.
+
+**[Télécharger la dernière version](https://github.com/LioChanDaYo/RGPDpseudonymizer/releases/latest)**
+
+| Plateforme | Fichier | Notes |
+|------------|---------|-------|
+| **Windows** | `gdpr-pseudonymizer-2.0.0-windows-setup.exe` | Lancer l'installeur. Ajoute un raccourci au menu Démarrer. |
+| **macOS (Apple Silicon)** | `gdpr-pseudonymizer-2.0.0-macos-arm64.dmg` | Ouvrir le DMG, glisser vers Applications. |
+| **macOS (Intel)** | `gdpr-pseudonymizer-2.0.0-macos-x86_64.dmg` | Ouvrir le DMG, glisser vers Applications. |
+| **Linux** | `gdpr-pseudonymizer-2.0.0-linux.AppImage` | `chmod +x` puis exécuter. |
+
+### Notes par plateforme
+
+- **Windows :** Si SmartScreen affiche « Windows a protégé votre PC », cliquez sur « Informations complémentaires » puis « Exécuter quand même ». Cela apparaît car l'exécutable n'est pas encore signé numériquement.
+- **macOS :** Si Gatekeeper bloque l'application, faites un clic droit sur l'app et sélectionnez « Ouvrir ».
+- **Linux :** Rendre le fichier exécutable : `chmod +x gdpr-pseudonymizer-*.AppImage`. Si le lancement échoue, installer les dépendances Qt : `sudo apt-get install libegl1 libxkbcommon0`.
+
+### Dépannage (exécutables autonomes)
+
+- **Faux positifs antivirus (Windows) :** Windows Defender ou Norton peuvent signaler les applications compilées avec PyInstaller. Il s'agit d'un faux positif connu.
+- **Avertissements Gatekeeper (macOS) :** Faites un clic droit et « Ouvrir » pour contourner l'avertissement.
+- **Premier lancement lent :** Le premier lancement peut prendre ~10-15s pendant que le système met en cache les fichiers. Les lancements suivants seront plus rapides.
+- **Bibliothèques système manquantes (Linux) :** `sudo apt-get install -y libegl1 libxkbcommon0`
 
 ---
 
 ## 🎯 Présentation
 
-GDPR Pseudonymizer est un **outil conçu pour la confidentialité**. Il associe la rapidité de l'IA à la rigueur de la relecture humaine pour pseudonymiser des documents en français. Disponible en **ligne de commande (CLI)** et en **application de bureau** (v2.0 en développement). Contrairement aux solutions entièrement automatiques ou aux services cloud, il mise sur l'**absence totale de faux négatifs** et sur la **solidité juridique** grâce à un processus de validation obligatoire.
+GDPR Pseudonymizer est un **outil CLI et GUI conçu pour la confidentialité**. Il associe la rapidité de l'IA à la rigueur de la relecture humaine pour pseudonymiser des documents en français. Disponible en **ligne de commande (CLI)** et en **application de bureau**, avec des **exécutables autonomes** pour les utilisateurs n'ayant pas Python installé. Contrairement aux solutions entièrement automatiques ou aux services cloud, il mise sur l'**absence totale de faux négatifs** et sur la **solidité juridique** grâce à un processus de validation obligatoire.
 
 **Pour qui ?**
 - 🏛️ **Organisations sensibles à la protection des données** ayant besoin d'analyses IA conformes au RGPD
@@ -68,22 +99,46 @@ GDPR Pseudonymizer est un **outil conçu pour la confidentialité**. Il associe 
 - ✅ **Respect du genre** — Détection automatique du genre des prénoms français à partir d'un dictionnaire de 945 prénoms, avec attribution de pseudonymes correspondants (prénom féminin → pseudonyme féminin, prénom masculin → pseudonyme masculin)
 - ✅ **Tous les types d'entités couverts** — Pseudonymes PERSON, LOCATION et ORGANIZATION pour chaque thème
 
+### 🖥️ **Fonctionnalités de l'interface graphique** (v2.0)
+- ✅ **Validation visuelle des entités** — Entités colorées par type (cliquer pour accepter/rejeter), annuler/rétablir
+- ✅ **Glisser-déposer** — Déposez vos fichiers sur l'écran d'accueil pour lancer le traitement
+- ✅ **Traitement par lot avec tableau de bord** — Progression en temps réel, validation par document, contrôles pause/annulation
+- ✅ **Thèmes clair/sombre/contraste élevé** — Préférence de thème persistante, conformité WCAG AA
+- ✅ **Interface entièrement en français** — Interface FR/EN complète avec changement de langue en temps réel
+- ✅ **Utilisation au clavier uniquement** — Accessibilité complète avec navigation au clavier et lecteurs d'écran
+
+<!-- TODO: Ajouter une capture d'écran de la validation -->
+
 ---
 
 ## 🚀 Prise en main rapide
 
-**Version actuelle :** 🎉 **v1.1.0** (février 2026)
+**Version actuelle :** 🎉 **v2.0.0** (mars 2026) — Interface graphique, exécutables autonomes et accessibilité
 
-### Ce que la v1.1 permet — et ce qu'elle ne permet pas
+### Pour commencer
 
-**Ce qu'elle offre :**
-- 🤖 **Détection assistée par IA** — La détection hybride NLP + expressions régulières repère environ 60 % des entités automatiquement (F1 59,97 %)
-- ✅ **Relecture humaine obligatoire** — Vous passez en revue toutes les entités (2-3 min par document)
-- 🔒 **Précision garantie à 100 %** — La validation humaine élimine tout faux négatif
-- ⚡ **Plus de 50 % de temps gagné** par rapport à la rédaction manuelle
-- 🗑️ **Effacement RGPD article 17** — Suppression sélective des correspondances d'entités avec piste d'audit
+**Pour les utilisateurs non techniques (sans Python) :**
+Téléchargez un exécutable autonome depuis la [section Téléchargement](#téléchargement--exécutables-autonomes-sans-python) ci-dessus et lancez-le directement.
+
+**Pour les développeurs (PyPI) :**
+```bash
+# CLI uniquement
+pip install gdpr-pseudonymizer
+
+# CLI + interface graphique
+pip install gdpr-pseudonymizer[gui]
+```
+
+### Ce que la v2.0 offre
+
+- 🖥️ **Interface graphique** — Validation visuelle des entités avec glisser-déposer, tableau de bord de lot et gestion de base de données
+- 📦 **Exécutables autonomes** — Installeur Windows .exe, DMG macOS (arm64 + Intel), AppImage Linux — Python non requis
+- ♿ **Accessibilité WCAG 2.1 AA** — Navigation au clavier, lecteurs d'écran, mode contraste élevé
+- 🌐 **Interface française** — Interface GUI FR/EN complète avec changement de langue en temps réel
+- 🤖 **Détection assistée par IA** — La détection hybride NLP + regex repère environ 60 % des entités (F1 59,97 %)
+- ✅ **Relecture humaine obligatoire** — Vous vérifiez toutes les entités (précision finale 100 %)
+- 🔒 **Traitement 100 % local** — Vos données ne quittent jamais votre machine
 - 📄 **Support PDF/DOCX** — Traitement direct des fichiers PDF et DOCX (extras optionnels)
-- 🇫🇷 **Documentation française** — Traduction complète des guides et du README
 
 **Ce qu'elle ne propose pas :**
 - ❌ Un traitement entièrement automatique sans intervention
@@ -93,61 +148,16 @@ GDPR Pseudonymizer est un **outil conçu pour la confidentialité**. Il associe 
 ### Feuille de route
 
 **v1.0 (MVP — T1 2026) :** CLI assisté par IA avec validation obligatoire
-- Public visé : utilisateurs soucieux de la confidentialité, attachés au contrôle humain
-- Traitement 100 % local, tables de correspondance chiffrées, journaux d'audit
 
-**v1.1 (T1 2026) — VERSION ACTUELLE :**
-- ✅ Droit à l'effacement RGPD : suppression sélective d'entités (commande `delete-mapping`, article 17)
-- ✅ Attribution de pseudonymes tenant compte du genre (dictionnaire de 945 prénoms)
-- ✅ Améliorations de la précision NER : F1 29,74 % → 59,97 % (+30,23 pp)
-- ✅ Traduction française de la documentation (MkDocs i18n, 6 documents traduits)
-- ✅ Support des formats PDF/DOCX en entrée (extras optionnels, extraction de texte)
-- ✅ Perfectionnement CLI et améliorations mineures (indicateur de défilement des contextes, retour visuel des actions groupées, benchmarks CI)
+**v1.1 (T1 2026) :** Effacement RGPD, pseudonymes genrés, amélioration NER, support PDF/DOCX, documentation française
 
-**v2.0 (T3-T4 2026) :** Interface graphique
-- Application de bureau encapsulant le noyau CLI (glisser-déposer, revue visuelle des entités)
-- Exécutables autonomes (.exe pour Windows, .app pour macOS) — Python non requis
-- ✅ Interface francophone avec architecture d'internationalisation (prête pour le multilingue) — **implémentée dans la Story 6.6**
-- ✅ Conformité WCAG 2.1 niveau AA — **implémentée dans la Story 6.7**
-  - Navigation complète au clavier avec indicateurs de focus visibles
-  - Support des lecteurs d'écran (NVDA, VoiceOver) avec étiquettes accessibles pour tous les widgets
-  - Détection du mode contraste élevé avec thème à contraste 21:1
-  - Palette adaptée au daltonisme et mise à l'échelle DPI (100-200 %)
-- Public visé : utilisateurs non techniques (équipes RH, juridiques, conformité)
+**v2.0 (T1 2026) — VERSION ACTUELLE :** Interface graphique, exécutables autonomes, accessibilité WCAG AA, interface française, validation par lot, renforcement
 
 **v3.0 (2027+) :** Précision NLP et automatisation
 - Modèle NER français affiné (objectif F1 70-85 %, contre ~60 % actuellement)
 - Option `--no-validate` pour les traitements à haute confiance
 - Traitement automatique à partir d'un seuil de confiance (objectif F1 85 %+)
 - Prise en charge multilingue (anglais, espagnol, allemand)
-
----
-
-## Téléchargement — Exécutables autonomes (sans Python)
-
-Des exécutables autonomes pré-compilés sont disponibles pour Windows, macOS et Linux. Aucune installation de Python requise.
-
-**[Télécharger la dernière version](https://github.com/LioChanDaYo/RGPDpseudonymizer/releases/latest)**
-
-| Plateforme | Fichier | Notes |
-|------------|---------|-------|
-| **Windows** | `gdpr-pseudonymizer-*-windows-setup.exe` | Lancer l'installeur. Ajoute un raccourci au menu Démarrer. |
-| **macOS (Apple Silicon)** | `gdpr-pseudonymizer-*-macos-arm64.dmg` | Ouvrir le DMG, glisser vers Applications. |
-| **macOS (Intel)** | `gdpr-pseudonymizer-*-macos-x86_64.dmg` | Ouvrir le DMG, glisser vers Applications. |
-| **Linux** | `gdpr-pseudonymizer-*-linux.AppImage` | `chmod +x` puis exécuter. |
-
-### Notes par plateforme
-
-- **Windows :** Si SmartScreen affiche « Windows a protégé votre PC », cliquez sur « Informations complémentaires » puis « Exécuter quand même ». Cela apparaît car l'exécutable n'est pas encore signé numériquement.
-- **macOS :** Si Gatekeeper bloque l'application, faites un clic droit sur l'app et sélectionnez « Ouvrir ».
-- **Linux :** Rendre le fichier exécutable : `chmod +x gdpr-pseudonymizer-*.AppImage`. Si le lancement échoue, installer les dépendances Qt : `sudo apt-get install libegl1 libxkbcommon0`.
-
-### Dépannage (exécutables autonomes)
-
-- **Faux positifs antivirus (Windows) :** Windows Defender ou Norton peuvent signaler les applications compilées avec PyInstaller. Il s'agit d'un faux positif connu.
-- **Avertissements Gatekeeper (macOS) :** Faites un clic droit et « Ouvrir » pour contourner l'avertissement.
-- **Premier lancement lent :** Le premier lancement peut prendre ~10-15s pendant que le système met en cache les fichiers. Les lancements suivants seront plus rapides.
-- **Bibliothèques système manquantes (Linux) :** `sudo apt-get install -y libegl1 libxkbcommon0`
 
 ---
 
@@ -449,14 +459,14 @@ L'interface de validation offre un parcours intuitif piloté au clavier pour pas
 
 ## 🛠️ État du développement
 
-**Epics 1-5 terminés** — v1.1.0 (février 2026). **Epic 6 en cours** — v2.0 Interface graphique.
+**Epics 1-6 terminés** — v2.0.0 (mars 2026). Interface graphique avec exécutables autonomes et accessibilité WCAG AA.
 
 - ✅ **Epic 1 :** Fondations et validation NLP (9 stories) — Intégration spaCy, interface de validation, détection hybride, déduplication des entités
 - ✅ **Epic 2 :** Moteur de pseudonymisation (9 stories) — Bibliothèques de pseudonymes, chiffrement, journaux d'audit, traitement par lot, correspondance 1:1 RGPD
 - ✅ **Epic 3 :** Interface CLI et traitement par lot (7 stories) — 8 commandes CLI, suivi de progression, fichiers de configuration, traitement parallèle, perfectionnement UX
 - ✅ **Epic 4 :** Préparation au lancement (8 stories) — Validation de l'utilité LLM, tests multi-plateformes, documentation, suite de précision NER, validation des performances, intégration des retours bêta, refactorisation, préparation au lancement
 - ✅ **Epic 5 :** Améliorations et conformité RGPD (7 stories) — Effacement article 17 RGPD, pseudonymes tenant compte du genre, amélioration de la précision NER (F1 29,74 % → 59,97 %), traduction française de la documentation, support PDF/DOCX, perfectionnement CLI et benchmarks, release v1.1
-- 🚧 **Epic 6 :** v2.0 Interface graphique et accessibilité (9 stories) — Application de bureau PySide6, validation visuelle, traitement par lot GUI, i18n, WCAG AA, exécutables autonomes
+- ✅ **Epic 6 :** v2.0 Interface graphique et accessibilité (9 stories) — Application de bureau PySide6, validation visuelle, traitement par lot GUI, i18n, WCAG AA, exécutables autonomes
   - ✅ Story 6.1 : Architecture UX et sélection du framework GUI
   - ✅ Story 6.2 : Fondations de l'application GUI (fenêtre principale, thèmes, écran d'accueil, paramètres, 77 tests GUI)
   - ✅ Story 6.3 : Workflow de traitement de documents (dialogue de phrase secrète, worker de traitement, écran de résultats, 45 nouveaux tests GUI)
@@ -467,7 +477,9 @@ L'interface de validation offre un parcours intuitif piloté au clavier pour pas
   - ✅ Story 6.7.1 : Renforcement du traitement et sécurité — Assainissement des DCP dans les messages d'erreur, gestion typée des exceptions, refactorisation DRY, comptage d'entités par document (correctif DATA-001), 26 nouveaux tests
   - ✅ Story 6.7.2 : Opérations base de données en arrière-plan — DatabaseWorker (QRunnable) pour les opérations liste/recherche/suppression/export, stratégie d'annulation-remplacement, recherche anti-rebond 300 ms, routage par seuil, indicateur de chargement, 38 nouveaux tests
   - ✅ Story 6.7.3 : Validation par document en lot — Validation interactive des entités par document en mode lot, navigation Précédent/Suivant, annulation avec affichage des statuts, 21 nouveaux tests
-- **Total :** 50 stories, 1 670+ tests, 86 %+ de couverture, tous les contrôles qualité au vert
+  - ✅ Story 6.8 : Exécutables autonomes et distribution — Builds PyInstaller, installeur NSIS (Windows), DMG (macOS), AppImage (Linux), workflow CI
+  - ✅ Story 6.9 : Préparation de la version v2.0 — Bump de version, CHANGELOG, mises à jour de la documentation, coordination de la publication
+- **Total :** 52 stories, 1 670+ tests, 86 %+ de couverture, tous les contrôles qualité au vert
 
 ---
 
@@ -614,7 +626,7 @@ poetry run pytest tests/integration/test_validation_workflow_integration.py -v
 - **Tests de précision :** 22 tests mesurant la précision NER sur un corpus de référence de 25 documents (Story 4.4)
 - **Tests de performance :** 19 tests validant toutes les exigences non fonctionnelles — benchmarks par document (NFR1), benchmarks de détection d'entités, traitement par lot (NFR2), profilage mémoire (NFR4), temps de démarrage (NFR5), stabilité et taux d'erreur (NFR6), tests de charge (Story 4.5)
 - **Couverture actuelle :** 86 %+ sur l'ensemble des modules (100 % pour le module de progression, 91,41 % pour AuditRepository)
-- **Total :** 1 650+ tests
+- **Total :** 1 670+ tests
 - **CI/CD :** Tests exécutés sur Python 3.10-3.12, sous Windows, macOS et Linux
 - **Contrôles qualité :** Tous validés (Black, Ruff, mypy, pytest)
 
@@ -644,12 +656,12 @@ La suite de tests d'intégration couvre :
 
 ---
 
-## 📊 Métriques du projet (au 2026-02-26)
+## 📊 Métriques du projet (au 2026-03-03)
 
 | Métrique | Valeur | Statut |
 |----------|--------|--------|
-| **Avancement** | v2.0-dev | 🚧 Epic 6 en cours (Stories 6.1-6.7.3 terminées) |
-| **Stories terminées** | 50 (Epic 1-5 + 6.1-6.7.3) | ✅ Epics 1-5, 🚧 Epic 6 |
+| **Avancement** | v2.0.0 | ✅ Epics 1-6 terminés |
+| **Stories terminées** | 52 (Epics 1-6) | ✅ Tous les epics terminés |
 | **Utilité LLM (NFR10)** | 4,27/5,0 (85,4 %) | ✅ VALIDÉ (seuil : 80 %) |
 | **Succès d'installation (NFR3)** | 87,5 % (7/8 plateformes) | ✅ VALIDÉ (seuil : 85 %) |
 | **Première pseudonymisation (NFR14)** | 100 % en moins de 30 min | ✅ VALIDÉ (seuil : 80 %) |
@@ -688,4 +700,4 @@ La suite de tests d'intégration couvre :
 
 ---
 
-**Dernière mise à jour :** 2026-02-27 (v2.0-dev — Epic 6 Story 6.7.3 terminée : validation par document en lot, navigation Précédent/Suivant, annulation avec statuts, 1 670+ tests au total)
+**Dernière mise à jour :** 2026-03-03 (v2.0.0 — Interface graphique, exécutables autonomes, accessibilité WCAG AA, interface française, 1 670+ tests au total)

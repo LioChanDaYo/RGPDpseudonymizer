@@ -18,12 +18,29 @@ This guide covers installation on Windows, macOS, and Linux.
 
 ---
 
+## Standalone Executables (No Python Required)
+
+For non-technical users, pre-built standalone executables are available. No Python installation needed:
+
+**[Download Latest Release](https://github.com/LioChanDaYo/RGPDpseudonymizer/releases/latest)**
+
+- **Windows:** `gdpr-pseudonymizer-2.0.0-windows-setup.exe` — Run the installer
+- **macOS (Apple Silicon):** `gdpr-pseudonymizer-2.0.0-macos-arm64.dmg` — Open DMG, drag to Applications
+- **macOS (Intel):** `gdpr-pseudonymizer-2.0.0-macos-x86_64.dmg` — Open DMG, drag to Applications
+- **Linux:** `gdpr-pseudonymizer-2.0.0-linux.AppImage` — `chmod +x` then run
+
+---
+
 ## Install from PyPI (Recommended)
 
-The simplest way to install for end-users:
+The simplest way to install for developers and power users:
 
 ```bash
+# CLI only
 pip install gdpr-pseudonymizer
+
+# CLI + Desktop GUI
+pip install gdpr-pseudonymizer[gui]
 
 # Verify installation
 gdpr-pseudo --help

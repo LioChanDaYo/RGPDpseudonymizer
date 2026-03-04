@@ -58,10 +58,10 @@ The v1.0/v1.1 CLI tool has validated the core value proposition (local GDPR-comp
 | 6.6: Internationalization & French UI | 🟡 **MEDIUM** | 1-2 weeks | FE-010b + 5.4.1 | ✅ COMPLETE |
 | 6.7: Accessibility (WCAG AA) | 🟡 **MEDIUM** | 1 week | Roadmap v2.0 | ✅ COMPLETE |
 | 6.7.1: Core Processing Hardening & Security | 🔴 **HIGH** | 1-2 weeks | Code review feedback + DATA-001 | ✅ COMPLETE |
-| 6.7.2: Database Background Threading (FE-021) | 🔴 **HIGH** | 1-2 weeks | Story 6.5 PERF-001 / Story 6.7 AC7 | 📋 PENDING |
-| 6.7.3: Batch Validation Workflow (FE-022) | 🟡 **MEDIUM** | 1-2 weeks | Story 6.5 DEFERRED-001 / Story 6.7 AC8 | 📋 PENDING |
-| 6.8: Standalone Executables & Distribution | 🔴 **HIGH** | 2-3 weeks | FE-009 | 📋 PENDING |
-| 6.9: v2.0 Release Preparation | 🔴 **HIGH** | 1-2 days | — | 📋 PENDING |
+| 6.7.2: Database Background Threading (FE-021) | 🔴 **HIGH** | 1-2 weeks | Story 6.5 PERF-001 / Story 6.7 AC7 | ✅ COMPLETE |
+| 6.7.3: Batch Validation Workflow (FE-022) | 🟡 **MEDIUM** | 1-2 weeks | Story 6.5 DEFERRED-001 / Story 6.7 AC8 | ✅ COMPLETE |
+| 6.8: Standalone Executables & Distribution | 🔴 **HIGH** | 2-3 weeks | FE-009 | ✅ COMPLETE |
+| 6.9: v2.0 Release Preparation | 🔴 **HIGH** | 1-2 days | — | ✅ COMPLETE |
 
 **Total Estimated Duration:** 13-19 weeks (target: 14-16 weeks)
 
@@ -522,7 +522,7 @@ Story 6.7.1 (Hardening/Security)  ─── Week 11-12 ─── Core quality + 
 Story 6.7.2 (DB Threading)        ─── Week 12-13 ─── Performance (FE-021)           ✅ Done
 Story 6.7.3 (Batch Validation)    ─── Week 13-14 ─── Feature (FE-022)               ✅ Done
 Story 6.8 (Executables)           ─── Week 13-15 ─── Distribution                   ✅ Done
-Story 6.9 (Release Prep)          ─── Week 15-16 ─── Release gate
+Story 6.9 (Release Prep)          ─── Week 15-16 ─── Release gate             ✅ Done
 ```
 
 **Parallelization Opportunities:**
