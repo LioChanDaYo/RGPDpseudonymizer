@@ -17,7 +17,6 @@ APP_PATH="dist/${APP_NAME}.app"
 DMG_NAME="gdpr-pseudonymizer-${VERSION}-macos-${ARCH}.dmg"
 DMG_PATH="dist/${DMG_NAME}"
 VOLUME_NAME="${APP_NAME} ${VERSION}"
-DMG_SIZE="700m"  # Enough for ~660MB uncompressed bundle
 
 echo "==> Creating DMG: ${DMG_NAME}"
 
@@ -38,7 +37,6 @@ hdiutil create \
     -fs HFS+ \
     -fsargs "-c c=64,a=16,e=16" \
     -format UDRW \
-    -size "${DMG_SIZE}" \
     "dist/tmp-${DMG_NAME}"
 
 # Mount the temporary DMG
