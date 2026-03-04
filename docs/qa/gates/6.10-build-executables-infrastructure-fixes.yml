@@ -1,0 +1,43 @@
+schema: 1
+story: '6.10'
+story_title: 'Build Executables Infrastructure Fixes'
+gate: PASS
+status_reason: 'All 6 ACs fully met. CI-only changes are clean, consistent, and well-targeted. Zero application code modified. No blocking issues.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-03-04T23:00:00Z'
+
+waiver: { active: false }
+
+top_issues: []
+
+quality_score: 100
+expires: '2026-03-18T23:00:00Z'
+
+evidence:
+  tests_reviewed: 0  # CI infrastructure story — no application tests to review
+  risks_identified: 0
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6]
+    ac_gaps: []
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'Signing secrets properly gated via job-level env vars. Temp cert files cleaned up. No exposure risk.'
+  performance:
+    status: PASS
+    notes: 'Disk cleanup adds ~30-60s. Rosetta 2 builds ~1.5-2x slower. Acceptable CI tradeoffs.'
+  reliability:
+    status: PASS
+    notes: 'Best-effort cleanup with || true. Version fallback handles workflow_dispatch. Artifact uploads use if-no-files-found: error.'
+  maintainability:
+    status: PASS
+    notes: 'Changes well-documented in story. Rosetta 2 approach clearly commented. Version fallback is simple and consistent.'
+
+recommendations:
+  immediate: []
+  future:
+    - action: 'Make macOS runner versions explicit (both arm64 and x86_64 use macos-14) for predictability'
+      refs: ['.github/workflows/build-executables.yaml']
+    - action: 'Add early-exit condition on upload-release job for workflow_dispatch to avoid 10-min timeout'
+      refs: ['.github/workflows/build-executables.yaml']
