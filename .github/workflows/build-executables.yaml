@@ -232,6 +232,21 @@ jobs:
           xcrun stapler staple "dist/GDPR Pseudonymizer.app"
 
       # -- DMG --
+      - name: Free space before DMG creation
+        run: |
+          echo "==> Disk space before post-build cleanup:"
+          df -h
+          # Remove build artifacts and caches no longer needed
+          rm -rf build/ || true
+          rm -rf .venv/ || true
+          poetry env remove --all 2>/dev/null || true
+          rm -rf ~/Library/Caches/pypoetry || true
+          rm -rf ~/Library/Caches/pip || true
+          # Remove PyInstaller onedir output (keep only .app for DMG)
+          rm -rf dist/gdpr-pseudonymizer/ || true
+          echo "==> Disk space after post-build cleanup:"
+          df -h
+
       - name: Extract version from tag
         id: version
         run: |
@@ -379,6 +394,18 @@ jobs:
           xcrun stapler staple "dist/GDPR Pseudonymizer.app"
 
       # -- DMG --
+      - name: Free space before DMG creation
+        run: |
+          echo "==> Disk space before post-build cleanup:"
+          df -h
+          rm -rf build/ || true
+          rm -rf venv_x86/ || true
+          rm -rf ~/Library/Caches/pypoetry || true
+          rm -rf ~/Library/Caches/pip || true
+          rm -rf dist/gdpr-pseudonymizer/ || true
+          echo "==> Disk space after post-build cleanup:"
+          df -h
+
       - name: Extract version from tag
         id: version
         run: |
