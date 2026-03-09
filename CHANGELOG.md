@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Validate-once-per-entity** (Story 7.1, FE-020) — Accepting or rejecting one entity occurrence now applies to all same-text occurrences in the document; undo reverts the entire group
+- **"Masquer les validées" toggle** (Story 7.1, FE-019) — New checkbox to hide confirmed/known entities from document highlights, letting users focus on remaining pending entities
+
 ---
 
 ## [2.0.0] - 2026-03-03
