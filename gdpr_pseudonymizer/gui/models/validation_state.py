@@ -44,6 +44,8 @@ class GUIValidationState(QObject):
         self._reviews_by_id: dict[str, EntityReview] = {}
         # Variant occurrence map: canonical key → all DetectedEntity instances
         self._variant_occurrences: dict[str, list[DetectedEntity]] = {}
+        # Text-based grouping index: entity_text → [entity_id, ...]
+        self._text_group_index: dict[str, list[str]] = {}
 
     @property
     def undo_stack(self) -> QUndoStack:
@@ -76,13 +78,19 @@ class GUIValidationState(QObject):
         for entity in detection_result.detected_entities:
             self._session.add_entity(entity)
 
-        # Build id lookup
+        # Build id lookup and text-based grouping index
+        self._text_group_index.clear()
         for review in self._session._entity_reviews:
             self._reviews_by_id[review.entity_id] = review
             # Set pseudonym preview
             key = f"{review.entity.text}_{review.entity.start_pos}"
             if key in self._pseudonym_previews:
                 review.suggested_pseudonym = self._pseudonym_previews[key]
+            # Build text grouping index (exact match, case-sensitive)
+            text = review.entity.text
+            if text not in self._text_group_index:
+                self._text_group_index[text] = []
+            self._text_group_index[text].append(review.entity_id)
 
     def classify_known_entities(self, db_path: str, passphrase: str) -> None:
         """Check which entities exist in the mapping DB and auto-accept them.
@@ -113,14 +121,36 @@ class GUIValidationState(QObject):
     # ------------------------------------------------------------------
 
     def accept_entity(self, entity_id: str) -> None:
-        """Mark entity as confirmed."""
-        cmd = _SingleActionCommand(self, entity_id, EntityReviewState.CONFIRMED)
-        self._undo_stack.push(cmd)
+        """Mark entity (and all same-text occurrences) as confirmed."""
+        review = self._reviews_by_id.get(entity_id)
+        if review is None:
+            return
+        group_ids = self._text_group_index.get(review.entity.text, [entity_id])
+        if len(group_ids) > 1:
+            self._undo_stack.beginMacro("Accepter le groupe")
+            for eid in group_ids:
+                cmd = _SingleActionCommand(self, eid, EntityReviewState.CONFIRMED)
+                self._undo_stack.push(cmd)
+            self._undo_stack.endMacro()
+        else:
+            cmd = _SingleActionCommand(self, entity_id, EntityReviewState.CONFIRMED)
+            self._undo_stack.push(cmd)
 
     def reject_entity(self, entity_id: str) -> None:
-        """Mark entity as rejected."""
-        cmd = _SingleActionCommand(self, entity_id, EntityReviewState.REJECTED)
-        self._undo_stack.push(cmd)
+        """Mark entity (and all same-text occurrences) as rejected."""
+        review = self._reviews_by_id.get(entity_id)
+        if review is None:
+            return
+        group_ids = self._text_group_index.get(review.entity.text, [entity_id])
+        if len(group_ids) > 1:
+            self._undo_stack.beginMacro("Rejeter le groupe")
+            for eid in group_ids:
+                cmd = _SingleActionCommand(self, eid, EntityReviewState.REJECTED)
+                self._undo_stack.push(cmd)
+            self._undo_stack.endMacro()
+        else:
+            cmd = _SingleActionCommand(self, entity_id, EntityReviewState.REJECTED)
+            self._undo_stack.push(cmd)
 
     def modify_entity_text(
         self,

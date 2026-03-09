@@ -241,6 +241,11 @@ class ValidationScreen(QWidget):
             self._editor.set_hide_rejected
         )
 
+        # Hide confirmed toggle
+        self._panel.hide_confirmed_checkbox.toggled.connect(
+            self._editor.set_hide_confirmed
+        )
+
     def _connect_shortcuts(self) -> None:
         """Set up keyboard shortcuts for the validation screen."""
         # Undo / Redo

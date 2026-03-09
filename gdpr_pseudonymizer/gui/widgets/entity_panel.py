@@ -105,6 +105,11 @@ class EntityPanel(QWidget):
         self._hide_rejected_cb.setContentsMargins(8, 0, 8, 0)
         layout.addWidget(self._hide_rejected_cb)
 
+        # Hide confirmed checkbox
+        self._hide_confirmed_cb = QCheckBox()
+        self._hide_confirmed_cb.setContentsMargins(8, 0, 8, 0)
+        layout.addWidget(self._hide_confirmed_cb)
+
         # Find field
         self._find_field = QLineEdit()
         self._find_field.setClearButtonEnabled(True)
@@ -170,6 +175,7 @@ class EntityPanel(QWidget):
         self._title_label.setText(self.tr("Entit\u00e9s (0)"))
         self._pending_label.setText(self.tr("Reste : 0"))
         self._hide_rejected_cb.setText(self.tr("Masquer les rejet\u00e9es"))
+        self._hide_confirmed_cb.setText(self.tr("Masquer les valid\u00e9es"))
         self._find_field.setPlaceholderText(self.tr("Filtrer les entit\u00e9s..."))
         self._accept_known_btn.setText(self.tr("Accepter les d\u00e9j\u00e0 connues"))
         self._accept_type_btn.setText(
@@ -278,6 +284,10 @@ class EntityPanel(QWidget):
     @property
     def hide_rejected_checkbox(self) -> QCheckBox:
         return self._hide_rejected_cb
+
+    @property
+    def hide_confirmed_checkbox(self) -> QCheckBox:
+        return self._hide_confirmed_cb
 
     @property
     def list_widget(self) -> QListWidget:

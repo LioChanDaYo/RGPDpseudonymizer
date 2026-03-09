@@ -6,7 +6,8 @@
 **Epic 3 Status:** ✅ Complete (7/7 stories)
 **Epic 4 Status:** ✅ Complete (7/7 stories)
 **v1.0 MVP:** ✅ LAUNCHED (2026-02-09, PyPI published)
-**Next Milestone:** v2.0 Desktop GUI (Epic 6 — Stories 6.1-6.5 complete)
+**Epic 6 Status:** ✅ Complete (13/13 stories, v2.0.0 released 2026-03-04)
+**Next Milestone:** v2.1 GUI Polish, Excel, NER Accuracy (Epic 7)
 
 ---
 
@@ -127,11 +128,10 @@
 
 ## 📋 Deferred from Story 6.7: Accessibility (WCAG AA)
 
-### Story 6.7.1: Database Performance Threading (AC7 - FE-021)
+### Story 6.7.1: Database Performance Threading (AC7 - FE-021) ✅ COMPLETE
 
 **Priority:** HIGH (Critical UX issue for production databases)
-**Estimated Effort:** 16-20 hours
-**Target Release:** v2.1
+**Status:** ✅ **COMPLETED** — Implemented as Story 6.7.2 in v2.0 release (2026-03-04)
 **Source:** Story 6.5 QA Gate (PERF-001), deferred from Story 6.7 as AC7
 
 **Description:**
@@ -171,11 +171,10 @@ Migrate all DatabaseScreen operations to background threads to prevent GUI freez
 
 ---
 
-### Story 6.7.2: Batch Validation Workflow (AC8 - FE-022)
+### Story 6.7.2: Batch Validation Workflow (AC8 - FE-022) ✅ COMPLETE
 
 **Priority:** MEDIUM (Workflow enhancement, not critical for v2.0)
-**Estimated Effort:** 12-16 hours
-**Target Release:** v2.1
+**Status:** ✅ **COMPLETED** — Implemented as Story 6.7.3 in v2.0 release (2026-03-04)
 **Source:** Story 6.5 AC3 (DEFERRED-001), deferred from Story 6.7 as AC8
 
 **Description:**
@@ -213,11 +212,11 @@ Add optional per-document validation to batch processing workflow. Currently, ba
 
 ---
 
-### Story 6.7.3: Accessibility Integration Tests (AC6, Tasks 14 partial)
+### Story 6.7.3: Accessibility Integration Tests (AC6, Tasks 14 partial) 📅 v2.1 — Epic 7 Story 7.6
 
-**Priority:** LOW (Testing enhancement, not blocking for v2.0)
+**Priority:** LOW (Testing enhancement)
 **Estimated Effort:** 6-8 hours
-**Target Release:** v2.1
+**Target Release:** v2.1 — Epic 7 Story 7.6
 **Source:** Story 6.7 Task 14 (integration tests for AC7/AC8)
 
 **Description:**
@@ -417,7 +416,7 @@ Press Enter to continue...
 
 ---
 
-#### FE-011: NLP Accuracy — Regex Pattern Expansion 📅 POST-MVP
+#### FE-011: NLP Accuracy — Regex Pattern Expansion 📅 v2.1 — Epic 7 Story 7.5
 **Source:** Story 4.4 NER Accuracy Report, MON-003 Baseline Review
 **Description:** Expand regex patterns to address lowest-accuracy edge case categories identified in Story 4.4 accuracy validation
 **Impact:** High — LOCATION FN=37%, ORG FN=66%, Last/First recall=0%. Regex improvements are the fastest path to reducing user-added entities in validation mode
@@ -445,7 +444,7 @@ Press Enter to continue...
 
 ---
 
-#### FE-012: Ground-Truth Annotation Quality Cleanup 📅 POST-MVP
+#### FE-012: Ground-Truth Annotation Quality Cleanup 📅 v2.1 — Epic 7 Story 7.5
 **Source:** Story 4.4 Task 4.4.1 corpus validation
 **Description:** Clean up annotation quality issues discovered during Story 4.4 accuracy validation
 **Impact:** Medium — annotation quality issues inflate FN counts and make accuracy metrics unreliable for trend analysis
@@ -470,7 +469,7 @@ Press Enter to continue...
 
 ---
 
-#### FE-013: Confidence Score Calibration Layer 📅 v1.1+
+#### FE-013: Confidence Score Calibration Layer 📅 v3.0 — Epic 9 Story 9.3
 **Source:** Story 4.4 Confidence Score Analysis (AC6)
 **Description:** Implement a confidence calibration layer to enable confidence-based auto-accept/auto-reject in validation mode
 **Impact:** Medium — would allow skipping validation for high-confidence entities, reducing user effort
@@ -489,7 +488,7 @@ Press Enter to continue...
 
 ---
 
-#### FE-014: Extended Coreference Resolution 📅 POST-MVP
+#### FE-014: Extended Coreference Resolution 📅 v3.0 — Epic 9 Story 9.4
 **Source:** Story 4.6 FB-001 (alpha feedback — entity variant grouping)
 **Description:** Extend entity variant grouping beyond heuristic suffix/prefix matching to full NLP coreference resolution (pronoun resolution, contextual entity linking)
 **Impact:** Medium — current heuristic grouping handles common cases (title variants, last-name-only references) but misses pronoun references ("il", "elle") and complex coreference chains
@@ -539,7 +538,7 @@ Press Enter to continue...
 
 ---
 
-#### FE-015: Excel and Google Sheets Format Support 📅 POST-v2.0 (v2.1+)
+#### FE-015: Excel and Google Sheets Format Support 📅 v2.1 — Epic 7 Story 7.4
 **Source:** User inquiry (2026-02-19)
 **Description:** Support Excel (.xlsx, .xls) and CSV formats for structured data pseudonymization. Google Sheets require export-to-Excel workflow (local-only architecture constraint).
 **Impact:** Medium — HR/compliance professionals (GUI target audience) heavily use Excel for employee data, case management, research datasets
@@ -565,7 +564,7 @@ Press Enter to continue...
 
 ---
 
-#### FE-016: Neutral/Generic Pseudonym Theme 📅 v2.0 or v2.1
+#### FE-016: Neutral/Generic Pseudonym Theme 📅 v2.1 — Epic 7 Story 7.3
 **Source:** User request (2026-02-19)
 **Description:** Add a "neutral" pseudonym theme option that uses generic identifiers (PER-001, PER-002, LOC-001, ORG-001, etc.) instead of named pseudonyms. Alternative to existing themes (french, lotr, star_wars).
 **Impact:** Medium — useful for formal/legal contexts where themed names feel inappropriate, maximum anonymity (no cultural associations), simpler for automated data processing
@@ -599,7 +598,7 @@ Press Enter to continue...
 
 ---
 
-#### FE-017: Persist Last-Used Database Across App Restarts 📅 v2.0
+#### FE-017: Persist Last-Used Database Across App Restarts 📅 v2.1 — Epic 7 Story 7.2
 **Source:** User feedback (2026-02-20)
 **Description:** After selecting a database in the PassphraseDialog, persist that choice so it becomes the default on next app launch. Currently the app auto-detects databases but never remembers which one was last used — users must re-select every session.
 **Impact:** Low-Medium — reduces friction for users who always work with the same database; especially important for single-project workflows
@@ -626,7 +625,7 @@ Press Enter to continue...
 
 ---
 
-#### FE-018: Show Validation Keyboard Shortcuts in Help Menu 📅 v2.0
+#### FE-018: Show Validation Keyboard Shortcuts in Help Menu 📅 v2.1 — Epic 7 Story 7.2
 **Source:** User feedback (2026-02-20)
 **Description:** The F1 keyboard shortcuts dialog and the Settings screen shortcuts section only show 6 global shortcuts. The powerful keyboard navigation mode (Enter, Tab, Delete, Escape) and validation shortcuts (Ctrl+Z, Ctrl+F) are completely undocumented in the UI — users can only discover them by accident.
 **Impact:** Medium — expert mode is a key productivity feature but zero discoverability makes it effectively invisible to most users
@@ -654,7 +653,7 @@ Press Enter to continue...
 
 ---
 
-#### FE-019: "Masquer les validées" Toggle — Hide Confirmed Entities 📅 v2.0
+#### FE-019: "Masquer les validées" Toggle — Hide Confirmed Entities ✅ Done — Epic 7 Story 7.1
 **Source:** User feedback (2026-02-20)
 **Description:** Add a "Masquer les validées" checkbox next to the existing "Masquer les rejetées" toggle. When enabled, confirmed/accepted entities are hidden from the document view, letting users focus on remaining pending entities. Mirrors the existing hide-rejected pattern exactly.
 **Impact:** Medium — significantly improves focus during validation of large documents where many entities are already confirmed; complementary to existing "masquer les rejetées"
@@ -684,7 +683,7 @@ Press Enter to continue...
 
 ---
 
-#### FE-020: Validate-Once-Per-Entity — Group Occurrences on Accept/Reject 📅 v2.0
+#### FE-020: Validate-Once-Per-Entity — Group Occurrences on Accept/Reject ✅ Done — Epic 7 Story 7.1
 **Source:** User feedback (2026-02-20)
 **Description:** When a user accepts or rejects an entity (e.g., "Marie Dupont"), ALL occurrences of that same entity in the document should be accepted/rejected at once. Currently each occurrence has its own `entity_id` and must be validated individually — "Marie Dupont" appearing 8 times requires 8 separate validations.
 **Impact:** High — this is the single biggest friction point in the validation workflow for documents with repeated entities; directly reduces validation time proportionally to entity repetition count
@@ -718,52 +717,17 @@ Press Enter to continue...
 
 ---
 
-#### FE-021: Database Operations on Background Thread 📅 v2.0 → Story 6.7
+#### FE-021: Database Operations on Background Thread ✅ COMPLETED (Story 6.7.2)
 **Source:** Story 6.5 QA Gate (PERF-001)
-**Description:** `DatabaseScreen` performs all database operations (entity listing, search/filter, Article 17 deletion, CSV export) on the main GUI thread. Large databases will freeze the UI during these operations, blocking assistive technologies and violating WCAG 2.1 Principle 2 (Operable).
-**Impact:** Medium — UI responsiveness degrades with large mapping databases; blocks screen reader interaction during operations
-**Effort:** Medium (2-3 days)
-**Target:** v2.0 — Story 6.7 (Accessibility / WCAG AA)
-**Rationale:** The `QRunnable + WorkerSignals` pattern is already established in `ProcessingWorker` and `BatchWorker`. Applying it to `DatabaseScreen` operations is architectural consistency and directly addresses WCAG AA responsive UI requirements.
-
-**Acceptance Criteria:**
-- [ ] Entity listing, search, and filter operations run on a background thread via `QRunnable + WorkerSignals`
-- [ ] Article 17 deletion runs on a background thread with progress indication
-- [ ] CSV export runs on a background thread with progress indication
-- [ ] Main thread remains responsive during all database operations
-- [ ] Error handling displays user-friendly messages on failure
-- [ ] No regression in existing `DatabaseScreen` functionality
-
-**References:**
-- `gdpr_pseudonymizer/gui/screens/database.py` — current main-thread implementation
-- `gdpr_pseudonymizer/gui/workers/processing_worker.py` — established `QRunnable + WorkerSignals` pattern
-- `gdpr_pseudonymizer/gui/workers/batch_worker.py` — established `QRunnable + WorkerSignals` pattern
-- `docs/qa/gates/6.5-batch-processing-and-configuration-management.yml` — PERF-001
+**Status:** ✅ **COMPLETED** — Implemented in Story 6.7.2 (v2.0 release, 2026-03-04)
+**Outcome:** All DatabaseScreen operations (entity listing, search/filter, deletion, CSV export) run on background threads via QRunnable + WorkerSignals pattern.
 
 ---
 
-#### FE-022: Batch Validation Workflow 📅 v2.0 → Story 6.7
+#### FE-022: Batch Validation Workflow ✅ COMPLETED (Story 6.7.3)
 **Source:** Story 6.5 AC3 (DEFERRED-001)
-**Description:** Batch processing currently forces `skip_validation=True`, removing user control over entity decisions for multi-document workflows. An optional validation step between documents would allow users to review and confirm/reject detected entities before pseudonymization proceeds, maintaining the same level of control available in single-document mode.
-**Impact:** Medium — users who need entity review in batch mode currently have no option; reduces trust in batch output quality
-**Effort:** Medium (3-4 days)
-**Target:** v2.0 — Story 6.7 (Accessibility / WCAG AA)
-**Rationale:** WCAG Principle 2 (Operable) requires that users maintain control over functionality. Batch mode removing validation choice is an operability gap. Groups naturally with FE-020 (Validate-Once-Per-Entity) — both are about user control during validation workflows.
-
-**Acceptance Criteria:**
-- [ ] Batch processing offers an optional "Validate entities" mode (checkbox or toggle in batch config)
-- [ ] When enabled, after entity detection for each document, the validation screen is presented
-- [ ] User can accept/reject entities before pseudonymization of that document proceeds
-- [ ] "Skip validation" remains the default for fully automated batch runs
-- [ ] Validation decisions persist across documents in the same batch (via shared mapping database)
-- [ ] Progress tracking accounts for validation time (not just processing time)
-- [ ] No regression in existing skip-validation batch mode
-
-**References:**
-- `gdpr_pseudonymizer/gui/screens/batch.py` — current batch workflow (skip_validation=True)
-- `gdpr_pseudonymizer/gui/screens/validation.py` — existing validation screen
-- `gdpr_pseudonymizer/gui/workers/batch_worker.py` — `BatchWorker` document loop
-- `docs/qa/gates/6.5-batch-processing-and-configuration-management.yml` — DEFERRED-001
+**Status:** ✅ **COMPLETED** — Implemented in Story 6.7.3 (v2.0 release, 2026-03-04)
+**Outcome:** Optional per-document validation in batch processing. Users can validate/reject entities for each document before pseudonymization proceeds. "Skip validation" remains the default.
 
 ---
 

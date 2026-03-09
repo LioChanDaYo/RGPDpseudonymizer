@@ -36,15 +36,31 @@
 
 ---
 
-### Epic 6: v2.0 — Desktop GUI & Broader Accessibility (🚧 IN PROGRESS)
+### Epic 6: v2.0 — Desktop GUI & Broader Accessibility ✅ COMPLETE (2026-03-04)
 
 **Goal:** Expand beyond CLI-only users to the primary growth market — non-technical professionals who need GDPR-compliant pseudonymization but lack command-line comfort — by delivering a cross-platform desktop GUI, standalone executables, French-first internationalization, and WCAG AA accessibility.
 
-**Progress:** Stories 6.1-6.6 complete. PySide6 desktop app with full single-document pseudonymization pipeline, visual entity validation, batch processing, database management, internationalization (FR/EN with live switching), theming, drag-and-drop, settings, 301 GUI tests.
+---
+
+### Epic 7: v2.1 — GUI Polish, Excel Support & NER Accuracy
+
+**Goal:** Refine the v2.0 desktop GUI based on real user feedback, add Excel/CSV format support for the HR/compliance audience, introduce a neutral pseudonym theme, and improve NER accuracy through regex pattern expansion.
 
 ---
 
-**Timeline: Epics 0-4: 14 weeks (v1.0 MVP). Epic 5: 6-7 weeks (v1.1). Epic 6: 10-14 weeks (v2.0)**
+### Epic 8: v2.2 — Output Format Preservation & Auto-Update
+
+**Goal:** Enable pseudonymized documents to retain their original format (PDF->PDF, DOCX->DOCX) instead of flattening to plaintext, and implement an auto-update mechanism for standalone executable users.
+
+---
+
+### Epic 9: v3.0 — NLP Accuracy & Intelligence
+
+**Goal:** Transform the pseudonymization engine from "good enough with mandatory validation" to "trustworthy with optional validation" by fine-tuning a French NER model to 70-85% F1, implementing confidence-based auto-validation, and adding coreference resolution.
+
+---
+
+**Timeline: Epics 0-4: 14 weeks (v1.0 MVP). Epic 5: 6-7 weeks (v1.1). Epic 6: 10-14 weeks (v2.0). Epic 7: 4-6 weeks (v2.1). Epic 8: 5-7 weeks (v2.2). Epic 9: 8-12 weeks (v3.0)**
 
 ---
 
@@ -99,7 +115,10 @@
 - **Week 13 (Post-Epic 3):** Beta release v0.2.0 to 10-15 early adopters for production workflow validation ✅ COMPLETE
 - **Week 14+ (Post-Epic 4):** Public v1.0 MVP release to broader early adopter community ✅ COMPLETE (2026-02-09, PyPI published)
 - **Q2 2026 (Epic 5):** v1.1 release — GDPR erasure, gender-aware pseudonyms, PDF/DOCX, French docs, NER accuracy improvements ✅ COMPLETE (2026-02-15)
-- **Epic 6:** v2.0 release — Desktop GUI, standalone executables, French-first i18n, WCAG AA accessibility
+- **Epic 6:** v2.0 release — Desktop GUI, standalone executables, French-first i18n, WCAG AA accessibility ✅ COMPLETE (2026-03-04)
+- **Epic 7:** v2.1 release — GUI polish, Excel/CSV support, neutral theme, NER regex expansion
+- **Epic 8:** v2.2 release — Output format preservation (DOCX->DOCX, PDF->PDF), auto-update
+- **Epic 9:** v3.0 release — Fine-tuned NER model, confidence calibration, coreference resolution, optional validation
 
 ---
 
@@ -113,13 +132,38 @@
 - ✓ v1.1.0 published on PyPI
 
 **Epic 6 DoD:**
-- [ ] Desktop GUI functional on Windows 10/11 and macOS 13+
-- [ ] Standalone executables (.exe, .app) tested on target platforms
-- [ ] Visual entity validation interface operational
-- [ ] French GUI translation complete and reviewed
-- [ ] WCAG AA accessibility checklist passed
-- [ ] CLI functionality fully preserved (no regressions)
-- [ ] v2.0.0 published on PyPI and standalone downloads on GitHub Releases
+- ✓ Desktop GUI functional on Windows 10/11 and macOS 13+
+- ✓ Standalone executables (.exe, .app) tested on target platforms
+- ✓ Visual entity validation interface operational
+- ✓ French GUI translation complete and reviewed
+- ✓ WCAG AA accessibility checklist passed
+- ✓ CLI functionality fully preserved (no regressions)
+- ✓ v2.0.0 published on PyPI and standalone downloads on GitHub Releases
+
+**Epic 7 DoD:**
+- [x] Validate-once-per-entity operational (FE-020)
+- [ ] All keyboard shortcuts documented in Help menu (FE-018)
+- [x] Hide-confirmed toggle functional (FE-019)
+- [ ] Last-used database persisted across sessions (FE-017)
+- [ ] Neutral pseudonym theme (PER-001, LOC-001, ORG-001) functional (FE-016)
+- [ ] Excel (.xlsx) and CSV format support operational (FE-015)
+- [ ] NER regex patterns expanded, accuracy improved (FE-011)
+- [ ] Ground-truth corpus cleaned (FE-012)
+- [ ] v2.1.0 published on PyPI and GitHub Releases
+
+**Epic 8 DoD:**
+- [ ] DOCX input produces pseudonymized DOCX output with formatting preserved
+- [ ] PDF input produces pseudonymized PDF output (overlay approach)
+- [ ] Auto-update notification functional in standalone executables
+- [ ] v2.2.0 published on PyPI and GitHub Releases
+
+**Epic 9 DoD:**
+- [ ] Fine-tuned French NER model achieves F1 >= 70% on held-out test set
+- [ ] All entities receive calibrated confidence scores (0.0-1.0)
+- [ ] Coreference resolution links pronouns to antecedent entities
+- [ ] Optional `--no-validate` mode functional with guard rails
+- [ ] v3.0.0 published on PyPI and GitHub Releases
+- [ ] Fine-tuned model package available for installation
 
 ---
 

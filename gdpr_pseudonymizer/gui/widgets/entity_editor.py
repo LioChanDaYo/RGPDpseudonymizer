@@ -73,6 +73,7 @@ class EntityEditor(QTextEdit):
         # Sorted list of (start_pos, end_pos, entity_id) for click detection
         self._entity_ranges: list[tuple[int, int, str]] = []
         self._hide_rejected = False
+        self._hide_confirmed = False
         self._dark_theme = False
 
         # Navigation mode state
@@ -102,6 +103,11 @@ class EntityEditor(QTextEdit):
     def set_hide_rejected(self, hide: bool) -> None:
         """Toggle hiding of rejected entity highlights."""
         self._hide_rejected = hide
+        self._apply_highlights()
+
+    def set_hide_confirmed(self, hide: bool) -> None:
+        """Toggle hiding of confirmed/known entity highlights."""
+        self._hide_confirmed = hide
         self._apply_highlights()
 
     def refresh_entity(self, entity_id: str) -> None:
@@ -219,6 +225,15 @@ class EntityEditor(QTextEdit):
             if is_rejected and self._hide_rejected:
                 continue
 
+            # Hide confirmed/added/known entities when toggle is on (AC8, AC9)
+            is_known = self._validation_state.is_entity_known(entity_id)
+            is_confirmed = review.state in (
+                EntityReviewState.CONFIRMED,
+                EntityReviewState.ADDED,
+            )
+            if (is_confirmed or is_known) and self._hide_confirmed:
+                continue
+
             # Determine colors
             if is_rejected:
                 bg_hex, fg_hex = rejected_colors
@@ -231,7 +246,6 @@ class EntityEditor(QTextEdit):
             bg_color = QColor(bg_hex)
 
             # Known (auto-accepted) entities at 50% opacity
-            is_known = self._validation_state.is_entity_known(entity_id)
             if is_known and not is_rejected:
                 bg_color.setAlpha(128)
 
