@@ -375,6 +375,84 @@ class TestEntityPanelAccessibility:
         assert isinstance(desc, str)
 
 
+class TestShortcutRegistry:
+    """Test shortcut registry completeness (Story 7.2, Task 6.2, 6.3)."""
+
+    def test_all_expected_groups_present(self) -> None:
+        """get_all_shortcuts() returns all expected groups."""
+        from gdpr_pseudonymizer.gui.accessibility.shortcuts import get_all_shortcuts
+
+        all_shortcuts = get_all_shortcuts()
+        expected_groups = {
+            "Global",
+            "Home",
+            "Validation",
+            "Navigation Mode",
+            "Editor",
+            "Results",
+            "Batch",
+            "Database",
+            "Settings",
+        }
+        assert expected_groups == set(all_shortcuts.keys())
+
+    def test_global_shortcuts_include_new_entries(self) -> None:
+        """Global group includes Ctrl+Shift+O, Ctrl+Q, F11."""
+        from gdpr_pseudonymizer.gui.accessibility.shortcuts import get_all_shortcuts
+
+        global_shortcuts = get_all_shortcuts()["Global"]
+        keys = {s.key for s in global_shortcuts}
+        assert "Ctrl+Shift+O" in keys
+        assert "Ctrl+Q" in keys
+        assert "F11" in keys
+
+    def test_navigation_mode_shortcuts(self) -> None:
+        """Navigation Mode group has Enter, Tab, Shift+Tab, Delete, Escape."""
+        from gdpr_pseudonymizer.gui.accessibility.shortcuts import get_all_shortcuts
+
+        nav_shortcuts = get_all_shortcuts()["Navigation Mode"]
+        keys = {s.key for s in nav_shortcuts}
+        assert keys == {"Enter", "Tab", "Shift+Tab", "Delete", "Escape"}
+
+    def test_editor_shortcuts(self) -> None:
+        """Editor group has Ctrl++ and Ctrl+-."""
+        from gdpr_pseudonymizer.gui.accessibility.shortcuts import get_all_shortcuts
+
+        editor_shortcuts = get_all_shortcuts()["Editor"]
+        keys = {s.key for s in editor_shortcuts}
+        assert keys == {"Ctrl++", "Ctrl+-"}
+
+    def test_navigation_mode_description_exists(self) -> None:
+        """NAVIGATION_MODE_DESCRIPTION constant exists with relevant keywords."""
+        from gdpr_pseudonymizer.gui.accessibility.shortcuts import (
+            NAVIGATION_MODE_DESCRIPTION,
+        )
+
+        assert isinstance(NAVIGATION_MODE_DESCRIPTION, str)
+        assert len(NAVIGATION_MODE_DESCRIPTION) > 0
+        # AC3: must mention activation (Enter) and deactivation (Escape)
+        assert "Enter" in NAVIGATION_MODE_DESCRIPTION
+        assert "Escape" in NAVIGATION_MODE_DESCRIPTION
+        assert "navigation" in NAVIGATION_MODE_DESCRIPTION.lower()
+
+    def test_validation_shortcuts_completeness(self) -> None:
+        """Validation group includes undo/redo, filter, and action shortcuts.
+        Tab/Shift+Tab are not listed here — they only work in Navigation Mode.
+        """
+        from gdpr_pseudonymizer.gui.accessibility.shortcuts import get_all_shortcuts
+
+        val_shortcuts = get_all_shortcuts()["Validation"]
+        keys = {s.key for s in val_shortcuts}
+        assert "Ctrl+Z" in keys
+        assert "Ctrl+Shift+Z" in keys
+        assert "Ctrl+F" in keys
+        assert "Enter" in keys
+        assert "Delete" in keys
+        # Tab navigation is navigation-mode-only — must NOT appear in Validation group
+        assert "Tab" not in keys
+        assert "Shift+Tab" not in keys
+
+
 class TestFocusIndicators:
     """Test that focus indicators are properly styled."""
 

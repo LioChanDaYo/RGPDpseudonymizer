@@ -23,6 +23,8 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
 )
 
+from gdpr_pseudonymizer.gui.config import add_recent_database, save_gui_config
+
 if TYPE_CHECKING:
     from PySide6.QtWidgets import QWidget
 
@@ -180,6 +182,11 @@ class PassphraseDialog(QDialog):
         # Update hint
         if detected:
             self._db_hint.setText(self.tr("Base existante détectée"))
+            # Pre-select default_db_path if it's in the list (AC5)
+            if settings_path and settings_path in detected:
+                default_idx = self._db_combo.findData(settings_path)
+                if default_idx >= 0:
+                    self._db_combo.setCurrentIndex(default_idx)
         else:
             self._db_hint.setText(
                 self.tr("Aucune base détectée \u2014 créez-en une nouvelle")
@@ -209,6 +216,8 @@ class PassphraseDialog(QDialog):
                 self._db_combo.setCurrentIndex(insert_idx)
                 self._db_combo.blockSignals(False)
                 self._db_hint.setText(self.tr("Base sélectionnée"))
+                # Persist selection (AC4)
+                self._persist_db_path(filepath)
             else:
                 # Revert to first item
                 self._db_combo.blockSignals(True)
@@ -228,12 +237,24 @@ class PassphraseDialog(QDialog):
                 self._db_combo.setCurrentIndex(insert_idx)
                 self._db_combo.blockSignals(False)
                 self._db_hint.setText(self.tr("Nouvelle base sera créée"))
+                # Persist new DB path (AC6)
+                self._persist_db_path(filepath)
             else:
                 self._db_combo.blockSignals(True)
                 self._db_combo.setCurrentIndex(0)
                 self._db_combo.blockSignals(False)
+        else:
+            # Regular detected DB item selected — persist path (AC4)
+            if isinstance(data, str):
+                self._persist_db_path(data)
 
         self._update_confirm_state()
+
+    def _persist_db_path(self, filepath: str) -> None:
+        """Persist the selected database path to config."""
+        self._config["default_db_path"] = filepath
+        add_recent_database(filepath, self._config)
+        save_gui_config(self._config)
 
     def _toggle_visibility(self, visible: bool) -> None:
         """Toggle passphrase visibility."""

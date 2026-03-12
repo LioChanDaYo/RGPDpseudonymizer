@@ -166,6 +166,129 @@ class TestNewConfigKeys:
         assert loaded["recent_databases"] == []
 
 
+class TestDefaultDbPathPersistence:
+    """Config persistence for default_db_path (Story 7.2, Task 6.1, 6.4, 6.5, 6.6)."""
+
+    def test_default_db_path_roundtrip(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Save default_db_path, load it back, verify value (Task 6.1)."""
+        config_file = tmp_path / ".gdpr-pseudo.yaml"
+        monkeypatch.setattr(
+            "gdpr_pseudonymizer.gui.config._config_path", lambda: config_file
+        )
+
+        config = dict(_DEFAULT_CONFIG)
+        config["default_db_path"] = "/path/to/test.db"
+        save_gui_config(config)
+
+        loaded = load_gui_config()
+        assert loaded["default_db_path"] == "/path/to/test.db"
+
+    def test_populate_db_paths_preselects_default(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, qtbot: Any
+    ) -> None:
+        """_populate_db_paths pre-selects default_db_path from config (Task 6.4)."""
+        from gdpr_pseudonymizer.gui.widgets.passphrase_dialog import PassphraseDialog
+
+        # Create a real db file so it's detected
+        db_file = tmp_path / "test.db"
+        db_file.touch()
+
+        config: dict[str, Any] = {"default_db_path": str(db_file)}
+        dialog = PassphraseDialog(config=config)
+        qtbot.addWidget(dialog)
+
+        # default_db_path should be pre-selected
+        assert dialog.db_combo.currentData() == str(db_file)
+
+    def test_create_new_db_updates_default_db_path(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, qtbot: Any
+    ) -> None:
+        """Creating a new database updates default_db_path in config (Task 6.5)."""
+        from unittest.mock import patch
+
+        from gdpr_pseudonymizer.gui.widgets.passphrase_dialog import PassphraseDialog
+
+        config_file = tmp_path / ".gdpr-pseudo.yaml"
+        monkeypatch.setattr(
+            "gdpr_pseudonymizer.gui.config._config_path", lambda: config_file
+        )
+
+        config: dict[str, Any] = dict(_DEFAULT_CONFIG)
+        new_db = str(tmp_path / "new.db")
+        dialog = PassphraseDialog(config=config)
+        qtbot.addWidget(dialog)
+
+        # Simulate selecting "Create new" and choosing a file
+        with patch(
+            "gdpr_pseudonymizer.gui.widgets.passphrase_dialog.QFileDialog.getSaveFileName",
+            return_value=(new_db, ""),
+        ):
+            create_idx = dialog.db_combo.findData("__create__")
+            dialog._on_db_combo_changed(create_idx)
+
+        assert config["default_db_path"] == new_db
+
+    def test_browse_db_updates_default_db_path(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, qtbot: Any
+    ) -> None:
+        """Browsing to a database updates default_db_path in config (Task 6.6)."""
+        from unittest.mock import patch
+
+        from gdpr_pseudonymizer.gui.widgets.passphrase_dialog import PassphraseDialog
+
+        config_file = tmp_path / ".gdpr-pseudo.yaml"
+        monkeypatch.setattr(
+            "gdpr_pseudonymizer.gui.config._config_path", lambda: config_file
+        )
+
+        config: dict[str, Any] = dict(_DEFAULT_CONFIG)
+        browsed_db = str(tmp_path / "browsed.db")
+        dialog = PassphraseDialog(config=config)
+        qtbot.addWidget(dialog)
+
+        # Simulate selecting "Browse" and choosing a file
+        with patch(
+            "gdpr_pseudonymizer.gui.widgets.passphrase_dialog.QFileDialog.getOpenFileName",
+            return_value=(browsed_db, ""),
+        ):
+            browse_idx = dialog.db_combo.findData("__browse__")
+            dialog._on_db_combo_changed(browse_idx)
+
+        assert config["default_db_path"] == browsed_db
+
+    def test_select_detected_db_updates_default_db_path(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, qtbot: Any
+    ) -> None:
+        """Selecting an already-detected DB from the combo persists default_db_path (AC4)."""
+        from gdpr_pseudonymizer.gui.widgets.passphrase_dialog import (
+            DB_FILENAME,
+            PassphraseDialog,
+        )
+
+        config_file = tmp_path / ".gdpr-pseudo.yaml"
+        monkeypatch.setattr(
+            "gdpr_pseudonymizer.gui.config._config_path", lambda: config_file
+        )
+
+        # Create the canonical DB filename in tmp_path so it's detected via file_directory
+        db_file = tmp_path / DB_FILENAME
+        db_file.touch()
+
+        config: dict[str, Any] = dict(_DEFAULT_CONFIG)
+        dialog = PassphraseDialog(file_directory=str(tmp_path), config=config)
+        qtbot.addWidget(dialog)
+
+        # Find the index of the detected DB in the combo (its data == str path)
+        detected_idx = dialog.db_combo.findData(str(db_file))
+        assert detected_idx >= 0, "Detected DB should appear in combo"
+
+        dialog._on_db_combo_changed(detected_idx)
+
+        assert config["default_db_path"] == str(db_file)
+
+
 class TestRecentDatabases:
     """Recent databases management."""
 

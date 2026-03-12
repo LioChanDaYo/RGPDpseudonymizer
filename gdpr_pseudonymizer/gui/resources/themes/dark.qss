@@ -169,6 +169,35 @@ QCheckBox::indicator, QRadioButton::indicator {
     height: 18px;
 }
 
+/* QTableWidget */
+QTableWidget {
+    background-color: #2D2D2D;
+    color: #E0E0E0;
+    gridline-color: #424242;
+    border: 1px solid #424242;
+    border-radius: 4px;
+}
+
+QTableWidget::item {
+    color: #E0E0E0;
+    background-color: #2D2D2D;
+    padding: 4px 8px;
+}
+
+QTableWidget::item:selected {
+    background-color: #37474F;
+    color: #64B5F6;
+}
+
+QHeaderView::section {
+    background-color: #363636;
+    color: #E0E0E0;
+    padding: 6px 8px;
+    border: none;
+    border-bottom: 1px solid #424242;
+    font-weight: bold;
+}
+
 /* QListWidget & QTableWidget checkboxes — BUG-UX-002 fix */
 QListWidget::indicator:unchecked,
 QTableWidget::indicator:unchecked {

@@ -49,9 +49,11 @@ L'écran d'accueil est votre point de départ :
 Une boîte de dialogue apparaît pour la base de données de correspondances :
 
 - Saisissez une phrase secrète (minimum 12 caractères)
-- L'application détecte automatiquement les fichiers `.gdpr-pseudo.db` existants
+- L'application détecte automatiquement les fichiers `.gdpr-pseudo.db` existants et mémorise la dernière base utilisée entre les sessions
 - Cochez « Mémoriser » pour conserver la phrase secrète pendant la session
 - Choisissez « Créer nouveau » pour démarrer une nouvelle base de données
+
+> **Conseil :** La base de données précédemment sélectionnée est pré-sélectionnée automatiquement au prochain lancement. Votre choix est enregistré dans `.gdpr-pseudo.yaml` sous la clé `default_db_path`.
 
 ### Étape 3 : Traitement
 
@@ -122,14 +124,16 @@ Les entités connues (déjà dans la base) affichent un badge « déjà connu »
    - Changer le type (PERSON, LOCATION, ORG)
 4. **Clic droit sur du texte sélectionné** pour l'ajouter comme nouvelle entité
 
-**Au clavier :**
+**Au clavier (mode navigation) :**
 
 1. Appuyez sur **Entrée** pour entrer en mode navigation (focus sur la première entité en attente)
-2. Utilisez **Tab** / **Maj+Tab** pour vous déplacer entre les entités
+2. Utilisez **Tab** / **Maj+Tab** pour vous déplacer entre les entités (uniquement actifs en mode navigation)
 3. Appuyez sur **Entrée** pour accepter l'entité courante
 4. Appuyez sur **Suppr** pour rejeter l'entité courante
 5. Appuyez sur **Maj+F10** ou la **touche Menu** pour ouvrir le menu contextuel
 6. Appuyez sur **Échap** pour quitter le mode navigation
+
+> **Remarque :** Tab et Maj+Tab ne naviguent entre les entités que lorsque le mode navigation est actif. En dehors de ce mode, ils suivent la navigation de focus standard. Appuyez sur **F1** pour ouvrir la fenêtre d'aide des raccourcis clavier.
 
 ### Actions groupées
 
@@ -154,9 +158,10 @@ Les entités connues (déjà dans la base) affichent un badge « déjà connu »
 
 Utilisez le champ de filtre en haut de la barre latérale pour rechercher des entités par texte. Tapez pour filtrer en temps réel ; utilisez le bouton d'effacement pour réinitialiser.
 
-### Masquer les rejetés
+### Masquer les rejetés / Masquer les validées
 
-Cochez « Masquer les rejetés » pour cacher les entités rejetées barrées dans l'éditeur, gardant la vue propre.
+- Cochez **« Masquer les rejetés »** pour cacher les entités rejetées barrées dans l'éditeur.
+- Cochez **« Masquer les validées »** pour cacher les entités déjà acceptées et connues, vous permettant de vous concentrer sur les entités en attente.
 
 ### Finaliser
 

@@ -13,6 +13,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Validate-once-per-entity** (Story 7.1, FE-020) — Accepting or rejecting one entity occurrence now applies to all same-text occurrences in the document; undo reverts the entire group
 - **"Masquer les validées" toggle** (Story 7.1, FE-019) — New checkbox to hide confirmed/known entities from document highlights, letting users focus on remaining pending entities
+- **Keyboard shortcuts help dialog — all groups** (Story 7.2, FE-018) — F1 dialog now lists all shortcut groups: Global, Home, Validation, Navigation Mode, Editor, Results, Batch, Database, Settings. Navigation Mode section includes an explanatory paragraph on how to activate (Enter) and deactivate (Escape) navigation mode.
+- **Settings screen shortcuts sync** (Story 7.2, FE-018) — Settings screen shortcuts section is now driven by the same `get_all_shortcuts()` registry as the F1 dialog; always in sync.
+- **Database path persistence** (Story 7.2, FE-017) — After selecting, browsing to, or creating a database in the passphrase dialog, the path is persisted as `default_db_path` in `.gdpr-pseudo.yaml` and pre-selected on next launch.
+- **English F1 dialog translations** — All shortcut action strings and dialog UI labels in the F1 help dialog are now correctly translated to English when the application language is set to English.
+
+### Fixed
+
+- **F1 dialog light-mode readability** — Section headers (Global, Validation, etc.) and table cells were unreadable (dark text on dark background) in light mode. Fixed by adding explicit `QTableWidget`/`QHeaderView` QSS rules to `light.qss`/`dark.qss` and making the `QScrollArea` viewport background transparent so labels inherit the dialog's white background.
+- **Tab key navigation clarification** — Tab/Shift+Tab navigate entities only when navigation mode is active (entered via Enter). Outside navigation mode, Tab follows standard Qt focus traversal. The F1 dialog and shortcuts registry now correctly reflect this distinction.
 
 ---
 

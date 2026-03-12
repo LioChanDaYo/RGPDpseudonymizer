@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (
     QDialog,
     QHBoxLayout,
@@ -15,7 +16,10 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from gdpr_pseudonymizer.gui.accessibility.shortcuts import get_all_shortcuts
+from gdpr_pseudonymizer.gui.accessibility.shortcuts import (
+    NAVIGATION_MODE_DESCRIPTION,
+    get_all_shortcuts,
+)
 
 
 class ShortcutsHelpDialog(QDialog):
@@ -34,7 +38,10 @@ class ShortcutsHelpDialog(QDialog):
 
         # Header
         header = QLabel(self.tr("Raccourcis clavier"))
-        header.setStyleSheet("font-size: 18px; font-weight: bold;")
+        header_font = QFont()
+        header_font.setPointSize(14)
+        header_font.setBold(True)
+        header.setFont(header_font)
         layout.addWidget(header)
 
         desc = QLabel(
@@ -51,8 +58,10 @@ class ShortcutsHelpDialog(QDialog):
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.setFrameShape(QScrollArea.Shape.NoFrame)
+        scroll.viewport().setStyleSheet("background-color: transparent;")
 
         content = QWidget()
+        content.setStyleSheet("background-color: transparent;")
         content_layout = QVBoxLayout(content)
         content_layout.setContentsMargins(0, 0, 0, 0)
         content_layout.setSpacing(20)
@@ -65,9 +74,22 @@ class ShortcutsHelpDialog(QDialog):
                 continue
 
             # Screen section header
-            section_label = QLabel(screen_name)
-            section_label.setStyleSheet("font-size: 14px; font-weight: bold;")
+            section_label = QLabel(self.tr(screen_name))
+            section_font = QFont()
+            section_font.setPointSize(11)
+            section_font.setBold(True)
+            section_label.setFont(section_font)
             content_layout.addWidget(section_label)
+
+            # Navigation Mode: add explanatory text (AC3)
+            if screen_name == "Navigation Mode":
+                nav_desc = QLabel(self.tr(NAVIGATION_MODE_DESCRIPTION))
+                nav_desc.setWordWrap(True)
+                nav_desc.setObjectName("secondaryLabel")
+                nav_desc_font = QFont()
+                nav_desc_font.setItalic(True)
+                nav_desc.setFont(nav_desc_font)
+                content_layout.addWidget(nav_desc)
 
             # Shortcuts table
             table = QTableWidget(len(shortcuts), 2)
@@ -90,7 +112,7 @@ class ShortcutsHelpDialog(QDialog):
                 table.setItem(row, 0, key_item)
 
                 # Action column
-                action_item = QTableWidgetItem(shortcut.action)
+                action_item = QTableWidgetItem(self.tr(shortcut.action))
                 action_item.setFlags(action_item.flags() & ~Qt.ItemFlag.ItemIsEditable)
                 table.setItem(row, 1, action_item)
 

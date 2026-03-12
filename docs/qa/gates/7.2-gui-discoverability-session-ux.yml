@@ -1,0 +1,47 @@
+schema: 1
+story: "7.2"
+story_title: "GUI Discoverability & Session UX"
+gate: PASS
+status_reason: "All 8 ACs fully met after FUNC-001 fix. 11 new tests, all quality gates pass. Clean, well-structured implementation with single source of truth for shortcuts and DRY config persistence."
+reviewer: "Quinn (Test Architect)"
+updated: "2026-03-12T00:00:00Z"
+
+waiver: { active: false }
+
+top_issues: []
+
+quality_score: 100
+expires: "2026-03-26T00:00:00Z"
+
+evidence:
+  tests_reviewed: 11
+  risks_identified: 0
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8]
+    ac_gaps: []
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: "No sensitive data in config, local file only"
+  performance:
+    status: PASS
+    notes: "Static data, lightweight YAML I/O on user action"
+  reliability:
+    status: PASS
+    notes: "Proper signal blocking, graceful fallbacks on empty config"
+  maintainability:
+    status: PASS
+    notes: "Single source of truth for shortcuts, DRY _persist_db_path helper, dynamic retranslateUi"
+
+recommendations:
+  immediate: []
+  future: []
+
+history:
+  - at: "2026-03-12T00:00:00Z"
+    gate: CONCERNS
+    note: "FUNC-001: _on_db_combo_changed() missing else branch for regular DB path selection (AC4)"
+  - at: "2026-03-12T00:00:00Z"
+    gate: PASS
+    note: "FUNC-001 resolved — else branch added, new test added, all 58 story tests pass"
