@@ -25,6 +25,7 @@ from PySide6.QtWidgets import (
 from gdpr_pseudonymizer.gui.accessibility.focus_manager import (
     setup_focus_order_settings,
 )
+from gdpr_pseudonymizer.gui.accessibility.shortcuts import get_all_shortcuts
 from gdpr_pseudonymizer.gui.config import save_gui_config
 
 if TYPE_CHECKING:
@@ -224,32 +225,13 @@ class SettingsScreen(QWidget):
 
         layout.addWidget(self._advanced_group)
 
-        # -- Raccourcis clavier (read-only) --
+        # -- Raccourcis clavier (read-only, from shortcuts registry) --
         self._shortcuts_group = QGroupBox()
         self._shortcuts_layout = QVBoxLayout(self._shortcuts_group)
-        # Store shortcut description labels for retranslation
-        self._shortcut_desc_labels: list[QLabel] = []
-        shortcuts_data = [
-            ("Ctrl+O", "Ouvrir un document"),
-            ("Ctrl+Shift+O", "Ouvrir un dossier"),
-            ("Ctrl+,", "Paramètres"),
-            ("Ctrl+Q", "Quitter"),
-            ("F1", "Raccourcis clavier"),
-            ("F11", "Plein écran"),
-        ]
-        self._shortcuts_data = shortcuts_data
-        for key, _desc in shortcuts_data:
-            row = QHBoxLayout()
-            key_label = QLabel(key)
-            key_label.setStyleSheet(
-                "font-family: monospace; font-weight: bold; min-width: 120px;"
-            )
-            row.addWidget(key_label)
-            desc_label = QLabel()
-            row.addWidget(desc_label)
-            self._shortcut_desc_labels.append(desc_label)
-            row.addStretch()
-            self._shortcuts_layout.addLayout(row)
+        # Store references for retranslation
+        self._shortcut_group_labels: list[QLabel] = []
+        self._shortcut_desc_labels: list[tuple[str, QLabel]] = []  # (action, label)
+        self._build_shortcuts_section()
         layout.addWidget(self._shortcuts_group)
 
         layout.addStretch()
@@ -264,6 +246,33 @@ class SettingsScreen(QWidget):
 
         # Configure keyboard navigation
         setup_focus_order_settings(self)
+
+    def _build_shortcuts_section(self) -> None:
+        """Populate the shortcuts group box from the shortcuts registry."""
+        all_shortcuts = get_all_shortcuts()
+        for group_name, shortcuts in all_shortcuts.items():
+            if not shortcuts:
+                continue
+            # Group sub-header
+            group_label = QLabel(self.tr(group_name))
+            group_label.setStyleSheet(
+                "font-size: 12px; font-weight: bold; margin-top: 8px;"
+            )
+            self._shortcuts_layout.addWidget(group_label)
+            self._shortcut_group_labels.append(group_label)
+
+            for shortcut in shortcuts:
+                row = QHBoxLayout()
+                key_label = QLabel(shortcut.key)
+                key_label.setStyleSheet(
+                    "font-family: monospace; font-weight: bold; min-width: 120px;"
+                )
+                row.addWidget(key_label)
+                desc_label = QLabel(self.tr(shortcut.action))
+                row.addWidget(desc_label)
+                self._shortcut_desc_labels.append((shortcut.action, desc_label))
+                row.addStretch()
+                self._shortcuts_layout.addLayout(row)
 
     def retranslateUi(self) -> None:
         """Re-set all translatable static UI text."""
@@ -314,16 +323,12 @@ class SettingsScreen(QWidget):
 
         # Raccourcis clavier
         self._shortcuts_group.setTitle(self.tr("Raccourcis clavier"))
-        shortcut_descriptions = [
-            self.tr("Ouvrir un document"),
-            self.tr("Ouvrir un dossier"),
-            self.tr("Paramètres"),
-            self.tr("Quitter"),
-            self.tr("Raccourcis clavier"),
-            self.tr("Plein écran"),
-        ]
-        for lbl, desc in zip(self._shortcut_desc_labels, shortcut_descriptions):
-            lbl.setText(desc)
+        all_shortcuts = get_all_shortcuts()
+        group_names = [name for name, s in all_shortcuts.items() if s]
+        for group_label, name in zip(self._shortcut_group_labels, group_names):
+            group_label.setText(self.tr(name))
+        for action, desc_label in self._shortcut_desc_labels:
+            desc_label.setText(self.tr(action))
 
     def changeEvent(self, event: QEvent) -> None:
         if event.type() == QEvent.Type.LanguageChange:

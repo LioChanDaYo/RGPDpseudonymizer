@@ -49,9 +49,11 @@ The home screen is your starting point. It provides:
 A passphrase dialog appears for the mapping database:
 
 - Enter a passphrase (minimum 12 characters)
-- The app auto-detects existing `.gdpr-pseudo.db` files in the document directory
+- The app auto-detects existing `.gdpr-pseudo.db` files in the document directory and remembers your last-used database across sessions
 - Check "Remember" to cache the passphrase for the session
 - Choose "Create new" to start a fresh mapping database
+
+> **Tip:** The previously selected database is pre-selected automatically on the next launch. Your selection is saved in `.gdpr-pseudo.yaml` as `default_db_path`.
 
 ### Step 3: Processing
 
@@ -122,14 +124,16 @@ Known entities (already in the database) show a "déjà connu" badge.
    - Change type (PERSON, LOCATION, ORG)
 4. **Right-click selected text** to add it as a new entity
 
-**With the keyboard:**
+**With the keyboard (Navigation Mode):**
 
 1. Press **Enter** to enter navigation mode (focuses the first pending entity)
-2. Use **Tab** / **Shift+Tab** to move between entities
+2. Use **Tab** / **Shift+Tab** to move between entities (only active while in navigation mode)
 3. Press **Enter** to accept the current entity
 4. Press **Delete** to reject the current entity
 5. Press **Shift+F10** or the **Menu key** to open the context menu
 6. Press **Escape** to exit navigation mode
+
+> **Note:** Tab and Shift+Tab navigate entities only when navigation mode is active. Outside navigation mode they follow standard focus traversal. Press **F1** to open the keyboard shortcuts help dialog listing all shortcuts.
 
 ### Bulk Actions
 
@@ -154,9 +158,10 @@ Known entities (already in the database) show a "déjà connu" badge.
 
 Use the filter field at the top of the sidebar to search entities by text. Type to filter in real-time; use the clear button to reset.
 
-### Hide Rejected
+### Hide Rejected / Hide Confirmed
 
-Check "Hide rejected" to hide strikethrough rejected entities in the editor, keeping the view clean.
+- Check **"Hide rejected"** to hide strikethrough rejected entities in the editor.
+- Check **"Hide confirmed"** ("Masquer les validées") to hide already-accepted and known entities, letting you focus on remaining pending entities.
 
 ### Finalizing
 

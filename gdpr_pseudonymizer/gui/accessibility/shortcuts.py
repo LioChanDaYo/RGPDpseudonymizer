@@ -21,10 +21,13 @@ class ShortcutDefinition:
 # Global navigation shortcuts (available from most screens)
 GLOBAL_SHORTCUTS = [
     ShortcutDefinition("Ctrl+O", "Ouvrir un fichier", "Global"),
+    ShortcutDefinition("Ctrl+Shift+O", "Ouvrir un dossier", "Global"),
     ShortcutDefinition("Ctrl+B", "Traitement par lot", "Global"),
     ShortcutDefinition("Ctrl+,", "Paramètres", "Global"),
     ShortcutDefinition("Ctrl+D", "Base de données", "Global"),
+    ShortcutDefinition("Ctrl+Q", "Quitter", "Global"),
     ShortcutDefinition("F1", "Aide", "Global"),
+    ShortcutDefinition("F11", "Plein écran", "Global"),
 ]
 
 # Home screen shortcuts
@@ -35,9 +38,6 @@ HOME_SHORTCUTS = [
 
 # Validation screen shortcuts
 VALIDATION_SHORTCUTS = [
-    # Navigation
-    ShortcutDefinition("Tab", "Entité suivante", "Validation"),
-    ShortcutDefinition("Shift+Tab", "Entité précédente", "Validation"),
     # Actions
     ShortcutDefinition("Enter", "Accepter l'entité courante", "Validation"),
     ShortcutDefinition("Delete", "Rejeter l'entité courante", "Validation"),
@@ -77,6 +77,31 @@ SETTINGS_SHORTCUTS = [
     ShortcutDefinition("Ctrl+S", "Enregistrer les paramètres", "Settings"),
 ]
 
+# Navigation mode shortcuts (subset of Validation, documents behavior when nav mode active)
+NAVIGATION_MODE_SHORTCUTS = [
+    ShortcutDefinition(
+        "Enter", "Activer la navigation / Accepter l'entité", "Navigation Mode"
+    ),
+    ShortcutDefinition("Tab", "Entité suivante", "Navigation Mode"),
+    ShortcutDefinition("Shift+Tab", "Entité précédente", "Navigation Mode"),
+    ShortcutDefinition("Delete", "Rejeter l'entité", "Navigation Mode"),
+    ShortcutDefinition("Escape", "Quitter le mode navigation", "Navigation Mode"),
+]
+
+# Navigation mode explanatory text (AC3)
+NAVIGATION_MODE_DESCRIPTION: str = (
+    "Le mode navigation permet de parcourir et valider les entités au clavier. "
+    "Appuyez sur Enter pour activer le mode navigation et accepter l'entité courante. "
+    "Utilisez Tab/Shift+Tab pour naviguer entre les entités, Delete pour rejeter, "
+    "et Escape pour quitter le mode navigation."
+)
+
+# Editor shortcuts
+EDITOR_SHORTCUTS = [
+    ShortcutDefinition("Ctrl++", "Zoom avant", "Editor"),
+    ShortcutDefinition("Ctrl+-", "Zoom arrière", "Editor"),
+]
+
 
 def get_all_shortcuts() -> dict[str, list[ShortcutDefinition]]:
     """Get all shortcut definitions organized by screen.
@@ -88,6 +113,8 @@ def get_all_shortcuts() -> dict[str, list[ShortcutDefinition]]:
         "Global": GLOBAL_SHORTCUTS,
         "Home": HOME_SHORTCUTS,
         "Validation": VALIDATION_SHORTCUTS,
+        "Navigation Mode": NAVIGATION_MODE_SHORTCUTS,
+        "Editor": EDITOR_SHORTCUTS,
         "Results": RESULTS_SHORTCUTS,
         "Batch": BATCH_SHORTCUTS,
         "Database": DATABASE_SHORTCUTS,

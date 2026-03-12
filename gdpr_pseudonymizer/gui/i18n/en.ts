@@ -1431,4 +1431,167 @@ Continue with pseudonymization?</translation>
         <translation>Got it</translation>
     </message>
 </context>
+<context>
+    <name>ShortcutsHelpDialog</name>
+    <message>
+        <source>Raccourcis clavier</source>
+        <translation>Keyboard shortcuts</translation>
+    </message>
+    <message>
+        <source>Utilisez ces raccourcis clavier pour naviguer rapidement dans l&apos;application.</source>
+        <translation>Use these keyboard shortcuts to quickly navigate the application.</translation>
+    </message>
+    <message>
+        <source>Raccourci</source>
+        <translation>Shortcut</translation>
+    </message>
+    <message>
+        <source>Action</source>
+        <translation>Action</translation>
+    </message>
+    <message>
+        <source>Fermer</source>
+        <translation>Close</translation>
+    </message>
+    <message>
+        <source>Navigation Mode</source>
+        <translation>Navigation Mode</translation>
+    </message>
+    <message>
+        <source>Le mode navigation permet de parcourir et valider les entités au clavier. Appuyez sur Enter pour activer le mode navigation et accepter l&apos;entité courante. Utilisez Tab/Shift+Tab pour naviguer entre les entités, Delete pour rejeter, et Escape pour quitter le mode navigation.</source>
+        <translation>Navigation mode lets you browse and validate entities using the keyboard. Press Enter to activate navigation mode and accept the current entity. Use Tab/Shift+Tab to move between entities, Delete to reject, and Escape to exit navigation mode.</translation>
+    </message>
+    <message>
+        <source>Ouvrir un fichier</source>
+        <translation>Open a file</translation>
+    </message>
+    <message>
+        <source>Ouvrir un dossier</source>
+        <translation>Open a folder</translation>
+    </message>
+    <message>
+        <source>Traitement par lot</source>
+        <translation>Batch processing</translation>
+    </message>
+    <message>
+        <source>Paramètres</source>
+        <translation>Settings</translation>
+    </message>
+    <message>
+        <source>Base de données</source>
+        <translation>Database</translation>
+    </message>
+    <message>
+        <source>Quitter</source>
+        <translation>Quit</translation>
+    </message>
+    <message>
+        <source>Aide</source>
+        <translation>Help</translation>
+    </message>
+    <message>
+        <source>Plein écran</source>
+        <translation>Full screen</translation>
+    </message>
+    <message>
+        <source>Ouvrir le traitement par lot</source>
+        <translation>Open batch processing</translation>
+    </message>
+    <message>
+        <source>Accepter l&apos;entité courante</source>
+        <translation>Accept current entity</translation>
+    </message>
+    <message>
+        <source>Rejeter l&apos;entité courante</source>
+        <translation>Reject current entity</translation>
+    </message>
+    <message>
+        <source>Accepter toutes les entités</source>
+        <translation>Accept all entities</translation>
+    </message>
+    <message>
+        <source>Rejeter toutes les entités</source>
+        <translation>Reject all entities</translation>
+    </message>
+    <message>
+        <source>Annuler</source>
+        <translation>Undo</translation>
+    </message>
+    <message>
+        <source>Rétablir</source>
+        <translation>Redo</translation>
+    </message>
+    <message>
+        <source>Rechercher</source>
+        <translation>Search</translation>
+    </message>
+    <message>
+        <source>Activer la navigation / Accepter l&apos;entité</source>
+        <translation>Enter navigation / Accept entity</translation>
+    </message>
+    <message>
+        <source>Entité suivante</source>
+        <translation>Next entity</translation>
+    </message>
+    <message>
+        <source>Entité précédente</source>
+        <translation>Previous entity</translation>
+    </message>
+    <message>
+        <source>Rejeter l&apos;entité</source>
+        <translation>Reject entity</translation>
+    </message>
+    <message>
+        <source>Quitter le mode navigation</source>
+        <translation>Exit navigation mode</translation>
+    </message>
+    <message>
+        <source>Zoom avant</source>
+        <translation>Zoom in</translation>
+    </message>
+    <message>
+        <source>Zoom arrière</source>
+        <translation>Zoom out</translation>
+    </message>
+    <message>
+        <source>Enregistrer le document</source>
+        <translation>Save document</translation>
+    </message>
+    <message>
+        <source>Nouveau document</source>
+        <translation>New document</translation>
+    </message>
+    <message>
+        <source>Ouvrir la base de données</source>
+        <translation>Open database</translation>
+    </message>
+    <message>
+        <source>Parcourir le dossier</source>
+        <translation>Browse folder</translation>
+    </message>
+    <message>
+        <source>Ajouter des fichiers</source>
+        <translation>Add files</translation>
+    </message>
+    <message>
+        <source>Démarrer le traitement</source>
+        <translation>Start processing</translation>
+    </message>
+    <message>
+        <source>Ouvrir une base de données</source>
+        <translation>Open a database</translation>
+    </message>
+    <message>
+        <source>Supprimer l&apos;entité sélectionnée</source>
+        <translation>Delete selected entity</translation>
+    </message>
+    <message>
+        <source>Exporter en CSV</source>
+        <translation>Export to CSV</translation>
+    </message>
+    <message>
+        <source>Enregistrer les paramètres</source>
+        <translation>Save settings</translation>
+    </message>
+</context>
 </TS>

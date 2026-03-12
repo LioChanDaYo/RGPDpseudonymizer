@@ -2,7 +2,7 @@
 
 **Epic Goal:** Expand beyond CLI-only users to the primary growth market — non-technical professionals (HR, legal, compliance, researchers) who need GDPR-compliant pseudonymization but lack command-line comfort — by delivering a cross-platform desktop GUI, standalone executables, French-first internationalization, and WCAG AA accessibility.
 
-**Target Release:** v2.0.0 — Ship when ready (quality over deadline)
+**Target Release:** v2.0.0 ✅ Released 2026-03-04
 **Duration:** Estimated 10-14 weeks
 **Predecessor:** Epic 5 (v1.1.0 released 2026-02-15)
 
@@ -62,7 +62,7 @@ The v1.0/v1.1 CLI tool has validated the core value proposition (local GDPR-comp
 | 6.7.3: Batch Validation Workflow (FE-022) | 🟡 **MEDIUM** | 1-2 weeks | Story 6.5 DEFERRED-001 / Story 6.7 AC8 | ✅ COMPLETE |
 | 6.8: Standalone Executables & Distribution | 🔴 **HIGH** | 2-3 weeks | FE-009 | ✅ COMPLETE |
 | 6.9: v2.0 Release Preparation | 🔴 **HIGH** | 1-2 days | — | ✅ COMPLETE |
-| 6.10: Build Executables Infrastructure Fixes | 🔴 **HIGH** | 1-2 days | Story 6.9 post-release | ✅ APPROVED |
+| 6.10: Build Executables Infrastructure Fixes | 🔴 **HIGH** | 1-2 days | Story 6.9 post-release | ✅ COMPLETE |
 
 **Total Estimated Duration:** 13-19 weeks (target: 14-16 weeks)
 
@@ -558,7 +558,7 @@ These decisions are **open** and will be resolved during Story 6.1:
 - [x] Existing pseudonym libraries unchanged
 - [x] PyPI installation path (`pip install gdpr-pseudonymizer`) continues to work (CLI-only)
 - [x] GUI available as separate install path (standalone executable) or via `pip install gdpr-pseudonymizer[gui]`
-- [ ] Configuration file (`.gdpr-pseudo.yaml`) shared between CLI and GUI
+- [x] Configuration file (`.gdpr-pseudo.yaml`) shared between CLI and GUI
 
 ---
 
@@ -597,17 +597,17 @@ These decisions are **open** and will be resolved during Story 6.1:
 
 ## Definition of Done
 
-- [ ] All 12 stories completed with acceptance criteria met
-- [ ] Existing CLI functionality verified (full test suite passing)
-- [ ] All quality gates green: black, ruff, mypy, pytest
-- [ ] Test count ≥ v1.1 baseline (1267+), coverage ≥ 86%
-- [ ] No regression in existing CLI processing workflows
-- [ ] GUI functional on Windows 10/11 and macOS 13+
-- [ ] Standalone executables (.exe, .app) tested on target platforms
-- [ ] French GUI translation complete and reviewed
-- [ ] WCAG AA accessibility checklist passed
-- [ ] v2.0.0 published on PyPI and standalone downloads on GitHub Releases
-- [ ] Documentation updated (EN + FR) with GUI user guide
+- [x] All 13 stories completed with acceptance criteria met
+- [x] Existing CLI functionality verified (full test suite passing)
+- [x] All quality gates green: black, ruff, mypy, pytest
+- [x] Test count ≥ v1.1 baseline (1267+), coverage ≥ 86% (1670+ tests)
+- [x] No regression in existing CLI processing workflows
+- [x] GUI functional on Windows 10/11 and macOS 13+
+- [x] Standalone executables (.exe, .app) tested on target platforms
+- [x] French GUI translation complete and reviewed
+- [x] WCAG AA accessibility checklist passed
+- [x] v2.0.0 published on PyPI and standalone downloads on GitHub Releases
+- [x] Documentation updated (EN + FR) with GUI user guide
 
 ---
 
