@@ -21,7 +21,7 @@ from gdpr_pseudonymizer.cli.formatters import (
 from gdpr_pseudonymizer.data.database import init_database
 
 # Valid pseudonym themes
-VALID_THEMES = ["neutral", "star_wars", "lotr"]
+VALID_THEMES = ["neutral", "star_wars", "lotr", "neutral_id"]
 
 # Valid log levels
 VALID_LOG_LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR"]

@@ -77,6 +77,12 @@ class TestValidateTheme:
         assert is_valid is True
         assert result == "lotr"
 
+    def test_validate_neutral_id_theme(self) -> None:
+        """Test neutral_id theme is valid."""
+        is_valid, result = validate_theme("neutral_id")
+        assert is_valid is True
+        assert result == "neutral_id"
+
     def test_validate_theme_case_insensitive(self) -> None:
         """Test theme validation is case insensitive."""
         is_valid, result = validate_theme("NEUTRAL")
@@ -94,6 +100,7 @@ class TestValidateTheme:
         assert "neutral" in VALID_THEMES
         assert "star_wars" in VALID_THEMES
         assert "lotr" in VALID_THEMES
+        assert "neutral_id" in VALID_THEMES
 
 
 class TestValidateWorkers:

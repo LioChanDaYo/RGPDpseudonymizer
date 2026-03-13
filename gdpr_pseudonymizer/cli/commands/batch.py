@@ -328,7 +328,7 @@ def batch_command(
         None,
         "--theme",
         "-t",
-        help="Pseudonym library theme (neutral/star_wars/lotr). Default from config.",
+        help="Pseudonym library theme (neutral/star_wars/lotr/neutral_id). Default from config.",
     ),
     model: Optional[str] = typer.Option(
         None,

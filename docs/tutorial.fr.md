@@ -160,7 +160,7 @@ database:
   path: project_mappings.db
 
 pseudonymization:
-  theme: star_wars    # neutral | star_wars | lotr
+  theme: star_wars    # neutral | star_wars | lotr | neutral_id
   model: spacy
 
 batch:
@@ -214,15 +214,15 @@ poetry run gdpr-pseudo process doc.txt --theme lotr
 
 ## Tutoriel 4 : Choisir un thème de pseudonymes
 
-Comparez les trois thèmes disponibles pour sélectionner le plus approprié à votre cas d'usage.
+Comparez les quatre thèmes disponibles pour sélectionner le plus approprié à votre cas d'usage.
 
 ### Comparaison des thèmes
 
-| Type d'entité | Neutre | Star Wars | Seigneur des anneaux |
-|-------------|---------|-----------|-------------------|
-| **PERSON** | Sophie Martin | Leia Organa | Arwen Evenstar |
-| **LOCATION** | Marseille | Coruscant | Rivendell |
-| **ORGANIZATION** | TechnoPlus SARL | Rebel Alliance | House of Elrond |
+| Type d'entité | Neutre | Star Wars | Seigneur des anneaux | Identifiant neutre |
+|-------------|---------|-----------|-------------------|------------|
+| **PERSON** | Sophie Martin | Leia Organa | Arwen Evenstar | PER-001 |
+| **LOCATION** | Marseille | Coruscant | Rivendell | LOC-001 |
+| **ORGANIZATION** | TechnoPlus SARL | Rebel Alliance | House of Elrond | ORG-001 |
 
 ### Thème neutre (par défaut)
 
@@ -280,6 +280,26 @@ Résultat : Arwen Evenstar travaille a Rivendell pour House of Elrond.
 - Personnages du Monde du Milieu de Tolkien
 - Localités : Rivendell, Gondor, La Comté, etc.
 - Organisations : Royaumes, maisons et alliances
+
+### Thème Identifiant neutre
+
+Idéal pour : Documents formels ou juridiques, pistes d'audit, contextes où les noms thématiques sont inappropriés.
+
+```bash
+poetry run gdpr-pseudo process doc.txt --theme neutral_id
+```
+
+**Exemple de transformation :**
+```
+Entrée :  Marie Dubois travaille a Paris pour Acme SA.
+Résultat : PER-001 travaille a LOC-001 pour ORG-001.
+```
+
+**Caractéristiques :**
+- Identifiants séquentiels par compteur (PER-001, PER-002, LOC-001, ORG-001)
+- Noms composés avec sous-identifiants : « Marie Dupont » → PER-001 avec PER-001-P (prénom) et PER-001-N (nom)
+- Pas d'épuisement — compteurs illimités
+- Aucun biais culturel — résultat entièrement neutre
 
 ### Changer de thème
 

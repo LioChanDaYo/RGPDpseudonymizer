@@ -68,7 +68,7 @@ class AppConfig:
 
 
 # Valid configuration values
-VALID_THEMES = ["neutral", "star_wars", "lotr"]
+VALID_THEMES = ["neutral", "star_wars", "lotr", "neutral_id"]
 VALID_LOG_LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR"]
 VALID_MODELS = ["spacy"]
 

@@ -95,7 +95,7 @@ GDPR Pseudonymizer is a **privacy-first CLI and GUI tool** that combines AI effi
 - ✅ **50%+ time savings** vs manual redaction (AI pre-detection + validation)
 
 ### 🎭 **Themed Pseudonyms**
-- ✅ **Readable output** - Star Wars, LOTR, or generic French names
+- ✅ **Readable output** - Star Wars, LOTR, generic French names, or neutral identifiers (PER-001, LOC-001)
 - ✅ **Maintains context** - LLM analysis preserves 85% document utility (validated: 4.27/5.0)
 - ✅ **Gender-aware** - Auto-detects French first name gender from 945-name dictionary and assigns gender-matched pseudonyms (female names → female pseudonyms, male names → male pseudonyms)
 - ✅ **Full entity support** - PERSON, LOCATION, and ORGANIZATION pseudonyms for all themes
@@ -234,7 +234,7 @@ database:
   path: mappings.db
 
 pseudonymization:
-  theme: star_wars    # neutral, star_wars, lotr
+  theme: star_wars    # neutral, star_wars, lotr, neutral_id
   model: spacy
 
 batch:
