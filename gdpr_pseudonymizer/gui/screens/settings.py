@@ -144,6 +144,7 @@ class SettingsScreen(QWidget):
         self._default_theme_combo.addItem("", "neutral")
         self._default_theme_combo.addItem("Star Wars", "star_wars")
         self._default_theme_combo.addItem("", "lotr")
+        self._default_theme_combo.addItem("", "neutral_id")
         self._default_theme_combo.currentIndexChanged.connect(
             self._on_default_theme_changed
         )
@@ -302,6 +303,9 @@ class SettingsScreen(QWidget):
         # Star Wars is a proper noun -- no translation needed
         self._default_theme_combo.setItemText(1, "Star Wars")
         self._default_theme_combo.setItemText(2, self.tr("Le Seigneur des Anneaux"))
+        self._default_theme_combo.setItemText(
+            3, self.tr("Neutre / Générique (PER-001, LOC-001)")
+        )
 
         # Traitement par lot
         self._batch_group.setTitle(self.tr("Traitement par lot"))

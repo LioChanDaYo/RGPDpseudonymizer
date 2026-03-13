@@ -160,7 +160,7 @@ database:
   path: project_mappings.db
 
 pseudonymization:
-  theme: star_wars    # neutral | star_wars | lotr
+  theme: star_wars    # neutral | star_wars | lotr | neutral_id
   model: spacy
 
 batch:
@@ -214,15 +214,15 @@ poetry run gdpr-pseudo process doc.txt --theme lotr
 
 ## Tutorial 4: Choosing a Pseudonym Theme
 
-Compare the three available themes to pick the best one for your use case.
+Compare the four available themes to pick the best one for your use case.
 
 ### Theme Comparison
 
-| Entity Type | Neutral | Star Wars | Lord of the Rings |
-|-------------|---------|-----------|-------------------|
-| **PERSON** | Sophie Martin | Leia Organa | Arwen Evenstar |
-| **LOCATION** | Marseille | Coruscant | Rivendell |
-| **ORGANIZATION** | TechnoPlus SARL | Rebel Alliance | House of Elrond |
+| Entity Type | Neutral | Star Wars | Lord of the Rings | Neutral ID |
+|-------------|---------|-----------|-------------------|------------|
+| **PERSON** | Sophie Martin | Leia Organa | Arwen Evenstar | PER-001 |
+| **LOCATION** | Marseille | Coruscant | Rivendell | LOC-001 |
+| **ORGANIZATION** | TechnoPlus SARL | Rebel Alliance | House of Elrond | ORG-001 |
 
 ### Neutral Theme (Default)
 
@@ -280,6 +280,26 @@ Output: Arwen Evenstar travaille a Rivendell pour House of Elrond.
 - Characters from Tolkien's Middle-earth
 - Locations: Rivendell, Gondor, The Shire, etc.
 - Organizations: Kingdoms, houses, and alliances
+
+### Neutral ID Theme
+
+Best for: Formal/legal documents, audit trails, contexts where themed names feel unprofessional.
+
+```bash
+poetry run gdpr-pseudo process doc.txt --theme neutral_id
+```
+
+**Example transformation:**
+```
+Input:  Marie Dubois travaille a Paris pour Acme SA.
+Output: PER-001 travaille a LOC-001 pour ORG-001.
+```
+
+**Characteristics:**
+- Sequential counter-based identifiers (PER-001, PER-002, LOC-001, ORG-001)
+- Compound names get sub-identifiers: "Marie Dupont" → PER-001 with PER-001-P (first) and PER-001-N (last)
+- No exhaustion — counters are unlimited
+- No cultural bias — fully neutral output
 
 ### Switching Themes
 

@@ -10,6 +10,9 @@ from gdpr_pseudonymizer.pseudonym.assignment_engine import (
     PseudonymAssignment,
     PseudonymManager,
 )
+from gdpr_pseudonymizer.pseudonym.neutral_id_generator import (
+    NeutralIdPseudonymGenerator,
+)
 from gdpr_pseudonymizer.utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -108,16 +111,27 @@ class LibraryBasedPseudonymManager(PseudonymManager):
             "ORG": 0,
         }
 
+        self._neutral_id_generator: NeutralIdPseudonymGenerator | None = None
+
     def load_library(self, theme: str) -> None:
-        """Load pseudonym library from JSON file.
+        """Load pseudonym library from JSON file or initialize neutral_id generator.
 
         Args:
-            theme: Library theme name (neutral, star_wars, lotr)
+            theme: Library theme name (neutral, star_wars, lotr, neutral_id)
 
         Raises:
-            FileNotFoundError: If library file not found
+            FileNotFoundError: If library file not found (JSON-based themes)
             ValueError: If library format is invalid
         """
+        if theme == "neutral_id":
+            self.theme = "neutral_id"
+            self._neutral_id_generator = NeutralIdPseudonymGenerator()
+            self._used_pseudonyms.clear()
+            self._component_mappings.clear()
+            self._fallback_counters = {"PERSON": 0, "LOCATION": 0, "ORG": 0}
+            logger.info("pseudonym_library_loaded", theme="neutral_id")
+            return
+
         # Load from bundled package resources
         from gdpr_pseudonymizer.resources import PSEUDONYMS_DIR
 
@@ -375,6 +389,10 @@ class LibraryBasedPseudonymManager(PseudonymManager):
         if entity_type not in ["PERSON", "LOCATION", "ORG"]:
             raise ValueError(f"Invalid entity_type: {entity_type}")
 
+        # Delegate to neutral_id-specific path
+        if self.theme == "neutral_id":
+            return self._assign_neutral_id_pseudonym(entity_type, first_name, last_name)
+
         # Check exhaustion and warn at 80% threshold
         exhaustion = self.check_exhaustion()
         if exhaustion >= 0.8:
@@ -460,6 +478,64 @@ class LibraryBasedPseudonymManager(PseudonymManager):
             pseudonym_last=pseudonym_last_name,
             theme=self.theme,
             exhaustion_percentage=exhaustion,
+        )
+
+    def _assign_neutral_id_pseudonym(
+        self,
+        entity_type: str,
+        first_name: str | None = None,
+        last_name: str | None = None,
+    ) -> PseudonymAssignment:
+        """Assign a counter-based neutral_id pseudonym.
+
+        Fully self-contained path — does NOT delegate to library-based
+        component-reuse methods.
+
+        Args:
+            entity_type: Entity type (PERSON, LOCATION, ORG)
+            first_name: First name component (PERSON compound names)
+            last_name: Last name component (PERSON compound names)
+
+        Returns:
+            PseudonymAssignment with counter-based identifier
+        """
+        if self._neutral_id_generator is None:
+            raise RuntimeError(
+                "NeutralIdPseudonymGenerator not initialised. "
+                "Call load_library('neutral_id') first."
+            )
+
+        pseudonym_first: str | None = None
+        pseudonym_last: str | None = None
+
+        if entity_type == "PERSON" and first_name and last_name:
+            # Compound PERSON name
+            identifier = self._neutral_id_generator.generate("PERSON")
+            pseudonym_first = f"{identifier}-P"
+            pseudonym_last = f"{identifier}-N"
+
+            # Store component mappings for sub-entity recognition
+            self._component_mappings[(first_name, "first_name")] = pseudonym_first
+            self._component_mappings[(last_name, "last_name")] = pseudonym_last
+
+            pseudonym_full = identifier
+        elif entity_type == "PERSON":
+            # Single / ambiguous PERSON name
+            pseudonym_full = self._neutral_id_generator.generate("PERSON")
+        elif entity_type == "LOCATION":
+            pseudonym_full = self._neutral_id_generator.generate("LOCATION")
+        else:
+            # ORG
+            pseudonym_full = self._neutral_id_generator.generate("ORG")
+
+        self._used_pseudonyms.add(pseudonym_full)
+
+        return PseudonymAssignment(
+            pseudonym_full=pseudonym_full,
+            pseudonym_first=pseudonym_first,
+            pseudonym_last=pseudonym_last,
+            theme="neutral_id",
+            exhaustion_percentage=0.0,
         )
 
     def _select_first_name(
@@ -703,6 +779,10 @@ class LibraryBasedPseudonymManager(PseudonymManager):
         # Pattern to match fallback-style pseudonyms: "Person-001", "Location-002", "Org-003"
         fallback_pattern = re.compile(r"^(Person|Location|Org)-(\d+)$")
 
+        # Pattern to match neutral_id pseudonyms: "PER-001", "LOC-002", "ORG-003"
+        neutral_id_pattern = re.compile(r"^(PER|LOC|ORG)-(\d+)$")
+        _neutral_id_prefix_to_type = {"PER": "PERSON", "LOC": "LOCATION", "ORG": "ORG"}
+
         for entity in existing_entities:
             # Only PERSON entities have component-level tracking
             if entity.entity_type == "PERSON":
@@ -736,6 +816,19 @@ class LibraryBasedPseudonymManager(PseudonymManager):
                             counter=counter_value,
                         )
 
+            # Check if this is a neutral_id pseudonym and update generator counter
+            nid_match = neutral_id_pattern.match(entity.pseudonym_full)
+            if nid_match and self._neutral_id_generator is not None:
+                nid_entity_type = _neutral_id_prefix_to_type[nid_match.group(1)]
+                nid_counter = int(nid_match.group(2))
+                self._neutral_id_generator.set_counter(
+                    nid_entity_type,
+                    max(
+                        nid_counter,
+                        self._neutral_id_generator.get_counter(nid_entity_type),
+                    ),
+                )
+
         logger.info(
             "existing_mappings_loaded",
             components=loaded_components,
@@ -756,6 +849,9 @@ class LibraryBasedPseudonymManager(PseudonymManager):
         Returns:
             Float between 0.0 (unused) and 1.0 (fully exhausted)
         """
+        if self.theme == "neutral_id":
+            return 0.0
+
         if self.theme is None or not self.last_names:
             return 0.0
 

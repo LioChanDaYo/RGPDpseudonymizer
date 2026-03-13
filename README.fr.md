@@ -94,7 +94,7 @@ GDPR Pseudonymizer est un **outil CLI et GUI conçu pour la confidentialité**. 
 - ✅ **Gain de temps de plus de 50 %** par rapport à la rédaction manuelle, grâce à la détection préalable par l'IA
 
 ### 🎭 **Pseudonymes thématiques**
-- ✅ **Résultat lisible** — Thèmes Star Wars, Le Seigneur des Anneaux, ou prénoms français génériques
+- ✅ **Résultat lisible** — Thèmes Star Wars, Le Seigneur des Anneaux, prénoms français génériques ou identifiants neutres (PER-001, LOC-001)
 - ✅ **Utilité préservée** — L'analyse par LLM conserve 85 % de la valeur du document (score validé : 4,27/5,0)
 - ✅ **Respect du genre** — Détection automatique du genre des prénoms français à partir d'un dictionnaire de 945 prénoms, avec attribution de pseudonymes correspondants (prénom féminin → pseudonyme féminin, prénom masculin → pseudonyme masculin)
 - ✅ **Tous les types d'entités couverts** — Pseudonymes PERSON, LOCATION et ORGANIZATION pour chaque thème
@@ -233,7 +233,7 @@ database:
   path: mappings.db
 
 pseudonymization:
-  theme: star_wars    # neutral, star_wars, lotr
+  theme: star_wars    # neutral, star_wars, lotr, neutral_id
   model: spacy
 
 batch:

@@ -266,10 +266,12 @@ class ProcessingScreen(QWidget):
         """Launch the detection worker (Phase 1 only)."""
         from gdpr_pseudonymizer.gui.workers.detection_worker import DetectionWorker
 
+        theme = self._main_window.config.get("default_theme", "neutral")
         worker = DetectionWorker(
             file_path=self._file_path,
             db_path=self._db_path,
             passphrase=self._passphrase,
+            theme=theme,
         )
         worker.signals.progress.connect(self._on_progress)
         worker.signals.finished.connect(self._on_finished)

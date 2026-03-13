@@ -107,7 +107,7 @@ gdpr-pseudo process INPUT_FILE [OPTIONS]
 | Option | Short | Default | Description |
 |--------|-------|---------|-------------|
 | `--output PATH` | `-o` | `<input>_pseudonymized.ext` | Output file path |
-| `--theme TEXT` | `-t` | `neutral` | Pseudonym library theme (neutral/star_wars/lotr) |
+| `--theme TEXT` | `-t` | `neutral` | Pseudonym library theme (neutral/star_wars/lotr/neutral_id) |
 | `--model TEXT` | `-m` | `spacy` | NLP model name |
 | `--db PATH` | | `mappings.db` | Database file path |
 | `--passphrase TEXT` | `-p` | (prompt) | Database passphrase |
@@ -253,7 +253,7 @@ gdpr-pseudo config set logging.level DEBUG
 | Key | Type | Description |
 |-----|------|-------------|
 | `database.path` | string | Database file path |
-| `pseudonymization.theme` | string | Pseudonym theme (neutral/star_wars/lotr) |
+| `pseudonymization.theme` | string | Pseudonym theme (neutral/star_wars/lotr/neutral_id) |
 | `pseudonymization.model` | string | NLP model (spacy) |
 | `batch.workers` | integer | Parallel workers (1-8) |
 | `batch.output_dir` | string | Default output directory |
@@ -672,7 +672,7 @@ database:
   path: mappings.db
 
 pseudonymization:
-  theme: neutral    # neutral | star_wars | lotr
+  theme: neutral    # neutral | star_wars | lotr | neutral_id
   model: spacy
 
 logging:
@@ -810,7 +810,7 @@ Starting with v1.1, the pseudonymizer automatically detects the gender of French
 - ~470 male names, ~457 female names, ~18 ambiguous names
 - Coverage: >=90% of common French first names
 
-**No configuration needed:** Gender-aware assignment is automatic and requires no user action. It works across all pseudonym themes (neutral, star_wars, lotr).
+**No configuration needed:** Gender-aware assignment is automatic and requires no user action. It works across all pseudonym themes (neutral, star_wars, lotr, neutral_id).
 
 ---
 
@@ -844,7 +844,7 @@ Starting with v1.1, the pseudonymizer automatically detects the gender of French
 
 **Error:** `Invalid theme 'xyz' is not recognized`
 
-**Solution:** Use one of the valid themes: `neutral`, `star_wars`, `lotr`
+**Solution:** Use one of the valid themes: `neutral`, `star_wars`, `lotr`, `neutral_id`
 
 ### File Permission Errors
 

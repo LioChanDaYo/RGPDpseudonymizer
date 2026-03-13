@@ -127,19 +127,19 @@ FE-020 (validate-once-per-entity) is the single highest-impact UX improvement id
 
 ### Acceptance Criteria
 
-1. **AC1:** New theme option `--theme neutral` (CLI) and "Neutre / Generique" in GUI theme dropdown
+1. **AC1:** New theme option `--theme neutral_id` (CLI) and "Neutre / Générique" in GUI theme dropdown
 2. **AC2:** Generates sequential identifiers per entity type: PER-001, PER-002, LOC-001, ORG-001, etc.
 3. **AC3:** Compositional pseudonymization works — if "Marie Dupont" -> PER-001, then "Marie" -> PER-001-P (prenom) and "Dupont" -> PER-001-N (nom). If "Marie" also appears independently (not as a sub-entity of a compound name), it receives its own identifier (PER-002). Grouping follows existing variant grouping logic from Story 4.6.
 4. **AC4:** Mapping table stores neutral pseudonyms like any other theme
 5. **AC5:** Counter resets per database session (not globally)
 6. **AC6:** Documentation updated (theme comparison table, CLI reference, GUI settings)
-7. **AC7:** No regression in existing theme functionality (french, lotr, star_wars)
+7. **AC7:** No regression in existing theme functionality (neutral, lotr, star_wars)
 8. **AC8:** Unit tests for counter-based generation, compositional logic, and mapping persistence
 
 ### Implementation Notes
 
 - No library files needed — purely algorithmic generation
-- Counter-based: `NeutralPseudonymGenerator` class in `pseudonym/` module
+- Counter-based: `NeutralIdPseudonymGenerator` class in `pseudonym/` module
 - Must integrate with existing `LibraryManager` API so GUI/CLI theme selection works transparently
 
 ### Estimated Effort: 1-2 days
@@ -305,7 +305,7 @@ Story 7.7 (Release Prep)               --- Day 19-20 ---  Release gate
 ## Compatibility Requirements
 
 - [x] Existing CLI commands remain unchanged
-- [ ] New `--theme neutral` option added to CLI
+- [ ] New `--theme neutral_id` option added to CLI
 - [ ] New `.xlsx` and `.csv` file support added to CLI and GUI
 - [ ] Existing mapping databases remain compatible (no migration)
 - [ ] PyPI installation path continues to work

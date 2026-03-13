@@ -366,7 +366,7 @@ class ValidationScreen(QWidget):
             input_file=document_path,
             db_path=db_path,
             passphrase=passphrase,
-            theme="neutral",
+            theme=self._main_window.config.get("default_theme", "neutral"),
             pseudonym_previews=pseudonym_previews,
             entity_type_counts={},
             detection_time_seconds=0.0,

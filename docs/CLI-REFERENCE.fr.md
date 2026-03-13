@@ -107,7 +107,7 @@ gdpr-pseudo process FICHIER_ENTREE [OPTIONS]
 | Option | Abrégé | Défaut | Description |
 |--------|--------|--------|-------------|
 | `--output CHEMIN` | `-o` | `<entrée>_pseudonymized.ext` | Chemin du fichier de sortie |
-| `--theme TEXTE` | `-t` | `neutral` | Thème de pseudonymes (neutral/star_wars/lotr) |
+| `--theme TEXTE` | `-t` | `neutral` | Thème de pseudonymes (neutral/star_wars/lotr/neutral_id) |
 | `--model TEXTE` | `-m` | `spacy` | Modèle NLP à utiliser |
 | `--db CHEMIN` | | `mappings.db` | Chemin de la base de données |
 | `--passphrase TEXTE` | `-p` | (saisie interactive) | Mot de passe de la base de données |
@@ -253,7 +253,7 @@ gdpr-pseudo config set logging.level DEBUG
 | Clé | Type | Description |
 |-----|------|-------------|
 | `database.path` | chaîne | Chemin du fichier de base de données |
-| `pseudonymization.theme` | chaîne | Thème de pseudonymes (neutral/star_wars/lotr) |
+| `pseudonymization.theme` | chaîne | Thème de pseudonymes (neutral/star_wars/lotr/neutral_id) |
 | `pseudonymization.model` | chaîne | Modèle NLP (spacy) |
 | `batch.workers` | entier | Processus parallèles (1-8) |
 | `batch.output_dir` | chaîne | Répertoire de sortie par défaut |
@@ -672,7 +672,7 @@ database:
   path: mappings.db
 
 pseudonymization:
-  theme: neutral    # neutral | star_wars | lotr
+  theme: neutral    # neutral | star_wars | lotr | neutral_id
   model: spacy
 
 logging:
@@ -810,7 +810,7 @@ Depuis la v1.1, le pseudonymiseur détecte automatiquement le genre des prénoms
 - ~470 prénoms masculins, ~457 prénoms féminins, ~18 prénoms épicènes
 - Couverture : ≥90 % des prénoms français courants
 
-**Aucune configuration nécessaire :** l'attribution selon le genre est automatique et fonctionne avec tous les thèmes de pseudonymes (neutral, star_wars, lotr).
+**Aucune configuration nécessaire :** l'attribution selon le genre est automatique et fonctionne avec tous les thèmes de pseudonymes (neutral, star_wars, lotr, neutral_id).
 
 ---
 
@@ -844,7 +844,7 @@ Depuis la v1.1, le pseudonymiseur détecte automatiquement le genre des prénoms
 
 **Erreur :** `Invalid theme 'xyz' is not recognized`
 
-**Solution :** utilisez l'un des thèmes disponibles : `neutral`, `star_wars`, `lotr`
+**Solution :** utilisez l'un des thèmes disponibles : `neutral`, `star_wars`, `lotr`, `neutral_id`
 
 ### Erreurs de permissions
 
