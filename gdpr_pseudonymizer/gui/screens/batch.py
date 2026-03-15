@@ -504,7 +504,7 @@ class BatchScreen(QWidget):
             self,
             self.tr("Ajouter des fichiers"),
             "",
-            self.tr("Documents (*.txt *.md *.pdf *.docx);;Tous (*)"),
+            self.tr("Documents (*.txt *.md *.pdf *.docx *.xlsx *.csv);;Tous (*)"),
         )
         if files:
             for f in files:

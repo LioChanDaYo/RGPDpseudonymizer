@@ -57,10 +57,12 @@ Supported formats:
 - **Markdown** (`.md`)
 - **PDF** (`.pdf`) -- requires optional dependency
 - **Microsoft Word** (`.docx`) -- requires optional dependency
+- **Excel** (`.xlsx`) -- requires optional dependency (`openpyxl`)
+- **CSV** (`.csv`) -- no extra dependency needed
 
 HTML and other formats are not yet supported. Convert those files to plain text before processing.
 
-### How do I process PDF or DOCX files?
+### How do I process PDF, DOCX, Excel, or CSV files?
 
 Install the optional format extras and process as usual:
 
@@ -68,14 +70,25 @@ Install the optional format extras and process as usual:
 # Install PDF/DOCX support
 pip install gdpr-pseudonymizer[formats]
 
+# Install Excel support
+pip install gdpr-pseudonymizer[excel]
+
 # Process a PDF
 gdpr-pseudo process report.pdf
 
 # Process a DOCX
 gdpr-pseudo process interview.docx
+
+# Process an Excel spreadsheet
+gdpr-pseudo process data.xlsx
+
+# Process a CSV file (no extra dependency needed)
+gdpr-pseudo process data.csv
 ```
 
-Output is always plaintext (`.txt`). The default output filename for `report.pdf` would be `report_pseudonymized.txt`. Format preservation (PDF-to-PDF, DOCX-to-DOCX) is planned for v1.2+.
+PDF and DOCX output is always plaintext (`.txt`). Excel and CSV inputs preserve their original format (.xlsx/.csv). Format preservation (PDF-to-PDF, DOCX-to-DOCX) is planned for a future release.
+
+**Excel notes:** Formulas are read as cached values (not preserved in output). Each cell is processed independently through the NER pipeline. Legacy `.xls` format is not supported.
 
 ### Can I use this for non-French documents?
 

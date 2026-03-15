@@ -187,8 +187,8 @@ poetry run gdpr-pseudo process doc2.txt --db shared.db
 **Solutions :**
 1. Assurez-vous que le texte est en français avec le bon encodage (UTF-8 avec accents : é, è, à)
 2. Vérifiez que le document contient des noms, des lieux ou des organisations
-3. Vérifiez que le fichier est au format `.txt`, `.md`, `.pdf` ou `.docx`
-4. Pour les PDF/DOCX, assurez-vous que les extras optionnels sont installés : `pip install gdpr-pseudonymizer[formats]`
+3. Vérifiez que le fichier est dans un format pris en charge (`.txt`, `.md`, `.pdf`, `.docx`, `.xlsx`, `.csv`)
+4. Pour les PDF/DOCX, assurez-vous que les extras optionnels sont installés : `pip install gdpr-pseudonymizer[formats]`. Pour Excel, installez `pip install gdpr-pseudonymizer[excel]`.
 5. Testez avec un exemple connu et valide :
    ```bash
    echo "Marie Dubois travaille a Paris pour Acme SA." > test.txt

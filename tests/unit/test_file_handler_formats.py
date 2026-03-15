@@ -502,8 +502,8 @@ class TestProcessCommandFormats:
 
     def test_unsupported_extension_rejected(self, tmp_path: Path) -> None:
         """Test that unsupported extensions are still rejected."""
-        csv_file = tmp_path / "data.csv"
-        csv_file.write_text("a,b,c")
+        json_file = tmp_path / "data.json"
+        json_file.write_text("{}")
 
         import typer
         from typer.testing import CliRunner
@@ -519,8 +519,8 @@ class TestProcessCommandFormats:
         test_app.command(name="process")(process_command)
         cli_runner = CliRunner()
 
-        result = cli_runner.invoke(test_app, ["process", str(csv_file)])
-        # Typer validates exists=True, so for an existing csv it should reach our check
+        result = cli_runner.invoke(test_app, ["process", str(json_file)])
+        # Typer validates exists=True, so for an existing json it should reach our check
         assert result.exit_code == 1
 
 
@@ -551,11 +551,12 @@ class TestBatchCommandFormats:
         (tmp_path / "b.md").write_text("md")
         _create_pdf(tmp_path / "c.pdf", ["pdf"])
         _create_docx(tmp_path / "d.docx", paragraphs=["docx"])
-        (tmp_path / "e.csv").write_text("csv")  # Unsupported
+        (tmp_path / "e.csv").write_text("csv")  # Now supported (Story 7.4)
+        (tmp_path / "f.json").write_text("{}")  # Unsupported
 
         files = collect_files(tmp_path)
         names = {f.name for f in files}
-        assert names == {"a.txt", "b.md", "c.pdf", "d.docx"}
+        assert names == {"a.txt", "b.md", "c.pdf", "d.docx", "e.csv"}
 
     def test_dependency_not_installed_error_message(self) -> None:
         """Test error message when PDF dependency is missing."""

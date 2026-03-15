@@ -57,10 +57,12 @@ Formats pris en charge :
 - **Markdown** (`.md`)
 - **PDF** (`.pdf`) -- nécessite une dépendance optionnelle
 - **Microsoft Word** (`.docx`) -- nécessite une dépendance optionnelle
+- **Excel** (`.xlsx`) -- nécessite une dépendance optionnelle (`openpyxl`)
+- **CSV** (`.csv`) -- aucune dépendance supplémentaire
 
 Les formats HTML et autres ne sont pas encore pris en charge. Convertissez ces fichiers en texte brut avant le traitement.
 
-### Comment traiter des fichiers PDF ou DOCX ?
+### Comment traiter des fichiers PDF, DOCX, Excel ou CSV ?
 
 Installez les extras de format optionnels et traitez comme d'habitude :
 
@@ -68,14 +70,25 @@ Installez les extras de format optionnels et traitez comme d'habitude :
 # Installer le support PDF/DOCX
 pip install gdpr-pseudonymizer[formats]
 
+# Installer le support Excel
+pip install gdpr-pseudonymizer[excel]
+
 # Traiter un PDF
 gdpr-pseudo process rapport.pdf
 
 # Traiter un DOCX
 gdpr-pseudo process entretien.docx
+
+# Traiter un fichier Excel
+gdpr-pseudo process donnees.xlsx
+
+# Traiter un fichier CSV (aucune dépendance supplémentaire)
+gdpr-pseudo process donnees.csv
 ```
 
-La sortie est toujours en texte brut (`.txt`). Le nom de fichier de sortie par défaut pour `rapport.pdf` serait `rapport_pseudonymized.txt`. La préservation du format (PDF vers PDF, DOCX vers DOCX) est prévue pour la v1.2+.
+Les fichiers PDF et DOCX produisent toujours une sortie en texte brut (`.txt`). Les fichiers Excel et CSV conservent leur format d'origine (.xlsx/.csv). La préservation du format (PDF vers PDF, DOCX vers DOCX) est prévue pour une version future.
+
+**Remarques sur Excel :** Les formules sont lues comme valeurs calculées en cache (non conservées en sortie). Chaque cellule est traitée indépendamment par le pipeline NER. Le format ancien `.xls` n'est pas pris en charge.
 
 ### Puis-je utiliser cet outil pour des documents non français ?
 

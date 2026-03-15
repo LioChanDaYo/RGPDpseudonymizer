@@ -99,6 +99,6 @@ GDPR Pseudonymizer supports compliance with Articles 4(5), 25, 30, 32, and 89 of
 
 **Current release:** v2.0.0 (March 2026) — Desktop GUI, Standalone Executables & WCAG AA Accessibility
 
-**Supported:** Python 3.10-3.12 | Windows, macOS, Linux | .txt, .md, .pdf, .docx formats | French language | Desktop GUI: `pip install gdpr-pseudonymizer[gui]`
+**Supported:** Python 3.10-3.12 | Windows, macOS, Linux | .txt, .md, .pdf, .docx, .xlsx, .csv formats | French language | Desktop GUI: `pip install gdpr-pseudonymizer[gui]`
 
 See the [FAQ](faq.md) for the product roadmap.

@@ -41,13 +41,15 @@ readchar = "^4.2.0"
 pdfplumber = {version = "^0.11.0", optional = true}
 python-docx = {version = "^1.1.0", optional = true}
 PySide6-Essentials = {version = "~6.7.0", optional = true, python = ">=3.10,<3.13"}
+openpyxl = {version = "^3.1.0", optional = true}
 
 [tool.poetry.extras]
 pdf = ["pdfplumber"]
 docx = ["python-docx"]
-formats = ["pdfplumber", "python-docx"]
+excel = ["openpyxl"]
+formats = ["pdfplumber", "python-docx", "openpyxl"]
 gui = ["PySide6-Essentials"]
-all = ["PySide6-Essentials", "pdfplumber", "python-docx"]
+all = ["PySide6-Essentials", "pdfplumber", "python-docx", "openpyxl"]
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.0"
@@ -222,6 +224,8 @@ module = [
     "pdfplumber.*",
     "docx",
     "docx.*",
+    "openpyxl",
+    "openpyxl.*",
     "PySide6",
     "PySide6.*",
 ]

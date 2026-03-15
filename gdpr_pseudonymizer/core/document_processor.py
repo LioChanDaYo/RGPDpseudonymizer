@@ -32,8 +32,17 @@ from gdpr_pseudonymizer.pseudonym.assignment_engine import (
 )
 from gdpr_pseudonymizer.pseudonym.gender_detector import GenderDetector
 from gdpr_pseudonymizer.pseudonym.library_manager import LibraryBasedPseudonymManager
-from gdpr_pseudonymizer.utils.file_handler import read_file, write_file
+from gdpr_pseudonymizer.utils.file_handler import (
+    get_file_extension,
+    read_file,
+    write_file,
+)
 from gdpr_pseudonymizer.utils.logger import get_logger
+from gdpr_pseudonymizer.utils.tabular_reader import (
+    TabularDocument,
+    read_csv_structured,
+    read_excel_structured,
+)
 from gdpr_pseudonymizer.validation.workflow import run_validation_workflow
 
 # Configure logging (NO sensitive data)
@@ -834,6 +843,13 @@ class DocumentProcessor:
         entity_type_filter: set[str] | None = None,
     ) -> ProcessingResult:
         """Process single document with complete pseudonymization workflow."""
+        # Route tabular files through the cell-aware pipeline
+        ext = get_file_extension(input_path)
+        if ext in (".xlsx", ".csv"):
+            return self._process_document_tabular(
+                input_path, output_path, skip_validation, entity_type_filter
+            )
+
         start_time = time.time()
         try:
             document_text = read_file(input_path)
@@ -873,6 +889,210 @@ class DocumentProcessor:
                 )
         except Exception as e:
             return self._handle_processing_error(e, input_path, output_path, start_time)
+
+    def _process_document_tabular(
+        self,
+        input_path: str,
+        output_path: str,
+        skip_validation: bool = False,
+        entity_type_filter: set[str] | None = None,
+    ) -> ProcessingResult:
+        """Process tabular document (Excel/CSV) through cell-aware pipeline."""
+        start_time = time.time()
+        try:
+            tabular_doc, detected_entities = self.detect_entities_tabular(
+                input_path, entity_type_filter
+            )
+
+            # For tabular files, build a flat text representation for validation display
+            document_text = "\n".join(cell.value for cell in tabular_doc.cells)
+
+            with open_database(self.db_path, self.passphrase) as db_session:
+                ctx = self._init_processing_context(db_session)
+                pseudonym_assigner = self._build_pseudonym_assigner(ctx)
+                validated_entities = self._run_validation(
+                    ctx=ctx,
+                    detected_entities=detected_entities,
+                    document_text=document_text,
+                    input_path=input_path,
+                    skip_validation=skip_validation,
+                    pseudonym_assigner=pseudonym_assigner,
+                )
+                self._reset_pseudonym_state(ctx)
+                resolve_result = self._resolve_pseudonyms(ctx, validated_entities)
+
+                self._apply_tabular_replacements(
+                    tabular_doc,
+                    validated_entities,
+                    resolve_result.replacements,
+                    output_path,
+                )
+
+                processing_time = time.time() - start_time
+                self._log_success_operation(
+                    ctx, input_path, validated_entities, processing_time
+                )
+                return ProcessingResult(
+                    success=True,
+                    input_file=input_path,
+                    output_file=output_path,
+                    entities_detected=len(validated_entities),
+                    entities_new=resolve_result.entities_new,
+                    entities_reused=resolve_result.entities_reused,
+                    processing_time_seconds=processing_time,
+                    entity_type_counts=resolve_result.entity_type_counts,
+                )
+        except Exception as e:
+            return self._handle_processing_error(e, input_path, output_path, start_time)
+
+    def detect_entities_tabular(
+        self,
+        input_path: str,
+        entity_type_filter: set[str] | None = None,
+    ) -> tuple[TabularDocument, list[DetectedEntity]]:
+        """Detect entities in a tabular file (Excel/CSV), preserving cell references.
+
+        Each cell is processed as an independent text unit through the NER pipeline.
+        Resulting entities have `context_label` set to the cell reference
+        (e.g., "Sheet1!B3") and `start_pos`/`end_pos` relative to cell text.
+
+        Args:
+            input_path: Path to .xlsx or .csv file
+            entity_type_filter: Optional set of entity types to keep
+
+        Returns:
+            Tuple of (TabularDocument, list of detected entities with cell refs)
+
+        Raises:
+            FileProcessingError: If file cannot be read
+        """
+        ext = get_file_extension(input_path)
+        if ext == ".xlsx":
+            tabular_doc = read_excel_structured(input_path)
+        else:
+            tabular_doc = read_csv_structured(input_path)
+
+        all_entities: list[DetectedEntity] = []
+        detector = self._get_detector()
+
+        for cell in tabular_doc.cells:
+            if not cell.value.strip():
+                continue
+            cell_entities = detector.detect_entities(cell.value)
+            for entity in cell_entities:
+                entity.context_label = cell.cell_ref
+                all_entities.append(entity)
+
+        if entity_type_filter:
+            all_entities = [
+                e for e in all_entities if e.entity_type in entity_type_filter
+            ]
+
+        logger.info(
+            "tabular_entities_detected",
+            count=len(all_entities),
+            cells_processed=len(tabular_doc.cells),
+            source_format=tabular_doc.source_format,
+        )
+
+        return tabular_doc, all_entities
+
+    def finalize_document_tabular(
+        self,
+        tabular_doc: TabularDocument,
+        validated_entities: list[DetectedEntity],
+        output_path: str,
+        input_path: str = "",
+    ) -> ProcessingResult:
+        """Apply pseudonym replacements to tabular document and write output.
+
+        Matches entities to cells via `context_label`, applies text replacements
+        within each cell, then writes the result in the appropriate format.
+
+        Args:
+            tabular_doc: Original tabular document with cell data
+            validated_entities: Entities approved by user
+            output_path: Path to write pseudonymized output
+            input_path: Original input file path (for result metadata)
+
+        Returns:
+            ProcessingResult with success/failure details
+        """
+        start_time = time.time()
+        try:
+            with open_database(self.db_path, self.passphrase) as db_session:
+                ctx = self._init_processing_context(db_session)
+                self._reset_pseudonym_state(ctx)
+                resolve_result = self._resolve_pseudonyms(ctx, validated_entities)
+
+                self._apply_tabular_replacements(
+                    tabular_doc,
+                    validated_entities,
+                    resolve_result.replacements,
+                    output_path,
+                )
+
+                processing_time = time.time() - start_time
+                return ProcessingResult(
+                    success=True,
+                    input_file=input_path,
+                    output_file=output_path,
+                    entities_detected=len(validated_entities),
+                    entities_new=resolve_result.entities_new,
+                    entities_reused=resolve_result.entities_reused,
+                    processing_time_seconds=processing_time,
+                    entity_type_counts=resolve_result.entity_type_counts,
+                )
+        except Exception as e:
+            return self._handle_processing_error(e, input_path, output_path, start_time)
+
+    def _apply_tabular_replacements(
+        self,
+        tabular_doc: TabularDocument,
+        validated_entities: list[DetectedEntity],
+        replacements: list[tuple[int, int, str]],
+        output_path: str,
+    ) -> None:
+        """Apply pseudonym replacements to tabular cells and write output.
+
+        Groups replacements by cell_ref, applies them per cell,
+        then writes the result in the format matching the output extension.
+
+        Args:
+            tabular_doc: Document with cell data (modified in place)
+            validated_entities: Entities with context_label for cell matching
+            replacements: List of (start, end, pseudonym) tuples
+            output_path: Output file path (extension determines format)
+        """
+        from gdpr_pseudonymizer.utils.tabular_writer import (
+            write_csv,
+            write_excel,
+            write_tabular_as_text,
+        )
+
+        # Group replacements by cell_ref
+        cell_replacements: dict[str, list[tuple[int, int, str]]] = {}
+        for entity, (start, end, pseudo) in zip(validated_entities, replacements):
+            ref = entity.context_label or ""
+            if ref not in cell_replacements:
+                cell_replacements[ref] = []
+            cell_replacements[ref].append((start, end, pseudo))
+
+        # Apply replacements within each cell
+        for cell in tabular_doc.cells:
+            if cell.cell_ref in cell_replacements:
+                cell.value = self._apply_replacements(
+                    cell.value, cell_replacements[cell.cell_ref]
+                )
+
+        # Write output based on extension
+        out_ext = get_file_extension(output_path)
+        if out_ext == ".xlsx":
+            write_excel(tabular_doc, output_path)
+        elif out_ext == ".csv":
+            write_csv(tabular_doc, output_path)
+        else:
+            write_tabular_as_text(tabular_doc, output_path)
 
     def _get_model_version(self) -> str:
         """Get NLP model version string.

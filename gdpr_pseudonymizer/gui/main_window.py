@@ -383,7 +383,7 @@ class MainWindow(QMainWindow):
             self,
             self.tr("Ouvrir un document"),
             "",
-            self.tr("Documents (*.txt *.md *.pdf *.docx);;Tous (*)"),
+            self.tr("Documents (*.txt *.md *.pdf *.docx *.xlsx *.csv);;Tous (*)"),
         )
         if filepath:
             self._notify_file_selected(filepath)

@@ -27,7 +27,7 @@ Au premier lancement, l'application détecte automatiquement la langue de votre 
 
 L'écran d'accueil est votre point de départ :
 
-- **Zone de glisser-déposer** — Déposez des fichiers `.txt`, `.md`, `.pdf` ou `.docx` pour démarrer le traitement
+- **Zone de glisser-déposer** — Déposez des fichiers `.txt`, `.md`, `.pdf`, `.docx`, `.xlsx` ou `.csv` pour démarrer le traitement
 - **Liste des fichiers récents** — Accès rapide aux documents déjà traités
 - **Carte traitement par lot** — Cliquez pour accéder au traitement par lot
 - **Barre de menus** — Accédez à toutes les fonctionnalités via Fichier, Affichage, Outils et Aide
@@ -179,7 +179,7 @@ Lorsque toutes les entités ont été vérifiées (le compteur affiche « Toutes
 
 1. Depuis l'écran d'accueil, cliquez sur la carte traitement par lot, ou utilisez **Fichier > Ouvrir un dossier** (Ctrl+Maj+O)
 2. Choisissez un dossier ou sélectionnez plusieurs fichiers
-3. L'application découvre tous les fichiers supportés (`.txt`, `.md`, `.pdf`, `.docx`), en excluant les fichiers déjà pseudonymisés (`*_pseudonymized*`)
+3. L'application découvre tous les fichiers supportés (`.txt`, `.md`, `.pdf`, `.docx`, `.xlsx`, `.csv`), en excluant les fichiers déjà pseudonymisés (`*_pseudonymized*`)
 4. Définissez le répertoire de sortie (par défaut : `{entrée}/_pseudonymized/`)
 5. Activez optionnellement **« Valider les entités par document »** pour vérifier les entités document par document
 

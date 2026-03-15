@@ -1,11 +1,13 @@
 """File handling utilities with cross-platform path support.
 
 This module provides safe file I/O operations using pathlib
-for cross-platform compatibility. Supports .txt, .md, .pdf, and .docx formats.
+for cross-platform compatibility. Supports .txt, .md, .pdf, .docx, .xlsx, and .csv formats.
 """
 
 from __future__ import annotations
 
+import csv
+import io
 from pathlib import Path
 
 from gdpr_pseudonymizer.exceptions import FileProcessingError
@@ -27,6 +29,13 @@ try:
     HAS_PYTHON_DOCX = True
 except ImportError:
     HAS_PYTHON_DOCX = False
+
+try:
+    import openpyxl  # type: ignore[import-untyped]
+
+    HAS_OPENPYXL = True
+except ImportError:
+    HAS_OPENPYXL = False
 
 # Minimum characters per page to consider a PDF as having text content
 _SCANNED_PDF_CHARS_PER_PAGE = 50
@@ -62,6 +71,12 @@ def read_file(file_path: str) -> str:
 
     if ext == ".docx":
         return read_docx(file_path)
+
+    if ext == ".xlsx":
+        return read_excel(file_path)
+
+    if ext == ".csv":
+        return read_csv(file_path)
 
     # Default: plaintext (.txt, .md, or any other text file)
     try:
@@ -194,6 +209,135 @@ def read_docx(file_path: str) -> str:
 
     except Exception as e:
         raise FileProcessingError(f"Cannot read DOCX file {file_path}: {e}") from e
+
+
+def read_excel(file_path: str) -> str:
+    """Extract text content from an Excel (.xlsx) file.
+
+    Args:
+        file_path: Path to Excel file
+
+    Returns:
+        Extracted text with cells tab-separated, rows newline-separated,
+        sheets double-newline-separated
+
+    Raises:
+        FileProcessingError: If openpyxl not installed, file corrupt,
+            password-protected, or binary .xls format
+    """
+    if not HAS_OPENPYXL:
+        raise FileProcessingError(
+            "Excel support requires 'openpyxl'. "
+            "Install with: pip install gdpr-pseudonymizer[excel]"
+        )
+
+    path = Path(file_path)
+
+    # Check for unsupported binary .xls format
+    if path.suffix.lower() == ".xls":
+        raise FileProcessingError(
+            "Binary .xls format is not supported. Please convert to .xlsx."
+        )
+
+    try:
+        wb = openpyxl.load_workbook(str(path), data_only=True)
+    except Exception as e:
+        error_msg = str(e).lower()
+        if "password" in error_msg or "encrypted" in error_msg:
+            raise FileProcessingError(
+                f"Excel file is password-protected: {file_path}. "
+                "Please provide an unprotected file."
+            ) from e
+        if "invalid" in error_msg or "not a zip" in error_msg or "corrupt" in error_msg:
+            raise FileProcessingError(
+                f"Cannot read Excel file {file_path}: "
+                "File appears to be corrupt or not a valid .xlsx file. "
+                "Binary .xls format is not supported. Please convert to .xlsx."
+            ) from e
+        raise FileProcessingError(f"Cannot read Excel file {file_path}: {e}") from e
+
+    try:
+        # Count non-empty cells for large-file warning
+        non_empty_count = 0
+        sheets_text: list[str] = []
+
+        for sheet in wb.worksheets:
+            rows_text: list[str] = []
+            for row in sheet.iter_rows():
+                cells: list[str] = []
+                for cell in row:
+                    if cell.value is not None:
+                        cells.append(str(cell.value))
+                        non_empty_count += 1
+                if cells:
+                    rows_text.append("\t".join(cells))
+            if rows_text:
+                sheets_text.append("\n".join(rows_text))
+
+        if non_empty_count > 100_000:
+            logger.warning(
+                "large_excel_file",
+                file=file_path,
+                non_empty_cells=non_empty_count,
+                message=(
+                    "This Excel file contains more than 100,000 non-empty cells. "
+                    "Processing may consume significant memory."
+                ),
+            )
+
+        return "\n\n".join(sheets_text)
+    finally:
+        wb.close()
+
+
+def read_csv(file_path: str) -> str:
+    """Extract text content from a CSV file.
+
+    Auto-detects encoding (UTF-8, then Latin-1 fallback) and delimiter.
+
+    Args:
+        file_path: Path to CSV file
+
+    Returns:
+        Extracted text with cells tab-separated, rows newline-separated
+
+    Raises:
+        FileProcessingError: If file cannot be read
+    """
+    path = Path(file_path)
+
+    # Auto-detect encoding: try UTF-8 first, fall back to latin-1
+    content: str | None = None
+    try:
+        raw_bytes = path.read_bytes()
+    except PermissionError as e:
+        raise FileProcessingError(f"Permission denied: {file_path}") from e
+    except OSError as e:
+        raise FileProcessingError(f"Cannot read file {file_path}: {e}") from e
+
+    try:
+        content = raw_bytes.decode("utf-8")
+    except UnicodeDecodeError:
+        content = raw_bytes.decode("latin-1")
+
+    if not content.strip():
+        return ""
+
+    # Auto-detect delimiter using csv.Sniffer on first 8KB
+    sample = content[:8192]
+    try:
+        dialect = csv.Sniffer().sniff(sample)
+        delimiter = dialect.delimiter
+    except csv.Error:
+        delimiter = ","
+
+    reader = csv.reader(io.StringIO(content), delimiter=delimiter)
+    rows_text: list[str] = []
+    for row in reader:
+        if any(cell.strip() for cell in row):
+            rows_text.append("\t".join(row))
+
+    return "\n".join(rows_text)
 
 
 def write_file(file_path: str, content: str) -> None:

@@ -151,8 +151,8 @@
     </message>
     <message>
         <location filename="../screens/batch.py" line="386"/>
-        <source>Documents (*.txt *.md *.pdf *.docx);;Tous (*)</source>
-        <translation>Documents (*.txt *.md *.pdf *.docx);;All (*)</translation>
+        <source>Documents (*.txt *.md *.pdf *.docx *.xlsx *.csv);;Tous (*)</source>
+        <translation>Documents (*.txt *.md *.pdf *.docx *.xlsx *.csv);;All (*)</translation>
     </message>
     <message>
         <location filename="../screens/batch.py" line="397"/>
@@ -527,8 +527,8 @@ or click to open</translation>
     </message>
     <message>
         <location filename="../widgets/drop_zone.py" line="157"/>
-        <source>Documents (*.txt *.md *.pdf *.docx);;Tous (*)</source>
-        <translation>Documents (*.txt *.md *.pdf *.docx);;All (*)</translation>
+        <source>Documents (*.txt *.md *.pdf *.docx *.xlsx *.csv);;Tous (*)</source>
+        <translation>Documents (*.txt *.md *.pdf *.docx *.xlsx *.csv);;All (*)</translation>
     </message>
 </context>
 <context>
@@ -854,8 +854,8 @@ or click to open</translation>
     </message>
     <message>
         <location filename="../main_window.py" line="338"/>
-        <source>Documents (*.txt *.md *.pdf *.docx);;Tous (*)</source>
-        <translation>Documents (*.txt *.md *.pdf *.docx);;All (*)</translation>
+        <source>Documents (*.txt *.md *.pdf *.docx *.xlsx *.csv);;Tous (*)</source>
+        <translation>Documents (*.txt *.md *.pdf *.docx *.xlsx *.csv);;All (*)</translation>
     </message>
     <message>
         <location filename="../main_window.py" line="346"/>

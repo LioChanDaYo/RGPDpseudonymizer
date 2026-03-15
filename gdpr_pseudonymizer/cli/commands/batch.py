@@ -50,7 +50,7 @@ logger = get_logger(__name__)
 console = Console()
 
 # Supported file extensions
-SUPPORTED_EXTENSIONS = [".txt", ".md", ".pdf", ".docx"]
+SUPPORTED_EXTENSIONS = [".txt", ".md", ".pdf", ".docx", ".xlsx", ".csv"]
 
 
 @dataclass
@@ -374,7 +374,7 @@ def batch_command(
 ) -> None:
     """Process multiple documents with pseudonymization.
 
-    Processes all .txt, .md, .pdf, and .docx files in the specified directory or file list.
+    Processes all .txt, .md, .pdf, .docx, .xlsx, and .csv files in the specified directory or file list.
 
     With --workers 1 (sequential mode): Files are processed one at a time with
     interactive validation prompts for each entity detected.

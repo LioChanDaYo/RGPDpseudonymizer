@@ -303,6 +303,7 @@ class GUIValidationState(QObject):
                         gender=review.entity.gender,
                         is_ambiguous=review.entity.is_ambiguous,
                         source=review.entity.source,
+                        context_label=review.entity.context_label,
                     )
                 )
             else:

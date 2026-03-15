@@ -142,11 +142,11 @@
 
 **Epic 7 DoD:**
 - [x] Validate-once-per-entity operational (FE-020)
-- [ ] All keyboard shortcuts documented in Help menu (FE-018)
+- [x] All keyboard shortcuts documented in Help menu (FE-018)
 - [x] Hide-confirmed toggle functional (FE-019)
-- [ ] Last-used database persisted across sessions (FE-017)
-- [ ] Neutral pseudonym theme (PER-001, LOC-001, ORG-001) functional (FE-016)
-- [ ] Excel (.xlsx) and CSV format support operational (FE-015)
+- [x] Last-used database persisted across sessions (FE-017)
+- [x] Neutral pseudonym theme (PER-001, LOC-001, ORG-001) functional (FE-016)
+- [x] Excel (.xlsx) and CSV format support operational (FE-015)
 - [ ] NER regex patterns expanded, accuracy improved (FE-011)
 - [ ] Ground-truth corpus cleaned (FE-012)
 - [ ] v2.1.0 published on PyPI and GitHub Releases

@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 logger = get_logger(__name__)
 
 # Same as CLI
-SUPPORTED_EXTENSIONS = [".txt", ".md", ".pdf", ".docx"]
+SUPPORTED_EXTENSIONS = [".txt", ".md", ".pdf", ".docx", ".xlsx", ".csv"]
 
 
 @dataclass

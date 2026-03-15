@@ -151,7 +151,7 @@
     </message>
     <message>
         <location filename="../screens/batch.py" line="386"/>
-        <source>Documents (*.txt *.md *.pdf *.docx);;Tous (*)</source>
+        <source>Documents (*.txt *.md *.pdf *.docx *.xlsx *.csv);;Tous (*)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -524,7 +524,7 @@ ou cliquez pour ouvrir</source>
     </message>
     <message>
         <location filename="../widgets/drop_zone.py" line="157"/>
-        <source>Documents (*.txt *.md *.pdf *.docx);;Tous (*)</source>
+        <source>Documents (*.txt *.md *.pdf *.docx *.xlsx *.csv);;Tous (*)</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -851,7 +851,7 @@ ou cliquez pour ouvrir</source>
     </message>
     <message>
         <location filename="../main_window.py" line="338"/>
-        <source>Documents (*.txt *.md *.pdf *.docx);;Tous (*)</source>
+        <source>Documents (*.txt *.md *.pdf *.docx *.xlsx *.csv);;Tous (*)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

@@ -127,6 +127,12 @@ pip install gdpr-pseudonymizer
 
 # CLI + interface graphique
 pip install gdpr-pseudonymizer[gui]
+
+# CLI + support Excel/CSV
+pip install gdpr-pseudonymizer[excel]
+
+# Tous les formats optionnels (PDF, DOCX, Excel)
+pip install gdpr-pseudonymizer[formats]
 ```
 
 ### Ce que la v2.0 offre
@@ -139,6 +145,7 @@ pip install gdpr-pseudonymizer[gui]
 - ✅ **Relecture humaine obligatoire** — Vous vérifiez toutes les entités (précision finale 100 %)
 - 🔒 **Traitement 100 % local** — Vos données ne quittent jamais votre machine
 - 📄 **Support PDF/DOCX** — Traitement direct des fichiers PDF et DOCX (extras optionnels)
+- 📊 **Support Excel/CSV** — Traitement des fichiers .xlsx et .csv avec pseudonymisation cellule par cellule (extra optionnel : `[excel]`)
 
 **Ce qu'elle ne propose pas :**
 - ❌ Un traitement entièrement automatique sans intervention
@@ -479,7 +486,7 @@ L'interface de validation offre un parcours intuitif piloté au clavier pour pas
   - ✅ Story 6.7.3 : Validation par document en lot — Validation interactive des entités par document en mode lot, navigation Précédent/Suivant, annulation avec affichage des statuts, 21 nouveaux tests
   - ✅ Story 6.8 : Exécutables autonomes et distribution — Builds PyInstaller, installeur NSIS (Windows), DMG (macOS), AppImage (Linux), workflow CI
   - ✅ Story 6.9 : Préparation de la version v2.0 — Bump de version, CHANGELOG, mises à jour de la documentation, coordination de la publication
-- **Total :** 52 stories, 1 670+ tests, 86 %+ de couverture, tous les contrôles qualité au vert
+- **Total :** 53 stories, 1 800+ tests, 86 %+ de couverture, tous les contrôles qualité au vert
 
 ---
 
@@ -544,7 +551,9 @@ Ce projet est distribué sous la [licence MIT](LICENSE).
 - Détection IA : environ 60 % F1 (pas 85 %+)
 - Validation requise pour TOUS les documents (pas facultative)
 - Documents en français uniquement (anglais, espagnol, etc. dans les versions futures)
-- Formats textuels : .txt, .md, .pdf, .docx (PDF/DOCX nécessitent des extras optionnels : `pip install gdpr-pseudonymizer[formats]`)
+- Formats supportés : .txt, .md, .pdf, .docx, .xlsx, .csv (PDF/DOCX/Excel nécessitent des extras optionnels : `pip install gdpr-pseudonymizer[formats]`)
+- Les formules Excel sont lues comme valeurs affichées en cache ; les chaînes de formule ne sont pas préservées dans la sortie pseudonymisée
+- Le format binaire .xls (Excel 97-2003) n'est pas supporté — enregistrez d'abord au format .xlsx
 
 ---
 
@@ -626,7 +635,7 @@ poetry run pytest tests/integration/test_validation_workflow_integration.py -v
 - **Tests de précision :** 22 tests mesurant la précision NER sur un corpus de référence de 25 documents (Story 4.4)
 - **Tests de performance :** 19 tests validant toutes les exigences non fonctionnelles — benchmarks par document (NFR1), benchmarks de détection d'entités, traitement par lot (NFR2), profilage mémoire (NFR4), temps de démarrage (NFR5), stabilité et taux d'erreur (NFR6), tests de charge (Story 4.5)
 - **Couverture actuelle :** 86 %+ sur l'ensemble des modules (100 % pour le module de progression, 91,41 % pour AuditRepository)
-- **Total :** 1 670+ tests
+- **Total :** 1 800+ tests
 - **CI/CD :** Tests exécutés sur Python 3.10-3.12, sous Windows, macOS et Linux
 - **Contrôles qualité :** Tous validés (Black, Ruff, mypy, pytest)
 
@@ -682,11 +691,11 @@ La suite de tests d'intégration couvre :
 | **Utilisation mémoire (NFR4)** | environ 1 Go de pic mesuré par Python | ✅ VALIDÉ (seuil < 8 Go) |
 | **Démarrage CLI (NFR5)** | 0,56 s (help), 6,0 s (démarrage à froid avec modèle) | ✅ VALIDÉ (< 5 s pour le démarrage CLI) |
 | **Taux d'erreur (NFR6)** | environ 0 % d'erreurs inattendues | ✅ VALIDÉ (seuil < 10 %) |
-| **Couverture de test** | 1 670+ tests (dont 393 GUI), 86 %+ de couverture | ✅ Tous les contrôles qualité validés |
+| **Couverture de test** | 1 800+ tests (dont 393 GUI), 86 %+ de couverture | ✅ Tous les contrôles qualité validés |
 | **Contrôles qualité** | Ruff, mypy, pytest | ✅ Tous validés (0 problème) |
 | **Langues GUI/CLI** | Français (défaut), Anglais | 🌐 Changement en temps réel (Story 6.6) |
 | **Langues de documents** | Français | 🇫🇷 v1.0 uniquement |
-| **Formats** | .txt, .md, .pdf, .docx | 📝 PDF/DOCX via extras optionnels |
+| **Formats** | .txt, .md, .pdf, .docx, .xlsx, .csv | 📝 PDF/DOCX/Excel via extras optionnels |
 
 ---
 
@@ -700,4 +709,4 @@ La suite de tests d'intégration couvre :
 
 ---
 
-**Dernière mise à jour :** 2026-03-03 (v2.0.0 — Interface graphique, exécutables autonomes, accessibilité WCAG AA, interface française, 1 670+ tests au total)
+**Dernière mise à jour :** 2026-03-13 (v2.0.0+ — Interface graphique, exécutables autonomes, accessibilité WCAG AA, interface française, support Excel/CSV, 1 800+ tests au total)
