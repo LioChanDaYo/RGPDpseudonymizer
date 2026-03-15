@@ -194,7 +194,7 @@ class TestBatchCommand:
     def test_batch_no_files_found(self, tmp_path: Path) -> None:
         """Test batch command with no supported files."""
         # Create only unsupported file
-        (tmp_path / "file.csv").write_text("content")
+        (tmp_path / "file.json").write_text("content")
 
         result = runner.invoke(app, ["batch", str(tmp_path)])
 

@@ -30,7 +30,7 @@ class TestFileDiscovery:
 
         batch_screen.folder_input.setText(str(tmp_path))
 
-        assert batch_screen.file_table.rowCount() == 2
+        assert batch_screen.file_table.rowCount() == 3
         assert batch_screen.start_button.isEnabled()
 
     def test_excludes_pseudonymized(self, batch_screen, tmp_path):  # type: ignore[no-untyped-def]

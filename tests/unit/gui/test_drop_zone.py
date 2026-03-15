@@ -31,11 +31,11 @@ class TestDropZoneCreation:
 class TestFileValidation:
     """File type validation."""
 
-    @pytest.mark.parametrize("ext", [".txt", ".md", ".pdf", ".docx"])
+    @pytest.mark.parametrize("ext", [".txt", ".md", ".pdf", ".docx", ".xlsx", ".csv"])
     def test_supported_extensions(self, ext: str) -> None:
         assert DropZone.is_supported_file(f"test{ext}")
 
-    @pytest.mark.parametrize("ext", [".exe", ".py", ".jpg", ".csv"])
+    @pytest.mark.parametrize("ext", [".exe", ".py", ".jpg", ".json"])
     def test_unsupported_extensions(self, ext: str) -> None:
         assert not DropZone.is_supported_file(f"test{ext}")
 
@@ -45,7 +45,7 @@ class TestFileValidation:
 
     def test_supported_extensions_set(self) -> None:
         exts = DropZone.supported_extensions()
-        assert exts == {".txt", ".md", ".pdf", ".docx"}
+        assert exts == {".txt", ".md", ".pdf", ".docx", ".xlsx", ".csv"}
 
 
 class TestClickToBrowse:
