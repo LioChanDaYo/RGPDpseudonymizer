@@ -70,6 +70,7 @@ mkdocs-static-i18n = "^1.2"
 fpdf2 = "^2.8.5"
 pytest-qt = "^4.4.0"
 pyinstaller = "^6.0.0"
+pytest-xdist = "^3.8.0"
 
 [tool.poetry.scripts]
 gdpr-pseudo = "gdpr_pseudonymizer.cli.main:cli_main"
