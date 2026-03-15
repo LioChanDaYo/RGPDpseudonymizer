@@ -124,19 +124,21 @@ jobs:
         if: runner.os != 'Windows'
         run: poetry run python -m spacy download fr_core_news_lg
 
+      # pytest-xdist parallelizes across cores; --timeout prevents hangs
+      # (Qt event loops in xdist workers can stall on teardown)
       - name: Run tests with coverage
         if: ${{ matrix.coverage }}
         env:
           OMP_NUM_THREADS: 1
           QT_QPA_PLATFORM: offscreen
-        run: poetry run pytest -m "not slow" -n auto --dist loadscope --cov=gdpr_pseudonymizer --cov-report=xml --cov-report=term --cov-branch -v
+        run: poetry run pytest -m "not slow" -n auto --dist loadscope --timeout=300 --cov=gdpr_pseudonymizer --cov-report=xml --cov-report=term --cov-branch -v
 
       - name: Run tests (Linux/macOS)
         if: ${{ !matrix.coverage && runner.os != 'Windows' }}
         env:
           OMP_NUM_THREADS: 1
           QT_QPA_PLATFORM: offscreen
-        run: poetry run pytest -m "not slow" -n auto --dist loadscope -v
+        run: poetry run pytest -m "not slow" -n auto --dist loadscope --timeout=300 -v
 
       # Windows: skip spaCy-dependent tests due to access violations
       # See: https://github.com/explosion/spaCy/issues/12659
@@ -145,7 +147,7 @@ jobs:
         if: runner.os == 'Windows'
         env:
           QT_QPA_PLATFORM: offscreen
-        run: poetry run pytest -m "not spacy and not slow" -n auto --dist loadscope -v
+        run: poetry run pytest -m "not spacy and not slow" -n auto --dist loadscope --timeout=300 -v
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
