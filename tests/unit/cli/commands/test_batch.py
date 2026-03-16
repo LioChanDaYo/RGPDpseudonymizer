@@ -791,12 +791,10 @@ class TestBatchConfigIntegration:
         project_dir = tmp_path / "project"
         project_dir.mkdir()
         config_file = project_dir / ".gdpr-pseudo.yaml"
-        config_file.write_text(
-            """
+        config_file.write_text("""
 pseudonymization:
   theme: star_wars
-"""
-        )
+""")
 
         # Create test file
         (project_dir / "file.txt").write_text("Test content")
@@ -835,12 +833,10 @@ pseudonymization:
         project_dir = tmp_path / "project"
         project_dir.mkdir()
         config_file = project_dir / ".gdpr-pseudo.yaml"
-        config_file.write_text(
-            """
+        config_file.write_text("""
 batch:
   workers: 2
-"""
-        )
+""")
 
         # Create test file
         (project_dir / "file.txt").write_text("Test content")
@@ -879,12 +875,10 @@ batch:
         project_dir = tmp_path / "project"
         project_dir.mkdir()
         config_file = project_dir / ".gdpr-pseudo.yaml"
-        config_file.write_text(
-            """
+        config_file.write_text("""
 pseudonymization:
   theme: star_wars
-"""
-        )
+""")
 
         # Create test file
         (project_dir / "file.txt").write_text("Test content")
@@ -924,12 +918,10 @@ pseudonymization:
         project_dir = tmp_path / "project"
         project_dir.mkdir()
         config_file = project_dir / ".gdpr-pseudo.yaml"
-        config_file.write_text(
-            """
+        config_file.write_text("""
 batch:
   workers: 2
-"""
-        )
+""")
 
         # Create test file
         (project_dir / "file.txt").write_text("Test content")

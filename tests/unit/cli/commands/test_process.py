@@ -71,12 +71,10 @@ class TestProcessConfigIntegration:
         project_dir = tmp_path / "project"
         project_dir.mkdir()
         config_file = project_dir / ".gdpr-pseudo.yaml"
-        config_file.write_text(
-            """
+        config_file.write_text("""
 pseudonymization:
   theme: star_wars
-"""
-        )
+""")
 
         # Create test file
         input_file = project_dir / "input.txt"
@@ -130,12 +128,10 @@ pseudonymization:
         project_dir = tmp_path / "project"
         project_dir.mkdir()
         config_file = project_dir / ".gdpr-pseudo.yaml"
-        config_file.write_text(
-            """
+        config_file.write_text("""
 pseudonymization:
   model: spacy
-"""
-        )
+""")
 
         # Create test file
         input_file = project_dir / "input.txt"
@@ -189,12 +185,10 @@ pseudonymization:
         project_dir = tmp_path / "project"
         project_dir.mkdir()
         config_file = project_dir / ".gdpr-pseudo.yaml"
-        config_file.write_text(
-            """
+        config_file.write_text("""
 database:
   path: custom_db.db
-"""
-        )
+""")
 
         # Create test file
         input_file = project_dir / "input.txt"
@@ -248,12 +242,10 @@ database:
         project_dir = tmp_path / "project"
         project_dir.mkdir()
         config_file = project_dir / ".gdpr-pseudo.yaml"
-        config_file.write_text(
-            """
+        config_file.write_text("""
 pseudonymization:
   theme: star_wars
-"""
-        )
+""")
 
         # Create test file
         input_file = project_dir / "input.txt"
@@ -308,12 +300,10 @@ pseudonymization:
         project_dir = tmp_path / "project"
         project_dir.mkdir()
         config_file = project_dir / ".gdpr-pseudo.yaml"
-        config_file.write_text(
-            """
+        config_file.write_text("""
 database:
   path: config_db.db
-"""
-        )
+""")
 
         # Create test file
         input_file = project_dir / "input.txt"
