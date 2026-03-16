@@ -65,7 +65,7 @@ def process_command(
         file_okay=True,
         dir_okay=False,
         readable=True,
-        help="Input file path (.txt, .md, .pdf, or .docx)",
+        help="Input file path (.txt, .md, .pdf, .docx, .xlsx, or .csv)",
     ),
     output_file: Optional[Path] = typer.Option(
         None,
@@ -138,7 +138,7 @@ def process_command(
         effective_model = model if model is not None else config.pseudonymization.model
         effective_db_path = db_path if db_path is not None else config.database.path
         # Validate file extension
-        allowed_extensions = [".txt", ".md", ".pdf", ".docx"]
+        allowed_extensions = [".txt", ".md", ".pdf", ".docx", ".xlsx", ".csv"]
         if input_file.suffix.lower() not in allowed_extensions:
             format_error_message(
                 "Invalid File Format",
@@ -150,6 +150,7 @@ def process_command(
         # Generate default output filename if not provided
         if output_file is None:
             # PDF/DOCX produce plaintext output, so default to .txt
+            # Excel/CSV preserve their own format
             output_suffix = input_file.suffix
             if input_file.suffix.lower() in [".pdf", ".docx"]:
                 output_suffix = ".txt"

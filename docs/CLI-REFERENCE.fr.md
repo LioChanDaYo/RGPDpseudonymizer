@@ -100,7 +100,7 @@ gdpr-pseudo process FICHIER_ENTREE [OPTIONS]
 
 | Argument | Obligatoire | Description |
 |----------|-------------|-------------|
-| `FICHIER_ENTREE` | Oui | Chemin du fichier à traiter (.txt, .md, .pdf ou .docx) |
+| `FICHIER_ENTREE` | Oui | Chemin du fichier à traiter (.txt, .md, .pdf, .docx, .xlsx ou .csv) |
 
 **Options :**
 
@@ -137,10 +137,13 @@ gdpr-pseudo process report.pdf
 gdpr-pseudo process interview.docx -o interview_pseudonymized.txt
 ```
 
-**Remarques sur les formats PDF/DOCX :**
+**Remarques sur les formats :**
 - La prise en charge des PDF et DOCX nécessite des dépendances optionnelles : `pip install gdpr-pseudonymizer[formats]`.
-- Pour les fichiers PDF/DOCX, la sortie est toujours en texte brut (`.txt`). La conservation du format d'origine est prévue pour la v1.2+.
+- La prise en charge d'Excel (.xlsx) nécessite `openpyxl` : `pip install gdpr-pseudonymizer[excel]`.
+- Les fichiers CSV sont pris en charge nativement (aucune dépendance supplémentaire).
+- Pour les fichiers PDF/DOCX, la sortie est toujours en texte brut (`.txt`). Les fichiers Excel et CSV conservent leur format d'origine (.xlsx/.csv).
 - Les PDF numérisés (à base d'images) déclenchent un avertissement si peu de texte est extrait. L'OCR n'est pas pris en charge.
+- Les formules Excel sont lues comme valeurs calculées en cache ; les formules ne sont pas conservées en sortie. Le format ancien `.xls` n'est pas pris en charge.
 
 ---
 
@@ -204,7 +207,7 @@ gdpr-pseudo batch ./documents/ --entity-types PERSON,ORG --workers 4
 gdpr-pseudo batch ./documents/ --recursive
 ```
 
-**Formats pris en charge :** `.txt`, `.md`, `.pdf`, `.docx`. Les formats PDF et DOCX nécessitent les dépendances optionnelles (`pip install gdpr-pseudonymizer[formats]`). Les fichiers de sortie issus de PDF/DOCX portent l'extension `.txt`.
+**Formats pris en charge :** `.txt`, `.md`, `.pdf`, `.docx`, `.xlsx`, `.csv`. Les formats PDF et DOCX nécessitent les dépendances optionnelles (`pip install gdpr-pseudonymizer[formats]`). Excel nécessite `pip install gdpr-pseudonymizer[excel]`. Les fichiers de sortie issus de PDF/DOCX portent l'extension `.txt` ; les fichiers Excel et CSV conservent leur format d'origine.
 
 ---
 

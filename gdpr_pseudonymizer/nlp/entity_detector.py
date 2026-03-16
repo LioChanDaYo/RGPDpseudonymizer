@@ -35,6 +35,7 @@ class DetectedEntity:
     gender: str | None = None
     is_ambiguous: bool = False
     source: str = "spacy"
+    context_label: str | None = None
 
 
 class EntityDetector(ABC):

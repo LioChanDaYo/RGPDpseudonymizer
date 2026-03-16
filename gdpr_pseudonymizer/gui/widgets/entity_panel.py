@@ -273,8 +273,11 @@ class EntityPanel(QWidget):
             pseudonym = self._validation_state.get_pseudonym(entity_id)
             is_known = self._validation_state.is_entity_known(entity_id)
             known_badge = "  " + self.tr("d\u00e9j\u00e0 connu") if is_known else ""
+            context_prefix = ""
+            if review.entity.context_label:
+                context_prefix = f"[{review.entity.context_label}] "
             text = (
-                f"{status_icon} {review.entity.text}{known_badge}\n"
+                f"{status_icon} {context_prefix}{review.entity.text}{known_badge}\n"
                 f"      \u2192 {pseudonym}"
             )
             item.setText(text)
@@ -338,8 +341,13 @@ class EntityPanel(QWidget):
         )
         known_badge = "  " + self.tr("d\u00e9j\u00e0 connu") if is_known else ""
 
+        # Show cell reference context for tabular files
+        context_prefix = ""
+        if review.entity.context_label:
+            context_prefix = f"[{review.entity.context_label}] "
+
         text = (
-            f"{status_icon} {review.entity.text}{known_badge}\n"
+            f"{status_icon} {context_prefix}{review.entity.text}{known_badge}\n"
             f"      \u2192 {pseudonym}"
         )
 

@@ -128,6 +128,12 @@ pip install gdpr-pseudonymizer
 
 # CLI + GUI
 pip install gdpr-pseudonymizer[gui]
+
+# CLI + Excel/CSV support
+pip install gdpr-pseudonymizer[excel]
+
+# All optional formats (PDF, DOCX, Excel)
+pip install gdpr-pseudonymizer[formats]
 ```
 
 ### What v2.0 Delivers
@@ -140,6 +146,7 @@ pip install gdpr-pseudonymizer[gui]
 - ✅ **Mandatory human verification** — You review and confirm all entities (ensures 100% accuracy)
 - 🔒 **100% local processing** — Your data never leaves your machine
 - 📄 **PDF/DOCX support** — Process PDF and DOCX files directly (optional extras)
+- 📊 **Excel/CSV support** — Process .xlsx and .csv files with cell-aware pseudonymization (optional extra: `[excel]`)
 
 **What v2.0 does NOT deliver:**
 - ❌ Fully automatic "set and forget" processing
@@ -480,7 +487,7 @@ The validation UI provides an intuitive keyboard-driven interface for reviewing 
   - ✅ Story 6.7.3: Batch Validation Workflow — Per-document entity validation in batch mode, Précédent/Suivant navigation, cancel with proper status display, 21 new tests
   - ✅ Story 6.8: Standalone Executables & Distribution — PyInstaller builds, NSIS installer (Windows), DMG (macOS), AppImage (Linux), CI workflow
   - ✅ Story 6.9: v2.0 Release Preparation — Version bump, CHANGELOG, documentation updates, release coordination
-- **Total:** 52 stories, 1670+ tests, 86%+ coverage, all quality gates green
+- **Total:** 53 stories, 1800+ tests, 86%+ coverage, all quality gates green
 
 ---
 
@@ -545,7 +552,9 @@ This project is licensed under the [MIT License](LICENSE).
 - AI detection: ~60% F1 baseline (not 85%+)
 - Validation required for ALL documents (not optional)
 - French documents only (English, Spanish, etc. in future versions)
-- Text-based formats: .txt, .md, .pdf, .docx (PDF/DOCX require optional extras: `pip install gdpr-pseudonymizer[formats]`)
+- Text-based formats: .txt, .md, .pdf, .docx, .xlsx, .csv (PDF/DOCX/Excel require optional extras: `pip install gdpr-pseudonymizer[formats]`)
+- Excel formulas are read as cached display values; formula strings are not preserved in pseudonymized output
+- Binary .xls format (Excel 97-2003) is not supported — save as .xlsx first
 
 ---
 
@@ -683,11 +692,11 @@ The integration test suite covers:
 | **Memory Usage (NFR4)** | ~1 GB Python-tracked peak | ✅ PASSED (<8GB threshold) |
 | **CLI Startup (NFR5)** | 0.56s (help), 6.0s (cold start w/ model) | ✅ PASSED (<5s for CLI startup) |
 | **Error Rate (NFR6)** | ~0% unexpected errors | ✅ PASSED (<10% threshold) |
-| **Test Coverage** | 1670+ tests (incl. 393 GUI), 86%+ coverage | ✅ All Quality Checks Pass |
+| **Test Coverage** | 1800+ tests (incl. 393 GUI), 86%+ coverage | ✅ All Quality Checks Pass |
 | **Quality Gates** | Ruff, mypy, pytest | ✅ All Pass (0 issues) |
 | **GUI/CLI Languages** | French (default), English | 🌐 Live switching (Story 6.6) |
 | **Supported Document Languages** | French | 🇫🇷 v1.0 only |
-| **Supported Formats** | .txt, .md, .pdf, .docx | 📝 PDF/DOCX via optional extras |
+| **Supported Formats** | .txt, .md, .pdf, .docx, .xlsx, .csv | 📝 PDF/DOCX/Excel via optional extras |
 
 ---
 
@@ -701,4 +710,4 @@ The integration test suite covers:
 
 ---
 
-**Last Updated:** 2026-03-03 (v2.0.0 — Desktop GUI, standalone executables, WCAG AA accessibility, French UI, 1670+ total tests)
+**Last Updated:** 2026-03-13 (v2.0.0+ — Desktop GUI, standalone executables, WCAG AA accessibility, French UI, Excel/CSV support, 1800+ total tests)

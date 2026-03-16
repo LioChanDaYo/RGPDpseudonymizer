@@ -527,7 +527,7 @@ poetry run gdpr-pseudo destroy-table --db project.db --force
 ### Limitations connues
 
 - **Français uniquement** — pas d'autres langues en v1.0
-- **Formats textuels** — `.txt`, `.md`, `.pdf` et `.docx` (PDF/DOCX nécessitent des extras optionnels : `pip install gdpr-pseudonymizer[formats]`)
+- **Formats pris en charge** — `.txt`, `.md`, `.pdf`, `.docx`, `.xlsx`, `.csv` (PDF/DOCX nécessitent `pip install gdpr-pseudonymizer[formats]`, Excel nécessite `pip install gdpr-pseudonymizer[excel]`)
 - **Validation obligatoire** — chaque entité doit être examinée (détection IA ~60 % F1)
 - **Le mot de passe est irrécupérable** — si perdu, les appariements existants ne peuvent pas être déchiffrés
 

@@ -49,6 +49,8 @@ jobs:
         run: poetry run mypy gdpr_pseudonymizer
 
   # ── Tests (reduced matrix: 4 jobs instead of 9) ────────────────────
+  # Excludes @pytest.mark.slow tests (performance, accuracy, stress).
+  # Those run in dedicated workflows: accuracy.yaml and performance.yaml.
   # - Ubuntu 3.11: primary (full coverage + Codecov)
   # - Ubuntu 3.10: oldest supported Python
   # - macOS 3.12:  cross-platform + newest Python
@@ -56,7 +58,7 @@ jobs:
   test:
     needs: lint
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 45
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
@@ -122,19 +124,21 @@ jobs:
         if: runner.os != 'Windows'
         run: poetry run python -m spacy download fr_core_news_lg
 
-      - name: Run tests with coverage and benchmarks
+      # pytest-xdist parallelizes across cores; --timeout prevents hangs
+      # (Qt event loops in xdist workers can stall on teardown)
+      - name: Run tests with coverage
         if: ${{ matrix.coverage }}
         env:
           OMP_NUM_THREADS: 1
           QT_QPA_PLATFORM: offscreen
-        run: poetry run pytest --cov=gdpr_pseudonymizer --cov-report=xml --cov-report=term --cov-branch -v --benchmark-json=benchmark-results.json --benchmark-max-time=60
+        run: poetry run pytest -m "not slow" -n auto --dist loadscope --timeout=300 --cov=gdpr_pseudonymizer --cov-report=xml --cov-report=term --cov-branch -v
 
       - name: Run tests (Linux/macOS)
         if: ${{ !matrix.coverage && runner.os != 'Windows' }}
         env:
           OMP_NUM_THREADS: 1
           QT_QPA_PLATFORM: offscreen
-        run: poetry run pytest -v
+        run: poetry run pytest -m "not slow" -n auto --dist loadscope --timeout=300 -v
 
       # Windows: skip spaCy-dependent tests due to access violations
       # See: https://github.com/explosion/spaCy/issues/12659
@@ -143,7 +147,7 @@ jobs:
         if: runner.os == 'Windows'
         env:
           QT_QPA_PLATFORM: offscreen
-        run: poetry run pytest -m "not spacy" -v
+        run: poetry run pytest -m "not spacy and not slow" -n auto --dist loadscope --timeout=300 -v
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
@@ -161,11 +165,3 @@ jobs:
           name: coverage-ubuntu-py3.11
           path: coverage.xml
           retention-days: 7
-
-      - name: Upload benchmark results
-        uses: actions/upload-artifact@v4
-        if: ${{ matrix.coverage && always() }}
-        with:
-          name: benchmark-results
-          path: benchmark-results.json
-          retention-days: 30

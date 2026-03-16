@@ -402,7 +402,9 @@ class TestConfigInit:
         assert result.exit_code == 0
         output = strip_ansi(result.stdout)
         assert "Created:" in output
-        assert ".gdpr-pseudo.yaml" in output
+        # Rich may line-wrap the path in narrow terminals (e.g. xdist workers),
+        # so check the unwrapped output.
+        assert ".gdpr-pseudo.yaml" in output.replace("\n", "")
 
     def test_init_template_has_security_note(self) -> None:
         """Test that template includes passphrase security warning."""

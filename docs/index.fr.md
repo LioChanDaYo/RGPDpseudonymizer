@@ -96,8 +96,8 @@ GDPR Pseudonymizer contribue à la conformité avec les articles 4(5), 25, 30, 3
 
 ## Statut
 
-**Version publiée :** v1.1.0 (février 2026) | **En développement :** v2.0 Interface graphique (Epic 6)
+**Version publiée :** v2.0.0 (mars 2026) — Interface graphique, exécutables autonomes et accessibilité WCAG AA
 
-**Environnements pris en charge :** Python 3.10-3.12 | Windows, macOS, Linux | Formats .txt, .md, .pdf, .docx | Français | Interface graphique : `pip install gdpr-pseudonymizer[gui]`
+**Environnements pris en charge :** Python 3.10-3.12 | Windows, macOS, Linux | Formats .txt, .md, .pdf, .docx, .xlsx, .csv | Français | Interface graphique : `pip install gdpr-pseudonymizer[gui]`
 
 Consultez la [FAQ](faq.fr.md) pour la feuille de route du produit.

@@ -17,6 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Settings screen shortcuts sync** (Story 7.2, FE-018) — Settings screen shortcuts section is now driven by the same `get_all_shortcuts()` registry as the F1 dialog; always in sync.
 - **Database path persistence** (Story 7.2, FE-017) — After selecting, browsing to, or creating a database in the passphrase dialog, the path is persisted as `default_db_path` in `.gdpr-pseudo.yaml` and pre-selected on next launch.
 - **English F1 dialog translations** — All shortcut action strings and dialog UI labels in the F1 help dialog are now correctly translated to English when the application language is set to English.
+- **Neutral ID pseudonym theme** (Story 7.3, FE-016) — New `neutral_id` theme generating counter-based identifiers (PERSON-001, LIEU-001, ORG-001) with sequential numbering per entity type. Available in CLI (`--theme neutral_id`), GUI settings, and configuration file.
+- **Excel (.xlsx) format support** (Story 7.4, FE-015) — Process Excel spreadsheets with cell-aware NER: each cell is independently analyzed, pseudonyms are applied per-cell, and output preserves the multi-sheet .xlsx structure. Requires optional `openpyxl` dependency (`pip install gdpr-pseudonymizer[excel]`). Formulas are read as cached values (not preserved in output).
+- **CSV format support** (Story 7.4, FE-015) — Process CSV files with automatic encoding detection (UTF-8/Latin-1 fallback) and delimiter sniffing (via `csv.Sniffer`). Each cell is processed independently through the NER pipeline. Output preserves the .csv format with comma delimiter.
+- **Tabular document pipeline** (Story 7.4) — New `TabularDocument`/`CellData` dataclasses, `tabular_reader` and `tabular_writer` modules for structured cell-aware reading and writing of Excel and CSV files. `context_label` field on `DetectedEntity` carries cell reference (e.g., "Sheet1!B3") through the pipeline.
 
 ### Fixed
 

@@ -1,12 +1,13 @@
 # Product Backlog - GDPR Pseudonymizer
 
-**Last Updated:** 2026-02-20
+**Last Updated:** 2026-03-13
 **Epic 1 Status:** ✅ Complete (9/9 stories)
 **Epic 2 Status:** ✅ Complete (9/9 stories)
 **Epic 3 Status:** ✅ Complete (7/7 stories)
 **Epic 4 Status:** ✅ Complete (7/7 stories)
 **v1.0 MVP:** ✅ LAUNCHED (2026-02-09, PyPI published)
 **Epic 6 Status:** ✅ Complete (13/13 stories, v2.0.0 released 2026-03-04)
+**Epic 7 Status:** In Progress (4/6 stories complete — Stories 7.1, 7.2, 7.3, 7.4 done; Stories 7.5, 7.6 remaining)
 **Next Milestone:** v2.1 GUI Polish, Excel, NER Accuracy (Epic 7)
 
 ---

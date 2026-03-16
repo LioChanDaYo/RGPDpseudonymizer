@@ -27,7 +27,7 @@ On first launch, the application auto-detects your system language (French or En
 
 The home screen is your starting point. It provides:
 
-- **Drag-and-drop zone** — Drop `.txt`, `.md`, `.pdf`, or `.docx` files to start processing
+- **Drag-and-drop zone** — Drop `.txt`, `.md`, `.pdf`, `.docx`, `.xlsx`, or `.csv` files to start processing
 - **Recent files list** — Quick access to previously processed documents
 - **Batch processing card** — Click to open the batch processing workflow
 - **Menu bar** — Access all features via File, View, Tools, and Help menus
@@ -179,7 +179,7 @@ When all entities have been reviewed (the pending counter shows "Toutes vérifi�
 
 1. From the home screen, click the batch processing card, or use **File > Open Folder** (Ctrl+Shift+O)
 2. Choose a folder or select multiple files
-3. The app discovers all supported files (`.txt`, `.md`, `.pdf`, `.docx`), excluding already-pseudonymized files (`*_pseudonymized*`)
+3. The app discovers all supported files (`.txt`, `.md`, `.pdf`, `.docx`, `.xlsx`, `.csv`), excluding already-pseudonymized files (`*_pseudonymized*`)
 4. Set the output directory (defaults to `{input}/_pseudonymized/`)
 5. Optionally enable **"Valider les entités par document"** to review entities per document
 

@@ -19,7 +19,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-SUPPORTED_EXTENSIONS = {".txt", ".md", ".pdf", ".docx"}
+SUPPORTED_EXTENSIONS = {".txt", ".md", ".pdf", ".docx", ".xlsx", ".csv"}
 
 
 class DropZone(QFrame):
@@ -42,7 +42,7 @@ class DropZone(QFrame):
         self.setAccessibleDescription(
             self.tr(
                 "Glissez un fichier ou cliquez pour ouvrir. "
-                "Formats supportés: TXT, MD, PDF, DOCX"
+                "Formats supportés: TXT, MD, PDF, DOCX, XLSX, CSV"
             )
         )
 
@@ -70,7 +70,7 @@ class DropZone(QFrame):
         badge_layout = QHBoxLayout()
         badge_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         badge_layout.setSpacing(8)
-        for ext in [".txt", ".md", ".pdf", ".docx"]:
+        for ext in sorted(SUPPORTED_EXTENSIONS):
             badge = QLabel(ext)
             badge.setStyleSheet(
                 "background-color: #E3F2FD; color: #1565C0; "
@@ -163,7 +163,7 @@ class DropZone(QFrame):
             self,
             self.tr("Ouvrir un document"),
             "",
-            self.tr("Documents (*.txt *.md *.pdf *.docx);;Tous (*)"),
+            self.tr("Documents (*.txt *.md *.pdf *.docx *.xlsx *.csv);;Tous (*)"),
         )
         if filepath:
             self.file_selected.emit(filepath)

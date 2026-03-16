@@ -100,7 +100,7 @@ gdpr-pseudo process INPUT_FILE [OPTIONS]
 
 | Argument | Required | Description |
 |----------|----------|-------------|
-| `INPUT_FILE` | Yes | Input file path (.txt, .md, .pdf, or .docx) |
+| `INPUT_FILE` | Yes | Input file path (.txt, .md, .pdf, .docx, .xlsx, or .csv) |
 
 **Options:**
 
@@ -137,10 +137,13 @@ gdpr-pseudo process report.pdf
 gdpr-pseudo process interview.docx -o interview_pseudonymized.txt
 ```
 
-**PDF/DOCX Notes:**
+**Format Notes:**
 - PDF and DOCX support requires optional dependencies. Install with `pip install gdpr-pseudonymizer[formats]`.
-- Output is always `.txt` (plaintext) for PDF/DOCX inputs. Format preservation is planned for v1.2+.
+- Excel (.xlsx) support requires `openpyxl`. Install with `pip install gdpr-pseudonymizer[excel]`.
+- CSV files are supported natively (no extra dependency).
+- Output is always `.txt` (plaintext) for PDF/DOCX inputs. Excel and CSV inputs preserve their original format (.xlsx/.csv).
 - Scanned/image-based PDFs will produce a warning if little text is extracted. OCR is not supported.
+- Excel formulas are read as cached values; formulas are not preserved in output. Legacy `.xls` format is not supported.
 
 ---
 
@@ -204,7 +207,7 @@ gdpr-pseudo batch ./documents/ --entity-types PERSON,ORG --workers 4
 gdpr-pseudo batch ./documents/ --recursive
 ```
 
-**Supported formats:** `.txt`, `.md`, `.pdf`, `.docx`. PDF/DOCX require optional extras (`pip install gdpr-pseudonymizer[formats]`). Output files from PDF/DOCX inputs use `.txt` extension.
+**Supported formats:** `.txt`, `.md`, `.pdf`, `.docx`, `.xlsx`, `.csv`. PDF/DOCX require optional extras (`pip install gdpr-pseudonymizer[formats]`). Excel requires `pip install gdpr-pseudonymizer[excel]`. Output files from PDF/DOCX inputs use `.txt` extension; Excel and CSV inputs preserve their original format.
 
 ---
 

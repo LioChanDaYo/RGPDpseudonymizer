@@ -21,10 +21,12 @@ class TestCollectFiles:
         (tmp_path / "c.pdf").write_bytes(b"c")
         (tmp_path / "d.docx").write_bytes(b"d")
         (tmp_path / "e.csv").write_text("e")
+        (tmp_path / "f.xlsx").write_bytes(b"f")
+        (tmp_path / "g.json").write_text("g")
 
         files = collect_files(tmp_path)
         names = {f.name for f in files}
-        assert names == {"a.txt", "b.md", "c.pdf", "d.docx"}
+        assert names == {"a.txt", "b.md", "c.pdf", "d.docx", "e.csv", "f.xlsx"}
 
     def test_excludes_pseudonymized(self, tmp_path: Path) -> None:
         (tmp_path / "doc.txt").write_text("content")

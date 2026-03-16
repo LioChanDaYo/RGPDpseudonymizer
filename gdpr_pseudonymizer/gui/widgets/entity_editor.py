@@ -265,13 +265,18 @@ class EntityEditor(QTextEdit):
                 fmt.setUnderlineStyle(QTextCharFormat.UnderlineStyle.SingleUnderline)
                 fmt.setUnderlineColor(QColor(underline_color))
 
-            # Tooltip: pseudonym + type + confidence
+            # Tooltip: pseudonym + type + confidence + cell reference
             pseudonym = self._validation_state.get_pseudonym(entity_id)
             confidence = review.entity.confidence
             conf_str = f"{confidence:.0%}" if confidence is not None else "N/A"
+            context_line = ""
+            if review.entity.context_label:
+                context_line = f"\n[{review.entity.context_label}]"
             tooltip = (
                 f"{review.entity.entity_type}: {review.entity.text}\n"
-                f"\u2192 {pseudonym}\n" + qarg(self.tr("Confiance : %1"), conf_str)
+                f"\u2192 {pseudonym}\n"
+                + qarg(self.tr("Confiance : %1"), conf_str)
+                + context_line
             )
             fmt.setToolTip(tooltip)
 
