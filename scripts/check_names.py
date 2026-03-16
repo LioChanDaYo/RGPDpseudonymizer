@@ -12,16 +12,12 @@ with open_database(db_path, passphrase) as db_session:
     enc = db_session.encryption
 
     # Get all PERSON entities
-    entities = session.execute(
-        text(
-            """
+    entities = session.execute(text("""
         SELECT full_name, first_name, last_name, pseudonym_first, pseudonym_last, pseudonym_full
         FROM entities
         WHERE entity_type = 'PERSON'
         ORDER BY full_name
-    """
-        )
-    ).fetchall()
+    """)).fetchall()
 
     print("\nPseudonyms for Dubois/Lefebvre entities:")
     print("=" * 80)
