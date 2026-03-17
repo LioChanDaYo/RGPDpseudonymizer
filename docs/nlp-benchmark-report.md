@@ -1,5 +1,7 @@
 # NLP Library Benchmark Report
 
+> **Note:** This is the historical baseline from Story 1.2. For current accuracy metrics including the hybrid detection pipeline (Story 5.3) and regex expansion with POS disambiguation (Story 7.5), see [docs/qa/ner-accuracy-report.md](qa/ner-accuracy-report.md).
+
 **Story:** 1.2 - Comprehensive NLP Library Benchmark
 **Date:** 2026-01-16
 **Evaluator:** Dev Agent (James)

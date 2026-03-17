@@ -97,8 +97,10 @@ class HybridDetector(EntityDetector):
 
         logger.debug("spacy_detection_complete", entities_found=len(spacy_entities))
 
-        # Step 2: Regex pattern matching
-        regex_entities = self.regex_matcher.match_entities(text)
+        # Step 2: Regex pattern matching (pass spaCy Doc for POS disambiguation)
+        regex_entities = self.regex_matcher.match_entities(
+            text, spacy_doc=self.spacy_detector.last_doc
+        )
         for entity in regex_entities:
             entity.source = "regex"
 

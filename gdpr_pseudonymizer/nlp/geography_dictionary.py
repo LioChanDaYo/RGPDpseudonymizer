@@ -38,6 +38,7 @@ class GeographyDictionary:
         self.cities: set[str] = set()
         self.regions: set[str] = set()
         self.departments: set[str] = set()
+        self.countries_and_international: set[str] = set()
         self.all_locations: set[str] = set()
         if dictionary_path is None:
             from gdpr_pseudonymizer.resources import FRENCH_GEOGRAPHY_PATH
@@ -65,7 +66,15 @@ class GeographyDictionary:
             self.cities = set(data.get("cities", []))
             self.regions = set(data.get("regions", []))
             self.departments = set(data.get("departments", []))
-            self.all_locations = self.cities | self.regions | self.departments
+            self.countries_and_international = set(
+                data.get("countries_and_international", [])
+            )
+            self.all_locations = (
+                self.cities
+                | self.regions
+                | self.departments
+                | self.countries_and_international
+            )
 
             logger.info(
                 "geography_dictionary_loaded",

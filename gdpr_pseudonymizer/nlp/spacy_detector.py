@@ -7,7 +7,7 @@ with the fr_core_news_lg French language model.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity, EntityDetector
 from gdpr_pseudonymizer.utils.logger import get_logger
@@ -29,6 +29,7 @@ class SpaCyDetector(EntityDetector):
         """Initialize spaCy detector without loading model."""
         self._nlp: Language | None = None
         self._model_name: str | None = None
+        self._last_doc: Any | None = None
 
     def load_model(self, model_name: str = "fr_core_news_lg") -> None:
         """Load spaCy NLP model into memory.
@@ -162,6 +163,7 @@ class SpaCyDetector(EntityDetector):
         try:
             # Process text with spaCy
             doc = self._nlp(text)
+            self._last_doc = doc
 
             # Extract entities
             entities = []
@@ -231,6 +233,15 @@ class SpaCyDetector(EntityDetector):
             "library": "spacy",
             "language": meta.get("lang", "fr"),
         }
+
+    @property
+    def last_doc(self) -> Any | None:
+        """Return the spaCy Doc from the most recent detect_entities() call.
+
+        Returns:
+            The spaCy Doc object, or None if no detection has been run.
+        """
+        return self._last_doc
 
     @property
     def supports_gender_classification(self) -> bool:

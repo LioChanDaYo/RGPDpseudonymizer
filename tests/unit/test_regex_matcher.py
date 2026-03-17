@@ -2,6 +2,8 @@
 Unit tests for RegexMatcher
 """
 
+from unittest.mock import MagicMock
+
 import pytest
 
 from gdpr_pseudonymizer.nlp.regex_matcher import RegexMatcher
@@ -502,3 +504,143 @@ class TestRegexMatcher:
         ]
         assert len(matching) >= 1
         assert matching[0].confidence >= 0.60
+
+    # Story 7.5: New ORG suffix tests (AC2)
+    def test_org_suffix_syndicat(self, matcher: RegexMatcher) -> None:
+        """Test ORG suffix: Syndicat National des Médecins detected as ORG."""
+        text = "Le Syndicat National des Médecins se réunit."
+        entities = matcher.match_entities(text)
+
+        orgs = [e for e in entities if e.entity_type == "ORG"]
+        matching = [e for e in orgs if "Syndicat" in e.text]
+        assert len(matching) >= 1, "Syndicat National should be detected as ORG"
+
+    def test_org_suffix_chambre(self, matcher: RegexMatcher) -> None:
+        """Test ORG suffix: Chambre de Commerce detected as ORG."""
+        text = "La Chambre de Commerce organise un salon."
+        entities = matcher.match_entities(text)
+
+        orgs = [e for e in entities if e.entity_type == "ORG"]
+        matching = [e for e in orgs if "Chambre" in e.text]
+        assert len(matching) >= 1, "Chambre de Commerce should be detected as ORG"
+
+    def test_org_suffix_mutuelle(self, matcher: RegexMatcher) -> None:
+        """Test ORG suffix: Mutuelle Générale detected as ORG."""
+        text = "La Mutuelle Générale propose de nouveaux contrats."
+        entities = matcher.match_entities(text)
+
+        orgs = [e for e in entities if e.entity_type == "ORG"]
+        matching = [e for e in orgs if "Mutuelle" in e.text]
+        assert len(matching) >= 1, "Mutuelle Générale should be detected as ORG"
+
+    def test_org_suffix_cooperative(self, matcher: RegexMatcher) -> None:
+        """Test ORG suffix: Coopérative Agricole detected as ORG."""
+        text = "La Coopérative Agricole livre ses produits."
+        entities = matcher.match_entities(text)
+
+        orgs = [e for e in entities if e.entity_type == "ORG"]
+        matching = [e for e in orgs if "Coopérative" in e.text]
+        assert len(matching) >= 1, "Coopérative Agricole should be detected as ORG"
+
+    def test_org_prefix_syndicat(self, matcher: RegexMatcher) -> None:
+        """Test ORG prefix: Syndicat Professionnel detected as ORG."""
+        text = "Le Syndicat Professionnel représente les artisans."
+        entities = matcher.match_entities(text)
+
+        orgs = [e for e in entities if e.entity_type == "ORG"]
+        matching = [e for e in orgs if "Syndicat" in e.text]
+        assert len(matching) >= 1, "Syndicat Professionnel should be detected as ORG"
+
+    def test_org_prefix_chambre(self, matcher: RegexMatcher) -> None:
+        """Test ORG prefix: Chambre Régionale detected as ORG."""
+        text = "La Chambre Régionale des Comptes audite les collectivités."
+        entities = matcher.match_entities(text)
+
+        orgs = [e for e in entities if e.entity_type == "ORG"]
+        matching = [e for e in orgs if "Chambre" in e.text]
+        assert len(matching) >= 1, "Chambre Régionale should be detected as ORG"
+
+    def test_org_suffix_count_25_plus(self, matcher: RegexMatcher) -> None:
+        """Test that there are 25+ distinct ORG suffixes in the suffix pattern."""
+        import re
+
+        org_patterns = matcher.patterns.get("organizations", [])
+        assert len(org_patterns) >= 1, "Should have at least one ORG pattern"
+        # First pattern is the suffix pattern
+        suffix_pattern = org_patterns[0]["regex"].pattern
+        # Extract the suffix group: (SA|SARL|...)
+        suffix_match = re.search(r"\(([A-Za-zÀ-ÿ|]+)\)\\b$", suffix_pattern)
+        assert suffix_match, "Should find suffix group in ORG pattern"
+        suffixes = suffix_match.group(1).split("|")
+        assert (
+            len(suffixes) >= 25
+        ), f"Should have 25+ ORG suffixes, found {len(suffixes)}: {suffixes}"
+
+    # Story 7.5: Geography POS-tag disambiguation tests (AC3)
+    def test_geography_capitalized_propn_accepted(self, matcher: RegexMatcher) -> None:
+        """Test geography: capitalized PROPN token is accepted."""
+        text = "Le bureau de Lyon est ouvert."
+        # Without spaCy doc, should accept based on capitalization alone
+        entities = matcher.match_entities(text)
+
+        matching = [
+            e for e in entities if e.text == "Lyon" and e.entity_type == "LOCATION"
+        ]
+        assert len(matching) >= 1, "Lyon (capitalized) should be detected as LOCATION"
+
+    def test_geography_lowercase_rejected(self, matcher: RegexMatcher) -> None:
+        """Test geography: lowercase 'lyon' not matched (regex enforces caps)."""
+        text = "on parle de lyon dans le texte."
+        entities = matcher.match_entities(text)
+
+        matching = [
+            e for e in entities if e.text == "lyon" and e.entity_type == "LOCATION"
+        ]
+        assert len(matching) == 0, "lowercase 'lyon' should NOT be detected as LOCATION"
+
+    def test_geography_no_spacy_doc_fallback(self, matcher: RegexMatcher) -> None:
+        """Test geography: without spaCy doc, capitalized match is accepted."""
+        text = "Rendez-vous à Marseille demain."
+        # Explicitly pass None
+        entities = matcher.match_entities(text, spacy_doc=None)
+
+        matching = [
+            e for e in entities if e.text == "Marseille" and e.entity_type == "LOCATION"
+        ]
+        assert len(matching) >= 1, "Marseille should be accepted without spaCy doc"
+
+    def test_geography_non_propn_filtered(self, matcher: RegexMatcher) -> None:
+        """Test geography: non-PROPN token with entity assignment is filtered."""
+        # Create a mock spaCy Doc
+        mock_doc = MagicMock()
+        mock_token = MagicMock()
+        mock_token.pos_ = "NOUN"
+        mock_token.ent_type_ = "PER"
+        mock_span = MagicMock()
+        mock_span.__iter__ = lambda self: iter([mock_token])
+        mock_doc.char_span.return_value = mock_span
+
+        text = "Le bureau de Lyon est ouvert."
+        entities = matcher.match_entities(text, spacy_doc=mock_doc)
+
+        matching = [
+            e for e in entities if e.text == "Lyon" and e.entity_type == "LOCATION"
+        ]
+        assert (
+            len(matching) == 0
+        ), "Lyon should be filtered when POS is NOUN and has entity assignment"
+
+    # Story 7.5: LastName, FirstName with ORG words negative test (AC5)
+    def test_last_first_names_rejects_org_words(self, matcher: RegexMatcher) -> None:
+        """Test that 'Dubois, Commission' is NOT detected as PERSON."""
+        text = "Le rapport Dubois, Commission est disponible."
+        entities = matcher.match_entities(text)
+
+        bad_matches = [
+            e
+            for e in entities
+            if "Dubois, Commission" in e.text and e.entity_type == "PERSON"
+        ]
+        assert (
+            len(bad_matches) == 0
+        ), "Dubois, Commission should NOT be detected as PERSON"

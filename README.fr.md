@@ -317,12 +317,13 @@ Après un benchmark approfondi sur 25 documents français (entretiens et documen
 | Approche | Score F1 | Précision | Rappel | Notes |
 |----------|----------|-----------|--------|-------|
 | **spaCy seul** `fr_core_news_lg` | 29,5 % | 27,0 % | 32,7 % | Ligne de base (Story 1.2) |
-| **Hybride** (spaCy + regex) | 59,97 % | 48,17 % | 79,45 % | Story 5.3 (actuel) |
+| **Hybride** (spaCy + regex) | 59,97 % | 48,17 % | 79,45 % | Story 5.3 |
+| **Hybride + patterns enrichis** | 31,79 % | 19,49 % | 85,15 % | Story 7.5 (actuel) |
 
-**Progression de la précision :** En passant de spaCy seul à l'approche hybride — avec nettoyage des annotations, enrichissement des expressions régulières et ajout d'un dictionnaire géographique français — le score F1 a doublé. Le rappel sur les entités PERSON atteint 82,93 %.
+**Progression de la précision :** En passant de spaCy seul à l'approche hybride — avec nettoyage des annotations, enrichissement des expressions régulières et ajout d'un dictionnaire géographique français — le score F1 a doublé. Story 7.5 a ajouté 12 mots-clés de détection ORG, la désambiguïsation POS pour le dictionnaire géographique et 7 lieux internationaux — réduisant le taux de faux négatifs LOCATION de 27,42 % à 12,90 %.
 
 **Solution retenue :**
-- ✅ **Approche hybride** (NLP + regex + dictionnaire géographique) : environ 60 % de F1
+- ✅ **Approche hybride** (NLP + regex + dictionnaire géographique + désambiguïsation POS)
 - ✅ **Validation obligatoire** pour une précision finale de 100 %
 - 📅 **Affinage du modèle** reporté à la v3.0 (objectif F1 70-85 %, nécessite des données d'entraînement issues des validations en v1.x/v2.x)
 

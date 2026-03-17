@@ -56,6 +56,28 @@ These are disabled in production (DEBUG level) and were out of scope for SEC-001
 
 ---
 
+### NER-001: Corpus-Wide ORG Annotation Cleanup
+
+| Field | Value |
+|-------|-------|
+| **Source** | Story 7.5 QA Review / PO Waiver (2026-03-17) |
+| **Severity** | Medium |
+| **Category** | Test Corpus / NER Accuracy |
+| **Affects** | ORG FN rate measurement (currently 59.54% vs <50% target) |
+
+**Description:**
+Story 7.5 cleaned `board_minutes.json` annotations but left the remaining 24 annotation files untouched. Garbage ORG entries in those files ("VP Europe" x7, "Salesforce o", "CONTRÔLES ORGANISA", etc.) inflate the ORG ground truth count, making the ORG FN rate appear worse than actual detection performance. The ORG FN <50% target was waived in Story 7.5 due to this combined with brand-name ORGs being structurally undetectable via regex.
+
+**Expected impact:** Cleaning ORG annotations across all 25 files should reduce the ORG ground truth denominator and likely bring ORG FN below 50% without detection code changes.
+
+**Refs:**
+- `tests/test_corpus/annotations/` (all 25 JSON files)
+- `tests/test_corpus/annotations/README.md`
+- `docs/qa/ner-accuracy-report.md` (Story 7.5 analysis section)
+- `docs/qa/gates/7.5-ner-accuracy-regex-expansion.yml` (waiver details)
+
+---
+
 ## Resolved Items
 
 | ID | Description | Resolved In | Date |
