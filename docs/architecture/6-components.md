@@ -63,20 +63,24 @@ Based on the architectural patterns, tech stack, and module interfaces defined a
 
 **Key Interfaces:**
 - `EntityDetector.detect_entities(text) -> List[DetectedEntity]` (abstract interface)
-- Concrete implementations: `SpaCyDetector`, `StanzaDetector`
+- Concrete implementations: `SpaCyDetector`, `HybridDetector` (spaCy + regex)
 
 **Dependencies:**
-- spaCy/Stanza libraries (external NLP frameworks)
-- French language models (downloaded post-install)
+- spaCy 3.7+ with `fr_core_news_lg` model (selected after Epic 1 benchmark)
+- `RegexMatcher` — pattern-based detection from `detection_patterns.yaml`
+- `GeographyDictionary` — French geography lookup (100 cities, 18 regions, 101 departments, 7 international locations)
 
 **Technology Stack:**
-- **spaCy 3.7+** with `fr_core_news_lg` model (preferred - pending Epic 1 benchmark)
-- **Alternative: Stanza 1.7+** with French models (fallback if spaCy <85% accuracy)
+- **spaCy 3.7+** with `fr_core_news_lg` model (selected — Story 1.2 benchmark)
+- **Hybrid approach** (Story 5.3+): spaCy NER + regex patterns + geography dictionary for improved recall
 
 **Key Design Decisions:**
+- **Hybrid Detection:** `HybridDetector` combines spaCy NER with regex-based patterns and geography dictionary lookup, merging and deduplicating results. This approach doubled F1 vs spaCy-only (Story 5.3).
+- **POS-tag Disambiguation:** Geography dictionary matches are filtered using spaCy POS tags (PROPN check) to prevent false positives on ambiguous names (Story 7.5).
+- **ORG Pattern Expansion:** 30 ORG suffixes and 22 prefixes (SA, SARL, Syndicat, Chambre, etc.) with negative lookahead in PERSON patterns to prevent cross-type false positives (Story 7.5).
 - **Lazy Model Loading:** Models loaded on first `detect_entities()` call, not during CLI startup (improves NFR5: <5s startup time)
 - **Interface Abstraction:** `EntityDetector` interface allows swapping libraries without changing Core logic
-- **Compound Name Handling:** Special detection for French hyphenated names (Jean-Pierre, Marie-Claire) via regex patterns if NER doesn't capture them (FR20)
+- **Compound Name Handling:** Special detection for French hyphenated names (Jean-Pierre, Marie-Claire) via regex patterns (FR20)
 - **Confidence Thresholds:** Low-confidence entities (<0.6) flagged as ambiguous for validation mode review (Risk #3 mitigation)
 
 **Performance Characteristics:**

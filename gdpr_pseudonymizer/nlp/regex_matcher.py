@@ -150,11 +150,14 @@ class RegexMatcher:
         use_dict = bool(geo_config.get("use_geography_dictionary", False))
         return enabled and use_dict
 
-    def match_entities(self, text: str) -> list[DetectedEntity]:
+    def match_entities(
+        self, text: str, spacy_doc: Any | None = None
+    ) -> list[DetectedEntity]:
         """Match entities in text using regex patterns.
 
         Args:
             text: Document text to process
+            spacy_doc: Optional spaCy Doc object for POS-tag disambiguation
 
         Returns:
             List of DetectedEntity objects found via pattern matching
@@ -187,7 +190,7 @@ class RegexMatcher:
 
         # Apply geography dictionary matching if enabled
         if self.geography_dictionary and self._is_geography_enabled():
-            entities.extend(self._match_geography(text))
+            entities.extend(self._match_geography(text, spacy_doc=spacy_doc))
 
         # Remove duplicates (same span)
         entities = self._deduplicate_entities(entities)
@@ -259,14 +262,19 @@ class RegexMatcher:
         geo_config: dict[str, Any] = pattern_config.get("geography_dictionary", {})
         return bool(geo_config.get("enabled", False))
 
-    def _match_geography(self, text: str) -> list[DetectedEntity]:
-        """Match locations using geography dictionary.
+    def _match_geography(
+        self, text: str, spacy_doc: Any | None = None
+    ) -> list[DetectedEntity]:
+        """Match locations using geography dictionary with POS-tag disambiguation.
 
         Scans text for tokens that match known French cities, regions,
-        or departments using O(1) set lookups.
+        or departments using O(1) set lookups. When a spaCy Doc is available,
+        filters out matches where the token is not a proper noun (PROPN) and
+        already has another entity assignment from spaCy.
 
         Args:
             text: Document text to process
+            spacy_doc: Optional spaCy Doc for POS-tag disambiguation
 
         Returns:
             List of DetectedEntity objects for locations
@@ -297,6 +305,13 @@ class RegexMatcher:
         for match in token_pattern.finditer(text):
             candidate = match.group(0)
             if self.geography_dictionary.is_location(candidate):
+                # POS-tag disambiguation when spaCy Doc is available
+                if spacy_doc is not None:
+                    if not self._passes_pos_disambiguation(
+                        spacy_doc, match.start(), match.end()
+                    ):
+                        continue
+
                 entity = DetectedEntity(
                     text=candidate,
                     entity_type="LOCATION",
@@ -308,6 +323,33 @@ class RegexMatcher:
                 entities.append(entity)
 
         return entities
+
+    def _passes_pos_disambiguation(self, spacy_doc: Any, start: int, end: int) -> bool:
+        """Check if a geography candidate passes POS-tag disambiguation.
+
+        A candidate is accepted if:
+        - The spaCy token(s) have POS tag PROPN, OR
+        - The token(s) have no entity assignment from spaCy (ent_type_ == "")
+        - If char_span returns None (tokenization misalignment), accept the match
+
+        Args:
+            spacy_doc: spaCy Doc object
+            start: Character start offset of the candidate
+            end: Character end offset of the candidate
+
+        Returns:
+            True if the candidate should be accepted
+        """
+        span = spacy_doc.char_span(start, end)
+        if span is None:
+            # Tokenization misalignment — accept the match
+            return True
+
+        for token in span:
+            if token.pos_ == "PROPN" or token.ent_type_ == "":
+                return True
+
+        return False
 
     def _deduplicate_entities(
         self, entities: list[DetectedEntity]

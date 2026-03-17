@@ -39,7 +39,7 @@ patterns:
     confidence: 0.80
     entity_type: PERSON
     patterns:
-      - pattern: '\b([A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][a-zàâäéèêëïîôöùûü]+(?:-[A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][a-zàâäéèêëïîôöùûü]+)?)\s*,\s*(?!Cabinet|Société|Association|Fondation|Institut|Groupe|Consortium|Fédération|Entreprise|Compagnie|Direction|Service|Département|Commission|Comité)([A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][a-zàâäéèêëïîôöùûü]+(?:-[A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][a-zàâäéèêëïîôöùûü]+)?)'
+      - pattern: '\b([A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][a-zàâäéèêëïîôöùûü]+(?:-[A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][a-zàâäéèêëïîôöùûü]+)?)\s*,\s*(?!Cabinet|Société|Association|Fondation|Institut|Groupe|Consortium|Fédération|Entreprise|Compagnie|Direction|Service|Département|Commission|Comité|Syndicat|Chambre|Mutuelle|Coopérative|Ordre|Caisse|Union|Confédération|Agence|Ligue)([A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][a-zàâäéèêëïîôöùûü]+(?:-[A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][a-zàâäéèêëïîôöùûü]+)?)'
         description: "Last, First format (e.g., Dubois, Jean-Marc) with exclusion of ORG/function words"
         examples:
           - "Dubois, Jean-Marc"
@@ -67,8 +67,8 @@ patterns:
     confidence: 0.70
     entity_type: ORG
     patterns:
-      - pattern: '\b([A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][A-Za-zàâäéèêëïîôöùûü\s&,''\.\-]+?)\s+(SA|SARL|SAS|SASU|EURL|SNC|SCM|SCI|GIE|EI|SCOP|SEL|Association|Fondation|Institut|Groupe|Consortium|Fédération)\b'
-        description: "Organization with legal form suffix (15+ forms)"
+      - pattern: '\b([A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][A-Za-zàâäéèêëïîôöùûü\s&,''\.\-]+?)\s+(SA|SARL|SAS|SASU|EURL|SNC|SCM|SCI|GIE|EI|SCOP|SEL|Association|Fondation|Institut|Groupe|Consortium|Fédération|Syndicat|Chambre|Mutuelle|Coopérative|Ordre|Caisse|Union|Confédération|Agence|Comité|Commission|Ligue)\b'
+        description: "Organization with legal form suffix (30 forms)"
         examples:
           - "TechCorp SA"
           - "Solutions Informatiques SARL"
@@ -78,8 +78,8 @@ patterns:
           - "Solutions SCOP"
           - "TechCorp Association"
           - "Marie Curie Fondation"
-      - pattern: '\b(Société|Entreprise|Cabinet|Groupe|Compagnie|Association|Fondation|Institut|Consortium|Fédération)\s+([A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][A-Za-zàâäéèêëïîôöùûü\s&,\-]+)'
-        description: "Organization with prefix keyword"
+      - pattern: '\b(Société|Entreprise|Cabinet|Groupe|Compagnie|Association|Fondation|Institut|Consortium|Fédération|Syndicat|Chambre|Mutuelle|Coopérative|Ordre|Caisse|Union|Confédération|Agence|Comité|Commission|Ligue)\s+([A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][A-Za-zàâäéèêëïîôöùûü\s&,\-]+)'
+        description: "Organization with prefix keyword (22 prefixes)"
         examples:
           - "Société TechCorp"
           - "Entreprise Dubois"

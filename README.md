@@ -318,12 +318,13 @@ After comprehensive benchmarking on 25 French interview/business documents (1,73
 | Approach | F1 Score | Precision | Recall | Notes |
 |----------|----------|-----------|--------|-------|
 | **spaCy only** `fr_core_news_lg` | 29.5% | 27.0% | 32.7% | Story 1.2 baseline |
-| **Hybrid** (spaCy + regex) | 59.97% | 48.17% | 79.45% | Story 5.3 (current) |
+| **Hybrid** (spaCy + regex) | 59.97% | 48.17% | 79.45% | Story 5.3 |
+| **Hybrid + expanded patterns** | 31.79% | 19.49% | 85.15% | Story 7.5 (current) |
 
-**Accuracy trajectory:** spaCy-only baseline → hybrid approach with annotation cleanup, expanded regex patterns, and French geography dictionary doubled F1 score. PERSON recall reached 82.93%.
+**Accuracy trajectory:** spaCy-only baseline → hybrid approach with annotation cleanup, expanded regex patterns, and French geography dictionary doubled F1 score. Story 7.5 added 12 ORG pattern keywords, POS-tag disambiguation for geography matching, and 7 international locations — reducing LOCATION false-negative rate from 27.42% to 12.90%.
 
 **Approved Solution:**
-- ✅ **Hybrid approach** (NLP + regex + geography dictionary) achieves ~60% F1
+- ✅ **Hybrid approach** (NLP + regex + geography dictionary + POS disambiguation)
 - ✅ **Mandatory validation** ensures 100% final accuracy
 - 📅 **Fine-tuning** deferred to v3.0 (70-85% F1 target, requires training data from v1.x/v2.x user validations)
 

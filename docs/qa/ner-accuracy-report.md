@@ -264,6 +264,87 @@ The combined annotation cleanup + regex expansion produced dramatic accuracy imp
 
 ---
 
+## Story 7.5 — NER Regex Expansion & POS Disambiguation (2026-03-17)
+
+**Changes:**
+- Expanded ORG suffix patterns from 18 to 30 (added: Syndicat, Chambre, Mutuelle, Coopérative, Ordre, Caisse, Union, Confédération, Agence, Comité, Commission, Ligue)
+- Expanded ORG prefix patterns from 10 to 22 (same 12 additions)
+- Updated last_first_names negative lookahead with all new ORG keywords
+- Implemented spaCy POS-tag disambiguation for geography dictionary matches (PROPN or no-entity-assignment filter)
+- Expanded geography dictionary with international locations (France, Allemagne, Berlin, Londres, Luxembourg, Madrid, Benelux)
+- Verified board_minutes.json annotation quality (no issues found)
+
+**Note on baseline discrepancy:** The Story 5.3 Final numbers above (e.g., PERSON precision=66.25%) do not match actual test runs. The measured baseline before Story 7.5 changes is used as the authoritative comparison below.
+
+### Pre-Story-7.5 Baseline (measured 2026-03-17)
+
+| Metric | Value |
+|--------|-------|
+| **Precision** | 25.18% |
+| **Recall** | 41.51% |
+| **F1 Score** | 31.35% |
+| **TP** | 721 |
+| **FP** | 2,142 |
+| **FN** | 1,016 |
+
+### Overall Metrics (Story 7.5 Final)
+
+| Metric | Pre-7.5 Baseline | **Story 7.5 Final** | Delta |
+|--------|-------------------|---------------------|-------|
+| **Precision** | 25.18% | **25.38%** | +0.20pp |
+| **Recall** | 41.51% | **42.54%** | +1.03pp |
+| **F1 Score** | 31.35% | **31.79%** | +0.44pp |
+| **TP** | 721 | **739** | +18 |
+| **FP** | 2,142 | **2,173** | +31 |
+| **FN** | 1,016 | **998** | -18 |
+
+### Per-Entity-Type Metrics (Story 7.5 Final)
+
+| Entity Type | Precision | Recall | F1 | TP | FP | FN | FN Rate |
+|------------|-----------|--------|-----|-----|------|------|---------|
+| **PERSON** | 31.19% | 39.00% | 34.66% | 578 | 1,275 | 904 | 61.00% |
+| **LOCATION** | 29.59% | 87.10% | 44.17% | 108 | 257 | 16 | 12.90% |
+| **ORG** | 7.64% | 40.46% | 12.85% | 53 | 641 | 78 | 59.54% |
+
+### Per-Detection-Source Metrics (Story 7.5 Final)
+
+| Source | TP | FP | Precision |
+|--------|-----|------|-----------|
+| **spaCy** | 653 | 1,575 | 29.31% |
+| **regex** | 86 | 598 | 12.57% |
+
+Regex now contributes 11.6% of true positives (up from 9.0% in pre-7.5 baseline), driven by geography dictionary expansion.
+
+### Target Verification (AC4/AC5)
+
+| Target | Pre-7.5 Baseline | **Story 7.5 Final** | Status |
+|--------|-------------------|---------------------|--------|
+| LOCATION FN <25% | 27.42% | **12.90%** | **PASS** (-14.52pp) |
+| ORG FN <50% | 59.54% | **59.54%** | NOT MET (unchanged) |
+| PERSON precision no regression (>2%) | 31.19% | **31.19%** | **PASS** (unchanged) |
+
+### Edge Case Analysis (Story 7.5 Final)
+
+| Category | Pre-7.5 Recall | Story 7.5 Recall | Delta |
+|----------|---------------|-----------------|-------|
+| **Compound/hyphenated** | 27.27% | 27.27% | 0 |
+| **Title with name** | 100.00% | 100.00% | 0 |
+| **Multi-word ORG** | 39.00% | 39.00% | 0 |
+| **French diacritics** | 35.96% | 35.96% | 0 |
+| **Last, First order** | 86.49% | 86.49% | 0 |
+
+Edge case recall is unchanged; Story 7.5 improvements were focused on dictionary-based detection.
+
+### Analysis
+
+1. **LOCATION FN rate -14.52pp (12.90%):** Adding "France" (40 annotated occurrences) and international locations (Allemagne, Berlin, Londres, Luxembourg, Madrid, Benelux) to the geography dictionary converted 18 FNs to TPs. The POS-tag disambiguation prevents these new dictionary entries from creating excessive false positives when they appear as part of ORG names (e.g., "Microsoft France").
+
+2. **ORG FN rate unchanged (59.54%):** The 12 new ORG suffixes/prefixes (Syndicat, Chambre, Mutuelle, etc.) did not produce new true positives because the test corpus ORG entities are predominantly brand names (OVHcloud, McKinsey, KPMG, Thales, etc.) that don't follow suffix/prefix patterns. Additionally, ORG annotation quality in non-board_minutes files includes garbage entries ("VP Europe" ×7, "Salesforce o", "CONTRÔLES ORGANISA", etc.) that inflate the ground truth count. Achieving <50% ORG FN would require either (a) brand-name ORG detection (not feasible with regex), (b) corpus-wide annotation cleanup, or (c) NLP model fine-tuning.
+
+3. **PERSON precision unchanged (31.19%):** The expanded ORG patterns and last_first_names negative lookahead did not introduce any PERSON precision regression.
+
+---
+
 ## Known Limitations
 
 1. ~~**Annotation quality issues:** Some ground-truth annotations in `board_minutes.json` contain entities spanning newlines, ORGs mislabeled as PERSON, truncated entities at hyphen boundaries, and garbage annotations (e.g., "élicite Mme"). These inflate FN counts.~~ **Fixed in Story 5.3 (Tasks 5.3.1-5.3.3).**
