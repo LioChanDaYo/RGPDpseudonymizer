@@ -74,6 +74,8 @@ class EntityPanel(QWidget):
         # Checked entity_ids
         self._checked_ids: set[str] = set()
         self._filter_text = ""
+        self._hide_rejected = False
+        self._hide_confirmed = False
 
         self._build_ui()
         self.retranslateUi()
@@ -213,13 +215,35 @@ class EntityPanel(QWidget):
             if not reviews:
                 continue
 
-            # Filter
+            # Filter by text
             if self._filter_text:
                 reviews = [
                     r
                     for r in reviews
                     if self._filter_text.lower() in r.entity.text.lower()
                 ]
+
+            # Filter by status (match EntityEditor logic)
+            if self._hide_rejected or self._hide_confirmed:
+                from gdpr_pseudonymizer.validation.models import EntityReviewState
+
+                filtered: list[EntityReview] = []
+                for r in reviews:
+                    if r.state == EntityReviewState.REJECTED and self._hide_rejected:
+                        continue
+                    is_confirmed = r.state in (
+                        EntityReviewState.CONFIRMED,
+                        EntityReviewState.ADDED,
+                    )
+                    is_known = (
+                        self._validation_state.is_entity_known(r.entity_id)
+                        if self._validation_state
+                        else False
+                    )
+                    if (is_confirmed or is_known) and self._hide_confirmed:
+                        continue
+                    filtered.append(r)
+                reviews = filtered
 
             if not reviews:
                 continue
@@ -249,6 +273,16 @@ class EntityPanel(QWidget):
         self._title_label.setText(qarg(self.tr("Entit\u00e9s (%1)"), str(total)))
         self._update_pending_counter()
         self._update_bulk_button_counts()
+
+    def set_hide_rejected(self, hide: bool) -> None:
+        """Toggle hiding of rejected entities in the list."""
+        self._hide_rejected = hide
+        self.populate()
+
+    def set_hide_confirmed(self, hide: bool) -> None:
+        """Toggle hiding of confirmed/known entities in the list."""
+        self._hide_confirmed = hide
+        self.populate()
 
     def highlight_entity(self, entity_id: str) -> None:
         """Scroll to and highlight an entity row."""

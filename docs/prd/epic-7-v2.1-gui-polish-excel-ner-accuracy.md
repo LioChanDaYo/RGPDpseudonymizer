@@ -39,10 +39,10 @@ v2.0 successfully launched the desktop GUI and standalone executables. Early use
 |-------|----------|---------------|--------|--------|
 | 7.1: Validation Workflow Productivity | HIGH | 1-2 days | FE-020, FE-019 | Done |
 | 7.2: GUI Discoverability & Session UX | MED | 1 day | FE-017, FE-018 | Done |
-| 7.3: Neutral Pseudonym Theme | MED | 1-2 days | FE-016 | Draft |
-| 7.4: Excel & CSV Format Support | MED | 1-2 weeks | FE-015 | Draft |
-| 7.5: NER Accuracy — Regex Expansion & Corpus Cleanup | HIGH | 3-5 days | FE-011, FE-012 | Draft |
-| 7.6: Quality & Compatibility | LOW | 2-3 days | TD-007, MON-005 | Draft |
+| 7.3: Neutral Pseudonym Theme | MED | 1-2 days | FE-016 | Done |
+| 7.4: Excel & CSV Format Support | MED | 1-2 weeks | FE-015 | Done |
+| 7.5: NER Accuracy — Regex Expansion & Corpus Cleanup | HIGH | 3-5 days | FE-011, FE-012 | Done |
+| 7.6: Quality & Compatibility | LOW | 2-3 days | TD-007, MON-005 | Done |
 | 7.7: v2.1 Release Preparation | HIGH | 1-2 days | — | Draft |
 
 **Total Estimated Duration:** 4-6 weeks
