@@ -236,14 +236,20 @@ class ValidationScreen(QWidget):
         # Bulk actions from panel
         self._panel.bulk_action_requested.connect(self._handle_bulk_action)
 
-        # Hide rejected toggle
+        # Hide rejected toggle (both editor highlights and panel list)
         self._panel.hide_rejected_checkbox.toggled.connect(
             self._editor.set_hide_rejected
         )
+        self._panel.hide_rejected_checkbox.toggled.connect(
+            self._panel.set_hide_rejected
+        )
 
-        # Hide confirmed toggle
+        # Hide confirmed toggle (both editor highlights and panel list)
         self._panel.hide_confirmed_checkbox.toggled.connect(
             self._editor.set_hide_confirmed
+        )
+        self._panel.hide_confirmed_checkbox.toggled.connect(
+            self._panel.set_hide_confirmed
         )
 
     def _connect_shortcuts(self) -> None:

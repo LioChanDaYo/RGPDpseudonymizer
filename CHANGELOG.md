@@ -24,6 +24,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **NER accuracy — regex expansion & POS disambiguation** (Story 7.5, FE-011/FE-012) — Expanded ORG detection patterns (30 suffixes, 22 prefixes) with 12 new keywords (Syndicat, Chambre, Mutuelle, Coopérative, Ordre, Caisse, Union, Confédération, Agence, Comité, Commission, Ligue). Added spaCy POS-tag disambiguation to geography dictionary matching (PROPN filter prevents false positives on ambiguous names). Added 7 international locations (France, Allemagne, Berlin, Londres, Luxembourg, Madrid, Benelux) to geography dictionary. LOCATION false-negative rate reduced from 27.42% to 12.90%.
 
+### Known Issues
+
+- **Python 3.13 not yet supported** — `thinc` (spaCy's ML backend) does not publish Python 3.13 wheels as of v9.1.1. Since spaCy depends on thinc, the entire NLP stack is blocked. PySide6-Essentials supports 3.13 via stable ABI wheels. The `pyproject.toml` constraint (`>=3.10,<3.14`) already allows 3.13; only the missing thinc wheels prevent it. Will be added once thinc ships cp313 wheels.
+
 ### Fixed
 
 - **F1 dialog light-mode readability** — Section headers (Global, Validation, etc.) and table cells were unreadable (dark text on dark background) in light mode. Fixed by adding explicit `QTableWidget`/`QHeaderView` QSS rules to `light.qss`/`dark.qss` and making the `QScrollArea` viewport background transparent so labels inherit the dialog's white background.
