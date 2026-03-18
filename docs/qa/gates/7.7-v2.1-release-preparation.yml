@@ -1,0 +1,53 @@
+schema: 1
+story: '7.7'
+story_title: 'v2.1 Release Preparation'
+gate: CONCERNS
+status_reason: 'Documentation quality is strong overall but download table filenames in both READMEs still reference v2.0.0 executables — will be stale after v2.1.0 tag. Fix before release.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-03-18T00:00:00Z'
+
+waiver: { active: false }
+
+top_issues:
+  - id: DOC-001
+    severity: medium
+    finding: 'Download table in README.md and README.fr.md references v2.0.0 executable filenames (e.g., gdpr-pseudonymizer-2.0.0-windows-setup.exe). After v2.1.0 release, actual filenames will contain 2.1.0.'
+    suggested_action: 'Update all 4 filename references in both READMEs to use 2.1.0 before creating the release tag.'
+    suggested_owner: dev
+  - id: DOC-002
+    severity: low
+    finding: 'Inconsistent test counts in README.md — "1670+" (Development Status), "1613+" (Testing section), "1800+" (Metrics table). Same inconsistency in README.fr.md.'
+    suggested_action: 'Pick one authoritative test count and use it consistently across all sections in both READMEs.'
+    suggested_owner: dev
+
+quality_score: 90  # 100 - (10 * 1 CONCERNS-level issue)
+expires: '2026-04-01T00:00:00Z'
+
+evidence:
+  tests_reviewed: 0  # No new tests — release prep story verifies existing tests pass
+  risks_identified: 2
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 9, 10]
+    ac_gaps: [7, 8]  # Tag not yet created — Tasks 9-10 deferred pending user action
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'No production code changes, no new attack surface'
+  performance:
+    status: PASS
+    notes: 'No runtime code changes'
+  reliability:
+    status: PASS
+    notes: 'Existing test suite verified passing; workflow configs confirmed from v2.0 precedent'
+  maintainability:
+    status: CONCERNS
+    notes: 'Test count inconsistencies across README sections reduce documentation maintainability'
+
+recommendations:
+  immediate:
+    - action: 'Update download table filenames from 2.0.0 to 2.1.0 in both README.md and README.fr.md'
+      refs: ['README.md:39-42', 'README.fr.md:39-42']
+  future:
+    - action: 'Reconcile test count references across README sections for consistency'
+      refs: ['README.md:501,650,706', 'README.fr.md:500,649']

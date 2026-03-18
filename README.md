@@ -14,34 +14,32 @@ Transform sensitive French documents for safe AI analysis with local processing,
 
 ---
 
-## What's New in v2.0
+## What's New in v2.1
 
-- **Desktop GUI Application** — Full-featured PySide6 desktop app with visual entity validation, drag-and-drop document processing, and real-time progress dashboard
-- **Standalone Executables** — Pre-built Windows installer (.exe), macOS DMG (arm64 + Intel), and Linux AppImage — no Python required
-- **WCAG 2.1 Level AA Accessibility** — Keyboard navigation, screen reader support, 4.5:1 contrast ratios, high contrast mode
-- **French UI with Language Switching** — Complete French/English GUI with live language switching and system locale auto-detection
-- **Batch Processing with Per-Document Validation** — Validate entities document-by-document during batch processing with prev/next navigation
-- **Database Management with Background Threading** — Responsive GUI with all database operations on background threads
-- **Core Processing Hardening** — PII sanitization in error messages, typed exception handling, per-document entity counts
+- **Validate-once-per-entity** — Accept or reject one entity occurrence and it applies to all same-text occurrences in the document (productivity boost for repeated names)
+- **Excel/CSV Format Support** — Process `.xlsx` and `.csv` files with cell-aware pseudonymization for HR/compliance use cases (`pip install gdpr-pseudonymizer[excel]`)
+- **Neutral ID Pseudonym Theme** — Counter-based identifiers (PERSON-001, LIEU-001, ORG-001) for formal/legal contexts (`--theme neutral_id`)
+- **NER Accuracy Improvements** — Expanded ORG detection patterns, POS-tag disambiguation for geography matching; LOCATION false-negative rate reduced from 27% to 13%
+- **GUI Discoverability** — F1 keyboard shortcuts help dialog with all shortcut groups, database path persistence across sessions, "Hide confirmed" toggle
 
 <!-- TODO: Add GUI screenshot -->
 
-**Upgrade:** `pip install --upgrade gdpr-pseudonymizer[gui]`
+**Upgrade:** `pip install --upgrade gdpr-pseudonymizer[gui,excel]`
 
 ---
 
 ## Download — Standalone Executables (No Python Required)
 
-Pre-built v2.0 standalone executables are available for Windows, macOS, and Linux. No Python installation needed.
+Pre-built standalone executables are available for Windows, macOS, and Linux. No Python installation needed.
 
 **[Download Latest Release](https://github.com/LioChanDaYo/RGPDpseudonymizer/releases/latest)**
 
 | Platform | File | Notes |
 |----------|------|-------|
-| **Windows** | `gdpr-pseudonymizer-2.0.0-windows-setup.exe` | Run the installer. Adds Start Menu shortcut. |
-| **macOS (Apple Silicon)** | `gdpr-pseudonymizer-2.0.0-macos-arm64.dmg` | Open DMG, drag to Applications. |
-| **macOS (Intel)** | `gdpr-pseudonymizer-2.0.0-macos-x86_64.dmg` | Open DMG, drag to Applications. |
-| **Linux** | `gdpr-pseudonymizer-2.0.0-linux.AppImage` | `chmod +x` then run. |
+| **Windows** | `gdpr-pseudonymizer-2.1.0-windows-setup.exe` | Run the installer. Adds Start Menu shortcut. |
+| **macOS (Apple Silicon)** | `gdpr-pseudonymizer-2.1.0-macos-arm64.dmg` | Open DMG, drag to Applications. |
+| **macOS (Intel)** | `gdpr-pseudonymizer-2.1.0-macos-x86_64.dmg` | Open DMG, drag to Applications. |
+| **Linux** | `gdpr-pseudonymizer-2.1.0-linux.AppImage` | `chmod +x` then run. |
 
 ### Platform Notes
 
@@ -114,7 +112,7 @@ GDPR Pseudonymizer is a **privacy-first CLI and GUI tool** that combines AI effi
 
 ## 🚀 Quick Start
 
-**Status:** 🎉 **v2.0.0** (March 2026) — Desktop GUI, Standalone Executables & Accessibility
+**Status:** 🎉 **v2.1.0** (March 2026) — GUI Polish, Excel/CSV Support & NER Accuracy
 
 ### Getting Started
 
@@ -136,19 +134,21 @@ pip install gdpr-pseudonymizer[excel]
 pip install gdpr-pseudonymizer[formats]
 ```
 
-### What v2.0 Delivers
+### What v2.1 Delivers
 
 - 🖥️ **Desktop GUI** — Visual entity validation with drag-and-drop, batch dashboard, and database management
 - 📦 **Standalone executables** — Windows .exe, macOS .dmg, Linux AppImage — no Python required
 - ♿ **WCAG 2.1 AA accessibility** — Keyboard navigation, screen reader, high contrast mode
 - 🌐 **French UI** — Complete FR/EN interface with live language switching
-- 🤖 **AI-assisted detection** — Hybrid NLP + regex detects ~60% of entities automatically (F1 59.97%)
+- 🤖 **AI-assisted detection** — Hybrid NLP + regex detects ~60% of entities automatically
 - ✅ **Mandatory human verification** — You review and confirm all entities (ensures 100% accuracy)
 - 🔒 **100% local processing** — Your data never leaves your machine
 - 📄 **PDF/DOCX support** — Process PDF and DOCX files directly (optional extras)
 - 📊 **Excel/CSV support** — Process .xlsx and .csv files with cell-aware pseudonymization (optional extra: `[excel]`)
+- 🆔 **Neutral ID theme** — Counter-based identifiers (PERSON-001, LIEU-001) for formal/legal contexts
+- 🎯 **NER accuracy** — LOCATION false-negative rate reduced from 27% to 13% via regex expansion & POS disambiguation
 
-**What v2.0 does NOT deliver:**
+**What v2.1 does NOT deliver:**
 - ❌ Fully automatic "set and forget" processing
 - ❌ 85%+ AI accuracy (current: ~60% F1 with hybrid approach)
 - ❌ Optional validation mode (validation is mandatory)
@@ -159,7 +159,9 @@ pip install gdpr-pseudonymizer[formats]
 
 **v1.1 (Q1 2026):** GDPR erasure, gender-aware pseudonyms, NER accuracy improvements, PDF/DOCX support, French docs
 
-**v2.0 (Q1 2026) — CURRENT RELEASE:** Desktop GUI, standalone executables, WCAG AA accessibility, French UI, batch validation, core hardening
+**v2.0 (Q1 2026):** Desktop GUI, standalone executables, WCAG AA accessibility, French UI, batch validation, core hardening
+
+**v2.1 (Q1 2026) — CURRENT RELEASE:** GUI polish, Excel/CSV support, neutral ID theme, NER accuracy improvements, keyboard shortcuts help
 
 **v3.0 (2027+):** NLP accuracy & automation
 - Fine-tuned French NER model (70-85% F1 target, up from ~60%)
@@ -468,7 +470,7 @@ The validation UI provides an intuitive keyboard-driven interface for reviewing 
 
 ## 🛠️ Development Status
 
-**Epics 1-6 Complete** — v2.0.0 (March 2026). Desktop GUI with standalone executables and WCAG AA accessibility.
+**Epics 1-7 Complete** — v2.1.0 (March 2026). GUI polish, Excel/CSV support, NER accuracy improvements.
 
 - ✅ **Epic 1:** Foundation & NLP Validation (9 stories) — spaCy integration, validation UI, hybrid detection, entity deduplication
 - ✅ **Epic 2:** Core Pseudonymization Engine (9 stories) — pseudonym libraries, encryption, audit logging, batch processing, GDPR 1:1 mapping
@@ -488,7 +490,15 @@ The validation UI provides an intuitive keyboard-driven interface for reviewing 
   - ✅ Story 6.7.3: Batch Validation Workflow — Per-document entity validation in batch mode, Précédent/Suivant navigation, cancel with proper status display, 21 new tests
   - ✅ Story 6.8: Standalone Executables & Distribution — PyInstaller builds, NSIS installer (Windows), DMG (macOS), AppImage (Linux), CI workflow
   - ✅ Story 6.9: v2.0 Release Preparation — Version bump, CHANGELOG, documentation updates, release coordination
-- **Total:** 53 stories, 1800+ tests, 86%+ coverage, all quality gates green
+- ✅ **Epic 7:** v2.1 GUI Polish, Excel/CSV & NER Accuracy (7 stories) — Validate-once-per-entity, keyboard shortcuts help, database path persistence, neutral ID theme, Excel/CSV format support, NER regex expansion & POS disambiguation, integration tests, v2.1 release
+  - ✅ Story 7.1: Validation UX Improvements (validate-once-per-entity, hide confirmed toggle)
+  - ✅ Story 7.2: GUI Discoverability (F1 shortcuts dialog, settings sync, database path persistence)
+  - ✅ Story 7.3: Neutral ID Pseudonym Theme (counter-based identifiers)
+  - ✅ Story 7.4: Excel & CSV Format Support (tabular document pipeline)
+  - ✅ Story 7.5: NER Accuracy Regex Expansion & POS Disambiguation
+  - ✅ Story 7.6: Quality & Compatibility Integration Tests
+  - ✅ Story 7.7: v2.1 Release Preparation
+- **Total:** 60 stories, 1670+ tests, 86%+ coverage, all quality gates green
 
 ---
 
@@ -637,7 +647,7 @@ poetry run pytest tests/integration/test_validation_workflow_integration.py -v
 - **Accuracy tests:** 22 tests validating NER accuracy against 25-document ground-truth corpus (Story 4.4)
 - **Performance tests:** 19 tests validating all NFR targets — single-document benchmarks (NFR1), entity-detection benchmarks, batch performance (NFR2), memory profiling (NFR4), startup time (NFR5), stability/error rate (NFR6), stress testing (Story 4.5)
 - **Current coverage:** 86%+ across all modules (100% for progress module, 91.41% for AuditRepository)
-- **Total tests:** 1613+ tests
+- **Total tests:** 1670+ tests
 - **CI/CD:** Tests run on Python 3.10-3.12 across Windows, macOS, and Linux
 - **Quality gates:** All pass (Black, Ruff, mypy, pytest)
 
@@ -667,12 +677,12 @@ The integration test suite covers:
 
 ---
 
-## 📊 Project Metrics (As of 2026-03-03)
+## 📊 Project Metrics (As of 2026-03-17)
 
 | Metric | Value | Status |
 |--------|-------|--------|
-| **Development Progress** | v2.0.0 | ✅ Epics 1-6 complete |
-| **Stories Complete** | 52 (Epics 1-6) | ✅ All epics complete |
+| **Development Progress** | v2.1.0 | ✅ Epics 1-7 complete |
+| **Stories Complete** | 60 (Epics 1-7) | ✅ All epics complete |
 | **LLM Utility (NFR10)** | 4.27/5.0 (85.4%) | ✅ PASSED (threshold: 80%) |
 | **Installation Success (NFR3)** | 87.5% (7/8 platforms) | ✅ PASSED (threshold: 85%) |
 | **First Pseudonymization (NFR14)** | 100% within 30 min | ✅ PASSED (threshold: 80%) |
@@ -693,7 +703,7 @@ The integration test suite covers:
 | **Memory Usage (NFR4)** | ~1 GB Python-tracked peak | ✅ PASSED (<8GB threshold) |
 | **CLI Startup (NFR5)** | 0.56s (help), 6.0s (cold start w/ model) | ✅ PASSED (<5s for CLI startup) |
 | **Error Rate (NFR6)** | ~0% unexpected errors | ✅ PASSED (<10% threshold) |
-| **Test Coverage** | 1800+ tests (incl. 393 GUI), 86%+ coverage | ✅ All Quality Checks Pass |
+| **Test Coverage** | 1670+ tests (incl. 393 GUI), 86%+ coverage | ✅ All Quality Checks Pass |
 | **Quality Gates** | Ruff, mypy, pytest | ✅ All Pass (0 issues) |
 | **GUI/CLI Languages** | French (default), English | 🌐 Live switching (Story 6.6) |
 | **Supported Document Languages** | French | 🇫🇷 v1.0 only |
@@ -711,4 +721,4 @@ The integration test suite covers:
 
 ---
 
-**Last Updated:** 2026-03-13 (v2.0.0+ — Desktop GUI, standalone executables, WCAG AA accessibility, French UI, Excel/CSV support, 1800+ total tests)
+**Last Updated:** 2026-03-17 (v2.1.0 — GUI polish, Excel/CSV support, neutral ID theme, NER accuracy improvements, 1670+ tests)

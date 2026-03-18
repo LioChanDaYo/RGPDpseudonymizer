@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+No changes yet.
+
+---
+
+## [2.1.0] - 2026-03-17
+
+**GDPR Pseudonymizer v2.1.0 — GUI Polish, Excel/CSV Support & NER Accuracy**
+
 ### Added
 
 - **Validate-once-per-entity** (Story 7.1, FE-020) — Accepting or rejecting one entity occurrence now applies to all same-text occurrences in the document; undo reverts the entire group
@@ -21,8 +29,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Excel (.xlsx) format support** (Story 7.4, FE-015) — Process Excel spreadsheets with cell-aware NER: each cell is independently analyzed, pseudonyms are applied per-cell, and output preserves the multi-sheet .xlsx structure. Requires optional `openpyxl` dependency (`pip install gdpr-pseudonymizer[excel]`). Formulas are read as cached values (not preserved in output).
 - **CSV format support** (Story 7.4, FE-015) — Process CSV files with automatic encoding detection (UTF-8/Latin-1 fallback) and delimiter sniffing (via `csv.Sniffer`). Each cell is processed independently through the NER pipeline. Output preserves the .csv format with comma delimiter.
 - **Tabular document pipeline** (Story 7.4) — New `TabularDocument`/`CellData` dataclasses, `tabular_reader` and `tabular_writer` modules for structured cell-aware reading and writing of Excel and CSV files. `context_label` field on `DetectedEntity` carries cell reference (e.g., "Sheet1!B3") through the pipeline.
-
 - **NER accuracy — regex expansion & POS disambiguation** (Story 7.5, FE-011/FE-012) — Expanded ORG detection patterns (30 suffixes, 22 prefixes) with 12 new keywords (Syndicat, Chambre, Mutuelle, Coopérative, Ordre, Caisse, Union, Confédération, Agence, Comité, Commission, Ligue). Added spaCy POS-tag disambiguation to geography dictionary matching (PROPN filter prevents false positives on ambiguous names). Added 7 international locations (France, Allemagne, Berlin, Londres, Luxembourg, Madrid, Benelux) to geography dictionary. LOCATION false-negative rate reduced from 27.42% to 12.90%.
+- **Quality & compatibility integration tests** (Story 7.6, TD-007) — 15 new integration tests covering keyboard shortcut registry completeness, batch 5-document pipeline, and database threading concurrency. Python 3.13 blocker documented (thinc v9.1.1 lacks cp313 wheels).
 
 ### Known Issues
 

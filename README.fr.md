@@ -14,34 +14,32 @@ Préparez vos documents sensibles pour l'analyse par IA en toute sérénité : t
 
 ---
 
-## Nouveautés de la v2.0
+## Nouveautés de la v2.1
 
-- **Application de bureau** — Interface graphique PySide6 complète avec validation visuelle des entités, glisser-déposer et tableau de bord de progression en temps réel
-- **Exécutables autonomes** — Installeur Windows (.exe), DMG macOS (arm64 + Intel) et AppImage Linux — Python non requis
-- **Accessibilité WCAG 2.1 niveau AA** — Navigation au clavier, lecteurs d'écran, contrastes 4,5:1, mode contraste élevé
-- **Interface française avec changement de langue** — Interface GUI FR/EN complète avec changement de langue en temps réel et détection automatique de la locale système
-- **Traitement par lot avec validation par document** — Validation interactive des entités document par document avec navigation Précédent/Suivant
-- **Gestion de base de données en arrière-plan** — Interface réactive avec toutes les opérations de base de données sur des threads séparés
-- **Renforcement du traitement** — Assainissement des DCP dans les messages d'erreur, gestion typée des exceptions, comptage d'entités par document
+- **Validation unique par entité** — Accepter ou rejeter une occurrence s'applique automatiquement à toutes les occurrences identiques dans le document (gain de productivité pour les noms répétés)
+- **Support Excel/CSV** — Traitement des fichiers `.xlsx` et `.csv` avec pseudonymisation cellule par cellule pour les cas d'usage RH/conformité (`pip install gdpr-pseudonymizer[excel]`)
+- **Thème Neutral ID** — Identifiants séquentiels (PERSON-001, LIEU-001, ORG-001) pour les contextes formels/juridiques (`--theme neutral_id`)
+- **Amélioration de la précision NER** — Enrichissement des expressions régulières ORG, désambiguïsation POS pour le dictionnaire géographique ; taux de faux négatifs LOCATION réduit de 27 % à 13 %
+- **Découvrabilité de l'interface** — Dialogue d'aide F1 avec tous les groupes de raccourcis, persistance du chemin de base de données entre sessions, bouton « Masquer les validées »
 
 <!-- TODO: Ajouter une capture d'écran de l'interface graphique -->
 
-**Mise à jour :** `pip install --upgrade gdpr-pseudonymizer[gui]`
+**Mise à jour :** `pip install --upgrade gdpr-pseudonymizer[gui,excel]`
 
 ---
 
 ## Téléchargement — Exécutables autonomes (sans Python)
 
-Des exécutables autonomes v2.0 pré-compilés sont disponibles pour Windows, macOS et Linux. Aucune installation de Python requise.
+Des exécutables autonomes pré-compilés sont disponibles pour Windows, macOS et Linux. Aucune installation de Python requise.
 
 **[Télécharger la dernière version](https://github.com/LioChanDaYo/RGPDpseudonymizer/releases/latest)**
 
 | Plateforme | Fichier | Notes |
 |------------|---------|-------|
-| **Windows** | `gdpr-pseudonymizer-2.0.0-windows-setup.exe` | Lancer l'installeur. Ajoute un raccourci au menu Démarrer. |
-| **macOS (Apple Silicon)** | `gdpr-pseudonymizer-2.0.0-macos-arm64.dmg` | Ouvrir le DMG, glisser vers Applications. |
-| **macOS (Intel)** | `gdpr-pseudonymizer-2.0.0-macos-x86_64.dmg` | Ouvrir le DMG, glisser vers Applications. |
-| **Linux** | `gdpr-pseudonymizer-2.0.0-linux.AppImage` | `chmod +x` puis exécuter. |
+| **Windows** | `gdpr-pseudonymizer-2.1.0-windows-setup.exe` | Lancer l'installeur. Ajoute un raccourci au menu Démarrer. |
+| **macOS (Apple Silicon)** | `gdpr-pseudonymizer-2.1.0-macos-arm64.dmg` | Ouvrir le DMG, glisser vers Applications. |
+| **macOS (Intel)** | `gdpr-pseudonymizer-2.1.0-macos-x86_64.dmg` | Ouvrir le DMG, glisser vers Applications. |
+| **Linux** | `gdpr-pseudonymizer-2.1.0-linux.AppImage` | `chmod +x` puis exécuter. |
 
 ### Notes par plateforme
 
@@ -113,7 +111,7 @@ GDPR Pseudonymizer est un **outil CLI et GUI conçu pour la confidentialité**. 
 
 ## 🚀 Prise en main rapide
 
-**Version actuelle :** 🎉 **v2.0.0** (mars 2026) — Interface graphique, exécutables autonomes et accessibilité
+**Version actuelle :** 🎉 **v2.1.0** (mars 2026) — Améliorations GUI, support Excel/CSV et précision NER
 
 ### Pour commencer
 
@@ -135,17 +133,19 @@ pip install gdpr-pseudonymizer[excel]
 pip install gdpr-pseudonymizer[formats]
 ```
 
-### Ce que la v2.0 offre
+### Ce que la v2.1 offre
 
 - 🖥️ **Interface graphique** — Validation visuelle des entités avec glisser-déposer, tableau de bord de lot et gestion de base de données
 - 📦 **Exécutables autonomes** — Installeur Windows .exe, DMG macOS (arm64 + Intel), AppImage Linux — Python non requis
 - ♿ **Accessibilité WCAG 2.1 AA** — Navigation au clavier, lecteurs d'écran, mode contraste élevé
 - 🌐 **Interface française** — Interface GUI FR/EN complète avec changement de langue en temps réel
-- 🤖 **Détection assistée par IA** — La détection hybride NLP + regex repère environ 60 % des entités (F1 59,97 %)
+- 🤖 **Détection assistée par IA** — La détection hybride NLP + regex repère environ 60 % des entités
 - ✅ **Relecture humaine obligatoire** — Vous vérifiez toutes les entités (précision finale 100 %)
 - 🔒 **Traitement 100 % local** — Vos données ne quittent jamais votre machine
 - 📄 **Support PDF/DOCX** — Traitement direct des fichiers PDF et DOCX (extras optionnels)
 - 📊 **Support Excel/CSV** — Traitement des fichiers .xlsx et .csv avec pseudonymisation cellule par cellule (extra optionnel : `[excel]`)
+- 🆔 **Thème Neutral ID** — Identifiants séquentiels (PERSON-001, LIEU-001) pour les contextes formels/juridiques
+- 🎯 **Précision NER** — Taux de faux négatifs LOCATION réduit de 27 % à 13 % via enrichissement regex et désambiguïsation POS
 
 **Ce qu'elle ne propose pas :**
 - ❌ Un traitement entièrement automatique sans intervention
@@ -158,7 +158,9 @@ pip install gdpr-pseudonymizer[formats]
 
 **v1.1 (T1 2026) :** Effacement RGPD, pseudonymes genrés, amélioration NER, support PDF/DOCX, documentation française
 
-**v2.0 (T1 2026) — VERSION ACTUELLE :** Interface graphique, exécutables autonomes, accessibilité WCAG AA, interface française, validation par lot, renforcement
+**v2.0 (T1 2026) :** Interface graphique, exécutables autonomes, accessibilité WCAG AA, interface française, validation par lot, renforcement
+
+**v2.1 (T1 2026) — VERSION ACTUELLE :** Améliorations GUI, support Excel/CSV, thème Neutral ID, précision NER, aide raccourcis clavier
 
 **v3.0 (2027+) :** Précision NLP et automatisation
 - Modèle NER français affiné (objectif F1 70-85 %, contre ~60 % actuellement)
@@ -467,7 +469,7 @@ L'interface de validation offre un parcours intuitif piloté au clavier pour pas
 
 ## 🛠️ État du développement
 
-**Epics 1-6 terminés** — v2.0.0 (mars 2026). Interface graphique avec exécutables autonomes et accessibilité WCAG AA.
+**Epics 1-7 terminés** — v2.1.0 (mars 2026). Améliorations GUI, support Excel/CSV, précision NER.
 
 - ✅ **Epic 1 :** Fondations et validation NLP (9 stories) — Intégration spaCy, interface de validation, détection hybride, déduplication des entités
 - ✅ **Epic 2 :** Moteur de pseudonymisation (9 stories) — Bibliothèques de pseudonymes, chiffrement, journaux d'audit, traitement par lot, correspondance 1:1 RGPD
@@ -487,7 +489,15 @@ L'interface de validation offre un parcours intuitif piloté au clavier pour pas
   - ✅ Story 6.7.3 : Validation par document en lot — Validation interactive des entités par document en mode lot, navigation Précédent/Suivant, annulation avec affichage des statuts, 21 nouveaux tests
   - ✅ Story 6.8 : Exécutables autonomes et distribution — Builds PyInstaller, installeur NSIS (Windows), DMG (macOS), AppImage (Linux), workflow CI
   - ✅ Story 6.9 : Préparation de la version v2.0 — Bump de version, CHANGELOG, mises à jour de la documentation, coordination de la publication
-- **Total :** 53 stories, 1 800+ tests, 86 %+ de couverture, tous les contrôles qualité au vert
+- ✅ **Epic 7 :** v2.1 Améliorations GUI, Excel/CSV et précision NER (7 stories) — Validation unique par entité, aide raccourcis clavier, persistance du chemin BDD, thème Neutral ID, support Excel/CSV, enrichissement regex NER et désambiguïsation POS, tests d'intégration, release v2.1
+  - ✅ Story 7.1 : Améliorations UX de la validation (validation unique par entité, bouton masquer les confirmées)
+  - ✅ Story 7.2 : Découvrabilité GUI (dialogue F1, synchronisation paramètres, persistance chemin BDD)
+  - ✅ Story 7.3 : Thème Neutral ID (identifiants séquentiels)
+  - ✅ Story 7.4 : Support formats Excel et CSV (pipeline tabulaire)
+  - ✅ Story 7.5 : Enrichissement regex NER et désambiguïsation POS
+  - ✅ Story 7.6 : Tests d'intégration qualité et compatibilité
+  - ✅ Story 7.7 : Préparation de la release v2.1
+- **Total :** 60 stories, 1 670+ tests, 86 %+ de couverture, tous les contrôles qualité au vert
 
 ---
 
@@ -636,7 +646,7 @@ poetry run pytest tests/integration/test_validation_workflow_integration.py -v
 - **Tests de précision :** 22 tests mesurant la précision NER sur un corpus de référence de 25 documents (Story 4.4)
 - **Tests de performance :** 19 tests validant toutes les exigences non fonctionnelles — benchmarks par document (NFR1), benchmarks de détection d'entités, traitement par lot (NFR2), profilage mémoire (NFR4), temps de démarrage (NFR5), stabilité et taux d'erreur (NFR6), tests de charge (Story 4.5)
 - **Couverture actuelle :** 86 %+ sur l'ensemble des modules (100 % pour le module de progression, 91,41 % pour AuditRepository)
-- **Total :** 1 800+ tests
+- **Total :** 1 670+ tests
 - **CI/CD :** Tests exécutés sur Python 3.10-3.12, sous Windows, macOS et Linux
 - **Contrôles qualité :** Tous validés (Black, Ruff, mypy, pytest)
 
@@ -666,12 +676,12 @@ La suite de tests d'intégration couvre :
 
 ---
 
-## 📊 Métriques du projet (au 2026-03-03)
+## 📊 Métriques du projet (au 2026-03-17)
 
 | Métrique | Valeur | Statut |
 |----------|--------|--------|
-| **Avancement** | v2.0.0 | ✅ Epics 1-6 terminés |
-| **Stories terminées** | 52 (Epics 1-6) | ✅ Tous les epics terminés |
+| **Avancement** | v2.1.0 | ✅ Epics 1-7 terminés |
+| **Stories terminées** | 60 (Epics 1-7) | ✅ Tous les epics terminés |
 | **Utilité LLM (NFR10)** | 4,27/5,0 (85,4 %) | ✅ VALIDÉ (seuil : 80 %) |
 | **Succès d'installation (NFR3)** | 87,5 % (7/8 plateformes) | ✅ VALIDÉ (seuil : 85 %) |
 | **Première pseudonymisation (NFR14)** | 100 % en moins de 30 min | ✅ VALIDÉ (seuil : 80 %) |
@@ -692,7 +702,7 @@ La suite de tests d'intégration couvre :
 | **Utilisation mémoire (NFR4)** | environ 1 Go de pic mesuré par Python | ✅ VALIDÉ (seuil < 8 Go) |
 | **Démarrage CLI (NFR5)** | 0,56 s (help), 6,0 s (démarrage à froid avec modèle) | ✅ VALIDÉ (< 5 s pour le démarrage CLI) |
 | **Taux d'erreur (NFR6)** | environ 0 % d'erreurs inattendues | ✅ VALIDÉ (seuil < 10 %) |
-| **Couverture de test** | 1 800+ tests (dont 393 GUI), 86 %+ de couverture | ✅ Tous les contrôles qualité validés |
+| **Couverture de test** | 1 670+ tests (dont 393 GUI), 86 %+ de couverture | ✅ Tous les contrôles qualité validés |
 | **Contrôles qualité** | Ruff, mypy, pytest | ✅ Tous validés (0 problème) |
 | **Langues GUI/CLI** | Français (défaut), Anglais | 🌐 Changement en temps réel (Story 6.6) |
 | **Langues de documents** | Français | 🇫🇷 v1.0 uniquement |
@@ -710,4 +720,4 @@ La suite de tests d'intégration couvre :
 
 ---
 
-**Dernière mise à jour :** 2026-03-13 (v2.0.0+ — Interface graphique, exécutables autonomes, accessibilité WCAG AA, interface française, support Excel/CSV, 1 800+ tests au total)
+**Dernière mise à jour :** 2026-03-17 (v2.1.0 — Améliorations GUI, support Excel/CSV, thème Neutral ID, précision NER, 1 670+ tests)

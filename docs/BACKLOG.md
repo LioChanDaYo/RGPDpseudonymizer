@@ -1,14 +1,14 @@
 # Product Backlog - GDPR Pseudonymizer
 
-**Last Updated:** 2026-03-13
+**Last Updated:** 2026-03-17
 **Epic 1 Status:** ✅ Complete (9/9 stories)
 **Epic 2 Status:** ✅ Complete (9/9 stories)
 **Epic 3 Status:** ✅ Complete (7/7 stories)
 **Epic 4 Status:** ✅ Complete (7/7 stories)
 **v1.0 MVP:** ✅ LAUNCHED (2026-02-09, PyPI published)
 **Epic 6 Status:** ✅ Complete (13/13 stories, v2.0.0 released 2026-03-04)
-**Epic 7 Status:** In Progress (4/6 stories complete — Stories 7.1, 7.2, 7.3, 7.4 done; Stories 7.5, 7.6 remaining)
-**Next Milestone:** v2.1 GUI Polish, Excel, NER Accuracy (Epic 7)
+**Epic 7 Status:** ✅ Complete (7/7 stories, v2.1.0 released 2026-03-17)
+**v2.1:** ✅ RELEASED (2026-03-17, PyPI published)
 
 ---
 
@@ -417,7 +417,7 @@ Press Enter to continue...
 
 ---
 
-#### FE-011: NLP Accuracy — Regex Pattern Expansion 📅 v2.1 — Epic 7 Story 7.5
+#### FE-011: NLP Accuracy — Regex Pattern Expansion ✅ Done — Epic 7 Story 7.5
 **Source:** Story 4.4 NER Accuracy Report, MON-003 Baseline Review
 **Description:** Expand regex patterns to address lowest-accuracy edge case categories identified in Story 4.4 accuracy validation
 **Impact:** High — LOCATION FN=37%, ORG FN=66%, Last/First recall=0%. Regex improvements are the fastest path to reducing user-added entities in validation mode
@@ -445,7 +445,7 @@ Press Enter to continue...
 
 ---
 
-#### FE-012: Ground-Truth Annotation Quality Cleanup 📅 v2.1 — Epic 7 Story 7.5
+#### FE-012: Ground-Truth Annotation Quality Cleanup ✅ Done — Epic 7 Story 7.5
 **Source:** Story 4.4 Task 4.4.1 corpus validation
 **Description:** Clean up annotation quality issues discovered during Story 4.4 accuracy validation
 **Impact:** Medium — annotation quality issues inflate FN counts and make accuracy metrics unreliable for trend analysis
@@ -539,7 +539,7 @@ Press Enter to continue...
 
 ---
 
-#### FE-015: Excel and Google Sheets Format Support 📅 v2.1 — Epic 7 Story 7.4
+#### FE-015: Excel and Google Sheets Format Support ✅ Done — Epic 7 Story 7.4
 **Source:** User inquiry (2026-02-19)
 **Description:** Support Excel (.xlsx, .xls) and CSV formats for structured data pseudonymization. Google Sheets require export-to-Excel workflow (local-only architecture constraint).
 **Impact:** Medium — HR/compliance professionals (GUI target audience) heavily use Excel for employee data, case management, research datasets
@@ -565,7 +565,7 @@ Press Enter to continue...
 
 ---
 
-#### FE-016: Neutral/Generic Pseudonym Theme 📅 v2.1 — Epic 7 Story 7.3
+#### FE-016: Neutral/Generic Pseudonym Theme ✅ Done — Epic 7 Story 7.3
 **Source:** User request (2026-02-19)
 **Description:** Add a "neutral" pseudonym theme option that uses generic identifiers (PER-001, PER-002, LOC-001, ORG-001, etc.) instead of named pseudonyms. Alternative to existing themes (french, lotr, star_wars).
 **Impact:** Medium — useful for formal/legal contexts where themed names feel inappropriate, maximum anonymity (no cultural associations), simpler for automated data processing
@@ -599,7 +599,7 @@ Press Enter to continue...
 
 ---
 
-#### FE-017: Persist Last-Used Database Across App Restarts 📅 v2.1 — Epic 7 Story 7.2
+#### FE-017: Persist Last-Used Database Across App Restarts ✅ Done — Epic 7 Story 7.2
 **Source:** User feedback (2026-02-20)
 **Description:** After selecting a database in the PassphraseDialog, persist that choice so it becomes the default on next app launch. Currently the app auto-detects databases but never remembers which one was last used — users must re-select every session.
 **Impact:** Low-Medium — reduces friction for users who always work with the same database; especially important for single-project workflows
@@ -626,7 +626,7 @@ Press Enter to continue...
 
 ---
 
-#### FE-018: Show Validation Keyboard Shortcuts in Help Menu 📅 v2.1 — Epic 7 Story 7.2
+#### FE-018: Show Validation Keyboard Shortcuts in Help Menu ✅ Done — Epic 7 Story 7.2
 **Source:** User feedback (2026-02-20)
 **Description:** The F1 keyboard shortcuts dialog and the Settings screen shortcuts section only show 6 global shortcuts. The powerful keyboard navigation mode (Enter, Tab, Delete, Escape) and validation shortcuts (Ctrl+Z, Ctrl+F) are completely undocumented in the UI — users can only discover them by accident.
 **Impact:** Medium — expert mode is a key productivity feature but zero discoverability makes it effectively invisible to most users
@@ -783,12 +783,14 @@ Press Enter to continue...
 3. Run full test suite on target version
 4. If passing: Update CI matrix, pyproject.toml, and documentation (see TD-004)
 
-**Current Status (2026-02-09):**
+**Current Status (2026-03-17):**
 | Python | spaCy Status | CI Status | Action Needed |
 |--------|--------------|-----------|---------------|
 | 3.12 | ✅ Verified | ✅ In matrix | None |
-| 3.13 | ❌ Blocked (thinc lacks cp313 wheels) | ❌ Not in matrix | Monitor thinc releases |
+| 3.13 | ❌ Blocked (thinc v9.1.1 lacks cp313 wheels) | ❌ Not in matrix | Monitor thinc releases |
 | 3.14 | ❌ Pre-release | N/A | Monitor |
+
+**Story 7.6 Confirmation (2026-03-17):** Python 3.13 still blocked by `thinc` v9.1.1 (no cp313 wheels). PySide6-Essentials supports 3.13 via stable ABI. Documented in CHANGELOG.md Known Issues. Will be added once thinc ships cp313 wheels.
 
 **Story 4.6 Finding (2026-02-09):** Python 3.13 blocked by `thinc` (spaCy's ML backend). Neither thinc 8.3.2 (locked) nor thinc 9.1.1 (latest) publishes cp313 wheels. Also blocked: `srsly` <2.5.0 and `numpy` <2.1.0 lack 3.13 wheels. Re-evaluate when thinc publishes 3.13 support.
 
@@ -918,9 +920,9 @@ When adding items from future stories:
 
 **Backlog Maintained By:** Sarah (Product Owner)
 **Review Cadence:** End of each epic
-**Last Review:** 2026-02-11 (Post-launch cleanup — all epics complete, v1.0 launched)
-**Last Update:** 2026-02-11 (Epic 5 created — all v1.1 backlog items assigned to stories)
-**Next Review:** After Epic 5 completion (v1.1 release)
+**Last Review:** 2026-03-17 (Epic 7 complete — v2.1.0 release, all backlog items assigned to Epic 7 marked Done)
+**Last Update:** 2026-03-17 (Epic 7 completion — FE-011/012/015/016/017/018/019/020 Done, MON-005 re-confirmed)
+**Next Review:** After Epic 8 planning or next feature cycle
 
 ---
 
