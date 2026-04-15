@@ -52,7 +52,7 @@ gui = ["PySide6-Essentials"]
 all = ["PySide6-Essentials", "pdfplumber", "python-docx", "openpyxl"]
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^7.4.0"
+pytest = ">=9.0.3,<10.0.0"
 pytest-cov = "^4.1.0"
 pytest-mock = "^3.12.0"
 pytest-benchmark = "^4.0.0"
