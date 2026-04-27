@@ -13,6 +13,24 @@ No changes yet.
 
 ---
 
+## [2.1.1] - 2026-04-27
+
+**GDPR Pseudonymizer v2.1.1 — Security Patch**
+
+Lockfile-only security update addressing 2 Dependabot alerts. No source code changes; no functional changes.
+
+### Security
+
+- **lxml 6.0.2 → 6.1.0** (Dependabot #20, High) — Patches CVE for XXE to local files via default configuration of `iterparse()` and `ETCompatXMLParser()`. Audit confirmed the vulnerable APIs are not invoked anywhere in the GDPR Pseudonymizer codebase; lxml is a transitive dependency via `python-docx`. Bump applied as defense-in-depth.
+- **python-dotenv 1.2.1 → 1.2.2** (Dependabot #19, Medium) — Patches symlink-following vulnerability in `set_key()` allowing arbitrary file overwrite via cross-device rename fallback. Audit confirmed `set_key()` is not used; only `load_dotenv()` (read path) is used in development scripts. Bump applied as defense-in-depth.
+
+### Verified
+
+- Local quality gates (Windows): black, ruff, mypy all pass; pytest 1673 passed / 1 skipped / 152 deselected (spaCy tests deselected per known Windows Story 4.6.1 issue)
+- CI matrix on PR #68: 9/9 checks green across Ubuntu / macOS / Windows × Python 3.10 / 3.11 / 3.12 (full suite incl. spaCy on Linux & macOS)
+
+---
+
 ## [2.1.0] - 2026-03-17
 
 **GDPR Pseudonymizer v2.1.0 — GUI Polish, Excel/CSV Support & NER Accuracy**
