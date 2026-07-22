@@ -114,6 +114,4 @@ class TestDocumentationBuild:
             for line in mkdocs_build.stderr.splitlines()
             if "WARNING" in line and "Material for MkDocs" not in line
         ]
-        assert not warnings, "MkDocs build produced warnings:\n" + "\n".join(
-            warnings
-        )
+        assert not warnings, "MkDocs build produced warnings:\n" + "\n".join(warnings)
