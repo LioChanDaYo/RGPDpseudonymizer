@@ -1,0 +1,32 @@
+# Normalize line endings. The repository canonical is LF (already how blobs
+# are stored); forcing eol=lf on checkout kills the CRLF/LF churn that mixed
+# Windows/WSL editing produces.
+* text=auto eol=lf
+
+# Scripts that must keep their native platform endings.
+*.sh   text eol=lf
+*.bat  text eol=crlf
+*.cmd  text eol=crlf
+*.ps1  text eol=crlf
+
+# Binary assets — never apply EOL conversion (would corrupt them).
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.pdf  binary
+*.doc  binary
+*.docx binary
+*.xls  binary
+*.xlsx binary
+*.zip  binary
+*.gz   binary
+*.woff  binary
+*.woff2 binary
+*.ttf  binary
+*.otf  binary
+*.eot  binary
+*.pyc  binary
+*.pyd  binary
+*.so   binary

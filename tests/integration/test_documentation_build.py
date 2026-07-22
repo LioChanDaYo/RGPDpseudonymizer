@@ -105,7 +105,15 @@ class TestDocumentationBuild:
     ) -> None:
         """Verify MkDocs build produces no link warnings in stderr."""
         assert mkdocs_build.returncode == 0, "Build must succeed first"
-        stderr = mkdocs_build.stderr.lower()
-        assert (
-            "warning" not in stderr
-        ), f"MkDocs build produced warnings:\n{mkdocs_build.stderr}"
+        # mkdocs emits real problems as all-caps "WARNING -  ..." log lines.
+        # The Material for MkDocs promotional banner (a box-drawn notice about
+        # the future MkDocs 2.0 release) contains the word "Warning" but is not
+        # a build warning, so it is excluded.
+        warnings = [
+            line
+            for line in mkdocs_build.stderr.splitlines()
+            if "WARNING" in line and "Material for MkDocs" not in line
+        ]
+        assert not warnings, "MkDocs build produced warnings:\n" + "\n".join(
+            warnings
+        )
