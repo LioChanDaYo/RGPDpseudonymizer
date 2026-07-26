@@ -13,6 +13,34 @@ No changes yet.
 
 ---
 
+## [2.1.2] - 2026-07-26
+
+**GDPR Pseudonymizer v2.1.2 — Security Patch**
+
+Dependency security update resolving 21 Dependabot alerts (13 High, 6 Medium, 2 Low). No source code changes; no functional changes.
+
+### Security
+
+- **cryptography `>=46.0.5,<47.0.0` → `>=48.0.1,<49.0.0`** (Dependabot #28 direct / #30 transitive, High) — GHSA-537c-gmf6-5ccf: vulnerable OpenSSL bundled in the published `cryptography` wheels. Unlike an API-specific CVE, this affects every consumer of the wheel regardless of which APIs are called, so no "vulnerable API not invoked" exemption applies — the constraint bump is the fix. **This is the only change visible to `pip install` users:** the published 2.1.1 metadata pinned `cryptography<47.0.0`, holding installations inside the vulnerable range with no upgrade path. Vault encryption re-verified on 48.0.1 (Fernet encrypt/decrypt round-trip).
+- **Lockfile bumps — reach users via the standalone executables, which bundle the resolved environment:** Pillow → 12.3.0 (13 alerts: 10 High, 3 Medium — heap overflow in `ImageCmsTransform.apply()` plus decoder CVEs; reaches the project transitively through the optional `pdfplumber` extra), stanza → 1.14.0 (CVE-2026-54499, High), torch → 2.13.0 (3 alerts), idna → 3.18 (CVE-2026-45409), pymdown-extensions → 11.0.1 (CVE-2026-46338, docs toolchain). These are dev/transitive dependencies not declared in the published package metadata, so `pip install` resolution is unaffected by them.
+
+### Fixed
+
+- **CI: mypy `python_version` 3.9 → 3.10** in `mypy.ini` — the torch 2.13 bump exposed that mypy at 3.9 cannot parse `match` statements in torch's source, failing the quality gate. 3.10 is the project's minimum supported version (matches `requires-python` and the black/ruff `py310` targets). Note: the root `mypy.ini` takes precedence over `[tool.mypy]` in `pyproject.toml`, which is therefore dead configuration.
+
+### Changed
+
+- **Added `.gitattributes`** normalizing line endings to LF, ending the CRLF churn produced by mixed Windows/WSL editing (working tree reported ~780 spuriously modified files).
+- **`test_internal_links_no_warnings`** now matches real mkdocs `WARNING` log lines instead of any occurrence of the substring "warning", which the Material for MkDocs 9.7.7 promotional banner tripped.
+
+### Verified
+
+- Local quality gates (Windows): black, ruff, mypy all pass; pytest 1819 passed / 9 skipped / 2 xfailed
+- CI on `426b6eb`: Code Quality, CodeQL and the full 4-cell test matrix (Ubuntu 3.10/3.11, macOS 3.12, Windows 3.12) all green
+- Dependabot open alerts: 21 → 0
+
+---
+
 ## [2.1.1] - 2026-04-27
 
 **GDPR Pseudonymizer v2.1.1 — Security Patch**
