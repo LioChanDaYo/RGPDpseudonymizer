@@ -9,7 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-No changes yet.
+### Removed
+
+- **macOS Intel (x86_64) DMG is no longer published.** GitHub no longer serves `macos-13` Intel runners — a job targeting that label is accepted and then never assigned (verified: it sat queued indefinitely while `build-macos-arm64` and `build-linux`, dispatched in the same run at the same second, both completed). The remaining option, cross-building from an Apple Silicon runner via `arch -x86_64`, does not work: `setup-python` installs an arm64 interpreter on `macos-14`, so `venv_x86` is an arm64 environment holding arm64 wheels, and PyInstaller correctly refuses it with `IncompatibleBinaryArchError: cryptography/hazmat/bindings/_rust.abi3.so is incompatible with target arch x86_64 (has arch: arm64)`. The `build-macos-x86_64` job has been removed rather than left permanently failing. **Intel Mac users: `pip install gdpr-pseudonymizer` — both the CLI and the GUI work.** Releases now ship Windows, Linux and macOS Apple Silicon.
+
+### Fixed
+
+- **A failing platform no longer strips every installer from a release.** `upload-release` was gated on all four build jobs succeeding, so one broken matrix cell skipped the upload entirely — which is why v2.1.3 published to PyPI successfully and still shipped a GitHub Release with zero assets, where v2.1.1 shipped four. It now runs under `if: always()` (which still waits for every build job to finish; it only stops one failure from skipping the upload), attaches whichever installers were produced, emits a warning annotation naming any that are missing, and fails only if no platform produced anything at all.
+
+- **The x86_64 dependency install was silently producing a broken environment.** Recorded for the archaeology, since the job itself is now gone: torch has no macOS x86_64 wheels from 2.8 onward and reached this project only transitively, through `stanza` in the dev group. Poetry does not skip an unresolvable package — it aborts the entire install, leaving every package sorting after `torch` uninstalled. The casualty was `wasabi`, which `thinc` imports, so the build died on `ModuleNotFoundError: No module named 'wasabi'` while appearing to blame spaCy. The step's `|| true` suppressed the exit code but not the damage. Installing with `--without dev` resolved it and let the build proceed to the arch check above, which is what exposed the real, unfixable problem.
+
+  Regression window: the install break dates to the torch 2.13.0 bump in v2.1.2 (2026-07-26). v2.1.1 (2026-04-27) was the last release to ship a complete asset set.
 
 ---
 

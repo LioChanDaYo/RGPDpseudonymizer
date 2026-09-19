@@ -36,10 +36,14 @@ Des exécutables autonomes pré-compilés sont disponibles pour Windows, macOS e
 
 | Plateforme | Fichier | Notes |
 |------------|---------|-------|
-| **Windows** | `gdpr-pseudonymizer-2.1.0-windows-setup.exe` | Lancer l'installeur. Ajoute un raccourci au menu Démarrer. |
-| **macOS (Apple Silicon)** | `gdpr-pseudonymizer-2.1.0-macos-arm64.dmg` | Ouvrir le DMG, glisser vers Applications. |
-| **macOS (Intel)** | `gdpr-pseudonymizer-2.1.0-macos-x86_64.dmg` | Ouvrir le DMG, glisser vers Applications. |
-| **Linux** | `gdpr-pseudonymizer-2.1.0-linux.AppImage` | `chmod +x` puis exécuter. |
+| **Windows** | `gdpr-pseudonymizer-2.1.3-windows-setup.exe` | Lancer l'installeur. Ajoute un raccourci au menu Démarrer. |
+| **macOS (Apple Silicon)** | `gdpr-pseudonymizer-2.1.3-macos-arm64.dmg` | Ouvrir le DMG, glisser vers Applications. |
+| **Linux** | `gdpr-pseudonymizer-2.1.3-linux.AppImage` | `chmod +x` puis exécuter. |
+
+> **Macs Intel :** aucun DMG n'est publié. GitHub a retiré ses runners macOS Intel, et un
+> runner Apple Silicon ne peut pas compiler un bundle x86_64 fonctionnel. Installez plutôt
+> avec `pip install gdpr-pseudonymizer` — la CLI et l'interface graphique fonctionnent sur Intel.
+
 
 ### Notes par plateforme
 
@@ -136,7 +140,7 @@ pip install gdpr-pseudonymizer[formats]
 ### Ce que la v2.1 offre
 
 - 🖥️ **Interface graphique** — Validation visuelle des entités avec glisser-déposer, tableau de bord de lot et gestion de base de données
-- 📦 **Exécutables autonomes** — Installeur Windows .exe, DMG macOS (arm64 + Intel), AppImage Linux — Python non requis
+- 📦 **Exécutables autonomes** — Installeur Windows .exe, DMG macOS (Apple Silicon), AppImage Linux — Python non requis
 - ♿ **Accessibilité WCAG 2.1 AA** — Navigation au clavier, lecteurs d'écran, mode contraste élevé
 - 🌐 **Interface française** — Interface GUI FR/EN complète avec changement de langue en temps réel
 - 🤖 **Détection assistée par IA** — La détection hybride NLP + regex repère environ 60 % des entités
