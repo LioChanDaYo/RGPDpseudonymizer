@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **`build-executables` can be dispatched for a specific version.** `workflow_dispatch` now takes an optional `version` input, stamped into installer internals and artifact names. Blank keeps the previous behaviour exactly (derive from the tag ref, else `dev`). This makes it possible to rebuild installers for an already-published release without moving its tag — moving a tag would re-trigger `release.yaml`, which fails against an already-published PyPI version. Used to backfill v2.1.3's installers.
+
 ### Removed
 
 - **macOS Intel (x86_64) DMG is no longer published.** GitHub no longer serves `macos-13` Intel runners — a job targeting that label is accepted and then never assigned (verified: it sat queued indefinitely while `build-macos-arm64` and `build-linux`, dispatched in the same run at the same second, both completed). The remaining option, cross-building from an Apple Silicon runner via `arch -x86_64`, does not work: `setup-python` installs an arm64 interpreter on `macos-14`, so `venv_x86` is an arm64 environment holding arm64 wheels, and PyInstaller correctly refuses it with `IncompatibleBinaryArchError: cryptography/hazmat/bindings/_rust.abi3.so is incompatible with target arch x86_64 (has arch: arm64)`. The `build-macos-x86_64` job has been removed rather than left permanently failing. **Intel Mac users: `pip install gdpr-pseudonymizer` — both the CLI and the GUI work.** Releases now ship Windows, Linux and macOS Apple Silicon.
