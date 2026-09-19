@@ -24,10 +24,14 @@ Pour les utilisateurs non techniques, des exécutables autonomes pré-compilés 
 
 **[Télécharger la dernière version](https://github.com/LioChanDaYo/RGPDpseudonymizer/releases/latest)**
 
-- **Windows :** `gdpr-pseudonymizer-2.0.0-windows-setup.exe` — Lancez l'installeur
-- **macOS (Apple Silicon) :** `gdpr-pseudonymizer-2.0.0-macos-arm64.dmg` — Ouvrez le DMG, glissez vers Applications
-- **macOS (Intel) :** `gdpr-pseudonymizer-2.0.0-macos-x86_64.dmg` — Ouvrez le DMG, glissez vers Applications
-- **Linux :** `gdpr-pseudonymizer-2.0.0-linux.AppImage` — `chmod +x` puis exécutez
+- **Windows :** `gdpr-pseudonymizer-2.1.3-windows-setup.exe` — Lancez l'installeur
+- **macOS (Apple Silicon) :** `gdpr-pseudonymizer-2.1.3-macos-arm64.dmg` — Ouvrez le DMG, glissez vers Applications
+- **Linux :** `gdpr-pseudonymizer-2.1.3-linux.AppImage` — `chmod +x` puis exécutez
+
+!!! note "Macs Intel"
+    Aucun DMG n'est publié pour les Macs Intel. GitHub a retiré ses runners macOS Intel, et
+    un runner Apple Silicon ne peut pas compiler un bundle x86_64 fonctionnel. Installez
+    plutôt via PyPI — voir ci-dessous. La CLI et l'interface graphique fonctionnent sur Intel.
 
 ---
 
