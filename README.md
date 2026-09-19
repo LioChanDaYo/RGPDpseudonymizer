@@ -36,10 +36,14 @@ Pre-built standalone executables are available for Windows, macOS, and Linux. No
 
 | Platform | File | Notes |
 |----------|------|-------|
-| **Windows** | `gdpr-pseudonymizer-2.1.0-windows-setup.exe` | Run the installer. Adds Start Menu shortcut. |
-| **macOS (Apple Silicon)** | `gdpr-pseudonymizer-2.1.0-macos-arm64.dmg` | Open DMG, drag to Applications. |
-| **macOS (Intel)** | `gdpr-pseudonymizer-2.1.0-macos-x86_64.dmg` | Open DMG, drag to Applications. |
-| **Linux** | `gdpr-pseudonymizer-2.1.0-linux.AppImage` | `chmod +x` then run. |
+| **Windows** | `gdpr-pseudonymizer-2.1.3-windows-setup.exe` | Run the installer. Adds Start Menu shortcut. |
+| **macOS (Apple Silicon)** | `gdpr-pseudonymizer-2.1.3-macos-arm64.dmg` | Open DMG, drag to Applications. |
+| **Linux** | `gdpr-pseudonymizer-2.1.3-linux.AppImage` | `chmod +x` then run. |
+
+> **Intel Macs:** no DMG is published. GitHub retired its Intel macOS runners, and an
+> Apple Silicon runner cannot cross-build a working x86_64 bundle. Install with
+> `pip install gdpr-pseudonymizer` instead — the CLI and GUI both work on Intel.
+
 
 ### Platform Notes
 
