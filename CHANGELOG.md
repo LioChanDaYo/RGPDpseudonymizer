@@ -13,6 +13,34 @@ No changes yet.
 
 ---
 
+## [2.1.3] - 2026-09-19
+
+**GDPR Pseudonymizer v2.1.3 — Security Patch**
+
+Dependency security update resolving 2 Dependabot alerts (2 High, one CVE). No source code changes; no functional changes.
+
+### Security
+
+- **cryptography `>=48.0.1,<49.0.0` → `>=50.0.1,<51.0.0`** (Dependabot #46 direct / #45 transitive, High) — GHSA-g6cj-pr64-35w5 / CVE-2026-69247: `pkcs7_decrypt_der`, `pkcs7_decrypt_pem` and `pkcs7_decrypt_smime` report `EnvelopedData` decryption failures in distinguishable ways — one of them disclosing the exact length recovered from the RSA operation — and the same distinction is observable by timing. An application that decrypts attacker-supplied `EnvelopedData` and reflects the outcome hands the attacker a Bleichenbacher oracle against the content-encryption key. Introduced in 44.0.0, fixed in 50.0.0 (RFC 3218 mitigation: the content-encryption algorithm is now resolved before the private key is used, and a random key of the expected length is substituted on failure so all paths perform identical work).
+
+  **Reachability: the vulnerable API is never called by this project.** Unlike the v2.1.2 advisory (a vulnerable OpenSSL bundled in the wheel, which affects every consumer regardless of API use), this is an API-specific CVE. The project's entire `cryptography` surface is three imports in `gdpr_pseudonymizer/data/encryption.py` — `AESSIV`, `PBKDF2HMAC` and `SHA256` — and `grep` over the codebase returns zero hits for `pkcs7`, `PKCS7` or `EnvelopedData`. Exploitation additionally requires a service that auto-decrypts untrusted `EnvelopedData` at high volume, such as an S/MIME gateway; this is a local-first CLI and desktop tool. **Runtime risk to this application is nil.**
+
+  **The bump is for downstream installers, and it is the whole point.** The published 2.1.2 metadata capped `cryptography` at `<49.0.0`, which sits entirely inside the advisory's vulnerable range (`>=44.0.0,<50.0.0`). Every `pip install gdpr-pseudonymizer` therefore resolved to a vulnerable `cryptography` with no upgrade path available to the user — the same metadata trap v2.1.2 fixed for the previous advisory. Raising the constraint is the fix; the reachability analysis above explains why no code change accompanies it.
+
+- **Lockfile impact is exactly one package.** `poetry lock` under Poetry 2.2 preserves unrelated pins by default; the regenerated `poetry.lock` changes `cryptography` 48.0.1 → 50.0.1 and nothing else. No transitive upgrade, no downgrade, no collateral churn.
+
+### Verified
+
+- `cryptography.__version__` reports 50.0.1 in the project environment
+- `AESSIV`, `PBKDF2HMAC` and `SHA256` imports resolve unchanged on the new major (48 → 50 spans two majors; no API break on this surface)
+- Vault encryption re-verified on 50.0.1: encrypt/decrypt round-trip preserves plaintext, no plaintext leakage into ciphertext, and the AES-SIV deterministic property (same plaintext + key → same ciphertext) still holds — the property compositional pseudonymization depends on
+- `tests/unit/test_encryption.py` + `tests/integration/test_encrypted_database_integration.py`: 35 passed
+- Local quality gates (Windows, Python 3.11): black, ruff, mypy all pass (102 source files, no issues)
+- `poetry check --lock` exit 0 — lock consistent with `pyproject.toml`
+- Dependabot open alerts: 2 → 0 (code scanning: 0 open; secret scanning: 0 open)
+
+---
+
 ## [2.1.2] - 2026-07-26
 
 **GDPR Pseudonymizer v2.1.2 — Security Patch**
