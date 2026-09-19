@@ -9,7 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-No changes yet.
+### Fixed
+
+- **`build-macos-x86_64` no longer fails, and a broken platform no longer empties a release.** Two defects, found when v2.1.3 published to PyPI successfully but its GitHub Release came out with zero installers (v2.1.1 shipped four).
+
+  1. **The x86_64 dependency install was silently producing a broken venv.** torch has no macOS x86_64 wheels from 2.8 onward and reaches this project only transitively, through `stanza` in the dev group. Poetry does not skip an unresolvable package — it aborts the entire install, so every package sorting after `torch` was left uninstalled. The casualty is `wasabi`, which `thinc` imports, so the next step died on `ModuleNotFoundError: No module named 'wasabi'` while pointing at spaCy. The step's `|| true` suppressed the exit code but not the damage. Fixed by installing with `--without dev`, which drops `stanza` and with it `torch`, so the resolve completes; `pyinstaller` lives in that same group and is now installed explicitly at its locked version (6.21.0). `torch` and `stanza` were already excluded from the bundle via `gdpr-pseudo-gui.spec`, so the app is unaffected. The `|| true` is gone — a real resolve failure must now fail loudly.
+  2. **`upload-release` was gated on all four build jobs succeeding.** One failed matrix cell skipped the upload entirely, so a single broken platform cost the release every other installer. It now runs with `if: always()` (which still waits for all four to finish), attaches whichever installers were produced, raises a warning annotation naming any that are missing, and fails only if no platform produced anything.
+
+  Regression window: the x86_64 break dates to the torch 2.13.0 bump in v2.1.2 (2026-07-26); v2.1.1 (2026-04-27) was the last release to ship a complete asset set.
 
 ---
 
