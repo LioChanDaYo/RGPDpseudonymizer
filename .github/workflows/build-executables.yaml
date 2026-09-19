@@ -272,7 +272,7 @@ jobs:
   # macOS -- Intel (x86_64) via Rosetta 2 cross-compilation
   # =========================================================================
   build-macos-x86_64:
-    runs-on: macos-14
+    runs-on: macos-13
     timeout-minutes: 45
     env:
       HAS_APPLE_CERT: ${{ secrets.APPLE_CERT_BASE64 != '' }}
