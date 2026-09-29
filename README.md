@@ -325,7 +325,8 @@ After comprehensive benchmarking on 25 French interview/business documents (1,73
 |----------|----------|-----------|--------|-------|
 | **spaCy only** `fr_core_news_lg` | 29.5% | 27.0% | 32.7% | Story 1.2 baseline |
 | **Hybrid** (spaCy + regex) | 59.97% | 48.17% | 79.45% | Story 5.3 |
-| **Hybrid + expanded patterns** | 31.79% | 19.49% | 85.15% | Story 7.5 (current) |
+| **Hybrid + expanded patterns** | 31.79% | 25.38% | 42.54% | Story 7.5 |
+| **Span-bleed fixes** | 32.34% | 26.75% | 40.88% | 2026-09-29 (current) — recall drop is a ground-truth artefact, see QA report |
 
 **Accuracy trajectory:** spaCy-only baseline → hybrid approach with annotation cleanup, expanded regex patterns, and French geography dictionary doubled F1 score. Story 7.5 added 12 ORG pattern keywords, POS-tag disambiguation for geography matching, and 7 international locations — reducing LOCATION false-negative rate from 27.42% to 12.90%.
 

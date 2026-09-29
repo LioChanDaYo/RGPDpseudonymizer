@@ -324,7 +324,8 @@ Après un benchmark approfondi sur 25 documents français (entretiens et documen
 |----------|----------|-----------|--------|-------|
 | **spaCy seul** `fr_core_news_lg` | 29,5 % | 27,0 % | 32,7 % | Ligne de base (Story 1.2) |
 | **Hybride** (spaCy + regex) | 59,97 % | 48,17 % | 79,45 % | Story 5.3 |
-| **Hybride + patterns enrichis** | 31,79 % | 19,49 % | 85,15 % | Story 7.5 (actuel) |
+| **Hybride + patterns enrichis** | 31,79 % | 25,38 % | 42,54 % | Story 7.5 |
+| **Correctifs de débordement des entités** | 32,34 % | 26,75 % | 40,88 % | 2026-09-29 (actuel) — la baisse du rappel vient de la vérité terrain, voir le rapport QA |
 
 **Progression de la précision :** En passant de spaCy seul à l'approche hybride — avec nettoyage des annotations, enrichissement des expressions régulières et ajout d'un dictionnaire géographique français — le score F1 a doublé. Story 7.5 a ajouté 12 mots-clés de détection ORG, la désambiguïsation POS pour le dictionnaire géographique et 7 lieux internationaux — réduisant le taux de faux négatifs LOCATION de 27,42 % à 12,90 %.
 

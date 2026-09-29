@@ -644,3 +644,50 @@ class TestRegexMatcher:
         assert (
             len(bad_matches) == 0
         ), "Dubois, Commission should NOT be detected as PERSON"
+
+    # Last, First guard: the first name must be known, else "Word, Word" leaks
+    @pytest.mark.parametrize(
+        "text",
+        [
+            "Thanks, Janne. The survey is done.",
+            "M. Thomas Weber, Directeur Commercial",
+            "BNP Paribas, Crédit Agricole et Natixis",
+            "On behalf of Tsinghua University, Wei and I agreed.",
+        ],
+    )
+    def test_last_first_names_rejects_unknown_first_name(
+        self, matcher: RegexMatcher, text: str
+    ) -> None:
+        """'Word, Word' pairs without a known first name are NOT Last, First."""
+        entities = matcher.match_entities(text)
+
+        bad_matches = [
+            e for e in entities if "," in e.text and e.entity_type == "PERSON"
+        ]
+        assert bad_matches == []
+
+    def test_last_first_names_without_dictionary_keeps_match(self) -> None:
+        """Without a name dictionary the Last, First pattern behaves as before."""
+        matcher = RegexMatcher()
+        matcher.load_patterns()
+        matcher.name_dictionary = None
+        entities = matcher.match_entities("Merci, Janne pour le rapport.")
+
+        assert any(e.text == "Merci, Janne" for e in entities)
+
+    @pytest.mark.parametrize(
+        ("text", "expected"),
+        [
+            ("Dr. Marja-Liisa Mikkola a validé.", "Dr. Marja-Liisa Mikkola"),
+            ("Dr. Fatima Al-Mansoor a signé.", "Dr. Fatima Al-Mansoor"),
+            ("Mme María García est arrivée.", "Mme María García"),
+            ("M. Ahmet Yılmaz est présent.", "M. Ahmet Yılmaz"),
+        ],
+    )
+    def test_title_pattern_non_french_and_hyphenated_names(
+        self, matcher: RegexMatcher, text: str, expected: str
+    ) -> None:
+        """Titles capture hyphenated and non-French names without cutting them."""
+        entities = matcher.match_entities(text)
+
+        assert expected in [e.text for e in entities if e.entity_type == "PERSON"]

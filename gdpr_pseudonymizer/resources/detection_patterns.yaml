@@ -1,4 +1,6 @@
 # Regex Pattern Library for French Entity Detection
+# Letter classes cover Latin-1 + Latin Extended-A (í ñ ø å ş ı ł č š ž ő...),
+# not only French accents, so non-French names are not cut mid-word.
 # Each pattern category can be enabled/disabled for hybrid detection
 
 patterns:
@@ -8,8 +10,8 @@ patterns:
     confidence: 0.85
     entity_type: PERSON
     patterns:
-      - pattern: '\b(M\.|Mme|Mlle|Dr\.|Pr\.|Maître|Me\.?)\s+([A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][a-zàâäéèêëïîôöùûü]+(?:\s+[A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][a-zàâäéèêëïîôöùûü]+)?)'
-        description: "Matches titles + names: M. Dupont, Dr. Marie Dubois, Mme Laurent, Maître Dupont, Me Mercier"
+      - pattern: '\b(M\.|Mme|Mlle|Dr\.|Pr\.|Maître|Me\.?)\s+([A-ZÀ-ÖØ-ÞĀ-ſ][a-zß-öø-ÿĀ-ſ]+(?:-[A-ZÀ-ÖØ-ÞĀ-ſ][a-zß-öø-ÿĀ-ſ]+)*(?:\s+[A-ZÀ-ÖØ-ÞĀ-ſ][a-zß-öø-ÿĀ-ſ]+(?:-[A-ZÀ-ÖØ-ÞĀ-ſ][a-zß-öø-ÿĀ-ſ]+)*)?)'
+        description: "Matches titles + names: M. Dupont, Dr. Marie Dubois, Mme Laurent, Maître Dupont, Me Mercier, Dr. Marja-Liisa Mikkola"
         examples:
           - "M. Dupont"
           - "Mme Laurent"
@@ -25,7 +27,7 @@ patterns:
     confidence: 0.80
     entity_type: PERSON
     patterns:
-      - pattern: '\b([A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][a-zàâäéèêëïîôöùûü]+-[A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][a-zàâäéèêëïîôöùûü]+)\b'
+      - pattern: '\b([A-ZÀ-ÖØ-ÞĀ-ſ][a-zß-öø-ÿĀ-ſ]+-[A-ZÀ-ÖØ-ÞĀ-ſ][a-zß-öø-ÿĀ-ſ]+)\b'
         description: "Matches hyphenated first names: Jean-Pierre, Marie-Claire"
         examples:
           - "Jean-Pierre"
@@ -38,8 +40,11 @@ patterns:
     enabled: true
     confidence: 0.80
     entity_type: PERSON
+    # First name (after the comma) must be in the name dictionary, otherwise
+    # any "Word, Word" pair matches ("Merci, Jean", "Weber, Directeur")
+    require_known_first_name: true
     patterns:
-      - pattern: '\b([A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][a-zàâäéèêëïîôöùûü]+(?:-[A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][a-zàâäéèêëïîôöùûü]+)?)\s*,\s*(?!Cabinet|Société|Association|Fondation|Institut|Groupe|Consortium|Fédération|Entreprise|Compagnie|Direction|Service|Département|Commission|Comité|Syndicat|Chambre|Mutuelle|Coopérative|Ordre|Caisse|Union|Confédération|Agence|Ligue)([A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][a-zàâäéèêëïîôöùûü]+(?:-[A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][a-zàâäéèêëïîôöùûü]+)?)'
+      - pattern: '\b([A-ZÀ-ÖØ-ÞĀ-ſ][a-zß-öø-ÿĀ-ſ]+(?:-[A-ZÀ-ÖØ-ÞĀ-ſ][a-zß-öø-ÿĀ-ſ]+)?)\s*,\s*(?!Cabinet|Société|Association|Fondation|Institut|Groupe|Consortium|Fédération|Entreprise|Compagnie|Direction|Service|Département|Commission|Comité|Syndicat|Chambre|Mutuelle|Coopérative|Ordre|Caisse|Union|Confédération|Agence|Ligue)([A-ZÀ-ÖØ-ÞĀ-ſ][a-zß-öø-ÿĀ-ſ]+(?:-[A-ZÀ-ÖØ-ÞĀ-ſ][a-zß-öø-ÿĀ-ſ]+)?)'
         description: "Last, First format (e.g., Dubois, Jean-Marc) with exclusion of ORG/function words"
         examples:
           - "Dubois, Jean-Marc"
@@ -52,7 +57,7 @@ patterns:
     confidence: 0.65
     entity_type: LOCATION
     patterns:
-      - pattern: '\b(à|en|dans|près de|ville de)\s+([A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][a-zàâäéèêëïîôöùûü]+(?:\s+[A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][a-zàâäéèêëïîôöùûü]+)?)'
+      - pattern: '\b(à|en|dans|près de|ville de)\s+([A-ZÀ-ÖØ-ÞĀ-ſ][a-zß-öø-ÿĀ-ſ]+(?:\s+[A-ZÀ-ÖØ-ÞĀ-ſ][a-zß-öø-ÿĀ-ſ]+)?)'
         description: "Matches location indicators: à Paris, en France, près de Lyon"
         examples:
           - "à Paris"
@@ -67,7 +72,7 @@ patterns:
     confidence: 0.70
     entity_type: ORG
     patterns:
-      - pattern: '\b([A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][A-Za-zàâäéèêëïîôöùûü\s&,''\.\-]+?)\s+(SA|SARL|SAS|SASU|EURL|SNC|SCM|SCI|GIE|EI|SCOP|SEL|Association|Fondation|Institut|Groupe|Consortium|Fédération|Syndicat|Chambre|Mutuelle|Coopérative|Ordre|Caisse|Union|Confédération|Agence|Comité|Commission|Ligue)\b'
+      - pattern: '\b([A-ZÀ-ÖØ-ÞĀ-ſ][A-Za-zß-öø-ÿĀ-ſ\s&,''\.\-]+?)\s+(SA|SARL|SAS|SASU|EURL|SNC|SCM|SCI|GIE|EI|SCOP|SEL|Association|Fondation|Institut|Groupe|Consortium|Fédération|Syndicat|Chambre|Mutuelle|Coopérative|Ordre|Caisse|Union|Confédération|Agence|Comité|Commission|Ligue)\b'
         description: "Organization with legal form suffix (30 forms)"
         examples:
           - "TechCorp SA"
@@ -78,7 +83,7 @@ patterns:
           - "Solutions SCOP"
           - "TechCorp Association"
           - "Marie Curie Fondation"
-      - pattern: '\b(Société|Entreprise|Cabinet|Groupe|Compagnie|Association|Fondation|Institut|Consortium|Fédération|Syndicat|Chambre|Mutuelle|Coopérative|Ordre|Caisse|Union|Confédération|Agence|Comité|Commission|Ligue)\s+([A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][A-Za-zàâäéèêëïîôöùûü\s&,\-]+)'
+      - pattern: '\b(Société|Entreprise|Cabinet|Groupe|Compagnie|Association|Fondation|Institut|Consortium|Fédération|Syndicat|Chambre|Mutuelle|Coopérative|Ordre|Caisse|Union|Confédération|Agence|Comité|Commission|Ligue)\s+([A-ZÀ-ÖØ-ÞĀ-ſ][A-Za-zß-öø-ÿĀ-ſ\s&,\-]+)'
         description: "Organization with prefix keyword (22 prefixes)"
         examples:
           - "Société TechCorp"

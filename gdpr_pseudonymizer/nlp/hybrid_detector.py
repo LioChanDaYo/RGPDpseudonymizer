@@ -10,6 +10,8 @@ Implements EntityDetector interface using a hybrid approach:
 
 from __future__ import annotations
 
+import re
+
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity, EntityDetector
 from gdpr_pseudonymizer.nlp.regex_matcher import RegexMatcher
 from gdpr_pseudonymizer.nlp.spacy_detector import SpaCyDetector
@@ -94,6 +96,10 @@ class HybridDetector(EntityDetector):
         spacy_entities = self.spacy_detector.detect_entities(text)
         for entity in spacy_entities:
             entity.source = "spacy"
+
+        # Trim non-name tokens (timestamps, punctuation) off span edges before
+        # merging, so dedup and mapping lookup see the bare name
+        spacy_entities = self._trim_entity_boundaries(spacy_entities)
 
         logger.debug("spacy_detection_complete", entities_found=len(spacy_entities))
 
@@ -235,6 +241,82 @@ class HybridDetector(EntityDetector):
             return True
 
         return False
+
+    @staticmethod
+    def _is_edge_junk_token(token: str, entity_type: str) -> bool:
+        """Check if a span-edge token cannot be part of an entity name.
+
+        Tokens with letters are always kept. PERSON names never contain
+        letterless tokens, so any is junk. ORG/LOCATION keep bare numbers
+        ("Studio 54", "Paris 2024") and only lose timestamps and punctuation.
+
+        Args:
+            token: Whitespace-delimited token at the edge of an entity span
+            entity_type: PERSON, LOCATION, or ORG
+
+        Returns:
+            True if the token should be trimmed off the span
+        """
+        if any(char.isalpha() for char in token):
+            return False
+        if entity_type == "PERSON":
+            return True
+        is_timestamp = ":" in token and any(char.isdigit() for char in token)
+        is_punctuation = not any(char.isalnum() for char in token)
+        return is_timestamp or is_punctuation
+
+    def _trim_entity_boundaries(
+        self, entities: list[DetectedEntity]
+    ) -> list[DetectedEntity]:
+        """Trim timestamps and punctuation that NER models glue to entity spans.
+
+        Transformer models (e.g. en_core_web_trf) often draw spans too wide on
+        transcripts: "Janne Matilainen        24:85:01" comes back as one PERSON.
+        Since mappings are keyed on the full entity text, every timestamp would
+        otherwise create a new entity with its own pseudonym.
+
+        Args:
+            entities: List of detected entities
+
+        Returns:
+            Entities with edge junk trimmed; entities that are only junk are dropped
+        """
+        trimmed = []
+        for entity in entities:
+            tokens = list(re.finditer(r"\S+", entity.text))
+            first, last = 0, len(tokens) - 1
+            while first <= last and self._is_edge_junk_token(
+                tokens[first].group(), entity.entity_type
+            ):
+                first += 1
+            while last >= first and self._is_edge_junk_token(
+                tokens[last].group(), entity.entity_type
+            ):
+                last -= 1
+
+            if first > last:
+                logger.debug(
+                    "junk_only_entity_filtered",
+                    text=entity.text,
+                    entity_type=entity.entity_type,
+                    reason="no_name_tokens",
+                )
+                continue
+
+            start = tokens[first].start()
+            end = tokens[last].end()
+            if start != 0 or end != len(entity.text):
+                logger.debug(
+                    "entity_boundary_trimmed",
+                    original=entity.text,
+                    trimmed=entity.text[start:end],
+                )
+                entity.start_pos += start
+                entity.end_pos = entity.start_pos + (end - start)
+                entity.text = entity.text[start:end]
+            trimmed.append(entity)
+
+        return trimmed
 
     def _filter_title_only_entities(
         self, entities: list[DetectedEntity]
