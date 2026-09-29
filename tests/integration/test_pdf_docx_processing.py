@@ -140,7 +140,7 @@ def mock_hybrid_detector(monkeypatch: pytest.MonkeyPatch):
     """Use mock detector for deterministic entity detection."""
     monkeypatch.setattr(
         "gdpr_pseudonymizer.core.document_processor.HybridDetector",
-        lambda: MockHybridDetector(),
+        lambda **kwargs: MockHybridDetector(),
     )
 
 

@@ -74,7 +74,7 @@ def mock_hybrid_detector_for_deterministic_tests(monkeypatch):
     from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 
     class MockHybridDetector:
-        def __init__(self):
+        def __init__(self, default_model: str = "fr_core_news_lg"):
             pass
 
         def load_model(self, model_name: str) -> None:
