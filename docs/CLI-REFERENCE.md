@@ -108,7 +108,7 @@ gdpr-pseudo process INPUT_FILE [OPTIONS]
 |--------|-------|---------|-------------|
 | `--output PATH` | `-o` | `<input>_pseudonymized.ext` | Output file path |
 | `--theme TEXT` | `-t` | `neutral` | Pseudonym library theme (neutral/star_wars/lotr/neutral_id) |
-| `--model TEXT` | `-m` | `spacy` | NLP model name |
+| `--model TEXT` | `-m` | `spacy` | NLP model: `spacy` (French `fr_core_news_lg`) or a spaCy package name, e.g. `en_core_web_trf` |
 | `--db PATH` | | `mappings.db` | Database file path |
 | `--passphrase TEXT` | `-p` | (prompt) | Database passphrase |
 | `--entity-types TEXT` | | (all) | Filter entity types to process (comma-separated: PERSON,LOCATION,ORG). Only specified types will be detected and pseudonymized. |
@@ -168,7 +168,7 @@ gdpr-pseudo batch INPUT_PATH [OPTIONS]
 |--------|-------|---------|-------------|
 | `--output PATH` | `-o` | Same as input with `_pseudonymized` suffix | Output directory |
 | `--theme TEXT` | `-t` | `neutral` | Pseudonym library theme |
-| `--model TEXT` | `-m` | `spacy` | NLP model name |
+| `--model TEXT` | `-m` | `spacy` | NLP model: `spacy` (French `fr_core_news_lg`) or a spaCy package name, e.g. `en_core_web_trf` |
 | `--db PATH` | | `mappings.db` | Database file path |
 | `--passphrase TEXT` | `-p` | (prompt) | Database passphrase |
 | `--recursive` | `-r` | | Process subdirectories recursively |
@@ -257,10 +257,12 @@ gdpr-pseudo config set logging.level DEBUG
 |-----|------|-------------|
 | `database.path` | string | Database file path |
 | `pseudonymization.theme` | string | Pseudonym theme (neutral/star_wars/lotr/neutral_id) |
-| `pseudonymization.model` | string | NLP model (spacy) |
+| `pseudonymization.model` | string | NLP model: `spacy` (French `fr_core_news_lg`) or a spaCy package name, e.g. `en_core_web_trf` |
 | `batch.workers` | integer | Parallel workers (1-8) |
 | `batch.output_dir` | string | Default output directory |
 | `logging.level` | string | Log level (DEBUG/INFO/WARNING/ERROR) |
+
+**Using another spaCy model:** set `model` to any spaCy package name (for example `en_core_web_trf` for English). A missing model is downloaded on first use (`python -m spacy download <name>`); the standalone installers only bundle the French model. The model choice affects NLP detection only: the regex patterns, name and geography dictionaries, and pseudonym libraries remain French. The model actually used (name and version) is recorded in the audit log.
 
 ---
 

@@ -13,6 +13,7 @@ from __future__ import annotations
 import re
 
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity, EntityDetector
+from gdpr_pseudonymizer.nlp.model_names import DEFAULT_SPACY_MODEL
 from gdpr_pseudonymizer.nlp.regex_matcher import RegexMatcher
 from gdpr_pseudonymizer.nlp.spacy_detector import SpaCyDetector
 from gdpr_pseudonymizer.utils.french_patterns import strip_french_titles
@@ -40,10 +41,16 @@ class HybridDetector(EntityDetector):
         regex_matcher: RegexMatcher instance for pattern-based detection
     """
 
-    def __init__(self) -> None:
-        """Initialize hybrid detector with spaCy and regex components."""
+    def __init__(self, default_model: str = DEFAULT_SPACY_MODEL) -> None:
+        """Initialize hybrid detector with spaCy and regex components.
+
+        Args:
+            default_model: spaCy model loaded lazily on first detection when
+                load_model() was not called (e.g., "en_core_web_trf")
+        """
         self.spacy_detector = SpaCyDetector()
         self.regex_matcher = RegexMatcher()
+        self.default_model = default_model
         self._model_loaded = False
 
     def load_model(self, model_name: str) -> None:
@@ -89,8 +96,10 @@ class HybridDetector(EntityDetector):
 
         if not self._model_loaded:
             # Lazy load with default model
-            logger.warning("hybrid_detector_lazy_loading_model")
-            self.load_model("fr_core_news_lg")
+            logger.warning(
+                "hybrid_detector_lazy_loading_model", model=self.default_model
+            )
+            self.load_model(self.default_model)
 
         # Step 1: spaCy NER
         spacy_entities = self.spacy_detector.detect_entities(text)

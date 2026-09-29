@@ -220,7 +220,9 @@ def _process(
         None,
         "--model",
         "-m",
-        help=_("NLP model name (spacy). Default from config."),
+        help=_(
+            "NLP model: 'spacy' (default French model) or a spaCy package name, e.g. en_core_web_trf. Default from config."
+        ),
     ),
     db_path: Optional[str] = typer.Option(
         None,
@@ -287,7 +289,9 @@ def _batch(
         None,
         "--model",
         "-m",
-        help=_("NLP model name (spacy). Default from config."),
+        help=_(
+            "NLP model: 'spacy' (default French model) or a spaCy package name, e.g. en_core_web_trf. Default from config."
+        ),
     ),
     db_path: Optional[str] = typer.Option(
         None,

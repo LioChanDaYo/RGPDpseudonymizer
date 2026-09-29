@@ -345,7 +345,7 @@ The validation UI provides an intuitive keyboard-driven interface for reviewing 
 - ✅ **Entity-by-type grouping** - Review PERSON → ORG → LOCATION in logical order
 - ✅ **Context display** - See 10 words before/after each entity with highlighting
 - ✅ **Confidence scores** - Color-coded confidence from spaCy NER (green >80%, yellow 60-80%, red <60%)
-- ✅ **Keyboard shortcuts** - Single-key actions: [Space] Confirm, [R] Reject, [E] Modify, [A] Add, [C] Change pseudonym
+- ✅ **Keyboard shortcuts** - Single-key actions: [Space] Confirm, [R] Reject, [E] Modify, [T] Change type, [A] Add, [C] Change pseudonym
 - ✅ **Batch operations** - Accept/reject all entities of a type at once (Shift+A/R) with entity count feedback
 - ✅ **Context cycling indicator** - Dot indicator (`● ○ ○ ○ ○`) shows current context position; `[Press X to cycle]` hint improves discoverability
 - ✅ **Help overlay** - Press [H] for full command reference

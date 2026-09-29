@@ -22,6 +22,7 @@ from gdpr_pseudonymizer.exceptions import (
     ConfigValidationError,
     PassphraseInConfigError,
 )
+from gdpr_pseudonymizer.nlp.model_names import is_spacy_package_name
 
 
 @dataclass
@@ -73,6 +74,21 @@ VALID_LOG_LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR"]
 VALID_MODELS = ["spacy"]
 
 
+def is_valid_model(model: str) -> bool:
+    """Check if a model value is accepted.
+
+    "spacy" selects the default French model; any well-formed spaCy package
+    name (e.g., "en_core_web_trf") selects that model.
+
+    Args:
+        model: Model value from config or CLI
+
+    Returns:
+        True if the value is accepted
+    """
+    return model in VALID_MODELS or is_spacy_package_name(model)
+
+
 def get_default_config() -> AppConfig:
     """Get default application configuration.
 
@@ -117,10 +133,11 @@ def validate_config_dict(config_dict: dict[str, Any], source: str = "config") ->
             )
 
         model = pseudonymization.get("model")
-        if model is not None and model not in VALID_MODELS:
+        if model is not None and not is_valid_model(str(model)):
             raise ConfigValidationError(
                 f"Invalid model '{model}' in {source}. "
-                f"Valid models: {', '.join(VALID_MODELS)}"
+                f"Valid models: {', '.join(VALID_MODELS)}, "
+                f"or a spaCy package name (e.g. en_core_web_trf)"
             )
 
     # Validate logging level

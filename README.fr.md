@@ -344,7 +344,7 @@ L'interface de validation offre un parcours intuitif piloté au clavier pour pas
 - ✅ **Regroupement par type** — Les entités sont présentées dans un ordre logique : PERSON → ORG → LOCATION
 - ✅ **Affichage du contexte** — 10 mots avant et après chaque entité, avec mise en surbrillance
 - ✅ **Scores de confiance** — Code couleur selon la confiance du modèle spaCy (vert > 80 %, jaune 60-80 %, rouge < 60 %)
-- ✅ **Raccourcis clavier** — Actions à une touche : [Espace] Confirmer, [R] Rejeter, [E] Modifier, [A] Ajouter, [C] Changer le pseudonyme
+- ✅ **Raccourcis clavier** — Actions à une touche : [Espace] Confirmer, [R] Rejeter, [E] Modifier, [T] Changer le type, [A] Ajouter, [C] Changer le pseudonyme
 - ✅ **Actions groupées** — Accepter ou rejeter toutes les entités d'un type en une fois (Maj+A/R) avec affichage du nombre d'entités traitées
 - ✅ **Indicateur de défilement des contextes** — Points indicateurs (`● ○ ○ ○ ○`) montrant la position courante ; mention `[Press X to cycle]` pour faciliter la découverte de la touche X
 - ✅ **Aide intégrée** — Appuyez sur [H] pour afficher tous les raccourcis

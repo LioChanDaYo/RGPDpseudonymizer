@@ -88,6 +88,10 @@ class TestValidateConfigDict:
         assert "Invalid theme" in str(exc_info.value)
         assert "invalid_theme" in str(exc_info.value)
 
+    def test_spacy_package_model_accepted(self) -> None:
+        """A spaCy package name is a valid model value."""
+        validate_config_dict({"pseudonymization": {"model": "en_core_web_trf"}})
+
     def test_invalid_model_rejected(self) -> None:
         """Test that invalid model is rejected."""
         config_dict = {"pseudonymization": {"model": "unknown_model"}}

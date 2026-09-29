@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Choose the spaCy model.** `--model` and `pseudonymization.model` now accept any spaCy package name (e.g. `en_core_web_trf` for English) in addition to `spacy`, which still selects the French `fr_core_news_lg`. Previously the value was only written to the audit log and the French model was always loaded, so using another language required editing the source. Unknown values (e.g. `--model english`) are rejected instead of silently falling back to French. The model choice affects NLP detection only; regex patterns, dictionaries and pseudonym libraries remain French.
+
+- **Change an entity's type during validation (`[T]`).** A person detected as LOCATION or ORG can be retyped in place (PERSON / LOCATION / ORG) instead of being rejected and re-added by hand. Applies to every occurrence in the group.
+
 - **`build-executables` can be dispatched for a specific version.** `workflow_dispatch` now takes an optional `version` input, stamped into installer internals and artifact names. Blank keeps the previous behaviour exactly (derive from the tag ref, else `dev`). This makes it possible to rebuild installers for an already-published release without moving its tag — moving a tag would re-trigger `release.yaml`, which fails against an already-published PyPI version. Used to backfill v2.1.3's installers.
 
 ### Removed
@@ -22,6 +26,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Regex name patterns accept non-French letters and hyphenated names after titles.** Letter classes in `detection_patterns.yaml` now cover Latin-1 and Latin Extended-A (í ñ ø å ş ı ł č š ž ő…) instead of French accents only, so "María" is no longer cut to "Mar" and "Yılmaz" to "Y". The title pattern accepts hyphenated names ("Dr. Marja-Liisa Mikkola", "Dr. Fatima Al-Mansoor").
 
 ### Fixed
+
+- **Editing an entity with `[E]` no longer erases neighbouring text.** The edited text kept the original span's offsets, and replacement is offset-based: trimming "Thanks, Aino" to "Aino" still replaced all of "Thanks, Aino", deleting "Thanks, " from the output. The span now moves to where the edited text sits (shrinking or extending it); if the text is not found next to the original span, the original offsets are kept as before.
+
+- **The audit log records the NLP model actually used.** Every operation was logged as `spacy-unknown`; it now records e.g. `fr_core_news_lg-3.8.0` or `en_core_web_trf-3.8.0`.
 
 - **"Last, First" matching no longer turns any "Word, Word" pair into a PERSON.** `last_first_names` matched "Merci, Jean", "Weber, Directeur" (a surname followed by a job title), "Paribas, Crédit" and, on English text, "Thanks, Aino". During validation these spans overlap the real name, so editing them with [E] deleted the neighbouring word. The pattern now requires the part after the comma to be a known first name (new `require_known_first_name` option, checked against the name dictionary). "Dubois, Jean-Marc" and "Martin, Sophie" still match.
 

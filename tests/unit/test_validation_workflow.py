@@ -301,3 +301,79 @@ class TestBatchFeedbackMessages:
         msg = str(reject_calls[0])
         # Should show 3 affected (5 total - 2 already decided)
         assert "3 PERSON" in msg
+
+
+class TestModifyAndChangeType:
+    """[E] keeps the edited text's own span; [T] changes the entity type."""
+
+    @staticmethod
+    def _review(
+        document_text: str,
+        entity: DetectedEntity,
+        actions: list[str],
+        inputs: list[str],
+    ) -> list[DetectedEntity]:
+        session = ValidationSession(document_path="t.txt", document_text=document_text)
+        session.add_entity(entity)
+        with (
+            patch(
+                "gdpr_pseudonymizer.validation.workflow.get_user_action",
+                side_effect=actions,
+            ),
+            patch(
+                "gdpr_pseudonymizer.validation.workflow.get_text_input",
+                side_effect=inputs,
+            ),
+            patch("gdpr_pseudonymizer.validation.workflow.display_warning_message"),
+            patch("gdpr_pseudonymizer.validation.workflow.display_info_message"),
+        ):
+            ValidationWorkflow()._review_entities_by_type(session, make_assigner("X"))
+        return session.get_validated_entities()
+
+    def test_modify_shrink_moves_span_to_edited_text(self) -> None:
+        """Editing "Thanks, Aino" to "Aino" must not replace "Thanks, " too."""
+        doc = "Thanks, Aino. The survey is done."
+        entity = _make_entity("Thanks, Aino", "PERSON", start_pos=0)
+
+        [result] = self._review(doc, entity, ["modify"], ["Aino"])
+
+        assert result.text == "Aino"
+        assert doc[result.start_pos : result.end_pos] == "Aino"
+
+    def test_modify_extend_covers_edited_text(self) -> None:
+        """Editing a truncated name to its full form extends the span."""
+        doc = "Dr. Marja-Liisa Mikkola a validé."
+        entity = _make_entity("Dr. Marja", "PERSON", start_pos=0)
+
+        [result] = self._review(doc, entity, ["modify"], ["Dr. Marja-Liisa Mikkola"])
+
+        assert doc[result.start_pos : result.end_pos] == "Dr. Marja-Liisa Mikkola"
+
+    def test_modify_text_not_in_document_keeps_original_span(self) -> None:
+        """A replacement text absent near the span keeps the original offsets."""
+        doc = "Rapport de Jean Dupont."
+        entity = _make_entity("Jean Dupont", "PERSON", start_pos=11)
+
+        [result] = self._review(doc, entity, ["modify"], ["Jean Dupond"])
+
+        assert result.text == "Jean Dupond"
+        assert (result.start_pos, result.end_pos) == (11, 22)
+
+    def test_change_type_retypes_entity(self) -> None:
+        """[T] turns a person mislabelled as LOCATION into a PERSON."""
+        doc = "Mikkola recommends a second pass."
+        entity = _make_entity("Mikkola", "LOCATION", start_pos=0)
+
+        [result] = self._review(doc, entity, ["change_type"], ["person"])
+
+        assert (result.text, result.entity_type) == ("Mikkola", "PERSON")
+        assert (result.start_pos, result.end_pos) == (0, 7)
+
+    def test_change_type_invalid_input_keeps_entity_pending(self) -> None:
+        """An invalid type is refused and the entity stays up for review."""
+        doc = "Mikkola recommends a second pass."
+        entity = _make_entity("Mikkola", "LOCATION", start_pos=0)
+
+        [result] = self._review(doc, entity, ["change_type", "confirm"], ["PLACE"])
+
+        assert result.entity_type == "LOCATION"

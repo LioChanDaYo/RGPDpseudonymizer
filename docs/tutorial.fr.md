@@ -341,7 +341,7 @@ Context:
 
 Proposed pseudonym: [Sophie Martin] (theme: neutral)
 --------------------------------------------------------------------------------
-[Space] Accept  [R] Reject  [E] Edit  [C] Change pseudonym  [H] Help
+[Space] Accept  [R] Reject  [E] Edit  [T] Type  [C] Change pseudonym  [H] Help
 ```
 
 ### Raccourcis clavier
@@ -353,6 +353,7 @@ Proposed pseudonym: [Sophie Martin] (theme: neutral)
 | `R` | Reject | Marquer comme faux positif (conserver l'original) |
 | `E` | Edit | Modifier le texte de l'entité |
 | `A` | Add | Ajouter manuellement une entité oubliée |
+| `T` | Type | Changer le type d'entité (PERSON / LOCATION / ORG) |
 | `C` | Change | Choisir un pseudonyme différent |
 
 **Navigation :**

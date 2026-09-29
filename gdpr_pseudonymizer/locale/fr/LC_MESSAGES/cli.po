@@ -64,8 +64,8 @@ msgstr "Chemin du fichier de sortie (par défaut : <entrée>_pseudonymized.ext)"
 msgid "Pseudonym library theme (neutral/star_wars/lotr). Default from config."
 msgstr "Thème de la bibliothèque de pseudonymes (neutral/star_wars/lotr). Par défaut depuis la configuration."
 
-msgid "NLP model name (spacy). Default from config."
-msgstr "Nom du modèle NLP (spacy). Par défaut depuis la configuration."
+msgid "NLP model: 'spacy' (default French model) or a spaCy package name, e.g. en_core_web_trf. Default from config."
+msgstr "Modèle NLP : « spacy » (modèle français par défaut) ou un nom de paquet spaCy, p. ex. en_core_web_trf. Par défaut depuis la configuration."
 
 msgid "Database file path. Default from config."
 msgstr "Chemin du fichier de base de données. Par défaut depuis la configuration."

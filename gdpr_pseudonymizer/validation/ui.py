@@ -62,7 +62,8 @@ def get_user_action() -> str:
     Returns:
         Action string: confirm, reject, modify, add, change_pseudonym,
                       next, previous, help, quit, batch_accept, batch_reject,
-                      expand_context (X key for cycling group contexts), invalid
+                      expand_context (X key for cycling group contexts),
+                      change_type, invalid
     """
     key = readchar.readkey()
 
@@ -80,6 +81,8 @@ def get_user_action() -> str:
         return "modify"
     elif key.lower() == "a":
         return "add"
+    elif key.lower() == "t":
+        return "change_type"
     elif key.lower() == "c":
         return "change_pseudonym"
     elif key.lower() == "x":
@@ -309,7 +312,8 @@ class ReviewScreen:
         # Action hints
         self.console.print("[bold]Actions:[/bold]")
         self.console.print(
-            "  [Space] Confirm  [R] Reject  [E] Modify  [C] Change Pseudonym"
+            "  [Space] Confirm  [R] Reject  [E] Modify  [T] Change Type"
+            "  [C] Change Pseudonym"
         )
         self.console.print(
             "  [N/→] Next  [P/←] Previous  [A] Add Entity  [H] Help  [Q] Quit"
@@ -429,6 +433,7 @@ class HelpOverlay:
   [E]         Edit entity text
   [A]         Add missed entity manually
   [C]         Change suggested pseudonym
+  [T]         Change entity type (PERSON / LOCATION / ORG)
 
 [bold]Navigation:[/bold]
   [N] / [→]   Next entity

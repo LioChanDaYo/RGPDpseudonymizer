@@ -108,7 +108,7 @@ gdpr-pseudo process FICHIER_ENTREE [OPTIONS]
 |--------|--------|--------|-------------|
 | `--output CHEMIN` | `-o` | `<entrée>_pseudonymized.ext` | Chemin du fichier de sortie |
 | `--theme TEXTE` | `-t` | `neutral` | Thème de pseudonymes (neutral/star_wars/lotr/neutral_id) |
-| `--model TEXTE` | `-m` | `spacy` | Modèle NLP à utiliser |
+| `--model TEXTE` | `-m` | `spacy` | Modèle NLP : `spacy` (français, `fr_core_news_lg`) ou un nom de paquet spaCy, p. ex. `en_core_web_trf` |
 | `--db CHEMIN` | | `mappings.db` | Chemin de la base de données |
 | `--passphrase TEXTE` | `-p` | (saisie interactive) | Mot de passe de la base de données |
 | `--entity-types TEXTE` | | (tous) | Types d'entités à traiter, séparés par des virgules (PERSON,LOCATION,ORG). Seuls les types indiqués seront détectés et pseudonymisés. |
@@ -168,7 +168,7 @@ gdpr-pseudo batch CHEMIN_ENTREE [OPTIONS]
 |--------|--------|--------|-------------|
 | `--output CHEMIN` | `-o` | Identique à l'entrée, suffixé `_pseudonymized` | Répertoire de sortie |
 | `--theme TEXTE` | `-t` | `neutral` | Thème de pseudonymes |
-| `--model TEXTE` | `-m` | `spacy` | Modèle NLP à utiliser |
+| `--model TEXTE` | `-m` | `spacy` | Modèle NLP : `spacy` (français, `fr_core_news_lg`) ou un nom de paquet spaCy, p. ex. `en_core_web_trf` |
 | `--db CHEMIN` | | `mappings.db` | Chemin de la base de données |
 | `--passphrase TEXTE` | `-p` | (saisie interactive) | Mot de passe de la base de données |
 | `--recursive` | `-r` | | Traite aussi les sous-répertoires |
@@ -257,10 +257,12 @@ gdpr-pseudo config set logging.level DEBUG
 |-----|------|-------------|
 | `database.path` | chaîne | Chemin du fichier de base de données |
 | `pseudonymization.theme` | chaîne | Thème de pseudonymes (neutral/star_wars/lotr/neutral_id) |
-| `pseudonymization.model` | chaîne | Modèle NLP (spacy) |
+| `pseudonymization.model` | chaîne | Modèle NLP : `spacy` (français, `fr_core_news_lg`) ou un nom de paquet spaCy, p. ex. `en_core_web_trf` |
 | `batch.workers` | entier | Processus parallèles (1-8) |
 | `batch.output_dir` | chaîne | Répertoire de sortie par défaut |
 | `logging.level` | chaîne | Niveau de log (DEBUG/INFO/WARNING/ERROR) |
+
+**Utiliser un autre modèle spaCy :** indiquez dans `model` n'importe quel nom de paquet spaCy (par exemple `en_core_web_trf` pour l'anglais). Un modèle absent est téléchargé à la première utilisation (`python -m spacy download <nom>`) ; les installeurs autonomes n'embarquent que le modèle français. Le choix du modèle ne concerne que la détection NLP : les expressions régulières, les dictionnaires de noms et de lieux et les bibliothèques de pseudonymes restent français. Le modèle réellement utilisé (nom et version) est enregistré dans le journal d'audit.
 
 ---
 
