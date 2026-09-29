@@ -34,7 +34,7 @@ click = ">=8.0.0,<8.2.0"
 rich = "^13.7.0"
 PyYAML = "^6.0"
 cryptography = "^50.0.1"
-SQLAlchemy = "^2.0.0"
+SQLAlchemy = ">=2.0.0,<2.1.0"  # 2.1 untested in CI; see CHANGELOG 2.2.0
 structlog = "^23.2.0"
 markdown-it-py = "^3.0.0"
 readchar = "^4.2.0"

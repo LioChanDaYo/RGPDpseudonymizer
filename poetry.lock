@@ -4727,4 +4727,4 @@ pdf = ["pdfplumber"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.14"
-content-hash = "51b290a78ed86195f58478b1f09335926e9e8d4ca31cf3a8c1ec1190247cd737"
+content-hash = "0b503a0b914a0a26aed1bf6ad6e049444b304ddd7f556a7fce596c57dae54607"

@@ -45,7 +45,6 @@ class Entity(Base):
         DateTime,
         nullable=False,
         default=datetime.utcnow,
-        insert_default=datetime.utcnow,
     )
     gender: Mapped[str | None] = mapped_column(
         String, nullable=True
@@ -55,7 +54,7 @@ class Entity(Base):
 
     # Validation support fields
     is_ambiguous: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, insert_default=False
+        Boolean, nullable=False, default=False
     )
     ambiguity_reason: Mapped[str | None] = mapped_column(String, nullable=True)
 
@@ -84,7 +83,6 @@ class Operation(Base):
         DateTime,
         nullable=False,
         default=datetime.utcnow,
-        insert_default=datetime.utcnow,
     )
     operation_type: Mapped[str] = mapped_column(
         String, nullable=False
@@ -132,7 +130,6 @@ class Metadata(Base):
         DateTime,
         nullable=False,
         default=datetime.utcnow,
-        insert_default=datetime.utcnow,
         onupdate=datetime.utcnow,
     )
 
