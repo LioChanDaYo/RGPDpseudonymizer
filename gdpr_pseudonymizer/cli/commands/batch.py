@@ -37,6 +37,7 @@ from gdpr_pseudonymizer.cli.progress import ETAColumn, ProgressTracker
 from gdpr_pseudonymizer.cli.validators import (
     ensure_database,
     parse_entity_type_filter,
+    validate_model_or_exit,
     validate_theme_or_exit,
 )
 from gdpr_pseudonymizer.core.document_processor import DocumentProcessor
@@ -438,6 +439,7 @@ def batch_command(
 
         # Validate theme
         validate_theme_or_exit(effective_theme)
+        validate_model_or_exit(effective_model)
 
         # Get passphrase
         resolved_passphrase = resolve_passphrase(

@@ -477,3 +477,22 @@ class TestHybridDetector:
         assert len(merged) == 1
         assert merged[0].source == "spacy"
         assert merged[0].text == "Marie Dubois"
+
+    def test_lazy_load_uses_default_model(self) -> None:
+        """Detection without load_model() loads the configured default model."""
+        detector = HybridDetector(default_model="en_core_web_trf")
+        loaded: list[str] = []
+
+        def fake_load(model_name: str) -> None:
+            loaded.append(model_name)
+            detector._model_loaded = True
+
+        detector.load_model = fake_load  # type: ignore[method-assign]
+        detector.spacy_detector.detect_entities = lambda text: []  # type: ignore[method-assign]
+        detector.regex_matcher.match_entities = (  # type: ignore[method-assign]
+            lambda text, spacy_doc=None: []
+        )
+
+        detector.detect_entities("Some text.")
+
+        assert loaded == ["en_core_web_trf"]

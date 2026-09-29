@@ -27,6 +27,7 @@ from gdpr_pseudonymizer.data.repositories.mapping_repository import (
 )
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 from gdpr_pseudonymizer.nlp.hybrid_detector import HybridDetector
+from gdpr_pseudonymizer.nlp.model_names import resolve_spacy_model
 from gdpr_pseudonymizer.pseudonym.assignment_engine import (
     CompositionalPseudonymEngine,
 )
@@ -132,7 +133,8 @@ class DocumentProcessor:
             db_path: Path to SQLite database file
             passphrase: Encryption passphrase for database access
             theme: Pseudonym library theme (neutral/star_wars/lotr)
-            model_name: NLP model name (spacy)
+            model_name: NLP model: "spacy" (default French model) or a spaCy
+                package name (e.g., "en_core_web_trf")
             notifier: Optional callback for user-facing messages.
                      Decouples core from CLI presentation layer.
 
@@ -162,7 +164,9 @@ class DocumentProcessor:
             OSError: If spaCy model not installed
         """
         if self._detector is None:
-            self._detector = HybridDetector()
+            self._detector = HybridDetector(
+                default_model=resolve_spacy_model(self.model_name)
+            )
         return self._detector
 
     def _detect_and_filter_entities(
@@ -1100,21 +1104,21 @@ class DocumentProcessor:
         Returns:
             Model version (e.g., "fr_core_news_lg-3.8.0")
         """
-        if self.model_name == "spacy":
-            try:
-                detector = self._get_detector()
-                if hasattr(detector, "nlp") and detector.nlp is not None:
-                    # Extract model name and version from spaCy meta
-                    meta = detector.nlp.meta
-                    return (
-                        f"{meta.get('name', 'unknown')}-{meta.get('version', '0.0.0')}"
-                    )
-            except (OSError, AttributeError, ImportError) as e:
-                logger.warning(
-                    "model_version_unavailable",
-                    error_type=type(e).__name__,
-                )
-        return f"{self.model_name}-unknown"
+        model = resolve_spacy_model(self.model_name)
+        try:
+            info = self._get_detector().spacy_detector.get_model_info()
+            if isinstance(info, dict) and "version" in info:
+                # spaCy meta names omit the language prefix ("core_news_lg")
+                lang, name = info.get("language", ""), info.get("name", "")
+                if lang and not name.startswith(f"{lang}_"):
+                    name = f"{lang}_{name}"
+                return f"{name}-{info['version']}"
+        except (OSError, AttributeError, ImportError) as e:
+            logger.warning(
+                "model_version_unavailable",
+                error_type=type(e).__name__,
+            )
+        return f"{model}-unknown"
 
     def _log_failed_operation(
         self,

@@ -15,6 +15,7 @@ from gdpr_pseudonymizer.cli.validators import (
     parse_entity_type_filter,
     validate_file_path,
     validate_log_level,
+    validate_model_or_exit,
     validate_passphrase_strength,
     validate_theme,
     validate_theme_or_exit,
@@ -292,3 +293,19 @@ class TestEnsureDatabase:
         db_path.write_text("data")
         ensure_database(str(db_path), "test_pass_12345", Console())
         mock_init.assert_not_called()
+
+
+class TestValidateModelOrExit:
+    """Tests for validate_model_or_exit()."""
+
+    @pytest.mark.parametrize("model", ["spacy", "en_core_web_trf"])
+    def test_valid_model_passes(self, model: str) -> None:
+        """'spacy' and spaCy package names do not exit."""
+        validate_model_or_exit(model)  # should not raise
+
+    @pytest.mark.parametrize("model", ["english", "--upgrade"])
+    def test_invalid_model_exits(self, model: str) -> None:
+        """Unknown values exit instead of silently falling back to French."""
+        with pytest.raises(SystemExit) as exc_info:
+            validate_model_or_exit(model)
+        assert exc_info.value.code == 1

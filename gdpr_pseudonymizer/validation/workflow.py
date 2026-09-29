@@ -244,11 +244,14 @@ class ValidationWorkflow:
                         if new_text and new_text != current_entity.text:
                             # Apply modification to all occurrences in group
                             for entity in group.occurrences:
+                                start_pos, end_pos = self._locate_modified_span(
+                                    session.document_text, entity, new_text
+                                )
                                 modified_entity = DetectedEntity(
                                     text=new_text,
                                     entity_type=entity.entity_type,
-                                    start_pos=entity.start_pos,
-                                    end_pos=entity.end_pos,
+                                    start_pos=start_pos,
+                                    end_pos=end_pos,
                                     confidence=entity.confidence,
                                     gender=entity.gender,
                                     is_ambiguous=False,
@@ -269,6 +272,23 @@ class ValidationWorkflow:
                         else:
                             for entity in group.occurrences:
                                 session.mark_confirmed(entity)
+                        group_index += 1
+                        break
+
+                    elif action == "change_type":
+                        new_type = (
+                            get_text_input("New entity type (PERSON/LOCATION/ORG)")
+                            .strip()
+                            .upper()
+                        )
+                        if new_type not in ("PERSON", "LOCATION", "ORG"):
+                            display_warning_message("Invalid entity type")
+                            continue  # Redisplay the same group
+                        for entity in group.occurrences:
+                            session.change_entity_type(entity, new_type)
+                        display_info_message(
+                            f"Changed {group.count} occurrence(s) to {new_type}"
+                        )
                         group_index += 1
                         break
 
@@ -407,6 +427,35 @@ class ValidationWorkflow:
             return "Partial compound name detected"
         else:
             return "Entity flagged as ambiguous by detection algorithm"
+
+    @staticmethod
+    def _locate_modified_span(
+        document_text: str, entity: DetectedEntity, new_text: str
+    ) -> tuple[int, int]:
+        """Find where the edited text sits relative to the original span.
+
+        Replacement is offset-based, so editing "Thanks, Aino" down to "Aino"
+        must move the span onto "Aino"; keeping the original offsets would
+        replace (erase) "Thanks, " as well. Extending a truncated name
+        ("Dr. Marja" -> "Dr. Marja-Liisa") widens the span the same way.
+
+        Args:
+            document_text: Full document text
+            entity: Entity being edited (original span)
+            new_text: Text entered by the user
+
+        Returns:
+            (start_pos, end_pos) of the edited text overlapping the original
+            span, or the original span if the text is not found there
+        """
+        window_start = max(0, entity.start_pos - len(new_text))
+        window_end = min(len(document_text), entity.end_pos + len(new_text))
+        pos = document_text.find(new_text, window_start, window_end)
+        while pos != -1:
+            if pos < entity.end_pos and pos + len(new_text) > entity.start_pos:
+                return pos, pos + len(new_text)
+            pos = document_text.find(new_text, pos + 1, window_end)
+        return entity.start_pos, entity.end_pos
 
     def _handle_add_entity(self, session: ValidationSession) -> None:
         """Handle manual entity addition flow.

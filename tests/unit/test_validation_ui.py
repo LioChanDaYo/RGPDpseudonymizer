@@ -6,6 +6,8 @@ and ReviewScreen display behaviour.
 
 from __future__ import annotations
 
+from unittest.mock import patch
+
 import pytest
 
 from gdpr_pseudonymizer.validation.ui import generate_context_dots
@@ -119,3 +121,12 @@ class TestGenerateContextDots:
     def test_exactly_one_active_dot_truncated(self, idx: int) -> None:
         result = generate_context_dots(idx, 15)
         assert result.count("●") == 1
+
+
+@pytest.mark.parametrize("key", ["t", "T"])
+def test_get_user_action_t_is_change_type(key: str) -> None:
+    """[T] maps to the change_type action."""
+    from gdpr_pseudonymizer.validation.ui import get_user_action
+
+    with patch("gdpr_pseudonymizer.validation.ui.readchar.readkey", return_value=key):
+        assert get_user_action() == "change_type"

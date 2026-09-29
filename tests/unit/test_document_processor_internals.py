@@ -709,3 +709,49 @@ class TestHandleProcessingError:
         assert result.success is False
         assert "ValueError" in result.error_message
         assert "bad value" in result.error_message
+
+
+class TestModelSelection:
+    """The configured model reaches the detector and the audit log."""
+
+    @patch("gdpr_pseudonymizer.core.document_processor.HybridDetector")
+    def test_legacy_spacy_uses_default_model(self, mock_detector: MagicMock) -> None:
+        """model_name="spacy" builds a detector on the French default."""
+        processor = _make_processor()
+        processor._get_detector()  # type: ignore[attr-defined]
+
+        mock_detector.assert_called_once_with(default_model="fr_core_news_lg")
+
+    @patch("gdpr_pseudonymizer.core.document_processor.HybridDetector")
+    def test_package_name_selects_model(self, mock_detector: MagicMock) -> None:
+        """A spaCy package name is passed through to the detector."""
+        from gdpr_pseudonymizer.core.document_processor import DocumentProcessor
+
+        processor = DocumentProcessor(
+            db_path="test.db", passphrase="test_pass", model_name="en_core_web_trf"
+        )
+        processor._get_detector()
+
+        mock_detector.assert_called_once_with(default_model="en_core_web_trf")
+
+    def test_model_version_from_loaded_model(self) -> None:
+        """Audit version is built from spaCy meta, with the language prefix."""
+        processor = _make_processor()
+        detector = MagicMock()
+        detector.spacy_detector.get_model_info.return_value = {
+            "name": "core_news_lg",
+            "version": "3.8.0",
+            "language": "fr",
+        }
+        processor._detector = detector  # type: ignore[attr-defined]
+
+        assert processor._get_model_version() == "fr_core_news_lg-3.8.0"  # type: ignore[attr-defined]
+
+    def test_model_version_before_model_loaded(self) -> None:
+        """Before the model loads, the configured model is recorded, not 'spacy'."""
+        processor = _make_processor()
+        detector = MagicMock()
+        detector.spacy_detector.get_model_info.return_value = {"language": "fr"}
+        processor._detector = detector  # type: ignore[attr-defined]
+
+        assert processor._get_model_version() == "fr_core_news_lg-unknown"  # type: ignore[attr-defined]

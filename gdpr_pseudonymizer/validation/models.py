@@ -136,6 +136,7 @@ class EntityReview:
         entity_id: Unique identifier for this entity
         state: Current review state
         user_modification: Modified entity text if state is MODIFIED
+        modified_entity: Full modified entity (text, span, type) if MODIFIED
         suggested_pseudonym: Suggested pseudonym for display (optional)
         custom_pseudonym: User-provided custom pseudonym override
     """
@@ -144,6 +145,7 @@ class EntityReview:
     entity_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     state: EntityReviewState = EntityReviewState.PENDING
     user_modification: str | None = None
+    modified_entity: DetectedEntity | None = None
     suggested_pseudonym: str | None = None
     custom_pseudonym: str | None = None
 
@@ -251,12 +253,13 @@ class ValidationSession:
 
         Args:
             original: Original detected entity
-            modified: Modified entity with corrected text
+            modified: Modified entity (corrected text, span or type)
         """
         review = self.get_entity_review(original)
         if review:
             review.state = EntityReviewState.MODIFIED
             review.user_modification = modified.text
+            review.modified_entity = modified
             self.user_decisions.append(
                 UserDecision(
                     entity_id=review.entity_id,
@@ -281,6 +284,29 @@ class ValidationSession:
                 action="ADD",
                 modified_entity=new_entity,
             )
+        )
+
+    def change_entity_type(self, entity: DetectedEntity, new_type: str) -> None:
+        """Change the type of an entity (e.g., a person detected as LOCATION).
+
+        Recorded as a modification: text and span are kept, only the type changes.
+
+        Args:
+            entity: Entity to retype
+            new_type: New entity type (PERSON, LOCATION, or ORG)
+        """
+        self.mark_modified(
+            entity,
+            DetectedEntity(
+                text=entity.text,
+                entity_type=new_type,
+                start_pos=entity.start_pos,
+                end_pos=entity.end_pos,
+                confidence=entity.confidence,
+                gender=entity.gender,
+                is_ambiguous=False,
+                source=entity.source,
+            ),
         )
 
     def change_pseudonym(self, entity: DetectedEntity, new_pseudonym: str) -> None:
@@ -335,6 +361,11 @@ class ValidationSession:
             ):
                 # Apply modifications if present
                 if (
+                    review.state == EntityReviewState.MODIFIED
+                    and review.modified_entity is not None
+                ):
+                    validated.append(review.modified_entity)
+                elif (
                     review.state == EntityReviewState.MODIFIED
                     and review.user_modification
                 ):

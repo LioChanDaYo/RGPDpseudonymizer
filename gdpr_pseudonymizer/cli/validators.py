@@ -12,6 +12,7 @@ from typing import Optional
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
+from gdpr_pseudonymizer.cli.config import VALID_MODELS, is_valid_model
 from gdpr_pseudonymizer.cli.formatters import (
     ErrorCode,
     format_error_message,
@@ -298,6 +299,22 @@ def validate_theme_or_exit(theme: str) -> None:
             "Invalid Theme",
             f"Theme '{theme}' is not recognized.",
             f"Valid themes: {', '.join(VALID_THEMES)}",
+        )
+        sys.exit(1)
+
+
+def validate_model_or_exit(model: str) -> None:
+    """Validate NLP model value and exit(1) if invalid.
+
+    Args:
+        model: "spacy" or a spaCy package name (e.g., "en_core_web_trf")
+    """
+    if not is_valid_model(model):
+        format_error_message(
+            "Invalid Model",
+            f"Model '{model}' is not recognized.",
+            f"Use {', '.join(VALID_MODELS)} (default French model) or a spaCy "
+            f"package name, e.g. en_core_web_trf",
         )
         sys.exit(1)
 
