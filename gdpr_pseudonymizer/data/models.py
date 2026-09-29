@@ -53,9 +53,7 @@ class Entity(Base):
     theme: Mapped[str] = mapped_column(String, nullable=False)  # neutral/star_wars/lotr
 
     # Validation support fields
-    is_ambiguous: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False
-    )
+    is_ambiguous: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     ambiguity_reason: Mapped[str | None] = mapped_column(String, nullable=True)
 
     def __init__(self, **kwargs: Any) -> None:
