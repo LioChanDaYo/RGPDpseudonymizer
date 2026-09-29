@@ -45,7 +45,6 @@ class Entity(Base):
         DateTime,
         nullable=False,
         default=datetime.utcnow,
-        insert_default=datetime.utcnow,
     )
     gender: Mapped[str | None] = mapped_column(
         String, nullable=True
@@ -54,9 +53,7 @@ class Entity(Base):
     theme: Mapped[str] = mapped_column(String, nullable=False)  # neutral/star_wars/lotr
 
     # Validation support fields
-    is_ambiguous: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, insert_default=False
-    )
+    is_ambiguous: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     ambiguity_reason: Mapped[str | None] = mapped_column(String, nullable=True)
 
     def __init__(self, **kwargs: Any) -> None:
@@ -84,7 +81,6 @@ class Operation(Base):
         DateTime,
         nullable=False,
         default=datetime.utcnow,
-        insert_default=datetime.utcnow,
     )
     operation_type: Mapped[str] = mapped_column(
         String, nullable=False
@@ -132,7 +128,6 @@ class Metadata(Base):
         DateTime,
         nullable=False,
         default=datetime.utcnow,
-        insert_default=datetime.utcnow,
         onupdate=datetime.utcnow,
     )
 

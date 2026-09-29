@@ -27,6 +27,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **A fresh `pip install` crashed on import.** `pyproject.toml` allowed SQLAlchemy `^2.0.0`, so pip now resolves SQLAlchemy 2.1, which rejects `mapped_column()` receiving both `default=` and `insert_default=`. Every command failed with `ArgumentError`, including `gdpr-pseudo --help` (v2.1.3 installed from PyPI into a clean environment is affected). CI and the installers were unaffected because they use the locked 2.0.51. The redundant `insert_default=` arguments are removed (the code now also works on 2.1), and SQLAlchemy is capped below 2.1 until CI tests it. **v2.1.3 users hitting this error: `pip install "sqlalchemy<2.1"`.**
+
 - **Editing an entity with `[E]` no longer erases neighbouring text.** The edited text kept the original span's offsets, and replacement is offset-based: trimming "Thanks, Aino" to "Aino" still replaced all of "Thanks, Aino", deleting "Thanks, " from the output. The span now moves to where the edited text sits (shrinking or extending it); if the text is not found next to the original span, the original offsets are kept as before.
 
 - **The audit log records the NLP model actually used.** Every operation was logged as `spacy-unknown`; it now records e.g. `fr_core_news_lg-3.8.0` or `en_core_web_trf-3.8.0`.
