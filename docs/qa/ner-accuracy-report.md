@@ -347,7 +347,7 @@ Edge case recall is unchanged; Story 7.5 improvements were focused on dictionary
 
 ## Span-Bleed Fixes (2026-09-29)
 
-**Trigger:** an external user running `en_core_web_trf` on English meeting transcripts reported names arriving with timestamps attached and, in validation, entity spans that included a neighbouring word (so [E] deleted it). Running their sample through the full pipeline showed the second symptom came from the regex layer, not the model: `last_first_names` matched "Thanks, Janne", "University, Wei" and "Sarah, Chen"; French-only letter classes cut "María" to "Mar"; the title pattern stopped at hyphens ("Dr. Marja").
+**Trigger:** an external user running `en_core_web_trf` on English meeting transcripts reported names arriving with timestamps attached and, in validation, entity spans that included a neighbouring word (so [E] deleted it). Running their sample through the full pipeline showed the second symptom came from the regex layer, not the model: `last_first_names` matched "Thanks, Aino", "University, Wei" and "Sarah, Chen"; French-only letter classes cut "María" to "Mar"; the title pattern stopped at hyphens ("Dr. Marja").
 
 **Changes:**
 - Letter classes widened to Latin-1 + Latin Extended-A in every YAML pattern

@@ -392,14 +392,14 @@ class TestHybridDetector:
         ("doc", "span", "expected"),
         [
             (
-                "Janne Matilainen        24:85:01\nHello.",
-                "Janne Matilainen        24:85:01",
-                "Janne Matilainen",
+                "Aino Virtanen        24:85:01\nHello.",
+                "Aino Virtanen        24:85:01",
+                "Aino Virtanen",
             ),
             (
-                "00:01:12 Janne Matilainen: hello.",
-                "00:01:12 Janne Matilainen",
-                "Janne Matilainen",
+                "00:01:12 Aino Virtanen: hello.",
+                "00:01:12 Aino Virtanen",
+                "Aino Virtanen",
             ),
             ("[10:42] Mehmet Öztürk\nHi.", "[10:42] Mehmet Öztürk", "Mehmet Öztürk"),
             ("Paavo Väyrynen - 12\nok", "Paavo Väyrynen - 12", "Paavo Väyrynen"),
@@ -449,12 +449,12 @@ class TestHybridDetector:
         self, detector: HybridDetector
     ) -> None:
         """ORG/LOCATION lose a trailing timestamp but not a bare number."""
-        doc = "Lapin AMK 12:30\n"
+        doc = "Acme Oy 12:30\n"
         trimmed = detector._trim_entity_boundaries(
-            [self._entity("Lapin AMK 12:30", doc, "ORG")]
+            [self._entity("Acme Oy 12:30", doc, "ORG")]
         )
 
-        assert trimmed[0].text == "Lapin AMK"
+        assert trimmed[0].text == "Acme Oy"
 
     def test_trimmed_span_still_dedups_with_regex(
         self, detector: HybridDetector

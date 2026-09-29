@@ -210,7 +210,7 @@ class RegexMatcher:
         """Check that the match's last group contains a known first name.
 
         Guards "Last, First" matching: without it, any "Word, Word" pair
-        ("Merci, Jean", "Thanks, Janne", "Weber, Directeur") becomes a PERSON.
+        ("Merci, Jean", "Thanks, Aino", "Weber, Directeur") becomes a PERSON.
         Compound first names pass if any part is known ("Jean-Marc").
         Without a loaded name dictionary the match is kept.
 

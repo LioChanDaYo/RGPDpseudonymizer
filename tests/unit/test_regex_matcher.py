@@ -649,7 +649,7 @@ class TestRegexMatcher:
     @pytest.mark.parametrize(
         "text",
         [
-            "Thanks, Janne. The survey is done.",
+            "Thanks, Aino. The survey is done.",
             "M. Thomas Weber, Directeur Commercial",
             "BNP Paribas, Crédit Agricole et Natixis",
             "On behalf of Tsinghua University, Wei and I agreed.",
@@ -671,9 +671,9 @@ class TestRegexMatcher:
         matcher = RegexMatcher()
         matcher.load_patterns()
         matcher.name_dictionary = None
-        entities = matcher.match_entities("Merci, Janne pour le rapport.")
+        entities = matcher.match_entities("Merci, Aino pour le rapport.")
 
-        assert any(e.text == "Merci, Janne" for e in entities)
+        assert any(e.text == "Merci, Aino" for e in entities)
 
     @pytest.mark.parametrize(
         ("text", "expected"),

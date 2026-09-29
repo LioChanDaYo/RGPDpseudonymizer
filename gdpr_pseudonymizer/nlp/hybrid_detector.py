@@ -271,7 +271,7 @@ class HybridDetector(EntityDetector):
         """Trim timestamps and punctuation that NER models glue to entity spans.
 
         Transformer models (e.g. en_core_web_trf) often draw spans too wide on
-        transcripts: "Janne Matilainen        24:85:01" comes back as one PERSON.
+        transcripts: "Aino Virtanen        24:85:01" comes back as one PERSON.
         Since mappings are keyed on the full entity text, every timestamp would
         otherwise create a new entity with its own pseudonym.
 
