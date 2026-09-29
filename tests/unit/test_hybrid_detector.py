@@ -375,3 +375,105 @@ class TestHybridDetector:
         # ORG should be preserved
         assert len(filtered) == 1
         assert filtered[0].text == "M. Dupont SA"
+
+    @staticmethod
+    def _entity(text: str, doc: str, entity_type: str = "PERSON") -> DetectedEntity:
+        """Build a spaCy-style entity whose span is `text` inside `doc`."""
+        start = doc.index(text)
+        return DetectedEntity(
+            text=text,
+            entity_type=entity_type,
+            start_pos=start,
+            end_pos=start + len(text),
+            source="spacy",
+        )
+
+    @pytest.mark.parametrize(
+        ("doc", "span", "expected"),
+        [
+            (
+                "Aino Virtanen        24:85:01\nHello.",
+                "Aino Virtanen        24:85:01",
+                "Aino Virtanen",
+            ),
+            (
+                "00:01:12 Aino Virtanen: hello.",
+                "00:01:12 Aino Virtanen",
+                "Aino Virtanen",
+            ),
+            ("[10:42] Mehmet Öztürk\nHi.", "[10:42] Mehmet Öztürk", "Mehmet Öztürk"),
+            ("Paavo Väyrynen - 12\nok", "Paavo Väyrynen - 12", "Paavo Väyrynen"),
+        ],
+    )
+    def test_trim_entity_boundaries_person(
+        self, detector: HybridDetector, doc: str, span: str, expected: str
+    ) -> None:
+        """Timestamps and letterless tokens glued to a PERSON span are trimmed."""
+        trimmed = detector._trim_entity_boundaries([self._entity(span, doc)])
+
+        assert len(trimmed) == 1
+        assert trimmed[0].text == expected
+        assert doc[trimmed[0].start_pos : trimmed[0].end_pos] == expected
+
+    def test_trim_entity_boundaries_drops_junk_only(
+        self, detector: HybridDetector
+    ) -> None:
+        """An entity made only of a timestamp is dropped."""
+        doc = "24:85:01 hello"
+        trimmed = detector._trim_entity_boundaries([self._entity("24:85:01", doc)])
+
+        assert trimmed == []
+
+    @pytest.mark.parametrize(
+        ("span", "entity_type"),
+        [("Studio 54", "ORG"), ("Paris 2024", "LOCATION"), ("Marie Dubois", "PERSON")],
+    )
+    def test_trim_entity_boundaries_keeps_clean_spans(
+        self, detector: HybridDetector, span: str, entity_type: str
+    ) -> None:
+        """Clean names and ORG/LOCATION numbers are left untouched."""
+        doc = f"Rendez-vous avec {span} demain."
+        entity = self._entity(span, doc, entity_type)
+        start, end = entity.start_pos, entity.end_pos
+
+        trimmed = detector._trim_entity_boundaries([entity])
+
+        assert len(trimmed) == 1
+        assert (trimmed[0].text, trimmed[0].start_pos, trimmed[0].end_pos) == (
+            span,
+            start,
+            end,
+        )
+
+    def test_trim_entity_boundaries_org_loses_timestamp(
+        self, detector: HybridDetector
+    ) -> None:
+        """ORG/LOCATION lose a trailing timestamp but not a bare number."""
+        doc = "Acme Oy 12:30\n"
+        trimmed = detector._trim_entity_boundaries(
+            [self._entity("Acme Oy 12:30", doc, "ORG")]
+        )
+
+        assert trimmed[0].text == "Acme Oy"
+
+    def test_trimmed_span_still_dedups_with_regex(
+        self, detector: HybridDetector
+    ) -> None:
+        """Trimming runs before merge, so a regex hit on the bare name is deduped."""
+        doc = "Marie Dubois 10:42"
+        spacy_entities = detector._trim_entity_boundaries(
+            [self._entity("Marie Dubois 10:42", doc)]
+        )
+        regex_entity = DetectedEntity(
+            text="Marie Dubois",
+            entity_type="PERSON",
+            start_pos=0,
+            end_pos=12,
+            source="regex",
+        )
+
+        merged = detector._merge_entities(spacy_entities, [regex_entity])
+
+        assert len(merged) == 1
+        assert merged[0].source == "spacy"
+        assert merged[0].text == "Marie Dubois"

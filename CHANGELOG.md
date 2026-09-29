@@ -17,7 +17,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **macOS Intel (x86_64) DMG is no longer published.** GitHub no longer serves `macos-13` Intel runners — a job targeting that label is accepted and then never assigned (verified: it sat queued indefinitely while `build-macos-arm64` and `build-linux`, dispatched in the same run at the same second, both completed). The remaining option, cross-building from an Apple Silicon runner via `arch -x86_64`, does not work: `setup-python` installs an arm64 interpreter on `macos-14`, so `venv_x86` is an arm64 environment holding arm64 wheels, and PyInstaller correctly refuses it with `IncompatibleBinaryArchError: cryptography/hazmat/bindings/_rust.abi3.so is incompatible with target arch x86_64 (has arch: arm64)`. The `build-macos-x86_64` job has been removed rather than left permanently failing. **Intel Mac users: `pip install gdpr-pseudonymizer` — both the CLI and the GUI work.** Releases now ship Windows, Linux and macOS Apple Silicon.
 
+### Changed
+
+- **Regex name patterns accept non-French letters and hyphenated names after titles.** Letter classes in `detection_patterns.yaml` now cover Latin-1 and Latin Extended-A (í ñ ø å ş ı ł č š ž ő…) instead of French accents only, so "María" is no longer cut to "Mar" and "Yılmaz" to "Y". The title pattern accepts hyphenated names ("Dr. Marja-Liisa Mikkola", "Dr. Fatima Al-Mansoor").
+
 ### Fixed
+
+- **"Last, First" matching no longer turns any "Word, Word" pair into a PERSON.** `last_first_names` matched "Merci, Jean", "Weber, Directeur" (a surname followed by a job title), "Paribas, Crédit" and, on English text, "Thanks, Aino". During validation these spans overlap the real name, so editing them with [E] deleted the neighbouring word. The pattern now requires the part after the comma to be a known first name (new `require_known_first_name` option, checked against the name dictionary). "Dubois, Jean-Marc" and "Martin, Sophie" still match.
+
+- **Entity spans no longer carry timestamps or stray punctuation at their edges.** Some NER models (seen with `en_core_web_trf` on meeting transcripts) return spans such as "Aino Virtanen 24:85:01". Because mappings are keyed on the full entity text, every timestamp created a separate entity and a separate pseudonym. `HybridDetector` now trims letterless tokens from PERSON span edges, and timestamps/punctuation from ORG and LOCATION edges, before merging (ORG/LOCATION keep bare numbers such as "Studio 54").
+
+  Accuracy (25-document benchmark): F1 31.79% → 32.34%, precision 25.38% → 26.75%, false positives 2,173 → 1,944. Measured recall falls 42.54% → 40.88%, but that drop comes from contaminated ground truth, not from lost detections: 36 of the 37 comma-containing annotations are artefacts of the old pattern ("Mesdames, Messieurs", "Oui, Auto"). With them excluded, recall is unchanged. See `docs/qa/ner-accuracy-report.md`.
 
 - **A failing platform no longer strips every installer from a release.** `upload-release` was gated on all four build jobs succeeding, so one broken matrix cell skipped the upload entirely — which is why v2.1.3 published to PyPI successfully and still shipped a GitHub Release with zero assets, where v2.1.1 shipped four. It now runs under `if: always()` (which still waits for every build job to finish; it only stops one failure from skipping the upload), attaches whichever installers were produced, emits a warning annotation naming any that are missing, and fails only if no platform produced anything at all.
 

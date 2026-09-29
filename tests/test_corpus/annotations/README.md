@@ -86,6 +86,10 @@ Annotations were generated using:
 - Manual review and validation
 - Entity counting verification (`count_entities.py`)
 
+### Known issue: comma annotations (found 2026-09-29)
+
+36 of the 37 PERSON annotations containing a comma are artefacts of the automated pass, not real "Surname, First name" entities ("Mesdames, Messieurs", "Oui, Auto", "Paribas, Crédit", "Martin, Analyste"…). They inflate the recall of the `last_first_names` regex, which produced them. Exclude comma annotations before judging a change to that pattern. See `docs/qa/ner-accuracy-report.md`, section "Span-Bleed Fixes".
+
 ## Usage
 
 These annotations serve as ground truth for:

@@ -345,6 +345,57 @@ Edge case recall is unchanged; Story 7.5 improvements were focused on dictionary
 
 ---
 
+## Span-Bleed Fixes (2026-09-29)
+
+**Trigger:** an external user running `en_core_web_trf` on English meeting transcripts reported names arriving with timestamps attached and, in validation, entity spans that included a neighbouring word (so [E] deleted it). Running their sample through the full pipeline showed the second symptom came from the regex layer, not the model: `last_first_names` matched "Thanks, Aino", "University, Wei" and "Sarah, Chen"; French-only letter classes cut "María" to "Mar"; the title pattern stopped at hyphens ("Dr. Marja").
+
+**Changes:**
+- Letter classes widened to Latin-1 + Latin Extended-A in every YAML pattern
+- Title pattern accepts hyphenated names
+- `last_first_names` requires the part after the comma to be a known first name (`require_known_first_name`)
+- `HybridDetector._trim_entity_boundaries` removes timestamps / letterless tokens from spaCy span edges before merging
+
+### Overall Metrics
+
+| Metric | Story 7.5 (HEAD) | **2026-09-29** | Delta |
+|--------|------------------|----------------|-------|
+| **Precision** | 25.38% | **26.75%** | +1.37pp |
+| **Recall** | 42.54% | **40.88%** | -1.66pp |
+| **F1 Score** | 31.79% | **32.34%** | +0.55pp |
+| **TP** | 739 | **710** | -29 |
+| **FP** | 2,173 | **1,944** | -229 |
+| **FN** | 998 | **1,027** | +29 |
+
+| Entity Type | Precision | Recall | F1 | TP | FP | FN |
+|------------|-----------|--------|-----|-----|------|------|
+| **PERSON** | 34.42% | 37.04% | 35.68% | 549 | 1,046 | 933 |
+| **LOCATION** | 29.59% | 87.10% | 44.17% | 108 | 257 | 16 |
+| **ORG** | 7.64% | 40.46% | 12.85% | 53 | 641 | 78 |
+
+| Source | TP | FP | Precision |
+|--------|-----|------|-----------|
+| **spaCy** | 657 | 1,571 | 29.49% |
+| **regex** | 53 | 373 | 12.44% |
+
+### Variants Compared
+
+| Variant | F1 | Precision | FP | Last, First recall |
+|---------|----|-----------|----|--------------------|
+| Story 7.5 + span trim only | 31.90% | 25.49% | 2,163 | 86.49% |
+| + letter classes & hyphenated titles | 32.46% | 26.21% | 2,083 | 86.49% |
+| + known first name required (**shipped**) | 32.34% | 26.75% | 1,944 | 5.41% |
+| + `last_first_names` disabled | 32.29% | 26.74% | 1,940 | 0.00% |
+
+The span trim alone is neutral-to-positive on French (+1 TP, -10 FP). Widening the letter classes is a pure gain (-80 FP, no recall change).
+
+### Ground-Truth Contamination (Last, First)
+
+The recall drop and the collapse of the "Last, First order" edge case are artefacts. 36 of the 37 annotations containing a comma are outputs of the old `last_first_names` pattern that were accepted into the ground truth during automated annotation, e.g. "Mesdames, Messieurs", "Oui, Auto", "Confidentiel, Secret", "Paribas, Crédit", "Martin, Analyste", "Rousseau, Responsable". Only "Laurent, Marie" is plausibly a genuine surname-first name. The old pattern was being scored against its own output.
+
+Re-scoring every variant with the comma annotations removed gives **identical recall (708 TP) for all variants**: the old pattern contributed no real true positives. On that cleaned ground truth the shipped variant moves F1 from 30.76% (span trim only) to 32.52% and cuts false positives from 2,195 to 1,946. The "Last, First order" edge case should not be read as a recall measure until those annotations are cleaned.
+
+---
+
 ## Known Limitations
 
 1. ~~**Annotation quality issues:** Some ground-truth annotations in `board_minutes.json` contain entities spanning newlines, ORGs mislabeled as PERSON, truncated entities at hyphen boundaries, and garbage annotations (e.g., "élicite Mme"). These inflate FN counts.~~ **Fixed in Story 5.3 (Tasks 5.3.1-5.3.3).**

@@ -121,6 +121,9 @@ class RegexMatcher:
                             "entity_type": config.get("entity_type", "PERSON"),
                             "confidence": config.get("confidence", 0.5),
                             "description": pattern_def.get("description", ""),
+                            "require_known_first_name": bool(
+                                config.get("require_known_first_name", False)
+                            ),
                         }
                     )
                 except re.error as e:
@@ -169,6 +172,11 @@ class RegexMatcher:
             for pattern_def in pattern_list:
                 matches = pattern_def["regex"].finditer(text)
                 for match in matches:
+                    if pattern_def[
+                        "require_known_first_name"
+                    ] and not self._has_known_first_name(match):
+                        continue
+
                     # Extract entity text (full match or last capturing group)
                     entity_text = match.group(0)
                     start_pos = match.start()
@@ -197,6 +205,29 @@ class RegexMatcher:
 
         logger.debug("regex_matching_complete", entities_found=len(entities))
         return entities
+
+    def _has_known_first_name(self, match: re.Match[str]) -> bool:
+        """Check that the match's last group contains a known first name.
+
+        Guards "Last, First" matching: without it, any "Word, Word" pair
+        ("Merci, Jean", "Thanks, Aino", "Weber, Directeur") becomes a PERSON.
+        Compound first names pass if any part is known ("Jean-Marc").
+        Without a loaded name dictionary the match is kept.
+
+        Args:
+            match: Regex match whose last capturing group is the first name
+
+        Returns:
+            True if the first name is in the name dictionary (or no dictionary)
+        """
+        if self.name_dictionary is None:
+            return True
+        first_name = match.group(match.re.groups)
+        return any(
+            self.name_dictionary.is_first_name(part)
+            for part in first_name.split("-")
+            if part
+        )
 
     def _is_full_names_enabled(self) -> bool:
         """Check if full names pattern matching is enabled."""
