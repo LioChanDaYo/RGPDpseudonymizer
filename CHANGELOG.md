@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [2.2.0] - 2026-09-29
+
 ### Added
 
 - **Choose the spaCy model.** `--model` and `pseudonymization.model` now accept any spaCy package name (e.g. `en_core_web_trf` for English) in addition to `spacy`, which still selects the French `fr_core_news_lg`. Previously the value was only written to the audit log and the French model was always loaded, so using another language required editing the source. Unknown values (e.g. `--model english`) are rejected instead of silently falling back to French. The model choice affects NLP detection only; regex patterns, dictionaries and pseudonym libraries remain French.
