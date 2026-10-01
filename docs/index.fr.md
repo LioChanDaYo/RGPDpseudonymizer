@@ -8,7 +8,7 @@ Préparez vos documents sensibles pour l'analyse par IA en toute sérénité : t
 
 ## Qu'est-ce que GDPR Pseudonymizer ?
 
-GDPR Pseudonymizer est un **outil conçu pour la confidentialité**. Il associe la rapidité de l'IA à la rigueur de la relecture humaine pour pseudonymiser des documents en français. Disponible en **ligne de commande (CLI)** et en **application de bureau** (v2.0 en développement). Contrairement aux solutions entièrement automatiques ou aux services cloud, il mise sur l'**absence totale de faux négatifs** et sur la **solidité juridique** grâce à un processus de validation obligatoire.
+GDPR Pseudonymizer est un **outil conçu pour la confidentialité**. Il associe la rapidité de l'IA à la rigueur de la relecture humaine pour pseudonymiser des documents en français. Disponible en **ligne de commande (CLI)** et en **application de bureau**. Contrairement aux solutions entièrement automatiques ou aux services cloud, il mise sur l'**absence totale de faux négatifs** et sur la **solidité juridique** grâce à un processus de validation obligatoire.
 
 **Pour qui ?**
 
@@ -30,7 +30,7 @@ GDPR Pseudonymizer est un **outil conçu pour la confidentialité**. Il associe 
 
 ### IA + relecture humaine
 
-- **Détection hybride** — l'IA repère environ 60 % des entités (NLP + expressions régulières + dictionnaire géographique, F1 59,97 %)
+- **Détection hybride** — l'IA repère environ 40 % des entités (NLP + expressions régulières + dictionnaire géographique, F1 32,34 %) ; amélioration prévue
 - **Validation obligatoire** — vous vérifiez et confirmez chaque entité (précision finale de 100 %)
 - **Interface de validation rapide** — raccourcis clavier, actions groupées, moins de 2 min par document
 - **Regroupement des variantes** — les formes apparentées (« Marie Dubois », « Pr. Dubois », « Dubois ») sont fusionnées en un seul élément à valider
@@ -96,7 +96,7 @@ GDPR Pseudonymizer contribue à la conformité avec les articles 4(5), 25, 30, 3
 
 ## Statut
 
-**Version publiée :** v2.0.0 (mars 2026) — Interface graphique, exécutables autonomes et accessibilité WCAG AA
+**Version publiée :** v2.2.0 (septembre 2026) — Choix du modèle spaCy, changement de type d'entité en validation CLI, corrections de délimitation des entités. Voir le [journal des modifications](https://github.com/LioChanDaYo/RGPDpseudonymizer/blob/main/CHANGELOG.md).
 
 **Environnements pris en charge :** Python 3.10-3.12 | Windows, macOS, Linux | Formats .txt, .md, .pdf, .docx, .xlsx, .csv | Français | Interface graphique : `pip install gdpr-pseudonymizer[gui]`
 

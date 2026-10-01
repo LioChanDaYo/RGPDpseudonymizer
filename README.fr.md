@@ -14,13 +14,24 @@ Préparez vos documents sensibles pour l'analyse par IA en toute sérénité : t
 
 ---
 
-## Nouveautés de la v2.1
+## Nouveautés de la v2.2
+
+- **Choix du modèle spaCy** — `--model` / `pseudonymization.model` acceptent n'importe quel nom de paquet spaCy (p. ex. `en_core_web_trf` pour l'anglais) ; `spacy` sélectionne toujours le modèle français `fr_core_news_lg`. Le modèle ne concerne que la détection NLP : expressions régulières, dictionnaires et bibliothèques de pseudonymes restent français. Voir la [référence CLI](docs/CLI-REFERENCE.fr.md).
+- **Changer le type d'une entité pendant la validation CLI (`[T]`)** — Passer une entité détectée de PERSON à LOCATION ou ORG (et inversement) pour toutes ses occurrences, au lieu de la rejeter puis la rajouter
+- **Délimitation des entités plus propre** — Modifier avec `[E]` n'efface plus le texte voisin ; le motif « Nom, Prénom » exige désormais un prénom connu ; horodatages et ponctuation parasites sont retirés des bords des entités NER ; les noms à lettres non françaises (« María », « Yılmaz ») et les noms composés après un titre sont détectés en entier
+- **Installation `pip` corrigée** — la v2.1.3 plantait au démarrage quand pip installait SQLAlchemy 2.1 ; SQLAlchemy est désormais limité à < 2.1
+- **Le journal d'audit enregistre le modèle réel** — p. ex. `fr_core_news_lg-3.8.0` au lieu de `spacy-unknown`
+
+<details>
+<summary>Points forts de la v2.1</summary>
 
 - **Validation unique par entité** — Accepter ou rejeter une occurrence s'applique automatiquement à toutes les occurrences identiques dans le document (gain de productivité pour les noms répétés)
 - **Support Excel/CSV** — Traitement des fichiers `.xlsx` et `.csv` avec pseudonymisation cellule par cellule pour les cas d'usage RH/conformité (`pip install gdpr-pseudonymizer[excel]`)
 - **Thème Neutral ID** — Identifiants séquentiels (PERSON-001, LIEU-001, ORG-001) pour les contextes formels/juridiques (`--theme neutral_id`)
 - **Amélioration de la précision NER** — Enrichissement des expressions régulières ORG, désambiguïsation POS pour le dictionnaire géographique ; taux de faux négatifs LOCATION réduit de 27 % à 13 %
 - **Découvrabilité de l'interface** — Dialogue d'aide F1 avec tous les groupes de raccourcis, persistance du chemin de base de données entre sessions, bouton « Masquer les validées »
+
+</details>
 
 <!-- TODO: Ajouter une capture d'écran de l'interface graphique -->
 
@@ -36,9 +47,9 @@ Des exécutables autonomes pré-compilés sont disponibles pour Windows, macOS e
 
 | Plateforme | Fichier | Notes |
 |------------|---------|-------|
-| **Windows** | `gdpr-pseudonymizer-2.1.3-windows-setup.exe` | Lancer l'installeur. Ajoute un raccourci au menu Démarrer. |
-| **macOS (Apple Silicon)** | `gdpr-pseudonymizer-2.1.3-macos-arm64.dmg` | Ouvrir le DMG, glisser vers Applications. |
-| **Linux** | `gdpr-pseudonymizer-2.1.3-linux.AppImage` | `chmod +x` puis exécuter. |
+| **Windows** | `gdpr-pseudonymizer-2.2.0-windows-setup.exe` | Lancer l'installeur. Ajoute un raccourci au menu Démarrer. |
+| **macOS (Apple Silicon)** | `gdpr-pseudonymizer-2.2.0-macos-arm64.dmg` | Ouvrir le DMG, glisser vers Applications. |
+| **Linux** | `gdpr-pseudonymizer-2.2.0-linux.AppImage` | `chmod +x` puis exécuter. |
 
 > **Macs Intel :** aucun DMG n'est publié. GitHub a retiré ses runners macOS Intel, et un
 > runner Apple Silicon ne peut pas compiler un bundle x86_64 fonctionnel. Installez plutôt
@@ -81,7 +92,7 @@ GDPR Pseudonymizer est un **outil CLI et GUI conçu pour la confidentialité**. 
 - ✅ **Aucune télémétrie** — Ni collecte analytique, ni rapport d'erreur, ni communication externe
 
 ### 🤝 **IA + relecture humaine**
-- ✅ **Détection hybride** — L'IA repère environ 60 % des entités (NLP + expressions régulières + dictionnaire géographique)
+- ✅ **Détection hybride** — L'IA repère environ 40 % des entités (NLP + expressions régulières + dictionnaire géographique ; la validation rattrape le reste). L'améliorer est une priorité
 - ✅ **Validation obligatoire** — Vous vérifiez et confirmez chaque entité (précision finale de 100 %)
 - ✅ **Interface de validation rapide** — Interface CLI enrichie avec raccourcis clavier, moins de 2 min par document
 - ✅ **Parcours intelligent** — Regroupement des entités par type (PERSON → ORG → LOCATION) avec affichage du contexte
@@ -115,7 +126,7 @@ GDPR Pseudonymizer est un **outil CLI et GUI conçu pour la confidentialité**. 
 
 ## 🚀 Prise en main rapide
 
-**Version actuelle :** 🎉 **v2.1.0** (mars 2026) — Améliorations GUI, support Excel/CSV et précision NER
+**Version actuelle :** 🎉 **v2.2.0** (septembre 2026) — Choix du modèle spaCy, changement de type d'entité et corrections de délimitation
 
 ### Pour commencer
 
@@ -137,23 +148,25 @@ pip install gdpr-pseudonymizer[excel]
 pip install gdpr-pseudonymizer[formats]
 ```
 
-### Ce que la v2.1 offre
+### Ce que la v2.2 offre
 
 - 🖥️ **Interface graphique** — Validation visuelle des entités avec glisser-déposer, tableau de bord de lot et gestion de base de données
 - 📦 **Exécutables autonomes** — Installeur Windows .exe, DMG macOS (Apple Silicon), AppImage Linux — Python non requis
 - ♿ **Accessibilité WCAG 2.1 AA** — Navigation au clavier, lecteurs d'écran, mode contraste élevé
 - 🌐 **Interface française** — Interface GUI FR/EN complète avec changement de langue en temps réel
-- 🤖 **Détection assistée par IA** — La détection hybride NLP + regex repère environ 60 % des entités
+- 🤖 **Détection assistée par IA** — La détection hybride NLP + regex repère environ 40 % des entités (F1 ~32 % sur notre corpus de test) ; la validation rattrape le reste
 - ✅ **Relecture humaine obligatoire** — Vous vérifiez toutes les entités (précision finale 100 %)
 - 🔒 **Traitement 100 % local** — Vos données ne quittent jamais votre machine
 - 📄 **Support PDF/DOCX** — Traitement direct des fichiers PDF et DOCX (extras optionnels)
 - 📊 **Support Excel/CSV** — Traitement des fichiers .xlsx et .csv avec pseudonymisation cellule par cellule (extra optionnel : `[excel]`)
 - 🆔 **Thème Neutral ID** — Identifiants séquentiels (PERSON-001, LIEU-001) pour les contextes formels/juridiques
 - 🎯 **Précision NER** — Taux de faux négatifs LOCATION réduit de 27 % à 13 % via enrichissement regex et désambiguïsation POS
+- 🧠 **Choix du modèle spaCy** — Français par défaut ; n'importe quel modèle spaCy pour la détection (p. ex. `--model en_core_web_trf`)
+- 🏷️ **Changement de type d'entité** — Modifier le type d'une entité (PERSON/LOCATION/ORG) pendant la validation CLI avec `[T]`
 
 **Ce qu'elle ne propose pas :**
 - ❌ Un traitement entièrement automatique sans intervention
-- ❌ Une précision IA supérieure à 85 % (actuellement : environ 60 % F1 avec l'approche hybride)
+- ❌ Une précision IA supérieure à 85 % (actuellement : environ 32 % F1 avec l'approche hybride — nous prévoyons de l'améliorer)
 - ❌ Un mode sans validation (la relecture est obligatoire)
 
 ### Feuille de route
@@ -164,10 +177,12 @@ pip install gdpr-pseudonymizer[formats]
 
 **v2.0 (T1 2026) :** Interface graphique, exécutables autonomes, accessibilité WCAG AA, interface française, validation par lot, renforcement
 
-**v2.1 (T1 2026) — VERSION ACTUELLE :** Améliorations GUI, support Excel/CSV, thème Neutral ID, précision NER, aide raccourcis clavier
+**v2.1 (T1 2026) :** Améliorations GUI, support Excel/CSV, thème Neutral ID, précision NER, aide raccourcis clavier
+
+**v2.2 (T3 2026) — VERSION ACTUELLE :** Choix du modèle spaCy, changement de type d'entité en validation CLI, corrections de délimitation des entités, correctif d'installation (SQLAlchemy < 2.1)
 
 **v3.0 (2027+) :** Précision NLP et automatisation
-- Modèle NER français affiné (objectif F1 70-85 %, contre ~60 % actuellement)
+- Modèle NER français affiné (objectif F1 70-85 %, contre ~32 % actuellement)
 - Option `--no-validate` pour les traitements à haute confiance
 - Traitement automatique à partir d'un seuil de confiance (objectif F1 85 %+)
 - Prise en charge multilingue (anglais, espagnol, allemand)
@@ -323,11 +338,17 @@ Après un benchmark approfondi sur 25 documents français (entretiens et documen
 | Approche | Score F1 | Précision | Rappel | Notes |
 |----------|----------|-----------|--------|-------|
 | **spaCy seul** `fr_core_news_lg` | 29,5 % | 27,0 % | 32,7 % | Ligne de base (Story 1.2) |
-| **Hybride** (spaCy + regex) | 59,97 % | 48,17 % | 79,45 % | Story 5.3 |
+| **Hybride** (spaCy + regex) | 31,35 % | 25,18 % | 41,51 % | Story 5.3 — annoncé à 59,97 %, non reproductible (voir note) |
 | **Hybride + patterns enrichis** | 31,79 % | 25,38 % | 42,54 % | Story 7.5 |
 | **Correctifs de débordement des entités** | 32,34 % | 26,75 % | 40,88 % | 2026-09-29 (actuel) — la baisse du rappel vient de la vérité terrain, voir le rapport QA |
 
-**Progression de la précision :** En passant de spaCy seul à l'approche hybride — avec nettoyage des annotations, enrichissement des expressions régulières et ajout d'un dictionnaire géographique français — le score F1 a doublé. Story 7.5 a ajouté 12 mots-clés de détection ORG, la désambiguïsation POS pour le dictionnaire géographique et 7 lieux internationaux — réduisant le taux de faux négatifs LOCATION de 27,42 % à 12,90 %.
+**Correction (octobre 2026) :** les versions précédentes de ce README annonçaient environ 60 % F1 pour l'approche hybride (le chiffre « 59,97 % » de la Story 5.3). Ce chiffre n'a jamais été reproductible : relancer la suite de précision sur le code exact de la Story 5.3 donne 31,35 %, et la version actuelle mesure 32,34 %. Le détecteur n'a pas régressé ; c'est le chiffre qui était faux. Tous les chiffres de cette page proviennent désormais d'une exécution reproductible de `tests/accuracy`.
+
+**Deux précautions de lecture.** Ces chiffres proviennent d'un seul corpus de 25 documents français (entretiens et documents professionnels), dont une partie de la vérité terrain a été annotée automatiquement avec les propres expressions régulières de l'outil, ce qui fausse le rappel dans les deux sens. Et ils ne mesurent que la *pré-détection* : c'est la validation obligatoire qui garantit un résultat final correct.
+
+**Nous prévoyons d'améliorer ces chiffres** — à la fois la détection elle-même (la précision est aujourd'hui le point le plus faible) et le corpus qui la mesure. Un modèle NER français affiné reste l'objectif de la v3.0 (F1 70-85 %).
+
+**Progression de la précision :** Story 7.5 a ajouté 12 mots-clés de détection ORG, la désambiguïsation POS pour le dictionnaire géographique et 7 lieux internationaux — réduisant le taux de faux négatifs LOCATION de 27,42 % à 12,90 %.
 
 **Solution retenue :**
 - ✅ **Approche hybride** (NLP + regex + dictionnaire géographique + désambiguïsation POS)
@@ -372,7 +393,7 @@ L'interface de validation offre un parcours intuitif piloté au clavier pour pas
 | **CLI** | Typer | 0.9+ | Interface en ligne de commande |
 | **Base de données** | SQLite | 3.35+ | Stockage local des tables de correspondance (mode WAL) |
 | **Chiffrement** | cryptography (AESSIV) | 44.0+ | Chiffrement AES-256-SIV des champs sensibles (dérivation PBKDF2, protégé par mot de passe) |
-| **ORM** | SQLAlchemy | 2.0+ | Couche d'abstraction base de données et gestion des sessions |
+| **ORM** | SQLAlchemy | 2.0.x (<2.1) | Couche d'abstraction base de données et gestion des sessions |
 | **Interface graphique** | PySide6 | 6.7+ | Application de bureau (optionnel : `pip install gdpr-pseudonymizer[gui]`) |
 | **Interface de validation** | rich | 13.7+ | Revue interactive des entités en CLI |
 | **Saisie clavier** | readchar | 4.2+ | Capture de touche unique pour la validation |
@@ -388,7 +409,7 @@ L'interface de validation offre un parcours intuitif piloté au clavier pour pas
 **En détail :**
 1. **Solidité juridique au regard du RGPD** — La relecture humaine fournit une piste d'audit opposable
 2. **Aucun faux négatif** — L'IA laisse passer des entités ; l'humain les rattrape (couverture à 100 %)
-3. **Limites actuelles du NLP** — Les modèles français sur des documents d'entretiens ou professionnels : 29,5 % F1 de base (l'approche hybride atteint environ 60 %)
+3. **Limites actuelles du NLP** — Les modèles français sur des documents d'entretiens ou professionnels : 29,5 % F1 de base (approche hybride : environ 32 % F1, 41 % de rappel ; amélioration prévue)
 4. **Mieux que les alternatives :**
    - ✅ **vs rédaction manuelle :** Plus de 50 % de temps gagné grâce à la détection préalable
    - ✅ **vs services cloud :** Traitement 100 % local, aucune fuite de données
@@ -474,13 +495,13 @@ L'interface de validation offre un parcours intuitif piloté au clavier pour pas
 
 ## 🛠️ État du développement
 
-**Epics 1-7 terminés** — v2.1.0 (mars 2026). Améliorations GUI, support Excel/CSV, précision NER.
+**Epics 1-7 terminés** — version actuelle v2.2.0 (septembre 2026) : choix du modèle spaCy, changement de type d'entité, corrections de délimitation. La v2.1.0 (mars 2026) a clôturé l'Epic 7.
 
 - ✅ **Epic 1 :** Fondations et validation NLP (9 stories) — Intégration spaCy, interface de validation, détection hybride, déduplication des entités
 - ✅ **Epic 2 :** Moteur de pseudonymisation (9 stories) — Bibliothèques de pseudonymes, chiffrement, journaux d'audit, traitement par lot, correspondance 1:1 RGPD
 - ✅ **Epic 3 :** Interface CLI et traitement par lot (7 stories) — 8 commandes CLI, suivi de progression, fichiers de configuration, traitement parallèle, perfectionnement UX
 - ✅ **Epic 4 :** Préparation au lancement (8 stories) — Validation de l'utilité LLM, tests multi-plateformes, documentation, suite de précision NER, validation des performances, intégration des retours bêta, refactorisation, préparation au lancement
-- ✅ **Epic 5 :** Améliorations et conformité RGPD (7 stories) — Effacement article 17 RGPD, pseudonymes tenant compte du genre, amélioration de la précision NER (F1 29,74 % → 59,97 %), traduction française de la documentation, support PDF/DOCX, perfectionnement CLI et benchmarks, release v1.1
+- ✅ **Epic 5 :** Améliorations et conformité RGPD (7 stories) — Effacement article 17 RGPD, pseudonymes tenant compte du genre, travail sur la précision NER (nettoyage des annotations, expressions régulières enrichies, dictionnaire géographique), traduction française de la documentation, support PDF/DOCX, perfectionnement CLI et benchmarks, release v1.1
 - ✅ **Epic 6 :** v2.0 Interface graphique et accessibilité (9 stories) — Application de bureau PySide6, validation visuelle, traitement par lot GUI, i18n, WCAG AA, exécutables autonomes
   - ✅ Story 6.1 : Architecture UX et sélection du framework GUI
   - ✅ Story 6.2 : Fondations de l'application GUI (fenêtre principale, thèmes, écran d'accueil, paramètres, 77 tests GUI)
@@ -564,7 +585,7 @@ Ce projet est distribué sous la [licence MIT](LICENSE).
 - ⚠️ Testez rigoureusement avant toute mise en production
 
 **Limitations actuelles :**
-- Détection IA : environ 60 % F1 (pas 85 %+)
+- Détection IA : environ 32 % F1 aujourd'hui (pas 85 %+) ; amélioration prévue
 - Validation requise pour TOUS les documents (pas facultative)
 - Documents en français uniquement (anglais, espagnol, etc. dans les versions futures)
 - Formats supportés : .txt, .md, .pdf, .docx, .xlsx, .csv (PDF/DOCX/Excel nécessitent des extras optionnels : `pip install gdpr-pseudonymizer[formats]`)
@@ -685,7 +706,7 @@ La suite de tests d'intégration couvre :
 
 | Métrique | Valeur | Statut |
 |----------|--------|--------|
-| **Avancement** | v2.1.0 | ✅ Epics 1-7 terminés |
+| **Avancement** | v2.2.0 | ✅ Epics 1-7 terminés |
 | **Stories terminées** | 60 (Epics 1-7) | ✅ Tous les epics terminés |
 | **Utilité LLM (NFR10)** | 4,27/5,0 (85,4 %) | ✅ VALIDÉ (seuil : 80 %) |
 | **Succès d'installation (NFR3)** | 87,5 % (7/8 plateformes) | ✅ VALIDÉ (seuil : 85 %) |
@@ -693,7 +714,7 @@ La suite de tests d'intégration couvre :
 | **Bugs critiques trouvés** | 1 (Story 2.8) | ✅ RÉSOLU — Epic 3 débloqué |
 | **Corpus de test** | 25 documents, 1 737 entités | ✅ Complet (après nettoyage) |
 | **Précision NLP (ligne de base)** | 29,5 % F1 (spaCy seul) | ✅ Mesuré (Story 1.2) |
-| **Précision hybride (NLP+Regex)** | 59,97 % F1 (+30,23 pp vs ligne de base) | ✅ Story 5.3 terminé |
+| **Précision hybride (NLP+Regex)** | 32,34 % F1 (v2.2.0) | ⚠️ Sous l'objectif — amélioration prévue |
 | **Précision finale (IA+Humain)** | 100 % (validé) | 🎯 Par conception |
 | **Bibliothèques de pseudonymes** | 3 thèmes (2 426 noms + 240 lieux + 588 organisations) | ✅ Stories 2.1, 3.0, 4.6 terminées |
 | **Résolution par composition** | Opérationnelle (réutilisation des composants + suppression des titres + noms composés) | ✅ Stories 2.2, 2.3 terminées |
@@ -725,4 +746,4 @@ La suite de tests d'intégration couvre :
 
 ---
 
-**Dernière mise à jour :** 2026-03-17 (v2.1.0 — Améliorations GUI, support Excel/CSV, thème Neutral ID, précision NER, 1 670+ tests)
+**Dernière mise à jour :** 2026-10-01 (v2.2.0 — Choix du modèle spaCy, changement de type d'entité, corrections de délimitation)

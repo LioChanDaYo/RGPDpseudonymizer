@@ -529,7 +529,7 @@ poetry run gdpr-pseudo destroy-table --db project.db --force
 
 - **French only** — no other languages in v1.0
 - **Supported formats** — `.txt`, `.md`, `.pdf`, `.docx`, `.xlsx`, `.csv` (PDF/DOCX require `pip install gdpr-pseudonymizer[formats]`, Excel requires `pip install gdpr-pseudonymizer[excel]`)
-- **Validation is mandatory** — every entity must be reviewed (AI detection ~60% F1)
+- **Validation is mandatory** — every entity must be reviewed (AI detection ~32% F1 today)
 - **Passphrase is irrecoverable** — if lost, existing mappings cannot be decrypted
 
 ---

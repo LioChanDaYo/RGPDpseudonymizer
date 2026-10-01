@@ -8,13 +8,13 @@
 
 ### Quelle précision puis-je attendre de la détection automatique ?
 
-Le pipeline hybride de détection (NLP + expressions régulières) identifie automatiquement environ 60 % des entités dans un texte français. Cette étape sert de pré-filtrage -- **vous vérifiez et validez chaque entité** au cours du processus de validation obligatoire.
+Le pipeline hybride de détection (NLP + expressions régulières) identifie automatiquement environ 40 % des entités dans un texte français (rappel 40,88 %, F1 32,34 % sur notre corpus de 25 documents). Nous prévoyons d'améliorer ces chiffres. Cette étape sert de pré-filtrage -- **vous vérifiez et validez chaque entité** au cours du processus de validation obligatoire.
 
 Après validation humaine, la précision atteint **100 %** puisque vous contrôlez la décision finale pour chaque entité.
 
 ### Pourquoi la précision du NER est-elle si faible ?
 
-Le modèle spaCy `fr_core_news_lg` a été entraîné principalement sur des textes journalistiques, pas sur des transcriptions d'entretiens ou des documents commerciaux. Les modèles linguistiques spécifiques à un domaine (registres conversationnels, formalité mixte) réduisent la précision en utilisation directe. Un test d'évaluation portant sur 25 documents français contenant 1 855 entités a mesuré un F1 de 29,5 % pour spaCy seul, amélioré à environ 60 % (F1 59,97 %) avec l'approche hybride.
+Le modèle spaCy `fr_core_news_lg` a été entraîné principalement sur des textes journalistiques, pas sur des transcriptions d'entretiens ou des documents commerciaux. Les modèles linguistiques spécifiques à un domaine (registres conversationnels, formalité mixte) réduisent la précision en utilisation directe. Un test d'évaluation portant sur 25 documents français contenant 1 855 entités a mesuré un F1 de 29,5 % pour spaCy seul. L'approche hybride (expressions régulières, dictionnaires de noms et de lieux) mesure 32,34 % F1 en v2.2.0. Un chiffre antérieur d'environ 60 % (Story 5.3) n'était pas reproductible et a été retiré. L'amélioration de la détection est prévue, avec un modèle français affiné comme objectif de la v3.0.
 
 Un affinage basé sur des données de validation du monde réel est prévu pour la v3.0 (ciblant un F1 de 70-85 %).
 
@@ -92,13 +92,13 @@ Les fichiers PDF et DOCX produisent toujours une sortie en texte brut (`.txt`). 
 
 ### Puis-je utiliser cet outil pour des documents non français ?
 
-Non. La v1.0 est conçue exclusivement pour le texte en langue française. Le modèle NLP (`fr_core_news_lg`), les expressions régulières et les bibliothèques de pseudonymes sont tous spécifiques au français.
+En partie, depuis la v2.2. Vous pouvez confier la détection NLP à un autre modèle spaCy avec `--model` (p. ex. `--model en_core_web_trf` pour l'anglais) ; voir la [référence CLI](CLI-REFERENCE.fr.md). Tout le reste reste français : expressions régulières, dictionnaires de noms et de lieux, bibliothèques de pseudonymes. La détection sera moins bonne sur un texte non français : appuyez-vous sur la validation (`[A]` pour ajouter une entité manquée, `[T]` pour corriger un type).
 
-La prise en charge multilingue (anglais, espagnol, allemand) est prévue pour la v3.0.
+La prise en charge multilingue complète (anglais, espagnol, allemand) est prévue pour la v3.0.
 
 ### Quelles langues sont prises en charge ?
 
-Le français uniquement dans la v1.0. L'outil utilise le modèle `fr_core_news_lg` de spaCy entraîné spécifiquement sur du texte français.
+Le français est la langue prise en charge : par défaut l'outil utilise le modèle `fr_core_news_lg` de spaCy, et les motifs, dictionnaires et bibliothèques de pseudonymes sont français. Depuis la v2.2, vous pouvez utiliser un autre modèle spaCy pour la détection (voir ci-dessus).
 
 ---
 
@@ -195,7 +195,11 @@ Non. Des exécutables autonomes sont disponibles pour Windows (installeur .exe),
 
 **v1.1 (T1 2026) :** Effacement RGPD, pseudonymes genrés, amélioration NER, support PDF/DOCX, documentation française
 
-**v2.0 (T1 2026 — Actuelle) :** Interface graphique, exécutables autonomes, accessibilité WCAG AA, interface française, validation par lot
+**v2.0 (T1 2026) :** Interface graphique, exécutables autonomes, accessibilité WCAG AA, interface française, validation par lot
+
+**v2.1 (T1 2026) :** Améliorations GUI, support Excel/CSV, thème Neutral ID, précision NER
+
+**v2.2 (T3 2026 — Actuelle) :** Choix du modèle spaCy, changement de type d'entité en validation CLI, corrections de délimitation des entités
 
 **v3.0 (2027+) :** Précision NLP et automatisation
 - Modèle NER français affiné (cible F1 de 70-85 %)
