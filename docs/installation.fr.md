@@ -24,9 +24,9 @@ Pour les utilisateurs non techniques, des exécutables autonomes pré-compilés 
 
 **[Télécharger la dernière version](https://github.com/LioChanDaYo/RGPDpseudonymizer/releases/latest)**
 
-- **Windows :** `gdpr-pseudonymizer-2.1.3-windows-setup.exe` — Lancez l'installeur
-- **macOS (Apple Silicon) :** `gdpr-pseudonymizer-2.1.3-macos-arm64.dmg` — Ouvrez le DMG, glissez vers Applications
-- **Linux :** `gdpr-pseudonymizer-2.1.3-linux.AppImage` — `chmod +x` puis exécutez
+- **Windows :** `gdpr-pseudonymizer-2.2.0-windows-setup.exe` — Lancez l'installeur
+- **macOS (Apple Silicon) :** `gdpr-pseudonymizer-2.2.0-macos-arm64.dmg` — Ouvrez le DMG, glissez vers Applications
+- **Linux :** `gdpr-pseudonymizer-2.2.0-linux.AppImage` — `chmod +x` puis exécutez
 
 !!! note "Macs Intel"
     Aucun DMG n'est publié pour les Macs Intel. GitHub a retiré ses runners macOS Intel, et

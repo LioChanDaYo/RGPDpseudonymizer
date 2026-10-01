@@ -14,13 +14,24 @@ Transform sensitive French documents for safe AI analysis with local processing,
 
 ---
 
-## What's New in v2.1
+## What's New in v2.2
+
+- **Choose the spaCy model** — `--model` / `pseudonymization.model` accept any spaCy package name (e.g. `en_core_web_trf` for English); `spacy` still selects the French `fr_core_news_lg`. The model only drives NLP detection: regex patterns, dictionaries and pseudonym libraries stay French. See the [CLI Reference](docs/CLI-REFERENCE.md).
+- **Retype entities during CLI validation (`[T]`)** — Switch a detected entity between PERSON, LOCATION and ORG for every occurrence, instead of rejecting and re-adding it
+- **Cleaner entity spans** — Editing with `[E]` no longer erases neighbouring text; "Last, First" matching now requires a known first name; timestamps and stray punctuation are trimmed from NER span edges; names with non-French letters ("María", "Yılmaz") and hyphenated names after titles are detected whole
+- **Fresh `pip install` fixed** — v2.1.3 crashed on import when pip resolved SQLAlchemy 2.1; SQLAlchemy is now capped below 2.1
+- **Audit log records the real model** — e.g. `fr_core_news_lg-3.8.0` instead of `spacy-unknown`
+
+<details>
+<summary>v2.1 highlights</summary>
 
 - **Validate-once-per-entity** — Accept or reject one entity occurrence and it applies to all same-text occurrences in the document (productivity boost for repeated names)
 - **Excel/CSV Format Support** — Process `.xlsx` and `.csv` files with cell-aware pseudonymization for HR/compliance use cases (`pip install gdpr-pseudonymizer[excel]`)
 - **Neutral ID Pseudonym Theme** — Counter-based identifiers (PERSON-001, LIEU-001, ORG-001) for formal/legal contexts (`--theme neutral_id`)
 - **NER Accuracy Improvements** — Expanded ORG detection patterns, POS-tag disambiguation for geography matching; LOCATION false-negative rate reduced from 27% to 13%
 - **GUI Discoverability** — F1 keyboard shortcuts help dialog with all shortcut groups, database path persistence across sessions, "Hide confirmed" toggle
+
+</details>
 
 <!-- TODO: Add GUI screenshot -->
 
@@ -36,9 +47,9 @@ Pre-built standalone executables are available for Windows, macOS, and Linux. No
 
 | Platform | File | Notes |
 |----------|------|-------|
-| **Windows** | `gdpr-pseudonymizer-2.1.3-windows-setup.exe` | Run the installer. Adds Start Menu shortcut. |
-| **macOS (Apple Silicon)** | `gdpr-pseudonymizer-2.1.3-macos-arm64.dmg` | Open DMG, drag to Applications. |
-| **Linux** | `gdpr-pseudonymizer-2.1.3-linux.AppImage` | `chmod +x` then run. |
+| **Windows** | `gdpr-pseudonymizer-2.2.0-windows-setup.exe` | Run the installer. Adds Start Menu shortcut. |
+| **macOS (Apple Silicon)** | `gdpr-pseudonymizer-2.2.0-macos-arm64.dmg` | Open DMG, drag to Applications. |
+| **Linux** | `gdpr-pseudonymizer-2.2.0-linux.AppImage` | `chmod +x` then run. |
 
 > **Intel Macs:** no DMG is published. GitHub retired its Intel macOS runners, and an
 > Apple Silicon runner cannot cross-build a working x86_64 bundle. Install with
@@ -81,7 +92,7 @@ GDPR Pseudonymizer is a **privacy-first CLI and GUI tool** that combines AI effi
 - ✅ **Zero telemetry** - No analytics, crash reporting, or external communication
 
 ### 🤝 **AI + Human Verification**
-- ✅ **Hybrid detection** - AI pre-detects ~60% of entities (NLP + regex + geography dictionary)
+- ✅ **Hybrid detection** - AI pre-detects ~40% of entities (NLP + regex + geography dictionary; you catch the rest during validation). Improving this is a priority — see [Technical Details](#-technical-details)
 - ✅ **Mandatory validation** - You review and confirm all entities (ensures 100% accuracy)
 - ✅ **Fast validation UI** - Rich CLI interface with keyboard shortcuts, <2 min per document
 - ✅ **Smart workflow** - Entity-by-type grouping (PERSON → ORG → LOCATION) with context display
@@ -116,7 +127,7 @@ GDPR Pseudonymizer is a **privacy-first CLI and GUI tool** that combines AI effi
 
 ## 🚀 Quick Start
 
-**Status:** 🎉 **v2.1.0** (March 2026) — GUI Polish, Excel/CSV Support & NER Accuracy
+**Status:** 🎉 **v2.2.0** (September 2026) — spaCy Model Choice, Entity Retyping & Span Fixes
 
 ### Getting Started
 
@@ -138,23 +149,25 @@ pip install gdpr-pseudonymizer[excel]
 pip install gdpr-pseudonymizer[formats]
 ```
 
-### What v2.1 Delivers
+### What v2.2 Delivers
 
 - 🖥️ **Desktop GUI** — Visual entity validation with drag-and-drop, batch dashboard, and database management
-- 📦 **Standalone executables** — Windows .exe, macOS .dmg, Linux AppImage — no Python required
+- 📦 **Standalone executables** — Windows .exe, macOS .dmg (Apple Silicon), Linux AppImage — no Python required
 - ♿ **WCAG 2.1 AA accessibility** — Keyboard navigation, screen reader, high contrast mode
 - 🌐 **French UI** — Complete FR/EN interface with live language switching
-- 🤖 **AI-assisted detection** — Hybrid NLP + regex detects ~60% of entities automatically
+- 🤖 **AI-assisted detection** — Hybrid NLP + regex pre-detects ~40% of entities (F1 ~32% on our benchmark); validation catches the rest
 - ✅ **Mandatory human verification** — You review and confirm all entities (ensures 100% accuracy)
 - 🔒 **100% local processing** — Your data never leaves your machine
 - 📄 **PDF/DOCX support** — Process PDF and DOCX files directly (optional extras)
 - 📊 **Excel/CSV support** — Process .xlsx and .csv files with cell-aware pseudonymization (optional extra: `[excel]`)
 - 🆔 **Neutral ID theme** — Counter-based identifiers (PERSON-001, LIEU-001) for formal/legal contexts
 - 🎯 **NER accuracy** — LOCATION false-negative rate reduced from 27% to 13% via regex expansion & POS disambiguation
+- 🧠 **Choice of spaCy model** — French by default; any spaCy model for detection (e.g. `--model en_core_web_trf`)
+- 🏷️ **Entity retyping** — Change an entity's type (PERSON/LOCATION/ORG) during CLI validation with `[T]`
 
-**What v2.1 does NOT deliver:**
+**What v2.2 does NOT deliver:**
 - ❌ Fully automatic "set and forget" processing
-- ❌ 85%+ AI accuracy (current: ~60% F1 with hybrid approach)
+- ❌ 85%+ AI accuracy (current: ~32% F1 with hybrid approach — we plan to raise it)
 - ❌ Optional validation mode (validation is mandatory)
 
 ### Roadmap
@@ -165,10 +178,12 @@ pip install gdpr-pseudonymizer[formats]
 
 **v2.0 (Q1 2026):** Desktop GUI, standalone executables, WCAG AA accessibility, French UI, batch validation, core hardening
 
-**v2.1 (Q1 2026) — CURRENT RELEASE:** GUI polish, Excel/CSV support, neutral ID theme, NER accuracy improvements, keyboard shortcuts help
+**v2.1 (Q1 2026):** GUI polish, Excel/CSV support, neutral ID theme, NER accuracy improvements, keyboard shortcuts help
+
+**v2.2 (Q3 2026) — CURRENT RELEASE:** Choice of spaCy model, entity retyping in CLI validation, entity-span accuracy fixes, fresh-install fix (SQLAlchemy < 2.1)
 
 **v3.0 (2027+):** NLP accuracy & automation
-- Fine-tuned French NER model (70-85% F1 target, up from ~60%)
+- Fine-tuned French NER model (70-85% F1 target, up from ~32% today)
 - Optional `--no-validate` flag for high-confidence workflows
 - Confidence-based auto-processing (85%+ F1 target)
 - Multi-language support (English, Spanish, German)
@@ -324,11 +339,17 @@ After comprehensive benchmarking on 25 French interview/business documents (1,73
 | Approach | F1 Score | Precision | Recall | Notes |
 |----------|----------|-----------|--------|-------|
 | **spaCy only** `fr_core_news_lg` | 29.5% | 27.0% | 32.7% | Story 1.2 baseline |
-| **Hybrid** (spaCy + regex) | 59.97% | 48.17% | 79.45% | Story 5.3 |
+| **Hybrid** (spaCy + regex) | 31.35% | 25.18% | 41.51% | Story 5.3 — originally reported as 59.97%, not reproducible (see note) |
 | **Hybrid + expanded patterns** | 31.79% | 25.38% | 42.54% | Story 7.5 |
 | **Span-bleed fixes** | 32.34% | 26.75% | 40.88% | 2026-09-29 (current) — recall drop is a ground-truth artefact, see QA report |
 
-**Accuracy trajectory:** spaCy-only baseline → hybrid approach with annotation cleanup, expanded regex patterns, and French geography dictionary doubled F1 score. Story 7.5 added 12 ORG pattern keywords, POS-tag disambiguation for geography matching, and 7 international locations — reducing LOCATION false-negative rate from 27.42% to 12.90%.
+**Correction (October 2026):** earlier versions of this README claimed ~60% F1 for the hybrid approach (the "59.97%" Story 5.3 figure). That number was never reproducible: re-running the accuracy suite on the exact Story 5.3 code gives 31.35%, and the current release measures 32.34%. The detector did not regress; the figure was wrong. Every number on this page now comes from a reproducible run of `tests/accuracy`.
+
+**Read these numbers with two caveats.** They come from one 25-document French interview/business corpus, and part of its ground truth was auto-annotated with the tool's own regex patterns, which skews recall in both directions. And they measure *pre-detection* only: mandatory validation is what makes the final output correct.
+
+**We plan to make these figures better** — both the detection itself (where precision is the weakest point today) and the benchmark that measures it. A fine-tuned French NER model remains the v3.0 target (70-85% F1).
+
+**Accuracy trajectory:** Story 7.5 added 12 ORG pattern keywords, POS-tag disambiguation for geography matching, and 7 international locations — reducing LOCATION false-negative rate from 27.42% to 12.90%.
 
 **Approved Solution:**
 - ✅ **Hybrid approach** (NLP + regex + geography dictionary + POS disambiguation)
@@ -373,7 +394,7 @@ The validation UI provides an intuitive keyboard-driven interface for reviewing 
 | **CLI Framework** | Typer | 0.9+ | Command-line interface |
 | **Database** | SQLite | 3.35+ | Local mapping table storage with WAL mode |
 | **Encryption** | cryptography (AESSIV) | 44.0+ | AES-256-SIV encryption for sensitive fields (PBKDF2 key derivation, passphrase-protected) |
-| **ORM** | SQLAlchemy | 2.0+ | Database abstraction and session management |
+| **ORM** | SQLAlchemy | 2.0.x (<2.1) | Database abstraction and session management |
 | **Desktop GUI** | PySide6 | 6.7+ | Desktop application (optional: `pip install gdpr-pseudonymizer[gui]`) |
 | **Validation UI** | rich | 13.7+ | Interactive CLI entity review |
 | **Keyboard Input** | readchar | 4.2+ | Single-keypress capture for validation UI |
@@ -389,7 +410,7 @@ The validation UI provides an intuitive keyboard-driven interface for reviewing 
 **Long answer:**
 1. **GDPR defensibility** - Human verification provides legal audit trail
 2. **Zero false negatives** - AI misses entities, humans catch them (100% coverage)
-3. **Current NLP limitations** - French models on interview/business docs: 29.5% F1 out-of-box (hybrid approach reaches ~60%)
+3. **Current NLP limitations** - French models on interview/business docs: 29.5% F1 out-of-box (hybrid approach: ~32% F1, ~41% recall; improvement planned)
 4. **Better than alternatives:**
    - ✅ **vs Manual redaction:** 50%+ faster (AI pre-detection)
    - ✅ **vs Cloud services:** 100% local processing (no data leakage)
@@ -475,13 +496,13 @@ The validation UI provides an intuitive keyboard-driven interface for reviewing 
 
 ## 🛠️ Development Status
 
-**Epics 1-7 Complete** — v2.1.0 (March 2026). GUI polish, Excel/CSV support, NER accuracy improvements.
+**Epics 1-7 Complete** — current release v2.2.0 (September 2026): spaCy model choice, entity retyping, entity-span fixes. v2.1.0 (March 2026) closed Epic 7.
 
 - ✅ **Epic 1:** Foundation & NLP Validation (9 stories) — spaCy integration, validation UI, hybrid detection, entity deduplication
 - ✅ **Epic 2:** Core Pseudonymization Engine (9 stories) — pseudonym libraries, encryption, audit logging, batch processing, GDPR 1:1 mapping
 - ✅ **Epic 3:** CLI Interface & Batch Processing (7 stories) — 8 CLI commands, progress reporting, config files, parallel batch, UX polish
 - ✅ **Epic 4:** Launch Readiness (8 stories) — LLM utility validation, cross-platform testing, documentation, NER accuracy suite, performance validation, beta feedback integration, codebase refactoring, launch preparation
-- ✅ **Epic 5:** Quick Wins & GDPR Compliance (7 stories) — GDPR Article 17 erasure, gender-aware pseudonyms, NER accuracy improvements (F1 29.74% → 59.97%), French documentation translation, PDF/DOCX support, CLI polish & benchmarks, v1.1 release
+- ✅ **Epic 5:** Quick Wins & GDPR Compliance (7 stories) — GDPR Article 17 erasure, gender-aware pseudonyms, NER accuracy work (annotation cleanup, expanded regex, geography dictionary), French documentation translation, PDF/DOCX support, CLI polish & benchmarks, v1.1 release
 - ✅ **Epic 6:** v2.0 Desktop GUI & Broader Accessibility (9 stories) — PySide6 desktop application, visual entity validation, batch GUI, i18n, WCAG AA, standalone executables
   - ✅ Story 6.1: UX Architecture & GUI Framework Selection
   - ✅ Story 6.2: GUI Application Foundation (main window, theming, home screen, settings, 77 GUI tests)
@@ -565,7 +586,7 @@ This project is licensed under the [MIT License](LICENSE).
 - ⚠️ Test thoroughly before production use
 
 **Current limitations:**
-- AI detection: ~60% F1 baseline (not 85%+)
+- AI detection: ~32% F1 today (not 85%+); improving it is planned
 - Validation required for ALL documents (not optional)
 - French documents only (English, Spanish, etc. in future versions)
 - Text-based formats: .txt, .md, .pdf, .docx, .xlsx, .csv (PDF/DOCX/Excel require optional extras: `pip install gdpr-pseudonymizer[formats]`)
@@ -686,7 +707,7 @@ The integration test suite covers:
 
 | Metric | Value | Status |
 |--------|-------|--------|
-| **Development Progress** | v2.1.0 | ✅ Epics 1-7 complete |
+| **Development Progress** | v2.2.0 | ✅ Epics 1-7 complete |
 | **Stories Complete** | 60 (Epics 1-7) | ✅ All epics complete |
 | **LLM Utility (NFR10)** | 4.27/5.0 (85.4%) | ✅ PASSED (threshold: 80%) |
 | **Installation Success (NFR3)** | 87.5% (7/8 platforms) | ✅ PASSED (threshold: 85%) |
@@ -694,7 +715,7 @@ The integration test suite covers:
 | **Critical Bugs Found** | 1 (Story 2.8) | ✅ RESOLVED - Epic 3 Unblocked |
 | **Test Corpus Size** | 25 docs, 1,737 entities | ✅ Complete (post-cleanup) |
 | **NLP Accuracy (Baseline)** | 29.5% F1 (spaCy only) | ✅ Measured (Story 1.2) |
-| **Hybrid Accuracy (NLP+Regex)** | 59.97% F1 (+30.23pp vs baseline) | ✅ Story 5.3 Complete |
+| **Hybrid Accuracy (NLP+Regex)** | 32.34% F1 (v2.2.0) | ⚠️ Below target — improvement planned |
 | **Final Accuracy (AI+Human)** | 100% (validated) | 🎯 By Design |
 | **Pseudonym Libraries** | 3 themes (2,426 names + 240 locations + 588 orgs) | ✅ Stories 2.1, 3.0, 4.6 Complete |
 | **Compositional Matching** | Operational (component reuse + title stripping + compound names) | ✅ Stories 2.2, 2.3 Complete |
@@ -726,4 +747,4 @@ The integration test suite covers:
 
 ---
 
-**Last Updated:** 2026-03-17 (v2.1.0 — GUI polish, Excel/CSV support, neutral ID theme, NER accuracy improvements, 1670+ tests)
+**Last Updated:** 2026-10-01 (v2.2.0 — spaCy model choice, entity retyping, entity-span fixes)

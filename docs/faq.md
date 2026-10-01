@@ -8,13 +8,13 @@
 
 ### What accuracy should I expect from the automatic detection?
 
-The hybrid detection pipeline (NLP + regex + geography dictionary) automatically identifies approximately 60% of entities in French text (F1 59.97%). This is a pre-filtering step -- **you review and confirm every entity** during the mandatory validation workflow.
+The hybrid detection pipeline (NLP + regex + geography dictionary) automatically identifies approximately 40% of entities in French text (recall 40.88%, F1 32.34% on our 25-document benchmark). We plan to improve these figures. This is a pre-filtering step -- **you review and confirm every entity** during the mandatory validation workflow.
 
 After human validation, accuracy is **100%** because you control the final decision for every entity.
 
 ### Why is the NER accuracy so low?
 
-The spaCy `fr_core_news_lg` model was trained primarily on news text, not interview transcripts or business documents. Domain-specific language patterns (conversational registers, mixed formality) reduce out-of-the-box accuracy. A benchmark on 25 French documents with 1,855 entities measured 29.5% F1 for spaCy alone, improving to ~60% with the hybrid approach (F1 59.97%) after annotation cleanup, expanded regex patterns, and a French geography dictionary (Story 5.3).
+The spaCy `fr_core_news_lg` model was trained primarily on news text, not interview transcripts or business documents. Domain-specific language patterns (conversational registers, mixed formality) reduce out-of-the-box accuracy. A benchmark on 25 French documents with 1,855 entities measured 29.5% F1 for spaCy alone. The hybrid approach (regex patterns, name and geography dictionaries) measures 32.34% F1 in v2.2.0. An earlier ~60% figure (Story 5.3) was not reproducible and has been withdrawn. Improving detection is planned, with a fine-tuned French model as the v3.0 target.
 
 Fine-tuning with real-world validation data is planned for v3.0 (targeting 70-85% F1).
 
@@ -92,13 +92,13 @@ PDF and DOCX output is always plaintext (`.txt`). Excel and CSV inputs preserve 
 
 ### Can I use this for non-French documents?
 
-No. v1.0 is designed exclusively for French-language text. The NLP model (`fr_core_news_lg`), regex patterns, and pseudonym libraries are all French-specific.
+Partially, since v2.2. You can point NLP detection at another spaCy model with `--model` (e.g. `--model en_core_web_trf` for English); see the [CLI Reference](CLI-REFERENCE.md). Everything else stays French: regex patterns, name and geography dictionaries, and pseudonym libraries. Expect lower detection on non-French text, and lean on validation (`[A]` to add missed entities, `[T]` to fix a wrong type).
 
-Multi-language support (English, Spanish, German) is planned for v3.0.
+Full multi-language support (English, Spanish, German) is planned for v3.0.
 
 ### What languages are supported?
 
-French only in v1.0. The tool uses spaCy's `fr_core_news_lg` model trained specifically on French text.
+French is the supported language: by default the tool uses spaCy's `fr_core_news_lg` model, and the patterns, dictionaries and pseudonym libraries are French. Since v2.2 you can swap in another spaCy model for detection (see above).
 
 ---
 
@@ -195,7 +195,11 @@ No. Standalone executables are available for Windows (.exe installer), macOS (.d
 
 **v1.1 (Q1 2026):** GDPR erasure, gender-aware pseudonyms, NER accuracy improvements, PDF/DOCX support, French docs
 
-**v2.0 (Q1 2026 — Current):** Desktop GUI, standalone executables, WCAG AA accessibility, French UI, batch validation
+**v2.0 (Q1 2026):** Desktop GUI, standalone executables, WCAG AA accessibility, French UI, batch validation
+
+**v2.1 (Q1 2026):** GUI polish, Excel/CSV support, neutral ID theme, NER accuracy improvements
+
+**v2.2 (Q3 2026 — Current):** Choice of spaCy model, entity retyping in CLI validation, entity-span fixes
 
 **v3.0 (2027+):** NLP accuracy and automation
 - Fine-tuned French NER model (70-85% F1 target)

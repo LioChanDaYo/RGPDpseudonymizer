@@ -97,6 +97,14 @@ exit
 
 ---
 
+### `ArgumentError` sur toutes les commandes après `pip install` (v2.1.3)
+
+**Cause :** la v2.1.3 autorisait SQLAlchemy 2.1, que pip installe désormais par défaut et qui refuse une des définitions de colonnes du projet. Toutes les commandes échouent, y compris `gdpr-pseudo --help`. Les installeurs autonomes ne sont pas concernés.
+
+**Solution :** passez à la v2.2.0 ou ultérieure (`pip install --upgrade gdpr-pseudonymizer`). Pour rester en v2.1.3 : `pip install "sqlalchemy<2.1"`.
+
+---
+
 ## Problèmes de mot de passe
 
 ### `Passphrase must be at least 12 characters`
@@ -202,6 +210,12 @@ poetry run gdpr-pseudo process doc2.txt --db shared.db
 ```bash
 poetry run gdpr-pseudo process doc.txt --theme neutral
 ```
+
+### `Model '...' is not recognized`
+
+**Cause :** `--model` (ou `pseudonymization.model`) doit valoir `spacy` (le modèle français par défaut) ou un nom de paquet spaCy. Depuis la v2.2, une valeur comme `english` est refusée au lieu de retomber silencieusement sur le français.
+
+**Solution :** indiquez un nom de paquet spaCy, p. ex. `--model en_core_web_trf`. Un modèle absent est téléchargé à la première utilisation ; les installeurs autonomes n'embarquent que le modèle français.
 
 ---
 

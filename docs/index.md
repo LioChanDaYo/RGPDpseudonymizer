@@ -30,7 +30,7 @@ GDPR Pseudonymizer is a **privacy-first tool** that combines AI efficiency with 
 
 ### AI + Human Verification
 
-- **Hybrid detection** -- AI pre-detects ~60% of entities (NLP + regex + geography dictionary, F1 59.97%)
+- **Hybrid detection** -- AI pre-detects ~40% of entities (NLP + regex + geography dictionary, F1 32.34%); improving this is planned
 - **Mandatory validation** -- you review and confirm all entities (ensures 100% accuracy)
 - **Fast validation UI** -- keyboard shortcuts, batch operations, <2 min per document
 - **Entity variant grouping** -- related forms ("Marie Dubois", "Pr. Dubois", "Dubois") merged into one validation item
@@ -97,7 +97,7 @@ GDPR Pseudonymizer supports compliance with Articles 4(5), 25, 30, 32, and 89 of
 
 ## Status
 
-**Current release:** v2.0.0 (March 2026) — Desktop GUI, Standalone Executables & WCAG AA Accessibility
+**Current release:** v2.2.0 (September 2026) — Choice of spaCy model, entity retyping in CLI validation, entity-span fixes. See the [changelog](https://github.com/LioChanDaYo/RGPDpseudonymizer/blob/main/CHANGELOG.md).
 
 **Supported:** Python 3.10-3.12 | Windows, macOS, Linux | .txt, .md, .pdf, .docx, .xlsx, .csv formats | French language | Desktop GUI: `pip install gdpr-pseudonymizer[gui]`
 
