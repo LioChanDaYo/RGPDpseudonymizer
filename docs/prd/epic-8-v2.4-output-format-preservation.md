@@ -1,8 +1,8 @@
-# Epic 8: v2.2 — Output Format Preservation & Auto-Update
+# Epic 8: v2.4 — Output Format Preservation & Auto-Update
 
 **Epic Goal:** Enable pseudonymized documents to retain their original format (PDF->PDF, DOCX->DOCX) instead of flattening to plaintext, and implement an auto-update mechanism so standalone executable users receive new versions without manual downloads.
 
-**Target Release:** v2.2.0
+**Target Release:** v2.4.0
 **Duration:** Estimated 5-7 weeks
 **Predecessor:** Epic 7 (v2.1.0)
 
@@ -35,7 +35,7 @@ Standalone executable users (the primary non-technical audience) have no `pip in
 | 8.1: DOCX Format Preservation | HIGH | 2-3 weeks | Epic 6 deferred | Draft |
 | 8.2: PDF Format Preservation | HIGH | 1-2 weeks | Epic 6 deferred | Draft |
 | 8.3: Auto-Update Mechanism | MED | 1 week | Epic 6 deferred | Draft |
-| 8.4: v2.2 Release Preparation | HIGH | 1-2 days | — | Draft |
+| 8.4: v2.4 Release Preparation | HIGH | 1-2 days | — | Draft |
 
 **Total Estimated Duration:** 5-7 weeks
 
@@ -101,7 +101,7 @@ PDF format preservation is significantly harder than DOCX because PDF is a page-
 - **Overlay approach:** Redact original text with white rectangles, then overlay pseudonymized text at the same position (using PyMuPDF/fitz). Simpler but may have visual artifacts.
 - **Reconstruction approach:** Extract full structure, rebuild PDF with pseudonymized content. More faithful but extremely complex.
 
-The overlay approach is recommended for v2.2 as the pragmatic choice.
+The overlay approach is recommended for v2.4 as the pragmatic choice.
 
 ### Acceptance Criteria
 
@@ -157,7 +157,7 @@ Auto-update for standalone executables (PyInstaller bundles) requires:
 2. A download mechanism for the platform-specific executable
 3. A replacement/installation mechanism
 
-For v2.2, the recommended approach is **notification + download link** (not silent auto-install), which is simpler and avoids code-signing complications with self-modifying executables.
+For v2.4, the recommended approach is **notification + download link** (not silent auto-install), which is simpler and avoids code-signing complications with self-modifying executables.
 
 ### Acceptance Criteria
 
@@ -191,23 +191,23 @@ For v2.2, the recommended approach is **notification + download link** (not sile
 
 ---
 
-## Story 8.4: v2.2 Release Preparation
+## Story 8.4: v2.4 Release Preparation
 
 **As a** product manager,
-**I want** v2.2.0 published with format preservation and auto-update,
+**I want** v2.4.0 published with format preservation and auto-update,
 **so that** users can output pseudonymized documents in their original format.
 
 **Priority:** HIGH — Gates the release
 
 ### Acceptance Criteria
 
-1. **AC1:** Version bumped to `2.2.0` in `pyproject.toml`
-2. **AC2:** CHANGELOG.md updated with v2.2.0 section
+1. **AC1:** Version bumped to `2.4.0` in `pyproject.toml`
+2. **AC2:** CHANGELOG.md updated with v2.4.0 section
 3. **AC3:** README updated: format preservation feature, auto-update mention
 4. **AC4:** README.fr.md mirrored
 5. **AC5:** Full regression suite passing
 6. **AC6:** Standalone executables built and tested
-7. **AC7:** Git tag `v2.2.0` triggers release workflow
+7. **AC7:** Git tag `v2.4.0` triggers release workflow
 8. **AC8:** Release notes highlight format preservation as headline feature
 9. **AC9:** Known limitations for PDF preservation clearly documented
 
@@ -248,7 +248,7 @@ Story 8.4 (Release Prep)          --- Week 5-6 ---    Release gate
 - [ ] All quality gates green
 - [ ] Test count >= v2.1 baseline, coverage >= 86%
 - [ ] No regression in existing processing workflows
-- [ ] v2.2.0 published on PyPI and GitHub Releases
+- [ ] v2.4.0 published on PyPI and GitHub Releases
 - [ ] Known limitations clearly documented
 
 ---

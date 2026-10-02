@@ -48,7 +48,7 @@
 
 ---
 
-### Epic 8: v2.2 — Output Format Preservation & Auto-Update
+### Epic 8: v2.4 — Output Format Preservation & Auto-Update
 
 **Goal:** Enable pseudonymized documents to retain their original format (PDF->PDF, DOCX->DOCX) instead of flattening to plaintext, and implement an auto-update mechanism for standalone executable users.
 
@@ -68,7 +68,7 @@
 
 ---
 
-**Timeline: Epics 0-4: 14 weeks (v1.0 MVP). Epic 5: 6-7 weeks (v1.1). Epic 6: 10-14 weeks (v2.0). Epic 7: 4-6 weeks (v2.1). Epic 8: 5-7 weeks (v2.2). Epic 9: 8-12 weeks (v3.0). Epic 10: 4-6 weeks (v2.3 candidate, runs before Epic 9)**
+**Timeline: Epics 0-4: 14 weeks (v1.0 MVP). Epic 5: 6-7 weeks (v1.1). Epic 6: 10-14 weeks (v2.0). Epic 7: 4-6 weeks (v2.1). Epic 8: 5-7 weeks (v2.4). Epic 9: 8-12 weeks (v3.0). Epic 10: 4-6 weeks (v2.3 candidate, runs before Epic 9)**
 
 ---
 
@@ -125,7 +125,7 @@
 - **Q2 2026 (Epic 5):** v1.1 release — GDPR erasure, gender-aware pseudonyms, PDF/DOCX, French docs, NER accuracy improvements ✅ COMPLETE (2026-02-15)
 - **Epic 6:** v2.0 release — Desktop GUI, standalone executables, French-first i18n, WCAG AA accessibility ✅ COMPLETE (2026-03-04)
 - **Epic 7:** v2.1 release — GUI polish, Excel/CSV support, neutral theme, NER regex expansion
-- **Epic 8:** v2.2 release — Output format preservation (DOCX->DOCX, PDF->PDF), auto-update
+- **Epic 8:** v2.4 release — Output format preservation (DOCX->DOCX, PDF->PDF), auto-update
 - **Epic 9:** v3.0 release — Fine-tuned NER model, confidence calibration, coreference resolution, optional validation
 - **Epic 10:** v2.3 candidate — detection precision quick wins. No release is part of the epic; v2.3.0 ships only on Lionel's explicit go
 
@@ -164,7 +164,7 @@
 - [ ] DOCX input produces pseudonymized DOCX output with formatting preserved
 - [ ] PDF input produces pseudonymized PDF output (overlay approach)
 - [ ] Auto-update notification functional in standalone executables
-- [ ] v2.2.0 published on PyPI and GitHub Releases
+- [ ] v2.4.0 published on PyPI and GitHub Releases
 
 **Epic 9 DoD:**
 - [ ] Fine-tuned French NER model achieves F1 >= 70% on held-out test set

@@ -82,6 +82,13 @@ The following block is normative and is referenced by every story's acceptance c
 - **G6 — Normal quality.** black, ruff, mypy clean; unit tests for every new rule; full CI green (one re-run allowed for the known macOS flake).
 - **G7 — Docs.** If a story changes the headline numbers, it updates README/README.fr, `docs/faq*.md`, `docs/index*.md`, `docs/tutorial*.md`, the QA report and CHANGELOG `[Unreleased]`, all from the G1 run.
 
+### Epic 10 G7 interpretation (Lionel, 2026-10-02)
+
+Decided by Lionel, 2026-10-02. This note interprets the gates for Epic 10; the gate text above is unchanged.
+
+- **G7 — per story vs. close-out.** The QA report (`docs/qa/ner-accuracy-report.md`) records the before/after at every story (10.1 marked "benchmark repair, same detector"), and each story adds its CHANGELOG `[Unreleased]` entry. README/README.fr, `docs/faq*.md`, `docs/index*.md` and `docs/tutorial*.md` change once, at Epic 10 close-out, from the final G1 run — not per story.
+- **G3 under a ground-truth change (10.1).** G3 does not block 10.1. 10.1's close-out run becomes the new baseline. Every per-type recall drop between the old and new ground truth is listed with its cause (e.g. "+N ORG annotations added") in the story and the PR. G3 applies strictly from 10.2 onwards.
+
 ---
 
 ## Enhancement Details
@@ -124,7 +131,7 @@ Part of the ground truth was produced by `scripts/auto_annotate_corpus.py` and a
 ### Sequence (mandatory order)
 
 1. Draft `tests/test_corpus/annotations/GUIDELINES.md`.
-2. **Guidelines approval stop — Lionel approves the guidelines.** The draft goes to Lionel. No annotation file (existing or held-out) is created or edited before his approval is recorded in the story's Dev Notes (date + any amendments). At the same stop, Lionel decides the open questions of AC11 (who annotates, held-out authoring method).
+2. **Guidelines approval stop — Lionel approves the guidelines.** The draft goes to Lionel. No annotation file (existing or held-out) is created or edited before his approval is recorded in the story's Dev Notes (date + any amendments). Annotator and held-out authoring were decided by Lionel on 2026-10-02 (AC11).
 3. Diagnose the auto-annotator bug; fix or retire `scripts/auto_annotate_corpus.py`.
 4. Apply the approved guidelines to the 25 existing annotation files.
 5. Write and annotate the held-out documents by hand under the approved guidelines.
@@ -149,19 +156,19 @@ Part of the ground truth was produced by `scripts/auto_annotate_corpus.py` and a
    - Missing real ORG and LOCATION annotations are added (CNIL, ANSSI, Deloitte and every other instance found).
    - `tests/test_corpus/annotations/README.md` entity counts are updated to the new totals.
    - A change log (counts per document: corrected / removed / added, per type) is attached to the story.
-5. **AC5 — Held-out set:** at least 5 new hand-written documents with annotations (authoring method and annotator as decided by Lionel under AC11):
-   - Synthetic French business and interview style text (no user data, no copy of real people's records).
-   - Annotated by hand under the approved guidelines, not pre-annotated by the detector or the auto-annotator.
+5. **AC5 — Held-out set:** at least 5 new documents with annotations (authoring and annotation as decided under AC11):
+   - Synthetic French business and interview style text (no user data, no copy of real people's records), seeded with known hard cases: particles, Mc/Mac names, greetings, role acronyms, foreign places. The text may be written by an LLM agent; Lionel reviews the text before annotation.
+   - Annotated under the approved guidelines, not pre-annotated by the detector or the auto-annotator.
    - Stored apart from the main corpus (the story fixes the exact location, e.g. `tests/test_corpus/held_out/`), and documented as never used for tuning: detector stories may read held-out aggregate metrics, not held-out FP/FN lists, while designing rules.
 6. **AC6 — Held-out scoring:** the accuracy suite scores the held-out set separately and prints labelled lines in `accuracy-output.txt` (e.g. `[HELD-OUT Overall]`, `[HELD-OUT PERSON]`, `[HELD-OUT LOCATION]`, `[HELD-OUT ORG]`). Held-out entities are not added to the main corpus totals.
 7. **AC7 — Before/after report:** the QA report gets a new section with the same detector scored on the old and the new ground truth: overall and per-type P/R/F1/TP/FP/FN, both from G1 runs (the "before" can be run `37013929807`), labelled as a benchmark-only delta, plus the first held-out numbers.
-8. **AC8 — Open point: G7 for a benchmark-only change.** The headline F1 will move because the ground truth changed, not because the detector changed. The story must decide explicitly, with Lionel, whether 10.1 updates README/README.fr, FAQ, index and tutorial now (wording that says the measurement changed, not the product) or whether the public number waits for the first detector story. This decision is recorded in the story; it is not made silently.
-9. **AC9 — Open point: G3 on a ground-truth change.** Adding missing ORG/LOCATION annotations can lower per-type recall with an unchanged detector. Any recall drop between the old and new ground truth is reported to Lionel per G3 with its cause, and his sign-off is recorded before merge.
-10. **AC10 — Gates:** G1, G2, G3 (as AC9), G4 (annotation/scorer changes only, no detector code; the scorer change for held-out scoring may share the PR with annotation changes since both are benchmark-side), G6, G7 (as AC8) apply. G5 starts applying from story 10.2.
-11. **AC11 — Prerequisite, open questions for Lionel (decided at the guidelines approval stop, recorded in Dev Notes; not decided by the PM or the dev agent):**
-   - Who annotates: (a) the corrections to the 25 existing annotation files; (b) authoring and annotating the ≥5 held-out documents.
-   - Held-out authoring method, including explicitly whether LLM-authored synthetic text is acceptable for held-out documents.
-   - No AC4 or AC5 work starts until these answers are recorded.
+8. **AC8 — G7 for a benchmark-only change.** Decided by Lionel, 2026-10-02: 10.1 records its before/after in the QA report, marked "benchmark repair, same detector", and adds a CHANGELOG `[Unreleased]` entry. README/README.fr, FAQ, docs index and tutorials are not updated in 10.1; they change once, at Epic 10 close-out, from the final G1 run (see "Epic 10 G7 interpretation").
+9. **AC9 — G3 on a ground-truth change.** Decided by Lionel, 2026-10-02: G3 does not block 10.1. 10.1's close-out run becomes the new baseline. Every per-type recall drop between the old and new ground truth is listed with its cause (e.g. "+N ORG annotations added") in the story and the PR. G3 applies strictly from 10.2 onwards.
+10. **AC10 — Gates:** G1, G2, G3 (as AC9: not blocking for 10.1), G4 (annotation/scorer changes only, no detector code; the scorer change for held-out scoring may share the PR with annotation changes since both are benchmark-side), G6, G7 (as AC8) apply. G5 starts applying from story 10.2.
+11. **AC11 — Annotator and held-out authoring.** Decided by Lionel, 2026-10-02 (recorded in Dev Notes):
+   - Annotator: the dev agent drafts the corrections to the 25 existing annotation files and the held-out annotations, applying the approved guidelines only. Lionel reviews the annotation diff before merge.
+   - Held-out authoring: an LLM agent may write the text of the ≥5 held-out documents (synthetic French business/interview style, seeded with known hard cases: particles, Mc/Mac names, greetings, role acronyms, foreign places). Lionel reviews the text before annotation. Held-out annotations are never pre-annotated by the detector or the auto-annotator.
+   - No AC4 or AC5 work starts before the guidelines are approved.
 
 ### Integration Points
 
@@ -200,7 +207,7 @@ Part of the ground truth was produced by `scripts/auto_annotate_corpus.py` and a
 2. **AC2:** The rule is implemented in `HybridDetector`; the `partial_overlap` log is kept for the different-type case, and a distinct log event records same-type dedup decisions (kept span, dropped span, reason) without logging entity text beyond what the existing logs already do.
 3. **AC3 — ORG role filter:** ORG detections whose whole normalized span is a job title or role acronym are dropped. The list lives in a resource file (not hard-coded), covers at least CEO, CTO, CFO, COO, CIO, CDO, DSI, DAF, DRH, DPO, RSSI, COMEX, CODIR, bare "VP", "VP/Vice-président + function" forms ("VP Engineering") and "VP/Vice-président + region/country" forms ("VP Europe", "VP France"), and is matched case-sensitively for acronyms. Real organisations that look like acronyms (CNIL, ANSSI, BNP, EY) are not in the list; a unit test proves they survive.
 4. **AC4:** Unit tests for each rule branch (containment, partial overlap, same-source tie, different-type untouched, role drop, real-acronym kept).
-5. **AC5 — Gates:** G1 (main and held-out lines), G2, G3 versus the 10.1 baseline, G4 (no annotation or scorer change in this PR), G5, G6 (plus NFR1 timing unchanged: existing perf test green), G7 if headline numbers move. CHANGELOG [Unreleased] entry describing the behaviour change, regardless of G7, including an upgrade note on pseudonym continuity (see Risk Mitigation). The story reports the measured FP reduction attributable to each of the two rules (one G1 run with both, plus the dedup-only or filter-only split if the dev runs it; every number cited with its run ID), and how many of the detections dropped by the overlap rule were TPs in the previous (10.1 close-out) run.
+5. **AC5 — Gates:** G1 (main and held-out lines), G2, G3 versus the 10.1 baseline, G4 (no annotation or scorer change in this PR), G5, G6 (plus NFR1 timing unchanged: existing perf test green), G7 per the Epic 10 G7 interpretation (Lionel, 2026-10-02): before/after recorded in the QA report in this story; README/README.fr, FAQ, docs index and tutorials are updated at Epic 10 close-out, not per story. CHANGELOG [Unreleased] entry describing the behaviour change, regardless of G7, including an upgrade note on pseudonym continuity (see Risk Mitigation). The story reports the measured FP reduction attributable to each of the two rules (one G1 run with both, plus the dedup-only or filter-only split if the dev runs it; every number cited with its run ID), and how many of the detections dropped by the overlap rule were TPs in the previous (10.1 close-out) run.
 
 ### Integration Points
 
@@ -230,7 +237,7 @@ Part of the ground truth was produced by `scripts/auto_annotate_corpus.py` and a
 5. **AC5 — Mc/Mac:** names starting with "Mc"/"Mac" followed by a capital are not truncated ("Mme Sarah McAllister" → PERSON "Sarah McAllister" after title stripping).
 6. **AC6 — Trailing roles:** a trailing ", Role" (e.g. ", Responsable", ", Directeur …") is trimmed from PERSON spans.
 7. **AC7:** Unit tests for every rule, including the negative cases (real all-caps places, a particle not followed by a surname, "Mac" as an ordinary word).
-8. **AC8 — Gates:** G1 (main and held-out), G2, G3 versus the 10.2 baseline (LOCATION recall is the type most at risk: report it explicitly), G4, G5, G6 (plus NFR1 timing unchanged: existing perf test green), G7 if headline numbers move. CHANGELOG [Unreleased] entry describing the behaviour change, regardless of G7, including an upgrade note on pseudonym continuity (see Risk Mitigation).
+8. **AC8 — Gates:** G1 (main and held-out), G2, G3 versus the 10.2 baseline (LOCATION recall is the type most at risk: report it explicitly), G4, G5, G6 (plus NFR1 timing unchanged: existing perf test green), G7 per the Epic 10 G7 interpretation (Lionel, 2026-10-02): before/after recorded in the QA report in this story; README/README.fr, FAQ, docs index and tutorials are updated at Epic 10 close-out, not per story. CHANGELOG [Unreleased] entry describing the behaviour change, regardless of G7, including an upgrade note on pseudonym continuity (see Risk Mitigation).
 
 ### Integration Points
 
@@ -258,7 +265,7 @@ Part of the ground truth was produced by `scripts/auto_annotate_corpus.py` and a
 3. **AC3:** The new bare-first-name rule of AC2 fires only in salutation contexts; existing detection of these names is unchanged. Unit tests cover first names that are also common words (e.g. "Rose", "Pierre", "Claire") in running text, proving the new rule does not fire there.
 4. **AC4 — Org + country:** an ORG immediately followed by a country or region name ("France", "Europe", and others listed in the story) is merged into a single ORG span ("Microsoft France"), when the approved guidelines annotate it that way. The merge runs after the 10.2 role filter and never merges a role token (e.g. "VP" + "Europe" is never merged into an ORG); a unit test proves it.
 5. **AC5:** Unit tests for each rule, including `email_chain.txt`-style fixtures written for the tests (not copied from the held-out set).
-6. **AC6 — Gates:** G1 (main and held-out), G2, G3 versus the 10.3 baseline, G4, G5, G6 (plus NFR1 timing unchanged: existing perf test green), G7 if headline numbers move. CHANGELOG [Unreleased] entry describing the behaviour change, regardless of G7, including an upgrade note on pseudonym continuity (see Risk Mitigation).
+6. **AC6 — Gates:** G1 (main and held-out), G2, G3 versus the 10.3 baseline, G4, G5, G6 (plus NFR1 timing unchanged: existing perf test green), G7 per the Epic 10 G7 interpretation (Lionel, 2026-10-02): before/after recorded in the QA report in this story; README/README.fr, FAQ, docs index and tutorials are updated at Epic 10 close-out, not per story. CHANGELOG [Unreleased] entry describing the behaviour change, regardless of G7, including an upgrade note on pseudonym continuity (see Risk Mitigation).
 
 ### Integration Points
 
@@ -319,7 +326,8 @@ Story 10.4 (Greetings + org+country)      --- Week 5      ---  baseline = 10.3 m
 - [ ] Held-out set exists and is reported for 10.2-10.4 (G5)
 - [ ] `GUIDELINES.md` approved by Lionel and applied to the whole corpus
 - [ ] black, ruff, mypy clean; full CI green (G6)
-- [ ] QA report and, where headline numbers moved, public docs updated from G1 runs (G7)
+- [ ] QA report updated with the before/after at every story, and CHANGELOG `[Unreleased]` entries per story (G7)
+- [ ] At Epic 10 close-out, README/README.fr, `docs/faq*.md`, `docs/index*.md` and `docs/tutorial*.md` updated once from the final G1 run (G7 interpretation, Lionel, 2026-10-02)
 - [ ] Close-out baseline recorded as Epic 9's starting point: run ID plus the pasted `[Overall]`/`[PERSON]`/`[LOCATION]`/`[ORG]`/`[HELD-OUT …]` lines in the QA report (CI artifacts expire after 90 days, so the run ID alone is not enough)
 - [ ] No release cut (v2.3.0 only on Lionel's explicit go)
 
@@ -339,7 +347,7 @@ Story 10.4 (Greetings + org+country)      --- Week 5      ---  baseline = 10.3 m
 
 ## Note: Epic 8 Version Label
 
-Epic 8 is titled "v2.2 — Output Format Preservation & Auto-Update", but v2.2.0 shipped different scope (model selection, validation retype, span-bleed fixes; commit `375eed9`). Proposal for Lionel: relabel Epic 8 to a later version (e.g. v2.4) so the epic list matches the release history. This epic does not change Epic 8's file or scope.
+Relabelled to v2.4 (Lionel, 2026-10-02). Epic 8 was titled "v2.2 — Output Format Preservation & Auto-Update", but v2.2.0 shipped different scope (model selection, validation retype, span-bleed fixes; commit `375eed9`). The file is now `docs/prd/epic-8-v2.4-output-format-preservation.md`; Epic 8's scope is unchanged.
 
 ---
 

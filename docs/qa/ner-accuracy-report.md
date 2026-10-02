@@ -432,6 +432,8 @@ Given the current accuracy levels, **validation mode should always be enabled** 
 
 ## Scorer aligned with app normalization (2026-10-02)
 
+**Source:** commit `fceef65`, CI accuracy run `37013929807`.
+
 **Change:** `match_entities` in `tests/accuracy/conftest.py` now normalizes both detected and ground-truth text the way `DocumentProcessor._normalize_entity_text` does before pseudonymizing: `strip_french_titles` on every entity, plus `strip_french_prepositions` on LOCATION. No detection code changed.
 
 **Why:** the annotation policy (Story 5.3) excludes titles, and the app strips titles before mapping, but the scorer compared raw spans. Each "Mme Isabelle Moreau" detection therefore counted as one FP plus one FN against the annotated "Isabelle Moreau". An error breakdown on v2.2.0 attributed 686 PERSON FNs and 851 PERSON FPs to boundary mismatches of this kind.
