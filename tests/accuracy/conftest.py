@@ -14,6 +14,10 @@ import pytest
 
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 from gdpr_pseudonymizer.nlp.hybrid_detector import HybridDetector
+from gdpr_pseudonymizer.utils.french_patterns import (
+    strip_french_prepositions,
+    strip_french_titles,
+)
 from gdpr_pseudonymizer.utils.logger import configure_logging
 
 # Configure structlog to use stdlib logging with WARNING level.
@@ -80,6 +84,21 @@ def load_annotations(annotation_path: Path) -> list[GroundTruthEntity]:
     ]
 
 
+def _match_key(text: str, entity_type: str) -> str:
+    """Normalize entity text the way the app does before pseudonymizing.
+
+    DocumentProcessor._normalize_entity_text strips titles from every entity
+    and prepositions from LOCATION entities, so "Mme Isabelle Moreau" and
+    "à Paris" are handled as "Isabelle Moreau" and "Paris". Scoring the raw
+    span would count those correct detections as a false positive plus a
+    false negative.
+    """
+    text = strip_french_titles(text)
+    if entity_type == "LOCATION":
+        text = strip_french_prepositions(text)
+    return " ".join(text.lower().split())
+
+
 def match_entities(
     detected: list[DetectedEntity],
     ground_truth: list[GroundTruthEntity],
@@ -90,7 +109,8 @@ def match_entities(
 ]:
     """Match detected entities against ground truth using text + type matching.
 
-    Uses case-insensitive, whitespace-normalized text comparison combined with
+    Text is normalized as the app normalizes it (see ``_match_key``), then
+    compared case-insensitively and whitespace-normalized, combined with
     entity type matching.  When the same text appears multiple times, position
     proximity is used as a tiebreaker.  Each entity is matched at most once.
 
@@ -102,12 +122,12 @@ def match_entities(
     fn_list: list[GroundTruthEntity] = []
 
     for gt in ground_truth:
-        gt_text = " ".join(gt.text.lower().split())
+        gt_text = _match_key(gt.text, gt.entity_type)
         best_match: DetectedEntity | None = None
         best_distance = float("inf")
 
         for det in available:
-            det_text = " ".join(det.text.lower().split())
+            det_text = _match_key(det.text, det.entity_type)
             if det_text == gt_text and det.entity_type == gt.entity_type:
                 distance = abs(det.start_pos - gt.start_pos)
                 if distance < best_distance:

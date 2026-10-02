@@ -30,7 +30,7 @@ GDPR Pseudonymizer is a **privacy-first tool** that combines AI efficiency with 
 
 ### AI + Human Verification
 
-- **Hybrid detection** -- AI pre-detects ~40% of entities (NLP + regex + geography dictionary, F1 32.34%); improving this is planned
+- **Hybrid detection** -- AI pre-detects ~74% of entities (NLP + regex + geography dictionary, F1 58.53%); improving this is planned
 - **Mandatory validation** -- you review and confirm all entities (ensures 100% accuracy)
 - **Fast validation UI** -- keyboard shortcuts, batch operations, <2 min per document
 - **Entity variant grouping** -- related forms ("Marie Dubois", "Pr. Dubois", "Dubois") merged into one validation item

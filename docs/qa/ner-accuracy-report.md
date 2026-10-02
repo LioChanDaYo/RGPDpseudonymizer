@@ -427,3 +427,30 @@ Given the current accuracy levels, **validation mode should always be enabled** 
 5. **Consider alternative models** (CamemBERT, FlauBERT) for higher French NER accuracy
 6. **Calibrate confidence scores** — train a secondary model to produce meaningful confidence estimates
 7. **Expand geography dictionary** — add non-French locations and informal city references to improve LOCATION FN below 25%
+
+---
+
+## Scorer aligned with app normalization (2026-10-02)
+
+**Change:** `match_entities` in `tests/accuracy/conftest.py` now normalizes both detected and ground-truth text the way `DocumentProcessor._normalize_entity_text` does before pseudonymizing: `strip_french_titles` on every entity, plus `strip_french_prepositions` on LOCATION. No detection code changed.
+
+**Why:** the annotation policy (Story 5.3) excludes titles, and the app strips titles before mapping, but the scorer compared raw spans. Each "Mme Isabelle Moreau" detection therefore counted as one FP plus one FN against the annotated "Isabelle Moreau". An error breakdown on v2.2.0 attributed 686 PERSON FNs and 851 PERSON FPs to boundary mismatches of this kind.
+
+| Metric | Strict scorer (v2.2.0) | **App-normalized scorer** |
+|--------|------------------------|---------------------------|
+| **Precision** | 26.75% | **48.42%** |
+| **Recall** | 40.88% | **73.98%** |
+| **F1 Score** | 32.34% | **58.53%** |
+| **TP** | 710 | **1,285** |
+| **FP** | 1,944 | **1,369** |
+| **FN** | 1,027 | **452** |
+
+| Entity Type | Precision | Recall | F1 | TP | FP | FN |
+|-------------|-----------|--------|----|----|----|----|
+| PERSON | 70.34% | 75.71% | 72.93% | 1,122 | 473 | 360 |
+| LOCATION | 30.14% | 88.71% | 44.99% | 110 | 255 | 14 |
+| ORG | 7.64% | 40.46% | 12.85% | 53 | 641 | 78 |
+
+**Relation to Story 5.3:** the 59.97% reported for Story 5.3 could not be reproduced with the committed scorer (re-run on 9c587c9: 31.35%), which led the Story 7.5 note above and the v2.2.0 docs to treat it as unreliable. It is consistent with app-normalized scoring, which suggests the Story 5.3 run used title-aware matching that was never committed.
+
+**Remaining weak points:** ORG precision (job titles and acronyms such as CTO, CFO, COMEX, DPO, RSSI, DRH detected as organisations; some remaining ORG "false positives" are real organisations missing from the ground truth, e.g. CNIL, ANSSI, Deloitte) and LOCATION precision (capitalised common words such as "CONFORME", "Équipe").

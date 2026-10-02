@@ -92,7 +92,7 @@ GDPR Pseudonymizer is a **privacy-first CLI and GUI tool** that combines AI effi
 - ✅ **Zero telemetry** - No analytics, crash reporting, or external communication
 
 ### 🤝 **AI + Human Verification**
-- ✅ **Hybrid detection** - AI pre-detects ~40% of entities (NLP + regex + geography dictionary; you catch the rest during validation). Improving this is a priority — see [Technical Details](#-technical-details)
+- ✅ **Hybrid detection** - AI pre-detects ~74% of entities (NLP + regex + geography dictionary; you catch the rest during validation). Improving this is a priority — see [Technical Details](#-technical-details)
 - ✅ **Mandatory validation** - You review and confirm all entities (ensures 100% accuracy)
 - ✅ **Fast validation UI** - Rich CLI interface with keyboard shortcuts, <2 min per document
 - ✅ **Smart workflow** - Entity-by-type grouping (PERSON → ORG → LOCATION) with context display
@@ -155,7 +155,7 @@ pip install gdpr-pseudonymizer[formats]
 - 📦 **Standalone executables** — Windows .exe, macOS .dmg (Apple Silicon), Linux AppImage — no Python required
 - ♿ **WCAG 2.1 AA accessibility** — Keyboard navigation, screen reader, high contrast mode
 - 🌐 **French UI** — Complete FR/EN interface with live language switching
-- 🤖 **AI-assisted detection** — Hybrid NLP + regex pre-detects ~40% of entities (F1 ~32% on our benchmark); validation catches the rest
+- 🤖 **AI-assisted detection** — Hybrid NLP + regex pre-detects ~74% of entities (F1 ~59% on our benchmark); validation catches the rest
 - ✅ **Mandatory human verification** — You review and confirm all entities (ensures 100% accuracy)
 - 🔒 **100% local processing** — Your data never leaves your machine
 - 📄 **PDF/DOCX support** — Process PDF and DOCX files directly (optional extras)
@@ -167,7 +167,7 @@ pip install gdpr-pseudonymizer[formats]
 
 **What v2.2 does NOT deliver:**
 - ❌ Fully automatic "set and forget" processing
-- ❌ 85%+ AI accuracy (current: ~32% F1 with hybrid approach — we plan to raise it)
+- ❌ 85%+ AI accuracy (current: ~59% F1 with hybrid approach — we plan to raise it)
 - ❌ Optional validation mode (validation is mandatory)
 
 ### Roadmap
@@ -183,7 +183,7 @@ pip install gdpr-pseudonymizer[formats]
 **v2.2 (Q3 2026) — CURRENT RELEASE:** Choice of spaCy model, entity retyping in CLI validation, entity-span accuracy fixes, fresh-install fix (SQLAlchemy < 2.1)
 
 **v3.0 (2027+):** NLP accuracy & automation
-- Fine-tuned French NER model (70-85% F1 target, up from ~32% today)
+- Fine-tuned French NER model (70-85% F1 target, up from ~59% today)
 - Optional `--no-validate` flag for high-confidence workflows
 - Confidence-based auto-processing (85%+ F1 target)
 - Multi-language support (English, Spanish, German)
@@ -339,15 +339,16 @@ After comprehensive benchmarking on 25 French interview/business documents (1,73
 | Approach | F1 Score | Precision | Recall | Notes |
 |----------|----------|-----------|--------|-------|
 | **spaCy only** `fr_core_news_lg` | 29.5% | 27.0% | 32.7% | Story 1.2 baseline |
-| **Hybrid** (spaCy + regex) | 31.35% | 25.18% | 41.51% | Story 5.3 — originally reported as 59.97%, not reproducible (see note) |
-| **Hybrid + expanded patterns** | 31.79% | 25.38% | 42.54% | Story 7.5 |
-| **Span-bleed fixes** | 32.34% | 26.75% | 40.88% | 2026-09-29 (current) — recall drop is a ground-truth artefact, see QA report |
+| **Hybrid** (spaCy + regex) | 59.97% | 48.17% | 79.45% | Story 5.3 (see scoring note) |
+| **Hybrid, current (v2.2.0)** | **58.53%** | 48.42% | 73.98% | Scored the way the app normalizes entities |
 
-**Correction (October 2026):** earlier versions of this README claimed ~60% F1 for the hybrid approach (the "59.97%" Story 5.3 figure). That number was never reproducible: re-running the accuracy suite on the exact Story 5.3 code gives 31.35%, and the current release measures 32.34%. The detector did not regress; the figure was wrong. Every number on this page now comes from a reproducible run of `tests/accuracy`.
+By entity type (v2.2.0): PERSON 72.9% F1, LOCATION 45.0%, ORG 12.9%. Organisation detection is the weak point: job titles such as CTO, DPO or RSSI are often mistaken for companies.
 
-**Read these numbers with two caveats.** They come from one 25-document French interview/business corpus, and part of its ground truth was auto-annotated with the tool's own regex patterns, which skews recall in both directions. And they measure *pre-detection* only: mandatory validation is what makes the final output correct.
+**How these numbers are scored (corrected October 2026).** The app strips titles and prepositions before pseudonymizing ("Mme Isabelle Moreau" is handled as "Isabelle Moreau", "à Paris" as "Paris"), and the benchmark now scores detections the same way. Until then the committed scorer compared raw text, so every correctly detected "Mme Isabelle Moreau" counted as a miss plus a false alarm. Under that strict scoring the same detector measured ~32% F1, a figure briefly published on this page in October 2026; it understated real-use detection. The Story 5.3 figure (59.97%) appears to have been measured with title-aware matching and is consistent with today's 58.53%. Every number in the table above is reproducible with `pytest tests/accuracy -m accuracy -s`.
 
-**We plan to make these figures better** — both the detection itself (where precision is the weakest point today) and the benchmark that measures it. A fine-tuned French NER model remains the v3.0 target (70-85% F1).
+**Read these numbers with two caveats.** They come from one 25-document French interview/business corpus, and part of its ground truth was auto-annotated with the tool's own regex patterns, which skews results in both directions. And they measure *pre-detection* only: mandatory validation is what makes the final output correct.
+
+**We plan to make these figures better**, starting with organisation detection, and including the benchmark that measures it. A fine-tuned French NER model remains the v3.0 target (70-85% F1).
 
 **Accuracy trajectory:** Story 7.5 added 12 ORG pattern keywords, POS-tag disambiguation for geography matching, and 7 international locations — reducing LOCATION false-negative rate from 27.42% to 12.90%.
 
@@ -410,7 +411,7 @@ The validation UI provides an intuitive keyboard-driven interface for reviewing 
 **Long answer:**
 1. **GDPR defensibility** - Human verification provides legal audit trail
 2. **Zero false negatives** - AI misses entities, humans catch them (100% coverage)
-3. **Current NLP limitations** - French models on interview/business docs: 29.5% F1 out-of-box (hybrid approach: ~32% F1, ~41% recall; improvement planned)
+3. **Current NLP limitations** - French models on interview/business docs: 29.5% F1 out-of-box (hybrid approach: ~59% F1, ~74% recall; organisations are the weak point; improvement planned)
 4. **Better than alternatives:**
    - ✅ **vs Manual redaction:** 50%+ faster (AI pre-detection)
    - ✅ **vs Cloud services:** 100% local processing (no data leakage)
@@ -586,7 +587,7 @@ This project is licensed under the [MIT License](LICENSE).
 - ⚠️ Test thoroughly before production use
 
 **Current limitations:**
-- AI detection: ~32% F1 today (not 85%+); improving it is planned
+- AI detection: ~59% F1 today (not 85%+); improving it is planned
 - Validation required for ALL documents (not optional)
 - French documents only (English, Spanish, etc. in future versions)
 - Text-based formats: .txt, .md, .pdf, .docx, .xlsx, .csv (PDF/DOCX/Excel require optional extras: `pip install gdpr-pseudonymizer[formats]`)
@@ -715,7 +716,7 @@ The integration test suite covers:
 | **Critical Bugs Found** | 1 (Story 2.8) | ✅ RESOLVED - Epic 3 Unblocked |
 | **Test Corpus Size** | 25 docs, 1,737 entities | ✅ Complete (post-cleanup) |
 | **NLP Accuracy (Baseline)** | 29.5% F1 (spaCy only) | ✅ Measured (Story 1.2) |
-| **Hybrid Accuracy (NLP+Regex)** | 32.34% F1 (v2.2.0) | ⚠️ Below target — improvement planned |
+| **Hybrid Accuracy (NLP+Regex)** | 58.53% F1 (v2.2.0) | ⚠️ Below target — improvement planned |
 | **Final Accuracy (AI+Human)** | 100% (validated) | 🎯 By Design |
 | **Pseudonym Libraries** | 3 themes (2,426 names + 240 locations + 588 orgs) | ✅ Stories 2.1, 3.0, 4.6 Complete |
 | **Compositional Matching** | Operational (component reuse + title stripping + compound names) | ✅ Stories 2.2, 2.3 Complete |
