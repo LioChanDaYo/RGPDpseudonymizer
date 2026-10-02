@@ -48,7 +48,7 @@
 
 ---
 
-### Epic 8: v2.2 — Output Format Preservation & Auto-Update
+### Epic 8: v2.4 — Output Format Preservation & Auto-Update
 
 **Goal:** Enable pseudonymized documents to retain their original format (PDF->PDF, DOCX->DOCX) instead of flattening to plaintext, and implement an auto-update mechanism for standalone executable users.
 
@@ -56,11 +56,19 @@
 
 ### Epic 9: v3.0 — NLP Accuracy & Intelligence
 
-**Goal:** Transform the pseudonymization engine from "good enough with mandatory validation" to "trustworthy with optional validation" by fine-tuning a French NER model to 70-85% F1, implementing confidence-based auto-validation, and adding coreference resolution.
+**Goal:** Transform the pseudonymization engine from "good enough with mandatory validation" to "trustworthy with optional validation" (PARKED — requires Lionel's decision) by fine-tuning a French NER model to 70-85% F1, implementing confidence-based auto-validation (PARKED — requires Lionel's decision), and adding coreference resolution.
+
+> **Sequencing:** Epic 10 precedes Epic 9. Epic 9 starts from Epic 10's merged close-out baseline. The optional no-validation mode, training on users' validation data and crowdsourced annotation are PARKED pending Lionel's decision (see Epic 9 file).
 
 ---
 
-**Timeline: Epics 0-4: 14 weeks (v1.0 MVP). Epic 5: 6-7 weeks (v1.1). Epic 6: 10-14 weeks (v2.0). Epic 7: 4-6 weeks (v2.1). Epic 8: 5-7 weeks (v2.2). Epic 9: 8-12 weeks (v3.0)**
+### Epic 10: v2.3 — Detection Precision Quick Wins
+
+**Goal:** Raise detection precision and benchmark trustworthiness with local, deterministic changes (benchmark repair + held-out set, same-type overlap dedup, ORG role filter, LOCATION noise and name-boundary rules, salutation and org-plus-country handling), without lowering recall. Baseline: F1 58.53% at commit `fceef65` (CI run 37013929807). Sequenced before Epic 9; no release inside the epic.
+
+---
+
+**Timeline: Epics 0-4: 14 weeks (v1.0 MVP). Epic 5: 6-7 weeks (v1.1). Epic 6: 10-14 weeks (v2.0). Epic 7: 4-6 weeks (v2.1). Epic 8: 5-7 weeks (v2.4). Epic 9: 8-12 weeks (v3.0). Epic 10: 4-6 weeks (v2.3 candidate, runs before Epic 9)**
 
 ---
 
@@ -117,8 +125,9 @@
 - **Q2 2026 (Epic 5):** v1.1 release — GDPR erasure, gender-aware pseudonyms, PDF/DOCX, French docs, NER accuracy improvements ✅ COMPLETE (2026-02-15)
 - **Epic 6:** v2.0 release — Desktop GUI, standalone executables, French-first i18n, WCAG AA accessibility ✅ COMPLETE (2026-03-04)
 - **Epic 7:** v2.1 release — GUI polish, Excel/CSV support, neutral theme, NER regex expansion
-- **Epic 8:** v2.2 release — Output format preservation (DOCX->DOCX, PDF->PDF), auto-update
+- **Epic 8:** v2.4 release — Output format preservation (DOCX->DOCX, PDF->PDF), auto-update
 - **Epic 9:** v3.0 release — Fine-tuned NER model, confidence calibration, coreference resolution, optional validation
+- **Epic 10:** v2.3 candidate — detection precision quick wins. No release is part of the epic; v2.3.0 ships only on Lionel's explicit go
 
 ---
 
@@ -155,15 +164,23 @@
 - [ ] DOCX input produces pseudonymized DOCX output with formatting preserved
 - [ ] PDF input produces pseudonymized PDF output (overlay approach)
 - [ ] Auto-update notification functional in standalone executables
-- [ ] v2.2.0 published on PyPI and GitHub Releases
+- [ ] v2.4.0 published on PyPI and GitHub Releases
 
 **Epic 9 DoD:**
 - [ ] Fine-tuned French NER model achieves F1 >= 70% on held-out test set
 - [ ] All entities receive calibrated confidence scores (0.0-1.0)
 - [ ] Coreference resolution links pronouns to antecedent entities
-- [ ] Optional `--no-validate` mode functional with guard rails
+- [ ] Optional `--no-validate` mode functional with guard rails — **PARKED, requires Lionel's decision**
 - [ ] v3.0.0 published on PyPI and GitHub Releases
 - [ ] Fine-tuned model package available for installation
+
+**Epic 10 DoD:**
+- [ ] Annotation guidelines approved by Lionel and applied to the whole corpus; held-out set (≥5 documents) scored separately
+- [ ] Same-type overlap dedup and ORG role filter shipped (10.2)
+- [ ] LOCATION noise filters and name-boundary rules shipped (10.3)
+- [ ] Salutation splitting / bare first names and org-plus-country merge shipped (10.4)
+- [ ] Every story closed with a cited CI accuracy run (G1), independent QA check (G2), no unapproved recall drop (G3), held-out numbers (G5, 10.2–10.4)
+- [ ] Close-out baseline recorded as Epic 9's starting point, with the `[Overall]`/`[PERSON]`/`[LOCATION]`/`[ORG]`/`[HELD-OUT …]` lines pasted into the QA report (artifacts expire at 90 days), not just the run ID; no release cut without Lionel's go
 
 ---
 

@@ -1,23 +1,27 @@
 # Epic 9: v3.0 — NLP Accuracy & Intelligence
 
-**Epic Goal:** Transform the pseudonymization engine from "good enough with mandatory validation" to "trustworthy with optional validation" by fine-tuning a French NER model to 70-85% F1, implementing confidence-based auto-validation, and adding coreference resolution — enabling a new optional no-validation mode for high-confidence documents.
+**Epic Goal:** Transform the pseudonymization engine from "good enough with mandatory validation" to "trustworthy with optional validation" by fine-tuning a French NER model to 70-85% F1, implementing confidence-based auto-validation (PARKED — requires Lionel's decision), and adding coreference resolution — enabling a new optional no-validation mode for high-confidence documents (PARKED — requires Lionel's decision).
 
 **Target Release:** v3.0.0
 **Duration:** Estimated 8-12 weeks
-**Predecessor:** Epic 8 (v2.2.0)
+**Predecessor:** Epic 10 (v2.3 candidate) merged close-out
+
+> **Sequencing note (2026-10-02):** Epic 10 (v2.3 — Detection Precision Quick Wins) precedes Epic 9. Epic 9 starts from Epic 10's merged close-out baseline (main corpus + held-out set, cited CI run), not from the figures below, which are the pre-Epic-10 baseline at commit `fceef65`.
+>
+> **PARKED — requires Lionel's decision** (text kept, not scheduled): (1) the optional no-validation mode (`--no-validate`, Story 9.5) and the auto-accept threshold that would let entities skip review (Story 9.3 AC7-AC8); (2) the use of users' validation data for training (Story 9.1 resourcing note, active learning); (3) crowdsourced annotation via external platforms (Prolific/MTurk, Story 9.1). Choosing an encoder/transformer NER model (CamemBERT, FlauBERT or similar) is also a Lionel decision.
 
 ---
 
 ## Existing System Context
 
 - **v2.2:** Full-featured CLI + GUI, standalone executables, format preservation (DOCX/PDF), Excel/CSV support, auto-update, WCAG AA, French/English i18n
-- **NER Accuracy Baseline (v2.1):**
-  - Hybrid detection (spaCy + regex): F1 ~60% (Story 4.4 baseline)
-  - spaCy alone: F1 ~30% on domain-specific text
-  - PERSON recall ~80%, LOCATION recall ~63-75%, ORG recall ~34-50%
+- **NER Accuracy Baseline (pre-Epic-10, commit `fceef65`, CI run 37013929807, app-normalized scorer):**
+  - Hybrid detection (spaCy + regex): F1 58.53% (P 48.42%, R 73.98%) on 25 documents / 1,737 annotated entities
+  - spaCy alone: F1 ~30% on domain-specific text (historical figure, not re-measured with the current scorer)
+  - PERSON recall 75.71%, LOCATION recall 88.71%, ORG recall 40.46%
   - 83.8% of entities have no meaningful confidence score (spaCy limitation)
-- **Current Constraint:** Validation is mandatory because ~20% of entities are missed (1 in 5). Users cannot trust automated output without review.
-- **Key Dependency:** Ground-truth corpus quality (FE-012 cleanup in v2.1) is a prerequisite for model training.
+- **Current Constraint:** Validation is mandatory because ~26% of entities are missed (about 1 in 4; recall 73.98% at `fceef65`). Users cannot trust automated output without review.
+- **Key Dependency:** Ground-truth corpus quality (Epic 10 Story 10.1 benchmark repair + held-out set; historically FE-012 cleanup in v2.1) is a prerequisite for model training.
 
 ---
 
@@ -29,16 +33,18 @@ v1.0-v2.2 focused on building the product surface — CLI, GUI, formats, distrib
 
 ### The Accuracy Gap
 
-| Metric | Current (v2.1) | Target (v3.0) | Impact |
+| Metric | Current (`fceef65`) | Target (v3.0) | Impact |
 |--------|----------------|---------------|--------|
-| Overall F1 | ~60% | 70-85% | Fewer missed entities, fewer false positives |
-| PERSON recall | ~80% | 90%+ | Near-complete person detection |
-| LOCATION recall | ~63-75% | 80%+ | Significantly fewer missed locations |
-| ORG recall | ~34-50% | 60%+ | Major improvement for organization detection |
-| Confidence reliability | None (83.8%) | 100% calibrated | Enables auto-validation |
-| Validation required | Always | Optional | Unlocks "trust the tool" mode for routine work |
+| Overall F1 | 58.53% | 70-85% | Fewer missed entities, fewer false positives |
+| PERSON recall | 75.71% | 90%+ | Near-complete person detection |
+| LOCATION recall | 88.71% | 80%+ | Already above target at baseline; LOCATION precision (30.14%) is the gap |
+| ORG recall | 40.46% | 60%+ | Major improvement for organization detection |
+| Confidence reliability | None (83.8%) | 100% calibrated | Enables auto-validation (PARKED — requires Lionel's decision) |
+| Validation required | Always | Optional (PARKED — requires Lionel's decision) | Unlocks "trust the tool" mode for routine work |
 
 ### Why v3.0 (Major Version)?
+
+> (PARKED — requires Lionel's decision) This rationale rests on optional validation, which is parked.
 
 The major version bump reflects a **paradigm shift**, not a breaking API change. v1.x-v2.x required mandatory validation — the tool's output was always "human-reviewed." v3.0 introduces optional validation, meaning the tool can produce "machine-only" output for the first time. This changes the trust model and user workflow fundamentally. The CLI/GUI API remains fully backward compatible — `--no-validate` is additive.
 
@@ -49,7 +55,7 @@ The major version bump reflects a **paradigm shift**, not a breaking API change.
 | NLP model | Fine-tuned `fr_core_news_lg` on domain corpus | Higher base accuracy |
 | Confidence scores | Calibration layer added | Meaningful 0.0-1.0 scores |
 | Coreference | Pronoun + context resolution added | Better entity grouping |
-| Validation mode | Optional `--no-validate` flag | New workflow option |
+| Validation mode | Optional `--no-validate` flag (PARKED — requires Lionel's decision) | New workflow option |
 | CLI/GUI | Confidence display, auto-accept threshold | UI enhancements |
 
 ---
@@ -62,7 +68,7 @@ The major version bump reflects a **paradigm shift**, not a breaking API change.
 | 9.2: Fine-Tuned French NER Model | HIGH | 2-3 weeks | Epic 6 deferred | Draft |
 | 9.3: Confidence Score Calibration | HIGH | 1-2 weeks | FE-013 | Draft |
 | 9.4: Extended Coreference Resolution (Beta) | MED | 1-2 weeks | FE-014 | Draft |
-| 9.5: Optional Validation Mode | MED | 1 week | Epic 6 deferred | Draft |
+| 9.5: Optional Validation Mode | MED | 1 week | Epic 6 deferred | PARKED — requires Lionel's decision |
 | 9.6: v3.0 Release Preparation | HIGH | 1-2 days | — | Draft |
 
 **Total Estimated Duration:** 8-12 weeks
@@ -79,7 +85,7 @@ The major version bump reflects a **paradigm shift**, not a breaking API change.
 
 ### Context
 
-The current test corpus has ~1,855 annotated entities across ~30 documents. For effective fine-tuning, we need 5,000-10,000+ annotated entities across diverse document types. Quality matters more than quantity — Story 4.4 and FE-012 identified annotation inconsistencies that must be resolved before training.
+The current test corpus has 1,737 annotated entities across 25 documents (at `fceef65`; Epic 10 Story 10.1 repairs it and adds a held-out set). For effective fine-tuning, we need 5,000-10,000+ annotated entities across diverse document types. Quality matters more than quantity — Story 4.4 and FE-012 identified annotation inconsistencies that must be resolved before training.
 
 ### Acceptance Criteria
 
@@ -113,14 +119,14 @@ The current test corpus has ~1,855 annotated entities across ~30 documents. For 
 
 ### Resourcing Note
 
-**This story requires dedicated annotation labor — it cannot be done "on the side."** Expanding from ~1,855 to 5,000+ entities means ~3,000+ new annotations. At ~100 annotations/hour (realistic for careful NER annotation with review), that's 30+ hours of pure annotation work, plus document sourcing, quality review, and format conversion.
+**This story requires dedicated annotation labor — it cannot be done "on the side."** Expanding from 1,737 to 5,000+ entities means ~3,300+ new annotations. At ~100 annotations/hour (realistic for careful NER annotation with review), that's 30+ hours of pure annotation work, plus document sourcing, quality review, and format conversion.
 
 **Annotator options:**
 - **Primary:** Use spaCy's `ner.correct` recipe with the existing model to pre-annotate, then manually correct (2-3x faster than manual annotation from scratch)
-- **Secondary:** Leverage v1.x/v2.x user validation data (accepted/rejected entities) as semi-automated annotations — requires user consent and data pipeline
+- **Secondary (PARKED — requires Lionel's decision):** Leverage v1.x/v2.x user validation data (accepted/rejected entities) as semi-automated annotations — requires user consent and data pipeline
 - **Seed:** Existing test corpus as starting point
 
-**Who annotates?** This must be assigned before the epic starts. Options: (a) dedicated annotation sprint by the team, (b) external annotator with French NER experience, (c) crowdsourced via Prolific/MTurk with French speakers. Budget and availability must be confirmed.
+**Who annotates?** This must be assigned before the epic starts. Options: (a) dedicated annotation sprint by the team, (b) external annotator with French NER experience, (c) crowdsourced via Prolific/MTurk with French speakers (**PARKED — requires Lionel's decision**). Budget and availability must be confirmed.
 
 ### Estimated Effort: 2-3 weeks (annotation-labor-bound, not engineering-bound)
 
@@ -188,7 +194,7 @@ Fine-tuning success depends heavily on corpus quality (Story 9.1) and domain mat
 **I want** each entity to have a meaningful confidence score (0.0-1.0) where higher scores reliably indicate higher precision,
 **so that** I can auto-accept high-confidence entities and focus validation effort on uncertain detections.
 
-**Priority:** HIGH — Enables Story 9.5 (optional validation mode)
+**Priority:** HIGH — Enables Story 9.5 (optional validation mode) (PARKED — requires Lionel's decision)
 
 ### Context
 
@@ -213,11 +219,11 @@ Story 4.4 found that 83.8% of entities have `confidence=None` (spaCy entities la
    - Tooltip shows exact confidence value
    - Sortable by confidence in entity list
 6. **AC6:** CLI displays confidence in validation UI (Rich-based)
-7. **AC7:** Auto-accept threshold configurable:
+7. **AC7 (PARKED — requires Lionel's decision; AC7-AC8 are a form of no-validation mode):** Auto-accept threshold configurable:
    - CLI: `--auto-accept-threshold 0.9`
    - GUI: Settings slider for auto-accept threshold
    - Default: disabled (0.0 — no auto-accept)
-8. **AC8:** Auto-accepted entities clearly marked as "auto-accepted" (distinguishable from user-accepted)
+8. **AC8 (PARKED — requires Lionel's decision):** Auto-accepted entities clearly marked as "auto-accepted" (distinguishable from user-accepted)
 9. **AC9:** Calibration model size < 5MB (lightweight)
 10. **AC10:** Unit tests for calibration accuracy, threshold logic, and UI display
 
@@ -286,6 +292,7 @@ Recommend starting with rule-based approach for French-specific accuracy, with s
 **so that** I can process documents in seconds instead of minutes when accuracy is sufficient.
 
 **Priority:** MEDIUM — Gated on accuracy improvements from Stories 9.2-9.3
+**Status:** **PARKED — requires Lionel's decision.** Mandatory human validation stays until Lionel decides otherwise.
 
 ### Context
 
@@ -296,7 +303,7 @@ Currently validation is mandatory (`--validate` is the only mode). This story ad
 1. **AC1:** CLI flag: `--no-validate` / `--skip-validation` skips the validation step entirely
 2. **AC2:** GUI toggle: "Mode automatique (sans validation)" in processing options
 3. **AC3:** Guard rail: `--no-validate` emits a warning if the custom fine-tuned model is NOT installed:
-   - "Warning: Skipping validation with the default model (F1 ~60%) may result in missed entities. Consider installing the fine-tuned model for better accuracy."
+   - "Warning: Skipping validation with the default model (F1 58.53% at `fceef65`; use the then-current CI figure) may result in missed entities. Consider installing the fine-tuned model for better accuracy."
 4. **AC4:** Guard rail: `--no-validate` logs all auto-decisions to audit trail:
    - Entity text, type, confidence, decision (auto-accepted), timestamp
 5. **AC5:** Summary report after no-validate processing:
@@ -322,7 +329,7 @@ Currently validation is mandatory (`--validate` is the only mode). This story ad
 ## Story 9.6: v3.0 Release Preparation
 
 **As a** product manager,
-**I want** v3.0.0 published as a major release with the fine-tuned model, confidence calibration, and optional validation,
+**I want** v3.0.0 published as a major release with the fine-tuned model, confidence calibration, and optional validation (PARKED — requires Lionel's decision),
 **so that** users experience a step-change in pseudonymization quality.
 
 **Priority:** HIGH — Gates the release
@@ -331,7 +338,7 @@ Currently validation is mandatory (`--validate` is the only mode). This story ad
 
 1. **AC1:** Version bumped to `3.0.0` in `pyproject.toml`
 2. **AC2:** CHANGELOG.md updated with v3.0.0 section — major release
-3. **AC3:** README updated: accuracy improvements, new model, confidence scores, optional validation
+3. **AC3:** README updated: accuracy improvements, new model, confidence scores, optional validation (PARKED — requires Lionel's decision)
 4. **AC4:** README.fr.md mirrored
 5. **AC5:** Accuracy report updated with fine-tuned model benchmarks
 6. **AC6:** Full regression suite passing
@@ -352,11 +359,11 @@ Story 9.1 (Corpus Expansion)          --- Week 1-3 ---    Blocks model training
 Story 9.2 (Fine-Tuned Model)          --- Week 3-6 ---    Depends on 9.1
 Story 9.3 (Confidence Calibration)    --- Week 5-7 ---    Can start during 9.2 (uses same corpus)
 Story 9.4 (Coreference Resolution)    --- Week 5-7 ---    Independent of 9.2/9.3
-Story 9.5 (Optional Validation)       --- Week 7-8 ---    Depends on 9.2 + 9.3
+Story 9.5 (Optional Validation)       --- Week 7-8 ---    Depends on 9.2 + 9.3 (PARKED — requires Lionel's decision)
 Story 9.6 (Release Prep)              --- Week 8-9 ---    Release gate
 ```
 
-**Critical Path:** 9.1 -> 9.2 -> 9.5 -> 9.6 (corpus -> model -> optional validation -> release)
+**Critical Path:** 9.1 -> 9.2 -> 9.5 -> 9.6 (corpus -> model -> optional validation -> release) (PARKED — requires Lionel's decision: 9.5 is parked, so the critical path through it is not scheduled)
 
 **Parallelization:** Stories 9.3 and 9.4 can run in parallel with each other and partially overlap with 9.2.
 
@@ -367,10 +374,10 @@ Story 9.6 (Release Prep)              --- Week 8-9 ---    Release gate
 | Risk | Likelihood | Impact | Mitigation |
 |------|-----------|--------|------------|
 | Corpus too small for meaningful fine-tuning | MEDIUM | HIGH | Set minimum 5,000 entities; use data augmentation; monitor dev set gains early |
-| Fine-tuning plateaus below 70% F1 | MEDIUM | HIGH | Evaluate at 65% — if stuck, consider alternative models (CamemBERT, FlauBERT) |
+| Fine-tuning plateaus below 70% F1 | MEDIUM | HIGH | Evaluate at 65% — if stuck, consider alternative models (CamemBERT, FlauBERT); encoder/transformer model choice is a Lionel decision |
 | Confidence calibration overfits to training data | MEDIUM | MEDIUM | Validate on held-out test set; use cross-validation |
 | Coreference resolution adds latency | LOW | MEDIUM | Make optional; profile and optimize; set 5s budget |
-| No-validate mode used inappropriately | MEDIUM | LOW | Guard rails, warnings, audit logging; default remains validated |
+| No-validate mode used inappropriately (mode PARKED) | MEDIUM | LOW | Guard rails, warnings, audit logging; default remains validated |
 | Custom model distribution complexity | MEDIUM | MEDIUM | Package as pip-installable; bundle in standalone executables |
 
 ---
@@ -380,7 +387,7 @@ Story 9.6 (Release Prep)              --- Week 8-9 ---    Release gate
 - [ ] All 6 stories completed with acceptance criteria met
 - [ ] Fine-tuned model achieves F1 >= 70% on held-out test set
 - [ ] Confidence scores are calibrated and monotonically correlated with precision
-- [ ] Optional validation mode works end-to-end with guard rails
+- [ ] Optional validation mode works end-to-end with guard rails (**PARKED — requires Lionel's decision**)
 - [ ] All quality gates green: black, ruff, mypy, pytest
 - [ ] Test count >= v2.2 baseline, coverage >= 86%
 - [ ] No regression in existing CLI and GUI workflows
@@ -398,7 +405,7 @@ Story 9.6 (Release Prep)              --- Week 8-9 ---    Release gate
 | Mobile app | Different platform entirely | v4.0+ |
 | Scanned PDF OCR | Requires OCR pipeline integration | v3.1+ |
 | Silent auto-update (self-replacing binary) | Code-signing complexity | v3.1+ |
-| Active learning pipeline | Requires user consent and data collection infrastructure | v3.1+ |
+| Active learning pipeline | Requires user consent and data collection infrastructure; uses users' validation data (**PARKED — requires Lionel's decision**) | v3.1+ |
 
 ---
 
@@ -407,8 +414,8 @@ Story 9.6 (Release Prep)              --- Week 8-9 ---    Release gate
 Epic 9 is successful if:
 
 1. Fine-tuned model achieves measurable accuracy improvement (F1 >= 70%)
-2. Confidence scores enable meaningful auto-accept (precision >= 95% at threshold 0.9)
-3. Users can optionally skip validation for routine documents
+2. Confidence scores enable meaningful auto-accept (precision >= 95% at threshold 0.9) (PARKED — requires Lionel's decision)
+3. Users can optionally skip validation for routine documents (**PARKED — requires Lionel's decision**)
 4. Coreference resolution reduces missed pronoun references in interview transcripts
 5. No regression in existing validated processing mode
 6. v3.0.0 published and fine-tuned model available
@@ -433,7 +440,7 @@ Epic 9 is successful if:
 
 ### Recommendation 1: Validate Fine-Tuning Viability Early
 
-**Before committing to the full epic, run a quick experiment.** Take the current ~1,855 entities, do an 80/10/10 split, fine-tune `fr_core_news_lg`, and measure the delta. If you see meaningful gains even on small data, it validates the approach and gives confidence that corpus expansion will pay off. If gains are flat, you know you need significantly more data (10,000+) and can plan accordingly. This experiment costs 1-2 days and de-risks the entire epic.
+**Before committing to the full epic, run a quick experiment.** Take the current 1,737 entities (or Epic 10's repaired corpus), do an 80/10/10 split, fine-tune `fr_core_news_lg`, and measure the delta. If you see meaningful gains even on small data, it validates the approach and gives confidence that corpus expansion will pay off. If gains are flat, you know you need significantly more data (10,000+) and can plan accordingly. This experiment costs 1-2 days and de-risks the entire epic.
 
 ### Recommendation 2: Descope Coreference (Story 9.4)
 
