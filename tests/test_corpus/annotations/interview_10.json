@@ -2,16 +2,28 @@
   "document_name": "interview_10.txt",
   "entities": [
     {
-      "entity_text": "Innovation Agricole",
+      "entity_text": "François Leclerc",
       "entity_type": "PERSON",
-      "start_pos": 12,
-      "end_pos": 31
+      "start_pos": 69,
+      "end_pos": 85
     },
     {
-      "entity_text": "Leclerc, Ferme",
-      "entity_type": "PERSON",
-      "start_pos": 78,
-      "end_pos": 92
+      "entity_text": "Ferme de Beauce",
+      "entity_type": "ORG",
+      "start_pos": 87,
+      "end_pos": 102
+    },
+    {
+      "entity_text": "Beauce",
+      "entity_type": "LOCATION",
+      "start_pos": 96,
+      "end_pos": 102
+    },
+    {
+      "entity_text": "Chartres",
+      "entity_type": "LOCATION",
+      "start_pos": 103,
+      "end_pos": 111
     },
     {
       "entity_text": "Leclerc",
@@ -26,10 +38,16 @@
       "end_pos": 231
     },
     {
-      "entity_text": "Sébastien Floc",
+      "entity_text": "InVivo",
+      "entity_type": "ORG",
+      "start_pos": 296,
+      "end_pos": 302
+    },
+    {
+      "entity_text": "Sébastien Floc'h",
       "entity_type": "PERSON",
       "start_pos": 359,
-      "end_pos": 373
+      "end_pos": 375
     },
     {
       "entity_text": "François Leclerc",
@@ -39,7 +57,7 @@
     },
     {
       "entity_text": "Bosch Agritech",
-      "entity_type": "PERSON",
+      "entity_type": "ORG",
       "start_pos": 502,
       "end_pos": 516
     },
@@ -50,10 +68,34 @@
       "end_pos": 550
     },
     {
+      "entity_text": "Parrot",
+      "entity_type": "ORG",
+      "start_pos": 611,
+      "end_pos": 617
+    },
+    {
       "entity_text": "Henri Seydoux",
       "entity_type": "PERSON",
       "start_pos": 666,
       "end_pos": 679
+    },
+    {
+      "entity_text": "Leclerc",
+      "entity_type": "PERSON",
+      "start_pos": 750,
+      "end_pos": 757
+    },
+    {
+      "entity_text": "Chambre d'Agriculture d'Eure-et-Loir",
+      "entity_type": "ORG",
+      "start_pos": 762,
+      "end_pos": 798
+    },
+    {
+      "entity_text": "Eure-et-Loir",
+      "entity_type": "LOCATION",
+      "start_pos": 786,
+      "end_pos": 798
     },
     {
       "entity_text": "Thierry Coué",
@@ -62,10 +104,22 @@
       "end_pos": 833
     },
     {
+      "entity_text": "INRAE",
+      "entity_type": "ORG",
+      "start_pos": 837,
+      "end_pos": 842
+    },
+    {
       "entity_text": "Christian Huyghe",
       "entity_type": "PERSON",
       "start_pos": 878,
       "end_pos": 894
+    },
+    {
+      "entity_text": "Ministère de l'Agriculture",
+      "entity_type": "ORG",
+      "start_pos": 925,
+      "end_pos": 951
     },
     {
       "entity_text": "Julien Denormandie",
@@ -80,10 +134,10 @@
       "end_pos": 1077
     },
     {
-      "entity_text": "Paris",
-      "entity_type": "LOCATION",
-      "start_pos": 1122,
-      "end_pos": 1127
+      "entity_text": "AgroParisTech",
+      "entity_type": "ORG",
+      "start_pos": 1118,
+      "end_pos": 1131
     },
     {
       "entity_text": "Geneviève Fioraso",
@@ -104,6 +158,18 @@
       "end_pos": 1249
     },
     {
+      "entity_text": "Leclerc",
+      "entity_type": "PERSON",
+      "start_pos": 1330,
+      "end_pos": 1337
+    },
+    {
+      "entity_text": "FNSEA",
+      "entity_type": "ORG",
+      "start_pos": 1360,
+      "end_pos": 1365
+    },
+    {
       "entity_text": "Christiane Lambert",
       "entity_type": "PERSON",
       "start_pos": 1385,
@@ -111,7 +177,7 @@
     },
     {
       "entity_text": "Jeunes Agriculteurs",
-      "entity_type": "PERSON",
+      "entity_type": "ORG",
       "start_pos": 1453,
       "end_pos": 1472
     },
@@ -122,16 +188,16 @@
       "end_pos": 1505
     },
     {
-      "entity_text": "On échange",
-      "entity_type": "PERSON",
-      "start_pos": 1507,
-      "end_pos": 1517
-    },
-    {
       "entity_text": "Pierre Martin",
       "entity_type": "PERSON",
       "start_pos": 1541,
       "end_pos": 1554
+    },
+    {
+      "entity_text": "Orléans",
+      "entity_type": "LOCATION",
+      "start_pos": 1557,
+      "end_pos": 1564
     },
     {
       "entity_text": "Sophie Rousseau",
@@ -140,15 +206,21 @@
       "end_pos": 1585
     },
     {
+      "entity_text": "Eure",
+      "entity_type": "LOCATION",
+      "start_pos": 1589,
+      "end_pos": 1593
+    },
+    {
       "entity_text": "Jean Dupont",
       "entity_type": "PERSON",
       "start_pos": 1601,
       "end_pos": 1612
     },
     {
-      "entity_text": "France",
+      "entity_text": "Île-de-France",
       "entity_type": "LOCATION",
-      "start_pos": 1623,
+      "start_pos": 1616,
       "end_pos": 1629
     },
     {
@@ -158,20 +230,32 @@
       "end_pos": 1687
     },
     {
+      "entity_text": "Carrefour",
+      "entity_type": "ORG",
+      "start_pos": 1699,
+      "end_pos": 1708
+    },
+    {
       "entity_text": "Marie Cheval",
       "entity_type": "PERSON",
       "start_pos": 1748,
       "end_pos": 1760
     },
     {
-      "entity_text": "François Loiseau",
+      "entity_text": "Axéréal",
+      "entity_type": "ORG",
+      "start_pos": 1785,
+      "end_pos": 1792
+    },
+    {
+      "entity_text": "Jean-François Loiseau",
       "entity_type": "PERSON",
-      "start_pos": 1814,
+      "start_pos": 1809,
       "end_pos": 1830
     },
     {
       "entity_text": "Soufflet Négoce",
-      "entity_type": "PERSON",
+      "entity_type": "ORG",
       "start_pos": 1865,
       "end_pos": 1880
     },
@@ -182,10 +266,28 @@
       "end_pos": 1919
     },
     {
+      "entity_text": "Leclerc",
+      "entity_type": "PERSON",
+      "start_pos": 1955,
+      "end_pos": 1962
+    },
+    {
+      "entity_text": "Ecocert",
+      "entity_type": "ORG",
+      "start_pos": 1994,
+      "end_pos": 2001
+    },
+    {
       "entity_text": "David Lefebvre",
       "entity_type": "PERSON",
       "start_pos": 2021,
       "end_pos": 2035
+    },
+    {
+      "entity_text": "Atos",
+      "entity_type": "ORG",
+      "start_pos": 2100,
+      "end_pos": 2104
     },
     {
       "entity_text": "Agnès Pannier-Runacher",

@@ -8,6 +8,18 @@
       "end_pos": 78
     },
     {
+      "entity_text": "Banque Régionale du Sud",
+      "entity_type": "ORG",
+      "start_pos": 102,
+      "end_pos": 125
+    },
+    {
+      "entity_text": "Avenue de la République",
+      "entity_type": "LOCATION",
+      "start_pos": 148,
+      "end_pos": 171
+    },
+    {
       "entity_text": "Marseille",
       "entity_type": "LOCATION",
       "start_pos": 179,
@@ -20,10 +32,10 @@
       "end_pos": 209
     },
     {
-      "entity_text": "Directeur Commercial",
-      "entity_type": "PERSON",
-      "start_pos": 211,
-      "end_pos": 231
+      "entity_text": "TechSolutions France SAS",
+      "entity_type": "ORG",
+      "start_pos": 236,
+      "end_pos": 260
     },
     {
       "entity_text": "France",
@@ -32,9 +44,9 @@
       "end_pos": 256
     },
     {
-      "entity_text": "Grande Armée",
-      "entity_type": "PERSON",
-      "start_pos": 281,
+      "entity_text": "Avenue de la Grande Armée",
+      "entity_type": "LOCATION",
+      "start_pos": 268,
       "end_pos": 293
     },
     {
@@ -44,16 +56,28 @@
       "end_pos": 306
     },
     {
+      "entity_text": "Isabelle Moreau",
+      "entity_type": "PERSON",
+      "start_pos": 456,
+      "end_pos": 471
+    },
+    {
       "entity_text": "Olivier Roussel",
       "entity_type": "PERSON",
       "start_pos": 490,
       "end_pos": 505
     },
     {
-      "entity_text": "Valérie Blanc DRH",
+      "entity_text": "Banque Régionale du Sud",
+      "entity_type": "ORG",
+      "start_pos": 690,
+      "end_pos": 713
+    },
+    {
+      "entity_text": "Valérie Blanc",
       "entity_type": "PERSON",
       "start_pos": 765,
-      "end_pos": 782
+      "end_pos": 778
     },
     {
       "entity_text": "Thierry Lecomte",
@@ -68,9 +92,27 @@
       "end_pos": 840
     },
     {
+      "entity_text": "ACPR",
+      "entity_type": "ORG",
+      "start_pos": 974,
+      "end_pos": 978
+    },
+    {
+      "entity_text": "BCE",
+      "entity_type": "ORG",
+      "start_pos": 980,
+      "end_pos": 983
+    },
+    {
       "entity_text": "DataCorp Europe",
       "entity_type": "ORG",
       "start_pos": 1082,
+      "end_pos": 1097
+    },
+    {
+      "entity_text": "Europe",
+      "entity_type": "LOCATION",
+      "start_pos": 1091,
       "end_pos": 1097
     },
     {
@@ -80,28 +122,22 @@
       "end_pos": 1122
     },
     {
+      "entity_text": "TECHSOLUTIONS",
+      "entity_type": "ORG",
+      "start_pos": 1220,
+      "end_pos": 1233
+    },
+    {
       "entity_text": "Thomas Weber",
       "entity_type": "PERSON",
       "start_pos": 1262,
       "end_pos": 1274
     },
     {
-      "entity_text": "Directeur Commercial",
-      "entity_type": "PERSON",
-      "start_pos": 1276,
-      "end_pos": 1296
-    },
-    {
       "entity_text": "Julie Marchand",
       "entity_type": "PERSON",
       "start_pos": 1322,
       "end_pos": 1336
-    },
-    {
-      "entity_text": "Account Manager",
-      "entity_type": "PERSON",
-      "start_pos": 1338,
-      "end_pos": 1353
     },
     {
       "entity_text": "Marie Dubois",
@@ -128,16 +164,16 @@
       "end_pos": 1550
     },
     {
+      "entity_text": "Alexandre Blanc",
+      "entity_type": "PERSON",
+      "start_pos": 1588,
+      "end_pos": 1603
+    },
+    {
       "entity_text": "Nadia Amrani",
       "entity_type": "PERSON",
       "start_pos": 1626,
       "end_pos": 1638
-    },
-    {
-      "entity_text": "Product Owner",
-      "entity_type": "PERSON",
-      "start_pos": 1640,
-      "end_pos": 1653
     },
     {
       "entity_text": "Laurent Benoit",
@@ -146,16 +182,16 @@
       "end_pos": 1673
     },
     {
-      "entity_text": "Architecte Cloud",
-      "entity_type": "PERSON",
-      "start_pos": 1675,
-      "end_pos": 1691
-    },
-    {
       "entity_text": "Caroline Petit",
       "entity_type": "PERSON",
       "start_pos": 1698,
       "end_pos": 1712
+    },
+    {
+      "entity_text": "Microsoft France",
+      "entity_type": "ORG",
+      "start_pos": 1759,
+      "end_pos": 1775
     },
     {
       "entity_text": "France",
@@ -176,6 +212,12 @@
       "end_pos": 1833
     },
     {
+      "entity_text": "OVHcloud",
+      "entity_type": "ORG",
+      "start_pos": 1858,
+      "end_pos": 1866
+    },
+    {
       "entity_text": "Octave Klaba",
       "entity_type": "PERSON",
       "start_pos": 1871,
@@ -188,10 +230,22 @@
       "end_pos": 1907
     },
     {
+      "entity_text": "Devoteam",
+      "entity_type": "ORG",
+      "start_pos": 1943,
+      "end_pos": 1951
+    },
+    {
       "entity_text": "David Park",
       "entity_type": "PERSON",
       "start_pos": 1956,
       "end_pos": 1966
+    },
+    {
+      "entity_text": "Capgemini",
+      "entity_type": "ORG",
+      "start_pos": 1988,
+      "end_pos": 1997
     },
     {
       "entity_text": "Ahmed Mansour",
@@ -200,10 +254,22 @@
       "end_pos": 2015
     },
     {
+      "entity_text": "Wavestone",
+      "entity_type": "ORG",
+      "start_pos": 2055,
+      "end_pos": 2064
+    },
+    {
       "entity_text": "Laure Bertholom",
       "entity_type": "PERSON",
       "start_pos": 2070,
       "end_pos": 2085
+    },
+    {
+      "entity_text": "Thales",
+      "entity_type": "ORG",
+      "start_pos": 2112,
+      "end_pos": 2118
     },
     {
       "entity_text": "Sarah Benoit",
@@ -212,16 +278,34 @@
       "end_pos": 2136
     },
     {
-      "entity_text": "Luc Moreau",
+      "entity_text": "Deloitte",
+      "entity_type": "ORG",
+      "start_pos": 2174,
+      "end_pos": 2182
+    },
+    {
+      "entity_text": "Jean-Luc Moreau",
       "entity_type": "PERSON",
-      "start_pos": 2192,
+      "start_pos": 2187,
       "end_pos": 2202
+    },
+    {
+      "entity_text": "KPMG",
+      "entity_type": "ORG",
+      "start_pos": 2215,
+      "end_pos": 2219
     },
     {
       "entity_text": "Dominique Leboureix",
       "entity_type": "PERSON",
       "start_pos": 2224,
       "end_pos": 2243
+    },
+    {
+      "entity_text": "GDPR Experts",
+      "entity_type": "ORG",
+      "start_pos": 2256,
+      "end_pos": 2268
     },
     {
       "entity_text": "Julie Legrand",
@@ -231,7 +315,7 @@
     },
     {
       "entity_text": "Société Générale",
-      "entity_type": "PERSON",
+      "entity_type": "ORG",
       "start_pos": 2374,
       "end_pos": 2390
     },
@@ -242,20 +326,20 @@
       "end_pos": 2421
     },
     {
+      "entity_text": "BNP Paribas",
+      "entity_type": "ORG",
+      "start_pos": 2561,
+      "end_pos": 2572
+    },
+    {
       "entity_text": "Jean Lemierre",
       "entity_type": "PERSON",
       "start_pos": 2586,
       "end_pos": 2599
     },
     {
-      "entity_text": "App Store",
-      "entity_type": "PERSON",
-      "start_pos": 2736,
-      "end_pos": 2745
-    },
-    {
       "entity_text": "Crédit Agricole",
-      "entity_type": "PERSON",
+      "entity_type": "ORG",
       "start_pos": 2750,
       "end_pos": 2765
     },
@@ -272,10 +356,34 @@
       "end_pos": 2956
     },
     {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 2950,
+      "end_pos": 2956
+    },
+    {
       "entity_text": "Denis Beau",
       "entity_type": "PERSON",
       "start_pos": 2971,
       "end_pos": 2981
+    },
+    {
+      "entity_text": "OVHcloud",
+      "entity_type": "ORG",
+      "start_pos": 3306,
+      "end_pos": 3314
+    },
+    {
+      "entity_text": "Thales",
+      "entity_type": "ORG",
+      "start_pos": 3339,
+      "end_pos": 3345
+    },
+    {
+      "entity_text": "Laurent Benoit",
+      "entity_type": "PERSON",
+      "start_pos": 3391,
+      "end_pos": 3405
     },
     {
       "entity_text": "Sarah Benoit",
@@ -284,10 +392,16 @@
       "end_pos": 3423
     },
     {
-      "entity_text": "Salesforce Financial",
-      "entity_type": "PERSON",
+      "entity_text": "Salesforce",
+      "entity_type": "ORG",
       "start_pos": 3476,
-      "end_pos": 3496
+      "end_pos": 3486
+    },
+    {
+      "entity_text": "Kevin Zhang",
+      "entity_type": "PERSON",
+      "start_pos": 3574,
+      "end_pos": 3585
     },
     {
       "entity_text": "Nadia Amrani",
@@ -308,10 +422,34 @@
       "end_pos": 3750
     },
     {
+      "entity_text": "Alexandre Blanc",
+      "entity_type": "PERSON",
+      "start_pos": 3855,
+      "end_pos": 3870
+    },
+    {
+      "entity_text": "Sophie Laurent",
+      "entity_type": "PERSON",
+      "start_pos": 3876,
+      "end_pos": 3890
+    },
+    {
+      "entity_text": "Bpifrance",
+      "entity_type": "ORG",
+      "start_pos": 4279,
+      "end_pos": 4288
+    },
+    {
       "entity_text": "Nicolas Dufourcq",
       "entity_type": "PERSON",
       "start_pos": 4293,
       "end_pos": 4309
+    },
+    {
+      "entity_text": "Caisse des Dépôts",
+      "entity_type": "ORG",
+      "start_pos": 4340,
+      "end_pos": 4357
     },
     {
       "entity_text": "Éric Lombard",
@@ -320,22 +458,46 @@
       "end_pos": 4374
     },
     {
-      "entity_text": "Prêt Numérique",
-      "entity_type": "PERSON",
-      "start_pos": 4381,
-      "end_pos": 4395
-    },
-    {
-      "entity_text": "Paribas Leasing",
-      "entity_type": "PERSON",
-      "start_pos": 4415,
+      "entity_text": "BNP Paribas Leasing",
+      "entity_type": "ORG",
+      "start_pos": 4411,
       "end_pos": 4430
     },
     {
-      "entity_text": "Laurent Bonnafé",
+      "entity_text": "Jean-Laurent Bonnafé",
       "entity_type": "PERSON",
-      "start_pos": 4448,
+      "start_pos": 4443,
       "end_pos": 4463
+    },
+    {
+      "entity_text": "Zhang",
+      "entity_type": "PERSON",
+      "start_pos": 4640,
+      "end_pos": 4645
+    },
+    {
+      "entity_text": "Blanc",
+      "entity_type": "PERSON",
+      "start_pos": 4650,
+      "end_pos": 4655
+    },
+    {
+      "entity_text": "Park",
+      "entity_type": "PERSON",
+      "start_pos": 4660,
+      "end_pos": 4664
+    },
+    {
+      "entity_text": "Thomas Weber",
+      "entity_type": "PERSON",
+      "start_pos": 4838,
+      "end_pos": 4850
+    },
+    {
+      "entity_text": "Isabelle Moreau",
+      "entity_type": "PERSON",
+      "start_pos": 4856,
+      "end_pos": 4871
     },
     {
       "entity_text": "Marie Dubois",
@@ -368,10 +530,22 @@
       "end_pos": 5151
     },
     {
+      "entity_text": "AFPA",
+      "entity_type": "ORG",
+      "start_pos": 5325,
+      "end_pos": 5329
+    },
+    {
       "entity_text": "Benoît Bazin",
       "entity_type": "PERSON",
       "start_pos": 5342,
       "end_pos": 5354
+    },
+    {
+      "entity_text": "AXA",
+      "entity_type": "ORG",
+      "start_pos": 5390,
+      "end_pos": 5393
     },
     {
       "entity_text": "Thomas Buberl",
@@ -380,16 +554,28 @@
       "end_pos": 5421
     },
     {
-      "entity_text": "Marc Bideau",
+      "entity_text": "Hiscox",
+      "entity_type": "ORG",
+      "start_pos": 5448,
+      "end_pos": 5454
+    },
+    {
+      "entity_text": "Jean-Marc Bideau",
       "entity_type": "PERSON",
-      "start_pos": 5474,
+      "start_pos": 5469,
       "end_pos": 5485
     },
     {
-      "entity_text": "Participants Tech",
-      "entity_type": "PERSON",
-      "start_pos": 5613,
-      "end_pos": 5630
+      "entity_text": "Banque Régionale du Sud",
+      "entity_type": "ORG",
+      "start_pos": 5551,
+      "end_pos": 5574
+    },
+    {
+      "entity_text": "TechSolutions",
+      "entity_type": "ORG",
+      "start_pos": 5626,
+      "end_pos": 5639
     },
     {
       "entity_text": "Isabelle Moreau",
@@ -410,6 +596,18 @@
       "end_pos": 5707
     },
     {
+      "entity_text": "BRS",
+      "entity_type": "ORG",
+      "start_pos": 5726,
+      "end_pos": 5729
+    },
+    {
+      "entity_text": "Jacques Martineau",
+      "entity_type": "PERSON",
+      "start_pos": 5734,
+      "end_pos": 5751
+    },
+    {
       "entity_text": "Isabelle Moreau",
       "entity_type": "PERSON",
       "start_pos": 5757,
@@ -423,7 +621,7 @@
     },
     {
       "entity_text": "Bredin Prat",
-      "entity_type": "PERSON",
+      "entity_type": "ORG",
       "start_pos": 5970,
       "end_pos": 5981
     },
@@ -432,6 +630,12 @@
       "entity_type": "PERSON",
       "start_pos": 5990,
       "end_pos": 6003
+    },
+    {
+      "entity_text": "TechSolutions France",
+      "entity_type": "ORG",
+      "start_pos": 6123,
+      "end_pos": 6143
     },
     {
       "entity_text": "France",
@@ -447,13 +651,19 @@
     },
     {
       "entity_text": "Société Générale",
-      "entity_type": "PERSON",
+      "entity_type": "ORG",
       "start_pos": 6276,
       "end_pos": 6292
     },
     {
+      "entity_text": "BNP Paribas",
+      "entity_type": "ORG",
+      "start_pos": 6294,
+      "end_pos": 6305
+    },
+    {
       "entity_text": "Crédit Agricole",
-      "entity_type": "PERSON",
+      "entity_type": "ORG",
       "start_pos": 6310,
       "end_pos": 6325
     },
@@ -470,22 +680,16 @@
       "end_pos": 6491
     },
     {
-      "entity_text": "Directeur Général",
-      "entity_type": "PERSON",
-      "start_pos": 6603,
-      "end_pos": 6620
-    },
-    {
       "entity_text": "Thomas Weber",
       "entity_type": "PERSON",
       "start_pos": 6671,
       "end_pos": 6683
     },
     {
-      "entity_text": "Directeur Commercial",
-      "entity_type": "PERSON",
-      "start_pos": 6684,
-      "end_pos": 6704
+      "entity_text": "TechSolutions France SAS",
+      "entity_type": "ORG",
+      "start_pos": 6705,
+      "end_pos": 6729
     },
     {
       "entity_text": "France",
@@ -500,16 +704,34 @@
       "end_pos": 6811
     },
     {
+      "entity_text": "TechSolutions",
+      "entity_type": "ORG",
+      "start_pos": 6817,
+      "end_pos": 6830
+    },
+    {
       "entity_text": "Marie Dubois",
       "entity_type": "PERSON",
       "start_pos": 6839,
       "end_pos": 6851
     },
     {
+      "entity_text": "TechSolutions",
+      "entity_type": "ORG",
+      "start_pos": 6857,
+      "end_pos": 6870
+    },
+    {
       "entity_text": "Philippe Arnaud",
       "entity_type": "PERSON",
       "start_pos": 6878,
       "end_pos": 6893
+    },
+    {
+      "entity_text": "TechSolutions",
+      "entity_type": "ORG",
+      "start_pos": 6899,
+      "end_pos": 6912
     }
   ]
 }

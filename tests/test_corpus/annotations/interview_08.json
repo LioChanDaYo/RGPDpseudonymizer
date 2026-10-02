@@ -2,27 +2,27 @@
   "document_name": "interview_08.txt",
   "entities": [
     {
-      "entity_text": "Interview Chercheur",
-      "entity_type": "PERSON",
-      "start_pos": 0,
-      "end_pos": 19
-    },
-    {
-      "entity_text": "Intelligence Artificielle",
-      "entity_type": "PERSON",
-      "start_pos": 22,
-      "end_pos": 47
-    },
-    {
       "entity_text": "Sarah Cohen",
       "entity_type": "PERSON",
       "start_pos": 63,
       "end_pos": 74
     },
     {
-      "entity_text": "Docteur Cohen",
+      "entity_text": "INRIA Saclay",
+      "entity_type": "ORG",
+      "start_pos": 76,
+      "end_pos": 88
+    },
+    {
+      "entity_text": "Saclay",
+      "entity_type": "LOCATION",
+      "start_pos": 82,
+      "end_pos": 88
+    },
+    {
+      "entity_text": "Cohen",
       "entity_type": "PERSON",
-      "start_pos": 127,
+      "start_pos": 135,
       "end_pos": 140
     },
     {
@@ -32,21 +32,33 @@
       "end_pos": 204
     },
     {
-      "entity_text": "Raja Chatila de Sorbonne Université",
+      "entity_text": "INRIA",
+      "entity_type": "ORG",
+      "start_pos": 222,
+      "end_pos": 227
+    },
+    {
+      "entity_text": "Raja Chatila",
       "entity_type": "PERSON",
       "start_pos": 333,
-      "end_pos": 368
+      "end_pos": 345
     },
     {
       "entity_text": "Sorbonne Université",
-      "entity_type": "PERSON",
+      "entity_type": "ORG",
       "start_pos": 349,
       "end_pos": 368
     },
     {
-      "entity_text": "Laurence Devillers du CNRS",
+      "entity_text": "Laurence Devillers",
       "entity_type": "PERSON",
       "start_pos": 376,
+      "end_pos": 394
+    },
+    {
+      "entity_text": "CNRS",
+      "entity_type": "ORG",
+      "start_pos": 398,
       "end_pos": 402
     },
     {
@@ -56,15 +68,9 @@
       "end_pos": 454
     },
     {
-      "entity_text": "On échange",
-      "entity_type": "PERSON",
-      "start_pos": 456,
-      "end_pos": 466
-    },
-    {
-      "entity_text": "Media Lab",
-      "entity_type": "PERSON",
-      "start_pos": 479,
+      "entity_text": "MIT Media Lab",
+      "entity_type": "ORG",
+      "start_pos": 475,
       "end_pos": 488
     },
     {
@@ -74,20 +80,44 @@
       "end_pos": 521
     },
     {
+      "entity_text": "Europe",
+      "entity_type": "LOCATION",
+      "start_pos": 526,
+      "end_pos": 532
+    },
+    {
       "entity_text": "Luciano Floridi",
       "entity_type": "PERSON",
       "start_pos": 559,
       "end_pos": 574
     },
     {
-      "entity_text": "Virginia Dignum de",
+      "entity_text": "Oxford",
+      "entity_type": "LOCATION",
+      "start_pos": 577,
+      "end_pos": 583
+    },
+    {
+      "entity_text": "Virginia Dignum",
       "entity_type": "PERSON",
       "start_pos": 591,
-      "end_pos": 609
+      "end_pos": 606
+    },
+    {
+      "entity_text": "Université d'Umeå",
+      "entity_type": "ORG",
+      "start_pos": 612,
+      "end_pos": 629
+    },
+    {
+      "entity_text": "Umeå",
+      "entity_type": "LOCATION",
+      "start_pos": 625,
+      "end_pos": 629
     },
     {
       "entity_text": "Fraunhofer Institute",
-      "entity_type": "PERSON",
+      "entity_type": "ORG",
       "start_pos": 676,
       "end_pos": 696
     },
@@ -98,16 +128,34 @@
       "end_pos": 709
     },
     {
+      "entity_text": "Cohen",
+      "entity_type": "PERSON",
+      "start_pos": 755,
+      "end_pos": 760
+    },
+    {
       "entity_text": "Meta AI France",
       "entity_type": "ORG",
       "start_pos": 773,
       "end_pos": 787
     },
     {
-      "entity_text": "Yann Le",
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 781,
+      "end_pos": 787
+    },
+    {
+      "entity_text": "Yann LeCun",
       "entity_type": "PERSON",
       "start_pos": 797,
-      "end_pos": 804
+      "end_pos": 807
+    },
+    {
+      "entity_text": "DeepMind",
+      "entity_type": "ORG",
+      "start_pos": 839,
+      "end_pos": 847
     },
     {
       "entity_text": "Londres",
@@ -122,6 +170,12 @@
       "end_pos": 893
     },
     {
+      "entity_text": "Huawei France",
+      "entity_type": "ORG",
+      "start_pos": 946,
+      "end_pos": 959
+    },
+    {
       "entity_text": "France",
       "entity_type": "LOCATION",
       "start_pos": 953,
@@ -134,10 +188,10 @@
       "end_pos": 997
     },
     {
-      "entity_text": "Votre équipe",
-      "entity_type": "PERSON",
-      "start_pos": 1013,
-      "end_pos": 1025
+      "entity_text": "INRIA",
+      "entity_type": "ORG",
+      "start_pos": 1030,
+      "end_pos": 1035
     },
     {
       "entity_text": "Sarah Cohen",
@@ -182,20 +236,26 @@
       "end_pos": 1280
     },
     {
-      "entity_text": "Marie-",
+      "entity_text": "Cohen",
       "entity_type": "PERSON",
-      "start_pos": 1387,
-      "end_pos": 1393
+      "start_pos": 1333,
+      "end_pos": 1338
     },
     {
-      "entity_text": "Laure Denis",
+      "entity_text": "CNIL",
+      "entity_type": "ORG",
+      "start_pos": 1360,
+      "end_pos": 1364
+    },
+    {
+      "entity_text": "Marie-Laure Denis",
       "entity_type": "PERSON",
-      "start_pos": 1393,
+      "start_pos": 1387,
       "end_pos": 1404
     },
     {
       "entity_text": "Parlement Européen",
-      "entity_type": "PERSON",
+      "entity_type": "ORG",
       "start_pos": 1465,
       "end_pos": 1483
     },
@@ -224,6 +284,12 @@
       "end_pos": 1666
     },
     {
+      "entity_text": "UNESCO",
+      "entity_type": "ORG",
+      "start_pos": 1675,
+      "end_pos": 1681
+    },
+    {
       "entity_text": "Paris",
       "entity_type": "LOCATION",
       "start_pos": 1684,
@@ -236,8 +302,14 @@
       "end_pos": 1750
     },
     {
+      "entity_text": "OCDE",
+      "entity_type": "ORG",
+      "start_pos": 1754,
+      "end_pos": 1758
+    },
+    {
       "entity_text": "Institut Montaigne",
-      "entity_type": "PERSON",
+      "entity_type": "ORG",
       "start_pos": 1808,
       "end_pos": 1826
     },
@@ -249,7 +321,7 @@
     },
     {
       "entity_text": "Terra Nova",
-      "entity_type": "PERSON",
+      "entity_type": "ORG",
       "start_pos": 1878,
       "end_pos": 1888
     },

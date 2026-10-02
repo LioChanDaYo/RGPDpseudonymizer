@@ -2,22 +2,16 @@
   "document_name": "incident_report.txt",
   "entities": [
     {
-      "entity_text": "Diffusion Restreinte",
-      "entity_type": "PERSON",
-      "start_pos": 60,
-      "end_pos": 80
-    },
-    {
       "entity_text": "Vincent Chen",
       "entity_type": "PERSON",
       "start_pos": 191,
       "end_pos": 203
     },
     {
-      "entity_text": "Security Operations",
-      "entity_type": "PERSON",
-      "start_pos": 273,
-      "end_pos": 292
+      "entity_text": "Splunk",
+      "entity_type": "ORG",
+      "start_pos": 632,
+      "end_pos": 638
     },
     {
       "entity_text": "Laura Martin",
@@ -26,34 +20,16 @@
       "end_pos": 710
     },
     {
-      "entity_text": "Martin, Analyste",
-      "entity_type": "PERSON",
-      "start_pos": 704,
-      "end_pos": 720
-    },
-    {
       "entity_text": "Vincent Chen",
       "entity_type": "PERSON",
       "start_pos": 754,
       "end_pos": 766
     },
     {
-      "entity_text": "Convocation équipe",
-      "entity_type": "PERSON",
-      "start_pos": 812,
-      "end_pos": 830
-    },
-    {
       "entity_text": "Catherine Rousseau",
       "entity_type": "PERSON",
       "start_pos": 855,
       "end_pos": 873
-    },
-    {
-      "entity_text": "Rousseau, Responsable",
-      "entity_type": "PERSON",
-      "start_pos": 865,
-      "end_pos": 886
     },
     {
       "entity_text": "Marc Dubois",
@@ -74,22 +50,22 @@
       "end_pos": 1020
     },
     {
+      "entity_text": "Wavestone",
+      "entity_type": "ORG",
+      "start_pos": 1033,
+      "end_pos": 1042
+    },
+    {
       "entity_text": "Laurent Benoit",
       "entity_type": "PERSON",
       "start_pos": 1104,
       "end_pos": 1118
     },
     {
-      "entity_text": "Architecte Cloud",
-      "entity_type": "PERSON",
-      "start_pos": 1120,
-      "end_pos": 1136
-    },
-    {
-      "entity_text": "Microsoft Azure ",
+      "entity_text": "Microsoft Azure",
       "entity_type": "ORG",
       "start_pos": 1164,
-      "end_pos": 1180
+      "end_pos": 1179
     },
     {
       "entity_text": "Romain Niccoli",
@@ -134,16 +110,16 @@
       "end_pos": 1519
     },
     {
+      "entity_text": "Wavestone",
+      "entity_type": "ORG",
+      "start_pos": 1547,
+      "end_pos": 1556
+    },
+    {
       "entity_text": "Laure Bertholom",
       "entity_type": "PERSON",
       "start_pos": 1562,
       "end_pos": 1577
-    },
-    {
-      "entity_text": "Partner Cyber",
-      "entity_type": "PERSON",
-      "start_pos": 1579,
-      "end_pos": 1592
     },
     {
       "entity_text": "Romain Duval",
@@ -170,10 +146,28 @@
       "end_pos": 1776
     },
     {
+      "entity_text": "Arnaud",
+      "entity_type": "PERSON",
+      "start_pos": 1781,
+      "end_pos": 1787
+    },
+    {
+      "entity_text": "Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 1793,
+      "end_pos": 1799
+    },
+    {
       "entity_text": "Thomas Weber",
       "entity_type": "PERSON",
       "start_pos": 1804,
       "end_pos": 1816
+    },
+    {
+      "entity_text": "ANSSI",
+      "entity_type": "ORG",
+      "start_pos": 1862,
+      "end_pos": 1867
     },
     {
       "entity_text": "Guillaume Poupard",
@@ -182,10 +176,22 @@
       "end_pos": 1897
     },
     {
+      "entity_text": "CNIL",
+      "entity_type": "ORG",
+      "start_pos": 1927,
+      "end_pos": 1931
+    },
+    {
       "entity_text": "Sarah Cohen",
       "entity_type": "PERSON",
       "start_pos": 1936,
       "end_pos": 1947
+    },
+    {
+      "entity_text": "Hiscox France",
+      "entity_type": "ORG",
+      "start_pos": 2016,
+      "end_pos": 2029
     },
     {
       "entity_text": "France",
@@ -194,10 +200,16 @@
       "end_pos": 2029
     },
     {
-      "entity_text": "Marc Bideau",
+      "entity_text": "Jean-Marc Bideau",
       "entity_type": "PERSON",
-      "start_pos": 2039,
+      "start_pos": 2034,
       "end_pos": 2050
+    },
+    {
+      "entity_text": "AXA Cyber",
+      "entity_type": "ORG",
+      "start_pos": 2072,
+      "end_pos": 2081
     },
     {
       "entity_text": "Thomas Buberl",
@@ -206,22 +218,16 @@
       "end_pos": 2099
     },
     {
-      "entity_text": "Débriefing équipe",
-      "entity_type": "PERSON",
-      "start_pos": 2124,
-      "end_pos": 2141
+      "entity_text": "SEKOIA.IO",
+      "entity_type": "ORG",
+      "start_pos": 2194,
+      "end_pos": 2203
     },
     {
       "entity_text": "Thomas Roccia",
       "entity_type": "PERSON",
       "start_pos": 2209,
       "end_pos": 2222
-    },
-    {
-      "entity_text": "Azure West",
-      "entity_type": "PERSON",
-      "start_pos": 2598,
-      "end_pos": 2608
     },
     {
       "entity_text": "Vincent Chen",
@@ -242,22 +248,10 @@
       "end_pos": 2798
     },
     {
-      "entity_text": "Martin, Analyste",
-      "entity_type": "PERSON",
-      "start_pos": 2792,
-      "end_pos": 2808
-    },
-    {
       "entity_text": "Catherine Rousseau",
       "entity_type": "PERSON",
       "start_pos": 2831,
       "end_pos": 2849
-    },
-    {
-      "entity_text": "Rousseau, Responsable",
-      "entity_type": "PERSON",
-      "start_pos": 2841,
-      "end_pos": 2862
     },
     {
       "entity_text": "Marc Dubois",
@@ -272,22 +266,16 @@
       "end_pos": 2962
     },
     {
-      "entity_text": "Architecte Cloud",
-      "entity_type": "PERSON",
-      "start_pos": 2964,
-      "end_pos": 2980
-    },
-    {
       "entity_text": "Kevin Zhang",
       "entity_type": "PERSON",
       "start_pos": 3013,
       "end_pos": 3024
     },
     {
-      "entity_text": "Jin, Lead",
+      "entity_text": "Alexandre Jin",
       "entity_type": "PERSON",
-      "start_pos": 3068,
-      "end_pos": 3077
+      "start_pos": 3058,
+      "end_pos": 3071
     },
     {
       "entity_text": "Romain Duval",
@@ -296,22 +284,10 @@
       "end_pos": 3120
     },
     {
-      "entity_text": "Backend Lead",
-      "entity_type": "PERSON",
-      "start_pos": 3122,
-      "end_pos": 3134
-    },
-    {
       "entity_text": "Nadia Amrani",
       "entity_type": "PERSON",
       "start_pos": 3155,
       "end_pos": 3167
-    },
-    {
-      "entity_text": "Amrani, Dev",
-      "entity_type": "PERSON",
-      "start_pos": 3161,
-      "end_pos": 3172
     },
     {
       "entity_text": "François Leclerc",
@@ -326,16 +302,22 @@
       "end_pos": 3275
     },
     {
+      "entity_text": "CNIL",
+      "entity_type": "ORG",
+      "start_pos": 3295,
+      "end_pos": 3299
+    },
+    {
       "entity_text": "Caroline Marchal",
       "entity_type": "PERSON",
       "start_pos": 3312,
       "end_pos": 3328
     },
     {
-      "entity_text": "Marchal, Dircom",
-      "entity_type": "PERSON",
-      "start_pos": 3321,
-      "end_pos": 3336
+      "entity_text": "Wavestone",
+      "entity_type": "ORG",
+      "start_pos": 3394,
+      "end_pos": 3403
     },
     {
       "entity_text": "Laure Bertholom",
@@ -350,22 +332,16 @@
       "end_pos": 3457
     },
     {
-      "entity_text": "Consultant Senior",
-      "entity_type": "PERSON",
-      "start_pos": 3459,
-      "end_pos": 3476
+      "entity_text": "SEKOIA.IO",
+      "entity_type": "ORG",
+      "start_pos": 3480,
+      "end_pos": 3489
     },
     {
       "entity_text": "Thomas Roccia",
       "entity_type": "PERSON",
       "start_pos": 3495,
       "end_pos": 3508
-    },
-    {
-      "entity_text": "Threat Intelligence",
-      "entity_type": "PERSON",
-      "start_pos": 3510,
-      "end_pos": 3529
     },
     {
       "entity_text": "Microsoft DART",
@@ -380,10 +356,10 @@
       "end_pos": 3564
     },
     {
-      "entity_text": "Response Team",
-      "entity_type": "PERSON",
-      "start_pos": 3578,
-      "end_pos": 3591
+      "entity_text": "Microsoft Azure",
+      "entity_type": "ORG",
+      "start_pos": 3620,
+      "end_pos": 3635
     },
     {
       "entity_text": "Romain Niccoli",
@@ -392,22 +368,16 @@
       "end_pos": 3654
     },
     {
-      "entity_text": "Account Director",
-      "entity_type": "PERSON",
-      "start_pos": 3656,
-      "end_pos": 3672
-    },
-    {
       "entity_text": "Sophie Bernard",
       "entity_type": "PERSON",
       "start_pos": 3679,
       "end_pos": 3693
     },
     {
-      "entity_text": "Palo Alto",
-      "entity_type": "PERSON",
+      "entity_text": "Palo Alto Networks",
+      "entity_type": "ORG",
       "start_pos": 3709,
-      "end_pos": 3718
+      "end_pos": 3727
     },
     {
       "entity_text": "Jennifer Smith",
@@ -416,15 +386,9 @@
       "end_pos": 3747
     },
     {
-      "entity_text": "Support Engineer",
-      "entity_type": "PERSON",
-      "start_pos": 3749,
-      "end_pos": 3765
-    },
-    {
-      "entity_text": "Francis Lefebvre",
-      "entity_type": "PERSON",
-      "start_pos": 3805,
+      "entity_text": "CMS Francis Lefebvre",
+      "entity_type": "ORG",
+      "start_pos": 3801,
       "end_pos": 3821
     },
     {
@@ -434,28 +398,34 @@
       "end_pos": 3849
     },
     {
-      "entity_text": "Marc Bideau",
+      "entity_text": "Hiscox",
+      "entity_type": "ORG",
+      "start_pos": 3865,
+      "end_pos": 3871
+    },
+    {
+      "entity_text": "Jean-Marc Bideau",
       "entity_type": "PERSON",
-      "start_pos": 3881,
+      "start_pos": 3876,
       "end_pos": 3892
     },
     {
-      "entity_text": "Claims Manager",
-      "entity_type": "PERSON",
-      "start_pos": 3894,
-      "end_pos": 3908
+      "entity_text": "AXA",
+      "entity_type": "ORG",
+      "start_pos": 3912,
+      "end_pos": 3915
     },
     {
-      "entity_text": "Laurent Bonnafé",
+      "entity_text": "Jean-Laurent Bonnafé",
       "entity_type": "PERSON",
-      "start_pos": 3925,
+      "start_pos": 3920,
       "end_pos": 3940
     },
     {
-      "entity_text": "Risk Manager",
-      "entity_type": "PERSON",
-      "start_pos": 3942,
-      "end_pos": 3954
+      "entity_text": "ANSSI",
+      "entity_type": "ORG",
+      "start_pos": 3970,
+      "end_pos": 3975
     },
     {
       "entity_text": "Guillaume Poupard",
@@ -470,21 +440,21 @@
       "end_pos": 4030
     },
     {
+      "entity_text": "CNIL",
+      "entity_type": "ORG",
+      "start_pos": 4043,
+      "end_pos": 4047
+    },
+    {
       "entity_text": "François Pellegrini",
       "entity_type": "PERSON",
       "start_pos": 4052,
       "end_pos": 4071
     },
     {
-      "entity_text": "Marie-",
+      "entity_text": "Marie-Laure Denis",
       "entity_type": "PERSON",
       "start_pos": 4090,
-      "end_pos": 4096
-    },
-    {
-      "entity_text": "Laure Denis",
-      "entity_type": "PERSON",
-      "start_pos": 4096,
       "end_pos": 4107
     },
     {
@@ -518,6 +488,12 @@
       "end_pos": 4425
     },
     {
+      "entity_text": "ANSSI",
+      "entity_type": "ORG",
+      "start_pos": 4442,
+      "end_pos": 4447
+    },
+    {
       "entity_text": "Sarah Cohen",
       "entity_type": "PERSON",
       "start_pos": 4469,
@@ -536,10 +512,10 @@
       "end_pos": 4566
     },
     {
-      "entity_text": "Charles Le",
+      "entity_text": "Jean-Charles Le Goff",
       "entity_type": "PERSON",
-      "start_pos": 4588,
-      "end_pos": 4598
+      "start_pos": 4583,
+      "end_pos": 4603
     },
     {
       "entity_text": "Kevin Zhang",
@@ -548,10 +524,10 @@
       "end_pos": 4652
     },
     {
-      "entity_text": "Devrait être",
-      "entity_type": "PERSON",
-      "start_pos": 4772,
-      "end_pos": 4784
+      "entity_text": "Wavestone",
+      "entity_type": "ORG",
+      "start_pos": 4656,
+      "end_pos": 4665
     },
     {
       "entity_text": "Alexandre Jin",
@@ -560,28 +536,10 @@
       "end_pos": 4833
     },
     {
-      "entity_text": "Logs Azure",
-      "entity_type": "PERSON",
-      "start_pos": 4838,
-      "end_pos": 4848
-    },
-    {
-      "entity_text": "Devrait être",
-      "entity_type": "PERSON",
-      "start_pos": 4911,
-      "end_pos": 4923
-    },
-    {
       "entity_text": "Nadia Amrani",
       "entity_type": "PERSON",
       "start_pos": 4960,
       "end_pos": 4972
-    },
-    {
-      "entity_text": "Devrait être",
-      "entity_type": "PERSON",
-      "start_pos": 5036,
-      "end_pos": 5048
     },
     {
       "entity_text": "Marc Dubois",
@@ -627,7 +585,7 @@
     },
     {
       "entity_text": "Palo Alto",
-      "entity_type": "PERSON",
+      "entity_type": "ORG",
       "start_pos": 5547,
       "end_pos": 5556
     },
@@ -650,6 +608,12 @@
       "end_pos": 5677
     },
     {
+      "entity_text": "Wavestone",
+      "entity_type": "ORG",
+      "start_pos": 5736,
+      "end_pos": 5745
+    },
+    {
       "entity_text": "Laure Bertholom",
       "entity_type": "PERSON",
       "start_pos": 5751,
@@ -668,10 +632,10 @@
       "end_pos": 5878
     },
     {
-      "entity_text": "Formation équipe",
-      "entity_type": "PERSON",
-      "start_pos": 5941,
-      "end_pos": 5957
+      "entity_text": "Wavestone",
+      "entity_type": "ORG",
+      "start_pos": 5880,
+      "end_pos": 5889
     },
     {
       "entity_text": "Kevin Zhang",
@@ -716,16 +680,10 @@
       "end_pos": 6313
     },
     {
-      "entity_text": "Charles Le",
+      "entity_text": "Jean-Charles Le Goff",
       "entity_type": "PERSON",
-      "start_pos": 6324,
-      "end_pos": 6334
-    },
-    {
-      "entity_text": "Email Mme",
-      "entity_type": "PERSON",
-      "start_pos": 6370,
-      "end_pos": 6379
+      "start_pos": 6319,
+      "end_pos": 6339
     },
     {
       "entity_text": "Caroline Marchal",
@@ -740,34 +698,64 @@
       "end_pos": 6558
     },
     {
+      "entity_text": "ANSSI",
+      "entity_type": "ORG",
+      "start_pos": 6651,
+      "end_pos": 6656
+    },
+    {
       "entity_text": "Sarah Cohen",
       "entity_type": "PERSON",
       "start_pos": 6684,
       "end_pos": 6695
     },
     {
-      "entity_text": "Heures équipe",
-      "entity_type": "PERSON",
-      "start_pos": 6887,
-      "end_pos": 6900
+      "entity_text": "CNIL",
+      "entity_type": "ORG",
+      "start_pos": 6711,
+      "end_pos": 6715
     },
     {
-      "entity_text": "Microsoft support priority",
+      "entity_text": "ACPR",
+      "entity_type": "ORG",
+      "start_pos": 6786,
+      "end_pos": 6790
+    },
+    {
+      "entity_text": "Wavestone",
+      "entity_type": "ORG",
+      "start_pos": 6936,
+      "end_pos": 6945
+    },
+    {
+      "entity_text": "SEKOIA.IO",
+      "entity_type": "ORG",
+      "start_pos": 6964,
+      "end_pos": 6973
+    },
+    {
+      "entity_text": "Microsoft",
       "entity_type": "ORG",
       "start_pos": 6994,
-      "end_pos": 7020
+      "end_pos": 7003
     },
     {
-      "entity_text": "Audit Wavestone",
-      "entity_type": "PERSON",
-      "start_pos": 7064,
+      "entity_text": "Wavestone",
+      "entity_type": "ORG",
+      "start_pos": 7070,
       "end_pos": 7079
     },
     {
-      "entity_text": "Formation SA",
+      "entity_text": "SANS",
       "entity_type": "ORG",
-      "start_pos": 7117,
-      "end_pos": 7129
+      "start_pos": 7127,
+      "end_pos": 7131
+    },
+    {
+      "entity_text": "Hiscox",
+      "entity_type": "ORG",
+      "start_pos": 7208,
+      "end_pos": 7214
     },
     {
       "entity_text": "Laura Martin",
@@ -776,16 +764,16 @@
       "end_pos": 7320
     },
     {
-      "entity_text": "Coordination équipes",
-      "entity_type": "PERSON",
-      "start_pos": 7376,
-      "end_pos": 7396
-    },
-    {
-      "entity_text": "Microsoft r",
+      "entity_text": "Microsoft",
       "entity_type": "ORG",
       "start_pos": 7418,
-      "end_pos": 7429
+      "end_pos": 7427
+    },
+    {
+      "entity_text": "Niccoli",
+      "entity_type": "PERSON",
+      "start_pos": 7440,
+      "end_pos": 7447
     },
     {
       "entity_text": "Bernard",
@@ -794,22 +782,22 @@
       "end_pos": 7460
     },
     {
-      "entity_text": "Security Orchestration",
-      "entity_type": "PERSON",
-      "start_pos": 7668,
-      "end_pos": 7690
-    },
-    {
       "entity_text": "Catherine Rousseau",
       "entity_type": "PERSON",
       "start_pos": 7715,
       "end_pos": 7733
     },
     {
-      "entity_text": "Alto Cortex",
-      "entity_type": "PERSON",
-      "start_pos": 7772,
-      "end_pos": 7783
+      "entity_text": "Splunk",
+      "entity_type": "ORG",
+      "start_pos": 7755,
+      "end_pos": 7761
+    },
+    {
+      "entity_text": "PaloAlto",
+      "entity_type": "ORG",
+      "start_pos": 7768,
+      "end_pos": 7776
     },
     {
       "entity_text": "Marie Dubois",
@@ -818,10 +806,10 @@
       "end_pos": 7835
     },
     {
-      "entity_text": "Red Team",
-      "entity_type": "PERSON",
-      "start_pos": 7840,
-      "end_pos": 7848
+      "entity_text": "Synacktiv",
+      "entity_type": "ORG",
+      "start_pos": 7877,
+      "end_pos": 7886
     },
     {
       "entity_text": "Fabien Perigaud",
@@ -836,16 +824,22 @@
       "end_pos": 7962
     },
     {
-      "entity_text": "Programme Security",
-      "entity_type": "PERSON",
-      "start_pos": 7967,
-      "end_pos": 7985
-    },
-    {
       "entity_text": "Kevin Zhang",
       "entity_type": "PERSON",
       "start_pos": 8010,
       "end_pos": 8021
+    },
+    {
+      "entity_text": "Alexandre Jin",
+      "entity_type": "PERSON",
+      "start_pos": 8039,
+      "end_pos": 8052
+    },
+    {
+      "entity_text": "Nadia Amrani",
+      "entity_type": "PERSON",
+      "start_pos": 8058,
+      "end_pos": 8070
     },
     {
       "entity_text": "Romain Duval",
@@ -857,6 +851,12 @@
       "entity_text": "OWASP France",
       "entity_type": "ORG",
       "start_pos": 8103,
+      "end_pos": 8115
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 8109,
       "end_pos": 8115
     },
     {
@@ -890,10 +890,10 @@
       "end_pos": 8298
     },
     {
-      "entity_text": "Charles Le",
+      "entity_text": "Jean-Charles Le Goff",
       "entity_type": "PERSON",
-      "start_pos": 8330,
-      "end_pos": 8340
+      "start_pos": 8325,
+      "end_pos": 8345
     },
     {
       "entity_text": "Sarah Cohen",
@@ -906,12 +906,6 @@
       "entity_type": "PERSON",
       "start_pos": 8395,
       "end_pos": 8407
-    },
-    {
-      "entity_text": "Directeur Commercial",
-      "entity_type": "PERSON",
-      "start_pos": 8409,
-      "end_pos": 8429
     },
     {
       "entity_text": "Sophie Laurent",

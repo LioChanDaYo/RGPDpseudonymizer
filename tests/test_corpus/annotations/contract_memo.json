@@ -2,34 +2,16 @@
   "document_name": "contract_memo.txt",
   "entities": [
     {
-      "entity_text": "Direction Générale",
-      "entity_type": "PERSON",
-      "start_pos": 56,
-      "end_pos": 74
-    },
-    {
       "entity_text": "Philippe Arnaud",
       "entity_type": "PERSON",
       "start_pos": 80,
       "end_pos": 95
     },
     {
-      "entity_text": "Nouveau Contrat-",
-      "entity_type": "PERSON",
-      "start_pos": 129,
-      "end_pos": 145
-    },
-    {
-      "entity_text": "Tech Industries",
-      "entity_type": "PERSON",
-      "start_pos": 162,
+      "entity_text": "GlobalTech Industries",
+      "entity_type": "ORG",
+      "start_pos": 156,
       "end_pos": 177
-    },
-    {
-      "entity_text": "Mesdames, Messieurs",
-      "entity_type": "PERSON",
-      "start_pos": 179,
-      "end_pos": 198
     },
     {
       "entity_text": "GlobalTech Industries",
@@ -38,16 +20,28 @@
       "end_pos": 278
     },
     {
+      "entity_text": "Europe",
+      "entity_type": "LOCATION",
+      "start_pos": 304,
+      "end_pos": 310
+    },
+    {
       "entity_text": "Sarah McDonald",
       "entity_type": "PERSON",
       "start_pos": 316,
       "end_pos": 330
     },
     {
-      "entity_text": "Luc Moreau",
+      "entity_text": "Jean-Luc Moreau",
       "entity_type": "PERSON",
-      "start_pos": 413,
+      "start_pos": 408,
       "end_pos": 423
+    },
+    {
+      "entity_text": "Jeantet & Associés",
+      "entity_type": "ORG",
+      "start_pos": 468,
+      "end_pos": 486
     },
     {
       "entity_text": "François Durand",
@@ -62,22 +56,10 @@
       "end_pos": 584
     },
     {
-      "entity_text": "Direction Juridique",
-      "entity_type": "PERSON",
-      "start_pos": 599,
-      "end_pos": 618
-    },
-    {
       "entity_text": "Alexandre Blanc",
       "entity_type": "PERSON",
       "start_pos": 623,
       "end_pos": 638
-    },
-    {
-      "entity_text": "Direction Technique",
-      "entity_type": "PERSON",
-      "start_pos": 662,
-      "end_pos": 681
     },
     {
       "entity_text": "Thomas Martin",
@@ -99,9 +81,15 @@
     },
     {
       "entity_text": "Palo Alto",
-      "entity_type": "PERSON",
+      "entity_type": "LOCATION",
       "start_pos": 803,
       "end_pos": 812
+    },
+    {
+      "entity_text": "Californie",
+      "entity_type": "LOCATION",
+      "start_pos": 814,
+      "end_pos": 824
     },
     {
       "entity_text": "Robert Chen",
@@ -110,9 +98,9 @@
       "end_pos": 849
     },
     {
-      "entity_text": "VP Sales Europe",
-      "entity_type": "ORG",
-      "start_pos": 854,
+      "entity_text": "Europe",
+      "entity_type": "LOCATION",
+      "start_pos": 863,
       "end_pos": 869
     },
     {
@@ -122,16 +110,16 @@
       "end_pos": 889
     },
     {
-      "entity_text": "Legal Counsel",
-      "entity_type": "PERSON",
-      "start_pos": 894,
-      "end_pos": 907
-    },
-    {
       "entity_text": "David Park",
       "entity_type": "PERSON",
       "start_pos": 912,
       "end_pos": 922
+    },
+    {
+      "entity_text": "McKinsey Paris",
+      "entity_type": "ORG",
+      "start_pos": 942,
+      "end_pos": 956
     },
     {
       "entity_text": "Paris",
@@ -152,6 +140,12 @@
       "end_pos": 1017
     },
     {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 1011,
+      "end_pos": 1017
+    },
+    {
       "entity_text": "Isabelle Blanchet",
       "entity_type": "PERSON",
       "start_pos": 1035,
@@ -164,28 +158,40 @@
       "end_pos": 1108
     },
     {
+      "entity_text": "Moreau",
+      "entity_type": "PERSON",
+      "start_pos": 1128,
+      "end_pos": 1134
+    },
+    {
       "entity_text": "Petit",
       "entity_type": "PERSON",
       "start_pos": 1140,
       "end_pos": 1145
     },
     {
-      "entity_text": "Mc",
+      "entity_text": "Chen",
       "entity_type": "PERSON",
-      "start_pos": 1160,
-      "end_pos": 1162
+      "start_pos": 1150,
+      "end_pos": 1154
     },
     {
-      "entity_text": "Formation équipes",
+      "entity_text": "McDonald",
       "entity_type": "PERSON",
-      "start_pos": 1171,
-      "end_pos": 1188
+      "start_pos": 1160,
+      "end_pos": 1168
     },
     {
       "entity_text": "Laurent Benoit",
       "entity_type": "PERSON",
       "start_pos": 1225,
       "end_pos": 1239
+    },
+    {
+      "entity_text": "GlobalTech",
+      "entity_type": "ORG",
+      "start_pos": 1241,
+      "end_pos": 1251
     },
     {
       "entity_text": "Julie Marchand",
@@ -248,10 +254,10 @@
       "end_pos": 1717
     },
     {
-      "entity_text": "Directeur Général",
-      "entity_type": "PERSON",
-      "start_pos": 1718,
-      "end_pos": 1735
+      "entity_text": "TechSolutions France SAS",
+      "entity_type": "ORG",
+      "start_pos": 1736,
+      "end_pos": 1760
     },
     {
       "entity_text": "France",
@@ -260,9 +266,9 @@
       "end_pos": 1756
     },
     {
-      "entity_text": "Grande Armée",
-      "entity_type": "PERSON",
-      "start_pos": 1784,
+      "entity_text": "Avenue de la Grande Armée",
+      "entity_type": "LOCATION",
+      "start_pos": 1771,
       "end_pos": 1796
     },
     {

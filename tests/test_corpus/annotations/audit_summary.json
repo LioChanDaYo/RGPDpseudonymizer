@@ -2,15 +2,21 @@
   "document_name": "audit_summary.txt",
   "entities": [
     {
+      "entity_text": "Deloitte France",
+      "entity_type": "ORG",
+      "start_pos": 194,
+      "end_pos": 209
+    },
+    {
       "entity_text": "France",
       "entity_type": "LOCATION",
       "start_pos": 203,
       "end_pos": 209
     },
     {
-      "entity_text": "Luc Moreau",
+      "entity_text": "Jean-Luc Moreau",
       "entity_type": "PERSON",
-      "start_pos": 241,
+      "start_pos": 236,
       "end_pos": 251
     },
     {
@@ -20,16 +26,22 @@
       "end_pos": 282
     },
     {
+      "entity_text": "Vincent Gorse",
+      "entity_type": "PERSON",
+      "start_pos": 309,
+      "end_pos": 322
+    },
+    {
+      "entity_text": "Émilie Bernard",
+      "entity_type": "PERSON",
+      "start_pos": 328,
+      "end_pos": 342
+    },
+    {
       "entity_text": "Julie Bertrand",
       "entity_type": "PERSON",
       "start_pos": 366,
       "end_pos": 380
-    },
-    {
-      "entity_text": "Directrice Qualité",
-      "entity_type": "PERSON",
-      "start_pos": 382,
-      "end_pos": 400
     },
     {
       "entity_text": "Vincent Chen",
@@ -44,10 +56,16 @@
       "end_pos": 476
     },
     {
-      "entity_text": "TechSolutions France SA",
+      "entity_text": "TechSolutions France SAS",
       "entity_type": "ORG",
       "start_pos": 523,
-      "end_pos": 546
+      "end_pos": 547
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 537,
+      "end_pos": 543
     },
     {
       "entity_text": "Isabelle Moreau",
@@ -122,6 +140,12 @@
       "end_pos": 908
     },
     {
+      "entity_text": "UE",
+      "entity_type": "LOCATION",
+      "start_pos": 1307,
+      "end_pos": 1309
+    },
+    {
       "entity_text": "Vincent Chen",
       "entity_type": "PERSON",
       "start_pos": 1511,
@@ -140,16 +164,16 @@
       "end_pos": 1615
     },
     {
+      "entity_text": "Thales",
+      "entity_type": "ORG",
+      "start_pos": 1635,
+      "end_pos": 1641
+    },
+    {
       "entity_text": "Catherine Rousseau",
       "entity_type": "PERSON",
       "start_pos": 1649,
       "end_pos": 1667
-    },
-    {
-      "entity_text": "Rousseau, Responsable",
-      "entity_type": "PERSON",
-      "start_pos": 1659,
-      "end_pos": 1680
     },
     {
       "entity_text": "Marc Dubois",
@@ -176,10 +200,22 @@
       "end_pos": 1813
     },
     {
-      "entity_text": "Luc Moreau",
+      "entity_text": "Jean-Luc Moreau",
       "entity_type": "PERSON",
-      "start_pos": 1886,
+      "start_pos": 1881,
       "end_pos": 1896
+    },
+    {
+      "entity_text": "Chen",
+      "entity_type": "PERSON",
+      "start_pos": 1929,
+      "end_pos": 1933
+    },
+    {
+      "entity_text": "Benoit",
+      "entity_type": "PERSON",
+      "start_pos": 1936,
+      "end_pos": 1942
     },
     {
       "entity_text": "Sarah Cohen",
@@ -200,6 +236,12 @@
       "end_pos": 2070
     },
     {
+      "entity_text": "GDPR Experts",
+      "entity_type": "ORG",
+      "start_pos": 2085,
+      "end_pos": 2097
+    },
+    {
       "entity_text": "Pierre Fontaine",
       "entity_type": "PERSON",
       "start_pos": 2113,
@@ -210,12 +252,6 @@
       "entity_type": "PERSON",
       "start_pos": 2158,
       "end_pos": 2170
-    },
-    {
-      "entity_text": "Amrani, Responsable",
-      "entity_type": "PERSON",
-      "start_pos": 2164,
-      "end_pos": 2183
     },
     {
       "entity_text": "Sophie Duchemin",
@@ -242,10 +278,10 @@
       "end_pos": 2469
     },
     {
-      "entity_text": "Jin, Lead",
+      "entity_text": "Alexandre Jin",
       "entity_type": "PERSON",
-      "start_pos": 2501,
-      "end_pos": 2510
+      "start_pos": 2491,
+      "end_pos": 2504
     },
     {
       "entity_text": "Romain Duval",
@@ -254,28 +290,22 @@
       "end_pos": 2538
     },
     {
-      "entity_text": "Backend Lead",
-      "entity_type": "PERSON",
-      "start_pos": 2540,
-      "end_pos": 2552
-    },
-    {
       "entity_text": "Lucie Renard",
       "entity_type": "PERSON",
       "start_pos": 2559,
       "end_pos": 2571
     },
     {
-      "entity_text": "Frontend Lead",
-      "entity_type": "PERSON",
-      "start_pos": 2573,
-      "end_pos": 2586
-    },
-    {
       "entity_text": "Alexandre Blanc",
       "entity_type": "PERSON",
       "start_pos": 2592,
       "end_pos": 2607
+    },
+    {
+      "entity_text": "Wavestone",
+      "entity_type": "ORG",
+      "start_pos": 2676,
+      "end_pos": 2685
     },
     {
       "entity_text": "Laure Bertholom",
@@ -290,22 +320,10 @@
       "end_pos": 2825
     },
     {
-      "entity_text": "Architecte Cloud",
-      "entity_type": "PERSON",
-      "start_pos": 2827,
-      "end_pos": 2843
-    },
-    {
       "entity_text": "Laurent Benoit",
       "entity_type": "PERSON",
       "start_pos": 2874,
       "end_pos": 2888
-    },
-    {
-      "entity_text": "Architecte Cloud",
-      "entity_type": "PERSON",
-      "start_pos": 2890,
-      "end_pos": 2906
     },
     {
       "entity_text": "Maxime Dubois",
@@ -320,28 +338,10 @@
       "end_pos": 2972
     },
     {
-      "entity_text": "Amrani, Dev",
+      "entity_text": "Julien Sarrazin",
       "entity_type": "PERSON",
-      "start_pos": 2966,
-      "end_pos": 2977
-    },
-    {
-      "entity_text": "Ops Lead",
-      "entity_type": "PERSON",
-      "start_pos": 2977,
-      "end_pos": 2985
-    },
-    {
-      "entity_text": "Sarrazin, Dev",
-      "entity_type": "PERSON",
-      "start_pos": 2998,
-      "end_pos": 3011
-    },
-    {
-      "entity_text": "Ops Engineer",
-      "entity_type": "PERSON",
-      "start_pos": 3011,
-      "end_pos": 3023
+      "start_pos": 2991,
+      "end_pos": 3006
     },
     {
       "entity_text": "Émilie Morel",
@@ -350,28 +350,16 @@
       "end_pos": 3042
     },
     {
-      "entity_text": "Morel, Network",
-      "entity_type": "PERSON",
-      "start_pos": 3037,
-      "end_pos": 3051
-    },
-    {
-      "entity_text": "Microsoft ",
+      "entity_text": "Microsoft",
       "entity_type": "ORG",
       "start_pos": 3250,
-      "end_pos": 3260
+      "end_pos": 3259
     },
     {
       "entity_text": "Romain Niccoli",
       "entity_type": "PERSON",
       "start_pos": 3264,
       "end_pos": 3278
-    },
-    {
-      "entity_text": "Best Practices",
-      "entity_type": "PERSON",
-      "start_pos": 3318,
-      "end_pos": 3332
     },
     {
       "entity_text": "Isabelle Moreau",
@@ -392,6 +380,18 @@
       "end_pos": 3457
     },
     {
+      "entity_text": "Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 3550,
+      "end_pos": 3556
+    },
+    {
+      "entity_text": "Moreau",
+      "entity_type": "PERSON",
+      "start_pos": 3573,
+      "end_pos": 3579
+    },
+    {
       "entity_text": "Moreau",
       "entity_type": "PERSON",
       "start_pos": 3622,
@@ -404,9 +404,15 @@
       "end_pos": 3718
     },
     {
-      "entity_text": "Marc Bideau",
+      "entity_text": "Hiscox",
+      "entity_type": "ORG",
+      "start_pos": 3810,
+      "end_pos": 3816
+    },
+    {
+      "entity_text": "Jean-Marc Bideau",
       "entity_type": "PERSON",
-      "start_pos": 3835,
+      "start_pos": 3830,
       "end_pos": 3846
     },
     {
@@ -422,10 +428,22 @@
       "end_pos": 3972
     },
     {
+      "entity_text": "Wavestone",
+      "entity_type": "ORG",
+      "start_pos": 4021,
+      "end_pos": 4030
+    },
+    {
       "entity_text": "Laure Bertholom",
       "entity_type": "PERSON",
       "start_pos": 4036,
       "end_pos": 4051
+    },
+    {
+      "entity_text": "SEKOIA.IO",
+      "entity_type": "ORG",
+      "start_pos": 4057,
+      "end_pos": 4066
     },
     {
       "entity_text": "Thomas Roccia",
@@ -434,10 +452,10 @@
       "end_pos": 4085
     },
     {
-      "entity_text": "Microsoft DART ",
+      "entity_text": "Microsoft DART",
       "entity_type": "ORG",
       "start_pos": 4091,
-      "end_pos": 4106
+      "end_pos": 4105
     },
     {
       "entity_text": "John Lambert",
@@ -464,10 +482,22 @@
       "end_pos": 4582
     },
     {
-      "entity_text": "Microsoft Azure ",
+      "entity_text": "M2i Formation",
+      "entity_type": "ORG",
+      "start_pos": 4643,
+      "end_pos": 4656
+    },
+    {
+      "entity_text": "Microsoft Azure",
       "entity_type": "ORG",
       "start_pos": 4735,
-      "end_pos": 4751
+      "end_pos": 4750
+    },
+    {
+      "entity_text": "Romain Niccoli",
+      "entity_type": "PERSON",
+      "start_pos": 4755,
+      "end_pos": 4769
     },
     {
       "entity_text": "Sophie Bernard",
@@ -476,10 +506,10 @@
       "end_pos": 4789
     },
     {
-      "entity_text": "Salesforce ",
+      "entity_text": "Salesforce",
       "entity_type": "ORG",
       "start_pos": 4805,
-      "end_pos": 4816
+      "end_pos": 4815
     },
     {
       "entity_text": "Marc Benioff",
@@ -488,16 +518,16 @@
       "end_pos": 4832
     },
     {
+      "entity_text": "OVHcloud",
+      "entity_type": "ORG",
+      "start_pos": 4848,
+      "end_pos": 4856
+    },
+    {
       "entity_text": "Octave Klaba",
       "entity_type": "PERSON",
       "start_pos": 4861,
       "end_pos": 4873
-    },
-    {
-      "entity_text": "Patch Management",
-      "entity_type": "PERSON",
-      "start_pos": 5033,
-      "end_pos": 5049
     },
     {
       "entity_text": "Laurent Benoit",
@@ -510,12 +540,6 @@
       "entity_type": "PERSON",
       "start_pos": 5197,
       "end_pos": 5210
-    },
-    {
-      "entity_text": "Azure Patch",
-      "entity_type": "PERSON",
-      "start_pos": 5238,
-      "end_pos": 5249
     },
     {
       "entity_text": "Vincent Chen",
@@ -536,16 +560,16 @@
       "end_pos": 5524
     },
     {
+      "entity_text": "Devoteam",
+      "entity_type": "ORG",
+      "start_pos": 5635,
+      "end_pos": 5643
+    },
+    {
       "entity_text": "David Park",
       "entity_type": "PERSON",
       "start_pos": 5648,
       "end_pos": 5658
-    },
-    {
-      "entity_text": "Formation Développeurs",
-      "entity_type": "PERSON",
-      "start_pos": 5672,
-      "end_pos": 5694
     },
     {
       "entity_text": "Kevin Zhang",
@@ -566,10 +590,22 @@
       "end_pos": 5941
     },
     {
+      "entity_text": "OWASP",
+      "entity_type": "ORG",
+      "start_pos": 5946,
+      "end_pos": 5951
+    },
+    {
       "entity_text": "Philippe Arnaud",
       "entity_type": "PERSON",
       "start_pos": 6016,
       "end_pos": 6031
+    },
+    {
+      "entity_text": "Marie Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 6148,
+      "end_pos": 6160
     },
     {
       "entity_text": "Sarah Benoit",
@@ -578,8 +614,14 @@
       "end_pos": 6178
     },
     {
+      "entity_text": "Splunk",
+      "entity_type": "ORG",
+      "start_pos": 6191,
+      "end_pos": 6197
+    },
+    {
       "entity_text": "Palo Alto",
-      "entity_type": "PERSON",
+      "entity_type": "ORG",
       "start_pos": 6206,
       "end_pos": 6215
     },
@@ -590,16 +632,22 @@
       "end_pos": 6259
     },
     {
-      "entity_text": "Red Team",
-      "entity_type": "PERSON",
-      "start_pos": 6311,
-      "end_pos": 6319
+      "entity_text": "Synacktiv",
+      "entity_type": "ORG",
+      "start_pos": 6399,
+      "end_pos": 6408
     },
     {
       "entity_text": "Fabien Perigaud",
       "entity_type": "PERSON",
       "start_pos": 6413,
       "end_pos": 6428
+    },
+    {
+      "entity_text": "HackMeIfYouCan",
+      "entity_type": "ORG",
+      "start_pos": 6431,
+      "end_pos": 6445
     },
     {
       "entity_text": "Vincent Chen",
@@ -614,22 +662,16 @@
       "end_pos": 6493
     },
     {
-      "entity_text": "Bug Bounty",
-      "entity_type": "PERSON",
-      "start_pos": 6556,
-      "end_pos": 6566
+      "entity_text": "YesWeHack",
+      "entity_type": "ORG",
+      "start_pos": 6635,
+      "end_pos": 6644
     },
     {
-      "entity_text": "Plateformes évaluées",
-      "entity_type": "PERSON",
-      "start_pos": 6613,
-      "end_pos": 6633
-    },
-    {
-      "entity_text": "Hack, Hacker",
-      "entity_type": "PERSON",
-      "start_pos": 6640,
-      "end_pos": 6652
+      "entity_text": "HackerOne",
+      "entity_type": "ORG",
+      "start_pos": 6646,
+      "end_pos": 6655
     },
     {
       "entity_text": "Marie Dubois",
@@ -650,10 +692,16 @@
       "end_pos": 6738
     },
     {
-      "entity_text": "Transferts Hors-",
-      "entity_type": "PERSON",
-      "start_pos": 6789,
-      "end_pos": 6805
+      "entity_text": "UE",
+      "entity_type": "LOCATION",
+      "start_pos": 6805,
+      "end_pos": 6807
+    },
+    {
+      "entity_text": "US",
+      "entity_type": "LOCATION",
+      "start_pos": 6848,
+      "end_pos": 6850
     },
     {
       "entity_text": "Microsoft",
@@ -674,12 +722,6 @@
       "end_pos": 6881
     },
     {
-      "entity_text": "Standard Contractual",
-      "entity_type": "PERSON",
-      "start_pos": 6904,
-      "end_pos": 6924
-    },
-    {
       "entity_text": "Sarah Cohen",
       "entity_type": "PERSON",
       "start_pos": 7027,
@@ -692,9 +734,9 @@
       "end_pos": 7059
     },
     {
-      "entity_text": "Francis Lefebvre",
-      "entity_type": "PERSON",
-      "start_pos": 7091,
+      "entity_text": "CMS Francis Lefebvre",
+      "entity_type": "ORG",
+      "start_pos": 7087,
       "end_pos": 7107
     },
     {
@@ -704,14 +746,14 @@
       "end_pos": 7135
     },
     {
-      "entity_text": "Sensibilisation Phishing",
-      "entity_type": "PERSON",
-      "start_pos": 7156,
-      "end_pos": 7180
+      "entity_text": "KnowBe4",
+      "entity_type": "ORG",
+      "start_pos": 7285,
+      "end_pos": 7292
     },
     {
       "entity_text": "Terranova Security",
-      "entity_type": "PERSON",
+      "entity_type": "ORG",
       "start_pos": 7296,
       "end_pos": 7314
     },
@@ -740,10 +782,10 @@
       "end_pos": 7543
     },
     {
-      "entity_text": "Palo Alto",
-      "entity_type": "PERSON",
+      "entity_text": "Palo Alto Networks",
+      "entity_type": "ORG",
       "start_pos": 7569,
-      "end_pos": 7578
+      "end_pos": 7587
     },
     {
       "entity_text": "Jennifer Smith",
@@ -752,10 +794,34 @@
       "end_pos": 7615
     },
     {
+      "entity_text": "Splunk",
+      "entity_type": "ORG",
+      "start_pos": 7638,
+      "end_pos": 7644
+    },
+    {
+      "entity_text": "Microsoft",
+      "entity_type": "ORG",
+      "start_pos": 7647,
+      "end_pos": 7656
+    },
+    {
+      "entity_text": "CrowdStrike",
+      "entity_type": "ORG",
+      "start_pos": 7694,
+      "end_pos": 7705
+    },
+    {
       "entity_text": "George Kurtz",
       "entity_type": "PERSON",
       "start_pos": 7718,
       "end_pos": 7730
+    },
+    {
+      "entity_text": "Splunk",
+      "entity_type": "ORG",
+      "start_pos": 7750,
+      "end_pos": 7756
     },
     {
       "entity_text": "Laura Martin",
@@ -764,16 +830,10 @@
       "end_pos": 7783
     },
     {
-      "entity_text": "Azure Backup",
-      "entity_type": "PERSON",
-      "start_pos": 7944,
-      "end_pos": 7956
-    },
-    {
-      "entity_text": "CONTRÔLES ORGANISA",
+      "entity_text": "Cloudflare",
       "entity_type": "ORG",
-      "start_pos": 7980,
-      "end_pos": 7998
+      "start_pos": 7814,
+      "end_pos": 7824
     },
     {
       "entity_text": "Émilie Bernard",
@@ -782,22 +842,16 @@
       "end_pos": 8036
     },
     {
+      "entity_text": "M2i",
+      "entity_type": "ORG",
+      "start_pos": 8280,
+      "end_pos": 8283
+    },
+    {
       "entity_text": "Catherine Rousseau",
       "entity_type": "PERSON",
       "start_pos": 8347,
       "end_pos": 8365
-    },
-    {
-      "entity_text": "Public, Interne",
-      "entity_type": "PERSON",
-      "start_pos": 8414,
-      "end_pos": 8429
-    },
-    {
-      "entity_text": "Confidentiel, Secret",
-      "entity_type": "PERSON",
-      "start_pos": 8431,
-      "end_pos": 8451
     },
     {
       "entity_text": "Sophie Duchemin",
@@ -806,10 +860,10 @@
       "end_pos": 8514
     },
     {
-      "entity_text": "Microsoft Azure ",
+      "entity_text": "Microsoft Azure",
       "entity_type": "ORG",
       "start_pos": 8559,
-      "end_pos": 8575
+      "end_pos": 8574
     },
     {
       "entity_text": "Romain Niccoli",
@@ -818,10 +872,10 @@
       "end_pos": 8593
     },
     {
-      "entity_text": "Salesforce ",
+      "entity_text": "Salesforce",
       "entity_type": "ORG",
       "start_pos": 8635,
-      "end_pos": 8646
+      "end_pos": 8645
     },
     {
       "entity_text": "Marc Benioff",
@@ -830,10 +884,22 @@
       "end_pos": 8675
     },
     {
+      "entity_text": "OVHcloud",
+      "entity_type": "ORG",
+      "start_pos": 8711,
+      "end_pos": 8719
+    },
+    {
       "entity_text": "Octave Klaba",
       "entity_type": "PERSON",
       "start_pos": 8724,
       "end_pos": 8736
+    },
+    {
+      "entity_text": "Devoteam",
+      "entity_type": "ORG",
+      "start_pos": 8774,
+      "end_pos": 8782
     },
     {
       "entity_text": "David Park",
@@ -842,40 +908,70 @@
       "end_pos": 8797
     },
     {
+      "entity_text": "Wavestone",
+      "entity_type": "ORG",
+      "start_pos": 8813,
+      "end_pos": 8822
+    },
+    {
       "entity_text": "Laure Bertholom",
       "entity_type": "PERSON",
       "start_pos": 8828,
       "end_pos": 8843
     },
     {
-      "entity_text": "Luc Moreau",
+      "entity_text": "Deloitte",
+      "entity_type": "ORG",
+      "start_pos": 8859,
+      "end_pos": 8867
+    },
+    {
+      "entity_text": "Jean-Luc Moreau",
       "entity_type": "PERSON",
-      "start_pos": 8877,
+      "start_pos": 8872,
       "end_pos": 8887
     },
     {
-      "entity_text": "Luc Moreau",
+      "entity_text": "Jean-Luc Moreau",
       "entity_type": "PERSON",
-      "start_pos": 9002,
+      "start_pos": 8997,
       "end_pos": 9012
     },
     {
-      "entity_text": "La société TechSolutions France SA",
+      "entity_text": "Deloitte",
       "entity_type": "ORG",
-      "start_pos": 9034,
-      "end_pos": 9068
+      "start_pos": 9022,
+      "end_pos": 9030
     },
     {
-      "entity_text": "Patch Management",
-      "entity_type": "PERSON",
-      "start_pos": 9380,
-      "end_pos": 9396
+      "entity_text": "TechSolutions France SAS",
+      "entity_type": "ORG",
+      "start_pos": 9045,
+      "end_pos": 9069
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 9059,
+      "end_pos": 9065
     },
     {
       "entity_text": "Laurent Benoit",
       "entity_type": "PERSON",
       "start_pos": 9403,
       "end_pos": 9417
+    },
+    {
+      "entity_text": "Vincent Chen",
+      "entity_type": "PERSON",
+      "start_pos": 9435,
+      "end_pos": 9447
+    },
+    {
+      "entity_text": "Sarah Benoit",
+      "entity_type": "PERSON",
+      "start_pos": 9453,
+      "end_pos": 9465
     },
     {
       "entity_text": "Alexandre Blanc",
@@ -896,10 +992,34 @@
       "end_pos": 9647
     },
     {
-      "entity_text": "Luc Moreau",
+      "entity_text": "Deloitte",
+      "entity_type": "ORG",
+      "start_pos": 9694,
+      "end_pos": 9702
+    },
+    {
+      "entity_text": "Jean-Luc Moreau",
       "entity_type": "PERSON",
-      "start_pos": 9712,
+      "start_pos": 9707,
       "end_pos": 9722
+    },
+    {
+      "entity_text": "AFNOR",
+      "entity_type": "ORG",
+      "start_pos": 9781,
+      "end_pos": 9786
+    },
+    {
+      "entity_text": "BSI",
+      "entity_type": "ORG",
+      "start_pos": 9788,
+      "end_pos": 9791
+    },
+    {
+      "entity_text": "LRQA",
+      "entity_type": "ORG",
+      "start_pos": 9793,
+      "end_pos": 9797
     },
     {
       "entity_text": "Isabelle Moreau",
@@ -926,10 +1046,16 @@
       "end_pos": 10011
     },
     {
-      "entity_text": "Luc Moreau",
+      "entity_text": "Jean-Luc Moreau",
       "entity_type": "PERSON",
-      "start_pos": 10038,
+      "start_pos": 10033,
       "end_pos": 10048
+    },
+    {
+      "entity_text": "Deloitte",
+      "entity_type": "ORG",
+      "start_pos": 10050,
+      "end_pos": 10058
     },
     {
       "entity_text": "Julie Bertrand",
@@ -938,10 +1064,10 @@
       "end_pos": 10079
     },
     {
-      "entity_text": "Charles Le",
+      "entity_text": "Jean-Charles Le Goff",
       "entity_type": "PERSON",
-      "start_pos": 10144,
-      "end_pos": 10154
+      "start_pos": 10139,
+      "end_pos": 10159
     },
     {
       "entity_text": "Isabelle Moreau",
@@ -974,10 +1100,22 @@
       "end_pos": 10436
     },
     {
-      "entity_text": "Luc Moreau",
+      "entity_text": "Jean-Luc Moreau",
       "entity_type": "PERSON",
-      "start_pos": 10494,
+      "start_pos": 10489,
       "end_pos": 10504
+    },
+    {
+      "entity_text": "Deloitte",
+      "entity_type": "ORG",
+      "start_pos": 10506,
+      "end_pos": 10514
+    },
+    {
+      "entity_text": "Deloitte France",
+      "entity_type": "ORG",
+      "start_pos": 10540,
+      "end_pos": 10555
     },
     {
       "entity_text": "France",
@@ -986,9 +1124,9 @@
       "end_pos": 10555
     },
     {
-      "entity_text": "Luc Moreau",
+      "entity_text": "Jean-Luc Moreau",
       "entity_type": "PERSON",
-      "start_pos": 10565,
+      "start_pos": 10560,
       "end_pos": 10575
     },
     {
@@ -998,10 +1136,10 @@
       "end_pos": 10604
     },
     {
-      "entity_text": "Pour Tech",
-      "entity_type": "PERSON",
-      "start_pos": 10635,
-      "end_pos": 10644
+      "entity_text": "TechSolutions France",
+      "entity_type": "ORG",
+      "start_pos": 10640,
+      "end_pos": 10660
     },
     {
       "entity_text": "France",
@@ -1028,12 +1166,6 @@
       "end_pos": 10727
     },
     {
-      "entity_text": "Directrice Qualité",
-      "entity_type": "PERSON",
-      "start_pos": 10729,
-      "end_pos": 10747
-    },
-    {
       "entity_text": "Isabelle Moreau",
       "entity_type": "PERSON",
       "start_pos": 10829,
@@ -1058,6 +1190,18 @@
       "end_pos": 10903
     },
     {
+      "entity_text": "Vincent Chen",
+      "entity_type": "PERSON",
+      "start_pos": 10921,
+      "end_pos": 10933
+    },
+    {
+      "entity_text": "Sarah Benoit",
+      "entity_type": "PERSON",
+      "start_pos": 10939,
+      "end_pos": 10951
+    },
+    {
       "entity_text": "Sarah Cohen",
       "entity_type": "PERSON",
       "start_pos": 10956,
@@ -1070,16 +1214,28 @@
       "end_pos": 10987
     },
     {
-      "entity_text": "Charles Le",
+      "entity_text": "Jean-Charles Le Goff",
       "entity_type": "PERSON",
-      "start_pos": 11022,
-      "end_pos": 11032
+      "start_pos": 11017,
+      "end_pos": 11037
+    },
+    {
+      "entity_text": "KPMG",
+      "entity_type": "ORG",
+      "start_pos": 11070,
+      "end_pos": 11074
     },
     {
       "entity_text": "Dominique Leboureix",
       "entity_type": "PERSON",
       "start_pos": 11079,
       "end_pos": 11098
+    },
+    {
+      "entity_text": "EY",
+      "entity_type": "ORG",
+      "start_pos": 11101,
+      "end_pos": 11103
     },
     {
       "entity_text": "Isabelle Blanchet",

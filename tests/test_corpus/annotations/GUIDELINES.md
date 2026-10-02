@@ -42,7 +42,7 @@
 - + `interview_13`: "INSA Lyon" → ORG "INSA Lyon" + LOCATION "Lyon".
 - + `interview_04`: "CHU de Lille" → ORG "CHU de Lille" + LOCATION "Lille". `interview_06`: "Banque de France" → ORG + LOCATION "France".
 - + `interview_03`: "Préfecture de la Gironde" → ORG + LOCATION "Gironde" (preposition and article outside the LOCATION, L2).
-- A place used outside any ORG name is a plain LOCATION (L1). A PERSON never contains a nested LOCATION, and an ORG never contains a nested PERSON (see the open items under "Pending amendments").
+- A place used outside any ORG name is a plain LOCATION (L1). A PERSON never contains a nested LOCATION. Whether an ORG may contain a nested PERSON is pending (A1). Whether a brand derived from a place name gets a nested LOCATION is pending (A2).
 
 ### PERSON
 
@@ -228,6 +228,15 @@ Changes after approval (AC2). Each row is also recorded in the story's Dev Notes
 
 ## Pending amendments (raised during the repair, not yet decided)
 
-Cases that no approved rule covers. They go back to Lionel; until each is decided, the case is **not annotated** (AC2).
+Cases that no approved rule covers, raised during the Story 10.1 repair. They go back to Lionel; until each is decided, the case is **not annotated** (AC2). The examples below are corpus examples.
 
-_None yet._
+| # | Case | Corpus examples | Current state |
+|---|------|-----------------|---------------|
+| A1 | A person's name inside an ORG name: nested PERSON or not? | `interview_01`: "Université Claude Bernard"; `interview_05`: "Mercier & Associés" (the firm of Me Antoine Mercier); `board_minutes`: "CMS Francis Lefebvre", "Bredin Prat", "August Debouzy", "Rothschild & Co"; `meeting_minutes`: "Michael Page" | ORG only, no nested PERSON |
+| A2 | A brand derived from a place name: nested LOCATION under G7? | `interview_15`: "Palo Alto Networks"; `interview_03`: "Orange Business Services"; `interview_11`: "Orange Cyberdefense" | ORG only, no nested LOCATION |
+| A3 | Compass-point regions | `interview_14`: "Mme Carole Petit pour le Nord", "Mme Nadia Kadem pour le Sud"; `interview_09`: "Banque Régionale du Sud" | Not annotated (the ORG is annotated) |
+| A4 | "l'État" as an actor | `interview_13`: "L'État soutient via l'ANCT" | Not annotated |
+| A5 | "EU", the English form of "UE" (Q14 lists "UE" only) | `partnership_agreement`: "Autres pays EU", "Mme Emer Cooke (EU)" | Not annotated |
+| A6 | Arrondissement numbers | `interview_13`: "M. Jean-Yves Sécheresse du 7ème"; `contract_memo`: "Paris 16ème" (only "Paris" annotated) | Not annotated |
+
+**Interpretation applied, for confirmation at STOP C:** a place name inside a job title or team name is annotated as LOCATION under L1, because it names a geographic place. The job title itself is still not annotated (O2, P6). This is consistent with the Q14 decision on "directeur UK". Examples: `partnership_agreement`: "VP Europe" (7), "Regional Manager France", "Équipe Europe"; `contract_memo`: "VP Sales Europe"; `interview_12`: "Leur directeur France". If Lionel decides otherwise, these LOCATION spans are removed under an amendment.

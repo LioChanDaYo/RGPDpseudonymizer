@@ -2,16 +2,16 @@
   "document_name": "interview_02.txt",
   "entities": [
     {
-      "entity_text": "Restructuration chez AutoMotive SA",
+      "entity_text": "AutoMotive SA",
       "entity_type": "ORG",
-      "start_pos": 13,
+      "start_pos": 34,
       "end_pos": 47
     },
     {
-      "entity_text": "Dubois, Jean-",
+      "entity_text": "Dubois, Jean-Marc",
       "entity_type": "PERSON",
       "start_pos": 61,
-      "end_pos": 74
+      "end_pos": 78
     },
     {
       "entity_text": "Strasbourg",
@@ -20,9 +20,9 @@
       "end_pos": 130
     },
     {
-      "entity_text": "Marc Dubois",
+      "entity_text": "Jean-Marc Dubois",
       "entity_type": "PERSON",
-      "start_pos": 154,
+      "start_pos": 149,
       "end_pos": 165
     },
     {
@@ -32,22 +32,40 @@
       "end_pos": 201
     },
     {
+      "entity_text": "J-M. Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 338,
+      "end_pos": 349
+    },
+    {
       "entity_text": "François Leclerc",
       "entity_type": "PERSON",
       "start_pos": 370,
       "end_pos": 386
     },
     {
-      "entity_text": "Isabelle Moreau de la DRH",
+      "entity_text": "Isabelle Moreau",
       "entity_type": "PERSON",
       "start_pos": 406,
-      "end_pos": 431
+      "end_pos": 421
     },
     {
-      "entity_text": "On était",
+      "entity_text": "Mulhouse",
+      "entity_type": "LOCATION",
+      "start_pos": 463,
+      "end_pos": 471
+    },
+    {
+      "entity_text": "Colmar",
+      "entity_type": "LOCATION",
+      "start_pos": 560,
+      "end_pos": 566
+    },
+    {
+      "entity_text": "Dubois",
       "entity_type": "PERSON",
-      "start_pos": 503,
-      "end_pos": 511
+      "start_pos": 625,
+      "end_pos": 631
     },
     {
       "entity_text": "Thomas Weber",
@@ -57,9 +75,21 @@
     },
     {
       "entity_text": "Volkswagen Group",
-      "entity_type": "PERSON",
+      "entity_type": "ORG",
       "start_pos": 757,
       "end_pos": 773
+    },
+    {
+      "entity_text": "Wolfsburg",
+      "entity_type": "LOCATION",
+      "start_pos": 776,
+      "end_pos": 785
+    },
+    {
+      "entity_text": "CGT",
+      "entity_type": "ORG",
+      "start_pos": 822,
+      "end_pos": 825
     },
     {
       "entity_text": "Bernard Lefebvre",
@@ -68,15 +98,27 @@
       "end_pos": 858
     },
     {
-      "entity_text": "Oui, Auto",
+      "entity_text": "J-M. Dubois",
       "entity_type": "PERSON",
-      "start_pos": 929,
-      "end_pos": 938
+      "start_pos": 916,
+      "end_pos": 927
+    },
+    {
+      "entity_text": "AutoMotive SA",
+      "entity_type": "ORG",
+      "start_pos": 934,
+      "end_pos": 947
     },
     {
       "entity_text": "McKinsey France",
       "entity_type": "ORG",
       "start_pos": 986,
+      "end_pos": 1001
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 995,
       "end_pos": 1001
     },
     {
@@ -86,10 +128,28 @@
       "end_pos": 1015
     },
     {
-      "entity_text": "Peugeot Citroën",
+      "entity_text": "Sophie Durand",
       "entity_type": "PERSON",
-      "start_pos": 1116,
+      "start_pos": 1049,
+      "end_pos": 1062
+    },
+    {
+      "entity_text": "Renault",
+      "entity_type": "ORG",
+      "start_pos": 1101,
+      "end_pos": 1108
+    },
+    {
+      "entity_text": "PSA Peugeot Citroën",
+      "entity_type": "ORG",
+      "start_pos": 1112,
       "end_pos": 1131
+    },
+    {
+      "entity_text": "Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 1164,
+      "end_pos": 1170
     },
     {
       "entity_text": "Strasbourg",
@@ -98,16 +158,58 @@
       "end_pos": 1216
     },
     {
-      "entity_text": "Anne Petit",
+      "entity_text": "Pierre Garnier",
       "entity_type": "PERSON",
-      "start_pos": 1281,
+      "start_pos": 1257,
+      "end_pos": 1271
+    },
+    {
+      "entity_text": "Marie-Anne Petit",
+      "entity_type": "PERSON",
+      "start_pos": 1275,
       "end_pos": 1291
+    },
+    {
+      "entity_text": "Stuttgart",
+      "entity_type": "LOCATION",
+      "start_pos": 1356,
+      "end_pos": 1365
+    },
+    {
+      "entity_text": "Turin",
+      "entity_type": "LOCATION",
+      "start_pos": 1369,
+      "end_pos": 1374
+    },
+    {
+      "entity_text": "J-M. Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 1411,
+      "end_pos": 1422
+    },
+    {
+      "entity_text": "Université de Strasbourg",
+      "entity_type": "ORG",
+      "start_pos": 1457,
+      "end_pos": 1481
     },
     {
       "entity_text": "Strasbourg",
       "entity_type": "LOCATION",
       "start_pos": 1471,
       "end_pos": 1481
+    },
+    {
+      "entity_text": "Centre de Recherche de Grenoble",
+      "entity_type": "ORG",
+      "start_pos": 1488,
+      "end_pos": 1519
+    },
+    {
+      "entity_text": "Grenoble",
+      "entity_type": "LOCATION",
+      "start_pos": 1511,
+      "end_pos": 1519
     },
     {
       "entity_text": "Antoine Mercier",

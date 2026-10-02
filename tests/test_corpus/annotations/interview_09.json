@@ -2,22 +2,22 @@
   "document_name": "interview_09.txt",
   "entities": [
     {
-      "entity_text": "Fusion Acquisition",
-      "entity_type": "PERSON",
-      "start_pos": 13,
-      "end_pos": 31
-    },
-    {
-      "entity_text": "Secteur Bancaire",
-      "entity_type": "PERSON",
-      "start_pos": 32,
-      "end_pos": 48
-    },
-    {
       "entity_text": "Isabelle Moreau",
       "entity_type": "PERSON",
       "start_pos": 58,
       "end_pos": 73
+    },
+    {
+      "entity_text": "Banque Régionale du Sud",
+      "entity_type": "ORG",
+      "start_pos": 75,
+      "end_pos": 98
+    },
+    {
+      "entity_text": "Nice",
+      "entity_type": "LOCATION",
+      "start_pos": 99,
+      "end_pos": 103
     },
     {
       "entity_text": "Moreau",
@@ -27,7 +27,7 @@
     },
     {
       "entity_text": "Crédit Provençal",
-      "entity_type": "PERSON",
+      "entity_type": "ORG",
       "start_pos": 187,
       "end_pos": 203
     },
@@ -62,8 +62,20 @@
       "end_pos": 453
     },
     {
-      "entity_text": "Bredin Prat",
+      "entity_text": "Rothschild & Co",
+      "entity_type": "ORG",
+      "start_pos": 455,
+      "end_pos": 470
+    },
+    {
+      "entity_text": "Alexandre de Rothschild",
       "entity_type": "PERSON",
+      "start_pos": 492,
+      "end_pos": 515
+    },
+    {
+      "entity_text": "Bredin Prat",
+      "entity_type": "ORG",
       "start_pos": 559,
       "end_pos": 570
     },
@@ -75,9 +87,15 @@
     },
     {
       "entity_text": "Crédit Provençal",
-      "entity_type": "PERSON",
+      "entity_type": "ORG",
       "start_pos": 611,
       "end_pos": 627
+    },
+    {
+      "entity_text": "Lazard",
+      "entity_type": "ORG",
+      "start_pos": 634,
+      "end_pos": 640
     },
     {
       "entity_text": "Matthieu Pigasse",
@@ -87,7 +105,7 @@
     },
     {
       "entity_text": "August Debouzy",
-      "entity_type": "PERSON",
+      "entity_type": "ORG",
       "start_pos": 693,
       "end_pos": 707
     },
@@ -98,9 +116,15 @@
       "end_pos": 769
     },
     {
-      "entity_text": "Menée par KPMG France",
+      "entity_text": "KPMG France",
       "entity_type": "ORG",
-      "start_pos": 771,
+      "start_pos": 781,
+      "end_pos": 792
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 786,
       "end_pos": 792
     },
     {
@@ -122,14 +146,20 @@
       "end_pos": 914
     },
     {
-      "entity_text": "Claire Daveu",
+      "entity_text": "Marie-Claire Daveu",
       "entity_type": "PERSON",
-      "start_pos": 945,
+      "start_pos": 939,
       "end_pos": 957
     },
     {
+      "entity_text": "PwC",
+      "entity_type": "ORG",
+      "start_pos": 971,
+      "end_pos": 974
+    },
+    {
       "entity_text": "Crédit Provençal",
-      "entity_type": "PERSON",
+      "entity_type": "ORG",
       "start_pos": 989,
       "end_pos": 1005
     },
@@ -140,16 +170,40 @@
       "end_pos": 1045
     },
     {
+      "entity_text": "ACPR",
+      "entity_type": "ORG",
+      "start_pos": 1049,
+      "end_pos": 1053
+    },
+    {
       "entity_text": "Dominique Laboureix",
       "entity_type": "PERSON",
       "start_pos": 1095,
       "end_pos": 1114
     },
     {
+      "entity_text": "BCE",
+      "entity_type": "ORG",
+      "start_pos": 1139,
+      "end_pos": 1142
+    },
+    {
+      "entity_text": "Francfort",
+      "entity_type": "LOCATION",
+      "start_pos": 1145,
+      "end_pos": 1154
+    },
+    {
       "entity_text": "Christine Lagarde",
       "entity_type": "PERSON",
       "start_pos": 1164,
       "end_pos": 1181
+    },
+    {
+      "entity_text": "Autorité de la Concurrence",
+      "entity_type": "ORG",
+      "start_pos": 1198,
+      "end_pos": 1224
     },
     {
       "entity_text": "Isabelle de Silva",
@@ -162,6 +216,12 @@
       "entity_type": "PERSON",
       "start_pos": 1317,
       "end_pos": 1332
+    },
+    {
+      "entity_text": "Banque Régionale",
+      "entity_type": "ORG",
+      "start_pos": 1339,
+      "end_pos": 1355
     },
     {
       "entity_text": "Thierry Lecomte",
@@ -182,10 +242,10 @@
       "end_pos": 1452
     },
     {
-      "entity_text": "Côté Crédit",
-      "entity_type": "PERSON",
-      "start_pos": 1454,
-      "end_pos": 1465
+      "entity_text": "Crédit Provençal",
+      "entity_type": "ORG",
+      "start_pos": 1459,
+      "end_pos": 1475
     },
     {
       "entity_text": "Jean Durand",
@@ -212,6 +272,18 @@
       "end_pos": 1616
     },
     {
+      "entity_text": "Martineau",
+      "entity_type": "PERSON",
+      "start_pos": 1652,
+      "end_pos": 1661
+    },
+    {
+      "entity_text": "Roussel",
+      "entity_type": "PERSON",
+      "start_pos": 1684,
+      "end_pos": 1691
+    },
+    {
       "entity_text": "Yves Perrier",
       "entity_type": "PERSON",
       "start_pos": 1749,
@@ -224,22 +296,46 @@
       "end_pos": 1807
     },
     {
-      "entity_text": "Marion Chauveau",
-      "entity_type": "PERSON",
-      "start_pos": 1792,
-      "end_pos": 1807
-    },
-    {
       "entity_text": "Nicolas Namias",
       "entity_type": "PERSON",
       "start_pos": 1834,
       "end_pos": 1848
     },
     {
+      "entity_text": "Toulon",
+      "entity_type": "LOCATION",
+      "start_pos": 1889,
+      "end_pos": 1895
+    },
+    {
+      "entity_text": "Bernard",
+      "entity_type": "PERSON",
+      "start_pos": 1900,
+      "end_pos": 1907
+    },
+    {
+      "entity_text": "Cannes",
+      "entity_type": "LOCATION",
+      "start_pos": 1910,
+      "end_pos": 1916
+    },
+    {
       "entity_text": "Leroy",
       "entity_type": "PERSON",
       "start_pos": 1922,
       "end_pos": 1927
+    },
+    {
+      "entity_text": "Avignon",
+      "entity_type": "LOCATION",
+      "start_pos": 1933,
+      "end_pos": 1940
+    },
+    {
+      "entity_text": "Petit",
+      "entity_type": "PERSON",
+      "start_pos": 1945,
+      "end_pos": 1950
     }
   ]
 }

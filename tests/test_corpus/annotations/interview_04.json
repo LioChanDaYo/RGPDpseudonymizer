@@ -2,16 +2,16 @@
   "document_name": "interview_04.txt",
   "entities": [
     {
-      "entity_text": "Entretien Recherche",
-      "entity_type": "PERSON",
-      "start_pos": 0,
-      "end_pos": 19
-    },
-    {
       "entity_text": "Élisabeth Martin",
       "entity_type": "PERSON",
       "start_pos": 57,
       "end_pos": 73
+    },
+    {
+      "entity_text": "CHU de Lille",
+      "entity_type": "ORG",
+      "start_pos": 75,
+      "end_pos": 87
     },
     {
       "entity_text": "Lille",
@@ -32,6 +32,12 @@
       "end_pos": 219
     },
     {
+      "entity_text": "CHU de Lille",
+      "entity_type": "ORG",
+      "start_pos": 224,
+      "end_pos": 236
+    },
+    {
       "entity_text": "Lille",
       "entity_type": "LOCATION",
       "start_pos": 231,
@@ -44,9 +50,15 @@
       "end_pos": 335
     },
     {
-      "entity_text": "France",
+      "entity_text": "ARS Hauts-de-France",
+      "entity_type": "ORG",
+      "start_pos": 356,
+      "end_pos": 375
+    },
+    {
+      "entity_text": "Hauts-de-France",
       "entity_type": "LOCATION",
-      "start_pos": 369,
+      "start_pos": 360,
       "end_pos": 375
     },
     {
@@ -57,7 +69,7 @@
     },
     {
       "entity_text": "Institut Pasteur",
-      "entity_type": "PERSON",
+      "entity_type": "ORG",
       "start_pos": 472,
       "end_pos": 488
     },
@@ -74,16 +86,58 @@
       "end_pos": 527
     },
     {
-      "entity_text": "Sylvie van",
+      "entity_text": "Sylvie van der Werf",
       "entity_type": "PERSON",
       "start_pos": 535,
-      "end_pos": 545
+      "end_pos": 554
+    },
+    {
+      "entity_text": "INSERM",
+      "entity_type": "ORG",
+      "start_pos": 569,
+      "end_pos": 575
     },
     {
       "entity_text": "Yazdan Yazdanpanah",
       "entity_type": "PERSON",
       "start_pos": 617,
       "end_pos": 635
+    },
+    {
+      "entity_text": "OMS",
+      "entity_type": "ORG",
+      "start_pos": 673,
+      "end_pos": 676
+    },
+    {
+      "entity_text": "Genève",
+      "entity_type": "LOCATION",
+      "start_pos": 679,
+      "end_pos": 685
+    },
+    {
+      "entity_text": "CDC",
+      "entity_type": "ORG",
+      "start_pos": 692,
+      "end_pos": 695
+    },
+    {
+      "entity_text": "Atlanta",
+      "entity_type": "LOCATION",
+      "start_pos": 698,
+      "end_pos": 705
+    },
+    {
+      "entity_text": "Martin",
+      "entity_type": "PERSON",
+      "start_pos": 764,
+      "end_pos": 770
+    },
+    {
+      "entity_text": "AP-HP",
+      "entity_type": "ORG",
+      "start_pos": 784,
+      "end_pos": 789
     },
     {
       "entity_text": "Paris",
@@ -104,6 +158,12 @@
       "end_pos": 850
     },
     {
+      "entity_text": "CHU de Marseille",
+      "entity_type": "ORG",
+      "start_pos": 855,
+      "end_pos": 871
+    },
+    {
       "entity_text": "Marseille",
       "entity_type": "LOCATION",
       "start_pos": 862,
@@ -122,15 +182,9 @@
       "end_pos": 1003
     },
     {
-      "entity_text": "Anne-",
+      "entity_text": "Anne-Sophie Jannot",
       "entity_type": "PERSON",
       "start_pos": 1022,
-      "end_pos": 1027
-    },
-    {
-      "entity_text": "Sophie Jannot",
-      "entity_type": "PERSON",
-      "start_pos": 1027,
       "end_pos": 1040
     },
     {
@@ -140,22 +194,40 @@
       "end_pos": 1114
     },
     {
+      "entity_text": "Sanofi France",
+      "entity_type": "ORG",
+      "start_pos": 1116,
+      "end_pos": 1129
+    },
+    {
       "entity_text": "France",
       "entity_type": "LOCATION",
       "start_pos": 1123,
       "end_pos": 1129
     },
     {
-      "entity_text": "Baptiste Chasseloup",
+      "entity_text": "Jean-Baptiste Chasseloup de Laubat",
       "entity_type": "PERSON",
-      "start_pos": 1186,
-      "end_pos": 1205
+      "start_pos": 1181,
+      "end_pos": 1215
     },
     {
-      "entity_text": "Europe, Bio",
-      "entity_type": "PERSON",
+      "entity_text": "Pfizer Europe",
+      "entity_type": "ORG",
+      "start_pos": 1217,
+      "end_pos": 1230
+    },
+    {
+      "entity_text": "Europe",
+      "entity_type": "LOCATION",
       "start_pos": 1224,
-      "end_pos": 1235
+      "end_pos": 1230
+    },
+    {
+      "entity_text": "BioNTech",
+      "entity_type": "ORG",
+      "start_pos": 1232,
+      "end_pos": 1240
     },
     {
       "entity_text": "Allemagne",
@@ -164,16 +236,46 @@
       "end_pos": 1253
     },
     {
+      "entity_text": "AstraZeneca UK",
+      "entity_type": "ORG",
+      "start_pos": 1258,
+      "end_pos": 1272
+    },
+    {
+      "entity_text": "UK",
+      "entity_type": "LOCATION",
+      "start_pos": 1270,
+      "end_pos": 1272
+    },
+    {
       "entity_text": "Ugur Sahin",
       "entity_type": "PERSON",
       "start_pos": 1344,
       "end_pos": 1354
     },
     {
-      "entity_text": "Agence Européenne",
+      "entity_text": "BioNTech",
+      "entity_type": "ORG",
+      "start_pos": 1358,
+      "end_pos": 1366
+    },
+    {
+      "entity_text": "Martin",
       "entity_type": "PERSON",
+      "start_pos": 1411,
+      "end_pos": 1417
+    },
+    {
+      "entity_text": "Agence Européenne des Médicaments",
+      "entity_type": "ORG",
       "start_pos": 1421,
-      "end_pos": 1438
+      "end_pos": 1454
+    },
+    {
+      "entity_text": "Amsterdam",
+      "entity_type": "LOCATION",
+      "start_pos": 1457,
+      "end_pos": 1466
     },
     {
       "entity_text": "Emer Cooke",
@@ -182,9 +284,15 @@
       "end_pos": 1487
     },
     {
-      "entity_text": "ANSM en France",
+      "entity_text": "ANSM",
       "entity_type": "ORG",
       "start_pos": 1494,
+      "end_pos": 1498
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 1502,
       "end_pos": 1508
     },
     {
@@ -212,12 +320,6 @@
       "end_pos": 1704
     },
     {
-      "entity_text": "Une équipe",
-      "entity_type": "PERSON",
-      "start_pos": 1706,
-      "end_pos": 1716
-    },
-    {
       "entity_text": "Sophie Rogez",
       "entity_type": "PERSON",
       "start_pos": 1733,
@@ -242,10 +344,22 @@
       "end_pos": 1906
     },
     {
+      "entity_text": "Université de Lille",
+      "entity_type": "ORG",
+      "start_pos": 1942,
+      "end_pos": 1961
+    },
+    {
       "entity_text": "Lille",
       "entity_type": "LOCATION",
       "start_pos": 1956,
       "end_pos": 1961
+    },
+    {
+      "entity_text": "CNRS",
+      "entity_type": "ORG",
+      "start_pos": 1968,
+      "end_pos": 1972
     }
   ]
 }

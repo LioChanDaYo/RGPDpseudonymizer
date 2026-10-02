@@ -20,6 +20,12 @@
       "end_pos": 116
     },
     {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 110,
+      "end_pos": 116
+    },
+    {
       "entity_text": "Dubois",
       "entity_type": "PERSON",
       "start_pos": 143,
@@ -35,6 +41,12 @@
       "entity_text": "TechCorp France",
       "entity_type": "ORG",
       "start_pos": 269,
+      "end_pos": 284
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 278,
       "end_pos": 284
     },
     {
@@ -62,6 +74,12 @@
       "end_pos": 520
     },
     {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 514,
+      "end_pos": 520
+    },
+    {
       "entity_text": "TechCorp",
       "entity_type": "ORG",
       "start_pos": 557,
@@ -74,16 +92,16 @@
       "end_pos": 649
     },
     {
-      "entity_text": "TechCorp",
-      "entity_type": "ORG",
-      "start_pos": 641,
-      "end_pos": 649
-    },
-    {
       "entity_text": "Dubois",
       "entity_type": "PERSON",
       "start_pos": 656,
       "end_pos": 662
+    },
+    {
+      "entity_text": "TechCorp",
+      "entity_type": "ORG",
+      "start_pos": 669,
+      "end_pos": 677
     },
     {
       "entity_text": "Jean-Pierre Martin",
@@ -176,15 +194,27 @@
       "end_pos": 1458
     },
     {
+      "entity_text": "Slack",
+      "entity_type": "ORG",
+      "start_pos": 1487,
+      "end_pos": 1492
+    },
+    {
       "entity_text": "IBM Europe",
       "entity_type": "ORG",
       "start_pos": 1525,
       "end_pos": 1535
     },
     {
-      "entity_text": "Docteur Dubois",
+      "entity_text": "Europe",
+      "entity_type": "LOCATION",
+      "start_pos": 1529,
+      "end_pos": 1535
+    },
+    {
+      "entity_text": "Dubois",
       "entity_type": "PERSON",
-      "start_pos": 1592,
+      "start_pos": 1600,
       "end_pos": 1606
     },
     {
@@ -194,9 +224,9 @@
       "end_pos": 1625
     },
     {
-      "entity_text": "Défense",
+      "entity_text": "la Défense",
       "entity_type": "LOCATION",
-      "start_pos": 1688,
+      "start_pos": 1685,
       "end_pos": 1695
     }
   ]

@@ -2,15 +2,21 @@
   "document_name": "partnership_agreement.txt",
   "entities": [
     {
-      "entity_text": "TechSolutions France SA",
+      "entity_text": "TechSolutions France SAS",
       "entity_type": "ORG",
       "start_pos": 105,
-      "end_pos": 128
+      "end_pos": 129
     },
     {
-      "entity_text": "Grande Armée",
-      "entity_type": "PERSON",
-      "start_pos": 160,
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 119,
+      "end_pos": 125
+    },
+    {
+      "entity_text": "Avenue de la Grande Armée",
+      "entity_type": "LOCATION",
+      "start_pos": 147,
       "end_pos": 172
     },
     {
@@ -38,16 +44,34 @@
       "end_pos": 280
     },
     {
-      "entity_text": "GlobalTech Industries",
+      "entity_text": "TECHSOLUTIONS",
+      "entity_type": "ORG",
+      "start_pos": 322,
+      "end_pos": 335
+    },
+    {
+      "entity_text": "GlobalTech Industries Inc.",
       "entity_type": "ORG",
       "start_pos": 343,
-      "end_pos": 364
+      "end_pos": 369
+    },
+    {
+      "entity_text": "Innovation Drive",
+      "entity_type": "LOCATION",
+      "start_pos": 389,
+      "end_pos": 405
     },
     {
       "entity_text": "Palo Alto",
-      "entity_type": "PERSON",
+      "entity_type": "LOCATION",
       "start_pos": 407,
       "end_pos": 416
+    },
+    {
+      "entity_text": "USA",
+      "entity_type": "LOCATION",
+      "start_pos": 428,
+      "end_pos": 431
     },
     {
       "entity_text": "Robert Chen",
@@ -62,16 +86,22 @@
       "end_pos": 493
     },
     {
-      "entity_text": "VP Europe",
-      "entity_type": "ORG",
-      "start_pos": 495,
+      "entity_text": "Europe",
+      "entity_type": "LOCATION",
+      "start_pos": 498,
       "end_pos": 504
     },
     {
-      "entity_text": "General Counsel",
-      "entity_type": "PERSON",
-      "start_pos": 507,
-      "end_pos": 522
+      "entity_text": "GLOBALTECH",
+      "entity_type": "ORG",
+      "start_pos": 543,
+      "end_pos": 553
+    },
+    {
+      "entity_text": "TECHSOLUTIONS",
+      "entity_type": "ORG",
+      "start_pos": 572,
+      "end_pos": 585
     },
     {
       "entity_text": "Isabelle Moreau",
@@ -93,15 +123,33 @@
     },
     {
       "entity_text": "Société Générale",
-      "entity_type": "PERSON",
+      "entity_type": "ORG",
       "start_pos": 789,
       "end_pos": 805
     },
     {
-      "entity_text": "Paribas, Crédit",
-      "entity_type": "PERSON",
-      "start_pos": 811,
-      "end_pos": 826
+      "entity_text": "BNP Paribas",
+      "entity_type": "ORG",
+      "start_pos": 807,
+      "end_pos": 818
+    },
+    {
+      "entity_text": "Crédit Agricole",
+      "entity_type": "ORG",
+      "start_pos": 820,
+      "end_pos": 835
+    },
+    {
+      "entity_text": "GLOBALTECH",
+      "entity_type": "ORG",
+      "start_pos": 839,
+      "end_pos": 849
+    },
+    {
+      "entity_text": "NASDAQ",
+      "entity_type": "ORG",
+      "start_pos": 873,
+      "end_pos": 879
     },
     {
       "entity_text": "Robert Chen",
@@ -116,10 +164,22 @@
       "end_pos": 950
     },
     {
-      "entity_text": "VP Europe",
-      "entity_type": "ORG",
-      "start_pos": 952,
+      "entity_text": "Europe",
+      "entity_type": "LOCATION",
+      "start_pos": 955,
       "end_pos": 961
+    },
+    {
+      "entity_text": "Europe",
+      "entity_type": "LOCATION",
+      "start_pos": 1117,
+      "end_pos": 1123
+    },
+    {
+      "entity_text": "TECHSOLUTIONS",
+      "entity_type": "ORG",
+      "start_pos": 1161,
+      "end_pos": 1174
     },
     {
       "entity_text": "Isabelle Moreau",
@@ -140,12 +200,6 @@
       "end_pos": 1299
     },
     {
-      "entity_text": "Directeur Commercial",
-      "entity_type": "PERSON",
-      "start_pos": 1301,
-      "end_pos": 1321
-    },
-    {
       "entity_text": "Kevin Zhang",
       "entity_type": "PERSON",
       "start_pos": 1386,
@@ -158,16 +212,22 @@
       "end_pos": 1434
     },
     {
-      "entity_text": "Directrice Produit",
+      "entity_text": "Alexandre Blanc",
       "entity_type": "PERSON",
-      "start_pos": 1436,
-      "end_pos": 1454
+      "start_pos": 1460,
+      "end_pos": 1475
     },
     {
       "entity_text": "Caroline Petit",
       "entity_type": "PERSON",
       "start_pos": 1511,
       "end_pos": 1525
+    },
+    {
+      "entity_text": "GLOBALTECH",
+      "entity_type": "ORG",
+      "start_pos": 1532,
+      "end_pos": 1542
     },
     {
       "entity_text": "Robert Chen",
@@ -182,9 +242,9 @@
       "end_pos": 1617
     },
     {
-      "entity_text": "VP Europe",
-      "entity_type": "ORG",
-      "start_pos": 1619,
+      "entity_text": "Europe",
+      "entity_type": "LOCATION",
+      "start_pos": 1622,
       "end_pos": 1628
     },
     {
@@ -194,16 +254,10 @@
       "end_pos": 1670
     },
     {
-      "entity_text": "VP Europe",
-      "entity_type": "ORG",
-      "start_pos": 1672,
+      "entity_text": "Europe",
+      "entity_type": "LOCATION",
+      "start_pos": 1675,
       "end_pos": 1681
-    },
-    {
-      "entity_text": "General Counsel",
-      "entity_type": "PERSON",
-      "start_pos": 1684,
-      "end_pos": 1699
     },
     {
       "entity_text": "Laurent Benoit",
@@ -212,22 +266,10 @@
       "end_pos": 1764
     },
     {
-      "entity_text": "Director Partner",
-      "entity_type": "PERSON",
-      "start_pos": 1766,
-      "end_pos": 1782
-    },
-    {
       "entity_text": "Émilie Rousseau",
       "entity_type": "PERSON",
       "start_pos": 1801,
       "end_pos": 1816
-    },
-    {
-      "entity_text": "Director Product",
-      "entity_type": "PERSON",
-      "start_pos": 1818,
-      "end_pos": 1834
     },
     {
       "entity_text": "Ahmed Mansour",
@@ -236,16 +278,22 @@
       "end_pos": 1863
     },
     {
-      "entity_text": "Regional Manager",
-      "entity_type": "PERSON",
-      "start_pos": 1865,
-      "end_pos": 1881
-    },
-    {
       "entity_text": "France",
       "entity_type": "LOCATION",
       "start_pos": 1882,
       "end_pos": 1888
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 1941,
+      "end_pos": 1947
+    },
+    {
+      "entity_text": "TECHSOLUTIONS",
+      "entity_type": "ORG",
+      "start_pos": 1964,
+      "end_pos": 1977
     },
     {
       "entity_text": "Thomas Weber",
@@ -260,10 +308,28 @@
       "end_pos": 2044
     },
     {
+      "entity_text": "Benelux",
+      "entity_type": "LOCATION",
+      "start_pos": 2046,
+      "end_pos": 2053
+    },
+    {
+      "entity_text": "GLOBALTECH",
+      "entity_type": "ORG",
+      "start_pos": 2089,
+      "end_pos": 2099
+    },
+    {
       "entity_text": "Sarah McDonald",
       "entity_type": "PERSON",
       "start_pos": 2105,
       "end_pos": 2119
+    },
+    {
+      "entity_text": "TECHSOLUTIONS",
+      "entity_type": "ORG",
+      "start_pos": 2133,
+      "end_pos": 2146
     },
     {
       "entity_text": "Pierre Fontaine",
@@ -272,10 +338,28 @@
       "end_pos": 2166
     },
     {
+      "entity_text": "Thomas Weber",
+      "entity_type": "PERSON",
+      "start_pos": 2216,
+      "end_pos": 2228
+    },
+    {
       "entity_text": "Sarah McDonald",
       "entity_type": "PERSON",
       "start_pos": 2234,
       "end_pos": 2248
+    },
+    {
+      "entity_text": "GlobalTech",
+      "entity_type": "ORG",
+      "start_pos": 2279,
+      "end_pos": 2289
+    },
+    {
+      "entity_text": "TECHSOLUTIONS",
+      "entity_type": "ORG",
+      "start_pos": 2314,
+      "end_pos": 2327
     },
     {
       "entity_text": "Kevin Zhang",
@@ -284,10 +368,22 @@
       "end_pos": 2368
     },
     {
+      "entity_text": "TECHSOLUTIONS",
+      "entity_type": "ORG",
+      "start_pos": 2370,
+      "end_pos": 2383
+    },
+    {
       "entity_text": "Laurent Benoit",
       "entity_type": "PERSON",
       "start_pos": 2389,
       "end_pos": 2403
+    },
+    {
+      "entity_text": "GLOBALTECH",
+      "entity_type": "ORG",
+      "start_pos": 2405,
+      "end_pos": 2415
     },
     {
       "entity_text": "Julie Marchand",
@@ -296,10 +392,64 @@
       "end_pos": 2451
     },
     {
+      "entity_text": "TECHSOLUTIONS",
+      "entity_type": "ORG",
+      "start_pos": 2453,
+      "end_pos": 2466
+    },
+    {
       "entity_text": "Émilie Rousseau",
       "entity_type": "PERSON",
       "start_pos": 2473,
       "end_pos": 2488
+    },
+    {
+      "entity_text": "GLOBALTECH",
+      "entity_type": "ORG",
+      "start_pos": 2490,
+      "end_pos": 2500
+    },
+    {
+      "entity_text": "TECHSOLUTIONS",
+      "entity_type": "ORG",
+      "start_pos": 2574,
+      "end_pos": 2587
+    },
+    {
+      "entity_text": "GLOBALTECH",
+      "entity_type": "ORG",
+      "start_pos": 2605,
+      "end_pos": 2615
+    },
+    {
+      "entity_text": "GLOBALTECH",
+      "entity_type": "ORG",
+      "start_pos": 2634,
+      "end_pos": 2644
+    },
+    {
+      "entity_text": "GLOBALTECH",
+      "entity_type": "ORG",
+      "start_pos": 2654,
+      "end_pos": 2664
+    },
+    {
+      "entity_text": "TECHSOLUTIONS",
+      "entity_type": "ORG",
+      "start_pos": 2682,
+      "end_pos": 2695
+    },
+    {
+      "entity_text": "TECHSOLUTIONS",
+      "entity_type": "ORG",
+      "start_pos": 2714,
+      "end_pos": 2727
+    },
+    {
+      "entity_text": "TECHSOLUTIONS",
+      "entity_type": "ORG",
+      "start_pos": 2751,
+      "end_pos": 2764
     },
     {
       "entity_text": "Philippe Arnaud",
@@ -314,6 +464,12 @@
       "end_pos": 2813
     },
     {
+      "entity_text": "GLOBALTECH",
+      "entity_type": "ORG",
+      "start_pos": 2838,
+      "end_pos": 2848
+    },
+    {
       "entity_text": "John Smith",
       "entity_type": "PERSON",
       "start_pos": 2853,
@@ -326,9 +482,9 @@
       "end_pos": 2888
     },
     {
-      "entity_text": "VP Finance Europe",
-      "entity_type": "ORG",
-      "start_pos": 2890,
+      "entity_text": "Europe",
+      "entity_type": "LOCATION",
+      "start_pos": 2901,
       "end_pos": 2907
     },
     {
@@ -338,10 +494,22 @@
       "end_pos": 3067
     },
     {
+      "entity_text": "TECHSOLUTIONS",
+      "entity_type": "ORG",
+      "start_pos": 3069,
+      "end_pos": 3082
+    },
+    {
       "entity_text": "Sarah McDonald",
       "entity_type": "PERSON",
       "start_pos": 3090,
       "end_pos": 3104
+    },
+    {
+      "entity_text": "GLOBALTECH",
+      "entity_type": "ORG",
+      "start_pos": 3106,
+      "end_pos": 3116
     },
     {
       "entity_text": "Isabelle Moreau",
@@ -354,6 +522,12 @@
       "entity_type": "PERSON",
       "start_pos": 3172,
       "end_pos": 3183
+    },
+    {
+      "entity_text": "TECHSOLUTIONS",
+      "entity_type": "ORG",
+      "start_pos": 3264,
+      "end_pos": 3277
     },
     {
       "entity_text": "Isabelle Moreau",
@@ -374,10 +548,10 @@
       "end_pos": 3347
     },
     {
-      "entity_text": "Directeur Commercial",
-      "entity_type": "PERSON",
-      "start_pos": 3349,
-      "end_pos": 3369
+      "entity_text": "GLOBALTECH",
+      "entity_type": "ORG",
+      "start_pos": 3371,
+      "end_pos": 3381
     },
     {
       "entity_text": "Sarah McDonald",
@@ -386,9 +560,9 @@
       "end_pos": 3403
     },
     {
-      "entity_text": "VP Europe",
-      "entity_type": "ORG",
-      "start_pos": 3405,
+      "entity_text": "Europe",
+      "entity_type": "LOCATION",
+      "start_pos": 3408,
       "end_pos": 3414
     },
     {
@@ -404,22 +578,34 @@
       "end_pos": 3464
     },
     {
-      "entity_text": "General Counsel",
-      "entity_type": "PERSON",
-      "start_pos": 3466,
-      "end_pos": 3481
-    },
-    {
       "entity_text": "Alexandre Blanc",
       "entity_type": "PERSON",
       "start_pos": 3537,
       "end_pos": 3552
     },
     {
+      "entity_text": "TECHSOLUTIONS",
+      "entity_type": "ORG",
+      "start_pos": 3554,
+      "end_pos": 3567
+    },
+    {
       "entity_text": "Ahmed Mansour",
       "entity_type": "PERSON",
       "start_pos": 3574,
       "end_pos": 3587
+    },
+    {
+      "entity_text": "GLOBALTECH",
+      "entity_type": "ORG",
+      "start_pos": 3589,
+      "end_pos": 3599
+    },
+    {
+      "entity_text": "Kevin Zhang",
+      "entity_type": "PERSON",
+      "start_pos": 3616,
+      "end_pos": 3627
     },
     {
       "entity_text": "Julie Marchand",
@@ -434,10 +620,34 @@
       "end_pos": 3667
     },
     {
+      "entity_text": "TECHSOLUTIONS",
+      "entity_type": "ORG",
+      "start_pos": 3669,
+      "end_pos": 3682
+    },
+    {
+      "entity_text": "Laurent Benoit",
+      "entity_type": "PERSON",
+      "start_pos": 3689,
+      "end_pos": 3703
+    },
+    {
       "entity_text": "Émilie Rousseau",
       "entity_type": "PERSON",
       "start_pos": 3709,
       "end_pos": 3724
+    },
+    {
+      "entity_text": "GLOBALTECH",
+      "entity_type": "ORG",
+      "start_pos": 3726,
+      "end_pos": 3736
+    },
+    {
+      "entity_text": "TECHSOLUTIONS",
+      "entity_type": "ORG",
+      "start_pos": 3768,
+      "end_pos": 3781
     },
     {
       "entity_text": "Alexandre Blanc",
@@ -464,12 +674,6 @@
       "end_pos": 3949
     },
     {
-      "entity_text": "Product Marketing",
-      "entity_type": "PERSON",
-      "start_pos": 3952,
-      "end_pos": 3969
-    },
-    {
       "entity_text": "Nadia Amrani",
       "entity_type": "PERSON",
       "start_pos": 3975,
@@ -482,10 +686,16 @@
       "end_pos": 4031
     },
     {
-      "entity_text": "Regional Manager",
-      "entity_type": "PERSON",
-      "start_pos": 4080,
-      "end_pos": 4096
+      "entity_text": "GLOBALTECH",
+      "entity_type": "ORG",
+      "start_pos": 4037,
+      "end_pos": 4047
+    },
+    {
+      "entity_text": "Europe",
+      "entity_type": "LOCATION",
+      "start_pos": 4056,
+      "end_pos": 4062
     },
     {
       "entity_text": "France",
@@ -506,12 +716,6 @@
       "end_pos": 4133
     },
     {
-      "entity_text": "Technical Architect",
-      "entity_type": "PERSON",
-      "start_pos": 4137,
-      "end_pos": 4156
-    },
-    {
       "entity_text": "Laurent Benoit",
       "entity_type": "PERSON",
       "start_pos": 4161,
@@ -519,15 +723,15 @@
     },
     {
       "entity_text": "Palo Alto",
-      "entity_type": "PERSON",
+      "entity_type": "LOCATION",
       "start_pos": 4182,
       "end_pos": 4191
     },
     {
-      "entity_text": "Account Manager",
-      "entity_type": "PERSON",
-      "start_pos": 4211,
-      "end_pos": 4226
+      "entity_text": "Europe",
+      "entity_type": "LOCATION",
+      "start_pos": 4201,
+      "end_pos": 4207
     },
     {
       "entity_text": "Sophie Bernard",
@@ -536,20 +740,20 @@
       "end_pos": 4246
     },
     {
+      "entity_text": "Londres",
+      "entity_type": "LOCATION",
+      "start_pos": 4254,
+      "end_pos": 4261
+    },
+    {
       "entity_text": "Sarah McDonald",
       "entity_type": "PERSON",
       "start_pos": 4294,
       "end_pos": 4308
     },
     {
-      "entity_text": "Secteur Bancaire",
-      "entity_type": "PERSON",
-      "start_pos": 4377,
-      "end_pos": 4393
-    },
-    {
       "entity_text": "Société Générale",
-      "entity_type": "PERSON",
+      "entity_type": "ORG",
       "start_pos": 4397,
       "end_pos": 4413
     },
@@ -560,16 +764,34 @@
       "end_pos": 4443
     },
     {
+      "entity_text": "TECHSOLUTIONS",
+      "entity_type": "ORG",
+      "start_pos": 4457,
+      "end_pos": 4470
+    },
+    {
       "entity_text": "Thomas Weber",
       "entity_type": "PERSON",
       "start_pos": 4475,
       "end_pos": 4487
     },
     {
+      "entity_text": "BNP Paribas",
+      "entity_type": "ORG",
+      "start_pos": 4491,
+      "end_pos": 4502
+    },
+    {
       "entity_text": "Jean Lemierre",
       "entity_type": "PERSON",
       "start_pos": 4515,
       "end_pos": 4528
+    },
+    {
+      "entity_text": "TECHSOLUTIONS",
+      "entity_type": "ORG",
+      "start_pos": 4536,
+      "end_pos": 4549
     },
     {
       "entity_text": "Julie Marchand",
@@ -579,7 +801,7 @@
     },
     {
       "entity_text": "Crédit Agricole",
-      "entity_type": "PERSON",
+      "entity_type": "ORG",
       "start_pos": 4573,
       "end_pos": 4588
     },
@@ -596,10 +818,10 @@
       "end_pos": 4645
     },
     {
-      "entity_text": "Contact Dr",
-      "entity_type": "PERSON",
-      "start_pos": 4647,
-      "end_pos": 4657
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 4639,
+      "end_pos": 4645
     },
     {
       "entity_text": "Denis Beau",
@@ -608,16 +830,34 @@
       "end_pos": 4669
     },
     {
-      "entity_text": "Secteur Assurance",
-      "entity_type": "PERSON",
-      "start_pos": 4689,
-      "end_pos": 4706
+      "entity_text": "GLOBALTECH",
+      "entity_type": "ORG",
+      "start_pos": 4677,
+      "end_pos": 4687
+    },
+    {
+      "entity_text": "AXA",
+      "entity_type": "ORG",
+      "start_pos": 4710,
+      "end_pos": 4713
     },
     {
       "entity_text": "Thomas Buberl",
       "entity_type": "PERSON",
       "start_pos": 4726,
       "end_pos": 4739
+    },
+    {
+      "entity_text": "GLOBALTECH",
+      "entity_type": "ORG",
+      "start_pos": 4747,
+      "end_pos": 4757
+    },
+    {
+      "entity_text": "Allianz France",
+      "entity_type": "ORG",
+      "start_pos": 4760,
+      "end_pos": 4774
     },
     {
       "entity_text": "France",
@@ -632,6 +872,12 @@
       "end_pos": 4801
     },
     {
+      "entity_text": "Generali France",
+      "entity_type": "ORG",
+      "start_pos": 4817,
+      "end_pos": 4832
+    },
+    {
       "entity_text": "France",
       "entity_type": "LOCATION",
       "start_pos": 4826,
@@ -644,10 +890,16 @@
       "end_pos": 4860
     },
     {
-      "entity_text": "Secteur Industrie",
-      "entity_type": "PERSON",
-      "start_pos": 4883,
-      "end_pos": 4900
+      "entity_text": "TECHSOLUTIONS",
+      "entity_type": "ORG",
+      "start_pos": 4868,
+      "end_pos": 4881
+    },
+    {
+      "entity_text": "Saint-Gobain",
+      "entity_type": "ORG",
+      "start_pos": 4904,
+      "end_pos": 4916
     },
     {
       "entity_text": "Benoît Bazin",
@@ -656,10 +908,16 @@
       "end_pos": 4941
     },
     {
-      "entity_text": "Contact Mme",
-      "entity_type": "PERSON",
-      "start_pos": 4975,
-      "end_pos": 4986
+      "entity_text": "TECHSOLUTIONS",
+      "entity_type": "ORG",
+      "start_pos": 4949,
+      "end_pos": 4962
+    },
+    {
+      "entity_text": "Michelin",
+      "entity_type": "ORG",
+      "start_pos": 4965,
+      "end_pos": 4973
     },
     {
       "entity_text": "Florent Menegaux",
@@ -668,28 +926,52 @@
       "end_pos": 5003
     },
     {
+      "entity_text": "GLOBALTECH",
+      "entity_type": "ORG",
+      "start_pos": 5011,
+      "end_pos": 5021
+    },
+    {
       "entity_text": "Schneider Electric",
-      "entity_type": "PERSON",
+      "entity_type": "ORG",
       "start_pos": 5024,
       "end_pos": 5042
     },
     {
-      "entity_text": "Contact Mme",
-      "entity_type": "PERSON",
-      "start_pos": 5044,
-      "end_pos": 5055
-    },
-    {
-      "entity_text": "Gwenaëlle Avice-",
+      "entity_text": "Gwenaëlle Avice-Huet",
       "entity_type": "PERSON",
       "start_pos": 5056,
-      "end_pos": 5072
+      "end_pos": 5076
     },
     {
-      "entity_text": "Mc",
+      "entity_text": "Weber",
+      "entity_type": "PERSON",
+      "start_pos": 5134,
+      "end_pos": 5139
+    },
+    {
+      "entity_text": "TECHSOLUTIONS",
+      "entity_type": "ORG",
+      "start_pos": 5141,
+      "end_pos": 5154
+    },
+    {
+      "entity_text": "McDonald",
       "entity_type": "PERSON",
       "start_pos": 5163,
-      "end_pos": 5165
+      "end_pos": 5171
+    },
+    {
+      "entity_text": "GLOBALTECH",
+      "entity_type": "ORG",
+      "start_pos": 5173,
+      "end_pos": 5183
+    },
+    {
+      "entity_text": "TECHSOLUTIONS",
+      "entity_type": "ORG",
+      "start_pos": 5228,
+      "end_pos": 5241
     },
     {
       "entity_text": "Thomas Weber",
@@ -710,10 +992,22 @@
       "end_pos": 5298
     },
     {
+      "entity_text": "GLOBALTECH",
+      "entity_type": "ORG",
+      "start_pos": 5313,
+      "end_pos": 5323
+    },
+    {
       "entity_text": "Sarah McDonald",
       "entity_type": "PERSON",
       "start_pos": 5329,
       "end_pos": 5343
+    },
+    {
+      "entity_text": "Europe",
+      "entity_type": "LOCATION",
+      "start_pos": 5352,
+      "end_pos": 5358
     },
     {
       "entity_text": "Émilie Rousseau",
@@ -734,10 +1028,10 @@
       "end_pos": 5479
     },
     {
-      "entity_text": "Cloud Infrastructure",
-      "entity_type": "PERSON",
-      "start_pos": 5513,
-      "end_pos": 5533
+      "entity_text": "Microsoft Azure",
+      "entity_type": "ORG",
+      "start_pos": 5537,
+      "end_pos": 5552
     },
     {
       "entity_text": "Romain Niccoli",
@@ -746,10 +1040,28 @@
       "end_pos": 5580
     },
     {
-      "entity_text": "Philippe Courtois",
+      "entity_text": "TECHSOLUTIONS",
+      "entity_type": "ORG",
+      "start_pos": 5582,
+      "end_pos": 5595
+    },
+    {
+      "entity_text": "Jean-Philippe Courtois",
       "entity_type": "PERSON",
-      "start_pos": 5606,
+      "start_pos": 5601,
       "end_pos": 5623
+    },
+    {
+      "entity_text": "GLOBALTECH",
+      "entity_type": "ORG",
+      "start_pos": 5625,
+      "end_pos": 5635
+    },
+    {
+      "entity_text": "OVHcloud",
+      "entity_type": "ORG",
+      "start_pos": 5639,
+      "end_pos": 5647
     },
     {
       "entity_text": "Octave Klaba",
@@ -758,10 +1070,16 @@
       "end_pos": 5672
     },
     {
-      "entity_text": "Contact Mme",
-      "entity_type": "PERSON",
-      "start_pos": 5720,
-      "end_pos": 5731
+      "entity_text": "TECHSOLUTIONS",
+      "entity_type": "ORG",
+      "start_pos": 5690,
+      "end_pos": 5703
+    },
+    {
+      "entity_text": "Google Cloud",
+      "entity_type": "ORG",
+      "start_pos": 5706,
+      "end_pos": 5718
     },
     {
       "entity_text": "Sundar Pichai",
@@ -770,16 +1088,40 @@
       "end_pos": 5745
     },
     {
+      "entity_text": "GLOBALTECH",
+      "entity_type": "ORG",
+      "start_pos": 5757,
+      "end_pos": 5767
+    },
+    {
+      "entity_text": "Deloitte France",
+      "entity_type": "ORG",
+      "start_pos": 5785,
+      "end_pos": 5800
+    },
+    {
       "entity_text": "France",
       "entity_type": "LOCATION",
       "start_pos": 5794,
       "end_pos": 5800
     },
     {
-      "entity_text": "Luc Moreau",
+      "entity_text": "Jean-Luc Moreau",
       "entity_type": "PERSON",
-      "start_pos": 5818,
+      "start_pos": 5813,
       "end_pos": 5828
+    },
+    {
+      "entity_text": "TECHSOLUTIONS",
+      "entity_type": "ORG",
+      "start_pos": 5840,
+      "end_pos": 5853
+    },
+    {
+      "entity_text": "Capgemini",
+      "entity_type": "ORG",
+      "start_pos": 5856,
+      "end_pos": 5865
     },
     {
       "entity_text": "Ahmed Mansour",
@@ -788,16 +1130,34 @@
       "end_pos": 5891
     },
     {
-      "entity_text": "Contact Mme",
-      "entity_type": "PERSON",
-      "start_pos": 5925,
-      "end_pos": 5936
+      "entity_text": "Accenture",
+      "entity_type": "ORG",
+      "start_pos": 5914,
+      "end_pos": 5923
     },
     {
       "entity_text": "Julie Marchand",
       "entity_type": "PERSON",
       "start_pos": 5937,
       "end_pos": 5951
+    },
+    {
+      "entity_text": "GLOBALTECH",
+      "entity_type": "ORG",
+      "start_pos": 5963,
+      "end_pos": 5973
+    },
+    {
+      "entity_text": "GLOBALTECH",
+      "entity_type": "ORG",
+      "start_pos": 6027,
+      "end_pos": 6037
+    },
+    {
+      "entity_text": "GLOBALTECH",
+      "entity_type": "ORG",
+      "start_pos": 6079,
+      "end_pos": 6089
     },
     {
       "entity_text": "David Park",
@@ -810,6 +1170,18 @@
       "entity_type": "PERSON",
       "start_pos": 6136,
       "end_pos": 6145
+    },
+    {
+      "entity_text": "TECHSOLUTIONS",
+      "entity_type": "ORG",
+      "start_pos": 6156,
+      "end_pos": 6169
+    },
+    {
+      "entity_text": "TECHSOLUTIONS",
+      "entity_type": "ORG",
+      "start_pos": 6215,
+      "end_pos": 6228
     },
     {
       "entity_text": "François Leclerc",
@@ -830,10 +1202,22 @@
       "end_pos": 6485
     },
     {
+      "entity_text": "TECHSOLUTIONS",
+      "entity_type": "ORG",
+      "start_pos": 6487,
+      "end_pos": 6500
+    },
+    {
       "entity_text": "David Park",
       "entity_type": "PERSON",
       "start_pos": 6506,
       "end_pos": 6516
+    },
+    {
+      "entity_text": "GLOBALTECH",
+      "entity_type": "ORG",
+      "start_pos": 6518,
+      "end_pos": 6528
     },
     {
       "entity_text": "Didier Martin",
@@ -843,9 +1227,15 @@
     },
     {
       "entity_text": "Bredin Prat",
-      "entity_type": "PERSON",
+      "entity_type": "ORG",
       "start_pos": 6565,
       "end_pos": 6576
+    },
+    {
+      "entity_text": "TECHSOLUTIONS",
+      "entity_type": "ORG",
+      "start_pos": 6586,
+      "end_pos": 6599
     },
     {
       "entity_text": "John Davis",
@@ -855,9 +1245,15 @@
     },
     {
       "entity_text": "Wilson Sonsini",
-      "entity_type": "PERSON",
+      "entity_type": "ORG",
       "start_pos": 6617,
       "end_pos": 6631
+    },
+    {
+      "entity_text": "GLOBALTECH",
+      "entity_type": "ORG",
+      "start_pos": 6641,
+      "end_pos": 6651
     },
     {
       "entity_text": "Isabelle Moreau",
@@ -866,10 +1262,22 @@
       "end_pos": 6789
     },
     {
+      "entity_text": "TECHSOLUTIONS",
+      "entity_type": "ORG",
+      "start_pos": 6791,
+      "end_pos": 6804
+    },
+    {
       "entity_text": "Sarah McDonald",
       "entity_type": "PERSON",
       "start_pos": 6811,
       "end_pos": 6825
+    },
+    {
+      "entity_text": "GLOBALTECH",
+      "entity_type": "ORG",
+      "start_pos": 6827,
+      "end_pos": 6837
     },
     {
       "entity_text": "Paris",
@@ -878,16 +1286,52 @@
       "end_pos": 6874
     },
     {
+      "entity_text": "TECHSOLUTIONS",
+      "entity_type": "ORG",
+      "start_pos": 6920,
+      "end_pos": 6933
+    },
+    {
       "entity_text": "Sarah Cohen",
       "entity_type": "PERSON",
       "start_pos": 6938,
       "end_pos": 6949
     },
     {
+      "entity_text": "GLOBALTECH",
+      "entity_type": "ORG",
+      "start_pos": 6956,
+      "end_pos": 6966
+    },
+    {
+      "entity_text": "Brian O'Connor",
+      "entity_type": "PERSON",
+      "start_pos": 6971,
+      "end_pos": 6985
+    },
+    {
+      "entity_text": "US",
+      "entity_type": "LOCATION",
+      "start_pos": 6987,
+      "end_pos": 6989
+    },
+    {
       "entity_text": "Emer Cooke",
       "entity_type": "PERSON",
       "start_pos": 6996,
       "end_pos": 7006
+    },
+    {
+      "entity_text": "CNIL",
+      "entity_type": "ORG",
+      "start_pos": 7058,
+      "end_pos": 7062
+    },
+    {
+      "entity_text": "TECHSOLUTIONS",
+      "entity_type": "ORG",
+      "start_pos": 7081,
+      "end_pos": 7094
     },
     {
       "entity_text": "Vincent Chen",
@@ -902,16 +1346,46 @@
       "end_pos": 7139
     },
     {
+      "entity_text": "GLOBALTECH",
+      "entity_type": "ORG",
+      "start_pos": 7158,
+      "end_pos": 7168
+    },
+    {
       "entity_text": "Chris Roberts",
       "entity_type": "PERSON",
       "start_pos": 7173,
       "end_pos": 7186
     },
     {
-      "entity_text": "Luc Moreau",
+      "entity_text": "GLOBALTECH",
+      "entity_type": "ORG",
+      "start_pos": 7250,
+      "end_pos": 7260
+    },
+    {
+      "entity_text": "Deloitte Cyber",
+      "entity_type": "ORG",
+      "start_pos": 7278,
+      "end_pos": 7292
+    },
+    {
+      "entity_text": "Jean-Luc Moreau",
       "entity_type": "PERSON",
-      "start_pos": 7302,
+      "start_pos": 7297,
       "end_pos": 7312
+    },
+    {
+      "entity_text": "TECHSOLUTIONS",
+      "entity_type": "ORG",
+      "start_pos": 7319,
+      "end_pos": 7332
+    },
+    {
+      "entity_text": "EY Cyber",
+      "entity_type": "ORG",
+      "start_pos": 7335,
+      "end_pos": 7343
     },
     {
       "entity_text": "Steve Stone",
@@ -920,10 +1394,22 @@
       "end_pos": 7359
     },
     {
+      "entity_text": "GLOBALTECH",
+      "entity_type": "ORG",
+      "start_pos": 7366,
+      "end_pos": 7376
+    },
+    {
       "entity_text": "Caroline Marchal",
       "entity_type": "PERSON",
       "start_pos": 7520,
       "end_pos": 7536
+    },
+    {
+      "entity_text": "TECHSOLUTIONS",
+      "entity_type": "ORG",
+      "start_pos": 7538,
+      "end_pos": 7551
     },
     {
       "entity_text": "Tom Anderson",
@@ -932,8 +1418,14 @@
       "end_pos": 7569
     },
     {
+      "entity_text": "GLOBALTECH",
+      "entity_type": "ORG",
+      "start_pos": 7571,
+      "end_pos": 7581
+    },
+    {
       "entity_text": "Image Sept",
-      "entity_type": "PERSON",
+      "entity_type": "ORG",
       "start_pos": 7597,
       "end_pos": 7607
     },
@@ -951,7 +1443,7 @@
     },
     {
       "entity_text": "Brunswick Group",
-      "entity_type": "PERSON",
+      "entity_type": "ORG",
       "start_pos": 7634,
       "end_pos": 7649
     },
@@ -962,9 +1454,9 @@
       "end_pos": 7680
     },
     {
-      "entity_text": "Tech Paris",
-      "entity_type": "PERSON",
-      "start_pos": 7721,
+      "entity_text": "Paris",
+      "entity_type": "LOCATION",
+      "start_pos": 7726,
       "end_pos": 7731
     },
     {
@@ -986,16 +1478,28 @@
       "end_pos": 7846
     },
     {
+      "entity_text": "TECHSOLUTIONS",
+      "entity_type": "ORG",
+      "start_pos": 7848,
+      "end_pos": 7861
+    },
+    {
+      "entity_text": "TECHSOLUTIONS",
+      "entity_type": "ORG",
+      "start_pos": 7926,
+      "end_pos": 7939
+    },
+    {
       "entity_text": "Catherine Rousseau",
       "entity_type": "PERSON",
       "start_pos": 7945,
       "end_pos": 7963
     },
     {
-      "entity_text": "Directrice Marketing",
-      "entity_type": "PERSON",
-      "start_pos": 7965,
-      "end_pos": 7985
+      "entity_text": "GLOBALTECH",
+      "entity_type": "ORG",
+      "start_pos": 7989,
+      "end_pos": 7999
     },
     {
       "entity_text": "Émilie Rousseau",
@@ -1004,22 +1508,40 @@
       "end_pos": 8020
     },
     {
-      "entity_text": "Director Product",
-      "entity_type": "PERSON",
-      "start_pos": 8022,
-      "end_pos": 8038
+      "entity_text": "AWS",
+      "entity_type": "ORG",
+      "start_pos": 8177,
+      "end_pos": 8180
     },
     {
-      "entity_text": "Formation Global",
-      "entity_type": "PERSON",
-      "start_pos": 8299,
-      "end_pos": 8315
+      "entity_text": "Microsoft",
+      "entity_type": "ORG",
+      "start_pos": 8192,
+      "end_pos": 8201
+    },
+    {
+      "entity_text": "TECHSOLUTIONS",
+      "entity_type": "ORG",
+      "start_pos": 8271,
+      "end_pos": 8284
+    },
+    {
+      "entity_text": "GlobalTech",
+      "entity_type": "ORG",
+      "start_pos": 8309,
+      "end_pos": 8319
     },
     {
       "entity_text": "Laurent Benoit",
       "entity_type": "PERSON",
       "start_pos": 8360,
       "end_pos": 8374
+    },
+    {
+      "entity_text": "GLOBALTECH",
+      "entity_type": "ORG",
+      "start_pos": 8376,
+      "end_pos": 8386
     },
     {
       "entity_text": "Kevin Zhang",
@@ -1029,21 +1551,45 @@
     },
     {
       "entity_text": "Palo Alto",
-      "entity_type": "PERSON",
+      "entity_type": "LOCATION",
       "start_pos": 8449,
       "end_pos": 8458
     },
     {
-      "entity_text": "Tech Certified",
-      "entity_type": "PERSON",
-      "start_pos": 8532,
-      "end_pos": 8546
+      "entity_text": "GLOBALTECH",
+      "entity_type": "ORG",
+      "start_pos": 8497,
+      "end_pos": 8507
+    },
+    {
+      "entity_text": "GlobalTech",
+      "entity_type": "ORG",
+      "start_pos": 8526,
+      "end_pos": 8536
     },
     {
       "entity_text": "Alexandre Blanc",
       "entity_type": "PERSON",
       "start_pos": 8606,
       "end_pos": 8621
+    },
+    {
+      "entity_text": "GLOBALTECH",
+      "entity_type": "ORG",
+      "start_pos": 8666,
+      "end_pos": 8676
+    },
+    {
+      "entity_text": "TECHSOLUTIONS",
+      "entity_type": "ORG",
+      "start_pos": 8711,
+      "end_pos": 8724
+    },
+    {
+      "entity_text": "Kevin Zhang",
+      "entity_type": "PERSON",
+      "start_pos": 8753,
+      "end_pos": 8764
     },
     {
       "entity_text": "Julie Marchand",
@@ -1064,10 +1610,28 @@
       "end_pos": 8843
     },
     {
+      "entity_text": "Europe",
+      "entity_type": "LOCATION",
+      "start_pos": 8837,
+      "end_pos": 8843
+    },
+    {
       "entity_text": "Paris",
       "entity_type": "LOCATION",
       "start_pos": 8866,
       "end_pos": 8871
+    },
+    {
+      "entity_text": "TECHSOLUTIONS",
+      "entity_type": "ORG",
+      "start_pos": 8913,
+      "end_pos": 8926
+    },
+    {
+      "entity_text": "TECHSOLUTIONS",
+      "entity_type": "ORG",
+      "start_pos": 9006,
+      "end_pos": 9019
     },
     {
       "entity_text": "IBM Watson",
@@ -1082,15 +1646,27 @@
       "end_pos": 9088
     },
     {
+      "entity_text": "GLOBALTECH",
+      "entity_type": "ORG",
+      "start_pos": 9092,
+      "end_pos": 9102
+    },
+    {
       "entity_text": "France",
       "entity_type": "LOCATION",
       "start_pos": 9145,
       "end_pos": 9151
     },
     {
-      "entity_text": "Capgemini, Atos",
-      "entity_type": "PERSON",
+      "entity_text": "Capgemini",
+      "entity_type": "ORG",
       "start_pos": 9153,
+      "end_pos": 9162
+    },
+    {
+      "entity_text": "Atos",
+      "entity_type": "ORG",
+      "start_pos": 9164,
       "end_pos": 9168
     },
     {
@@ -1100,16 +1676,28 @@
       "end_pos": 9419
     },
     {
-      "entity_text": "Commerce Internationale",
-      "entity_type": "PERSON",
-      "start_pos": 9486,
+      "entity_text": "Chambre de Commerce Internationale",
+      "entity_type": "ORG",
+      "start_pos": 9475,
       "end_pos": 9509
+    },
+    {
+      "entity_text": "CCI",
+      "entity_type": "ORG",
+      "start_pos": 9511,
+      "end_pos": 9514
     },
     {
       "entity_text": "Paris",
       "entity_type": "LOCATION",
       "start_pos": 9518,
       "end_pos": 9523
+    },
+    {
+      "entity_text": "TECHSOLUTIONS",
+      "entity_type": "ORG",
+      "start_pos": 9551,
+      "end_pos": 9564
     },
     {
       "entity_text": "Isabelle Moreau",
@@ -1124,15 +1712,21 @@
       "end_pos": 9663
     },
     {
+      "entity_text": "GLOBALTECH",
+      "entity_type": "ORG",
+      "start_pos": 9742,
+      "end_pos": 9752
+    },
+    {
       "entity_text": "Sarah McDonald",
       "entity_type": "PERSON",
       "start_pos": 9759,
       "end_pos": 9773
     },
     {
-      "entity_text": "VP Europe",
-      "entity_type": "ORG",
-      "start_pos": 9775,
+      "entity_text": "Europe",
+      "entity_type": "LOCATION",
+      "start_pos": 9778,
       "end_pos": 9784
     },
     {
@@ -1142,16 +1736,10 @@
       "end_pos": 9850
     },
     {
-      "entity_text": "VP Europe",
-      "entity_type": "ORG",
-      "start_pos": 9852,
+      "entity_text": "Europe",
+      "entity_type": "LOCATION",
+      "start_pos": 9855,
       "end_pos": 9861
-    },
-    {
-      "entity_text": "General Counsel",
-      "entity_type": "PERSON",
-      "start_pos": 9864,
-      "end_pos": 9879
     },
     {
       "entity_text": "Kevin Zhang",
@@ -1190,6 +1778,12 @@
       "end_pos": 10183
     },
     {
+      "entity_text": "Marie Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 10241,
+      "end_pos": 10253
+    },
+    {
       "entity_text": "Lisa Wong",
       "entity_type": "PERSON",
       "start_pos": 10259,
@@ -1208,10 +1802,22 @@
       "end_pos": 10352
     },
     {
+      "entity_text": "TECHSOLUTIONS",
+      "entity_type": "ORG",
+      "start_pos": 10379,
+      "end_pos": 10392
+    },
+    {
       "entity_text": "Isabelle Moreau",
       "entity_type": "PERSON",
       "start_pos": 10398,
       "end_pos": 10413
+    },
+    {
+      "entity_text": "GLOBALTECH",
+      "entity_type": "ORG",
+      "start_pos": 10435,
+      "end_pos": 10445
     },
     {
       "entity_text": "Sarah McDonald",
@@ -1220,10 +1826,10 @@
       "end_pos": 10465
     },
     {
-      "entity_text": "Cabinet Bredin",
-      "entity_type": "PERSON",
-      "start_pos": 10508,
-      "end_pos": 10522
+      "entity_text": "Bredin Prat",
+      "entity_type": "ORG",
+      "start_pos": 10516,
+      "end_pos": 10527
     },
     {
       "entity_text": "Didier Martin",
@@ -1232,16 +1838,28 @@
       "end_pos": 10549
     },
     {
-      "entity_text": "Cabinet Wilson",
-      "entity_type": "PERSON",
-      "start_pos": 10572,
-      "end_pos": 10586
+      "entity_text": "TECHSOLUTIONS",
+      "entity_type": "ORG",
+      "start_pos": 10556,
+      "end_pos": 10569
+    },
+    {
+      "entity_text": "Wilson Sonsini",
+      "entity_type": "ORG",
+      "start_pos": 10580,
+      "end_pos": 10594
     },
     {
       "entity_text": "John Davis",
       "entity_type": "PERSON",
       "start_pos": 10599,
       "end_pos": 10609
+    },
+    {
+      "entity_text": "GLOBALTECH",
+      "entity_type": "ORG",
+      "start_pos": 10616,
+      "end_pos": 10626
     }
   ]
 }
