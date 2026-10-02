@@ -1,13 +1,13 @@
 # Annotation Guidelines: NER Benchmark Corpus
 
-**Status:** DRAFT for approval (Story 10.1, STOP A). No annotation file has been changed under these rules yet.
+**Status:** APPROVED by Lionel on 2026-10-02 (STOP A, Story 10.1). Reviewed draft: commit `e7835a3`, sha256 `57ceba37a60014c900637c441c95db3b4fc8e3c059821486698b604d101fe37e`. Part A was approved as drafted. Part B records his answers; three of them changed the proposed default (Q3, Q5, Q14). The decision record is at the end of this file.
 **Scope:** the 25 documents in `tests/test_corpus/` (main corpus) and the held-out set in `tests/test_corpus/held_out/` (Story 10.1, Task 4).
 **Entity types:** `PERSON`, `LOCATION`, `ORG` (schema in `README.md`).
 
 ## How to read this document
 
 - Every rule has a stable ID (`G…` general, `P…` PERSON, `O…` ORG, `L…` LOCATION). Each annotation edit cites one ID in the change log. The JSON stays as it is: citations are kept out of the annotation files.
-- **Part A** lists rules settled by Epic 10 or Story 10.1. **Part B** lists the cases the corpus raises that are not settled. Each has a proposed default for Lionel to confirm or override, by number (e.g. "Q3 yes, Q6 override: …").
+- **Part A** lists rules settled by Epic 10 or Story 10.1, plus G7 (nesting), which Lionel added at approval. **Part B** holds the rules decided at STOP A from the open questions. They keep their IDs `Q1`–`Q18`, so a change-log row cites e.g. `Q14`.
 - Examples are quoted from the corpus as `document: "text"`. **+** marks a correct annotation, **−** marks the current annotation that the rule corrects.
 - After approval, a rule changes only through the Amendments table (end of file). A case no approved rule covers goes back to Lionel first. It is not annotated in the meantime (AC2).
 
@@ -32,10 +32,17 @@
 - − `interview_01`: "TechCorp" (ORG, 641–649) annotated twice → one.
 - − "CNIL" appears in 7 documents (e.g. `interview_08`: "Nous conseillons la CNIL") with 0 annotations → one ORG per occurrence.
 
-**G5. No same-type overlaps.** Two annotations of the same type never overlap. [Story 10.1, 1.4]
+**G5. No same-type overlaps.** Two annotations of the same type never overlap. Annotations of different types may overlap only as G7 allows. [Story 10.1, 1.4; G7 added at approval]
 - − `interview_09`: PERSON "Anne Marion Chauveau" and PERSON "Marion Chauveau" over the same words → one span (which one: Q9).
 
 **G6. Annotate the text, not a tool's output.** Each annotation follows from a rule applied to the text. A detector hit can point at a candidate on the main corpus, but it never justifies an annotation by itself. Held-out annotations are made by hand, never pre-annotated by the detector or `auto_annotate_corpus.py`. [Story 10.1, AC5, Judgment Calls]
+
+**G7. Nesting: a place inside an ORG name is also a LOCATION.** When an ORG name contains a word or phrase that names a place, the whole name is ORG, and the place gets its own LOCATION annotation inside it. This is the only cross-type overlap allowed. It covers org + country/region/city (Q3) and organisations named after a place (Q5). [Lionel, STOP A, 2026-10-02: one rule for Q3 and Q5]
+- + `interview_01`: "Microsoft France" → ORG "Microsoft France" + LOCATION "France".
+- + `interview_13`: "INSA Lyon" → ORG "INSA Lyon" + LOCATION "Lyon".
+- + `interview_04`: "CHU de Lille" → ORG "CHU de Lille" + LOCATION "Lille". `interview_06`: "Banque de France" → ORG + LOCATION "France".
+- + `interview_03`: "Préfecture de la Gironde" → ORG + LOCATION "Gironde" (preposition and article outside the LOCATION, L2).
+- A place used outside any ORG name is a plain LOCATION (L1). A PERSON never contains a nested LOCATION, and an ORG never contains a nested PERSON (see the open items under "Pending amendments").
 
 ### PERSON
 
@@ -117,86 +124,99 @@
 
 ---
 
-## Part B: Open questions for Lionel
+## Part B: Rules decided at STOP A (Q1–Q18)
 
-Each item has the question, examples from the corpus, a proposed default and the reason for it. "Default source: story" means Story 10.1 (1.5) proposes it. "Default source: dev" means the story gives no default and the dev proposes one. Reply by number.
+Each item keeps its question, examples, the decided rule and the reason for it. "Approved default" means Lionel accepted the proposal unchanged. **CHANGED** means his answer replaced the proposal; the original proposal is kept in the decision record at the end of this file.
 
 **Q1. Salutation lines.** `email_chain`: "Laurent, Marie," (email 3) is a greeting to two people (Laurent Benoit, Marie Dubois). The same thread has a bare "Marie," on a greeting line (email 2), "Marie, pour la réunion du 12" (email 3), the signature "Laurent" (email 2) and "Bonne initiative Laurent." (email 3).
-- **Default (source: story):** "Laurent, Marie," → two PERSON, "Laurent" and "Marie". Each bare first name used to address or sign is a PERSON ("Marie", "Laurent").
+- **Rule (approved default):** "Laurent, Marie," → two PERSON, "Laurent" and "Marie". Each bare first name used to address or sign is a PERSON ("Marie", "Laurent").
 - Why: each is one person; consistent with epic F8 and 10.4 AC1. Today one PERSON "Laurent, Marie" covers both, and the bare forms are missing.
 
 **Q2. "Last, First".** The corpus has one genuine inverted name: `interview_02`: "Participant: Dubois, Jean-Marc (Chef d'équipe production)". Today it is annotated "Dubois, Jean-". Of the 37 comma annotations, this is the only genuine "Last, First": "Laurent, Marie" is a salutation (Q1), and the other 35 are artefacts (P6, O1).
-- **Default (source: dev):** one PERSON span "Dubois, Jean-Marc", comma included.
+- **Rule (approved default):** one PERSON span "Dubois, Jean-Marc", comma included.
 - Why: one person, one span, consistent with P3 (whole name). The alternative is two spans, "Dubois" and "Jean-Marc".
 
 **Q3. Organisation + country, region or city.** `interview_01`, `email_chain`, `meeting_minutes`, `project_report`: "Microsoft France"; also "KPMG France", "Deloitte France", "Google Cloud France", "IBM Europe", "Pfizer Europe", "AstraZeneca UK", "TechSolutions UK", "McKinsey Paris", "BETC Paris", "INSA Lyon", "Keolis Lyon", "French Tech Lyon", "INRIA Saclay".
-- **Default (source: story for "Microsoft France"; dev for the rest):** one ORG covering the name and its geographic qualifier. No separate LOCATION inside.
-- Why: it names one organisational unit. Consistent with epic F9 and 10.4 AC4. Some of these are company names in their own right ("DataCorp Europe").
+- **Rule (CHANGED by Lionel):** one ORG covering the name and its geographic qualifier, **plus a nested LOCATION** for the place (G7): "Microsoft France" = ORG "Microsoft France" + LOCATION "France"; "INSA Lyon" = ORG + LOCATION "Lyon"; "DataCorp Europe" = ORG + LOCATION "Europe".
+- Why: the ORG stays whole (epic F9, 10.4 AC4), and the place is still a place a reviewer must see.
 
 **Q4. Legal forms and descriptor words in ORG spans.** `board_minutes`: "TechSolutions France SAS", "CloudTech SAS"; `partnership_agreement`: "GlobalTech Industries Inc."; `interview_02`: "AutoMotive SA"; `interview_09`: "Rothschild & Co". Descriptors: `interview_15`: "cabinet CMS Francis Lefebvre", `partnership_agreement`: "Cabinet Bredin Prat", `meeting_minutes`: "Fond Ardian", `interview_07`: "Groupe Industriel Normandie", `interview_05`: "Cabinet Mercier & Associés".
-- **Default (source: dev):** a legal form attached to the name (SAS, SA, Inc., & Co, & Associés) is inside the span. A leading descriptor (cabinet, société, groupe, fonds, agence, startup, coopérative) is outside the span when the rest is a name by itself ("CMS Francis Lefebvre", "Bredin Prat", "Ardian", "Mercier & Associés"). It is inside when the rest would not be a name ("Groupe Industriel Normandie", "Banque Régionale du Sud").
+- **Rule (approved default):** a legal form attached to the name (SAS, SA, Inc., & Co, & Associés) is inside the span. A leading descriptor (cabinet, société, groupe, fonds, agence, startup, coopérative) is outside the span when the rest is a name by itself ("CMS Francis Lefebvre", "Bredin Prat", "Ardian", "Mercier & Associés"). It is inside when the rest would not be a name ("Groupe Industriel Normandie", "Banque Régionale du Sud"). A place inside the name is nested under G7 ("Normandie").
 - Why: the span is the name as the organisation writes it. − Today: "TechSolutions France SA" (the "S" of SAS cut off), PERSON "Cabinet Mercier", "Cabinet Bredin", "Fond Ardian", and ORG "Le Group" + PERSON "Industriel Normandie".
 
 **Q5. Organisations whose name contains a place.** `interview_03`: "Mairie de Bordeaux", "Préfecture de la Gironde", "Région Nouvelle-Aquitaine"; `interview_04`: "CHU de Lille", "Université de Lille"; `interview_02`: "Université de Strasbourg"; `interview_13`: "Métropole de Lyon"; `interview_05`: "Tribunal de Commerce de Paris", "Cour d'Appel de Paris"; `interview_10`: "Chambre d'Agriculture d'Eure-et-Loir"; `interview_07`: "La Région Normandie, représentée par M. Hervé Morin".
-- **Default (source: dev):** the whole name is one ORG and the place inside it is not annotated (no nested annotations, of any type). A place used as a place stays LOCATION ("la région Occitanie" in `interview_11`; Q12).
-- Why: the schema has no nesting, and the scorer matches one-to-one. Consistent with the existing ORG "Banque de France".
+- **Rule (CHANGED by Lionel):** the whole name is one ORG, **plus a nested LOCATION** for the place inside it (G7): "CHU de Lille" = ORG + LOCATION "Lille"; "Région Normandie" = ORG + LOCATION "Normandie". A place used as a place, outside an ORG name, is a plain LOCATION ("la région Occitanie" in `interview_11`; Q12).
+- Why: Lionel chose one rule for Q3 and Q5. The schema allows overlapping spans, and the scorer matches each annotation on its own text and type, so nesting costs nothing in the scorer.
 
 **Q6. Products, services, platforms, events, projects.** `email_chain`: "Azure Cloud Platform (région France Central)", "Azure AD"; `project_report`: "Licences Microsoft Azure"; `audit_summary`: "Microsoft Azure (M. Romain Niccoli): ✓ Conforme", "Palo Alto Cortex XSOAR", "Azure Backup"; `incident_report`: "Azure West Europe", "Microsoft DART: M. John Lambert"; `partnership_agreement`: "IBM Watson, Google AI", "VivaTech", "Microsoft Ignite"; `meeting_minutes`: "SAP S/4HANA"; `interview_14`: "Salesforce Commerce Cloud"; `email_chain`: "Projet Phoenix".
-- **Default (source: dev; the story leaves this open with no default):**
+- **Rule (approved default):**
   (a) a company name used alone is ORG, even when it stands for its product ("Salesforce déployé", "on utilise Splunk");
   (b) a product, service, cloud region, event, project or certification name is not annotated ("Azure", "Azure AD", "Cortex XSOAR", "France Central", "VivaTech", "Phoenix", "ISO 27001", "SecNumCloud");
   (c) vendor + product ("Microsoft Azure", "Google Cloud", "IBM Watson", "Microsoft DART") is one ORG when it designates the supplier organisation (it has contacts, signs, audits, is a subcontractor). Otherwise only the vendor name is ORG, under (a).
 - Why: what gets pseudonymised is who acts, not the tools used. This keeps vendor recall. − Today: PERSON "Azure Cloud", "Azure West", "Azure Backup", "Azure Patch"; ORG "IBM Watson", "Google AI".
 
 **Q7. Internal departments, teams and committees.** `contract_memo`: "Direction Juridique", "Direction des Achats"; `hr_announcement`: "Équipe Security", "Équipe Engineering"; `meeting_minutes`: "Comité de Direction"; `board_minutes`: "Conseil d'administration"; `incident_report`: "cellule de crise", "SOC".
-- **Default (source: dev):** not ORG.
+- **Rule (approved default):** not ORG.
 - Why: this extends AC1 (COMEX and DRH are not ORG). These name a part of an organisation, not one a reader can identify. − Today: PERSON "Direction Juridique", "Équipe Security", "Ressources Humaines".
 
 **Q8. Partial names.** Surname only: `board_minutes`: "Mme Moreau", "M. Arnaud"; speaker labels `interview_01`: "Dr. Dubois:"; `interview_06`: "Rodriguez:". First name only: `hr_announcement`: "Kevin rejoint le COMEX", "Julie pilotera". Short company forms: `interview_15`: "SecurePay"; `interview_05`: "SoftTech", "DataCorp".
-- **Default (source: dev):** each one is annotated with its type (PERSON or ORG), at every occurrence.
+- **Rule (approved default):** each one is annotated with its type (PERSON or ORG), at every occurrence.
 - Why: each identifies the entity, so a pseudonymised document must replace it. Matches current practice (PERSON "Moreau" 15, "Dubois" 8).
 
 **Q9. Several given names.** `interview_09`: "Mme Anne Marion Chauveau"; `interview_12`: "Mme Marcy Ericka Charollois". Both are annotated twice today (G5).
-- **Default (source: dev):** one PERSON covering every given name and the surname as written ("Anne Marion Chauveau", "Marcy Ericka Charollois").
+- **Rule (approved default):** one PERSON covering every given name and the surname as written ("Anne Marion Chauveau", "Marcy Ericka Charollois").
 - Why: whole-name principle (P3). The alternative is to treat the first word as a separate first name.
 
 **Q10. Initials.** `interview_02`: "J-M. Dubois" (3 occurrences, none annotated today).
-- **Default (source: dev):** one PERSON "J-M. Dubois", including the initials and their dot.
+- **Rule (approved default):** one PERSON "J-M. Dubois", including the initials and their dot.
 - Why: the initials are part of how the person is named here, as with P3. Without them the span is a surname only (Q8).
 
 **Q11. Apostrophes and inner capitals.** `interview_10`: "M. Sébastien Floc'h" (today "Sébastien Floc"); `partnership_agreement`: "M. Brian O'Connor"; `hr_announcement`, `interview_08`: "M. Yann LeCun" (today "Yann Le" twice, whole in `board_minutes`).
-- **Default (source: dev):** whole name, apostrophe and inner capital included.
+- **Rule (approved default):** whole name, apostrophe and inner capital included.
 - Why: same principle as P3–P5.
 
 **Q12. "de" + place after a name.** `interview_05`: "Me Isabella Ferrari de Milan" (today one PERSON); `interview_11`: "Mme Nacira Salvan de la région Occitanie" (today PERSON "Nacira Salvan de la").
-- **Default (source: dev):** "de" followed by a place is not a particle: PERSON "Isabella Ferrari" + LOCATION "Milan"; PERSON "Nacira Salvan" + LOCATION "Occitanie". Contrast P4: "Chasseloup de Laubat" (no place or ORG follows), where the particle stays in the name.
+- **Rule (approved default):** "de" followed by a place is not a particle: PERSON "Isabella Ferrari" + LOCATION "Milan"; PERSON "Nacira Salvan" + LOCATION "Occitanie". Contrast P4: "Chasseloup de Laubat" (no place or ORG follows), where the particle stays in the name.
 - Why: it marks origin or affiliation, like the de + ORG negative in P4.
 
 **Q13. Stage names and pseudonyms of real people.** `interview_14`: "Léna Situations", "Enjoy Phoenix (Marie Lopez)".
-- **Default (source: dev):** PERSON.
+- **Rule (approved default):** PERSON.
 - Why: they identify an individual as surely as a legal name.
 
 **Q14. "US", "USA", "UK" and country abbreviations.** `partnership_agreement`: "Palo Alto, CA 94303, USA", "M. Brian O'Connor (US)"; `interview_15`: "depuis les US"; `audit_summary`: "sous-traitants US"; `board_minutes`: "Expansion internationale: UK, Allemagne, Benelux" (today LOCATION "UK"); `interview_06`: "directeur UK"; `audit_summary`: "Transferts hors UE".
-- **Default (source: dev; the story leaves this open with no default):** LOCATION when it names the place as a noun ("USA" in an address, "les US", "(US)", "UK" in a list of countries, "hors UE"). Not annotated when it is an adjective ("sous-traitants US", "directeur UK"). Inside an ORG name it follows Q3 ("TechSolutions UK").
-- Why: same test as for any place name. The adjectival use names no place.
+- **Rule (CHANGED by Lionel):** "US", "USA", "UK" and "UE" are **always LOCATION, at every occurrence**, including adjectival use ("sous-traitants US", "directeur UK"). Inside an ORG name they are a nested LOCATION (G7: "TechSolutions UK", "AstraZeneca UK").
+- Why: a single string-level rule, with no noun/adjective judgment.
 
 **Q15. Article that is part of a place name.** `interview_01`: "notre bureau à la Défense" (today LOCATION "Défense"); `interview_07`: "notre usine du Havre".
-- **Default (source: dev):** keep the article when it is written separately: "la Défense". When the article is fused with a preposition ("du Havre", "au Havre"), the span is "Havre".
+- **Rule (approved default):** keep the article when it is written separately: "la Défense". When the article is fused with a preposition ("du Havre", "au Havre"), the span is "Havre".
 - Why: the app's preposition pattern deliberately keeps la/le/les as part of names ("La Rochelle", "Le Mans": comment in `french_patterns.py`), and a fused article cannot be split off inside a span.
 
 **Q16. Buildings, sites, venues and street addresses.** `meeting_minutes`: "Salle de réunion A, Tour Montparnasse, Paris"; `interview_06`: "Station F"; `interview_12`: "manager à l'Hôtel Plaza Athénée"; `board_minutes`, `email_chain`, `partnership_agreement`, `sales_proposal`: "45 Avenue de la Grande Armée, 75016 Paris", and `contract_memo`: "45 Avenue de la Grande Armée, Paris 16ème" (today PERSON "Grande Armée", 4); `sales_proposal`: "123 Avenue de la République, 13001 Marseille"; `partnership_agreement`: "2500 Innovation Drive, Palo Alto, CA 94303, USA"; `interview_14`: "L'entrepôt de Lesquin".
-- **Default (source: dev):** a named building or venue is LOCATION ("Tour Montparnasse", "Station F"). A hotel or shop named as an employer or business is ORG ("Hôtel Plaza Athénée"). In a street address, the street name is LOCATION ("Avenue de la Grande Armée") and the city is a separate LOCATION ("Paris"). House numbers, postcodes, state codes ("CA") and generic rooms ("Salle de réunion A") are not annotated.
+- **Rule (approved default):** a named building or venue is LOCATION ("Tour Montparnasse", "Station F"). A hotel or shop named as an employer or business is ORG ("Hôtel Plaza Athénée"). In a street address, the street name is LOCATION ("Avenue de la Grande Armée") and the city is a separate LOCATION ("Paris"). House numbers, postcodes, state codes ("CA") and generic rooms ("Salle de réunion A") are not annotated. "USA" at the end of an address is LOCATION (Q14).
 - Why: an address identifies people and premises, and the reviewer should be offered it. Number and postcode spans have no entity type here (G1).
 
 **Q17. Place granularity.** `board_minutes`: "Benelux"; `partnership_agreement`: "partenariat stratégique en Europe"; `interview_10`: "Mme Sophie Rousseau en Eure", "M. Jean Dupont en Île-de-France"; `interview_05`: "Sophia-Antipolis" (not annotated today; its second half sits inside the junk ORG "Antipolis et DataCorp Europe").
-- **Default (source: dev):** every named place is LOCATION at any level: supranational (Europe, Benelux), country, region, département, city, district. A place inside an ORG name follows Q3/Q5 and is not annotated separately (`interview_04`: "ARS Hauts-de-France", `interview_10`: "Ferme de Beauce").
+- **Rule (approved default):** every named place is LOCATION at any level: supranational (Europe, Benelux), country, region, département, city, district. A place inside an ORG name is a nested LOCATION under G7 (`interview_04`: "ARS Hauts-de-France" → ORG + LOCATION "Hauts-de-France"; `interview_10`: "Ferme de Beauce" → ORG + LOCATION "Beauce").
 - Why: any place can narrow down who a person is. The scorer ignores granularity anyway (exact text match).
 
 **Q18. Defined-term aliases and abbreviations of organisations.** `partnership_agreement`: 'Ci-après dénommée "TECHSOLUTIONS"' and "GLOBALTECH", used 44 and 42 times; `sales_proposal`: "Participants BRS" (Banque Régionale du Sud) and the reference "PROP-2024-BRS-001".
-- **Default (source: dev):** an alias or abbreviation that refers to the organisation is ORG at every occurrence ("TECHSOLUTIONS", "GLOBALTECH", "BRS"). An abbreviation inside a reference code is not annotated (G1).
+- **Rule (approved default):** an alias or abbreviation that refers to the organisation is ORG at every occurrence ("TECHSOLUTIONS", "GLOBALTECH", "BRS"). An abbreviation inside a reference code is not annotated (G1).
 - Why: the alias names the company, so leaving it would undo the pseudonymisation of the full name. **Impact:** about 86 new ORG annotations in `partnership_agreement` alone, against 131 ORG today. This is the largest single effect on ORG counts in the repair.
 
 ---
+
+## Decision record (STOP A)
+
+Approved by Lionel on 2026-10-02. Reviewed draft: commit `e7835a3`, sha256 `57ceba37a60014c900637c441c95db3b4fc8e3c059821486698b604d101fe37e`.
+
+| Item | Decision |
+|------|----------|
+| Part A (G1–G6, P1–P6, O1–O4, L1–L3) | Approved as drafted |
+| G7 | Added by Lionel (one nesting rule for Q3 and Q5; cross-type overlap allowed, same-type still forbidden) |
+| Q1, Q2, Q4, Q6–Q13, Q15–Q18 | Proposed default approved |
+| Q3 | **Changed.** Proposed: one ORG, no LOCATION inside. Decided: ORG + nested LOCATION |
+| Q5 | **Changed.** Proposed: one ORG, no nesting of any type. Decided: ORG + nested LOCATION |
+| Q14 | **Changed.** Proposed: LOCATION as a noun, nothing as an adjective. Decided: always LOCATION, every occurrence |
 
 ## Amendments
 
@@ -205,3 +225,9 @@ Changes after approval (AC2). Each row is also recorded in the story's Dev Notes
 | Date | Rule ID | Change | Approved by |
 |------|---------|--------|-------------|
 | | | | |
+
+## Pending amendments (raised during the repair, not yet decided)
+
+Cases that no approved rule covers. They go back to Lionel; until each is decided, the case is **not annotated** (AC2).
+
+_None yet._
