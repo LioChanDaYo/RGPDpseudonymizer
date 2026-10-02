@@ -63,8 +63,12 @@ jobs:
         env:
           OMP_NUM_THREADS: 1
           PYTHONUTF8: 1
+        # pipefail: without it `| tee` reports success even when pytest crashes.
+        # -p no:pytestqt: the accuracy tests need no Qt, and pytest-qt aborts
+        # collection when no Qt binding is installed.
         run: |
-          poetry run pytest tests/accuracy/ -v -m accuracy -s --timeout=300 \
+          set -o pipefail
+          poetry run pytest tests/accuracy/ -v -m accuracy -s --timeout=300 -p no:pytestqt \
             --junitxml=accuracy-results.xml 2>&1 | tee accuracy-output.txt
 
       - name: Upload accuracy results
