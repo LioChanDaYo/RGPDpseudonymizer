@@ -8,13 +8,13 @@
 
 ### Quelle précision puis-je attendre de la détection automatique ?
 
-Le pipeline hybride de détection (NLP + expressions régulières) identifie automatiquement environ 40 % des entités dans un texte français (rappel 40,88 %, F1 32,34 % sur notre corpus de 25 documents). Nous prévoyons d'améliorer ces chiffres. Cette étape sert de pré-filtrage -- **vous vérifiez et validez chaque entité** au cours du processus de validation obligatoire.
+Le pipeline hybride de détection (NLP + expressions régulières) identifie automatiquement environ 74 % des entités dans un texte français (rappel 73,98 %, F1 58,53 % sur notre corpus de 25 documents). Les noms d'organisations sont le point faible. Nous prévoyons d'améliorer ces chiffres. Cette étape sert de pré-filtrage -- **vous vérifiez et validez chaque entité** au cours du processus de validation obligatoire.
 
 Après validation humaine, la précision atteint **100 %** puisque vous contrôlez la décision finale pour chaque entité.
 
 ### Pourquoi la précision du NER est-elle si faible ?
 
-Le modèle spaCy `fr_core_news_lg` a été entraîné principalement sur des textes journalistiques, pas sur des transcriptions d'entretiens ou des documents commerciaux. Les modèles linguistiques spécifiques à un domaine (registres conversationnels, formalité mixte) réduisent la précision en utilisation directe. Un test d'évaluation portant sur 25 documents français contenant 1 855 entités a mesuré un F1 de 29,5 % pour spaCy seul. L'approche hybride (expressions régulières, dictionnaires de noms et de lieux) mesure 32,34 % F1 en v2.2.0. Un chiffre antérieur d'environ 60 % (Story 5.3) n'était pas reproductible et a été retiré. L'amélioration de la détection est prévue, avec un modèle français affiné comme objectif de la v3.0.
+Le modèle spaCy `fr_core_news_lg` a été entraîné principalement sur des textes journalistiques, pas sur des transcriptions d'entretiens ou des documents commerciaux. Les modèles linguistiques spécifiques à un domaine (registres conversationnels, formalité mixte) réduisent la précision en utilisation directe. Un test d'évaluation portant sur 25 documents français contenant 1 855 entités a mesuré un F1 de 29,5 % pour spaCy seul. L'approche hybride (expressions régulières, dictionnaires de noms et de lieux) atteint 58,53 % F1 en v2.2.0 (calculé comme l'application traite les titres et les prépositions). L'amélioration de la détection est prévue, avec un modèle français affiné comme objectif de la v3.0.
 
 Un affinage basé sur des données de validation du monde réel est prévu pour la v3.0 (ciblant un F1 de 70-85 %).
 

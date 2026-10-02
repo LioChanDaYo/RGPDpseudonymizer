@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **The accuracy benchmark now scores entities the way the app handles them.** The app strips titles and prepositions before pseudonymizing ("Mme Isabelle Moreau" → "Isabelle Moreau", "à Paris" → "Paris"), but `tests/accuracy` compared raw text, so each such correct detection counted as a false positive plus a false negative. The scorer now applies the same normalization (`strip_french_titles`, plus `strip_french_prepositions` for LOCATION). Same detector, same corpus: F1 32.34% → **58.53%** (precision 48.42%, recall 73.98%); PERSON 72.93%, LOCATION 44.99%, ORG 12.85%.
+
+- **Documentation accuracy figures corrected again.** The v2.2.0 docs update (#76) replaced the ~60% F1 claim with ~32%, calling the Story 5.3 figure wrong. That was itself wrong: ~32% was a strict-scoring artefact. README, FAQ, index and tutorial (EN + FR) now state the reproducible 58.53% and explain the scoring change.
+
 ---
 
 ## [2.2.0] - 2026-09-29

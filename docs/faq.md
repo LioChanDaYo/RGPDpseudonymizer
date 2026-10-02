@@ -8,13 +8,13 @@
 
 ### What accuracy should I expect from the automatic detection?
 
-The hybrid detection pipeline (NLP + regex + geography dictionary) automatically identifies approximately 40% of entities in French text (recall 40.88%, F1 32.34% on our 25-document benchmark). We plan to improve these figures. This is a pre-filtering step -- **you review and confirm every entity** during the mandatory validation workflow.
+The hybrid detection pipeline (NLP + regex + geography dictionary) automatically identifies approximately 74% of entities in French text (recall 73.98%, F1 58.53% on our 25-document benchmark). Organisation names are the weak point. We plan to improve these figures. This is a pre-filtering step -- **you review and confirm every entity** during the mandatory validation workflow.
 
 After human validation, accuracy is **100%** because you control the final decision for every entity.
 
 ### Why is the NER accuracy so low?
 
-The spaCy `fr_core_news_lg` model was trained primarily on news text, not interview transcripts or business documents. Domain-specific language patterns (conversational registers, mixed formality) reduce out-of-the-box accuracy. A benchmark on 25 French documents with 1,855 entities measured 29.5% F1 for spaCy alone. The hybrid approach (regex patterns, name and geography dictionaries) measures 32.34% F1 in v2.2.0. An earlier ~60% figure (Story 5.3) was not reproducible and has been withdrawn. Improving detection is planned, with a fine-tuned French model as the v3.0 target.
+The spaCy `fr_core_news_lg` model was trained primarily on news text, not interview transcripts or business documents. Domain-specific language patterns (conversational registers, mixed formality) reduce out-of-the-box accuracy. A benchmark on 25 French documents with 1,855 entities measured 29.5% F1 for spaCy alone. The hybrid approach (regex patterns, name and geography dictionaries) reaches 58.53% F1 in v2.2.0 (scored the way the app handles titles and prepositions). Improving detection is planned, with a fine-tuned French model as the v3.0 target.
 
 Fine-tuning with real-world validation data is planned for v3.0 (targeting 70-85% F1).
 
