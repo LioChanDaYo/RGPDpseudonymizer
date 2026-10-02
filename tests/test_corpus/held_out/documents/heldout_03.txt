@@ -1,0 +1,51 @@
+CONTRAT-CADRE DE PRESTATIONS ANALYTIQUES
+Version 1.3 - 22 janvier 2025
+
+ENTRE :
+
+Ferrolux Industrie SAS
+Siège social : 12 rue des Tanneurs, 49100 Angers
+RCS Angers 552 104 387
+Représentée par Mme Léonie Ambre Castagnier, Présidente
+Ci-après dénommée « FERROLUX »
+
+ET :
+
+Ondine Analytics Inc.
+Siège social : 410 Harbor Street, Portland, Oregon, USA
+Représentée par M. Padraig O'Sullivan, CEO
+Assistée de Mme Friederike von Ascheberg, General Counsel
+Ci-après dénommée « ONDINE »
+
+---
+
+1. OBJET
+
+ONDINE fournit à FERROLUX la plateforme Ondine Pulse pour l'analyse de la production des usines d'Angers et de Cholet. Le support de niveau 1 est assuré par Ondine Analytics Canada depuis Montréal.
+
+2. INTERLOCUTEURS
+
+Pour FERROLUX :
+- Mme Léonie Ambre Castagnier, Présidente (sponsor)
+- M. Yannick Le Gall, DSI
+- Mme Sixtine de Rocquigny, DPO
+
+Pour ONDINE :
+- M. Padraig O'Sullivan, CEO
+- Mme Friederike von Ascheberg, General Counsel
+- M. Kwame Asante-Boateng, Head of Customer Success EMEA (basé à Dublin)
+
+3. DONNÉES ET SOUS-TRAITANCE
+
+Les données de production sont hébergées en Irlande. Tout transfert vers les USA requiert l'accord écrit de la DPO de FERROLUX. ONDINE fait appel à un sous-traitant, Quillon Data Services, à Dublin.
+
+4. DROIT APPLICABLE
+
+Droit français. Tout litige est porté devant le Tribunal de commerce d'Angers, après une médiation conduite par le Centre de médiation de l'Anjou.
+
+5. SIGNATURES
+
+Pour FERROLUX : Mme Léonie Ambre Castagnier
+Pour ONDINE : M. Padraig O'Sullivan
+
+Document préparé par Me Romane Delacour-Iribarne, conseil de FERROLUX.

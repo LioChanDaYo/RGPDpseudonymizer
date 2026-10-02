@@ -1,0 +1,23 @@
+Entretien - Logistique portuaire et transition numérique
+Interviewée : Mme Maëlys Kerbrat, Directrice des opérations, Port de Brest
+Date : 6 mai 2025
+
+Interviewer : Madame Kerbrat, comment le port s'est-il modernisé ?
+
+Maëlys Kerbrat : Nous avons tout repris en 2023. Notre directeur général, M. Hugo de La Brosse, a lancé un programme de numérisation avec la Chambre de commerce de Bretagne occidentale.
+
+Interviewer : Avec quels partenaires ?
+
+Mme Kerbrat : Le premier, c'est Thalassia Shipping, un armateur grec installé au Pirée. Leur directeur Adriatique, M. Stavros Kalogeropoulos, vient chaque trimestre. Nous travaillons aussi avec le port de Gdańsk, où Mme Agnieszka Wróblewska pilote le même chantier, et avec celui de Bilbao.
+
+Interviewer : Et côté technologie ?
+
+Maëlys Kerbrat : Le système de suivi des conteneurs vient de Corvina Tech Irlande. Leur consultante, Mme Niamh McCarthy, a passé six mois à Brest. Le capteur de houle a été conçu par M. Aurélien Le Bihan, ingénieur à l'Université de Bretagne Occidentale.
+
+Interviewer : Des difficultés ?
+
+Mme Kerbrat : La cybersécurité. Notre RSSI, M. Tomasz Wiśniewski, a dû tout reprendre après une alerte de l'Agence maritime européenne. Il a été aidé par Dr Ingrid Solheim, qui vient de Bergen.
+
+Interviewer : Et la suite ?
+
+Maëlys Kerbrat : Une ligne directe vers Valparaíso, en partenariat avec Andes Cargo Chile. Leur responsable, M. Matías Errázuriz, sera à Brest en juin. Le COMEX doit encore valider l'investissement.
