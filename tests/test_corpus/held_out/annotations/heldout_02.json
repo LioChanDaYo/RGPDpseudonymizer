@@ -1,0 +1,251 @@
+{
+  "document_name": "heldout_02.txt",
+  "entities": [
+    {
+      "entity_text": "Valcourt Assurances",
+      "entity_type": "ORG",
+      "start_pos": 31,
+      "end_pos": 50
+    },
+    {
+      "entity_text": "quai de la Tournette",
+      "entity_type": "LOCATION",
+      "start_pos": 110,
+      "end_pos": 130
+    },
+    {
+      "entity_text": "Annecy",
+      "entity_type": "LOCATION",
+      "start_pos": 138,
+      "end_pos": 144
+    },
+    {
+      "entity_text": "Ophélie Ranchin",
+      "entity_type": "PERSON",
+      "start_pos": 163,
+      "end_pos": 178
+    },
+    {
+      "entity_text": "Gaspard du Pontavice",
+      "entity_type": "PERSON",
+      "start_pos": 205,
+      "end_pos": 225
+    },
+    {
+      "entity_text": "Héléna Matsouka",
+      "entity_type": "PERSON",
+      "start_pos": 236,
+      "end_pos": 251
+    },
+    {
+      "entity_text": "Aurore Lestringant",
+      "entity_type": "PERSON",
+      "start_pos": 263,
+      "end_pos": 281
+    },
+    {
+      "entity_text": "Basile Vandercruyssen",
+      "entity_type": "PERSON",
+      "start_pos": 292,
+      "end_pos": 313
+    },
+    {
+      "entity_text": "Florian Achterberg",
+      "entity_type": "PERSON",
+      "start_pos": 352,
+      "end_pos": 370
+    },
+    {
+      "entity_text": "Altarive Conseil",
+      "entity_type": "ORG",
+      "start_pos": 391,
+      "end_pos": 407
+    },
+    {
+      "entity_text": "Clémence de Varennes-Ollier",
+      "entity_type": "PERSON",
+      "start_pos": 424,
+      "end_pos": 451
+    },
+    {
+      "entity_text": "Inès Bouhafa",
+      "entity_type": "PERSON",
+      "start_pos": 503,
+      "end_pos": 515
+    },
+    {
+      "entity_text": "Lausanne",
+      "entity_type": "LOCATION",
+      "start_pos": 540,
+      "end_pos": 548
+    },
+    {
+      "entity_text": "du Pontavice",
+      "entity_type": "PERSON",
+      "start_pos": 592,
+      "end_pos": 604
+    },
+    {
+      "entity_text": "Valcourt Assurances Suisse",
+      "entity_type": "ORG",
+      "start_pos": 655,
+      "end_pos": 681
+    },
+    {
+      "entity_text": "Suisse",
+      "entity_type": "LOCATION",
+      "start_pos": 675,
+      "end_pos": 681
+    },
+    {
+      "entity_text": "Lausanne",
+      "entity_type": "LOCATION",
+      "start_pos": 698,
+      "end_pos": 706
+    },
+    {
+      "entity_text": "Reto Stalder",
+      "entity_type": "PERSON",
+      "start_pos": 714,
+      "end_pos": 726
+    },
+    {
+      "entity_text": "Chambéry",
+      "entity_type": "LOCATION",
+      "start_pos": 812,
+      "end_pos": 820
+    },
+    {
+      "entity_text": "Achterberg",
+      "entity_type": "PERSON",
+      "start_pos": 871,
+      "end_pos": 881
+    },
+    {
+      "entity_text": "Altarive Conseil",
+      "entity_type": "ORG",
+      "start_pos": 884,
+      "end_pos": 900
+    },
+    {
+      "entity_text": "Crédit Hérault-Lys",
+      "entity_type": "ORG",
+      "start_pos": 937,
+      "end_pos": 955
+    },
+    {
+      "entity_text": "Silvère Bonnafoux",
+      "entity_type": "PERSON",
+      "start_pos": 993,
+      "end_pos": 1010
+    },
+    {
+      "entity_text": "Montpellier",
+      "entity_type": "LOCATION",
+      "start_pos": 1038,
+      "end_pos": 1049
+    },
+    {
+      "entity_text": "Ranchin",
+      "entity_type": "PERSON",
+      "start_pos": 1065,
+      "end_pos": 1072
+    },
+    {
+      "entity_text": "Vandercruyssen",
+      "entity_type": "PERSON",
+      "start_pos": 1079,
+      "end_pos": 1093
+    },
+    {
+      "entity_text": "Valcourt",
+      "entity_type": "ORG",
+      "start_pos": 1109,
+      "end_pos": 1117
+    },
+    {
+      "entity_text": "de Varennes-Ollier",
+      "entity_type": "PERSON",
+      "start_pos": 1153,
+      "end_pos": 1171
+    },
+    {
+      "entity_text": "Autorité de contrôle des assurances",
+      "entity_type": "ORG",
+      "start_pos": 1176,
+      "end_pos": 1211
+    },
+    {
+      "entity_text": "Clémence de Varennes-Ollier",
+      "entity_type": "PERSON",
+      "start_pos": 1262,
+      "end_pos": 1289
+    },
+    {
+      "entity_text": "Thibaut Larrouy",
+      "entity_type": "PERSON",
+      "start_pos": 1329,
+      "end_pos": 1344
+    },
+    {
+      "entity_text": "Lisière Avocats",
+      "entity_type": "ORG",
+      "start_pos": 1367,
+      "end_pos": 1382
+    },
+    {
+      "entity_text": "Lestringant",
+      "entity_type": "PERSON",
+      "start_pos": 1449,
+      "end_pos": 1460
+    },
+    {
+      "entity_text": "Talentaria",
+      "entity_type": "ORG",
+      "start_pos": 1525,
+      "end_pos": 1535
+    },
+    {
+      "entity_text": "Agathe Pruvost-Mallard",
+      "entity_type": "PERSON",
+      "start_pos": 1555,
+      "end_pos": 1577
+    },
+    {
+      "entity_text": "Annecy",
+      "entity_type": "LOCATION",
+      "start_pos": 1601,
+      "end_pos": 1607
+    },
+    {
+      "entity_text": "Bâle",
+      "entity_type": "LOCATION",
+      "start_pos": 1636,
+      "end_pos": 1640
+    },
+    {
+      "entity_text": "Rhenia Re",
+      "entity_type": "ORG",
+      "start_pos": 1664,
+      "end_pos": 1673
+    },
+    {
+      "entity_text": "du Pontavice",
+      "entity_type": "PERSON",
+      "start_pos": 1704,
+      "end_pos": 1716
+    },
+    {
+      "entity_text": "Matsouka",
+      "entity_type": "PERSON",
+      "start_pos": 1763,
+      "end_pos": 1771
+    },
+    {
+      "entity_text": "Lucien Abgrall",
+      "entity_type": "PERSON",
+      "start_pos": 1901,
+      "end_pos": 1915
+    }
+  ]
+}

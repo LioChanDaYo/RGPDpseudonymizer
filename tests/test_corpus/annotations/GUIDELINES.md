@@ -262,4 +262,9 @@ Changes after approval (AC2). Each row is also recorded in the story's Dev Notes
 
 ## Pending amendments
 
-_None open._
+Raised while annotating the held-out set (2026-10-03). Held-out entity text is never quoted outside `held_out/`, so the cases are described by kind only.
+
+| # | Case | Current state |
+|---|------|---------------|
+| A8 | A region acronym inside a job title, such as "EMEA" in "Head of … EMEA". A7 covers place names; is a business-region acronym a place? | Not annotated |
+| A9 | An ORG name followed by "de" + a city, written in running text ("le laboratoire X de <ville>"): is the city part of the ORG name (one ORG + nested LOCATION under G7), or the ORG's location (ORG "X" + plain LOCATION)? Q5 covers names that clearly contain the place; Q12 covers "de + place" after a PERSON only | Annotated as ORG "X" + LOCATION "<ville>". The city is LOCATION under either reading; only the ORG span differs |

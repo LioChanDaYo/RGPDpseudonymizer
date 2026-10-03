@@ -1,0 +1,221 @@
+{
+  "document_name": "heldout_06.txt",
+  "entities": [
+    {
+      "entity_text": "Gwenola Kerhervé",
+      "entity_type": "PERSON",
+      "start_pos": 31,
+      "end_pos": 47
+    },
+    {
+      "entity_text": "Yanis Belkacem-Roux",
+      "entity_type": "PERSON",
+      "start_pos": 226,
+      "end_pos": 245
+    },
+    {
+      "entity_text": "Yanis",
+      "entity_type": "PERSON",
+      "start_pos": 277,
+      "end_pos": 282
+    },
+    {
+      "entity_text": "Kestrel Partners Royaume-Uni",
+      "entity_type": "ORG",
+      "start_pos": 293,
+      "end_pos": 321
+    },
+    {
+      "entity_text": "Royaume-Uni",
+      "entity_type": "LOCATION",
+      "start_pos": 310,
+      "end_pos": 321
+    },
+    {
+      "entity_text": "Manchester",
+      "entity_type": "LOCATION",
+      "start_pos": 325,
+      "end_pos": 335
+    },
+    {
+      "entity_text": "Évariste Montagnac",
+      "entity_type": "PERSON",
+      "start_pos": 380,
+      "end_pos": 398
+    },
+    {
+      "entity_text": "Aoife O'Donnell",
+      "entity_type": "PERSON",
+      "start_pos": 408,
+      "end_pos": 423
+    },
+    {
+      "entity_text": "Aoife",
+      "entity_type": "PERSON",
+      "start_pos": 463,
+      "end_pos": 468
+    },
+    {
+      "entity_text": "Rémi D'Auria",
+      "entity_type": "PERSON",
+      "start_pos": 492,
+      "end_pos": 504
+    },
+    {
+      "entity_text": "Calmar Sécurité",
+      "entity_type": "ORG",
+      "start_pos": 533,
+      "end_pos": 548
+    },
+    {
+      "entity_text": "Édimbourg",
+      "entity_type": "LOCATION",
+      "start_pos": 552,
+      "end_pos": 561
+    },
+    {
+      "entity_text": "Hamza El Ouardi",
+      "entity_type": "PERSON",
+      "start_pos": 570,
+      "end_pos": 585
+    },
+    {
+      "entity_text": "Hamza",
+      "entity_type": "PERSON",
+      "start_pos": 613,
+      "end_pos": 618
+    },
+    {
+      "entity_text": "Lysandre Labs Espagne",
+      "entity_type": "ORG",
+      "start_pos": 654,
+      "end_pos": 675
+    },
+    {
+      "entity_text": "Espagne",
+      "entity_type": "LOCATION",
+      "start_pos": 668,
+      "end_pos": 675
+    },
+    {
+      "entity_text": "Valence",
+      "entity_type": "LOCATION",
+      "start_pos": 679,
+      "end_pos": 686
+    },
+    {
+      "entity_text": "Rémi D'Auria",
+      "entity_type": "PERSON",
+      "start_pos": 703,
+      "end_pos": 715
+    },
+    {
+      "entity_text": "Théo Ravelonjanahary",
+      "entity_type": "PERSON",
+      "start_pos": 719,
+      "end_pos": 739
+    },
+    {
+      "entity_text": "Valmorel Conseil Portugal",
+      "entity_type": "ORG",
+      "start_pos": 765,
+      "end_pos": 790
+    },
+    {
+      "entity_text": "Portugal",
+      "entity_type": "LOCATION",
+      "start_pos": 782,
+      "end_pos": 790
+    },
+    {
+      "entity_text": "Porto",
+      "entity_type": "LOCATION",
+      "start_pos": 794,
+      "end_pos": 799
+    },
+    {
+      "entity_text": "Capucine Ollivier-Hamel",
+      "entity_type": "PERSON",
+      "start_pos": 806,
+      "end_pos": 829
+    },
+    {
+      "entity_text": "Bettina Kleinschmidt",
+      "entity_type": "PERSON",
+      "start_pos": 833,
+      "end_pos": 853
+    },
+    {
+      "entity_text": "UK",
+      "entity_type": "LOCATION",
+      "start_pos": 888,
+      "end_pos": 890
+    },
+    {
+      "entity_text": "Leeds",
+      "entity_type": "LOCATION",
+      "start_pos": 900,
+      "end_pos": 905
+    },
+    {
+      "entity_text": "Octavien de Saint-Pol",
+      "entity_type": "PERSON",
+      "start_pos": 920,
+      "end_pos": 941
+    },
+    {
+      "entity_text": "Octavien",
+      "entity_type": "PERSON",
+      "start_pos": 991,
+      "end_pos": 999
+    },
+    {
+      "entity_text": "Mutuelle des Artisans du Morbihan",
+      "entity_type": "ORG",
+      "start_pos": 1011,
+      "end_pos": 1044
+    },
+    {
+      "entity_text": "Morbihan",
+      "entity_type": "LOCATION",
+      "start_pos": 1036,
+      "end_pos": 1044
+    },
+    {
+      "entity_text": "Ollivier-Hamel",
+      "entity_type": "PERSON",
+      "start_pos": 1088,
+      "end_pos": 1102
+    },
+    {
+      "entity_text": "Solène Abiven",
+      "entity_type": "PERSON",
+      "start_pos": 1168,
+      "end_pos": 1181
+    },
+    {
+      "entity_text": "Kenji Morimoto-Lefort",
+      "entity_type": "PERSON",
+      "start_pos": 1190,
+      "end_pos": 1211
+    },
+    {
+      "entity_text": "Vigilia Formation",
+      "entity_type": "ORG",
+      "start_pos": 1264,
+      "end_pos": 1281
+    },
+    {
+      "entity_text": "Gwenola Kerhervé",
+      "entity_type": "PERSON",
+      "start_pos": 1343,
+      "end_pos": 1359
+    },
+    {
+      "entity_text": "Valmorel Conseil SA",
+      "entity_type": "ORG",
+      "start_pos": 1365,
+      "end_pos": 1384
+    }
+  ]
+}
