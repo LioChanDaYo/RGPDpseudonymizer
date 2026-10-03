@@ -378,3 +378,40 @@ class TestPerDocumentBreakdown:
                 f"  {r.doc_name:40s} P={m.precision:.2f} R={m.recall:.2f} "
                 f"F1={m.f1:.2f} TP={tp} FP={fp} FN={fn}"
             )
+
+
+# ===========================================================================
+# Held-out set — Story 10.1 (AC 6)
+# ===========================================================================
+
+
+@pytest.mark.accuracy
+@pytest.mark.slow
+class TestHeldOutMetrics:
+    """AC6 (Story 10.1): the held-out set is scored separately.
+
+    Only the four aggregate lines are printed. No per-document, edge-case,
+    confidence or entity-text output: detector stories may read held-out
+    aggregates only (tests/test_corpus/held_out/README.md). Assertion
+    messages carry counts only.
+    """
+
+    def test_held_out_aggregate_metrics(
+        self, held_out_results: list[DocumentResult]
+    ) -> None:
+        assert (
+            len(held_out_results) >= 5
+        ), f"Expected at least 5 held-out documents, got {len(held_out_results)}"
+        m = _aggregate(held_out_results)
+        print(
+            f"\n[HELD-OUT Overall] P={m.precision:.4f} R={m.recall:.4f} "
+            f"F1={m.f1:.4f} TP={m.tp} FP={m.fp} FN={m.fn} "
+            f"FN%={m.fn_rate:.2f} FP%={m.fp_rate:.2f}"
+        )
+        for entity_type in ENTITY_TYPES:
+            mt = _aggregate(held_out_results, entity_type)
+            print(
+                f"[HELD-OUT {entity_type}] P={mt.precision:.4f} R={mt.recall:.4f} "
+                f"F1={mt.f1:.4f} TP={mt.tp} FP={mt.fp} FN={mt.fn}"
+            )
+        assert m.tp + m.fn > 0, "Held-out set has no ground-truth entities"
