@@ -28,7 +28,7 @@ held_out/
 
 ## Authoring and annotation
 
-- The text was authored by an LLM agent (Story 10.1 dev agent), reviewed by Lionel on _pending (STOP B)_. No LLM-calling script or prompt is committed.
+- Text authored by an LLM agent (the Story 10.1 dev agent), reviewed by Lionel on 2026-10-03. No LLM-calling script or prompt is committed.
 - All people, companies and records are invented. No user data and no real public figures (product constraint 4).
 - The documents are seeded with the same kinds of hard case as the main corpus (particle surnames, Mc/Mac names, apostrophes, greeting and salutation lines, a "Last, First" name, initials, role acronyms, organisation + country, places inside organisation names, foreign places, US/UK abbreviations, defined-term aliases). The strings themselves do not come from the main corpus.
 - Annotations are made **by hand** under [`../annotations/GUIDELINES.md`](../annotations/GUIDELINES.md), after Lionel has reviewed the text (STOP B). They are never pre-annotated by `HybridDetector`, by the analysis scripts, or by `scripts/auto_annotate_corpus.py` (retired in Story 10.1; it must never be used here).
