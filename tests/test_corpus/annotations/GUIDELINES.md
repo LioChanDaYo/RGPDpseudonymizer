@@ -1,13 +1,13 @@
 # Annotation Guidelines: NER Benchmark Corpus
 
-**Status:** APPROVED by Lionel on 2026-10-02 (STOP A, Story 10.1). Reviewed draft: commit `e7835a3`, sha256 `57ceba37a60014c900637c441c95db3b4fc8e3c059821486698b604d101fe37e`. Part A was approved as drafted. Part B records his answers; three of them changed the proposed default (Q3, Q5, Q14). The decision record is at the end of this file.
+**Status:** APPROVED by Lionel on 2026-10-02 (STOP A, Story 10.1). Reviewed draft: commit `e7835a3`, sha256 `57ceba37a60014c900637c441c95db3b4fc8e3c059821486698b604d101fe37e`. Part A was approved as drafted. Part B records his answers; three of them changed the proposed default (Q3, Q5, Q14). The decision record is at the end of this file. Amendments A1–A6 and A7 were decided by Lionel on 2026-10-03 (Part C).
 **Scope:** the 25 documents in `tests/test_corpus/` (main corpus) and the held-out set in `tests/test_corpus/held_out/` (Story 10.1, Task 4).
 **Entity types:** `PERSON`, `LOCATION`, `ORG` (schema in `README.md`).
 
 ## How to read this document
 
 - Every rule has a stable ID (`G…` general, `P…` PERSON, `O…` ORG, `L…` LOCATION). Each annotation edit cites one ID in the change log. The JSON stays as it is: citations are kept out of the annotation files.
-- **Part A** lists rules settled by Epic 10 or Story 10.1, plus G7 (nesting), which Lionel added at approval. **Part B** holds the rules decided at STOP A from the open questions. They keep their IDs `Q1`–`Q18`, so a change-log row cites e.g. `Q14`.
+- **Part A** lists rules settled by Epic 10 or Story 10.1, plus G7 (nesting), which Lionel added at approval. **Part B** holds the rules decided at STOP A from the open questions. They keep their IDs `Q1`–`Q18`, so a change-log row cites e.g. `Q14`. **Part C** holds the amendments decided on 2026-10-03 (`A1`–`A7`). They are cited the same way.
 - Examples are quoted from the corpus as `document: "text"`. **+** marks a correct annotation, **−** marks the current annotation that the rule corrects.
 - After approval, a rule changes only through the Amendments table (end of file). A case no approved rule covers goes back to Lionel first. It is not annotated in the meantime (AC2).
 
@@ -37,12 +37,16 @@
 
 **G6. Annotate the text, not a tool's output.** Each annotation follows from a rule applied to the text. A detector hit can point at a candidate on the main corpus, but it never justifies an annotation by itself. Held-out annotations are made by hand, never pre-annotated by the detector or `auto_annotate_corpus.py`. [Story 10.1, AC5, Judgment Calls]
 
-**G7. Nesting: a place inside an ORG name is also a LOCATION.** When an ORG name contains a word or phrase that names a place, the whole name is ORG, and the place gets its own LOCATION annotation inside it. This is the only cross-type overlap allowed. It covers org + country/region/city (Q3) and organisations named after a place (Q5). [Lionel, STOP A, 2026-10-02: one rule for Q3 and Q5]
-- + `interview_01`: "Microsoft France" → ORG "Microsoft France" + LOCATION "France".
+**G7. Nesting: a place inside an ORG name gets a nested LOCATION only if it says where the organisation is.** Ask: *does this place tell me where this organisation, or this branch of it, is?* If it does, the whole name is ORG and the place also gets its own LOCATION inside it. If the place word is just part of a brand name, nothing is nested. Nesting is limited to places: an ORG never contains a nested PERSON (A1), and a PERSON never contains a nested LOCATION. This is the only cross-type overlap allowed. [Lionel, STOP A 2026-10-02 (one rule for Q3 and Q5); meaning test added by amendment A2, 2026-10-03]
+- + `interview_01`: "Microsoft France" → ORG "Microsoft France" + LOCATION "France" (the French branch).
 - + `interview_13`: "INSA Lyon" → ORG "INSA Lyon" + LOCATION "Lyon".
 - + `interview_04`: "CHU de Lille" → ORG "CHU de Lille" + LOCATION "Lille". `interview_06`: "Banque de France" → ORG + LOCATION "France".
 - + `interview_03`: "Préfecture de la Gironde" → ORG + LOCATION "Gironde" (preposition and article outside the LOCATION, L2).
-- A place used outside any ORG name is a plain LOCATION (L1). A PERSON never contains a nested LOCATION. Whether an ORG may contain a nested PERSON is pending (A1). Whether a brand derived from a place name gets a nested LOCATION is pending (A2).
+- + `interview_09`: "Banque Régionale du Sud" → ORG + LOCATION "Sud" (the bank of the South: it says where the bank is, A3).
+- − `interview_15`: "Palo Alto Networks" → ORG only. The place word is part of the brand.
+- − `interview_03`: "Orange Business Services", `interview_11`: "Orange Cyberdefense" → ORG only. Here "Orange" is a company name, not the city (Lionel).
+- − `interview_01`: "Université Claude Bernard", `board_minutes`: "CMS Francis Lefebvre" → ORG only, no nested PERSON (A1).
+- A place used outside any ORG name is a plain LOCATION (L1).
 
 ### PERSON
 
@@ -218,25 +222,44 @@ Approved by Lionel on 2026-10-02. Reviewed draft: commit `e7835a3`, sha256 `57ce
 | Q5 | **Changed.** Proposed: one ORG, no nesting of any type. Decided: ORG + nested LOCATION |
 | Q14 | **Changed.** Proposed: LOCATION as a noun, nothing as an adjective. Decided: always LOCATION, every occurrence |
 
+## Part C: Amendments decided on 2026-10-03
+
+These came up during the repair. Lionel decided them on 2026-10-03. Cite them by ID.
+
+**A1. A person's name inside an ORG name.** ORG only, no nested PERSON. G7 nesting is limited to places.
+- `interview_01`: "Université Claude Bernard"; `interview_05`: "Mercier & Associés"; `board_minutes`: "CMS Francis Lefebvre", "Bredin Prat", "August Debouzy"; `meeting_minutes`: "Michael Page" → ORG only.
+
+**A2. Place words in ORG names are judged by meaning (G7 test).** Nest a LOCATION only when the place says where the organisation or branch is ("Microsoft France", "INSA Lyon", "CHU de Lille"). A place word that is part of a brand name gets nothing ("Palo Alto Networks", "Orange Business Services", "Orange Cyberdefense").
+
+**A3. Compass-point regions.** A capitalised "le Nord" / "le Sud" used as a region is LOCATION. The span is the name without the article ("Nord", "Sud"): the article is not part of the name, as with "la France", unlike "la Défense" (Q15). Inside an ORG name it follows G7 ("Sud" in "Banque Régionale du Sud" is nested: it says where the bank is). Lowercase directions ("au nord de") are not annotated.
+- `interview_14`: "Mme Carole Petit pour le Nord", "Mme Nadia Kadem pour le Sud" → LOCATION "Nord", "Sud".
+
+**A4. "l'État" as an actor** is not annotated. Named state bodies stay ORG (O1).
+- `interview_13`: "L'État soutient via l'ANCT" → nothing for "État"; ORG "ANCT".
+
+**A5. "EU"** is treated like "UE" (Q14): always LOCATION, at every occurrence.
+- `partnership_agreement`: "Autres pays EU", "Mme Emer Cooke (EU)" → LOCATION "EU".
+
+**A6. Arrondissements are their own LOCATION.** "Paris 16ème" = LOCATION "Paris" + LOCATION "16ème". A bare "du 7ème" = LOCATION "7ème", with the preposition excluded (L2). Postcodes stay unannotated (Q16).
+- `contract_memo`: "Paris 16ème"; `interview_13`: "M. Jean-Yves Sécheresse du 7ème".
+
+**A7. A place inside a job title or team name is LOCATION** (L1). The job title or team itself is still not annotated (O2, P6, Q7). This was confirmed by Lionel on 2026-10-03; it had been applied at the repair as an interpretation.
+- `partnership_agreement`: "VP Europe" (7), "Regional Manager France", "Équipe Europe"; `contract_memo`: "VP Sales Europe"; `interview_12`: "Leur directeur France" → LOCATION on the place word.
+
 ## Amendments
 
 Changes after approval (AC2). Each row is also recorded in the story's Dev Notes "Guidelines Approval Record".
 
 | Date | Rule ID | Change | Approved by |
 |------|---------|--------|-------------|
-| | | | |
+| 2026-10-03 | A1 | A person's name inside an ORG name: ORG only, no nested PERSON | Lionel |
+| 2026-10-03 | A2, G7 | G7 rewritten to a meaning test: nest a place only if it says where the organisation or branch is; brand-name place words get nothing | Lionel |
+| 2026-10-03 | A3 | Capitalised "le Nord" / "le Sud" as a region is LOCATION; inside an ORG it follows G7; lowercase directions are not annotated | Lionel |
+| 2026-10-03 | A4 | "l'État" as an actor is not annotated | Lionel |
+| 2026-10-03 | A5 | "EU" is always LOCATION, like "UE" | Lionel |
+| 2026-10-03 | A6 | An arrondissement is its own LOCATION ("16ème", "7ème"). This changed the proposed default, which was to leave it unannotated | Lionel |
+| 2026-10-03 | A7 | A place inside a job title or team name is LOCATION (interpretation confirmed) | Lionel |
 
-## Pending amendments (raised during the repair, not yet decided)
+## Pending amendments
 
-Cases that no approved rule covers, raised during the Story 10.1 repair. They go back to Lionel; until each is decided, the case is **not annotated** (AC2). The examples below are corpus examples.
-
-| # | Case | Corpus examples | Current state |
-|---|------|-----------------|---------------|
-| A1 | A person's name inside an ORG name: nested PERSON or not? | `interview_01`: "Université Claude Bernard"; `interview_05`: "Mercier & Associés" (the firm of Me Antoine Mercier); `board_minutes`: "CMS Francis Lefebvre", "Bredin Prat", "August Debouzy", "Rothschild & Co"; `meeting_minutes`: "Michael Page" | ORG only, no nested PERSON |
-| A2 | A brand derived from a place name: nested LOCATION under G7? | `interview_15`: "Palo Alto Networks"; `interview_03`: "Orange Business Services"; `interview_11`: "Orange Cyberdefense" | ORG only, no nested LOCATION |
-| A3 | Compass-point regions | `interview_14`: "Mme Carole Petit pour le Nord", "Mme Nadia Kadem pour le Sud"; `interview_09`: "Banque Régionale du Sud" | Not annotated (the ORG is annotated) |
-| A4 | "l'État" as an actor | `interview_13`: "L'État soutient via l'ANCT" | Not annotated |
-| A5 | "EU", the English form of "UE" (Q14 lists "UE" only) | `partnership_agreement`: "Autres pays EU", "Mme Emer Cooke (EU)" | Not annotated |
-| A6 | Arrondissement numbers | `interview_13`: "M. Jean-Yves Sécheresse du 7ème"; `contract_memo`: "Paris 16ème" (only "Paris" annotated) | Not annotated |
-
-**Interpretation applied, for confirmation at STOP C:** a place name inside a job title or team name is annotated as LOCATION under L1, because it names a geographic place. The job title itself is still not annotated (O2, P6). This is consistent with the Q14 decision on "directeur UK". Examples: `partnership_agreement`: "VP Europe" (7), "Regional Manager France", "Équipe Europe"; `contract_memo`: "VP Sales Europe"; `interview_12`: "Leur directeur France". If Lionel decides otherwise, these LOCATION spans are removed under an amendment.
+_None open._

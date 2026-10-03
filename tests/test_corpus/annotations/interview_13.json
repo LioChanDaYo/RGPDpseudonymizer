@@ -98,6 +98,12 @@
       "end_pos": 678
     },
     {
+      "entity_text": "7ème",
+      "entity_type": "LOCATION",
+      "start_pos": 682,
+      "end_pos": 686
+    },
+    {
       "entity_text": "Thomas Weber",
       "entity_type": "PERSON",
       "start_pos": 731,

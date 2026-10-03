@@ -276,6 +276,12 @@
       "entity_type": "LOCATION",
       "start_pos": 1798,
       "end_pos": 1803
+    },
+    {
+      "entity_text": "16ème",
+      "entity_type": "LOCATION",
+      "start_pos": 1804,
+      "end_pos": 1809
     }
   ]
 }

@@ -7,20 +7,20 @@ This directory contains ground truth annotations for the GDPR Pseudonymizer test
 ## Statistics
 
 - **Total Documents**: 25 (15 interview transcripts + 10 business documents)
-- **Total Entities**: 2,205 (after the Story 10.1 repair; 1,737 before)
+- **Total Entities**: 2,215 (after the Story 10.1 repair; 1,737 before)
 - **Entity Distribution**:
   - PERSON: 1,328 entities
-  - LOCATION: 253 entities (97 of them nested inside an ORG name, GUIDELINES rule G7)
+  - LOCATION: 263 entities (101 of them nested inside an ORG name, GUIDELINES rule G7)
   - ORG: 624 entities
 
-All annotations follow [`GUIDELINES.md`](GUIDELINES.md), approved by Lionel on 2026-10-02. The per-edit change log of the repair is in `docs/qa/10.1-annotation-change-log.md`.
+All annotations follow [`GUIDELINES.md`](GUIDELINES.md), approved by Lionel on 2026-10-02 and amended on 2026-10-03 (A1–A7). The per-edit change log of the repair is in `docs/qa/10.1-annotation-change-log.md`.
 
 ## Acceptance Criteria Verification
 
 | Entity Type | Required | Actual | Status |
 |-------------|----------|--------|--------|
 | PERSON      | 100      | 1,328  | ✓ PASS |
-| LOCATION    | 50       | 253    | ✓ PASS |
+| LOCATION    | 50       | 263    | ✓ PASS |
 | ORG         | 30       | 624    | ✓ PASS |
 
 ## Annotation Schema
@@ -51,7 +51,7 @@ Each annotation file follows this JSON schema:
 
 ## Annotation Policy: Titles
 
-The full annotation policy is [`GUIDELINES.md`](GUIDELINES.md) (rule IDs G1–G7, P1–P6, O1–O4, L1–L3, Q1–Q18). The title rule below is its rule P2, which also excludes "MM.", "Mlle" and "Docteur".
+The full annotation policy is [`GUIDELINES.md`](GUIDELINES.md) (rule IDs G1–G7, P1–P6, O1–O4, L1–L3, Q1–Q18, A1–A7). The title rule below is its rule P2, which also excludes "MM.", "Mlle" and "Docteur".
 
 **Policy (Story 5.3):** French honorific titles are **excluded** from PERSON entity text.
 

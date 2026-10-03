@@ -338,6 +338,12 @@
       "end_pos": 2166
     },
     {
+      "entity_text": "EU",
+      "entity_type": "LOCATION",
+      "start_pos": 2180,
+      "end_pos": 2182
+    },
+    {
       "entity_text": "Thomas Weber",
       "entity_type": "PERSON",
       "start_pos": 2216,
@@ -1320,6 +1326,12 @@
       "entity_type": "PERSON",
       "start_pos": 6996,
       "end_pos": 7006
+    },
+    {
+      "entity_text": "EU",
+      "entity_type": "LOCATION",
+      "start_pos": 7008,
+      "end_pos": 7010
     },
     {
       "entity_text": "CNIL",

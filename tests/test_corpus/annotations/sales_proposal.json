@@ -14,6 +14,12 @@
       "end_pos": 125
     },
     {
+      "entity_text": "Sud",
+      "entity_type": "LOCATION",
+      "start_pos": 122,
+      "end_pos": 125
+    },
+    {
       "entity_text": "Avenue de la République",
       "entity_type": "LOCATION",
       "start_pos": 148,
@@ -71,6 +77,12 @@
       "entity_text": "Banque Régionale du Sud",
       "entity_type": "ORG",
       "start_pos": 690,
+      "end_pos": 713
+    },
+    {
+      "entity_text": "Sud",
+      "entity_type": "LOCATION",
+      "start_pos": 710,
       "end_pos": 713
     },
     {
@@ -569,6 +581,12 @@
       "entity_text": "Banque Régionale du Sud",
       "entity_type": "ORG",
       "start_pos": 5551,
+      "end_pos": 5574
+    },
+    {
+      "entity_text": "Sud",
+      "entity_type": "LOCATION",
+      "start_pos": 5571,
       "end_pos": 5574
     },
     {

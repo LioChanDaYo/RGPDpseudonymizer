@@ -218,6 +218,12 @@
       "end_pos": 1487
     },
     {
+      "entity_text": "Nord",
+      "entity_type": "LOCATION",
+      "start_pos": 1496,
+      "end_pos": 1500
+    },
+    {
       "entity_text": "Stéphane Martin",
       "entity_type": "PERSON",
       "start_pos": 1505,
@@ -240,6 +246,12 @@
       "entity_type": "PERSON",
       "start_pos": 1556,
       "end_pos": 1567
+    },
+    {
+      "entity_text": "Sud",
+      "entity_type": "LOCATION",
+      "start_pos": 1576,
+      "end_pos": 1579
     },
     {
       "entity_text": "François Leroux",
