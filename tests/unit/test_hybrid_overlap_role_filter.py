@@ -263,6 +263,29 @@ class TestRoleFilterKeepsPlace:
             ("Zorbalie", 10, 18)
         ]
 
+    def test_place_never_matched_inside_a_longer_word(
+        self, detector: HybridDetector, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        # QA REL-001: invented lower-case region "ente" also occurs inside
+        # "Ventes"; the emitted span must be the standalone word.
+        monkeypatch.setattr(hd, "_load_geography_region_words", lambda: ["ente"])
+        load_org_role_filter.cache_clear()
+        doc = "VP Ventes ente"
+        merged = detector._merge_entities([_ent(doc, "ORG", 0, "spacy")], [], doc)
+        assert [(e.text, e.start_pos, e.end_pos) for e in merged] == [("ente", 10, 14)]
+
+    def test_adjacent_places_without_connector_are_separate(
+        self, detector: HybridDetector, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        # QA REQ-002: only de/du/des/d' join places.
+        monkeypatch.setattr(
+            hd, "_load_geography_region_words", lambda: ["Zorbalie", "Quentrie"]
+        )
+        load_org_role_filter.cache_clear()
+        doc = "VP Zorbalie Quentrie"
+        merged = detector._merge_entities([_ent(doc, "ORG", 0, "spacy")], [], doc)
+        assert [e.text for e in merged] == ["Zorbalie", "Quentrie"]
+
     def test_emitted_place_deduplicated_with_existing_location(
         self, detector: HybridDetector
     ) -> None:
@@ -590,3 +613,39 @@ class TestSameTypeDedup:
                         and k.start_pos <= pos < k.end_pos
                         for k in out
                     ), (doc, e, out)
+
+    def test_large_input_uses_an_active_window(self, detector: HybridDetector) -> None:
+        """QA PERF-001: the walk only compares against overlapping candidates.
+
+        20,000 entities in a long synthetic document, with overlapping pairs
+        every few entities. A full O(n^2) scan took about 2 s for 16,000 entities
+        (QA probe); the active window keeps this far below 1 s.
+        """
+        import time
+
+        entities: list[DetectedEntity] = []
+        for i in range(10_000):
+            base = i * 40
+            entities.append(_ent("Zorbalia Quentin", "PERSON", base, "spacy"))
+            entities.append(_ent("Quentin", "PERSON", base + 9, "regex"))
+        start = time.perf_counter()
+        out = detector._dedup_same_type_overlaps(entities)
+        elapsed = time.perf_counter() - start
+        assert len(out) == 10_000
+        assert all(e.text == "Zorbalia Quentin" for e in out)
+        assert elapsed < 1.0, elapsed
+
+    def test_window_keeps_rechecking_retired_entities_after_a_union(
+        self, detector: HybridDetector
+    ) -> None:
+        """A union that starts before the walk position is compared again
+        with retired entities that reach into it (same result as a full scan).
+        """
+        doc = "Zorbalia Quentin Vardel Morrix"
+        a = _ent("Zorbalia Quentin", "PERSON", 0, "spacy")  # [0, 16)
+        b = _ent("Quentin Vardel", "PERSON", 9, "regex")  # [9, 23) partial with a
+        c = _ent("Vardel Morrix", "PERSON", 17, "regex")  # [17, 30) partial with b
+        out = detector._dedup_same_type_overlaps([a, b, c], doc)
+        assert [(e.text, e.start_pos, e.end_pos) for e in out] == [
+            ("Zorbalia Quentin Vardel Morrix", 0, 30)
+        ]

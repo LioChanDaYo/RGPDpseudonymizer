@@ -142,8 +142,12 @@ def _match_org_role_places(text: str) -> tuple[str | None, list[str]]:
         for phrase in role_filter.region_phrases:
             if tuple(tokens[i : i + len(phrase)]) == phrase:
                 has_content = True
-                if places and all(
-                    tokens[k] in _PLACE_JOINERS for k in range(places[-1][1], i)
+                if (
+                    places
+                    and i > places[-1][1]
+                    and all(
+                        tokens[k] in _PLACE_JOINERS for k in range(places[-1][1], i)
+                    )
                 ):
                     places[-1][1] = i + len(phrase)
                 else:
@@ -190,10 +194,14 @@ class HybridDetector(EntityDetector):
         - Exact overlap (same span or same title-stripped text) → Keep spaCy entity
         - No overlap → Keep both entities
         - Different-type partial overlap → Flag regex entity as ambiguous, keep both
-        - Same-type overlap → One entity kept (Story 10.2 AC1: containment keeps
-          the containing span unless C1/C2 apply; partial overlap prefers spaCy,
-          then the longer core; ties broken deterministically)
-        - ORG whose whole text is a job title or role acronym → Dropped (AC3)
+        - Same-type overlap → One span kept (Story 10.2 AC1, PR #81 review):
+          containment keeps the containing span, unless C1 (lower-case,
+          digit-free extra words → inner span) or the C2 trim (a containing
+          span crossing a line break is cut at the break when it still
+          contains the inner span) applies; a partial overlap becomes the
+          union span (source "merged"); ties broken deterministically
+        - ORG whose whole text is a job title or role acronym → Dropped (AC3);
+          the place named in a dropped VP title is kept as a LOCATION
 
     Attributes:
         spacy_detector: SpaCyDetector instance for NLP-based detection
@@ -636,7 +644,12 @@ class HybridDetector(EntityDetector):
         result: list[DetectedEntity] = []
         cursor = 0
         for phrase in places:
-            pattern = r"\s+".join(re.escape(tok) for tok in phrase.split())
+            # whole words only: never inside a longer word ("est" in "investir")
+            pattern = (
+                r"(?<!\w)"
+                + r"\s+".join(re.escape(tok) for tok in phrase.split())
+                + r"(?!\w)"
+            )
             match = re.compile(pattern).search(raw, cursor)
             if match is None:
                 continue
@@ -803,14 +816,35 @@ class HybridDetector(EntityDetector):
         ordered = sorted(
             entities, key=lambda e: (e.start_pos, -e.end_pos, e.source != "spacy")
         )
-        kept: list[DetectedEntity] = []
+        # Active window: kept entities that end at or before the walk position
+        # can never overlap a later entity, so they are retired. A replacement
+        # (union / trimmed span) can start before the walk position; only then
+        # are the retired entities that reach into it compared again. Entries
+        # carry their insertion number so that comparisons and the result keep
+        # the exact insertion order (same outcome as a full scan).
+        active: list[tuple[int, DetectedEntity]] = []
+        retired: list[tuple[int, DetectedEntity]] = []
+        seq = 0
         for entity in ordered:
+            walk_pos = entity.start_pos
+            still_active: list[tuple[int, DetectedEntity]] = []
+            for item in active:
+                (retired if item[1].end_pos <= walk_pos else still_active).append(item)
+            active = still_active
             current: DetectedEntity | None = entity
             while current is not None:
-                rivals: list[tuple[DetectedEntity, str]] = []
-                replaced: tuple[DetectedEntity, DetectedEntity, str] | None = None
+                candidates = active
+                if current.start_pos < walk_pos:
+                    reach = [r for r in retired if r[1].end_pos > current.start_pos]
+                    if reach:
+                        candidates = sorted(active + reach, key=lambda item: item[0])
+                rivals: list[tuple[tuple[int, DetectedEntity], str]] = []
+                replaced: (
+                    tuple[tuple[int, DetectedEntity], DetectedEntity, str] | None
+                ) = None
                 lost: tuple[DetectedEntity, str] | None = None
-                for other in kept:
+                for item in candidates:
+                    other = item[1]
                     if (
                         other.entity_type != current.entity_type
                         or other.end_pos <= current.start_pos
@@ -824,26 +858,39 @@ class HybridDetector(EntityDetector):
                         lost = (other, reason)
                         break
                     if result is current:
-                        rivals.append((other, reason))
+                        rivals.append((item, reason))
                         continue
-                    replaced = (other, result, reason)
+                    replaced = (item, result, reason)
                     break
                 if lost is not None:
                     self._log_dedup(lost[0], current, lost[1])
                     current = None
                 elif replaced is not None:
-                    other, result, reason = replaced
-                    kept.remove(other)
-                    self._log_dedup(result, other, reason)
+                    item, result, reason = replaced
+                    self._remove_kept(item, active, retired)
+                    self._log_dedup(result, item[1], reason)
                     self._log_dedup(result, current, reason)
                     current = result
                 else:
-                    for other, reason in rivals:
-                        kept.remove(other)
-                        self._log_dedup(current, other, reason)
-                    kept.append(current)
+                    for item, reason in rivals:
+                        self._remove_kept(item, active, retired)
+                        self._log_dedup(current, item[1], reason)
+                    active.append((seq, current))
+                    seq += 1
                     current = None
-        return kept
+        return [e for _, e in sorted(active + retired, key=lambda item: item[0])]
+
+    @staticmethod
+    def _remove_kept(
+        item: tuple[int, DetectedEntity],
+        active: list[tuple[int, DetectedEntity]],
+        retired: list[tuple[int, DetectedEntity]],
+    ) -> None:
+        """Remove a kept entry from whichever window list holds it."""
+        if item in active:
+            active.remove(item)
+        else:
+            retired.remove(item)
 
     @staticmethod
     def _log_dedup(kept: DetectedEntity, dropped: DetectedEntity, reason: str) -> None:

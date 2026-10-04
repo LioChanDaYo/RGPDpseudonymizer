@@ -296,10 +296,14 @@ class TestHybridDetector:
         assert merged[0].start_pos == 10  # Paris comes first
         assert merged[1].start_pos == 20  # M. Dupont comes second
 
-    def test_merge_entities_partial_overlap_same_type(
+    def test_merge_entities_containment_same_type(
         self, detector: HybridDetector
     ) -> None:
-        """Same-type overlap keeps one entity, unflagged (Story 10.2 AC1).
+        """Same-type containment keeps one entity, unflagged (Story 10.2 AC1).
+
+        Renamed from test_merge_entities_partial_overlap_same_type (QA
+        TEST-001): "Dubois" lies inside "Marie Dubois", a containment. True
+        partial overlaps (union) are tested in test_hybrid_overlap_role_filter.
 
         Rewritten for Story 10.2: v2.2 kept both and flagged the regex one.
         "Marie Dubois" is 12 characters (end_pos=12; was 13, off by one).
