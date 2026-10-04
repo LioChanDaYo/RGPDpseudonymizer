@@ -13,7 +13,7 @@ This directory contains ground truth annotations for the GDPR Pseudonymizer test
   - LOCATION: 263 entities (101 of them nested inside an ORG name, GUIDELINES rule G7)
   - ORG: 624 entities
 
-All annotations follow [`GUIDELINES.md`](GUIDELINES.md), approved by Lionel on 2026-10-02 and amended on 2026-10-03 (A1–A7). The per-edit change log of the repair is in `docs/qa/10.1-annotation-change-log.md`.
+All annotations follow [`GUIDELINES.md`](GUIDELINES.md), approved by Lionel on 2026-10-02 and amended on 2026-10-03 and 2026-10-04 (A1–A9). The per-edit change log of the repair is in `docs/qa/10.1-annotation-change-log.md`.
 
 ## Acceptance Criteria Verification
 
@@ -51,7 +51,7 @@ Each annotation file follows this JSON schema:
 
 ## Annotation Policy: Titles
 
-The full annotation policy is [`GUIDELINES.md`](GUIDELINES.md) (rule IDs G1–G7, P1–P6, O1–O4, L1–L3, Q1–Q18, A1–A7). The title rule below is its rule P2, which also excludes "MM.", "Mlle" and "Docteur".
+The full annotation policy is [`GUIDELINES.md`](GUIDELINES.md) (rule IDs G1–G7, P1–P6, O1–O4, L1–L3, Q1–Q18, A1–A9). The title rule below is its rule P2, which also excludes "MM.", "Mlle" and "Docteur".
 
 **Policy (Story 5.3):** French honorific titles are **excluded** from PERSON entity text.
 
