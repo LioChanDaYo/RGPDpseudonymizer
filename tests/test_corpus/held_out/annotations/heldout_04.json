@@ -1,0 +1,215 @@
+{
+  "document_name": "heldout_04.txt",
+  "entities": [
+    {
+      "entity_text": "Maëlys Kerbrat",
+      "entity_type": "PERSON",
+      "start_pos": 75,
+      "end_pos": 89
+    },
+    {
+      "entity_text": "Port de Brest",
+      "entity_type": "ORG",
+      "start_pos": 118,
+      "end_pos": 131
+    },
+    {
+      "entity_text": "Brest",
+      "entity_type": "LOCATION",
+      "start_pos": 126,
+      "end_pos": 131
+    },
+    {
+      "entity_text": "Kerbrat",
+      "entity_type": "PERSON",
+      "start_pos": 172,
+      "end_pos": 179
+    },
+    {
+      "entity_text": "Maëlys Kerbrat",
+      "entity_type": "PERSON",
+      "start_pos": 219,
+      "end_pos": 233
+    },
+    {
+      "entity_text": "Hugo de La Brosse",
+      "entity_type": "PERSON",
+      "start_pos": 296,
+      "end_pos": 313
+    },
+    {
+      "entity_text": "Chambre de commerce de Bretagne occidentale",
+      "entity_type": "ORG",
+      "start_pos": 360,
+      "end_pos": 403
+    },
+    {
+      "entity_text": "Bretagne occidentale",
+      "entity_type": "LOCATION",
+      "start_pos": 383,
+      "end_pos": 403
+    },
+    {
+      "entity_text": "Kerbrat",
+      "entity_type": "PERSON",
+      "start_pos": 450,
+      "end_pos": 457
+    },
+    {
+      "entity_text": "Thalassia Shipping",
+      "entity_type": "ORG",
+      "start_pos": 478,
+      "end_pos": 496
+    },
+    {
+      "entity_text": "Pirée",
+      "entity_type": "LOCATION",
+      "start_pos": 527,
+      "end_pos": 532
+    },
+    {
+      "entity_text": "Adriatique",
+      "entity_type": "LOCATION",
+      "start_pos": 549,
+      "end_pos": 559
+    },
+    {
+      "entity_text": "Stavros Kalogeropoulos",
+      "entity_type": "PERSON",
+      "start_pos": 564,
+      "end_pos": 586
+    },
+    {
+      "entity_text": "Gdańsk",
+      "entity_type": "LOCATION",
+      "start_pos": 651,
+      "end_pos": 657
+    },
+    {
+      "entity_text": "Agnieszka Wróblewska",
+      "entity_type": "PERSON",
+      "start_pos": 666,
+      "end_pos": 686
+    },
+    {
+      "entity_text": "Bilbao",
+      "entity_type": "LOCATION",
+      "start_pos": 729,
+      "end_pos": 735
+    },
+    {
+      "entity_text": "Maëlys Kerbrat",
+      "entity_type": "PERSON",
+      "start_pos": 775,
+      "end_pos": 789
+    },
+    {
+      "entity_text": "Corvina Tech Irlande",
+      "entity_type": "ORG",
+      "start_pos": 836,
+      "end_pos": 856
+    },
+    {
+      "entity_text": "Irlande",
+      "entity_type": "LOCATION",
+      "start_pos": 849,
+      "end_pos": 856
+    },
+    {
+      "entity_text": "Niamh McCarthy",
+      "entity_type": "PERSON",
+      "start_pos": 880,
+      "end_pos": 894
+    },
+    {
+      "entity_text": "Brest",
+      "entity_type": "LOCATION",
+      "start_pos": 915,
+      "end_pos": 920
+    },
+    {
+      "entity_text": "Aurélien Le Bihan",
+      "entity_type": "PERSON",
+      "start_pos": 961,
+      "end_pos": 978
+    },
+    {
+      "entity_text": "Université de Bretagne Occidentale",
+      "entity_type": "ORG",
+      "start_pos": 994,
+      "end_pos": 1028
+    },
+    {
+      "entity_text": "Bretagne Occidentale",
+      "entity_type": "LOCATION",
+      "start_pos": 1008,
+      "end_pos": 1028
+    },
+    {
+      "entity_text": "Kerbrat",
+      "entity_type": "PERSON",
+      "start_pos": 1068,
+      "end_pos": 1075
+    },
+    {
+      "entity_text": "Tomasz Wiśniewski",
+      "entity_type": "PERSON",
+      "start_pos": 1111,
+      "end_pos": 1128
+    },
+    {
+      "entity_text": "Agence maritime européenne",
+      "entity_type": "ORG",
+      "start_pos": 1172,
+      "end_pos": 1198
+    },
+    {
+      "entity_text": "Ingrid Solheim",
+      "entity_type": "PERSON",
+      "start_pos": 1221,
+      "end_pos": 1235
+    },
+    {
+      "entity_text": "Bergen",
+      "entity_type": "LOCATION",
+      "start_pos": 1250,
+      "end_pos": 1256
+    },
+    {
+      "entity_text": "Maëlys Kerbrat",
+      "entity_type": "PERSON",
+      "start_pos": 1288,
+      "end_pos": 1302
+    },
+    {
+      "entity_text": "Valparaíso",
+      "entity_type": "LOCATION",
+      "start_pos": 1328,
+      "end_pos": 1338
+    },
+    {
+      "entity_text": "Andes Cargo Chile",
+      "entity_type": "ORG",
+      "start_pos": 1360,
+      "end_pos": 1377
+    },
+    {
+      "entity_text": "Chile",
+      "entity_type": "LOCATION",
+      "start_pos": 1372,
+      "end_pos": 1377
+    },
+    {
+      "entity_text": "Matías Errázuriz",
+      "entity_type": "PERSON",
+      "start_pos": 1400,
+      "end_pos": 1416
+    },
+    {
+      "entity_text": "Brest",
+      "entity_type": "LOCATION",
+      "start_pos": 1425,
+      "end_pos": 1430
+    }
+  ]
+}

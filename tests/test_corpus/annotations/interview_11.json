@@ -8,9 +8,15 @@
       "end_pos": 61
     },
     {
-      "entity_text": "Soft Toulouse",
-      "entity_type": "PERSON",
-      "start_pos": 69,
+      "entity_text": "DirectSoft Toulouse",
+      "entity_type": "ORG",
+      "start_pos": 63,
+      "end_pos": 82
+    },
+    {
+      "entity_text": "Toulouse",
+      "entity_type": "LOCATION",
+      "start_pos": 74,
       "end_pos": 82
     },
     {
@@ -24,6 +30,12 @@
       "entity_type": "PERSON",
       "start_pos": 184,
       "end_pos": 202
+    },
+    {
+      "entity_text": "DirectSoft",
+      "entity_type": "ORG",
+      "start_pos": 209,
+      "end_pos": 219
     },
     {
       "entity_text": "Alain Bertrand",
@@ -56,16 +68,40 @@
       "end_pos": 622
     },
     {
+      "entity_text": "CyberExpertise",
+      "entity_type": "ORG",
+      "start_pos": 626,
+      "end_pos": 640
+    },
+    {
       "entity_text": "Catherine Rousseau",
       "entity_type": "PERSON",
       "start_pos": 679,
       "end_pos": 697
     },
     {
+      "entity_text": "CrowdStrike",
+      "entity_type": "ORG",
+      "start_pos": 712,
+      "end_pos": 723
+    },
+    {
       "entity_text": "George Kurtz",
       "entity_type": "PERSON",
       "start_pos": 767,
       "end_pos": 779
+    },
+    {
+      "entity_text": "Splunk",
+      "entity_type": "ORG",
+      "start_pos": 825,
+      "end_pos": 831
+    },
+    {
+      "entity_text": "Econocom",
+      "entity_type": "ORG",
+      "start_pos": 872,
+      "end_pos": 880
     },
     {
       "entity_text": "Sophie Martin",
@@ -80,6 +116,18 @@
       "end_pos": 967
     },
     {
+      "entity_text": "KnowBe4",
+      "entity_type": "ORG",
+      "start_pos": 969,
+      "end_pos": 976
+    },
+    {
+      "entity_text": "ANSSI",
+      "entity_type": "ORG",
+      "start_pos": 1040,
+      "end_pos": 1045
+    },
+    {
       "entity_text": "Toulouse",
       "entity_type": "LOCATION",
       "start_pos": 1072,
@@ -92,10 +140,16 @@
       "end_pos": 1100
     },
     {
-      "entity_text": "Nacira Salvan de la",
+      "entity_text": "Nacira Salvan",
       "entity_type": "PERSON",
       "start_pos": 1157,
-      "end_pos": 1176
+      "end_pos": 1170
+    },
+    {
+      "entity_text": "Occitanie",
+      "entity_type": "LOCATION",
+      "start_pos": 1184,
+      "end_pos": 1193
     },
     {
       "entity_text": "Catherine Rousseau",
@@ -104,10 +158,16 @@
       "end_pos": 1245
     },
     {
-      "entity_text": "Julie Marchand du",
+      "entity_text": "Julie Marchand",
       "entity_type": "PERSON",
       "start_pos": 1276,
-      "end_pos": 1293
+      "end_pos": 1290
+    },
+    {
+      "entity_text": "GDPR Experts",
+      "entity_type": "ORG",
+      "start_pos": 1302,
+      "end_pos": 1314
     },
     {
       "entity_text": "Pierre Dubois",
@@ -116,10 +176,16 @@
       "end_pos": 1383
     },
     {
-      "entity_text": "Pellegrini, était",
+      "entity_text": "CNIL",
+      "entity_type": "ORG",
+      "start_pos": 1408,
+      "end_pos": 1412
+    },
+    {
+      "entity_text": "François Pellegrini",
       "entity_type": "PERSON",
-      "start_pos": 1441,
-      "end_pos": 1458
+      "start_pos": 1432,
+      "end_pos": 1451
     },
     {
       "entity_text": "Rousseau",
@@ -128,10 +194,22 @@
       "end_pos": 1517
     },
     {
+      "entity_text": "CESIN",
+      "entity_type": "ORG",
+      "start_pos": 1537,
+      "end_pos": 1542
+    },
+    {
       "entity_text": "Jérôme Notin",
       "entity_type": "PERSON",
       "start_pos": 1563,
       "end_pos": 1575
+    },
+    {
+      "entity_text": "Digital 113",
+      "entity_type": "ORG",
+      "start_pos": 1624,
+      "end_pos": 1635
     },
     {
       "entity_text": "Toulouse",
@@ -152,15 +230,21 @@
       "end_pos": 1747
     },
     {
-      "entity_text": "Airbus Cyber",
-      "entity_type": "PERSON",
+      "entity_text": "Airbus CyberSecurity",
+      "entity_type": "ORG",
       "start_pos": 1750,
-      "end_pos": 1762
+      "end_pos": 1770
     },
     {
-      "entity_text": "Natacha Reynaud de Thales",
+      "entity_text": "Natacha Reynaud",
       "entity_type": "PERSON",
       "start_pos": 1778,
+      "end_pos": 1793
+    },
+    {
+      "entity_text": "Thales",
+      "entity_type": "ORG",
+      "start_pos": 1797,
       "end_pos": 1803
     },
     {
@@ -171,21 +255,21 @@
     },
     {
       "entity_text": "Orange Cyberdefense",
-      "entity_type": "PERSON",
+      "entity_type": "ORG",
       "start_pos": 1886,
       "end_pos": 1905
     },
     {
-      "entity_text": "Michel Van",
+      "entity_text": "Michel Van Den Berghe",
       "entity_type": "PERSON",
       "start_pos": 1927,
-      "end_pos": 1937
+      "end_pos": 1948
     },
     {
-      "entity_text": "Den Berghe",
-      "entity_type": "PERSON",
-      "start_pos": 1938,
-      "end_pos": 1948
+      "entity_text": "AXA",
+      "entity_type": "ORG",
+      "start_pos": 2016,
+      "end_pos": 2019
     },
     {
       "entity_text": "Thomas Buberl",

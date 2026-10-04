@@ -1,0 +1,293 @@
+{
+  "document_name": "heldout_03.txt",
+  "entities": [
+    {
+      "entity_text": "Ferrolux Industrie SAS",
+      "entity_type": "ORG",
+      "start_pos": 81,
+      "end_pos": 103
+    },
+    {
+      "entity_text": "rue des Tanneurs",
+      "entity_type": "LOCATION",
+      "start_pos": 122,
+      "end_pos": 138
+    },
+    {
+      "entity_text": "Angers",
+      "entity_type": "LOCATION",
+      "start_pos": 146,
+      "end_pos": 152
+    },
+    {
+      "entity_text": "Angers",
+      "entity_type": "LOCATION",
+      "start_pos": 157,
+      "end_pos": 163
+    },
+    {
+      "entity_text": "Léonie Ambre Castagnier",
+      "entity_type": "PERSON",
+      "start_pos": 196,
+      "end_pos": 219
+    },
+    {
+      "entity_text": "FERROLUX",
+      "entity_type": "ORG",
+      "start_pos": 252,
+      "end_pos": 260
+    },
+    {
+      "entity_text": "Ondine Analytics Inc.",
+      "entity_type": "ORG",
+      "start_pos": 270,
+      "end_pos": 291
+    },
+    {
+      "entity_text": "Harbor Street",
+      "entity_type": "LOCATION",
+      "start_pos": 311,
+      "end_pos": 324
+    },
+    {
+      "entity_text": "Portland",
+      "entity_type": "LOCATION",
+      "start_pos": 326,
+      "end_pos": 334
+    },
+    {
+      "entity_text": "Oregon",
+      "entity_type": "LOCATION",
+      "start_pos": 336,
+      "end_pos": 342
+    },
+    {
+      "entity_text": "USA",
+      "entity_type": "LOCATION",
+      "start_pos": 344,
+      "end_pos": 347
+    },
+    {
+      "entity_text": "Padraig O'Sullivan",
+      "entity_type": "PERSON",
+      "start_pos": 367,
+      "end_pos": 385
+    },
+    {
+      "entity_text": "Friederike von Ascheberg",
+      "entity_type": "PERSON",
+      "start_pos": 407,
+      "end_pos": 431
+    },
+    {
+      "entity_text": "ONDINE",
+      "entity_type": "ORG",
+      "start_pos": 469,
+      "end_pos": 475
+    },
+    {
+      "entity_text": "ONDINE",
+      "entity_type": "ORG",
+      "start_pos": 494,
+      "end_pos": 500
+    },
+    {
+      "entity_text": "FERROLUX",
+      "entity_type": "ORG",
+      "start_pos": 511,
+      "end_pos": 519
+    },
+    {
+      "entity_text": "Ondine",
+      "entity_type": "ORG",
+      "start_pos": 534,
+      "end_pos": 540
+    },
+    {
+      "entity_text": "Angers",
+      "entity_type": "LOCATION",
+      "start_pos": 592,
+      "end_pos": 598
+    },
+    {
+      "entity_text": "Cholet",
+      "entity_type": "LOCATION",
+      "start_pos": 605,
+      "end_pos": 611
+    },
+    {
+      "entity_text": "Ondine Analytics Canada",
+      "entity_type": "ORG",
+      "start_pos": 651,
+      "end_pos": 674
+    },
+    {
+      "entity_text": "Canada",
+      "entity_type": "LOCATION",
+      "start_pos": 668,
+      "end_pos": 674
+    },
+    {
+      "entity_text": "Montréal",
+      "entity_type": "LOCATION",
+      "start_pos": 682,
+      "end_pos": 690
+    },
+    {
+      "entity_text": "FERROLUX",
+      "entity_type": "ORG",
+      "start_pos": 717,
+      "end_pos": 725
+    },
+    {
+      "entity_text": "Léonie Ambre Castagnier",
+      "entity_type": "PERSON",
+      "start_pos": 734,
+      "end_pos": 757
+    },
+    {
+      "entity_text": "Yannick Le Gall",
+      "entity_type": "PERSON",
+      "start_pos": 785,
+      "end_pos": 800
+    },
+    {
+      "entity_text": "Sixtine de Rocquigny",
+      "entity_type": "PERSON",
+      "start_pos": 812,
+      "end_pos": 832
+    },
+    {
+      "entity_text": "ONDINE",
+      "entity_type": "ORG",
+      "start_pos": 844,
+      "end_pos": 850
+    },
+    {
+      "entity_text": "Padraig O'Sullivan",
+      "entity_type": "PERSON",
+      "start_pos": 858,
+      "end_pos": 876
+    },
+    {
+      "entity_text": "Friederike von Ascheberg",
+      "entity_type": "PERSON",
+      "start_pos": 888,
+      "end_pos": 912
+    },
+    {
+      "entity_text": "Kwame Asante-Boateng",
+      "entity_type": "PERSON",
+      "start_pos": 935,
+      "end_pos": 955
+    },
+    {
+      "entity_text": "EMEA",
+      "entity_type": "LOCATION",
+      "start_pos": 982,
+      "end_pos": 986
+    },
+    {
+      "entity_text": "Dublin",
+      "entity_type": "LOCATION",
+      "start_pos": 995,
+      "end_pos": 1001
+    },
+    {
+      "entity_text": "Irlande",
+      "entity_type": "LOCATION",
+      "start_pos": 1078,
+      "end_pos": 1085
+    },
+    {
+      "entity_text": "USA",
+      "entity_type": "LOCATION",
+      "start_pos": 1111,
+      "end_pos": 1114
+    },
+    {
+      "entity_text": "FERROLUX",
+      "entity_type": "ORG",
+      "start_pos": 1152,
+      "end_pos": 1160
+    },
+    {
+      "entity_text": "ONDINE",
+      "entity_type": "ORG",
+      "start_pos": 1162,
+      "end_pos": 1168
+    },
+    {
+      "entity_text": "Quillon Data Services",
+      "entity_type": "ORG",
+      "start_pos": 1200,
+      "end_pos": 1221
+    },
+    {
+      "entity_text": "Dublin",
+      "entity_type": "LOCATION",
+      "start_pos": 1225,
+      "end_pos": 1231
+    },
+    {
+      "entity_text": "Tribunal de commerce d'Angers",
+      "entity_type": "ORG",
+      "start_pos": 1303,
+      "end_pos": 1332
+    },
+    {
+      "entity_text": "Angers",
+      "entity_type": "LOCATION",
+      "start_pos": 1326,
+      "end_pos": 1332
+    },
+    {
+      "entity_text": "Centre de médiation de l'Anjou",
+      "entity_type": "ORG",
+      "start_pos": 1370,
+      "end_pos": 1400
+    },
+    {
+      "entity_text": "Anjou",
+      "entity_type": "LOCATION",
+      "start_pos": 1395,
+      "end_pos": 1400
+    },
+    {
+      "entity_text": "FERROLUX",
+      "entity_type": "ORG",
+      "start_pos": 1423,
+      "end_pos": 1431
+    },
+    {
+      "entity_text": "Léonie Ambre Castagnier",
+      "entity_type": "PERSON",
+      "start_pos": 1438,
+      "end_pos": 1461
+    },
+    {
+      "entity_text": "ONDINE",
+      "entity_type": "ORG",
+      "start_pos": 1467,
+      "end_pos": 1473
+    },
+    {
+      "entity_text": "Padraig O'Sullivan",
+      "entity_type": "PERSON",
+      "start_pos": 1479,
+      "end_pos": 1497
+    },
+    {
+      "entity_text": "Romane Delacour-Iribarne",
+      "entity_type": "PERSON",
+      "start_pos": 1523,
+      "end_pos": 1547
+    },
+    {
+      "entity_text": "FERROLUX",
+      "entity_type": "ORG",
+      "start_pos": 1560,
+      "end_pos": 1568
+    }
+  ]
+}

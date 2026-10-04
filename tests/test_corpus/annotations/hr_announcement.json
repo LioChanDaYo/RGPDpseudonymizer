@@ -8,18 +8,6 @@
       "end_pos": 59
     },
     {
-      "entity_text": "Laurent, Directrice",
-      "entity_type": "PERSON",
-      "start_pos": 52,
-      "end_pos": 71
-    },
-    {
-      "entity_text": "Ressources Humaines",
-      "entity_type": "PERSON",
-      "start_pos": 76,
-      "end_pos": 95
-    },
-    {
       "entity_text": "Isabelle Moreau",
       "entity_type": "PERSON",
       "start_pos": 215,
@@ -32,16 +20,28 @@
       "end_pos": 404
     },
     {
+      "entity_text": "Kevin",
+      "entity_type": "PERSON",
+      "start_pos": 447,
+      "end_pos": 452
+    },
+    {
       "entity_text": "Marie Dubois",
       "entity_type": "PERSON",
       "start_pos": 501,
       "end_pos": 513
     },
     {
-      "entity_text": "Jin, Romain",
+      "entity_text": "Alexandre Jin",
       "entity_type": "PERSON",
-      "start_pos": 570,
-      "end_pos": 581
+      "start_pos": 560,
+      "end_pos": 573
+    },
+    {
+      "entity_text": "Romain Duval",
+      "entity_type": "PERSON",
+      "start_pos": 575,
+      "end_pos": 587
     },
     {
       "entity_text": "Laura Martin",
@@ -62,6 +62,12 @@
       "end_pos": 646
     },
     {
+      "entity_text": "Julie",
+      "entity_type": "PERSON",
+      "start_pos": 681,
+      "end_pos": 686
+    },
+    {
       "entity_text": "Thomas Weber",
       "entity_type": "PERSON",
       "start_pos": 745,
@@ -72,12 +78,6 @@
       "entity_type": "PERSON",
       "start_pos": 778,
       "end_pos": 796
-    },
-    {
-      "entity_text": "Son équipe",
-      "entity_type": "PERSON",
-      "start_pos": 810,
-      "end_pos": 820
     },
     {
       "entity_text": "Maxime Dubois",
@@ -98,15 +98,27 @@
       "end_pos": 889
     },
     {
+      "entity_text": "Alexandre",
+      "entity_type": "PERSON",
+      "start_pos": 916,
+      "end_pos": 925
+    },
+    {
       "entity_text": "Caroline Petit",
       "entity_type": "PERSON",
       "start_pos": 1008,
       "end_pos": 1022
     },
     {
-      "entity_text": "Luc Moreau",
+      "entity_text": "Deloitte",
+      "entity_type": "ORG",
+      "start_pos": 1057,
+      "end_pos": 1065
+    },
+    {
+      "entity_text": "Jean-Luc Moreau",
       "entity_type": "PERSON",
-      "start_pos": 1075,
+      "start_pos": 1070,
       "end_pos": 1085
     },
     {
@@ -116,16 +128,34 @@
       "end_pos": 1169
     },
     {
+      "entity_text": "Émilie",
+      "entity_type": "PERSON",
+      "start_pos": 1194,
+      "end_pos": 1200
+    },
+    {
+      "entity_text": "Google France",
+      "entity_type": "ORG",
+      "start_pos": 1221,
+      "end_pos": 1234
+    },
+    {
       "entity_text": "France",
       "entity_type": "LOCATION",
       "start_pos": 1228,
       "end_pos": 1234
     },
     {
-      "entity_text": "Yann Le",
+      "entity_text": "Yann LeCun",
       "entity_type": "PERSON",
       "start_pos": 1267,
-      "end_pos": 1274
+      "end_pos": 1277
+    },
+    {
+      "entity_text": "Google",
+      "entity_type": "ORG",
+      "start_pos": 1297,
+      "end_pos": 1303
     },
     {
       "entity_text": "Sundar Pichai",
@@ -146,10 +176,16 @@
       "end_pos": 1396
     },
     {
-      "entity_text": "Microsoft ",
+      "entity_text": "David",
+      "entity_type": "PERSON",
+      "start_pos": 1429,
+      "end_pos": 1434
+    },
+    {
+      "entity_text": "Microsoft",
       "entity_type": "ORG",
       "start_pos": 1451,
-      "end_pos": 1461
+      "end_pos": 1460
     },
     {
       "entity_text": "Satya Nadella",
@@ -176,6 +212,18 @@
       "end_pos": 1623
     },
     {
+      "entity_text": "Sarah",
+      "entity_type": "PERSON",
+      "start_pos": 1652,
+      "end_pos": 1657
+    },
+    {
+      "entity_text": "Thales",
+      "entity_type": "ORG",
+      "start_pos": 1667,
+      "end_pos": 1673
+    },
+    {
       "entity_text": "Patrice Caine",
       "entity_type": "PERSON",
       "start_pos": 1702,
@@ -200,22 +248,28 @@
       "end_pos": 1824
     },
     {
+      "entity_text": "Sarah",
+      "entity_type": "PERSON",
+      "start_pos": 1838,
+      "end_pos": 1843
+    },
+    {
       "entity_text": "Ahmed Mansour",
       "entity_type": "PERSON",
       "start_pos": 1852,
       "end_pos": 1865
     },
     {
-      "entity_text": "Customer Success",
+      "entity_text": "Ahmed",
       "entity_type": "PERSON",
-      "start_pos": 1876,
-      "end_pos": 1892
+      "start_pos": 1896,
+      "end_pos": 1901
     },
     {
-      "entity_text": "Salesforce o",
+      "entity_text": "Salesforce",
       "entity_type": "ORG",
       "start_pos": 1918,
-      "end_pos": 1930
+      "end_pos": 1928
     },
     {
       "entity_text": "Marc Benioff",
@@ -242,10 +296,10 @@
       "end_pos": 2100
     },
     {
-      "entity_text": "Product Management",
+      "entity_text": "Nadia",
       "entity_type": "PERSON",
-      "start_pos": 2122,
-      "end_pos": 2140
+      "start_pos": 2144,
+      "end_pos": 2149
     },
     {
       "entity_text": "Julie Marchand",
@@ -266,6 +320,12 @@
       "end_pos": 2284
     },
     {
+      "entity_text": "Maxime",
+      "entity_type": "PERSON",
+      "start_pos": 2339,
+      "end_pos": 2345
+    },
+    {
       "entity_text": "Laurent Benoit",
       "entity_type": "PERSON",
       "start_pos": 2369,
@@ -282,6 +342,12 @@
       "entity_type": "PERSON",
       "start_pos": 2519,
       "end_pos": 2531
+    },
+    {
+      "entity_text": "Vincent",
+      "entity_type": "PERSON",
+      "start_pos": 2570,
+      "end_pos": 2577
     },
     {
       "entity_text": "Sophie Laurent",
@@ -308,15 +374,39 @@
       "end_pos": 2774
     },
     {
+      "entity_text": "Pierre",
+      "entity_type": "PERSON",
+      "start_pos": 2778,
+      "end_pos": 2784
+    },
+    {
+      "entity_text": "TechSolutions UK",
+      "entity_type": "ORG",
+      "start_pos": 2793,
+      "end_pos": 2809
+    },
+    {
+      "entity_text": "UK",
+      "entity_type": "LOCATION",
+      "start_pos": 2807,
+      "end_pos": 2809
+    },
+    {
+      "entity_text": "UK",
+      "entity_type": "LOCATION",
+      "start_pos": 2851,
+      "end_pos": 2853
+    },
+    {
       "entity_text": "James Wilson",
       "entity_type": "PERSON",
       "start_pos": 2858,
       "end_pos": 2870
     },
     {
-      "entity_text": "Remplacement en France",
-      "entity_type": "ORG",
-      "start_pos": 2872,
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 2888,
       "end_pos": 2894
     },
     {
@@ -332,22 +422,16 @@
       "end_pos": 2944
     },
     {
-      "entity_text": "Product Owner",
+      "entity_text": "Claire",
       "entity_type": "PERSON",
-      "start_pos": 3078,
-      "end_pos": 3091
+      "start_pos": 2984,
+      "end_pos": 2990
     },
     {
       "entity_text": "Thomas Khalifa",
       "entity_type": "PERSON",
       "start_pos": 3111,
       "end_pos": 3125
-    },
-    {
-      "entity_text": "RÉORGANISA",
-      "entity_type": "ORG",
-      "start_pos": 3133,
-      "end_pos": 3143
     },
     {
       "entity_text": "Isabelle Moreau",
@@ -386,22 +470,10 @@
       "end_pos": 3400
     },
     {
-      "entity_text": "Directeur Commercial",
-      "entity_type": "PERSON",
-      "start_pos": 3413,
-      "end_pos": 3433
-    },
-    {
       "entity_text": "Thomas Weber",
       "entity_type": "PERSON",
       "start_pos": 3438,
       "end_pos": 3450
-    },
-    {
-      "entity_text": "Directrice Marketing",
-      "entity_type": "PERSON",
-      "start_pos": 3453,
-      "end_pos": 3473
     },
     {
       "entity_text": "Catherine Rousseau",
@@ -428,16 +500,22 @@
       "end_pos": 3590
     },
     {
-      "entity_text": "Équipe Engineering",
-      "entity_type": "PERSON",
-      "start_pos": 3623,
-      "end_pos": 3641
-    },
-    {
       "entity_text": "Kevin Zhang",
       "entity_type": "PERSON",
       "start_pos": 3646,
       "end_pos": 3657
+    },
+    {
+      "entity_text": "Alexandre Jin",
+      "entity_type": "PERSON",
+      "start_pos": 3675,
+      "end_pos": 3688
+    },
+    {
+      "entity_text": "Laura Martin",
+      "entity_type": "PERSON",
+      "start_pos": 3694,
+      "end_pos": 3706
     },
     {
       "entity_text": "Romain Duval",
@@ -464,22 +542,40 @@
       "end_pos": 3795
     },
     {
+      "entity_text": "Alexandre Blanc",
+      "entity_type": "PERSON",
+      "start_pos": 3805,
+      "end_pos": 3820
+    },
+    {
+      "entity_text": "Sophie Bernard",
+      "entity_type": "PERSON",
+      "start_pos": 3826,
+      "end_pos": 3840
+    },
+    {
       "entity_text": "Émilie Rousseau",
       "entity_type": "PERSON",
       "start_pos": 3859,
       "end_pos": 3874
     },
     {
-      "entity_text": "Data Engineering",
+      "entity_text": "Thomas Martin",
       "entity_type": "PERSON",
-      "start_pos": 3879,
-      "end_pos": 3895
+      "start_pos": 3900,
+      "end_pos": 3913
     },
     {
-      "entity_text": "Data Science",
+      "entity_text": "Nathalie Rousseau",
       "entity_type": "PERSON",
-      "start_pos": 3939,
-      "end_pos": 3951
+      "start_pos": 3919,
+      "end_pos": 3936
+    },
+    {
+      "entity_text": "Karim Benani",
+      "entity_type": "PERSON",
+      "start_pos": 3956,
+      "end_pos": 3968
     },
     {
       "entity_text": "Émilie Bernard",
@@ -500,22 +596,16 @@
       "end_pos": 4039
     },
     {
-      "entity_text": "Équipe Product",
-      "entity_type": "PERSON",
-      "start_pos": 4041,
-      "end_pos": 4055
-    },
-    {
       "entity_text": "Julie Marchand",
       "entity_type": "PERSON",
       "start_pos": 4061,
       "end_pos": 4075
     },
     {
-      "entity_text": "Product Owners",
+      "entity_text": "Thomas Khalifa",
       "entity_type": "PERSON",
-      "start_pos": 4080,
-      "end_pos": 4094
+      "start_pos": 4099,
+      "end_pos": 4113
     },
     {
       "entity_text": "Nadia Amrani",
@@ -542,12 +632,6 @@
       "end_pos": 4200
     },
     {
-      "entity_text": "Équipe Security",
-      "entity_type": "PERSON",
-      "start_pos": 4202,
-      "end_pos": 4217
-    },
-    {
       "entity_text": "Sarah Benoit",
       "entity_type": "PERSON",
       "start_pos": 4223,
@@ -566,10 +650,22 @@
       "end_pos": 4293
     },
     {
+      "entity_text": "Jonathan Cherki",
+      "entity_type": "PERSON",
+      "start_pos": 4304,
+      "end_pos": 4319
+    },
+    {
       "entity_text": "Laure Bertholom",
       "entity_type": "PERSON",
       "start_pos": 4325,
       "end_pos": 4340
+    },
+    {
+      "entity_text": "Matthieu Bonenfant",
+      "entity_type": "PERSON",
+      "start_pos": 4351,
+      "end_pos": 4369
     },
     {
       "entity_text": "Sophie Duchemin",
@@ -590,12 +686,6 @@
       "end_pos": 4528
     },
     {
-      "entity_text": "Coordination Mme",
-      "entity_type": "PERSON",
-      "start_pos": 4550,
-      "end_pos": 4566
-    },
-    {
       "entity_text": "Caroline Petit",
       "entity_type": "PERSON",
       "start_pos": 4567,
@@ -614,10 +704,22 @@
       "end_pos": 4639
     },
     {
+      "entity_text": "OpenClassrooms",
+      "entity_type": "ORG",
+      "start_pos": 4664,
+      "end_pos": 4678
+    },
+    {
       "entity_text": "Anne Browaeys",
       "entity_type": "PERSON",
       "start_pos": 4693,
       "end_pos": 4706
+    },
+    {
+      "entity_text": "M2i Formation",
+      "entity_type": "ORG",
+      "start_pos": 4709,
+      "end_pos": 4722
     },
     {
       "entity_text": "Yves Blanc",
@@ -632,10 +734,10 @@
       "end_pos": 5065
     },
     {
-      "entity_text": "Ressources Humaines",
-      "entity_type": "PERSON",
-      "start_pos": 5081,
-      "end_pos": 5100
+      "entity_text": "TechSolutions France SAS",
+      "entity_type": "ORG",
+      "start_pos": 5101,
+      "end_pos": 5125
     },
     {
       "entity_text": "France",

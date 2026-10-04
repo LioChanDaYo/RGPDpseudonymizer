@@ -2,28 +2,22 @@
   "document_name": "interview_14.txt",
   "entities": [
     {
-      "entity_text": "Transformation Omnicanale",
-      "entity_type": "PERSON",
-      "start_pos": 22,
-      "end_pos": 47
-    },
-    {
       "entity_text": "Sophie Laurent",
       "entity_type": "PERSON",
       "start_pos": 75,
       "end_pos": 89
     },
     {
-      "entity_text": "Magasins Mode",
-      "entity_type": "PERSON",
-      "start_pos": 91,
-      "end_pos": 104
+      "entity_text": "ModeFrance",
+      "entity_type": "ORG",
+      "start_pos": 100,
+      "end_pos": 110
     },
     {
-      "entity_text": "France",
+      "entity_text": "Roubaix",
       "entity_type": "LOCATION",
-      "start_pos": 104,
-      "end_pos": 110
+      "start_pos": 111,
+      "end_pos": 118
     },
     {
       "entity_text": "Laurent",
@@ -62,10 +56,10 @@
       "end_pos": 465
     },
     {
-      "entity_text": "Salesforce Commerce",
-      "entity_type": "PERSON",
+      "entity_text": "Salesforce",
+      "entity_type": "ORG",
       "start_pos": 505,
-      "end_pos": 524
+      "end_pos": 515
     },
     {
       "entity_text": "Lucie Renard",
@@ -74,10 +68,22 @@
       "end_pos": 548
     },
     {
+      "entity_text": "Fabernovel",
+      "entity_type": "ORG",
+      "start_pos": 600,
+      "end_pos": 610
+    },
+    {
       "entity_text": "Alexandre Jin",
       "entity_type": "PERSON",
       "start_pos": 615,
       "end_pos": 628
+    },
+    {
+      "entity_text": "Google France",
+      "entity_type": "ORG",
+      "start_pos": 664,
+      "end_pos": 677
     },
     {
       "entity_text": "France",
@@ -92,10 +98,16 @@
       "end_pos": 736
     },
     {
-      "entity_text": "Michel Rousseau",
+      "entity_text": "Jean-Michel Rousseau",
       "entity_type": "PERSON",
-      "start_pos": 791,
+      "start_pos": 786,
       "end_pos": 806
+    },
+    {
+      "entity_text": "XPO Logistics",
+      "entity_type": "ORG",
+      "start_pos": 823,
+      "end_pos": 836
     },
     {
       "entity_text": "Delphine Mallet",
@@ -104,10 +116,28 @@
       "end_pos": 877
     },
     {
+      "entity_text": "Lesquin",
+      "entity_type": "LOCATION",
+      "start_pos": 904,
+      "end_pos": 911
+    },
+    {
+      "entity_text": "Savoye",
+      "entity_type": "ORG",
+      "start_pos": 931,
+      "end_pos": 937
+    },
+    {
       "entity_text": "Marc Laperrière",
       "entity_type": "PERSON",
       "start_pos": 961,
       "end_pos": 976
+    },
+    {
+      "entity_text": "ID Logistics",
+      "entity_type": "ORG",
+      "start_pos": 978,
+      "end_pos": 990
     },
     {
       "entity_text": "Laurent",
@@ -116,10 +146,16 @@
       "end_pos": 1068
     },
     {
-      "entity_text": "Hybris SA",
+      "entity_text": "SAP",
       "entity_type": "ORG",
-      "start_pos": 1070,
-      "end_pos": 1079
+      "start_pos": 1077,
+      "end_pos": 1080
+    },
+    {
+      "entity_text": "Deloitte Digital",
+      "entity_type": "ORG",
+      "start_pos": 1109,
+      "end_pos": 1125
     },
     {
       "entity_text": "Vincent Gorse",
@@ -128,10 +164,10 @@
       "end_pos": 1159
     },
     {
-      "entity_text": "Salesforce est g",
+      "entity_text": "Salesforce",
       "entity_type": "ORG",
       "start_pos": 1171,
-      "end_pos": 1187
+      "end_pos": 1181
     },
     {
       "entity_text": "Karim Benani",
@@ -140,8 +176,14 @@
       "end_pos": 1210
     },
     {
+      "entity_text": "Google Cloud",
+      "entity_type": "ORG",
+      "start_pos": 1233,
+      "end_pos": 1245
+    },
+    {
       "entity_text": "Publicis Sapient",
-      "entity_type": "PERSON",
+      "entity_type": "ORG",
       "start_pos": 1261,
       "end_pos": 1277
     },
@@ -152,9 +194,9 @@
       "end_pos": 1310
     },
     {
-      "entity_text": "Et Contentsquare",
-      "entity_type": "PERSON",
-      "start_pos": 1312,
+      "entity_text": "Contentsquare",
+      "entity_type": "ORG",
+      "start_pos": 1315,
       "end_pos": 1328
     },
     {
@@ -176,6 +218,12 @@
       "end_pos": 1487
     },
     {
+      "entity_text": "Nord",
+      "entity_type": "LOCATION",
+      "start_pos": 1496,
+      "end_pos": 1500
+    },
+    {
       "entity_text": "Stéphane Martin",
       "entity_type": "PERSON",
       "start_pos": 1505,
@@ -188,9 +236,9 @@
       "end_pos": 1531
     },
     {
-      "entity_text": "France",
+      "entity_text": "Île-de-France",
       "entity_type": "LOCATION",
-      "start_pos": 1544,
+      "start_pos": 1537,
       "end_pos": 1550
     },
     {
@@ -200,10 +248,22 @@
       "end_pos": 1567
     },
     {
+      "entity_text": "Sud",
+      "entity_type": "LOCATION",
+      "start_pos": 1576,
+      "end_pos": 1579
+    },
+    {
       "entity_text": "François Leroux",
       "entity_type": "PERSON",
       "start_pos": 1615,
       "end_pos": 1630
+    },
+    {
+      "entity_text": "OpenClassrooms",
+      "entity_type": "ORG",
+      "start_pos": 1668,
+      "end_pos": 1682
     },
     {
       "entity_text": "Anne Browaeys",
@@ -222,6 +282,12 @@
       "entity_type": "PERSON",
       "start_pos": 1807,
       "end_pos": 1819
+    },
+    {
+      "entity_text": "BETC",
+      "entity_type": "ORG",
+      "start_pos": 1856,
+      "end_pos": 1860
     },
     {
       "entity_text": "Rémi Babinet",
@@ -278,10 +344,52 @@
       "end_pos": 2203
     },
     {
-      "entity_text": "Régine Ballonad de Printemps",
+      "entity_text": "Carrefour",
+      "entity_type": "ORG",
+      "start_pos": 2207,
+      "end_pos": 2216
+    },
+    {
+      "entity_text": "Régine Ballonad",
       "entity_type": "PERSON",
       "start_pos": 2224,
+      "end_pos": 2239
+    },
+    {
+      "entity_text": "Printemps",
+      "entity_type": "ORG",
+      "start_pos": 2243,
       "end_pos": 2252
+    },
+    {
+      "entity_text": "Zara",
+      "entity_type": "ORG",
+      "start_pos": 2267,
+      "end_pos": 2271
+    },
+    {
+      "entity_text": "Inditex",
+      "entity_type": "ORG",
+      "start_pos": 2273,
+      "end_pos": 2280
+    },
+    {
+      "entity_text": "H&M",
+      "entity_type": "ORG",
+      "start_pos": 2283,
+      "end_pos": 2286
+    },
+    {
+      "entity_text": "Zalando",
+      "entity_type": "ORG",
+      "start_pos": 2314,
+      "end_pos": 2321
+    },
+    {
+      "entity_text": "FEVAD",
+      "entity_type": "ORG",
+      "start_pos": 2336,
+      "end_pos": 2341
     },
     {
       "entity_text": "Marc Lolivier",

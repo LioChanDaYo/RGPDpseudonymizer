@@ -1,0 +1,179 @@
+{
+  "document_name": "heldout_05.txt",
+  "entities": [
+    {
+      "entity_text": "Garrigues, Pierre-Yves",
+      "entity_type": "PERSON",
+      "start_pos": 64,
+      "end_pos": 86
+    },
+    {
+      "entity_text": "Poitiers",
+      "entity_type": "LOCATION",
+      "start_pos": 112,
+      "end_pos": 120
+    },
+    {
+      "entity_text": "Garrigues",
+      "entity_type": "PERSON",
+      "start_pos": 158,
+      "end_pos": 167
+    },
+    {
+      "entity_text": "P.-Y. Garrigues",
+      "entity_type": "PERSON",
+      "start_pos": 203,
+      "end_pos": 218
+    },
+    {
+      "entity_text": "Héloïse Varenne",
+      "entity_type": "PERSON",
+      "start_pos": 316,
+      "end_pos": 331
+    },
+    {
+      "entity_text": "CHU de Poitiers",
+      "entity_type": "ORG",
+      "start_pos": 336,
+      "end_pos": 351
+    },
+    {
+      "entity_text": "Poitiers",
+      "entity_type": "LOCATION",
+      "start_pos": 343,
+      "end_pos": 351
+    },
+    {
+      "entity_text": "P.-Y. Garrigues",
+      "entity_type": "PERSON",
+      "start_pos": 396,
+      "end_pos": 411
+    },
+    {
+      "entity_text": "Teodor Lupescu",
+      "entity_type": "PERSON",
+      "start_pos": 437,
+      "end_pos": 451
+    },
+    {
+      "entity_text": "Cluj",
+      "entity_type": "LOCATION",
+      "start_pos": 455,
+      "end_pos": 459
+    },
+    {
+      "entity_text": "Inês Albuquerque",
+      "entity_type": "PERSON",
+      "start_pos": 501,
+      "end_pos": 517
+    },
+    {
+      "entity_text": "Université de Coimbra",
+      "entity_type": "ORG",
+      "start_pos": 523,
+      "end_pos": 544
+    },
+    {
+      "entity_text": "Coimbra",
+      "entity_type": "LOCATION",
+      "start_pos": 537,
+      "end_pos": 544
+    },
+    {
+      "entity_text": "Biocéane",
+      "entity_type": "ORG",
+      "start_pos": 597,
+      "end_pos": 605
+    },
+    {
+      "entity_text": "Nancy",
+      "entity_type": "LOCATION",
+      "start_pos": 609,
+      "end_pos": 614
+    },
+    {
+      "entity_text": "Nancy Delorme",
+      "entity_type": "PERSON",
+      "start_pos": 631,
+      "end_pos": 644
+    },
+    {
+      "entity_text": "Garrigues",
+      "entity_type": "PERSON",
+      "start_pos": 685,
+      "end_pos": 694
+    },
+    {
+      "entity_text": "Institut Ménestrel",
+      "entity_type": "ORG",
+      "start_pos": 699,
+      "end_pos": 717
+    },
+    {
+      "entity_text": "Marie-Lou Ferracci",
+      "entity_type": "PERSON",
+      "start_pos": 781,
+      "end_pos": 799
+    },
+    {
+      "entity_text": "Fondation Clairvent",
+      "entity_type": "ORG",
+      "start_pos": 863,
+      "end_pos": 882
+    },
+    {
+      "entity_text": "P.-Y. Garrigues",
+      "entity_type": "PERSON",
+      "start_pos": 933,
+      "end_pos": 948
+    },
+    {
+      "entity_text": "Aurélie Saint-Clair",
+      "entity_type": "PERSON",
+      "start_pos": 965,
+      "end_pos": 984
+    },
+    {
+      "entity_text": "Poitiers",
+      "entity_type": "LOCATION",
+      "start_pos": 1083,
+      "end_pos": 1091
+    },
+    {
+      "entity_text": "Canada",
+      "entity_type": "LOCATION",
+      "start_pos": 1120,
+      "end_pos": 1126
+    },
+    {
+      "entity_text": "Québec",
+      "entity_type": "LOCATION",
+      "start_pos": 1153,
+      "end_pos": 1159
+    },
+    {
+      "entity_text": "Mathis Tremblay-Gagnon",
+      "entity_type": "PERSON",
+      "start_pos": 1167,
+      "end_pos": 1189
+    },
+    {
+      "entity_text": "Garrigues",
+      "entity_type": "PERSON",
+      "start_pos": 1227,
+      "end_pos": 1236
+    },
+    {
+      "entity_text": "Varenne",
+      "entity_type": "PERSON",
+      "start_pos": 1284,
+      "end_pos": 1291
+    },
+    {
+      "entity_text": "Lupescu",
+      "entity_type": "PERSON",
+      "start_pos": 1300,
+      "end_pos": 1307
+    }
+  ]
+}

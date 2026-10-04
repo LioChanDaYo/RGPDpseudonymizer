@@ -2,12 +2,6 @@
   "document_name": "interview_12.txt",
   "entities": [
     {
-      "entity_text": "Reconversion Professionnelle",
-      "entity_type": "PERSON",
-      "start_pos": 13,
-      "end_pos": 41
-    },
-    {
       "entity_text": "Julie Bertrand",
       "entity_type": "PERSON",
       "start_pos": 76,
@@ -32,15 +26,15 @@
       "end_pos": 233
     },
     {
-      "entity_text": "Hôtel Plaza",
-      "entity_type": "PERSON",
+      "entity_text": "Hôtel Plaza Athénée",
+      "entity_type": "ORG",
       "start_pos": 307,
-      "end_pos": 318
+      "end_pos": 326
     },
     {
-      "entity_text": "Pierre Lavoignat",
+      "entity_text": "Jean-Pierre Lavoignat",
       "entity_type": "PERSON",
-      "start_pos": 351,
+      "start_pos": 346,
       "end_pos": 367
     },
     {
@@ -56,9 +50,21 @@
       "end_pos": 488
     },
     {
-      "entity_text": "Leur directeur France",
+      "entity_text": "Doctolib",
       "entity_type": "ORG",
-      "start_pos": 550,
+      "start_pos": 508,
+      "end_pos": 516
+    },
+    {
+      "entity_text": "Le Wagon",
+      "entity_type": "ORG",
+      "start_pos": 540,
+      "end_pos": 548
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 565,
       "end_pos": 571
     },
     {
@@ -68,10 +74,28 @@
       "end_pos": 590
     },
     {
+      "entity_text": "OpenClassrooms",
+      "entity_type": "ORG",
+      "start_pos": 624,
+      "end_pos": 638
+    },
+    {
+      "entity_text": "Simplon.co",
+      "entity_type": "ORG",
+      "start_pos": 642,
+      "end_pos": 652
+    },
+    {
       "entity_text": "Julie Bertrand",
       "entity_type": "PERSON",
       "start_pos": 688,
       "end_pos": 702
+    },
+    {
+      "entity_text": "Le Wagon",
+      "entity_type": "ORG",
+      "start_pos": 704,
+      "end_pos": 712
     },
     {
       "entity_text": "Paris",
@@ -84,6 +108,12 @@
       "entity_type": "PERSON",
       "start_pos": 752,
       "end_pos": 769
+    },
+    {
+      "entity_text": "Cécile Veneziani",
+      "entity_type": "PERSON",
+      "start_pos": 785,
+      "end_pos": 801
     },
     {
       "entity_text": "Kevin Soltani",
@@ -117,7 +147,7 @@
     },
     {
       "entity_text": "Pôle Emploi",
-      "entity_type": "PERSON",
+      "entity_type": "ORG",
       "start_pos": 1019,
       "end_pos": 1030
     },
@@ -128,9 +158,15 @@
       "end_pos": 1071
     },
     {
-      "entity_text": "France",
+      "entity_text": "Région Île-de-France",
+      "entity_type": "ORG",
+      "start_pos": 1088,
+      "end_pos": 1108
+    },
+    {
+      "entity_text": "Île-de-France",
       "entity_type": "LOCATION",
-      "start_pos": 1102,
+      "start_pos": 1095,
       "end_pos": 1108
     },
     {
@@ -146,9 +182,9 @@
       "end_pos": 1236
     },
     {
-      "entity_text": "Tech Innovations",
-      "entity_type": "PERSON",
-      "start_pos": 1265,
+      "entity_text": "MedTech Innovations",
+      "entity_type": "ORG",
+      "start_pos": 1262,
       "end_pos": 1281
     },
     {
@@ -218,6 +254,12 @@
       "end_pos": 1746
     },
     {
+      "entity_text": "Paris.js",
+      "entity_type": "ORG",
+      "start_pos": 1768,
+      "end_pos": 1776
+    },
+    {
       "entity_text": "Paris",
       "entity_type": "LOCATION",
       "start_pos": 1768,
@@ -230,15 +272,15 @@
       "end_pos": 1815
     },
     {
-      "entity_text": "Women Who",
-      "entity_type": "PERSON",
+      "entity_text": "Women Who Code Paris",
+      "entity_type": "ORG",
       "start_pos": 1831,
-      "end_pos": 1840
+      "end_pos": 1851
     },
     {
-      "entity_text": "Code Paris",
-      "entity_type": "PERSON",
-      "start_pos": 1841,
+      "entity_text": "Paris",
+      "entity_type": "LOCATION",
+      "start_pos": 1846,
       "end_pos": 1851
     },
     {
@@ -248,10 +290,10 @@
       "end_pos": 1890
     },
     {
-      "entity_text": "Ericka Charollois",
-      "entity_type": "PERSON",
-      "start_pos": 1873,
-      "end_pos": 1890
+      "entity_text": "Social Builder",
+      "entity_type": "ORG",
+      "start_pos": 1918,
+      "end_pos": 1932
     },
     {
       "entity_text": "Emmanuelle Larroque",
@@ -278,15 +320,9 @@
       "end_pos": 2199
     },
     {
-      "entity_text": "Anne-",
+      "entity_text": "Anne-Laure Civeyrac",
       "entity_type": "PERSON",
       "start_pos": 2207,
-      "end_pos": 2212
-    },
-    {
-      "entity_text": "Laure Civeyrac",
-      "entity_type": "PERSON",
-      "start_pos": 2212,
       "end_pos": 2226
     }
   ]

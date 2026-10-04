@@ -2,12 +2,6 @@
   "document_name": "project_report.txt",
   "entities": [
     {
-      "entity_text": "Migration Cloud",
-      "entity_type": "PERSON",
-      "start_pos": 26,
-      "end_pos": 41
-    },
-    {
       "entity_text": "Caroline Petit",
       "entity_type": "PERSON",
       "start_pos": 90,
@@ -26,12 +20,6 @@
       "end_pos": 239
     },
     {
-      "entity_text": "Architecte Cloud",
-      "entity_type": "PERSON",
-      "start_pos": 241,
-      "end_pos": 257
-    },
-    {
       "entity_text": "Caroline Petit",
       "entity_type": "PERSON",
       "start_pos": 437,
@@ -48,12 +36,6 @@
       "entity_type": "PERSON",
       "start_pos": 511,
       "end_pos": 525
-    },
-    {
-      "entity_text": "Lead Developer",
-      "entity_type": "PERSON",
-      "start_pos": 528,
-      "end_pos": 542
     },
     {
       "entity_text": "Kevin Zhang",
@@ -86,10 +68,22 @@
       "end_pos": 668
     },
     {
+      "entity_text": "Microsoft France",
+      "entity_type": "ORG",
+      "start_pos": 696,
+      "end_pos": 712
+    },
+    {
       "entity_text": "France",
       "entity_type": "LOCATION",
       "start_pos": 706,
       "end_pos": 712
+    },
+    {
+      "entity_text": "Romain Niccoli",
+      "entity_type": "PERSON",
+      "start_pos": 717,
+      "end_pos": 731
     },
     {
       "entity_text": "Sophie Bernard",
@@ -98,16 +92,34 @@
       "end_pos": 751
     },
     {
+      "entity_text": "Devoteam",
+      "entity_type": "ORG",
+      "start_pos": 754,
+      "end_pos": 762
+    },
+    {
       "entity_text": "David Park",
       "entity_type": "PERSON",
       "start_pos": 781,
       "end_pos": 791
     },
     {
+      "entity_text": "Ahmed Mansour",
+      "entity_type": "PERSON",
+      "start_pos": 813,
+      "end_pos": 826
+    },
+    {
       "entity_text": "Émilie Rousseau",
       "entity_type": "PERSON",
       "start_pos": 832,
       "end_pos": 847
+    },
+    {
+      "entity_text": "Wavestone",
+      "entity_type": "ORG",
+      "start_pos": 850,
+      "end_pos": 859
     },
     {
       "entity_text": "Laure Bertholom",
@@ -164,12 +176,6 @@
       "end_pos": 1413
     },
     {
-      "entity_text": "Lead Dev",
-      "entity_type": "PERSON",
-      "start_pos": 1415,
-      "end_pos": 1423
-    },
-    {
       "entity_text": "Nadia Amrani",
       "entity_type": "PERSON",
       "start_pos": 1460,
@@ -188,10 +194,22 @@
       "end_pos": 1590
     },
     {
-      "entity_text": "Microsoft France ",
+      "entity_text": "Microsoft France",
       "entity_type": "ORG",
       "start_pos": 1697,
-      "end_pos": 1714
+      "end_pos": 1713
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 1707,
+      "end_pos": 1713
+    },
+    {
+      "entity_text": "Romain Niccoli",
+      "entity_type": "PERSON",
+      "start_pos": 1718,
+      "end_pos": 1732
     },
     {
       "entity_text": "Sophie Bernard",
@@ -200,22 +218,34 @@
       "end_pos": 1752
     },
     {
-      "entity_text": "Philippe Courtois",
+      "entity_text": "Jean-Philippe Courtois",
       "entity_type": "PERSON",
-      "start_pos": 1828,
+      "start_pos": 1823,
       "end_pos": 1845
     },
     {
-      "entity_text": "Microsoft Global Sales",
+      "entity_text": "Microsoft",
       "entity_type": "ORG",
       "start_pos": 1851,
-      "end_pos": 1873
+      "end_pos": 1860
+    },
+    {
+      "entity_text": "Devoteam",
+      "entity_type": "ORG",
+      "start_pos": 1877,
+      "end_pos": 1885
     },
     {
       "entity_text": "David Park",
       "entity_type": "PERSON",
       "start_pos": 1890,
       "end_pos": 1900
+    },
+    {
+      "entity_text": "Ahmed Mansour",
+      "entity_type": "PERSON",
+      "start_pos": 1962,
+      "end_pos": 1975
     },
     {
       "entity_text": "Émilie Morel",
@@ -228,6 +258,12 @@
       "entity_type": "PERSON",
       "start_pos": 1998,
       "end_pos": 2013
+    },
+    {
+      "entity_text": "Wavestone",
+      "entity_type": "ORG",
+      "start_pos": 2069,
+      "end_pos": 2078
     },
     {
       "entity_text": "Laure Bertholom",
@@ -254,6 +290,12 @@
       "end_pos": 2585
     },
     {
+      "entity_text": "Wavestone",
+      "entity_type": "ORG",
+      "start_pos": 2619,
+      "end_pos": 2628
+    },
+    {
       "entity_text": "Laure Bertholom",
       "entity_type": "PERSON",
       "start_pos": 2655,
@@ -264,6 +306,18 @@
       "entity_type": "PERSON",
       "start_pos": 2736,
       "end_pos": 2747
+    },
+    {
+      "entity_text": "Alexandre Jin",
+      "entity_type": "PERSON",
+      "start_pos": 2766,
+      "end_pos": 2779
+    },
+    {
+      "entity_text": "Laura Martin",
+      "entity_type": "PERSON",
+      "start_pos": 2785,
+      "end_pos": 2797
     },
     {
       "entity_text": "Sarah Cohen",
@@ -278,21 +332,51 @@
       "end_pos": 2895
     },
     {
-      "entity_text": "Luc Moreau",
+      "entity_text": "GDPR Experts",
+      "entity_type": "ORG",
+      "start_pos": 2897,
+      "end_pos": 2909
+    },
+    {
+      "entity_text": "CNIL",
+      "entity_type": "ORG",
+      "start_pos": 2915,
+      "end_pos": 2919
+    },
+    {
+      "entity_text": "Deloitte",
+      "entity_type": "ORG",
+      "start_pos": 2981,
+      "end_pos": 2989
+    },
+    {
+      "entity_text": "Jean-Luc Moreau",
       "entity_type": "PERSON",
-      "start_pos": 3009,
+      "start_pos": 3004,
       "end_pos": 3019
     },
     {
-      "entity_text": "Microsoft Azure",
-      "entity_type": "ORG",
-      "start_pos": 3150,
-      "end_pos": 3165
+      "entity_text": "Leclerc",
+      "entity_type": "PERSON",
+      "start_pos": 3049,
+      "end_pos": 3056
     },
     {
-      "entity_text": "Prestation Devoteam",
+      "entity_text": "Microsoft",
+      "entity_type": "ORG",
+      "start_pos": 3150,
+      "end_pos": 3159
+    },
+    {
+      "entity_text": "Niccoli",
       "entity_type": "PERSON",
-      "start_pos": 3197,
+      "start_pos": 3186,
+      "end_pos": 3193
+    },
+    {
+      "entity_text": "Devoteam",
+      "entity_type": "ORG",
+      "start_pos": 3208,
       "end_pos": 3216
     },
     {
@@ -302,9 +386,9 @@
       "end_pos": 3238
     },
     {
-      "entity_text": "Conseil Wavestone",
-      "entity_type": "PERSON",
-      "start_pos": 3242,
+      "entity_text": "Wavestone",
+      "entity_type": "ORG",
+      "start_pos": 3250,
       "end_pos": 3259
     },
     {
@@ -314,10 +398,10 @@
       "end_pos": 3287
     },
     {
-      "entity_text": "Formation équipes",
-      "entity_type": "PERSON",
-      "start_pos": 3291,
-      "end_pos": 3308
+      "entity_text": "M2i Formation",
+      "entity_type": "ORG",
+      "start_pos": 3327,
+      "end_pos": 3340
     },
     {
       "entity_text": "Yves Blanc",
@@ -362,16 +446,28 @@
       "end_pos": 3660
     },
     {
+      "entity_text": "Kea & Partners",
+      "entity_type": "ORG",
+      "start_pos": 3680,
+      "end_pos": 3694
+    },
+    {
       "entity_text": "Marc Durand",
       "entity_type": "PERSON",
       "start_pos": 3711,
       "end_pos": 3722
     },
     {
-      "entity_text": "Orange Business",
+      "entity_text": "Benoit",
       "entity_type": "PERSON",
+      "start_pos": 3751,
+      "end_pos": 3757
+    },
+    {
+      "entity_text": "Orange Business Services",
+      "entity_type": "ORG",
       "start_pos": 3803,
-      "end_pos": 3818
+      "end_pos": 3827
     },
     {
       "entity_text": "Karim Benzema",
@@ -386,10 +482,28 @@
       "end_pos": 3867
     },
     {
+      "entity_text": "GitLab",
+      "entity_type": "ORG",
+      "start_pos": 3909,
+      "end_pos": 3915
+    },
+    {
       "entity_text": "Laura Martin",
       "entity_type": "PERSON",
       "start_pos": 3938,
       "end_pos": 3950
+    },
+    {
+      "entity_text": "Zhang",
+      "entity_type": "PERSON",
+      "start_pos": 3956,
+      "end_pos": 3961
+    },
+    {
+      "entity_text": "Mindquest",
+      "entity_type": "ORG",
+      "start_pos": 4006,
+      "end_pos": 4015
     },
     {
       "entity_text": "Ahmed Mansour",
@@ -408,6 +522,18 @@
       "entity_type": "PERSON",
       "start_pos": 4204,
       "end_pos": 4210
+    },
+    {
+      "entity_text": "Arnaud",
+      "entity_type": "PERSON",
+      "start_pos": 4215,
+      "end_pos": 4221
+    },
+    {
+      "entity_text": "Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 4227,
+      "end_pos": 4233
     }
   ]
 }

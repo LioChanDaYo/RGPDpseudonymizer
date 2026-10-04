@@ -2,28 +2,16 @@
   "document_name": "interview_03.txt",
   "entities": [
     {
-      "entity_text": "Transformation Digitale",
-      "entity_type": "PERSON",
-      "start_pos": 12,
-      "end_pos": 35
-    },
-    {
-      "entity_text": "Secteur Public",
-      "entity_type": "PERSON",
-      "start_pos": 36,
-      "end_pos": 50
-    },
-    {
       "entity_text": "Claire Fontaine",
       "entity_type": "PERSON",
       "start_pos": 68,
       "end_pos": 83
     },
     {
-      "entity_text": "Fontaine, Directrice",
-      "entity_type": "PERSON",
-      "start_pos": 75,
-      "end_pos": 95
+      "entity_text": "Mairie de Bordeaux",
+      "entity_type": "ORG",
+      "start_pos": 99,
+      "end_pos": 117
     },
     {
       "entity_text": "Bordeaux",
@@ -44,10 +32,22 @@
       "end_pos": 239
     },
     {
+      "entity_text": "Mairie de Bordeaux",
+      "entity_type": "ORG",
+      "start_pos": 253,
+      "end_pos": 271
+    },
+    {
       "entity_text": "Bordeaux",
       "entity_type": "LOCATION",
       "start_pos": 263,
       "end_pos": 271
+    },
+    {
+      "entity_text": "Accenture France",
+      "entity_type": "ORG",
+      "start_pos": 327,
+      "end_pos": 343
     },
     {
       "entity_text": "France",
@@ -86,10 +86,10 @@
       "end_pos": 614
     },
     {
-      "entity_text": "Orange Business",
-      "entity_type": "PERSON",
+      "entity_text": "Orange Business Services",
+      "entity_type": "ORG",
       "start_pos": 662,
-      "end_pos": 677
+      "end_pos": 686
     },
     {
       "entity_text": "Karim Benzema",
@@ -104,10 +104,40 @@
       "end_pos": 785
     },
     {
+      "entity_text": "Préfecture de la Gironde",
+      "entity_type": "ORG",
+      "start_pos": 824,
+      "end_pos": 848
+    },
+    {
+      "entity_text": "Gironde",
+      "entity_type": "LOCATION",
+      "start_pos": 841,
+      "end_pos": 848
+    },
+    {
+      "entity_text": "Région Nouvelle-Aquitaine",
+      "entity_type": "ORG",
+      "start_pos": 853,
+      "end_pos": 878
+    },
+    {
+      "entity_text": "Nouvelle-Aquitaine",
+      "entity_type": "LOCATION",
+      "start_pos": 860,
+      "end_pos": 878
+    },
+    {
       "entity_text": "Commission Européenne",
-      "entity_type": "PERSON",
+      "entity_type": "ORG",
       "start_pos": 891,
       "end_pos": 912
+    },
+    {
+      "entity_text": "Bruxelles",
+      "entity_type": "LOCATION",
+      "start_pos": 915,
+      "end_pos": 924
     },
     {
       "entity_text": "Paolo Rossi",
@@ -122,6 +152,12 @@
       "end_pos": 1060
     },
     {
+      "entity_text": "ANSSI",
+      "entity_type": "ORG",
+      "start_pos": 1064,
+      "end_pos": 1069
+    },
+    {
       "entity_text": "Julie Marchand",
       "entity_type": "PERSON",
       "start_pos": 1102,
@@ -134,22 +170,28 @@
       "end_pos": 1135
     },
     {
-      "entity_text": "On échange",
-      "entity_type": "PERSON",
-      "start_pos": 1137,
-      "end_pos": 1147
-    },
-    {
       "entity_text": "Lyon",
       "entity_type": "LOCATION",
       "start_pos": 1181,
       "end_pos": 1185
     },
     {
+      "entity_text": "Dupont",
+      "entity_type": "PERSON",
+      "start_pos": 1201,
+      "end_pos": 1207
+    },
+    {
       "entity_text": "Nantes",
       "entity_type": "LOCATION",
       "start_pos": 1234,
       "end_pos": 1240
+    },
+    {
+      "entity_text": "DINUM",
+      "entity_type": "ORG",
+      "start_pos": 1245,
+      "end_pos": 1250
     },
     {
       "entity_text": "Paris",
@@ -164,16 +206,40 @@
       "end_pos": 1334
     },
     {
-      "entity_text": "IBM et SAP France",
+      "entity_text": "IBM",
       "entity_type": "ORG",
       "start_pos": 1380,
+      "end_pos": 1383
+    },
+    {
+      "entity_text": "SAP France",
+      "entity_type": "ORG",
+      "start_pos": 1387,
       "end_pos": 1397
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 1391,
+      "end_pos": 1397
+    },
+    {
+      "entity_text": "Capgemini",
+      "entity_type": "ORG",
+      "start_pos": 1432,
+      "end_pos": 1441
     },
     {
       "entity_text": "Léa Rodriguez",
       "entity_type": "PERSON",
       "start_pos": 1457,
       "end_pos": 1470
+    },
+    {
+      "entity_text": "Google France",
+      "entity_type": "ORG",
+      "start_pos": 1517,
+      "end_pos": 1530
     },
     {
       "entity_text": "France",
@@ -188,16 +254,16 @@
       "end_pos": 1542
     },
     {
-      "entity_text": "Prochaines étapes",
-      "entity_type": "PERSON",
-      "start_pos": 1558,
-      "end_pos": 1575
-    },
-    {
       "entity_text": "Fontaine",
       "entity_type": "PERSON",
       "start_pos": 1582,
       "end_pos": 1590
+    },
+    {
+      "entity_text": "Métropole de Bordeaux",
+      "entity_type": "ORG",
+      "start_pos": 1607,
+      "end_pos": 1628
     },
     {
       "entity_text": "Bordeaux",
@@ -206,15 +272,27 @@
       "end_pos": 1628
     },
     {
-      "entity_text": "Mérignac, Pessac",
-      "entity_type": "PERSON",
+      "entity_text": "Mérignac",
+      "entity_type": "LOCATION",
       "start_pos": 1659,
+      "end_pos": 1667
+    },
+    {
+      "entity_text": "Pessac",
+      "entity_type": "LOCATION",
+      "start_pos": 1669,
       "end_pos": 1675
     },
     {
-      "entity_text": "Transformation Publique",
-      "entity_type": "PERSON",
-      "start_pos": 1731,
+      "entity_text": "Talence",
+      "entity_type": "LOCATION",
+      "start_pos": 1679,
+      "end_pos": 1686
+    },
+    {
+      "entity_text": "Ministère de la Transformation Publique",
+      "entity_type": "ORG",
+      "start_pos": 1715,
       "end_pos": 1754
     },
     {

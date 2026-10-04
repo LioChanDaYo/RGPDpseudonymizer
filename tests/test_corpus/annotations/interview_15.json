@@ -2,22 +2,22 @@
   "document_name": "interview_15.txt",
   "entities": [
     {
-      "entity_text": "Crise Management",
+      "entity_text": "Vincent Chen",
       "entity_type": "PERSON",
-      "start_pos": 13,
-      "end_pos": 29
+      "start_pos": 70,
+      "end_pos": 82
     },
     {
-      "entity_text": "Chen, Fin",
-      "entity_type": "PERSON",
-      "start_pos": 78,
-      "end_pos": 87
+      "entity_text": "SecurePay",
+      "entity_type": "ORG",
+      "start_pos": 92,
+      "end_pos": 101
     },
     {
-      "entity_text": "Tech Secure",
-      "entity_type": "PERSON",
-      "start_pos": 87,
-      "end_pos": 98
+      "entity_text": "Paris",
+      "entity_type": "LOCATION",
+      "start_pos": 102,
+      "end_pos": 107
     },
     {
       "entity_text": "Chen",
@@ -32,10 +32,22 @@
       "end_pos": 224
     },
     {
+      "entity_text": "SecurePay",
+      "entity_type": "ORG",
+      "start_pos": 226,
+      "end_pos": 235
+    },
+    {
       "entity_text": "Alice Durand",
       "entity_type": "PERSON",
       "start_pos": 328,
       "end_pos": 340
+    },
+    {
+      "entity_text": "Chen",
+      "entity_type": "PERSON",
+      "start_pos": 405,
+      "end_pos": 409
     },
     {
       "entity_text": "David Park",
@@ -68,9 +80,15 @@
       "end_pos": 693
     },
     {
-      "entity_text": "Baptiste Soufron",
+      "entity_text": "Wavestone",
+      "entity_type": "ORG",
+      "start_pos": 703,
+      "end_pos": 712
+    },
+    {
+      "entity_text": "Jean-Baptiste Soufron",
       "entity_type": "PERSON",
-      "start_pos": 756,
+      "start_pos": 751,
       "end_pos": 772
     },
     {
@@ -86,10 +104,22 @@
       "end_pos": 846
     },
     {
+      "entity_text": "ANSSI",
+      "entity_type": "ORG",
+      "start_pos": 868,
+      "end_pos": 873
+    },
+    {
       "entity_text": "Guillaume Poupard",
       "entity_type": "PERSON",
       "start_pos": 892,
       "end_pos": 909
+    },
+    {
+      "entity_text": "Chen",
+      "entity_type": "PERSON",
+      "start_pos": 977,
+      "end_pos": 981
     },
     {
       "entity_text": "Romain Duval",
@@ -98,16 +128,28 @@
       "end_pos": 1021
     },
     {
-      "entity_text": "Palo Alto",
-      "entity_type": "PERSON",
+      "entity_text": "Palo Alto Networks",
+      "entity_type": "ORG",
       "start_pos": 1059,
-      "end_pos": 1068
+      "end_pos": 1077
     },
     {
-      "entity_text": "Smith, était",
+      "entity_text": "Jennifer Smith",
       "entity_type": "PERSON",
-      "start_pos": 1108,
-      "end_pos": 1120
+      "start_pos": 1099,
+      "end_pos": 1113
+    },
+    {
+      "entity_text": "US",
+      "entity_type": "LOCATION",
+      "start_pos": 1142,
+      "end_pos": 1144
+    },
+    {
+      "entity_text": "SEKOIA.IO",
+      "entity_type": "ORG",
+      "start_pos": 1171,
+      "end_pos": 1180
     },
     {
       "entity_text": "Thomas Roccia",
@@ -116,10 +158,10 @@
       "end_pos": 1208
     },
     {
-      "entity_text": "Microsoft DART nous a aussi aid",
+      "entity_text": "Microsoft DART",
       "entity_type": "ORG",
       "start_pos": 1210,
-      "end_pos": 1241
+      "end_pos": 1224
     },
     {
       "entity_text": "John Lambert",
@@ -140,16 +182,16 @@
       "end_pos": 1361
     },
     {
+      "entity_text": "DGM",
+      "entity_type": "ORG",
+      "start_pos": 1384,
+      "end_pos": 1387
+    },
+    {
       "entity_text": "Olivier Durand",
       "entity_type": "PERSON",
       "start_pos": 1404,
       "end_pos": 1418
-    },
-    {
-      "entity_text": "Customer Success",
-      "entity_type": "PERSON",
-      "start_pos": 1458,
-      "end_pos": 1474
     },
     {
       "entity_text": "Ahmed Mansour",
@@ -159,7 +201,7 @@
     },
     {
       "entity_text": "Image Sept",
-      "entity_type": "PERSON",
+      "entity_type": "ORG",
       "start_pos": 1522,
       "end_pos": 1532
     },
@@ -170,15 +212,27 @@
       "end_pos": 1549
     },
     {
+      "entity_text": "Chen",
+      "entity_type": "PERSON",
+      "start_pos": 1612,
+      "end_pos": 1616
+    },
+    {
+      "entity_text": "CNIL",
+      "entity_type": "ORG",
+      "start_pos": 1635,
+      "end_pos": 1639
+    },
+    {
       "entity_text": "Julie Legrand",
       "entity_type": "PERSON",
       "start_pos": 1672,
       "end_pos": 1685
     },
     {
-      "entity_text": "Francis Lefebvre",
-      "entity_type": "PERSON",
-      "start_pos": 1724,
+      "entity_text": "CMS Francis Lefebvre",
+      "entity_type": "ORG",
+      "start_pos": 1720,
       "end_pos": 1740
     },
     {
@@ -188,15 +242,27 @@
       "end_pos": 1768
     },
     {
-      "entity_text": "Édouard Fernandez-",
-      "entity_type": "PERSON",
-      "start_pos": 1808,
-      "end_pos": 1826
+      "entity_text": "ACPR",
+      "entity_type": "ORG",
+      "start_pos": 1772,
+      "end_pos": 1776
     },
     {
-      "entity_text": "Marc Bideau",
+      "entity_text": "Édouard Fernandez-Bollo",
       "entity_type": "PERSON",
-      "start_pos": 1878,
+      "start_pos": 1808,
+      "end_pos": 1831
+    },
+    {
+      "entity_text": "Hiscox",
+      "entity_type": "ORG",
+      "start_pos": 1858,
+      "end_pos": 1864
+    },
+    {
+      "entity_text": "Jean-Marc Bideau",
+      "entity_type": "PERSON",
+      "start_pos": 1873,
       "end_pos": 1889
     },
     {
@@ -230,10 +296,40 @@
       "end_pos": 2150
     },
     {
+      "entity_text": "Partech",
+      "entity_type": "ORG",
+      "start_pos": 2196,
+      "end_pos": 2203
+    },
+    {
       "entity_text": "Roxanne Varza",
       "entity_type": "PERSON",
       "start_pos": 2213,
       "end_pos": 2226
+    },
+    {
+      "entity_text": "Eurazeo",
+      "entity_type": "ORG",
+      "start_pos": 2230,
+      "end_pos": 2237
+    },
+    {
+      "entity_text": "Yann du Rusquec",
+      "entity_type": "PERSON",
+      "start_pos": 2246,
+      "end_pos": 2261
+    },
+    {
+      "entity_text": "Chen",
+      "entity_type": "PERSON",
+      "start_pos": 2322,
+      "end_pos": 2326
+    },
+    {
+      "entity_text": "CyberTraining.fr",
+      "entity_type": "ORG",
+      "start_pos": 2388,
+      "end_pos": 2404
     },
     {
       "entity_text": "Damien Bancal",
@@ -242,10 +338,22 @@
       "end_pos": 2434
     },
     {
+      "entity_text": "Synacktiv",
+      "entity_type": "ORG",
+      "start_pos": 2483,
+      "end_pos": 2492
+    },
+    {
       "entity_text": "Fabien Perigaud",
       "entity_type": "PERSON",
       "start_pos": 2509,
       "end_pos": 2524
+    },
+    {
+      "entity_text": "Advens",
+      "entity_type": "ORG",
+      "start_pos": 2584,
+      "end_pos": 2590
     },
     {
       "entity_text": "Thierry Bedos",

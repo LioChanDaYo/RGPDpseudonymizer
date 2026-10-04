@@ -8,6 +8,18 @@
       "end_pos": 62
     },
     {
+      "entity_text": "CloudNative Solutions",
+      "entity_type": "ORG",
+      "start_pos": 71,
+      "end_pos": 92
+    },
+    {
+      "entity_text": "Station F",
+      "entity_type": "LOCATION",
+      "start_pos": 107,
+      "end_pos": 116
+    },
+    {
       "entity_text": "Paris",
       "entity_type": "LOCATION",
       "start_pos": 118,
@@ -20,10 +32,28 @@
       "end_pos": 152
     },
     {
-      "entity_text": "Amazon ",
+      "entity_text": "CloudNative Solutions",
+      "entity_type": "ORG",
+      "start_pos": 165,
+      "end_pos": 186
+    },
+    {
+      "entity_text": "Rodriguez",
+      "entity_type": "PERSON",
+      "start_pos": 296,
+      "end_pos": 305
+    },
+    {
+      "entity_text": "Amazon",
       "entity_type": "ORG",
       "start_pos": 334,
-      "end_pos": 341
+      "end_pos": 340
+    },
+    {
+      "entity_text": "Seattle",
+      "entity_type": "LOCATION",
+      "start_pos": 343,
+      "end_pos": 350
     },
     {
       "entity_text": "France",
@@ -56,16 +86,40 @@
       "end_pos": 559
     },
     {
+      "entity_text": "Société Générale",
+      "entity_type": "ORG",
+      "start_pos": 564,
+      "end_pos": 580
+    },
+    {
       "entity_text": "Philippe Aymerich",
       "entity_type": "PERSON",
       "start_pos": 648,
       "end_pos": 665
     },
     {
-      "entity_text": "Paribas, Crédit",
-      "entity_type": "PERSON",
-      "start_pos": 679,
-      "end_pos": 694
+      "entity_text": "BNP Paribas",
+      "entity_type": "ORG",
+      "start_pos": 675,
+      "end_pos": 686
+    },
+    {
+      "entity_text": "Crédit Agricole",
+      "entity_type": "ORG",
+      "start_pos": 688,
+      "end_pos": 703
+    },
+    {
+      "entity_text": "Banque de France",
+      "entity_type": "ORG",
+      "start_pos": 716,
+      "end_pos": 732
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 726,
+      "end_pos": 732
     },
     {
       "entity_text": "Denis Beau",
@@ -74,8 +128,14 @@
       "end_pos": 775
     },
     {
-      "entity_text": "Partech Partners",
+      "entity_text": "Rodriguez",
       "entity_type": "PERSON",
+      "start_pos": 834,
+      "end_pos": 843
+    },
+    {
+      "entity_text": "Partech Partners",
+      "entity_type": "ORG",
       "start_pos": 877,
       "end_pos": 893
     },
@@ -93,25 +153,19 @@
     },
     {
       "entity_text": "Kima Ventures",
-      "entity_type": "PERSON",
+      "entity_type": "ORG",
       "start_pos": 974,
       "end_pos": 987
     },
     {
-      "entity_text": "Anne-",
+      "entity_text": "Anne-Sophie Pastel",
       "entity_type": "PERSON",
       "start_pos": 996,
-      "end_pos": 1001
-    },
-    {
-      "entity_text": "Sophie Pastel",
-      "entity_type": "PERSON",
-      "start_pos": 1001,
       "end_pos": 1014
     },
     {
       "entity_text": "Serena Capital",
-      "entity_type": "PERSON",
+      "entity_type": "ORG",
       "start_pos": 1018,
       "end_pos": 1032
     },
@@ -120,6 +174,12 @@
       "entity_type": "PERSON",
       "start_pos": 1067,
       "end_pos": 1079
+    },
+    {
+      "entity_text": "OVHcloud",
+      "entity_type": "ORG",
+      "start_pos": 1093,
+      "end_pos": 1101
     },
     {
       "entity_text": "Léa Rodriguez",
@@ -132,6 +192,18 @@
       "entity_type": "PERSON",
       "start_pos": 1183,
       "end_pos": 1197
+    },
+    {
+      "entity_text": "Datadog",
+      "entity_type": "ORG",
+      "start_pos": 1209,
+      "end_pos": 1216
+    },
+    {
+      "entity_text": "Caroline Thibault",
+      "entity_type": "PERSON",
+      "start_pos": 1238,
+      "end_pos": 1255
     },
     {
       "entity_text": "Salesforce",
@@ -152,10 +224,22 @@
       "end_pos": 1359
     },
     {
-      "entity_text": "Google Cloud France ",
+      "entity_text": "Rodriguez",
+      "entity_type": "PERSON",
+      "start_pos": 1414,
+      "end_pos": 1423
+    },
+    {
+      "entity_text": "Google Cloud France",
       "entity_type": "ORG",
       "start_pos": 1441,
-      "end_pos": 1461
+      "end_pos": 1460
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 1454,
+      "end_pos": 1460
     },
     {
       "entity_text": "Sophie Bernard",
@@ -164,27 +248,27 @@
       "end_pos": 1507
     },
     {
-      "entity_text": "Corp, Docker",
-      "entity_type": "PERSON",
-      "start_pos": 1537,
+      "entity_text": "HashiCorp",
+      "entity_type": "ORG",
+      "start_pos": 1532,
+      "end_pos": 1541
+    },
+    {
+      "entity_text": "Docker",
+      "entity_type": "ORG",
+      "start_pos": 1543,
       "end_pos": 1549
     },
     {
       "entity_text": "Kubernetes Foundation",
-      "entity_type": "PERSON",
+      "entity_type": "ORG",
       "start_pos": 1554,
       "end_pos": 1575
     },
     {
-      "entity_text": "Cloud Native",
-      "entity_type": "PERSON",
+      "entity_text": "Cloud Native Computing Foundation",
+      "entity_type": "ORG",
       "start_pos": 1626,
-      "end_pos": 1638
-    },
-    {
-      "entity_text": "Computing Foundation",
-      "entity_type": "PERSON",
-      "start_pos": 1639,
       "end_pos": 1659
     },
     {
@@ -212,10 +296,22 @@
       "end_pos": 1785
     },
     {
+      "entity_text": "UK",
+      "entity_type": "LOCATION",
+      "start_pos": 1802,
+      "end_pos": 1804
+    },
+    {
       "entity_text": "Berlin",
       "entity_type": "LOCATION",
       "start_pos": 1816,
       "end_pos": 1822
+    },
+    {
+      "entity_text": "Barcelone",
+      "entity_type": "LOCATION",
+      "start_pos": 1826,
+      "end_pos": 1835
     },
     {
       "entity_text": "Antonio Garcia",
@@ -224,9 +320,9 @@
       "end_pos": 1889
     },
     {
-      "entity_text": "Business School",
-      "entity_type": "PERSON",
-      "start_pos": 1896,
+      "entity_text": "IE Business School",
+      "entity_type": "ORG",
+      "start_pos": 1893,
       "end_pos": 1911
     },
     {

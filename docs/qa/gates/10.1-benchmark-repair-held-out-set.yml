@@ -1,0 +1,86 @@
+schema: 1
+story: '10.1'
+story_title: 'Benchmark Repair + Held-Out Set'
+gate: PASS
+status_reason: 'G2 verified independently: all 12 metric lines in story, QA report, CHANGELOG and PR body match the downloaded artifacts of runs 37189862679 and 37013929807; annotation-set sha256 at run head a4e7dab equals the approved caf9bcac...; G4 diff empty; CI green. Only low-severity documentation and test-hardening findings.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-10-04T12:00:00Z'
+
+waiver: { active: false }
+
+top_issues:
+  - id: 'DOC-001'
+    severity: low
+    finding: 'Annotation-set sha256 recipe is ambiguous ("sha256 of the sorted <sha256(blob)>  <path> lines"). caf9bcac... reproduces only with LF blob content from git, lines sorted BY PATH, newline-terminated; sorting the lines as strings (by hash) gives 679664b4... instead.'
+    suggested_action: 'State "sorted by path" and give the one-liner in the story/STOP C record so 10.2+ reviewers reproduce it first time.'
+    refs: ['docs/stories/10.1.benchmark-repair-held-out-set.story.md:232']
+    suggested_owner: dev
+  - id: 'DOC-002'
+    severity: low
+    finding: 'STOP C task checkboxes C.1-C.3 are unchecked although the Annotation Diff Review Record is filled (C.2 2026-10-04 696338..., C.3 2026-10-04 caf9bc...).'
+    suggested_action: 'Tick C.1-C.3 (and 7.4 after this review) when the story is closed.'
+    refs: ['docs/stories/10.1.benchmark-repair-held-out-set.story.md:136-138']
+    suggested_owner: dev
+  - id: 'DOC-003'
+    severity: low
+    finding: 'Stale or drifted counts: 170 held-out-only strings (now 171 after A8); detector-pointer disposition 197/431 in the story vs 199/429 in the change log; annotations README cites amendments A1-A7 only; story line 538 gives the pre-A8 held-out totals (230, LOC 67) after the post-A8 ones (231, LOC 68).'
+    suggested_action: 'Refresh the numbers at close-out; none of them affects a G1 metric.'
+    refs: ['docs/stories/10.1.benchmark-repair-held-out-set.story.md:484', 'docs/stories/10.1.benchmark-repair-held-out-set.story.md:501', 'docs/stories/10.1.benchmark-repair-held-out-set.story.md:538', 'docs/qa/10.1-annotation-change-log.md:119', 'tests/test_corpus/annotations/README.md:16', 'tests/test_corpus/annotations/README.md:54']
+    suggested_owner: dev
+  - id: 'TEST-001'
+    severity: low
+    finding: 'Leakage allowlist is keyed by string hash only, not (path, hash). Any of the 14 allowlisted held-out strings can be added to a NEW resource or unit-test file without the guard firing. Compliant with Task 5.5b as written.'
+    suggested_action: 'Key the allowlist by (relative path, sha256) so only the 26 existing hits are excused.'
+    refs: ['tests/unit/test_held_out_leakage.py:116-118', 'tests/unit/held_out_leakage_allowlist.json']
+    suggested_owner: dev
+  - id: 'TEST-002'
+    severity: low
+    finding: 'The integrity and leakage guards have no negative self-test (a synthetic same-type overlap, non-nested cross-type overlap or planted leak showing the guard fires). Logic was reviewed by hand and is correct.'
+    suggested_action: 'Add small tmp_path-based negative tests when the guards are next touched.'
+    refs: ['tests/unit/test_annotation_integrity.py:108-125', 'tests/unit/test_held_out_leakage.py:97-109']
+    suggested_owner: dev
+
+quality_score: 100
+expires: '2026-10-18T12:00:00Z'
+
+evidence:
+  g1_run: 37189862679
+  g1_run_head: 'a4e7dabc1e536805ebc5ca66f0db956db88b97be'
+  before_run: 37013929807
+  before_run_head: 'fceef65b37ef32f35836a190053faf12e004a428'
+  annotation_set_sha256: 'caf9bcac19413fe7744d13392c2e150e4db6b78086c79c8044121dd53c4be32b'
+  annotation_set_identical_at: ['a73329d', 'a4e7dab', 'be34495']
+  metric_lines_verified: 12
+  metric_lines_matched: 12
+  detections_before_after: '2654 / 2654 (PERSON 1595, LOCATION 365, ORG 694 both runs)'
+  tests_reviewed: 36
+  risks_identified: 5
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+    ac_gaps: []
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'No product code change. Held-out hygiene: 0 held-out-only strings in the 42 changed files outside held_out/, the PR body, commit messages or the accuracy artifact; guard hits 14/14 allowlisted.'
+  performance:
+    status: PASS
+    notes: 'New unit tests run in 0.46s locally; accuracy run 7.69s test time.'
+  reliability:
+    status: PASS
+    notes: 'Auto-annotator main() exits 1 without writing; integrity test guards offsets, overlaps, duplicates and pairing on all 31 files.'
+  maintainability:
+    status: PASS
+    notes: 'Shared _load_documents/_score_documents helpers; public loader signatures unchanged; GUIDELINES rules carry stable IDs and every edit is logged.'
+
+recommendations:
+  immediate: []
+  future:
+    - action: 'Use run 37189862679 as the G3 baseline for 10.2 (LOCATION R 0.8099, PERSON R 0.9759, ORG R 0.4183, Overall R 0.7991); held-out baseline from the same run for G5.'
+      refs: ['docs/qa/ner-accuracy-report.md']
+    - action: 'Download-before-expiry is done: the 37013929807 artifact matched the QA report; after ~2026-11-01 the report copy is the fallback.'
+      refs: ['docs/qa/ner-accuracy-report.md']
+    - action: 'TestRegressionComparison floors (F1 0.2954 etc.) are far below the new baseline; revisit at Epic 10 close-out, not per story.'
+      refs: ['tests/accuracy/test_ner_accuracy_validation.py']
+    - action: 'Key leakage allowlist by (path, hash); add negative self-tests for the guards.'
+      refs: ['tests/unit/test_held_out_leakage.py', 'tests/unit/test_annotation_integrity.py']

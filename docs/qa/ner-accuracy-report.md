@@ -390,6 +390,8 @@ The span trim alone is neutral-to-positive on French (+1 TP, -10 FP). Widening t
 
 ### Ground-Truth Contamination (Last, First)
 
+> **Correction (Story 10.1, 2026-10-04).** The comma annotations did not come from the detector's `last_first_names` pattern. They came from the "Last, First" regex of the Story 1.1 auto-annotator (`scripts/auto_annotate_corpus.py` as committed in `c9bc1ed`). Running those patterns over the corpus reproduces them ("Rousseau, Responsable" ×3, "Paribas, Crédit" ×2). Also, the one genuine "Last, First" name is "Dubois, Jean-Marc" (`interview_02`); "Laurent, Marie" is a greeting to two people. Story 10.1 removed or corrected all 37 comma annotations; see "Benchmark repair, same detector" below. The original text follows unchanged.
+
 The recall drop and the collapse of the "Last, First order" edge case are artefacts. 36 of the 37 annotations containing a comma are outputs of the old `last_first_names` pattern that were accepted into the ground truth during automated annotation, e.g. "Mesdames, Messieurs", "Oui, Auto", "Confidentiel, Secret", "Paribas, Crédit", "Martin, Analyste", "Rousseau, Responsable". Only "Laurent, Marie" is plausibly a genuine surname-first name. The old pattern was being scored against its own output.
 
 Re-scoring every variant with the comma annotations removed gives **identical recall (708 TP) for all variants**: the old pattern contributed no real true positives. On that cleaned ground truth the shipped variant moves F1 from 30.76% (span trim only) to 32.52% and cuts false positives from 2,195 to 1,946. The "Last, First order" edge case should not be read as a recall measure until those annotations are cleaned.
@@ -456,3 +458,94 @@ Given the current accuracy levels, **validation mode should always be enabled** 
 **Relation to Story 5.3:** the 59.97% reported for Story 5.3 could not be reproduced with the committed scorer (re-run on 9c587c9: 31.35%), which led the Story 7.5 note above and the v2.2.0 docs to treat it as unreliable. It is consistent with app-normalized scoring, which suggests the Story 5.3 run used title-aware matching that was never committed.
 
 **Remaining weak points:** ORG precision (job titles and acronyms such as CTO, CFO, COMEX, DPO, RSSI, DRH detected as organisations; some remaining ORG "false positives" are real organisations missing from the ground truth, e.g. CNIL, ANSSI, Deloitte) and LOCATION precision (capitalised common words such as "CONFORME", "Équipe").
+
+---
+
+## Benchmark repair, same detector (Story 10.1, 2026-10-04)
+
+**Benchmark-only delta.** Detector code is unchanged since `fceef65`: `git diff --stat fceef65 HEAD -- gdpr_pseudonymizer/` is empty (G4). The numbers below differ only because the ground truth changed. This is not a detector improvement.
+
+**Sources (G1):**
+- Before: CI accuracy run `37013929807` (commit `fceef65`), old ground truth.
+- After: CI accuracy run `37189862679` (commit `a4e7dab`, branch `story/10.1-benchmark-repair`), repaired ground truth plus the new held-out set. Annotation-set sha256 `caf9bcac19413fe7744d13392c2e150e4db6b78086c79c8044121dd53c4be32b`, as approved by Lionel at STOP C/C.3.
+
+**What changed in the ground truth:**
+- The 25 annotation files were repaired by hand under `tests/test_corpus/annotations/GUIDELINES.md` (approved 2026-10-02, amendments A1–A9 to 2026-10-04).
+- Every edit cites a rule: `docs/qa/10.1-annotation-change-log.md`.
+- 96 truncated PERSON spans were corrected or removed, junk labels removed, and missing ORG/LOCATION added. A place inside an ORG name is now also annotated as a nested LOCATION when it says where the organisation is (rule G7).
+- Totals: 25 documents; PERSON 1,482 → 1,328, LOCATION 124 → 263 (101 nested in an ORG), ORG 131 → 624; total 1,737 → 2,215.
+- `scripts/auto_annotate_corpus.py`, which produced the truncations, is retired.
+
+### Lines from `accuracy-output.txt`, verbatim
+
+Before (`37013929807`):
+
+```
+[Overall] P=0.4842 R=0.7398 F1=0.5853 TP=1285 FP=1369 FN=452 FN%=26.02 FP%=51.58
+[PERSON] P=0.7034 R=0.7571 F1=0.7293 TP=1122 FP=473 FN=360
+[LOCATION] P=0.3014 R=0.8871 F1=0.4499 TP=110 FP=255 FN=14
+[ORG] P=0.0764 R=0.4046 F1=0.1285 TP=53 FP=641 FN=78
+```
+
+After (`37189862679`):
+
+```
+[Overall] P=0.6669 R=0.7991 F1=0.7270 TP=1770 FP=884 FN=445 FN%=20.09 FP%=33.31
+[PERSON] P=0.8125 R=0.9759 F1=0.8868 TP=1296 FP=299 FN=32
+[LOCATION] P=0.5836 R=0.8099 F1=0.6783 TP=213 FP=152 FN=50
+[ORG] P=0.3761 R=0.4183 F1=0.3961 TP=261 FP=433 FN=363
+```
+
+| | Precision | Recall | F1 | TP | FP | FN |
+|---|---|---|---|---|---|---|
+| Overall, before | 48.42% | 73.98% | 58.53% | 1,285 | 1,369 | 452 |
+| **Overall, after** | **66.69%** | **79.91%** | **72.70%** | 1,770 | 884 | 445 |
+| PERSON, before | 70.34% | 75.71% | 72.93% | 1,122 | 473 | 360 |
+| **PERSON, after** | **81.25%** | **97.59%** | **88.68%** | 1,296 | 299 | 32 |
+| LOCATION, before | 30.14% | 88.71% | 44.99% | 110 | 255 | 14 |
+| **LOCATION, after** | **58.36%** | **80.99%** | **67.83%** | 213 | 152 | 50 |
+| ORG, before | 7.64% | 40.46% | 12.85% | 53 | 641 | 78 |
+| **ORG, after** | **37.61%** | **41.83%** | **39.61%** | 261 | 433 | 363 |
+
+### Held-out set (first measurement)
+
+Six synthetic documents in `tests/test_corpus/held_out/`, never used for tuning, 231 annotations (PERSON 112, LOCATION 68, ORG 51). Aggregates only, from the same run `37189862679`:
+
+```
+[HELD-OUT Overall] P=0.5353 R=0.7229 F1=0.6151 TP=167 FP=145 FN=64 FN%=27.71 FP%=46.47
+[HELD-OUT PERSON] P=0.5987 R=0.8125 F1=0.6894 TP=91 FP=61 FN=21
+[HELD-OUT LOCATION] P=0.6092 R=0.7794 F1=0.6839 TP=53 FP=34 FN=15
+[HELD-OUT ORG] P=0.3151 R=0.4510 F1=0.3710 TP=23 FP=50 FN=28
+```
+
+From story 10.2 on, every detector story reports these lines next to the main corpus (G5).
+
+### Per-type recall drops (AC9, not blocking)
+
+Only one per-type recall dropped between the old and the new ground truth:
+
+- **LOCATION recall 88.71% → 80.99%** (FN 14 → 50). Cause: +139 LOCATION annotations were added to the ground truth (124 → 263), and 36 of them are not detected by the unchanged detector. By rule:
+  - 10 places nested inside an ORG name (G7);
+  - 9 places inside job titles or team names (A7);
+  - 4 "US"/"UK"/"UE" (Q14);
+  - 4 "Sud" (A3);
+  - 2 "EU" (A5);
+  - 2 arrondissements (A6);
+  - 4 other places (L1);
+  - 1 street name (Q16).
+
+  The 14 FNs that existed before are still undetected. The breakdown comes from re-scoring a local detection dump of the same detector code (2,654 detections, equal to TP+FP of `37013929807`) against the final annotations; it reproduces the CI FN count of 50.
+
+Overall, PERSON and ORG recall rose.
+
+### Annotation reliability check (2026-10-04)
+
+A blind cross-check was run before STOP C. An independent annotator (GPT-5.5 via `codex exec`) read only `GUIDELINES.md` and 5 texts (3 main corpus, 2 held-out):
+- Main corpus: 207/207 agreement. This is inflated, because `GUIDELINES.md` quotes 72 of those strings as examples.
+- Held-out (the clean figure): 68 matched, 3 disagreements, F1 agreement 97.8%.
+- A blind second Claude annotation: 99.8%.
+
+### Notes
+
+- The edge-case category `title_with_name` was redefined (test-side) as PERSON annotations immediately preceded by a title, since titles are outside spans (GUIDELINES P2). It now covers 1,211 entities.
+- The README, FAQ, docs index and tutorials are not updated in this story (Epic 10 G7 interpretation). Public figures change once, at Epic 10 close-out.

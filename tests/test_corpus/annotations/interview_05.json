@@ -2,33 +2,21 @@
   "document_name": "interview_05.txt",
   "entities": [
     {
-      "entity_text": "Témoignage Avocat",
-      "entity_type": "PERSON",
-      "start_pos": 0,
-      "end_pos": 17
-    },
-    {
-      "entity_text": "Affaire Commerciale",
-      "entity_type": "PERSON",
-      "start_pos": 20,
-      "end_pos": 39
-    },
-    {
       "entity_text": "Antoine Mercier",
       "entity_type": "PERSON",
       "start_pos": 43,
       "end_pos": 58
     },
     {
-      "entity_text": "Cabinet Mercier",
-      "entity_type": "PERSON",
-      "start_pos": 60,
-      "end_pos": 75
+      "entity_text": "Mercier & Associés",
+      "entity_type": "ORG",
+      "start_pos": 68,
+      "end_pos": 86
     },
     {
-      "entity_text": "Associés, Nice",
-      "entity_type": "PERSON",
-      "start_pos": 78,
+      "entity_text": "Nice",
+      "entity_type": "LOCATION",
+      "start_pos": 88,
       "end_pos": 92
     },
     {
@@ -50,9 +38,21 @@
       "end_pos": 319
     },
     {
-      "entity_text": "Antipolis et DataCorp Europe",
+      "entity_text": "Sophia-Antipolis",
+      "entity_type": "LOCATION",
+      "start_pos": 328,
+      "end_pos": 344
+    },
+    {
+      "entity_text": "DataCorp Europe",
       "entity_type": "ORG",
-      "start_pos": 335,
+      "start_pos": 348,
+      "end_pos": 363
+    },
+    {
+      "entity_text": "Europe",
+      "entity_type": "LOCATION",
+      "start_pos": 357,
       "end_pos": 363
     },
     {
@@ -62,16 +62,16 @@
       "end_pos": 376
     },
     {
+      "entity_text": "SoftTech",
+      "entity_type": "ORG",
+      "start_pos": 395,
+      "end_pos": 403
+    },
+    {
       "entity_text": "Nathalie Rousseau",
       "entity_type": "PERSON",
       "start_pos": 434,
       "end_pos": 451
-    },
-    {
-      "entity_text": "Qui était",
-      "entity_type": "PERSON",
-      "start_pos": 467,
-      "end_pos": 476
     },
     {
       "entity_text": "Antoine Mercier",
@@ -86,14 +86,20 @@
       "end_pos": 529
     },
     {
-      "entity_text": "Sarah Goldman du",
+      "entity_text": "Europe",
+      "entity_type": "LOCATION",
+      "start_pos": 523,
+      "end_pos": 529
+    },
+    {
+      "entity_text": "Sarah Goldman",
       "entity_type": "PERSON",
       "start_pos": 551,
-      "end_pos": 567
+      "end_pos": 564
     },
     {
       "entity_text": "Clifford Chance",
-      "entity_type": "PERSON",
+      "entity_type": "ORG",
       "start_pos": 576,
       "end_pos": 591
     },
@@ -110,16 +116,28 @@
       "end_pos": 647
     },
     {
-      "entity_text": "Amazon Web",
-      "entity_type": "PERSON",
+      "entity_text": "Amazon Web Services",
+      "entity_type": "ORG",
       "start_pos": 695,
-      "end_pos": 705
+      "end_pos": 714
+    },
+    {
+      "entity_text": "Microsoft Corporation",
+      "entity_type": "ORG",
+      "start_pos": 718,
+      "end_pos": 739
     },
     {
       "entity_text": "Mercier",
       "entity_type": "PERSON",
       "start_pos": 779,
       "end_pos": 786
+    },
+    {
+      "entity_text": "Tribunal de Commerce de Paris",
+      "entity_type": "ORG",
+      "start_pos": 791,
+      "end_pos": 820
     },
     {
       "entity_text": "Paris",
@@ -134,15 +152,15 @@
       "end_pos": 867
     },
     {
-      "entity_text": "Marc Durand de",
+      "entity_text": "Marc Durand",
       "entity_type": "PERSON",
       "start_pos": 925,
-      "end_pos": 939
+      "end_pos": 936
     },
     {
-      "entity_text": "Business School",
-      "entity_type": "PERSON",
-      "start_pos": 948,
+      "entity_text": "EDHEC Business School",
+      "entity_type": "ORG",
+      "start_pos": 942,
       "end_pos": 963
     },
     {
@@ -150,6 +168,12 @@
       "entity_type": "PERSON",
       "start_pos": 971,
       "end_pos": 988
+    },
+    {
+      "entity_text": "FMI",
+      "entity_type": "ORG",
+      "start_pos": 1004,
+      "end_pos": 1007
     },
     {
       "entity_text": "Antoine Mercier",
@@ -164,9 +188,15 @@
       "end_pos": 1133
     },
     {
-      "entity_text": "Isabella Ferrari de Milan",
+      "entity_text": "Isabella Ferrari",
       "entity_type": "PERSON",
       "start_pos": 1193,
+      "end_pos": 1209
+    },
+    {
+      "entity_text": "Milan",
+      "entity_type": "LOCATION",
+      "start_pos": 1213,
       "end_pos": 1218
     },
     {
@@ -182,10 +212,28 @@
       "end_pos": 1362
     },
     {
-      "entity_text": "Luc Bertin",
+      "entity_text": "Jean-Luc Bertin",
       "entity_type": "PERSON",
-      "start_pos": 1383,
+      "start_pos": 1378,
       "end_pos": 1393
+    },
+    {
+      "entity_text": "SoftTech",
+      "entity_type": "ORG",
+      "start_pos": 1417,
+      "end_pos": 1425
+    },
+    {
+      "entity_text": "Amélie Roussel",
+      "entity_type": "PERSON",
+      "start_pos": 1431,
+      "end_pos": 1445
+    },
+    {
+      "entity_text": "Deloitte France",
+      "entity_type": "ORG",
+      "start_pos": 1464,
+      "end_pos": 1479
     },
     {
       "entity_text": "France",
@@ -200,9 +248,9 @@
       "end_pos": 1503
     },
     {
-      "entity_text": "Du côté de DataCorp",
+      "entity_text": "DataCorp",
       "entity_type": "ORG",
-      "start_pos": 1530,
+      "start_pos": 1541,
       "end_pos": 1549
     },
     {
@@ -228,6 +276,12 @@
       "entity_type": "PERSON",
       "start_pos": 1709,
       "end_pos": 1724
+    },
+    {
+      "entity_text": "Cour d'Appel de Paris",
+      "entity_type": "ORG",
+      "start_pos": 1751,
+      "end_pos": 1772
     },
     {
       "entity_text": "Paris",

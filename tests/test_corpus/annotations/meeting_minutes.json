@@ -3,7 +3,7 @@
   "entities": [
     {
       "entity_text": "Tour Montparnasse",
-      "entity_type": "PERSON",
+      "entity_type": "LOCATION",
       "start_pos": 120,
       "end_pos": 137
     },
@@ -50,22 +50,10 @@
       "end_pos": 327
     },
     {
-      "entity_text": "Directeur Commercial",
-      "entity_type": "PERSON",
-      "start_pos": 329,
-      "end_pos": 349
-    },
-    {
       "entity_text": "Catherine Rousseau",
       "entity_type": "PERSON",
       "start_pos": 356,
       "end_pos": 374
-    },
-    {
-      "entity_text": "Rousseau, Directrice",
-      "entity_type": "PERSON",
-      "start_pos": 366,
-      "end_pos": 386
     },
     {
       "entity_text": "Pierre Fontaine",
@@ -74,22 +62,10 @@
       "end_pos": 417
     },
     {
-      "entity_text": "Directeur Opérations",
-      "entity_type": "PERSON",
-      "start_pos": 419,
-      "end_pos": 439
-    },
-    {
       "entity_text": "Julie Bertrand",
       "entity_type": "PERSON",
       "start_pos": 446,
       "end_pos": 460
-    },
-    {
-      "entity_text": "Directrice Qualité",
-      "entity_type": "PERSON",
-      "start_pos": 462,
-      "end_pos": 480
     },
     {
       "entity_text": "Alexandre Blanc",
@@ -98,27 +74,33 @@
       "end_pos": 519
     },
     {
+      "entity_text": "Luxembourg",
+      "entity_type": "LOCATION",
+      "start_pos": 557,
+      "end_pos": 567
+    },
+    {
       "entity_text": "Sarah Cohen",
       "entity_type": "PERSON",
       "start_pos": 575,
       "end_pos": 586
     },
     {
-      "entity_text": "Cohen, Directrice",
+      "entity_text": "Jean-Luc Moreau",
       "entity_type": "PERSON",
-      "start_pos": 581,
-      "end_pos": 598
-    },
-    {
-      "entity_text": "Luc Moreau",
-      "entity_type": "PERSON",
-      "start_pos": 646,
+      "start_pos": 641,
       "end_pos": 656
     },
     {
-      "entity_text": "Partner chez Deloitte France",
+      "entity_text": "Deloitte France",
       "entity_type": "ORG",
-      "start_pos": 658,
+      "start_pos": 671,
+      "end_pos": 686
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 680,
       "end_pos": 686
     },
     {
@@ -128,10 +110,22 @@
       "end_pos": 717
     },
     {
+      "entity_text": "Leclerc",
+      "entity_type": "PERSON",
+      "start_pos": 839,
+      "end_pos": 846
+    },
+    {
       "entity_text": "François Leclerc",
       "entity_type": "PERSON",
       "start_pos": 852,
       "end_pos": 868
+    },
+    {
+      "entity_text": "Leclerc",
+      "entity_type": "PERSON",
+      "start_pos": 1000,
+      "end_pos": 1007
     },
     {
       "entity_text": "Moreau",
@@ -140,9 +134,9 @@
       "end_pos": 1094
     },
     {
-      "entity_text": "Fond Ardian",
-      "entity_type": "PERSON",
-      "start_pos": 1127,
+      "entity_text": "Ardian",
+      "entity_type": "ORG",
+      "start_pos": 1132,
       "end_pos": 1138
     },
     {
@@ -159,7 +153,7 @@
     },
     {
       "entity_text": "Michael Page",
-      "entity_type": "PERSON",
+      "entity_type": "ORG",
       "start_pos": 1356,
       "end_pos": 1368
     },
@@ -170,10 +164,10 @@
       "end_pos": 1396
     },
     {
-      "entity_text": "In Talent",
-      "entity_type": "PERSON",
-      "start_pos": 1407,
-      "end_pos": 1416
+      "entity_text": "LinkedIn Talent Solutions",
+      "entity_type": "ORG",
+      "start_pos": 1401,
+      "end_pos": 1426
     },
     {
       "entity_text": "Laura Martin",
@@ -188,22 +182,10 @@
       "end_pos": 1510
     },
     {
-      "entity_text": "Lead Developer",
-      "entity_type": "PERSON",
-      "start_pos": 1523,
-      "end_pos": 1537
-    },
-    {
       "entity_text": "Nadia Amrani",
       "entity_type": "PERSON",
       "start_pos": 1548,
       "end_pos": 1560
-    },
-    {
-      "entity_text": "Senior Product",
-      "entity_type": "PERSON",
-      "start_pos": 1567,
-      "end_pos": 1581
     },
     {
       "entity_text": "Laurent",
@@ -212,10 +194,28 @@
       "end_pos": 1614
     },
     {
+      "entity_text": "Hays",
+      "entity_type": "ORG",
+      "start_pos": 1666,
+      "end_pos": 1670
+    },
+    {
       "entity_text": "Philippe Bernard",
       "entity_type": "PERSON",
       "start_pos": 1684,
       "end_pos": 1700
+    },
+    {
+      "entity_text": "Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 1708,
+      "end_pos": 1714
+    },
+    {
+      "entity_text": "Zhang",
+      "entity_type": "PERSON",
+      "start_pos": 1755,
+      "end_pos": 1760
     },
     {
       "entity_text": "Bertrand",
@@ -224,10 +224,28 @@
       "end_pos": 1815
     },
     {
-      "entity_text": "Luc Moreau",
+      "entity_text": "Moreau",
       "entity_type": "PERSON",
-      "start_pos": 1910,
+      "start_pos": 1825,
+      "end_pos": 1831
+    },
+    {
+      "entity_text": "Deloitte",
+      "entity_type": "ORG",
+      "start_pos": 1835,
+      "end_pos": 1843
+    },
+    {
+      "entity_text": "Jean-Luc Moreau",
+      "entity_type": "PERSON",
+      "start_pos": 1905,
       "end_pos": 1920
+    },
+    {
+      "entity_text": "Deloitte France",
+      "entity_type": "ORG",
+      "start_pos": 1924,
+      "end_pos": 1939
     },
     {
       "entity_text": "France",
@@ -248,6 +266,12 @@
       "end_pos": 2076
     },
     {
+      "entity_text": "Fontaine",
+      "entity_type": "PERSON",
+      "start_pos": 2111,
+      "end_pos": 2119
+    },
+    {
       "entity_text": "Laurent",
       "entity_type": "PERSON",
       "start_pos": 2166,
@@ -266,6 +290,12 @@
       "end_pos": 2330
     },
     {
+      "entity_text": "AFNOR Certification",
+      "entity_type": "ORG",
+      "start_pos": 2369,
+      "end_pos": 2388
+    },
+    {
       "entity_text": "Petit",
       "entity_type": "PERSON",
       "start_pos": 2448,
@@ -276,6 +306,12 @@
       "entity_type": "PERSON",
       "start_pos": 2460,
       "end_pos": 2474
+    },
+    {
+      "entity_text": "Accenture France",
+      "entity_type": "ORG",
+      "start_pos": 2572,
+      "end_pos": 2588
     },
     {
       "entity_text": "France",
@@ -290,10 +326,16 @@
       "end_pos": 2620
     },
     {
-      "entity_text": "Microsoft France ",
+      "entity_text": "Microsoft France",
       "entity_type": "ORG",
       "start_pos": 2625,
-      "end_pos": 2642
+      "end_pos": 2641
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 2635,
+      "end_pos": 2641
     },
     {
       "entity_text": "Romain Niccoli",
@@ -302,10 +344,10 @@
       "end_pos": 2677
     },
     {
-      "entity_text": "Salesforce d",
+      "entity_text": "Salesforce",
       "entity_type": "ORG",
       "start_pos": 2705,
-      "end_pos": 2717
+      "end_pos": 2715
     },
     {
       "entity_text": "Paris",
@@ -338,10 +380,16 @@
       "end_pos": 2843
     },
     {
-      "entity_text": "SAP S",
+      "entity_text": "SAP",
       "entity_type": "ORG",
       "start_pos": 2871,
-      "end_pos": 2876
+      "end_pos": 2874
+    },
+    {
+      "entity_text": "Capgemini",
+      "entity_type": "ORG",
+      "start_pos": 2897,
+      "end_pos": 2906
     },
     {
       "entity_text": "Ahmed Mansour",
@@ -356,10 +404,34 @@
       "end_pos": 2964
     },
     {
+      "entity_text": "Mansour",
+      "entity_type": "PERSON",
+      "start_pos": 3005,
+      "end_pos": 3012
+    },
+    {
+      "entity_text": "Weber",
+      "entity_type": "PERSON",
+      "start_pos": 3018,
+      "end_pos": 3023
+    },
+    {
       "entity_text": "Morel",
       "entity_type": "PERSON",
       "start_pos": 3068,
       "end_pos": 3073
+    },
+    {
+      "entity_text": "Sarrazin",
+      "entity_type": "PERSON",
+      "start_pos": 3080,
+      "end_pos": 3088
+    },
+    {
+      "entity_text": "Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 3095,
+      "end_pos": 3101
     },
     {
       "entity_text": "Microsoft",
@@ -380,6 +452,12 @@
       "end_pos": 3230
     },
     {
+      "entity_text": "BETC Paris",
+      "entity_type": "ORG",
+      "start_pos": 3283,
+      "end_pos": 3293
+    },
+    {
       "entity_text": "Paris",
       "entity_type": "LOCATION",
       "start_pos": 3288,
@@ -392,10 +470,22 @@
       "end_pos": 3336
     },
     {
+      "entity_text": "Le Figaro",
+      "entity_type": "ORG",
+      "start_pos": 3397,
+      "end_pos": 3406
+    },
+    {
       "entity_text": "Marc Feuillée",
       "entity_type": "PERSON",
       "start_pos": 3420,
       "end_pos": 3433
+    },
+    {
+      "entity_text": "Les Échos",
+      "entity_type": "ORG",
+      "start_pos": 3436,
+      "end_pos": 3445
     },
     {
       "entity_text": "Sophie Pedder",
@@ -404,9 +494,9 @@
       "end_pos": 3473
     },
     {
-      "entity_text": "In Ads",
-      "entity_type": "PERSON",
-      "start_pos": 3482,
+      "entity_text": "LinkedIn Ads",
+      "entity_type": "ORG",
+      "start_pos": 3476,
       "end_pos": 3488
     },
     {
@@ -422,10 +512,34 @@
       "end_pos": 3547
     },
     {
+      "entity_text": "Weber",
+      "entity_type": "PERSON",
+      "start_pos": 3570,
+      "end_pos": 3575
+    },
+    {
       "entity_text": "Dumont",
       "entity_type": "PERSON",
       "start_pos": 3583,
       "end_pos": 3589
+    },
+    {
+      "entity_text": "Weber",
+      "entity_type": "PERSON",
+      "start_pos": 3617,
+      "end_pos": 3622
+    },
+    {
+      "entity_text": "Leclerc",
+      "entity_type": "PERSON",
+      "start_pos": 3650,
+      "end_pos": 3657
+    },
+    {
+      "entity_text": "Fontaine",
+      "entity_type": "PERSON",
+      "start_pos": 3687,
+      "end_pos": 3695
     },
     {
       "entity_text": "Lille",
@@ -434,10 +548,28 @@
       "end_pos": 3720
     },
     {
+      "entity_text": "Prologis",
+      "entity_type": "ORG",
+      "start_pos": 3740,
+      "end_pos": 3748
+    },
+    {
       "entity_text": "Ben Bannatyne",
       "entity_type": "PERSON",
       "start_pos": 3762,
       "end_pos": 3775
+    },
+    {
+      "entity_text": "Dubois",
+      "entity_type": "PERSON",
+      "start_pos": 3792,
+      "end_pos": 3798
+    },
+    {
+      "entity_text": "Heidrick & Struggles",
+      "entity_type": "ORG",
+      "start_pos": 3874,
+      "end_pos": 3894
     },
     {
       "entity_text": "Valérie Martin",
@@ -456,12 +588,6 @@
       "entity_type": "PERSON",
       "start_pos": 4038,
       "end_pos": 4055
-    },
-    {
-      "entity_text": "Rousseau, Assistante",
-      "entity_type": "PERSON",
-      "start_pos": 4047,
-      "end_pos": 4067
     },
     {
       "entity_text": "Isabelle Moreau",

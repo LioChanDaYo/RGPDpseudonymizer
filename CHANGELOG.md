@@ -11,6 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Accuracy benchmark repaired, held-out set added (Story 10.1, benchmark-only, same detector).**
+  - The 25 annotation files were repaired by hand under written, approved guidelines (`tests/test_corpus/annotations/GUIDELINES.md`). This covers 96 truncated names, junk labels, missing organisations and places, and nested places in organisation names. Every edit is logged in `docs/qa/10.1-annotation-change-log.md`.
+  - Ground truth: 1,737 → 2,215 entities.
+  - CI accuracy run `37189862679` (vs `37013929807` on the old ground truth, same detector): F1 58.53% → 72.70% (P 48.42% → 66.69%, R 73.98% → 79.91%); PERSON 72.93% → 88.68%, LOCATION 44.99% → 67.83%, ORG 12.85% → 39.61%. LOCATION recall fell from 88.71% to 80.99% because 139 LOCATION annotations were added.
+  - A separate six-document held-out set, never used for tuning, is scored on its own: held-out F1 61.51% (P 53.53%, R 72.29%), same run.
+  - `scripts/auto_annotate_corpus.py`, the source of the truncations, is retired.
+  - New tests guard annotation integrity and held-out leakage.
+
 - **The accuracy benchmark now scores entities the way the app handles them.** The app strips titles and prepositions before pseudonymizing ("Mme Isabelle Moreau" → "Isabelle Moreau", "à Paris" → "Paris"), but `tests/accuracy` compared raw text, so each such correct detection counted as a false positive plus a false negative. The scorer now applies the same normalization (`strip_french_titles`, plus `strip_french_prepositions` for LOCATION). Same detector, same corpus: F1 32.34% → **58.53%** (precision 48.42%, recall 73.98%); PERSON 72.93%, LOCATION 44.99%, ORG 12.85%.
 
 - **Documentation accuracy figures corrected again.** The v2.2.0 docs update (#76) replaced the ~60% F1 claim with ~32%, calling the Story 5.3 figure wrong. That was itself wrong: ~32% was a strict-scoring artefact. README, FAQ, index and tutorial (EN + FR) now state the reproducible 58.53% and explain the scoring change.

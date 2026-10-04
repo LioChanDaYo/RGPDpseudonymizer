@@ -1,0 +1,23 @@
+Entretien - Recherche en épidémiologie de terrain
+Participant : Garrigues, Pierre-Yves (épidémiologiste)
+Lieu : Poitiers, 17 juin 2025
+
+Interviewer : Docteur Garrigues, sur quoi porte votre équipe ?
+
+Dr P.-Y. Garrigues : Sur la surveillance des infections respiratoires dans les écoles. Je dirige l'unité avec la Pr Héloïse Varenne, du CHU de Poitiers.
+
+Interviewer : Qui sont vos partenaires ?
+
+P.-Y. Garrigues : Au niveau européen, M. Teodor Lupescu de Cluj, qui coordonne le réseau roumain, et Mme Inês Albuquerque de l'Université de Coimbra. Pour les analyses, nous passons par le laboratoire Biocéane de Nancy, dirigé par Mme Nancy Delorme.
+
+Interviewer : Et les financeurs ?
+
+Dr Garrigues : L'Institut Ménestrel finance la moitié du projet. Leur directrice scientifique, Mme Marie-Lou Ferracci, suit nos résultats. Le reste vient d'une fondation privée, la Fondation Clairvent.
+
+Interviewer : Comment gérez-vous les données ?
+
+P.-Y. Garrigues : Notre DPO, Me Aurélie Saint-Clair, a imposé une pseudonymisation stricte. Les données ne quittent pas le serveur de l'université, à Poitiers. Une copie chiffrée part au Canada, chez notre partenaire de Québec, le Dr Mathis Tremblay-Gagnon.
+
+Interviewer : Un dernier mot ?
+
+Dr Garrigues : Merci à toute l'équipe, en particulier à Mme Varenne et à M. Lupescu.

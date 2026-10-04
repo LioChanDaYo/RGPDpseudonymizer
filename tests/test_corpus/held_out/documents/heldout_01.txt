@@ -1,0 +1,49 @@
+===== MESSAGE 1 =====
+De : Bérénice Vautrin-Lemoine
+À : Joost van den Akker ; Corentin Le Floch
+Date : 3 mars 2025, 09:12
+Objet : Migration de l'entrepôt de Gand - point d'étape
+
+Bonjour Joost, Corentin,
+
+Comme convenu hier avec l'équipe de Brisemer Logistique Belgique, je vous confirme le calendrier de migration. Notre DSI, M. Anatole Chaumeix, valide l'architecture vendredi. Notre DPO, Me Salomé Ferrandou, doit encore relire l'analyse d'impact avant la mise en production.
+
+Côté prestataire, Nubeon Systems nous propose une équipe basée à Rotterdam, menée par Mme Orla McGrath. Leur VP Scandinavie, M. Pieter-Jan Verhoeven, sera présent au lancement. Les données seront hébergées à Tallinn, dans le centre de données de Nubeon Systems Estonie.
+
+Pouvez-vous bloquer la matinée du 14 mars ?
+
+Bien à vous,
+Bérénice
+
+===== MESSAGE 2 =====
+De : Joost van den Akker
+À : Bérénice Vautrin-Lemoine
+Cc : Corentin Le Floch
+Date : 3 mars 2025, 10:47
+Objet : RE: Migration de l'entrepôt de Gand - point d'étape
+
+Bérénice,
+
+OK pour le 14. J'ajoute à la boucle notre RSSI, M. Ewan MacKinnon, qui arrive de notre bureau de Cork. Il voudra revoir le plan de chiffrement avec Mme McGrath.
+
+Question : le COMEX a-t-il validé le budget ? Notre CFO, Mme Ilse Brandsma, me demande une estimation avant la fin de la semaine.
+
+Joost
+
+===== MESSAGE 3 =====
+De : Corentin Le Floch
+À : Bérénice Vautrin-Lemoine ; Joost van den Akker
+Date : 3 mars 2025, 14:05
+Objet : RE: Migration de l'entrepôt de Gand - point d'étape
+
+Joost, Bérénice,
+
+Merci Joost. Le COMEX a validé le budget ce matin, sous réserve de l'avis de la DPO.
+
+Pour le 14, je propose une visioconférence : la moitié de l'équipe sera à Anvers. J'invite aussi M. Chaumeix et Me Ferrandou.
+
+Corentin
+
+Corentin Le Floch
+Directeur des opérations
+Brisemer Logistique SAS

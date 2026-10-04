@@ -8,6 +8,18 @@
       "end_pos": 66
     },
     {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 56,
+      "end_pos": 62
+    },
+    {
+      "entity_text": "Avenue de la Grande Armée",
+      "entity_type": "LOCATION",
+      "start_pos": 103,
+      "end_pos": 128
+    },
+    {
       "entity_text": "Paris",
       "entity_type": "LOCATION",
       "start_pos": 136,
@@ -122,6 +134,12 @@
       "end_pos": 794
     },
     {
+      "entity_text": "CLOUDTECH SAS",
+      "entity_type": "ORG",
+      "start_pos": 947,
+      "end_pos": 960
+    },
+    {
       "entity_text": "Jean-Charles Le Goff",
       "entity_type": "PERSON",
       "start_pos": 1072,
@@ -140,6 +158,12 @@
       "end_pos": 1234
     },
     {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 1228,
+      "end_pos": 1234
+    },
+    {
       "entity_text": "Dominique Leboureix",
       "entity_type": "PERSON",
       "start_pos": 1248,
@@ -149,6 +173,12 @@
       "entity_text": "EY France",
       "entity_type": "ORG",
       "start_pos": 1272,
+      "end_pos": 1281
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 1275,
       "end_pos": 1281
     },
     {
@@ -404,6 +434,12 @@
       "end_pos": 3199
     },
     {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 3193,
+      "end_pos": 3199
+    },
+    {
       "entity_text": "Yann LeCun",
       "entity_type": "PERSON",
       "start_pos": 3216,
@@ -456,6 +492,12 @@
       "entity_type": "PERSON",
       "start_pos": 3688,
       "end_pos": 3694
+    },
+    {
+      "entity_text": "CLOUDTECH SAS",
+      "entity_type": "ORG",
+      "start_pos": 3763,
+      "end_pos": 3776
     },
     {
       "entity_text": "Isabelle Moreau",
@@ -521,6 +563,12 @@
       "entity_text": "Deloitte France",
       "entity_type": "ORG",
       "start_pos": 4114,
+      "end_pos": 4129
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 4123,
       "end_pos": 4129
     },
     {
@@ -750,6 +798,12 @@
       "entity_type": "ORG",
       "start_pos": 5976,
       "end_pos": 5991
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 5976,
+      "end_pos": 5982
     },
     {
       "entity_text": "Moreau",

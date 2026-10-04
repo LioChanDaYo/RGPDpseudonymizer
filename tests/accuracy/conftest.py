@@ -30,6 +30,12 @@ ANNOTATIONS_DIR = CORPUS_DIR / "annotations"
 INTERVIEWS_DIR = CORPUS_DIR / "interview_transcripts"
 BUSINESS_DIR = CORPUS_DIR / "business_documents"
 
+# Held-out set (Story 10.1): scored separately, never merged into the main
+# corpus totals, and never used for tuning (see held_out/README.md).
+HELD_OUT_DIR = CORPUS_DIR / "held_out"
+HELD_OUT_DOCUMENTS_DIR = HELD_OUT_DIR / "documents"
+HELD_OUT_ANNOTATIONS_DIR = HELD_OUT_DIR / "annotations"
+
 
 @dataclass
 class GroundTruthEntity:
@@ -166,24 +172,44 @@ def compute_metrics(tp: int, fp: int, fn: int) -> AccuracyMetrics:
     )
 
 
-def _load_corpus_documents() -> list[tuple[str, str, list[GroundTruthEntity]]]:
-    """Load all document texts paired with their annotations.
+def _load_documents(
+    text_dirs: tuple[Path, ...], annotations_dir: Path
+) -> list[tuple[str, str, list[GroundTruthEntity]]]:
+    """Load ``*.txt`` documents from ``text_dirs`` paired with their annotations.
 
-    Returns:
-        List of (doc_name, text, ground_truth) tuples.
+    A text without a matching ``<stem>.json`` in ``annotations_dir`` is skipped.
+    Texts are read with universal newlines, so offsets index LF-normalized text.
     """
     docs: list[tuple[str, str, list[GroundTruthEntity]]] = []
-    for subdir in (INTERVIEWS_DIR, BUSINESS_DIR):
+    for subdir in text_dirs:
         if not subdir.exists():
             continue
         for txt_path in sorted(subdir.glob("*.txt")):
-            ann_path = ANNOTATIONS_DIR / f"{txt_path.stem}.json"
+            ann_path = annotations_dir / f"{txt_path.stem}.json"
             if not ann_path.exists():
                 continue
             text = txt_path.read_text(encoding="utf-8")
             annotations = load_annotations(ann_path)
             docs.append((txt_path.name, text, annotations))
     return docs
+
+
+def _load_corpus_documents() -> list[tuple[str, str, list[GroundTruthEntity]]]:
+    """Load all main-corpus document texts paired with their annotations.
+
+    Returns:
+        List of (doc_name, text, ground_truth) tuples.
+    """
+    return _load_documents((INTERVIEWS_DIR, BUSINESS_DIR), ANNOTATIONS_DIR)
+
+
+def _load_held_out_documents() -> list[tuple[str, str, list[GroundTruthEntity]]]:
+    """Load the held-out documents paired with their annotations (Story 10.1).
+
+    Returns:
+        List of (doc_name, text, ground_truth) tuples.
+    """
+    return _load_documents((HELD_OUT_DOCUMENTS_DIR,), HELD_OUT_ANNOTATIONS_DIR)
 
 
 # ---------------------------------------------------------------------------
@@ -218,3 +244,31 @@ def corpus_results(hybrid_detector: HybridDetector) -> list[DocumentResult]:
             )
         )
     return results
+
+
+def _score_documents(
+    detector: HybridDetector,
+    docs: list[tuple[str, str, list[GroundTruthEntity]]],
+) -> list[DocumentResult]:
+    """Run detection on each document and match it against its ground truth."""
+    results: list[DocumentResult] = []
+    for doc_name, text, ground_truth in docs:
+        detected = detector.detect_entities(text)
+        tp_pairs, fp_list, fn_list = match_entities(detected, ground_truth)
+        results.append(
+            DocumentResult(
+                doc_name=doc_name,
+                detected=detected,
+                ground_truth=ground_truth,
+                true_positives=tp_pairs,
+                false_positives=fp_list,
+                false_negatives=fn_list,
+            )
+        )
+    return results
+
+
+@pytest.fixture(scope="session")
+def held_out_results(hybrid_detector: HybridDetector) -> list[DocumentResult]:
+    """Run detection on the held-out set. Never merged into ``corpus_results``."""
+    return _score_documents(hybrid_detector, _load_held_out_documents())
