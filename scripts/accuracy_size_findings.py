@@ -535,11 +535,14 @@ def main() -> None:
     # baseline TP map: detection identity -> annotation
     base_tp: dict[tuple[str, tuple[str, str, int, int]], GroundTruthEntity] = {}
     base_fp: dict[str, list[DetectedEntity]] = {}
+    base_fn_ids: dict[str, set[int]] = {}
+    base_dets: dict[str, list[DetectedEntity]] = {n: d for n, _, _, d in docs}
     for name, _, gt, dets in docs:
-        tp, fp, _ = match_entities(dets, gt)
+        tp, fp, _fn = match_entities(dets, gt)
         for d, g in tp:
             base_tp[(name, ident(d))] = g
         base_fp[name] = fp
+        base_fn_ids[name] = {id(g) for g in _fn}
 
     # ---- 1.3 F1 re-measure ------------------------------------------------
     print("\n## 1.3 F1: FP overlapping a same-type TP detection (size.py definition)")
@@ -653,6 +656,72 @@ def main() -> None:
         for (name, *_), (gt, kept) in zip(filtered, out):
             tp, _, _ = match_entities(kept, gt)
             post_matched[name] = {id(g) for _, g in tp}
+
+        # coverage of newly missed annotations: is the annotated span still
+        # fully covered by a kept detection of the same type (pseudonymized
+        # with a wrong boundary) or truly uncovered (a privacy leak)?
+        cover: collections.Counter[str] = collections.Counter()
+        uncovered: list[str] = []
+        for (name, text, gt, _), (_, kept) in zip(filtered, out):
+            base_fn = base_fn_ids[name]
+            for g in gt:
+                if id(g) in post_matched[name] or id(g) in base_fn:
+                    continue
+                same = any(
+                    k.entity_type == g.entity_type
+                    and k.start_pos <= g.start_pos
+                    and g.end_pos <= k.end_pos
+                    for k in kept
+                )
+                anyt = any(
+                    k.start_pos <= g.start_pos and g.end_pos <= k.end_pos for k in kept
+                )
+                if same:
+                    cover[f"{g.entity_type} still covered (same type)"] += 1
+                elif anyt:
+                    cover[f"{g.entity_type} covered by another type only"] += 1
+                else:
+                    was = any(
+                        d.start_pos <= g.start_pos and g.end_pos <= d.end_pos
+                        for d in base_dets[name]
+                    )
+                    tag = "NEW LEAK" if was else "uncovered in baseline too"
+                    cover[f"{g.entity_type} truly uncovered ({tag})"] += 1
+                    part = [
+                        (k.text, k.entity_type, k.start_pos, k.end_pos)
+                        for k in kept
+                        if k.start_pos < g.end_pos and g.start_pos < k.end_pos
+                    ]
+                    uncovered.append(
+                        f"    UNCOVERED ({tag}) [{g.entity_type}] {g.text!r}"
+                        f" @{g.start_pos} doc={name} overlapping kept={part}"
+                    )
+        lost_cov: collections.Counter[str] = collections.Counter()
+        lost_rows: list[str] = []
+        for (name, text, gt, _), (_, kept) in zip(filtered, out):
+            for g in gt:
+                was = any(
+                    d.start_pos <= g.start_pos and g.end_pos <= d.end_pos
+                    for d in base_dets[name]
+                )
+                now = any(
+                    k.start_pos <= g.start_pos and g.end_pos <= k.end_pos for k in kept
+                )
+                if was and not now:
+                    lost_cov[g.entity_type] += 1
+                    lost_rows.append(
+                        f"    LOST COVERAGE [{g.entity_type}] {g.text!r}"
+                        f" @{g.start_pos} doc={name}"
+                    )
+        print(
+            "  annotations fully covered (any type) in baseline but not after"
+            f"={dict(lost_cov)}"
+        )
+        for row in lost_rows:
+            print(row)
+        print(f"  new FN coverage={dict(sorted(cover.items()))}")
+        for row in uncovered:
+            print(row)
         cls: collections.Counter[str] = collections.Counter()
         cont_pat: dict[str, list[str]] = collections.defaultdict(list)
         lost_rows: list[str] = []
