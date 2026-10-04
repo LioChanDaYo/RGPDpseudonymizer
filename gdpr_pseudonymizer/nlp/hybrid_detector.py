@@ -10,16 +10,133 @@ Implements EntityDetector interface using a hybrid approach:
 
 from __future__ import annotations
 
+import functools
+import json
 import re
+from dataclasses import dataclass
+
+import yaml
 
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity, EntityDetector
 from gdpr_pseudonymizer.nlp.model_names import DEFAULT_SPACY_MODEL
 from gdpr_pseudonymizer.nlp.regex_matcher import RegexMatcher
 from gdpr_pseudonymizer.nlp.spacy_detector import SpaCyDetector
+from gdpr_pseudonymizer.resources import FRENCH_GEOGRAPHY_PATH, ORG_ROLE_FILTER_PATH
 from gdpr_pseudonymizer.utils.french_patterns import strip_french_titles
 from gdpr_pseudonymizer.utils.logger import get_logger
 
 logger = get_logger(__name__)
+
+
+# ---------------------------------------------------------------------------
+# ORG role filter (Story 10.2, AC3)
+# ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class OrgRoleFilter:
+    """Role list loaded from ``org_role_filter.yaml`` plus runtime region words."""
+
+    acronyms: frozenset[str]
+    vp_prefixes: tuple[str, ...]
+    functions: frozenset[str]
+    connectors: frozenset[str]
+    region_phrases: tuple[tuple[str, ...], ...]
+
+
+def _role_tokens(text: str) -> list[str]:
+    """Split a VP-form remainder into tokens.
+
+    Whitespace tokens, with "/" and the elision "d'" split off. "&" is a
+    connector only as a standalone token ("Sales & Marketing"); inside a word
+    ("R&D") it stays part of the word.
+    """
+    text = text.replace("/", " / ")
+    text = re.sub(r"(?i)\b(d')", r"\1 ", text)
+    return text.split()
+
+
+def _load_geography_region_words() -> list[str]:
+    """Country and French region names from the existing geography resource."""
+    with open(FRENCH_GEOGRAPHY_PATH, encoding="utf-8") as f:
+        data = json.load(f)
+    return list(data.get("countries_and_international", [])) + list(
+        data.get("regions", [])
+    )
+
+
+@functools.lru_cache(maxsize=1)
+def load_org_role_filter() -> OrgRoleFilter:
+    """Load the ORG role filter resource once (no spaCy import)."""
+    with open(ORG_ROLE_FILTER_PATH, encoding="utf-8") as f:
+        data = yaml.safe_load(f)
+    regions = [e["term"] for e in data["vp_regions"]] + _load_geography_region_words()
+    phrases = {tuple(t.casefold() for t in _role_tokens(r)) for r in regions}
+    return OrgRoleFilter(
+        acronyms=frozenset(e["term"] for e in data["acronyms"]),
+        vp_prefixes=tuple(e["term"] for e in data["vp_prefixes"]),
+        functions=frozenset(e["term"].casefold() for e in data["vp_functions"]),
+        connectors=frozenset(c.casefold() for c in data["connectors"]),
+        region_phrases=tuple(sorted(phrases, key=len, reverse=True)),
+    )
+
+
+def _vp_remainder(text: str, prefixes: tuple[str, ...]) -> str | None:
+    """Return the text after a VP prefix ("" for a bare prefix), else None.
+
+    "VP" is case-sensitive; spelled-out prefixes compare case-insensitively.
+    """
+    for prefix in prefixes:
+        if prefix == "VP":
+            if text == "VP":
+                return ""
+            if text.startswith("VP "):
+                return text[3:]
+        else:
+            folded = text.casefold()
+            if folded == prefix.casefold():
+                return ""
+            if folded.startswith(prefix.casefold() + " "):
+                return text[len(prefix) + 1 :]
+    return None
+
+
+def match_org_role(text: str) -> str | None:
+    """Classify an ORG text as a role (Story 10.2, AC3).
+
+    The whole normalized text (titles stripped, whitespace collapsed, case
+    kept) must be a role acronym, a bare VP prefix, or a VP prefix followed
+    only by function words, region words and connectors, with at least one
+    function or region word.
+
+    Returns:
+        "role_acronym", "vp_form", or None when the text is not a role
+    """
+    role_filter = load_org_role_filter()
+    normalized = " ".join(strip_french_titles(text).split())
+    if normalized in role_filter.acronyms:
+        return "role_acronym"
+    rest = _vp_remainder(normalized, role_filter.vp_prefixes)
+    if rest is None:
+        return None
+    if rest == "":
+        return "vp_form"
+    tokens = [t.casefold() for t in _role_tokens(rest)]
+    i = 0
+    has_content = False
+    while i < len(tokens):
+        for phrase in role_filter.region_phrases:
+            if tuple(tokens[i : i + len(phrase)]) == phrase:
+                has_content = True
+                i += len(phrase)
+                break
+        else:
+            if tokens[i] in role_filter.functions:
+                has_content = True
+            elif tokens[i] not in role_filter.connectors:
+                return None
+            i += 1
+    return "vp_form" if has_content else None
 
 
 class HybridDetector(EntityDetector):
@@ -210,6 +327,9 @@ class HybridDetector(EntityDetector):
 
         # Filter out common French label words detected as entities
         merged = self._filter_label_words(merged)
+
+        # Filter out job titles / role acronyms detected as ORG (Story 10.2 AC3)
+        merged = self._filter_org_roles(merged)
 
         # Sort by start position
         merged.sort(key=lambda e: e.start_pos)
@@ -404,6 +524,34 @@ class HybridDetector(EntityDetector):
             else:
                 filtered.append(entity)
 
+        return filtered
+
+    def _filter_org_roles(self, entities: list[DetectedEntity]) -> list[DetectedEntity]:
+        """Drop ORG detections whose whole normalized text is a job title.
+
+        Role acronyms ("CTO", "DRH", "COMEX") and VP forms ("VP", "VP Sales",
+        "VP Europe") are roles, not organisations (Story 10.2, AC3). The list
+        lives in ``resources/org_role_filter.yaml``. ORG only, any source.
+
+        Args:
+            entities: List of detected entities
+
+        Returns:
+            Filtered list with role ORG detections removed
+        """
+        filtered = []
+        for entity in entities:
+            if entity.entity_type == "ORG":
+                reason = match_org_role(entity.text)
+                if reason is not None:
+                    logger.debug(
+                        "org_role_filtered",
+                        entity_type=entity.entity_type,
+                        source=entity.source,
+                        reason=reason,
+                    )
+                    continue
+            filtered.append(entity)
         return filtered
 
     def _has_overlap(self, e1: DetectedEntity, e2: DetectedEntity) -> bool:

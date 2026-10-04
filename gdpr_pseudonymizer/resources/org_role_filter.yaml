@@ -1,0 +1,138 @@
+# ORG role filter (Story 10.2, AC3). An ORG detection whose whole normalized
+# text is a role is dropped. Every entry needs a `why` that holds for any
+# French business text. Never add an entry because it appeared as an FP in
+# the corpus alone; never add held-out strings (Story 10.2 Dev Notes).
+# Frozen list: Story 10.2 Task 2.2. Changes go back through the story.
+
+acronyms:            # case-sensitive, whole span
+  - {term: "CEO", why: "Chief Executive Officer: English C-suite title used in French companies"}
+  - {term: "CTO", why: "Chief Technology Officer: English C-suite title"}
+  - {term: "CFO", why: "Chief Financial Officer: English C-suite title"}
+  - {term: "COO", why: "Chief Operating Officer: English C-suite title"}
+  - {term: "CIO", why: "Chief Information Officer: English C-suite title. Caveat: also the acronym of the Comité international olympique, a real organisation; a bare CIO detected as ORG is dropped either way (required by AC3)"}
+  - {term: "CDO", why: "Chief Data / Digital Officer: English C-suite title"}
+  - {term: "CSO", why: "Chief Security / Strategy Officer: English C-suite title"}
+  - {term: "CISO", why: "Chief Information Security Officer: English C-suite title"}
+  - {term: "CMO", why: "Chief Marketing Officer: English C-suite title"}
+  - {term: "CPO", why: "Chief Product / Privacy Officer: English C-suite title"}
+  - {term: "CHRO", why: "Chief Human Resources Officer: English C-suite title"}
+  - {term: "DSI", why: "directeur / direction des systèmes d'information: French role or internal department"}
+  - {term: "DAF", why: "directeur administratif et financier: French role"}
+  - {term: "DRH", why: "directeur / direction des ressources humaines: French role or internal department"}
+  - {term: "DPO", why: "délégué à la protection des données (GDPR art. 37): a role"}
+  - {term: "RSSI", why: "responsable de la sécurité des systèmes d'information: French role"}
+  - {term: "PDG", why: "président-directeur général: French role"}
+  - {term: "DGA", why: "directeur général adjoint: French role"}
+  - {term: "COMEX", why: "comité exécutif: a company's internal committee, not an organisation"}
+  - {term: "CODIR", why: "comité de direction: a company's internal committee, not an organisation"}
+
+vp_prefixes:         # "VP" case-sensitive; spelled-out forms case-insensitive
+  - {term: "VP", why: "Vice President abbreviation (case-sensitive)"}
+  - {term: "Vice-président", why: "French title (masculine)"}
+  - {term: "Vice-présidente", why: "French title (feminine)"}
+  - {term: "Vice President", why: "English title"}
+  - {term: "Vice-President", why: "English title, hyphenated spelling"}
+
+vp_functions:        # case-insensitive; standard corporate functions
+  - {term: "Engineering", why: "corporate function: engineering department"}
+  - {term: "Sales", why: "corporate function: sales department"}
+  - {term: "Marketing", why: "corporate function: marketing department"}
+  - {term: "Finance", why: "corporate function: finance department"}
+  - {term: "Operations", why: "corporate function: operations department"}
+  - {term: "Product", why: "corporate function: product department"}
+  - {term: "Products", why: "corporate function: product department (plural)"}
+  - {term: "Technology", why: "corporate function: technology department"}
+  - {term: "Tech", why: "corporate function: technology department (short form)"}
+  - {term: "Legal", why: "corporate function: legal department"}
+  - {term: "HR", why: "corporate function: human resources department (English acronym)"}
+  - {term: "People", why: "corporate function: people / HR department"}
+  - {term: "Strategy", why: "corporate function: strategy department"}
+  - {term: "Business", why: "corporate function: business (as in Business Development)"}
+  - {term: "Development", why: "corporate function: development (as in Business Development)"}
+  - {term: "Communications", why: "corporate function: communications department"}
+  - {term: "Procurement", why: "corporate function: procurement department"}
+  - {term: "Purchasing", why: "corporate function: purchasing department"}
+  - {term: "Research", why: "corporate function: research department"}
+  - {term: "R&D", why: "corporate function: research and development department"}
+  - {term: "Data", why: "corporate function: data department"}
+  - {term: "IT", why: "corporate function: information technology department"}
+  - {term: "Digital", why: "corporate function: digital department"}
+  - {term: "Innovation", why: "corporate function: innovation department"}
+  - {term: "Security", why: "corporate function: security department"}
+  - {term: "Compliance", why: "corporate function: compliance department"}
+  - {term: "Risk", why: "corporate function: risk department"}
+  - {term: "Audit", why: "corporate function: audit department"}
+  - {term: "Quality", why: "corporate function: quality department"}
+  - {term: "Customer", why: "corporate function: customer (as in Customer Success)"}
+  - {term: "Success", why: "corporate function: success (as in Customer Success)"}
+  - {term: "Partnerships", why: "corporate function: partnerships department"}
+  - {term: "Supply", why: "corporate function: supply (as in Supply Chain)"}
+  - {term: "Chain", why: "corporate function: chain (as in Supply Chain)"}
+  - {term: "Logistics", why: "corporate function: logistics department"}
+  - {term: "Manufacturing", why: "corporate function: manufacturing department"}
+  - {term: "Ventes", why: "corporate function: service des ventes"}
+  - {term: "Ingénierie", why: "corporate function: service ingénierie"}
+  - {term: "Produit", why: "corporate function: service produit"}
+  - {term: "Produits", why: "corporate function: service produits (pluriel)"}
+  - {term: "Opérations", why: "corporate function: service des opérations"}
+  - {term: "RH", why: "corporate function: ressources humaines (sigle)"}
+  - {term: "Communication", why: "corporate function: service communication"}
+  - {term: "Juridique", why: "corporate function: service juridique"}
+  - {term: "Achats", why: "corporate function: service des achats"}
+  - {term: "Technique", why: "corporate function: direction technique"}
+  - {term: "Technologie", why: "corporate function: direction technologie"}
+  - {term: "Commercial", why: "corporate function: direction commerciale (masculin)"}
+  - {term: "Commerciale", why: "corporate function: direction commerciale"}
+  - {term: "Stratégie", why: "corporate function: direction de la stratégie"}
+  - {term: "Développement", why: "corporate function: développement (commercial)"}
+  - {term: "Recherche", why: "corporate function: service recherche"}
+  - {term: "Informatique", why: "corporate function: service informatique"}
+  - {term: "Numérique", why: "corporate function: direction du numérique"}
+  - {term: "Sécurité", why: "corporate function: direction de la sécurité"}
+  - {term: "Conformité", why: "corporate function: service conformité"}
+  - {term: "Risques", why: "corporate function: direction des risques"}
+  - {term: "Qualité", why: "corporate function: service qualité"}
+  - {term: "Partenariats", why: "corporate function: service partenariats"}
+  - {term: "Logistique", why: "corporate function: service logistique"}
+  - {term: "Production", why: "corporate function: direction de la production"}
+  - {term: "Clients", why: "corporate function: service clients"}
+  - {term: "Ressources", why: "corporate function: ressources (as in Ressources Humaines)"}
+  - {term: "Humaines", why: "corporate function: humaines (as in Ressources Humaines)"}
+  - {term: "Financier", why: "corporate function: financier (as in directeur financier)"}
+  - {term: "Financière", why: "corporate function: financière (as in direction financière)"}
+  - {term: "Affaires", why: "corporate function: affaires (as in Affaires publiques)"}
+  - {term: "Publiques", why: "corporate function: publiques (as in Affaires publiques)"}
+  - {term: "Public", why: "corporate function: public (as in Public Affairs)"}
+  - {term: "Affairs", why: "corporate function: affairs (as in Public Affairs)"}
+  - {term: "Relations", why: "corporate function: relations (as in Relations investisseurs)"}
+  - {term: "Investisseurs", why: "corporate function: investisseurs (as in Relations investisseurs)"}
+  - {term: "Investor", why: "corporate function: investor (as in Investor Relations)"}
+
+vp_regions:          # case-insensitive; continents/standard territories + France ONLY
+  # other countries and French regions are read at runtime from
+  # french_geography.json (countries_and_international, regions); never retyped here
+  - {term: "Europe", why: "continent; standard sales/ops territory"}
+  - {term: "Afrique", why: "continent (French)"}
+  - {term: "Africa", why: "continent (English)"}
+  - {term: "Asie", why: "continent (French)"}
+  - {term: "Asia", why: "continent (English)"}
+  - {term: "Amérique", why: "continent (French)"}
+  - {term: "Amériques", why: "the Americas (French)"}
+  - {term: "Americas", why: "the Americas (English)"}
+  - {term: "Océanie", why: "continent (French)"}
+  - {term: "Oceania", why: "continent (English)"}
+  - {term: "International", why: "worldwide scope"}
+  - {term: "Monde", why: "worldwide scope (French)"}
+  - {term: "Global", why: "worldwide scope"}
+  - {term: "Worldwide", why: "worldwide scope (English)"}
+  - {term: "Nord", why: "cardinal territory (French)"}
+  - {term: "North", why: "cardinal territory (English)"}
+  - {term: "Sud", why: "cardinal territory (French)"}
+  - {term: "South", why: "cardinal territory (English)"}
+  - {term: "Est", why: "cardinal territory (French)"}
+  - {term: "East", why: "cardinal territory (English)"}
+  - {term: "Ouest", why: "cardinal territory (French)"}
+  - {term: "West", why: "cardinal territory (English)"}
+  - {term: "France", why: "home market of French business text (AC3)"}
+
+connectors: [de, du, des, "d'", et, "&", "/"]   # grammar words: exempt from `why` (AC7)
