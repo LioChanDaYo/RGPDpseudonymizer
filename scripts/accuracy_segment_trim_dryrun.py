@@ -22,7 +22,9 @@ import accuracy_size_findings as m
 
 from gdpr_pseudonymizer.nlp.hybrid_detector import HybridDetector
 
-ORIG = HybridDetector._resolve_same_type_pair.__func__
+ORIG = (
+    HybridDetector._resolve_same_type_pair_base.__func__
+)  # without V3 (V3 is in the product since 10.2)
 TITLES = {"mme", "mlle", "prof", "dr", "pr", "me", "m"}
 BOUND = re.compile(r"\n|[,;:](?=\s)|\.(?=\s+\S)")
 

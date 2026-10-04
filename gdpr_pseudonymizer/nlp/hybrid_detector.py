@@ -53,6 +53,35 @@ _ROLE_TOKEN_RE = re.compile(r"/|(?i:d')|[^\s/]+")
 # Connectors that join two place words into one place ("Europe du Nord")
 _PLACE_JOINERS = frozenset({"de", "du", "des", "d'"})
 
+# Clause boundaries for the ORG segment trim (Story 10.2, V3): a line break;
+# ",", ";" or ":" followed by whitespace; a sentence period followed by
+# whitespace (guarded, see ``_clause_boundaries``).
+_CLAUSE_BOUNDARY_RE = re.compile(r"\n|[,;:](?=\s)|\.(?=\s+\S)")
+_LAST_WORD_RE = re.compile(r"([A-Za-zÀ-ÿ]+)$")
+# A period after one of these is an abbreviation, not a sentence end
+_PERIOD_TITLES = frozenset({"mme", "mlle", "prof", "dr", "pr", "me", "m"})
+# Types whose spans are cut at clause boundaries. Not PERSON: a comma is part
+# of the "Last, First" name form.
+_SEGMENT_TRIM_TYPES = frozenset({"ORG"})
+
+
+def _clause_boundaries(raw: str) -> list[tuple[int, int]]:
+    """(start, end) offsets of the clause boundaries in ``raw``.
+
+    A period counts only as a sentence end: not after a word shorter than
+    three letters, an all-caps word, or a title (Mme, Mlle, Prof, Dr, Pr, Me,
+    M).
+    """
+    found: list[tuple[int, int]] = []
+    for match in _CLAUSE_BOUNDARY_RE.finditer(raw):
+        if match.group() == ".":
+            word = _LAST_WORD_RE.search(raw[: match.start()])
+            last = word.group(1) if word else ""
+            if len(last) < 3 or last.lower() in _PERIOD_TITLES or last.isupper():
+                continue
+        found.append((match.start(), match.end()))
+    return found
+
 
 def _role_token_spans(text: str) -> list[tuple[str, int, int]]:
     """Split a VP-form remainder into (token, start, end).
@@ -750,7 +779,68 @@ class HybridDetector(EntityDetector):
         )
 
     @classmethod
+    def _clause_segment(
+        cls, entity: DetectedEntity, anchor: tuple[int, int], text: str | None
+    ) -> DetectedEntity | None:
+        """The part of ``entity`` between the clause boundaries around ``anchor``.
+
+        Returns None when the anchor itself crosses a boundary, when the
+        segment would be the whole span, or when it is empty.
+        """
+        raw = cls._slice(entity, text)
+        a0, a1 = anchor[0] - entity.start_pos, anchor[1] - entity.start_pos
+        bounds = _clause_boundaries(raw)
+        if any(s < a1 and e > a0 for s, e in bounds):
+            return None
+        left = max((e for s, e in bounds if e <= a0), default=0)
+        right = min((s for s, e in bounds if s >= a1), default=len(raw))
+        if left == 0 and right == len(raw):
+            return None
+        segment = raw[left:right]
+        lead = len(segment) - len(segment.lstrip())
+        segment = segment.strip()
+        if not segment:
+            return None
+        start = entity.start_pos + left + lead
+        return dataclasses.replace(
+            entity, text=segment, start_pos=start, end_pos=start + len(segment)
+        )
+
+    @classmethod
     def _resolve_same_type_pair(
+        cls, a: DetectedEntity, b: DetectedEntity, text: str | None = None
+    ) -> tuple[DetectedEntity | None, str]:
+        """Pairwise decision, with the ORG segment trim (Story 10.2, V3).
+
+        After the base decision, for ORG pairs: a containment kept by the
+        outer span (``containment`` or ``containment_outer_trimmed_linebreak``)
+        is replaced by the outer span cut to the clause segment around the
+        inner core, when that segment still contains the inner core (reason
+        ``containment_outer_trimmed_boundary``). A union is cut the same way
+        around the overlap of the two cores (``partial_overlap_union_trimmed``).
+        """
+        result, reason = cls._resolve_same_type_pair_base(a, b, text)
+        if a.entity_type not in _SEGMENT_TRIM_TYPES or result is None:
+            return result, reason
+        ca, cb = cls._dedup_core(a), cls._dedup_core(b)
+        if reason in ("containment", "containment_outer_trimmed_linebreak"):
+            a_contains = ca[0] <= cb[0] and cb[1] <= ca[1]
+            outer, inner = (a, b) if a_contains else (b, a)
+            inner_core = cls._dedup_core(inner)
+            segment = cls._clause_segment(outer, inner_core, text)
+            if segment is not None:
+                sc = cls._dedup_core(segment)
+                if sc[0] <= inner_core[0] and inner_core[1] <= sc[1]:
+                    return segment, "containment_outer_trimmed_boundary"
+        elif reason == "partial_overlap_union":
+            anchor = (max(ca[0], cb[0]), min(ca[1], cb[1]))
+            segment = cls._clause_segment(result, anchor, text)
+            if segment is not None:
+                return segment, "partial_overlap_union_trimmed"
+        return result, reason
+
+    @classmethod
+    def _resolve_same_type_pair_base(
         cls, a: DetectedEntity, b: DetectedEntity, text: str | None = None
     ) -> tuple[DetectedEntity | None, str]:
         """Pairwise decision for two same-type entities with overlapping spans.

@@ -657,3 +657,133 @@ class TestSameTypeDedup:
         assert [(e.text, e.start_pos, e.end_pos) for e in out] == [
             ("Zorbalia Quentin Vardel Morrix", 0, 30)
         ]
+
+
+class TestOrgSegmentTrim:
+    """V3, adopted by Lionel 2026-10-04: ORG spans cut at clause boundaries."""
+
+    @pytest.mark.parametrize(
+        ("doc", "kept"),
+        [
+            ("Quentrix SA\nRapport annuel", "Quentrix SA"),  # line break
+            ("Quentrix SA, Notre Client", "Quentrix SA"),  # comma
+            ("Quentrix SA; Notre Client", "Quentrix SA"),  # semicolon
+            ("Quentrix SA: Notre Client", "Quentrix SA"),  # colon
+            ("Merci beaucoup. Quentrix SA", "Quentrix SA"),  # sentence period
+        ],
+    )
+    def test_each_boundary_kind_cuts_the_outer_org(
+        self, detector: HybridDetector, log: _LogRecorder, doc: str, kept: str
+    ) -> None:
+        start = doc.index("Quentrix")
+        outer = _ent(doc, "ORG", 0, "regex")
+        inner = _ent("Quentrix SA", "ORG", start, "spacy")
+        merged = detector._merge_entities([inner], [outer], doc)
+        assert [(e.text, e.start_pos) for e in merged] == [(kept, start)]
+        reasons = {e["reason"] for e in log.named("same_type_overlap_resolved")}
+        assert reasons == {"containment_outer_trimmed_boundary"}
+
+    @pytest.mark.parametrize(
+        "doc",
+        [
+            "Contact Dr. Quentrix SA",  # title before the period
+            "Groupe QTX. Quentrix SA",  # all-caps word before the period
+            "Le no. Quentrix SA",  # word shorter than three letters
+        ],
+    )
+    def test_period_guard_keeps_the_outer_org(
+        self, detector: HybridDetector, doc: str
+    ) -> None:
+        start = doc.index("Quentrix")
+        outer = _ent(doc, "ORG", 0, "regex")
+        inner = _ent("Quentrix SA", "ORG", start, "spacy")
+        merged = detector._merge_entities([inner], [outer], doc)
+        assert [e.text for e in merged] == [doc]
+
+    def test_list_of_orgs_keeps_each_name(self, detector: HybridDetector) -> None:
+        doc = "Quentrix SA, Zorbalia Conseil, et Vardel Group"
+        outer = _ent(doc, "ORG", 0, "regex")
+        spacy_orgs = [
+            _ent("Quentrix SA", "ORG", 0, "spacy"),
+            _ent("Zorbalia Conseil", "ORG", 13, "spacy"),
+            _ent("Vardel Group", "ORG", 34, "spacy"),
+        ]
+        merged = detector._merge_entities(spacy_orgs, [outer], doc)
+        assert [e.text for e in merged] == [
+            "Quentrix SA",
+            "Zorbalia Conseil",
+            "Vardel Group",
+        ]
+
+    def test_signature_block_keeps_the_org_line(self, detector: HybridDetector) -> None:
+        doc = "Cordialement,\n\nZorbalia Quentin\nDirectrice\nQuentrix SA"
+        outer = _ent(doc, "ORG", 0, "regex")
+        inner = _ent("Quentrix SA", "ORG", doc.index("Quentrix"), "spacy")
+        merged = detector._merge_entities([inner], [outer], doc)
+        assert [(e.text, e.start_pos) for e in merged] == [
+            ("Quentrix SA", doc.index("Quentrix"))
+        ]
+
+    def test_union_trimmed_at_a_boundary(
+        self, detector: HybridDetector, log: _LogRecorder
+    ) -> None:
+        doc = "Quentrix Holding SA\nSiège social"
+        regex_e = _ent("Quentrix Holding SA", "ORG", 0, "regex")
+        spacy_e = _ent("Holding SA\nSiège social", "ORG", 9, "spacy")
+        merged = detector._merge_entities([spacy_e], [regex_e], doc)
+        assert [(e.text, e.start_pos, e.source) for e in merged] == [
+            ("Quentrix Holding SA", 0, "merged")
+        ]
+        reasons = {e["reason"] for e in log.named("same_type_overlap_resolved")}
+        assert reasons == {"partial_overlap_union_trimmed"}
+
+    def test_person_last_first_is_not_cut(self, detector: HybridDetector) -> None:
+        doc = "Quentin, Zorbalia"
+        outer = _ent(doc, "PERSON", 0, "regex")
+        inner = _ent("Zorbalia", "PERSON", 9, "spacy")
+        merged = detector._merge_entities([inner], [outer], doc)
+        assert [e.text for e in merged] == ["Quentin, Zorbalia"]
+
+    def test_location_is_not_cut(self, detector: HybridDetector) -> None:
+        doc = "Zorbaville, Quentrie"
+        outer = _ent(doc, "LOCATION", 0, "regex")
+        inner = _ent("Quentrie", "LOCATION", 12, "spacy")
+        merged = detector._merge_entities([inner], [outer], doc)
+        assert [e.text for e in merged] == [doc]
+
+    def test_anchor_crossing_a_boundary_is_not_cut(
+        self, detector: HybridDetector
+    ) -> None:
+        doc = "Groupe Quentrix, Zorbalia et associés"
+        outer = _ent(doc, "ORG", 0, "regex")
+        inner = _ent("Quentrix, Zorbalia", "ORG", 7, "spacy")
+        merged = detector._merge_entities([inner], [outer], doc)
+        assert [e.text for e in merged] == [doc]
+
+    @pytest.mark.xfail(
+        strict=True,
+        reason="Known V3 gap, handed to 10.3: an outer ORG that already "
+        "absorbed one contained name is later cut to another name's segment",
+    )
+    def test_known_gap_chain_cut_uncovers_absorbed_name(
+        self, detector: HybridDetector
+    ) -> None:
+        doc = "Groupe, Quentrix, Zorbalia Conseil"
+        outer = _ent(doc, "ORG", 0, "regex")
+        absorbed = _ent("Groupe, Quentrix", "ORG", 0, "spacy")  # crosses a comma
+        later = _ent("Zorbalia Conseil", "ORG", 18, "spacy")
+        out = detector._dedup_same_type_overlaps([outer, absorbed, later], doc)
+        q = doc.index("Quentrix")
+        assert any(k.start_pos <= q < k.end_pos for k in out)
+
+    @pytest.mark.xfail(
+        strict=True,
+        reason="Known V3 gap, handed to 10.3: a union cut around the overlap "
+        "drops a name held by one of its inputs",
+    )
+    def test_known_gap_union_cut_drops_a_name(self, detector: HybridDetector) -> None:
+        doc = "Quentrix, Zorbalia Group"
+        a = _ent("Quentrix, Zorbalia", "ORG", 0, "regex")
+        b = _ent("Zorbalia Group", "ORG", 10, "spacy")
+        out = detector._dedup_same_type_overlaps([a, b], doc)
+        assert any(k.start_pos <= 0 < k.end_pos for k in out)
