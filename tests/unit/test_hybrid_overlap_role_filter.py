@@ -615,25 +615,33 @@ class TestSameTypeDedup:
                     ), (doc, e, out)
 
     def test_large_input_uses_an_active_window(self, detector: HybridDetector) -> None:
-        """QA PERF-001: the walk only compares against overlapping candidates.
+        """QA PERF-001: the walk scales linearly, not quadratically.
 
-        20,000 entities in a long synthetic document, with overlapping pairs
-        every few entities. A full O(n^2) scan took about 2 s for 16,000 entities
-        (QA probe); the active window keeps this far below 1 s.
+        Pairs of overlapping same-type entities along a long document. Going
+        from 1,500 to 6,000 pairs (4x) costs about 4x with the active window
+        and about 16x with a full scan of the kept list. The ratio is used
+        instead of an absolute time, so slow or instrumented CI legs do not
+        make the test flaky.
         """
         import time
 
-        entities: list[DetectedEntity] = []
-        for i in range(10_000):
-            base = i * 40
-            entities.append(_ent("Zorbalia Quentin", "PERSON", base, "spacy"))
-            entities.append(_ent("Quentin", "PERSON", base + 9, "regex"))
-        start = time.perf_counter()
-        out = detector._dedup_same_type_overlaps(entities)
-        elapsed = time.perf_counter() - start
-        assert len(out) == 10_000
-        assert all(e.text == "Zorbalia Quentin" for e in out)
-        assert elapsed < 1.0, elapsed
+        def run(pairs: int) -> float:
+            entities: list[DetectedEntity] = []
+            for i in range(pairs):
+                base = i * 40
+                entities.append(_ent("Zorbalia Quentin", "PERSON", base, "spacy"))
+                entities.append(_ent("Quentin", "PERSON", base + 9, "regex"))
+            start = time.perf_counter()
+            out = detector._dedup_same_type_overlaps(entities)
+            elapsed = time.perf_counter() - start
+            assert len(out) == pairs
+            assert all(e.text == "Zorbalia Quentin" for e in out)
+            return elapsed
+
+        run(500)  # warm-up
+        small = min(run(1_500) for _ in range(2))
+        large = min(run(6_000) for _ in range(2))
+        assert large / small < 10, (small, large)
 
     def test_window_keeps_rechecking_retired_entities_after_a_union(
         self, detector: HybridDetector
