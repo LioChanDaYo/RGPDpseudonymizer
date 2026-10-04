@@ -16,6 +16,7 @@ from tests.accuracy.conftest import (
     AccuracyMetrics,
     DocumentResult,
     GroundTruthEntity,
+    _load_corpus_documents,
     compute_metrics,
 )
 
@@ -67,19 +68,40 @@ _TITLE_RE = re.compile(
     r"Madame|Monsieur|Mademoiselle|Maître)\s",
     re.IGNORECASE,
 )
+# Story 10.1: titles are excluded from PERSON spans (GUIDELINES P2), so the
+# title_with_name category looks at the document text just before the span.
+_PRECEDING_TITLE_RE = re.compile(
+    r"(?<!\w)(?:M\.|Mme\.?|Mlle\.?|MM\.|Mmes|Dr\.?|Docteur|Pr\.?|Me|Maître)\s+$"
+)
 _ABBREVIATION_RE = re.compile(r"\b[A-ZÀ-ÖØ-Ÿ](?:-[A-ZÀ-ÖØ-Ÿ])?\.\s")
 _DIACRITICS_RE = re.compile(r"[àâäéèêëïîôùûüÿçœæÀÂÄÉÈÊËÏÎÔÙÛÜŸÇŒÆ]")
 _LAST_FIRST_RE = re.compile(r"^[A-ZÀ-ÖØ-Ÿ][a-zà-öø-ÿ]+,\s")
 _MULTI_WORD_ORG_RE = re.compile(r"\s")
 
 
-def _categorise_edge_case(entity: GroundTruthEntity) -> list[str]:
-    """Return a list of edge-case categories that apply to *entity*."""
+def _categorise_edge_case(
+    entity: GroundTruthEntity, doc_text: str | None = None
+) -> list[str]:
+    """Return a list of edge-case categories that apply to *entity*.
+
+    ``title_with_name``: a PERSON whose span is immediately preceded in
+    *doc_text* by a title (M., Mme, Mlle, MM., Mmes, Dr, Docteur, Pr, Me,
+    Maître). Titles are outside the span since Story 10.1 (GUIDELINES P2).
+    A span that still starts with a title also counts.
+    """
     cats: list[str] = []
     text = entity.text
     if _COMPOUND_RE.search(text):
         cats.append("compound_hyphenated")
-    if _TITLE_RE.match(text):
+    preceded_by_title = (
+        entity.entity_type == "PERSON"
+        and doc_text is not None
+        and _PRECEDING_TITLE_RE.search(
+            doc_text[max(0, entity.start_pos - 12) : entity.start_pos]
+        )
+        is not None
+    )
+    if _TITLE_RE.match(text) or preceded_by_title:
         cats.append("title_with_name")
     if _ABBREVIATION_RE.search(text):
         cats.append("abbreviation")
@@ -244,10 +266,11 @@ class TestEdgeCaseAccuracy:
     ) -> None:
         """Calculate accuracy for each edge-case category."""
         tp = fn = 0
+        doc_texts = {name: text for name, text, _ in _load_corpus_documents()}
         for r in corpus_results:
             matched_gt = {id(gt) for _, gt in r.true_positives}
             for gt in r.ground_truth:
-                cats = _categorise_edge_case(gt)
+                cats = _categorise_edge_case(gt, doc_texts.get(r.doc_name))
                 if category in cats:
                     if id(gt) in matched_gt:
                         tp += 1
