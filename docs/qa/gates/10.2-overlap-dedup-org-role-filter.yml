@@ -1,0 +1,124 @@
+schema: 1
+story: '10.2'
+story_title: 'Same-Type Overlap Dedup + ORG Role Filter'
+gate: CONCERNS
+status_reason: 'G2 verified: every metric line and number in the story, QA report, CHANGELOG and PR body matches the downloaded artifacts of runs 37189862679, 37212585445, 37212993514 and 37227245274. Run C sits exactly at the revised G3 bounds, and G4 and G6 are clean. Concerns: the user-facing coverage wording in the CHANGELOG and PR body overstates the measured coverage, and the held-out recall drop still needs Lionel''s decision before merge.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-10-04T20:30:00Z'
+
+waiver: { active: false }
+
+merge_blockers:
+  - 'Held-out recall drop (run C vs 37189862679: Overall R 0.7229 -> 0.6970, FN 64 -> 70; ORG R 0.4510 -> 0.3333, FN 28 -> 34): pending Lionel decision. Not recorded in the story; blocks merge per STOP G3.2, not this review.'
+
+top_issues:
+  - id: 'REQ-001'
+    severity: medium
+    finding: 'Held-out recall drop in run C 37227245274 vs 37189862679: Overall FN 64 -> 70, ORG FN 28 -> 34 (R 0.4510 -> 0.3333), LOCATION FN 15 -> 16; PERSON FN 21 -> 20. Precision is up (Overall P 0.5353 -> 0.7523). This is the main-gain / held-out-loss pattern of G5. Lionel''s decision is pending (decision 5 was deferred until run C).'
+    suggested_action: 'Lionel decides; record date, decision and bounds in Decisions Recorded before merge.'
+    refs: ['docs/stories/10.2.overlap-dedup-org-role-filter.story.md:196', 'docs/stories/10.2.overlap-dedup-org-role-filter.story.md:708']
+    suggested_owner: po
+  - id: 'DOC-001'
+    severity: medium
+    finding: 'User-facing coverage claims overstate the measured result. CHANGELOG says "no part of a name is left unreplaced" and "the name is still covered by a span of the same type". The PR body says "Every newly missed name is still covered by a same-type span" and "One remaining partial leak". The QA independent coverage check (own script, QA-generated dumps that reproduce both CI runs exactly) finds two exceptions. First, 1 new LOCATION miss ("Lille", interview_04) is covered by another type only. Second, 3 annotations lose name-character coverage vs v2.2: TechSolutions France SAS (board_minutes @42, partial), Pierre (hr_announcement @2778, full) and BRS (sales_proposal @5726, full). The story discloses all of this accurately.'
+    suggested_action: 'Reword CHANGELOG lines 18 and 27 and the PR body. Say that 3 main-corpus names lose coverage versus v2.2 (1 partial, 2 that were covered only by accident) and are handed to 10.3, and that 1 new LOCATION miss is covered by another type.'
+    refs: ['CHANGELOG.md:18', 'CHANGELOG.md:27', 'PR #81 body (G3 bullet, Remaining work bullet)']
+    suggested_owner: dev
+  - id: 'PERF-001'
+    severity: low
+    finding: 'The dedup walk compares each entity with every kept entity, with no active window, so it is O(n^2). The story Technical Constraints asked for an active window. QA probe without logging: 1k entities 0.011 s, 4k 0.134 s, 8k 0.51 s, 16k 2.03 s. This is negligible at realistic sizes and far below NFR1 (30 s).'
+    suggested_action: 'Optional: keep kept entities sorted by start and skip those with end_pos <= current.start_pos (active window).'
+    refs: ['gdpr_pseudonymizer/nlp/hybrid_detector.py:813', 'docs/stories/10.2.overlap-dedup-org-role-filter.story.md:616']
+    suggested_owner: dev
+  - id: 'REL-001'
+    severity: low
+    finding: 'The place phrase is searched in the ORG slice without a word boundary. QA probe: ORG "Vice-président investisseurs est" emits LOCATION "est" at [21,24), which is inside "investisseurs"; the correct offsets are [32,35). This is reachable only with a lower-case region word, but the emitted span has the wrong offsets.'
+    suggested_action: 'Anchor the search on token boundaries, or reuse the token offsets from _role_token_spans mapped back to the raw slice. Add a unit test.'
+    refs: ['gdpr_pseudonymizer/nlp/hybrid_detector.py:639-641']
+    suggested_owner: dev
+  - id: 'REQ-002'
+    severity: low
+    finding: 'Adjacent place phrases with no connector are joined into one LOCATION ("VP Europe Asie" -> "Europe Asie"), because all() over the empty range between them is True. The docstring and the frozen rule text say only de/du/des/d'' join places.'
+    suggested_action: 'Require at least one joiner token between phrases, or document the adjacency behaviour in the frozen text.'
+    refs: ['gdpr_pseudonymizer/nlp/hybrid_detector.py:145-148', 'gdpr_pseudonymizer/nlp/hybrid_detector.py:124-125', 'docs/stories/10.2.overlap-dedup-org-role-filter.story.md:387']
+    suggested_owner: dev
+  - id: 'MNT-001'
+    severity: low
+    finding: 'Stale descriptions of the pre-review behaviour. The HybridDetector class docstring still says "partial overlap prefers spaCy, then the longer core". Dev Notes "Logging" lists the old reasons. "Pseudonym Continuity" item 4 describes "keeps the spaCy one" (Completion Notes acknowledge item 4).'
+    suggested_action: 'Update the class docstring to the union and trim rules. The story notes can be refreshed at close-out.'
+    refs: ['gdpr_pseudonymizer/nlp/hybrid_detector.py:193-195', 'docs/stories/10.2.overlap-dedup-org-role-filter.story.md:493', 'docs/stories/10.2.overlap-dedup-org-role-filter.story.md:505']
+    suggested_owner: dev
+  - id: 'DOC-002'
+    severity: low
+    finding: 'Commit 936f0c5 is labelled docs-only, but it also changes scripts/accuracy_dump_detections.py (the --record-dedup wrapper now takes text). No file under gdpr_pseudonymizer/ or tests/ changes between 1550f54 and 936f0c5, so run C still describes the PR head.'
+    suggested_action: 'None needed for metrics. Mention the script fix in the Dev Agent Record for completeness.'
+    refs: ['scripts/accuracy_dump_detections.py:63-68']
+    suggested_owner: dev
+  - id: 'DOC-003'
+    severity: low
+    finding: 'CI run 37228616068 at 936f0c5 needed one rerun. Attempt 1 failed on macOS with the known mappings.db flake (idx_entities_full_name already exists, tests/integration/test_pdf_docx_processing.py); attempt 2 was green. Tasks 0.2/11.2 require recording the rerun, and it is not yet in the story.'
+    suggested_action: 'Add the rerun (run ID, failing tests, attempt 2 green) to the Dev Agent Record.'
+    refs: ['docs/stories/10.2.overlap-dedup-org-role-filter.story.md:141']
+    suggested_owner: dev
+  - id: 'TEST-001'
+    severity: low
+    finding: 'test_merge_entities_partial_overlap_same_type exercises a containment ("Dubois" inside "Marie Dubois"), not a partial overlap. True partial overlaps are covered in tests/unit/test_hybrid_overlap_role_filter.py.'
+    suggested_action: 'Rename it, or add a docstring note.'
+    refs: ['tests/unit/test_hybrid_detector.py:299']
+    suggested_owner: dev
+
+quality_score: 80
+expires: '2026-10-18T20:30:00Z'
+
+evidence:
+  runs_downloaded: ['37189862679', '37212585445', '37212993514', '37227245274']
+  metric_lines_checked:
+    story: '32/32 match'
+    qa_report_10_2_section: 'all match; 4 non-matching lines belong to the pre-existing 10.1 section (run 37013929807)'
+    changelog: 'all numbers match run C vs baseline'
+    pr_body: 'all numbers, run IDs and heads match'
+  g3_run_c_fn_delta: 'PERSON +21 (bound +21), LOCATION +4 (bound +4), ORG +16 (bound +16), Overall 486 (bound 486)'
+  g3_run_a_fn_delta: '0 / 0 / 0 / 0'
+  g4_diff: 'empty (tests/test_corpus, tests/accuracy, leakage allowlist, .github)'
+  local_reproduction: 'QA baseline dump at d4b7105 reproduces 37189862679 exactly; QA run-C dump reproduces 37227245274 exactly; AC5 overlap-dropped TPs 91 (61/14/16) confirmed'
+  tests_reviewed: 122
+  tests_run_locally: 'test_hybrid_overlap_role_filter.py + test_hybrid_detector.py + test_held_out_leakage.py: 122 passed (Windows)'
+  lint: 'ruff, black, mypy clean (Windows)'
+  ci_at_head: 'green at 936f0c5 (CI run 37228616068 attempt 2 after the macOS mappings.db flake; quality, lint, CodeQL green)'
+  risks_identified: 9
+  trace:
+    ac_covered: [1, 2, 3, 4, 6, 7, 8]
+    ac_gaps: [5]
+    ac_gap_notes: 'AC5 is met except the held-out recall decision (pending Lionel) and NFR1 CI evidence (CI perf job vacuous, fixed in PR #82)'
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'yaml.safe_load. New log events carry no entity text. No allowlist or held-out change. Privacy trade-off (3 annotations lose coverage vs v2.2) disclosed in the story and accepted by Lionel; see DOC-001 for the user-facing wording.'
+  performance:
+    status: CONCERNS
+    notes: 'NFR1 evidence is a local benchmark only (0.4-1.6 s vs 30 s). The CI perf job is vacuous on main too, and PR #82 (OPEN) fixes it. Acceptable as stated; re-run performance.yaml on the branch once #82 merges. Dedup is O(n^2) (PERF-001) but harmless at realistic sizes.'
+  reliability:
+    status: PASS
+    notes: 'Deterministic walk and tie-breaks. Termination is argued and holds. Offsets are sliced from the document (0 mismatches over the run-C dump). CRLF probe correct. One place-offset edge case (REL-001).'
+  maintainability:
+    status: PASS
+    notes: 'Role list in YAML with a why per entry. Rules in small methods. Stale class docstring (MNT-001).'
+
+recommendations:
+  immediate:
+    - action: 'Record Lionel''s held-out recall decision before merge'
+      refs: ['docs/stories/10.2.overlap-dedup-org-role-filter.story.md (Decisions Recorded)']
+    - action: 'Fix the coverage wording in the CHANGELOG and the PR body (DOC-001)'
+      refs: ['CHANGELOG.md:18', 'CHANGELOG.md:27']
+    - action: 'Record the macOS flake rerun of 37228616068 (DOC-003)'
+      refs: ['docs/stories/10.2.overlap-dedup-org-role-filter.story.md']
+  future:
+    - action: 'Word-boundary place search (REL-001); joiner rule for adjacent places (REQ-002)'
+      refs: ['gdpr_pseudonymizer/nlp/hybrid_detector.py:124-163', 'gdpr_pseudonymizer/nlp/hybrid_detector.py:629-654']
+    - action: 'Active window in the dedup walk (PERF-001)'
+      refs: ['gdpr_pseudonymizer/nlp/hybrid_detector.py:783-846']
+    - action: 'Run performance.yaml on the branch after PR #82 merges'
+      refs: ['.github/workflows/performance.yaml']
+    - action: '10.3: cover Pierre / BRS with their own detections; fix the board_minutes union and trim leak'
+      refs: ['docs/stories/10.2.overlap-dedup-org-role-filter.story.md (Handoff to 10.3)']
