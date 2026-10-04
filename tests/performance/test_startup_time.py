@@ -172,8 +172,3 @@ class TestStartupTime:
                 f"Cold start mean {mean:.3f}s exceeds 60s — "
                 f"possible regression in model loading"
             )
-
-
-def test_forced_ci_failure_temporary() -> None:
-    """TEMPORARY: proves performance.yaml now fails on a failing test."""
-    assert False, "forced failure (revert me)"
