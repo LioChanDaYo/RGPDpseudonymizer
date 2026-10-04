@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **One candidate per place.** When two detections of the same type overlap, one span is offered instead of fragments. For example, "Jean-Luc" and "Jean-Luc Martin" at the same place now give only "Jean-Luc Martin".
     - The containing span is kept, except when the extra words are all lower-case without digits ("près de Lyon" → "Lyon").
     - A span that runs over a line break (a name plus the next line's heading) is cut at the break.
-    - Two spans that partly overlap become one span covering both, so no part of a name is left unreplaced.
+    - Two spans that partly overlap become one span covering both, instead of keeping one and leaving the rest of the other unreplaced.
     - Overlaps between different types are unchanged: a place inside an organisation name is still offered.
   - **Job titles are not organisations.** Role acronyms (CTO, CFO, DRH, DPO, RSSI, COMEX, …) and VP titles ("VP", "VP Sales", "VP Europe") are no longer offered as ORG.
     - The list is in `gdpr_pseudonymizer/resources/org_role_filter.yaml`. Real organisations with acronym names (CNIL, ANSSI, BNP, EY) are not affected.
@@ -24,7 +24,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - precision 66.69% → 77.22%, recall 79.91% → 78.06%, F1 72.70% → 77.64%;
     - false positives 884 → 510;
     - PERSON F1 88.68% → 93.82%, LOCATION 67.83% → 71.94%, ORG 39.61% → 42.42%.
-  - **Recall trade-off.** Recall drops slightly in every type: FN +21 PERSON, +4 LOCATION, +16 ORG. These are boundary changes: the name is still covered by a span of the same type. This trade-off was approved for this release.
+  - **Recall trade-off.** Recall drops slightly in every type: FN +21 PERSON, +4 LOCATION, +16 ORG. This trade-off was approved for this release. Measured on the 25 main-corpus documents:
+    - Almost all of these misses are boundary changes: the name is still covered by a span of the same type. One location miss is covered only by a detection of another type.
+    - 3 annotated names lose coverage compared with v2.2. One organisation name is now partly unreplaced (a span merged across a heading line, then cut at the line break), and two short names were covered in v2.2 only by accident, inside a wrong-type span that is now cut back.
+    - All three are handed to the next story (10.3).
   - **Held-out set** (same run): F1 61.51% → 72.36%, with recall 72.29% → 69.70%.
   - **Upgrading: pseudonym continuity.** The mapping schema is unchanged.
     - Existing mapping databases keep working: rows created by v2.2 are still found by exact key, so an entity already mapped keeps its pseudonym.
