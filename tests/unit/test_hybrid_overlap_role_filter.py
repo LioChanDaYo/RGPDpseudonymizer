@@ -230,3 +230,200 @@ class TestOrgRoleFilterResource:
         for entry in data["vp_regions"]:
             term = str(entry["term"])
             assert not (len(term) > 1 and term.isupper()), term
+
+
+# ---------------------------------------------------------------------------
+# Same-type overlap dedup (AC1, AC2)
+# ---------------------------------------------------------------------------
+
+DEDUP_FIELDS = {
+    "entity_type",
+    "reason",
+    "kept_source",
+    "dropped_source",
+    "kept_start",
+    "kept_end",
+    "dropped_start",
+    "dropped_end",
+}
+
+
+class TestSameTypeDedup:
+    def test_containment_spacy_short_inside_regex_long(
+        self, detector: HybridDetector
+    ) -> None:
+        short = _ent("Zorbalia", "PERSON", 0, "spacy")
+        long = _ent("Zorbalia Quentin", "PERSON", 0, "regex")
+        assert detector._merge_entities([short], [long]) == [long]
+
+    def test_containment_regex_short_inside_spacy_long(
+        self, detector: HybridDetector
+    ) -> None:
+        long = _ent("Zorbalia Quentin", "PERSON", 0, "spacy")
+        short = _ent("Quentin", "PERSON", 9, "regex")
+        assert detector._merge_entities([long], [short]) == [long]
+
+    def test_partial_overlap_spacy_vs_regex_keeps_spacy(
+        self, detector: HybridDetector, log: _LogRecorder
+    ) -> None:
+        spacy_e = _ent("Zorbalia Quentin", "PERSON", 0, "spacy")
+        regex_e = _ent("Quentin Vardel", "PERSON", 9, "regex")
+        merged = detector._merge_entities([spacy_e], [regex_e])
+        assert merged == [spacy_e]
+        assert merged[0].is_ambiguous is False
+        assert regex_e.is_ambiguous is False
+        assert log.named("ambiguous_entity_added") == []
+        assert [e["reason"] for e in log.named("same_type_overlap_resolved")] == [
+            "partial_overlap_spacy_preferred"
+        ]
+
+    def test_partial_overlap_regex_vs_regex_keeps_longer_core(
+        self, detector: HybridDetector
+    ) -> None:
+        a = _ent("Zorbalia Quentin", "PERSON", 0)
+        b = _ent("Quentin Vardelmorr", "PERSON", 9)
+        assert detector._merge_entities([], [a, b]) == [b]
+
+    def test_same_source_tie_keeps_earliest_start(
+        self, detector: HybridDetector, log: _LogRecorder
+    ) -> None:
+        # Equal core length, equal raw length, both regex → earliest start.
+        a = _ent("Zorb Quen", "PERSON", 0)
+        b = _ent("Quen Vard", "PERSON", 5)
+        assert detector._merge_entities([], [b, a]) == [a]
+        assert log.named("same_type_overlap_resolved")[0]["reason"] == "tie"
+
+    def test_title_variant_is_a_tie_longer_raw_span_kept(
+        self, detector: HybridDetector
+    ) -> None:
+        titled = _ent("Dr Zorbalia Quentin", "PERSON", 0)
+        bare = _ent("Zorbalia Quentin", "PERSON", 3)
+        assert detector._merge_entities([], [bare, titled]) == [titled]
+
+    def test_preposition_variant_location_is_a_tie(
+        self, detector: HybridDetector, log: _LogRecorder
+    ) -> None:
+        with_prep = _ent("à Zorbaville", "LOCATION", 10)
+        bare = _ent("Zorbaville", "LOCATION", 12)
+        assert detector._merge_entities([], [bare, with_prep]) == [with_prep]
+        assert log.named("same_type_overlap_resolved")[0]["reason"] == "tie"
+
+    def test_preposition_rule_does_not_apply_to_person(
+        self, detector: HybridDetector, log: _LogRecorder
+    ) -> None:
+        # "à" is not stripped from PERSON: this is containment, not a tie.
+        with_prep = _ent("à Quentin", "PERSON", 0)
+        bare = _ent("Quentin", "PERSON", 2)
+        detector._merge_entities([], [with_prep, bare])
+        assert log.named("same_type_overlap_resolved")[0]["reason"] != "tie"
+
+    def test_different_types_partial_overlap_untouched(
+        self, detector: HybridDetector, log: _LogRecorder
+    ) -> None:
+        person = _ent("Zorbalia Quentin", "PERSON", 0, "spacy")
+        org = _ent("Quentin Holding", "ORG", 9, "regex")
+        merged = detector._merge_entities([person], [org])
+        assert merged == [person, org]
+        assert org.is_ambiguous is True
+        assert [e["reason"] for e in log.named("ambiguous_entity_added")] == [
+            "partial_overlap"
+        ]
+        assert log.named("same_type_overlap_resolved") == []
+
+    def test_location_nested_in_org_keeps_both(
+        self, detector: HybridDetector, log: _LogRecorder
+    ) -> None:
+        org = _ent("Quentrix Zorbaville", "ORG", 0, "spacy")
+        place = _ent("Zorbaville", "LOCATION", 9, "regex")
+        assert detector._merge_entities([org], [place]) == [org, place]
+        assert log.named("same_type_overlap_resolved") == []
+
+    def test_cores_disjoint_keeps_both(self, detector: HybridDetector) -> None:
+        # Raw spans touch only through the title: cores are disjoint.
+        a = _ent("Quentin Mme", "PERSON", 0, end=11)
+        b = _ent("Mme Zorbalia", "PERSON", 8)
+        assert detector._merge_entities([], [a, b]) == [a, b]
+
+    def test_chain_a_in_b_b_partial_c(self, detector: HybridDetector) -> None:
+        # A ⊂ B, B partially overlaps C. Walk order B, C, A: C loses to B
+        # (partial overlap, spaCy preferred), A loses to B (containment).
+        a = _ent("Quentin", "PERSON", 9, "regex")
+        b = _ent("Zorbalia Quentin", "PERSON", 0, "spacy")
+        c = _ent("Quentin Vardel", "PERSON", 9, "regex")
+        assert detector._merge_entities([b], [a, c]) == [b]
+
+    def test_c1_lowercase_prefix_keeps_inner(
+        self, detector: HybridDetector, log: _LogRecorder
+    ) -> None:
+        outer = _ent("près de Zorbaville", "LOCATION", 0, "regex")
+        inner = _ent("Zorbaville", "LOCATION", 8, "spacy")
+        assert detector._merge_entities([inner], [outer]) == [inner]
+        assert log.named("same_type_overlap_resolved")[0]["reason"] == (
+            "containment_inner_preferred"
+        )
+
+    def test_c1_digit_token_keeps_outer(self, detector: HybridDetector) -> None:
+        outer = _ent("Zorbaville 3ème", "LOCATION", 0, "regex")
+        inner = _ent("Zorbaville", "LOCATION", 0, "spacy")
+        assert detector._merge_entities([inner], [outer]) == [outer]
+
+    def test_c1_uppercase_token_keeps_outer(self, detector: HybridDetector) -> None:
+        outer = _ent("Zorbalia Quentin", "PERSON", 0, "regex")
+        inner = _ent("Zorbalia", "PERSON", 0, "spacy")
+        assert detector._merge_entities([inner], [outer]) == [outer]
+
+    def test_c2_line_break_keeps_inner(
+        self, detector: HybridDetector, log: _LogRecorder
+    ) -> None:
+        outer = _ent("Zorbalia Quentin\nRapport", "PERSON", 0, "spacy")
+        inner = _ent("Zorbalia Quentin", "PERSON", 0, "regex")
+        assert detector._merge_entities([outer], [inner]) == [inner]
+        assert log.named("same_type_overlap_resolved")[0]["reason"] == (
+            "containment_inner_preferred_linebreak"
+        )
+
+    def test_dedup_log_fields_and_no_entity_text(
+        self, detector: HybridDetector, log: _LogRecorder
+    ) -> None:
+        long = _ent("Zorbalia Quentin", "PERSON", 0, "spacy")
+        short = _ent("Quentin", "PERSON", 9, "regex")
+        detector._merge_entities([long], [short])
+        (event,) = log.named("same_type_overlap_resolved")
+        assert set(event) == DEDUP_FIELDS
+        assert event == {
+            "entity_type": "PERSON",
+            "reason": "containment",
+            "kept_source": "spacy",
+            "dropped_source": "regex",
+            "kept_start": 0,
+            "kept_end": 16,
+            "dropped_start": 9,
+            "dropped_end": 16,
+        }
+
+    def test_invariant_no_same_type_overlapping_cores(
+        self, detector: HybridDetector
+    ) -> None:
+        import random
+
+        rng = random.Random(102)
+        words = ["Zorbalia", "Quentin", "Vardel", "Mme", "à", "près", "de", "x"]
+        for _ in range(300):
+            spacy_list: list[DetectedEntity] = []
+            regex_list: list[DetectedEntity] = []
+            for _ in range(rng.randint(1, 6)):
+                text = " ".join(rng.choice(words) for _ in range(rng.randint(1, 3)))
+                start = rng.randint(0, 20)
+                etype = rng.choice(["PERSON", "LOCATION", "ORG"])
+                source = rng.choice(["spacy", "regex"])
+                e = _ent(text, etype, start, source)
+                (spacy_list if source == "spacy" else regex_list).append(e)
+            merged = detector._merge_entities(spacy_list, regex_list)
+            for i, e1 in enumerate(merged):
+                for e2 in merged[i + 1 :]:
+                    if e1.entity_type != e2.entity_type:
+                        continue
+                    if not (e1.start_pos < e2.end_pos and e2.start_pos < e1.end_pos):
+                        continue
+                    c1, c2 = detector._dedup_core(e1), detector._dedup_core(e2)
+                    assert not (c1[0] < c2[1] and c2[0] < c1[1]), (e1, e2)

@@ -81,30 +81,24 @@ class TestHybridDetector:
             set(spans)
         ), "Duplicate entities with same span detected"
 
-    def test_partial_overlap_flags_ambiguous(self, detector: HybridDetector) -> None:
-        """Test that partial overlaps (non-title variants) are flagged as ambiguous.
+    def test_no_same_type_overlapping_cores(self, detector: HybridDetector) -> None:
+        """No two same-type output entities have overlapping cores.
 
-        Note: Title variants like "Dr. Marie Dubois" vs "Marie Dubois" are now
-        normalized and deduplicated, so they won't appear as partial overlaps.
-        This test verifies TRUE partial overlaps (different entity boundaries)
-        are still flagged as ambiguous.
+        Rewritten for Story 10.2 AC1: same-type overlaps are deduplicated, so
+        the old "partial overlap is flagged ambiguous" assertion only holds for
+        different-type pairs; it moved to the deterministic
+        test_merge_entities_partial_overlap_* tests below.
         """
-        # Use text that creates true partial overlap (not just title variants)
         text = "Interview avec Marie Dubois Fontaine."
         entities = detector.detect_entities(text)
 
-        # May have overlapping entities (e.g., "Marie Dubois" vs "Dubois Fontaine")
-        # If there are partial overlaps, at least one should be flagged ambiguous
-        overlapping_entities = []
         for i, e1 in enumerate(entities):
             for e2 in entities[i + 1 :]:
-                if detector._has_overlap(e1, e2) and not detector._is_exact_match(
-                    e1, e2
-                ):
-                    overlapping_entities.extend([e1, e2])
-
-        if overlapping_entities:
-            assert any(e.is_ambiguous for e in overlapping_entities)
+                if e1.entity_type != e2.entity_type:
+                    continue
+                c1 = detector._dedup_core(e1)
+                c2 = detector._dedup_core(e2)
+                assert not (c1[0] < c2[1] and c2[0] < c1[1]), (e1, e2)
 
     def test_no_overlap_keeps_both(self, detector: HybridDetector) -> None:
         """Test that non-overlapping entities from both sources are kept."""
@@ -302,13 +296,14 @@ class TestHybridDetector:
         assert merged[0].start_pos == 10  # Paris comes first
         assert merged[1].start_pos == 20  # M. Dupont comes second
 
-    def test_merge_entities_partial_overlap(self, detector: HybridDetector) -> None:
-        """Test _merge_entities with partial overlap (non-title variant).
+    def test_merge_entities_partial_overlap_same_type(
+        self, detector: HybridDetector
+    ) -> None:
+        """Same-type overlap keeps one entity, unflagged (Story 10.2 AC1).
 
-        This tests TRUE partial overlap where entity boundaries differ,
-        not title variants which are correctly deduplicated.
+        Rewritten for Story 10.2: v2.2 kept both and flagged the regex one.
+        "Marie Dubois" is 12 characters (end_pos=12; was 13, off by one).
         """
-        # TRUE partial overlap: "Marie Dubois" vs "Dubois" (different boundaries)
         spacy_entity = DetectedEntity(
             text="Marie Dubois",
             entity_type="PERSON",
@@ -326,9 +321,33 @@ class TestHybridDetector:
 
         merged = detector._merge_entities([spacy_entity], [regex_entity])
 
-        # Should keep both entities, one flagged as ambiguous
-        assert len(merged) == 2
-        assert any(e.is_ambiguous for e in merged)
+        assert merged == [spacy_entity]
+        assert merged[0].is_ambiguous is False
+
+    def test_merge_entities_partial_overlap_different_type(
+        self, detector: HybridDetector
+    ) -> None:
+        """Different-type partial overlap keeps both, regex flagged (Story 10.2)."""
+        spacy_entity = DetectedEntity(
+            text="Marie Dubois",
+            entity_type="PERSON",
+            start_pos=0,
+            end_pos=12,
+            source="spacy",
+        )
+        regex_entity = DetectedEntity(
+            text="Dubois Conseil",
+            entity_type="ORG",
+            start_pos=6,
+            end_pos=20,
+            source="regex",
+        )
+
+        merged = detector._merge_entities([spacy_entity], [regex_entity])
+
+        assert merged == [spacy_entity, regex_entity]
+        assert spacy_entity.is_ambiguous is False
+        assert regex_entity.is_ambiguous is True
 
     def test_filter_title_only_entities(self, detector: HybridDetector) -> None:
         """Test that title-only entities are filtered out.

@@ -22,7 +22,10 @@ from gdpr_pseudonymizer.nlp.model_names import DEFAULT_SPACY_MODEL
 from gdpr_pseudonymizer.nlp.regex_matcher import RegexMatcher
 from gdpr_pseudonymizer.nlp.spacy_detector import SpaCyDetector
 from gdpr_pseudonymizer.resources import FRENCH_GEOGRAPHY_PATH, ORG_ROLE_FILTER_PATH
-from gdpr_pseudonymizer.utils.french_patterns import strip_french_titles
+from gdpr_pseudonymizer.utils.french_patterns import (
+    strip_french_prepositions,
+    strip_french_titles,
+)
 from gdpr_pseudonymizer.utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -149,9 +152,13 @@ class HybridDetector(EntityDetector):
         4. Return combined entity list
 
     Deduplication Rules:
-        - Exact overlap (same span) → Keep spaCy entity
+        - Exact overlap (same span or same title-stripped text) → Keep spaCy entity
         - No overlap → Keep both entities
-        - Partial overlap → Flag as ambiguous, keep both
+        - Different-type partial overlap → Flag regex entity as ambiguous, keep both
+        - Same-type overlap → One entity kept (Story 10.2 AC1: containment keeps
+          the containing span unless C1/C2 apply; partial overlap prefers spaCy,
+          then the longer core; ties broken deterministically)
+        - ORG whose whole text is a job title or role acronym → Dropped (AC3)
 
     Attributes:
         spacy_detector: SpaCyDetector instance for NLP-based detection
@@ -260,8 +267,14 @@ class HybridDetector(EntityDetector):
         Deduplication Rules:
             - Exact overlap (same span) → Keep spaCy entity (prefer NLP confidence)
             - No overlap → Keep both entities
-            - Partial overlap → Flag regex entity as ambiguous, keep both
+            - Partial overlap, different types → Flag regex entity as ambiguous,
+              keep both
+            - Partial overlap, same type → Keep both here; the same-type dedup
+              pass below keeps one (Story 10.2 AC1)
             - Special case: Regex ORG with "Cabinet" overlapping spaCy PERSON → Prefer ORG
+
+        Post-filters, in order: title-only PERSON, label words, ORG roles
+        (AC3), same-type overlap dedup (AC1), then sort by start position.
 
         Args:
             spacy_entities: Entities detected by spaCy
@@ -301,8 +314,9 @@ class HybridDetector(EntityDetector):
                             reason="cabinet_pattern_preferred",
                         )
                         break
-                    else:
-                        # Partial overlap → Flag regex entity as ambiguous, add it
+                    elif regex_entity.entity_type != spacy_entity.entity_type:
+                        # Partial overlap, different types → Flag regex entity
+                        # as ambiguous, keep both
                         regex_entity.is_ambiguous = True
                         merged.append(regex_entity)
                         logger.debug(
@@ -311,6 +325,11 @@ class HybridDetector(EntityDetector):
                             spacy_text=spacy_entity.text,
                             reason="partial_overlap",
                         )
+                        break
+                    else:
+                        # Partial overlap, same type → keep for now, unflagged;
+                        # _dedup_same_type_overlaps decides (Story 10.2 AC1)
+                        merged.append(regex_entity)
                         break
 
             if not overlap_found:
@@ -330,6 +349,9 @@ class HybridDetector(EntityDetector):
 
         # Filter out job titles / role acronyms detected as ORG (Story 10.2 AC3)
         merged = self._filter_org_roles(merged)
+
+        # Keep one entity per same-type overlap (Story 10.2 AC1)
+        merged = self._dedup_same_type_overlaps(merged)
 
         # Sort by start position
         merged.sort(key=lambda e: e.start_pos)
@@ -553,6 +575,149 @@ class HybridDetector(EntityDetector):
                     continue
             filtered.append(entity)
         return filtered
+
+    # ------------------------------------------------------------------
+    # Same-type overlap dedup (Story 10.2, AC1/AC2)
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _dedup_norm(entity: DetectedEntity) -> str:
+        """App normalization: titles stripped; prepositions too on LOCATION."""
+        text = strip_french_titles(entity.text)
+        if entity.entity_type == "LOCATION":
+            text = strip_french_prepositions(text)
+        return text
+
+    @classmethod
+    def _dedup_key(cls, entity: DetectedEntity) -> str:
+        """Normalized text, lower-cased, whitespace collapsed (mapping key)."""
+        return " ".join(cls._dedup_norm(entity).lower().split())
+
+    @classmethod
+    def _dedup_core(cls, entity: DetectedEntity) -> tuple[int, int]:
+        """Character span of the normalized text inside the raw span."""
+        norm = cls._dedup_norm(entity)
+        i = entity.text.find(norm) if norm else -1
+        if i >= 0:
+            return (entity.start_pos + i, entity.start_pos + i + len(norm))
+        return (entity.start_pos, entity.end_pos)
+
+    @classmethod
+    def _containment_added_text(
+        cls, outer: DetectedEntity, inner: DetectedEntity
+    ) -> str:
+        """Text of the outer core outside the inner core (left + right)."""
+        oc, ic = cls._dedup_core(outer), cls._dedup_core(inner)
+        off = outer.start_pos
+        left = outer.text[oc[0] - off : ic[0] - off]
+        right = outer.text[ic[1] - off : oc[1] - off]
+        return left + " " + right if left and right else left + right
+
+    @classmethod
+    def _resolve_same_type_pair(
+        cls, a: DetectedEntity, b: DetectedEntity
+    ) -> tuple[DetectedEntity | None, str]:
+        """Pairwise decision for two same-type entities with overlapping spans.
+
+        ``a`` precedes ``b`` in walk order. Returns (winner, reason); winner
+        is None when both are kept (cores disjoint).
+        """
+        ca, cb = cls._dedup_core(a), cls._dedup_core(b)
+        equal = ca == cb or cls._dedup_key(a) == cls._dedup_key(b)
+        if not equal:
+            if not (ca[0] < cb[1] and cb[0] < ca[1]):
+                return None, "cores_disjoint"
+            a_contains = ca[0] <= cb[0] and cb[1] <= ca[1]
+            b_contains = cb[0] <= ca[0] and ca[1] <= cb[1]
+            if a_contains or b_contains:
+                outer, inner = (a, b) if a_contains else (b, a)
+                added = cls._containment_added_text(outer, inner)
+                tokens = added.split()
+                if tokens and all(
+                    not any(ch.isupper() or ch.isdigit() for ch in tok)
+                    for tok in tokens
+                ):
+                    return inner, "containment_inner_preferred"
+                if "\n" in added:
+                    return inner, "containment_inner_preferred_linebreak"
+                return outer, "containment"
+            if a.source != b.source:
+                winner = a if a.source == "spacy" else b
+                return winner, "partial_overlap_spacy_preferred"
+            len_a, len_b = ca[1] - ca[0], cb[1] - cb[0]
+            if len_a != len_b:
+                return (a if len_a > len_b else b), "partial_overlap_longer"
+        # Tie: spaCy first, longer raw span, earlier start, earlier in walk
+        if a.source != b.source:
+            return (a if a.source == "spacy" else b), "tie"
+        raw_a, raw_b = a.end_pos - a.start_pos, b.end_pos - b.start_pos
+        if raw_a != raw_b:
+            return (a if raw_a > raw_b else b), "tie"
+        if a.start_pos != b.start_pos:
+            return (a if a.start_pos < b.start_pos else b), "tie"
+        return a, "tie"
+
+    def _dedup_same_type_overlaps(
+        self, entities: list[DetectedEntity]
+    ) -> list[DetectedEntity]:
+        """Keep one entity per same-type overlap (Story 10.2, AC1).
+
+        Walks entities by (start, -end, spaCy first). A new entity that loses
+        to any kept same-type rival it conflicts with is dropped; otherwise
+        every conflicting kept rival is dropped and the new entity is kept.
+        Cross-type pairs are never compared (a LOCATION nested in an ORG is
+        legitimate, GUIDELINES G7).
+
+        Args:
+            entities: Merged, filtered entity list
+
+        Returns:
+            Entity list without same-type overlaps (order not guaranteed)
+        """
+        ordered = sorted(
+            entities, key=lambda e: (e.start_pos, -e.end_pos, e.source != "spacy")
+        )
+        kept: list[DetectedEntity] = []
+        for entity in ordered:
+            rivals: list[tuple[DetectedEntity, DetectedEntity, str]] = []
+            lost = False
+            for other in kept:
+                if (
+                    other.entity_type != entity.entity_type
+                    or other.end_pos <= entity.start_pos
+                    or entity.end_pos <= other.start_pos
+                ):
+                    continue
+                winner, reason = self._resolve_same_type_pair(other, entity)
+                if winner is None:
+                    continue
+                if winner is other:
+                    self._log_dedup(other, entity, reason)
+                    lost = True
+                    break
+                rivals.append((entity, other, reason))
+            if lost:
+                continue
+            for winner, loser, reason in rivals:
+                kept.remove(loser)
+                self._log_dedup(winner, loser, reason)
+            kept.append(entity)
+        return kept
+
+    @staticmethod
+    def _log_dedup(kept: DetectedEntity, dropped: DetectedEntity, reason: str) -> None:
+        """Log a same-type dedup decision without any entity text (AC2)."""
+        logger.debug(
+            "same_type_overlap_resolved",
+            entity_type=kept.entity_type,
+            reason=reason,
+            kept_source=kept.source,
+            dropped_source=dropped.source,
+            kept_start=kept.start_pos,
+            kept_end=kept.end_pos,
+            dropped_start=dropped.start_pos,
+            dropped_end=dropped.end_pos,
+        )
 
     def _has_overlap(self, e1: DetectedEntity, e2: DetectedEntity) -> bool:
         """Check if two entities overlap in text span.
