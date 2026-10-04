@@ -60,8 +60,12 @@ def main() -> None:
     if record:
         original = det._dedup_same_type_overlaps
 
-        def recording(entities: list[DetectedEntity]) -> list[DetectedEntity]:
-            kept = original(entities)
+        def recording(
+            entities: list[DetectedEntity], text: str | None = None
+        ) -> list[DetectedEntity]:
+            # an input missing from the output was dropped or replaced
+            # (union / trimmed span)
+            kept = original(entities, text)
             kept_ids = {id(e) for e in kept}
             dropped.extend(
                 {

@@ -554,18 +554,37 @@ A blind cross-check was run before STOP C. An independent annotator (GPT-5.5 via
 
 **Detector change, same ground truth.** No annotation, scorer or held-out change (G4): `git diff --stat main...HEAD -- tests/test_corpus/ tests/accuracy/` is empty. The ground truth is the 10.1 one (2,215 main-corpus annotations).
 
-**What changed in the detector:**
-- **ORG role filter (AC3).** An ORG detection whose whole normalized text is a role acronym (CTO, DRH, COMEX, …) or a VP form ("VP", "VP Sales", "VP Europe", …) is dropped. List: `gdpr_pseudonymizer/resources/org_role_filter.yaml`.
-- **Same-type overlap dedup (AC1), with refinements C1 and C2 (Lionel, STOP R, 2026-10-04).** When two detections of the same type overlap, one is kept. Containment keeps the containing span, except in two cases where the inner span wins: C1, the extra words are all lower-case with no digit (e.g. "près de"); C2, the extra text contains a line break. Partial overlap keeps the spaCy span, then the longer one. Ties are broken deterministically. Overlaps between different types are untouched (a place nested in an organisation name stays).
+**What changed in the detector (final version, run C):**
+- **ORG role filter (AC3).** An ORG detection whose whole normalized text is a role acronym (CTO, DRH, COMEX, …) or a VP form ("VP", "VP Sales", "VP Europe", …) is dropped. List: `gdpr_pseudonymizer/resources/org_role_filter.yaml`. When a dropped VP form names a place ("VP Europe"), the place is kept as a LOCATION detection, so it is still pseudonymized.
+- **Same-type overlap dedup (AC1), coverage-preserving.** When two detections of the same type overlap, one span remains:
+  - Containment keeps the containing span, except that the inner span wins when the extra words are all lower-case without digits (C1).
+  - A containing span that runs over a line break is cut at the break when the cut span still contains the other one (C2).
+  - A partial overlap becomes the union of the two spans.
+  - Ties are broken deterministically.
+  - Overlaps between different types are untouched (a place nested in an organisation name stays).
+- Decided by Lionel at STOP R and in the PR #81 review (2026-10-04); rule text in the story.
 
 **Sources (G1):**
 - Before: CI accuracy run `37189862679` (10.1 close-out, reproduced on `main` by `37199452557`).
-- Run A, role filter only: CI accuracy run `37212585445` (commit `01aca6e`).
-- Run B, role filter + dedup (close-out): CI accuracy run `37212993514` (commit `ebf99a8`).
+- **After (close-out): run C `37227245274`** (commit `1550f54`).
+- History: run A `37212585445` (commit `01aca6e`, role filter without place emission); run B `37212993514` (commit `ebf99a8`, role filter + first dedup version: partial overlap kept the spaCy span, C2 kept the inner span). Run B left parts of 4 names uncovered (story 10.2 coverage check); the final version keeps every newly missed name covered by a same-type span.
 
 ### Lines from `accuracy-output.txt`, verbatim
 
-Run A (`37212585445`):
+Run C (`37227245274`, close-out):
+
+```
+[Overall] P=0.7722 R=0.7806 F1=0.7764 TP=1729 FP=510 FN=486 FN%=21.94 FP%=22.78
+[PERSON] P=0.9173 R=0.9601 F1=0.9382 TP=1275 FP=115 FN=53
+[LOCATION] P=0.6572 R=0.7947 F1=0.7194 TP=209 FP=109 FN=54
+[ORG] P=0.4614 R=0.3926 F1=0.4242 TP=245 FP=286 FN=379
+[HELD-OUT Overall] P=0.7523 R=0.6970 F1=0.7236 TP=161 FP=53 FN=70 FN%=30.30 FP%=24.77
+[HELD-OUT PERSON] P=0.8598 R=0.8214 F1=0.8402 TP=92 FP=15 FN=20
+[HELD-OUT LOCATION] P=0.7536 R=0.7647 F1=0.7591 TP=52 FP=17 FN=16
+[HELD-OUT ORG] P=0.4474 R=0.3333 F1=0.3820 TP=17 FP=21 FN=34
+```
+
+History, run A (`37212585445`):
 
 ```
 [Overall] P=0.7024 R=0.7991 F1=0.7476 TP=1770 FP=750 FN=445 FN%=20.09 FP%=29.76
@@ -578,7 +597,7 @@ Run A (`37212585445`):
 [HELD-OUT ORG] P=0.4894 R=0.4510 F1=0.4694 TP=23 FP=24 FN=28
 ```
 
-Run B (`37212993514`):
+History, run B (`37212993514`):
 
 ```
 [Overall] P=0.7745 R=0.7815 F1=0.7780 TP=1731 FP=504 FN=484 FN%=21.85 FP%=22.55
@@ -591,76 +610,73 @@ Run B (`37212993514`):
 [HELD-OUT ORG] P=0.5385 R=0.4118 F1=0.4667 TP=21 FP=18 FN=30
 ```
 
-### Main corpus, before / run A / run B
+### Main corpus, before / after (run C)
 
 | | Precision | Recall | F1 | TP | FP | FN |
 |---|---|---|---|---|---|---|
 | Overall, before | 66.69% | 79.91% | 72.70% | 1,770 | 884 | 445 |
-| Overall, run A | 70.24% | 79.91% | 74.76% | 1,770 | 750 | 445 |
-| **Overall, run B** | **77.45%** | **78.15%** | **77.80%** | 1,731 | 504 | 484 |
+| **Overall, after** | **77.22%** | **78.06%** | **77.64%** | 1,729 | 510 | 486 |
 | PERSON, before | 81.25% | 97.59% | 88.68% | 1,296 | 299 | 32 |
-| **PERSON, run B** | **91.95%** | **96.39%** | **94.12%** | 1,280 | 112 | 48 |
+| **PERSON, after** | **91.73%** | **96.01%** | **93.82%** | 1,275 | 115 | 53 |
 | LOCATION, before | 58.36% | 80.99% | 67.83% | 213 | 152 | 50 |
-| **LOCATION, run B** | **65.27%** | **77.19%** | **70.73%** | 203 | 108 | 60 |
+| **LOCATION, after** | **65.72%** | **79.47%** | **71.94%** | 209 | 109 | 54 |
 | ORG, before | 37.61% | 41.83% | 39.61% | 261 | 433 | 363 |
-| ORG, run A | 46.61% | 41.83% | 44.09% | 261 | 299 | 363 |
-| **ORG, run B** | **46.62%** | **39.74%** | **42.91%** | 248 | 284 | 376 |
+| **ORG, after** | **46.14%** | **39.26%** | **42.42%** | 245 | 286 | 379 |
 
-Run A changes ORG only (PERSON and LOCATION lines are identical to the baseline).
+### FP reduction (AC5)
 
-### FP reduction per rule (AC5)
+| Runs | PERSON ΔTP / ΔFP | LOCATION ΔTP / ΔFP | ORG ΔTP / ΔFP | Overall ΔTP / ΔFP |
+|---|---|---|---|---|
+| Both rules, final: `37189862679` → `37227245274` | −21 / −184 | −4 / −43 | −16 / −147 | −41 / −374 |
+| History, role filter without place emission: `37189862679` → `37212585445` | 0 / 0 | 0 / 0 | 0 / −134 | 0 / −134 |
+| History, first dedup version: `37212585445` → `37212993514` | −16 / −187 | −10 / −44 | −13 / −15 | −39 / −246 |
 
-The split is order-dependent: the dedup is measured after the role filter, as in the pipeline.
-
-| Rule | Runs | PERSON ΔTP / ΔFP | LOCATION ΔTP / ΔFP | ORG ΔTP / ΔFP | Overall ΔTP / ΔFP |
-|---|---|---|---|---|---|
-| Role filter | `37189862679` → `37212585445` | 0 / 0 | 0 / 0 | 0 / −134 | 0 / −134 |
-| Dedup (C1 + C2) | `37212585445` → `37212993514` | −16 / −187 | −10 / −44 | −13 / −15 | −39 / −246 |
-| Both | `37189862679` → `37212993514` | −16 / −187 | −10 / −44 | −13 / −149 | −39 / −380 |
+There is no CI run of the final role filter alone. The two final rules are only measured together, in run C.
 
 ### Recall (G3)
 
-The role filter changes no recall. The dedup lowers recall: FN +16 PERSON, +10 LOCATION, +13 ORG (overall 445 → 484). Lionel accepted a recall loss up to exactly these per-type amounts at STOP R (2026-10-04, recorded in the story). Run B is at that bound in every type, not above it.
+- FN versus `37189862679`: PERSON +21, LOCATION +4, ORG +16 (overall 445 → 486).
+- Lionel accepted these bounds on 2026-10-04 for the coverage-preserving version (recorded in the story); run C is exactly at them.
+- Most lost TPs are boundary losses: a span of the same type still covers the name, so it is still pseudonymized, with a different boundary.
 
-**Overlap-dropped TPs (AC5):** local instrumented dump, reproduces run B TP/FP/FN exactly (`scripts/accuracy_dump_detections.py --record-dedup`, commit `ebf99a8`). The dedup dropped 285 detections (PERSON 203, LOCATION 54, ORG 28). Of these, 51 were TPs in the baseline dump scored with `match_entities`, matched on (text, type, start, end): PERSON 28, LOCATION 10, ORG 13. Net FN delta baseline → run B, from the CI lines: PERSON +16, LOCATION +10, ORG +13. The dropped-TP count exceeds the net delta because the scorer matches by text: another detection can take over a dropped TP's annotation.
-
-Most of the lost TPs are boundary losses: a longer span of the same type still covers the name, so it is still pseudonymized in the output, with a wrong boundary. The story's coverage check lists the few cases where part of a name is no longer covered, and the "Europe" in "VP Europe" job titles that the role filter leaves in clear (story 10.2, Dev Notes "Re-measured Sizes").
+**Overlap-dropped TPs (AC5).** Source: local instrumented dump, which reproduces run C TP/FP/FN exactly (`scripts/accuracy_dump_detections.py --record-dedup`, commit `1550f54`).
+- The dedup removed or replaced 340 input detections (PERSON 245, LOCATION 59, ORG 36). The count includes inputs replaced by a union or a trimmed span.
+- 91 of them were TPs in the baseline dump scored with `match_entities`, matched on (text, type, start, end): PERSON 61, LOCATION 14, ORG 16. A trimmed span often carries the same name as the input it replaces.
+- The net FN delta from the CI lines is +21 / +4 / +16.
 
 ### Held-out set (G5)
 
-Aggregates only.
-
-Run A (`37212585445`):
+Aggregates only. Run C (`37227245274`):
 
 ```
-[HELD-OUT Overall] P=0.5839 R=0.7229 F1=0.6460 TP=167 FP=119 FN=64 FN%=27.71 FP%=41.61
-[HELD-OUT PERSON] P=0.5987 R=0.8125 F1=0.6894 TP=91 FP=61 FN=21
-[HELD-OUT LOCATION] P=0.6092 R=0.7794 F1=0.6839 TP=53 FP=34 FN=15
-[HELD-OUT ORG] P=0.4894 R=0.4510 F1=0.4694 TP=23 FP=24 FN=28
-```
-
-Run B (`37212993514`):
-
-```
-[HELD-OUT Overall] P=0.7535 R=0.7013 F1=0.7265 TP=162 FP=53 FN=69 FN%=29.87 FP%=24.65
-[HELD-OUT PERSON] P=0.8318 R=0.7946 F1=0.8128 TP=89 FP=18 FN=23
+[HELD-OUT Overall] P=0.7523 R=0.6970 F1=0.7236 TP=161 FP=53 FN=70 FN%=30.30 FP%=24.77
+[HELD-OUT PERSON] P=0.8598 R=0.8214 F1=0.8402 TP=92 FP=15 FN=20
 [HELD-OUT LOCATION] P=0.7536 R=0.7647 F1=0.7591 TP=52 FP=17 FN=16
-[HELD-OUT ORG] P=0.5385 R=0.4118 F1=0.4667 TP=21 FP=18 FN=30
+[HELD-OUT ORG] P=0.4474 R=0.3333 F1=0.3820 TP=17 FP=21 FN=34
 ```
 
-- Held-out precision rose sharply (Overall P 53.53% → 75.35%, F1 61.51% → 72.65%).
-- **Held-out recall fell in run B**: Overall 72.29% → 70.13% (FN 64 → 69); PERSON 81.25% → 79.46% (FN 21 → 23), LOCATION 77.94% → 76.47% (FN 15 → 16), ORG 45.10% → 41.18% (FN 28 → 30). Run A had no held-out recall change.
-- Small-sample note: held-out ORG has 51 annotations, so 1 ORG FN ≈ 2 points of ORG recall (PERSON 112, LOCATION 68).
-- Under the story, a held-out recall drop blocks the merge until Lionel's decision is recorded.
+Versus the 10.1 baseline (`37189862679`):
+- **Overall:** P 53.53% → 75.23%, R 72.29% → 69.70%, F1 61.51% → 72.36%, FN 64 → 70.
+- **PERSON:** R 81.25% → 82.14% (FN 21 → 20), F1 68.94% → 84.02%.
+- **LOCATION:** R 77.94% → 76.47% (FN 15 → 16), F1 68.39% → 75.91%.
+- **ORG:** R 45.10% → 33.33% (FN 28 → 34), P 31.51% → 44.74%, F1 37.10% → 38.20%.
 
-### Performance (NFR1)
+**Held-out recall drop.** Overall and ORG recall drop on the held-out set (ORG the most, while main-corpus ORG recall drops 2.6 points). Small-sample note: held-out ORG has 51 annotations, so 1 ORG FN ≈ 2 points of ORG recall (PERSON 112, LOCATION 68). Under the story, this blocks the merge until Lionel's decision is recorded.
 
-- Performance workflow run `37213019377` on `ebf99a8`: success.
-- That workflow currently runs no test. Its pytest step aborts at plugin load ("pytest-qt requires either PySide6, PyQt5 or PyQt6 installed"), and the `| tee` hides the exit code. The `main` reference run `36635484755` has the same defect.
-- Informational local single-document benchmark (Windows, 34 rounds; NFR1 threshold 30 s), `d4b7105` detector → `ebf99a8`:
-  - 2k words 0.388 s → 0.409 s;
-  - 3.5k words 0.678 s → 0.666 s;
-  - 5k words 0.973 s → 0.961 s.
+### Performance (NFR1): local benchmark, CI perf job vacuous (separate fix PR)
+
+- Performance workflow run `37213019377` (on `ebf99a8`) is green but ran no test. Its pytest steps abort at plugin load ("pytest-qt requires either PySide6, PyQt5 or PyQt6 installed"), and `| tee` hides the exit code. The `main` reference run `36635484755` has the same defect. A separate PR fixes the workflow.
+- Informational local single-document benchmark (Windows, `--benchmark-only`, 34 rounds; NFR1 threshold 30 s), mean per document:
+
+| Code | 2k words | 3.5k words | 5k words |
+|---|---|---|---|
+| `d4b7105` detector, quiet machine | 0.388 s | 0.678 s | 0.973 s |
+| `ebf99a8` (run B code), quiet machine | 0.409 s | 0.666 s | 0.961 s |
+| `d4b7105` detector, loaded machine | 0.634 s | 0.932 s | 1.498 s |
+| `1550f54` (run C code), loaded machine, run 1 | 0.567 s | 1.013 s | 1.511 s |
+| `1550f54` (run C code), loaded machine, run 2 | 0.666 s | 1.568 s | 1.518 s |
+
+  The last three rows were measured back to back. Variance comes from machine load, not the detector; every mean is far below 30 s.
 
 ### Notes
 

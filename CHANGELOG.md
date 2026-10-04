@@ -12,20 +12,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - **Fewer false candidates in validation: one candidate per name, and no job titles offered as organisations (Story 10.2).**
-  - **One candidate per place.** When two detections of the same type overlap, only one is offered. For example, "Jean-Luc" and "Jean-Luc Martin" at the same place now give only "Jean-Luc Martin". The containing span is kept, except in two cases where the shorter one is kept: the extra words are all lower-case with no digit ("près de Lyon" → "Lyon"), or the longer span runs over a line break (a name plus the next line's heading). Overlaps between different types are unchanged: a place inside an organisation name is still offered.
-  - **Job titles are not organisations.** Role acronyms (CTO, CFO, DRH, DPO, RSSI, COMEX, …) and VP titles ("VP", "VP Sales", "VP Europe") are no longer offered as ORG. The list is in `gdpr_pseudonymizer/resources/org_role_filter.yaml`. Real organisations with acronym names (CNIL, ANSSI, BNP, EY) are not affected.
-  - **Numbers.** CI accuracy run `37212993514` vs `37189862679`, same ground truth:
-    - precision 66.69% → 77.45%, recall 79.91% → 78.15%, F1 72.70% → 77.80%;
-    - false positives 884 → 504;
-    - PERSON F1 88.68% → 94.12%, LOCATION 67.83% → 70.73%, ORG 39.61% → 42.91%.
-  - **Recall trade-off.** Recall drops slightly in every type: FN +16 PERSON, +10 LOCATION, +13 ORG. Most of these are boundary changes, where a longer span still covers the name. This trade-off was approved for this release.
-  - **Held-out set** (same run): F1 61.51% → 72.65%, with recall 72.29% → 70.13%.
+  - **One candidate per place.** When two detections of the same type overlap, one span is offered instead of fragments. For example, "Jean-Luc" and "Jean-Luc Martin" at the same place now give only "Jean-Luc Martin".
+    - The containing span is kept, except when the extra words are all lower-case without digits ("près de Lyon" → "Lyon").
+    - A span that runs over a line break (a name plus the next line's heading) is cut at the break.
+    - Two spans that partly overlap become one span covering both, so no part of a name is left unreplaced.
+    - Overlaps between different types are unchanged: a place inside an organisation name is still offered.
+  - **Job titles are not organisations.** Role acronyms (CTO, CFO, DRH, DPO, RSSI, COMEX, …) and VP titles ("VP", "VP Sales", "VP Europe") are no longer offered as ORG.
+    - The list is in `gdpr_pseudonymizer/resources/org_role_filter.yaml`. Real organisations with acronym names (CNIL, ANSSI, BNP, EY) are not affected.
+    - The place in a VP title is still offered, as a location ("VP Europe" → "Europe").
+  - **Numbers.** CI accuracy run `37227245274` vs `37189862679`, same ground truth:
+    - precision 66.69% → 77.22%, recall 79.91% → 78.06%, F1 72.70% → 77.64%;
+    - false positives 884 → 510;
+    - PERSON F1 88.68% → 93.82%, LOCATION 67.83% → 71.94%, ORG 39.61% → 42.42%.
+  - **Recall trade-off.** Recall drops slightly in every type: FN +21 PERSON, +4 LOCATION, +16 ORG. These are boundary changes: the name is still covered by a span of the same type. This trade-off was approved for this release.
+  - **Held-out set** (same run): F1 61.51% → 72.36%, with recall 72.29% → 69.70%.
   - **Upgrading: pseudonym continuity.** The mapping schema is unchanged.
     - Existing mapping databases keep working: rows created by v2.2 are still found by exact key, so an entity already mapped keeps its pseudonym.
     - Fragments are no longer offered. v2.2 could show both "Jean-Luc" and "Jean-Luc Martin" at the same place, and accepting both created two mapping rows, although the output only used the longer one. Now only one is offered there, so no row is created for the fragment.
     - New databases can differ from old ones for short forms. In a project started with this version, a later standalone "Jean-Luc" no longer finds a row created from an overlapping fragment. It is resolved by component matching or gets a new pseudonym. A document processed with v2.2 and re-processed with a fresh database can therefore show a different pseudonym for such short forms.
-    - Partial overlaps can resolve to a different span. When two same-type spans partly overlap, v2.2's output kept the earlier-starting one; this version keeps the spaCy one, or the longer one from the same source. Characters of the dropped span that the kept span does not cover stay unreplaced, as before, but which characters those are can differ. Check such spots during validation.
-    - Role words are no longer pseudonymized as organisations. "CTO", "DRH", "VP Europe" and the like now appear unchanged in the output (they are job titles, not personal data). Rows a v2.2 database holds for them stay, but are no longer applied.
+    - Partial overlaps now resolve to one span covering both. In v2.2 the output kept the earlier-starting span and left the rest of the other unreplaced; now the whole covered text is replaced as one entity. The mapping key is the combined text, so it differs from the v2.2 key. Check such spots during validation.
+    - Role words are no longer pseudonymized as organisations. "CTO", "DRH" and the like now appear unchanged in the output (they are job titles, not personal data); the place in "VP Europe" is still pseudonymized as a location. Rows a v2.2 database holds for role words stay, but are no longer applied.
     - Recommendation: keep using the same mapping database across versions for consistent pseudonyms. Re-process with v2.2 if byte-identical output with an old run is required.
 
 ### Fixed
