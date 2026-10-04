@@ -70,6 +70,76 @@ def test_every_text_has_annotations_and_vice_versa(set_name: str) -> None:
     )
 
 
+def annotation_errors(text: str, data: object, where: str) -> list[str]:
+    """Return integrity errors for one annotation file (empty list = valid).
+
+    Messages carry the location (set/stem, entry index, offsets) only, never
+    entity text.
+    """
+    errors: list[str] = []
+    if not isinstance(data, dict) or set(data) != {"document_name", "entities"}:
+        return [f"{where}: top-level keys"]
+    if data["document_name"] != f"{where.split('/')[-1]}.txt":
+        errors.append(f"{where}: document_name")
+    entities = data["entities"]
+    if not isinstance(entities, list):
+        return errors + [f"{where}: entities is not a list"]
+
+    seen: set[tuple[str, str, int, int]] = set()
+    valid: list[dict[str, object]] = []
+    for i, e in enumerate(entities):
+        at = f"{where} entry {i}"
+        if not isinstance(e, dict) or set(e) != ENTITY_KEYS:
+            errors.append(f"{at}: keys")
+            continue
+        start, end, etype = e["start_pos"], e["end_pos"], e["entity_type"]
+        span = f"{at} [{start}:{end}]"
+        if etype not in ENTITY_TYPES:
+            errors.append(f"{span}: unknown entity_type")
+        if not (isinstance(start, int) and isinstance(end, int)):
+            errors.append(f"{span}: offsets")
+            continue
+        if not 0 <= start < end <= len(text):
+            errors.append(f"{span}: offsets out of range")
+            continue
+        if text[start:end] != e["entity_text"]:
+            errors.append(f"{span}: text/offset mismatch")
+        if e["entity_text"] != str(e["entity_text"]).strip():
+            errors.append(f"{span}: leading or trailing whitespace")
+        key = (str(e["entity_text"]), str(etype), start, end)
+        if key in seen:
+            errors.append(f"{span}: exact duplicate")
+        seen.add(key)
+        valid.append(e)
+
+    # Overlaps: same type never (G5); cross type only LOCATION inside ORG (G7).
+    for i, a in enumerate(valid):
+        for b in valid[i + 1 :]:
+            a_start, a_end = int(str(a["start_pos"])), int(str(a["end_pos"]))
+            b_start, b_end = int(str(b["start_pos"])), int(str(b["end_pos"]))
+            if not (a_start < b_end and b_start < a_end):
+                continue
+            pair = (
+                f"{where} [{a_start}:{a_end}] {a['entity_type']} / "
+                f"[{b_start}:{b_end}] {b['entity_type']}"
+            )
+            if a["entity_type"] == b["entity_type"]:
+                errors.append(f"{pair}: same-type overlap")
+                continue
+            org, loc = (a, b) if a["entity_type"] == "ORG" else (b, a)
+            nested = (
+                org["entity_type"] == "ORG"
+                and loc["entity_type"] == "LOCATION"
+                and int(str(org["start_pos"])) <= int(str(loc["start_pos"]))
+                and int(str(loc["end_pos"])) <= int(str(org["end_pos"]))
+            )
+            if not nested:
+                errors.append(
+                    f"{pair}: cross-type overlap other than LOCATION inside ORG"
+                )
+    return errors
+
+
 @pytest.mark.parametrize(
     ("set_name", "ann_path"),
     ANNOTATION_FILES,
@@ -78,48 +148,67 @@ def test_every_text_has_annotations_and_vice_versa(set_name: str) -> None:
 def test_annotation_file_integrity(set_name: str, ann_path: Path) -> None:
     text_dirs, _ = ANNOTATION_SETS[set_name]
     stem = ann_path.stem
-    text_path = _text_paths(text_dirs)[stem]
-    text = text_path.read_text(encoding="utf-8")  # LF-normalized, as the scorer
+    text = _text_paths(text_dirs)[stem].read_text(encoding="utf-8")  # LF-normalized
     data = json.loads(ann_path.read_text(encoding="utf-8"))
-    where = f"{set_name}/{stem}"
+    errors = annotation_errors(text, data, f"{set_name}/{stem}")
+    assert not errors, "; ".join(errors)
 
-    assert set(data) == {"document_name", "entities"}, f"{where}: top-level keys"
-    assert data["document_name"] == f"{stem}.txt", f"{where}: document_name"
-    entities = data["entities"]
-    assert isinstance(entities, list), f"{where}: entities is not a list"
 
-    seen: set[tuple[str, str, int, int]] = set()
-    for i, e in enumerate(entities):
-        at = f"{where} entry {i}"
-        assert set(e) == ENTITY_KEYS, f"{at}: keys"
-        start, end, etype = e["start_pos"], e["end_pos"], e["entity_type"]
-        span = f"{at} [{start}:{end}]"
-        assert etype in ENTITY_TYPES, f"{span}: unknown entity_type"
-        assert isinstance(start, int) and isinstance(end, int), f"{span}: offsets"
-        assert 0 <= start < end <= len(text), f"{span}: offsets out of range"
-        assert text[start:end] == e["entity_text"], f"{span}: text/offset mismatch"
-        assert (
-            e["entity_text"] == e["entity_text"].strip()
-        ), f"{span}: leading or trailing whitespace"
-        key = (e["entity_text"], etype, start, end)
-        assert key not in seen, f"{span}: exact duplicate"
-        seen.add(key)
+# ---------------------------------------------------------------------------
+# Negative self-tests (QA TEST-002): the checker fires on bad input.
+# Synthetic text only; no corpus or held-out strings.
+# ---------------------------------------------------------------------------
 
-    # Overlaps: same type never (G5); cross type only LOCATION inside ORG (G7).
-    for i, a in enumerate(entities):
-        for j in range(i + 1, len(entities)):
-            b = entities[j]
-            if not (a["start_pos"] < b["end_pos"] and b["start_pos"] < a["end_pos"]):
-                continue
-            pair = (
-                f"{where} [{a['start_pos']}:{a['end_pos']}] {a['entity_type']} / "
-                f"[{b['start_pos']}:{b['end_pos']}] {b['entity_type']}"
-            )
-            assert a["entity_type"] != b["entity_type"], f"{pair}: same-type overlap"
-            org, loc = (a, b) if a["entity_type"] == "ORG" else (b, a)
-            assert (
-                org["entity_type"] == "ORG"
-                and loc["entity_type"] == "LOCATION"
-                and org["start_pos"] <= loc["start_pos"]
-                and loc["end_pos"] <= org["end_pos"]
-            ), f"{pair}: cross-type overlap other than LOCATION inside ORG"
+_SYNTH_TEXT = "Zorvik Quandel travaille chez Plimtex Varnoz depuis longtemps."
+
+
+def _ent(text: str, etype: str, start: int) -> dict[str, object]:
+    return {
+        "entity_text": _SYNTH_TEXT[start : start + len(text)],
+        "entity_type": etype,
+        "start_pos": start,
+        "end_pos": start + len(text),
+    }
+
+
+def _doc(*entities: dict[str, object]) -> dict[str, object]:
+    return {"document_name": "synthetic.txt", "entities": list(entities)}
+
+
+def test_checker_accepts_valid_synthetic_document() -> None:
+    org = _ent("Plimtex Varnoz", "ORG", 30)
+    nested_loc = _ent("Varnoz", "LOCATION", 38)
+    person = _ent("Zorvik Quandel", "PERSON", 0)
+    assert (
+        annotation_errors(_SYNTH_TEXT, _doc(person, org, nested_loc), "t/synthetic")
+        == []
+    )
+
+
+def test_checker_rejects_same_type_overlap() -> None:
+    a = _ent("Zorvik Quandel", "PERSON", 0)
+    b = _ent("Quandel", "PERSON", 7)
+    errors = annotation_errors(_SYNTH_TEXT, _doc(a, b), "t/synthetic")
+    assert any("same-type overlap" in e for e in errors)
+
+
+def test_checker_rejects_cross_type_overlap_other_than_location_in_org() -> None:
+    org = _ent("Plimtex Varnoz", "ORG", 30)
+    person_inside_org = _ent("Plimtex", "PERSON", 30)
+    errors = annotation_errors(_SYNTH_TEXT, _doc(org, person_inside_org), "t/synthetic")
+    assert any("cross-type overlap" in e for e in errors)
+
+
+def test_checker_rejects_location_straddling_org_boundary() -> None:
+    org = _ent("Plimtex", "ORG", 30)
+    loc = _ent("tex Varnoz", "LOCATION", 34)
+    errors = annotation_errors(_SYNTH_TEXT, _doc(org, loc), "t/synthetic")
+    assert any("cross-type overlap" in e for e in errors)
+
+
+def test_checker_rejects_offset_mismatch_and_padding() -> None:
+    bad_offsets = {**_ent("Zorvik", "PERSON", 0), "entity_text": "Quandel"}
+    padded = _ent("Plimtex ", "ORG", 30)
+    errors = annotation_errors(_SYNTH_TEXT, _doc(bad_offsets, padded), "t/synthetic")
+    assert any("text/offset mismatch" in e for e in errors)
+    assert any("whitespace" in e for e in errors)
