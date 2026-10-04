@@ -10,6 +10,7 @@ Implements EntityDetector interface using a hybrid approach:
 
 from __future__ import annotations
 
+import dataclasses
 import functools
 import json
 import re
@@ -47,16 +48,25 @@ class OrgRoleFilter:
     region_phrases: tuple[tuple[str, ...], ...]
 
 
-def _role_tokens(text: str) -> list[str]:
-    """Split a VP-form remainder into tokens.
+_ROLE_TOKEN_RE = re.compile(r"/|(?i:d')|[^\s/]+")
+
+# Connectors that join two place words into one place ("Europe du Nord")
+_PLACE_JOINERS = frozenset({"de", "du", "des", "d'"})
+
+
+def _role_token_spans(text: str) -> list[tuple[str, int, int]]:
+    """Split a VP-form remainder into (token, start, end).
 
     Whitespace tokens, with "/" and the elision "d'" split off. "&" is a
     connector only as a standalone token ("Sales & Marketing"); inside a word
     ("R&D") it stays part of the word.
     """
-    text = text.replace("/", " / ")
-    text = re.sub(r"(?i)\b(d')", r"\1 ", text)
-    return text.split()
+    return [(m.group(), m.start(), m.end()) for m in _ROLE_TOKEN_RE.finditer(text)]
+
+
+def _role_tokens(text: str) -> list[str]:
+    """Tokens of a VP-form remainder (see ``_role_token_spans``)."""
+    return [t for t, _, _ in _role_token_spans(text)]
 
 
 def _load_geography_region_words() -> list[str]:
@@ -104,6 +114,55 @@ def _vp_remainder(text: str, prefixes: tuple[str, ...]) -> str | None:
     return None
 
 
+def _match_org_role_places(text: str) -> tuple[str | None, list[str]]:
+    """Classify an ORG text as a role and return the place phrases it names.
+
+    Returns:
+        (reason, places): reason is "role_acronym", "vp_form" or None; places
+        are the place phrases of a VP form, as they appear in the normalized
+        text (e.g. ["Europe"] for "VP Europe", [] for "VP Engineering").
+        Consecutive place words joined only by de/du/des/d' form one place
+        ("Europe du Nord"); "et", "&" and "/" separate places.
+    """
+    role_filter = load_org_role_filter()
+    normalized = " ".join(strip_french_titles(text).split())
+    if normalized in role_filter.acronyms:
+        return "role_acronym", []
+    rest = _vp_remainder(normalized, role_filter.vp_prefixes)
+    if rest is None:
+        return None, []
+    if rest == "":
+        return "vp_form", []
+    spans = _role_token_spans(rest)
+    tokens = [t.casefold() for t, _, _ in spans]
+    i = 0
+    has_content = False
+    places: list[list[int]] = []  # [start_token, end_token) per place
+    while i < len(tokens):
+        for phrase in role_filter.region_phrases:
+            if tuple(tokens[i : i + len(phrase)]) == phrase:
+                has_content = True
+                if places and all(
+                    tokens[k] in _PLACE_JOINERS for k in range(places[-1][1], i)
+                ):
+                    places[-1][1] = i + len(phrase)
+                else:
+                    places.append([i, i + len(phrase)])
+                i += len(phrase)
+                break
+        else:
+            if tokens[i] in role_filter.functions:
+                has_content = True
+                places.append([i, i])  # a function word ends the current place
+            elif tokens[i] not in role_filter.connectors:
+                return None, []
+            i += 1
+    if not has_content:
+        return None, []
+    phrases = [rest[spans[a][1] : spans[b - 1][2]] for a, b in places if b > a]
+    return "vp_form", phrases
+
+
 def match_org_role(text: str) -> str | None:
     """Classify an ORG text as a role (Story 10.2, AC3).
 
@@ -115,31 +174,7 @@ def match_org_role(text: str) -> str | None:
     Returns:
         "role_acronym", "vp_form", or None when the text is not a role
     """
-    role_filter = load_org_role_filter()
-    normalized = " ".join(strip_french_titles(text).split())
-    if normalized in role_filter.acronyms:
-        return "role_acronym"
-    rest = _vp_remainder(normalized, role_filter.vp_prefixes)
-    if rest is None:
-        return None
-    if rest == "":
-        return "vp_form"
-    tokens = [t.casefold() for t in _role_tokens(rest)]
-    i = 0
-    has_content = False
-    while i < len(tokens):
-        for phrase in role_filter.region_phrases:
-            if tuple(tokens[i : i + len(phrase)]) == phrase:
-                has_content = True
-                i += len(phrase)
-                break
-        else:
-            if tokens[i] in role_filter.functions:
-                has_content = True
-            elif tokens[i] not in role_filter.connectors:
-                return None
-            i += 1
-    return "vp_form" if has_content else None
+    return _match_org_role_places(text)[0]
 
 
 class HybridDetector(EntityDetector):
@@ -246,7 +281,7 @@ class HybridDetector(EntityDetector):
         logger.debug("regex_detection_complete", entities_found=len(regex_entities))
 
         # Step 3: Merge with deduplication
-        merged_entities = self._merge_entities(spacy_entities, regex_entities)
+        merged_entities = self._merge_entities(spacy_entities, regex_entities, text)
 
         logger.info(
             "hybrid_detection_complete",
@@ -261,6 +296,7 @@ class HybridDetector(EntityDetector):
         self,
         spacy_entities: list[DetectedEntity],
         regex_entities: list[DetectedEntity],
+        text: str | None = None,
     ) -> list[DetectedEntity]:
         """Merge spaCy and regex entities with deduplication logic.
 
@@ -279,6 +315,9 @@ class HybridDetector(EntityDetector):
         Args:
             spacy_entities: Entities detected by spaCy
             regex_entities: Entities detected by regex patterns
+            text: Document text, used to slice spans built by the post-filters
+                (union, trimmed and place spans). When None, the entity texts
+                are used and are assumed to be raw slices of the document.
 
         Returns:
             Merged and deduplicated list of entities, sorted by position
@@ -348,10 +387,10 @@ class HybridDetector(EntityDetector):
         merged = self._filter_label_words(merged)
 
         # Filter out job titles / role acronyms detected as ORG (Story 10.2 AC3)
-        merged = self._filter_org_roles(merged)
+        merged = self._filter_org_roles(merged, text)
 
         # Keep one entity per same-type overlap (Story 10.2 AC1)
-        merged = self._dedup_same_type_overlaps(merged)
+        merged = self._dedup_same_type_overlaps(merged, text)
 
         # Sort by start position
         merged.sort(key=lambda e: e.start_pos)
@@ -548,33 +587,71 @@ class HybridDetector(EntityDetector):
 
         return filtered
 
-    def _filter_org_roles(self, entities: list[DetectedEntity]) -> list[DetectedEntity]:
+    def _filter_org_roles(
+        self, entities: list[DetectedEntity], text: str | None = None
+    ) -> list[DetectedEntity]:
         """Drop ORG detections whose whole normalized text is a job title.
 
         Role acronyms ("CTO", "DRH", "COMEX") and VP forms ("VP", "VP Sales",
         "VP Europe") are roles, not organisations (Story 10.2, AC3). The list
         lives in ``resources/org_role_filter.yaml``. ORG only, any source.
+        When a dropped VP form names a place ("VP Europe"), the place part is
+        kept as a LOCATION detection (Lionel, PR #81 review), so the place is
+        still pseudonymized. Places come from the role list's region words and
+        the geography resource only.
 
         Args:
             entities: List of detected entities
+            text: Document text (see ``_merge_entities``)
 
         Returns:
-            Filtered list with role ORG detections removed
+            Filtered list with role ORG detections removed and place spans added
         """
         filtered = []
         for entity in entities:
             if entity.entity_type == "ORG":
-                reason = match_org_role(entity.text)
+                reason, places = _match_org_role_places(entity.text)
                 if reason is not None:
+                    emitted = self._place_entities(entity, places, text)
+                    filtered.extend(emitted)
                     logger.debug(
                         "org_role_filtered",
                         entity_type=entity.entity_type,
                         source=entity.source,
                         reason=reason,
+                        places_emitted=len(emitted),
                     )
                     continue
             filtered.append(entity)
         return filtered
+
+    @staticmethod
+    def _place_entities(
+        entity: DetectedEntity, places: list[str], text: str | None
+    ) -> list[DetectedEntity]:
+        """LOCATION detections for the place phrases of a dropped VP form."""
+        raw = entity.text
+        if text is not None and entity.end_pos <= len(text):
+            raw = text[entity.start_pos : entity.end_pos]
+        result: list[DetectedEntity] = []
+        cursor = 0
+        for phrase in places:
+            pattern = r"\s+".join(re.escape(tok) for tok in phrase.split())
+            match = re.compile(pattern).search(raw, cursor)
+            if match is None:
+                continue
+            cursor = match.end()
+            result.append(
+                DetectedEntity(
+                    text=match.group(),
+                    entity_type="LOCATION",
+                    start_pos=entity.start_pos + match.start(),
+                    end_pos=entity.start_pos + match.end(),
+                    confidence=entity.confidence,
+                    source=entity.source,
+                )
+            )
+        return result
 
     # ------------------------------------------------------------------
     # Same-type overlap dedup (Story 10.2, AC1/AC2)
@@ -613,14 +690,61 @@ class HybridDetector(EntityDetector):
         right = outer.text[ic[1] - off : oc[1] - off]
         return left + " " + right if left and right else left + right
 
+    @staticmethod
+    def _slice(entity: DetectedEntity, text: str | None) -> str:
+        """Raw text of an entity's span: from the document when available."""
+        if text is not None and entity.end_pos <= len(text):
+            return text[entity.start_pos : entity.end_pos]
+        return entity.text
+
+    @classmethod
+    def _union(
+        cls, a: DetectedEntity, b: DetectedEntity, text: str | None
+    ) -> DetectedEntity:
+        """One span covering both a and b (source "merged")."""
+        start, end = min(a.start_pos, b.start_pos), max(a.end_pos, b.end_pos)
+        if text is not None and end <= len(text):
+            union_text = text[start:end]
+        else:
+            left, right = (a, b) if a.start_pos <= b.start_pos else (b, a)
+            union_text = left.text
+            if right.end_pos > left.end_pos:
+                union_text += right.text[left.end_pos - right.start_pos :]
+        base = a if a.source == "spacy" or b.source != "spacy" else b
+        return dataclasses.replace(
+            base,
+            text=union_text,
+            start_pos=start,
+            end_pos=end,
+            source="merged",
+            is_ambiguous=False,
+        )
+
+    @classmethod
+    def _trim_at_line_break(
+        cls, entity: DetectedEntity, text: str | None
+    ) -> DetectedEntity | None:
+        """The entity cut at its first line break, or None if it has none."""
+        raw = cls._slice(entity, text)
+        cut = raw.find("\n")
+        if cut < 0:
+            return None
+        kept = raw[:cut].rstrip()
+        if not kept:
+            return None
+        return dataclasses.replace(
+            entity, text=kept, end_pos=entity.start_pos + len(kept)
+        )
+
     @classmethod
     def _resolve_same_type_pair(
-        cls, a: DetectedEntity, b: DetectedEntity
+        cls, a: DetectedEntity, b: DetectedEntity, text: str | None = None
     ) -> tuple[DetectedEntity | None, str]:
         """Pairwise decision for two same-type entities with overlapping spans.
 
-        ``a`` precedes ``b`` in walk order. Returns (winner, reason); winner
-        is None when both are kept (cores disjoint).
+        ``a`` precedes ``b`` in walk order. Returns (result, reason): result is
+        a, b, a new entity replacing both (union or trimmed span), or None when
+        both are kept (cores disjoint).
         """
         ca, cb = cls._dedup_core(a), cls._dedup_core(b)
         equal = ca == cb or cls._dedup_key(a) == cls._dedup_key(b)
@@ -639,14 +763,13 @@ class HybridDetector(EntityDetector):
                 ):
                     return inner, "containment_inner_preferred"
                 if "\n" in added:
-                    return inner, "containment_inner_preferred_linebreak"
+                    trimmed = cls._trim_at_line_break(outer, text)
+                    if trimmed is not None:
+                        tc, ic = cls._dedup_core(trimmed), cls._dedup_core(inner)
+                        if tc[0] <= ic[0] and ic[1] <= tc[1]:
+                            return trimmed, "containment_outer_trimmed_linebreak"
                 return outer, "containment"
-            if a.source != b.source:
-                winner = a if a.source == "spacy" else b
-                return winner, "partial_overlap_spacy_preferred"
-            len_a, len_b = ca[1] - ca[0], cb[1] - cb[0]
-            if len_a != len_b:
-                return (a if len_a > len_b else b), "partial_overlap_longer"
+            return cls._union(a, b, text), "partial_overlap_union"
         # Tie: spaCy first, longer raw span, earlier start, earlier in walk
         if a.source != b.source:
             return (a if a.source == "spacy" else b), "tie"
@@ -658,18 +781,21 @@ class HybridDetector(EntityDetector):
         return a, "tie"
 
     def _dedup_same_type_overlaps(
-        self, entities: list[DetectedEntity]
+        self, entities: list[DetectedEntity], text: str | None = None
     ) -> list[DetectedEntity]:
         """Keep one entity per same-type overlap (Story 10.2, AC1).
 
         Walks entities by (start, -end, spaCy first). A new entity that loses
-        to any kept same-type rival it conflicts with is dropped; otherwise
-        every conflicting kept rival is dropped and the new entity is kept.
-        Cross-type pairs are never compared (a LOCATION nested in an ORG is
-        legitimate, GUIDELINES G7).
+        to any kept same-type rival it conflicts with is dropped. When a pair
+        resolves to a new span (union of a partial overlap, or an outer span
+        trimmed at a line break), that span replaces both and is compared
+        again with the kept entities. Otherwise every conflicting kept rival
+        is dropped and the new entity is kept. Cross-type pairs are never
+        compared (a LOCATION nested in an ORG is legitimate, GUIDELINES G7).
 
         Args:
             entities: Merged, filtered entity list
+            text: Document text (see ``_merge_entities``)
 
         Returns:
             Entity list without same-type overlaps (order not guaranteed)
@@ -679,29 +805,44 @@ class HybridDetector(EntityDetector):
         )
         kept: list[DetectedEntity] = []
         for entity in ordered:
-            rivals: list[tuple[DetectedEntity, DetectedEntity, str]] = []
-            lost = False
-            for other in kept:
-                if (
-                    other.entity_type != entity.entity_type
-                    or other.end_pos <= entity.start_pos
-                    or entity.end_pos <= other.start_pos
-                ):
-                    continue
-                winner, reason = self._resolve_same_type_pair(other, entity)
-                if winner is None:
-                    continue
-                if winner is other:
-                    self._log_dedup(other, entity, reason)
-                    lost = True
+            current: DetectedEntity | None = entity
+            while current is not None:
+                rivals: list[tuple[DetectedEntity, str]] = []
+                replaced: tuple[DetectedEntity, DetectedEntity, str] | None = None
+                lost: tuple[DetectedEntity, str] | None = None
+                for other in kept:
+                    if (
+                        other.entity_type != current.entity_type
+                        or other.end_pos <= current.start_pos
+                        or current.end_pos <= other.start_pos
+                    ):
+                        continue
+                    result, reason = self._resolve_same_type_pair(other, current, text)
+                    if result is None:
+                        continue
+                    if result is other:
+                        lost = (other, reason)
+                        break
+                    if result is current:
+                        rivals.append((other, reason))
+                        continue
+                    replaced = (other, result, reason)
                     break
-                rivals.append((entity, other, reason))
-            if lost:
-                continue
-            for winner, loser, reason in rivals:
-                kept.remove(loser)
-                self._log_dedup(winner, loser, reason)
-            kept.append(entity)
+                if lost is not None:
+                    self._log_dedup(lost[0], current, lost[1])
+                    current = None
+                elif replaced is not None:
+                    other, result, reason = replaced
+                    kept.remove(other)
+                    self._log_dedup(result, other, reason)
+                    self._log_dedup(result, current, reason)
+                    current = result
+                else:
+                    for other, reason in rivals:
+                        kept.remove(other)
+                        self._log_dedup(current, other, reason)
+                    kept.append(current)
+                    current = None
         return kept
 
     @staticmethod

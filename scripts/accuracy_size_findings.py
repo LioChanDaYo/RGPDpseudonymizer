@@ -38,6 +38,7 @@ import structlog  # noqa: E402
 structlog.configure(wrapper_class=structlog.make_filtering_bound_logger(logging.ERROR))
 
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity  # noqa: E402
+from gdpr_pseudonymizer.nlp.hybrid_detector import HybridDetector  # noqa: E402
 from gdpr_pseudonymizer.resources import FRENCH_GEOGRAPHY_PATH  # noqa: E402
 from gdpr_pseudonymizer.utils.french_patterns import (  # noqa: E402
     strip_french_prepositions,
@@ -341,6 +342,7 @@ VARIANTS = {
     "default + C2": ("C2",),
     "default + C1 + C2": ("C1", "C2"),
     "equal-only (no containment/partial drops)": ("EQ",),
+    "PRODUCT CODE (role filter + places, dedup with union and C2 trim)": ("PRODUCT",),
 }
 
 
@@ -670,10 +672,17 @@ def main() -> None:
     print_delta("Dry-run: role filter only (vs baseline)", base, after_role)
 
     # ---- 1.5 dedup dry-runs ----------------------------------------------
+    product = HybridDetector()  # no model load: post-filters only
     for label, mode in VARIANTS.items():
         out: list[tuple[list[GroundTruthEntity], list[DetectedEntity]]] = []
         all_drops: list[tuple[str, str, Drop]] = []
-        for name, text, gt, dets in filtered:
+        for (name, text, gt, dets), (_, _, _, raw) in zip(filtered, docs):
+            if mode == ("PRODUCT",):
+                # current product code over the baseline dump (role filter
+                # with place emission, then the dedup), document text given
+                roles = product._filter_org_roles(list(raw), text)
+                out.append((gt, product._dedup_same_type_overlaps(roles, text)))
+                continue
             kept, drops = dedup(dets, mode)
             out.append((gt, kept))
             all_drops += [(name, text, dr) for dr in drops]
