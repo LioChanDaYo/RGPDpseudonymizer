@@ -135,8 +135,8 @@ class TestBatchWorkerValidationSignal:
             DetectedEntity(
                 text="Jean Dupont",
                 entity_type="PERSON",
-                start_pos=24,
-                end_pos=35,
+                start_pos=19,
+                end_pos=30,
                 confidence=0.9,
                 source="spacy",
             )
