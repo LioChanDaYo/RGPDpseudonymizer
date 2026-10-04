@@ -16,19 +16,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - The containing span is kept, except when the extra words are all lower-case without digits ("près de Lyon" → "Lyon").
     - A span that runs over a line break (a name plus the next line's heading) is cut at the break.
     - Two spans that partly overlap become one span covering both, instead of keeping one and leaving the rest of the other unreplaced.
+    - For organisations, a span that ran on over a sentence, a list of organisations or a signature block is cut back to the clause that holds the name. Clause boundaries are a line break; ",", ";" or ":" followed by a space; or a sentence period. Example: a span over "Quentrix SA, Zorbalia Conseil, Vardel Group" that contains a separately detected "Zorbalia Conseil" is cut back to "Zorbalia Conseil". Person names are not cut, because "Last, First" contains a comma.
     - Overlaps between different types are unchanged: a place inside an organisation name is still offered.
   - **Job titles are not organisations.** Role acronyms (CTO, CFO, DRH, DPO, RSSI, COMEX, …) and VP titles ("VP", "VP Sales", "VP Europe") are no longer offered as ORG.
     - The list is in `gdpr_pseudonymizer/resources/org_role_filter.yaml`. Real organisations with acronym names (CNIL, ANSSI, BNP, EY) are not affected.
     - The place in a VP title is still offered, as a location ("VP Europe" → "Europe").
-  - **Numbers.** CI accuracy run `37227245274` vs `37189862679`, same ground truth:
-    - precision 66.69% → 77.22%, recall 79.91% → 78.06%, F1 72.70% → 77.64%;
-    - false positives 884 → 510;
-    - PERSON F1 88.68% → 93.82%, LOCATION 67.83% → 71.94%, ORG 39.61% → 42.42%.
-  - **Recall trade-off.** Recall drops slightly in every type: FN +21 PERSON, +4 LOCATION, +16 ORG. This trade-off was approved for this release. Measured on the 25 main-corpus documents:
+  - **Numbers.** CI accuracy run `37236253941` vs `37189862679`, same ground truth:
+    - precision 66.69% → 77.62%, recall 79.91% → 78.60%, F1 72.70% → 78.11%;
+    - false positives 884 → 502;
+    - PERSON F1 88.68% → 93.82%, LOCATION 67.83% → 71.94%, ORG 39.61% → 44.35%.
+  - **Recall trade-off.** Recall drops slightly in every type: FN +21 PERSON, +4 LOCATION, +4 ORG. This trade-off was approved for this release. Measured on the 25 main-corpus documents:
     - Almost all of these misses are boundary changes: the name is still covered by a span of the same type. One location miss is covered only by a detection of another type.
     - 3 annotated names lose coverage compared with v2.2. One organisation name is now partly unreplaced (a span merged across a heading line, then cut at the line break), and two short names were covered in v2.2 only by accident, inside a wrong-type span that is now cut back.
     - All three are handed to the next story (10.3).
-  - **Held-out set** (same run): F1 61.51% → 72.36%, with recall 72.29% → 69.70%.
+  - **Held-out set** (same run): F1 61.51% → 73.83%, with recall 72.29% → 71.43%.
   - **Upgrading: pseudonym continuity.** The mapping schema is unchanged.
     - Existing mapping databases keep working: rows created by v2.2 are still found by exact key, so an entity already mapped keeps its pseudonym.
     - Fragments are no longer offered. v2.2 could show both "Jean-Luc" and "Jean-Luc Martin" at the same place, and accepting both created two mapping rows, although the output only used the longer one. Now only one is offered there, so no row is created for the fragment.
