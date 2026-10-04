@@ -109,8 +109,8 @@ class TestBatchValidationEndToEnd:
             DetectedEntity(
                 text="Jean Dupont",
                 entity_type="PERSON",
-                start_pos=15,
-                end_pos=26,
+                start_pos=20,
+                end_pos=31,
                 confidence=0.95,
                 source="spacy",
             ),
@@ -217,8 +217,8 @@ class TestBatchValidationCancelDuringValidation:
             DetectedEntity(
                 text="Marie Martin",
                 entity_type="PERSON",
-                start_pos=15,
-                end_pos=27,
+                start_pos=20,
+                end_pos=32,
                 confidence=0.92,
                 source="spacy",
             ),

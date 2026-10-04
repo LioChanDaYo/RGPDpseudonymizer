@@ -209,8 +209,8 @@ class TestBatch5DocumentValidation:
             DetectedEntity(
                 text="Marie Martin",
                 entity_type="PERSON",
-                start_pos=14,
-                end_pos=26,
+                start_pos=16,
+                end_pos=28,
                 confidence=0.92,
                 source="spacy",
             ),

@@ -19,6 +19,25 @@ from gdpr_pseudonymizer.data.repositories.mapping_repository import (
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 
 TEST_PASSPHRASE = "integration_test_passphrase_123!"
+INPUT_TEXT = "Marie Dubois habite à Paris."
+
+
+def _entity(text: str, entity_type: str, input_text: str) -> DetectedEntity:
+    """Build a mocked detection whose span is derived from the input text."""
+    start = input_text.index(text)
+    return DetectedEntity(
+        text=text,
+        entity_type=entity_type,
+        start_pos=start,
+        end_pos=start + len(text),
+    )
+
+
+def _detected_entities(input_text: str) -> list[DetectedEntity]:
+    return [
+        _entity("Marie Dubois", "PERSON", input_text),
+        _entity("Paris", "LOCATION", input_text),
+    ]
 
 
 class TestDocumentProcessorIntegration:
@@ -42,23 +61,10 @@ class TestDocumentProcessorIntegration:
         tmp_path: Path,
     ) -> None:
         """End-to-end: detect entities -> assign pseudonyms -> save to DB -> write output."""
-        input_text = "Marie Dubois habite à Paris."
+        input_text = INPUT_TEXT
         mock_read_file.return_value = input_text
 
-        detected_entities = [
-            DetectedEntity(
-                text="Marie Dubois",
-                entity_type="PERSON",
-                start_pos=0,
-                end_pos=12,
-            ),
-            DetectedEntity(
-                text="Paris",
-                entity_type="LOCATION",
-                start_pos=23,
-                end_pos=28,
-            ),
-        ]
+        detected_entities = _detected_entities(input_text)
         mock_detector = Mock()
         mock_detector.detect_entities.return_value = detected_entities
         mock_detector.nlp = Mock()
@@ -82,12 +88,6 @@ class TestDocumentProcessorIntegration:
         assert result.entities_new == 2
         assert result.entities_reused == 0
 
-        # Verify output was written with pseudonyms (not original names)
-        mock_write_file.assert_called_once()
-        written_text = mock_write_file.call_args[0][1]
-        assert "Marie Dubois" not in written_text
-        assert "Paris" not in written_text
-
         # Verify entities are saved in the real database
         with open_database(db_path, TEST_PASSPHRASE) as db_session:
             repo = SQLiteMappingRepository(db_session)
@@ -99,6 +99,18 @@ class TestDocumentProcessorIntegration:
             location = repo.find_by_full_name("Paris")
             assert location is not None
             assert location.entity_type == "LOCATION"
+            assert location.pseudonym_full is not None
+            person_pseudonym = person.pseudonym_full
+            location_pseudonym = location.pseudonym_full
+
+        # Verify each original span was replaced by its mapped pseudonym and
+        # the surrounding text is intact. Pseudonyms are random, so compare
+        # against the expected structure rather than checking that a word
+        # such as "Paris" never appears (a pseudonym surname can be "Paris").
+        mock_write_file.assert_called_once()
+        written_text = mock_write_file.call_args[0][1]
+        assert written_text == f"{person_pseudonym} habite à {location_pseudonym}."
+        assert "habite à Paris" not in written_text
 
     @patch("gdpr_pseudonymizer.core.document_processor.HybridDetector")
     @patch("gdpr_pseudonymizer.core.document_processor.read_file")
@@ -112,23 +124,10 @@ class TestDocumentProcessorIntegration:
         tmp_path: Path,
     ) -> None:
         """Process same document twice: verify reuse, no duplicate entities."""
-        input_text = "Marie Dubois habite à Paris."
+        input_text = INPUT_TEXT
         mock_read_file.return_value = input_text
 
-        detected_entities = [
-            DetectedEntity(
-                text="Marie Dubois",
-                entity_type="PERSON",
-                start_pos=0,
-                end_pos=12,
-            ),
-            DetectedEntity(
-                text="Paris",
-                entity_type="LOCATION",
-                start_pos=23,
-                end_pos=28,
-            ),
-        ]
+        detected_entities = _detected_entities(input_text)
         mock_detector = Mock()
         mock_detector.detect_entities.return_value = detected_entities
         mock_detector.nlp = Mock()

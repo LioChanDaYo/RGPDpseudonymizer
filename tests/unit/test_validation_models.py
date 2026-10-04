@@ -125,8 +125,8 @@ def test_validation_session_mark_rejected() -> None:
     entity = DetectedEntity(
         text="TechCorp",
         entity_type="ORG",
-        start_pos=40,
-        end_pos=48,
+        start_pos=36,
+        end_pos=44,
     )
 
     session.add_entity(entity)
@@ -187,8 +187,8 @@ def test_validation_session_add_manual_entity() -> None:
     new_entity = DetectedEntity(
         text="Jean Dupont",
         entity_type="PERSON",
-        start_pos=14,
-        end_pos=25,
+        start_pos=15,
+        end_pos=26,
         confidence=None,
     )
 
@@ -239,10 +239,10 @@ def test_validation_session_get_validated_entities() -> None:
         text="Marie Dubois", entity_type="PERSON", start_pos=0, end_pos=12
     )
     entity2 = DetectedEntity(
-        text="Paris", entity_type="LOCATION", start_pos=26, end_pos=31
+        text="Paris", entity_type="LOCATION", start_pos=25, end_pos=30
     )
     entity3 = DetectedEntity(
-        text="TechCorp", entity_type="ORG", start_pos=40, end_pos=48
+        text="TechCorp", entity_type="ORG", start_pos=36, end_pos=44
     )
 
     session.add_entity(entity1)
@@ -274,10 +274,10 @@ def test_validation_session_get_summary_stats() -> None:
         text="Marie Dubois", entity_type="PERSON", start_pos=0, end_pos=12
     )
     entity2 = DetectedEntity(
-        text="Paris", entity_type="LOCATION", start_pos=26, end_pos=31
+        text="Paris", entity_type="LOCATION", start_pos=25, end_pos=30
     )
     entity3 = DetectedEntity(
-        text="TechCorp", entity_type="ORG", start_pos=40, end_pos=48
+        text="TechCorp", entity_type="ORG", start_pos=36, end_pos=44
     )
 
     session.add_entity(entity1)
@@ -288,7 +288,7 @@ def test_validation_session_get_summary_stats() -> None:
     session.mark_confirmed(entity1)
     session.mark_rejected(entity3)
     modified_entity2 = DetectedEntity(
-        text="Paris, France", entity_type="LOCATION", start_pos=26, end_pos=31
+        text="Paris, France", entity_type="LOCATION", start_pos=25, end_pos=30
     )
     session.mark_modified(entity2, modified_entity2)
 
@@ -312,10 +312,10 @@ def test_validation_session_get_pending_entities() -> None:
         text="Marie Dubois", entity_type="PERSON", start_pos=0, end_pos=12
     )
     entity2 = DetectedEntity(
-        text="Paris", entity_type="LOCATION", start_pos=26, end_pos=31
+        text="Paris", entity_type="LOCATION", start_pos=25, end_pos=30
     )
     entity3 = DetectedEntity(
-        text="TechCorp", entity_type="ORG", start_pos=40, end_pos=48
+        text="TechCorp", entity_type="ORG", start_pos=36, end_pos=44
     )
 
     session.add_entity(entity1)
@@ -417,9 +417,9 @@ def test_get_entity_groups_basic() -> None:
 
     # Add duplicate entities
     session.add_entity(DetectedEntity("Marie Dubois", "PERSON", 0, 12))
-    session.add_entity(DetectedEntity("Paris", "LOCATION", 26, 31))
-    session.add_entity(DetectedEntity("Marie Dubois", "PERSON", 37, 49))
-    session.add_entity(DetectedEntity("Paris", "LOCATION", 52, 57))
+    session.add_entity(DetectedEntity("Paris", "LOCATION", 25, 30))
+    session.add_entity(DetectedEntity("Marie Dubois", "PERSON", 36, 48))
+    session.add_entity(DetectedEntity("Paris", "LOCATION", 51, 56))
 
     groups = session.get_entity_groups()
 
@@ -431,14 +431,14 @@ def test_get_entity_groups_basic() -> None:
     assert marie_group.entity_type == "PERSON"
     assert marie_group.count == 2
     assert marie_group.occurrences[0].start_pos == 0
-    assert marie_group.occurrences[1].start_pos == 37
+    assert marie_group.occurrences[1].start_pos == 36
 
     # Verify Paris group
     paris_group = next(g for g in groups if g.text == "Paris")
     assert paris_group.entity_type == "LOCATION"
     assert paris_group.count == 2
-    assert paris_group.occurrences[0].start_pos == 26
-    assert paris_group.occurrences[1].start_pos == 52
+    assert paris_group.occurrences[0].start_pos == 25
+    assert paris_group.occurrences[1].start_pos == 51
 
 
 def test_get_entity_groups_filter_by_type() -> None:
@@ -624,7 +624,7 @@ def test_get_entity_groups_occurrences_sorted_by_position() -> None:
     )
 
     # Add in non-position order
-    session.add_entity(DetectedEntity("Paris", "LOCATION", 45, 50))  # Middle
+    session.add_entity(DetectedEntity("Paris", "LOCATION", 46, 51))  # Middle
     session.add_entity(DetectedEntity("Paris", "LOCATION", 10, 15))  # Start
     session.add_entity(DetectedEntity("Paris", "LOCATION", 29, 34))  # End
 
@@ -635,4 +635,4 @@ def test_get_entity_groups_occurrences_sorted_by_position() -> None:
     # Occurrences should be sorted by start_pos
     assert paris_group.occurrences[0].start_pos == 10  # Start
     assert paris_group.occurrences[1].start_pos == 29  # End
-    assert paris_group.occurrences[2].start_pos == 45  # Middle
+    assert paris_group.occurrences[2].start_pos == 46  # Middle

@@ -484,7 +484,7 @@ class TestDetectEntities:
                 text="Marie Dubois", entity_type="PERSON", start_pos=0, end_pos=12
             ),
             DetectedEntity(
-                text="Paris", entity_type="LOCATION", start_pos=23, end_pos=28
+                text="Paris", entity_type="LOCATION", start_pos=22, end_pos=27
             ),
         ]
         mock_detector = Mock()
@@ -529,7 +529,7 @@ class TestDetectEntities:
                 text="Marie Dubois", entity_type="PERSON", start_pos=0, end_pos=12
             ),
             DetectedEntity(
-                text="Paris", entity_type="LOCATION", start_pos=23, end_pos=28
+                text="Paris", entity_type="LOCATION", start_pos=22, end_pos=27
             ),
         ]
         mock_detector = Mock()

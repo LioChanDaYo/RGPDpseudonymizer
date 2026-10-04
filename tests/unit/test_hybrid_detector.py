@@ -313,14 +313,14 @@ class TestHybridDetector:
             text="Marie Dubois",
             entity_type="PERSON",
             start_pos=0,
-            end_pos=13,
+            end_pos=12,
             source="spacy",
         )
         regex_entity = DetectedEntity(
             text="Dubois",
             entity_type="PERSON",
             start_pos=6,
-            end_pos=13,
+            end_pos=12,
             source="regex",
         )
 
