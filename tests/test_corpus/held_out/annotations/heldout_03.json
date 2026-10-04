@@ -182,6 +182,12 @@
       "end_pos": 955
     },
     {
+      "entity_text": "EMEA",
+      "entity_type": "LOCATION",
+      "start_pos": 982,
+      "end_pos": 986
+    },
+    {
       "entity_text": "Dublin",
       "entity_type": "LOCATION",
       "start_pos": 995,

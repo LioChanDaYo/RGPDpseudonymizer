@@ -1,13 +1,13 @@
 # Annotation Guidelines: NER Benchmark Corpus
 
-**Status:** APPROVED by Lionel on 2026-10-02 (STOP A, Story 10.1). Reviewed draft: commit `e7835a3`, sha256 `57ceba37a60014c900637c441c95db3b4fc8e3c059821486698b604d101fe37e`. Part A was approved as drafted. Part B records his answers; three of them changed the proposed default (Q3, Q5, Q14). The decision record is at the end of this file. Amendments A1–A6 and A7 were decided by Lionel on 2026-10-03 (Part C).
+**Status:** APPROVED by Lionel on 2026-10-02 (STOP A, Story 10.1). Reviewed draft: commit `e7835a3`, sha256 `57ceba37a60014c900637c441c95db3b4fc8e3c059821486698b604d101fe37e`. Part A was approved as drafted. Part B records his answers; three of them changed the proposed default (Q3, Q5, Q14). The decision record is at the end of this file. Amendments A1–A7 were decided by Lionel on 2026-10-03 and A8–A9 on 2026-10-04 (Part C).
 **Scope:** the 25 documents in `tests/test_corpus/` (main corpus) and the held-out set in `tests/test_corpus/held_out/` (Story 10.1, Task 4).
 **Entity types:** `PERSON`, `LOCATION`, `ORG` (schema in `README.md`).
 
 ## How to read this document
 
 - Every rule has a stable ID (`G…` general, `P…` PERSON, `O…` ORG, `L…` LOCATION). Each annotation edit cites one ID in the change log. The JSON stays as it is: citations are kept out of the annotation files.
-- **Part A** lists rules settled by Epic 10 or Story 10.1, plus G7 (nesting), which Lionel added at approval. **Part B** holds the rules decided at STOP A from the open questions. They keep their IDs `Q1`–`Q18`, so a change-log row cites e.g. `Q14`. **Part C** holds the amendments decided on 2026-10-03 (`A1`–`A7`). They are cited the same way.
+- **Part A** lists rules settled by Epic 10 or Story 10.1, plus G7 (nesting), which Lionel added at approval. **Part B** holds the rules decided at STOP A from the open questions. They keep their IDs `Q1`–`Q18`, so a change-log row cites e.g. `Q14`. **Part C** holds the amendments decided on 2026-10-03 and 2026-10-04 (`A1`–`A9`). They are cited the same way.
 - Examples are quoted from the corpus as `document: "text"`. **+** marks a correct annotation, **−** marks the current annotation that the rule corrects.
 - After approval, a rule changes only through the Amendments table (end of file). A case no approved rule covers goes back to Lionel first. It is not annotated in the meantime (AC2).
 
@@ -222,9 +222,9 @@ Approved by Lionel on 2026-10-02. Reviewed draft: commit `e7835a3`, sha256 `57ce
 | Q5 | **Changed.** Proposed: one ORG, no nesting of any type. Decided: ORG + nested LOCATION |
 | Q14 | **Changed.** Proposed: LOCATION as a noun, nothing as an adjective. Decided: always LOCATION, every occurrence |
 
-## Part C: Amendments decided on 2026-10-03
+## Part C: Amendments decided on 2026-10-03 and 2026-10-04
 
-These came up during the repair. Lionel decided them on 2026-10-03. Cite them by ID.
+These came up during the repair and the held-out annotation. Lionel decided A1–A7 on 2026-10-03 and A8–A9 on 2026-10-04. Cite them by ID.
 
 **A1. A person's name inside an ORG name.** ORG only, no nested PERSON. G7 nesting is limited to places.
 - `interview_01`: "Université Claude Bernard"; `interview_05`: "Mercier & Associés"; `board_minutes`: "CMS Francis Lefebvre", "Bredin Prat", "August Debouzy"; `meeting_minutes`: "Michael Page" → ORG only.
@@ -246,6 +246,12 @@ These came up during the repair. Lionel decided them on 2026-10-03. Cite them by
 **A7. A place inside a job title or team name is LOCATION** (L1). The job title or team itself is still not annotated (O2, P6, Q7). This was confirmed by Lionel on 2026-10-03; it had been applied at the repair as an interpretation.
 - `partnership_agreement`: "VP Europe" (7), "Regional Manager France", "Équipe Europe"; `contract_memo`: "VP Sales Europe"; `interview_12`: "Leur directeur France" → LOCATION on the place word.
 
+**A8. Region acronyms inside job titles** (APAC, LATAM, DACH and the like) are LOCATION, at every occurrence. This follows A7 (place inside a job title) and Q17 (every named place at any level). [Lionel, 2026-10-04]
+- Main corpus: no occurrence. Held-out set: one occurrence.
+
+**A9. "<org> de <ville>" in running text** is ORG + a separate LOCATION. A descriptor word ("le laboratoire") stays outside the ORG span (Q4), and the city is not part of the ORG name. [Lionel, 2026-10-04]
+- Main corpus: no occurrence. Held-out set: one occurrence (annotated this way from the start).
+
 ## Amendments
 
 Changes after approval (AC2). Each row is also recorded in the story's Dev Notes "Guidelines Approval Record".
@@ -259,12 +265,9 @@ Changes after approval (AC2). Each row is also recorded in the story's Dev Notes
 | 2026-10-03 | A5 | "EU" is always LOCATION, like "UE" | Lionel |
 | 2026-10-03 | A6 | An arrondissement is its own LOCATION ("16ème", "7ème"). This changed the proposed default, which was to leave it unannotated | Lionel |
 | 2026-10-03 | A7 | A place inside a job title or team name is LOCATION (interpretation confirmed) | Lionel |
+| 2026-10-04 | A8 | Region acronyms inside job titles (APAC, LATAM, DACH and the like) are LOCATION | Lionel |
+| 2026-10-04 | A9 | "<org> de <ville>" in running text = ORG + separate LOCATION, descriptor outside (Q4) | Lionel |
 
 ## Pending amendments
 
-Raised while annotating the held-out set (2026-10-03). Held-out entity text is never quoted outside `held_out/`, so the cases are described by kind only.
-
-| # | Case | Current state |
-|---|------|---------------|
-| A8 | A region acronym inside a job title, such as "EMEA" in "Head of … EMEA". A7 covers place names; is a business-region acronym a place? | Not annotated |
-| A9 | An ORG name followed by "de" + a city, written in running text ("le laboratoire X de <ville>"): is the city part of the ORG name (one ORG + nested LOCATION under G7), or the ORG's location (ORG "X" + plain LOCATION)? Q5 covers names that clearly contain the place; Q12 covers "de + place" after a PERSON only | Annotated as ORG "X" + LOCATION "<ville>". The city is LOCATION under either reading; only the ORG span differs |
+_None open._
