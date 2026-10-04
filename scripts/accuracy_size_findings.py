@@ -514,6 +514,31 @@ def ident(e: DetectedEntity) -> tuple[str, str, int, int]:
 # ---------------------------------------------------------------------------
 
 
+def overlap_dropped_tps(docs: list[Doc], dropped_path: Path) -> None:
+    """Task 8.4: dedup-dropped detections that were baseline TPs, per type.
+
+    ``docs`` is the baseline dump; matching is on (text, type, start, end).
+    """
+    dropped = json.loads(dropped_path.read_text(encoding="utf-8"))
+    counts: collections.Counter[str] = collections.Counter()
+    total: collections.Counter[str] = collections.Counter()
+    for name, _, gt, dets in docs:
+        tp, _, _ = match_entities(dets, gt)
+        tp_ids = {ident(d) for d, _ in tp}
+        for d in dropped.get(name, []):
+            key4 = (d["text"], d["type"], d["start"], d["end"])
+            total[d["type"]] += 1
+            if key4 in tp_ids:
+                counts[d["type"]] += 1
+    print("## 8.4 dedup-dropped detections that were TPs in the baseline dump")
+    for t in TYPES:
+        print(f"  [{t}] dropped={total[t]} of which baseline TP={counts[t]}")
+    print(
+        f"  [Overall] dropped={sum(total.values())} of which baseline TP="
+        f"{sum(counts.values())}"
+    )
+
+
 def main() -> None:
     args = sys.argv[1:]
     n_ex = 5
@@ -521,9 +546,20 @@ def main() -> None:
         i = args.index("--examples")
         n_ex = int(args[i + 1])
         del args[i : i + 2]
+    dropped_path = None
+    if "--dedup-dropped" in args:
+        i = args.index("--dedup-dropped")
+        dropped_path = Path(args[i + 1])
+        del args[i : i + 2]
     if len(args) != 1:
-        sys.exit("usage: accuracy_size_findings.py <dump.json> [--examples N]")
+        sys.exit(
+            "usage: accuracy_size_findings.py <dump.json> [--examples N]"
+            " [--dedup-dropped <x.dedup_dropped.json>]"
+        )
     docs = load(Path(args[0]))
+    if dropped_path is not None:
+        overlap_dropped_tps(docs, dropped_path)
+        return
     base = score((gt, d) for _, _, gt, d in docs)
     print("## Baseline (dump re-scored)")
     for t in ("Overall",) + TYPES:
