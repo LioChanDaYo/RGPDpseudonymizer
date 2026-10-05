@@ -24,6 +24,7 @@ from gdpr_pseudonymizer.nlp.regex_matcher import RegexMatcher
 from gdpr_pseudonymizer.nlp.spacy_detector import SpaCyDetector
 from gdpr_pseudonymizer.resources import FRENCH_GEOGRAPHY_PATH, ORG_ROLE_FILTER_PATH
 from gdpr_pseudonymizer.utils.french_patterns import (
+    FRENCH_TITLE_PATTERN,
     strip_french_prepositions,
     strip_french_titles,
 )
@@ -65,22 +66,61 @@ _PERIOD_TITLES = frozenset({"mme", "mlle", "prof", "dr", "pr", "me", "m"})
 _SEGMENT_TRIM_TYPES = frozenset({"ORG"})
 
 
+# A word: a letter followed by letters, digits, apostrophes or hyphens
+_WORD_RE = re.compile(r"[^\W\d_][\w'’-]*")
+_TITLE_WORD_RE = re.compile(FRENCH_TITLE_PATTERN, re.IGNORECASE)
+
+
+def _is_sentence_period(raw: str, index: int) -> bool:
+    """Whether the period at ``raw[index]`` ends a sentence.
+
+    Not a sentence end after a word shorter than three letters, an all-caps
+    word, or a title (Mme, Mlle, Prof, Dr, Pr, Me, M). Not either after an
+    abbreviation (REL-002): a capitalised word of at most four letters
+    ("Corp", "Inc", "Cie", "Ltd") followed by a capitalised word.
+    """
+    word = _LAST_WORD_RE.search(raw[:index])
+    last = word.group(1) if word else ""
+    if len(last) < 3 or last.lower() in _PERIOD_TITLES or last.isupper():
+        return False
+    following = raw[index + 1 :].lstrip()
+    if len(last) <= 4 and last[0].isupper() and following[:1].isupper():
+        return False
+    return True
+
+
 def _clause_boundaries(raw: str) -> list[tuple[int, int]]:
     """(start, end) offsets of the clause boundaries in ``raw``.
 
-    A period counts only as a sentence end: not after a word shorter than
-    three letters, an all-caps word, or a title (Mme, Mlle, Prof, Dr, Pr, Me,
-    M).
+    A period counts only when it ends a sentence (``_is_sentence_period``).
     """
     found: list[tuple[int, int]] = []
     for match in _CLAUSE_BOUNDARY_RE.finditer(raw):
-        if match.group() == ".":
-            word = _LAST_WORD_RE.search(raw[: match.start()])
-            last = word.group(1) if word else ""
-            if len(last) < 3 or last.lower() in _PERIOD_TITLES or last.isupper():
-                continue
+        if match.group() == "." and not _is_sentence_period(raw, match.start()):
+            continue
         found.append((match.start(), match.end()))
     return found
+
+
+def _discards_capitalised_word(context: str, regions: list[tuple[int, int]]) -> bool:
+    """Whether any region of ``context`` holds a capitalised word (V3 guard).
+
+    Excepted: a title from the French title pattern (it is not a name), and
+    the first word of a sentence, i.e. a word whose preceding non-space text
+    in ``context`` ends with a sentence period (``_is_sentence_period``).
+    """
+    for start, end in regions:
+        for match in _WORD_RE.finditer(context, start, end):
+            word = match.group()
+            if not word[0].isupper():
+                continue
+            if _TITLE_WORD_RE.fullmatch(word) or _TITLE_WORD_RE.fullmatch(word + "."):
+                continue
+            before = context[: match.start()].rstrip()
+            if before.endswith(".") and _is_sentence_period(context, len(before) - 1):
+                continue
+            return True
+    return False
 
 
 def _role_token_spans(text: str) -> list[tuple[str, int, int]]:
@@ -828,16 +868,35 @@ class HybridDetector(EntityDetector):
             outer, inner = (a, b) if a_contains else (b, a)
             inner_core = cls._dedup_core(inner)
             segment = cls._clause_segment(outer, inner_core, text)
-            if segment is not None:
+            if segment is not None and not cls._cut_discards_name(outer, segment, text):
                 sc = cls._dedup_core(segment)
                 if sc[0] <= inner_core[0] and inner_core[1] <= sc[1]:
                     return segment, "containment_outer_trimmed_boundary"
         elif reason == "partial_overlap_union":
             anchor = (max(ca[0], cb[0]), min(ca[1], cb[1]))
             segment = cls._clause_segment(result, anchor, text)
-            if segment is not None:
+            if segment is not None and not cls._cut_discards_name(
+                result, segment, text
+            ):
                 return segment, "partial_overlap_union_trimmed"
         return result, reason
+
+    @classmethod
+    def _cut_discards_name(
+        cls, entity: DetectedEntity, segment: DetectedEntity, text: str | None
+    ) -> bool:
+        """V3 guard (Lionel, 2026-10-05): a cut may only discard text with no
+        capitalised word, titles and sentence-start words excepted. The words
+        are read in the document when available, else in the entity text."""
+        if text is not None and entity.end_pos <= len(text):
+            context, offset = text, 0
+        else:
+            context, offset = entity.text, entity.start_pos
+        regions = [
+            (entity.start_pos - offset, segment.start_pos - offset),
+            (segment.end_pos - offset, entity.end_pos - offset),
+        ]
+        return _discards_capitalised_word(context, regions)
 
     @classmethod
     def _resolve_same_type_pair_base(
