@@ -554,7 +554,7 @@ A blind cross-check was run before STOP C. An independent annotator (GPT-5.5 via
 
 **Detector change, same ground truth.** No annotation, scorer or held-out change (G4): `git diff --stat main...HEAD -- tests/test_corpus/ tests/accuracy/` is empty. The ground truth is the 10.1 one (2,215 main-corpus annotations).
 
-**What changed in the detector (final version, run F):**
+**What changed in the detector (final version, run G):**
 - **ORG role filter (AC3).** An ORG detection whose whole normalized text is a role acronym (CTO, DRH, COMEX, …) or a VP form ("VP", "VP Sales", "VP Europe", …) is dropped. List: `gdpr_pseudonymizer/resources/org_role_filter.yaml`. When a dropped VP form names a place ("VP Europe"), the place is kept as a LOCATION detection.
 - **Same-type overlap dedup (AC1).** When two detections of the same type overlap, one span remains:
   - Containment keeps the containing span, except that the inner span wins when the extra words are all lower-case without digits (C1).
@@ -562,25 +562,39 @@ A blind cross-check was run before STOP C. An independent annotator (GPT-5.5 via
   - A partial overlap becomes the union of the two spans.
   - Ties are broken deterministically.
   - Overlaps between different types are untouched.
-- **Guarded ORG segment trim (V3).** For organisations only, a containing span or a union may be cut to the clause around the name, but only if the cut discards no capitalised word.
-  - Titles (Dr, Mme, …) and the first word of a sentence are excepted.
-  - Abbreviation periods ("Corp.", "Inc.") are not sentence ends.
-  - On the main corpus, the guard refuses every cut that changed a score in run E, because each of those cuts would have dropped another name. Run F therefore has the same metrics as run C; one detection differs.
-- Decided by Lionel at STOP R, in the PR #81 review and after the ORG loss investigation and the QA re-review (2026-10-04/05); rule text in the story.
+- **ORG segment trim with a precise guard (V3).** For organisations only, a containing span or a union may be cut to the clause around the name.
+  - Clause boundaries are a line break; ",", ";" or ":" followed by a space; a sentence period. Abbreviation periods such as "Corp." are not sentence ends.
+  - A cut may drop a capitalised word only if another organisation span that survives the dedup covers that word. Titles and the first word of a sentence are excepted.
+  - Example: a run-on span over a list of organisations is cut back when each organisation is also detected on its own, and kept whole otherwise.
+- Decided by Lionel at STOP R, in the PR #81 review, after the ORG loss investigation and after QA's two re-reviews (2026-10-04/05); rule text in the story.
 
 **Sources (G1):**
 - Before: CI accuracy run `37189862679` (10.1 close-out, reproduced on `main` by `37199452557`).
-- **After (close-out): run F `37267364891`** (commit `0cbd962`).
+- **After (close-out): run G `37371866394`** (commit `ecef3f3`).
 - History:
   - run A `37212585445` (`01aca6e`): role filter without place emission;
   - run B `37212993514` (`ebf99a8`): first dedup version;
   - run C `37227245274` (`1550f54`): coverage-preserving dedup;
-  - run D `37233261519` (`9046eab`): QA fixes, identical to run C;
-  - run E `37236253941` (`8e36776`): unguarded V3.
+  - run D `37233261519` (`9046eab`): QA fixes, identical to C;
+  - run E `37236253941` (`8e36776`): unguarded V3;
+  - run F `37267364891` (`0cbd962`): V3 with a blunt guard (metrics identical to C).
 
 ### Lines from `accuracy-output.txt`, verbatim
 
-Run F (`37267364891`, close-out):
+Run G (`37371866394`, close-out):
+
+```
+[Overall] P=0.7735 R=0.7833 F1=0.7784 TP=1735 FP=508 FN=480 FN%=21.67 FP%=22.65
+[PERSON] P=0.9173 R=0.9601 F1=0.9382 TP=1275 FP=115 FN=53
+[LOCATION] P=0.6572 R=0.7947 F1=0.7194 TP=209 FP=109 FN=54
+[ORG] P=0.4692 R=0.4022 F1=0.4331 TP=251 FP=284 FN=373
+[HELD-OUT Overall] P=0.7523 R=0.6970 F1=0.7236 TP=161 FP=53 FN=70 FN%=30.30 FP%=24.77
+[HELD-OUT PERSON] P=0.8598 R=0.8214 F1=0.8402 TP=92 FP=15 FN=20
+[HELD-OUT LOCATION] P=0.7536 R=0.7647 F1=0.7591 TP=52 FP=17 FN=16
+[HELD-OUT ORG] P=0.4474 R=0.3333 F1=0.3820 TP=17 FP=21 FN=34
+```
+
+History, run F (`37267364891`, blunt guard; identical to run C `37227245274` and run D `37233261519`):
 
 ```
 [Overall] P=0.7722 R=0.7806 F1=0.7764 TP=1729 FP=510 FN=486 FN%=21.94 FP%=22.78
@@ -604,19 +618,6 @@ History, run E (`37236253941`, unguarded V3):
 [HELD-OUT PERSON] P=0.8598 R=0.8214 F1=0.8402 TP=92 FP=15 FN=20
 [HELD-OUT LOCATION] P=0.7536 R=0.7647 F1=0.7591 TP=52 FP=17 FN=16
 [HELD-OUT ORG] P=0.5250 R=0.4118 F1=0.4615 TP=21 FP=19 FN=30
-```
-
-History, run C (`37227245274`); run D (`37233261519`) is line-for-line identical:
-
-```
-[Overall] P=0.7722 R=0.7806 F1=0.7764 TP=1729 FP=510 FN=486 FN%=21.94 FP%=22.78
-[PERSON] P=0.9173 R=0.9601 F1=0.9382 TP=1275 FP=115 FN=53
-[LOCATION] P=0.6572 R=0.7947 F1=0.7194 TP=209 FP=109 FN=54
-[ORG] P=0.4614 R=0.3926 F1=0.4242 TP=245 FP=286 FN=379
-[HELD-OUT Overall] P=0.7523 R=0.6970 F1=0.7236 TP=161 FP=53 FN=70 FN%=30.30 FP%=24.77
-[HELD-OUT PERSON] P=0.8598 R=0.8214 F1=0.8402 TP=92 FP=15 FN=20
-[HELD-OUT LOCATION] P=0.7536 R=0.7647 F1=0.7591 TP=52 FP=17 FN=16
-[HELD-OUT ORG] P=0.4474 R=0.3333 F1=0.3820 TP=17 FP=21 FN=34
 ```
 
 History, run A (`37212585445`):
@@ -645,46 +646,47 @@ History, run B (`37212993514`):
 [HELD-OUT ORG] P=0.5385 R=0.4118 F1=0.4667 TP=21 FP=18 FN=30
 ```
 
-### Main corpus, before / after (run F)
+### Main corpus, before / after (run G)
 
 | | Precision | Recall | F1 | TP | FP | FN |
 |---|---|---|---|---|---|---|
 | Overall, before | 66.69% | 79.91% | 72.70% | 1,770 | 884 | 445 |
-| **Overall, after** | **77.22%** | **78.06%** | **77.64%** | 1,729 | 510 | 486 |
+| **Overall, after** | **77.35%** | **78.33%** | **77.84%** | 1,735 | 508 | 480 |
 | PERSON, before | 81.25% | 97.59% | 88.68% | 1,296 | 299 | 32 |
 | **PERSON, after** | **91.73%** | **96.01%** | **93.82%** | 1,275 | 115 | 53 |
 | LOCATION, before | 58.36% | 80.99% | 67.83% | 213 | 152 | 50 |
 | **LOCATION, after** | **65.72%** | **79.47%** | **71.94%** | 209 | 109 | 54 |
 | ORG, before | 37.61% | 41.83% | 39.61% | 261 | 433 | 363 |
-| **ORG, after** | **46.14%** | **39.26%** | **42.42%** | 245 | 286 | 379 |
+| **ORG, after** | **46.92%** | **40.22%** | **43.31%** | 251 | 284 | 373 |
 
 ### FP reduction (AC5)
 
 | Runs | PERSON ΔTP / ΔFP | LOCATION ΔTP / ΔFP | ORG ΔTP / ΔFP | Overall ΔTP / ΔFP |
 |---|---|---|---|---|
-| Final: `37189862679` → `37267364891` | −21 / −184 | −4 / −43 | −16 / −147 | −41 / −374 |
+| Final: `37189862679` → `37371866394` | −21 / −184 | −4 / −43 | −10 / −149 | −35 / −376 |
+| Precise-guarded V3 alone: `37267364891` → `37371866394` | 0 / 0 | 0 / 0 | +6 / −2 | +6 / −2 |
 | History, unguarded V3: `37189862679` → `37236253941` | −21 / −184 | −4 / −43 | −4 / −155 | −29 / −382 |
 | History, role filter without place emission: `37189862679` → `37212585445` | 0 / 0 | 0 / 0 | 0 / −134 | 0 / −134 |
 | History, first dedup version: `37212585445` → `37212993514` | −16 / −187 | −10 / −44 | −13 / −15 | −39 / −246 |
 
 ### Recall (G3)
 
-- FN versus `37189862679`: PERSON +21, LOCATION +4, ORG +16 (overall 445 → 486).
-- Lionel accepted up to PERSON +21 / LOCATION +4 / ORG +16 on 2026-10-04 (recorded in the story). Run F is at the bounds.
+- FN versus `37189862679`: PERSON +21, LOCATION +4, ORG +10 (overall 445 → 480).
+- Lionel accepted up to PERSON +21 / LOCATION +4 / ORG +16 (recorded in the story). Run G is within these bounds.
 
-**Coverage, main corpus (local check on a dump that reproduces run F exactly; details in the story):**
+**Coverage, main corpus (local check on a dump that reproduces run G exactly; details in the story):**
 - The new misses are boundary changes: a span of the same type still covers the name. The exception is one LOCATION miss, which is covered only by a detection of another type.
 - 3 annotations lose coverage compared with v2.2. One organisation name is partly uncovered (a span merged across a heading, then cut at the line break). Two short names were covered in v2.2 only by accident, inside a wrong-type span.
-- All three are handed to story 10.3.
+- All three are handed to story 10.3. The V3 cut adds no coverage loss.
 
-**Overlap-dropped TPs (AC5).** Source: local instrumented dump, which reproduces run F TP/FP/FN exactly (`scripts/accuracy_dump_detections.py --record-dedup`, commit `0cbd962`).
-- The dedup removed or replaced 341 input detections (PERSON 245, LOCATION 59, ORG 37).
-- 91 of them were TPs in the baseline dump: PERSON 61, LOCATION 14, ORG 16.
-- The net FN delta from the CI lines is +21 / +4 / +16.
+**Overlap-dropped TPs (AC5).** Source: local instrumented dump, which reproduces run G TP/FP/FN exactly (`scripts/accuracy_dump_detections.py --record-dedup`, commit `ecef3f3`).
+- The dedup removed or replaced 339 input detections (PERSON 245, LOCATION 59, ORG 35).
+- 87 of them were TPs in the baseline dump: PERSON 61, LOCATION 14, ORG 12.
+- The net FN delta from the CI lines is +21 / +4 / +10.
 
 ### Held-out set (G5)
 
-Aggregates only. Run F (`37267364891`):
+Aggregates only. Run G (`37371866394`):
 
 ```
 [HELD-OUT Overall] P=0.7523 R=0.6970 F1=0.7236 TP=161 FP=53 FN=70 FN%=30.30 FP%=24.77
@@ -694,23 +696,23 @@ Aggregates only. Run F (`37267364891`):
 ```
 
 Versus the 10.1 baseline (`37189862679`):
-- **Overall:** P 53.53% → 75.23%, R 72.29% → 69.70%, F1 61.51% → 72.36%, FN 64 → 70.
+- **Overall:** P 53.53% → 75.23%, R 72.29% → 69.70%, F1 61.51% → 72.36%, FN 64 → 70 (+6 FN).
 - **PERSON:** FN 21 → 20.
 - **LOCATION:** FN 15 → 16.
-- **ORG:** FN 28 → 34 (R 45.10% → 33.33%), P 31.51% → 44.74%, F1 37.10% → 38.20%.
+- **ORG:** FN 28 → 34 (+6 FN; R 45.10% → 33.33%), P 31.51% → 44.74%, F1 37.10% → 38.20%.
 
 Versus run E (`37236253941`, unguarded V3):
-- Overall FN 66 → 70 (R 71.43% → 69.70%).
-- ORG FN 30 → 34 (R 41.18% → 33.33%).
+- Overall FN 66 → 70.
+- ORG FN 30 → 34.
 - PERSON and LOCATION unchanged.
 
-For reference, run E's held-out recall was below the 10.1 baseline by +2 FN overall and +2 FN ORG. Run F is below it by +6 FN overall and +6 FN ORG. Small-sample note: held-out ORG has 51 annotations, so 1 ORG FN ≈ 2 points of ORG recall (PERSON 112, LOCATION 68). Under the story, this blocks the merge until Lionel's decision is recorded.
+Run G's held-out lines are identical to runs C and F. The held-out gain of run E came only from cuts that dropped names with no detection of their own, which the precise guard refuses. Small-sample note: held-out ORG has 51 annotations, so 1 ORG FN ≈ 2 points of ORG recall (PERSON 112, LOCATION 68). Under the story, the held-out recall drop blocks the merge until Lionel's decision is recorded.
 
 ### Performance (NFR1): local benchmark, CI perf job vacuous (separate fix PR)
 
 - The performance workflow currently runs no test. Run `37213019377` is green, but its pytest steps abort at plugin load (pytest-qt), and `| tee` hides the exit code. The same holds on `main` (`36635484755`). PR #82 fixes the workflow.
 - Informational local single-document benchmark (Windows, 34 rounds; NFR1 threshold 30 s): all means stay between 0.4 s and 1.6 s. The story has the before/after table, measured back to back with `d4b7105` on the same machine.
-- The dedup walk uses an active window, so it scales linearly (unit-tested).
+- The dedup walk uses an active window, so it scales linearly (unit-tested). The precise guard adds a pass only when a cut must be refused.
 
 ### Notes
 

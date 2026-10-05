@@ -16,16 +16,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - The containing span is kept, except when the extra words are all lower-case without digits ("près de Lyon" → "Lyon").
     - A span that runs over a line break (a name plus the next line's heading) is cut at the break.
     - Two spans that partly overlap become one span covering both, instead of keeping one and leaving the rest of the other unreplaced.
-    - For organisations, a span that ran on over a sentence or a list can be cut back to the clause that holds the name, but only when the cut removes no capitalised word other than a title (Dr, Mme, …) or the first word of a sentence. Clause boundaries are a line break; ",", ";" or ":" followed by a space; or a sentence period (abbreviations such as "Corp." or "Inc." do not end a sentence). Example: "Quentrix SA, lot 42" around a separately detected "Quentrix SA" is cut back to "Quentrix SA". A list such as "Quentrix SA, Zorbalia Conseil, et Vardel Group" is not cut, so all three names stay covered. Person names are never cut, because "Last, First" contains a comma.
+    - For organisations, a span that ran on over a sentence or a list can be cut back to the clause that holds the name. The cut is made only when every other capitalised word it removes is still covered by another organisation detection (titles such as "Dr" and the first word of a sentence aside). Clause boundaries are a line break; ",", ";" or ":" followed by a space; or a sentence period (abbreviations such as "Corp." or "Inc." do not end a sentence). Example: a span over "Quentrix SA, Zorbalia Conseil, et Vardel Group" is cut into the three names when each is also detected on its own. It is kept whole when one of them is not, so no name is left unreplaced. Person names are never cut, because "Last, First" contains a comma.
     - Overlaps between different types are unchanged: a place inside an organisation name is still offered.
   - **Job titles are not organisations.** Role acronyms (CTO, CFO, DRH, DPO, RSSI, COMEX, …) and VP titles ("VP", "VP Sales", "VP Europe") are no longer offered as ORG.
     - The list is in `gdpr_pseudonymizer/resources/org_role_filter.yaml`. Real organisations with acronym names (CNIL, ANSSI, BNP, EY) are not affected.
     - The place in a VP title is still offered, as a location ("VP Europe" → "Europe").
-  - **Numbers.** CI accuracy run `37267364891` vs `37189862679`, same ground truth:
-    - precision 66.69% → 77.22%, recall 79.91% → 78.06%, F1 72.70% → 77.64%;
-    - false positives 884 → 510;
-    - PERSON F1 88.68% → 93.82%, LOCATION 67.83% → 71.94%, ORG 39.61% → 42.42%.
-  - **Recall trade-off.** Recall drops slightly in every type: FN +21 PERSON, +4 LOCATION, +16 ORG. This trade-off was approved for this release. Measured on the 25 main-corpus documents:
+  - **Numbers.** CI accuracy run `37371866394` vs `37189862679`, same ground truth:
+    - precision 66.69% → 77.35%, recall 79.91% → 78.33%, F1 72.70% → 77.84%;
+    - false positives 884 → 508;
+    - PERSON F1 88.68% → 93.82%, LOCATION 67.83% → 71.94%, ORG 39.61% → 43.31%.
+  - **Recall trade-off.** Recall drops slightly in every type: FN +21 PERSON, +4 LOCATION, +10 ORG. This trade-off was approved for this release. Measured on the 25 main-corpus documents:
     - Almost all of these misses are boundary changes: the name is still covered by a span of the same type. One location miss is covered only by a detection of another type.
     - 3 annotated names lose coverage compared with v2.2. One organisation name is now partly unreplaced (a span merged across a heading line, then cut at the line break), and two short names were covered in v2.2 only by accident, inside a wrong-type span that is now cut back.
     - All three are handed to the next story (10.3).
