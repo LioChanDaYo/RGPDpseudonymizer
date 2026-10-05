@@ -2,76 +2,77 @@ schema: 1
 story: '10.2'
 story_title: 'Same-Type Overlap Dedup + ORG Role Filter'
 gate: CONCERNS
-status_reason: 'Re-review at head 99d63b7 (code 8e36776). G2 verified: run D 37233261519 is identical to run C, and every line and number in the story, QA report, CHANGELOG and PR body matches run E 37236253941. Run E is within the G3 bounds (+21/+4/+4); all 8 earlier findings are resolved; QA''s own coverage check confirms the same 3 losses vs baseline, none new. Open: the held-out recall decision is still Lionel''s, and V3''s containment cut can uncover org names that have no detection of their own (0 on the main corpus, undocumented as a gap).'
+status_reason: 'Third review at 0008c6b (rebased onto main 6bbde14; run G 37371866394 on ecef3f3, same detector code). G2 verified for runs F and G; G3 is within bounds (+21/+4/+10); the rebase is exactly PR #80; V3-001 and REL-002 are resolved (QA probes and a 3,000-case fuzz); the same 3 coverage losses remain, none new; CI is green after one infrastructure rerun. Only open non-low item: the held-out recall decision (FN 64 -> 70, ORG 28 -> 34) is still Lionel''s.'
 reviewer: 'Quinn (Test Architect)'
-updated: '2026-10-05T10:00:00Z'
+updated: '2026-10-06T12:00:00Z'
 
 waiver: { active: false }
 
 merge_blockers:
-  - 'Held-out recall drop, run E 37236253941 vs 37189862679: Overall R 0.7229 -> 0.7143 (FN 64 -> 66); ORG R 0.4510 -> 0.4118 (FN 28 -> 30). Lionel re-asks on run E; pending, not recorded. Blocks merge per STOP G3.2, not this review.'
+  - 'Held-out recall drop, run G 37371866394 (same as runs C and F) vs 37189862679: Overall R 0.7229 -> 0.6970 (FN 64 -> 70); ORG R 0.4510 -> 0.3333 (FN 28 -> 34). Lionel''s decision is pending. It blocks the merge per STOP G3.2, not this review. Once it is recorded in Decisions Recorded, QA has no objection to merging.'
 
 top_issues:
   - id: 'REQ-001'
     severity: medium
-    finding: 'Held-out recall drop on run E vs 10.1: Overall FN 64 -> 66, ORG FN 28 -> 30, LOCATION 15 -> 16, PERSON 21 -> 20. Precision is up (P 0.5353 -> 0.7639, F1 0.6151 -> 0.7383). It is improved vs run C (70 -> 66) but still below baseline. Lionel''s decision is pending.'
-    suggested_action: 'Lionel decides on run E; record it in Decisions Recorded before merge.'
-    refs: ['docs/stories/10.2.overlap-dedup-org-role-filter.story.md:835']
+    finding: 'Held-out recall drop on run G vs 10.1: Overall FN 64 -> 70, ORG FN 28 -> 34 (R 0.4510 -> 0.3333), LOCATION 15 -> 16, PERSON 21 -> 20. Precision is up (P 0.5353 -> 0.7523, F1 0.6151 -> 0.7236). Lionel''s decision is pending.'
+    suggested_action: 'Lionel decides on run G; record it in Decisions Recorded before merge.'
+    refs: ['docs/qa/ner-accuracy-report.md (Story 10.2, Held-out set)']
     suggested_owner: po
-  - id: 'V3-001'
-    severity: medium
-    finding: 'The V3 containment cut drops everything outside the inner name''s clause, including org names that have no detection of their own. QA probe: run-on ORG "Quentrix SA, Zorbalia Conseil, et Vardel Group" with only "Zorbalia Conseil" detected gives "Zorbalia Conseil"; "Quentrix SA" and "Vardel Group" become unreplaced, while run C kept them covered. This plain single-inner case is not one of the two documented known gaps. It occurs 0 times on the main corpus (verified). The CHANGELOG example describes exactly this shape as a benefit; the story''s coverage invariant still lists only the C1/C2 exceptions; and the random invariant test draws PERSON/LOCATION only, so V3 is never exercised by it.'
-    suggested_action: 'Either guard the cut (refuse it when the removed part holds an upper-case letter or digit not covered by another kept same-type entity), or have Lionel accept it as a third invariant exception. If accepted, document it in the story invariant and Handoff to 10.3, reword the CHANGELOG example, and extend the random invariant test to ORG.'
-    refs: ['gdpr_pseudonymizer/nlp/hybrid_detector.py:820-834', 'CHANGELOG.md:19', 'docs/stories/10.2.overlap-dedup-org-role-filter.story.md:389', 'tests/unit/test_hybrid_overlap_role_filter.py:600']
-    suggested_owner: po
-  - id: 'REL-002'
+  - id: 'REL-003'
     severity: low
-    finding: 'The period guard treats abbreviations of 3+ letters ("Corp.", "Inc.", "Cie.") as sentence ends. QA probe: "Zorb Corp. Holding Quentrix" with inner "Holding Quentrix" is cut to "Holding Quentrix", which uncovers "Zorb Corp.". The guard is otherwise correct as specified (short words, all-caps words, titles and digits are skipped).'
-    suggested_action: 'Decide in 10.3 whether to treat a capitalised word followed by "." and a capitalised continuation inside one ORG as a non-boundary, or to add generic legal-form abbreviations with a why.'
-    refs: ['gdpr_pseudonymizer/nlp/hybrid_detector.py:59-82']
+    finding: 'Pre-existing since run B: rule 1 treats overlapping same-type spans with equal keys as a tie even when their cores sit at different positions, so one is dropped and its extra text is uncovered. Found by QA fuzz. Probe: "Zorbalia et Zorbalia et Zorbalia" with spans [0,20) and [12,32) keeps only [0,20), so the third "Zorbalia" is unreplaced (PERSON and ORG). Pathological repeated text, but it breaks the coverage invariant.'
+    suggested_action: 'Apply the key-equal tie only when one core contains the other; otherwise use the union. Add the case to the random invariant test.'
+    refs: ['gdpr_pseudonymizer/nlp/hybrid_detector.py (_resolve_same_type_pair_base, rule 1)']
     suggested_owner: dev
-  - id: 'DOC-004'
+  - id: 'REL-004'
     severity: low
-    finding: 'QA report says held-out recall is below baseline by "overall −2 FN, ORG −2 FN". The FN counts rose by 2 (64 -> 66, 28 -> 30), so the minus sign reads backwards. The story words it correctly.'
-    suggested_action: 'Write "+2 FN".'
-    refs: ['docs/qa/ner-accuracy-report.md:692']
+    finding: 'By design (Lionel''s rule text excepts sentence-start words): a V3 cut may discard an uncovered capitalised word that starts a sentence. Probe: "Nous avons conclu. Quentrix, Zorbalia Conseil" with a run-on ORG and "Zorbalia Conseil" detected gives "Zorbalia Conseil"; "Quentrix" is unreplaced. Documented residual risk.'
+    suggested_action: '10.3: consider dropping the sentence-start exception, or limiting it to common sentence-initial function words.'
+    refs: ['docs/stories/10.2.overlap-dedup-org-role-filter.story.md:402']
+    suggested_owner: po
+  - id: 'PERF-002'
+    severity: low
+    finding: 'Guard passes grow with the depth of a chain of refused cuts. Adversarial nested chain of run-on ORG spans: n=20 gives 12 passes, 0.025 s; n=80 gives 42 passes, 1.2 s; n=200 gives 102 passes, 19.7 s. The fuzz of realistic shapes needs at most 10 passes, at most 5 ms per case, and the main corpus is unaffected.'
+    suggested_action: 'Cap the number of passes, then refuse every remaining V3 cut that discards capitalised words (same safety, bounded time).'
+    refs: ['gdpr_pseudonymizer/nlp/hybrid_detector.py (_dedup_same_type_overlaps pass loop)']
+    suggested_owner: dev
+  - id: 'DOC-005'
+    severity: low
+    finding: 'The story coverage invariant still lists only C1 and C2 as exceptions, not the guarded V3 cut with its title and sentence-start exceptions. The random invariant test still draws PERSON/LOCATION only; the guard is covered by dedicated tests. The PR body cites pre-rebase SHAs (d2631f2, 28b240f, b918291, ...) no longer on the branch.'
+    suggested_action: 'Update the invariant text; add ORG to the random invariant test; map the SHAs in the PR body to their rebased equivalents, or note that they are pre-rebase.'
+    refs: ['docs/stories/10.2.overlap-dedup-org-role-filter.story.md:393', 'tests/unit/test_hybrid_overlap_role_filter.py:600', 'PR #81 body']
     suggested_owner: dev
   - id: 'TEST-002'
     severity: low
-    finding: 'The mappings.db xdist race in tests/integration/test_pdf_docx_processing.py now fails on Linux too. CI 37236257731 at 8e36776: attempt 1 failed on ubuntu 3.10 and 3.11; the single allowed rerun failed again on ubuntu 3.10. All failures are in that file; the other ~1972 tests passed. QA accepts G6 because two later heads with identical code and tests are green 9/9 on their first attempt (690f981 run 37237306349, 99d63b7 run 37239021486), and the story records the sequence.'
-    suggested_action: 'Open a tracking issue and fix the test isolation (per-test temporary mappings.db), so that green CI stops depending on reruns.'
+    finding: 'The mappings.db xdist race in tests/integration/test_pdf_docx_processing.py (carried over) is left for a separate PR, as recorded.'
+    suggested_action: 'Separate PR: per-test temporary mappings.db.'
     refs: ['tests/integration/test_pdf_docx_processing.py']
     suggested_owner: dev
 
-resolved_since_d2631f2:
-  - 'DOC-001: CHANGELOG and PR body coverage wording now accurate (3 losses, 1 other-type-only miss)'
-  - 'REL-001: place search anchored with (?<!\w)/(?!\w); unit test added'
-  - 'REQ-002: adjacent places with no connector stay separate; unit test added'
-  - 'PERF-001: active window; QA re-measure 1k 0.005 s, 16k 0.090 s (linear); run D identical to run C'
-  - 'MNT-001: class docstring, Logging notes and Pseudonym Continuity item 4 updated'
-  - 'DOC-002: script change in 936f0c5 recorded'
-  - 'DOC-003: macOS rerun of 37228616068 recorded'
-  - 'TEST-001: test renamed to test_merge_entities_containment_same_type'
+resolved_since_28b240f:
+  - 'V3-001: precise guard. Probes: a list with only the middle name detected stays whole; a fully detected list is cut into its names; a mixed list stays whole; a cover by a span that is itself cut stays whole; the former chain and union gaps are fixed. Fuzz: 3,000 random ORG sets, 0 guard-caused uncovering, 0 order dependence.'
+  - 'REL-002: abbreviation periods ("Corp.") are not sentence ends; probe and unit test.'
+  - 'DOC-004: held-out FN wording fixed.'
 
-quality_score: 80
-expires: '2026-10-19T10:00:00Z'
+quality_score: 90
+expires: '2026-10-20T12:00:00Z'
 
 evidence:
-  runs_downloaded: ['37189862679', '37212585445', '37212993514', '37227245274', '37233261519', '37236253941']
+  runs_downloaded: ['37189862679', '37212585445', '37212993514', '37227245274', '37233261519', '37236253941', '37267364891', '37371866394']
   metric_lines_checked:
-    story: '40/40 match'
-    qa_report: '44/48 match; the 4 mismatches are the pre-existing 10.1 "before" lines (run 37013929807)'
-    changelog: 'all numbers match run E vs baseline'
-    pr_body: 'all numbers, run IDs and heads match (D 9046eab, E 8e36776)'
-    run_d_vs_run_c: 'identical, 8/8 lines'
-  head_vs_run_e_code: '8e36776..99d63b7 changes nothing under gdpr_pseudonymizer/, tests/, scripts/ or .github/'
-  g3_run_e_fn_delta: 'PERSON +21 (bound +21), LOCATION +4 (bound +4), ORG +4 (bound +16), Overall 474 (bound 486)'
+    story: '56/56 match'
+    qa_report: '52/56 match; the 4 mismatches are the pre-existing 10.1 "before" lines (run 37013929807)'
+    changelog: 'all numbers match run G vs baseline'
+    pr_body: 'all numbers and run/head IDs match'
+    run_f_vs_run_c: 'identical, 8/8 lines'
+    run_g_held_out_vs_run_c: 'identical, 4/4 lines'
+  rebase: '6bbde14 is an ancestor of 0008c6b; ecef3f3 -> 0008c6b changes nothing under gdpr_pseudonymizer/, scripts/, tests/accuracy/, tests/test_corpus/, .github/ or the two hybrid test files; the non-doc diff equals PR #80 file for file (test_hybrid_detector.py end_pos fix already present)'
+  g3_run_g_fn_delta: 'PERSON +21 (bound +21), LOCATION +4 (bound +4), ORG +10 (bound +16), Overall 480 (bound 486)'
   g4_diff: 'empty'
-  local_reproduction: 'QA run-E dump reproduces 37236253941 exactly (2,243 detections, 0 offset mismatches); AC5 345 drops / 87 baseline TPs (61/14/12) confirmed'
-  coverage_check: 'QA script: new misses PERSON 22 / ORG 6 same-type; LOCATION 8 same-type, 1 other-type only, 1 already uncovered; lost vs baseline: same 3 (TechSolutions @42 partial, Pierre, BRS), none new'
-  tests_run_locally: '140 passed, 2 xfailed (strict known-gap tests) on Windows; ruff, black, mypy clean'
-  ci_at_head: '99d63b7 run 37239021486: 9/9 green, first attempt'
-  known_gap_xfails: 'correct (they assert the desired coverage and use strict=True), documented as handoff to 10.3, non-blocking in CI'
+  local_reproduction: 'QA run-G dump reproduces 37371866394 exactly (2,243 detections, 0 offset mismatches); AC5 339 drops / 87 baseline TPs (61/14/12)'
+  coverage_check: 'QA script: new misses PERSON 22 / ORG 10 same-type; LOCATION 8 same-type, 1 other-type only, 1 already uncovered; lost vs baseline: same 3 (TechSolutions @42 partial, Pierre, BRS), none new'
+  tests_run_locally: '155 passed (two hybrid test files + leakage guard, Windows); ruff, black, mypy clean'
+  ci_at_head: '0008c6b run 37374482917: attempt 1 macOS "hosted runner lost communication" (infrastructure); attempt 2 green on every leg; all PR checks pass'
   trace:
     ac_covered: [1, 2, 3, 4, 6, 7, 8]
     ac_gaps: [5]
@@ -79,28 +80,26 @@ evidence:
 
 nfr_validation:
   security:
-    status: CONCERNS
-    notes: 'No new log text and safe YAML loading. Privacy: V3 can uncover org names that have no detection of their own (V3-001), and two documented xfail gaps exist. 0 occurrences on the main corpus; needs Lionel''s explicit acceptance or a guard.'
+    status: PASS
+    notes: 'The precise guard prevents V3 from uncovering names that have no detection of their own (verified). Residual low risks: sentence-start exception (REL-004, by design) and the pre-existing equal-key tie (REL-003, pathological). Same 3 disclosed losses vs v2.2.'
   performance:
     status: CONCERNS
-    notes: 'The dedup is now linear (QA re-measured). NFR1 evidence is still local only; the CI perf job is vacuous until PR #82 merges.'
+    notes: 'NFR1 evidence is still local only (CI perf job vacuous until PR #82). Dedup is linear on realistic input; adversarial deep chains cost many guard passes (PERF-002).'
   reliability:
     status: PASS
-    notes: 'Deterministic (50-shuffle probe gives 1 outcome); offsets sliced from the document; CRLF handled; PERSON and LOCATION never cut. CI flake is test isolation, not detector code (TEST-002).'
+    notes: 'Deterministic and order-independent (fuzz plus unit test); terminates; offsets sliced from the document; PERSON and LOCATION never cut.'
   maintainability:
     status: PASS
-    notes: 'Docstrings and story notes refreshed; V3 is in small helpers with unit tests per boundary kind and per guard.'
+    notes: 'Guard algorithm documented step by step in the story rule text and docstrings; dedicated unit tests per behaviour.'
 
 recommendations:
   immediate:
-    - action: 'Record Lionel''s held-out decision on run E'
+    - action: 'Record Lionel''s held-out decision on run G'
       refs: ['docs/stories/10.2.overlap-dedup-org-role-filter.story.md (Decisions Recorded)']
-    - action: 'Resolve V3-001: guard the cut, or record Lionel''s acceptance and fix the CHANGELOG example and the invariant text'
-      refs: ['gdpr_pseudonymizer/nlp/hybrid_detector.py:820-834', 'CHANGELOG.md:19']
   future:
-    - action: 'REL-002 abbreviation guard; fix the two strict-xfail gaps (10.3)'
-      refs: ['gdpr_pseudonymizer/nlp/hybrid_detector.py:59-82', 'tests/unit/test_hybrid_overlap_role_filter.py:768', 'tests/unit/test_hybrid_overlap_role_filter.py:784']
-    - action: 'Fix the mappings.db test isolation (TEST-002); run performance.yaml after PR #82'
+    - action: 'REL-003 equal-key tie, REL-004 sentence-start exception, PERF-002 pass cap (10.3 or follow-up)'
+      refs: ['gdpr_pseudonymizer/nlp/hybrid_detector.py']
+    - action: 'DOC-005 invariant text, ORG in the random invariant test, PR body SHAs'
+      refs: ['docs/stories/10.2.overlap-dedup-org-role-filter.story.md:393', 'tests/unit/test_hybrid_overlap_role_filter.py:600']
+    - action: 'TEST-002 separate PR; run performance.yaml after PR #82'
       refs: ['tests/integration/test_pdf_docx_processing.py', '.github/workflows/performance.yaml']
-    - action: 'DOC-004 sign fix'
-      refs: ['docs/qa/ner-accuracy-report.md:692']
