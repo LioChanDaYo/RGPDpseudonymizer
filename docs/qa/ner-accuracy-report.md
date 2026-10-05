@@ -550,11 +550,11 @@ A blind cross-check was run before STOP C. An independent annotator (GPT-5.5 via
 - The edge-case category `title_with_name` was redefined (test-side) as PERSON annotations immediately preceded by a title, since titles are outside spans (GUIDELINES P2). It now covers 1,211 entities.
 - The README, FAQ, docs index and tutorials are not updated in this story (Epic 10 G7 interpretation). Public figures change once, at Epic 10 close-out.
 
-## Same-type overlap dedup + ORG role filter (Story 10.2, 2026-10-05)
+## Same-type overlap dedup + ORG role filter (Story 10.2, 2026-10-06)
 
 **Detector change, same ground truth.** No annotation, scorer or held-out change (G4): `git diff --stat main...HEAD -- tests/test_corpus/ tests/accuracy/` is empty. The ground truth is the 10.1 one (2,215 main-corpus annotations).
 
-**What changed in the detector (final version, run G):**
+**What changed in the detector (final version, run H):**
 - **ORG role filter (AC3).** An ORG detection whose whole normalized text is a role acronym (CTO, DRH, COMEX, …) or a VP form ("VP", "VP Sales", "VP Europe", …) is dropped. List: `gdpr_pseudonymizer/resources/org_role_filter.yaml`. When a dropped VP form names a place ("VP Europe"), the place is kept as a LOCATION detection.
 - **Same-type overlap dedup (AC1).** When two detections of the same type overlap, one span remains:
   - Containment keeps the containing span, except that the inner span wins when the extra words are all lower-case without digits (C1).
@@ -570,18 +570,33 @@ A blind cross-check was run before STOP C. An independent annotator (GPT-5.5 via
 
 **Sources (G1):**
 - Before: CI accuracy run `37189862679` (10.1 close-out, reproduced on `main` by `37199452557`).
-- **After (close-out): run G `37371866394`** (commit `ecef3f3`).
+- **After (close-out): run H `37385301566`** (commit `9f68da8`, branch rebased onto `main`). It is identical on every metric line to run G `37371866394`, with the same detections on the main corpus. Run H adds the REL-003 fix (equal text at shifted positions becomes a union) and the PERF-002 pass cap; neither changes a main-corpus detection.
+- The run heads below are pre-rebase commits. After the rebase onto `main` (PR #80) they are A `731b917`, B `9361645`, C `da41f82`, D `544e6d0`, E `765d9be`, F `dd6d32c` and G `d6ef7be`.
 - History:
   - run A `37212585445` (`01aca6e`): role filter without place emission;
   - run B `37212993514` (`ebf99a8`): first dedup version;
   - run C `37227245274` (`1550f54`): coverage-preserving dedup;
   - run D `37233261519` (`9046eab`): QA fixes, identical to C;
   - run E `37236253941` (`8e36776`): unguarded V3;
-  - run F `37267364891` (`0cbd962`): V3 with a blunt guard (metrics identical to C).
+  - run F `37267364891` (`0cbd962`): V3 with a blunt guard (metrics identical to C);
+  - run G `37371866394` (`ecef3f3`): precise guard, identical to run H.
 
 ### Lines from `accuracy-output.txt`, verbatim
 
-Run G (`37371866394`, close-out):
+Run H (`37385301566`, close-out):
+
+```
+[Overall] P=0.7735 R=0.7833 F1=0.7784 TP=1735 FP=508 FN=480 FN%=21.67 FP%=22.65
+[PERSON] P=0.9173 R=0.9601 F1=0.9382 TP=1275 FP=115 FN=53
+[LOCATION] P=0.6572 R=0.7947 F1=0.7194 TP=209 FP=109 FN=54
+[ORG] P=0.4692 R=0.4022 F1=0.4331 TP=251 FP=284 FN=373
+[HELD-OUT Overall] P=0.7523 R=0.6970 F1=0.7236 TP=161 FP=53 FN=70 FN%=30.30 FP%=24.77
+[HELD-OUT PERSON] P=0.8598 R=0.8214 F1=0.8402 TP=92 FP=15 FN=20
+[HELD-OUT LOCATION] P=0.7536 R=0.7647 F1=0.7591 TP=52 FP=17 FN=16
+[HELD-OUT ORG] P=0.4474 R=0.3333 F1=0.3820 TP=17 FP=21 FN=34
+```
+
+History, run G (`37371866394`), identical to run H:
 
 ```
 [Overall] P=0.7735 R=0.7833 F1=0.7784 TP=1735 FP=508 FN=480 FN%=21.67 FP%=22.65
@@ -646,7 +661,7 @@ History, run B (`37212993514`):
 [HELD-OUT ORG] P=0.5385 R=0.4118 F1=0.4667 TP=21 FP=18 FN=30
 ```
 
-### Main corpus, before / after (run G)
+### Main corpus, before / after (run H)
 
 | | Precision | Recall | F1 | TP | FP | FN |
 |---|---|---|---|---|---|---|
@@ -663,8 +678,8 @@ History, run B (`37212993514`):
 
 | Runs | PERSON ΔTP / ΔFP | LOCATION ΔTP / ΔFP | ORG ΔTP / ΔFP | Overall ΔTP / ΔFP |
 |---|---|---|---|---|
-| Final: `37189862679` → `37371866394` | −21 / −184 | −4 / −43 | −10 / −149 | −35 / −376 |
-| Precise-guarded V3 alone: `37267364891` → `37371866394` | 0 / 0 | 0 / 0 | +6 / −2 | +6 / −2 |
+| Final: `37189862679` → `37385301566` | −21 / −184 | −4 / −43 | −10 / −149 | −35 / −376 |
+| Precise-guarded V3 alone: `37267364891` → `37385301566` | 0 / 0 | 0 / 0 | +6 / −2 | +6 / −2 |
 | History, unguarded V3: `37189862679` → `37236253941` | −21 / −184 | −4 / −43 | −4 / −155 | −29 / −382 |
 | History, role filter without place emission: `37189862679` → `37212585445` | 0 / 0 | 0 / 0 | 0 / −134 | 0 / −134 |
 | History, first dedup version: `37212585445` → `37212993514` | −16 / −187 | −10 / −44 | −13 / −15 | −39 / −246 |
@@ -672,21 +687,21 @@ History, run B (`37212993514`):
 ### Recall (G3)
 
 - FN versus `37189862679`: PERSON +21, LOCATION +4, ORG +10 (overall 445 → 480).
-- Lionel accepted up to PERSON +21 / LOCATION +4 / ORG +16 (recorded in the story). Run G is within these bounds.
+- Lionel accepted up to PERSON +21 / LOCATION +4 / ORG +16 (recorded in the story). Run H is within these bounds.
 
-**Coverage, main corpus (local check on a dump that reproduces run G exactly; details in the story):**
+**Coverage, main corpus (local check on a dump that reproduces run H exactly; details in the story):**
 - The new misses are boundary changes: a span of the same type still covers the name. The exception is one LOCATION miss, which is covered only by a detection of another type.
 - 3 annotations lose coverage compared with v2.2. One organisation name is partly uncovered (a span merged across a heading, then cut at the line break). Two short names were covered in v2.2 only by accident, inside a wrong-type span.
 - All three are handed to story 10.3. The V3 cut adds no coverage loss.
 
-**Overlap-dropped TPs (AC5).** Source: local instrumented dump, which reproduces run G TP/FP/FN exactly (`scripts/accuracy_dump_detections.py --record-dedup`, commit `ecef3f3`).
+**Overlap-dropped TPs (AC5).** Source: local instrumented dump, which reproduces run H TP/FP/FN exactly (`scripts/accuracy_dump_detections.py --record-dedup`, commit `9f68da8`).
 - The dedup removed or replaced 339 input detections (PERSON 245, LOCATION 59, ORG 35).
 - 87 of them were TPs in the baseline dump: PERSON 61, LOCATION 14, ORG 12.
 - The net FN delta from the CI lines is +21 / +4 / +10.
 
 ### Held-out set (G5)
 
-Aggregates only. Run G (`37371866394`):
+Aggregates only. Run H (`37385301566`):
 
 ```
 [HELD-OUT Overall] P=0.7523 R=0.6970 F1=0.7236 TP=161 FP=53 FN=70 FN%=30.30 FP%=24.77
@@ -706,13 +721,13 @@ Versus run E (`37236253941`, unguarded V3):
 - ORG FN 30 → 34.
 - PERSON and LOCATION unchanged.
 
-Run G's held-out lines are identical to runs C and F. The held-out gain of run E came only from cuts that dropped names with no detection of their own, which the precise guard refuses. Small-sample note: held-out ORG has 51 annotations, so 1 ORG FN ≈ 2 points of ORG recall (PERSON 112, LOCATION 68). Under the story, the held-out recall drop blocks the merge until Lionel's decision is recorded.
+Run H's held-out lines are identical to runs C, F and G. The held-out gain of run E came only from cuts that dropped names with no detection of their own, which the precise guard refuses. Small-sample note: held-out ORG has 51 annotations, so 1 ORG FN ≈ 2 points of ORG recall (PERSON 112, LOCATION 68). Lionel accepted this held-out recall drop on 2026-10-06 (recorded in the story); it is tracked in story 10.3.
 
 ### Performance (NFR1): local benchmark, CI perf job vacuous (separate fix PR)
 
 - The performance workflow currently runs no test. Run `37213019377` is green, but its pytest steps abort at plugin load (pytest-qt), and `| tee` hides the exit code. The same holds on `main` (`36635484755`). PR #82 fixes the workflow.
 - Informational local single-document benchmark (Windows, 34 rounds; NFR1 threshold 30 s): all means stay between 0.4 s and 1.6 s. The story has the before/after table, measured back to back with `d4b7105` on the same machine.
-- The dedup walk uses an active window, so it scales linearly (unit-tested). The precise guard adds a pass only when a cut must be refused.
+- The dedup walk uses an active window, so it scales linearly (unit-tested). The precise guard adds a pass only when a cut must be refused, with at most 16 refusal passes (QA PERF-002).
 
 ### Notes
 

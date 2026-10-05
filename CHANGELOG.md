@@ -21,7 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Job titles are not organisations.** Role acronyms (CTO, CFO, DRH, DPO, RSSI, COMEX, …) and VP titles ("VP", "VP Sales", "VP Europe") are no longer offered as ORG.
     - The list is in `gdpr_pseudonymizer/resources/org_role_filter.yaml`. Real organisations with acronym names (CNIL, ANSSI, BNP, EY) are not affected.
     - The place in a VP title is still offered, as a location ("VP Europe" → "Europe").
-  - **Numbers.** CI accuracy run `37371866394` vs `37189862679`, same ground truth:
+  - **Numbers.** CI accuracy run `37385301566` vs `37189862679`, same ground truth:
     - precision 66.69% → 77.35%, recall 79.91% → 78.33%, F1 72.70% → 77.84%;
     - false positives 884 → 508;
     - PERSON F1 88.68% → 93.82%, LOCATION 67.83% → 71.94%, ORG 39.61% → 43.31%.
