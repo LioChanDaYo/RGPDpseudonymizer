@@ -61,7 +61,7 @@ def segment(cls, ent, anchor, text):
 
 
 def make(types, union_too):
-    def resolve(cls, a, b, text=None):
+    def resolve(cls, a, b, text=None, v3=None):
         res, reason = ORIG(cls, a, b, text)
         if a.entity_type not in types:
             return res, reason

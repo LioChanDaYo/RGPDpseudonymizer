@@ -660,10 +660,11 @@ class TestSameTypeDedup:
 
 
 class TestOrgSegmentTrim:
-    """V3 (Lionel 2026-10-04) with its guard (Lionel 2026-10-05).
+    """V3 (Lionel 2026-10-04) with its precise guard (Lionel 2026-10-05).
 
-    ORG spans are cut at clause boundaries, but a cut may only discard text
-    with no capitalised word; titles and sentence-start words are excepted.
+    ORG spans are cut at clause boundaries. A cut may discard a capitalised
+    word only if another kept ORG span covers it; titles and sentence-start
+    words are excepted.
     """
 
     @staticmethod
@@ -735,6 +736,59 @@ class TestOrgSegmentTrim:
         for name in ("Quentrix SA", "Zorbalia Conseil", "Vardel Group"):
             pos = doc.index(name)
             assert any(e.start_pos <= pos < e.end_pos for e in merged), name
+
+    def test_list_with_every_name_detected_is_cut(
+        self, detector: HybridDetector
+    ) -> None:
+        # Precise guard: every discarded name is covered by its own kept span.
+        doc = "Quentrix SA, Zorbalia Conseil, et Vardel Group"
+        outer = _ent(doc, "ORG", 0, "regex")
+        names = [
+            _ent(n, "ORG", doc.index(n), "spacy")
+            for n in ("Quentrix SA", "Zorbalia Conseil", "Vardel Group")
+        ]
+        merged = detector._merge_entities(names, [outer], doc)
+        assert [e.text for e in merged] == [
+            "Quentrix SA",
+            "Zorbalia Conseil",
+            "Vardel Group",
+        ]
+
+    def test_mixed_list_is_not_cut(self, detector: HybridDetector) -> None:
+        # "Vardel Group" has no detection of its own: the cut is refused and
+        # the run-on span keeps every name covered.
+        doc = "Quentrix SA, Zorbalia Conseil, et Vardel Group"
+        outer = _ent(doc, "ORG", 0, "regex")
+        names = [
+            _ent(n, "ORG", doc.index(n), "spacy")
+            for n in ("Quentrix SA", "Zorbalia Conseil")
+        ]
+        merged = detector._merge_entities(names, [outer], doc)
+        assert [e.text for e in merged] == [doc]
+
+    def test_precise_guard_does_not_depend_on_input_order(
+        self, detector: HybridDetector
+    ) -> None:
+        import random
+
+        doc = "Quentrix SA, Zorbalia Conseil, et Vardel Group; Morrix SA, lot 4"
+        base = [
+            _ent(doc[:46], "ORG", 0, "regex"),
+            _ent("Quentrix SA", "ORG", 0, "spacy"),
+            _ent("Zorbalia Conseil", "ORG", 13, "spacy"),
+            _ent(doc[48:], "ORG", 48, "regex"),
+            _ent("Morrix SA", "ORG", 48, "spacy"),
+        ]
+        expected = [
+            (e.text, e.start_pos)
+            for e in detector._dedup_same_type_overlaps(list(base), doc)
+        ]
+        rng = random.Random(7)
+        for _ in range(20):
+            shuffled = list(base)
+            rng.shuffle(shuffled)
+            out = detector._dedup_same_type_overlaps(shuffled, doc)
+            assert sorted((e.text, e.start_pos) for e in out) == sorted(expected)
 
     def test_signature_block_is_not_cut(self, detector: HybridDetector) -> None:
         doc = "Cordialement,\n\nZorbalia Quentin\nDirectrice\nQuentrix SA"

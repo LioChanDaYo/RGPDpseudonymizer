@@ -102,13 +102,16 @@ def _clause_boundaries(raw: str) -> list[tuple[int, int]]:
     return found
 
 
-def _discards_capitalised_word(context: str, regions: list[tuple[int, int]]) -> bool:
-    """Whether any region of ``context`` holds a capitalised word (V3 guard).
+def _capitalised_words(
+    context: str, regions: list[tuple[int, int]]
+) -> list[tuple[int, int]]:
+    """(start, end) of the capitalised words inside ``regions`` (V3 guard).
 
     Excepted: a title from the French title pattern (it is not a name), and
     the first word of a sentence, i.e. a word whose preceding non-space text
     in ``context`` ends with a sentence period (``_is_sentence_period``).
     """
+    found: list[tuple[int, int]] = []
     for start, end in regions:
         for match in _WORD_RE.finditer(context, start, end):
             word = match.group()
@@ -119,8 +122,32 @@ def _discards_capitalised_word(context: str, regions: list[tuple[int, int]]) -> 
             before = context[: match.start()].rstrip()
             if before.endswith(".") and _is_sentence_period(context, len(before) - 1):
                 continue
-            return True
-    return False
+            found.append((match.start(), match.end()))
+    return found
+
+
+PairKey = tuple[tuple[str, int, int, str, str], tuple[str, int, int, str, str]]
+
+
+@dataclass
+class _V3Pass:
+    """State of one dedup pass for the precise V3 guard.
+
+    ``refused``: pairs whose V3 cut is refused in this pass (they keep their
+    run-C result). ``cuts``: the V3 cuts applied in this pass that discard
+    capitalised words, as (pair, entity type, discarded word spans).
+    """
+
+    refused: frozenset[PairKey]
+    cuts: list[tuple[PairKey, str, list[tuple[int, int]]]]
+
+
+def _pair_key(a: DetectedEntity, b: DetectedEntity) -> PairKey:
+    """Value identity of a resolved pair (stable across dedup passes)."""
+    return (
+        (a.entity_type, a.start_pos, a.end_pos, a.source, a.text),
+        (b.entity_type, b.start_pos, b.end_pos, b.source, b.text),
+    )
 
 
 def _role_token_spans(text: str) -> list[tuple[str, int, int]]:
@@ -848,7 +875,11 @@ class HybridDetector(EntityDetector):
 
     @classmethod
     def _resolve_same_type_pair(
-        cls, a: DetectedEntity, b: DetectedEntity, text: str | None = None
+        cls,
+        a: DetectedEntity,
+        b: DetectedEntity,
+        text: str | None = None,
+        v3: _V3Pass | None = None,
     ) -> tuple[DetectedEntity | None, str]:
         """Pairwise decision, with the ORG segment trim (Story 10.2, V3).
 
@@ -858,6 +889,12 @@ class HybridDetector(EntityDetector):
         inner core, when that segment still contains the inner core (reason
         ``containment_outer_trimmed_boundary``). A union is cut the same way
         around the overlap of the two cores (``partial_overlap_union_trimmed``).
+
+        Precise guard (Lionel, 2026-10-05): a cut whose discarded text holds
+        capitalised words is applied provisionally and recorded in ``v3``;
+        ``_dedup_same_type_overlaps`` refuses it afterwards if a discarded
+        word is not covered by a kept same-type span. A refused pair (or any
+        such cut when ``v3`` is None) keeps its base (run-C) result.
         """
         result, reason = cls._resolve_same_type_pair_base(a, b, text)
         if a.entity_type not in _SEGMENT_TRIM_TYPES or result is None:
@@ -868,26 +905,60 @@ class HybridDetector(EntityDetector):
             outer, inner = (a, b) if a_contains else (b, a)
             inner_core = cls._dedup_core(inner)
             segment = cls._clause_segment(outer, inner_core, text)
-            if segment is not None and not cls._cut_discards_name(outer, segment, text):
+            if segment is not None:
                 sc = cls._dedup_core(segment)
-                if sc[0] <= inner_core[0] and inner_core[1] <= sc[1]:
+                if (
+                    sc[0] <= inner_core[0]
+                    and inner_core[1] <= sc[1]
+                    and cls._cut_allowed(a, b, outer, segment, text, v3)
+                ):
                     return segment, "containment_outer_trimmed_boundary"
         elif reason == "partial_overlap_union":
             anchor = (max(ca[0], cb[0]), min(ca[1], cb[1]))
             segment = cls._clause_segment(result, anchor, text)
-            if segment is not None and not cls._cut_discards_name(
-                result, segment, text
+            if segment is not None and cls._cut_allowed(
+                a, b, result, segment, text, v3
             ):
                 return segment, "partial_overlap_union_trimmed"
         return result, reason
 
     @classmethod
-    def _cut_discards_name(
-        cls, entity: DetectedEntity, segment: DetectedEntity, text: str | None
+    def _cut_allowed(
+        cls,
+        a: DetectedEntity,
+        b: DetectedEntity,
+        entity: DetectedEntity,
+        segment: DetectedEntity,
+        text: str | None,
+        v3: _V3Pass | None,
     ) -> bool:
-        """V3 guard (Lionel, 2026-10-05): a cut may only discard text with no
-        capitalised word, titles and sentence-start words excepted. The words
-        are read in the document when available, else in the entity text."""
+        """Whether a V3 cut of ``entity`` to ``segment`` may be applied now.
+
+        A cut that discards no capitalised word is always allowed. Otherwise
+        it is allowed provisionally (and recorded) unless the pair is already
+        refused; outside a dedup pass (``v3`` None) it is refused.
+        """
+        words = cls._discarded_name_words(entity, segment, text)
+        if not words:
+            return True
+        if v3 is None:
+            return False
+        key = _pair_key(a, b)
+        if key in v3.refused:
+            return False
+        v3.cuts.append((key, entity.entity_type, words))
+        return True
+
+    @classmethod
+    def _discarded_name_words(
+        cls, entity: DetectedEntity, segment: DetectedEntity, text: str | None
+    ) -> list[tuple[int, int]]:
+        """Document offsets of the capitalised words a cut would discard.
+
+        Titles and sentence-start words are excepted (``_capitalised_words``).
+        Words are read in the document when available, else in the entity
+        text.
+        """
         if text is not None and entity.end_pos <= len(text):
             context, offset = text, 0
         else:
@@ -896,7 +967,10 @@ class HybridDetector(EntityDetector):
             (entity.start_pos - offset, segment.start_pos - offset),
             (segment.end_pos - offset, entity.end_pos - offset),
         ]
-        return _discards_capitalised_word(context, regions)
+        return [
+            (start + offset, end + offset)
+            for start, end in _capitalised_words(context, regions)
+        ]
 
     @classmethod
     def _resolve_same_type_pair_base(
@@ -947,6 +1021,53 @@ class HybridDetector(EntityDetector):
     ) -> list[DetectedEntity]:
         """Keep one entity per same-type overlap (Story 10.2, AC1).
 
+        Runs ``_dedup_walk`` in passes for the precise V3 guard (Lionel,
+        2026-10-05). After each pass, every applied V3 cut that discarded
+        capitalised words is checked against the kept entities: each such
+        word must lie inside a kept span of the same type. Failing cuts are
+        added to the refused set and the walk is run again from the start.
+        The refused set only grows and is bounded by the number of pairs, so
+        the loop terminates; each walk is deterministic (sorted input), so the
+        result does not depend on the input order. Only the final pass logs.
+
+        Args:
+            entities: Merged, filtered entity list
+            text: Document text (see ``_merge_entities``)
+
+        Returns:
+            Entity list without same-type overlaps (order not guaranteed)
+        """
+        refused: frozenset[PairKey] = frozenset()
+        while True:
+            v3 = _V3Pass(refused=refused, cuts=[])
+            kept, events = self._dedup_walk(entities, text, v3)
+            failing = {
+                key
+                for key, entity_type, words in v3.cuts
+                if not all(
+                    any(
+                        k.entity_type == entity_type
+                        and k.start_pos <= ws
+                        and we <= k.end_pos
+                        for k in kept
+                    )
+                    for ws, we in words
+                )
+            }
+            if not failing:
+                for kept_e, dropped_e, reason in events:
+                    self._log_dedup(kept_e, dropped_e, reason)
+                return kept
+            refused = refused | failing
+
+    def _dedup_walk(
+        self,
+        entities: list[DetectedEntity],
+        text: str | None,
+        v3: _V3Pass,
+    ) -> tuple[list[DetectedEntity], list[tuple[DetectedEntity, DetectedEntity, str]]]:
+        """One dedup pass; returns the kept entities and the log events.
+
         Walks entities by (start, -end, spaCy first). A new entity that loses
         to any kept same-type rival it conflicts with is dropped. When a pair
         resolves to a new span (union of a partial overlap, or an outer span
@@ -958,10 +1079,13 @@ class HybridDetector(EntityDetector):
         Args:
             entities: Merged, filtered entity list
             text: Document text (see ``_merge_entities``)
+            v3: Pass state of the precise V3 guard (refused pairs, cut record)
 
         Returns:
-            Entity list without same-type overlaps (order not guaranteed)
+            (kept entities without same-type overlaps, in insertion order;
+            the dedup log events of this pass)
         """
+        events: list[tuple[DetectedEntity, DetectedEntity, str]] = []
         ordered = sorted(
             entities, key=lambda e: (e.start_pos, -e.end_pos, e.source != "spacy")
         )
@@ -1000,7 +1124,9 @@ class HybridDetector(EntityDetector):
                         or current.end_pos <= other.start_pos
                     ):
                         continue
-                    result, reason = self._resolve_same_type_pair(other, current, text)
+                    result, reason = self._resolve_same_type_pair(
+                        other, current, text, v3
+                    )
                     if result is None:
                         continue
                     if result is other:
@@ -1012,22 +1138,23 @@ class HybridDetector(EntityDetector):
                     replaced = (item, result, reason)
                     break
                 if lost is not None:
-                    self._log_dedup(lost[0], current, lost[1])
+                    events.append((lost[0], current, lost[1]))
                     current = None
                 elif replaced is not None:
                     item, result, reason = replaced
                     self._remove_kept(item, active, retired)
-                    self._log_dedup(result, item[1], reason)
-                    self._log_dedup(result, current, reason)
+                    events.append((result, item[1], reason))
+                    events.append((result, current, reason))
                     current = result
                 else:
                     for item, reason in rivals:
                         self._remove_kept(item, active, retired)
-                        self._log_dedup(current, item[1], reason)
+                        events.append((current, item[1], reason))
                     active.append((seq, current))
                     seq += 1
                     current = None
-        return [e for _, e in sorted(active + retired, key=lambda item: item[0])]
+        kept = [e for _, e in sorted(active + retired, key=lambda item: item[0])]
+        return kept, events
 
     @staticmethod
     def _remove_kept(
