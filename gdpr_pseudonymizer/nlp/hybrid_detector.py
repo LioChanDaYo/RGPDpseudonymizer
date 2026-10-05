@@ -129,6 +129,15 @@ def _capitalised_words(
 PairKey = tuple[tuple[str, int, int, str, str], tuple[str, int, int, str, str]]
 
 
+# Cap on dedup passes for the precise V3 guard (QA PERF-002). Realistic input
+# needs at most about 10 passes (QA fuzz); only adversarial chains of nested
+# refused cuts need more (n=200 nested run-on spans took 102 passes). After
+# the cap, one last pass refuses every V3 cut that discards a capitalised
+# word: that is the blunt guard, which never uncovers a name, so the cap
+# bounds the time without giving up coverage.
+_MAX_GUARD_PASSES = 16
+
+
 @dataclass
 class _V3Pass:
     """State of one dedup pass for the precise V3 guard.
@@ -140,6 +149,7 @@ class _V3Pass:
 
     refused: frozenset[PairKey]
     cuts: list[tuple[PairKey, str, list[tuple[int, int]]]]
+    refuse_all: bool = False
 
 
 def _pair_key(a: DetectedEntity, b: DetectedEntity) -> PairKey:
@@ -941,7 +951,7 @@ class HybridDetector(EntityDetector):
         words = cls._discarded_name_words(entity, segment, text)
         if not words:
             return True
-        if v3 is None:
+        if v3 is None or v3.refuse_all:
             return False
         key = _pair_key(a, b)
         if key in v3.refused:
@@ -983,12 +993,18 @@ class HybridDetector(EntityDetector):
         both are kept (cores disjoint).
         """
         ca, cb = cls._dedup_core(a), cls._dedup_core(b)
-        equal = ca == cb or cls._dedup_key(a) == cls._dedup_key(b)
+        a_contains = ca[0] <= cb[0] and cb[1] <= ca[1]
+        b_contains = cb[0] <= ca[0] and ca[1] <= cb[1]
+        # Equal cores, or equal keys when one core contains the other (title or
+        # preposition variants). Equal text at two different, partly
+        # overlapping positions is not a tie (QA REL-003): it is a partial
+        # overlap and becomes a union below.
+        equal = ca == cb or (
+            cls._dedup_key(a) == cls._dedup_key(b) and (a_contains or b_contains)
+        )
         if not equal:
             if not (ca[0] < cb[1] and cb[0] < ca[1]):
                 return None, "cores_disjoint"
-            a_contains = ca[0] <= cb[0] and cb[1] <= ca[1]
-            b_contains = cb[0] <= ca[0] and ca[1] <= cb[1]
             if a_contains or b_contains:
                 outer, inner = (a, b) if a_contains else (b, a)
                 added = cls._containment_added_text(outer, inner)
@@ -1029,6 +1045,9 @@ class HybridDetector(EntityDetector):
         The refused set only grows and is bounded by the number of pairs, so
         the loop terminates; each walk is deterministic (sorted input), so the
         result does not depend on the input order. Only the final pass logs.
+        After ``_MAX_GUARD_PASSES`` passes, a last pass refuses every V3 cut
+        that discards a capitalised word (QA PERF-002), so the time is bounded
+        and coverage is kept.
 
         Args:
             entities: Merged, filtered entity list
@@ -1038,8 +1057,12 @@ class HybridDetector(EntityDetector):
             Entity list without same-type overlaps (order not guaranteed)
         """
         refused: frozenset[PairKey] = frozenset()
+        passes = 0
         while True:
-            v3 = _V3Pass(refused=refused, cuts=[])
+            passes += 1
+            v3 = _V3Pass(
+                refused=refused, cuts=[], refuse_all=passes > _MAX_GUARD_PASSES
+            )
             kept, events = self._dedup_walk(entities, text, v3)
             failing = {
                 key

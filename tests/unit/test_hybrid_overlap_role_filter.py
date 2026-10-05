@@ -574,8 +574,10 @@ class TestSameTypeDedup:
 
         Every character that carries a name (an upper-case letter or a digit
         inside an input entity's normalized core) stays covered by an output
-        entity of the same type. Documents have no line break here; the C2
-        trim is covered by its own tests. C1 only drops tokens without an
+        entity of the same type. Documents have no line break and no clause
+        punctuation here, so the C2 trim and the V3 cut do not fire; they have
+        their own tests, including an ORG property test with punctuation.
+        ORG is drawn too (QA DOC-005). C1 only drops tokens without an
         upper-case letter or digit, so it never uncovers such a character.
         """
         import random
@@ -597,7 +599,7 @@ class TestSameTypeDedup:
                 entities.append(
                     _ent(
                         doc[start:end],
-                        rng.choice(["PERSON", "LOCATION"]),
+                        rng.choice(["PERSON", "LOCATION", "ORG"]),
                         start,
                         rng.choice(["spacy", "regex"]),
                     )
@@ -922,3 +924,87 @@ class TestOrgSegmentTrim:
                             e,
                             out,
                         )
+
+
+class TestReviewThreeFixes:
+    """QA third review, fixed in 10.2 (Lionel, 2026-10-06)."""
+
+    @pytest.mark.parametrize("entity_type", ["PERSON", "ORG"])
+    def test_equal_text_at_shifted_positions_is_not_a_tie(
+        self, detector: HybridDetector, entity_type: str
+    ) -> None:
+        # REL-003: same text, different overlapping positions -> union, so the
+        # third "Zorbalia" stays covered.
+        doc = "Zorbalia et Zorbalia et Zorbalia"
+        a = _ent(doc[0:20], entity_type, 0, "spacy")
+        b = _ent(doc[12:32], entity_type, 12, "regex")
+        out = detector._dedup_same_type_overlaps([a, b], doc)
+        for pos in (0, 12, 24):
+            assert any(k.start_pos <= pos < k.end_pos for k in out), pos
+
+    @staticmethod
+    def _chain(n: int) -> tuple[str, list[DetectedEntity]]:
+        """n run-on ORG spans, each overlapping the next by one name."""
+        names = [f"Zorb{chr(65 + i % 26)}{i}" for i in range(n + 1)]
+        doc = ", ".join(names)
+        starts = [doc.index(name) for name in names]
+        entities = [
+            _ent(
+                doc[starts[i] : starts[i + 1] + len(names[i + 1])],
+                "ORG",
+                starts[i],
+                "regex" if i % 2 else "spacy",
+            )
+            for i in range(n)
+        ]
+        return doc, entities
+
+    def test_pass_cap_bounds_an_adversarial_chain(
+        self, detector: HybridDetector, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        # PERF-002: a chain of 200 overlapping run-on ORG spans keeps refusing
+        # cuts pass after pass; the cap stops it at _MAX_GUARD_PASSES + 1 walks.
+        import time
+
+        walks = {"n": 0}
+        original = HybridDetector._dedup_walk
+
+        def counting(self: HybridDetector, *args: Any, **kwargs: Any) -> Any:
+            walks["n"] += 1
+            return original(self, *args, **kwargs)
+
+        monkeypatch.setattr(HybridDetector, "_dedup_walk", counting)
+        doc, entities = self._chain(200)
+        start = time.perf_counter()
+        out = detector._dedup_same_type_overlaps(entities, doc)
+        elapsed = time.perf_counter() - start
+        assert walks["n"] == hd._MAX_GUARD_PASSES + 1
+        assert elapsed < 5.0, elapsed
+        assert out
+
+    def test_capped_result_is_coverage_safe(self, detector: HybridDetector) -> None:
+        doc, entities = self._chain(200)
+        out = detector._dedup_same_type_overlaps(entities, doc)
+        for pos, ch in enumerate(doc):
+            if ch.isupper():
+                assert any(k.start_pos <= pos < k.end_pos for k in out), pos
+
+    def test_two_hundred_nested_run_on_spans_finish_fast(
+        self, detector: HybridDetector
+    ) -> None:
+        import time
+
+        names = [f"Zorb{chr(65 + i % 26)}{i}" for i in range(201)]
+        doc = ", ".join(names)
+        starts = [doc.index(name) for name in names]
+        entities = [
+            _ent(doc[: starts[i] + len(names[i])], "ORG", 0, "regex")
+            for i in range(1, 201)
+        ]
+        entities.append(_ent(names[-1], "ORG", starts[-1], "spacy"))
+        start = time.perf_counter()
+        out = detector._dedup_same_type_overlaps(entities, doc)
+        assert time.perf_counter() - start < 5.0
+        for pos, ch in enumerate(doc):
+            if ch.isupper():
+                assert any(k.start_pos <= pos < k.end_pos for k in out), pos
