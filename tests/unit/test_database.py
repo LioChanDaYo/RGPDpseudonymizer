@@ -2,6 +2,7 @@
 
 import base64
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 from sqlalchemy import text
@@ -146,6 +147,55 @@ class TestDatabaseInitialization:
             # Verify operations table indexes
             assert "idx_operations_timestamp" in indexes
             assert "idx_operations_type" in indexes
+
+    def test_init_database_twice_same_path_keeps_existing_db(
+        self, tmp_path: Path
+    ) -> None:
+        """Calling init_database twice on one path leaves the first DB usable."""
+        db_path = tmp_path / "test.db"
+        passphrase = "test_passphrase_123!"
+
+        init_database(str(db_path), passphrase)
+        with pytest.raises(ValueError, match="Database already exists"):
+            init_database(str(db_path), passphrase)
+
+        # Existing DB survives the rejected second call, indexes intact
+        with open_database(str(db_path), passphrase) as db_session:
+            result = db_session.session.execute(
+                text(
+                    "SELECT name FROM sqlite_master "
+                    "WHERE type='index' AND name LIKE 'idx_%'"
+                )
+            )
+            assert len({row[0] for row in result}) == 7
+
+    def test_init_database_index_creation_idempotent(self, tmp_path: Path) -> None:
+        """Index DDL tolerates a DB whose indexes already exist (TEST-002).
+
+        Simulates two processes initializing the same new DB at once: both
+        pass the existence check before either has created the file. The
+        loser must not fail on "index ... already exists".
+        """
+        db_path = tmp_path / "test.db"
+        passphrase = "test_passphrase_123!"
+
+        init_database(str(db_path), passphrase)
+
+        # Bypass the existence guard to replay schema creation on the same file
+        with patch("gdpr_pseudonymizer.data.database.Path") as mock_path:
+            mock_path.return_value.exists.return_value = False
+            with pytest.raises(Exception) as exc_info:
+                init_database(str(db_path), passphrase)
+
+        # Schema + index steps pass; only the metadata insert collides
+        message = str(exc_info.value)
+        assert "already exists" not in message
+        assert "idx_" not in message
+        assert "metadata" in message
+
+        # First DB is still valid and opens with its passphrase
+        with open_database(str(db_path), passphrase) as db_session:
+            assert db_session.session.query(Metadata).count() == 4
 
     def test_init_database_canary_encrypted_correctly(self, tmp_path: Path) -> None:
         """Test passphrase canary is encrypted and stored correctly."""
