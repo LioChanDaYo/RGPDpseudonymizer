@@ -295,30 +295,34 @@ class TestWrappedNamePseudonymKey:
         assert (third.entities_new, third.entities_reused) == (0, 1)
         assert written.count(pseudonym) == 1
 
-    def test_row_stored_under_a_pre_fix_key_still_resolves(
+    def test_pre_fix_key_with_unusual_spacing_gets_one_stable_new_mapping(
         self, db_path: str, tmp_path: Path
     ) -> None:
-        # Continuity: a row stored before the fix under a key with a no-break
-        # space is still found for that spelling (fallback lookup), and no
-        # second row is created.
+        # Accepted upgrade behaviour (Lionel 2026-10-07, no fallback lookup):
+        # a row stored before the fix under a key with unusual spacing (here a
+        # no-break space) is not reused. The name gets one new single-space
+        # mapping once, and that mapping is stable from then on, whichever
+        # spelling a later document uses. The old row stays in the database.
         legacy = "Quentrix\u00a0Vardel"
         self._store_org(db_path, legacy, "Morrix Conseil")
-        text = f"le contrat est signé par {legacy}, avec le projet"
-        result, written = self._process(
-            db_path, tmp_path, text, "legacy", [_entity(legacy, "ORG", text)]
-        )
-        assert (result.entities_new, result.entities_reused) == (0, 1)
-        assert written == "le contrat est signé par Morrix Conseil, avec le projet"
-        assert self._stored(db_path) == [(legacy, "Morrix Conseil")]
+        prefix, suffix = "le contrat est signé par ", ", avec le projet"
 
-    def test_single_space_row_wins_over_a_pre_fix_row(
-        self, db_path: str, tmp_path: Path
-    ) -> None:
-        legacy = "Quentrix\u00a0Vardel"
-        self._store_org(db_path, legacy, "Morrix Conseil")
-        self._store_org(db_path, "Quentrix Vardel", "Zorbal Conseil")
-        text = f"le contrat est signé par {legacy}, avec le projet"
-        _, written = self._process(
-            db_path, tmp_path, text, "both", [_entity(legacy, "ORG", text)]
+        def run(name: str, doc: str) -> tuple[int, int, str]:
+            text = f"{prefix}{name}{suffix}"
+            result, written = self._process(
+                db_path, tmp_path, text, doc, [_entity(name, "ORG", text)]
+            )
+            assert written.startswith(prefix) and written.endswith(suffix)
+            pseudonym = written[len(prefix) : len(written) - len(suffix)]
+            return result.entities_new, result.entities_reused, pseudonym
+
+        new, reused, pseudonym = run(legacy, "upgrade")
+        assert (new, reused) == (1, 0)
+        assert pseudonym != "Morrix Conseil"
+        assert sorted(self._stored(db_path)) == sorted(
+            [(legacy, "Morrix Conseil"), ("Quentrix Vardel", pseudonym)]
         )
-        assert written == "le contrat est signé par Zorbal Conseil, avec le projet"
+
+        assert run(legacy, "again") == (0, 1, pseudonym)
+        assert run("Quentrix Vardel", "one_space") == (0, 1, pseudonym)
+        assert len(self._stored(db_path)) == 2

@@ -61,9 +61,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Speed.** The wrapped-name join no longer scans the whole candidate list once per person name. With 8,000 person candidates it took 4.9 s and now takes 0.04 s or less (same machine). Its output is unchanged.
   - **Detection is unchanged.** The main-corpus detections are identical (2,263), and CI accuracy run `37506971042` matches `37480506234` (main) on all eight metric lines, held-out included.
   - **Upgrading: pseudonym continuity.** The mapping schema is unchanged.
-    - A key with single spaces only is unchanged, so its row resolves as before. This is the case for every main-corpus detection.
-    - A row stored earlier under a key with other whitespace (for example a name written with a no-break space) is still found for that spelling while no row exists for the single-space spelling. New rows are always stored with single spaces.
-    - When both rows exist, the single-space row wins and the other spelling switches to its pseudonym. That is the fix (one person, one pseudonym), but the output for that spelling differs from earlier runs. Check such spots during validation.
+    - Names previously stored with unusual spacing (no-break space, line break, tab, double space) receive a new pseudonym once after upgrading; single-space names are unaffected. Every main-corpus detection has a single-space key.
+    - After that one change the new pseudonym is stable, whichever spacing a later document uses. New rows are always stored with single spaces. The old rows stay in the database but are no longer applied. Check such names during validation of the first documents processed after the upgrade.
 
 - **Accuracy benchmark repaired, held-out set added (Story 10.1, benchmark-only, same detector).**
   - The 25 annotation files were repaired by hand under written, approved guidelines (`tests/test_corpus/annotations/GUIDELINES.md`). This covers 96 truncated names, junk labels, missing organisations and places, and nested places in organisation names. Every edit is logged in `docs/qa/10.1-annotation-change-log.md`.
