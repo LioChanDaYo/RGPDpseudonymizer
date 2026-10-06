@@ -30,6 +30,12 @@ jobs:
   performance:
     runs-on: ubuntu-22.04
     timeout-minutes: 90
+    # Explicit `shell: bash` makes Actions run steps with `bash -eo pipefail`,
+    # so a failing pytest is not masked by `| tee` (the implicit default is
+    # `bash -e` without pipefail, which reported green on aborted runs).
+    defaults:
+      run:
+        shell: bash
 
     steps:
       - name: Checkout code
@@ -68,13 +74,16 @@ jobs:
       - name: Download spaCy model
         run: poetry run python -m spacy download fr_core_news_lg
 
+      # The performance tests do not use Qt. pytest-qt is a dev dependency but
+      # PySide6 is only installed with the `gui` extra, so pytest-qt aborts at
+      # plugin load ("requires either PySide6, PyQt5 or PyQt6"). Disable it.
       # Run non-benchmark performance tests (startup, stability, memory, stress)
       - name: Run stability and memory tests
         run: |
           poetry run pytest tests/performance/test_stability.py \
             tests/performance/test_memory_profiling.py \
             tests/performance/test_startup_time.py \
-            -v -s --timeout=600 -p no:benchmark \
+            -v -s --timeout=600 -p no:benchmark -p no:pytest-qt \
             --junitxml=performance-stability-results.xml \
             2>&1 | tee performance-stability-output.txt
 
@@ -82,7 +91,7 @@ jobs:
       - name: Run stress tests
         run: |
           poetry run pytest tests/performance/test_stress.py \
-            -v -s --timeout=1200 -p no:benchmark \
+            -v -s --timeout=1200 -p no:benchmark -p no:pytest-qt \
             --junitxml=stress-results.xml \
             2>&1 | tee stress-output.txt
 
@@ -100,12 +109,31 @@ jobs:
           fi
           poetry run pytest tests/performance/test_single_document_benchmark.py \
             tests/performance/test_batch_performance.py \
-            -v -s --timeout=3600 \
+            -v -s --timeout=3600 -p no:pytest-qt \
             --benchmark-only --benchmark-autosave \
             ${BENCH_MIN_ROUNDS} \
             --benchmark-json=benchmark-results.json \
             --junitxml=benchmark-results.xml \
             2>&1 | tee benchmark-output.txt
+
+      # Guard against vacuous green: the results file must exist and hold
+      # at least one benchmark.
+      - name: Verify benchmark results are non-empty
+        run: |
+          python - <<'PY'
+          import json, pathlib, sys
+          p = pathlib.Path("benchmark-results.json")
+          if not p.is_file() or p.stat().st_size == 0:
+              sys.exit("benchmark-results.json is missing or empty")
+          benchmarks = json.loads(p.read_text(encoding="utf-8")).get("benchmarks", [])
+          if not benchmarks:
+              sys.exit("benchmark-results.json contains zero benchmarks")
+          print(f"{len(benchmarks)} benchmarks recorded:")
+          for b in benchmarks:
+              st = b["stats"]
+              print(f"  {b['fullname']}: mean={st['mean']:.3f}s "
+                    f"median={st['median']:.3f}s rounds={st['rounds']}")
+          PY
 
       - name: Upload performance results
         uses: actions/upload-artifact@v4
