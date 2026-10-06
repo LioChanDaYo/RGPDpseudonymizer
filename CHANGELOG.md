@@ -11,6 +11,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Names and organisations no longer run across lines, clauses or lists (Story 10.3a).**
+  - **Line breaks end a name.** A detected name or organisation no longer carries the next line with it: a heading, a signature line ("Cordialement,"), or a job title under a name. The pattern-based detection joins name words only with spaces (including no-break spaces). A model detection that still crosses a line is cut into one candidate per line. Lines without a capital letter or digit are dropped, and every piece goes through the usual filters.
+  - **Organisation names stop at the name.** A pattern-detected organisation is now a run of up to six capitalised words. Lower-case "de", "du", "des", "la", "le", "et", "&" are allowed between them, and "d'" or "l'" are glued to the next word. A comma, the rest of a sentence, or a leading "La société …" / "Quand la direction de …" is no longer swallowed. For example, "Institut Zorbal à Zorbaville, notamment le Dr" now gives "Institut Zorbal", and "Quentrix SA, Vardel SA" gives two organisations.
+  - **Sentence starts are protected.** When a run-on organisation span is cut back to a clause, the first word of a sentence now counts as a possible name. The cut is refused if that word would be left unreplaced.
+  - **Hard-wrapped names.** A one-word person name at the end of a prose line is joined to the surname that starts the next line, so "… signé par Zorbalia⏎Quentrix, …" is offered as one candidate. This targets names wrapped by PDF text extraction. A blank line, punctuation at the line end, a second name or a "Label:" line prevent the join.
+  - **Numbers.** CI accuracy run `37459114468` vs `37385301566`, same ground truth:
+    - precision 77.35% → 77.64%, recall 78.33% → 79.32%, F1 77.84% → 78.47%;
+    - PERSON F1 93.82% → 93.87%, LOCATION 71.94% (unchanged), ORG 43.31% → 46.00%;
+    - misses 480 → 458 (PERSON 53 → 50, LOCATION 54 → 54, ORG 373 → 354), with no recall drop in any type.
+    - Held-out set (same run): F1 72.36% → 76.44%, recall 69.70% → 74.46%.
+  - **Upgrading: pseudonym continuity.** The mapping schema is unchanged.
+    - Mapping keys are the normalized entity text, so the new, shorter spans have different keys from the old run-on ones. An organisation now comes out alone ("Institut Zorbal") instead of inside a sentence-long span. Its key is the bare name, which an existing database may already hold from other documents, so it may reuse that pseudonym. The old run-on keys stay in the database but are no longer applied.
+    - A name that ran into the next line ("Zorbalia Quentrix⏎Directeur") is now offered without the next line. Its key is the bare name.
+    - A run-on organisation span that v2.2 / 10.2 cut back at a sentence start may now be kept whole, when cutting it would leave a capitalised first word unreplaced.
+    - Recommendation: keep using the same mapping database across versions for consistent pseudonyms. Re-process with the previous version if byte-identical output with an old run is required.
+
 - **Fewer false candidates in validation: one candidate per name, and no job titles offered as organisations (Story 10.2).**
   - **One candidate per place.** When two detections of the same type overlap, one span is offered instead of fragments. For example, "Jean-Luc" and "Jean-Luc Martin" at the same place now give only "Jean-Luc Martin".
     - The containing span is kept, except when the extra words are all lower-case without digits ("près de Lyon" → "Lyon").

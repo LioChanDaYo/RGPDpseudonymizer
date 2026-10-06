@@ -115,7 +115,14 @@ class TestRegexMatcher:
         entities = matcher.match_entities(text)
 
         orgs = [e for e in entities if e.entity_type == "ORG"]
-        assert len(orgs) >= 2
+        # Story 10.3a AC3 (R-ORG): "et" and the glued "l'" are connectors
+        # between capitalised tokens, so both names come out in one ORG span.
+        for name in ("TechCorp", "Dubois"):
+            start = text.index(name)
+            assert any(
+                e.start_pos <= start and start + len(name) <= e.end_pos for e in orgs
+            )
+        assert not any(e.text.endswith(".") for e in orgs)
 
     def test_full_name_dictionary_match(self, matcher: RegexMatcher) -> None:
         """Test full name matching using name dictionary."""
@@ -261,12 +268,10 @@ class TestRegexMatcher:
         entities = matcher.match_entities(text)
 
         orgs = [e for e in entities if e.entity_type == "ORG"]
-        matching = [
-            e for e in orgs if "Cabinet Dupont" in e.text and "Associés" in e.text
-        ]
-        assert (
-            len(matching) >= 1
-        ), "Cabinet Dupont, Martin & Associés should be detected as ORG"
+        # Story 10.3a AC3 (R-ORG): a comma ends the organisation name (lists
+        # of organisations must not run together), so the regex span stops
+        # at "Cabinet Dupont".
+        assert [e.text for e in orgs] == ["Cabinet Dupont"]
 
     # Story 3.9: Professional Title Detection Tests (AC4)
     def test_maitre_title_detection(self, matcher: RegexMatcher) -> None:

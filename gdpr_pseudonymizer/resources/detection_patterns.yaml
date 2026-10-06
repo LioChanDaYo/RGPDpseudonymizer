@@ -2,6 +2,8 @@
 # Letter classes cover Latin-1 + Latin Extended-A (í ñ ø å ş ı ł č š ž ő...),
 # not only French accents, so non-French names are not cut mid-word.
 # Each pattern category can be enabled/disabled for hybrid detection
+# Story 10.3a: name tokens are joined by horizontal whitespace only
+# ([ \t\u00A0\u202F]), never by a line break: a name does not span lines.
 
 patterns:
   # High confidence patterns: Titles + Names
@@ -10,7 +12,7 @@ patterns:
     confidence: 0.85
     entity_type: PERSON
     patterns:
-      - pattern: '\b(M\.|Mme|Mlle|Dr\.|Pr\.|Maître|Me\.?)\s+([A-ZÀ-ÖØ-ÞĀ-ſ][a-zß-öø-ÿĀ-ſ]+(?:-[A-ZÀ-ÖØ-ÞĀ-ſ][a-zß-öø-ÿĀ-ſ]+)*(?:\s+[A-ZÀ-ÖØ-ÞĀ-ſ][a-zß-öø-ÿĀ-ſ]+(?:-[A-ZÀ-ÖØ-ÞĀ-ſ][a-zß-öø-ÿĀ-ſ]+)*)?)'
+      - pattern: '\b(M\.|Mme|Mlle|Dr\.|Pr\.|Maître|Me\.?)[ \t\u00A0\u202F]+([A-ZÀ-ÖØ-ÞĀ-ſ][a-zß-öø-ÿĀ-ſ]+(?:-[A-ZÀ-ÖØ-ÞĀ-ſ][a-zß-öø-ÿĀ-ſ]+)*(?:[ \t\u00A0\u202F]+[A-ZÀ-ÖØ-ÞĀ-ſ][a-zß-öø-ÿĀ-ſ]+(?:-[A-ZÀ-ÖØ-ÞĀ-ſ][a-zß-öø-ÿĀ-ſ]+)*)?)'
         description: "Matches titles + names: M. Dupont, Dr. Marie Dubois, Mme Laurent, Maître Dupont, Me Mercier, Dr. Marja-Liisa Mikkola"
         examples:
           - "M. Dupont"
@@ -44,7 +46,7 @@ patterns:
     # any "Word, Word" pair matches ("Merci, Jean", "Weber, Directeur")
     require_known_first_name: true
     patterns:
-      - pattern: '\b([A-ZÀ-ÖØ-ÞĀ-ſ][a-zß-öø-ÿĀ-ſ]+(?:-[A-ZÀ-ÖØ-ÞĀ-ſ][a-zß-öø-ÿĀ-ſ]+)?)\s*,\s*(?!Cabinet|Société|Association|Fondation|Institut|Groupe|Consortium|Fédération|Entreprise|Compagnie|Direction|Service|Département|Commission|Comité|Syndicat|Chambre|Mutuelle|Coopérative|Ordre|Caisse|Union|Confédération|Agence|Ligue)([A-ZÀ-ÖØ-ÞĀ-ſ][a-zß-öø-ÿĀ-ſ]+(?:-[A-ZÀ-ÖØ-ÞĀ-ſ][a-zß-öø-ÿĀ-ſ]+)?)'
+      - pattern: '\b([A-ZÀ-ÖØ-ÞĀ-ſ][a-zß-öø-ÿĀ-ſ]+(?:-[A-ZÀ-ÖØ-ÞĀ-ſ][a-zß-öø-ÿĀ-ſ]+)?)[ \t\u00A0\u202F]*,[ \t\u00A0\u202F]*(?!Cabinet|Société|Association|Fondation|Institut|Groupe|Consortium|Fédération|Entreprise|Compagnie|Direction|Service|Département|Commission|Comité|Syndicat|Chambre|Mutuelle|Coopérative|Ordre|Caisse|Union|Confédération|Agence|Ligue)([A-ZÀ-ÖØ-ÞĀ-ſ][a-zß-öø-ÿĀ-ſ]+(?:-[A-ZÀ-ÖØ-ÞĀ-ſ][a-zß-öø-ÿĀ-ſ]+)?)'
         description: "Last, First format (e.g., Dubois, Jean-Marc) with exclusion of ORG/function words"
         examples:
           - "Dubois, Jean-Marc"
@@ -57,7 +59,7 @@ patterns:
     confidence: 0.65
     entity_type: LOCATION
     patterns:
-      - pattern: '\b(à|en|dans|près de|ville de)\s+([A-ZÀ-ÖØ-ÞĀ-ſ][a-zß-öø-ÿĀ-ſ]+(?:\s+[A-ZÀ-ÖØ-ÞĀ-ſ][a-zß-öø-ÿĀ-ſ]+)?)'
+      - pattern: '\b(à|en|dans|près de|ville de)[ \t\u00A0\u202F]+([A-ZÀ-ÖØ-ÞĀ-ſ][a-zß-öø-ÿĀ-ſ]+(?:[ \t\u00A0\u202F]+[A-ZÀ-ÖØ-ÞĀ-ſ][a-zß-öø-ÿĀ-ſ]+)?)'
         description: "Matches location indicators: à Paris, en France, près de Lyon"
         examples:
           - "à Paris"
@@ -72,8 +74,8 @@ patterns:
     confidence: 0.70
     entity_type: ORG
     patterns:
-      - pattern: '\b([A-ZÀ-ÖØ-ÞĀ-ſ][A-Za-zß-öø-ÿĀ-ſ\s&,''\.\-]+?)\s+(SA|SARL|SAS|SASU|EURL|SNC|SCM|SCI|GIE|EI|SCOP|SEL|Association|Fondation|Institut|Groupe|Consortium|Fédération|Syndicat|Chambre|Mutuelle|Coopérative|Ordre|Caisse|Union|Confédération|Agence|Comité|Commission|Ligue)\b'
-        description: "Organization with legal form suffix (30 forms)"
+      - pattern: '\b([A-ZÀ-ÖØ-ÞĀ-ſ](?:[A-ZÀ-ÖØ-ÞĀ-ſa-zß-öø-ÿĀ-ſ0-9]|[&''’.\-](?=[A-ZÀ-ÖØ-ÞĀ-ſa-zß-öø-ÿĀ-ſ0-9]))*(?:[ \t\u00A0\u202F](?:(?:de|du|des|la|le|et|&)[ \t\u00A0\u202F]){0,2}(?:[dl][''’])?[A-ZÀ-ÖØ-ÞĀ-ſ](?:[A-ZÀ-ÖØ-ÞĀ-ſa-zß-öø-ÿĀ-ſ0-9]|[&''’.\-](?=[A-ZÀ-ÖØ-ÞĀ-ſa-zß-öø-ÿĀ-ſ0-9]))*){0,5}?)[ \t\u00A0\u202F]+(SA|SARL|SAS|SASU|EURL|SNC|SCM|SCI|GIE|EI|SCOP|SEL|Association|Fondation|Institut|Groupe|Consortium|Fédération|Syndicat|Chambre|Mutuelle|Coopérative|Ordre|Caisse|Union|Confédération|Agence|Comité|Commission|Ligue)\b'
+        description: "Organization with legal form suffix (30 forms). Name = 1-6 capitalised tokens; lower-case connectors (de, du, des, la, le, et, &; at most 2) only between two of them; d'/l' glued to the next token (Story 10.3a R-ORG)"
         examples:
           - "TechCorp SA"
           - "Solutions Informatiques SARL"
@@ -83,8 +85,8 @@ patterns:
           - "Solutions SCOP"
           - "TechCorp Association"
           - "Marie Curie Fondation"
-      - pattern: '\b(Société|Entreprise|Cabinet|Groupe|Compagnie|Association|Fondation|Institut|Consortium|Fédération|Syndicat|Chambre|Mutuelle|Coopérative|Ordre|Caisse|Union|Confédération|Agence|Comité|Commission|Ligue)\s+([A-ZÀ-ÖØ-ÞĀ-ſ][A-Za-zß-öø-ÿĀ-ſ\s&,\-]+)'
-        description: "Organization with prefix keyword (22 prefixes)"
+      - pattern: '\b(Société|Entreprise|Cabinet|Groupe|Compagnie|Association|Fondation|Institut|Consortium|Fédération|Syndicat|Chambre|Mutuelle|Coopérative|Ordre|Caisse|Union|Confédération|Agence|Comité|Commission|Ligue)[ \t\u00A0\u202F]+([A-ZÀ-ÖØ-ÞĀ-ſ](?:[A-ZÀ-ÖØ-ÞĀ-ſa-zß-öø-ÿĀ-ſ0-9]|[&''’.\-](?=[A-ZÀ-ÖØ-ÞĀ-ſa-zß-öø-ÿĀ-ſ0-9]))*(?:[ \t\u00A0\u202F](?:(?:de|du|des|la|le|et|&)[ \t\u00A0\u202F]){0,2}(?:[dl][''’])?[A-ZÀ-ÖØ-ÞĀ-ſ](?:[A-ZÀ-ÖØ-ÞĀ-ſa-zß-öø-ÿĀ-ſ0-9]|[&''’.\-](?=[A-ZÀ-ÖØ-ÞĀ-ſa-zß-öø-ÿĀ-ſ0-9]))*){0,5})'
+        description: "Organization with prefix keyword (22 prefixes), same name shape as above (Story 10.3a R-ORG)"
         examples:
           - "Société TechCorp"
           - "Entreprise Dubois"

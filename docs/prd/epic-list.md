@@ -68,7 +68,7 @@
 
 ---
 
-**Timeline: Epics 0-4: 14 weeks (v1.0 MVP). Epic 5: 6-7 weeks (v1.1). Epic 6: 10-14 weeks (v2.0). Epic 7: 4-6 weeks (v2.1). Epic 8: 5-7 weeks (v2.4). Epic 9: 8-12 weeks (v3.0). Epic 10: 4-6 weeks (v2.3 candidate, runs before Epic 9)**
+**Timeline: Epics 0-4: 14 weeks (v1.0 MVP). Epic 5: 6-7 weeks (v1.1). Epic 6: 10-14 weeks (v2.0). Epic 7: 4-6 weeks (v2.1). Epic 8: 5-7 weeks (v2.4). Epic 9: 8-12 weeks (v3.0). Epic 10: 5-7.5 weeks (v2.3 candidate, runs before Epic 9)**
 
 ---
 
@@ -177,10 +177,13 @@
 **Epic 10 DoD:**
 - [ ] Annotation guidelines approved by Lionel and applied to the whole corpus; held-out set (≥5 documents) scored separately
 - [ ] Same-type overlap dedup and ORG role filter shipped (10.2)
-- [ ] LOCATION noise filters and name-boundary rules shipped (10.3)
+- [ ] Line-break span boundaries and run-on regex shapes fixed (10.3a, split from 10.3, Lionel, 2026-10-06)
+- [ ] LOCATION noise filters and name-boundary rules shipped (10.3b, split from 10.3, Lionel, 2026-10-06)
+- [ ] Type-aware exact match in the merge shipped (10.3c, added at 10.3a STOP R, Lionel, 2026-10-06)
 - [ ] Salutation splitting / bare first names and org-plus-country merge shipped (10.4)
-- [ ] Every story closed with a cited CI accuracy run (G1), independent QA check (G2), no unapproved recall drop (G3), held-out numbers (G5, 10.2–10.4)
-- [ ] Close-out baseline recorded as Epic 9's starting point, with the `[Overall]`/`[PERSON]`/`[LOCATION]`/`[ORG]`/`[HELD-OUT …]` lines pasted into the QA report (artifacts expire at 90 days), not just the run ID; no release cut without Lionel's go
+- [ ] DB init no longer deletes a database another process created (10.5, data-layer hardening, Lionel, 2026-10-07)
+- [ ] Every story closed with a cited CI accuracy run (G1), independent QA check (G2), no unapproved recall drop (G3), held-out numbers (G5, 10.2, 10.3a, 10.3b, 10.3c, 10.4)
+- [ ] Close-out baseline recorded as Epic 9's starting point, with the `[Overall]`/`[PERSON]`/`[LOCATION]`/`[ORG]`/`[HELD-OUT …]` lines pasted into the QA report (`accuracy-results` artifacts are kept 30 days, `.github/workflows/accuracy.yaml:83`), not just the run ID; no release cut without Lionel's go
 
 ---
 

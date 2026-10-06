@@ -3,7 +3,7 @@
 **Epic Goal:** Raise detection precision and make the accuracy benchmark trustworthy with local, deterministic changes to the hybrid detector and the ground-truth corpus, without lowering recall. The user-facing value is fewer false entities to reject during the (mandatory) validation step and a benchmark whose numbers can be believed.
 
 **Target Release:** v2.3.0 candidate. **No release is part of this epic.** v2.3.0 ships only on Lionel's explicit go, through a separate release story.
-**Duration:** Estimated 4-6 weeks (10.1 is annotation-labor-bound)
+**Duration:** Estimated 5-7.5 weeks (10.1 is annotation-labor-bound; 10.3 split into 10.3a and 10.3b, and 10.3c added, Lionel, 2026-10-06; 10.5 added, Lionel, 2026-10-07)
 **Predecessor:** v2.2.0 + accuracy scorer fix (#77), commit `fceef65`
 **Successor:** Epic 9 (v3.0) starts from this epic's merged close-out baseline.
 
@@ -60,8 +60,8 @@ Measured at commit `fceef65`, CI run `37013929807`, with the app-normalized scor
 | F3 | Truncated PERSON annotations from the auto-annotator: "Luc Moreau" ×16 for "Jean-Luc Moreau", "Charles Le", "Marc Bideau", "Anne-", "Marie-", "Rousseau, Responsable", "Paribas, Crédit" | 96 PERSON annotations | 10.1 |
 | F4 | Junk PERSON annotations: "Directeur Commercial" 6, "Lancement Projet" 5, "Validation Architecture" 5, "Palo Alto", "Société Générale", … | not yet counted in full | 10.1 |
 | F5 | Real organisations missing from the annotations (CNIL, ANSSI, Deloitte, …), so part of the 641 ORG FP are correct detections. ORG precision is not measurable until this is fixed | not yet counted in full | 10.1 |
-| F6 | LOCATION noise: "Wavestone" 10, "CONFORME" 10, "CC" 4, "US", "Équipe", "Constat", "SecNumCloud", "Pentest", "à Dr" | subset of 255 LOCATION FP | 10.3 |
-| F7 | Name boundary errors: particles ("Jean-Charles Le Goff", "Sylvie van der Werf", "Chasseloup de Laubat"), "Mme Sarah Mc…" truncation, trailing roles (", Responsable") | not yet counted in full | 10.3 |
+| F6 | LOCATION noise: "Wavestone" 10, "CONFORME" 10, "CC" 4, "US", "Équipe", "Constat", "SecNumCloud", "Pentest", "à Dr" | subset of 255 LOCATION FP | 10.3b |
+| F7 | Name boundary errors: particles ("Jean-Charles Le Goff", "Sylvie van der Werf", "Chasseloup de Laubat"), "Mme Sarah Mc…" truncation, trailing roles (", Responsable") | not yet counted in full | 10.3b |
 | F8 | Greetings in `email_chain.txt`: "Laurent, Marie," matched as one person; bare "Marie," line and "Bonne initiative Laurent." missed | small, high user visibility | 10.4 |
 | F9 | ORG split: "Microsoft France" detected as two pieces | small | 10.4 |
 | F10 | ORG recall: brands missed (OVHcloud, TechCorp, Microsoft Azure, Partech, Kima Ventures, EY) | part of 78 ORG FN | **Not in scope** (see Out of Scope) |
@@ -91,9 +91,17 @@ Decided by Lionel, 2026-10-02. This note interprets the gates for Epic 10; the g
 
 ---
 
+## Cross-Story Rules
+
+These notes sit outside the normative Gates block above and do not change its text. They bind every detector story from 10.3a on (10.3a, 10.3b, 10.4).
+
+- **Coverage level 2b (Lionel, 2026-10-06):** No rule may remove the last covering span of any type from an annotation of any type without Lionel's sign-off.
+
+---
+
 ## Enhancement Details
 
-- **What's being changed:** (1) the benchmark is repaired against written annotation guidelines and gains a held-out set; (2) `HybridDetector` gets a same-type overlap rule and an ORG role filter; (3) LOCATION noise filters and PERSON boundary rules for particles, Mc/Mac and trailing roles; (4) salutation-aware first-name detection and ORG + country merging.
+- **What's being changed:** (1) the benchmark is repaired against written annotation guidelines and gains a held-out set; (2) `HybridDetector` gets a same-type overlap rule and an ORG role filter; (3a) spans stop at line breaks and run-on regex name shapes are fixed; (3b) LOCATION noise filters and PERSON boundary rules for particles, Mc/Mac and trailing roles; (3c) the merge's exact-match check becomes type-aware; (4) salutation-aware first-name detection and ORG + country merging, plus two carried coverage losses restored.
 - **How it integrates:** all detector changes are post-processing steps or patterns inside the existing `HybridDetector` pipeline and its YAML/JSON resources. No public API, CLI flag, GUI screen, mapping-table schema or file format changes.
 - **Success criteria:**
   - Every story closes with a G1 run, G2 verification, no unapproved recall drop (G3) and held-out numbers (G5, from 10.2 on).
@@ -106,12 +114,44 @@ Decided by Lionel, 2026-10-02. This note interprets the gates for Epic 10; the g
 
 | Story | Priority | Est. Duration | Source | Status |
 |-------|----------|---------------|--------|--------|
-| 10.1: Benchmark Repair + Held-Out Set | HIGH | 1.5-2.5 weeks | F3, F4, F5, F2 (junk) | Draft |
-| 10.2: Same-Type Overlap Dedup + ORG Role Filter | HIGH | 1 week | F1, F2 | Draft |
-| 10.3: LOCATION Noise + Name Boundaries | MED | 1 week | F6, F7 | Draft |
+| 10.1: Benchmark Repair + Held-Out Set | HIGH | 1.5-2.5 weeks | F3, F4, F5, F2 (junk) | Done (PR #79) |
+| 10.2: Same-Type Overlap Dedup + ORG Role Filter | HIGH | 1 week | F1, F2 | Done (PR #81) |
+| 10.3a: Boundaries & Run-On Spans (split from 10.3, Lionel, 2026-10-06) | MED | 0.5-1 week | 10.2 handoff, REL-004 | Draft |
+| 10.3b: Particles, Roles & LOCATION Noise (split from 10.3, Lionel, 2026-10-06) | MED | 0.5-1 week | F6, F7 | Draft |
+| 10.3c: Type-Aware Exact Match in Merge (added at 10.3a STOP R, Lionel, 2026-10-06) | MED | 0.5 week | 10.3a STOP R | Draft |
 | 10.4: Greetings + Org-Plus-Country | MED | 0.5-1 week | F8, F9 | Draft |
+| 10.5: DB Init Safety (data-layer hardening, added by Lionel, 2026-10-07) | LOW | 0.5 week | PR #83 finding | Draft |
 
-**Total Estimated Duration:** 4-6 weeks
+**Total Estimated Duration:** 5-7.5 weeks
+
+---
+
+## Course Correction: 10.3 Split (Lionel, 2026-10-06)
+
+Story 10.3 is split into two sequential stories: **10.3a "Boundaries & run-on spans"** (the draft's Slice A) and **10.3b "Particles, roles & LOCATION noise"** (Slices B and C, the epic's original 10.3 ACs).
+
+- **Reason (PO recommendation):** Slice A rewrites the regex patterns that Slices B and C depend on. 10.3b therefore needs the merged 10.3a close-out run as its baseline, and smaller PRs are easier to review. The combined 10.3 draft had 745 lines and 15 ACs against an epic estimate of 1 week.
+- **Effect:** order is now 10.1 → 10.2 → 10.3a → 10.3b → 10.3c → 10.4. Each story's baseline is the previous story's merged close-out G1 run. Gates, product constraints and the Epic 10 G7 interpretation are unchanged.
+- **Decisions at 10.3a STOP R (Lionel, 2026-10-06):**
+  - New story **10.3c** makes the exact-match check in `_merge_entities` type-aware (0.5 week, after 10.3b, before 10.4).
+  - The carried coverage losses PERSON "Pierre" and ORG "BRS" move to 10.4 (AC5). ORG "TechSolutions France SAS" stays in 10.3a.
+  - The "keyword + connector(s)" ORG widening is deferred out of 10.3a (see Out of Scope).
+
+---
+
+## Close-Out Record
+
+Numbers come only from CI runs; each line cites its run ID. Full verbatim lines are in `docs/qa/ner-accuracy-report.md`.
+
+| Story | Close-out G1 run | Main corpus | Held-out | Merged |
+|---|---|---|---|---|
+| 10.1 (benchmark repair, same detector) | `37189862679` | P 66.69% / R 79.91% / F1 72.70% | F1 61.51% | PR #79 |
+| 10.2 | `37385301566`, reproduced on `main` by `37424140809` | P 77.35% / R 78.33% / F1 77.84% | F1 72.36% | PR #81 |
+
+- **10.2 recall (G3):** Lionel accepted recall bounds of FN PERSON +21 / LOCATION +4 / ORG +16 versus 10.1 (`37189862679`). Run `37385301566` is inside them: FN PERSON +21 / LOCATION +4 / ORG +10.
+- **10.2 held-out ORG recall:** Lionel accepted the drop (held-out ORG FN 28 → 34, `37189862679` → `37385301566`). It is tracked in 10.3a (AC7).
+- **Side PRs:** #80 (test offsets in the document processor integration tests) and #82 (performance workflow fix; it makes the NFR1 gate real, since the workflow previously ran no tests).
+- **Current baseline for 10.3a:** `37385301566` / `37424140809`.
 
 ---
 
@@ -219,14 +259,51 @@ Part of the ground truth was produced by `scripts/auto_annotate_corpus.py` and a
 
 ---
 
-## Story 10.3: LOCATION Noise + Name Boundaries
+## Story 10.3a: Boundaries & Run-On Spans
+
+**Split from 10.3 (Lionel, 2026-10-06).** This is the 10.3 draft's Slice A. It must merge before 10.3b starts.
+
+**As a** user reviewing detected entities,
+**I want** detected spans to stop at line breaks and at the end of the name,
+**so that** a heading, a signature line or the rest of a sentence is not offered as one organisation or person, and no part of a name is left in clear text.
+
+**Priority:** MEDIUM — 10.3b depends on the regex patterns this story rewrites.
+**Change type:** Detector-only (G4). Baseline: 10.2 merged close-out, run `37385301566` (reproduced on `main` by `37424140809`).
+
+### Acceptance Criteria
+
+1. **AC1 — Regex spans stop at line breaks:** no regex detection spans a line break. The "Laurent⏎⏎Laurent" junk span is gone (its cause is the `\s+` in the regex `full_names` pattern, `regex_matcher.py:257-262`, not spaCy).
+2. **AC2 — spaCy spans split at line breaks:** a spaCy span that crosses a line break is split at the break; each part that holds an upper-case letter or a digit is kept as its own entity and then goes through the existing post-filters; other parts are dropped.
+3. **AC3 — Run-on ORG/PERSON regex shapes:** the regex ORG and PERSON name shapes no longer swallow clauses, lists or leading words. Covered cases: signature lines, heading + org, sentence-long ORG, leading "La société", clause tails without punctuation.
+4. **AC4 — TechSolutions partial leak:** the partial leak from 10.2 (union + trim against a junk inner span) is fixed.
+5. **AC5 — REL-004:** the V3 guard's sentence-start exception, carried over from 10.2, is decided by Lionel from a dry-run of three options: keep it; drop it; or limit it to common sentence-initial function words held in a resource. The chosen option is implemented, with QA's 10.2 probe ("Nous avons conclu. Quentrix, Zorbalia Conseil") as a unit test.
+6. **AC6 — Coverage invariant (from 10.2):** no rule uncovers a character that a span of the same type covered in the baseline, unless Lionel signs off the exception. Every close-out reports the coverage table.
+7. **AC7 — Carried losses tracked:**
+   - The three main-corpus annotations that lost coverage in 10.2 (ORG "TechSolutions France SAS", PERSON "Pierre", ORG "BRS") are each reported as restored, or as deferred with the reason. *(Lionel, 2026-10-06, STOP R: "Pierre" and "BRS" are deferred to 10.4 AC5.)*
+   - Held-out ORG recall (FN 28 → 34, accepted by Lionel in 10.2) is reported against both the 10.1 and the 10.2 held-out lines, from the aggregate `[HELD-OUT …]` lines only.
+8. **AC8:** Unit tests for every rule, including negative cases. Tests use synthetic strings with invented names, never held-out strings.
+9. **AC9 — Gates:** G1 (main and held-out), G2, G3 versus the 10.2 baseline, G4, G5, G6 (plus NFR1 timing unchanged: a real `performance.yaml` run on the branch, green since PR #82), G7 per the Epic 10 G7 interpretation (Lionel, 2026-10-02): before/after recorded in the QA report in this story; README/README.fr, FAQ, docs index and tutorials are updated at Epic 10 close-out, not per story. CHANGELOG [Unreleased] entry describing the behaviour change, including an upgrade note on pseudonym continuity (see Risk Mitigation). The merged close-out run is 10.3b's baseline.
+
+### Integration Points
+
+- `gdpr_pseudonymizer/resources/detection_patterns.yaml`, `gdpr_pseudonymizer/nlp/regex_matcher.py` — line-break stops, ORG/PERSON name shapes
+- `gdpr_pseudonymizer/nlp/hybrid_detector.py` — spaCy span split, V3 guard (REL-004), union + trim
+- `tests/unit/` — new rule tests
+
+### Estimated Effort: 0.5-1 week
+
+---
+
+## Story 10.3b: Particles, Roles & LOCATION Noise
+
+**Split from 10.3 (Lionel, 2026-10-06).** This is the 10.3 draft's Slices B and C. AC1 to AC7 are the original 10.3 ACs, word for word. AC8 is the original text with its baseline amended at the split. AC9 is added by the split.
 
 **As a** user reviewing detected entities,
 **I want** common words and company names not offered as places, and names with particles or "Mc/Mac" detected whole,
 **so that** I reject fewer false places and do not have to repair cut names by hand.
 
 **Priority:** MEDIUM
-**Change type:** Detector-only (G4). Baseline: 10.2 merged close-out.
+**Change type:** Detector-only (G4). Baseline: 10.3a merged close-out.
 
 ### Acceptance Criteria
 
@@ -237,7 +314,8 @@ Part of the ground truth was produced by `scripts/auto_annotate_corpus.py` and a
 5. **AC5 — Mc/Mac:** names starting with "Mc"/"Mac" followed by a capital are not truncated ("Mme Sarah McAllister" → PERSON "Sarah McAllister" after title stripping).
 6. **AC6 — Trailing roles:** a trailing ", Role" (e.g. ", Responsable", ", Directeur …") is trimmed from PERSON spans.
 7. **AC7:** Unit tests for every rule, including the negative cases (real all-caps places, a particle not followed by a surname, "Mac" as an ordinary word).
-8. **AC8 — Gates:** G1 (main and held-out), G2, G3 versus the 10.2 baseline (LOCATION recall is the type most at risk: report it explicitly), G4, G5, G6 (plus NFR1 timing unchanged: existing perf test green), G7 per the Epic 10 G7 interpretation (Lionel, 2026-10-02): before/after recorded in the QA report in this story; README/README.fr, FAQ, docs index and tutorials are updated at Epic 10 close-out, not per story. CHANGELOG [Unreleased] entry describing the behaviour change, regardless of G7, including an upgrade note on pseudonym continuity (see Risk Mitigation).
+8. **AC8 — Gates (amended at split, Lionel 2026-10-06):** G1 (main and held-out), G2, G3 versus the previous merged baseline (10.3a close-out) (LOCATION recall is the type most at risk: report it explicitly), G4, G5, G6 (plus NFR1 timing unchanged: existing perf test green), G7 per the Epic 10 G7 interpretation (Lionel, 2026-10-02): before/after recorded in the QA report in this story; README/README.fr, FAQ, docs index and tutorials are updated at Epic 10 close-out, not per story. CHANGELOG [Unreleased] entry describing the behaviour change, regardless of G7, including an upgrade note on pseudonym continuity (see Risk Mitigation).
+9. **AC9 — " - Lead <Org>" variant (added by the split, 2026-10-06):** the AC6 trailing-role trim also covers a name followed by " - " and a role word on the same line ("<Name> - Lead <Org>", from the 10.2 handoff). Only the role word(s) are cut. The span becomes "<Name>" only if every capitalised word after the role word(s) is covered by another kept span; otherwise the span is not trimmed. Unit tests cover both branches.
 
 ### Integration Points
 
@@ -245,7 +323,41 @@ Part of the ground truth was produced by `scripts/auto_annotate_corpus.py` and a
 - `gdpr_pseudonymizer/nlp/geography_dictionary.py`, `gdpr_pseudonymizer/resources/` — stoplists
 - `gdpr_pseudonymizer/resources/detection_patterns.yaml` — particle and Mc/Mac name patterns
 
-### Estimated Effort: 1 week
+### Estimated Effort: 0.5-1 week
+
+---
+
+## Story 10.3c: Type-Aware Exact Match in Merge
+
+**Added at 10.3a STOP R (Lionel, 2026-10-06).** Runs after 10.3b and before 10.4.
+
+**As a** user reviewing detected entities,
+**I want** a name or place found by the regex layer to stay on the list when spaCy found the same text with another type,
+**so that** I choose the right type during validation instead of the candidate being silently lost.
+
+**Priority:** MEDIUM — small, isolated fix to the merge step.
+**Change type:** Detector-only (G4). Baseline: 10.3b merged close-out.
+
+### Context
+
+`HybridDetector._merge_entities` (`hybrid_detector.py:450`) skips a regex detection when `_is_exact_match` (`hybrid_detector.py:1240`) finds a spaCy detection with the same span or the same normalized text. The check ignores entity type, so a regex detection is dropped even when spaCy gave the text another type. Example: regex LOCATION "Nice" is dropped because spaCy found ORG "Nice".
+
+**10.3a dry-run measure (local dump on top of 10.3a's rules; NOT a CI result, NOT a target):** FN PERSON −2 / LOCATION −2; FP +3 PERSON on hyphenated place names ("Saint-Gobain", "Clermont-Ferrand"); the kept regex entity is flagged `is_ambiguous`.
+
+### Acceptance Criteria
+
+1. **AC1 — Type-aware exact match:** the exact-match skip applies only when both detections have the same entity type. When the span or normalized text matches but the types differ, both detections are kept, the regex detection is flagged `is_ambiguous = True`, and a distinct log event records the decision without logging entity text beyond current practice. Same-type exact matches keep today's behaviour (regex skipped). The 10.2 same-type overlap rule and the regex-ORG-over-spaCy-PERSON special case (`_should_prefer_regex_org`) are unchanged.
+2. **AC2 — Re-measure first:** the dry-run figures above were taken on top of 10.3a. Before coding, the story re-measures them on the 10.3b close-out baseline and reports the per-type FN/FP delta. Only the cited G1 run counts as a result.
+3. **AC3 — Hyphenated place names:** the new PERSON FP on hyphenated place names ("Saint-Gobain", "Clermont-Ferrand" in the dry-run) are reported. A rule that removes them is in scope only if it is generic (no lexicon built from corpus strings) and keeps to the Cross-Story Rules. Otherwise they are recorded as accepted FP with Lionel's sign-off: both candidates reach the mandatory validation step, flagged ambiguous.
+4. **AC4:** Unit tests with invented names: same text and different types (both kept, regex flagged ambiguous); same span and different types; title-normalized match ("Dr X" vs "X") with different types; same text and same type (regex skipped, unchanged).
+5. **AC5 — Gates:** G1 (main and held-out), G2, G3 versus the previous merged baseline (10.3b close-out), G4, G5, G6 (plus NFR1 timing unchanged: a real `performance.yaml` run on the branch), G7 per the Epic 10 G7 interpretation (Lionel, 2026-10-02): before/after recorded in the QA report in this story; README/README.fr, FAQ, docs index and tutorials are updated at Epic 10 close-out, not per story. CHANGELOG [Unreleased] entry describing the behaviour change, including an upgrade note on pseudonym continuity (see Risk Mitigation). The merged close-out run is 10.4's baseline.
+
+### Integration Points
+
+- `gdpr_pseudonymizer/nlp/hybrid_detector.py` — `_merge_entities`, `_is_exact_match`
+- `tests/unit/` — merge tests
+
+### Estimated Effort: 0.5 week
 
 ---
 
@@ -256,7 +368,7 @@ Part of the ground truth was produced by `scripts/auto_annotate_corpus.py` and a
 **so that** the people addressed in an email are not left in clear text and organisations get one consistent pseudonym.
 
 **Priority:** MEDIUM — Small counts, high user visibility (email is a primary use case).
-**Change type:** Detector-only (G4). Baseline: 10.3 merged close-out.
+**Change type:** Detector-only (G4). Baseline: 10.3c merged close-out.
 
 ### Acceptance Criteria
 
@@ -264,8 +376,12 @@ Part of the ground truth was produced by `scripts/auto_annotate_corpus.py` and a
 2. **AC2 — Bare first name on a salutation line:** a known first name is detected as PERSON when it stands alone on a line followed by a comma ("Marie,") or follows a greeting or thanks opener ("Bonjour Marie", "Merci Laurent", "Bonne initiative Laurent."). The story defines "salutation line" precisely (opener list, maximum line length) as a resource, not a hard-coded string. The opener resource must state explicitly whether non-greeting phrases such as "Bonne initiative Laurent." (a compliment, not a salutation) are in scope; the call is left to the story but must be written down.
 3. **AC3:** The new bare-first-name rule of AC2 fires only in salutation contexts; existing detection of these names is unchanged. Unit tests cover first names that are also common words (e.g. "Rose", "Pierre", "Claire") in running text, proving the new rule does not fire there.
 4. **AC4 — Org + country:** an ORG immediately followed by a country or region name ("France", "Europe", and others listed in the story) is merged into a single ORG span ("Microsoft France"), when the approved guidelines annotate it that way. The merge runs after the 10.2 role filter and never merges a role token (e.g. "VP" + "Europe" is never merged into an ORG); a unit test proves it.
-5. **AC5:** Unit tests for each rule, including `email_chain.txt`-style fixtures written for the tests (not copied from the held-out set).
-6. **AC6 — Gates:** G1 (main and held-out), G2, G3 versus the 10.3 baseline, G4, G5, G6 (plus NFR1 timing unchanged: existing perf test green), G7 per the Epic 10 G7 interpretation (Lionel, 2026-10-02): before/after recorded in the QA report in this story; README/README.fr, FAQ, docs index and tutorials are updated at Epic 10 close-out, not per story. CHANGELOG [Unreleased] entry describing the behaviour change, regardless of G7, including an upgrade note on pseudonym continuity (see Risk Mitigation).
+5. **AC5 — Restore carried coverage losses (from 10.2; moved from 10.3a at STOP R, Lionel, 2026-10-06):** two main-corpus annotations that have had no covering detection since 10.2 regain coverage, each by a generic rule (no lexicon entry built from the corpus string):
+   - PERSON "Pierre" (`hr_announcement`): a bare known first name at the start of an indented sentence, covered today by no detection. The rule must keep AC3 true (no firing on first names in running text); if both cannot hold, the annotation is reported as still uncovered, with the reason and Lionel's sign-off.
+   - ORG "BRS": an alias that the text defines for an organisation, covered in v2.2 only by a junk span. Coverage comes from the alias being tied to its defining ORG in the text, not from listing "BRS".
+   - The coverage table at close-out reports both annotations as restored or still uncovered.
+6. **AC6:** Unit tests for each rule, including `email_chain.txt`-style fixtures written for the tests (not copied from the held-out set) and invented-name fixtures for the two AC5 cases.
+7. **AC7 — Gates:** G1 (main and held-out), G2, G3 versus the previous merged baseline (10.3c close-out), G4, G5, G6 (plus NFR1 timing unchanged: existing perf test green), G7 per the Epic 10 G7 interpretation (Lionel, 2026-10-02): before/after recorded in the QA report in this story; README/README.fr, FAQ, docs index and tutorials are updated at Epic 10 close-out, not per story. CHANGELOG [Unreleased] entry describing the behaviour change, regardless of G7, including an upgrade note on pseudonym continuity (see Risk Mitigation).
 
 ### Integration Points
 
@@ -277,16 +393,60 @@ Part of the ground truth was produced by `scripts/auto_annotate_corpus.py` and a
 
 ---
 
+## Story 10.5: DB Init Safety
+
+**Added by Lionel, 2026-10-07.** Data-layer hardening found during the TEST-002 race fix (PR #83). It is not a detection-precision change. It sits in Epic 10 because this repo puts hardening found along the way into the active epic as a small story (precedents: 4.6.1, 6.7.1), and `epic-list.md` has no backlog section.
+
+**As a** user running several CLI processes against a new mapping database (e.g. from a script),
+**I want** a failed initialization never to delete a database that another process just created,
+**so that** I do not lose the winner's mappings and passphrase setup to a race.
+
+**Priority:** LOW — rare: it needs two processes initializing the same new DB at the same moment. Single CLI or GUI runs initialize once.
+**Change type:** Data-layer only. No file under `gdpr_pseudonymizer/nlp/`, `gdpr_pseudonymizer/resources/`, `tests/accuracy/` or `tests/test_corpus/` changes.
+**Ordering:** outside the detector chain. It changes no detection, so it has no accuracy baseline and may run before, between or after the detector stories. It does not move the epic close-out baseline.
+
+### Context
+
+`init_database` (`gdpr_pseudonymizer/data/database.py:60`) checks that `db_path` does not exist, creates it, and on **any** exception deletes `db_path` (`database.py:180-184`, "Clean up partial database file on failure"). If two processes create the same new database at once, the loser's cleanup can delete the winner's freshly created file. PR #83 (open at the time of writing) makes index creation idempotent (`CREATE INDEX IF NOT EXISTS`). That only moves the loser's failure to the metadata key collision; the delete stays.
+
+### Acceptance Criteria
+
+1. **AC1 — No deletion of a pre-existing DB:** on failure, `init_database` deletes `db_path` only if this call itself created the file. A database that existed before the call, or that another process created during it, is never deleted. The mechanism is chosen and documented in the story: create the file exclusively and track ownership, or take a lock on first-time creation, or both.
+2. **AC2 — Clear failure for the loser:** the process that loses the race fails with the existing "Database already exists" `ValueError`, or a documented equivalent, not a generic initialization exception. The winner's database opens with `open_database` and its own passphrase, and its metadata (schema version, encryption parameters, passphrase canary) is intact.
+3. **AC3 — Concurrency test:** a test runs two initializations of the same new `db_path` concurrently, in separate processes, repeated enough times to make the race likely (the story states the count). Each iteration passes only if exactly one initialization succeeds, the file exists, it opens with the winner's passphrase, and the loser failed as AC2 says. The test is deterministic in its pass criteria and uses a temporary directory per iteration.
+4. **AC4 — Existing behaviour kept:** initializing an existing path still raises `ValueError` without touching the file. A failure inside a single, uncontended initialization still leaves no partial file behind. Existing database tests stay green.
+5. **AC5 — Gates:**
+   - **G1 and G3 are N/A:** there is no detection change, so no accuracy run is required and recall cannot move. The PR states this explicitly.
+   - **G5 is N/A** for the same reason.
+   - **G4** holds trivially: no annotation, scorer or detector change.
+   - **G2:** QA verifies the fix independently by re-running the AC3 test and reading the diff. There is no accuracy artifact to download.
+   - **G6** applies in full (black, ruff, mypy, unit tests, full CI green).
+   - **G7:** no headline number changes, so no QA report or docs update. CHANGELOG `[Unreleased]` gets a "Fixed" entry.
+
+### Integration Points
+
+- `gdpr_pseudonymizer/data/database.py` — `init_database` cleanup path
+- `tests/unit/` or `tests/integration/` — concurrent-initialization test
+
+### Estimated Effort: 0.5 week
+
+---
+
 ## Execution Sequence
 
 ```
 Story 10.1 (Benchmark repair + held-out)  --- Week 1-2.5 ---  guidelines approval stop inside; benchmark-only
 Story 10.2 (Overlap dedup + ORG roles)    --- Week 3      ---  baseline = 10.1 merged
-Story 10.3 (LOCATION noise + boundaries)  --- Week 4      ---  baseline = 10.2 merged
-Story 10.4 (Greetings + org+country)      --- Week 5      ---  baseline = 10.3 merged
+Story 10.3a (Boundaries + run-on spans)   --- Week 4      ---  baseline = 10.2 merged
+Story 10.3b (Particles, roles, LOC noise) --- Week 4.5-5  ---  baseline = 10.3a merged
+Story 10.3c (Type-aware exact match)      --- Week 5.5    ---  baseline = 10.3b merged
+Story 10.4 (Greetings + org+country)      --- Week 6-6.5  ---  baseline = 10.3c merged
+Story 10.5 (DB init safety)               --- 0.5 week, any slot --- no accuracy baseline (data layer)
 ```
 
-**Strictly sequential.** Each story's baseline is the previous story's merged close-out G1 run. No parallel detector stories: overlapping changes would make G3/G4 attribution impossible.
+**Strictly sequential:** 10.1 → 10.2 → 10.3a → 10.3b → 10.3c → 10.4. Each story's baseline is the previous story's merged close-out G1 run. No parallel detector stories: overlapping changes would make G3/G4 attribution impossible.
+
+**Story 10.5** is outside this chain: it changes no detection, so it has no accuracy baseline and can merge at any point without affecting G3/G4 attribution.
 
 **Epic close-out baseline:** the 10.4 merged G1 run (main + held-out) is the baseline Epic 9 starts from.
 
@@ -309,26 +469,28 @@ Story 10.4 (Greetings + org+country)      --- Week 5      ---  baseline = 10.3 m
 | Rules overfit to the 25-document corpus | MEDIUM | MEDIUM | G5 held-out check from 10.2; held-out FP/FN lists not used for rule design |
 | Ground-truth repair encodes the detector's own output | MEDIUM | HIGH | Written guidelines approved by Lionel (guidelines approval stop) before any edit; held-out annotated by hand, never pre-annotated |
 | Benchmark and detector deltas mixed | LOW | HIGH | G4: separate PRs and separate reporting |
+| 10.3b rules built on regex shapes that 10.3a then rewrites | LOW (after the split) | MEDIUM | 10.3 split (Lionel, 2026-10-06): 10.3b starts only after 10.3a merges and uses the 10.3a close-out run as its baseline |
+| 10.3c offers more candidates of a second type (e.g. PERSON on hyphenated place names) | MEDIUM | LOW | Both candidates reach mandatory validation, flagged ambiguous; FP reported per type (10.3c AC3) |
 | Unsupported accuracy claims in docs | LOW | HIGH | G1/G2/G7; the arithmetic estimate is never published |
-| Pseudonym continuity across versions: span changes in 10.2-10.4 re-key mapping entries (normalized text), so a user keeping a v2.2 mapping DB can get a new pseudonym for the same entity | MEDIUM | MEDIUM | CHANGELOG [Unreleased] entry with an upgrade note in each of 10.2-10.4 explaining the effect; schema unchanged |
+| Pseudonym continuity across versions: span changes in 10.2, 10.3a, 10.3b, 10.3c and 10.4 re-key mapping entries (normalized text), so a user keeping a v2.2 mapping DB can get a new pseudonym for the same entity | MEDIUM | MEDIUM | CHANGELOG [Unreleased] entry with an upgrade note in each of 10.2, 10.3a, 10.3b, 10.3c and 10.4 explaining the effect; schema unchanged |
 
 - **Primary Risk:** a precision rule silently removes real persons, places or organisations.
 - **Mitigation:** G3 on every story, negative-case tests for every rule, held-out check (G5).
-- **Rollback Plan:** every rule is an isolated post-filter or pattern in its own PR; revert the PR. Annotation changes (10.1) are in their own PRs and revert independently.
+- **Rollback Plan:** every rule is an isolated post-filter or pattern in its own PR; revert the PR. Reverting 10.3a after 10.3b has merged also means re-measuring 10.3b, since its baseline includes 10.3a. Annotation changes (10.1) are in their own PRs and revert independently.
 
 ---
 
 ## Definition of Done
 
-- [ ] All 4 stories completed with acceptance criteria met
+- [ ] All 7 stories (10.1, 10.2, 10.3a, 10.3b, 10.3c, 10.4, 10.5) completed with acceptance criteria met (10.5: G1/G3/G5 N/A, no detection change)
 - [ ] Every story closed with a cited G1 run and an independent G2 check
 - [ ] No unapproved recall drop (G3) at any story
-- [ ] Held-out set exists and is reported for 10.2-10.4 (G5)
+- [ ] Held-out set exists and is reported for 10.2, 10.3a, 10.3b, 10.3c and 10.4 (G5)
 - [ ] `GUIDELINES.md` approved by Lionel and applied to the whole corpus
 - [ ] black, ruff, mypy clean; full CI green (G6)
 - [ ] QA report updated with the before/after at every story, and CHANGELOG `[Unreleased]` entries per story (G7)
 - [ ] At Epic 10 close-out, README/README.fr, `docs/faq*.md`, `docs/index*.md` and `docs/tutorial*.md` updated once from the final G1 run (G7 interpretation, Lionel, 2026-10-02)
-- [ ] Close-out baseline recorded as Epic 9's starting point: run ID plus the pasted `[Overall]`/`[PERSON]`/`[LOCATION]`/`[ORG]`/`[HELD-OUT …]` lines in the QA report (CI artifacts expire after 90 days, so the run ID alone is not enough)
+- [ ] Close-out baseline recorded as Epic 9's starting point: run ID plus the pasted `[Overall]`/`[PERSON]`/`[LOCATION]`/`[ORG]`/`[HELD-OUT …]` lines in the QA report (`accuracy-results` artifacts are kept 30 days, `retention-days: 30` at `.github/workflows/accuracy.yaml:83`, so the run ID alone is not enough)
 - [ ] No release cut (v2.3.0 only on Lionel's explicit go)
 
 ---
@@ -338,7 +500,8 @@ Story 10.4 (Greetings + org+country)      --- Week 5      ---  baseline = 10.3 m
 | Item | Reason | Where |
 |------|--------|-------|
 | ORG recall for missed brands (OVHcloud, TechCorp, Microsoft Azure, Partech, Kima Ventures, EY) — F10 | A gazetteer built from the brands in the corpus would be overfitting by construction; needs a general approach | Epic 9 or a later story |
-| Different-type overlaps (PERSON vs ORG on the same span) | Needs its own rule and evidence | Later |
+| Different-type overlaps (PERSON vs ORG on the same span), except the exact-match case handled by 10.3c | Needs its own rule and evidence | Later |
+| "Keyword + connector(s)" ORG widening ("Chambre d'Agriculture d'Eure-et-Loir", "Cour d'Appel de Paris"). 10.3a dry-run: +1 ORG TP (local, not a CI result) | Deferred out of 10.3a at STOP R (Lionel, 2026-10-06): it adds new recall rather than fixing a boundary | Candidate for 10.3b or later recall work |
 | Encoder NER models (CamemBERT-NER, …) | Lionel decision | Epic 9 |
 | Auto-accept / no-validation modes | Product constraint 3 | Parked in Epic 9 |
 | v2.3.0 release | Only on Lionel's explicit go | Separate release story |
@@ -358,7 +521,7 @@ Relabelled to v2.4 (Lionel, 2026-10-02). Epic 8 was titled "v2.2 — Output Form
 - This is an enhancement to an existing system running Python 3.10-3.12, spaCy 3.7 `fr_core_news_lg` + regex hybrid detection, Poetry, pytest, GitHub Actions.
 - Integration points: `HybridDetector` merge and post-filters, regex patterns and resource lexicons, the accuracy suite (`tests/accuracy/`), the annotation corpus and `scripts/auto_annotate_corpus.py`.
 - Existing patterns to follow: post-filters as `HybridDetector` methods; lists and patterns in `gdpr_pseudonymizer/resources/`; structured logging without entity text beyond current practice.
-- Critical compatibility requirements: the product constraints and gates G1-G7 above, verbatim; the guidelines approval stop inside 10.1; strict 10.1 → 10.2 → 10.3 → 10.4 order, each baseline the previous merged one.
+- Critical compatibility requirements: the product constraints and gates G1-G7 above, verbatim; the guidelines approval stop inside 10.1; strict 10.1 → 10.2 → 10.3a → 10.3b → 10.3c → 10.4 order for detector stories (10.5, data-layer hardening, sits outside that chain), each baseline the previous merged close-out G1 run (10.3 was split into 10.3a and 10.3b, and 10.3c was added at 10.3a STOP R, Lionel, 2026-10-06; see "Course Correction" and "Close-Out Record").
 - Each story must include verification that existing functionality remains intact (full CI green, recall guard).
 
 The epic should maintain system integrity while delivering higher detection precision and a trustworthy benchmark, without lowering recall."
