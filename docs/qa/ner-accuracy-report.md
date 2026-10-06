@@ -723,11 +723,20 @@ Versus run E (`37236253941`, unguarded V3):
 
 Run H's held-out lines are identical to runs C, F and G. The held-out gain of run E came only from cuts that dropped names with no detection of their own, which the precise guard refuses. Small-sample note: held-out ORG has 51 annotations, so 1 ORG FN ≈ 2 points of ORG recall (PERSON 112, LOCATION 68). Lionel accepted this held-out recall drop on 2026-10-06 (recorded in the story); it is tracked in story 10.3.
 
-### Performance (NFR1): local benchmark, CI perf job vacuous (separate fix PR)
+### Performance (NFR1)
 
-- The performance workflow currently runs no test. Run `37213019377` is green, but its pytest steps abort at plugin load (pytest-qt), and `| tee` hides the exit code. The same holds on `main` (`36635484755`). PR #82 fixes the workflow.
-- Informational local single-document benchmark (Windows, 34 rounds; NFR1 threshold 30 s): all means stay between 0.4 s and 1.6 s. The story has the before/after table, measured back to back with `d4b7105` on the same machine.
-- The dedup walk uses an active window, so it scales linearly (unit-tested). The precise guard adds a pass only when a cut must be refused, with at most 16 refusal passes (QA PERF-002).
+Performance workflow run `37419128870` on the story branch, after the workflow fix (PR #82, `main` `acf1aba`): **success**. The "Verify benchmark results are non-empty" step passed. Single-document benchmark means: 2k words 0.441 s, 3.5k 0.761 s, 5k 1.310 s (34 rounds), entity detection 3k 0.680 s (10 rounds), against the NFR1 threshold of 30 s.
+
+Informational comparison with `main`:
+
+| Run | CPU | 2k | 3.5k | 5k | Entity detection 3k |
+|---|---|---|---|---|---|
+| Branch `37419128870` | AMD EPYC 7763 | 0.441 s | 0.761 s | 1.310 s | 0.680 s |
+| Branch `37421340202` | AMD EPYC 7763 | 0.443 s | 0.761 s | 1.307 s | 0.674 s |
+| `main` `37226334035` | AMD EPYC 9V45 | 0.312 s | 0.537 s | 0.761 s | 0.450 s |
+| `main` `37420216045` | Intel Xeon 6973P | 0.274 s | 0.473 s | 0.698 s | 0.406 s |
+
+The differences follow the runner CPU (pytest-benchmark `machine_info`). The detection is CPU-bound in spaCy. Measured locally on the same machine, the 10.2 post-filters (role filter and dedup) take about 1 ms of a 0.57 s detection, and branch and `main` detection times are equal. The dedup walk scales linearly, and the guard is capped at 16 refusal passes.
 
 ### Notes
 
