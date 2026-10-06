@@ -208,11 +208,28 @@ class DocumentProcessor:
         return detected_entities
 
     @staticmethod
+    def _strip_entity_text(ctx: _ProcessingContext, entity: DetectedEntity) -> str:
+        """Strip titles (all entities) and leading prepositions (LOCATION).
+
+        This was the whole mapping key before the 10.3a QA REL-001 fix. It
+        is still looked up as a fallback by ``_find_existing_mapping``.
+        """
+        text = ctx.compositional_engine.strip_titles(entity.text)
+        if entity.entity_type == "LOCATION":
+            text = ctx.compositional_engine.strip_prepositions(text)
+        return text
+
+    @staticmethod
     def _normalize_entity_text(ctx: _ProcessingContext, entity: DetectedEntity) -> str:
-        """Normalize entity text by stripping titles and prepositions.
+        """Normalize entity text into the mapping key.
 
         Applies strip_titles for all entities, then strip_prepositions
-        for LOCATION entities. Used for DB lookups and pseudonym assignment.
+        for LOCATION entities, then collapses every whitespace run (line
+        breaks, tabs, no-break spaces, repeated spaces) to one space, so a
+        name hard-wrapped over a line break gets the same key as its one-line
+        spelling (10.3a QA REL-001). A key with single spaces only is
+        unchanged. Used for DB lookups and pseudonym assignment, and by the
+        validation preview and known-entity check, so all three agree.
 
         Args:
             ctx: Processing context with compositional engine
@@ -221,10 +238,35 @@ class DocumentProcessor:
         Returns:
             Stripped entity text ready for lookup/assignment
         """
-        text = ctx.compositional_engine.strip_titles(entity.text)
-        if entity.entity_type == "LOCATION":
-            text = ctx.compositional_engine.strip_prepositions(text)
-        return text
+        return " ".join(DocumentProcessor._strip_entity_text(ctx, entity).split())
+
+    @staticmethod
+    def _find_existing_mapping(
+        ctx: _ProcessingContext, entity: DetectedEntity, key: str
+    ) -> Entity | None:
+        """Find the stored mapping of an entity whose mapping key is ``key``.
+
+        The whitespace-collapsed key is looked up first, so it wins whenever
+        it has a row. Otherwise, when the entity's stripped text has other
+        whitespace (a line break, a tab, a no-break space, repeated spaces),
+        the key as stored before the REL-001 fix is looked up too. A row
+        created under that spelling therefore keeps its pseudonym until the
+        single-space spelling gets a row of its own.
+
+        Args:
+            ctx: Processing context with the mapping repository
+            entity: Detected entity being resolved
+            key: The entity's mapping key (``_normalize_entity_text``)
+
+        Returns:
+            The stored mapping, or None
+        """
+        existing = ctx.mapping_repo.find_by_full_name(key)
+        if existing is None:
+            legacy_key = DocumentProcessor._strip_entity_text(ctx, entity)
+            if legacy_key != key:
+                existing = ctx.mapping_repo.find_by_full_name(legacy_key)
+        return existing
 
     def _build_pseudonym_assigner(
         self, ctx: _ProcessingContext
@@ -246,7 +288,9 @@ class DocumentProcessor:
         def pseudonym_assigner(entity: DetectedEntity) -> str:
             entity_text_stripped = DocumentProcessor._normalize_entity_text(ctx, entity)
 
-            existing_entity = ctx.mapping_repo.find_by_full_name(entity_text_stripped)
+            existing_entity = DocumentProcessor._find_existing_mapping(
+                ctx, entity, entity_text_stripped
+            )
             if existing_entity:
                 return existing_entity.pseudonym_full
 
@@ -296,7 +340,7 @@ class DocumentProcessor:
         for entity in detected_entities:
             entity_text_stripped = self._normalize_entity_text(ctx, entity)
 
-            existing = ctx.mapping_repo.find_by_full_name(entity_text_stripped)
+            existing = self._find_existing_mapping(ctx, entity, entity_text_stripped)
             if existing:
                 known_entities.append(entity)
             else:
@@ -499,8 +543,8 @@ class DocumentProcessor:
                 pseudonym = entity_cache[entity_text_stripped]
                 entities_reused += 1
             else:
-                existing_entity = ctx.mapping_repo.find_by_full_name(
-                    entity_text_stripped
+                existing_entity = self._find_existing_mapping(
+                    ctx, entity, entity_text_stripped
                 )
                 if existing_entity:
                     pseudonym = existing_entity.pseudonym_full
