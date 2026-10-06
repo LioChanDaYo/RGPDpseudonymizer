@@ -515,10 +515,16 @@ class TestSameTypeDedup:
     ) -> None:
         # The line break comes before the inner span: the trimmed outer
         # ("Rapport") no longer contains it, so containment keeps the outer.
+        # Story 10.3a AC2 (R-SPLIT late): the kept outer is then cut at its
+        # line break, so each line is its own entity.
         doc = "Rapport\nZorbalia Quentin"
         outer = _ent(doc, "PERSON", 0, "spacy")
         inner = _ent("Zorbalia Quentin", "PERSON", 8, "regex")
-        assert detector._merge_entities([outer], [inner], doc) == [outer]
+        merged = detector._merge_entities([outer], [inner], doc)
+        assert [(e.text, e.start_pos) for e in merged] == [
+            ("Rapport", 0),
+            ("Zorbalia Quentin", 8),
+        ]
         assert log.named("same_type_overlap_resolved")[0]["reason"] == "containment"
 
     def test_dedup_log_fields_and_no_entity_text(
@@ -807,12 +813,13 @@ class TestOrgSegmentTrim:
         reasons = {e["reason"] for e in log.named("same_type_overlap_resolved")}
         assert reasons == {"containment_outer_trimmed_boundary"}
 
-    def test_sentence_start_word_may_be_discarded(
-        self, detector: HybridDetector
-    ) -> None:
+    def test_sentence_start_word_is_protected(self, detector: HybridDetector) -> None:
+        # Story 10.3a AC5, REL-004 option (b): the first word of a sentence
+        # is no longer excepted from the guard, so the cut that would leave
+        # "Merci" uncovered is refused and the outer span is kept.
         doc = "Quentrix SA fournit. Merci"
         merged = self._contain(detector, doc, "Quentrix SA")
-        assert [e.text for e in merged] == ["Quentrix SA fournit"]
+        assert [e.text for e in merged] == [doc]
 
     def test_guard_fallback_keeps_the_run_c_result(
         self, detector: HybridDetector, log: _LogRecorder
@@ -843,7 +850,9 @@ class TestOrgSegmentTrim:
         regex_e = _ent("Quentrix Holding SA", "ORG", 0, "regex")
         spacy_e = _ent("Holding SA\nSiège Zorbaville", "ORG", 9, "spacy")
         merged = detector._merge_entities([spacy_e], [regex_e], doc)
-        assert [e.text for e in merged] == [doc]
+        # Story 10.3a AC2 (R-SPLIT late): the union is then cut at its line
+        # break; both lines stay covered.
+        assert [e.text for e in merged] == ["Quentrix Holding SA", "Siège Zorbaville"]
 
     def test_person_last_first_is_not_cut(self, detector: HybridDetector) -> None:
         doc = "Quentin, Zorbalia"

@@ -1173,6 +1173,21 @@ def main() -> None:
             f"{s['l2b']} | {s['l1_chars']} ({s['l1_in_gt']}) / {s['l1_spans']} |"
         )
     print(f"W-JOIN fired {len(wj_fired)} times on the main corpus: {wj_fired}")
+    final = compose(rx_key="LB+ORG", late=True, segtrim=True, rel4="b", wjoin=True)
+    (out_dir / "final_dets.json").write_text(
+        json.dumps(
+            {
+                n: [
+                    {**to_json(e), "is_ambiguous": e.is_ambiguous}
+                    for e in sorted(v, key=lambda x: (x.start_pos, x.end_pos))
+                ]
+                for n, v in final.items()
+            },
+            ensure_ascii=False,
+            indent=0,
+        ),
+        encoding="utf-8",
+    )
     report_path = out_dir / "dryrun_report.txt"
     report_path.write_text("\n".join(log), encoding="utf-8")
     print(f"\nfull report -> {report_path}")

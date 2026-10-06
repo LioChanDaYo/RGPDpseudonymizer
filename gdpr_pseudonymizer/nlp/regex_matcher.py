@@ -20,6 +20,12 @@ from gdpr_pseudonymizer.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
+# Horizontal whitespace (space, tab, no-break space, narrow no-break space).
+# Name tokens are joined by it, never by a line break (Story 10.3a, R-LB):
+# a name does not span lines. Not ``[^\S\r\n]``, which still matches
+# \v, \f, \x85, U+2028 and U+2029.
+HSPACE = r"[ \t\u00A0\u202F]"
+
 
 class RegexMatcher:
     """Pattern-based entity matcher using regex and French name dictionary.
@@ -256,7 +262,8 @@ class RegexMatcher:
         # This is a candidate full name that we'll validate with dictionary
         name_pattern = re.compile(
             r"\b([A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][a-zàâäéèêëïîôöùûü]+(?:-[A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][a-zàâäéèêëïîôöùûü]+)?)"
-            r"\s+"
+            + HSPACE
+            + r"+"
             r"([A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][a-zàâäéèêëïîôöùûü]+)",
             re.UNICODE,
         )
@@ -327,7 +334,7 @@ class RegexMatcher:
         token_pattern = re.compile(
             r"\b([A-ZÀÂÄÉÈÊËÏÎÔÙÛÜ][a-zàâäéèêëïîôöùûü]*"
             r"(?:[-'][A-Za-zàâäéèêëïîôöùûü]+)*"
-            r"(?:\s+(?:de|du|des|d'|en|et|la|le|les|sur)\s+"
+            r"(?:" + HSPACE + r"+(?:de|du|des|d'|en|et|la|le|les|sur)" + HSPACE + r"+"
             r"[A-ZÀÂÄÉÈÊËÏÎÔÙÛÜa-zàâäéèêëïîôöùûü]"
             r"[a-zàâäéèêëïîôöùûü]*(?:[-'][A-Za-zàâäéèêëïîôöùûü]+)*)*)",
             re.UNICODE,

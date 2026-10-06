@@ -20,7 +20,7 @@ import yaml
 
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity, EntityDetector
 from gdpr_pseudonymizer.nlp.model_names import DEFAULT_SPACY_MODEL
-from gdpr_pseudonymizer.nlp.regex_matcher import RegexMatcher
+from gdpr_pseudonymizer.nlp.regex_matcher import HSPACE, RegexMatcher
 from gdpr_pseudonymizer.nlp.spacy_detector import SpaCyDetector
 from gdpr_pseudonymizer.resources import FRENCH_GEOGRAPHY_PATH, ORG_ROLE_FILTER_PATH
 from gdpr_pseudonymizer.utils.french_patterns import (
@@ -70,6 +70,28 @@ _SEGMENT_TRIM_TYPES = frozenset({"ORG"})
 _WORD_RE = re.compile(r"[^\W\d_][\w'’-]*")
 _TITLE_WORD_RE = re.compile(FRENCH_TITLE_PATTERN, re.IGNORECASE)
 
+# Line-break split, R-SPLIT (Story 10.3a): the line separators HSPACE
+# excludes. A detected span is cut at each of them.
+_LINE_BREAK_RE = re.compile("[\n\r\v\f\x85\u2028\u2029]")
+
+# Wrapped-name join, W-JOIN (Story 10.3a, Lionel 2026-10-06): a PERSON name
+# hard-wrapped over one line break (PDF text extraction).
+_UPPER = "A-ZÀ-ÖØ-ÞĀ-ſ"
+_LOWER = "a-zß-öø-ÿĀ-ſ"
+_WRAP_PARTICLES = "(?:de|du|des|la|le|van|der|den)"
+_WRAP_TOKEN = f"[{_UPPER}][{_UPPER}{_LOWER}]*(?:[-'’][{_UPPER}][{_UPPER}{_LOWER}]*)*"
+_WRAP_TOKEN_RE = re.compile(_WRAP_TOKEN)
+# After a one-word PERSON: optional particles, one line break, optional
+# particles, one capitalised token, then end of text, , . ! ? ) or a space
+# and a lower-case letter (never ":" or ";", which start a label line).
+_WRAP_RE = re.compile(
+    f"(?:{HSPACE}+{_WRAP_PARTICLES})*{HSPACE}*\r?\n{HSPACE}*"
+    f"(?P<right>(?:{_WRAP_PARTICLES}{HSPACE}+)*{_WRAP_TOKEN})"
+    f"(?={HSPACE}*(?:[,.!?)]|\\Z)|{HSPACE}+[a-zß-öø-ÿ])"
+)
+# A lower-case word start: the line is prose, not a name-only line
+_PROSE_WORD_RE = re.compile("(?<![\\w'’])[a-zß-öø-ÿ]")
+
 
 def _is_sentence_period(raw: str, index: int) -> bool:
     """Whether the period at ``raw[index]`` ends a sentence.
@@ -107,9 +129,10 @@ def _capitalised_words(
 ) -> list[tuple[int, int]]:
     """(start, end) of the capitalised words inside ``regions`` (V3 guard).
 
-    Excepted: a title from the French title pattern (it is not a name), and
-    the first word of a sentence, i.e. a word whose preceding non-space text
-    in ``context`` ends with a sentence period (``_is_sentence_period``).
+    Excepted: a title from the French title pattern (it is not a name).
+    The first word of a sentence is not excepted (Story 10.3a, REL-004
+    option (b), Lionel 2026-10-06): it may be a name, so a cut that would
+    leave it uncovered is refused.
     """
     found: list[tuple[int, int]] = []
     for start, end in regions:
@@ -118,9 +141,6 @@ def _capitalised_words(
             if not word[0].isupper():
                 continue
             if _TITLE_WORD_RE.fullmatch(word) or _TITLE_WORD_RE.fullmatch(word + "."):
-                continue
-            before = context[: match.start()].rstrip()
-            if before.endswith(".") and _is_sentence_period(context, len(before) - 1):
                 continue
             found.append((match.start(), match.end()))
     return found
@@ -506,10 +526,144 @@ class HybridDetector(EntityDetector):
         # Keep one entity per same-type overlap (Story 10.2 AC1)
         merged = self._dedup_same_type_overlaps(merged, text)
 
+        # Cut the spans that still cross a line break; the pieces go through
+        # the same post-filters again (Story 10.3a AC2, R-SPLIT late)
+        merged, split_count = self._split_at_line_breaks(merged, text)
+        if split_count:
+            merged = self._filter_title_only_entities(merged)
+            merged = self._filter_label_words(merged)
+            merged = self._filter_org_roles(merged, text)
+            merged = self._dedup_same_type_overlaps(merged, text)
+
+        # Re-join a PERSON name hard-wrapped over one line (Story 10.3a W-JOIN)
+        if text is not None:
+            merged = self._join_wrapped_names(merged, text)
+
         # Sort by start position
         merged.sort(key=lambda e: e.start_pos)
 
         return merged
+
+    def _split_at_line_breaks(
+        self, entities: list[DetectedEntity], text: str | None
+    ) -> tuple[list[DetectedEntity], int]:
+        """Cut every entity at each line break inside it (Story 10.3a, R-SPLIT).
+
+        Each piece is whitespace-stripped and kept, with the same type and
+        source and document offsets, if it holds an upper-case letter or a
+        digit; the edge-junk trim then runs on the new pieces only. A name
+        never spans a line break in the app's input formats.
+
+        Args:
+            entities: Merged, filtered, deduplicated entities
+            text: Document text, or None (entity texts are then raw slices)
+
+        Returns:
+            (entities, number of entities that were split)
+        """
+        out: list[DetectedEntity] = []
+        split_count = 0
+        for entity in entities:
+            raw = self._slice(entity, text)
+            if not _LINE_BREAK_RE.search(raw):
+                out.append(entity)
+                continue
+            split_count += 1
+            pieces: list[DetectedEntity] = []
+            dropped = 0
+            pos = 0
+            for part in _LINE_BREAK_RE.split(raw):
+                part_start = pos
+                pos += len(part) + 1
+                stripped = part.strip()
+                if not any(ch.isupper() or ch.isdigit() for ch in stripped):
+                    dropped += 1 if stripped else 0
+                    continue
+                start = entity.start_pos + part_start + (len(part) - len(part.lstrip()))
+                pieces.append(
+                    dataclasses.replace(
+                        entity,
+                        text=stripped,
+                        start_pos=start,
+                        end_pos=start + len(stripped),
+                    )
+                )
+            kept = self._trim_entity_boundaries(pieces)
+            logger.debug(
+                "span_split_linebreak",
+                entity_type=entity.entity_type,
+                source=entity.source,
+                segments_kept=len(kept),
+                segments_dropped=dropped + len(pieces) - len(kept),
+            )
+            out.extend(kept)
+        return out, split_count
+
+    @staticmethod
+    def _join_wrapped_names(
+        entities: list[DetectedEntity], text: str
+    ) -> list[DetectedEntity]:
+        """Extend a PERSON hard-wrapped over one line break (Story 10.3a W-JOIN).
+
+        A PERSON whose text, titles stripped, is one capitalised name token,
+        on a line that has a lower-case word before it, is extended across a
+        single line break (no blank line, no punctuation at the line end) to
+        the capitalised token that starts the next line, particles included,
+        when that token is followed by the end of the text, , . ! ? ) or a
+        space and a lower-case letter. PERSON entities inside the new span
+        are dropped. Never a ":" or ";" follower (a label line), never a
+        following capitalised token (a second name or a role line).
+
+        Args:
+            entities: Entities after the line-break split
+            text: Document text
+
+        Returns:
+            Entities with wrapped names joined
+        """
+        out = list(entities)
+        for entity in entities:
+            if entity.entity_type != "PERSON" or entity not in out:
+                continue
+            if entity.end_pos > len(text):
+                continue
+            raw = text[entity.start_pos : entity.end_pos]
+            if not raw or not raw[-1].isalpha():
+                continue
+            core = strip_french_titles(raw).split()
+            if len(core) != 1 or not _WRAP_TOKEN_RE.fullmatch(core[0]):
+                continue
+            match = _WRAP_RE.match(text, entity.end_pos)
+            if match is None:
+                continue
+            line_start = entity.start_pos
+            while line_start > 0 and not _LINE_BREAK_RE.match(text[line_start - 1]):
+                line_start -= 1
+            if not _PROSE_WORD_RE.search(text, line_start, entity.start_pos):
+                continue
+            end = match.end("right")
+            joined = dataclasses.replace(
+                entity, text=text[entity.start_pos : end], end_pos=end
+            )
+            out = [
+                kept
+                for kept in out
+                if kept is not entity
+                and not (
+                    kept.entity_type == "PERSON"
+                    and entity.start_pos <= kept.start_pos
+                    and kept.end_pos <= end
+                )
+            ]
+            out.append(joined)
+            logger.debug(
+                "wrapped_name_joined",
+                entity_type=entity.entity_type,
+                source=entity.source,
+                start=entity.start_pos,
+                end=end,
+            )
+        return out
 
     def _should_prefer_regex_org(
         self, regex_entity: DetectedEntity, spacy_entity: DetectedEntity
