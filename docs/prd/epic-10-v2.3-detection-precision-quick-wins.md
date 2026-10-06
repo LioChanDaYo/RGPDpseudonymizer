@@ -3,7 +3,7 @@
 **Epic Goal:** Raise detection precision and make the accuracy benchmark trustworthy with local, deterministic changes to the hybrid detector and the ground-truth corpus, without lowering recall. The user-facing value is fewer false entities to reject during the (mandatory) validation step and a benchmark whose numbers can be believed.
 
 **Target Release:** v2.3.0 candidate. **No release is part of this epic.** v2.3.0 ships only on Lionel's explicit go, through a separate release story.
-**Duration:** Estimated 4.5-7 weeks (10.1 is annotation-labor-bound; 10.3 split into 10.3a and 10.3b, and 10.3c added, Lionel, 2026-10-06)
+**Duration:** Estimated 5-7.5 weeks (10.1 is annotation-labor-bound; 10.3 split into 10.3a and 10.3b, and 10.3c added, Lionel, 2026-10-06; 10.5 added, Lionel, 2026-10-07)
 **Predecessor:** v2.2.0 + accuracy scorer fix (#77), commit `fceef65`
 **Successor:** Epic 9 (v3.0) starts from this epic's merged close-out baseline.
 
@@ -120,8 +120,9 @@ These notes sit outside the normative Gates block above and do not change its te
 | 10.3b: Particles, Roles & LOCATION Noise (split from 10.3, Lionel, 2026-10-06) | MED | 0.5-1 week | F6, F7 | Draft |
 | 10.3c: Type-Aware Exact Match in Merge (added at 10.3a STOP R, Lionel, 2026-10-06) | MED | 0.5 week | 10.3a STOP R | Draft |
 | 10.4: Greetings + Org-Plus-Country | MED | 0.5-1 week | F8, F9 | Draft |
+| 10.5: DB Init Safety (data-layer hardening, added by Lionel, 2026-10-07) | LOW | 0.5 week | PR #83 finding | Draft |
 
-**Total Estimated Duration:** 4.5-7 weeks
+**Total Estimated Duration:** 5-7.5 weeks
 
 ---
 
@@ -392,6 +393,45 @@ Part of the ground truth was produced by `scripts/auto_annotate_corpus.py` and a
 
 ---
 
+## Story 10.5: DB Init Safety
+
+**Added by Lionel, 2026-10-07.** Data-layer hardening found during the TEST-002 race fix (PR #83). It is not a detection-precision change. It sits in Epic 10 because this repo puts hardening found along the way into the active epic as a small story (precedents: 4.6.1, 6.7.1), and `epic-list.md` has no backlog section.
+
+**As a** user running several CLI processes against a new mapping database (e.g. from a script),
+**I want** a failed initialization never to delete a database that another process just created,
+**so that** I do not lose the winner's mappings and passphrase setup to a race.
+
+**Priority:** LOW — rare: it needs two processes initializing the same new DB at the same moment. Single CLI or GUI runs initialize once.
+**Change type:** Data-layer only. No file under `gdpr_pseudonymizer/nlp/`, `gdpr_pseudonymizer/resources/`, `tests/accuracy/` or `tests/test_corpus/` changes.
+**Ordering:** outside the detector chain. It changes no detection, so it has no accuracy baseline and may run before, between or after the detector stories. It does not move the epic close-out baseline.
+
+### Context
+
+`init_database` (`gdpr_pseudonymizer/data/database.py:60`) checks that `db_path` does not exist, creates it, and on **any** exception deletes `db_path` (`database.py:180-184`, "Clean up partial database file on failure"). If two processes create the same new database at once, the loser's cleanup can delete the winner's freshly created file. PR #83 (open at the time of writing) makes index creation idempotent (`CREATE INDEX IF NOT EXISTS`). That only moves the loser's failure to the metadata key collision; the delete stays.
+
+### Acceptance Criteria
+
+1. **AC1 — No deletion of a pre-existing DB:** on failure, `init_database` deletes `db_path` only if this call itself created the file. A database that existed before the call, or that another process created during it, is never deleted. The mechanism is chosen and documented in the story: create the file exclusively and track ownership, or take a lock on first-time creation, or both.
+2. **AC2 — Clear failure for the loser:** the process that loses the race fails with the existing "Database already exists" `ValueError`, or a documented equivalent, not a generic initialization exception. The winner's database opens with `open_database` and its own passphrase, and its metadata (schema version, encryption parameters, passphrase canary) is intact.
+3. **AC3 — Concurrency test:** a test runs two initializations of the same new `db_path` concurrently, in separate processes, repeated enough times to make the race likely (the story states the count). Each iteration passes only if exactly one initialization succeeds, the file exists, it opens with the winner's passphrase, and the loser failed as AC2 says. The test is deterministic in its pass criteria and uses a temporary directory per iteration.
+4. **AC4 — Existing behaviour kept:** initializing an existing path still raises `ValueError` without touching the file. A failure inside a single, uncontended initialization still leaves no partial file behind. Existing database tests stay green.
+5. **AC5 — Gates:**
+   - **G1 and G3 are N/A:** there is no detection change, so no accuracy run is required and recall cannot move. The PR states this explicitly.
+   - **G5 is N/A** for the same reason.
+   - **G4** holds trivially: no annotation, scorer or detector change.
+   - **G2:** QA verifies the fix independently by re-running the AC3 test and reading the diff. There is no accuracy artifact to download.
+   - **G6** applies in full (black, ruff, mypy, unit tests, full CI green).
+   - **G7:** no headline number changes, so no QA report or docs update. CHANGELOG `[Unreleased]` gets a "Fixed" entry.
+
+### Integration Points
+
+- `gdpr_pseudonymizer/data/database.py` — `init_database` cleanup path
+- `tests/unit/` or `tests/integration/` — concurrent-initialization test
+
+### Estimated Effort: 0.5 week
+
+---
+
 ## Execution Sequence
 
 ```
@@ -401,9 +441,12 @@ Story 10.3a (Boundaries + run-on spans)   --- Week 4      ---  baseline = 10.2 m
 Story 10.3b (Particles, roles, LOC noise) --- Week 4.5-5  ---  baseline = 10.3a merged
 Story 10.3c (Type-aware exact match)      --- Week 5.5    ---  baseline = 10.3b merged
 Story 10.4 (Greetings + org+country)      --- Week 6-6.5  ---  baseline = 10.3c merged
+Story 10.5 (DB init safety)               --- 0.5 week, any slot --- no accuracy baseline (data layer)
 ```
 
 **Strictly sequential:** 10.1 → 10.2 → 10.3a → 10.3b → 10.3c → 10.4. Each story's baseline is the previous story's merged close-out G1 run. No parallel detector stories: overlapping changes would make G3/G4 attribution impossible.
+
+**Story 10.5** is outside this chain: it changes no detection, so it has no accuracy baseline and can merge at any point without affecting G3/G4 attribution.
 
 **Epic close-out baseline:** the 10.4 merged G1 run (main + held-out) is the baseline Epic 9 starts from.
 
@@ -439,7 +482,7 @@ Story 10.4 (Greetings + org+country)      --- Week 6-6.5  ---  baseline = 10.3c 
 
 ## Definition of Done
 
-- [ ] All 6 stories (10.1, 10.2, 10.3a, 10.3b, 10.3c, 10.4) completed with acceptance criteria met
+- [ ] All 7 stories (10.1, 10.2, 10.3a, 10.3b, 10.3c, 10.4, 10.5) completed with acceptance criteria met (10.5: G1/G3/G5 N/A, no detection change)
 - [ ] Every story closed with a cited G1 run and an independent G2 check
 - [ ] No unapproved recall drop (G3) at any story
 - [ ] Held-out set exists and is reported for 10.2, 10.3a, 10.3b, 10.3c and 10.4 (G5)
@@ -478,7 +521,7 @@ Relabelled to v2.4 (Lionel, 2026-10-02). Epic 8 was titled "v2.2 — Output Form
 - This is an enhancement to an existing system running Python 3.10-3.12, spaCy 3.7 `fr_core_news_lg` + regex hybrid detection, Poetry, pytest, GitHub Actions.
 - Integration points: `HybridDetector` merge and post-filters, regex patterns and resource lexicons, the accuracy suite (`tests/accuracy/`), the annotation corpus and `scripts/auto_annotate_corpus.py`.
 - Existing patterns to follow: post-filters as `HybridDetector` methods; lists and patterns in `gdpr_pseudonymizer/resources/`; structured logging without entity text beyond current practice.
-- Critical compatibility requirements: the product constraints and gates G1-G7 above, verbatim; the guidelines approval stop inside 10.1; strict 10.1 → 10.2 → 10.3a → 10.3b → 10.3c → 10.4 order, each baseline the previous merged close-out G1 run (10.3 was split into 10.3a and 10.3b, and 10.3c was added at 10.3a STOP R, Lionel, 2026-10-06; see "Course Correction" and "Close-Out Record").
+- Critical compatibility requirements: the product constraints and gates G1-G7 above, verbatim; the guidelines approval stop inside 10.1; strict 10.1 → 10.2 → 10.3a → 10.3b → 10.3c → 10.4 order for detector stories (10.5, data-layer hardening, sits outside that chain), each baseline the previous merged close-out G1 run (10.3 was split into 10.3a and 10.3b, and 10.3c was added at 10.3a STOP R, Lionel, 2026-10-06; see "Course Correction" and "Close-Out Record").
 - Each story must include verification that existing functionality remains intact (full CI green, recall guard).
 
 The epic should maintain system integrity while delivering higher detection precision and a trustworthy benchmark, without lowering recall."
