@@ -741,3 +741,81 @@ The differences follow the runner CPU (pytest-benchmark `machine_info`). The det
 ### Notes
 
 - README, FAQ, docs index and tutorials are not updated in this story (Epic 10 G7 interpretation).
+
+## Boundaries + run-on spans (Story 10.3a, 2026-10-06)
+
+**Detector change, same ground truth.** No annotation, scorer or held-out change (G4). The ground truth is the 10.1 one (2,215 main-corpus annotations).
+
+**What changed in the detector:**
+- **Names never span a line break (AC1).** The regex patterns join name tokens with horizontal whitespace only (space, tab, no-break space, narrow no-break space): titles, "Last, First", location indicators, organisations, dictionary full names, dictionary places.
+- **Organisation name shape (AC3, AC4).** The two regex organisation patterns take 1 to 6 capitalised tokens. Lower-case connectors (de, du, des, la, le, et, &; at most two in a row) are allowed only between two of them, and d'/l' glue to the next token. A comma, a clause, a lower-case content word or a sentence word followed by lower-case words no longer becomes part of the organisation ("Quand la direction d'<Org> SA" → "<Org> SA"; "Institut <Name> à <City>, notamment le Dr" → "Institut <Name>").
+- **Spans still crossing a line are split (AC2).** After the same-type dedup, any span that still crosses a line break is cut at each break. Each piece with an upper-case letter or a digit is kept, edge-trimmed, and goes through the existing filters again (title-only, label words, ORG roles, same-type dedup).
+- **V3 guard (AC5, REL-004 option b).** The first word of a sentence is no longer excepted: a cut that would leave it uncovered is refused.
+- **Wrapped names (Lionel, 2026-10-06).** A one-word PERSON at the end of a prose line is extended across a single line break to the capitalised surname (particles included) that starts the next line, when that surname is followed by the end of the text, `, . ! ? )` or a lower-case word. A blank line, punctuation at the line end, a second capitalised word or a ":" label line stop it. The main corpus has no wrapped name; the rule fires 0 times there.
+- Rule text and STOP R decisions: story 10.3a.
+
+**Sources (G1):**
+- Before: run H `37385301566` (10.2 close-out; reproduced on `main` at `f75ad9a` by `37424140809`).
+- **After (close-out): run `37459114468`** (workflow_dispatch, commit `39ab544`).
+
+### Lines from `accuracy-output.txt`, verbatim
+
+Run `37459114468`:
+
+```
+[Overall] P=0.7764 R=0.7932 F1=0.7847 TP=1757 FP=506 FN=458 FN%=20.68 FP%=22.36
+[PERSON] P=0.9161 R=0.9623 F1=0.9387 TP=1278 FP=117 FN=50
+[LOCATION] P=0.6572 R=0.7947 F1=0.7194 TP=209 FP=109 FN=54
+[ORG] P=0.4909 R=0.4327 F1=0.4600 TP=270 FP=280 FN=354
+[HELD-OUT Overall] P=0.7854 R=0.7446 F1=0.7644 TP=172 FP=47 FN=59 FN%=25.54 FP%=21.46
+[HELD-OUT PERSON] P=0.8818 R=0.8661 F1=0.8739 TP=97 FP=13 FN=15
+[HELD-OUT LOCATION] P=0.7536 R=0.7647 F1=0.7591 TP=52 FP=17 FN=16
+[HELD-OUT ORG] P=0.5750 R=0.4510 F1=0.5055 TP=23 FP=17 FN=28
+```
+
+### Main corpus, before / after
+
+| | Precision | Recall | F1 | TP | FP | FN |
+|---|---|---|---|---|---|---|
+| Overall, before (run H) | 77.35% | 78.33% | 77.84% | 1,735 | 508 | 480 |
+| **Overall, after** | **77.64%** | **79.32%** | **78.47%** | 1,757 | 506 | 458 |
+| PERSON, before | 91.73% | 96.01% | 93.82% | 1,275 | 115 | 53 |
+| **PERSON, after** | **91.61%** | **96.23%** | **93.87%** | 1,278 | 117 | 50 |
+| LOCATION, before | 65.72% | 79.47% | 71.94% | 209 | 109 | 54 |
+| **LOCATION, after** | **65.72%** | **79.47%** | **71.94%** | 209 | 109 | 54 |
+| ORG, before | 46.92% | 40.22% | 43.31% | 251 | 284 | 373 |
+| **ORG, after** | **49.09%** | **43.27%** | **46.00%** | 270 | 280 | 354 |
+
+### Recall (G3, strict)
+
+- FN versus run H: Overall 480 → 458, PERSON 53 → 50, LOCATION 54 → 54 (unchanged), ORG 373 → 354. No FN increase in any type.
+
+**Coverage, main corpus** (local check on a dump that reproduces run `37459114468` exactly; details in the story):
+- No annotation matched in run H becomes a miss.
+- 3 organisation annotations that were already misses lose their organisation cover. Before, only a run-on organisation span covered them; a place span still covers them. Lionel signed this off at STOP R.
+- No annotation loses its last cover of any type.
+- Carried from 10.2: the partly uncovered organisation name is fully covered again. The two short names covered in v2.2 only by accident are handed to story 10.4.
+
+### Held-out set (G5)
+
+Aggregates only (lines above).
+- **Versus run H (10.2):** Overall P 75.23% → 78.54%, R 69.70% → 74.46%, F1 72.36% → 76.44%, FN 70 → 59. PERSON FN 20 → 15. LOCATION FN 16 → 16. ORG FN 34 → 28 (R 33.33% → 45.10%, P 44.74% → 57.50%).
+- **Versus the 10.1 baseline (`37189862679`):**
+  - Overall FN 64 → 59, PERSON FN 21 → 15, LOCATION FN 15 → 16, ORG FN 28 → 28.
+  - Held-out ORG recall is back to its 10.1 level. The 10.2 drop was accepted by Lionel and tracked in this story.
+- There is no held-out loss versus run H. Small-sample note: held-out ORG has 51 annotations, so 1 ORG FN ≈ 2 points of ORG recall (PERSON 112, LOCATION 68).
+
+### Performance (NFR1)
+
+Performance workflow run `37459118119` on the story branch (commit `39ab544`): **success**. The "Verify benchmark results are non-empty" step passed.
+
+| Run | CPU (`machine_info`) | 2k | 3.5k | 5k | Entity detection 3k |
+|---|---|---|---|---|---|
+| Branch `37459118119` | AMD EPYC 7763 | 0.443 s | 0.764 s | 1.136 s | 0.686 s |
+| `main` `37424140829` (`f75ad9a`) | AMD EPYC 7763 | 0.448 s | 0.765 s | 1.323 s | 0.681 s |
+
+Same runner CPU, so the comparison is like for like. Timings are unchanged within noise (34 rounds; 10 for entity detection), against the NFR1 threshold of 30 s. The new organisation patterns are capped at 6 tokens. Their time is linear on long capitalised runs: a unit test bounds a 50 KB adversarial line below 2 s, and it takes about 0.02 s locally.
+
+### Notes
+
+- README, FAQ, docs index and tutorials are not updated in this story (Epic 10 G7 interpretation).
