@@ -209,10 +209,15 @@ class DocumentProcessor:
 
     @staticmethod
     def _normalize_entity_text(ctx: _ProcessingContext, entity: DetectedEntity) -> str:
-        """Normalize entity text by stripping titles and prepositions.
+        """Normalize entity text into the mapping key.
 
         Applies strip_titles for all entities, then strip_prepositions
-        for LOCATION entities. Used for DB lookups and pseudonym assignment.
+        for LOCATION entities, then collapses every whitespace run (line
+        breaks, tabs, no-break spaces, repeated spaces) to one space, so a
+        name hard-wrapped over a line break gets the same key as its one-line
+        spelling (10.3a QA REL-001). A key with single spaces only is
+        unchanged. Used for DB lookups and pseudonym assignment, and by the
+        validation preview and known-entity check, so all three agree.
 
         Args:
             ctx: Processing context with compositional engine
@@ -224,7 +229,7 @@ class DocumentProcessor:
         text = ctx.compositional_engine.strip_titles(entity.text)
         if entity.entity_type == "LOCATION":
             text = ctx.compositional_engine.strip_prepositions(text)
-        return text
+        return " ".join(text.split())
 
     def _build_pseudonym_assigner(
         self, ctx: _ProcessingContext

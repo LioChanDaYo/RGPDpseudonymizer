@@ -10,6 +10,7 @@ Implements EntityDetector interface using a hybrid approach:
 
 from __future__ import annotations
 
+import bisect
 import dataclasses
 import functools
 import json
@@ -614,6 +615,12 @@ class HybridDetector(EntityDetector):
         are dropped. Never a ":" or ";" follower (a label line), never a
         following capitalised token (a second name or a role line).
 
+        Output order: the input entities that are kept, in input order, then
+        the joined spans in the order they were made. Near-linear (QA
+        PERF-001): removals are tracked by object identity, and the PERSON
+        spans inside a new span are found by start offset, so no step scans
+        the whole entity list.
+
         Args:
             entities: Entities after the line-break split
             text: Document text
@@ -621,9 +628,17 @@ class HybridDetector(EntityDetector):
         Returns:
             Entities with wrapped names joined
         """
-        out = list(entities)
+        removed: set[int] = set()
+        joined_spans: list[DetectedEntity] = []
+        # PERSON candidates by start offset. A joined span starts where its
+        # source entity starts, so ``starts`` also covers the joined spans.
+        persons_at: dict[int, list[DetectedEntity]] = {}
         for entity in entities:
-            if entity.entity_type != "PERSON" or entity not in out:
+            if entity.entity_type == "PERSON":
+                persons_at.setdefault(entity.start_pos, []).append(entity)
+        starts = sorted(persons_at)
+        for entity in entities:
+            if entity.entity_type != "PERSON" or id(entity) in removed:
                 continue
             if entity.end_pos > len(text):
                 continue
@@ -645,17 +660,15 @@ class HybridDetector(EntityDetector):
             joined = dataclasses.replace(
                 entity, text=text[entity.start_pos : end], end_pos=end
             )
-            out = [
-                kept
-                for kept in out
-                if kept is not entity
-                and not (
-                    kept.entity_type == "PERSON"
-                    and entity.start_pos <= kept.start_pos
-                    and kept.end_pos <= end
-                )
-            ]
-            out.append(joined)
+            removed.add(id(entity))
+            lo = bisect.bisect_left(starts, entity.start_pos)
+            hi = bisect.bisect_right(starts, end)
+            for start in starts[lo:hi]:
+                for kept in persons_at[start]:
+                    if kept.end_pos <= end:
+                        removed.add(id(kept))
+            persons_at[entity.start_pos].append(joined)
+            joined_spans.append(joined)
             logger.debug(
                 "wrapped_name_joined",
                 entity_type=entity.entity_type,
@@ -663,7 +676,9 @@ class HybridDetector(EntityDetector):
                 start=entity.start_pos,
                 end=end,
             )
-        return out
+        return [e for e in entities if id(e) not in removed] + [
+            j for j in joined_spans if id(j) not in removed
+        ]
 
     def _should_prefer_regex_org(
         self, regex_entity: DetectedEntity, spacy_entity: DetectedEntity

@@ -56,6 +56,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **A hard-wrapped name keeps one pseudonym; the wrapped-name join is faster (10.3a QA follow-up).**
+  - **One key per name.** The mapping key now turns every run of whitespace (line break, tab, no-break space, repeated spaces) into one space, after titles (and, for places, prepositions) are stripped. "Zorbalia⏎Quentrix", joined by the 10.3a hard-wrapped-name rule, and "Zorbalia Quentrix" now share one mapping row and one pseudonym. Before, the wrapped spelling got a row of its own and, through the pseudonym collision check, a second pseudonym for the same person. The validation preview and the known-entity check use the same key, so the preview matches the output.
+  - **Speed.** The wrapped-name join no longer scans the whole candidate list once per person name. With 8,000 person candidates it took 4.9 s and now takes 0.04 s or less (same machine). Its output is unchanged.
+  - **Detection is unchanged.** The main-corpus detections are identical (2,263), and CI accuracy run `37506971042` matches `37480506234` (main) on all eight metric lines, held-out included.
+  - **Upgrading: pseudonym continuity.** The mapping schema is unchanged.
+    - Names previously stored with unusual spacing (no-break space, line break, tab, double space) receive a new pseudonym once after upgrading; single-space names are unaffected. Every main-corpus detection has a single-space key.
+    - After that one change the new pseudonym is stable, whichever spacing a later document uses. New rows are always stored with single spaces. The old rows stay in the database but are no longer applied. Check such names during validation of the first documents processed after the upgrade.
+
 - **Accuracy benchmark repaired, held-out set added (Story 10.1, benchmark-only, same detector).**
   - The 25 annotation files were repaired by hand under written, approved guidelines (`tests/test_corpus/annotations/GUIDELINES.md`). This covers 96 truncated names, junk labels, missing organisations and places, and nested places in organisation names. Every edit is logged in `docs/qa/10.1-annotation-change-log.md`.
   - Ground truth: 1,737 → 2,215 entities.

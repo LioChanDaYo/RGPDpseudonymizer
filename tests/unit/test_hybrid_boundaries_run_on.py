@@ -208,21 +208,34 @@ class TestOrgNameShape:
 
     def test_adversarial_line_is_linear(self, matcher: RegexMatcher) -> None:
         # Technical Constraints: a 50 KB line of capitalised words, commas and
-        # connectors must not trigger catastrophic backtracking.
+        # connectors must not trigger catastrophic backtracking. A ratio check
+        # on the same machine, not an absolute limit (10.3a follow-up): 8x the
+        # line length must cost under 24x the time, best of five. Linear
+        # matching gives about 8, quadratic backtracking about 64.
         lines = [
-            ("Zorbal Quentrix " * 3200)[:50_000],
-            ("Zorbal, Quentrix de Vardel " * 2000)[:50_000],
-            ("Zorbal de la Quentrix d'Vardel " * 2000)[:50_000],
+            "Zorbal Quentrix " * 3200,
+            "Zorbal, Quentrix de Vardel " * 2000,
+            "Zorbal de la Quentrix d'Vardel " * 2000,
         ]
-        for line in lines:
-            for regex in (
-                _pattern(matcher, "organizations", 0),
-                _pattern(matcher, "organizations", 1),
-            ):
+        regexes = [
+            _pattern(matcher, "organizations", 0),
+            _pattern(matcher, "organizations", 1),
+        ]
+
+        def best_time(length: int) -> float:
+            cut = [line[:length] for line in lines]
+            best = float("inf")
+            for _ in range(5):
                 start = time.perf_counter()
-                for _ in regex.finditer(line):
-                    pass
-                assert time.perf_counter() - start < 2.0
+                for line in cut:
+                    for regex in regexes:
+                        for _ in regex.finditer(line):
+                            pass
+                best = min(best, time.perf_counter() - start)
+            return best
+
+        ratio = best_time(50_000) / best_time(6_250)
+        assert ratio < 24, ratio
 
     def test_heading_line_no_longer_feeds_a_union_leak(
         self, matcher: RegexMatcher, detector: HybridDetector
@@ -492,3 +505,65 @@ class TestWrappedNameJoin:
         # word is joined (over-coverage, nothing left in clear).
         doc = "le contrat est signé avec Zorbalia\nDirectrice de la société"
         assert _persons(detector, doc, "Zorbalia") == ["Zorbalia\nDirectrice"]
+
+
+# ---------------------------------------------------------------------------
+# W-JOIN cost and order (10.3a QA PERF-001)
+# ---------------------------------------------------------------------------
+
+
+def _join_input(units: int, wrapped: bool) -> tuple[str, list[DetectedEntity]]:
+    """``units`` copies of one line, two one-word PERSON entities per copy."""
+    sep = "\n" if wrapped else " "
+    line = f"le contrat est signé par Zorbalia{sep}Quentrix, avec le projet\n"
+    entities: list[DetectedEntity] = []
+    for i in range(units):
+        base = i * len(line)
+        for name in ("Zorbalia", "Quentrix"):
+            entities.append(_ent(name, "PERSON", base + line.index(name)))
+    return line * units, entities
+
+
+class TestWrappedNameJoinCost:
+    def test_join_time_grows_linearly(self) -> None:
+        # The join used to scan the whole entity list once per PERSON
+        # (quadratic: 8x the entities took about 64x the time). A ratio check
+        # on the same machine, best of five runs: linear work gives about 8.
+        def best_time(units: int, wrapped: bool) -> float:
+            doc, entities = _join_input(units, wrapped)
+            best = float("inf")
+            for _ in range(5):
+                start = time.perf_counter()
+                out = HybridDetector._join_wrapped_names(entities, doc)
+                best = min(best, time.perf_counter() - start)
+            assert len(out) == (units if wrapped else 2 * units)
+            return best
+
+        for wrapped in (False, True):
+            ratio = best_time(8000, wrapped) / best_time(1000, wrapped)
+            assert ratio < 24, (wrapped, ratio)
+
+    def test_order_is_kept_inputs_then_joined_spans(self) -> None:
+        # Output order is unchanged by the PERF-001 rewrite: the kept input
+        # entities in input order, then the joined spans in the order made.
+        # A later join that covers an earlier joined span drops it.
+        doc = (
+            "le contrat est signé par M. Zorbalia\nQuentrix, avec le projet\n"
+            "Vardel SA et le projet\n"
+            "le contrat est signé par Morrix\nde Quentrix."
+        )
+        z = doc.index("Zorbalia")
+        entities = [
+            _ent("Zorbalia", "PERSON", z, "regex"),
+            _at(doc, "Vardel SA", "ORG"),
+            _at(doc, "Morrix", "PERSON"),
+            _at(doc, "M. Zorbalia", "PERSON"),
+            _ent("Quentrix", "PERSON", doc.rindex("Quentrix")),
+        ]
+        out = HybridDetector._join_wrapped_names(entities, doc)
+        assert [(e.text, e.source) for e in out] == [
+            ("Vardel SA", "spacy"),
+            ("Morrix\nde Quentrix", "spacy"),
+            ("M. Zorbalia\nQuentrix", "spacy"),
+        ]
+        assert out[0] is entities[1]

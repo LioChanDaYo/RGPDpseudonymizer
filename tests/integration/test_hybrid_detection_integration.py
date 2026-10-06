@@ -86,26 +86,34 @@ class TestHybridDetectionIntegration:
             # Verify source field is set
             assert entity.source in ["spacy", "regex"]
 
-    def test_processing_time_within_target(self, detector: HybridDetector) -> None:
-        """Test that hybrid detection completes within performance target."""
+    def test_processing_time_grows_linearly(self, detector: HybridDetector) -> None:
+        """Hybrid detection time grows linearly with document length.
+
+        A ratio check on the same machine, not an absolute limit, so a slow
+        CI runner cannot fail it (10.3a follow-up): 8x the text must cost
+        under 24x the time, best of three. Linear work gives about 8,
+        quadratic work about 64. The absolute NFR1 target (under 30 s per
+        document) is checked by the slow benchmark in tests/performance,
+        which the performance workflow runs.
+        """
         import time
 
-        # Create a ~2000 word document
-        document = " ".join(
-            ["M. Dupont travaille à Paris pour TechCorp SA."] * 200
-        )  # ~2000 words
+        sentence = "M. Dupont travaille à Paris pour TechCorp SA."
 
-        start_time = time.time()
-        entities = detector.detect_entities(document)
-        elapsed_time = time.time() - start_time
+        def best_time(sentences: int) -> float:
+            document = " ".join([sentence] * sentences)
+            best = float("inf")
+            for _ in range(3):
+                start = time.perf_counter()
+                entities = detector.detect_entities(document)
+                best = min(best, time.perf_counter() - start)
+            # Should detect entities
+            assert len(entities) > 0
+            return best
 
-        # Should complete in under 30 seconds per document
-        assert (
-            elapsed_time < 30.0
-        ), f"Processing took {elapsed_time:.2f}s, exceeds 30s target"
-
-        # Should detect entities
-        assert len(entities) > 0
+        best_time(10)  # warm-up
+        ratio = best_time(400) / best_time(50)  # ~3,200 vs ~400 words
+        assert ratio < 24, ratio
 
     def test_improved_recall_over_spacy_only(self, detector: HybridDetector) -> None:
         """Test that hybrid detection improves recall vs spaCy baseline."""
