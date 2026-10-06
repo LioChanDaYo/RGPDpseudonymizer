@@ -208,21 +208,34 @@ class TestOrgNameShape:
 
     def test_adversarial_line_is_linear(self, matcher: RegexMatcher) -> None:
         # Technical Constraints: a 50 KB line of capitalised words, commas and
-        # connectors must not trigger catastrophic backtracking.
+        # connectors must not trigger catastrophic backtracking. A ratio check
+        # on the same machine, not an absolute limit (10.3a follow-up): 8x the
+        # line length must cost under 24x the time, best of five. Linear
+        # matching gives about 8, quadratic backtracking about 64.
         lines = [
-            ("Zorbal Quentrix " * 3200)[:50_000],
-            ("Zorbal, Quentrix de Vardel " * 2000)[:50_000],
-            ("Zorbal de la Quentrix d'Vardel " * 2000)[:50_000],
+            "Zorbal Quentrix " * 3200,
+            "Zorbal, Quentrix de Vardel " * 2000,
+            "Zorbal de la Quentrix d'Vardel " * 2000,
         ]
-        for line in lines:
-            for regex in (
-                _pattern(matcher, "organizations", 0),
-                _pattern(matcher, "organizations", 1),
-            ):
+        regexes = [
+            _pattern(matcher, "organizations", 0),
+            _pattern(matcher, "organizations", 1),
+        ]
+
+        def best_time(length: int) -> float:
+            cut = [line[:length] for line in lines]
+            best = float("inf")
+            for _ in range(5):
                 start = time.perf_counter()
-                for _ in regex.finditer(line):
-                    pass
-                assert time.perf_counter() - start < 2.0
+                for line in cut:
+                    for regex in regexes:
+                        for _ in regex.finditer(line):
+                            pass
+                best = min(best, time.perf_counter() - start)
+            return best
+
+        ratio = best_time(50_000) / best_time(6_250)
+        assert ratio < 24, ratio
 
     def test_heading_line_no_longer_feeds_a_union_leak(
         self, matcher: RegexMatcher, detector: HybridDetector

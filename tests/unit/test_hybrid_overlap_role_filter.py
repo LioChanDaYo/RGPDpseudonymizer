@@ -968,13 +968,9 @@ class TestReviewThreeFixes:
         ]
         return doc, entities
 
-    def test_pass_cap_bounds_an_adversarial_chain(
-        self, detector: HybridDetector, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
-        # PERF-002: a chain of 200 overlapping run-on ORG spans keeps refusing
-        # cuts pass after pass; the cap stops it at _MAX_GUARD_PASSES + 1 walks.
-        import time
-
+    @staticmethod
+    def _count_walks(monkeypatch: pytest.MonkeyPatch) -> dict[str, int]:
+        """Count the dedup walks (guard passes) of the next dedup calls."""
         walks = {"n": 0}
         original = HybridDetector._dedup_walk
 
@@ -983,13 +979,33 @@ class TestReviewThreeFixes:
             return original(self, *args, **kwargs)
 
         monkeypatch.setattr(HybridDetector, "_dedup_walk", counting)
+        return walks
+
+    @staticmethod
+    def _assert_upper_case_covered(doc: str, out: list[DetectedEntity]) -> None:
+        for pos, ch in enumerate(doc):
+            if ch.isupper():
+                assert any(k.start_pos <= pos < k.end_pos for k in out), pos
+
+    # The two tests below bound the work by the number of walks, not by
+    # wall-clock time, so a slow runner cannot fail them (10.3a follow-up:
+    # the chain took 6.95 s against a 5 s limit on a macOS CI runner). The
+    # cost of one walk is covered by the ratio check in
+    # test_large_input_uses_an_active_window.
+
+    def test_pass_cap_bounds_an_adversarial_chain(
+        self, detector: HybridDetector, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        # PERF-002: a chain of 200 overlapping run-on ORG spans keeps refusing
+        # cuts pass after pass; the cap stops it at _MAX_GUARD_PASSES + 1 walks.
+        walks = self._count_walks(monkeypatch)
         doc, entities = self._chain(200)
-        start = time.perf_counter()
         out = detector._dedup_same_type_overlaps(entities, doc)
-        elapsed = time.perf_counter() - start
-        assert walks["n"] == hd._MAX_GUARD_PASSES + 1
-        assert elapsed < 5.0, elapsed
-        assert out
+        cap = hd._MAX_GUARD_PASSES + 1
+        assert walks["n"] <= cap
+        # This chain reaches the cap, so the cap is what stopped it.
+        assert walks["n"] == cap
+        self._assert_upper_case_covered(doc, out)
 
     def test_capped_result_is_coverage_safe(self, detector: HybridDetector) -> None:
         doc, entities = self._chain(200)
@@ -999,10 +1015,11 @@ class TestReviewThreeFixes:
                 assert any(k.start_pos <= pos < k.end_pos for k in out), pos
 
     def test_two_hundred_nested_run_on_spans_finish_fast(
-        self, detector: HybridDetector
+        self, detector: HybridDetector, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        import time
-
+        # 200 nested run-on spans settle before the pass cap (2 walks today)
+        # and every name stays covered.
+        walks = self._count_walks(monkeypatch)
         names = [f"Zorb{chr(65 + i % 26)}{i}" for i in range(201)]
         doc = ", ".join(names)
         starts = [doc.index(name) for name in names]
@@ -1011,9 +1028,6 @@ class TestReviewThreeFixes:
             for i in range(1, 201)
         ]
         entities.append(_ent(names[-1], "ORG", starts[-1], "spacy"))
-        start = time.perf_counter()
         out = detector._dedup_same_type_overlaps(entities, doc)
-        assert time.perf_counter() - start < 5.0
-        for pos, ch in enumerate(doc):
-            if ch.isupper():
-                assert any(k.start_pos <= pos < k.end_pos for k in out), pos
+        assert walks["n"] < hd._MAX_GUARD_PASSES + 1
+        self._assert_upper_case_covered(doc, out)
