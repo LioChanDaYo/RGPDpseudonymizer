@@ -407,6 +407,62 @@ def split_spacy(
     return out, changed
 
 
+# W-JOIN (STOP R decision 11): a PERSON name hard-wrapped over one line break
+WRAP_PARTICLES = "(?:de|du|des|la|le|van|der|den)"
+WRAP_TOKEN = f"[{_U}][{_U}{_L}]*(?:[-'’][{_U}][{_U}{_L}]*)*"
+WRAP_RE = re.compile(
+    f"(?:{HSPACE}+{WRAP_PARTICLES})*{HSPACE}*\r?\n{HSPACE}*"
+    f"(?P<right>(?:{WRAP_PARTICLES}{HSPACE}+)*{WRAP_TOKEN})"
+    f"(?={HSPACE}*(?:[,.!?)]|\\Z)|{HSPACE}+[a-zß-öø-ÿ])"
+)
+WRAP_TOKEN_RE = re.compile(WRAP_TOKEN)
+_PROSE_WORD_RE = re.compile("(?<![\\w'’])[a-zß-öø-ÿ]")
+
+
+def wrap_join(
+    entities: list[DetectedEntity], text: str, fired: list[str] | None = None
+) -> list[DetectedEntity]:
+    """W-JOIN: extend a one-word PERSON at the end of a prose line across a
+    single line break to the surname that starts the next line."""
+    from gdpr_pseudonymizer.utils.french_patterns import strip_french_titles
+
+    out = list(entities)
+    for e in list(out):
+        if e not in out or e.entity_type != "PERSON":
+            continue
+        raw = text[e.start_pos : e.end_pos]
+        if not raw or not raw[-1].isalpha():
+            continue
+        core = strip_french_titles(raw).split()
+        if len(core) != 1 or not WRAP_TOKEN_RE.fullmatch(core[0]):
+            continue
+        line_start = (
+            max(text.rfind(c, 0, e.start_pos) for c in "\n\r\v\f\x85\u2028\u2029") + 1
+        )
+        if not _PROSE_WORD_RE.search(text, line_start, e.start_pos):
+            continue
+        m = WRAP_RE.match(text, e.end_pos)
+        if m is None:
+            continue
+        end = m.end("right")
+        joined = dataclasses.replace(e, text=text[e.start_pos : end], end_pos=end)
+        out = [
+            k
+            for k in out
+            if k is not e
+            and not (
+                k.entity_type == "PERSON"
+                and e.start_pos <= k.start_pos
+                and k.end_pos <= end
+            )
+        ]
+        out.append(joined)
+        if fired is not None:
+            fired.append(f"{raw!r} -> {joined.text!r} @{e.start_pos}")
+    out.sort(key=lambda x: x.start_pos)
+    return out
+
+
 _ORIG_CAPWORDS = hd._capitalised_words
 
 
@@ -807,6 +863,7 @@ def main() -> None:
         mx: bool = False,
         segtrim: bool = False,
         late: bool = False,
+        wjoin: bool = False,
     ) -> dict[str, list[DetectedEntity]]:
         hd._capitalised_words = capwords_option(rel4)  # type: ignore[assignment]
         if mx:
@@ -843,6 +900,8 @@ def main() -> None:
                         merged = det._filter_org_roles(merged, text)
                         merged = det._dedup_same_type_overlaps(merged, text)
                     merged.sort(key=lambda e: e.start_pos)
+                if wjoin:
+                    merged = wrap_join(merged, text, wj_fired)
                 out[name] = merged
             return out
         finally:
@@ -851,6 +910,7 @@ def main() -> None:
             HybridDetector._is_exact_match = _ORIG_EXACT  # type: ignore[method-assign]
 
     log: list[str] = []
+    wj_fired: list[str] = []
 
     # --- 1.2: re-merge reproduces the dump -------------------------------
     base_dets = compose()
@@ -1022,6 +1082,10 @@ def main() -> None:
             dict(rx_key="LB+ORG", late=True, segtrim=True),
         ),
         (
+            "FINAL: R-LB + R-ORG + R-SPLIT late + segment trim + REL-004 (b) + W-JOIN",
+            dict(rx_key="LB+ORG", late=True, segtrim=True, rel4="b", wjoin=True),
+        ),
+        (
             "R-LB + R-ORG + R-SPLIT late + segment trim + MX",
             dict(rx_key="LB+ORG", late=True, segtrim=True, mx=True),
         ),
@@ -1108,6 +1172,7 @@ def main() -> None:
             f"| {s['label']} | {cells} | {p:.4f}/{r:.4f}/{f:.4f} | {s['l2']} | "
             f"{s['l2b']} | {s['l1_chars']} ({s['l1_in_gt']}) / {s['l1_spans']} |"
         )
+    print(f"W-JOIN fired {len(wj_fired)} times on the main corpus: {wj_fired}")
     report_path = out_dir / "dryrun_report.txt"
     report_path.write_text("\n".join(log), encoding="utf-8")
     print(f"\nfull report -> {report_path}")
