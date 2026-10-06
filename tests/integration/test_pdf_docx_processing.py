@@ -145,12 +145,17 @@ def mock_hybrid_detector(monkeypatch: pytest.MonkeyPatch):
 
 
 @pytest.fixture(autouse=True)
-def cleanup_test_database():
-    """Clean up test database files after each test."""
-    yield
-    db_path = Path("mappings.db")
-    if db_path.exists():
-        db_path.unlink()
+def isolated_cwd(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    """Run each test in its own CWD so the default mappings.db is per-test.
+
+    The process command defaults to ``mappings.db`` in the current directory.
+    Under pytest-xdist, a shared CWD let workers race on that one file
+    (TEST-002). A private CWD per test removes the shared file entirely.
+    """
+    cwd = tmp_path / "cwd"
+    cwd.mkdir()
+    monkeypatch.chdir(cwd)
+    return cwd
 
 
 @pytest.mark.integration

@@ -111,31 +111,43 @@ def init_database(db_path: str, passphrase: str) -> None:
         with engine.connect() as conn:
             # Entity table indexes (for encrypted field queries)
             conn.execute(
-                text("CREATE INDEX idx_entities_full_name ON entities(full_name)")
+                text(
+                    "CREATE INDEX IF NOT EXISTS idx_entities_full_name ON entities(full_name)"
+                )
             )
             conn.execute(
-                text("CREATE INDEX idx_entities_type ON entities(entity_type)")
+                text(
+                    "CREATE INDEX IF NOT EXISTS idx_entities_type ON entities(entity_type)"
+                )
             )
             conn.execute(
-                text("CREATE INDEX idx_entities_first_name ON entities(first_name)")
+                text(
+                    "CREATE INDEX IF NOT EXISTS idx_entities_first_name ON entities(first_name)"
+                )
             )
             conn.execute(
-                text("CREATE INDEX idx_entities_last_name ON entities(last_name)")
+                text(
+                    "CREATE INDEX IF NOT EXISTS idx_entities_last_name ON entities(last_name)"
+                )
             )
             # Partial index for ambiguous entities
             conn.execute(
                 text(
-                    "CREATE INDEX idx_entities_ambiguous ON entities(is_ambiguous) "
+                    "CREATE INDEX IF NOT EXISTS idx_entities_ambiguous ON entities(is_ambiguous) "
                     "WHERE is_ambiguous = 1"
                 )
             )
 
             # Operations table indexes (for audit queries)
             conn.execute(
-                text("CREATE INDEX idx_operations_timestamp ON operations(timestamp)")
+                text(
+                    "CREATE INDEX IF NOT EXISTS idx_operations_timestamp ON operations(timestamp)"
+                )
             )
             conn.execute(
-                text("CREATE INDEX idx_operations_type ON operations(operation_type)")
+                text(
+                    "CREATE INDEX IF NOT EXISTS idx_operations_type ON operations(operation_type)"
+                )
             )
 
             conn.commit()
