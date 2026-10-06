@@ -1,0 +1,81 @@
+schema: 1
+story: '10.2'
+story_title: 'Same-Type Overlap Dedup + ORG Role Filter'
+gate: PASS
+status_reason: 'Final pass at b0140d5 (code 9f68da8). Run H 37385301566 is verified independently and identical to run G; every pasted line and number in the story, QA report, CHANGELOG and PR body matches. G3 is within bounds (+21/+4/+10), G4 is empty, and CI is green 9/9 on the first attempt. Lionel accepted the held-out recall drop on 2026-10-06 (recorded). REL-003, PERF-002 and DOC-005 are fixed and verified by QA probes and a 9,000-case fuzz; REL-004 is documented by design. Only low, separately tracked items remain.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-10-06T18:00:00Z'
+
+waiver: { active: false }
+
+merge_blockers: []
+
+top_issues:
+  - id: 'TEST-002'
+    severity: low
+    finding: 'The mappings.db xdist race in tests/integration/test_pdf_docx_processing.py (carried over) is not caused by this story. It is left for a separate PR, as recorded.'
+    suggested_action: 'Separate PR: per-test temporary mappings.db.'
+    refs: ['tests/integration/test_pdf_docx_processing.py']
+    suggested_owner: dev
+  - id: 'REL-004'
+    severity: low
+    finding: 'Accepted by design (Lionel, 2026-10-06): the V3 guard excepts the first word after a sentence period, so an uncovered sentence-initial capitalised word can be cut. Documented in the coverage invariant and in Handoff to 10.3.'
+    suggested_action: 'Revisit in 10.3.'
+    refs: ['docs/stories/10.2.overlap-dedup-org-role-filter.story.md (Coverage invariant, exception 3; Handoff to 10.3)']
+    suggested_owner: po
+
+resolved_in_final_pass:
+  - 'REQ-001: held-out recall drop (FN 64 -> 70, ORG 28 -> 34) accepted by Lionel on 2026-10-06, recorded in Decisions Recorded; tracked in 10.3.'
+  - 'REL-003: equal text at shifted, partly overlapping positions is now a union. QA probe: [0,20) + [12,32) gives [0,32) for PERSON and ORG. Unit test added.'
+  - 'PERF-002: _MAX_GUARD_PASSES = 16, then one refuse-all (blunt) pass. QA chains: n=200 takes 17 walks and 1.38 s (was 102 passes, 19.7 s). Capped results at n=200 and n=400 leave 0 uncovered capitals.'
+  - 'DOC-005: invariant text lists the guarded V3 cut and its exceptions; the random invariant test draws ORG; the PR body uses post-rebase SHAs (mapping checked).'
+
+quality_score: 100
+expires: '2026-10-20T18:00:00Z'
+
+evidence:
+  runs_downloaded: ['37189862679', '37212585445', '37212993514', '37227245274', '37233261519', '37236253941', '37267364891', '37371866394', '37385301566']
+  metric_lines_checked:
+    story: '64/64 match'
+    qa_report: '60/64 match; the 4 mismatches are the pre-existing 10.1 "before" lines (run 37013929807)'
+    changelog: 'all numbers match run H vs baseline'
+    pr_body: 'all numbers, run IDs and post-rebase SHA mapping match'
+    run_h_vs_run_g: 'identical, 8/8 lines'
+  head_vs_run_h_code: '9f68da8..b0140d5 changes nothing under gdpr_pseudonymizer/, scripts/, tests/ or .github/; main 6bbde14 is an ancestor'
+  g3_run_h_fn_delta: 'PERSON +21 (bound +21), LOCATION +4 (bound +4), ORG +10 (bound +16), Overall 480 (bound 486)'
+  g4_diff: 'empty'
+  g5: 'held-out lines identical to runs C/F/G; drop accepted by Lionel 2026-10-06 (recorded)'
+  local_reproduction: 'QA run-H dump reproduces 37385301566 exactly and is identical to the QA run-G dump (2,243 detections, 0 offset mismatches); AC5 339 drops / 87 baseline TPs'
+  coverage_check: 'same 3 losses vs baseline (TechSolutions @42 partial, Pierre, BRS), none new'
+  fuzz: '9,000 random overlap sets (ORG, PERSON, LOCATION; clause punctuation, no line breaks): 0 coverage violations, 0 order dependence, max 10 passes, worst 3.3 ms'
+  tests_run_locally: '160 passed (two hybrid test files + leakage guard, Windows); ruff, black, mypy clean'
+  ci_at_head: 'b0140d5 run 37387046757 success on attempt 1; all 9 PR checks pass'
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8]
+    ac_gaps: []
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'The precise guard plus the capped refuse-all pass never uncover a capitalised word outside the documented exceptions (C1, C2, titles, sentence start). Same 3 disclosed losses vs v2.2, handed to 10.3. No new log text; YAML loaded with safe_load.'
+  performance:
+    status: PASS
+    notes: 'Dedup walk is linear; guard passes are capped (17 walks max). NFR1 local benchmark accepted as stated (Lionel decision 6); the CI perf job is fixed separately in PR #82.'
+  reliability:
+    status: PASS
+    notes: 'Deterministic and order-independent (fuzz and unit test); terminates; offsets sliced from the document; PERSON and LOCATION never cut by V3.'
+  maintainability:
+    status: PASS
+    notes: 'Rule text, invariant and guard algorithm are documented in the story and docstrings; dedicated unit tests per behaviour.'
+
+recommendations:
+  immediate: []
+  future:
+    - action: 'TEST-002: fix mappings.db test isolation in a separate PR'
+      refs: ['tests/integration/test_pdf_docx_processing.py']
+    - action: 'Run performance.yaml after PR #82 merges'
+      refs: ['.github/workflows/performance.yaml']
+    - action: '10.3: REL-004, the 3 coverage losses, held-out ORG recall follow-up'
+      refs: ['docs/stories/10.2.overlap-dedup-org-role-filter.story.md (Handoff to 10.3)']
+    - action: 'Story owner: tick Task 11.5 (QA G2), which this review completes'
+      refs: ['docs/stories/10.2.overlap-dedup-org-role-filter.story.md:144']

@@ -549,3 +549,195 @@ A blind cross-check was run before STOP C. An independent annotator (GPT-5.5 via
 
 - The edge-case category `title_with_name` was redefined (test-side) as PERSON annotations immediately preceded by a title, since titles are outside spans (GUIDELINES P2). It now covers 1,211 entities.
 - The README, FAQ, docs index and tutorials are not updated in this story (Epic 10 G7 interpretation). Public figures change once, at Epic 10 close-out.
+
+## Same-type overlap dedup + ORG role filter (Story 10.2, 2026-10-06)
+
+**Detector change, same ground truth.** No annotation, scorer or held-out change (G4): `git diff --stat main...HEAD -- tests/test_corpus/ tests/accuracy/` is empty. The ground truth is the 10.1 one (2,215 main-corpus annotations).
+
+**What changed in the detector (final version, run H):**
+- **ORG role filter (AC3).** An ORG detection whose whole normalized text is a role acronym (CTO, DRH, COMEX, …) or a VP form ("VP", "VP Sales", "VP Europe", …) is dropped. List: `gdpr_pseudonymizer/resources/org_role_filter.yaml`. When a dropped VP form names a place ("VP Europe"), the place is kept as a LOCATION detection.
+- **Same-type overlap dedup (AC1).** When two detections of the same type overlap, one span remains:
+  - Containment keeps the containing span, except that the inner span wins when the extra words are all lower-case without digits (C1).
+  - A containing span that runs over a line break is cut at the break when the cut span still contains the other one (C2).
+  - A partial overlap becomes the union of the two spans.
+  - Ties are broken deterministically.
+  - Overlaps between different types are untouched.
+- **ORG segment trim with a precise guard (V3).** For organisations only, a containing span or a union may be cut to the clause around the name.
+  - Clause boundaries are a line break; ",", ";" or ":" followed by a space; a sentence period. Abbreviation periods such as "Corp." are not sentence ends.
+  - A cut may drop a capitalised word only if another organisation span that survives the dedup covers that word. Titles and the first word of a sentence are excepted.
+  - Example: a run-on span over a list of organisations is cut back when each organisation is also detected on its own, and kept whole otherwise.
+- Decided by Lionel at STOP R, in the PR #81 review, after the ORG loss investigation and after QA's two re-reviews (2026-10-04/05); rule text in the story.
+
+**Sources (G1):**
+- Before: CI accuracy run `37189862679` (10.1 close-out, reproduced on `main` by `37199452557`).
+- **After (close-out): run H `37385301566`** (commit `9f68da8`, branch rebased onto `main`). It is identical on every metric line to run G `37371866394`, with the same detections on the main corpus. Run H adds the REL-003 fix (equal text at shifted positions becomes a union) and the PERF-002 pass cap; neither changes a main-corpus detection.
+- The run heads below are pre-rebase commits. After the rebase onto `main` (PR #80) they are A `731b917`, B `9361645`, C `da41f82`, D `544e6d0`, E `765d9be`, F `dd6d32c` and G `d6ef7be`.
+- History:
+  - run A `37212585445` (`01aca6e`): role filter without place emission;
+  - run B `37212993514` (`ebf99a8`): first dedup version;
+  - run C `37227245274` (`1550f54`): coverage-preserving dedup;
+  - run D `37233261519` (`9046eab`): QA fixes, identical to C;
+  - run E `37236253941` (`8e36776`): unguarded V3;
+  - run F `37267364891` (`0cbd962`): V3 with a blunt guard (metrics identical to C);
+  - run G `37371866394` (`ecef3f3`): precise guard, identical to run H.
+
+### Lines from `accuracy-output.txt`, verbatim
+
+Run H (`37385301566`, close-out):
+
+```
+[Overall] P=0.7735 R=0.7833 F1=0.7784 TP=1735 FP=508 FN=480 FN%=21.67 FP%=22.65
+[PERSON] P=0.9173 R=0.9601 F1=0.9382 TP=1275 FP=115 FN=53
+[LOCATION] P=0.6572 R=0.7947 F1=0.7194 TP=209 FP=109 FN=54
+[ORG] P=0.4692 R=0.4022 F1=0.4331 TP=251 FP=284 FN=373
+[HELD-OUT Overall] P=0.7523 R=0.6970 F1=0.7236 TP=161 FP=53 FN=70 FN%=30.30 FP%=24.77
+[HELD-OUT PERSON] P=0.8598 R=0.8214 F1=0.8402 TP=92 FP=15 FN=20
+[HELD-OUT LOCATION] P=0.7536 R=0.7647 F1=0.7591 TP=52 FP=17 FN=16
+[HELD-OUT ORG] P=0.4474 R=0.3333 F1=0.3820 TP=17 FP=21 FN=34
+```
+
+History, run G (`37371866394`), identical to run H:
+
+```
+[Overall] P=0.7735 R=0.7833 F1=0.7784 TP=1735 FP=508 FN=480 FN%=21.67 FP%=22.65
+[PERSON] P=0.9173 R=0.9601 F1=0.9382 TP=1275 FP=115 FN=53
+[LOCATION] P=0.6572 R=0.7947 F1=0.7194 TP=209 FP=109 FN=54
+[ORG] P=0.4692 R=0.4022 F1=0.4331 TP=251 FP=284 FN=373
+[HELD-OUT Overall] P=0.7523 R=0.6970 F1=0.7236 TP=161 FP=53 FN=70 FN%=30.30 FP%=24.77
+[HELD-OUT PERSON] P=0.8598 R=0.8214 F1=0.8402 TP=92 FP=15 FN=20
+[HELD-OUT LOCATION] P=0.7536 R=0.7647 F1=0.7591 TP=52 FP=17 FN=16
+[HELD-OUT ORG] P=0.4474 R=0.3333 F1=0.3820 TP=17 FP=21 FN=34
+```
+
+History, run F (`37267364891`, blunt guard; identical to run C `37227245274` and run D `37233261519`):
+
+```
+[Overall] P=0.7722 R=0.7806 F1=0.7764 TP=1729 FP=510 FN=486 FN%=21.94 FP%=22.78
+[PERSON] P=0.9173 R=0.9601 F1=0.9382 TP=1275 FP=115 FN=53
+[LOCATION] P=0.6572 R=0.7947 F1=0.7194 TP=209 FP=109 FN=54
+[ORG] P=0.4614 R=0.3926 F1=0.4242 TP=245 FP=286 FN=379
+[HELD-OUT Overall] P=0.7523 R=0.6970 F1=0.7236 TP=161 FP=53 FN=70 FN%=30.30 FP%=24.77
+[HELD-OUT PERSON] P=0.8598 R=0.8214 F1=0.8402 TP=92 FP=15 FN=20
+[HELD-OUT LOCATION] P=0.7536 R=0.7647 F1=0.7591 TP=52 FP=17 FN=16
+[HELD-OUT ORG] P=0.4474 R=0.3333 F1=0.3820 TP=17 FP=21 FN=34
+```
+
+History, run E (`37236253941`, unguarded V3):
+
+```
+[Overall] P=0.7762 R=0.7860 F1=0.7811 TP=1741 FP=502 FN=474 FN%=21.40 FP%=22.38
+[PERSON] P=0.9173 R=0.9601 F1=0.9382 TP=1275 FP=115 FN=53
+[LOCATION] P=0.6572 R=0.7947 F1=0.7194 TP=209 FP=109 FN=54
+[ORG] P=0.4804 R=0.4119 F1=0.4435 TP=257 FP=278 FN=367
+[HELD-OUT Overall] P=0.7639 R=0.7143 F1=0.7383 TP=165 FP=51 FN=66 FN%=28.57 FP%=23.61
+[HELD-OUT PERSON] P=0.8598 R=0.8214 F1=0.8402 TP=92 FP=15 FN=20
+[HELD-OUT LOCATION] P=0.7536 R=0.7647 F1=0.7591 TP=52 FP=17 FN=16
+[HELD-OUT ORG] P=0.5250 R=0.4118 F1=0.4615 TP=21 FP=19 FN=30
+```
+
+History, run A (`37212585445`):
+
+```
+[Overall] P=0.7024 R=0.7991 F1=0.7476 TP=1770 FP=750 FN=445 FN%=20.09 FP%=29.76
+[PERSON] P=0.8125 R=0.9759 F1=0.8868 TP=1296 FP=299 FN=32
+[LOCATION] P=0.5836 R=0.8099 F1=0.6783 TP=213 FP=152 FN=50
+[ORG] P=0.4661 R=0.4183 F1=0.4409 TP=261 FP=299 FN=363
+[HELD-OUT Overall] P=0.5839 R=0.7229 F1=0.6460 TP=167 FP=119 FN=64 FN%=27.71 FP%=41.61
+[HELD-OUT PERSON] P=0.5987 R=0.8125 F1=0.6894 TP=91 FP=61 FN=21
+[HELD-OUT LOCATION] P=0.6092 R=0.7794 F1=0.6839 TP=53 FP=34 FN=15
+[HELD-OUT ORG] P=0.4894 R=0.4510 F1=0.4694 TP=23 FP=24 FN=28
+```
+
+History, run B (`37212993514`):
+
+```
+[Overall] P=0.7745 R=0.7815 F1=0.7780 TP=1731 FP=504 FN=484 FN%=21.85 FP%=22.55
+[PERSON] P=0.9195 R=0.9639 F1=0.9412 TP=1280 FP=112 FN=48
+[LOCATION] P=0.6527 R=0.7719 F1=0.7073 TP=203 FP=108 FN=60
+[ORG] P=0.4662 R=0.3974 F1=0.4291 TP=248 FP=284 FN=376
+[HELD-OUT Overall] P=0.7535 R=0.7013 F1=0.7265 TP=162 FP=53 FN=69 FN%=29.87 FP%=24.65
+[HELD-OUT PERSON] P=0.8318 R=0.7946 F1=0.8128 TP=89 FP=18 FN=23
+[HELD-OUT LOCATION] P=0.7536 R=0.7647 F1=0.7591 TP=52 FP=17 FN=16
+[HELD-OUT ORG] P=0.5385 R=0.4118 F1=0.4667 TP=21 FP=18 FN=30
+```
+
+### Main corpus, before / after (run H)
+
+| | Precision | Recall | F1 | TP | FP | FN |
+|---|---|---|---|---|---|---|
+| Overall, before | 66.69% | 79.91% | 72.70% | 1,770 | 884 | 445 |
+| **Overall, after** | **77.35%** | **78.33%** | **77.84%** | 1,735 | 508 | 480 |
+| PERSON, before | 81.25% | 97.59% | 88.68% | 1,296 | 299 | 32 |
+| **PERSON, after** | **91.73%** | **96.01%** | **93.82%** | 1,275 | 115 | 53 |
+| LOCATION, before | 58.36% | 80.99% | 67.83% | 213 | 152 | 50 |
+| **LOCATION, after** | **65.72%** | **79.47%** | **71.94%** | 209 | 109 | 54 |
+| ORG, before | 37.61% | 41.83% | 39.61% | 261 | 433 | 363 |
+| **ORG, after** | **46.92%** | **40.22%** | **43.31%** | 251 | 284 | 373 |
+
+### FP reduction (AC5)
+
+| Runs | PERSON ΔTP / ΔFP | LOCATION ΔTP / ΔFP | ORG ΔTP / ΔFP | Overall ΔTP / ΔFP |
+|---|---|---|---|---|
+| Final: `37189862679` → `37385301566` | −21 / −184 | −4 / −43 | −10 / −149 | −35 / −376 |
+| Precise-guarded V3 alone: `37267364891` → `37385301566` | 0 / 0 | 0 / 0 | +6 / −2 | +6 / −2 |
+| History, unguarded V3: `37189862679` → `37236253941` | −21 / −184 | −4 / −43 | −4 / −155 | −29 / −382 |
+| History, role filter without place emission: `37189862679` → `37212585445` | 0 / 0 | 0 / 0 | 0 / −134 | 0 / −134 |
+| History, first dedup version: `37212585445` → `37212993514` | −16 / −187 | −10 / −44 | −13 / −15 | −39 / −246 |
+
+### Recall (G3)
+
+- FN versus `37189862679`: PERSON +21, LOCATION +4, ORG +10 (overall 445 → 480).
+- Lionel accepted up to PERSON +21 / LOCATION +4 / ORG +16 (recorded in the story). Run H is within these bounds.
+
+**Coverage, main corpus (local check on a dump that reproduces run H exactly; details in the story):**
+- The new misses are boundary changes: a span of the same type still covers the name. The exception is one LOCATION miss, which is covered only by a detection of another type.
+- 3 annotations lose coverage compared with v2.2. One organisation name is partly uncovered (a span merged across a heading, then cut at the line break). Two short names were covered in v2.2 only by accident, inside a wrong-type span.
+- All three are handed to story 10.3. The V3 cut adds no coverage loss.
+
+**Overlap-dropped TPs (AC5).** Source: local instrumented dump, which reproduces run H TP/FP/FN exactly (`scripts/accuracy_dump_detections.py --record-dedup`, commit `9f68da8`).
+- The dedup removed or replaced 339 input detections (PERSON 245, LOCATION 59, ORG 35).
+- 87 of them were TPs in the baseline dump: PERSON 61, LOCATION 14, ORG 12.
+- The net FN delta from the CI lines is +21 / +4 / +10.
+
+### Held-out set (G5)
+
+Aggregates only. Run H (`37385301566`):
+
+```
+[HELD-OUT Overall] P=0.7523 R=0.6970 F1=0.7236 TP=161 FP=53 FN=70 FN%=30.30 FP%=24.77
+[HELD-OUT PERSON] P=0.8598 R=0.8214 F1=0.8402 TP=92 FP=15 FN=20
+[HELD-OUT LOCATION] P=0.7536 R=0.7647 F1=0.7591 TP=52 FP=17 FN=16
+[HELD-OUT ORG] P=0.4474 R=0.3333 F1=0.3820 TP=17 FP=21 FN=34
+```
+
+Versus the 10.1 baseline (`37189862679`):
+- **Overall:** P 53.53% → 75.23%, R 72.29% → 69.70%, F1 61.51% → 72.36%, FN 64 → 70 (+6 FN).
+- **PERSON:** FN 21 → 20.
+- **LOCATION:** FN 15 → 16.
+- **ORG:** FN 28 → 34 (+6 FN; R 45.10% → 33.33%), P 31.51% → 44.74%, F1 37.10% → 38.20%.
+
+Versus run E (`37236253941`, unguarded V3):
+- Overall FN 66 → 70.
+- ORG FN 30 → 34.
+- PERSON and LOCATION unchanged.
+
+Run H's held-out lines are identical to runs C, F and G. The held-out gain of run E came only from cuts that dropped names with no detection of their own, which the precise guard refuses. Small-sample note: held-out ORG has 51 annotations, so 1 ORG FN ≈ 2 points of ORG recall (PERSON 112, LOCATION 68). Lionel accepted this held-out recall drop on 2026-10-06 (recorded in the story); it is tracked in story 10.3.
+
+### Performance (NFR1)
+
+Performance workflow run `37419128870` on the story branch, after the workflow fix (PR #82, `main` `acf1aba`): **success**. The "Verify benchmark results are non-empty" step passed. Single-document benchmark means: 2k words 0.441 s, 3.5k 0.761 s, 5k 1.310 s (34 rounds), entity detection 3k 0.680 s (10 rounds), against the NFR1 threshold of 30 s.
+
+Informational comparison with `main`:
+
+| Run | CPU | 2k | 3.5k | 5k | Entity detection 3k |
+|---|---|---|---|---|---|
+| Branch `37419128870` | AMD EPYC 7763 | 0.441 s | 0.761 s | 1.310 s | 0.680 s |
+| Branch `37421340202` | AMD EPYC 7763 | 0.443 s | 0.761 s | 1.307 s | 0.674 s |
+| `main` `37226334035` | AMD EPYC 9V45 | 0.312 s | 0.537 s | 0.761 s | 0.450 s |
+| `main` `37420216045` | Intel Xeon 6973P | 0.274 s | 0.473 s | 0.698 s | 0.406 s |
+
+The differences follow the runner CPU (pytest-benchmark `machine_info`). The detection is CPU-bound in spaCy. Measured locally on the same machine, the 10.2 post-filters (role filter and dedup) take about 1 ms of a 0.57 s detection, and branch and `main` detection times are equal. The dedup walk scales linearly, and the guard is capped at 16 refusal passes.
+
+### Notes
+
+- README, FAQ, docs index and tutorials are not updated in this story (Epic 10 G7 interpretation).
