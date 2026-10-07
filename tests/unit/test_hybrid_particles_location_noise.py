@@ -573,3 +573,168 @@ class TestLocationNoiseResource:
             "sud",
             "est",
         }
+
+
+# ---------------------------------------------------------------------------
+# QA fixes (gate CONCERNS, Lionel 2026-10-07): WJ-001, REQ-001, REQ-002,
+# COV-001, PERF-001
+# ---------------------------------------------------------------------------
+
+
+class TestWrappedNameLineStartWords:
+    """WJ-001: Le, La, De, Du, Des are not particles at the start of the
+    next line; the other particles still join."""
+
+    def _persons(self, detector: HybridDetector, doc: str) -> list[str]:
+        out = detector._merge_entities([_at(doc, "Zorbalia", "PERSON")], [], doc)
+        return [e.text for e in out if e.entity_type == "PERSON"]
+
+    @pytest.mark.parametrize(
+        "next_line",
+        [
+            "Le Comité a validé le projet",
+            "La Direction a validé le projet",
+            "Des Zorbs ont validé le projet",
+            "Du Quentrix a validé le projet",
+            "De Quentrix a validé le projet",
+        ],
+    )
+    def test_article_at_the_line_start_is_not_joined(
+        self, detector: HybridDetector, next_line: str
+    ) -> None:
+        doc = f"le contrat est signé par Zorbalia\n{next_line}"
+        assert self._persons(detector, doc) == ["Zorbalia"]
+
+    @pytest.mark.parametrize(
+        ("next_line", "joined"),
+        [
+            ("Di Quentrix, avec le projet", "Zorbalia\nDi Quentrix"),
+            ("Da Quentrix, avec le projet", "Zorbalia\nDa Quentrix"),
+            ("Dos Quentrix, avec le projet", "Zorbalia\nDos Quentrix"),
+            ("von Quentrix, avec le projet", "Zorbalia\nvon Quentrix"),
+            ("de Quentrix, avec le projet", "Zorbalia\nde Quentrix"),
+        ],
+    )
+    def test_other_particles_still_join(
+        self, detector: HybridDetector, next_line: str, joined: str
+    ) -> None:
+        doc = f"le contrat est signé par Zorbalia\n{next_line}"
+        assert self._persons(detector, doc) == [joined]
+
+    def test_capitalised_article_before_the_break_still_joins(
+        self, detector: HybridDetector
+    ) -> None:
+        doc = "le contrat est signé par Zorbalia Le\nQuentrix, avec le projet"
+        assert self._persons(detector, doc) == ["Zorbalia Le\nQuentrix"]
+
+
+class TestParticleRefinements:
+    @pytest.mark.parametrize(
+        "doc",
+        [
+            "pour Zorbalia le Directeur a signé",
+            "avec Zorbalia la Présidente du projet",
+        ],
+    )
+    def test_role_word_after_an_article_is_no_surname(
+        self, detector: HybridDetector, doc: str
+    ) -> None:
+        # REQ-001 (GUIDELINES P6)
+        assert _fix(detector, doc, _at(doc, "Zorbalia", "PERSON")) == "Zorbalia"
+
+    def test_article_surname_still_extends(self, detector: HybridDetector) -> None:
+        doc = "pour Zorbalia le Quentrix a signé"
+        assert _fix(detector, doc, _at(doc, "Zorbalia", "PERSON")) == (
+            "Zorbalia le Quentrix"
+        )
+
+    def test_contracted_place_is_not_absorbed(self, detector: HybridDetector) -> None:
+        # REQ-002: "du Havre" is "de" + "Le Havre", a dictionary place
+        doc = "pour Zorbalia du Havre a signé"
+        assert _fix(detector, doc, _at(doc, "Zorbalia", "PERSON")) == "Zorbalia"
+
+    @pytest.mark.parametrize(
+        ("doc", "place"),
+        [
+            ("pour Zorbalia de La Zorbelle a signé", "la zorbelle"),
+            ("pour Zorbalia de Le Zorbmans a signé", "le zorbmans"),
+            ("pour Zorbalia des Zorbières a signé", "les zorbières"),
+        ],
+    )
+    def test_place_inside_the_chain_is_not_absorbed(
+        self,
+        detector: HybridDetector,
+        monkeypatch: pytest.MonkeyPatch,
+        doc: str,
+        place: str,
+    ) -> None:
+        # REQ-002, with an invented place injected into the dictionary
+        monkeypatch.setattr(hd, "_geography_folded", lambda: frozenset({place}))
+        assert _fix(detector, doc, _at(doc, "Zorbalia", "PERSON")) == "Zorbalia"
+
+    def test_trailing_particle_search_scales_linearly(
+        self, detector: HybridDetector
+    ) -> None:
+        # PERF-001: a span ending in a long particle run; the search looks at
+        # the last few tokens only. A ratio, not an absolute time.
+        blocked = hd._SpanIndex([])
+
+        def run(n: int) -> float:
+            doc = "Zorbal" + " le" * n + " Quentrix"
+            entity = _ent(doc[: -len(" Quentrix")], "PERSON", 0)
+            best = float("inf")
+            for _ in range(3):
+                start = time.perf_counter()
+                for _ in range(20):
+                    HybridDetector._extend_particles(entity, doc, blocked)
+                best = min(best, time.perf_counter() - start)
+            return best
+
+        run(1_000)  # warm-up
+        small = run(5_000)
+        large = run(20_000)
+        assert large / small < 10, (small, large)
+
+
+class TestCommaRoleGuard:
+    """COV-001: ", <role>" is guarded like " - <role>"."""
+
+    def test_comma_role_trimmed_when_the_org_is_covered(
+        self, detector: HybridDetector, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        doc = "Contact: Zorbalia Quentrel, Directeur de Zorbtech\n"
+        person = _at(doc, "Zorbalia Quentrel, Directeur de Zorbtech", "PERSON")
+        org = _at(doc, "Zorbtech", "ORG", "regex")
+        _stub_pipeline(monkeypatch, detector, [person], [org])
+        out = detector.detect_entities(doc)
+        assert [e.text for e in out if e.entity_type == "PERSON"] == [
+            "Zorbalia Quentrel"
+        ]
+
+    def test_comma_role_kept_when_the_org_is_uncovered(
+        self, detector: HybridDetector, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        doc = "Contact: Zorbalia Quentrel, Directeur de Zorbtech\n"
+        person = _at(doc, "Zorbalia Quentrel, Directeur de Zorbtech", "PERSON")
+        _stub_pipeline(monkeypatch, detector, [person], [])
+        out = detector.detect_entities(doc)
+        assert [e.text for e in out if e.entity_type == "PERSON"] == [
+            "Zorbalia Quentrel, Directeur de Zorbtech"
+        ]
+
+    def test_comma_role_without_capitalised_tail_needs_no_cover(
+        self, detector: HybridDetector, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        doc = "Contact: Zorbalia Quentrel, Responsable technique\n"
+        person = _at(doc, "Zorbalia Quentrel, Responsable technique", "PERSON")
+        _stub_pipeline(monkeypatch, detector, [person], [])
+        out = detector.detect_entities(doc)
+        assert [e.text for e in out if e.entity_type == "PERSON"] == [
+            "Zorbalia Quentrel"
+        ]
+
+    def test_late_comma_trim_is_guarded(self, detector: HybridDetector) -> None:
+        doc = "Contact: Zorbalia Quentrel, Directeur de Zorbtech"
+        person = _at(doc, "Zorbalia Quentrel, Directeur de Zorbtech", "PERSON")
+        out = detector._trim_roles_late([person], doc)
+        assert [e.text for e in out] == ["Zorbalia Quentrel, Directeur de Zorbtech"]

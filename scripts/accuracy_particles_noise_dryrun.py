@@ -272,10 +272,8 @@ def _particle_extend(
     raw = text[e.start_pos : e.end_pos]
     last_lb = max((m.end() for m in hd._LINE_BREAK_RE.finditer(raw)), default=0)
     line_start = e.start_pos + last_lb
-    anchor = e.end_pos
-    tail = TAIL_PARTS_RE.search(text, line_start, e.end_pos)
-    if tail and tail.end() == e.end_pos and tail.start() > line_start:
-        anchor = tail.start()
+    # QA PERF-001: bounded walk over the last tokens (product helper)
+    anchor = HybridDetector._trailing_particles_start(text, line_start, e.end_pos)
     pos = anchor
     parts: list[str] = []
     while len(parts) < 3:
@@ -312,10 +310,14 @@ def _particle_extend(
         if not allowed:
             return e
     # condition 4: blockers and geography
+    if parts[-1] in ("le", "la") and token in ROLE_WORDS:
+        return e  # QA REQ-001
     if _overlaps_any(e.end_pos, end, blockers):
         return e
     if token.casefold() in GEO:
         return e
+    if HybridDetector._chain_names_a_place(parts, token, frozenset(GEO)):
+        return e  # QA REQ-002
     phrase = " ".join(text[anchor:end].split())
     if phrase.casefold() in GEO:
         return e
@@ -348,6 +350,14 @@ def _role_trim(e: DetectedEntity, text: str, opts: dict[str, Any]) -> DetectedEn
         if not (nd is not None and nd.is_first_name(word.strip(",.;:"))):
             keep = raw[: m.start()].rstrip()
             if keep:
+                guard = [
+                    (e.start_pos + w.start(), e.start_pos + w.end())
+                    for w in hd._WORD_RE.finditer(raw, m.end())
+                    if w.group()[0].isupper() and w.group() not in ROLE_WORDS
+                ]
+                CUR.setdefault("guards", []).append(
+                    (CUR["doc"], e.start_pos, e.start_pos + len(keep), e, guard, 0)
+                )
                 return _with_span(
                     e, text, e.start_pos, e.start_pos + len(keep), "trailing_role_comma"
                 )
@@ -512,14 +522,16 @@ def _c2off_base(cls, a, b, text=None):  # type: ignore[no-untyped-def]
 
 # --- R-WJP: W-JOIN reads the frozen particle list ---------------------------
 
-_ORIG_WRAP_RE = hd._WRAP_RE
+_ORIG_WRAP_RE = hd._wrap_re  # since 10.3b the product builds it from the list
 
 
 def _wjp_wrap_re() -> re.Pattern[str]:
     parts = f"(?:{_alts(PARTICLES_LOWER + PARTICLES_CAP)})"
+    # QA WJ-001: Le/La/De/Du/Des are not particles on the next-line side
+    after = f"(?:{_alts([p for p in PARTICLES_LOWER + PARTICLES_CAP if p not in ('Le', 'La', 'De', 'Du', 'Des')])})"
     return re.compile(
         f"(?:{HSPACE}+{parts})*{HSPACE}*\r?\n{HSPACE}*"
-        f"(?P<right>(?:{parts}{HSPACE}+)*{hd._WRAP_TOKEN})"
+        f"(?P<right>(?:{after}{HSPACE}+)*{hd._WRAP_TOKEN})"
         f"(?={HSPACE}*(?:[,.!?)]|\\Z)|{HSPACE}+[a-zß-öø-ÿ])"
     )
 
@@ -673,7 +685,7 @@ def main() -> None:  # noqa: C901
         elif count_c2:
             HybridDetector._resolve_same_type_pair_base = classmethod(_c2_counting_base)  # type: ignore[method-assign,assignment]
         if wjp:
-            hd._WRAP_RE = _wjp_wrap_re()  # type: ignore[attr-defined]
+            hd._wrap_re = _wjp_wrap_re  # type: ignore[assignment]
         HybridDetector._join_wrapped_names = staticmethod(_counting_join)  # type: ignore[method-assign,assignment]
         try:
             out = {}
@@ -741,7 +753,7 @@ def main() -> None:  # noqa: C901
         finally:
             HybridDetector._filter_org_roles = _ORIG_ROLES  # type: ignore[method-assign]
             HybridDetector._resolve_same_type_pair_base = classmethod(_ORIG_BASE)  # type: ignore[method-assign,assignment]
-            hd._WRAP_RE = _ORIG_WRAP_RE  # type: ignore[attr-defined]
+            hd._wrap_re = _ORIG_WRAP_RE  # type: ignore[assignment]
             HybridDetector._join_wrapped_names = staticmethod(_ORIG_JOIN)  # type: ignore[method-assign,assignment]
 
     log: list[str] = []
