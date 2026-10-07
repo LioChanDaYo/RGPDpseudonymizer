@@ -1,0 +1,106 @@
+schema: 1
+story: '10.3b'
+story_title: 'Particles, Roles + LOCATION Noise'
+gate: CONCERNS
+status_reason: 'Pre-merge review at 8046e53 (code 6207bcf). G2 verified: runs B 37586332744 and C 37586903397 and the baseline 37534939934 match every line and number in the story, QA report, CHANGELOG and PR body. G3 strict passes per slice (FN 452/44/54/354), G5 recall unchanged (held-out FP 47 -> 45), level 2 = 0, level 2b = 0, no TP lost, CI 9/9 on attempt 1, NFR1 on the same CPU. One medium concern for Lionel: wiring W-JOIN to the frozen particle list (decision 14) lets it join a line-end name to a next line that starts with Le/La/De/Du/Des (over-coverage only, 0 fires on the corpus).'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-10-07T15:00:00Z'
+
+waiver: { active: false }
+
+merge_blockers:
+  - 'WJ-001 needs a decision from Lionel: accept the article-led W-JOIN joins as a residual (as with "Zorbalia\nDirectrice de"), or narrow the next-line side. No name is left in clear either way.'
+
+top_issues:
+  - id: 'WJ-001'
+    severity: medium
+    finding: 'Because W-JOIN reads the capitalised resource particles (R-WJP, decision 14), it now joins a one-word PERSON at the end of a prose line to a next line that starts with a capitalised French article or preposition in the list (Le, La, De, Du, Des) followed by a capitalised word and a lower-case word. QA probes (base 23df76a: no join in each): "remis à Zorbalia\nLe Comité a validé" -> PERSON "Zorbalia\nLe Comité"; likewise "Zorbalia\nLa Direction", "Zorbalia\nDes Zorbs", "Zorbalia\nDu Quentrix". Over-coverage only, 0 fires on the main corpus, but W-JOIN is widened beyond particle + surname to common sentence and heading starts. The only R-WJP negative test is the blank line.'
+    suggested_action: 'Lionel decides: keep one list but exclude Le, La, De, Du, Des on the next-line side of the break, or accept the residual explicitly. Either way add a negative test with an invented name.'
+    refs: ['gdpr_pseudonymizer/nlp/hybrid_detector.py:156-170', 'tests/unit/test_hybrid_particles_location_noise.py:454']
+    suggested_owner: po
+  - id: 'REQ-001'
+    severity: low
+    finding: 'Particle extension takes a capitalised role word as the surname after a lower-case article particle: "pour Zorbalia le Directeur a signé" -> "Zorbalia le Directeur"; "avec Zorbalia la Présidente du jury" -> "Zorbalia la Présidente". This goes against P6. 0 cases on the main corpus.'
+    suggested_action: 'Reject a surname token that is a role word (or a stoplist word).'
+    refs: ['gdpr_pseudonymizer/nlp/hybrid_detector.py:868-928']
+    suggested_owner: dev
+  - id: 'REQ-002'
+    severity: low
+    finding: 'The Q12 dictionary check compares the surname token and the whole chain, not the place inside the chain. Without a LOCATION detection blocking it, "Zorbalia de La Rochelle", "de Le Mans" and "du Havre" are extended, although "La Rochelle", "Le Mans" and "Le Havre" are dictionary entries. spaCy usually tags these LOC, which blocks the extension.'
+    suggested_action: 'Also look up each chain suffix that starts at a capitalised particle, plus the du/au -> Le contraction.'
+    refs: ['gdpr_pseudonymizer/nlp/hybrid_detector.py:920-924']
+    suggested_owner: dev
+  - id: 'PERF-001'
+    severity: low
+    finding: 'tail_parts.search scans the whole last line of a PERSON span and is quadratic in the number of particles inside it: 2k particles 0.14 s, 8k 2.4 s, 32k 38 s. Such spans are unrealistic. Entity-count scaling is linear (32k entities 0.22 s).'
+    suggested_action: 'Search only the last few tokens of the span; at most 3 particles matter (_MAX_PARTICLES).'
+    refs: ['gdpr_pseudonymizer/nlp/hybrid_detector.py:148', 'gdpr_pseudonymizer/nlp/hybrid_detector.py:885']
+    suggested_owner: dev
+  - id: 'COV-001'
+    severity: low
+    finding: 'The ", <role>" trim is unguarded, unlike " - <role>". In "Zorbalia Quentrel, Directeur de Zorbtech", "Zorbtech" leaves the PERSON span and is left in clear if it has no detection of its own. There is no ", Role" span on the main corpus, and this is within the decision-9 sign-off.'
+    suggested_action: 'Apply the dash guard to the comma variant.'
+    refs: ['gdpr_pseudonymizer/nlp/hybrid_detector.py:949-958']
+    suggested_owner: po
+  - id: 'MX-001'
+    severity: low
+    finding: 'A trimmed or extended PERSON can become an exact text match of an ORG/LOCATION detection, which the type-blind exact match drops. QA fuzz (3,000 cases, detect level, base vs new): 4 PERSON covers moved to an ORG cover (0 any-type losses); 1 result depended on input order (base 0).'
+    suggested_action: 'None here; story 10.3c (type-aware exact match) removes it.'
+    refs: ['gdpr_pseudonymizer/nlp/hybrid_detector.py (_is_exact_match, 10.3c)']
+    suggested_owner: dev
+  - id: 'DOC-001'
+    severity: low
+    finding: 'Decision 5 says the 16 extra stoplist words must not appear anywhere. The story still names "NA", "PJ" and "NON CONFORME" in Entry categories and in Held-Out Isolation, and "NON CONFORME" again in the 1.3 Change Log row. They are absent from code, resources and tests (verified). Nit: the QA report and PR body say an all-caps surname is accepted "only after a capitalised particle"; it is also accepted after an all-caps particle.'
+    suggested_action: 'Replace them with "the draft stoplist extras (not approved, decision 5)".'
+    refs: ['docs/stories/10.3b.particles-roles-location-noise.story.md:621', 'docs/stories/10.3b.particles-roles-location-noise.story.md:674', 'docs/stories/10.3b.particles-roles-location-noise.story.md:842']
+    suggested_owner: sm
+
+quality_score: 90
+expires: '2026-10-21T15:00:00Z'
+
+evidence:
+  runs_downloaded: ['37534939934', '37586332744', '37586903397']
+  performance_runs_downloaded: ['37586906584', '37534939830']
+  metric_lines_checked:
+    story: '24/24 match'
+    qa_report_10_3b_section: '16/16 match; all derived numbers match'
+    changelog: 'all numbers match run C vs the 10.3a close-out'
+    pr_87_body: '16/16 lines and all numbers match'
+  docs_only_after_code_head: '6207bcf..8046e53 touches only CHANGELOG.md, docs/qa/ner-accuracy-report.md and the story'
+  g3: 'run B and run C: FN 452/44/54/354 vs thresholds 458/50/54/354; LOCATION unchanged'
+  g5: 'held-out FN 59 (15/16/28) unchanged; run C FP 47 -> 45, F1 76.44 -> 76.79'
+  g4_diff: 'empty for tests/test_corpus, tests/accuracy, tests/integration, .github, gdpr_pseudonymizer/core and the allowlist'
+  local_reproduction: 'QA dump of 23df76a reproduces the baseline (2,263 detections); QA dump of 6207bcf reproduces run C (2,225 detections, 0 offset mismatches, 0 line-break detections, so W-JOIN 0 fires)'
+  coverage_check: 'QA script: 0 TP lost, 6 PERSON TPs gained; level 2 = 0; level 2b = 0; level 1 = 134 chars in 44 spans, 0 inside an annotation (38 noise places, 4 role words, 2 title letters)'
+  lists: 'all 62 stoplist entries occur in the main corpus; person_boundaries non-corpus entries are exactly the approved strings; test-file non-corpus words are invented, identifiers or approved; TOKYO nowhere under gdpr_pseudonymizer/, tests/unit/, scripts/; leakage guard 5 passed'
+  fuzz: '3,000 detect-level cases on base and new: 0 any-type coverage loss, 0 offset mismatches, 1 order-dependent result (MX interplay)'
+  tests_run_locally: '370 passed (10.3b/10.3a/10.2/detector/regex test files + leakage guard); ruff, black, mypy clean'
+  ci: 'attempt 1 green at 6207bcf (CI 37586907676), ec15214 (CI 37588226542) and PR head 8046e53 (CI 37589592896, Code Quality 37589592897, CodeQL 37589588478); gh pr checks 87: 9/9'
+  nfr1: '37586906584 success, non-empty step passed, AMD EPYC 7763 = reference 37534939830; means 0.440/0.761/1.114/0.674 s vs 0.452/0.774/1.134/0.688 s'
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+    ac_gaps: []
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'Level 2b = 0 on the main corpus; the fuzz shows no any-type coverage loss. The new logs carry offsets only. COV-001 (comma trim unguarded) is within the sign-off.'
+  performance:
+    status: PASS
+    notes: 'NFR1 measured on the same CPU, unchanged. New steps are linear in entity count; a pathological particle run inside one span is quadratic (PERF-001, low).'
+  reliability:
+    status: CONCERNS
+    notes: 'W-JOIN over-wide joins on article-led next lines (WJ-001). Offsets are document slices; CRLF handled; deterministic apart from the MX interplay (10.3c).'
+  maintainability:
+    status: PASS
+    notes: 'Frozen lists in resources with a why per entry; one particle list for both rules; 77 targeted unit tests.'
+
+recommendations:
+  immediate:
+    - action: 'Lionel decides WJ-001 (accept, or exclude Le/La/De/Du/Des on the next-line side); add a negative test'
+      refs: ['gdpr_pseudonymizer/nlp/hybrid_detector.py:156-170']
+  future:
+    - action: 'REQ-001 role word as surname; REQ-002 place inside the particle chain; PERF-001 bounded tail search; COV-001 comma guard'
+      refs: ['gdpr_pseudonymizer/nlp/hybrid_detector.py:868-958']
+    - action: 'DOC-001 redact the unapproved stoplist words from the story'
+      refs: ['docs/stories/10.3b.particles-roles-location-noise.story.md:621', 'docs/stories/10.3b.particles-roles-location-noise.story.md:674']
