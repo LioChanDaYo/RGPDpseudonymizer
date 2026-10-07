@@ -12,8 +12,8 @@ patterns:
     confidence: 0.85
     entity_type: PERSON
     patterns:
-      - pattern: '\b(M\.|Mme|Mlle|Dr\.|Pr\.|Maître|Me\.?)[ \t\u00A0\u202F]+([A-ZÀ-ÖØ-ÞĀ-ſ][a-zß-öø-ÿĀ-ſ]+(?:-[A-ZÀ-ÖØ-ÞĀ-ſ][a-zß-öø-ÿĀ-ſ]+)*(?:[ \t\u00A0\u202F]+[A-ZÀ-ÖØ-ÞĀ-ſ][a-zß-öø-ÿĀ-ſ]+(?:-[A-ZÀ-ÖØ-ÞĀ-ſ][a-zß-öø-ÿĀ-ſ]+)*)?)'
-        description: "Matches titles + names: M. Dupont, Dr. Marie Dubois, Mme Laurent, Maître Dupont, Me Mercier, Dr. Marja-Liisa Mikkola"
+      - pattern: '\b(M\.|Mme|Mlle|Dr\.|Pr\.|Maître|Me\.?)[ \t\u00A0\u202F]+((?:M(?:a)?c[A-ZÀ-ÖØ-ÞĀ-ſ][a-zß-öø-ÿĀ-ſ]+|[A-ZÀ-ÖØ-ÞĀ-ſ][a-zß-öø-ÿĀ-ſ]+)(?:-(?:M(?:a)?c[A-ZÀ-ÖØ-ÞĀ-ſ][a-zß-öø-ÿĀ-ſ]+|[A-ZÀ-ÖØ-ÞĀ-ſ][a-zß-öø-ÿĀ-ſ]+))*(?:[ \t\u00A0\u202F]+(?:M(?:a)?c[A-ZÀ-ÖØ-ÞĀ-ſ][a-zß-öø-ÿĀ-ſ]+|[A-ZÀ-ÖØ-ÞĀ-ſ][a-zß-öø-ÿĀ-ſ]+)(?:-(?:M(?:a)?c[A-ZÀ-ÖØ-ÞĀ-ſ][a-zß-öø-ÿĀ-ſ]+|[A-ZÀ-ÖØ-ÞĀ-ſ][a-zß-öø-ÿĀ-ſ]+))*)?)'
+        description: "Matches titles + names: M. Dupont, Dr. Marie Dubois, Mme Laurent, Maître Dupont, Me Mercier, Dr. Marja-Liisa Mikkola. A Mc/Mac surname (Mc + capital) is one token (Story 10.3b AC5)"
         examples:
           - "M. Dupont"
           - "Mme Laurent"

@@ -21,9 +21,14 @@ import yaml
 
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity, EntityDetector
 from gdpr_pseudonymizer.nlp.model_names import DEFAULT_SPACY_MODEL
+from gdpr_pseudonymizer.nlp.name_dictionary import NameDictionary
 from gdpr_pseudonymizer.nlp.regex_matcher import HSPACE, RegexMatcher
 from gdpr_pseudonymizer.nlp.spacy_detector import SpaCyDetector
-from gdpr_pseudonymizer.resources import FRENCH_GEOGRAPHY_PATH, ORG_ROLE_FILTER_PATH
+from gdpr_pseudonymizer.resources import (
+    FRENCH_GEOGRAPHY_PATH,
+    ORG_ROLE_FILTER_PATH,
+    PERSON_BOUNDARIES_PATH,
+)
 from gdpr_pseudonymizer.utils.french_patterns import (
     FRENCH_TITLE_PATTERN,
     strip_french_prepositions,
@@ -79,19 +84,172 @@ _LINE_BREAK_RE = re.compile("[\n\r\v\f\x85\u2028\u2029]")
 # hard-wrapped over one line break (PDF text extraction).
 _UPPER = "A-ZÀ-ÖØ-ÞĀ-ſ"
 _LOWER = "a-zß-öø-ÿĀ-ſ"
-_WRAP_PARTICLES = "(?:de|du|des|la|le|van|der|den)"
 _WRAP_TOKEN = f"[{_UPPER}][{_UPPER}{_LOWER}]*(?:[-'’][{_UPPER}][{_UPPER}{_LOWER}]*)*"
 _WRAP_TOKEN_RE = re.compile(_WRAP_TOKEN)
-# After a one-word PERSON: optional particles, one line break, optional
-# particles, one capitalised token, then end of text, , . ! ? ) or a space
-# and a lower-case letter (never ":" or ";", which start a label line).
-_WRAP_RE = re.compile(
-    f"(?:{HSPACE}+{_WRAP_PARTICLES})*{HSPACE}*\r?\n{HSPACE}*"
-    f"(?P<right>(?:{_WRAP_PARTICLES}{HSPACE}+)*{_WRAP_TOKEN})"
-    f"(?={HSPACE}*(?:[,.!?)]|\\Z)|{HSPACE}+[a-zß-öø-ÿ])"
-)
 # A lower-case word start: the line is prose, not a name-only line
 _PROSE_WORD_RE = re.compile("(?<![\\w'’])[a-zß-öø-ÿ]")
+
+
+# ---------------------------------------------------------------------------
+# PERSON boundaries (Story 10.3b, AC4-AC6, AC9) and W-JOIN particles (R-WJP)
+# ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class PersonBoundaries:
+    """Particle and role-word lists loaded from ``person_boundaries.yaml``."""
+
+    particles: tuple[str, ...]
+    allcaps_particles: tuple[str, ...]
+    role_words: frozenset[str]
+
+
+@functools.lru_cache(maxsize=1)
+def load_person_boundaries() -> PersonBoundaries:
+    """Load the PERSON boundary resource once (no spaCy import).
+
+    All-caps particle forms are derived from the capitalised entries.
+    """
+    with open(PERSON_BOUNDARIES_PATH, encoding="utf-8") as f:
+        data = yaml.safe_load(f)
+    particles = tuple(e["term"] for e in data["particles"])
+    allcaps = tuple(sorted({p.upper() for p in particles if p[:1].isupper()}))
+    return PersonBoundaries(
+        particles=particles,
+        allcaps_particles=allcaps,
+        role_words=frozenset(e["term"] for e in data["role_words"]),
+    )
+
+
+def _alternation(words: tuple[str, ...] | list[str] | frozenset[str]) -> str:
+    """Regex alternation of literal words, longest first."""
+    return "|".join(sorted((re.escape(w) for w in words), key=len, reverse=True))
+
+
+@dataclass(frozen=True)
+class _BoundaryPatterns:
+    part_spaced: re.Pattern[str]
+    tail_parts: re.Pattern[str]
+    comma_role: re.Pattern[str]
+    dash_role: re.Pattern[str]
+    role_acronym: re.Pattern[str]
+
+
+@functools.lru_cache(maxsize=1)
+def _boundary_patterns() -> _BoundaryPatterns:
+    """Patterns built from the frozen lists (particles, role words, acronyms)."""
+    lists = load_person_boundaries()
+    parts = _alternation(lists.particles + lists.allcaps_particles)
+    roles = _alternation(lists.role_words)
+    acronyms = _alternation(load_org_role_filter().acronyms)
+    return _BoundaryPatterns(
+        part_spaced=re.compile(f"{HSPACE}+({parts})(?={HSPACE})"),
+        tail_parts=re.compile(f"(?:{HSPACE}+(?:{parts}))+$"),
+        comma_role=re.compile(f",{HSPACE}+(?:{roles})(?![\\w])"),
+        dash_role=re.compile(f"{HSPACE}+-{HSPACE}+(?:{roles})(?![\\w])"),
+        role_acronym=re.compile(f"(?<=[^\\W\\d_]){HSPACE}+(?:{acronyms})$"),
+    )
+
+
+@functools.lru_cache(maxsize=1)
+def _wrap_re() -> re.Pattern[str]:
+    """W-JOIN follower pattern, with the frozen particle list (R-WJP).
+
+    After a one-word PERSON: optional particles, one line break, optional
+    particles, one capitalised token, then end of text, , . ! ? ) or a space
+    and a lower-case letter (never ":" or ";", which start a label line).
+    """
+    parts = f"(?:{_alternation(load_person_boundaries().particles)})"
+    return re.compile(
+        f"(?:{HSPACE}+{parts})*{HSPACE}*\r?\n{HSPACE}*"
+        f"(?P<right>(?:{parts}{HSPACE}+)*{_WRAP_TOKEN})"
+        f"(?={HSPACE}*(?:[,.!?)]|\\Z)|{HSPACE}+[a-zß-öø-ÿ])"
+    )
+
+
+@functools.lru_cache(maxsize=1)
+def _geography_folded() -> frozenset[str]:
+    """Every geography-dictionary entry, case-folded (absence is no evidence)."""
+    with open(FRENCH_GEOGRAPHY_PATH, encoding="utf-8") as f:
+        data = json.load(f)
+    words: set[str] = set()
+    for key in ("cities", "regions", "departments", "countries_and_international"):
+        words |= {w.casefold() for w in data.get(key, [])}
+    return frozenset(words)
+
+
+@functools.lru_cache(maxsize=1)
+def _default_name_dictionary() -> NameDictionary:
+    """The bundled name dictionary, for the Q2 "Last, First" check."""
+    names = NameDictionary()
+    names.load()
+    return names
+
+
+_ELISION_RE = re.compile(f"{HSPACE}+([dD]['’])(?=[{_UPPER}])")
+_HSPACE_RUN_RE = re.compile(f"{HSPACE}+")
+_SURNAME_RE = re.compile(
+    f"(?:M(?:a)?c[{_UPPER}][{_LOWER}]+|[{_UPPER}][{_LOWER}]+|[{_UPPER}]{{2,}})"
+    f"(?:-(?:[{_UPPER}][{_LOWER}]+|[{_UPPER}]{{2,}}))*(?![\\w'’])"
+)
+_NEXT_CAPITAL_RE = re.compile(f"{HSPACE}+[{_UPPER}]")
+_MC_TAIL_RE = re.compile(r"(?<![\w])Ma?c$")
+_MC_WORD_RE = re.compile(f"[{_UPPER}][{_LOWER}]+")
+_GLUED_PUNCT_RE = re.compile(r"[):,;]+$")
+# At most this many particles before the surname ("van der", "de la")
+_MAX_PARTICLES = 3
+
+
+class _SpanIndex:
+    """Interval queries over entity spans in O(log n) (no list scan).
+
+    ``overlaps(a, b)``: some span overlaps [a, b). ``covers(a, b, exclude)``:
+    some span other than ``exclude`` contains [a, b).
+    """
+
+    def __init__(self, spans: list[tuple[int, int, int]]) -> None:
+        # (start, end, owner id), sorted by start; prefix top-2 ends
+        spans = sorted(spans)
+        self._starts = [s for s, _, _ in spans]
+        self._prefix: list[tuple[int, int, int]] = []
+        best_end, best_owner, second_end = -1, -1, -1
+        for _, end, owner in spans:
+            if end > best_end:
+                if best_owner != owner:
+                    second_end = best_end
+                best_end, best_owner = end, owner
+            elif end > second_end:
+                second_end = end
+            self._prefix.append((best_end, best_owner, second_end))
+
+    @classmethod
+    def of(cls, entities: list[DetectedEntity]) -> _SpanIndex:
+        return cls([(e.start_pos, e.end_pos, id(e)) for e in entities])
+
+    def overlaps(self, start: int, end: int) -> bool:
+        i = bisect.bisect_left(self._starts, end)
+        return i > 0 and self._prefix[i - 1][0] > start
+
+    def covers(
+        self, start: int, end: int, exclude: DetectedEntity | None = None
+    ) -> bool:
+        i = bisect.bisect_right(self._starts, start)
+        if i == 0:
+            return False
+        best_end, best_owner, second_end = self._prefix[i - 1]
+        if best_end >= end and (exclude is None or best_owner != id(exclude)):
+            return True
+        return exclude is not None and second_end >= end
+
+
+@dataclass(frozen=True)
+class _RoleGuard:
+    """A guarded " - <role>" trim: the cut stands only if every capitalised
+    word after the role word(s) is covered by another kept detection."""
+
+    index: int
+    original: DetectedEntity
+    words: tuple[tuple[int, int], ...]
 
 
 def _is_sentence_period(raw: str, index: int) -> bool:
@@ -415,8 +573,43 @@ class HybridDetector(EntityDetector):
 
         logger.debug("regex_detection_complete", entities_found=len(regex_entities))
 
-        # Step 3: Merge with deduplication
+        # Step 3: PERSON boundaries before the merge, on both sources (Story
+        # 10.3b AC4-AC6, AC9): particles, Mc/Mac, trailing roles. The ORG and
+        # LOCATION spans of both lists block a particle extension.
+        blockers = [
+            (e.start_pos, e.end_pos)
+            for e in spacy_entities + regex_entities
+            if e.entity_type in ("ORG", "LOCATION")
+        ]
+        spacy_entities, spacy_guards = self._fix_person_boundaries(
+            spacy_entities, text, blockers
+        )
+        regex_entities, regex_guards = self._fix_person_boundaries(
+            regex_entities, text, blockers
+        )
+        # The merge flags regex entities in place: keep pristine copies in case
+        # a guarded trim is refused and the document is merged once more
+        pristine_regex = (
+            [dataclasses.replace(e) for e in regex_entities]
+            if spacy_guards or regex_guards
+            else []
+        )
+
+        # Step 4: Merge with deduplication
         merged_entities = self._merge_entities(spacy_entities, regex_entities, text)
+
+        if spacy_guards or regex_guards:
+            kept = _SpanIndex.of(merged_entities)
+            refused_spacy = self._refused_guards(spacy_guards, kept)
+            refused_regex = self._refused_guards(regex_guards, kept)
+            if refused_spacy or refused_regex:
+                for index, original in refused_spacy.items():
+                    spacy_entities[index] = original
+                for index, original in refused_regex.items():
+                    pristine_regex[index] = original
+                merged_entities = self._merge_entities(
+                    spacy_entities, pristine_regex, text
+                )
 
         logger.info(
             "hybrid_detection_complete",
@@ -536,14 +729,286 @@ class HybridDetector(EntityDetector):
             merged = self._filter_org_roles(merged, text)
             merged = self._dedup_same_type_overlaps(merged, text)
 
-        # Re-join a PERSON name hard-wrapped over one line (Story 10.3a W-JOIN)
+        # Re-join a PERSON name hard-wrapped over one line (Story 10.3a W-JOIN),
+        # then trim trailing roles once more on the final spans (Story 10.3b,
+        # R-ROLE-LATE, Lionel 2026-10-07)
         if text is not None:
             merged = self._join_wrapped_names(merged, text)
+            merged = self._trim_roles_late(merged, text)
 
         # Sort by start position
         merged.sort(key=lambda e: e.start_pos)
 
         return merged
+
+    @staticmethod
+    def _refused_guards(
+        guards: list[_RoleGuard], kept: _SpanIndex
+    ) -> dict[int, DetectedEntity]:
+        """Guarded trims whose discarded capitalised words are not all covered
+        by a kept detection: list index → original entity."""
+        refused: dict[int, DetectedEntity] = {}
+        for guard in guards:
+            if not all(kept.covers(start, end) for start, end in guard.words):
+                refused[guard.index] = guard.original
+                logger.debug(
+                    "person_boundary_refused",
+                    rule="trailing_role_dash",
+                    source=guard.original.source,
+                    start=guard.original.start_pos,
+                    end=guard.original.end_pos,
+                )
+        return refused
+
+    def _fix_person_boundaries(
+        self,
+        entities: list[DetectedEntity],
+        text: str,
+        blockers: list[tuple[int, int]],
+    ) -> tuple[list[DetectedEntity], list[_RoleGuard]]:
+        """Fix PERSON span boundaries before the merge (Story 10.3b).
+
+        In order, on each PERSON entity: Mc/Mac completion (AC5), particle
+        extension (AC4), trailing-role trim (AC6, AC9). Other types are
+        returned unchanged. A fixed span's text is the document slice.
+
+        Args:
+            entities: Pre-merge entities of one source
+            text: Document text
+            blockers: Pre-merge ORG and LOCATION spans of both sources
+
+        Returns:
+            (entities, guards): the guarded " - <role>" trims, to be checked
+            against the merged detections (``_refused_guards``)
+        """
+        blocked = _SpanIndex([(s, e, 0) for s, e in blockers])
+        out: list[DetectedEntity] = []
+        guards: list[_RoleGuard] = []
+        for entity in entities:
+            if entity.entity_type != "PERSON" or entity.end_pos > len(text):
+                out.append(entity)
+                continue
+            new = entity
+            rules: list[str] = []
+            extended = self._complete_mc(new, text)
+            if extended is not None:
+                new = extended
+                rules.append("mc_mac")
+            extended = self._extend_particles(new, text, blocked)
+            if extended is not None:
+                new = extended
+                rules.append("particle")
+            trimmed, rule, words = self._trim_trailing_role(new, text)
+            if trimmed is not None:
+                if words:
+                    # a refused trim falls back to the span before the trim
+                    guards.append(_RoleGuard(len(out), new, words))
+                new = trimmed
+                rules.append(rule)
+            for rule in rules:
+                logger.debug(
+                    "person_boundary_fixed",
+                    rule=rule,
+                    source=entity.source,
+                    old_start=entity.start_pos,
+                    old_end=entity.end_pos,
+                    new_start=new.start_pos,
+                    new_end=new.end_pos,
+                )
+            out.append(new)
+        return out, guards
+
+    @staticmethod
+    def _respan(
+        entity: DetectedEntity, text: str, start: int, end: int
+    ) -> DetectedEntity:
+        """The entity with a new span; its text is the document slice."""
+        return dataclasses.replace(
+            entity, text=text[start:end], start_pos=start, end_pos=end
+        )
+
+    @classmethod
+    def _complete_mc(cls, entity: DetectedEntity, text: str) -> DetectedEntity | None:
+        """A span ending in a bare "Mc"/"Mac" followed by an upper-case letter
+        is extended to the end of that word (AC5)."""
+        raw = text[entity.start_pos : entity.end_pos]
+        end = entity.end_pos
+        if not _MC_TAIL_RE.search(raw) or end >= len(text) or not text[end].isupper():
+            return None
+        word = _MC_WORD_RE.match(text, end)
+        if word is None:
+            return None
+        return cls._respan(entity, text, entity.start_pos, word.end())
+
+    @classmethod
+    def _extend_particles(
+        cls, entity: DetectedEntity, text: str, blocked: _SpanIndex
+    ) -> DetectedEntity | None:
+        """Extend a PERSON span over particle(s) + one surname token (AC4).
+
+        Same line only. A span that already ends in particle(s) is re-anchored
+        before them. The surname is one capitalised token (or Mc/Mac, or an
+        all-caps token after a capitalised or all-caps particle), not followed
+        by another capitalised token; the added text overlaps no ORG or
+        LOCATION detection, and is not a geography-dictionary entry.
+        """
+        patterns = _boundary_patterns()
+        raw = text[entity.start_pos : entity.end_pos]
+        line_start = entity.start_pos + max(
+            (m.end() for m in _LINE_BREAK_RE.finditer(raw)), default=0
+        )
+        anchor = entity.end_pos
+        tail = patterns.tail_parts.search(text, line_start, entity.end_pos)
+        if tail and tail.end() == entity.end_pos and tail.start() > line_start:
+            anchor = tail.start()
+        pos = anchor
+        parts: list[str] = []
+        while len(parts) < _MAX_PARTICLES:
+            match = patterns.part_spaced.match(text, pos)
+            if match is None:
+                break
+            parts.append(match.group(1))
+            pos = match.end()
+        elision = _ELISION_RE.match(text, pos)
+        if elision is not None:
+            parts.append(elision.group(1))
+            pos = elision.end()
+        else:
+            if not parts:
+                return None
+            space = _HSPACE_RUN_RE.match(text, pos)
+            if space is None:
+                return None
+            pos = space.end()
+        surname = _SURNAME_RE.match(text, pos)
+        if surname is None or surname.end() <= entity.end_pos:
+            return None
+        end = surname.end()
+        if _NEXT_CAPITAL_RE.match(text, end):
+            return None
+        token = surname.group(0)
+        letters = token.replace("-", "")
+        if len(letters) >= 2 and letters.isupper() and not parts[-1][:1].isupper():
+            # all-caps after lower-case de/du/des/d': an acronym ORG ("du CNRS")
+            return None
+        if blocked.overlaps(entity.end_pos, end):
+            return None
+        places = _geography_folded()
+        phrase = " ".join(text[anchor:end].split())
+        if token.casefold() in places or phrase.casefold() in places:
+            return None
+        return cls._respan(entity, text, entity.start_pos, end)
+
+    def _known_first_name(self, word: str) -> bool:
+        names = self.regex_matcher.name_dictionary or _default_name_dictionary()
+        return names.is_first_name(word)
+
+    def _trim_trailing_role(
+        self, entity: DetectedEntity, text: str
+    ) -> tuple[DetectedEntity | None, str, tuple[tuple[int, int], ...]]:
+        """Trim a trailing role from a single-line PERSON span (AC6, AC9).
+
+        ", <role word>" (not "Last, First"); " - <role word> …" (guarded:
+        the capitalised words after the role words are returned and must be
+        covered by another kept detection); a role acronym right after a
+        letter ("<Name> DRH"); glued trailing ``) : , ;`` ("<Name>):").
+
+        Returns:
+            (trimmed entity or None, rule, guard words)
+        """
+        raw = text[entity.start_pos : entity.end_pos]
+        if _LINE_BREAK_RE.search(raw):
+            return None, "", ()
+        patterns = _boundary_patterns()
+        roles = load_person_boundaries().role_words
+        start = entity.start_pos
+        match = patterns.comma_role.search(raw)
+        if match is not None:
+            word = raw[match.start() + 1 :].split()[0].strip(",.;:")
+            keep = raw[: match.start()].rstrip()
+            if keep and not self._known_first_name(word):
+                return (
+                    self._respan(entity, text, start, start + len(keep)),
+                    "trailing_role_comma",
+                    (),
+                )
+        match = patterns.dash_role.search(raw)
+        if match is not None:
+            keep = raw[: match.start()].rstrip()
+            words = tuple(
+                (start + w.start(), start + w.end())
+                for w in _WORD_RE.finditer(raw, match.end())
+                if w.group()[0].isupper() and w.group() not in roles
+            )
+            if keep:
+                return (
+                    self._respan(entity, text, start, start + len(keep)),
+                    "trailing_role_dash",
+                    words,
+                )
+        match = patterns.role_acronym.search(raw)
+        if match is not None and match.start() > 0:
+            return (
+                self._respan(entity, text, start, start + match.start()),
+                "trailing_role_acronym",
+                (),
+            )
+        match = _GLUED_PUNCT_RE.search(raw)
+        if match is not None and match.start() > 0 and raw[match.start() - 1].isalpha():
+            return (
+                self._respan(entity, text, start, start + match.start()),
+                "glued_punctuation",
+                (),
+            )
+        return None, "", ()
+
+    def _trim_roles_late(
+        self, entities: list[DetectedEntity], text: str
+    ) -> list[DetectedEntity]:
+        """Trailing-role trims once more on the final PERSON spans
+        (R-ROLE-LATE, Lionel 2026-10-07); then the same-type dedup again.
+
+        A guarded " - <role>" trim stands only if another final entity
+        covers each discarded capitalised word.
+        """
+        kept: _SpanIndex | None = None
+        out: list[DetectedEntity] = []
+        changed = False
+        for entity in entities:
+            if entity.entity_type != "PERSON" or entity.end_pos > len(text):
+                out.append(entity)
+                continue
+            trimmed, rule, words = self._trim_trailing_role(entity, text)
+            if trimmed is None:
+                out.append(entity)
+                continue
+            if words:
+                if kept is None:
+                    kept = _SpanIndex.of(entities)
+                if not all(kept.covers(s, e, exclude=entity) for s, e in words):
+                    logger.debug(
+                        "person_boundary_refused",
+                        rule=rule,
+                        source=entity.source,
+                        start=entity.start_pos,
+                        end=entity.end_pos,
+                    )
+                    out.append(entity)
+                    continue
+            logger.debug(
+                "person_boundary_fixed",
+                rule=rule,
+                source=entity.source,
+                old_start=entity.start_pos,
+                old_end=entity.end_pos,
+                new_start=trimmed.start_pos,
+                new_end=trimmed.end_pos,
+            )
+            out.append(trimmed)
+            changed = True
+        if changed:
+            out = self._dedup_same_type_overlaps(out, text)
+        return out
 
     def _split_at_line_breaks(
         self, entities: list[DetectedEntity], text: str | None
@@ -648,7 +1113,7 @@ class HybridDetector(EntityDetector):
             core = strip_french_titles(raw).split()
             if len(core) != 1 or not _WRAP_TOKEN_RE.fullmatch(core[0]):
                 continue
-            match = _WRAP_RE.match(text, entity.end_pos)
+            match = _wrap_re().match(text, entity.end_pos)
             if match is None:
                 continue
             line_start = entity.start_pos
