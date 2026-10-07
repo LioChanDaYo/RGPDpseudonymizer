@@ -827,11 +827,11 @@ Same runner CPU, so the comparison is like for like. Timings are unchanged withi
 **What changed in the detector** (rule text and STOP R decisions: story 10.3b):
 - **Slice B, PERSON boundaries, before the merge on both detectors:**
   - Surname particles are kept with the name: "M. Jean-Zorbal Le" becomes "M. Jean-Zorbal Le Quentrix". The particles are le, la, de, du, des, d', van, van der, von, ter, ten, Di, Da, Del, Della, Dos, …
-  - The extension is blocked when the next words are an organisation or place detection, a dictionary place, or more than one capitalised word. An all-caps surname is accepted only after a capitalised particle.
+  - The extension is blocked when the next words are an organisation or place detection, a dictionary place, or more than one capitalised word. An all-caps surname is accepted only after a capitalised or all-caps particle. A role word after a lower-case article ("le Directeur") is never taken as a surname, and a place inside the particle chain ("du Havre" = de + Le Havre) blocks the extension.
   - "Mc"/"Mac" surnames stay whole.
-  - Trailing roles are trimmed: ", Responsable …"; " - Lead …" (only when every other capitalised word removed is covered by another detection); a role acronym ("DRH"); glued "):".
+  - Trailing roles are trimmed: ", Responsable …" and " - Lead …" (both only when every other capitalised word removed is covered by another detection); a role acronym ("DRH"); glued "):".
   - The same trims run again on the final spans.
-  - The hard-wrapped-name join reads the same particle list.
+  - The hard-wrapped-name join reads the same particle list, except that Le, La, De, Du and Des at the start of the next line are not particles there ("Le Comité" is not a surname).
 - **Slice C, LOCATION noise:**
   - A place detection whose whole text is a common word, label or jargon term from a reviewed stoplist ("CONFORME", "CC", "Équipe", "Constat", "SecNumCloud", "Pentest", …) is dropped, unless it is a dictionary place. Absence from the dictionary is never evidence, so unknown real places such as "BOSTON" stay.
   - Fragments such as "à Dr" are dropped.

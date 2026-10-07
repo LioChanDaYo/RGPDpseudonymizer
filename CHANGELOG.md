@@ -15,9 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Particles.** A name is no longer cut before its particle: "M. Jean-Zorbal Le" becomes "M. Jean-Zorbal Le Quentrix", and "Mme Zorbalia van der Zorb" and "Zorbal d'Quentrac" stay whole.
     - Recognised particles: le, la, de, du, des, d', van, von, der, den, ter, ten, Di, Da, Del, Della, Dos, and their capitalised or all-caps forms. The list is in `gdpr_pseudonymizer/resources/person_boundaries.yaml`.
     - A particle is not taken when the next words are an organisation or a place ("… de Quentrix SA", "… de Zorbaville"), or more than one capitalised word.
-    - The hard-wrapped-name join reads the same list.
+    - The hard-wrapped-name join reads the same list, except that "Le", "La", "De", "Du" and "Des" starting the next line are not taken as particles ("Le Comité" stays out of the name).
+    - A role after an article ("Zorbalia le Directeur") and a place after the particle ("… du Havre") are not taken as surnames.
   - **Mc/Mac.** "Mme Sarah McZorbal" is no longer cut at "Mc".
-  - **Trailing roles.** A role stuck to a name on the same line is removed: ", Responsable …", "<Name> DRH", "<Name>):", and "<Name> - Lead <Org>". The " - Lead" cut is made only when the organisation after it is detected on its own, so it is never left in clear. "Dubois, Jean-Marc" ("Last, First") is never cut.
+  - **Trailing roles.** A role stuck to a name on the same line is removed: ", Responsable …", "<Name> DRH", "<Name>):", and "<Name> - Lead <Org>". The ", Role" and " - Lead" cuts are made only when every other capitalised word removed (such as an organisation) is detected on its own, so it is never left in clear. "Dubois, Jean-Marc" ("Last, First") is never cut.
   - **Fewer false places.** Places whose whole text is a common word, label or jargon term are no longer offered: "CONFORME", "CC", "OK", "Équipe", "Constat", "SecNumCloud", "Pentest", … The list is in `gdpr_pseudonymizer/resources/location_noise_filter.yaml`. Fragments such as "à Dr" are dropped too.
     - Real places are kept even when they are not in the bundled dictionary ("BOSTON"). "US", "USA", "UK", "UE" and "EU" are always kept.
     - Company names detected as places are left as they are, so they are still pseudonymized.
