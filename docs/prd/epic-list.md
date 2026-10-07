@@ -68,7 +68,7 @@
 
 ---
 
-**Timeline: Epics 0-4: 14 weeks (v1.0 MVP). Epic 5: 6-7 weeks (v1.1). Epic 6: 10-14 weeks (v2.0). Epic 7: 4-6 weeks (v2.1). Epic 8: 5-7 weeks (v2.4). Epic 9: 8-12 weeks (v3.0). Epic 10: 5.5-8 weeks (v2.3 candidate, runs before Epic 9)**
+**Timeline: Epics 0-4: 14 weeks (v1.0 MVP). Epic 5: 6-7 weeks (v1.1). Epic 6: 10-14 weeks (v2.0). Epic 7: 4-6 weeks (v2.1). Epic 8: 5-7 weeks (v2.4). Epic 9: 8-12 weeks (v3.0). Epic 10: 5-7.5 weeks (v2.3 candidate, runs before Epic 9)**
 
 ---
 

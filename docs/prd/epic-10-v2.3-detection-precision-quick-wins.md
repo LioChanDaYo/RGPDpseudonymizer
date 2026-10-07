@@ -3,7 +3,7 @@
 **Epic Goal:** Raise detection precision and make the accuracy benchmark trustworthy with local, deterministic changes to the hybrid detector and the ground-truth corpus, without lowering recall. The user-facing value is fewer false entities to reject during the (mandatory) validation step and a benchmark whose numbers can be believed.
 
 **Target Release:** v2.3.0 candidate. **No release is part of this epic.** v2.3.0 ships only on Lionel's explicit go, through a separate release story.
-**Duration:** Estimated 5.5-8 weeks (10.1 is annotation-labor-bound; 10.3 split into 10.3a and 10.3b, and 10.3c added, Lionel, 2026-10-06; 10.5 added, Lionel, 2026-10-07; 10.3b re-estimated, 2026-10-07)
+**Duration:** Estimated 5-7.5 weeks (10.1 is annotation-labor-bound; 10.3 split into 10.3a and 10.3b, and 10.3c added, Lionel, 2026-10-06; 10.5 added, Lionel, 2026-10-07; 10.3b re-estimated after its STOP R, 2026-10-07)
 **Predecessor:** v2.2.0 + accuracy scorer fix (#77), commit `fceef65`
 **Successor:** Epic 9 (v3.0) starts from this epic's merged close-out baseline.
 
@@ -117,12 +117,12 @@ These notes sit outside the normative Gates block above and do not change its te
 | 10.1: Benchmark Repair + Held-Out Set | HIGH | 1.5-2.5 weeks | F3, F4, F5, F2 (junk) | Done (PR #79) |
 | 10.2: Same-Type Overlap Dedup + ORG Role Filter | HIGH | 1 week | F1, F2 | Done (PR #81) |
 | 10.3a: Boundaries & Run-On Spans (split from 10.3, Lionel, 2026-10-06) | MED | 0.5-1 week | 10.2 handoff, REL-004 | Done (PR #84) |
-| 10.3b: Particles, Roles & LOCATION Noise (split from 10.3, Lionel, 2026-10-06) | MED | 1-1.5 weeks (re-estimated 2026-10-07) | F6, F7 | Draft |
+| 10.3b: Particles, Roles & LOCATION Noise (split from 10.3, Lionel, 2026-10-06) | MED | 0.5-1 week (re-estimated after STOP R, 2026-10-07) | F6, F7 | Draft |
 | 10.3c: Type-Aware Exact Match in Merge (added at 10.3a STOP R, Lionel, 2026-10-06) | MED | 0.5 week | 10.3a STOP R | Draft |
 | 10.4: Greetings + Org-Plus-Country | MED | 0.5-1 week | F8, F9 | Draft |
 | 10.5: DB Init Safety (data-layer hardening, added by Lionel, 2026-10-07) | LOW | 0.5 week | PR #83 finding | Draft |
 
-**Total Estimated Duration:** 5.5-8 weeks
+**Total Estimated Duration:** 5-7.5 weeks
 
 ---
 
@@ -308,6 +308,7 @@ Part of the ground truth was produced by `scripts/auto_annotate_corpus.py` and a
 
 **Priority:** MEDIUM
 **Change type:** Detector-only (G4). Baseline: 10.3a merged close-out, run `37459114468` (reproduced on `main` by `37480506234`).
+**STOP R outcome (Lionel, 2026-10-07):** AC3 uses no organisation lexicon and no in-document evidence rule, so company names tagged LOCATION stay LOCATION; C2 is kept (QA REL-002); R-KWC is routed to 10.4 (candidate item).
 
 ### Acceptance Criteria
 
@@ -327,11 +328,9 @@ Part of the ground truth was produced by `scripts/auto_annotate_corpus.py` and a
 - `gdpr_pseudonymizer/nlp/geography_dictionary.py`, `gdpr_pseudonymizer/resources/` — stoplists
 - `gdpr_pseudonymizer/resources/detection_patterns.yaml` — particle and Mc/Mac name patterns
 
-### Estimated Effort: 1-1.5 weeks
+### Estimated Effort: 0.5-1 week
 
-Re-estimated on 2026-10-07 from 0.5-1 week. On top of AC1-AC9, the story now carries:
-- the REL-002 C2 keep/remove decision (QA REL-002, routed by Lionel 2026-10-07), with C2 removal and 4 unit-test rewrites if Lionel removes it;
-- the optional "keyword + connector(s)" ORG widening (see Out of Scope), with its own G1 run if Lionel adopts it.
+Re-estimated after STOP R on 2026-10-07 (it was 1-1.5 weeks while the C2 removal and the optional ORG widening were open). Lionel kept C2, so there is no C2 removal and no test rewrite. R-KWC moved to 10.4, so there is no run K. What remains is AC1-AC9 in two slices (B and C), each with its own G1 run.
 
 ---
 
@@ -391,9 +390,9 @@ Re-estimated on 2026-10-07 from 0.5-1 week. On top of AC1-AC9, the story now car
 6. **AC6:** Unit tests for each rule, including `email_chain.txt`-style fixtures written for the tests (not copied from the held-out set) and invented-name fixtures for the two AC5 cases.
 7. **AC7 — Gates:** G1 (main and held-out), G2, G3 versus the previous merged baseline (10.3c close-out), G4, G5, G6 (plus NFR1 timing unchanged: existing perf test green), G7 per the Epic 10 G7 interpretation (Lionel, 2026-10-02): before/after recorded in the QA report in this story; README/README.fr, FAQ, docs index and tutorials are updated at Epic 10 close-out, not per story. CHANGELOG [Unreleased] entry describing the behaviour change, regardless of G7, including an upgrade note on pseudonym continuity (see Risk Mitigation).
 
-### Candidate Item: ORG Name-Shape Limits (QA REQ-001, routed by Lionel 2026-10-07)
+### Candidate Item: ORG Name-Shape Limits and R-KWC (QA REQ-001, routed by Lionel 2026-10-07; R-KWC, routed by Lionel at 10.3b STOP R, 2026-10-07)
 
-Not an AC. The 10.4 story decides whether to take it in or leave it to later ORG recall work, and records the call. Any change follows G3 and the Cross-Story Rules.
+Not an AC. The 10.4 story decides whether to take each part in or leave it to later ORG recall work, and records the call. If it takes either in, it re-estimates 10.4. Any change follows G3 and the Cross-Story Rules.
 
 - **Finding:** the 10.3a ORG name shape (`detection_patterns.yaml:77` suffix form, `:88` prefix form) can leave part of a real organisation name uncovered when the name:
   - has 7 or more words (past the 6-token cap);
@@ -401,7 +400,11 @@ Not an AC. The 10.4 story decides whether to take it in or leave it to later ORG
   - has 3 or more connectors in a row (the shape allows at most 2);
   - has an elision right after the prefix keyword ("Chambre d'…").
 - **Size:** no main-corpus case (QA gate `docs/qa/gates/10.3a-boundaries-run-on-spans.yml`, REQ-001, severity low).
-- **Related:** the deferred "keyword + connector(s)" ORG widening and F10 (ORG recall), both in Out of Scope.
+- **R-KWC, the "keyword + connector(s)" ORG widening (routed by Lionel at 10.3b STOP R, 2026-10-07):**
+  - What it does: the prefix form accepts connectors or an elision right after the keyword, so names such as "Chambre d'Agriculture d'Eure-et-Loir" or "Cour d'Appel de Paris" are covered whole.
+  - Why it sits here: it changes the same `organizations` prefix pattern (`detection_patterns.yaml:88`) and shares REQ-001's elision-after-keyword case, so the two are handled together. It covers only that case; REQ-001's other limits (7+ words, "& Co.", 3+ connectors) stay as listed above.
+  - Size: 0 change on the main corpus in the 10.3b dry-run (local, not a CI result); +1 ORG TP in the earlier 10.3a dry-run.
+- **Related:** F10 (ORG recall) and the R-KWC row, both in Out of Scope.
 
 ### Integration Points
 
@@ -458,9 +461,9 @@ Not an AC. The 10.4 story decides whether to take it in or leave it to later ORG
 Story 10.1 (Benchmark repair + held-out)  --- Week 1-2.5 ---  guidelines approval stop inside; benchmark-only
 Story 10.2 (Overlap dedup + ORG roles)    --- Week 3      ---  baseline = 10.1 merged
 Story 10.3a (Boundaries + run-on spans)   --- Week 4      ---  baseline = 10.2 merged
-Story 10.3b (Particles, roles, LOC noise) --- Week 4.5-6  ---  baseline = 10.3a merged
-Story 10.3c (Type-aware exact match)      --- Week 6-6.5  ---  baseline = 10.3b merged
-Story 10.4 (Greetings + org+country)      --- Week 7-7.5  ---  baseline = 10.3c merged
+Story 10.3b (Particles, roles, LOC noise) --- Week 4.5-5  ---  baseline = 10.3a merged
+Story 10.3c (Type-aware exact match)      --- Week 5.5    ---  baseline = 10.3b merged
+Story 10.4 (Greetings + org+country)      --- Week 6-6.5  ---  baseline = 10.3c merged
 Story 10.5 (DB init safety)               --- 0.5 week, any slot --- no accuracy baseline (data layer)
 ```
 
@@ -521,7 +524,7 @@ Story 10.5 (DB init safety)               --- 0.5 week, any slot --- no accuracy
 |------|--------|-------|
 | ORG recall for missed brands (OVHcloud, TechCorp, Microsoft Azure, Partech, Kima Ventures, EY) — F10 | A gazetteer built from the brands in the corpus would be overfitting by construction; needs a general approach | Epic 9 or a later story. Related: 10.4 candidate item (QA REQ-001) |
 | Different-type overlaps (PERSON vs ORG on the same span), except the exact-match case handled by 10.3c | Needs its own rule and evidence | Later |
-| "Keyword + connector(s)" ORG widening ("Chambre d'Agriculture d'Eure-et-Loir", "Cour d'Appel de Paris"). 10.3a dry-run: +1 ORG TP (local, not a CI result) | Deferred out of 10.3a at STOP R (Lionel, 2026-10-06): it adds new recall rather than fixing a boundary | Candidate for 10.3b or later recall work. Related: 10.4 candidate item (QA REQ-001, ORG name-shape limits) |
+| "Keyword + connector(s)" ORG widening, R-KWC ("Chambre d'Agriculture d'Eure-et-Loir", "Cour d'Appel de Paris"). Dry-runs (local, not CI results): 10.3a +1 ORG TP; 10.3b 0 change | Deferred out of 10.3a at STOP R (Lionel, 2026-10-06): it adds new recall rather than fixing a boundary. Routed to 10.4 at 10.3b STOP R (Lionel, 2026-10-07), together with QA REQ-001 (same prefix pattern) | 10.4 candidate item (not an AC) |
 | Encoder NER models (CamemBERT-NER, …) | Lionel decision | Epic 9 |
 | Auto-accept / no-validation modes | Product constraint 3 | Parked in Epic 9 |
 | v2.3.0 release | Only on Lionel's explicit go | Separate release story |
