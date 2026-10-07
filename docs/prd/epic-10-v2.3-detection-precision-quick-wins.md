@@ -3,7 +3,7 @@
 **Epic Goal:** Raise detection precision and make the accuracy benchmark trustworthy with local, deterministic changes to the hybrid detector and the ground-truth corpus, without lowering recall. The user-facing value is fewer false entities to reject during the (mandatory) validation step and a benchmark whose numbers can be believed.
 
 **Target Release:** v2.3.0 candidate. **No release is part of this epic.** v2.3.0 ships only on Lionel's explicit go, through a separate release story.
-**Duration:** Estimated 5-7.5 weeks (10.1 is annotation-labor-bound; 10.3 split into 10.3a and 10.3b, and 10.3c added, Lionel, 2026-10-06; 10.5 added, Lionel, 2026-10-07)
+**Duration:** Estimated 5.5-8 weeks (10.1 is annotation-labor-bound; 10.3 split into 10.3a and 10.3b, and 10.3c added, Lionel, 2026-10-06; 10.5 added, Lionel, 2026-10-07; 10.3b re-estimated, 2026-10-07)
 **Predecessor:** v2.2.0 + accuracy scorer fix (#77), commit `fceef65`
 **Successor:** Epic 9 (v3.0) starts from this epic's merged close-out baseline.
 
@@ -93,7 +93,7 @@ Decided by Lionel, 2026-10-02. This note interprets the gates for Epic 10; the g
 
 ## Cross-Story Rules
 
-These notes sit outside the normative Gates block above and do not change its text. They bind every detector story from 10.3a on (10.3a, 10.3b, 10.4).
+These notes sit outside the normative Gates block above and do not change its text. They bind every detector story from 10.3a on: 10.3a, 10.3b, 10.3c and 10.4 (10.3c added, orchestrator 2026-10-07; rule text unchanged).
 
 - **Coverage level 2b (Lionel, 2026-10-06):** No rule may remove the last covering span of any type from an annotation of any type without Lionel's sign-off.
 
@@ -117,12 +117,12 @@ These notes sit outside the normative Gates block above and do not change its te
 | 10.1: Benchmark Repair + Held-Out Set | HIGH | 1.5-2.5 weeks | F3, F4, F5, F2 (junk) | Done (PR #79) |
 | 10.2: Same-Type Overlap Dedup + ORG Role Filter | HIGH | 1 week | F1, F2 | Done (PR #81) |
 | 10.3a: Boundaries & Run-On Spans (split from 10.3, Lionel, 2026-10-06) | MED | 0.5-1 week | 10.2 handoff, REL-004 | Done (PR #84) |
-| 10.3b: Particles, Roles & LOCATION Noise (split from 10.3, Lionel, 2026-10-06) | MED | 0.5-1 week | F6, F7 | Draft |
+| 10.3b: Particles, Roles & LOCATION Noise (split from 10.3, Lionel, 2026-10-06) | MED | 1-1.5 weeks (re-estimated 2026-10-07) | F6, F7 | Draft |
 | 10.3c: Type-Aware Exact Match in Merge (added at 10.3a STOP R, Lionel, 2026-10-06) | MED | 0.5 week | 10.3a STOP R | Draft |
 | 10.4: Greetings + Org-Plus-Country | MED | 0.5-1 week | F8, F9 | Draft |
 | 10.5: DB Init Safety (data-layer hardening, added by Lionel, 2026-10-07) | LOW | 0.5 week | PR #83 finding | Draft |
 
-**Total Estimated Duration:** 5-7.5 weeks
+**Total Estimated Duration:** 5.5-8 weeks
 
 ---
 
@@ -323,11 +323,15 @@ Part of the ground truth was produced by `scripts/auto_annotate_corpus.py` and a
 
 ### Integration Points
 
-- `gdpr_pseudonymizer/nlp/hybrid_detector.py` — `_trim_entity_boundaries`, LOCATION post-filter
+- `gdpr_pseudonymizer/nlp/hybrid_detector.py` — `_trim_entity_boundaries`, LOCATION post-filter. *Note (2026-10-07): `_trim_entity_boundaries` (`hybrid_detector.py:741` at `main` `23df76a`) receives no document text. The particle and boundary rules therefore plug in through a new `_fix_person_boundaries(entities, text, blockers)`, wired after `_trim_entity_boundaries`, as the 10.3b story specifies.*
 - `gdpr_pseudonymizer/nlp/geography_dictionary.py`, `gdpr_pseudonymizer/resources/` — stoplists
 - `gdpr_pseudonymizer/resources/detection_patterns.yaml` — particle and Mc/Mac name patterns
 
-### Estimated Effort: 0.5-1 week
+### Estimated Effort: 1-1.5 weeks
+
+Re-estimated on 2026-10-07 from 0.5-1 week. On top of AC1-AC9, the story now carries:
+- the REL-002 C2 keep/remove decision (QA REL-002, routed by Lionel 2026-10-07), with C2 removal and 4 unit-test rewrites if Lionel removes it;
+- the optional "keyword + connector(s)" ORG widening (see Out of Scope), with its own G1 run if Lionel adopts it.
 
 ---
 
@@ -344,7 +348,7 @@ Part of the ground truth was produced by `scripts/auto_annotate_corpus.py` and a
 
 ### Context
 
-`HybridDetector._merge_entities` (`hybrid_detector.py:450`) skips a regex detection when `_is_exact_match` (`hybrid_detector.py:1240`) finds a spaCy detection with the same span or the same normalized text. The check ignores entity type, so a regex detection is dropped even when spaCy gave the text another type. Example: regex LOCATION "Nice" is dropped because spaCy found ORG "Nice".
+`HybridDetector._merge_entities` (definition `:430`; its `_is_exact_match` call at `:471`) skips a regex detection when `_is_exact_match` (defined at `hybrid_detector.py:1409-1432`) finds a spaCy detection with the same span or the same normalized text. (Line numbers at `main` `23df76a`, after PR #86.) The check ignores entity type, so a regex detection is dropped even when spaCy gave the text another type. Example: regex LOCATION "Nice" is dropped because spaCy found ORG "Nice".
 
 **10.3a dry-run measure (local dump on top of 10.3a's rules; NOT a CI result, NOT a target):** FN PERSON −2 / LOCATION −2; FP +3 PERSON on hyphenated place names ("Saint-Gobain", "Clermont-Ferrand"); the kept regex entity is flagged `is_ambiguous`.
 
@@ -454,9 +458,9 @@ Not an AC. The 10.4 story decides whether to take it in or leave it to later ORG
 Story 10.1 (Benchmark repair + held-out)  --- Week 1-2.5 ---  guidelines approval stop inside; benchmark-only
 Story 10.2 (Overlap dedup + ORG roles)    --- Week 3      ---  baseline = 10.1 merged
 Story 10.3a (Boundaries + run-on spans)   --- Week 4      ---  baseline = 10.2 merged
-Story 10.3b (Particles, roles, LOC noise) --- Week 4.5-5  ---  baseline = 10.3a merged
-Story 10.3c (Type-aware exact match)      --- Week 5.5    ---  baseline = 10.3b merged
-Story 10.4 (Greetings + org+country)      --- Week 6-6.5  ---  baseline = 10.3c merged
+Story 10.3b (Particles, roles, LOC noise) --- Week 4.5-6  ---  baseline = 10.3a merged
+Story 10.3c (Type-aware exact match)      --- Week 6-6.5  ---  baseline = 10.3b merged
+Story 10.4 (Greetings + org+country)      --- Week 7-7.5  ---  baseline = 10.3c merged
 Story 10.5 (DB init safety)               --- 0.5 week, any slot --- no accuracy baseline (data layer)
 ```
 
