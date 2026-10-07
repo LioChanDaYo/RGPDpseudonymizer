@@ -1,0 +1,74 @@
+# LOCATION noise stoplist (Story 10.3b, AC1, AC2). A LOCATION detection whose
+# whole normalized text (prepositions, then titles stripped; whitespace
+# collapsed) is an entry, compared case-folded and accent-sensitive, and is
+# not a geography-dictionary place, is dropped. Every entry needs a `why`
+# that holds for any French business text. Never add an entry because it
+# appeared as an FP in the corpus alone; never add held-out strings; never
+# add a place, "US"/"USA"/"UK"/"UE"/"EU" (GUIDELINES Q14/A5), a compass
+# region (A3) or a region acronym (A8).
+# Frozen list: Story 10.3b Task 2 (Lionel's STOP R decisions, 2026-10-07).
+# Changes go back through the story.
+
+terms:
+  - {term: "conforme", why: "status word in audit/compliance checklists"}
+  - {term: "validé", why: "status word"}
+  - {term: "validée", why: "status word (feminine)"}
+  - {term: "ok", why: "status word"}
+  - {term: "cc", why: "e-mail header label (copie carbone)"}
+  - {term: "cci", why: "e-mail header label (copie carbone invisible)"}
+  - {term: "objet", why: "e-mail / letter header label"}
+  - {term: "urgent", why: "priority label"}
+  - {term: "confidentiel", why: "classification label"}
+  - {term: "nouveau", why: "status tag in lists and announcements"}
+  - {term: "new", why: "status tag in English lists and announcements"}
+  - {term: "cordialement", why: "letter closing word"}
+  - {term: "équipe", why: "common noun used as a heading/label"}
+  - {term: "constat", why: "common noun used as an audit heading"}
+  - {term: "synthèse", why: "common noun used as a heading"}
+  - {term: "contexte", why: "common noun used as a heading"}
+  - {term: "annexe", why: "common noun used as a heading"}
+  - {term: "objectif", why: "common noun used as a heading"}
+  - {term: "objectifs", why: "common noun used as a heading (plural)"}
+  - {term: "recommandation", why: "common noun used as a heading"}
+  - {term: "recommandations", why: "common noun used as a heading (plural)"}
+  - {term: "conclusion", why: "common noun used as a heading"}
+  - {term: "résumé", why: "common noun used as a heading"}
+  - {term: "budget", why: "common noun used as a heading/label"}
+  - {term: "planning", why: "common noun used as a heading/label"}
+  - {term: "calendrier", why: "common noun used as a heading/label"}
+  - {term: "action", why: "common noun used as a heading/label"}
+  - {term: "actions", why: "common noun used as a heading/label (plural)"}
+  - {term: "risque", why: "common noun used as a heading/label"}
+  - {term: "risques", why: "common noun used as a heading/label (plural)"}
+  - {term: "décision", why: "common noun used as a heading/label"}
+  - {term: "commentaire", why: "common noun used as a heading/label"}
+  - {term: "résultat", why: "common noun used as a heading/label"}
+  - {term: "résultats", why: "common noun used as a heading/label (plural)"}
+  - {term: "analyse", why: "common noun used as a heading/label"}
+  - {term: "évaluation", why: "common noun used as a heading/label"}
+  - {term: "audit", why: "common noun used as a heading/label"}
+  - {term: "rapport", why: "common noun used as a heading/label"}
+  - {term: "projet", why: "common noun used as a heading/label"}
+  - {term: "phase", why: "common noun used as a heading/label"}
+  - {term: "jalon", why: "project-management noun (milestone)"}
+  - {term: "livrables", why: "project-management noun (plural)"}
+  - {term: "périmètre", why: "common noun used as a heading/label"}
+  - {term: "participants", why: "common noun used as a heading/label"}
+  - {term: "invités", why: "common noun used as a heading/label (minutes)"}
+  - {term: "registre", why: "common noun used as a heading/label"}
+  - {term: "directeur général", why: "job title, never a place"}
+  - {term: "pentest", why: "security jargon (penetration test)"}
+  - {term: "pentester", why: "security jargon (penetration tester)"}
+  - {term: "secnumcloud", why: "certification name (GUIDELINES Q6 b), never a place"}
+  - {term: "cloud", why: "IT jargon"}
+  - {term: "soc", why: "security jargon (security operations centre)"}
+  - {term: "siem", why: "security jargon"}
+  - {term: "api", why: "IT jargon"}
+  - {term: "devops", why: "IT jargon"}
+  - {term: "firewalls", why: "IT jargon (plural)"}
+  - {term: "backup", why: "IT jargon"}
+  - {term: "backups", why: "IT jargon (plural)"}
+  - {term: "edr", why: "security jargon"}
+  - {term: "mfa", why: "security jargon"}
+  - {term: "roadmap", why: "project-management jargon"}
+  - {term: "forensics", why: "security jargon"}

@@ -1,0 +1,64 @@
+# PERSON boundary rules (Story 10.3b, AC4-AC6, AC9). Every entry needs a `why`
+# that holds for any French business text. Never add an entry because it
+# appeared as an FP in the corpus alone; never add held-out strings.
+# Frozen list: Story 10.3b Task 2 (Lionel's STOP R decisions, 2026-10-07).
+# Changes go back through the story.
+
+particles:           # case-sensitive; all-caps forms are derived from the
+                     # capitalised entries at load time (never typed here)
+  - {term: "le", why: "surname particle, lower-case (GUIDELINES P4)"}
+  - {term: "la", why: "surname particle, lower-case (GUIDELINES P4)"}
+  - {term: "de", why: "surname particle, lower-case (GUIDELINES P4)"}
+  - {term: "du", why: "surname particle, lower-case (GUIDELINES P4)"}
+  - {term: "des", why: "surname particle, lower-case (GUIDELINES P4)"}
+  - {term: "van", why: "Dutch/Flemish surname particle, lower-case (GUIDELINES P4)"}
+  - {term: "von", why: "German surname particle, lower-case (GUIDELINES P4)"}
+  - {term: "der", why: "second part of a particle chain such as van der (GUIDELINES P4)"}
+  - {term: "den", why: "second part of a particle chain such as van den (GUIDELINES P4)"}
+  - {term: "ter", why: "Dutch surname particle, lower-case (GUIDELINES P4)"}
+  - {term: "ten", why: "Dutch surname particle, lower-case (GUIDELINES P4)"}
+  - {term: "Le", why: "surname particle, capitalised (GUIDELINES P4)"}
+  - {term: "La", why: "surname particle, capitalised (GUIDELINES P4)"}
+  - {term: "De", why: "surname particle, capitalised (GUIDELINES P4)"}
+  - {term: "Du", why: "surname particle, capitalised (GUIDELINES P4)"}
+  - {term: "Des", why: "surname particle, capitalised (GUIDELINES P4)"}
+  - {term: "Van", why: "Dutch/Flemish surname particle, capitalised (GUIDELINES P4)"}
+  - {term: "Von", why: "German surname particle, capitalised (GUIDELINES P4)"}
+  - {term: "Der", why: "second part of a capitalised chain such as Van Der (GUIDELINES P4)"}
+  - {term: "Den", why: "second part of a capitalised chain such as Van Den (GUIDELINES P4)"}
+  - {term: "Di", why: "Italian surname particle (GUIDELINES P4)"}
+  - {term: "Da", why: "Italian/Portuguese surname particle (GUIDELINES P4)"}
+  - {term: "Del", why: "Italian/Spanish surname particle (GUIDELINES P4)"}
+  - {term: "Della", why: "Italian surname particle (GUIDELINES P4)"}
+  - {term: "Dos", why: "Portuguese surname particle (GUIDELINES P4)"}
+
+role_words:          # case-sensitive, capitalised job-title head words
+  - {term: "Responsable", why: "generic French job-title head word"}
+  - {term: "Directeur", why: "generic French job-title head word"}
+  - {term: "Directrice", why: "generic French job-title head word (feminine)"}
+  - {term: "Chef", why: "generic French job-title head word"}
+  - {term: "Président", why: "generic French job-title head word"}
+  - {term: "Présidente", why: "generic French job-title head word (feminine)"}
+  - {term: "Gérant", why: "generic French job-title head word"}
+  - {term: "Gérante", why: "generic French job-title head word (feminine)"}
+  - {term: "Associé", why: "generic French job-title head word"}
+  - {term: "Associée", why: "generic French job-title head word (feminine)"}
+  - {term: "Consultant", why: "generic French/English job-title head word"}
+  - {term: "Consultante", why: "generic French job-title head word (feminine)"}
+  - {term: "Ingénieur", why: "generic French job-title head word"}
+  - {term: "Ingénieure", why: "generic French job-title head word (feminine)"}
+  - {term: "Manager", why: "generic English job-title head word used in French companies"}
+  - {term: "Head", why: "generic English job-title head word (Head of ...)"}
+  - {term: "Lead", why: "generic English job-title head word (Lead ..., Tech Lead)"}
+  - {term: "Architecte", why: "generic French job-title head word"}
+  - {term: "Développeur", why: "generic French job-title head word"}
+  - {term: "Analyste", why: "generic French job-title head word"}
+  - {term: "Avocat", why: "generic French job-title head word"}
+  - {term: "Avocate", why: "generic French job-title head word (feminine)"}
+  - {term: "Juriste", why: "generic French job-title head word"}
+  - {term: "Chargé", why: "generic French job-title head word (Chargé de ...)"}
+  - {term: "Chargée", why: "generic French job-title head word (feminine)"}
+  - {term: "Délégué", why: "generic French job-title head word"}
+  - {term: "Déléguée", why: "generic French job-title head word (feminine)"}
+  - {term: "Secrétaire", why: "generic French job-title head word"}
+  - {term: "Trésorier", why: "generic French job-title head word"}

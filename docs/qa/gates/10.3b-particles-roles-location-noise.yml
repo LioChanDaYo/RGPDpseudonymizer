@@ -1,0 +1,74 @@
+schema: 1
+story: '10.3b'
+story_title: 'Particles, Roles + LOCATION Noise'
+gate: PASS
+status_reason: 'Re-review at 5418912 (code 81befe8). Run D 37641796495 is identical to run C and matches every line and number in the story, QA report, CHANGELOG and PR body. G3 strict passes, held-out recall is unchanged, and level 2 = 0 and level 2b = 0 with no TP lost (QA dumps). WJ-001, REQ-001, REQ-002, COV-001, PERF-001 and DOC-001 are fixed per Lionel''s 2026-10-07 decisions and verified by QA probes and fuzz. CI is 9/9 on attempt 1, and NFR1 compares runs on the same CPU. Only MX-001 remains, routed to 10.3c.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-10-07T18:00:00Z'
+
+waiver: { active: false }
+
+merge_blockers: []
+
+top_issues:
+  - id: 'MX-001'
+    severity: low
+    finding: 'A trimmed or extended PERSON can become an exact text match of an ORG/LOCATION detection, which the type-blind exact match drops. QA fuzz (3,000 cases, detect level, base vs run-D code): 4 PERSON covers move to an ORG cover (0 any-type losses); 1 result depends on input order (base 0).'
+    suggested_action: 'Story 10.3c (type-aware exact match), as decided by Lionel on 2026-10-07; recorded in the story Carry-ins.'
+    refs: ['gdpr_pseudonymizer/nlp/hybrid_detector.py (_is_exact_match)']
+    suggested_owner: dev
+
+resolved_since_e93aa38:
+  - 'WJ-001: W-JOIN excludes Le/La/De/Du/Des on the next-line side (_LINE_START_WORDS). "Zorbalia\nLe Comité / La Direction / Des Zorbs / Du Quentrix / De Quentrix" no longer join; "Anna Di\nZorbal", "Anna\nDos Zorbal", "von\nQuentrix" and "\nVan Quentrix" still do.'
+  - 'REQ-001: after lower-case le/la, a role word is never taken as the surname ("Zorbalia le Directeur", "la Présidente", "la Lead" not extended), as decided.'
+  - 'REQ-002: every chain suffix and the du -> le / des -> les contractions are checked against the dictionary. Real places "de La Rochelle", "de Le Mans", "du Havre", "du Mans" and injected invented places (des, DES, du, de La, de Le, de Les) are not extended; invented surnames still are.'
+  - 'COV-001: the ", <role>" trim is guarded like " - <role>": refused while a capitalised word after the role has no detection of its own, accepted once it has one.'
+  - 'PERF-001: the trailing-particle walk is bounded: a span with 128k particles takes 0.024 s (was 38 s at 32k).'
+  - 'DOC-001: the unapproved draft stoplist words are redacted from the story (dev) and from QA''s own entry and this gate (QA); QA refers to them by count only. None of the three appears in the story, docs/qa, the CHANGELOG, resources, tests/unit or scripts.'
+
+quality_score: 100
+expires: '2026-10-21T18:00:00Z'
+
+evidence:
+  runs_downloaded: ['37534939934', '37586332744', '37586903397', '37641796495']
+  performance_runs_downloaded: ['37586906584', '37534939830', '37641855606']
+  metric_lines_checked:
+    story: '32/32 match'
+    qa_report_10_3b_section: '16/16 match; run D cited as the close-out; derived numbers match'
+    changelog: 'cites 37641796495 (identical to 37586903397); numbers match'
+    pr_87_body: '16/16 lines and all numbers match (run D, NFR1 37641855606)'
+    run_d_vs_run_c: 'identical, 8/8 lines'
+  docs_only_after_code_head: '81befe8..5418912 touches only CHANGELOG.md, docs/qa/ner-accuracy-report.md and the story'
+  g3: 'run D FN 452/44/54/354 vs thresholds 458/50/54/354'
+  g5: 'held-out FN 59 (15/16/28) unchanged versus the 10.3a close-out; FP 45'
+  g4_diff: 'empty for tests/test_corpus, tests/accuracy, tests/integration, .github, gdpr_pseudonymizer/core and the allowlist'
+  local_reproduction: 'QA dump of 81befe8 byte-identical to the run-C dump; reproduces run D (2,225 detections, 0 offset mismatches, 0 line-break detections)'
+  coverage_check: 'level 2 = 0; level 2b = 0; 0 TP lost; 6 PERSON TPs gained; level 1 = 134 chars in 44 spans, 0 inside an annotation (38 noise places, 4 role words, 2 title letters)'
+  fuzz: '3,000 detect-level cases, base vs run-D code, two input orders: 0 any-type coverage loss, 0 offset mismatches; MX-001 interplay only'
+  held_out_blind: 'words added by the new tests: non-corpus strings are approved particles (Da, Dos), invented names and identifiers; TOKYO nowhere in code, resources, tests or scripts; leakage guard 5 passed'
+  tests_run_locally: '393 passed; ruff, black, mypy clean'
+  ci: 'attempt 1 green at 42b2f80 (CI 37641812274, Code Quality 37641812288, CodeQL 37641798058) and PR head 5418912 (CI 37642695168, Code Quality 37642695087, CodeQL 37642692387); gh pr checks 87: 9/9'
+  nfr1: '37641855606 success, non-empty step passed, AMD EPYC 7763 = reference 37534939830; means 0.438/0.755/1.110/0.671 s vs 0.452/0.774/1.134/0.688 s'
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+    ac_gaps: []
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'Level 2b = 0 on the main corpus; no any-type coverage loss in the fuzz; the comma role trim is now guarded. Logs carry offsets only.'
+  performance:
+    status: PASS
+    notes: 'NFR1 on the same CPU, unchanged; the particle walk and the entity-count scaling are linear.'
+  reliability:
+    status: PASS
+    notes: 'W-JOIN no longer joins article-led next lines; offsets are document slices; CRLF handled; deterministic apart from the MX interplay routed to 10.3c.'
+  maintainability:
+    status: PASS
+    notes: 'One frozen particle list with a documented next-line exclusion; lists in resources with a why per entry; 51 test functions.'
+
+recommendations:
+  immediate: []
+  future:
+    - action: 'MX-001: type-aware exact match in story 10.3c'
+      refs: ['gdpr_pseudonymizer/nlp/hybrid_detector.py (_is_exact_match)']
