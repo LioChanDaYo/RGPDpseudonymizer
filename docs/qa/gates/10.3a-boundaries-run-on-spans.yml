@@ -1,0 +1,109 @@
+schema: 1
+story: '10.3a'
+story_title: 'Boundaries + Run-On Spans'
+gate: PASS
+status_reason: 'Post-merge review (PR #84 merged as ac354cc before QA). G1 37459114468 and the main reproduction 37480506234 are identical and match every line and number in the story, QA report, CHANGELOG and PR body. G3 is strict and clean (FN 458: P50/L54/O354 vs 480/53/54/373), G5 is up against run H, G4 is empty, CI is green on attempt 1 on both the PR and main, and the NFR1 comparison is like for like (AMD EPYC 7763). QA''s own dump and coverage check confirm level 2 = 3 (signed off), level 2b = 0 and no TP lost. Only low findings.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-10-07T12:00:00Z'
+
+waiver: { active: false }
+
+merge_blockers: []
+
+top_issues:
+  - id: 'PERF-001'
+    severity: low
+    finding: 'W-JOIN checks membership with a value-equality list scan (`entity not in out`) for every PERSON, so it is O(PERSON x entities). QA measure: 1k entities 0.05 s, 4k 0.72 s, 8k 2.97 s. Invisible at NFR1 sizes; quadratic on very long documents.'
+    suggested_action: 'Track removed entities in a set of id() values. Small follow-up PR, with no metric change expected.'
+    refs: ['gdpr_pseudonymizer/nlp/hybrid_detector.py:626']
+    suggested_owner: dev
+  - id: 'REL-001'
+    severity: low
+    finding: 'A W-JOIN span keeps its line break ("Zorbalia\nQuentrix"). The mapping key (strip_titles, no whitespace collapse) therefore differs from the one-line spelling, so one person can get two pseudonyms in one document, and the output replaces the line break too. Fires 0 times on the main corpus.'
+    suggested_action: 'Collapse whitespace in the mapping-key normalization. This is a key change, so it needs a story with a continuity note.'
+    refs: ['gdpr_pseudonymizer/nlp/hybrid_detector.py:603-666', 'gdpr_pseudonymizer/core/document_processor.py:211-227']
+    suggested_owner: po
+  - id: 'REL-002'
+    severity: low
+    finding: 'By design since 10.2: the C2 trim still drops the tail after the first line break of a containment outer span, and that tail can hold a name. In QA fuzz (4,000 split + join documents) C2 is the only source of upper-case name-character loss; there are 0 losses with C2 neutralised. R-SPLIT late now cuts multi-line spans into covered pieces, so the tail drop is no longer needed.'
+    suggested_action: 'Dry-run "C2 tail drop off, R-SPLIT handles the line" against run 37459114468 in 10.3b/10.3c, and have Lionel decide.'
+    refs: ['gdpr_pseudonymizer/nlp/hybrid_detector.py:997']
+    suggested_owner: po
+  - id: 'REQ-001'
+    severity: low
+    finding: 'R-ORG shape limits can leave part of a real organisation name uncovered where the old run-on span covered it: 7+ tokens (the first token is lost), "& Co." with a period (the following word is lost), 3+ connectors, and an elision right after a prefix keyword ("Chambre d''Zorbal ..." gives no ORG span). The last case contradicts the Task 3.2 and Candidate Rules examples. 0 cases on the main corpus; within the signed-off level-1 exceptions.'
+    suggested_action: 'Record these for 10.4 / F10 (ORG recall) and correct the "Chambre d''Agriculture" example in the story.'
+    refs: ['gdpr_pseudonymizer/resources/detection_patterns.yaml:77', 'gdpr_pseudonymizer/resources/detection_patterns.yaml:88', 'docs/stories/10.3a.boundaries-run-on-spans.story.md:109', 'docs/stories/10.3a.boundaries-run-on-spans.story.md:507']
+    suggested_owner: po
+  - id: 'DOC-001'
+    severity: low
+    finding: 'The story still says hard-wrapped names are "not fixed", although decision 11 fixed them (W-JOIN). Frozen Rules are numbered 1-5, 7, 8, 6.'
+    suggested_action: 'Refresh those sections.'
+    refs: ['docs/stories/10.3a.boundaries-run-on-spans.story.md:365-367', 'docs/stories/10.3a.boundaries-run-on-spans.story.md:515', 'docs/stories/10.3a.boundaries-run-on-spans.story.md:629', 'docs/stories/10.3a.boundaries-run-on-spans.story.md:385-393']
+    suggested_owner: dev
+  - id: 'DOC-002'
+    severity: low
+    finding: 'The 10.2 CHANGELOG bullet still says the V3 cut excepts "the first word of a sentence"; 10.3a removed that exception, and both entries are under [Unreleased].'
+    suggested_action: 'Add "(removed in 10.3a)" or reword the bullet.'
+    refs: ['CHANGELOG.md:35']
+    suggested_owner: dev
+  - id: 'DOC-003'
+    severity: low
+    finding: 'Process: the PR was merged before G6 (Task 8.2) and QA (Task 8.5) were recorded, and the story Status still reads "Ready for Review". CI was in fact green on attempt 1.'
+    suggested_action: 'Story owner: tick 8.2 and 8.5 and set the Status to Done.'
+    refs: ['docs/stories/10.3a.boundaries-run-on-spans.story.md:5', 'docs/stories/10.3a.boundaries-run-on-spans.story.md:150', 'docs/stories/10.3a.boundaries-run-on-spans.story.md:153']
+    suggested_owner: sm
+
+quality_score: 90
+expires: '2026-10-21T12:00:00Z'
+
+evidence:
+  runs_downloaded: ['37459114468', '37480506234', '37385301566']
+  performance_runs_downloaded: ['37459118119', '37424140829', '37480506476']
+  metric_lines_checked:
+    story: '16/16 match'
+    qa_report_10_3a_section: '8/8 match; all derived numbers match'
+    changelog: 'all numbers match'
+    pr_84_body: '8/8 lines and all numbers match'
+    main_vs_g1: 'identical, 8/8 lines'
+  code_identity: '39ab544..ac354cc non-doc delta equals PR #83 exactly; PR #84 merged content equals f75ad9a..39ab544'
+  g3: 'FN 458 (PERSON 50, LOCATION 54, ORG 354) vs thresholds 480/53/54/373'
+  g4_diff: 'empty for tests/test_corpus, tests/accuracy, .github and the leakage allowlist'
+  g5: 'held-out FN 70 -> 59 vs run H (PERSON 20 -> 15, LOCATION 16 -> 16, ORG 34 -> 28); P/R/F1 all up'
+  local_reproduction: 'QA dump of ac354cc reproduces G1 exactly (2,263 detections, 0 offset mismatches, 0 detections with a line break)'
+  coverage_check: 'QA script vs QA run-H dump: 0 TP lost; level 2 = 3 (Prefecture de la Gironde, Region Nouvelle-Aquitaine, Wavestone; LOCATION-covered, signed off); level 2b = 0; TechSolutions @42 restored; Pierre and BRS still uncovered (10.4 AC5)'
+  regex_timing: '12 adversarial 50 KB line shapes, each <= 0.09 s'
+  fuzz: '4,000 single-type documents with line breaks through _merge_entities: 0 offset mismatches; with the C2 trim neutralised, 0 order dependence and 0 upper-case losses; with C2 active, tail losses come only from C2 (REL-002)'
+  held_out_blind: '102 non-docstring words of the new test file checked with scripts/accuracy_heldout_blind_check.py; every non-corpus word is an invented name or a code identifier'
+  tests_run_locally: '296 passed (4 detector test files + leakage guard, Windows); leakage guard 5 passed; ruff, black, mypy clean'
+  ci: 'PR #84 run 37460553643 attempt 1, 9/9 checks; main ac354cc all 6 workflows attempt 1'
+  nfr1: '37459118119 success, non-empty step passed, AMD EPYC 7763 = main reference 37424140829 (same CPU)'
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+    ac_gaps: []
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'No name character is lost through the new rules (fuzz with C2 neutralised); level 2b = 0 on the main corpus. The residual C2 tail drop is by design (REL-002). New logs carry no text.'
+  performance:
+    status: PASS
+    notes: 'Real NFR1 run on the same CPU as main; regex patterns linear on adversarial lines. W-JOIN is quadratic on very large entity counts (PERF-001, low).'
+  reliability:
+    status: PASS
+    notes: 'Offsets come from the document; CRLF handled; deterministic. W-JOIN key keeps the line break (REL-001, low).'
+  maintainability:
+    status: PASS
+    notes: 'Rules frozen in the story and implemented as written; constants named; 68 targeted unit tests. Some stale story text (DOC-001).'
+
+recommendations:
+  immediate: []
+  future:
+    - action: 'PERF-001 id()-set fix in _join_wrapped_names (follow-up PR)'
+      refs: ['gdpr_pseudonymizer/nlp/hybrid_detector.py:626']
+    - action: 'REL-002 dry-run of retiring the C2 tail drop (10.3b/10.3c)'
+      refs: ['gdpr_pseudonymizer/nlp/hybrid_detector.py:997']
+    - action: 'REL-001 whitespace-collapsed mapping key (story with continuity note)'
+      refs: ['gdpr_pseudonymizer/core/document_processor.py:211-227']
+    - action: 'DOC-001/002/003 wording and story close-out (8.2, 8.5, Status Done)'
+      refs: ['docs/stories/10.3a.boundaries-run-on-spans.story.md', 'CHANGELOG.md:35']

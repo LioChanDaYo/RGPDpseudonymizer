@@ -116,7 +116,7 @@ These notes sit outside the normative Gates block above and do not change its te
 |-------|----------|---------------|--------|--------|
 | 10.1: Benchmark Repair + Held-Out Set | HIGH | 1.5-2.5 weeks | F3, F4, F5, F2 (junk) | Done (PR #79) |
 | 10.2: Same-Type Overlap Dedup + ORG Role Filter | HIGH | 1 week | F1, F2 | Done (PR #81) |
-| 10.3a: Boundaries & Run-On Spans (split from 10.3, Lionel, 2026-10-06) | MED | 0.5-1 week | 10.2 handoff, REL-004 | Draft |
+| 10.3a: Boundaries & Run-On Spans (split from 10.3, Lionel, 2026-10-06) | MED | 0.5-1 week | 10.2 handoff, REL-004 | Done (PR #84) |
 | 10.3b: Particles, Roles & LOCATION Noise (split from 10.3, Lionel, 2026-10-06) | MED | 0.5-1 week | F6, F7 | Draft |
 | 10.3c: Type-Aware Exact Match in Merge (added at 10.3a STOP R, Lionel, 2026-10-06) | MED | 0.5 week | 10.3a STOP R | Draft |
 | 10.4: Greetings + Org-Plus-Country | MED | 0.5-1 week | F8, F9 | Draft |
@@ -147,11 +147,15 @@ Numbers come only from CI runs; each line cites its run ID. Full verbatim lines 
 |---|---|---|---|---|
 | 10.1 (benchmark repair, same detector) | `37189862679` | P 66.69% / R 79.91% / F1 72.70% | F1 61.51% | PR #79 |
 | 10.2 | `37385301566`, reproduced on `main` by `37424140809` | P 77.35% / R 78.33% / F1 77.84% | F1 72.36% | PR #81 |
+| 10.3a | `37459114468` (head `39ab544`), reproduced on `main` by `37480506234` at `ac354cc` | P 77.64% / R 79.32% / F1 78.47% | F1 76.44% | PR #84 |
 
 - **10.2 recall (G3):** Lionel accepted recall bounds of FN PERSON +21 / LOCATION +4 / ORG +16 versus 10.1 (`37189862679`). Run `37385301566` is inside them: FN PERSON +21 / LOCATION +4 / ORG +10.
 - **10.2 held-out ORG recall:** Lionel accepted the drop (held-out ORG FN 28 → 34, `37189862679` → `37385301566`). It is tracked in 10.3a (AC7).
 - **Side PRs:** #80 (test offsets in the document processor integration tests) and #82 (performance workflow fix; it makes the NFR1 gate real, since the workflow previously ran no tests).
-- **Current baseline for 10.3a:** `37385301566` / `37424140809`.
+- **10.3a recall (G3, strict):** main FN 458 (PERSON 50 / LOCATION 54 / ORG 354) versus 480 (53 / 54 / 373) in `37385301566`. No per-type FN increase.
+- **10.3a held-out:** FN 59, ORG FN 28 (`37459114468`), versus 70 and 34 in `37385301566`. Held-out ORG FN is back to its 10.1 level (28 in `37189862679`).
+- **10.3a QA:** PR #84 merged before QA. The post-merge QA gate is PASS (`docs/qa/gates/10.3a-boundaries-run-on-spans.yml`, PR #85). Its REQ-001 finding is routed to 10.4 (see "Candidate item" there).
+- **Current baseline for 10.3b:** `37459114468` / `37480506234`.
 
 ---
 
@@ -303,7 +307,7 @@ Part of the ground truth was produced by `scripts/auto_annotate_corpus.py` and a
 **so that** I reject fewer false places and do not have to repair cut names by hand.
 
 **Priority:** MEDIUM
-**Change type:** Detector-only (G4). Baseline: 10.3a merged close-out.
+**Change type:** Detector-only (G4). Baseline: 10.3a merged close-out, run `37459114468` (reproduced on `main` by `37480506234`).
 
 ### Acceptance Criteria
 
@@ -382,6 +386,18 @@ Part of the ground truth was produced by `scripts/auto_annotate_corpus.py` and a
    - The coverage table at close-out reports both annotations as restored or still uncovered.
 6. **AC6:** Unit tests for each rule, including `email_chain.txt`-style fixtures written for the tests (not copied from the held-out set) and invented-name fixtures for the two AC5 cases.
 7. **AC7 — Gates:** G1 (main and held-out), G2, G3 versus the previous merged baseline (10.3c close-out), G4, G5, G6 (plus NFR1 timing unchanged: existing perf test green), G7 per the Epic 10 G7 interpretation (Lionel, 2026-10-02): before/after recorded in the QA report in this story; README/README.fr, FAQ, docs index and tutorials are updated at Epic 10 close-out, not per story. CHANGELOG [Unreleased] entry describing the behaviour change, regardless of G7, including an upgrade note on pseudonym continuity (see Risk Mitigation).
+
+### Candidate Item: ORG Name-Shape Limits (QA REQ-001, routed by Lionel 2026-10-07)
+
+Not an AC. The 10.4 story decides whether to take it in or leave it to later ORG recall work, and records the call. Any change follows G3 and the Cross-Story Rules.
+
+- **Finding:** the 10.3a ORG name shape (`detection_patterns.yaml:77` suffix form, `:88` prefix form) can leave part of a real organisation name uncovered when the name:
+  - has 7 or more words (past the 6-token cap);
+  - contains "& Co." with a period;
+  - has 3 or more connectors in a row (the shape allows at most 2);
+  - has an elision right after the prefix keyword ("Chambre d'…").
+- **Size:** no main-corpus case (QA gate `docs/qa/gates/10.3a-boundaries-run-on-spans.yml`, REQ-001, severity low).
+- **Related:** the deferred "keyword + connector(s)" ORG widening and F10 (ORG recall), both in Out of Scope.
 
 ### Integration Points
 
@@ -499,9 +515,9 @@ Story 10.5 (DB init safety)               --- 0.5 week, any slot --- no accuracy
 
 | Item | Reason | Where |
 |------|--------|-------|
-| ORG recall for missed brands (OVHcloud, TechCorp, Microsoft Azure, Partech, Kima Ventures, EY) — F10 | A gazetteer built from the brands in the corpus would be overfitting by construction; needs a general approach | Epic 9 or a later story |
+| ORG recall for missed brands (OVHcloud, TechCorp, Microsoft Azure, Partech, Kima Ventures, EY) — F10 | A gazetteer built from the brands in the corpus would be overfitting by construction; needs a general approach | Epic 9 or a later story. Related: 10.4 candidate item (QA REQ-001) |
 | Different-type overlaps (PERSON vs ORG on the same span), except the exact-match case handled by 10.3c | Needs its own rule and evidence | Later |
-| "Keyword + connector(s)" ORG widening ("Chambre d'Agriculture d'Eure-et-Loir", "Cour d'Appel de Paris"). 10.3a dry-run: +1 ORG TP (local, not a CI result) | Deferred out of 10.3a at STOP R (Lionel, 2026-10-06): it adds new recall rather than fixing a boundary | Candidate for 10.3b or later recall work |
+| "Keyword + connector(s)" ORG widening ("Chambre d'Agriculture d'Eure-et-Loir", "Cour d'Appel de Paris"). 10.3a dry-run: +1 ORG TP (local, not a CI result) | Deferred out of 10.3a at STOP R (Lionel, 2026-10-06): it adds new recall rather than fixing a boundary | Candidate for 10.3b or later recall work. Related: 10.4 candidate item (QA REQ-001, ORG name-shape limits) |
 | Encoder NER models (CamemBERT-NER, …) | Lionel decision | Epic 9 |
 | Auto-accept / no-validation modes | Product constraint 3 | Parked in Epic 9 |
 | v2.3.0 release | Only on Lionel's explicit go | Separate release story |
