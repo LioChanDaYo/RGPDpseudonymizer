@@ -22,7 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Fewer false places.** Places whose whole text is a common word, label or jargon term are no longer offered: "CONFORME", "CC", "OK", "Équipe", "Constat", "SecNumCloud", "Pentest", … The list is in `gdpr_pseudonymizer/resources/location_noise_filter.yaml`. Fragments such as "à Dr" are dropped too.
     - Real places are kept even when they are not in the bundled dictionary ("BOSTON"). "US", "USA", "UK", "UE" and "EU" are always kept.
     - Company names detected as places are left as they are, so they are still pseudonymized.
-  - **Numbers.** CI accuracy run `37586903397` vs `37459114468`, same ground truth:
+  - **Numbers.** CI accuracy run `37641796495` (identical to `37586903397`) vs `37459114468`, same ground truth:
     - precision 77.64% → 79.24%, recall 79.32% → 79.59%, F1 78.47% → 79.41%;
     - PERSON F1 93.87% → 94.31%, LOCATION 71.94% → 76.98% (false places 109 → 71), ORG 46.00% (unchanged);
     - misses 458 → 452 (PERSON 50 → 44, LOCATION 54 → 54, ORG 354 → 354), with no recall drop in any type.

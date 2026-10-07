@@ -840,12 +840,13 @@ Same runner CPU, so the comparison is like for like. Timings are unchanged withi
 **Sources (G1):**
 - Before: the 10.3a close-out run `37459114468`, reproduced on `main` by `37480506234` and `37534939934`.
 - Run B (Slice B, head `e6de592`): `37586332744`.
-- **After (close-out): run C `37586903397`** (Slices B + C, head `6207bcf`).
+- Run C `37586903397` (Slices B + C, head `6207bcf`).
+- **After (close-out): run D `37641796495`** (head `42b2f80`, after the QA fixes). It is identical to run C on all eight lines; the fixes target shapes that do not occur in the main corpus.
 - The per-slice split below is order-dependent (B first, then C).
 
 ### Lines from `accuracy-output.txt`, verbatim
 
-Run C (`37586903397`, close-out):
+Run D (`37641796495`, close-out; identical to run C `37586903397`):
 
 ```
 [Overall] P=0.7924 R=0.7959 F1=0.7941 TP=1763 FP=462 FN=452 FN%=20.41 FP%=20.76
@@ -876,7 +877,7 @@ Run B (`37586332744`, Slice B only):
 | | Precision | Recall | F1 | TP | FP | FN |
 |---|---|---|---|---|---|---|
 | Overall, before (10.3a close-out) | 77.64% | 79.32% | 78.47% | 1,757 | 506 | 458 |
-| **Overall, after (run C)** | **79.24%** | **79.59%** | **79.41%** | 1,763 | 462 | 452 |
+| **Overall, after (run D = run C)** | **79.24%** | **79.59%** | **79.41%** | 1,763 | 462 | 452 |
 | PERSON, before | 91.61% | 96.23% | 93.87% | 1,278 | 117 | 50 |
 | **PERSON, after** | **92.04%** | **96.69%** | **94.31%** | 1,284 | 111 | 44 |
 | LOCATION, before | 65.72% | 79.47% | 71.94% | 209 | 109 | 54 |
@@ -914,11 +915,12 @@ Aggregates only (lines above).
 
 ### Performance (NFR1)
 
-Performance workflow run `37586906584` on the story branch (head `6207bcf`): **success**. The "Verify benchmark results are non-empty" step passed.
+Performance workflow run `37641855606` on the story branch (close-out head `42b2f80`): **success**. The "Verify benchmark results are non-empty" step passed. The earlier run `37586906584` (head `6207bcf`) was green too.
 
 | Run | CPU (`machine_info`) | 2k | 3.5k | 5k | Entity detection 3k |
 |---|---|---|---|---|---|
-| Branch `37586906584` | AMD EPYC 7763 | 0.440 s | 0.761 s | 1.114 s | 0.674 s |
+| Branch `37641855606` | AMD EPYC 7763 | 0.438 s | 0.755 s | 1.110 s | 0.671 s |
+| Branch `37586906584` (before the QA fixes) | AMD EPYC 7763 | 0.440 s | 0.761 s | 1.114 s | 0.674 s |
 | `main` `37534939830` (`1703616`) | AMD EPYC 7763 | 0.452 s | 0.774 s | 1.134 s | 0.688 s |
 
 Both runs used the same CPU, so the comparison is like for like. Timings are unchanged (34 rounds; 10 for entity detection), well under the NFR1 threshold of 30 s. The new steps are linear in the number of detections: interval queries use a sorted index, not a list scan, and a refused " - <role>" trim adds at most one extra merge. A unit test bounds the widened `titles` pattern on a 50 KB adversarial line below 2 s.
