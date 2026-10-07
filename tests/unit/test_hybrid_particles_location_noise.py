@@ -461,3 +461,115 @@ class TestWrappedNameParticles:
         pattern = hd._wrap_re().pattern
         for particle in load_person_boundaries().particles:
             assert particle in pattern
+
+
+# ---------------------------------------------------------------------------
+# Slice C: LOCATION noise (AC1, AC2, fragment of AC3)
+# ---------------------------------------------------------------------------
+
+
+def _locations(detector: HybridDetector, doc: str, *spans: str) -> list[str]:
+    entities = [_at(doc, s, "LOCATION") for s in spans]
+    out = detector._merge_entities(entities, [], doc)
+    return [e.text for e in out if e.entity_type == "LOCATION"]
+
+
+class TestLocationNoise:
+    @pytest.mark.parametrize(
+        "word", ["CONFORME", "CC", "Équipe", "Constat", "SecNumCloud", "Pentest"]
+    )
+    def test_stoplist_word_is_dropped(
+        self, detector: HybridDetector, word: str
+    ) -> None:
+        doc = f"Point 3: {word} pour le projet"
+        assert _locations(detector, doc, word) == []
+
+    @pytest.mark.parametrize(
+        "place",
+        ["PARIS", "BOSTON", "ZORBAVILLE", "Zorbaville", "US", "USA", "UK", "UE", "EU"],
+    )
+    def test_real_and_unknown_places_are_kept(
+        self, detector: HybridDetector, place: str
+    ) -> None:
+        # absence from the geography dictionary is never evidence (AC1)
+        doc = f"Bureau: {place} pour le projet"
+        assert _locations(detector, doc, place) == [place]
+
+    @pytest.mark.parametrize("fragment", ["à Dr", "à M"])
+    def test_fragment_is_dropped(self, detector: HybridDetector, fragment: str) -> None:
+        doc = f"Il a parlé {fragment}. Zorbal pour le projet"
+        assert _locations(detector, doc, fragment) == []
+
+    def test_place_after_a_preposition_is_kept(self, detector: HybridDetector) -> None:
+        doc = "Il travaille à Zorbaville depuis mars"
+        assert _locations(detector, doc, "à Zorbaville") == ["à Zorbaville"]
+
+    def test_multi_word_place_with_a_stoplist_word_is_kept(
+        self, detector: HybridDetector
+    ) -> None:
+        doc = "Le siège Équipe Zorbaville pour le projet"
+        assert _locations(detector, doc, "Équipe Zorbaville") == ["Équipe Zorbaville"]
+
+    def test_stoplist_piece_cut_by_r_split_is_dropped(
+        self, detector: HybridDetector
+    ) -> None:
+        doc = "Zorbaville\nCONFORME"
+        assert _locations(detector, doc, doc) == ["Zorbaville"]
+
+    def test_company_typed_as_place_is_kept(self, detector: HybridDetector) -> None:
+        # AC3 (Lionel 2026-10-07): no lexicon, no in-document evidence, so a
+        # company typed LOCATION stays covered as it is
+        doc = "Quentrix a signé. Le cabinet Quentrix aussi."
+        place = _ent("Quentrix", "LOCATION", doc.rindex("Quentrix"))
+        org = _ent("Quentrix", "ORG", 0)
+        out = detector._merge_entities([place, org], [], doc)
+        assert sorted((e.entity_type, e.start_pos) for e in out) == [
+            ("LOCATION", doc.rindex("Quentrix")),
+            ("ORG", 0),
+        ]
+
+    def test_other_types_are_untouched(self, detector: HybridDetector) -> None:
+        doc = "CONFORME pour le projet"
+        out = detector._merge_entities([_at(doc, "CONFORME", "ORG")], [], doc)
+        assert [e.text for e in out] == ["CONFORME"]
+
+    def test_noise_log_has_no_entity_text(
+        self, detector: HybridDetector, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        log = _LogRecorder()
+        monkeypatch.setattr(hd, "logger", log)
+        doc = "Point 3: CONFORME, à Dr, Équipe"
+        _locations(detector, doc, "CONFORME", "à Dr", "Équipe")
+        events = [f for e, f in log.events if e == "location_noise_filtered"]
+        assert sorted(f["reason"] for f in events) == [
+            "allcaps_common_word",
+            "common_noun",
+            "fragment",
+        ]
+        assert all(
+            set(f) == {"reason", "action", "source", "start", "end"} for f in events
+        )
+
+
+class TestLocationNoiseResource:
+    def test_every_entry_has_a_why(self) -> None:
+        from gdpr_pseudonymizer.resources import LOCATION_NOISE_FILTER_PATH
+
+        data = yaml.safe_load(LOCATION_NOISE_FILTER_PATH.read_text(encoding="utf-8"))
+        assert data["terms"]
+        for entry in data["terms"]:
+            assert entry["term"] and entry["why"], entry
+
+    def test_stoplist_holds_no_place(self) -> None:
+        stoplist = hd.load_location_noise_filter()
+        assert not stoplist & hd._geography_folded()
+        assert not stoplist & {
+            "us",
+            "usa",
+            "uk",
+            "ue",
+            "eu",
+            "nord",
+            "sud",
+            "est",
+        }

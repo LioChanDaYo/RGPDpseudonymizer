@@ -26,6 +26,7 @@ from gdpr_pseudonymizer.nlp.regex_matcher import HSPACE, RegexMatcher
 from gdpr_pseudonymizer.nlp.spacy_detector import SpaCyDetector
 from gdpr_pseudonymizer.resources import (
     FRENCH_GEOGRAPHY_PATH,
+    LOCATION_NOISE_FILTER_PATH,
     ORG_ROLE_FILTER_PATH,
     PERSON_BOUNDARIES_PATH,
 )
@@ -176,6 +177,25 @@ def _geography_folded() -> frozenset[str]:
     for key in ("cities", "regions", "departments", "countries_and_international"):
         words |= {w.casefold() for w in data.get(key, [])}
     return frozenset(words)
+
+
+@functools.lru_cache(maxsize=1)
+def load_location_noise_filter() -> frozenset[str]:
+    """Load the LOCATION stoplist once (Story 10.3b), case-folded."""
+    with open(LOCATION_NOISE_FILTER_PATH, encoding="utf-8") as f:
+        data = yaml.safe_load(f)
+    return frozenset(e["term"].casefold() for e in data["terms"])
+
+
+# A LOCATION whose whole text is one of these is a fragment (Story 10.3b);
+# the words of FRENCH_PREPOSITION_PATTERN
+_BARE_PREPOSITIONS = frozenset({"d'", "l'", "aux", "au", "des", "du", "de", "à", "en"})
+
+
+def _is_all_caps(text: str) -> bool:
+    """At least two letters, all upper-case."""
+    letters = [c for c in text if c.isalpha()]
+    return len(letters) >= 2 and all(c.isupper() for c in letters)
 
 
 @functools.lru_cache(maxsize=1)
@@ -714,6 +734,9 @@ class HybridDetector(EntityDetector):
         # Filter out common French label words detected as entities
         merged = self._filter_label_words(merged)
 
+        # Drop common words and fragments detected as places (Story 10.3b)
+        merged = self._filter_location_noise(merged, text)
+
         # Filter out job titles / role acronyms detected as ORG (Story 10.2 AC3)
         merged = self._filter_org_roles(merged, text)
 
@@ -726,6 +749,7 @@ class HybridDetector(EntityDetector):
         if split_count:
             merged = self._filter_title_only_entities(merged)
             merged = self._filter_label_words(merged)
+            merged = self._filter_location_noise(merged, text)
             merged = self._filter_org_roles(merged, text)
             merged = self._dedup_same_type_overlaps(merged, text)
 
@@ -1334,6 +1358,55 @@ class HybridDetector(EntityDetector):
                 filtered.append(entity)
 
         return filtered
+
+    def _filter_location_noise(
+        self, entities: list[DetectedEntity], text: str | None = None
+    ) -> list[DetectedEntity]:
+        """Drop common words and fragments detected as places (Story 10.3b).
+
+        The text is normalized as the mapping key does: prepositions, then
+        titles stripped, whitespace collapsed; compared case-folded. A
+        LOCATION is dropped when the whole normalized text is a stoplist
+        entry and not a geography-dictionary place (AC1, AC2; an all-caps
+        detection only on a stoplist hit, never because it is absent from the
+        dictionary), or when it is a fragment: nothing left, or a bare
+        preposition ("à Dr", "à M"). Company names typed LOCATION are kept
+        (AC3, no lexicon, Lionel 2026-10-07).
+
+        Args:
+            entities: Merged entities
+            text: Document text (see ``_merge_entities``)
+
+        Returns:
+            Entities without the noise LOCATIONs
+        """
+        stoplist = load_location_noise_filter()
+        places = _geography_folded()
+        out: list[DetectedEntity] = []
+        for entity in entities:
+            if entity.entity_type != "LOCATION":
+                out.append(entity)
+                continue
+            raw = self._slice(entity, text)
+            norm = " ".join(strip_french_titles(strip_french_prepositions(raw)).split())
+            folded = norm.casefold()
+            reason = None
+            if not norm or raw.strip().casefold() in _BARE_PREPOSITIONS:
+                reason = "fragment"
+            elif folded in stoplist and folded not in places:
+                reason = "allcaps_common_word" if _is_all_caps(norm) else "common_noun"
+            if reason is None:
+                out.append(entity)
+                continue
+            logger.debug(
+                "location_noise_filtered",
+                reason=reason,
+                action="dropped",
+                source=entity.source,
+                start=entity.start_pos,
+                end=entity.end_pos,
+            )
+        return out
 
     def _filter_org_roles(
         self, entities: list[DetectedEntity], text: str | None = None
