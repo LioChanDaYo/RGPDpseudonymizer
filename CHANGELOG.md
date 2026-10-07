@@ -11,6 +11,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Fewer false places; names with particles or Mc/Mac kept whole; trailing roles trimmed (Story 10.3b).**
+  - **Particles.** A name is no longer cut before its particle: "M. Jean-Zorbal Le" becomes "M. Jean-Zorbal Le Quentrix", and "Mme Zorbalia van der Zorb" and "Zorbal d'Quentrac" stay whole.
+    - Recognised particles: le, la, de, du, des, d', van, von, der, den, ter, ten, Di, Da, Del, Della, Dos, and their capitalised or all-caps forms. The list is in `gdpr_pseudonymizer/resources/person_boundaries.yaml`.
+    - A particle is not taken when the next words are an organisation or a place ("… de Quentrix SA", "… de Zorbaville"), or more than one capitalised word.
+    - The hard-wrapped-name join reads the same list.
+  - **Mc/Mac.** "Mme Sarah McZorbal" is no longer cut at "Mc".
+  - **Trailing roles.** A role stuck to a name on the same line is removed: ", Responsable …", "<Name> DRH", "<Name>):", and "<Name> - Lead <Org>". The " - Lead" cut is made only when the organisation after it is detected on its own, so it is never left in clear. "Dubois, Jean-Marc" ("Last, First") is never cut.
+  - **Fewer false places.** Places whose whole text is a common word, label or jargon term are no longer offered: "CONFORME", "CC", "OK", "Équipe", "Constat", "SecNumCloud", "Pentest", … The list is in `gdpr_pseudonymizer/resources/location_noise_filter.yaml`. Fragments such as "à Dr" are dropped too.
+    - Real places are kept even when they are not in the bundled dictionary ("BOSTON"). "US", "USA", "UK", "UE" and "EU" are always kept.
+    - Company names detected as places are left as they are, so they are still pseudonymized.
+  - **Numbers.** CI accuracy run `37586903397` vs `37459114468`, same ground truth:
+    - precision 77.64% → 79.24%, recall 79.32% → 79.59%, F1 78.47% → 79.41%;
+    - PERSON F1 93.87% → 94.31%, LOCATION 71.94% → 76.98% (false places 109 → 71), ORG 46.00% (unchanged);
+    - misses 458 → 452 (PERSON 50 → 44, LOCATION 54 → 54, ORG 354 → 354), with no recall drop in any type.
+    - Held-out set (same run): F1 76.44% → 76.79%, recall unchanged (74.46%).
+  - **Upgrading: pseudonym continuity.** The mapping schema is unchanged. Keys are still the entity text with titles stripped (and prepositions, for places), whitespace collapsed.
+    - A completed name ("Jean-Zorbal Le Quentrix" instead of "Jean-Zorbal Le") gets its own key. An existing database keeps the row of the truncated form, and the full name gets its own row or is resolved by component matching. Spaces do not matter: a particle joined by a no-break space gives the same key as one joined by a plain space.
+    - A name without its trailing role ("Zorbalia" instead of "Zorbalia, Responsable") has the bare name as its key. An existing database may already hold it, in which case the person keeps the pseudonym it already has.
+    - Rows for common words and fragments offered as places in earlier versions ("CONFORME", "à Dr") stay in the database but are no longer applied.
+    - Recommendation: keep using the same mapping database across versions for consistent pseudonyms. Re-process with the previous version if byte-identical output with an old run is required.
+
 - **Names and organisations no longer run across lines, clauses or lists (Story 10.3a).**
   - **Line breaks end a name.** A detected name or organisation no longer carries the next line with it: a heading, a signature line ("Cordialement,"), or a job title under a name. The pattern-based detection joins name words only with spaces (including no-break spaces). A model detection that still crosses a line is cut into one candidate per line. Lines without a capital letter or digit are dropped, and every piece goes through the usual filters.
   - **Organisation names stop at the name.** A pattern-detected organisation is now a run of up to six capitalised words. Lower-case "de", "du", "des", "la", "le", "et", "&" are allowed between them, and "d'" or "l'" are glued to the next word. A comma, the rest of a sentence, or a leading "La société …" / "Quand la direction de …" is no longer swallowed. For example, "Institut Zorbal à Zorbaville, notamment le Dr" now gives "Institut Zorbal", and "Quentrix SA, Vardel SA" gives two organisations.

@@ -819,3 +819,110 @@ Same runner CPU, so the comparison is like for like. Timings are unchanged withi
 ### Notes
 
 - README, FAQ, docs index and tutorials are not updated in this story (Epic 10 G7 interpretation).
+
+## Particles, roles + LOCATION noise (Story 10.3b, 2026-10-07)
+
+**Detector change, same ground truth.** No annotation, scorer or held-out change (G4). The ground truth is the 10.1 one (2,215 main-corpus annotations).
+
+**What changed in the detector** (rule text and STOP R decisions: story 10.3b):
+- **Slice B, PERSON boundaries, before the merge on both detectors:**
+  - Surname particles are kept with the name: "M. Jean-Zorbal Le" becomes "M. Jean-Zorbal Le Quentrix". The particles are le, la, de, du, des, d', van, van der, von, ter, ten, Di, Da, Del, Della, Dos, …
+  - The extension is blocked when the next words are an organisation or place detection, a dictionary place, or more than one capitalised word. An all-caps surname is accepted only after a capitalised particle.
+  - "Mc"/"Mac" surnames stay whole.
+  - Trailing roles are trimmed: ", Responsable …"; " - Lead …" (only when every other capitalised word removed is covered by another detection); a role acronym ("DRH"); glued "):".
+  - The same trims run again on the final spans.
+  - The hard-wrapped-name join reads the same particle list.
+- **Slice C, LOCATION noise:**
+  - A place detection whose whole text is a common word, label or jargon term from a reviewed stoplist ("CONFORME", "CC", "Équipe", "Constat", "SecNumCloud", "Pentest", …) is dropped, unless it is a dictionary place. Absence from the dictionary is never evidence, so unknown real places such as "BOSTON" stay.
+  - Fragments such as "à Dr" are dropped.
+  - Company names detected as places are left as they are (no company lexicon): they stay pseudonymized, as places.
+
+**Sources (G1):**
+- Before: the 10.3a close-out run `37459114468`, reproduced on `main` by `37480506234` and `37534939934`.
+- Run B (Slice B, head `e6de592`): `37586332744`.
+- **After (close-out): run C `37586903397`** (Slices B + C, head `6207bcf`).
+- The per-slice split below is order-dependent (B first, then C).
+
+### Lines from `accuracy-output.txt`, verbatim
+
+Run C (`37586903397`, close-out):
+
+```
+[Overall] P=0.7924 R=0.7959 F1=0.7941 TP=1763 FP=462 FN=452 FN%=20.41 FP%=20.76
+[PERSON] P=0.9204 R=0.9669 F1=0.9431 TP=1284 FP=111 FN=44
+[LOCATION] P=0.7464 R=0.7947 F1=0.7698 TP=209 FP=71 FN=54
+[ORG] P=0.4909 R=0.4327 F1=0.4600 TP=270 FP=280 FN=354
+[HELD-OUT Overall] P=0.7926 R=0.7446 F1=0.7679 TP=172 FP=45 FN=59 FN%=25.54 FP%=20.74
+[HELD-OUT PERSON] P=0.8818 R=0.8661 F1=0.8739 TP=97 FP=13 FN=15
+[HELD-OUT LOCATION] P=0.7761 R=0.7647 F1=0.7704 TP=52 FP=15 FN=16
+[HELD-OUT ORG] P=0.5750 R=0.4510 F1=0.5055 TP=23 FP=17 FN=28
+```
+
+Run B (`37586332744`, Slice B only):
+
+```
+[Overall] P=0.7791 R=0.7959 F1=0.7874 TP=1763 FP=500 FN=452 FN%=20.41 FP%=22.09
+[PERSON] P=0.9204 R=0.9669 F1=0.9431 TP=1284 FP=111 FN=44
+[LOCATION] P=0.6572 R=0.7947 F1=0.7194 TP=209 FP=109 FN=54
+[ORG] P=0.4909 R=0.4327 F1=0.4600 TP=270 FP=280 FN=354
+[HELD-OUT Overall] P=0.7854 R=0.7446 F1=0.7644 TP=172 FP=47 FN=59 FN%=25.54 FP%=21.46
+[HELD-OUT PERSON] P=0.8818 R=0.8661 F1=0.8739 TP=97 FP=13 FN=15
+[HELD-OUT LOCATION] P=0.7536 R=0.7647 F1=0.7591 TP=52 FP=17 FN=16
+[HELD-OUT ORG] P=0.5750 R=0.4510 F1=0.5055 TP=23 FP=17 FN=28
+```
+
+### Main corpus, before / after
+
+| | Precision | Recall | F1 | TP | FP | FN |
+|---|---|---|---|---|---|---|
+| Overall, before (10.3a close-out) | 77.64% | 79.32% | 78.47% | 1,757 | 506 | 458 |
+| **Overall, after (run C)** | **79.24%** | **79.59%** | **79.41%** | 1,763 | 462 | 452 |
+| PERSON, before | 91.61% | 96.23% | 93.87% | 1,278 | 117 | 50 |
+| **PERSON, after** | **92.04%** | **96.69%** | **94.31%** | 1,284 | 111 | 44 |
+| LOCATION, before | 65.72% | 79.47% | 71.94% | 209 | 109 | 54 |
+| **LOCATION, after** | **74.64%** | **79.47%** | **76.98%** | 209 | 71 | 54 |
+| ORG, before | 49.09% | 43.27% | 46.00% | 270 | 280 | 354 |
+| **ORG, after** | **49.09%** | **43.27%** | **46.00%** | 270 | 280 | 354 |
+
+**Per slice** (ΔTP / ΔFP / ΔFN):
+
+| Slice | Runs | PERSON | LOCATION | ORG |
+|---|---|---|---|---|
+| B: PERSON boundaries | `37459114468` → `37586332744` | +6 / −6 / −6 | 0 / 0 / 0 | 0 / 0 / 0 |
+| C: LOCATION noise | `37586332744` → `37586903397` | 0 / 0 / 0 | 0 / −38 / 0 | 0 / 0 / 0 |
+
+### Recall (G3, strict)
+
+FN versus the 10.3a close-out: Overall 458 → 452, PERSON 50 → 44, LOCATION 54 → 54 (unchanged), ORG 354 → 354. There is no FN increase in any type after either slice.
+
+**Coverage, main corpus** (local check on a dump that reproduces run C exactly; details in the story):
+- No annotation matched before becomes a miss.
+- No annotation loses its cover by its own type (level 2: 0).
+- No annotation loses its last cover of any type (level 2b: 0).
+- The characters no longer covered are those of the dropped noise places, the trimmed role words ("Lead", "DRH", "DSI") and two title letters ("M."). Lionel signed off the role-trim exception at STOP R.
+
+### Held-out set (G5)
+
+Aggregates only (lines above).
+- **Versus the 10.3a close-out:**
+  - Recall is unchanged: FN 59 (PERSON 15, LOCATION 16, ORG 28).
+  - Precision is up: FP 47 → 45 (LOCATION 17 → 15), so P 78.54% → 79.26% and F1 76.44% → 76.79%.
+  - No held-out loss: no overfitting flag.
+- **Versus run H (10.2):** FN 70 → 59 (ORG 34 → 28).
+- **Versus 10.1 (`37189862679`):** FN 64 → 59 (PERSON 21 → 15, LOCATION 15 → 16, ORG 28 → 28).
+- Small-sample note: held-out PERSON 112, LOCATION 68, ORG 51 annotations, so 1 ORG FN ≈ 2 points of ORG recall.
+
+### Performance (NFR1)
+
+Performance workflow run `37586906584` on the story branch (head `6207bcf`): **success**. The "Verify benchmark results are non-empty" step passed.
+
+| Run | CPU (`machine_info`) | 2k | 3.5k | 5k | Entity detection 3k |
+|---|---|---|---|---|---|
+| Branch `37586906584` | AMD EPYC 7763 | 0.440 s | 0.761 s | 1.114 s | 0.674 s |
+| `main` `37534939830` (`1703616`) | AMD EPYC 7763 | 0.452 s | 0.774 s | 1.134 s | 0.688 s |
+
+Both runs used the same CPU, so the comparison is like for like. Timings are unchanged (34 rounds; 10 for entity detection), well under the NFR1 threshold of 30 s. The new steps are linear in the number of detections: interval queries use a sorted index, not a list scan, and a refused " - <role>" trim adds at most one extra merge. A unit test bounds the widened `titles` pattern on a 50 KB adversarial line below 2 s.
+
+### Notes
+
+- README, FAQ, docs index and tutorials are not updated in this story (Epic 10 G7 interpretation).
