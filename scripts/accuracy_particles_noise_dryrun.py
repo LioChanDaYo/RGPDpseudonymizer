@@ -104,16 +104,11 @@ ROLE_WORDS = [
 STOPLIST: dict[str, str] = {
     # document status and label words (headers, checklists, e-mail headers)
     "conforme": "status word in audit/compliance checklists",
-    "non conforme": "status phrase in audit/compliance checklists",
-    "non-conforme": "status word, hyphenated spelling",
     "validé": "status word",
     "validée": "status word (feminine)",
     "ok": "status word",
-    "na": "status abbreviation (not applicable)",
-    "n/a": "status abbreviation (not applicable)",
     "cc": "e-mail header label (copie carbone)",
     "cci": "e-mail header label (copie carbone invisible)",
-    "pj": "e-mail label (pièce jointe)",
     "objet": "e-mail / letter header label",
     "urgent": "priority label",
     "confidentiel": "classification label",
@@ -131,9 +126,7 @@ STOPLIST: dict[str, str] = {
     "recommandation": "common noun used as a heading",
     "recommandations": "common noun used as a heading (plural)",
     "conclusion": "common noun used as a heading",
-    "introduction": "common noun used as a heading",
     "résumé": "common noun used as a heading",
-    "sommaire": "common noun used as a heading",
     "budget": "common noun used as a heading/label",
     "planning": "common noun used as a heading/label",
     "calendrier": "common noun used as a heading/label",
@@ -141,10 +134,7 @@ STOPLIST: dict[str, str] = {
     "actions": "common noun used as a heading/label (plural)",
     "risque": "common noun used as a heading/label",
     "risques": "common noun used as a heading/label (plural)",
-    "priorité": "common noun used as a heading/label",
     "décision": "common noun used as a heading/label",
-    "décisions": "common noun used as a heading/label (plural)",
-    "remarque": "common noun used as a heading/label",
     "commentaire": "common noun used as a heading/label",
     "résultat": "common noun used as a heading/label",
     "résultats": "common noun used as a heading/label (plural)",
@@ -154,9 +144,7 @@ STOPLIST: dict[str, str] = {
     "rapport": "common noun used as a heading/label",
     "projet": "common noun used as a heading/label",
     "phase": "common noun used as a heading/label",
-    "étape": "common noun used as a heading/label",
     "jalon": "project-management noun (milestone)",
-    "livrable": "project-management noun (deliverable)",
     "livrables": "project-management noun (plural)",
     "périmètre": "common noun used as a heading/label",
     "participants": "common noun used as a heading/label",
@@ -170,12 +158,8 @@ STOPLIST: dict[str, str] = {
     "cloud": "IT jargon",
     "soc": "security jargon (security operations centre)",
     "siem": "security jargon",
-    "sso": "IT jargon (single sign-on)",
-    "vpn": "IT jargon",
     "api": "IT jargon",
-    "saas": "IT jargon",
     "devops": "IT jargon",
-    "firewall": "IT jargon",
     "firewalls": "IT jargon (plural)",
     "backup": "IT jargon",
     "backups": "IT jargon (plural)",
@@ -1100,6 +1084,25 @@ def main() -> None:  # noqa: C901
                 late_role={"role": True, "dash": True, "acr": True, "punct": True},
             ),
         ),
+        (
+            "FINAL Slice B (decided): B + R-ROLE-LATE + R-WJP, C2 kept",
+            dict(
+                b=b_all,
+                rx="mc",
+                late_role={"role": True, "dash": True, "acr": True, "punct": True},
+                wjp=True,
+            ),
+        ),
+        (
+            "FINAL (decided): Slice B + C (stoplist + fragment), C2 kept",
+            dict(
+                b=b_all,
+                rx="mc",
+                c={"stop": True, "frag": True},
+                late_role={"role": True, "dash": True, "acr": True, "punct": True},
+                wjp=True,
+            ),
+        ),
         ("ALL: B + C retype-(i)", dict(b=b_all, rx="mc", c=c_ret)),
         ("ALL: B + C retype-(i) + C2 off", dict(b=b_all, rx="mc", c=c_ret, c2off=True)),
         ("ALL: B + C drop + C2 off", dict(b=b_all, rx="mc", c=c_def, c2off=True)),
@@ -1119,6 +1122,44 @@ def main() -> None:  # noqa: C901
         for f in FIRES:
             log.append(f"    FIRE {f[0]} [{f[1]}] src={f[2]} {f[3]!r} -> {f[4]!r}")
         summary.append(res)
+
+    # final detection sets, for the local dump check of each slice
+    for tag, kw in (
+        (
+            "final_b",
+            dict(
+                b=b_all,
+                rx="mc",
+                late_role={"role": True, "dash": True, "acr": True, "punct": True},
+                wjp=True,
+            ),
+        ),
+        (
+            "final_all",
+            dict(
+                b=b_all,
+                rx="mc",
+                c={"stop": True, "frag": True},
+                late_role={"role": True, "dash": True, "acr": True, "punct": True},
+                wjp=True,
+            ),
+        ),
+    ):
+        dets = compose(**kw)  # type: ignore[arg-type]
+        (out_dir / f"{tag}_dets.json").write_text(
+            json.dumps(
+                {
+                    n: [
+                        {**ro.to_json(e), "is_ambiguous": e.is_ambiguous}
+                        for e in sorted(v, key=lambda x: (x.start_pos, x.end_pos))
+                    ]
+                    for n, v in dets.items()
+                },
+                ensure_ascii=False,
+                indent=0,
+            ),
+            encoding="utf-8",
+        )
 
     # --- summary -------------------------------------------------------------
     print(log[0])
