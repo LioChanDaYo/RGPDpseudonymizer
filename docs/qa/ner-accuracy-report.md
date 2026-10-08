@@ -928,3 +928,55 @@ Both runs used the same CPU, so the comparison is like for like. Timings are unc
 ### Notes
 
 - README, FAQ, docs index and tutorials are not updated in this story (Epic 10 G7 interpretation).
+
+## Confidence ranges (Story 10.6 PR A, 2026-10-09)
+
+**Benchmark reporting change, same detector and ground truth.** No detector, annotation, scorer or held-out change (G4): `match_entities`, `_match_key` and the P/R/F1 formulas are untouched, and the existing lines keep their exact format. No headline number changes.
+
+**Method** (`tests/accuracy/bootstrap.py`):
+- **Unit = document.** Entities in one document are not independent, so the bootstrap resamples whole documents, with replacement: 25 main-corpus documents, 6 held-out documents.
+- Each resample re-sums TP/FP/FN over the drawn documents and recomputes P, R and F1 with the scorer's own `compute_metrics`. One draw of document indices per resample serves every label.
+- **Percentile interval**, 95%: with the defined values sorted, the bounds are the 2.5% and 97.5% order statistics (`v[250]` and `v[9749]` for 10,000 values), no interpolation.
+- **10,000 resamples, seed 20261008**, fixed and printed on every line, so the output is deterministic.
+- **Undefined metrics:** a resample with no denominator for a metric (P: TP+FP = 0; R: TP+FN = 0; F1: P or R undefined) is left out of that metric's distribution and counted in `undef_P`, `undef_R`, `undef_F1`. A metric with no defined resample prints `[n/a]`. In this run every count is 0.
+- Every new line starts with `[CI95 `, so the established extractions (`grep '\[Overall\]'`, `^\[HELD-OUT`) match exactly the lines they matched before.
+
+**Sources (G1):**
+- **CI accuracy run `37856056081`** (workflow_dispatch on `story/10.6-pr-a-confidence-ranges`, head `49a5338`).
+- Baseline: `main` push run `37678069251` (`bab6717`, the 10.3b merge) and the 10.3b close-out run D `37641796495`.
+
+### Lines from `accuracy-output.txt`, verbatim
+
+Run `37856056081`:
+
+```
+[Overall] P=0.7924 R=0.7959 F1=0.7941 TP=1763 FP=462 FN=452 FN%=20.41 FP%=20.76
+[PERSON] P=0.9204 R=0.9669 F1=0.9431 TP=1284 FP=111 FN=44
+[LOCATION] P=0.7464 R=0.7947 F1=0.7698 TP=209 FP=71 FN=54
+[ORG] P=0.4909 R=0.4327 F1=0.4600 TP=270 FP=280 FN=354
+[HELD-OUT Overall] P=0.7926 R=0.7446 F1=0.7679 TP=172 FP=45 FN=59 FN%=25.54 FP%=20.74
+[HELD-OUT PERSON] P=0.8818 R=0.8661 F1=0.8739 TP=97 FP=13 FN=15
+[HELD-OUT LOCATION] P=0.7761 R=0.7647 F1=0.7704 TP=52 FP=15 FN=16
+[HELD-OUT ORG] P=0.5750 R=0.4510 F1=0.5055 TP=23 FP=17 FN=28
+[CI95 Overall] P=[0.7667,0.8265] R=[0.7441,0.8376] F1=[0.7634,0.8264] unit=document docs=25 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[CI95 PERSON] P=[0.9094,0.9343] R=[0.9415,0.9839] F1=[0.9318,0.9538] unit=document docs=25 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[CI95 LOCATION] P=[0.6495,0.8249] R=[0.7473,0.8485] F1=[0.7086,0.8220] unit=document docs=25 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[CI95 ORG] P=[0.4286,0.5866] R=[0.3436,0.5341] F1=[0.3894,0.5506] unit=document docs=25 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[CI95 HELD-OUT Overall] P=[0.7232,0.8614] R=[0.7098,0.7877] F1=[0.7222,0.8177] unit=document docs=6 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[CI95 HELD-OUT PERSON] P=[0.8145,0.9519] R=[0.8000,0.9355] F1=[0.8462,0.9118] unit=document docs=6 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[CI95 HELD-OUT LOCATION] P=[0.6719,0.8939] R=[0.6866,0.8281] F1=[0.6870,0.8516] unit=document docs=6 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[CI95 HELD-OUT ORG] P=[0.4255,0.7500] R=[0.3191,0.5714] F1=[0.3704,0.6429] unit=document docs=6 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+```
+
+The eight existing lines are **byte-identical** to `37678069251` (and so to run D `37641796495`): `diff` of the lines extracted with `^\[(Overall|PERSON|LOCATION|ORG)\] ` and `^\[HELD-OUT (Overall|PERSON|LOCATION|ORG)\] ` is empty, and the unanchored `[Overall]`/`[PERSON]`/`[LOCATION]`/`[ORG]` and `[HELD-OUT` counts are unchanged.
+
+### Reading the ranges
+
+- A range shows how far a figure could move on another set of documents like these. Its width reflects how few documents there are as much as the detector.
+- **The held-out set has 6 documents, so its ranges are wide.** Held-out ORG F1, for example, spans 0.3704 to 0.6429. A held-out change of a few points between two stories is inside its own range.
+- The ranges are not centred on the point value, and they are not printed with it; the point value stays in the existing line.
+- **Story-to-story comparisons use the paired delta** (AC3), not two overlapping ranges. The artifact now also holds `accuracy-per-document.json` (main-corpus per-document, per-type TP/FP/FN; nothing per document for the held-out set). `scripts/accuracy_paired_delta.py delta <baseline.json> <candidate.json>` resamples the same documents in both runs and prints one `[PAIRED-DELTA …]` line per label; a gain is "outside the paired range" when the range excludes 0 (`excludes_0=yes`). From this PR's merge on, a detector story that reports a precision or F1 gain states this. `recompute <run.json> --lines <accuracy-output.txt>` rebuilds the four main-corpus `[CI95 …]` lines from the JSON (QA's G2 check).
+
+### Notes
+
+- README, FAQ, docs index and tutorials are not updated in this story (Epic 10 G7 interpretation).
