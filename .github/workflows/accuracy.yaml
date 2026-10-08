@@ -64,6 +64,7 @@ jobs:
         env:
           OMP_NUM_THREADS: 1
           PYTHONUTF8: 1
+          ACCURACY_PER_DOC_JSON: accuracy-per-document.json
         # pipefail: without it `| tee` reports success even when pytest crashes.
         # -p no:pytest-qt: the accuracy tests need no Qt, and pytest-qt aborts
         # collection when no Qt binding is installed.
@@ -80,4 +81,5 @@ jobs:
           path: |
             accuracy-results.xml
             accuracy-output.txt
+            accuracy-per-document.json
           retention-days: 30
