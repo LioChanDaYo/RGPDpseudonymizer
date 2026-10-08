@@ -3,7 +3,7 @@
 **Epic Goal:** Raise detection precision and make the accuracy benchmark trustworthy with local, deterministic changes to the hybrid detector and the ground-truth corpus, without lowering recall. The user-facing value is fewer false entities to reject during the (mandatory) validation step and a benchmark whose numbers can be believed.
 
 **Target Release:** v2.3.0 candidate. **No release is part of this epic.** v2.3.0 ships only on Lionel's explicit go, through a separate release story.
-**Duration:** Estimated 5-7.5 weeks (10.1 is annotation-labor-bound; 10.3 split into 10.3a and 10.3b, and 10.3c added, Lionel, 2026-10-06; 10.5 added, Lionel, 2026-10-07; 10.3b re-estimated after its STOP R, 2026-10-07); 10.6 runs in parallel (2-3 weeks elapsed) and close-out waits for its sealed set
+**Duration:** Estimated 5-7.5 weeks (10.1 is annotation-labor-bound; 10.3 split into 10.3a and 10.3b, and 10.3c added, Lionel, 2026-10-06; 10.5 added, Lionel, 2026-10-07; 10.3b re-estimated after its STOP R, 2026-10-07); 10.6 runs in parallel (2-3 weeks elapsed) and close-out waits for its adjudication after 10.4 merges, then its seal and one scored run
 **Predecessor:** v2.2.0 + accuracy scorer fix (#77), commit `fceef65`
 **Successor:** Epic 9 (v3.0) starts from this epic's merged close-out baseline.
 
@@ -123,7 +123,7 @@ These notes sit outside the normative Gates block above and do not change its te
 | 10.5: DB Init Safety (data-layer hardening, added by Lionel, 2026-10-07) | LOW | 0.5 week | PR #83 finding | Draft |
 | 10.6: Final-Exam Set and Confidence Ranges (added by Lionel, 2026-10-07) | HIGH | 2-3 weeks elapsed, in parallel | Overfitting check, close-out evidence | Draft |
 
-**Total Estimated Duration:** 5-7.5 weeks; 10.6 runs in parallel (2-3 weeks elapsed) and close-out waits for its sealed set
+**Total Estimated Duration:** 5-7.5 weeks; 10.6 runs in parallel (2-3 weeks elapsed) and close-out waits for its adjudication after 10.4 merges, then its seal and one scored run
 
 ---
 
@@ -467,7 +467,7 @@ Not an AC. The 10.4 story decides whether to take each part in or leave it to la
 
 **Priority:** HIGH. It is the evidence for the Epic 10 close-out number.
 **Change type:** Benchmark-only (G4). No file under `gdpr_pseudonymizer/` changes. Two PRs: PR A (confidence ranges, scorer-side reporting) and PR B (final-exam set, sealing, CI job, leakage guard).
-**Ordering:** outside the detector chain, like 10.5. PR A should land early, so 10.3c and 10.4 report ranges. PR B's set must be sealed before 10.4 merges, and must not influence 10.3c or 10.4. The set is scored exactly once, at Epic 10 close-out, after 10.4 merges.
+**Ordering:** outside the detector chain, like 10.5. PR A should land early, so 10.3c and 10.4 report ranges. PR B's 30 documents are frozen, and both model annotations are done, before 10.4 merges. They must not influence 10.3c or 10.4. Lionel adjudicates after 10.4 merges. The final archive is then sealed and scored exactly once, at Epic 10 close-out. Close-out waits for his adjudication.
 
 ### Context
 
@@ -496,27 +496,34 @@ This story adds a second, larger, blind "final exam" set, written by a different
    - A script computes the paired bootstrap range of the delta between two runs (same documents, resampled together).
    - From PR A's merge on, a detector story that reports a precision or F1 gain states whether that gain is outside the paired range.
    - Held-out has no paired delta, because that would need per-document held-out output.
-   - *(PO question Q8: keep or drop AC3.)*
 
 **PR B: final-exam set**
 
 4. **AC4 — Brief and author.**
-   - The set has 20 to 30 synthetic French documents (count chosen by Lionel, Q2). The formats are messier than the main corpus: email threads with quoted replies, PDF-style hard line breaks, tables flattened to text, mixed case, headers and signatures.
-   - The author is **not** a rule-writing agent: GPT via `codex exec`, Lionel, or a mix (Lionel's choice, Q1).
-   - The author brief lists formats and hard-case categories. It contains no GUIDELINES text and no corpus or held-out text. Lionel approves the brief before generation.
+   - The set has 30 synthetic French documents (Lionel, Q2). The formats are messier than the main corpus: email threads with quoted replies, PDF-style hard line breaks, tables flattened to text, mixed case, headers and signatures.
+   - 15 documents are planted with the known hard-case categories and 15 are natural, with no planted case (Lionel, Q6). The half each document belongs to is recorded with the set, so AC8 can score each half.
+   - The author is GPT via `codex exec` (Lionel, Q1). It is **not** a rule-writing agent.
+   - The author brief lists formats and hard-case categories. It names categories only, never corpus examples. It contains no GUIDELINES text and no corpus or held-out text. Lionel approves the brief before any generation.
    - No real public figures and no real people. No user data, no copy of real records (product constraint 4).
    - An annotator who meets a real person or public figure flags it, and the name is replaced consistently before freeze.
 5. **AC5 — Double blind annotation, with agreement reported.**
-   - Two independent annotations are made under `tests/test_corpus/annotations/GUIDELINES.md`. Neither is pre-annotated by the detector or by any auto-annotator. Who annotates is Lionel's choice (Q3).
+   - Two independent annotations are made under `tests/test_corpus/annotations/GUIDELINES.md` (Lionel, Q3):
+     - Annotator A is GPT via `codex exec`.
+     - Annotator B is Kimi (Moonshot), or Gemini if Kimi access fails.
+     - Neither sees the other's output. Neither is pre-annotated by the detector or by any auto-annotator.
+     - Lionel does no hand annotation. Claude agents do not annotate, because they write the rules.
    - Inter-annotator agreement is reported per type as pairwise span F1. It uses the scorer's own matching (exact text and type after `_match_key`, one-to-one). Disagreements are counted by class.
-   - Disagreements are adjudicated under GUIDELINES, and the adjudication is logged. A case GUIDELINES does not cover goes to Lionel as an amendment, as in 10.1.
-   - The report holds only agreement figures, counts and classes, never entity text.
-6. **AC6 — Sealed and frozen.**
+   - Lionel adjudicates the disagreements only, under GUIDELINES, after 10.4 merges (Q4). The adjudication is logged. A case GUIDELINES does not cover goes to Lionel as an amendment, as in 10.1.
+   - **Spot-check:** Lionel also checks about 3 documents where the two annotations agree, to catch errors both models share. The finding (the number of shared errors, by class) is reported next to the agreement figures.
+   - The report holds only agreement figures, spot-check counts and classes, never entity text.
+6. **AC6 — Frozen, adjudicated, then sealed.**
    - Authoring and annotation happen in a sealed workspace outside the repo. Orchestrating agents handle only paths, hashes and counts, and never print document or annotation content.
-   - At freeze, the set (documents plus adjudicated annotations) is sealed: an encrypted archive is committed under its own folder (e.g. `tests/test_corpus/final_exam/`), and its sha256 is recorded in this story.
-   - The decryption key lives only in a GitHub Actions environment `final-exam`, with Lionel as required reviewer. No agent holds it.
+   - **Freeze, before 10.4 merges:** once both model annotations are done, the 30 documents and the two annotations are frozen. Their sha256 values are recorded in this story, and the material is kept encrypted.
+   - **Adjudication, after 10.4 merges:** Lionel adjudicates and spot-checks (AC5). Any adjudication view shown to him is produced by a deterministic local script. Agents run that script without printing or reading its output.
+   - **Seal:** the final archive (documents plus adjudicated annotations) is encrypted and committed under its own folder (e.g. `tests/test_corpus/final_exam/`), and its sha256 is recorded in this story.
+   - **Key:** Lionel runs the encryption at freeze and the sealing command himself, so no agent ever holds the key. The decryption key lives only in the GitHub Actions environment `final-exam`, with Lionel as required reviewer.
    - The folder is outside every path the regular accuracy job loads, and outside `accuracy.yaml`'s push `paths`.
-   - The storage choice is Lionel's (Q5); plain text plus rules alone is the weaker fallback.
+   - Storage: an encrypted archive in the repo (Lionel, Q5).
 7. **AC7 — Leakage guard covers the final exam without decrypting it.**
    - At sealing, a hash list of the final-exam-only strings is committed. These are the strings, normalized as `_match_key` does, that do not occur in the main-corpus text. They are stored as sha256 with a fixed salt, never as text.
    - `tests/unit/test_held_out_leakage.py`, or a sibling test, checks `gdpr_pseudonymizer/resources/**` and `tests/unit/**` against that list on every CI run, and reports paths and hashes only.
@@ -524,9 +531,10 @@ This story adds a second, larger, blind "final exam" set, written by a different
 8. **AC8 — Scored exactly once, and enforced.**
    - **Trigger:** the final exam runs only on a manual `accuracy.yaml` dispatch whose `final_exam` input equals `final exam`.
    - **Job:** the run uses a job bound to the `final-exam` environment, so Lionel must approve it. The job checks the archive sha256 against the recorded value, decrypts, runs the usual suite and appends `[FINAL-EXAM Overall]`/`[FINAL-EXAM PERSON]`/`[FINAL-EXAM LOCATION]`/`[FINAL-EXAM ORG]` lines plus their CI95 lines to `accuracy-output.txt` in the `accuracy-results` artifact. The regular job is skipped in that run, so there is one `accuracy-results`.
+   - **Per half (Q6):** the same Overall and per-type lines, each with its CI95 line, are also printed for each half: `[FINAL-EXAM PLANTED …]` for the 15 planted documents and `[FINAL-EXAM NATURAL …]` for the 15 natural ones.
    - **Why this shape:** the close-out evidence must be a G1 run as the Gates block defines it (an `accuracy.yaml` run, cited by ID, lines pasted from `accuracy-results`). With this shape G1 and G2 apply word for word. This is why the job lives inside `accuracy.yaml` rather than in a separate workflow.
    - **Ledger:** a committed ledger (e.g. `tests/test_corpus/final_exam/RUNS.md`) records the one scored run: run ID, commit, date, and Lionel's approval. A re-run is allowed only for an infrastructure failure at the **same** commit, with the reason recorded. A run at a later commit is a second look, and it is forbidden within Epic 10.
-   - **Numbers are never inputs:** final-exam numbers are never used for a decision or for tuning. No agent opens, lists, decrypts or greps the set. From PR B on, every later story's Dev Notes restate this, next to the held-out isolation rule.
+   - **Numbers are never inputs:** final-exam numbers are never used for a decision or for tuning. No agent opens, lists, decrypts or greps the set. From the start of 10.6 authoring, every later story's Dev Notes restate this, next to the held-out isolation rule.
    - **Before the real run:** QA proves the job on a **dummy** sealed fixture (invented text, separate key) and never on the real set.
 9. **AC9 — Close-out reporting and the public number.**
    - At Epic 10 close-out (10.4 merged), the QA report and the epic Close-Out Record carry the main, held-out and final-exam figures, each with its range. The lines are pasted verbatim, because `accuracy-results` artifacts are kept 30 days (`accuracy.yaml:83`).
@@ -545,43 +553,47 @@ This story adds a second, larger, blind "final exam" set, written by a different
 - `.github/workflows/accuracy.yaml`: `final_exam` dispatch input, environment-bound job, artifact contents
 - `tests/unit/test_held_out_leakage.py` (or a sibling): final-exam hash list
 - `tests/test_corpus/final_exam/` (new): sealed archive, sha256, hash list, `RUNS.md` ledger, README
-- `scripts/`: sealing script (uses the existing `cryptography` dependency) and the paired-delta script (AC3)
+- `scripts/`: sealing script (uses the existing `cryptography` dependency), the paired-delta script (AC3) and the deterministic adjudication-view script (AC6)
 - `docs/qa/ner-accuracy-report.md`: ranges from PR A on; final-exam section at close-out
 
-### Estimated Effort: 2-3 weeks elapsed (annotation is the long pole), in parallel with 10.3c and 10.4
+### Estimated Effort: 2-3 weeks elapsed (adjudication waits for 10.4 to merge), in parallel with 10.3c and 10.4
 
 - PR A: about 2-3 days (ranges, JSON, paired-delta script, G1 run, QA).
-- PR B, tooling: about 2-3 days (sealing, workflow job, ledger, guard, dummy-fixture proof).
-- PR B, set: authoring 1-2 days. At held-out density (231 entities in 6 documents, about 38 per document), 20 documents means about 770 entities per annotator and 30 documents about 1,150, annotated twice and then adjudicated. Calendar time depends on who annotates (Q3).
-- Close-out: one scored run, then the reporting in AC9.
+- PR B, tooling: about 2-3 days (sealing, workflow job, ledger, guard, adjudication-view script, dummy-fixture proof).
+- PR B, set: GPT writes the 30 documents from the approved brief. GPT and Kimi (or Gemini) then annotate them independently. This is machine time, not Lionel's.
+- Lionel's time: after 10.4 merges, he adjudicates the disagreements and spot-checks about 3 agreed documents (AC5). Its size depends on the agreement rate, so it is not estimated here.
+- Close-out: Lionel's adjudication, the seal, one scored run, then the reporting in AC9.
 
-### Decisions for Lionel at this story's STOP (before any authoring)
+### Decisions Recorded (Lionel, 2026-10-08)
 
-- **Q1 — Author.** GPT via `codex exec`, Lionel, or a mix.
-  - *PM recommendation:* GPT via `codex exec` writes the texts from a brief Lionel approves. It is a different model family from the rule writers and costs Lionel no writing time.
-- **Q2 — Document count, 20 or 30.**
-  - At held-out density, 20 documents give about 170 ORG annotations, so 1 ORG miss is about 0.6 recall point. 30 documents give about 255, or about 0.4 point. Today's held-out set is about 2 points per ORG miss.
-  - These are projections from held-out averages, not counts.
-  - *PM recommendation:* 30, if annotation time allows, since annotation is the cost.
-- **Q3 — Annotators and adjudicator.**
-  - (a) GPT via `codex exec` as annotator A and Lionel as annotator B, with Lionel adjudicating.
-  - (b) Two GPT annotations with different prompts. Independence is weak, so the agreement figure is less meaningful.
-  - (c) Lionel plus a second human.
-  - Claude agents are excluded: they write the rules.
-  - *PM recommendation:* (a).
-- **Q4 — Lionel's exposure.**
-  - If Lionel reads, annotates or adjudicates the texts, he will also sit at the 10.3c and 10.4 STOPs having seen them.
-  - Proposed rule: Lionel's STOP decisions never cite or draw on a final-exam case, and this is recorded in the story.
-  - Alternatively, Lionel's annotation work is scheduled after 10.4's STOP R.
-- **Q5 — Storage.**
-  - *PM recommendation:* encrypted archive in the repo, with the key in a Lionel-approved CI environment.
-  - Fallback: a plain folder protected by rules only. That is the same protection the held-out set has today, which this story exists to improve on.
-- **Q6 — Seeding.**
-  - *PM recommendation:* half the documents are seeded with known hard-case categories (particles, Mc/Mac, greetings, role acronyms, foreign places, ORG plus country). The other half are unseeded "natural" documents.
-  - The final-exam lines then report both halves, so known-problem progress and general behaviour are visible separately.
-- **Q7 — After Epic 10.** Once scored, the set is spent for Epic 10. For Epic 9, either it becomes a second held-out set (aggregate-only access, no longer blind), or it is retired and a new final exam is written for Epic 9's close-out.
-- **Q8 — AC3 (paired delta).** Keep it (recommended: it is what stops a +0.3 F1 being called a win) or drop it to shrink PR A.
-- **Q9 — Public number.** Not decided now. It is Lionel's call at close-out (AC9).
+- **Q1 — Author:** GPT via `codex exec`, from a brief Lionel approves before any generation.
+- **Q2 — Document count:** 30.
+  - The recommendation at the time was 20, made while Lionel was going to annotate by hand. Lionel kept 30 after Q3 was redone.
+  - At held-out density, 30 documents give about 255 ORG annotations, so 1 ORG miss is about 0.4 recall point, against about 2 points on today's held-out set. This is a projection from held-out averages, not a count.
+- **Q3 — Annotators and adjudicator:**
+  - *Superseded (first answer):* ~~GPT via `codex exec` as annotator A and Lionel annotating by hand as annotator B, with Lionel adjudicating.~~
+  - *Redone, and this supersedes the first answer:* Lionel had understood "GPT-assisted" as confirming edge cases only, not annotating by hand.
+    - Annotator A is GPT via `codex exec`. Annotator B is Kimi (Moonshot), with Gemini as the fallback if Kimi access fails. The two annotate independently.
+    - Lionel adjudicates the disagreements only. He also spot-checks about 3 documents where the two agreed, to catch shared errors. The spot-check finding (the number of shared errors, by class, no entity text) is reported next to the agreement figures.
+    - Lionel does no hand annotation. Claude agents stay excluded, because they write the rules.
+- **Q4 — Lionel's exposure:**
+  - Lionel sees no final-exam content until 10.4 has merged.
+  - The documents are frozen, and both model annotations are done, before 10.4 merges. Their sha256 values are recorded and the material is kept encrypted.
+  - Lionel's adjudication and spot-check happen after 10.4 merges. The final archive (documents plus adjudicated annotations) is then sealed and scored once.
+  - Close-out waits for his adjudication.
+- **Q5 — Storage:**
+  - An encrypted archive in the repo, with the key only in the GitHub environment `final-exam`, where Lionel is the required reviewer.
+  - Lionel runs the sealing command himself, so no agent ever holds the key.
+  - Any adjudication view shown to Lionel is produced by a deterministic local script. Agents run it without printing or reading its content.
+- **Q6 — Seeding:**
+  - 15 documents are planted with the known hard-case categories (particles, Mc/Mac, greetings, role acronyms, foreign places, ORG plus country). The brief names the categories only, never corpus examples. The other 15 are natural.
+  - The final-exam output reports the overall figures and each half, with CI95 (AC8).
+- **Q7 — After Epic 10:**
+  - Once scored, the exam becomes a second held-out set (aggregate-only, never opened). That takes the held-out pool from 6 to 36 documents.
+  - Epic 9 writes a new blind final exam for its own close-out.
+  - This records intent for Epic 9. It changes nothing in Epic 10.
+- **Q8 — AC3 (paired delta):** kept.
+- **Q9 — Public number:** still open. Lionel decides at close-out (AC9).
 
 ---
 
@@ -595,14 +607,14 @@ Story 10.3b (Particles, roles, LOC noise) --- Week 4.5-5  ---  baseline = 10.3a 
 Story 10.3c (Type-aware exact match)      --- Week 5.5    ---  baseline = 10.3b merged
 Story 10.4 (Greetings + org+country)      --- Week 6-6.5  ---  baseline = 10.3c merged
 Story 10.5 (DB init safety)               --- 0.5 week, any slot --- no accuracy baseline (data layer)
-Story 10.6 (Final-exam set + ranges)      --- parallel ---  PR A early; set sealed before 10.4 merges; scored once after 10.4
+Story 10.6 (Final-exam set + ranges)      --- parallel ---  PR A early; frozen + model-annotated before 10.4 merges; adjudicated after 10.4, then sealed and scored once
 ```
 
 **Strictly sequential:** 10.1 → 10.2 → 10.3a → 10.3b → 10.3c → 10.4. Each story's baseline is the previous story's merged close-out G1 run. No parallel detector stories: overlapping changes would make G3/G4 attribution impossible.
 
 **Story 10.5** is outside this chain: it changes no detection, so it has no accuracy baseline and can merge at any point without affecting G3/G4 attribution.
 
-**Story 10.6** is outside the detector chain too. PR A (ranges) changes no metric line and should land before 10.3c, so 10.3c and 10.4 report ranges. PR B's set must be sealed before 10.4 merges, and nothing in 10.3c or 10.4 may draw on it. The final exam is scored exactly once, after 10.4 merges, and that run is part of the Epic 10 close-out evidence.
+**Story 10.6** is outside the detector chain too. PR A (ranges) changes no metric line and should land before 10.3c, so 10.3c and 10.4 report ranges. PR B's documents are frozen, and both model annotations are done, before 10.4 merges. Nothing in 10.3c or 10.4 may draw on them. Lionel adjudicates after 10.4 merges, and close-out waits for his adjudication. The final archive is then sealed and scored exactly once, and that run is part of the Epic 10 close-out evidence.
 
 **Epic close-out baseline:** the 10.4 merged G1 run (main + held-out) is the baseline Epic 9 starts from, together with the one final-exam run (10.6) and its ranges.
 
@@ -629,11 +641,11 @@ Story 10.6 (Final-exam set + ranges)      --- parallel ---  PR A early; set seal
 | 10.3c offers more candidates of a second type (e.g. PERSON on hyphenated place names) | MEDIUM | LOW | Both candidates reach mandatory validation, flagged ambiguous; FP reported per type (10.3c AC3) |
 | Unsupported accuracy claims in docs | LOW | HIGH | G1/G2/G7; the arithmetic estimate is never published |
 | Pseudonym continuity across versions: span changes in 10.2, 10.3a, 10.3b, 10.3c and 10.4 re-key mapping entries (normalized text), so a user keeping a v2.2 mapping DB can get a new pseudonym for the same entity | MEDIUM | MEDIUM | CHANGELOG [Unreleased] entry with an upgrade note in each of 10.2, 10.3a, 10.3b, 10.3c and 10.4 explaining the effect; schema unchanged |
-| Final-exam set seen or used before close-out (leak) | LOW | HIGH | Sealed (encrypted) at freeze; key only in a Lionel-approved CI environment; hash-list leakage guard on every CI run; isolation rule restated in every later story (10.6 AC6-AC8) |
+| Final-exam set seen or used before close-out (leak) | LOW | HIGH | Encrypted at freeze (before 10.4 merges) and sealed after Lionel's adjudication, both run by Lionel; key only in the Lionel-approved CI environment `final-exam`; Lionel sees no content before 10.4 merges; adjudication view from a deterministic script that agents never read; hash-list leakage guard on every CI run; isolation rule restated in every later story (10.6 AC5-AC8) |
 | Final-exam score well below main or held-out | MEDIUM | MEDIUM | It is information, not a failure: no tuning in response inside Epic 10. Lionel picks the public number (10.6 AC9). The gap goes to Epic 9 as evidence |
-| Double annotation delays close-out | MEDIUM | MEDIUM | 10.6 starts now, in parallel; close-out waits only for the sealed set, not for any detector story |
+| Double annotation and adjudication delay close-out | MEDIUM | MEDIUM | 10.6 starts now, in parallel; both annotations are model runs, done before 10.4 merges; Lionel adjudicates only the disagreements plus a spot-check of about 3 agreed documents (10.6 AC5); close-out waits for that adjudication, the seal and one scored run, not for any further detector story |
 | Ranges misread (held-out has 6 documents, so its ranges are wide) | MEDIUM | LOW | Every range states unit=document and the document count; story-to-story claims use the paired main-corpus delta (10.6 AC3) |
-| Final-exam author shares conventions with the rule writers | LOW | MEDIUM | Different model family or a human author; the brief contains no GUIDELINES text or corpus text and is approved by Lionel (10.6 AC4) |
+| Final-exam author shares conventions with the rule writers | LOW | MEDIUM | Different model family: GPT via `codex exec` writes, GPT and Kimi (or Gemini) annotate, no Claude agent takes part; the brief contains no GUIDELINES text or corpus text and is approved by Lionel (10.6 AC4, AC5) |
 
 - **Primary Risk:** a precision rule silently removes real persons, places or organisations.
 - **Mitigation:** G3 on every story, negative-case tests for every rule, held-out check (G5).
@@ -653,7 +665,7 @@ Story 10.6 (Final-exam set + ranges)      --- parallel ---  PR A early; set seal
 - [ ] At Epic 10 close-out, README/README.fr, `docs/faq*.md`, `docs/index*.md` and `docs/tutorial*.md` updated once from the final G1 run (G7 interpretation, Lionel, 2026-10-02)
 - [ ] Close-out baseline recorded as Epic 9's starting point: run ID plus the pasted `[Overall]`/`[PERSON]`/`[LOCATION]`/`[ORG]`/`[HELD-OUT …]` lines in the QA report (`accuracy-results` artifacts are kept 30 days, `retention-days: 30` at `.github/workflows/accuracy.yaml:83`, so the run ID alone is not enough)
 - [ ] Accuracy output reports 95% bootstrap ranges (unit=document) per type for main and held-out, with the eight existing lines unchanged (10.6 PR A)
-- [ ] Final-exam set (10.6) sealed before 10.4 merged, with its sha256 recorded, double-annotated with inter-annotator agreement reported, and scored exactly once at close-out: run ID, ledger entry and pasted `[FINAL-EXAM …]` lines in the QA report
+- [ ] Final-exam set (10.6): 30 documents frozen and annotated independently by two models before 10.4 merged, with sha256 recorded; inter-annotator agreement and the spot-check finding reported; adjudicated by Lionel after 10.4 merged; then sealed, with its sha256 recorded, and scored exactly once at close-out: run ID, ledger entry and pasted `[FINAL-EXAM …]` lines (overall, planted half, natural half) in the QA report
 - [ ] Public headline figure chosen by Lionel among main, held-out and final exam, with its range (G7 interpretation)
 - [ ] No release cut (v2.3.0 only on Lionel's explicit go)
 
@@ -686,7 +698,7 @@ Relabelled to v2.4 (Lionel, 2026-10-02). Epic 8 was titled "v2.2 — Output Form
 - Integration points: `HybridDetector` merge and post-filters, regex patterns and resource lexicons, the accuracy suite (`tests/accuracy/`), the annotation corpus and `scripts/auto_annotate_corpus.py`.
 - Existing patterns to follow: post-filters as `HybridDetector` methods; lists and patterns in `gdpr_pseudonymizer/resources/`; structured logging without entity text beyond current practice.
 - Critical compatibility requirements: the product constraints and gates G1-G7 above, verbatim; the guidelines approval stop inside 10.1; strict 10.1 → 10.2 → 10.3a → 10.3b → 10.3c → 10.4 order for detector stories (10.5, data-layer hardening, sits outside that chain), each baseline the previous merged close-out G1 run (10.3 was split into 10.3a and 10.3b, and 10.3c was added at 10.3a STOP R, Lionel, 2026-10-06; see "Course Correction" and "Close-Out Record").
-- Story 10.6 (final exam and ranges) runs outside the detector chain. From its PR B on, every story's Dev Notes forbid opening, listing, decrypting or grepping `tests/test_corpus/final_exam/`, next to the held-out isolation rule. Final-exam numbers exist only after close-out and are never used for a decision or for tuning inside Epic 10.
+- Story 10.6 (final exam and ranges) runs outside the detector chain. Its documents are frozen and model-annotated before 10.4 merges, adjudicated by Lionel after 10.4 merges, then sealed and scored once. From the start of 10.6 authoring, every story's Dev Notes forbid opening, listing, decrypting or grepping the final-exam material (its sealed workspace and `tests/test_corpus/final_exam/`), next to the held-out isolation rule. Final-exam numbers exist only after close-out and are never used for a decision or for tuning inside Epic 10.
 - Each story must include verification that existing functionality remains intact (full CI green, recall guard).
 
 The epic should maintain system integrity while delivering higher detection precision and a trustworthy benchmark, without lowering recall."

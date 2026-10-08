@@ -182,7 +182,7 @@
 - [ ] Type-aware exact match in the merge shipped (10.3c, added at 10.3a STOP R, Lionel, 2026-10-06)
 - [ ] Salutation splitting / bare first names and org-plus-country merge shipped (10.4)
 - [ ] DB init no longer deletes a database another process created (10.5, data-layer hardening, Lionel, 2026-10-07)
-- [ ] Final-exam set (10.6) sealed before 10.4 merged and scored exactly once at close-out; accuracy output carries 95% bootstrap ranges; Lionel picks the public figure among main, held-out and final exam
+- [ ] Final-exam set (10.6): 30 documents frozen and annotated by two models before 10.4 merged, adjudicated by Lionel after 10.4 merged, then sealed and scored exactly once at close-out; accuracy output carries 95% bootstrap ranges; Lionel picks the public figure among main, held-out and final exam
 - [ ] Every story closed with a cited CI accuracy run (G1), independent QA check (G2), no unapproved recall drop (G3), held-out numbers (G5, 10.2, 10.3a, 10.3b, 10.3c, 10.4)
 - [ ] Close-out baseline recorded as Epic 9's starting point, with the `[Overall]`/`[PERSON]`/`[LOCATION]`/`[ORG]`/`[HELD-OUT …]` lines pasted into the QA report (`accuracy-results` artifacts are kept 30 days, `.github/workflows/accuracy.yaml:83`), not just the run ID; no release cut without Lionel's go
 
