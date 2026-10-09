@@ -1,0 +1,35 @@
+{
+  "document_name": "dummy_04.txt",
+  "entities": [
+    {
+      "entity_text": "Zorbaville",
+      "entity_type": "LOCATION",
+      "start_pos": 12,
+      "end_pos": 22
+    },
+    {
+      "entity_text": "Quentrix SA",
+      "entity_type": "ORG",
+      "start_pos": 110,
+      "end_pos": 121
+    },
+    {
+      "entity_text": "Institut Zorbal",
+      "entity_type": "ORG",
+      "start_pos": 132,
+      "end_pos": 147
+    },
+    {
+      "entity_text": "Vraskaland",
+      "entity_type": "LOCATION",
+      "start_pos": 151,
+      "end_pos": 161
+    },
+    {
+      "entity_text": "Tralvio",
+      "entity_type": "PERSON",
+      "start_pos": 177,
+      "end_pos": 184
+    }
+  ]
+}
