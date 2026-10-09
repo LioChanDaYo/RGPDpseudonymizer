@@ -45,6 +45,7 @@ evidence:
   held_out_blind: '683 capitalised words added by the PR checked against main-corpus text: the 571 not in it are generic words, identifiers, tool or people names and the invented names; leakage guard passes (5 passed locally, green in CI)'
   tests_run_locally: '355 passed (new file, leakage guard, 4 hybrid unit files, tests/integration/test_ner_title_improvements.py); ruff, black and mypy clean on the changed files'
   ci: 'attempt 1 green at 15555cb (CI 37966188770, Code Quality 37966189241, CodeQL 37966183676), at 8d25dbe and at b18a714; gh pr checks 91: 9/9 pass'
+  ci_qa_commit: 'dd365e2 (the first QA commit, docs only): CI 37969993440 attempt 1 failed on infrastructure. The runner received a shutdown signal and the macOS job "Run tests" was cancelled at 17% with no test failure; the other 8 checks passed. Not rerun; this commit supersedes it, and its own CI must be green before the merge.'
   nfr1: '37963988214 success at 8d25dbe, Verify step passed; AMD EPYC 7763 = reference 37641855606; means 0.442/0.756/1.116/0.675 s vs 0.438/0.755/1.110/0.671 s'
   trace:
     ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
