@@ -672,8 +672,11 @@ class HybridDetector(EntityDetector):
     ) -> list[DetectedEntity]:
         """Merge spaCy and regex entities with deduplication logic.
 
-        Deduplication Rules:
-            - Exact overlap (same span) → Keep spaCy entity (prefer NLP confidence)
+        Deduplication Rules (the first overlapping spaCy entity decides):
+            - Exact match (same span, or same text once titles are stripped),
+              same type → Keep spaCy entity (prefer NLP confidence)
+            - Exact match, different types → Keep both, flag the regex entity
+              as ambiguous (Story 10.3c AC1); checked before the Cabinet case
             - No overlap → Keep both entities
             - Partial overlap, different types → Flag regex entity as ambiguous,
               keep both
@@ -706,12 +709,26 @@ class HybridDetector(EntityDetector):
                     overlap_found = True
 
                     if self._is_exact_match(spacy_entity, regex_entity):
-                        # Exact match → Skip regex entity (prefer spaCy)
-                        logger.debug(
-                            "duplicate_entity_removed",
-                            text=regex_entity.text,
-                            reason="exact_match_with_spacy",
-                        )
+                        if regex_entity.entity_type == spacy_entity.entity_type:
+                            # Exact match, same type → Skip regex entity (prefer spaCy)
+                            logger.debug(
+                                "duplicate_entity_removed",
+                                text=regex_entity.text,
+                                reason="exact_match_with_spacy",
+                            )
+                        else:
+                            # Exact match, different types → keep both, flag the
+                            # regex entity (Story 10.3c AC1, R-MX). This comes
+                            # before the Cabinet case, which therefore sees
+                            # exactly the pairs it saw before.
+                            regex_entity.is_ambiguous = True
+                            merged.append(regex_entity)
+                            self._log_cross_type_exact_match(
+                                regex_entity,
+                                spacy_entity,
+                                decision="kept_both",
+                                rule="type_aware_exact_match",
+                            )
                         break
                     elif self._should_prefer_regex_org(regex_entity, spacy_entity):
                         # Special case: Regex ORG (Cabinet pattern) supersedes spaCy PERSON
@@ -788,6 +805,32 @@ class HybridDetector(EntityDetector):
         merged.sort(key=lambda e: e.start_pos)
 
         return merged
+
+    @staticmethod
+    def _log_cross_type_exact_match(
+        regex_entity: DetectedEntity,
+        spacy_entity: DetectedEntity,
+        decision: str,
+        rule: str,
+    ) -> None:
+        """Log a different-type exact match (Story 10.3c AC1): types, match
+        kind and offsets only, never entity text."""
+        same_span = (
+            regex_entity.start_pos == spacy_entity.start_pos
+            and regex_entity.end_pos == spacy_entity.end_pos
+        )
+        logger.debug(
+            "cross_type_exact_match",
+            regex_type=regex_entity.entity_type,
+            spacy_type=spacy_entity.entity_type,
+            match="span" if same_span else "normalized_text",
+            regex_start=regex_entity.start_pos,
+            regex_end=regex_entity.end_pos,
+            spacy_start=spacy_entity.start_pos,
+            spacy_end=spacy_entity.end_pos,
+            decision=decision,
+            rule=rule,
+        )
 
     @staticmethod
     def _refused_guards(
