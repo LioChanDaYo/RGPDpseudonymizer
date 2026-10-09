@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "target": "dummy",
+  "documents": [
+    {
+      "id": "dummy_01",
+      "half": "planted",
+      "kind": "email thread",
+      "format": [
+        "email thread with quoted replies",
+        "headers and signatures",
+        "mixed case"
+      ],
+      "categories": [
+        "Greetings"
+      ]
+    },
+    {
+      "id": "dummy_02",
+      "half": "planted",
+      "kind": "meeting minutes",
+      "format": [
+        "table flattened to text",
+        "mixed case"
+      ],
+      "categories": [
+        "Organisation plus country"
+      ]
+    },
+    {
+      "id": "dummy_03",
+      "half": "natural",
+      "kind": "memo",
+      "format": [
+        "PDF-style hard line breaks",
+        "headers and signatures"
+      ],
+      "categories": []
+    },
+    {
+      "id": "dummy_04",
+      "half": "natural",
+      "kind": "interview transcript",
+      "format": [
+        "mixed case"
+      ],
+      "categories": []
+    }
+  ]
+}
