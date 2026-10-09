@@ -12,6 +12,7 @@ from collections import defaultdict
 
 import pytest
 
+from tests.accuracy import bootstrap
 from tests.accuracy.conftest import (
     AccuracyMetrics,
     DocumentResult,
@@ -438,3 +439,67 @@ class TestHeldOutMetrics:
                 f"F1={mt.f1:.4f} TP={mt.tp} FP={mt.fp} FN={mt.fn}"
             )
         assert m.tp + m.fn > 0, "Held-out set has no ground-truth entities"
+
+
+# ===========================================================================
+# Confidence ranges — Story 10.6 PR A (AC 1, 3)
+# ===========================================================================
+
+
+@pytest.mark.accuracy
+@pytest.mark.slow
+class TestConfidenceRanges:
+    """AC1/AC3 (Story 10.6): 95% bootstrap ranges, resampled by document.
+
+    Prints one ``[CI95 …]`` line per label for the main corpus and one
+    ``[CI95 HELD-OUT …]`` line per label for the held-out set, after the
+    existing point lines, which are unchanged. Held-out per-document counts
+    stay local to ``test_held_out_ranges``: never printed, stored or put in an
+    assertion, whose operands are plain integers only.
+    """
+
+    def test_main_corpus_ranges(self, corpus_results: list[DocumentResult]) -> None:
+        n_docs = len(corpus_results)
+        assert n_docs > 0, "No main-corpus documents"
+        ranges = bootstrap.bootstrap_ranges(
+            [bootstrap.doc_counts(r) for r in corpus_results]
+        )
+        print(
+            "\n"
+            + "\n".join(
+                bootstrap.format_ci95_line(ranges[label]) for label in bootstrap.LABELS
+            )
+        )
+
+    def test_held_out_ranges(self, held_out_results: list[DocumentResult]) -> None:
+        n_docs = len(held_out_results)
+        assert n_docs >= 5, f"Expected at least 5 held-out documents, got {n_docs}"
+        per_doc = [bootstrap.doc_counts(r) for r in held_out_results]
+        ranges = bootstrap.bootstrap_ranges(per_doc)
+        print(
+            "\n"
+            + "\n".join(
+                bootstrap.format_ci95_line(ranges[label], scope="HELD-OUT")
+                for label in bootstrap.LABELS
+            )
+        )
+
+    def test_main_corpus_per_document_json(
+        self, corpus_results: list[DocumentResult], tmp_path
+    ) -> None:
+        """Main corpus only: written to $ACCURACY_PER_DOC_JSON in CI, else to
+        tmp_path, then read back and checked against ``_aggregate``."""
+        path = bootstrap.per_document_json_path(tmp_path)
+        run_id, commit = bootstrap.github_run_metadata()
+        names = [r.doc_name for r in corpus_results]
+        per_doc = [bootstrap.doc_counts(r) for r in corpus_results]
+        bootstrap.write_per_document_json(path, names, per_doc, run_id, commit)
+        run = bootstrap.read_per_document_json(path)
+        assert list(run.names) == names, "JSON document order differs from the corpus"
+        for label in bootstrap.LABELS:
+            m = _aggregate(corpus_results, None if label == "Overall" else label)
+            sums = tuple(sum(doc[label][k] for doc in run.counts) for k in range(3))
+            assert sums == (m.tp, m.fp, m.fn), (
+                f"{label}: JSON sums TP/FP/FN={sums}, "
+                f"aggregate TP/FP/FN={(m.tp, m.fp, m.fn)}"
+            )

@@ -1,0 +1,82 @@
+schema: 1
+story: '10.6'
+story_title: 'Final-Exam Set and Confidence Ranges (PR A: confidence ranges)'
+scope: 'PR A only: AC1-AC3, the PR A part of AC10, tasks A0-A10.5. PR #89 at head bf2f62a (code 49a5338). PR B not started and not reviewed.'
+gate: PASS
+status_reason: 'QA recomputed the four main-corpus [CI95 ...] lines with its own implementation (exact match), and its own re-run 37860150044 reproduces all 16 lines of G1 run 37856056081, whose eight existing lines are byte-identical to 37678069251; CI is green on attempt 1. Only two low, non-blocking findings remain: a held-out print path that opens only if a held-out test fails, as in the existing held-out test (SEC-001), and one exit code (REL-001).'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-10-08T23:55:00Z'
+
+waiver: { active: false }
+
+merge_blockers: []
+
+top_issues:
+  - id: 'SEC-001'
+    severity: low
+    finding: 'Failure path only. When a test fails, pytest''s default traceback (--tb=auto) prints the arguments of the test function and of the frame that raised. These are reprs cut to about 240 characters. QA confirmed this with a probe on pytest 9.1.1. So if test_held_out_ranges ever fails, the public CI log, accuracy-output.txt and the JUnit <failure> element would show the start and end of repr(held_out_results): held-out document names and entity text. If the error is raised inside the bootstrap, the raising frame''s arguments would also show (for _summed, one label''s held-out per-document TP/FP/FN lists, in full). Asserting on plain integers (A2.3) closes the assertion-rewriting path but not this one. Nothing is printed while the tests pass, and the 16 lines of both runs hold aggregates only. TestHeldOutMetrics already has the same exposure through its held_out_results argument, so PR A adds almost no new risk.'
+    suggested_action: 'Not a merge blocker. Fix this together with the existing follow-up on TestHeldOutMetrics (the len() assert, story Notes for the PO and PM), in one later benchmark PR. Either let the held-out tests get the fixture through request.getfixturevalue(...) and re-raise errors as a bare RuntimeError(<class name>) from None, or run the accuracy pytest with --tb=short or --tb=native (QA probe: neither prints arguments). Design this out of PR B''s TestFinalExamMetrics and its final_exam job before B3.4/B3.5: the planned RuntimeError re-raise does not stop pytest from printing the test function''s fixture arguments.'
+    refs:
+      - 'tests/accuracy/test_ner_accuracy_validation.py:474-478 (test_held_out_ranges takes held_out_results as an argument)'
+      - 'tests/accuracy/bootstrap.py:211-217 (_summed(columns, idx))'
+      - 'tests/accuracy/test_ner_accuracy_validation.py:423 (TestHeldOutMetrics, existing, same exposure)'
+    suggested_owner: dev
+  - id: 'REL-001'
+    severity: low
+    finding: 'recompute --lines on a file that is not valid UTF-8 raises an uncaught UnicodeDecodeError. The CLI then exits 1 with a traceback, not 2 ("invalid input"), only OSError is caught at scripts/accuracy_paired_delta.py:106-109. The same fault in the JSON input is handled (exit 2), because the JSON reader turns it into a ValueError. CI writes the artifact as UTF-8 (PYTHONUTF8=1), so a real artifact never hits this.'
+    suggested_action: 'Catch (OSError, UnicodeDecodeError) at :108, as _load does, and add one unit case. A nit; it can wait for the next PR that touches the script.'
+    refs: ['scripts/accuracy_paired_delta.py:106-109']
+    suggested_owner: dev
+
+quality_score: 100
+expires: '2026-10-22T23:55:00Z'
+
+evidence:
+  runs_downloaded:
+    g1: '37856056081 (workflow_dispatch, story/10.6-pr-a-confidence-ranges, head 49a5338, attempt 1, success)'
+    baseline: '37678069251 (push on main, bab6717, success)'
+    qa_rerun: '37860150044 (workflow_dispatch by QA, reason "10.6 PR A QA re-run", head bf2f62a, attempt 1, success)'
+  ac2_eight_lines: 'E1+E2 extraction of 37856056081 vs 37678069251: diff empty. E3 counts [Overall] 1, [PERSON]/[LOCATION]/[ORG] 2 each; E4 4 and 4; same as the baseline. ^\[CI95  = 8, ^\[CI95 HELD-OUT  = 4. The full output diff against the baseline is the collected count (23 to 26), the 13 lines of the three new tests, and the passed count and duration.'
+  g2_recompute:
+    qa_implementation: 'Throw-away script outside the repo, written from Dev Notes "PR A Design" only (random.Random(seed), randrange draw, undefined rule, integer percentile rule): the four [CI95 ...] main lines of 37856056081 reproduced byte for byte. It also reproduces the dev''s resampled golden lines (tests/unit/test_accuracy_bootstrap.py GOLDEN_DOCS), undefined counts included, and the four main lines of 37860150044.'
+    dev_script: 'scripts/accuracy_paired_delta.py recompute <json> --lines <accuracy-output.txt> on 37856056081: 4/4 lines and 4/4 sums match, exit 0; delta <json> <json>: every delta and bound +0.0000, excludes_0=P:no,R:no,F1:no.'
+    json_sums: 'Per-document sums equal the [Overall]/[PERSON]/[LOCATION]/[ORG] TP/FP/FN (1763/462/452, 1284/111/44, 209/71/54, 270/280/354). 25 documents; their names, order and per-document Overall TP/FP/FN equal the main-corpus Per-Document Breakdown lines; Overall = PERSON+LOCATION+ORG in every document.'
+  qa_rerun_identity: '37860150044 vs 37856056081: the 16 lines (8 existing + 4 [CI95 ...] + 4 [CI95 HELD-OUT ...]) are byte-identical; the full accuracy-output.txt differs only in the duration; the JSON differs only in run_id and commit.'
+  artifact_contents: 'Each artifact holds exactly accuracy-output.txt, accuracy-results.xml and accuracy-per-document.json. The JUnit XML has no system-out/system-err and no captured output (with -s nothing is captured). The JSON is main corpus only (corpus "main", 25 main-corpus names).'
+  g4_diff: 'git diff --stat main...HEAD = the 8 PR A paths of Dev Notes File Locations. Nothing under gdpr_pseudonymizer/, tests/accuracy/conftest.py, conftest.py, pytest.ini, tests/test_corpus/, the leakage allowlist, README/README.fr, docs/faq*, docs/index*, docs/tutorial*, pyproject.toml or poetry.lock. accuracy.yaml diff = one env line and one upload path. test_ner_accuracy_validation.py diff = one import line plus TestConfidenceRanges appended. No PR B file.'
+  probes: 'Invented names only (Zorbalia, Quentrix, Zorbaville, Quentrel), run through the dev script on the Windows toolchain and compared with the QA implementation. Edge cases match it exactly: a document with no gold for a type, a corpus where every document has only FP (P=[0.0000,0.0000], R and F1 [n/a], undef_R=undef_F1=10000), and a one-document corpus (every range collapses to the point value). Rejected with exit 2: duplicate names, malformed JSON, a top-level array, non-UTF-8 JSON, negative, float or bool counts, empty documents, corpus held_out, a missing name or file. In delta, also rejected with exit 2: mismatched or fewer documents, a different method or seed. recompute --lines exits 1 on a duplicated CI95 line, a missing or duplicated point line, a trailing space, or another seed or resample count. It accepts a CRLF artifact. Reordered candidates align by name. Importing the script leaves sys.stdout unchanged.'
+  docs_traceability: 'The QA report block (16 lines), the Dev Agent Record block (16 lines) and the Baseline block (8 lines vs 37678069251) match the artifacts byte for byte. The CHANGELOG figures 79.41% [76.34%, 82.64%] and 76.79% [72.22%, 81.77%] and the QA report figure held-out ORG F1 0.3704 to 0.6429 trace to 37856056081. No headline, README, FAQ, index or tutorial change (G7).'
+  held_out_isolation: 'QA opened, listed and searched nothing under tests/test_corpus/. It read held-out results only as aggregate lines in downloaded artifacts. The commit messages, story, QA report and CHANGELOG hold held-out aggregates only.'
+  determinism: 'The golden resampled test passes on Python 3.10, 3.11 and 3.12 (ubuntu, macOS, Windows CI legs). QA reproduced the CI lines (3.11, Linux) with Python 3.12.3 (WSL) and with 3.11.9 (Windows).'
+  tests_run_locally: 'Windows toolchain: ruff check ., black --check . and mypy gdpr_pseudonymizer clean; pytest tests/unit/test_accuracy_bootstrap.py -v 38 passed; pytest -m "not slow" 2194 passed, 8 skipped, 54 deselected, exit 0 (leakage guard included).'
+  ci: 'PR #89 head bf2f62a: CI - Test Matrix 37858287354 (lint; test ubuntu 3.11 with coverage, ubuntu 3.10, macos 3.12, windows 3.12), Code Quality 37858287304 and CodeQL 37858283726 (Analyze actions and python) all succeeded on run_attempt 1. Earlier heads 49a5338 (37856710422, 37856710307, 37856706957) were also attempt 1, success. No rerun.'
+  trace:
+    ac_covered: [1, 2, 3, 10]
+    ac_gaps: []
+    not_in_scope: [4, 5, 6, 7, 8, 9]
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'Nothing held-out per document is printed, stored or uploaded on the passing path; the artifact and the JUnit XML were checked. SEC-001 is a failure-only path, the same exposure as the existing held-out test. Low.'
+  performance:
+    status: PASS
+    notes: '10,000 resamples take 0.29 s (main) and 0.16 s (held-out) in CI (JUnit times); the whole accuracy suite reports 13.08 s against 13.00 s for the baseline.'
+  reliability:
+    status: PASS
+    notes: 'Deterministic across runs, OSes and Python 3.10-3.12. Invalid JSON input exits 2; the only gap is REL-001 (non-UTF-8 --lines file, exit 1).'
+  maintainability:
+    status: PASS
+    notes: 'A small standard-library module with type hints on every public function; draw injection for tests; 38 unit tests, including golden lines; G1 test file edits are limited to one import and an appended class.'
+
+recommendations:
+  immediate: []
+  future:
+    - action: 'SEC-001: close the failure-path argument display for every held-out test (TestHeldOutMetrics and TestConfidenceRanges), together with the existing len() assert follow-up, in one later benchmark PR.'
+      refs: ['tests/accuracy/test_ner_accuracy_validation.py:423', 'tests/accuracy/test_ner_accuracy_validation.py:474']
+    - action: 'PR B input (B3.4, B3.5): TestFinalExamMetrics must not take final-exam results as a test argument, or the final_exam job must run pytest with --tb=short or --tb=native. Prove it on the dummy fixture with a forced failure at B8.'
+      refs: ['docs/stories/10.6.final-exam-set-confidence-ranges.story.md (B3.4, B3.5, B8)']
+    - action: 'REL-001: catch UnicodeDecodeError on the --lines file.'
+      refs: ['scripts/accuracy_paired_delta.py:106-109']
+    - action: 'Optional unit cases: reader rejects duplicate names; a one-document corpus collapses to the point value. QA probes show both already work.'
+      refs: ['tests/unit/test_accuracy_bootstrap.py']

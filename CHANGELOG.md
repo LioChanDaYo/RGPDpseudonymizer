@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Confidence ranges in the accuracy report (Story 10.6 PR A).** Benchmark reporting only: no detector, scorer or ground-truth change, and no metric changed.
+  - **New report lines.** The accuracy suite prints a 95% confidence range for precision, recall and F1, for Overall and each type, on the main corpus and on the held-out set: eight `[CI95 …]` lines (`[CI95 Overall]` … `[CI95 HELD-OUT ORG]`). The range comes from a bootstrap over documents (resampled with replacement, 10,000 resamples, fixed seed 20261008, percentile interval), so the output is deterministic. Each line states `unit=document` and the document count.
+  - **Per-document counts.** The `accuracy-results` artifact also holds `accuracy-per-document.json`, the main corpus's per-document, per-type TP/FP/FN. Nothing per document is stored for the held-out set.
+  - **Script.** `scripts/accuracy_paired_delta.py delta` gives the paired range of the change between two runs (same documents, resampled together), so a story can say whether a gain is outside it. `recompute` rebuilds the main-corpus range lines from the JSON.
+  - **Numbers.** CI accuracy run `37856056081`: the eight existing lines are byte-identical to `37678069251`. For example, main-corpus F1 79.41% has the range 76.34%–82.64%; held-out F1 76.79% has 72.22%–81.77% (6 documents).
+
 ### Changed
 
 - **Fewer false places; names with particles or Mc/Mac kept whole; trailing roles trimmed (Story 10.3b).**
