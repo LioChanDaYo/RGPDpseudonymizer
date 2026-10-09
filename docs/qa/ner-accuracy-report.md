@@ -980,3 +980,145 @@ The eight existing lines are **byte-identical** to `37678069251` (and so to run 
 ### Notes
 
 - README, FAQ, docs index and tutorials are not updated in this story (Epic 10 G7 interpretation).
+
+## Type-aware exact match (Story 10.3c, 2026-10-09)
+
+**Detector change, same ground truth.** No annotation, scorer or held-out change (G4). The ground truth is the 10.1 one (2,215 main-corpus annotations).
+
+**What changed in the detector** (rule text and STOP R decisions: story 10.3c):
+- **Slice M, type-aware exact match (AC1).** When a pattern detection and a model detection have the same span, or the same text once a title is stripped, the pattern one used to be dropped whatever the types. It is now dropped only when both have the same type.
+  - With different types, both are kept and the pattern one is flagged `is_ambiguous`. Example: pattern LOCATION "Zorbaville" and model ORG "Zorbaville" both reach validation, and the user picks the type.
+  - The CLI validation marks the flagged candidate "(ambiguous)". The desktop app shows the two entries without a marker.
+  - The new branch comes before the "Cabinet …" special case, which keeps seeing the pairs it saw before. A debug event `cross_type_exact_match` records the decision with types, match kind and offsets only.
+  - This also removes the QA MX-001 drop of 10.3b: a person span reshaped before the merge into the exact text of an organisation or a place is no longer lost.
+- **Slice P, hyphenated names (AC3; Lionel, STOP R).** A hyphenated pattern PERSON of the `compound_names` shape ("Zorbal-Quentrac"), in which neither part is a known first name, is still dropped when the model detected the same text as a place or an organisation: this is the behaviour before 10.3c. The place or organisation candidate stays, so the name is still replaced. The check uses the bundled name dictionary only.
+
+**Sources (G1):**
+- Before: 10.3b close-out run D `37641796495`, reproduced on `main` by `37891970847`, whose `accuracy-per-document.json` is the paired-delta baseline (AC10).
+- Run M (Slice M, head `b18a714`): `37962781237`.
+- **After (close-out): run P `37963522411`** (Slices M + P, head `8d25dbe`).
+
+### Lines from `accuracy-output.txt`, verbatim
+
+Run P (`37963522411`, close-out):
+
+```
+[Overall] P=0.7920 R=0.7977 F1=0.7949 TP=1767 FP=464 FN=448 FN%=20.23 FP%=20.80
+[PERSON] P=0.9205 R=0.9684 F1=0.9439 TP=1286 FP=111 FN=42
+[LOCATION] P=0.7482 R=0.8023 F1=0.7743 TP=211 FP=71 FN=52
+[ORG] P=0.4891 R=0.4327 F1=0.4592 TP=270 FP=282 FN=354
+[HELD-OUT Overall] P=0.7926 R=0.7446 F1=0.7679 TP=172 FP=45 FN=59 FN%=25.54 FP%=20.74
+[HELD-OUT PERSON] P=0.8818 R=0.8661 F1=0.8739 TP=97 FP=13 FN=15
+[HELD-OUT LOCATION] P=0.7761 R=0.7647 F1=0.7704 TP=52 FP=15 FN=16
+[HELD-OUT ORG] P=0.5750 R=0.4510 F1=0.5055 TP=23 FP=17 FN=28
+[CI95 Overall] P=[0.7662,0.8264] R=[0.7464,0.8393] F1=[0.7638,0.8272] unit=document docs=25 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[CI95 PERSON] P=[0.9095,0.9344] R=[0.9429,0.9858] F1=[0.9324,0.9550] unit=document docs=25 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[CI95 LOCATION] P=[0.6509,0.8266] R=[0.7530,0.8551] F1=[0.7115,0.8267] unit=document docs=25 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[CI95 ORG] P=[0.4266,0.5858] R=[0.3436,0.5341] F1=[0.3878,0.5506] unit=document docs=25 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[CI95 HELD-OUT Overall] P=[0.7232,0.8614] R=[0.7098,0.7877] F1=[0.7222,0.8177] unit=document docs=6 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[CI95 HELD-OUT PERSON] P=[0.8145,0.9519] R=[0.8000,0.9355] F1=[0.8462,0.9118] unit=document docs=6 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[CI95 HELD-OUT LOCATION] P=[0.6719,0.8939] R=[0.6866,0.8281] F1=[0.6870,0.8516] unit=document docs=6 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[CI95 HELD-OUT ORG] P=[0.4255,0.7500] R=[0.3191,0.5714] F1=[0.3704,0.6429] unit=document docs=6 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+```
+
+Run M (`37962781237`, Slice M only):
+
+```
+[Overall] P=0.7906 R=0.7977 F1=0.7942 TP=1767 FP=468 FN=448 FN%=20.23 FP%=20.94
+[PERSON] P=0.9179 R=0.9684 F1=0.9425 TP=1286 FP=115 FN=42
+[LOCATION] P=0.7482 R=0.8023 F1=0.7743 TP=211 FP=71 FN=52
+[ORG] P=0.4891 R=0.4327 F1=0.4592 TP=270 FP=282 FN=354
+[HELD-OUT Overall] P=0.7890 R=0.7446 F1=0.7661 TP=172 FP=46 FN=59 FN%=25.54 FP%=21.10
+[HELD-OUT PERSON] P=0.8739 R=0.8661 F1=0.8700 TP=97 FP=14 FN=15
+[HELD-OUT LOCATION] P=0.7761 R=0.7647 F1=0.7704 TP=52 FP=15 FN=16
+[HELD-OUT ORG] P=0.5750 R=0.4510 F1=0.5055 TP=23 FP=17 FN=28
+[CI95 Overall] P=[0.7650,0.8245] R=[0.7464,0.8393] F1=[0.7629,0.8264] unit=document docs=25 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[CI95 PERSON] P=[0.9075,0.9310] R=[0.9429,0.9858] F1=[0.9314,0.9529] unit=document docs=25 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[CI95 LOCATION] P=[0.6509,0.8266] R=[0.7530,0.8551] F1=[0.7115,0.8267] unit=document docs=25 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[CI95 ORG] P=[0.4266,0.5858] R=[0.3436,0.5341] F1=[0.3878,0.5506] unit=document docs=25 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[CI95 HELD-OUT Overall] P=[0.7188,0.8608] R=[0.7098,0.7877] F1=[0.7189,0.8156] unit=document docs=6 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[CI95 HELD-OUT PERSON] P=[0.8080,0.9457] R=[0.8000,0.9355] F1=[0.8425,0.9091] unit=document docs=6 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[CI95 HELD-OUT LOCATION] P=[0.6719,0.8939] R=[0.6866,0.8281] F1=[0.6870,0.8516] unit=document docs=6 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[CI95 HELD-OUT ORG] P=[0.4255,0.7500] R=[0.3191,0.5714] F1=[0.3704,0.6429] unit=document docs=6 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+```
+
+### Main corpus, before / after
+
+| | Precision | Recall | F1 | TP | FP | FN |
+|---|---|---|---|---|---|---|
+| Overall, before (run D) | 79.24% | 79.59% | 79.41% | 1,763 | 462 | 452 |
+| **Overall, after (run P)** | **79.20%** | **79.77%** | **79.49%** | 1,767 | 464 | 448 |
+| PERSON, before | 92.04% | 96.69% | 94.31% | 1,284 | 111 | 44 |
+| **PERSON, after** | **92.05%** | **96.84%** | **94.39%** | 1,286 | 111 | 42 |
+| LOCATION, before | 74.64% | 79.47% | 76.98% | 209 | 71 | 54 |
+| **LOCATION, after** | **74.82%** | **80.23%** | **77.43%** | 211 | 71 | 52 |
+| ORG, before | 49.09% | 43.27% | 46.00% | 270 | 280 | 354 |
+| **ORG, after** | **48.91%** | **43.27%** | **45.92%** | 270 | 282 | 354 |
+
+**Per slice** (ΔTP / ΔFP / ΔFN):
+
+| Slice | Runs | PERSON | LOCATION | ORG |
+|---|---|---|---|---|
+| M: type-aware exact match | `37891970847` → `37962781237` | +2 / +4 / −2 | +2 / 0 / −2 | 0 / +2 / 0 |
+| P: hyphenated names | `37962781237` → `37963522411` | 0 / −4 / 0 | 0 / 0 / 0 | 0 / 0 / 0 |
+
+**New second candidates per type** (from the G1 runs): Slice M keeps 2 more true people and 2 more true places that were dropped because the model had given them another type. It also offers 4 new PERSON candidates and 2 new ORG candidates that do not match an annotation. The 4 PERSON ones are hyphenated place or company names that the model already detected as a place or an organisation; Slice P removes all 4 (PERSON FP 115 → 111). The 2 ORG ones remain: law-firm names detected with their "Cabinet" prefix, both as ORG by the patterns and as PERSON by the model, where the annotation is the name without the prefix. Both reach validation, the ORG one flagged ambiguous.
+
+### Paired delta (AC10)
+
+Run P against the baseline (`scripts/accuracy_paired_delta.py delta <37891970847 json> <37963522411 json>`):
+
+```
+baseline run_id=37891970847 commit=6abf8584b9cb2dbd742ef92078a7ad92a7cc8465
+candidate run_id=37963522411 commit=8d25dbe1a31926efa62ab2b6de8130d8ab36d874
+[PAIRED-DELTA Overall] dP=-0.0003 [-0.0016,+0.0005] dR=+0.0018 [+0.0005,+0.0033] dF1=+0.0007 [-0.0001,+0.0017] unit=document docs=25 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0 excludes_0=P:no,R:yes,F1:no
+[PAIRED-DELTA PERSON] dP=+0.0001 [+0.0000,+0.0003] dR=+0.0015 [+0.0000,+0.0041] dF1=+0.0008 [+0.0000,+0.0021] unit=document docs=25 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0 excludes_0=P:no,R:no,F1:no
+[PAIRED-DELTA LOCATION] dP=+0.0018 [+0.0000,+0.0038] dR=+0.0076 [+0.0000,+0.0167] dF1=+0.0045 [+0.0000,+0.0099] unit=document docs=25 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0 excludes_0=P:no,R:no,F1:no
+[PAIRED-DELTA ORG] dP=-0.0018 [-0.0049,+0.0000] dR=+0.0000 [+0.0000,+0.0000] dF1=-0.0008 [-0.0018,+0.0000] unit=document docs=25 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0 excludes_0=P:no,R:no,F1:no
+```
+
+- **No precision or F1 gain is outside the paired range.** The P and F1 gains (PERSON dP +0.0001, dF1 +0.0008; LOCATION dP +0.0018, dF1 +0.0045; Overall dF1 +0.0007) are within it (`excludes_0` no), so they are not presented as wins. Overall dP −0.0003 and ORG dP −0.0018 / dF1 −0.0008 are losses within the range.
+- **The overall recall gain is outside the paired range** (dR +0.0018, range +0.0005 to +0.0033).
+
+Run M against the baseline, for the per-slice record:
+
+```
+baseline run_id=37891970847 commit=6abf8584b9cb2dbd742ef92078a7ad92a7cc8465
+candidate run_id=37962781237 commit=b18a71435278f9578473919460351d5d87c65b47
+[PAIRED-DELTA Overall] dP=-0.0018 [-0.0044,+0.0003] dR=+0.0018 [+0.0005,+0.0033] dF1=+0.0000 [-0.0013,+0.0014] unit=document docs=25 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0 excludes_0=P:no,R:yes,F1:no
+[PAIRED-DELTA PERSON] dP=-0.0025 [-0.0066,+0.0001] dR=+0.0015 [+0.0000,+0.0041] dF1=-0.0006 [-0.0029,+0.0013] unit=document docs=25 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0 excludes_0=P:no,R:no,F1:no
+[PAIRED-DELTA LOCATION] dP=+0.0018 [+0.0000,+0.0038] dR=+0.0076 [+0.0000,+0.0167] dF1=+0.0045 [+0.0000,+0.0099] unit=document docs=25 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0 excludes_0=P:no,R:no,F1:no
+[PAIRED-DELTA ORG] dP=-0.0018 [-0.0049,+0.0000] dR=+0.0000 [+0.0000,+0.0000] dF1=-0.0008 [-0.0018,+0.0000] unit=document docs=25 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0 excludes_0=P:no,R:no,F1:no
+```
+
+### Recall (G3, strict)
+
+FN versus run D: Overall 452 → 448, PERSON 44 → 42, LOCATION 54 → 52, ORG 354 → 354, in run M and in run P. There is no FN increase in any type after either slice.
+
+**Coverage, main corpus** (local check on a dump that reproduces run P exactly; details in the story):
+- No annotation matched before becomes a miss.
+- No annotation loses its cover by its own type (level 2: 0) or its last cover of any type (level 2b: 0).
+- No character covered before by a span of its type is uncovered (level 1: 0): the change only adds candidates, and Slice P only restores the earlier skip.
+
+### Held-out set (G5)
+
+Aggregates only (lines above).
+- **Run P versus run D:** the eight held-out lines and the four `[CI95 HELD-OUT …]` lines are identical: FN 59 (PERSON 15, LOCATION 16, ORG 28), FP 45, F1 76.79%. No held-out change.
+- **Run M versus run D:** recall unchanged, one more held-out PERSON FP (FP 45 → 46), so P 79.26% → 78.90% and F1 76.79% → 76.61%. With the main-corpus recall gain, this was reported as an overfitting red flag at run M. Slice P removes it.
+- Small-sample note: held-out PERSON 112, LOCATION 68, ORG 51 annotations, so 1 ORG FN ≈ 2 points of ORG recall. The held-out ranges are wide (6 documents) and the held-out set has no paired delta.
+
+### Performance (NFR1)
+
+Performance workflow run `37963988214` on the story branch (head `8d25dbe`, the last code commit; later commits change documentation only): **success**. The "Verify benchmark results are non-empty" step passed and listed the 4 benchmarks.
+
+| Run | CPU (`machine_info`) | 2k | 3.5k | 5k | Entity detection 3k |
+|---|---|---|---|---|---|
+| Branch `37963988214` (`8d25dbe`) | AMD EPYC 7763 | 0.442 s | 0.756 s | 1.116 s | 0.675 s |
+| Reference `37641855606` (10.3b close-out `42b2f80`) | AMD EPYC 7763 | 0.438 s | 0.755 s | 1.110 s | 0.671 s |
+
+Both runs used the same CPU, so the comparison is like for like. Timings are unchanged (34 rounds; 10 for entity detection), well under the NFR1 threshold of 30 s. The change adds one type comparison per exact-match pair in the merge loop, and the hyphen check runs only on a different-type exact match.
+
+### Notes
+
+- Pseudonym continuity: the mapping key has no entity type, so two confirmed candidates of different types share one key and one pseudonym; a key already in a database is auto-accepted for both, with the stored pseudonym, as before. Upgrade note in CHANGELOG `[Unreleased]`. Story 10.7 (Type-Aware Mapping Lookup) is the follow-up Lionel added at this story's STOP R.
+- README, FAQ, docs index and tutorials are not updated in this story (Epic 10 G7 interpretation).
