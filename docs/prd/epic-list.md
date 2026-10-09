@@ -68,7 +68,7 @@
 
 ---
 
-**Timeline: Epics 0-4: 14 weeks (v1.0 MVP). Epic 5: 6-7 weeks (v1.1). Epic 6: 10-14 weeks (v2.0). Epic 7: 4-6 weeks (v2.1). Epic 8: 5-7 weeks (v2.4). Epic 9: 8-12 weeks (v3.0). Epic 10: 5-7.5 weeks + 10.6 in parallel (v2.3 candidate, runs before Epic 9)**
+**Timeline: Epics 0-4: 14 weeks (v1.0 MVP). Epic 5: 6-7 weeks (v1.1). Epic 6: 10-14 weeks (v2.0). Epic 7: 4-6 weeks (v2.1). Epic 8: 5-7 weeks (v2.4). Epic 9: 8-12 weeks (v3.0). Epic 10: 5.5-8.5 weeks + 10.6 in parallel (v2.3 candidate, runs before Epic 9)**
 
 ---
 
@@ -182,6 +182,7 @@
 - [ ] Type-aware exact match in the merge shipped (10.3c, added at 10.3a STOP R, Lionel, 2026-10-06)
 - [ ] Salutation splitting / bare first names and org-plus-country merge shipped (10.4)
 - [ ] DB init no longer deletes a database another process created (10.5, data-layer hardening, Lionel, 2026-10-07)
+- [ ] Mapping lookup is type-aware: the same text under another type gets its own pseudonym and row; continuity for existing databases as Lionel decides at the story's STOP (10.7, data layer, added by Lionel at 10.3c STOP R, 2026-10-09)
 - [ ] Final-exam set (10.6): 30 documents frozen and annotated by two models before 10.4 merged, adjudicated by Lionel after 10.4 merged, then committed as plain files (documents' sha256 checked against the freeze record; no encryption, Lionel, 2026-10-09) and scored exactly once at close-out; accuracy output carries 95% bootstrap ranges; Lionel picks the public figure among main, held-out and final exam
 - [ ] Every story closed with a cited CI accuracy run (G1), independent QA check (G2), no unapproved recall drop (G3), held-out numbers (G5, 10.2, 10.3a, 10.3b, 10.3c, 10.4)
 - [ ] Close-out baseline recorded as Epic 9's starting point, with the `[Overall]`/`[PERSON]`/`[LOCATION]`/`[ORG]`/`[HELD-OUT …]` lines pasted into the QA report (`accuracy-results` artifacts are kept 30 days, `.github/workflows/accuracy.yaml:83`), not just the run ID; no release cut without Lionel's go
