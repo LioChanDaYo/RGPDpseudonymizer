@@ -10,6 +10,10 @@ Unmarked on purpose (not ``spacy``, not ``slow``): ``HybridDetector()`` loads
 no spaCy model; ``_merge_entities`` gets synthetic lists and
 ``detect_entities`` runs with stubbed detectors. Names are invented (AC8);
 the other words are generic words of the rules or main-corpus words.
+
+Slice P, R-HYPH-FN (AC3): on a different-type exact match, a PERSON whose
+title-stripped text is one hyphenated compound with no known first name is
+skipped, as before 10.3c. The name dictionary is injected (monkeypatch).
 """
 
 from __future__ import annotations
@@ -22,6 +26,7 @@ import pytest
 from gdpr_pseudonymizer.nlp import hybrid_detector as hd
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 from gdpr_pseudonymizer.nlp.hybrid_detector import HybridDetector
+from gdpr_pseudonymizer.nlp.name_dictionary import NameDictionary
 
 EVENT = "cross_type_exact_match"
 EVENT_FIELDS = {
@@ -367,3 +372,119 @@ class TestOrderAndPipeline:
         ]
         (fields,) = log.named(EVENT)
         assert fields["match"] == "span"
+
+
+# ---------------------------------------------------------------------------
+# Slice P: R-HYPH-FN (AC3)
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture
+def first_names(monkeypatch: pytest.MonkeyPatch) -> NameDictionary:
+    """An injected name dictionary; tests add first names to it."""
+    names = NameDictionary()
+    names.first_names = set()
+    names.last_names = set()
+    monkeypatch.setattr(hd, "_default_name_dictionary", lambda: names)
+    return names
+
+
+class TestHyphenNoFirstName:
+    @pytest.mark.parametrize("spacy_type", ["ORG", "LOCATION"])
+    def test_hyphenated_person_without_first_name_is_skipped(
+        self,
+        detector: HybridDetector,
+        log: _LogRecorder,
+        first_names: NameDictionary,
+        spacy_type: str,
+    ) -> None:
+        doc = "Le siège Zorbal-Quentrac pour le projet"
+        spacy_entity = _at(doc, "Zorbal-Quentrac", spacy_type, "spacy")
+        regex_person = _at(doc, "Zorbal-Quentrac", "PERSON", "regex")
+        out = detector._merge_entities([spacy_entity], [regex_person], doc)
+        assert _keys(out) == [("Zorbal-Quentrac", spacy_type, 9, 24, "spacy", False)]
+        assert regex_person.is_ambiguous is False
+        (fields,) = log.named(EVENT)
+        assert (fields["decision"], fields["rule"]) == (
+            "regex_skipped",
+            "hyphen_no_known_first_name",
+        )
+        assert (fields["regex_type"], fields["spacy_type"]) == ("PERSON", spacy_type)
+        _assert_no_text(fields, "Zorbal-Quentrac")
+
+    def test_titled_hyphenated_person_is_skipped(
+        self,
+        detector: HybridDetector,
+        log: _LogRecorder,
+        first_names: NameDictionary,
+    ) -> None:
+        doc = "Contact Dr Zorbal-Quentrac pour le projet"
+        regex_person = _at(doc, "Dr Zorbal-Quentrac", "PERSON", "regex")
+        spacy_org = _at(doc, "Zorbal-Quentrac", "ORG", "spacy")
+        out = detector._merge_entities([spacy_org], [regex_person], doc)
+        assert _keys(out) == [("Zorbal-Quentrac", "ORG", 11, 26, "spacy", False)]
+        (fields,) = log.named(EVENT)
+        assert fields["match"] == "normalized_text"
+        assert fields["decision"] == "regex_skipped"
+
+    @pytest.mark.parametrize("known", ["Zorbal", "Quentrac"])
+    def test_a_known_first_name_part_keeps_both(
+        self,
+        detector: HybridDetector,
+        log: _LogRecorder,
+        first_names: NameDictionary,
+        known: str,
+    ) -> None:
+        first_names.first_names = {known}
+        doc = "Le siège Zorbal-Quentrac pour le projet"
+        spacy_org = _at(doc, "Zorbal-Quentrac", "ORG", "spacy")
+        regex_person = _at(doc, "Zorbal-Quentrac", "PERSON", "regex")
+        out = detector._merge_entities([spacy_org], [regex_person], doc)
+        assert _keys(out) == [
+            ("Zorbal-Quentrac", "ORG", 9, 24, "spacy", False),
+            ("Zorbal-Quentrac", "PERSON", 9, 24, "regex", True),
+        ]
+        (fields,) = log.named(EVENT)
+        assert (fields["decision"], fields["rule"]) == (
+            "kept_both",
+            "type_aware_exact_match",
+        )
+
+    @pytest.mark.parametrize(
+        ("text", "regex_type"),
+        [
+            ("Zorbalia Quentrel", "PERSON"),  # several words: not the shape
+            ("Zorbal-Quentrac-Zorbia", "PERSON"),  # three parts: not the shape
+            ("Zorbal-Quentrac", "LOCATION"),  # not a PERSON
+        ],
+    )
+    def test_other_shapes_and_types_keep_both(
+        self,
+        detector: HybridDetector,
+        log: _LogRecorder,
+        first_names: NameDictionary,
+        text: str,
+        regex_type: str,
+    ) -> None:
+        doc = f"Le siège {text} pour le projet"
+        spacy_org = _at(doc, text, "ORG", "spacy")
+        regex_entity = _at(doc, text, regex_type, "regex")
+        out = detector._merge_entities([spacy_org], [regex_entity], doc)
+        assert sorted((e.entity_type, e.source, e.is_ambiguous) for e in out) == sorted(
+            [("ORG", "spacy", False), (regex_type, "regex", True)]
+        )
+        assert [f["decision"] for f in log.named(EVENT)] == ["kept_both"]
+
+    def test_same_type_pair_is_unchanged(
+        self,
+        detector: HybridDetector,
+        log: _LogRecorder,
+        first_names: NameDictionary,
+    ) -> None:
+        doc = "Le siège Zorbal-Quentrac pour le projet"
+        spacy_person = _at(doc, "Zorbal-Quentrac", "PERSON", "spacy")
+        regex_person = _at(doc, "Zorbal-Quentrac", "PERSON", "regex")
+        out = detector._merge_entities([spacy_person], [regex_person], doc)
+        assert _keys(out) == [("Zorbal-Quentrac", "PERSON", 9, 24, "spacy", False)]
+        assert log.named(EVENT) == []
+        assert len(log.named("duplicate_entity_removed")) == 1
