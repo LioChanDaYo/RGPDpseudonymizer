@@ -19,6 +19,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **A name found by both detectors with different types is no longer dropped (Story 10.3c).**
+  - **What you see.** The pattern-based detection and the language model sometimes find the same text with different types: the same span, or the same text once a title such as "Dr" is removed. For example, the patterns find LOCATION "Zorbaville" and the model finds ORG "Zorbaville". The pattern candidate used to be dropped silently. Now both candidates reach validation and you choose the right type.
+    - The command-line validation marks the pattern candidate "(ambiguous)". The desktop app lists the two entries, without a marker.
+    - When both detections have the same type, nothing changes: one candidate, as before.
+    - A person name reshaped before the merge (particle added, trailing role removed) that becomes the exact text of an organisation or place detection is no longer lost.
+  - **Hyphenated place and company names.** A hyphenated name that the model already detects as a place or an organisation, and in which neither part is a known first name ("Zorbal-Quentrac"), is not offered as a person as well: this is the behaviour before 10.3c. The place or organisation candidate stays, so the name is still replaced. A hyphenated name with a known first name in it ("Jean-Zorbal") is offered both ways, flagged ambiguous.
+  - **Numbers.** CI accuracy run `37963522411` vs `37891970847` (identical to the 10.3b close-out run `37641796495`), same ground truth:
+    - precision 79.24% → 79.20%, recall 79.59% → 79.77%, F1 79.41% → 79.49%;
+    - PERSON F1 94.31% → 94.39%, LOCATION 76.98% → 77.43%, ORG 46.00% → 45.92%;
+    - misses 452 → 448 (PERSON 44 → 42, LOCATION 54 → 52, ORG 354 → 354), with no recall drop in any type.
+    - Paired delta (`scripts/accuracy_paired_delta.py`, same documents resampled together): the overall recall gain is outside the paired range (+0.18 points, range +0.05 to +0.33). The precision and F1 changes are within their paired ranges, so they are not claimed as gains.
+    - Held-out set (same run): unchanged (F1 76.79%, recall 74.46%).
+  - **Upgrading: pseudonym continuity.** The mapping schema is unchanged. Keys are still the entity text with titles stripped (and prepositions, for places), whitespace collapsed, **without the entity type**.
+    - If you confirm both candidates of a pair (say LOCATION "Zorbaville" and ORG "Zorbaville"), they share one key: the first one resolved gets or creates the row, the second reuses its pseudonym. One row is stored, with the first one's type. Rejecting one candidate gives the earlier result for the other.
+    - If the key is already in your database, whatever its type, both candidates are accepted automatically with the stored pseudonym, as known entities, and neither is shown for review. The output is the same as before: the same stored pseudonym, and at the same position the same replacement.
+    - Making the lookup type-aware is planned as a separate story (10.7, Type-Aware Mapping Lookup).
+    - Recommendation: keep using the same mapping database across versions for consistent pseudonyms. Re-process with the previous version if byte-identical output with an old run is required.
+
 - **Fewer false places; names with particles or Mc/Mac kept whole; trailing roles trimmed (Story 10.3b).**
   - **Particles.** A name is no longer cut before its particle: "M. Jean-Zorbal Le" becomes "M. Jean-Zorbal Le Quentrix", and "Mme Zorbalia van der Zorb" and "Zorbal d'Quentrac" stay whole.
     - Recognised particles: le, la, de, du, des, d', van, von, der, den, ter, ten, Di, Da, Del, Della, Dos, and their capitalised or all-caps forms. The list is in `gdpr_pseudonymizer/resources/person_boundaries.yaml`.
