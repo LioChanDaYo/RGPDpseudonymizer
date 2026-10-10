@@ -7,6 +7,19 @@ on:
         description: "Reason for running accuracy validation"
         required: false
         default: "Manual trigger"
+      # Story 10.6 PR B (AC8): empty for a regular run; "final exam" for the
+      # one scored run (on main, with Lionel's recorded go); "dummy" for the
+      # QA proof on tests/fixtures/final_exam_dummy.
+      final_exam:
+        description: "Final exam target: empty, 'final exam' or 'dummy'"
+        required: false
+        default: ""
+        type: string
+      force_failure:
+        description: "Dummy only: make TestFinalExamMetrics fail after scoring (B8.5)"
+        required: false
+        default: false
+        type: boolean
   push:
     branches: ["main"]
     paths:
@@ -20,6 +33,7 @@ permissions:
 
 jobs:
   accuracy:
+    if: github.event_name != 'workflow_dispatch' || inputs.final_exam == ''
     runs-on: ubuntu-22.04
     timeout-minutes: 30
 
@@ -72,6 +86,120 @@ jobs:
           set -o pipefail
           poetry run pytest tests/accuracy/ -v -m accuracy -s --timeout=300 -p no:pytest-qt \
             --junitxml=accuracy-results.xml 2>&1 | tee accuracy-output.txt
+
+      - name: Upload accuracy results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: accuracy-results
+          path: |
+            accuracy-results.xml
+            accuracy-output.txt
+            accuracy-per-document.json
+          retention-days: 30
+
+  # Story 10.6 PR B (AC8): the final exam, scored once at Epic 10 close-out.
+  # No environment and no secret (Q5 reversed, Lionel 2026-10-09). Every step
+  # that touches the final-exam files prints anonymous file names or error
+  # classes only: this repo's CI logs are public.
+  final_exam:
+    if: github.event_name == 'workflow_dispatch' && inputs.final_exam != ''
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+
+    steps:
+      - name: Check inputs
+        env:
+          FINAL_EXAM_INPUT: ${{ inputs.final_exam }}
+          FORCE_FAILURE: ${{ inputs.force_failure }}
+          GIT_REF: ${{ github.ref }}
+        run: |
+          case "$FINAL_EXAM_INPUT" in
+            "final exam"|"dummy") ;;
+            *) echo "ERROR - final_exam must be 'final exam' or 'dummy'"; exit 1 ;;
+          esac
+          if [ "$FORCE_FAILURE" = "true" ] && [ "$FINAL_EXAM_INPUT" != "dummy" ]; then
+            echo "ERROR - force_failure is accepted only with final_exam=dummy"; exit 1
+          fi
+          if [ "$FINAL_EXAM_INPUT" = "final exam" ] && [ "$GIT_REF" != "refs/heads/main" ]; then
+            echo "ERROR - the final exam runs on main only"; exit 1
+          fi
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Select the final-exam root
+        env:
+          FINAL_EXAM_INPUT: ${{ inputs.final_exam }}
+        run: |
+          if [ "$FINAL_EXAM_INPUT" = "final exam" ]; then
+            {
+              echo "FINAL_EXAM_DIR=tests/test_corpus/final_exam"
+              echo "FINAL_EXAM_TARGET=real"
+              echo "FINAL_EXAM_EXPECTED_DOCS=30"
+            } >> "$GITHUB_ENV"
+          else
+            {
+              echo "FINAL_EXAM_DIR=tests/fixtures/final_exam_dummy"
+              echo "FINAL_EXAM_TARGET=dummy"
+              echo "FINAL_EXAM_EXPECTED_DOCS=4"
+            } >> "$GITHUB_ENV"
+          fi
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Ledger check (no scored run yet)
+        run: python scripts/final_exam_fingerprints.py ledger-check --ledger "$FINAL_EXAM_DIR/RUNS.md"
+
+      - name: Fingerprint check
+        run: |
+          (cd "$FINAL_EXAM_DIR" && sha256sum -c --quiet FINGERPRINTS.sha256)
+          python scripts/final_exam_fingerprints.py check --root "$FINAL_EXAM_DIR" --record "$FINAL_EXAM_DIR/FINGERPRINTS.sha256"
+
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+
+      - name: Cache Poetry dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pypoetry
+            ~/.cache/pip
+          key: poetry-deps-ubuntu-3.11-${{ hashFiles('**/poetry.lock') }}
+
+      - name: Install Poetry and dependencies
+        run: |
+          pip install poetry>=1.7.0
+          poetry install --no-interaction
+
+      - name: Cache spaCy model
+        uses: actions/cache@v4
+        with:
+          path: ~/.spacy
+          key: spacy-model-fr-core-news-lg-ubuntu
+
+      - name: Download spaCy model
+        run: poetry run python -m spacy download fr_core_news_lg
+
+      - name: Run accuracy validation tests with the final exam
+        env:
+          OMP_NUM_THREADS: 1
+          PYTHONUTF8: 1
+          ACCURACY_PER_DOC_JSON: accuracy-per-document.json
+          ACCURACY_LOG_LEVEL: CRITICAL
+          FINAL_EXAM_FORCE_FAILURE: ${{ inputs.force_failure && '1' || '' }}
+        # --tb=short: a failing test never prints its arguments (QA SEC-001).
+        run: |
+          set -o pipefail
+          echo "final_exam_target=$FINAL_EXAM_TARGET fingerprints_sha256=$(sha256sum "$FINAL_EXAM_DIR/FINGERPRINTS.sha256" | cut -d' ' -f1)" > accuracy-output.txt
+          poetry run pytest tests/accuracy/ -v -m accuracy -s --timeout=300 -p no:pytest-qt \
+            --tb=short --junitxml=accuracy-results.xml 2>&1 | tee -a accuracy-output.txt
 
       - name: Upload accuracy results
         uses: actions/upload-artifact@v4

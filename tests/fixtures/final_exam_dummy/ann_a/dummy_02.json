@@ -1,0 +1,59 @@
+{
+  "document_name": "dummy_02.txt",
+  "entities": [
+    {
+      "entity_text": "INSTITUT ZORBAL",
+      "entity_type": "ORG",
+      "start_pos": 15,
+      "end_pos": 30
+    },
+    {
+      "entity_text": "QUELBRIX Zorvane",
+      "entity_type": "PERSON",
+      "start_pos": 86,
+      "end_pos": 102
+    },
+    {
+      "entity_text": "Zorbaville",
+      "entity_type": "LOCATION",
+      "start_pos": 124,
+      "end_pos": 134
+    },
+    {
+      "entity_text": "ZENDRAK Tralvio",
+      "entity_type": "PERSON",
+      "start_pos": 135,
+      "end_pos": 150
+    },
+    {
+      "entity_text": "Vraskaland",
+      "entity_type": "LOCATION",
+      "start_pos": 173,
+      "end_pos": 183
+    },
+    {
+      "entity_text": "Zendrak",
+      "entity_type": "PERSON",
+      "start_pos": 188,
+      "end_pos": 195
+    },
+    {
+      "entity_text": "Quelbrix",
+      "entity_type": "PERSON",
+      "start_pos": 220,
+      "end_pos": 228
+    },
+    {
+      "entity_text": "Quentrix Vraskaland",
+      "entity_type": "ORG",
+      "start_pos": 251,
+      "end_pos": 270
+    },
+    {
+      "entity_text": "Vraskaland",
+      "entity_type": "LOCATION",
+      "start_pos": 260,
+      "end_pos": 270
+    }
+  ]
+}
