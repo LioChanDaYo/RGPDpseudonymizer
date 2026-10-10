@@ -15,6 +15,7 @@ import dataclasses
 import functools
 import json
 import re
+import unicodedata
 from dataclasses import dataclass
 
 import yaml
@@ -266,6 +267,46 @@ class _SalutationLine:
     kind: str
     names: tuple[tuple[int, int], ...]
     comma_after: bool
+
+
+# ---------------------------------------------------------------------------
+# Document-level detections after the final merge (Story 10.4, AC5)
+# ---------------------------------------------------------------------------
+
+# A standalone all-caps token of 2 to 6 letters, never joined to a letter,
+# digit or hyphen (so never inside a reference code such as "REF-2024-AB-01")
+_ACRONYM_RE = re.compile(f"(?<![\\w-])([{_UPPER}]{{2,6}})(?![\\w-])")
+# A name token standing alone (an elided "d'" before it is allowed)
+_NAME_TOKEN_RE = re.compile(f"(?<![\\w-]){_NAME_TOKEN}(?![\\w-])")
+# Lower-case connectors of the organizations pattern, skipped by the initials
+_INITIALS_CONNECTORS = frozenset({"de", "du", "des", "la", "le", "et", "&"})
+_ELISION_PREFIX_RE = re.compile(r"^[dlDL]['’]")
+
+
+def _fold(text: str) -> str:
+    """Accents removed, case-folded."""
+    return "".join(
+        c for c in unicodedata.normalize("NFD", text) if not unicodedata.combining(c)
+    ).casefold()
+
+
+def _org_initials(text: str) -> str | None:
+    """Initials of an organisation name (Story 10.4, R-ACR).
+
+    The first letters of the capitalised words of the title-stripped text,
+    skipping the connectors de, du, des, la, le, et, & and a leading elision
+    (d', l'). None when fewer than two capitalised words remain.
+    """
+    words: list[str] = []
+    for token in strip_french_titles(text).split():
+        if token in _INITIALS_CONNECTORS:
+            continue
+        token = _ELISION_PREFIX_RE.sub("", token)
+        if token[:1].isupper():
+            words.append(token)
+    if len(words) < 2:
+        return None
+    return "".join(word[0] for word in words)
 
 
 def _line_spans(text: str) -> list[tuple[int, int]]:
@@ -832,6 +873,14 @@ class HybridDetector(EntityDetector):
                     spacy_entities, pristine_regex, text
                 )
 
+        # Story 10.4 (AC5): detections that need the document's final list
+        added = self._document_level_entities(text, merged_entities)
+        if added:
+            merged_entities = self._dedup_same_type_overlaps(
+                merged_entities + added, text
+            )
+            merged_entities.sort(key=lambda e: e.start_pos)
+
         logger.info(
             "hybrid_detection_complete",
             spacy_count=len(spacy_entities),
@@ -1294,6 +1343,108 @@ class HybridDetector(EntityDetector):
                     )
                 )
         return found
+
+    def _document_level_entities(
+        self, text: str, entities: list[DetectedEntity]
+    ) -> list[DetectedEntity]:
+        """Story 10.4 rules that read the final merged list of the document,
+        in order: R-ACR, then R-FN-DOC. Each sees the previous additions.
+        They only add detections, and an addition overlaps no detection."""
+        added: list[DetectedEntity] = []
+        added += self._org_acronyms(text, entities + added)
+        added += self._document_first_names(text, entities + added)
+        return added
+
+    @staticmethod
+    def _org_acronyms(
+        text: str, entities: list[DetectedEntity]
+    ) -> list[DetectedEntity]:
+        """R-ACR (Story 10.4, AC5): a standalone all-caps token of 2-6 letters
+        whose letters are the initials of an ORG detection of the same
+        document becomes an ORG, at every occurrence that overlaps no
+        detection (GUIDELINES Q18). A token that is a role for the 10.2 role
+        test (a role acronym or a VP prefix) is skipped. No acronym list: the
+        tie is the organisation named in the same text."""
+        initials: dict[str, DetectedEntity] = {}
+        for entity in entities:
+            if entity.entity_type == "ORG":
+                found = _org_initials(entity.text)
+                if found:
+                    initials.setdefault(_fold(found).upper(), entity)
+        if not initials:
+            return []
+        index = _SpanIndex.of(entities)
+        added: list[DetectedEntity] = []
+        for match in _ACRONYM_RE.finditer(text):
+            token = match.group(1)
+            org = initials.get(_fold(token).upper())
+            if org is None or match_org_role(token) is not None:
+                continue
+            if index.overlaps(match.start(), match.end()):
+                continue
+            added.append(
+                DetectedEntity(
+                    text=token,
+                    entity_type="ORG",
+                    start_pos=match.start(),
+                    end_pos=match.end(),
+                    confidence=0.70,
+                    source="regex",
+                )
+            )
+            logger.debug(
+                "org_acronym_added",
+                start=match.start(),
+                end=match.end(),
+                org_start=org.start_pos,
+                org_end=org.end_pos,
+            )
+        return added
+
+    def _document_first_names(
+        self, text: str, entities: list[DetectedEntity]
+    ) -> list[DetectedEntity]:
+        """R-FN-DOC (Story 10.4, AC5): a known first name that overlaps no
+        detection and equals the first token (titles stripped) of a PERSON
+        detection of two or more tokens in the same document becomes a PERSON,
+        at every such occurrence (GUIDELINES Q8). Lower-case words never
+        fire; a capitalised common word fires only in a document that names
+        a person with that first name (accepted by Lionel, STOP R Q2)."""
+        firsts: dict[str, DetectedEntity] = {}
+        for entity in entities:
+            if entity.entity_type == "PERSON":
+                tokens = strip_french_titles(entity.text).split()
+                if len(tokens) >= 2:
+                    firsts.setdefault(tokens[0].strip(",;:"), entity)
+        if not firsts:
+            return []
+        index = _SpanIndex.of(entities)
+        added: list[DetectedEntity] = []
+        for match in _NAME_TOKEN_RE.finditer(text):
+            name = match.group()
+            person = firsts.get(name)
+            if person is None or not self._is_known_name_token(name):
+                continue
+            if index.overlaps(match.start(), match.end()):
+                continue
+            added.append(
+                DetectedEntity(
+                    text=name,
+                    entity_type="PERSON",
+                    start_pos=match.start(),
+                    end_pos=match.end(),
+                    confidence=0.80,
+                    source="regex",
+                )
+            )
+            logger.debug(
+                "document_first_name_added",
+                start=match.start(),
+                end=match.end(),
+                person_start=person.start_pos,
+                person_end=person.end_pos,
+            )
+        return added
 
     @staticmethod
     def _salutation_names(

@@ -3,6 +3,10 @@
 Slice O (organisation + place, AC4): R-OPC merges an ORG and the listed place
 that follows it, the place keeping its own LOCATION.
 
+Slice A (carried losses, AC5): R-ACR ties an all-caps token to the initials of
+an ORG of the same document; R-FN-DOC offers a first name used alone when the
+document names that person in full.
+
 Slice S (salutations, AC1-AC3):
 - R-SAL-SPLIT: "X, Y" on a salutation line, both known first names → two
   PERSONs (AC1);
@@ -627,4 +631,216 @@ class TestOrgPlaceMerge:
             "place_end": 11,
             "place_source": "abbreviation",
             "location_emitted": True,
+        }
+
+
+# ---------------------------------------------------------------------------
+# Slice A: R-ACR ("BRS") and R-FN-DOC ("Pierre") (AC5)
+# ---------------------------------------------------------------------------
+
+
+class TestOrgAcronym:
+    def test_initials(self) -> None:
+        assert hd._org_initials("Zorbal Régionale Quentrix") == "ZRQ"
+        assert hd._org_initials("Zorbal de la Quentrix") == "ZQ"
+        assert hd._org_initials("Zorbal d'Quentrix Vardel") == "ZQV"
+        assert hd._org_initials("Zorbal & Quentrix") == "ZQ"
+        assert hd._org_initials("Dr Zorbal Quentrix") == "ZQ"
+        assert hd._org_initials("Zorbtech") is None
+        assert hd._org_initials("Zorbtech technique") is None
+
+    def test_acronym_of_an_org_of_the_document(
+        self, detector: HybridDetector, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        doc = (
+            "Le rapport de Zorbal Régionale Quentrix est prêt.\n"
+            "   - Participants ZRQ: le comité.\n"
+            "ZRQ et le comité.\n"
+        )
+        org = _at(doc, "Zorbal Régionale Quentrix", "ORG")
+        found = _detect(monkeypatch, detector, doc, spacy_entities=[org])
+        assert [s for t, ty, s in found if t == "ZRQ" and ty == "ORG"] == [
+            doc.index("ZRQ"),
+            doc.index("ZRQ", doc.index("ZRQ") + 1),
+        ]
+
+    @pytest.mark.parametrize(
+        "line",
+        [
+            "Référence: PROP-2024-ZRQ-001",  # inside a reference code
+            "ZRQs et le comité.",  # joined to a letter
+            "zrq et le comité.",  # not all caps
+        ],
+    )
+    def test_no_fire(
+        self, detector: HybridDetector, monkeypatch: pytest.MonkeyPatch, line: str
+    ) -> None:
+        doc = f"Le rapport de Zorbal Régionale Quentrix est prêt.\n{line}\n"
+        org = _at(doc, "Zorbal Régionale Quentrix", "ORG")
+        found = _detect(monkeypatch, detector, doc, spacy_entities=[org])
+        assert _types(found) == [("Zorbal Régionale Quentrix", "ORG")]
+
+    def test_no_org_with_these_initials(
+        self, detector: HybridDetector, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        doc = "Le rapport est prêt.\nZRQ et le comité.\n"
+        assert _detect(monkeypatch, detector, doc) == []
+
+    @pytest.mark.parametrize(
+        ("org", "token"),
+        [("Corbal Ezran Oquel", "CEO"), ("Vardel Pemmon", "VP")],
+    )
+    def test_role_tokens_are_skipped(
+        self,
+        detector: HybridDetector,
+        monkeypatch: pytest.MonkeyPatch,
+        org: str,
+        token: str,
+    ) -> None:
+        # a role acronym, or a VP prefix (refined rule, Lionel STOP R Q3)
+        doc = f"Le rapport de {org} est prêt.\nLe {token} et le comité.\n"
+        found = _detect(
+            monkeypatch, detector, doc, spacy_entities=[_at(doc, org, "ORG")]
+        )
+        assert _types(found) == [(org, "ORG")]
+
+    def test_covered_token_is_left_alone(
+        self, detector: HybridDetector, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        doc = "Le rapport de Zorbal Régionale Quentrix est prêt.\nZRQ Zorbtech.\n"
+        spacy_entities = [
+            _at(doc, "Zorbal Régionale Quentrix", "ORG"),
+            _at(doc, "ZRQ Zorbtech", "ORG"),
+        ]
+        found = _detect(monkeypatch, detector, doc, spacy_entities=spacy_entities)
+        assert ("ZRQ", "ORG") not in _types(found)
+
+    def test_accents_are_folded(
+        self, detector: HybridDetector, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        doc = "Le rapport de Ébral Zorbtech est prêt.\nEZ et le comité.\n"
+        found = _detect(
+            monkeypatch,
+            detector,
+            doc,
+            spacy_entities=[_at(doc, "Ébral Zorbtech", "ORG")],
+        )
+        assert ("EZ", "ORG") in _types(found)
+
+
+class TestDocumentFirstName:
+    def test_first_name_alone_after_the_full_name(
+        self,
+        detector: HybridDetector,
+        first_names: NameDictionary,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        doc = (
+            "Mme Zorbalia Quentrel rejoint le comité.\n   Zorbalia rejoint le bureau.\n"
+        )
+        person = _at(doc, "Mme Zorbalia Quentrel", "PERSON")
+        found = _detect(monkeypatch, detector, doc, spacy_entities=[person])
+        assert ("Zorbalia", "PERSON", doc.index("   Zorbalia") + 3) in found
+
+    def test_no_full_name_no_fire(
+        self,
+        detector: HybridDetector,
+        first_names: NameDictionary,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        doc = "Le rapport est prêt.\n   Zorbalia rejoint le bureau.\n"
+        assert _detect(monkeypatch, detector, doc) == []
+
+    def test_one_token_person_does_not_seed(
+        self,
+        detector: HybridDetector,
+        first_names: NameDictionary,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        doc = "Zorbalia rejoint le comité.\nZorbalia rejoint le bureau.\n"
+        person = _at(doc, "Zorbalia", "PERSON")
+        found = _detect(monkeypatch, detector, doc, spacy_entities=[person])
+        assert _persons(found) == ["Zorbalia"]
+
+    def test_lower_case_and_covered_words_do_not_fire(
+        self,
+        detector: HybridDetector,
+        first_names: NameDictionary,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        doc = (
+            "Zorbalia Quentrel rejoint le comité.\n"
+            "Le bureau de zorbalia.\n"
+            "Zorbalia Zorbtech et le comité.\n"
+        )
+        spacy_entities = [
+            _at(doc, "Zorbalia Quentrel", "PERSON"),
+            _at(doc, "Zorbalia Zorbtech", "ORG"),
+        ]
+        found = _detect(monkeypatch, detector, doc, spacy_entities=spacy_entities)
+        assert _persons(found) == ["Zorbalia Quentrel"]
+
+    @pytest.mark.parametrize(
+        "doc",
+        [
+            "Pierre après pierre, le projet reste solide.",
+            "Le rapport de Pierre et du comité est prêt.",
+            "Blanche, la page du rapport reste sur le bureau.",
+            "Une pierre sur le bureau du comité.",
+            "Une page blanche pour le rapport.",
+        ],
+    )
+    def test_common_words_in_a_document_naming_no_such_person(
+        self, detector: HybridDetector, monkeypatch: pytest.MonkeyPatch, doc: str
+    ) -> None:
+        # AC3 as read for AC5 ("never on a common-word use"); real dictionary
+        doc = f"M. Zorbalia Quentrel a signé le rapport.\n{doc}\n"
+        person = _at(doc, "M. Zorbalia Quentrel", "PERSON")
+        found = _detect(monkeypatch, detector, doc, spacy_entities=[person])
+        assert _persons(found) == ["M. Zorbalia Quentrel"]
+
+    def test_accepted_residual(
+        self, detector: HybridDetector, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        # Lionel, STOP R Q2: a capitalised common word that is the first name
+        # of a person named in the same document is offered (one more line to
+        # reject, never a leak); the lower-case word is not
+        doc = (
+            "M. Pierre Quentrel a signé le rapport.\n"
+            "Pierre après pierre, le projet reste solide.\n"
+        )
+        person = _at(doc, "M. Pierre Quentrel", "PERSON")
+        found = _detect(monkeypatch, detector, doc, spacy_entities=[person])
+        assert _persons(found) == ["M. Pierre Quentrel", "Pierre"]
+
+    def test_events_carry_no_entity_text(
+        self,
+        detector: HybridDetector,
+        first_names: NameDictionary,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        recorder = _LogRecorder()
+        monkeypatch.setattr(hd, "logger", recorder)
+        doc = "Zorbalia Quentrel de Zorbal Régionale Quentrix.\n" "Zorbalia et ZRQ.\n"
+        spacy_entities = [
+            _at(doc, "Zorbalia Quentrel", "PERSON"),
+            _at(doc, "Zorbal Régionale Quentrix", "ORG"),
+        ]
+        _detect(monkeypatch, detector, doc, spacy_entities=spacy_entities)
+        events = dict(
+            (name, fields)
+            for name, fields in recorder.events
+            if name in ("org_acronym_added", "document_first_name_added")
+        )
+        assert events["org_acronym_added"] == {
+            "start": 60,
+            "end": 63,
+            "org_start": 21,
+            "org_end": 46,
+        }
+        assert events["document_first_name_added"] == {
+            "start": 48,
+            "end": 56,
+            "person_start": 0,
+            "person_end": 17,
         }
