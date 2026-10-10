@@ -328,6 +328,7 @@ def _view_bytes(ws: Path) -> list[bytes]:
     names = (
         "adjudication_view.html",
         "decisions.tsv",
+        "occurrences.tsv",
         "spotcheck_view.html",
         "spotcheck.tsv",
     )
@@ -342,15 +343,33 @@ def test_spotcheck_draw_is_deterministic_and_stratified() -> None:
     assert len(set(first)) == 3
 
 
-def _fill(ws: Path, decision: str, spot: str = "NONE") -> None:
+def _set_groups(ws: Path, codes: dict[str, str], default: str = "") -> None:
     rows = (ws / "decisions.tsv").read_text(encoding="utf-8").splitlines()
-    filled = [rows[0]] + [
-        r.split("\t")[0] + "\t" + r.split("\t")[1] + f"\t{decision}\t" for r in rows[1:]
-    ]
+    filled = [rows[0]]
+    for r in rows[1:]:
+        gid, cls, count = r.split("\t")[:3]
+        filled.append("\t".join([gid, cls, count, codes.get(gid, default), ""]))
     _write(ws / "decisions.tsv", "\n".join(filled) + "\n")
+
+
+def _set_occurrences(ws: Path, codes: dict[str, str]) -> None:
+    rows = (ws / "occurrences.tsv").read_text(encoding="utf-8").splitlines()
+    filled = [rows[0]]
+    for r in rows[1:]:
+        did, gid, cls = r.split("\t")[:3]
+        filled.append("\t".join([did, gid, cls, codes.get(did, ""), ""]))
+    _write(ws / "occurrences.tsv", "\n".join(filled) + "\n")
+
+
+def _set_spotcheck(ws: Path, spot: str = "NONE") -> None:
     srows = (ws / "spotcheck.tsv").read_text(encoding="utf-8").splitlines()
     sfilled = [srows[0]] + [r.split("\t")[0] + f"\t{spot}\t" for r in srows[1:]]
     _write(ws / "spotcheck.tsv", "\n".join(sfilled) + "\n")
+
+
+def _fill(ws: Path, decision: str, spot: str = "NONE") -> None:
+    _set_groups(ws, {}, default=decision)
+    _set_spotcheck(ws, spot)
 
 
 def test_view_and_merge_are_deterministic(
@@ -361,7 +380,9 @@ def test_view_and_merge_are_deterministic(
     first = _view_bytes(ws)
     assert adj.main(["view", "--workspace", str(ws)]) == 0
     assert _view_bytes(ws) == first
+    # the dummy fixture's three disagreements are all different: three groups
     assert len((ws / "decisions.tsv").read_text().splitlines()) == 4
+    assert len((ws / "occurrences.tsv").read_text().splitlines()) == 4
     _fill(ws, "A")
     assert adj.main(["merge", "--workspace", str(ws)]) == 0
     merged = {p.name: p.read_bytes() for p in (ws / "annotations").glob("*.json")}
@@ -397,23 +418,12 @@ def test_merge_fix_and_spotcheck_codes(
 ) -> None:
     ws = _workspace(tmp_path)
     adj.main(["view", "--workspace", str(ws)])
-    _fill(ws, "NONE")
-    # dummy_01, in offset order: d001 type, d002 boundary, d003 one-sided.
-    codes = {"dummy_01-d001": "A", "dummy_01-d002": "FIX:PERSON:Zorbalia QUENTREL"}
+    # dummy_01, in order of first occurrence: g001 type, g002 boundary, g003 one-sided.
     rows = (ws / "decisions.tsv").read_text(encoding="utf-8").splitlines()
-    rows = [rows[0]] + [
-        "\t".join(
-            [
-                r.split("\t")[0],
-                r.split("\t")[1],
-                codes.get(r.split("\t")[0], "NONE"),
-                "",
-            ]
-        )
-        for r in rows[1:]
-    ]
     assert [r.split("\t")[1] for r in rows[1:]] == ["type", "boundary", "one-sided"]
-    _write(ws / "decisions.tsv", "\n".join(rows) + "\n")
+    _set_groups(
+        ws, {"g001": "A", "g002": "FIX:PERSON:Zorbalia QUENTREL", "g003": "NONE"}
+    )
     spot_docs = sorted(adj.spotcheck_documents(adj.load_manifest(ws)))
     target = "dummy_03" if "dummy_03" in spot_docs else spot_docs[0]
     rows = ["document\tcorrection\tnote"] + [
@@ -429,8 +439,172 @@ def test_merge_fix_and_spotcheck_codes(
         assert "MISSING=1" in out and "missing_occurrences_added=1" in out
     assert adj.main(["report", "--workspace", str(ws)]) == 0
     report = capsys.readouterr().out
+    assert "[GROUPS] groups=3 single=3 multi=0 split=0" in report
     assert "[SPOT-CHECK] documents=3" in report
     assert "Zorba" not in report and "Quentr" not in report
+
+
+# ---------------------------------------------------------------------------
+# Grouped adjudication (story precision, 2026-10-10), invented text only
+# ---------------------------------------------------------------------------
+
+_GROUP_DOCS = {
+    "grp_01": (
+        "planted",
+        "Bonjour Zorvane.\nLe site de Zorbaville ouvre.\nQuentrix signe avec Zorbaville.\n",
+        [
+            ("Zorvane", "PERSON", 0),
+            ("Zorbaville", "LOCATION", 0),
+            ("Quentrix", "ORG", 0),
+            ("Zorbaville", "LOCATION", 1),
+        ],
+        [("Zorvane", "PERSON", 0), ("Quentrix", "LOCATION", 0)],
+    ),
+    "grp_02": (
+        "natural",
+        "Zorbaville accueille Quentrix.\n",
+        [("Zorbaville", "LOCATION", 0), ("Quentrix", "ORG", 0)],
+        [("Quentrix", "LOCATION", 0)],
+    ),
+    "grp_03": (
+        "natural",
+        "Tralvio Zendrak arrive.\n",
+        [("Tralvio Zendrak", "PERSON", 0)],
+        [("Tralvio Zendrak", "PERSON", 0)],
+    ),
+}
+
+
+def _spans(text: str, specs: list[tuple[str, str, int]]) -> list[dict[str, object]]:
+    out = []
+    for needle, etype, nth in specs:
+        start = -1
+        for _ in range(nth + 1):
+            start = text.index(needle, start + 1)
+        out.append(
+            {
+                "entity_text": needle,
+                "entity_type": etype,
+                "start_pos": start,
+                "end_pos": start + len(needle),
+            }
+        )
+    return sorted(out, key=lambda e: (e["start_pos"], e["end_pos"]))  # type: ignore[arg-type,return-value]
+
+
+def _group_workspace(tmp_path: Path) -> Path:
+    ws = tmp_path / "gws"
+    documents = []
+    for doc_id, (half, text, a, b) in _GROUP_DOCS.items():
+        _write(ws / "documents" / f"{doc_id}.txt", text)
+        for folder, specs in (("ann_a", a), ("ann_b", b)):
+            _write(
+                ws / folder / f"{doc_id}.json",
+                json.dumps(
+                    {"document_name": f"{doc_id}.txt", "entities": _spans(text, specs)}
+                ),
+            )
+        documents.append({"id": doc_id, "half": half})
+    _write(
+        ws / "manifest.json", json.dumps({"target": "dummy", "documents": documents})
+    )
+    return ws
+
+
+def _types(ws: Path, doc_id: str) -> list[tuple[str, str]]:
+    data = json.loads(
+        (ws / "annotations" / f"{doc_id}.json").read_text(encoding="utf-8")
+    )
+    return [(e["entity_text"], e["entity_type"]) for e in data["entities"]]
+
+
+def test_identical_disagreements_are_grouped(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    ws = _group_workspace(tmp_path)
+    assert adj.main(["view", "--workspace", str(ws)]) == 0
+    out = capsys.readouterr().out
+    assert "view disagreements=5 groups=2 single=0 multi=2" in out
+    assert "Zorba" not in out and "Quentr" not in out
+    assert (ws / "decisions.tsv").read_text(encoding="utf-8").splitlines() == [
+        "group\tclass\tcount\tdecision\tnote",
+        "g001\tone-sided\t3\t\t",
+        "g002\ttype\t2\t\t",
+    ]
+    occurrences = (ws / "occurrences.tsv").read_text(encoding="utf-8").splitlines()
+    assert [r.split("\t")[1] for r in occurrences[1:]] == ["g001"] * 3 + ["g002"] * 2
+    view = (ws / "adjudication_view.html").read_text(encoding="utf-8")
+    assert (
+        "3 occurrences</h2>" in view and "<summary>All 3 occurrences</summary>" in view
+    )
+    assert view.count("<details>") == 1  # g002 has two occurrences, both shown
+    groups, _ = adj.build_groups(ws)
+    assert adj.group_counts(groups) == (2, 0, 2)
+
+
+def test_group_decision_applies_to_every_occurrence(tmp_path: Path) -> None:
+    ws = _group_workspace(tmp_path)
+    adj.main(["view", "--workspace", str(ws)])
+    _set_groups(ws, {"g001": "A", "g002": "B"})
+    _set_spotcheck(ws)
+    assert adj.main(["merge", "--workspace", str(ws)]) == 0
+    assert _types(ws, "grp_01") == [
+        ("Zorvane", "PERSON"),
+        ("Zorbaville", "LOCATION"),
+        ("Quentrix", "LOCATION"),
+        ("Zorbaville", "LOCATION"),
+    ]
+    assert _types(ws, "grp_02") == [
+        ("Zorbaville", "LOCATION"),
+        ("Quentrix", "LOCATION"),
+    ]
+
+
+def test_split_group_decides_per_occurrence(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    ws = _group_workspace(tmp_path)
+    adj.main(["view", "--workspace", str(ws)])
+    _set_groups(ws, {"g001": "SPLIT", "g002": "A"})
+    _set_occurrences(
+        ws, {"grp_01-d001": "A", "grp_01-d003": "A", "grp_02-d001": "NONE"}
+    )
+    _set_spotcheck(ws)
+    capsys.readouterr()
+    assert adj.main(["merge", "--workspace", str(ws)]) == 0
+    assert "A=4 NONE=1" in capsys.readouterr().out
+    assert _types(ws, "grp_02") == [("Quentrix", "ORG")]
+    assert adj.main(["report", "--workspace", str(ws)]) == 0
+    assert "[GROUPS] groups=2 single=0 multi=2 split=1" in capsys.readouterr().out
+
+
+@pytest.mark.parametrize(
+    ("groups", "occurrences"),
+    [
+        ({"g001": "SPLIT", "g002": "A"}, {"grp_01-d001": "A", "grp_01-d003": "A"}),
+        ({"g001": "A", "g002": "A"}, {"grp_02-d001": "NONE"}),
+        (
+            {"g001": "SPLIT", "g002": "A"},
+            {"grp_01-d001": "A", "grp_01-d003": "A", "grp_02-d001": "SPLIT"},
+        ),
+        ({"g001": "A", "g002": "BOTH"}, {}),
+        ({"g001": "A"}, {}),
+    ],
+)
+def test_grouped_merge_rejects_inconsistent_decisions(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+    groups: dict[str, str],
+    occurrences: dict[str, str],
+) -> None:
+    ws = _group_workspace(tmp_path)
+    adj.main(["view", "--workspace", str(ws)])
+    _set_groups(ws, groups)
+    _set_occurrences(ws, occurrences)
+    _set_spotcheck(ws)
+    capsys.readouterr()
+    assert adj.main(["merge", "--workspace", str(ws)]) == 1
+    assert capsys.readouterr().out.strip() == "ERROR - DecisionError"
 
 
 # ---------------------------------------------------------------------------
