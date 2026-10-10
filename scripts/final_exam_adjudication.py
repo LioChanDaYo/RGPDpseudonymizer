@@ -62,8 +62,22 @@ class FormatFailureError(Exception):
         self.kind = kind
 
 
-class DecisionError(Exception):
+class AnonymousError(Exception):
+    """An error that names only an anonymous place: a group id (``gNNN``), a
+    disagreement id (``fe_NN-dKKK``), a document id, or a TSV file name and
+    line number. Its message is never printed (QA ADJ-003)."""
+
+    def __init__(self, reason: str, where: str = "-") -> None:
+        super().__init__(reason)
+        self.where = where
+
+
+class DecisionError(AnonymousError):
     """An empty, unknown or inapplicable adjudication code (B10.1)."""
+
+
+class OverwriteError(AnonymousError):
+    """``view`` would overwrite a decision file without ``--force`` (QA ADJ-002)."""
 
 
 @dataclass(frozen=True)
@@ -653,7 +667,14 @@ def _occurrence_html(text: str, d: Disagreement) -> str:
     )
 
 
-def cmd_view(workspace: Path) -> int:
+DECISION_FILES = ("decisions.tsv", "occurrences.tsv", "spotcheck.tsv")
+
+
+def cmd_view(workspace: Path, force: bool = False) -> int:
+    if not force:
+        for name in DECISION_FILES:
+            if (workspace / name).exists():
+                raise OverwriteError("decision file exists", where=name)
     halves = load_manifest(workspace)
     groups, texts = build_groups(workspace)
     view: list[str] = ["<h1>Final exam: disagreements, grouped</h1>"]
@@ -715,11 +736,17 @@ def cmd_view(workspace: Path) -> int:
     return 0
 
 
-def read_tsv(path: Path, header: str) -> list[list[str]]:
-    lines = path.read_text(encoding="utf-8").replace("\r", "").split("\n")
+def read_tsv(path: Path, header: str) -> list[tuple[str, list[str]]]:
+    """(``<file>:<line>``, cells) per non-empty row. Read as ``utf-8-sig``, so a
+    byte-order mark added by an editor does not break the header (QA ADJ-003)."""
+    lines = path.read_text(encoding="utf-8-sig").replace("\r", "").split("\n")
     if lines[0] != header:
-        raise DecisionError("bad header")
-    return [line.split("\t") for line in lines[1:] if line.strip()]
+        raise DecisionError("bad header", where=f"{path.name}:1")
+    return [
+        (f"{path.name}:{n}", line.split("\t"))
+        for n, line in enumerate(lines[1:], start=2)
+        if line.strip()
+    ]
 
 
 def _occurrences(text: str, needle: str) -> list[int]:
@@ -755,15 +782,25 @@ def apply_decision(text: str, d: Disagreement, code: str) -> list[Span]:
         _, etype, needle = code.split(":", 2)
         etype = _parse_type(etype)
         lo, hi = context_window(text, d.start, d.end)
+        # The FIX span must overlap its own disagreement (QA ADJ-001): a group's
+        # occurrences share a normalized key, not the raw text, so a FIX text may
+        # exist only on a neighbouring line. Then the group must be split.
         hits = [
-            i for i in _occurrences(text, needle) if lo <= i and i + len(needle) <= hi
+            i
+            for i in _occurrences(text, needle)
+            if lo <= i
+            and i + len(needle) <= hi
+            and i < d.end
+            and d.start < i + len(needle)
         ]
         if not hits:
-            raise DecisionError("FIX text not in context")
+            raise DecisionError(
+                "FIX text does not overlap its disagreement", where=d.did
+            )
         i = min(hits, key=lambda h: (abs(h - d.start), h))
         doc_id = d.did.split("-")[0]
         return [Span(doc_id, i, i + len(needle), etype, needle)]
-    raise DecisionError("unknown or inapplicable code")
+    raise DecisionError("unknown or inapplicable code", where=d.did)
 
 
 def apply_spotcheck(
@@ -831,23 +868,24 @@ def read_decisions(workspace: Path, groups: list[Group]) -> dict[str, str]:
     """The code that applies to each disagreement id (B10.1, grouped)."""
     by_gid = {g.gid: g for g in groups}
     group_codes: dict[str, str] = {}
-    for row in read_tsv(workspace / "decisions.tsv", DECISIONS_HEADER):
+    for where, row in read_tsv(workspace / "decisions.tsv", DECISIONS_HEADER):
         if len(row) < 4 or row[0] not in by_gid or row[0] in group_codes:
-            raise DecisionError("unknown or duplicate group")
+            raise DecisionError("unknown or duplicate group", where=where)
         if not row[3].strip():
-            raise DecisionError("empty group decision")
+            raise DecisionError("empty group decision", where=row[0])
         group_codes[row[0]] = row[3].strip()
-    if set(group_codes) != set(by_gid):
-        raise DecisionError("group without a decision")
+    missing = sorted(set(by_gid) - set(group_codes))
+    if missing:
+        raise DecisionError("group without a decision", where=missing[0])
     member_gid = {d.did: g.gid for g in groups for d in g.members}
     occurrence_codes: dict[str, str] = {}
-    for row in read_tsv(workspace / "occurrences.tsv", OCCURRENCES_HEADER):
+    for where, row in read_tsv(workspace / "occurrences.tsv", OCCURRENCES_HEADER):
         if (
             len(row) < 2
             or member_gid.get(row[0]) != row[1]
             or row[0] in occurrence_codes
         ):
-            raise DecisionError("unknown or duplicate occurrence")
+            raise DecisionError("unknown or duplicate occurrence", where=where)
         occurrence_codes[row[0]] = row[3].strip() if len(row) > 3 else ""
     decisions: dict[str, str] = {}
     for g in groups:
@@ -855,9 +893,9 @@ def read_decisions(workspace: Path, groups: list[Group]) -> dict[str, str]:
         for d in g.members:
             own = occurrence_codes.get(d.did, "")
             if split and (not own or own == SPLIT):
-                raise DecisionError("split group with an undecided occurrence")
+                raise DecisionError("split group, undecided occurrence", where=d.did)
             if not split and own:
-                raise DecisionError("occurrence decision in an unsplit group")
+                raise DecisionError("occurrence code, unsplit group", where=d.did)
             decisions[d.did] = own if split else group_codes[g.gid]
     return decisions
 
@@ -871,15 +909,17 @@ def merge_workspace(
     halves = load_manifest(workspace)
     groups, _ = build_groups(workspace)
     decisions = read_decisions(workspace, groups)
+    gid_of = {d.did: g.gid for g in groups for d in g.members}
     spot_rows = read_tsv(workspace / "spotcheck.tsv", "document\tcorrection\tnote")
     spot_docs = sorted(spotcheck_documents(halves))
-    spot_codes: dict[str, list[str]] = {d: [] for d in spot_docs}
-    for row in spot_rows:
+    spot_codes: dict[str, list[tuple[str, str]]] = {d: [] for d in spot_docs}
+    for where, row in spot_rows:
         if len(row) < 2 or row[0] not in spot_codes or not row[1].strip():
-            raise DecisionError("empty or unknown spot-check row")
-        spot_codes[row[0]].append(row[1].strip())
-    if any(not codes for codes in spot_codes.values()):
-        raise DecisionError("spot-check document without a row")
+            raise DecisionError("empty or unknown spot-check row", where=where)
+        spot_codes[row[0]].append((where, row[1].strip()))
+    for doc_id, codes in spot_codes.items():
+        if not codes:
+            raise DecisionError("spot-check document without a row", where=doc_id)
     code_counts: dict[str, int] = {}
     spot_counts = {c: 0 for c in SPOT_CLASSES}
     missing_added = 0
@@ -889,12 +929,20 @@ def merge_workspace(
         spans = list(agreed)
         for d in disagreements:
             code = decisions[d.did]
-            spans += apply_decision(text, d, code)
+            try:
+                spans += apply_decision(text, d, code)
+            except DecisionError as exc:
+                raise DecisionError(
+                    "decision refused", f"{gid_of[d.did]}/{d.did}"
+                ) from exc
             key = code.split(":", 1)[0]
             code_counts[key] = code_counts.get(key, 0) + 1
         named = agreed_ids(doc_id, agreed)
-        for code in spot_codes.get(doc_id, []):
-            spans, cls, added = apply_spotcheck(text, doc_id, spans, named, code)
+        for where, code in spot_codes.get(doc_id, []):
+            try:
+                spans, cls, added = apply_spotcheck(text, doc_id, spans, named, code)
+            except DecisionError as exc:
+                raise DecisionError("spot-check code refused", where=where) from exc
             if cls in spot_counts:
                 spot_counts[cls] += 1
             missing_added += added
@@ -948,7 +996,7 @@ def cmd_report(workspace: Path) -> int:
     n_groups, single, multi = group_counts(groups)
     split = sum(
         1
-        for row in read_tsv(workspace / "decisions.tsv", DECISIONS_HEADER)
+        for _, row in read_tsv(workspace / "decisions.tsv", DECISIONS_HEADER)
         if row[3].strip() == SPLIT
     )
     print(f"[GROUPS] groups={n_groups} single={single} multi={multi} split={split}")
@@ -998,6 +1046,12 @@ def build_parser() -> argparse.ArgumentParser:
     for name in ("view", "merge", "report"):
         sp = sub.add_parser(name)
         sp.add_argument("--workspace", required=True, type=Path)
+        if name == "view":
+            sp.add_argument(
+                "--force",
+                action="store_true",
+                help="overwrite decisions.tsv, occurrences.tsv and spotcheck.tsv",
+            )
     grd = sub.add_parser("guard-report")
     grd.add_argument("--workspace", required=True, type=Path)
     grd.add_argument(
@@ -1016,7 +1070,7 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "agreement":
             return cmd_agreement(args.a, args.b)
         if args.command == "view":
-            return cmd_view(args.workspace)
+            return cmd_view(args.workspace, args.force)
         if args.command == "merge":
             return cmd_merge(args.workspace)
         if args.command == "report":
@@ -1024,6 +1078,10 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "guard-report":
             return cmd_guard_report(args.workspace, args.annotations)
         raise ValueError("unknown command")
+    except AnonymousError as exc:
+        # an anonymous id or a file name and line, never the message (ADJ-003)
+        print(f"ERROR {exc.where} {type(exc).__name__}")
+        return 1
     except Exception as exc:  # noqa: BLE001 - class only (Error Output)
         print(f"ERROR - {type(exc).__name__}")
         return 1

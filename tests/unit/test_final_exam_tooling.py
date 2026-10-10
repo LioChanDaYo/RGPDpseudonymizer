@@ -378,7 +378,7 @@ def test_view_and_merge_are_deterministic(
     ws = _workspace(tmp_path)
     assert adj.main(["view", "--workspace", str(ws)]) == 0
     first = _view_bytes(ws)
-    assert adj.main(["view", "--workspace", str(ws)]) == 0
+    assert adj.main(["view", "--workspace", str(ws), "--force"]) == 0
     assert _view_bytes(ws) == first
     # the dummy fixture's three disagreements are all different: three groups
     assert len((ws / "decisions.tsv").read_text().splitlines()) == 4
@@ -400,17 +400,24 @@ def test_view_and_merge_are_deterministic(
 
 
 @pytest.mark.parametrize(
-    "decision", ["", "MAYBE", "BOTH", "FIX:PERSON:Quentrix Zorbaland"]
+    ("decision", "where"),
+    [
+        ("", "g001"),
+        ("MAYBE", "g001/dummy_01-d001"),
+        ("BOTH", "g001/dummy_01-d001"),
+        ("FIX:PERSON:Quentrix Zorbaland", "g001/dummy_01-d001"),
+    ],
 )
 def test_merge_rejects_bad_decisions(
-    tmp_path: Path, capsys: pytest.CaptureFixture[str], decision: str
+    tmp_path: Path, capsys: pytest.CaptureFixture[str], decision: str, where: str
 ) -> None:
     ws = _workspace(tmp_path)
     adj.main(["view", "--workspace", str(ws)])
     _fill(ws, decision)
     capsys.readouterr()
     assert adj.main(["merge", "--workspace", str(ws)]) == 1
-    assert capsys.readouterr().out.strip() == "ERROR - DecisionError"
+    # the anonymous place only, never the code or any text (QA ADJ-003)
+    assert capsys.readouterr().out.strip() == f"ERROR {where} DecisionError"
 
 
 def test_merge_fix_and_spotcheck_codes(
@@ -579,16 +586,21 @@ def test_split_group_decides_per_occurrence(
 
 
 @pytest.mark.parametrize(
-    ("groups", "occurrences"),
+    ("groups", "occurrences", "where"),
     [
-        ({"g001": "SPLIT", "g002": "A"}, {"grp_01-d001": "A", "grp_01-d003": "A"}),
-        ({"g001": "A", "g002": "A"}, {"grp_02-d001": "NONE"}),
+        (
+            {"g001": "SPLIT", "g002": "A"},
+            {"grp_01-d001": "A", "grp_01-d003": "A"},
+            "grp_02-d001",
+        ),
+        ({"g001": "A", "g002": "A"}, {"grp_02-d001": "NONE"}, "grp_02-d001"),
         (
             {"g001": "SPLIT", "g002": "A"},
             {"grp_01-d001": "A", "grp_01-d003": "A", "grp_02-d001": "SPLIT"},
+            "grp_02-d001",
         ),
-        ({"g001": "A", "g002": "BOTH"}, {}),
-        ({"g001": "A"}, {}),
+        ({"g001": "A", "g002": "BOTH"}, {}, "g002/grp_01-d002"),
+        ({"g001": "A"}, {}, "g002"),
     ],
 )
 def test_grouped_merge_rejects_inconsistent_decisions(
@@ -596,6 +608,7 @@ def test_grouped_merge_rejects_inconsistent_decisions(
     capsys: pytest.CaptureFixture[str],
     groups: dict[str, str],
     occurrences: dict[str, str],
+    where: str,
 ) -> None:
     ws = _group_workspace(tmp_path)
     adj.main(["view", "--workspace", str(ws)])
@@ -604,7 +617,151 @@ def test_grouped_merge_rejects_inconsistent_decisions(
     _set_spotcheck(ws)
     capsys.readouterr()
     assert adj.main(["merge", "--workspace", str(ws)]) == 1
-    assert capsys.readouterr().out.strip() == "ERROR - DecisionError"
+    assert capsys.readouterr().out.strip() == f"ERROR {where} DecisionError"
+
+
+# ---------------------------------------------------------------------------
+# QA findings ADJ-001, ADJ-002, ADJ-003, LED-001 (B8 review), invented text only
+# ---------------------------------------------------------------------------
+
+_CASE_DOCS = {
+    "fx_01": (
+        "planted",
+        "Accord avec Zorbal Quentrix pour Zorbaville.\n",
+        [("Zorbal Quentrix", "ORG", 0), ("Zorbaville", "LOCATION", 0)],
+        [("Zorbaville", "LOCATION", 0)],
+    ),
+    "fx_02": (
+        "natural",
+        "De : Zorbal Quentrix\nZORBAL QUENTRIX\nObjet : Zorbaville\n",
+        [
+            ("Zorbal Quentrix", "ORG", 0),
+            ("ZORBAL QUENTRIX", "ORG", 0),
+            ("Zorbaville", "LOCATION", 0),
+        ],
+        [("Zorbal Quentrix", "ORG", 0), ("Zorbaville", "LOCATION", 0)],
+    ),
+    "fx_03": (
+        "natural",
+        "Tralvio Zendrak arrive.\n",
+        [("Tralvio Zendrak", "PERSON", 0)],
+        [("Tralvio Zendrak", "PERSON", 0)],
+    ),
+}
+
+
+def _case_workspace(tmp_path: Path) -> Path:
+    ws = tmp_path / "cws"
+    documents = []
+    for doc_id, (half, text, a, b) in _CASE_DOCS.items():
+        _write(ws / "documents" / f"{doc_id}.txt", text)
+        for folder, specs in (("ann_a", a), ("ann_b", b)):
+            _write(
+                ws / folder / f"{doc_id}.json",
+                json.dumps(
+                    {"document_name": f"{doc_id}.txt", "entities": _spans(text, specs)}
+                ),
+            )
+        documents.append({"id": doc_id, "half": half})
+    _write(
+        ws / "manifest.json", json.dumps({"target": "dummy", "documents": documents})
+    )
+    return ws
+
+
+def test_fix_must_overlap_its_own_disagreement(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    # QA's ADJ-001 probe: one one-sided group holds "Zorbal Quentrix" (fx_01)
+    # and "ZORBAL QUENTRIX" (fx_02, the line after an agreed "Zorbal Quentrix").
+    ws = _case_workspace(tmp_path)
+    adj.main(["view", "--workspace", str(ws)])
+    assert (ws / "decisions.tsv").read_text(encoding="utf-8").splitlines()[1:] == [
+        "g001\tone-sided\t2\t\t"
+    ]
+    _set_groups(ws, {"g001": "FIX:ORG:Zorbal Quentrix"})
+    _set_spotcheck(ws)
+    capsys.readouterr()
+    assert adj.main(["merge", "--workspace", str(ws)]) == 1
+    assert capsys.readouterr().out.strip() == "ERROR g001/fx_02-d001 DecisionError"
+    assert not (ws / "annotations").exists()
+    # split: each occurrence gets its own code, and the all-caps one is kept
+    _set_groups(ws, {"g001": "SPLIT"})
+    _set_occurrences(ws, {"fx_01-d001": "FIX:ORG:Zorbal Quentrix", "fx_02-d001": "A"})
+    assert adj.main(["merge", "--workspace", str(ws)]) == 0
+    assert ("ZORBAL QUENTRIX", "ORG") in _types(ws, "fx_02")
+    assert ("Zorbal Quentrix", "ORG") in _types(ws, "fx_01")
+
+
+def test_view_refuses_to_overwrite_decision_files(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    ws = _group_workspace(tmp_path)
+    assert adj.main(["view", "--workspace", str(ws)]) == 0
+    _set_groups(ws, {"g001": "A", "g002": "B"})
+    _set_spotcheck(ws)
+    filled = {n: (ws / n).read_bytes() for n in adj.DECISION_FILES}
+    capsys.readouterr()
+    assert adj.main(["view", "--workspace", str(ws)]) == 1
+    assert capsys.readouterr().out.strip() == "ERROR decisions.tsv OverwriteError"
+    assert {n: (ws / n).read_bytes() for n in adj.DECISION_FILES} == filled
+    (ws / "decisions.tsv").unlink()
+    assert adj.main(["view", "--workspace", str(ws)]) == 1
+    assert capsys.readouterr().out.strip() == "ERROR occurrences.tsv OverwriteError"
+    assert adj.main(["view", "--workspace", str(ws), "--force"]) == 0
+    rows = (ws / "decisions.tsv").read_text(encoding="utf-8").splitlines()
+    assert [r.split("\t")[3] for r in rows[1:]] == ["", ""]
+
+
+def test_decision_files_accept_a_byte_order_mark(tmp_path: Path) -> None:
+    ws = _group_workspace(tmp_path)
+    adj.main(["view", "--workspace", str(ws)])
+    _set_groups(ws, {"g001": "A", "g002": "B"})
+    _set_spotcheck(ws)
+    for name in adj.DECISION_FILES:
+        path = ws / name
+        path.write_bytes(b"\xef\xbb\xbf" + path.read_bytes())
+    assert adj.main(["merge", "--workspace", str(ws)]) == 0
+
+
+def test_tsv_errors_name_the_file_and_line_only(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    ws = _group_workspace(tmp_path)
+    adj.main(["view", "--workspace", str(ws)])
+    _set_groups(ws, {"g001": "A", "g002": "B"})
+    _set_spotcheck(ws)
+    good = (ws / "decisions.tsv").read_bytes()
+    with open(ws / "decisions.tsv", "a", encoding="utf-8") as f:
+        f.write("Zorbaville\tone-sided\t1\tA\t\n")
+    capsys.readouterr()
+    assert adj.main(["merge", "--workspace", str(ws)]) == 1
+    assert capsys.readouterr().out.strip() == "ERROR decisions.tsv:4 DecisionError"
+    (ws / "decisions.tsv").write_bytes(good)
+    _write(
+        ws / "spotcheck.tsv",
+        "document\tcorrection\tnote\ngrp_01\tMISSING:ORG:Zorbaland\t\n"
+        "grp_02\tNONE\t\ngrp_03\tNONE\t\n",
+    )
+    assert adj.main(["merge", "--workspace", str(ws)]) == 1
+    out = capsys.readouterr().out.strip()
+    assert out == "ERROR spotcheck.tsv:2 DecisionError"
+    assert "Zorba" not in out
+
+
+def test_ledger_ignores_a_separate_dummy_run_table(tmp_path: Path) -> None:
+    # LED-001: dummy proof runs live in their own table below the ledger.
+    ledger = _ledger(
+        tmp_path / "RUNS.md",
+        ["| 101 | abc1234 | 2026-10-10 | dummy | rerun | B14.1 | - |\n"],
+    )
+    with open(ledger, "a", encoding="utf-8") as f:
+        f.write(
+            "\n## Dummy proof runs\n\n| Run ID | Commit | Result |\n|---|---|---|\n"
+            "| 102 | abc1234 | failure, intended |\n"
+        )
+    assert len(fp.ledger_rows(ledger.read_text(encoding="utf-8"))) == 1
+    assert fp.main(["ledger-check", "--ledger", str(ledger)]) == 0
 
 
 # ---------------------------------------------------------------------------
