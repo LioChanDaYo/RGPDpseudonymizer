@@ -1,5 +1,8 @@
 """spaCy-free unit tests for Story 10.4 (greetings, organisation + place).
 
+Slice O (organisation + place, AC4): R-OPC merges an ORG and the listed place
+that follows it, the place keeping its own LOCATION.
+
 Slice S (salutations, AC1-AC3):
 - R-SAL-SPLIT: "X, Y" on a salutation line, both known first names → two
   PERSONs (AC1);
@@ -22,9 +25,13 @@ import yaml
 
 from gdpr_pseudonymizer.nlp import hybrid_detector as hd
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
-from gdpr_pseudonymizer.nlp.hybrid_detector import HybridDetector, load_salutations
+from gdpr_pseudonymizer.nlp.hybrid_detector import (
+    HybridDetector,
+    load_place_abbreviations,
+    load_salutations,
+)
 from gdpr_pseudonymizer.nlp.name_dictionary import NameDictionary
-from gdpr_pseudonymizer.resources import SALUTATIONS_PATH
+from gdpr_pseudonymizer.resources import PLACE_ABBREVIATIONS_PATH, SALUTATIONS_PATH
 
 INVENTED_FIRST_NAMES = {"Zorbalia", "Quentrel"}
 
@@ -473,3 +480,151 @@ class TestSalutationEvents:
             assert "text" not in fields
             for value in fields.values():
                 assert not (isinstance(value, str) and "Zorbalia" in value)
+
+
+# ---------------------------------------------------------------------------
+# Slice O: R-OPC, organisation + place (AC4)
+# ---------------------------------------------------------------------------
+
+
+def _types(found: list[tuple[str, str, int]]) -> list[tuple[str, str]]:
+    return [(text, entity_type) for text, entity_type, _ in found]
+
+
+class TestPlaceAbbreviationResource:
+    def test_the_five_abbreviations_with_a_why(self) -> None:
+        data = yaml.safe_load(PLACE_ABBREVIATIONS_PATH.read_text(encoding="utf-8"))
+        assert [e["term"] for e in data["terms"]] == ["UK", "US", "USA", "UE", "EU"]
+        for entry in data["terms"]:
+            assert entry["why"], entry
+        assert load_place_abbreviations() == ("UK", "US", "USA", "UE", "EU")
+
+    def test_scope_and_compass_words_are_not_places(self) -> None:
+        places = {phrase for phrase, _source in hd._org_place_phrases()}
+        assert {"France", "Europe", "Paris", "UK"} <= places
+        assert not places & {"Monde", "Nord", "International", "Sud"}
+
+
+class TestOrgPlaceMerge:
+    @pytest.mark.parametrize(
+        ("doc", "place"),
+        [
+            ("Zorbtech France et le comité.", "France"),  # country
+            ("Zorbtech Europe et le comité.", "Europe"),  # vp_regions place
+            ("Zorbtech Paris et le comité.", "Paris"),  # city
+            ("Zorbtech UK et le comité.", "UK"),  # abbreviation
+            ("Zorbtech Hauts-de-France et le comité.", "Hauts-de-France"),  # region
+        ],
+    )
+    def test_org_and_place_are_merged_with_a_nested_location(
+        self,
+        detector: HybridDetector,
+        monkeypatch: pytest.MonkeyPatch,
+        doc: str,
+        place: str,
+    ) -> None:
+        found = _detect(
+            monkeypatch, detector, doc, spacy_entities=[_at(doc, "Zorbtech", "ORG")]
+        )
+        assert _types(found) == [(f"Zorbtech {place}", "ORG"), (place, "LOCATION")]
+
+    def test_existing_location_is_kept(
+        self, detector: HybridDetector, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        doc = "Le rapport de Zorbtech France est prêt."
+        spacy_entities = [_at(doc, "Zorbtech", "ORG"), _at(doc, "France", "LOCATION")]
+        found = _detect(monkeypatch, detector, doc, spacy_entities=spacy_entities)
+        assert found == [
+            ("Zorbtech France", "ORG", 14),
+            ("France", "LOCATION", 23),
+        ]
+        merged = detector._merge_org_places(
+            [DetectedEntity(**vars(e)) for e in spacy_entities], doc
+        )
+        assert [(e.text, e.source) for e in merged] == [
+            ("Zorbtech France", "spacy"),
+            ("France", "spacy"),
+        ]
+
+    @pytest.mark.parametrize(
+        "doc",
+        [
+            "Zorbtech Uk et le comité.",  # an abbreviation matches in capitals only
+            "Zorbtech france et le comité.",  # the place starts with a capital
+            "Zorbtech Monde et le comité.",  # scope word
+            "Zorbtech Nord et le comité.",  # compass word
+            "Zorbtech\nFrance et le comité.",  # a line break
+            "Zorbtech  France et le comité.",  # two spaces
+            "Zorbtech Parisoval et le comité.",  # a letter follows the place
+            "Zorbtech de France et le comité.",  # a connector
+        ],
+    )
+    def test_not_merged(
+        self, detector: HybridDetector, monkeypatch: pytest.MonkeyPatch, doc: str
+    ) -> None:
+        found = _detect(
+            monkeypatch, detector, doc, spacy_entities=[_at(doc, "Zorbtech", "ORG")]
+        )
+        assert ("Zorbtech", "ORG") in _types(found)
+        assert not [t for t, ty in _types(found) if ty == "ORG" and t != "Zorbtech"]
+
+    def test_role_and_place_are_never_merged(
+        self, detector: HybridDetector, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        # AC4: the role filter drops "VP" and "VP Europe" first; the place of a
+        # dropped VP form is kept as a LOCATION (Story 10.2)
+        doc = "Le VP Europe et le VP Europe."
+        spacy_entities = [
+            _at(doc, "VP", "ORG"),
+            _at(doc, "VP Europe", "ORG", nth=1),
+        ]
+        found = _detect(monkeypatch, detector, doc, spacy_entities=spacy_entities)
+        assert [ty for _t, ty in _types(found)] == ["LOCATION"]
+        assert _types(found) == [("Europe", "LOCATION")]
+
+    def test_merged_text_that_is_a_role_is_not_merged(
+        self, detector: HybridDetector
+    ) -> None:
+        # even when the ORG piece reaches the merge, "VP Sales Europe" is a role
+        doc = "VP Sales Europe"
+        piece = _at(doc, "VP Sales", "ORG")
+        assert detector._merge_org_places([piece], doc) == [piece]
+
+    def test_without_text_nothing_changes(self, detector: HybridDetector) -> None:
+        piece = _at("Zorbtech France", "Zorbtech", "ORG")
+        assert detector._merge_org_places([piece], None) == [piece]
+
+    def test_guarded_re_merge_gives_the_same_output(
+        self, detector: HybridDetector, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        doc = "Contact: Zorbalia Quentrel - Lead QUENTRIX\nZorbtech France\n"
+        person = _at(doc, "Zorbalia Quentrel - Lead QUENTRIX", "PERSON")
+        spacy_entities = [person, _at(doc, "Zorbtech", "ORG")]
+        found = _detect(monkeypatch, detector, doc, spacy_entities=spacy_entities)
+        # the dash-role trim is refused (QUENTRIX is covered by nothing), so the
+        # document is merged twice; the organisation and its place appear once
+        assert ("Zorbalia Quentrel - Lead QUENTRIX", "PERSON") in _types(found)
+        assert _types(found).count(("Zorbtech France", "ORG")) == 1
+        assert _types(found).count(("France", "LOCATION")) == 1
+
+    def test_event_carries_no_entity_text(
+        self, detector: HybridDetector, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        recorder = _LogRecorder()
+        monkeypatch.setattr(hd, "logger", recorder)
+        doc = "Zorbtech UK et le comité."
+        _detect(
+            monkeypatch, detector, doc, spacy_entities=[_at(doc, "Zorbtech", "ORG")]
+        )
+        merged = [f for name, f in recorder.events if name == "org_place_merged"]
+        assert len(merged) == 1
+        fields = merged[0]
+        assert fields == {
+            "source": "spacy",
+            "org_start": 0,
+            "org_end": 8,
+            "place_start": 9,
+            "place_end": 11,
+            "place_source": "abbreviation",
+            "location_emitted": True,
+        }

@@ -29,6 +29,7 @@ from gdpr_pseudonymizer.resources import (
     LOCATION_NOISE_FILTER_PATH,
     ORG_ROLE_FILTER_PATH,
     PERSON_BOUNDARIES_PATH,
+    PLACE_ABBREVIATIONS_PATH,
     SALUTATIONS_PATH,
 )
 from gdpr_pseudonymizer.utils.french_patterns import (
@@ -505,6 +506,85 @@ def load_org_role_filter() -> OrgRoleFilter:
     )
 
 
+# vp_regions entries that are not places on their own: scope and compass words
+# (Story 10.4, AC4)
+_VP_NOT_PLACES = frozenset(
+    {
+        "International",
+        "Monde",
+        "Global",
+        "Worldwide",
+        "Nord",
+        "North",
+        "Sud",
+        "South",
+        "Est",
+        "East",
+        "Ouest",
+        "West",
+    }
+)
+
+
+@functools.lru_cache(maxsize=1)
+def load_place_abbreviations() -> tuple[str, ...]:
+    """Load the place abbreviations once (Story 10.4, AC4; GUIDELINES Q14, A5)."""
+    with open(PLACE_ABBREVIATIONS_PATH, encoding="utf-8") as f:
+        data = yaml.safe_load(f)
+    return tuple(e["term"] for e in data["terms"])
+
+
+@functools.lru_cache(maxsize=1)
+def _org_place_phrases() -> tuple[tuple[str, str], ...]:
+    """(place, source) for the organisation + place merge, longest first.
+
+    Sources: the countries and regions of the geography resource, the place
+    entries of ``vp_regions`` (scope and compass words excluded), the cities
+    of the geography resource, and the place abbreviations. A place listed
+    twice keeps its first source.
+    """
+    with open(FRENCH_GEOGRAPHY_PATH, encoding="utf-8") as f:
+        geography = json.load(f)
+    with open(ORG_ROLE_FILTER_PATH, encoding="utf-8") as f:
+        roles = yaml.safe_load(f)
+    places: dict[str, str] = {}
+    for place in _load_geography_region_words():
+        places.setdefault(place, "country_region")
+    for entry in roles["vp_regions"]:
+        if entry["term"] not in _VP_NOT_PLACES:
+            places.setdefault(entry["term"], "country_region")
+    for place in geography.get("cities", []):
+        places.setdefault(place, "city")
+    for place in load_place_abbreviations():
+        places.setdefault(place, "abbreviation")
+    return tuple(sorted(places.items(), key=lambda item: len(item[0]), reverse=True))
+
+
+def _place_after(
+    text: str, start: int, phrases: tuple[tuple[str, str], ...]
+) -> tuple[int, str] | None:
+    """(end, source) of the listed place that starts at ``start``, if any.
+
+    The place starts with an upper-case letter in the text and is not followed
+    by a letter; it equals the list entry case-insensitively, or exactly for
+    an abbreviation. The longest entry wins.
+    """
+    if start >= len(text) or not text[start].isupper():
+        return None
+    for phrase, source in phrases:
+        end = start + len(phrase)
+        candidate = text[start:end]
+        if source == "abbreviation":
+            if candidate != phrase:
+                continue
+        elif candidate.casefold() != phrase.casefold():
+            continue
+        if end < len(text) and text[end].isalpha():
+            continue
+        return end, source
+    return None
+
+
 def _vp_remainder(text: str, prefixes: tuple[str, ...]) -> str | None:
     """Return the text after a VP prefix ("" for a bare prefix), else None.
 
@@ -890,6 +970,10 @@ class HybridDetector(EntityDetector):
         # Filter out job titles / role acronyms detected as ORG (Story 10.2 AC3)
         merged = self._filter_org_roles(merged, text)
 
+        # Organisation + place → one ORG, the place keeping its LOCATION
+        # (Story 10.4 AC4, R-OPC)
+        merged = self._merge_org_places(merged, text)
+
         # Keep one entity per same-type overlap (Story 10.2 AC1)
         merged = self._dedup_same_type_overlaps(merged, text)
 
@@ -901,6 +985,7 @@ class HybridDetector(EntityDetector):
             merged = self._filter_label_words(merged)
             merged = self._filter_location_noise(merged, text)
             merged = self._filter_org_roles(merged, text)
+            merged = self._merge_org_places(merged, text)
             merged = self._dedup_same_type_overlaps(merged, text)
 
         # Re-join a PERSON name hard-wrapped over one line (Story 10.3a W-JOIN),
@@ -1850,6 +1935,75 @@ class HybridDetector(EntityDetector):
                     continue
             filtered.append(entity)
         return filtered
+
+    @staticmethod
+    def _merge_org_places(
+        entities: list[DetectedEntity], text: str | None
+    ) -> list[DetectedEntity]:
+        """R-OPC (Story 10.4, AC4): an ORG followed, on the same line, by one
+        horizontal whitespace and a listed place becomes one ORG over both.
+
+        The merged text must not be a role (``match_org_role``), so "VP" +
+        "Europe" is never merged (the role filter ran before). The place keeps
+        its own LOCATION (GUIDELINES Q3, G7): an existing LOCATION with the
+        place's exact span is kept, otherwise one is emitted. Runs after
+        ``_filter_org_roles``, before the same-type dedup.
+        """
+        if text is None:
+            return entities
+        phrases = _org_place_phrases()
+        locations = {
+            (e.start_pos, e.end_pos) for e in entities if e.entity_type == "LOCATION"
+        }
+        out: list[DetectedEntity] = []
+        emitted: list[DetectedEntity] = []
+        for entity in entities:
+            if (
+                entity.entity_type != "ORG"
+                or entity.end_pos + 1 >= len(text)
+                or text[entity.end_pos] not in _HSPACE_CHARS
+            ):
+                out.append(entity)
+                continue
+            place_start = entity.end_pos + 1
+            place = _place_after(text, place_start, phrases)
+            if place is None:
+                out.append(entity)
+                continue
+            place_end, source = place
+            merged_text = text[entity.start_pos : place_end]
+            if match_org_role(merged_text) is not None:
+                out.append(entity)
+                continue
+            out.append(
+                dataclasses.replace(
+                    entity, text=merged_text, end_pos=place_end, is_ambiguous=False
+                )
+            )
+            location_emitted = (place_start, place_end) not in locations
+            if location_emitted:
+                emitted.append(
+                    DetectedEntity(
+                        text=text[place_start:place_end],
+                        entity_type="LOCATION",
+                        start_pos=place_start,
+                        end_pos=place_end,
+                        confidence=entity.confidence,
+                        source=entity.source,
+                    )
+                )
+                locations.add((place_start, place_end))
+            logger.debug(
+                "org_place_merged",
+                source=entity.source,
+                org_start=entity.start_pos,
+                org_end=entity.end_pos,
+                place_start=place_start,
+                place_end=place_end,
+                place_source=source,
+                location_emitted=location_emitted,
+            )
+        return out + emitted
 
     @staticmethod
     def _place_entities(
