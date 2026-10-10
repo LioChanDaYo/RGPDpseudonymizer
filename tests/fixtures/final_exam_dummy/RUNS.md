@@ -4,4 +4,3 @@ Dummy proof runs only (Story 10.6 PR B, B8), "dummy proof, not the exam". The du
 
 | Run ID | Commit | Date (UTC) | Target | Status | Approved by | Note |
 |---|---|---|---|---|---|---|
-| 0 | adad4e9 | 2026-10-10 | dummy | scored | - | B8.3 throw-away: ledger negative proof, reverted |
