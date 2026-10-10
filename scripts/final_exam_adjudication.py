@@ -500,6 +500,59 @@ def agreed_ids(doc_id: str, agreed: list[Span]) -> dict[str, Span]:
     return {f"{doc_id}-a{k:03d}": s for k, s in enumerate(agreed, start=1)}
 
 
+SPLIT = "SPLIT"
+DECISIONS_HEADER = "group\tclass\tcount\tdecision\tnote"
+OCCURRENCES_HEADER = "id\tgroup\tclass\tdecision\tnote"
+GroupKey = tuple[str, str, str, str, str]
+
+
+@dataclass(frozen=True)
+class Group:
+    """Identical disagreements, decided once (story precision, 2026-10-10)."""
+
+    gid: str
+    key: GroupKey
+    members: tuple[Disagreement, ...]
+
+    @property
+    def cls(self) -> str:
+        return self.key[4]
+
+
+def group_key(d: Disagreement) -> GroupKey:
+    """(A's normalized string, A's type, B's normalized string, B's type, class).
+
+    Strings are normalized with the scorer's ``_match_key``; a missing side is
+    ``-``. For a ``type`` or ``one-sided`` disagreement this is one string.
+    """
+    a_key, a_type = (_match_key(d.a.text, d.a.etype), d.a.etype) if d.a else ("-", "-")
+    b_key, b_type = (_match_key(d.b.text, d.b.etype), d.b.etype) if d.b else ("-", "-")
+    return (a_key, a_type, b_key, b_type, d.cls)
+
+
+def build_groups(workspace: Path) -> tuple[list[Group], dict[str, str]]:
+    """Groups in order of first occurrence, and the text of each document."""
+    members: dict[GroupKey, list[Disagreement]] = {}
+    texts: dict[str, str] = {}
+    for doc_id in doc_ids(workspace):
+        text, _, disagreements = doc_state(workspace, doc_id)
+        texts[doc_id] = text
+        for d in disagreements:
+            members.setdefault(group_key(d), []).append(d)
+    width = max(3, len(str(len(members))))
+    groups = [
+        Group(f"g{k:0{width}d}", key, tuple(found))
+        for k, (key, found) in enumerate(members.items(), start=1)
+    ]
+    return groups, texts
+
+
+def group_counts(groups: list[Group]) -> tuple[int, int, int]:
+    """(groups, groups with one occurrence, groups with more than one)."""
+    single = sum(1 for g in groups if len(g.members) == 1)
+    return len(groups), single, len(groups) - single
+
+
 def context_window(text: str, start: int, end: int) -> tuple[int, int]:
     """From the start of the line before ``start`` to the end of the line after ``end``."""
     line_start = text.rfind("\n", 0, start)
@@ -576,23 +629,59 @@ def _marked_all(text: str, spans: dict[str, Span]) -> str:
     return "<pre>" + "".join(out) + "</pre>"
 
 
+SNIPPET_CHARS = 80
+
+
+def snippet_window(text: str, d: Disagreement) -> tuple[int, int]:
+    """The disagreement's line(s), cut to SNIPPET_CHARS on each side."""
+    line_start = text.rfind("\n", 0, d.start) + 1
+    line_end = text.find("\n", d.end)
+    line_end = len(text) if line_end < 0 else line_end
+    return max(line_start, d.start - SNIPPET_CHARS), min(
+        line_end, d.end + SNIPPET_CHARS
+    )
+
+
+def _occurrence_html(text: str, d: Disagreement) -> str:
+    lo, hi = snippet_window(text, d)
+    return (
+        f"<p><b>{d.did}</b></p>"
+        + "<p>A</p>"
+        + _marked(text, lo, hi, d.a, "a")
+        + "<p>B</p>"
+        + _marked(text, lo, hi, d.b, "b")
+    )
+
+
 def cmd_view(workspace: Path) -> int:
-    ids = doc_ids(workspace)
     halves = load_manifest(workspace)
-    view: list[str] = ["<h1>Final exam: disagreements</h1>"]
-    decisions = ["id\tclass\tdecision\tnote"]
+    groups, texts = build_groups(workspace)
+    view: list[str] = ["<h1>Final exam: disagreements, grouped</h1>"]
+    decisions = [DECISIONS_HEADER]
+    occurrences = [OCCURRENCES_HEADER]
     total = 0
-    for doc_id in ids:
-        text, _, disagreements = doc_state(workspace, doc_id)
-        for d in disagreements:
-            lo, hi = context_window(text, d.start, d.end)
-            view.append(f"<h2>{d.did} ({d.cls})</h2>")
-            view.append("<p>A</p>" + _marked(text, lo, hi, d.a, "a"))
-            view.append("<p>B</p>" + _marked(text, lo, hi, d.b, "b"))
-            decisions.append(f"{d.did}\t{d.cls}\t\t")
-            total += 1
+    for g in groups:
+        a_type, b_type = g.key[1], g.key[3]
+        n = len(g.members)
+        view.append(
+            f"<h2>{g.gid} ({g.cls}): A {a_type if a_type != '-' else 'none'}, "
+            f"B {b_type if b_type != '-' else 'none'}, "
+            f"{n} occurrence{'s' if n > 1 else ''}</h2>"
+        )
+        for d in g.members[:2]:
+            view.append(_occurrence_html(texts[d.did.split("-")[0]], d))
+        if n > 2:
+            view.append(f"<details><summary>All {n} occurrences</summary>")
+            for d in g.members:
+                view.append(_occurrence_html(texts[d.did.split("-")[0]], d))
+            view.append("</details>")
+        decisions.append(f"{g.gid}\t{g.cls}\t{n}\t\t")
+        for d in g.members:
+            occurrences.append(f"{d.did}\t{g.gid}\t{g.cls}\t\t")
+        total += n
     write_text(workspace / "adjudication_view.html", _html_page("Adjudication", view))
     write_text(workspace / "decisions.tsv", "\n".join(decisions) + "\n")
+    write_text(workspace / "occurrences.tsv", "\n".join(occurrences) + "\n")
     spot = spotcheck_documents(halves)
     sview: list[str] = ["<h1>Final exam: spot-check (agreed spans)</h1>"]
     srows = ["document\tcorrection\tnote"]
@@ -611,8 +700,14 @@ def cmd_view(workspace: Path) -> int:
         srows.append(f"{doc_id}\t\t")
     write_text(workspace / "spotcheck_view.html", _html_page("Spot-check", sview))
     write_text(workspace / "spotcheck.tsv", "\n".join(srows) + "\n")
-    print(f"view disagreements={total} written={workspace / 'adjudication_view.html'}")
-    print(f"view decisions={workspace / 'decisions.tsv'}")
+    n_groups, single, multi = group_counts(groups)
+    print(
+        f"view disagreements={total} groups={n_groups} single={single} multi={multi} "
+        f"written={workspace / 'adjudication_view.html'}"
+    )
+    print(
+        f"view decisions={workspace / 'decisions.tsv'} {workspace / 'occurrences.tsv'}"
+    )
     print(
         f"view spotcheck_documents={len(spot)} agreed_spans={agreed_total} "
         f"written={workspace / 'spotcheck_view.html'} {workspace / 'spotcheck.tsv'}"
@@ -732,18 +827,50 @@ def apply_spotcheck(
 SPOT_CLASSES = ("MISSING", "REMOVE", "RETYPE", "BOUNDARY")
 
 
+def read_decisions(workspace: Path, groups: list[Group]) -> dict[str, str]:
+    """The code that applies to each disagreement id (B10.1, grouped)."""
+    by_gid = {g.gid: g for g in groups}
+    group_codes: dict[str, str] = {}
+    for row in read_tsv(workspace / "decisions.tsv", DECISIONS_HEADER):
+        if len(row) < 4 or row[0] not in by_gid or row[0] in group_codes:
+            raise DecisionError("unknown or duplicate group")
+        if not row[3].strip():
+            raise DecisionError("empty group decision")
+        group_codes[row[0]] = row[3].strip()
+    if set(group_codes) != set(by_gid):
+        raise DecisionError("group without a decision")
+    member_gid = {d.did: g.gid for g in groups for d in g.members}
+    occurrence_codes: dict[str, str] = {}
+    for row in read_tsv(workspace / "occurrences.tsv", OCCURRENCES_HEADER):
+        if (
+            len(row) < 2
+            or member_gid.get(row[0]) != row[1]
+            or row[0] in occurrence_codes
+        ):
+            raise DecisionError("unknown or duplicate occurrence")
+        occurrence_codes[row[0]] = row[3].strip() if len(row) > 3 else ""
+    decisions: dict[str, str] = {}
+    for g in groups:
+        split = group_codes[g.gid] == SPLIT
+        for d in g.members:
+            own = occurrence_codes.get(d.did, "")
+            if split and (not own or own == SPLIT):
+                raise DecisionError("split group with an undecided occurrence")
+            if not split and own:
+                raise DecisionError("occurrence decision in an unsplit group")
+            decisions[d.did] = own if split else group_codes[g.gid]
+    return decisions
+
+
 def merge_workspace(
     workspace: Path,
 ) -> tuple[dict[str, list[Span]], dict[str, int], dict[str, int], int]:
-    """Adjudicated spans per document, decision counts, spot-check counts, MISSING added."""
+    """Adjudicated spans per document, decision counts (per disagreement),
+    spot-check counts and MISSING occurrences added."""
     ids = doc_ids(workspace)
     halves = load_manifest(workspace)
-    rows = read_tsv(workspace / "decisions.tsv", "id\tclass\tdecision\tnote")
-    decisions: dict[str, str] = {}
-    for row in rows:
-        if len(row) < 3 or not row[2].strip() or row[0] in decisions:
-            raise DecisionError("empty or duplicate decision")
-        decisions[row[0]] = row[2].strip()
+    groups, _ = build_groups(workspace)
+    decisions = read_decisions(workspace, groups)
     spot_rows = read_tsv(workspace / "spotcheck.tsv", "document\tcorrection\tnote")
     spot_docs = sorted(spotcheck_documents(halves))
     spot_codes: dict[str, list[str]] = {d: [] for d in spot_docs}
@@ -757,14 +884,10 @@ def merge_workspace(
     spot_counts = {c: 0 for c in SPOT_CLASSES}
     missing_added = 0
     result: dict[str, list[Span]] = {}
-    seen: set[str] = set()
     for doc_id in ids:
         text, agreed, disagreements = doc_state(workspace, doc_id)
         spans = list(agreed)
         for d in disagreements:
-            if d.did not in decisions:
-                raise DecisionError("missing decision")
-            seen.add(d.did)
             code = decisions[d.did]
             spans += apply_decision(text, d, code)
             key = code.split(":", 1)[0]
@@ -777,8 +900,6 @@ def merge_workspace(
             missing_added += added
         unique = {(s.start, s.end, s.etype): s for s in spans}
         result[doc_id] = sorted(unique.values(), key=Span.sort_key)
-    if set(decisions) - seen:
-        raise DecisionError("decision for an unknown id")
     return result, code_counts, spot_counts, missing_added
 
 
@@ -823,6 +944,14 @@ def cmd_report(workspace: Path) -> int:
     for line in agreement_lines(workspace / "ann_a", workspace / "ann_b"):
         print(line)
     _, code_counts, spot_counts, missing_added = merge_workspace(workspace)
+    groups, _ = build_groups(workspace)
+    n_groups, single, multi = group_counts(groups)
+    split = sum(
+        1
+        for row in read_tsv(workspace / "decisions.tsv", DECISIONS_HEADER)
+        if row[3].strip() == SPLIT
+    )
+    print(f"[GROUPS] groups={n_groups} single={single} multi={multi} split={split}")
     print("[DECISIONS] " + " ".join(f"{k}={v}" for k, v in sorted(code_counts.items())))
     print(
         f"[SPOT-CHECK] documents=3 shared_errors={sum(spot_counts.values())} "
