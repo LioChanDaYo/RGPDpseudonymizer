@@ -29,6 +29,7 @@ from gdpr_pseudonymizer.resources import (
     LOCATION_NOISE_FILTER_PATH,
     ORG_ROLE_FILTER_PATH,
     PERSON_BOUNDARIES_PATH,
+    SALUTATIONS_PATH,
 )
 from gdpr_pseudonymizer.utils.french_patterns import (
     FRENCH_TITLE_PATTERN,
@@ -197,6 +198,84 @@ def load_location_noise_filter() -> frozenset[str]:
     with open(LOCATION_NOISE_FILTER_PATH, encoding="utf-8") as f:
         data = yaml.safe_load(f)
     return frozenset(e["term"].casefold() for e in data["terms"])
+
+
+# ---------------------------------------------------------------------------
+# Salutation lines (Story 10.4, AC1-AC3)
+# ---------------------------------------------------------------------------
+
+# A name token: capitalised, hyphen allowed. A "known first name" is a name
+# token for which the name dictionary knows the whole token.
+_NAME_TOKEN = f"[{_UPPER}][{_UPPER}{_LOWER}]*(?:-[{_UPPER}][{_UPPER}{_LOWER}]*)*"
+# Shape 1: one or two names alone on the line, ending with a comma
+_SHAPE1_RE = re.compile(
+    f"({_NAME_TOKEN})(?:{HSPACE}*,{HSPACE}*({_NAME_TOKEN}))?{HSPACE}*,{HSPACE}*$"
+)
+# Shape 2, after the opener: two names, else one, then , . ! or the line end
+_OPENER_TWO_NAMES_RE = re.compile(
+    f"({_NAME_TOKEN}){HSPACE}*,{HSPACE}*({_NAME_TOKEN})(?=[,.!]|{HSPACE}*$)",
+    re.MULTILINE,
+)
+_OPENER_ONE_NAME_RE = re.compile(f"({_NAME_TOKEN})(?=[,.!]|{HSPACE}*$)", re.MULTILINE)
+# A PERSON span "X, Y" (AC1)
+_NAME_PAIR_RE = re.compile(f"({_NAME_TOKEN}){HSPACE}*,{HSPACE}*({_NAME_TOKEN})")
+_HSPACE_STR = " \t\u00a0\u202f"
+
+
+@dataclass(frozen=True)
+class Salutations:
+    """Opener list and shape-1 length limit loaded from ``salutations.yaml``."""
+
+    max_line_length: int
+    openers: tuple[tuple[str, str], ...]  # (term, kind)
+    opener_re: re.Pattern[str]
+
+
+@functools.lru_cache(maxsize=1)
+def load_salutations() -> Salutations:
+    """Load the salutation resource once (Story 10.4, AC2).
+
+    An opener matches at the start of a line, case as written; a space in a
+    term matches any run of horizontal whitespace. One or more horizontal
+    whitespace must follow it.
+    """
+    with open(SALUTATIONS_PATH, encoding="utf-8") as f:
+        data = yaml.safe_load(f)
+    openers = tuple((e["term"], e["kind"]) for e in data["openers"])
+    alternatives = "|".join(
+        f"(?P<o{i}>{(HSPACE + '+').join(re.escape(w) for w in term.split())})"
+        for i, (term, _kind) in enumerate(openers)
+    )
+    return Salutations(
+        max_line_length=int(data["max_line_length"]),
+        openers=openers,
+        opener_re=re.compile(f"(?:{alternatives}){HSPACE}+"),
+    )
+
+
+@dataclass(frozen=True)
+class _SalutationLine:
+    """A salutation line: its shape (1 or 2), the opener kind ("names" for
+    shape 1), the (start, end) of its one or two names, and whether a comma
+    follows the last name."""
+
+    start: int
+    end: int
+    shape: int
+    kind: str
+    names: tuple[tuple[int, int], ...]
+    comma_after: bool
+
+
+def _line_spans(text: str) -> list[tuple[int, int]]:
+    """(start, end) of every line, split at ``_LINE_BREAK_RE``."""
+    spans: list[tuple[int, int]] = []
+    pos = 0
+    for match in _LINE_BREAK_RE.finditer(text):
+        spans.append((pos, match.start()))
+        pos = match.end()
+    spans.append((pos, len(text)))
+    return spans
 
 
 # A LOCATION whose whole text is one of these is a fragment (Story 10.3b);
@@ -620,6 +699,13 @@ class HybridDetector(EntityDetector):
 
         logger.debug("regex_detection_complete", entities_found=len(regex_entities))
 
+        # Story 10.4 (AC2): a known first name alone on a salutation line, or
+        # after a greeting, thanks or compliment opener, joins the regex list
+        salutation_lines = self._salutation_lines(text)
+        regex_entities = regex_entities + self._salutation_names(
+            text, salutation_lines, spacy_entities, regex_entities
+        )
+
         # Step 3: PERSON boundaries before the merge, on both sources (Story
         # 10.3b AC4-AC6, AC9): particles, Mc/Mac, trailing roles. The ORG and
         # LOCATION spans of both lists block a particle extension.
@@ -633,6 +719,14 @@ class HybridDetector(EntityDetector):
         )
         regex_entities, regex_guards = self._fix_person_boundaries(
             regex_entities, text, blockers
+        )
+        # Story 10.4 (AC1): "X, Y" on a salutation line, both known first
+        # names → two PERSONs, on both lists
+        spacy_entities, spacy_guards = self._split_salutation_pairs(
+            spacy_entities, spacy_guards, text, salutation_lines
+        )
+        regex_entities, regex_guards = self._split_salutation_pairs(
+            regex_entities, regex_guards, text, salutation_lines
         )
         # The merge flags regex entities in place: keep pristine copies in case
         # a guarded trim is refused and the document is merged once more
@@ -1059,6 +1153,164 @@ class HybridDetector(EntityDetector):
     def _known_first_name(self, word: str) -> bool:
         names = self.regex_matcher.name_dictionary or _default_name_dictionary()
         return names.is_first_name(word)
+
+    def _is_known_name_token(self, word: str) -> bool:
+        """A known first name in the text (Story 10.4): capitalised there,
+        and the whole token is a dictionary first name."""
+        return bool(word) and word[0].isupper() and self._known_first_name(word)
+
+    def _salutation_lines(self, text: str) -> list[_SalutationLine]:
+        """The salutation lines of a document (Story 10.4, AC precisions).
+
+        Shape 1: after removing leading and trailing horizontal whitespace,
+        the line is one or two known first names (comma-separated) followed
+        by a comma, and is at most ``max_line_length`` characters long.
+        Shape 2 (tried when shape 1 does not apply): after optional leading
+        horizontal whitespace, an opener of ``salutations.yaml``, then two
+        known first names "N, N" or one, followed by , . ! or the end of the
+        line. One pass over the lines.
+        """
+        lists = load_salutations()
+        found: list[_SalutationLine] = []
+        for start, end in _line_spans(text):
+            line = text[start:end]
+            body = start + len(line) - len(line.lstrip(_HSPACE_STR))
+            shape1 = _SHAPE1_RE.fullmatch(text, body, end)
+            if shape1:
+                names = tuple(
+                    (shape1.start(g), shape1.end(g)) for g in (1, 2) if shape1.group(g)
+                )
+                if all(self._is_known_name_token(text[a:b]) for a, b in names):
+                    if len(line.strip(_HSPACE_STR)) <= lists.max_line_length:
+                        found.append(
+                            _SalutationLine(start, end, 1, "names", names, True)
+                        )
+                    continue
+            opener = lists.opener_re.match(text, body, end)
+            if opener is None:
+                continue
+            kind = lists.openers[int(str(opener.lastgroup)[1:])][1]
+            two = _OPENER_TWO_NAMES_RE.match(text, opener.end(), end)
+            if (
+                two
+                and self._is_known_name_token(two.group(1))
+                and self._is_known_name_token(two.group(2))
+            ):
+                names = ((two.start(1), two.end(1)), (two.start(2), two.end(2)))
+                comma = text[two.end() : two.end() + 1] == ","
+                found.append(_SalutationLine(start, end, 2, kind, names, comma))
+                continue
+            one = _OPENER_ONE_NAME_RE.match(text, opener.end(), end)
+            if one and self._is_known_name_token(one.group(1)):
+                comma = text[one.end() : one.end() + 1] == ","
+                found.append(
+                    _SalutationLine(
+                        start, end, 2, kind, ((one.start(1), one.end(1)),), comma
+                    )
+                )
+        return found
+
+    @staticmethod
+    def _salutation_names(
+        text: str,
+        lines: list[_SalutationLine],
+        spacy_entities: list[DetectedEntity],
+        regex_entities: list[DetectedEntity],
+    ) -> list[DetectedEntity]:
+        """R-SAL-BARE (Story 10.4, AC2): each name of a salutation line that no
+        PERSON of either list contains becomes a regex PERSON (confidence
+        0.80). Only adds detections."""
+        persons = [
+            (e.start_pos, e.end_pos)
+            for e in spacy_entities + regex_entities
+            if e.entity_type == "PERSON"
+        ]
+        added: list[DetectedEntity] = []
+        for line in lines:
+            for start, end in line.names:
+                if any(a <= start and end <= b for a, b in persons):
+                    continue
+                persons.append((start, end))
+                added.append(
+                    DetectedEntity(
+                        text=text[start:end],
+                        entity_type="PERSON",
+                        start_pos=start,
+                        end_pos=end,
+                        confidence=0.80,
+                        source="regex",
+                    )
+                )
+                logger.debug(
+                    "salutation_name_added",
+                    shape=line.shape,
+                    opener_kind=line.kind,
+                    start=start,
+                    end=end,
+                )
+        return added
+
+    def _split_salutation_pairs(
+        self,
+        entities: list[DetectedEntity],
+        guards: list[_RoleGuard],
+        text: str,
+        lines: list[_SalutationLine],
+    ) -> tuple[list[DetectedEntity], list[_RoleGuard]]:
+        """R-SAL-SPLIT (Story 10.4, AC1): a PERSON span "X, Y" that is exactly
+        the two names of a salutation line whose names end with a comma, both
+        known first names, is replaced in place by PERSON X and PERSON Y.
+        Elsewhere (running text, "Last, First") the span is unchanged. The
+        guards of the list are re-indexed to the new positions."""
+        pairs = {
+            (line.names[0][0], line.names[1][1])
+            for line in lines
+            if len(line.names) == 2 and line.comma_after
+        }
+        if not pairs:
+            return entities, guards
+        out: list[DetectedEntity] = []
+        new_index: dict[int, int] = {}
+        for index, entity in enumerate(entities):
+            new_index[index] = len(out)
+            match = (
+                _NAME_PAIR_RE.fullmatch(text, entity.start_pos, entity.end_pos)
+                if entity.entity_type == "PERSON"
+                and (entity.start_pos, entity.end_pos) in pairs
+                else None
+            )
+            if (
+                match is None
+                or not self._is_known_name_token(match.group(1))
+                or not self._is_known_name_token(match.group(2))
+            ):
+                out.append(entity)
+                continue
+            for group in (1, 2):
+                out.append(
+                    dataclasses.replace(
+                        entity,
+                        text=match.group(group),
+                        start_pos=match.start(group),
+                        end_pos=match.end(group),
+                        is_ambiguous=False,
+                    )
+                )
+            logger.debug(
+                "salutation_name_split",
+                source=entity.source,
+                old_start=entity.start_pos,
+                old_end=entity.end_pos,
+                first_start=match.start(1),
+                first_end=match.end(1),
+                second_start=match.start(2),
+                second_end=match.end(2),
+            )
+        if len(out) == len(entities):
+            return out, guards
+        return out, [
+            dataclasses.replace(guard, index=new_index[guard.index]) for guard in guards
+        ]
 
     def _is_hyphen_name_without_first_name(self, entity: DetectedEntity) -> bool:
         """R-HYPH-FN (Story 10.3c AC3): a PERSON whose title-stripped text is
