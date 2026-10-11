@@ -1,0 +1,96 @@
+schema: 1
+story: '10.4'
+story_title: 'Greetings + Org-Plus-Country'
+gate: PASS
+status_reason: 'Pre-merge review at 3a11f53 (code 2695dee). Runs S, O, A, D and K, the baseline 37975010715, and the NFR1 runs, all downloaded by QA, match every pasted line and number. G3 strict passes at every run, held-out recall rises (FN 59 -> 53), QA''s own dump is byte-identical to the frozen FINAL dump with coverage levels 1/2/2b at 0 and "Pierre" and "BRS" restored, the paired delta reproduces, and CI is green on attempt 1. The findings are low: recall gaps and extra candidates on new text, never a lost cover.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-10-11T22:23:31Z'
+
+waiver: { active: false }
+
+merge_blockers: []
+
+top_issues:
+  - id: 'REQ-001'
+    severity: low
+    finding: 'Salutation shape 2 needs , . or ! directly after the name, or the end of the line. French typography puts a space (often U+202F) before "!", so "Merci Zorbalia !" is not detected, and neither is "Bonjour Zorbalia et Quentrel," (QA probes). This is the frozen rule text, not a regression; the name stays as before 10.4, found only if spaCy finds it.'
+    suggested_action: 'Lionel''s call: allow horizontal whitespace before ! (and ?), and "et" between two names, in a follow-up (Epic 9), or now through Task 2 and a new G1 run. After 10.4 no detector change happens inside Epic 10.'
+    refs: ['gdpr_pseudonymizer/nlp/hybrid_detector.py:217-221 (_OPENER_TWO_NAMES_RE, _OPENER_ONE_NAME_RE)']
+    suggested_owner: po
+  - id: 'REQ-002'
+    severity: low
+    finding: 'R-OPC''s "never merges a role token" means a role known to the 10.2 role lists (match_org_role). When spaCy types a spelled-out French role as ORG ("Directeur"), it merges with a following place: "Directeur France" becomes ORG "Directeur France", and LOCATION "France" is kept. Without R-OPC it would be ORG "Directeur" plus LOCATION "France". An ORG false positive gets wider; no cover is lost; 0 main-corpus cases.'
+    suggested_action: 'Optional, later: skip the merge when the ORG piece starts with a French role word (a resource list), or accept it as an extra candidate.'
+    refs: ['gdpr_pseudonymizer/nlp/hybrid_detector.py:2167-2234 (_merge_org_places; role test at :2202)']
+    suggested_owner: po
+  - id: 'TEST-001'
+    severity: low
+    finding: 'Two frozen conditions have no test that fails without them. (1) R-SAL-SPLIT requires a comma after the second name: a mutant that drops the check survives the 108 tests. (2) R-DEF-NAME rejects an alias that starts with an article: the only test uses lower-case "la", which the alias pattern already rejects, so a mutant without the check survives. QA probes show both behave as frozen ("Merci Zorbalia, Quentrel." stays one PERSON; « La Zorbtech » is not taken).'
+    suggested_action: 'Add two unit tests: two names after an opener followed by "." (not split), and a capitalised-article alias (not taken).'
+    refs: ['gdpr_pseudonymizer/nlp/hybrid_detector.py:1580', 'gdpr_pseudonymizer/nlp/hybrid_detector.py:292', 'tests/unit/test_hybrid_greetings_org_country.py']
+    suggested_owner: dev
+  - id: 'DOC-001'
+    severity: low
+    finding: 'The 10.4 CHANGELOG continuity note says keys still have no entity type, but unlike the story''s Pseudonym Continuity section ("Story 10.7 will change that") and the 10.3c entry, it does not point to Story 10.7. The 10.4 rules add new keys (organisation + place, short forms, aliases), so the pointer is useful.'
+    suggested_action: 'Add one line to the 10.4 continuity note: "Making the lookup type-aware is Story 10.7".'
+    refs: ['CHANGELOG.md (10.4 entry, "Upgrading: pseudonym continuity")']
+    suggested_owner: dev
+
+quality_score: 100
+expires: '2026-10-25T22:23:31Z'
+
+evidence:
+  runs_downloaded: ['37975010715', '38039302673', '38039762663', '38040093781', '38173179474', '38173542707']
+  performance_runs_downloaded: ['38174221283', '38173566957', '37963988214']
+  metric_lines_checked:
+    story_baseline_block: '16/16 byte-identical to 37975010715'
+    story_runs: 'S, O, A, D, K: 16/16 lines each byte-identical to their artifacts'
+    story_paired_delta: '9 blocks (each run vs 37975010715 and vs the previous run), 6 lines each, byte-identical to QA''s own scripts/accuracy_paired_delta.py output'
+    qa_report_10_4_section: 'run K 16/16 lines, paired block 6/6; before/after table, per-slice split, FN chain and held-out numbers match the runs'
+    changelog: 'P/R/F1 79.20->80.68 / 79.77->84.65 / 79.49->82.62, per-type F1, FN 448->340 (42->30, 52->51, 354->259), paired ranges (+0.51..+2.64, +0.65..+6.68) and held-out R/F1/P all match run K'
+    pr_93_body: '8/8 metric lines of run K and the 6-line paired block match; the gain wording (Overall and ORG outside, PERSON and LOCATION within) and the FN chain match'
+  recompute: 'scripts/accuracy_paired_delta.py recompute prints match for all six JSONs'
+  independent_paired_check: 'own document bootstrap (own code and random generator, 10,000 resamples), base vs K: same point deltas on all 4 lines, bounds within 0.0021, same excludes_0 verdicts. Base vs A (no Slice D): Overall P/R/F1 still excludes 0, so the Overall "outside the range" claim does not rest on the one contract'
+  gain_wording: 'PERSON and LOCATION P/F1 gains are called within the range and recall fixes in the story, the QA report and the CHANGELOG; only Overall and ORG are claimed outside. Per document, 80 of the 95 ORG TP gains are in partnership_agreement.txt (79 aliases plus 1 R-KWC); the CHANGELOG says "79 of the 95 ... from one contract" and the QA report says the Slice D gain comes from one contract. Held-out ORG FN 28 -> 22 appears at run D, the only slice between A and D.'
+  g3: 'FN per run vs 448/42/52/354: S 444/38/52/354, O 429/38/51/340, A 420/30/51/339, D 341/30/51/260, K 340/30/51/259; no increase in any type'
+  g5: 'held-out FN 59 at S, O and A, then 53 at D and K (ORG 28 -> 22); FP 45 -> 47 from run A on (PERSON 13 -> 15, the reported G5 precision red flag; held-out P 0.7926 -> 0.7911 at K). No held-out recall drop, so nothing blocks the merge'
+  g4_diff: 'git diff --stat 5846419...HEAD empty for tests/test_corpus, tests/accuracy, tests/integration, .github, gdpr_pseudonymizer/core, data, validation, gui, scripts/accuracy_paired_delta.py and the leakage allowlist; code touches nlp/hybrid_detector.py and resources (two new YAML files, two path constants, the R-KWC prefix pattern)'
+  g7: 'no README/README.fr, FAQ, docs index or tutorial change'
+  docs_only_after_code_head: '2695dee..7c1b5fb and 7c1b5fb..3a11f53 touch only the story, the QA report and the CHANGELOG'
+  local_reproduction: 'QA dump of 2695dee is byte-identical to rgpd-analysis/r104/frozen/dump_Recommended_FINAL_Slice_S+O+A+D+K.json, final/ and sliceK_dump.json (sha256 d93691ff...); 2,324 detections; TP 1875 / FP 449 / FN 340, per type equal to run K'
+  coverage_check: 'vs r103c/final/dump_R-MX+R-HYPH-FN.json, QA''s own script: 0 name characters uncovered (level 1), 0 annotations losing same-type cover (level 2), 0 losing their last cover (level 2b). The 19 baseline detections that are gone are replaced by a superset (16 ORG pieces now inside ORG + place, "Laurent, Marie" split into its two names, "La Chambre" and "La Caisse" widened by R-KWC). PERSON "Pierre" (hr_announcement @2778) and ORG "BRS" (sales_proposal @5726) are now covered by their own type. Annotations not fully covered by their own type: 399 -> 289'
+  unit_tests: '108 new tests, all pass. Against the pre-10.4 code (loaders shimmed so the file imports), 67 fail and 41 pass; the 41 are resource checks and no-fire or unchanged guards. Targeted mutants: 8 of 12 killed (role skip in R-ACR and R-OPC, R-NEST, abbreviation case, acronym boundary, two-token seed, shape-1 length, nested LOCATION); 2 survivors are equivalent (the capital-letter test is redundant with the name-token pattern; the "already in a PERSON" skip is redone by the merge); 2 are TEST-001. test_accepted_residual pins the stone-Pierre case Lionel accepted. No existing test changed; no wall-clock assert in the new file'
+  probes: 'invented names plus main-corpus words, real regex layer, spaCy stubbed, branch vs base. Opener + name, shape 1 with one or two names, and a real first name all fire as frozen. A pair in running text and an opener mid-line do not fire. ORG + country/city merges with the LOCATION kept. VP + place is not merged; "Directeur France" is merged (REQ-002); a compass word is not. The role acronym DSI is skipped; QC, CA and RH are tied to ORG initials. A defined alias is taken at every same-case occurrence, including a heading; a capitalised-article alias is refused. A first name used alone after the full name fires, and so does the accepted stone residual. R-KWC widens existing "Le Comité"/"La Commission" FPs without adding any. French "!" spacing and "et" between names do not fire (REQ-001)'
+  fuzz: '3,000 detect-level cases x 2 input orders, base 5846419 vs branch: salutation lines, running text with injected first names, first names reused after a full name, ORG + place with role forms, acronyms and reference codes, defined aliases. 0 offset mismatches; 0 cases with any alphanumeric character losing cover (any type or same type); invented-name capitals gain same-type cover in 1,484 (PERSON) and 71 (ORG) cases; order dependence base 4, branch 4, 0 new; 0 detections lost to the extra dedup that runs after the document-level rules'
+  held_out_blind: 'every word in the new test file''s strings and both resources was checked against main-corpus text: the words not found are English docstring words, identifiers and invented names; the resource words (Bonjour, Merci, Bonne initiative, Félicitations, UK, US, USA, UE, EU) are all in the main corpus. Leakage guard green in CI. Dry-run script loads _load_corpus_documents only'
+  ten_six_freeze: 'PR #92 commit 564bbc6 "docs(10.6): PR B freeze record (B7.3), before 10.4 merges" (2026-10-10T08:59:53Z) is on origin/story/10.6-pr-b-final-exam, branched from main 5846419, touches only the 10.6 story file, and its CI (CI 38039824450, Code Quality 38039824452, CodeQL 38039821589) ran green on attempt 1 at 09:00Z the same day. Task 10.7 is satisfied. Checked by commit metadata only; the record and the exam material were not opened'
+  tests_run_locally: '531 passed (new file, leakage guard, the five hybrid unit files, test_regex_matcher.py, tests/integration/test_ner_title_improvements.py); ruff, black and mypy clean on the changed files'
+  ci: 'every PR #93 head with CI is green on attempt 1: f469c7a, 8b52c54, e593622, 2444b69, 7c1b5fb, aac0e37, 3a11f53 (CI 38177923390, Code Quality 38177923288, CodeQL 38177920972); gh pr checks 93: 9/9 pass. Accuracy runs S/O/A/D/K and both performance runs are attempt 1'
+  nfr1: '38174221283 (7c1b5fb = code 2695dee) success, Verify step passed, AMD EPYC 7763: 0.443/0.761/1.122/0.689 s vs reference 37963988214 (AMD EPYC 7763) 0.442/0.756/1.116/0.675 s. The first run 38173566957 (same head, success, Verify passed) ran on an Intel Xeon Platinum 8573C and was redispatched on the same head only for the CPU. Entity detection is +0.014 s (+2%) vs 37963988214 and +0.007 s vs the main same-code run; informational, far below 30 s'
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+    ac_gaps: []
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'No lost cover anywhere (dump, coverage levels, 6,000 fuzz runs). The new rules only add or widen detections; the split uncovers only ", ". Every new log event carries offsets, shapes, kinds and sources only. Precision costs (CA/RH tied to ORG initials, a generic defined alias, a capitalised common-word first name) are extra candidates to reject, never a leak.'
+  performance:
+    status: PASS
+    notes: 'NFR1 on the same CPU: within 2% of the reference. Rules are one pass over lines or tokens with interval lookups; the R-KWC regex ratio stays under the 10.3a bound (story).'
+  reliability:
+    status: PASS
+    notes: 'Deterministic dumps; no new order dependence in the fuzz; R-OPC runs in both filter passes and in the guarded re-merge; R-SAL-BARE/R-SAL-SPLIT run before the pristine copies, so a re-merge sees them; the late dedup removed nothing in the fuzz.'
+  maintainability:
+    status: PASS
+    notes: '655 added lines with docstrings and frozen-rule references; two small resources with a why per entry; 108 tests (two test gaps, TEST-001).'
+
+recommendations:
+  immediate: []
+  future:
+    - action: 'REQ-001 and REQ-002 (low): Lionel''s scope call, Epic 9 by default since no detector change happens inside Epic 10 after 10.4.'
+      refs: ['gdpr_pseudonymizer/nlp/hybrid_detector.py:217-221', 'gdpr_pseudonymizer/nlp/hybrid_detector.py:2202']
+    - action: 'TEST-001 and DOC-001: two unit tests and one CHANGELOG line; can go in this PR as a docs and tests commit (no detector change, no new G1 run needed) or in a later housekeeping PR.'
+      refs: ['tests/unit/test_hybrid_greetings_org_country.py', 'CHANGELOG.md']
+    - action: 'After the merge: the main push accuracy run must reproduce run K (16 lines) and becomes the epic close-out baseline. Run K''s artifact expires 30 days after 2026-10-11.'
+      refs: ['.github/workflows/accuracy.yaml']
