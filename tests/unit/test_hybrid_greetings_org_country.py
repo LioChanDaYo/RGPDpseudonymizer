@@ -983,3 +983,50 @@ class TestNestedExactMatch:
         regex_entity = _at(doc, "Dr. Zorbalia Quentrel", "PERSON", source="regex")
         merged = detector._merge_entities([spacy_entity], [regex_entity], doc)
         assert [e.text for e in merged] == ["Zorbalia Quentrel"]
+
+
+# ---------------------------------------------------------------------------
+# Slice K: R-KWC, keyword + connector(s) or elision (prefix form)
+# ---------------------------------------------------------------------------
+
+
+def _orgs(matcher: hd.RegexMatcher, text: str) -> list[str]:
+    return [e.text for e in matcher.match_entities(text) if e.entity_type == "ORG"]
+
+
+class TestKeywordConnector:
+    @pytest.fixture(scope="class")
+    def matcher(self) -> hd.RegexMatcher:
+        m = hd.RegexMatcher()
+        m.load_patterns()
+        return m
+
+    @pytest.mark.parametrize(
+        ("text", "expected"),
+        [
+            (
+                "La Chambre de Zorbal Quentrix et le comité.",
+                "Chambre de Zorbal Quentrix",
+            ),
+            ("La Chambre d'Zorbal et le comité.", "Chambre d'Zorbal"),
+            ("La Caisse des Zorbtech et le comité.", "Caisse des Zorbtech"),
+            ("Le Comité de la Zorbtech et le bureau.", "Comité de la Zorbtech"),
+            ("Le Groupe Zorbtech et le comité.", "Groupe Zorbtech"),  # unchanged
+        ],
+    )
+    def test_keyword_then_connectors(
+        self, matcher: hd.RegexMatcher, text: str, expected: str
+    ) -> None:
+        assert expected in _orgs(matcher, text)
+
+    @pytest.mark.parametrize(
+        "text",
+        [
+            "Le Groupe de la et le comité.",  # no capitalised token after
+            "Le Groupe de la de Zorbtech et le comité.",  # three connectors
+        ],
+    )
+    def test_connectors_alone_are_not_a_name(
+        self, matcher: hd.RegexMatcher, text: str
+    ) -> None:
+        assert not [o for o in _orgs(matcher, text) if o.startswith("Groupe")]
