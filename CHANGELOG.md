@@ -37,6 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - A first name newly offered on a greeting line, or used alone after the full name, gets the pseudonym already stored for that first name, or a new one; the existing person-name component match applies unchanged.
     - Organisation + place: "Zorbtech France" is a new key, different from "Zorbtech", so the branch gets its own pseudonym. The place "France" keeps its own key; in the output, the organisation's replacement covers the place at that position.
     - Short forms and defined aliases get their own key ("ZRQ", "ZORBTECH"), so their own pseudonym: the short form is no longer left in clear, but the output does not show that it is the same organisation as the full name.
+    - Making the lookup type-aware is planned as a separate story (10.7, Type-Aware Mapping Lookup).
     - Recommendation: keep using the same mapping database across versions for consistent pseudonyms. Re-process with the previous version if byte-identical output with an old run is required.
 
 - **A name found by both detectors with different types is no longer dropped (Story 10.3c).**

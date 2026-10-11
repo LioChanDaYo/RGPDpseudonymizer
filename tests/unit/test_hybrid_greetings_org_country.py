@@ -313,6 +313,29 @@ class TestSalutationSplit:
         assert [e.text for e in matcher.match_entities(doc)] == ["Quentrix, Zorbalia"]
         assert matcher.match_entities("Zorbalia, Quentrix") == []
 
+    @pytest.mark.parametrize(
+        "doc",
+        [
+            "Merci Zorbalia, Quentrel.",
+            "Félicitations Zorbalia, Quentrel!",
+            "Bonjour Zorbalia, Quentrel",
+        ],
+    )
+    def test_pair_not_followed_by_a_comma_is_unchanged(
+        self,
+        detector: HybridDetector,
+        first_names: NameDictionary,
+        monkeypatch: pytest.MonkeyPatch,
+        doc: str,
+    ) -> None:
+        # QA TEST-001: a two-name salutation line splits only when a comma
+        # follows the second name ("Bonjour Zorbalia, Quentrel,")
+        (line,) = detector._salutation_lines(doc)
+        assert len(line.names) == 2 and not line.comma_after
+        pair = _at(doc, "Zorbalia, Quentrel", "PERSON", source="regex")
+        found = _detect(monkeypatch, detector, doc, regex_entities=[pair])
+        assert _persons(found) == ["Zorbalia, Quentrel"]
+
     def test_guards_are_reindexed(
         self, detector: HybridDetector, first_names: NameDictionary
     ) -> None:
@@ -909,6 +932,23 @@ class TestDefinedAlias:
             ("Zorbtech SAS", "ORG"),
             ("M. Zorbalia Quentrel", "PERSON"),
         ]
+
+    @pytest.mark.parametrize(
+        "alias", ["La Zorbtech", "Le Zorbtech", "Les Zorbtech", "L'Zorbtech"]
+    )
+    def test_alias_starting_with_a_capitalised_article_is_not_taken(
+        self, detector: HybridDetector, monkeypatch: pytest.MonkeyPatch, alias: str
+    ) -> None:
+        # QA TEST-001: the alias is the name of an ORG of the document, so only
+        # the article check keeps it out
+        doc = (
+            f"{alias} et le comité, ci-après dénommée « {alias} ».\n"
+            f"{alias} et le bureau.\n"
+        )
+        found = _detect(
+            monkeypatch, detector, doc, spacy_entities=[_at(doc, alias, "ORG")]
+        )
+        assert _types(found) == [(alias, "ORG")]
 
     def test_other_words_and_cases_do_not_fire(
         self, detector: HybridDetector, monkeypatch: pytest.MonkeyPatch
