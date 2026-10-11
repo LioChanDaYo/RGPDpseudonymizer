@@ -939,3 +939,47 @@ class TestDefinedAlias:
         )
         events = [f for name, f in recorder.events if name == "org_alias_added"]
         assert events == [{"start": 24, "end": 32, "definition_start": 24}]
+
+
+# ---------------------------------------------------------------------------
+# Slice K: R-NEST, the normalized-text exact match needs nested spans
+# ---------------------------------------------------------------------------
+
+
+class TestNestedExactMatch:
+    def test_exact_match_rules(self, detector: HybridDetector) -> None:
+        doc = "Zorbalia Dr Zorbalia et Dr. Zorbalia Quentrel"
+        left = _at(doc, "Zorbalia Dr", "PERSON")
+        right = _at(doc, "Dr Zorbalia", "PERSON", source="regex")
+        titled = _at(doc, "Dr. Zorbalia Quentrel", "PERSON", source="regex")
+        bare = _at(doc, "Zorbalia Quentrel", "PERSON")
+        assert not detector._is_exact_match(left, right)  # same text, not nested
+        assert detector._is_exact_match(bare, titled)  # nested: still a match
+        assert detector._is_exact_match(titled, titled)  # same span
+
+    def test_both_occurrences_covered_same_type(self, detector: HybridDetector) -> None:
+        doc = "Zorbalia Dr Zorbalia"
+        spacy_entity = _at(doc, "Zorbalia Dr", "PERSON")
+        regex_entity = _at(doc, "Dr Zorbalia", "PERSON", source="regex")
+        merged = detector._merge_entities([spacy_entity], [regex_entity], doc)
+        covered = {i for e in merged for i in range(e.start_pos, e.end_pos)}
+        assert {0, len(doc) - 1} <= covered
+
+    def test_both_kept_different_types(self, detector: HybridDetector) -> None:
+        doc = "Zorbalia Dr Zorbalia"
+        spacy_entity = _at(doc, "Zorbalia Dr", "PERSON")
+        regex_entity = _at(doc, "Dr Zorbalia", "ORG", source="regex")
+        merged = detector._merge_entities([spacy_entity], [regex_entity], doc)
+        assert [(e.text, e.entity_type, e.is_ambiguous) for e in merged] == [
+            ("Zorbalia Dr", "PERSON", False),
+            ("Dr Zorbalia", "ORG", True),
+        ]
+
+    def test_nested_titled_pair_is_still_one_detection(
+        self, detector: HybridDetector
+    ) -> None:
+        doc = "Le rapport de Dr. Zorbalia Quentrel est prêt."
+        spacy_entity = _at(doc, "Zorbalia Quentrel", "PERSON")
+        regex_entity = _at(doc, "Dr. Zorbalia Quentrel", "PERSON", source="regex")
+        merged = detector._merge_entities([spacy_entity], [regex_entity], doc)
+        assert [e.text for e in merged] == ["Zorbalia Quentrel"]

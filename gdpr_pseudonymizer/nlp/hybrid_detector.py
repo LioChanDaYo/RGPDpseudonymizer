@@ -732,7 +732,9 @@ class HybridDetector(EntityDetector):
         4. Return combined entity list
 
     Deduplication Rules:
-        - Exact overlap (same span or same title-stripped text) → Keep spaCy entity
+        - Exact match (same span, or same title-stripped text with one span
+          inside the other) → same type: keep the spaCy entity; different
+          types: keep both, flag the regex entity (Story 10.3c, 10.4)
         - No overlap → Keep both entities
         - Different-type partial overlap → Flag regex entity as ambiguous, keep both
         - Same-type overlap → One span kept (Story 10.2 AC1, PR #81 review):
@@ -908,8 +910,9 @@ class HybridDetector(EntityDetector):
         """Merge spaCy and regex entities with deduplication logic.
 
         Deduplication Rules (the first overlapping spaCy entity decides):
-            - Exact match (same span, or same text once titles are stripped),
-              same type → Keep spaCy entity (prefer NLP confidence)
+            - Exact match (same span, or same text once titles are stripped
+              with one span inside the other, Story 10.4 R-NEST), same type →
+              Keep spaCy entity (prefer NLP confidence)
             - Exact match, different types → Keep both, flag the regex entity
               as ambiguous (Story 10.3c AC1); checked before the Cabinet case.
               Except a hyphenated PERSON with no known first name (R-HYPH-FN,
@@ -921,8 +924,10 @@ class HybridDetector(EntityDetector):
               pass below keeps one (Story 10.2 AC1)
             - Special case: Regex ORG with "Cabinet" overlapping spaCy PERSON → Prefer ORG
 
-        Post-filters, in order: title-only PERSON, label words, ORG roles
-        (AC3), same-type overlap dedup (AC1), then sort by start position.
+        Post-filters, in order: title-only PERSON, label words, LOCATION
+        noise, ORG roles (AC3), organisation + place (Story 10.4 AC4),
+        same-type overlap dedup (AC1), the line-break split, W-JOIN and the
+        late role trim, then sort by start position.
 
         Args:
             spacy_entities: Entities detected by spaCy
@@ -2726,18 +2731,22 @@ class HybridDetector(EntityDetector):
         return strip_french_titles(text)
 
     def _is_exact_match(self, e1: DetectedEntity, e2: DetectedEntity) -> bool:
-        """Check if two entities have identical span OR normalized text.
+        """Check if two entities have identical span OR nested normalized text.
 
         Checks both positional exact match and normalized text match to handle
         cases where one detector includes a title and the other doesn't
         (e.g., "Dr. Marie Dubois" from regex vs "Marie Dubois" from spaCy).
+        The normalized-text match also requires one span to contain the other
+        (Story 10.4, R-NEST): in "Zorbalia Dr Zorbalia", "Zorbalia Dr" and
+        "Dr Zorbalia" are two occurrences, not one.
 
         Args:
             e1: First entity
             e2: Second entity
 
         Returns:
-            True if entities have same start/end positions OR same normalized text
+            True if entities have same start/end positions, OR same normalized
+            text and one span contains the other
         """
         # Check positional exact match
         if e1.start_pos == e2.start_pos and e1.end_pos == e2.end_pos:
@@ -2746,7 +2755,9 @@ class HybridDetector(EntityDetector):
         # Check normalized text match (strips titles for comparison)
         # This handles "Dr. Marie Dubois" == "Marie Dubois" cases
         if self._normalize_entity_text(e1.text) == self._normalize_entity_text(e2.text):
-            return True
+            return (e1.start_pos <= e2.start_pos and e2.end_pos <= e1.end_pos) or (
+                e2.start_pos <= e1.start_pos and e1.end_pos <= e2.end_pos
+            )
 
         return False
 
