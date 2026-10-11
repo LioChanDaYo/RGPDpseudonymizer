@@ -7,6 +7,9 @@ Slice A (carried losses, AC5): R-ACR ties an all-caps token to the initials of
 an ORG of the same document; R-FN-DOC offers a first name used alone when the
 document names that person in full.
 
+Slice D (defined aliases): R-DEF-NAME offers an alias that the text defines
+("ci-après dénommée ...") when it is the name of an ORG of the same document.
+
 Slice S (salutations, AC1-AC3):
 - R-SAL-SPLIT: "X, Y" on a salutation line, both known first names → two
   PERSONs (AC1);
@@ -844,3 +847,95 @@ class TestDocumentFirstName:
             "person_start": 0,
             "person_end": 17,
         }
+
+
+# ---------------------------------------------------------------------------
+# Slice D: R-DEF-NAME, aliases defined in the text (Lionel, STOP R Q1)
+# ---------------------------------------------------------------------------
+
+
+class TestDefinedAlias:
+    @pytest.mark.parametrize(
+        "clause",
+        [
+            'Ci-après dénommée "ZORBTECH"',
+            "ci-après dénommée « ZORBTECH »",
+            '(ci-après "ZORBTECH")',
+        ],
+    )
+    def test_alias_of_an_org_of_the_document(
+        self, detector: HybridDetector, monkeypatch: pytest.MonkeyPatch, clause: str
+    ) -> None:
+        doc = (
+            f"Zorbtech SAS\nReprésentée par Mme Zorbalia Quentrel\n\n{clause}\n\n"
+            "ZORBTECH et le comité. Le rapport de ZORBTECH est prêt.\n"
+        )
+        spacy_entities = [
+            _at(doc, "Zorbtech SAS", "ORG"),
+            _at(doc, "Mme Zorbalia Quentrel", "PERSON"),
+        ]
+        found = _detect(monkeypatch, detector, doc, spacy_entities=spacy_entities)
+        starts = [s for t, ty, s in found if (t, ty) == ("ZORBTECH", "ORG")]
+        assert len(starts) == 3  # the clause's own occurrence included
+
+    def test_multi_word_alias_equal_to_the_org(
+        self, detector: HybridDetector, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        doc = 'Le Groupe Zorbtech Quentrix, ci-après "Zorbtech Quentrix".\nZorbtech Quentrix et le comité.\n'
+        spacy_entities = [_at(doc, "Zorbtech Quentrix", "ORG")]
+        found = _detect(monkeypatch, detector, doc, spacy_entities=spacy_entities)
+        assert _types(found).count(("Zorbtech Quentrix", "ORG")) == 3
+
+    @pytest.mark.parametrize(
+        "clause",
+        [
+            "ci-après dénommée « la Société »",  # an article starts the alias
+            'ci-après dénommée "QUENTREL"',  # no ORG of that name
+        ],
+    )
+    def test_no_fire(
+        self, detector: HybridDetector, monkeypatch: pytest.MonkeyPatch, clause: str
+    ) -> None:
+        doc = (
+            f"Zorbtech SAS et M. Zorbalia Quentrel, {clause}.\n"
+            "QUENTREL et la Société.\n"
+        )
+        spacy_entities = [
+            _at(doc, "Zorbtech SAS", "ORG"),
+            _at(doc, "M. Zorbalia Quentrel", "PERSON"),
+        ]
+        found = _detect(monkeypatch, detector, doc, spacy_entities=spacy_entities)
+        assert _types(found) == [
+            ("Zorbtech SAS", "ORG"),
+            ("M. Zorbalia Quentrel", "PERSON"),
+        ]
+
+    def test_other_words_and_cases_do_not_fire(
+        self, detector: HybridDetector, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        doc = (
+            'Zorbtech SAS, ci-après dénommée "ZORBTECH".\n'
+            "ZORBTECHS et Zorbtech et zorbtech.\n"
+        )
+        found = _detect(
+            monkeypatch,
+            detector,
+            doc,
+            spacy_entities=[_at(doc, "Zorbtech SAS", "ORG")],
+        )
+        assert _types(found) == [("Zorbtech SAS", "ORG"), ("ZORBTECH", "ORG")]
+
+    def test_event_carries_no_entity_text(
+        self, detector: HybridDetector, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        recorder = _LogRecorder()
+        monkeypatch.setattr(hd, "logger", recorder)
+        doc = 'Zorbtech SAS, ci-après "ZORBTECH".\n'
+        _detect(
+            monkeypatch,
+            detector,
+            doc,
+            spacy_entities=[_at(doc, "Zorbtech SAS", "ORG")],
+        )
+        events = [f for name, f in recorder.events if name == "org_alias_added"]
+        assert events == [{"start": 24, "end": 32, "definition_start": 24}]

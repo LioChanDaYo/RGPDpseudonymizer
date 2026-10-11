@@ -281,6 +281,15 @@ _NAME_TOKEN_RE = re.compile(f"(?<![\\w-]){_NAME_TOKEN}(?![\\w-])")
 # Lower-case connectors of the organizations pattern, skipped by the initials
 _INITIALS_CONNECTORS = frozenset({"de", "du", "des", "la", "le", "et", "&"})
 _ELISION_PREFIX_RE = re.compile(r"^[dlDL]['’]")
+# A defined alias (Slice D): one or more capitalised tokens, quoted after
+# "ci-après [dénommé(e)(s)|désigné(e)]"
+_ALIAS = f"(?:[{_UPPER}][\\w&'’.-]*(?:{HSPACE}+[{_UPPER}][\\w&'’.-]*)*)"
+_DEFINITION_CLAUSE_RE = re.compile(
+    f"[Cc]i-après{HSPACE}+(?:(?:dénommée?|désignée?|dénommés|dénommées){HSPACE}+)?"
+    f'(?:["“«]{HSPACE}*)({_ALIAS})(?:{HSPACE}*["”»])'
+)
+# An alias that starts with one of these is a role noun, never taken
+_ALIAS_ARTICLES = frozenset({"le", "la", "les", "l'", "l’", "un", "une"})
 
 
 def _fold(text: str) -> str:
@@ -1348,11 +1357,73 @@ class HybridDetector(EntityDetector):
         self, text: str, entities: list[DetectedEntity]
     ) -> list[DetectedEntity]:
         """Story 10.4 rules that read the final merged list of the document,
-        in order: R-ACR, then R-FN-DOC. Each sees the previous additions.
-        They only add detections, and an addition overlaps no detection."""
+        in order: R-ACR, R-DEF-NAME, then R-FN-DOC. Each sees the previous
+        additions. They only add detections, and an addition overlaps no
+        detection."""
         added: list[DetectedEntity] = []
         added += self._org_acronyms(text, entities + added)
+        added += self._defined_aliases(text, entities + added)
         added += self._document_first_names(text, entities + added)
+        return added
+
+    @staticmethod
+    def _defined_aliases(
+        text: str, entities: list[DetectedEntity]
+    ) -> list[DetectedEntity]:
+        """R-DEF-NAME (Story 10.4, Slice D; Lionel, STOP R Q1): an alias that
+        the text defines ('ci-après dénommée "ZORBTECH"') becomes an ORG at
+        every standalone occurrence (same case) that overlaps no detection,
+        when the alias, accents and case aside, is the title-stripped text or
+        the first word of an ORG detection of the same document. An alias
+        that starts with an article ("le Client", "la Société") is never
+        taken. No alias list: the tie is the organisation named in the same
+        text (GUIDELINES Q18)."""
+        org_names: dict[str, DetectedEntity] = {}
+        for entity in sorted(
+            (e for e in entities if e.entity_type == "ORG"), key=lambda e: e.end_pos
+        ):
+            core = strip_french_titles(entity.text)
+            if core:
+                org_names.setdefault(_fold(core), entity)
+                org_names.setdefault(_fold(core.split()[0]), entity)
+        if not org_names:
+            return []
+        aliases: dict[str, int] = {}
+        for clause in _DEFINITION_CLAUSE_RE.finditer(text):
+            alias = clause.group(1)
+            first = alias.split()[0].casefold()
+            if first in _ALIAS_ARTICLES or first.startswith(("l'", "l’")):
+                continue
+            if _fold(alias) in org_names:
+                aliases.setdefault(alias, clause.start(1))
+        if not aliases:
+            return []
+        index = _SpanIndex.of(entities)
+        added: list[DetectedEntity] = []
+        for alias, definition_start in aliases.items():
+            pattern = re.compile(f"(?<![\\w-]){re.escape(alias)}(?![\\w-])")
+            for match in pattern.finditer(text):
+                start, end = match.start(), match.end()
+                if index.overlaps(start, end) or any(
+                    a.start_pos < end and start < a.end_pos for a in added
+                ):
+                    continue
+                added.append(
+                    DetectedEntity(
+                        text=alias,
+                        entity_type="ORG",
+                        start_pos=start,
+                        end_pos=end,
+                        confidence=0.70,
+                        source="regex",
+                    )
+                )
+                logger.debug(
+                    "org_alias_added",
+                    start=start,
+                    end=end,
+                    definition_start=definition_start,
+                )
         return added
 
     @staticmethod
