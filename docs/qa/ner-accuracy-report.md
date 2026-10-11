@@ -1122,3 +1122,118 @@ Both runs used the same CPU, so the comparison is like for like. Timings are unc
 
 - Pseudonym continuity: the mapping key has no entity type, so two confirmed candidates of different types share one key and one pseudonym; a key already in a database is auto-accepted for both, with the stored pseudonym, as before. Upgrade note in CHANGELOG `[Unreleased]`. Story 10.7 (Type-Aware Mapping Lookup) is the follow-up Lionel added at this story's STOP R.
 - README, FAQ, docs index and tutorials are not updated in this story (Epic 10 G7 interpretation).
+
+## Greetings and organisation + country (Story 10.4, 2026-10-11)
+
+**Detector change, same ground truth.** No annotation, scorer or held-out change (G4). The ground truth is the 10.1 one (2,215 main-corpus annotations).
+
+**What changed in the detector** (rule text and STOP R decisions: story 10.4):
+- **Slice S, salutations (AC1–AC3).** On a salutation line, a pattern or model PERSON "X, Y" whose two parts are known first names ("Zorbalia, Quentrel,") becomes two PERSONs. A known first name alone on a short line ending with a comma, or right after a greeting, thanks or compliment opener at the start of a line ("Bonjour Zorbalia,", "Merci Zorbalia.", "Bonne initiative Zorbalia."), is offered as PERSON. Openers and the line-length limit are in the new `resources/salutations.yaml`. Nothing changes off a salutation line.
+- **Slice O, organisation + place (AC4).** An organisation followed on the same line by one space and a country, region, city or one of UK, US, USA, UE, EU ("Zorbtech France") is offered as one organisation, and the place keeps its own LOCATION (GUIDELINES Q3, G7). The abbreviations are in the new `resources/place_abbreviations.yaml`; the other places come from the bundled lists. A job title is never merged ("VP Europe").
+- **Slice A, carried losses (AC5).** An all-caps short form whose letters are the initials of an organisation named in the same text ("ZRQ" for "Zorbal Régionale Quentrix") is offered as an organisation, except a role word ("CEO", "VP"; Lionel, STOP R). A known first name used alone after the person is named in full in the same document ("Zorbalia" after "Zorbalia Quentrel") is offered as PERSON (Lionel, STOP R). Both restore the two annotations that had no covering detection since Story 10.2.
+- **Slice D, defined aliases (Lionel, STOP R).** A short name that the text defines ('ci-après dénommée "ZORBTECH"') is offered as an organisation at every occurrence when it is the name of an organisation found in the same text.
+- **Slice K, candidate items.** The title-stripped exact match in the merge now needs one span inside the other (no main-corpus change); the organisation prefix form accepts connectors or an elision after its keyword ("Chambre de Commerce …").
+
+**Sources (G1):**
+- Before: 10.3c close-out run P `37963522411`, reproduced on `main` by `37975010715`, whose `accuracy-per-document.json` is the paired-delta baseline (AC12).
+- Run S `38039302673` (`f469c7a`), run O `38039762663` (`8b52c54`), run A `38040093781` (`e593622`), run D `38173179474` (`2444b69`).
+- **After (close-out): run K `38173542707`** (all slices; head `7c1b5fb`, code of `2695dee`).
+
+### Lines from `accuracy-output.txt`, verbatim
+
+Run K (`38173542707`, close-out):
+
+```
+[Overall] P=0.8068 R=0.8465 F1=0.8262 TP=1875 FP=449 FN=340 FN%=15.35 FP%=19.32
+[PERSON] P=0.9219 R=0.9774 F1=0.9488 TP=1298 FP=110 FN=30
+[LOCATION] P=0.7491 R=0.8061 F1=0.7766 TP=212 FP=71 FN=51
+[ORG] P=0.5766 R=0.5849 F1=0.5807 TP=365 FP=268 FN=259
+[HELD-OUT Overall] P=0.7911 R=0.7706 F1=0.7807 TP=178 FP=47 FN=53 FN%=22.94 FP%=20.89
+[HELD-OUT PERSON] P=0.8661 R=0.8661 F1=0.8661 TP=97 FP=15 FN=15
+[HELD-OUT LOCATION] P=0.7761 R=0.7647 F1=0.7704 TP=52 FP=15 FN=16
+[HELD-OUT ORG] P=0.6304 R=0.5686 F1=0.5979 TP=29 FP=17 FN=22
+[CI95 Overall] P=[0.7782,0.8402] R=[0.8230,0.8659] F1=[0.8054,0.8461] unit=document docs=25 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[CI95 PERSON] P=[0.9104,0.9361] R=[0.9632,0.9884] F1=[0.9410,0.9580] unit=document docs=25 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[CI95 LOCATION] P=[0.6519,0.8275] R=[0.7570,0.8589] F1=[0.7136,0.8290] unit=document docs=25 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[CI95 ORG] P=[0.4801,0.6652] R=[0.4844,0.6800] F1=[0.4876,0.6635] unit=document docs=25 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[CI95 HELD-OUT Overall] P=[0.7194,0.8564] R=[0.7130,0.8286] F1=[0.7216,0.8342] unit=document docs=6 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[CI95 HELD-OUT PERSON] P=[0.8065,0.9256] R=[0.8000,0.9355] F1=[0.8441,0.8973] unit=document docs=6 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[CI95 HELD-OUT LOCATION] P=[0.6719,0.8939] R=[0.6866,0.8281] F1=[0.6870,0.8516] unit=document docs=6 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[CI95 HELD-OUT ORG] P=[0.4286,0.7692] R=[0.3261,0.7606] F1=[0.3704,0.7500] unit=document docs=6 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+```
+
+### Main corpus, before / after
+
+| | Precision | Recall | F1 | TP | FP | FN |
+|---|---|---|---|---|---|---|
+| Overall, before (run P) | 79.20% | 79.77% | 79.49% | 1,767 | 464 | 448 |
+| **Overall, after (run K)** | **80.68%** | **84.65%** | **82.62%** | 1,875 | 449 | 340 |
+| PERSON, before | 92.05% | 96.84% | 94.39% | 1,286 | 111 | 42 |
+| **PERSON, after** | **92.19%** | **97.74%** | **94.88%** | 1,298 | 110 | 30 |
+| LOCATION, before | 74.82% | 80.23% | 77.43% | 211 | 71 | 52 |
+| **LOCATION, after** | **74.91%** | **80.61%** | **77.66%** | 212 | 71 | 51 |
+| ORG, before | 48.91% | 43.27% | 45.92% | 270 | 282 | 354 |
+| **ORG, after** | **57.66%** | **58.49%** | **58.07%** | 365 | 268 | 259 |
+
+**Per slice** (ΔTP / ΔFP / ΔFN):
+
+| Slice | Runs | PERSON | LOCATION | ORG |
+|---|---|---|---|---|
+| S: salutations | `37975010715` → `38039302673` | +4 / −1 / −4 | 0 / 0 / 0 | 0 / 0 / 0 |
+| O: organisation + place | `38039302673` → `38039762663` | 0 / 0 / 0 | +1 / 0 / −1 | +14 / −14 / −14 |
+| A: acronym, first name alone | `38039762663` → `38040093781` | +8 / 0 / −8 | 0 / 0 / 0 | +1 / 0 / −1 |
+| D: defined aliases | `38040093781` → `38173179474` | 0 / 0 / 0 | 0 / 0 / 0 | +79 / 0 / −79 |
+| K: nested exact match, keyword + connector | `38173179474` → `38173542707` | 0 / 0 / 0 | 0 / 0 / 0 | +1 / 0 / −1 |
+
+The Slice D gain comes from one contract of the main corpus, which defines two aliases used many times (Lionel saw this caveat at STOP R; the Epic 10 final exam will show whether it generalises).
+
+### Paired delta (AC12)
+
+Run K against the baseline (`scripts/accuracy_paired_delta.py delta <37975010715 json> <38173542707 json>`):
+
+```
+baseline run_id=37975010715 commit=584641970573dcf74344badebc1f3f9b7694caf0
+candidate run_id=38173542707 commit=7c1b5fb5e4def98f577a3e2d7f373b76bec40c38
+[PAIRED-DELTA Overall] dP=+0.0148 [+0.0051,+0.0264] dR=+0.0488 [+0.0076,+0.1077] dF1=+0.0313 [+0.0065,+0.0668] unit=document docs=25 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0 excludes_0=P:yes,R:yes,F1:yes
+[PAIRED-DELTA PERSON] dP=+0.0013 [+0.0000,+0.0034] dR=+0.0090 [+0.0000,+0.0225] dF1=+0.0050 [+0.0000,+0.0123] unit=document docs=25 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0 excludes_0=P:no,R:no,F1:no
+[PAIRED-DELTA LOCATION] dP=+0.0009 [+0.0000,+0.0030] dR=+0.0038 [+0.0000,+0.0125] dF1=+0.0022 [+0.0000,+0.0074] unit=document docs=25 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0 excludes_0=P:no,R:no,F1:no
+[PAIRED-DELTA ORG] dP=+0.0875 [+0.0169,+0.1722] dR=+0.1522 [+0.0174,+0.3236] dF1=+0.1216 [+0.0172,+0.2553] unit=document docs=25 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0 excludes_0=P:yes,R:yes,F1:yes
+```
+
+- **Overall and ORG precision and F1 gains are outside the paired range** (`excludes_0=yes`): Overall dP +1.48 points (range +0.51 to +2.64), dF1 +3.13 points (+0.65 to +6.68); ORG dP +8.75 points, dF1 +12.16 points.
+- PERSON and LOCATION gains are **within the paired range** (`excludes_0=no`): they are recall fixes (names and places left in clear are now offered), not score wins.
+- The overall and ORG recall gains are outside the paired range too.
+
+### Recall (G3, strict)
+
+FN versus run P: Overall 448 → 444 (run S) → 429 (O) → 420 (A) → 341 (D) → 340 (K); PERSON 42 → 38 → 38 → 30 → 30 → 30; LOCATION 52 → 52 → 51 → 51 → 51 → 51; ORG 354 → 354 → 340 → 339 → 260 → 259. There is no FN increase in any type after any slice.
+
+**Coverage, main corpus** (local check on a dump that reproduces run K exactly; details in the story):
+- No annotation loses its cover by its own type (level 2: 0) or its last cover of any type (level 2b: 0), and no character covered before by a span of its type is uncovered (level 1: 0).
+- The two annotations without any covering detection since Story 10.2, PERSON "Pierre" (`hr_announcement`) and ORG "BRS" (`sales_proposal`), are **restored**, each covered by a detection of its own type.
+
+### Held-out set (G5)
+
+Aggregates only (lines above).
+- **Runs S and O:** the eight held-out lines are identical to run P (FN 59, FP 45, F1 76.79%).
+- **Run A:** recall unchanged, two more held-out PERSON FPs (FP 45 → 47), so P 79.26% → 78.54% and F1 76.79% → 76.44%. With the main-corpus gain, this is reported as an **overfitting red flag**. It is not a recall drop; the held-out documents are not opened, so its cause is not looked at.
+- **Runs D and K:** held-out recall rises, FN 59 → 53 (ORG 28 → 22): R 74.46% → 77.06%, F1 76.79% → 78.07%, ORG F1 50.55% → 59.79%. FP stays 47, so held-out P (79.11%) is still below run P's 79.26%: the run A red flag carries on.
+- Small-sample note: held-out PERSON 112, LOCATION 68, ORG 51 annotations, so 1 ORG FN ≈ 2 points of ORG recall. The held-out ranges are wide (6 documents) and the held-out set has no paired delta.
+
+### Performance (NFR1)
+
+Performance workflow run `38174221283` on the story branch (head `7c1b5fb`; its code is that of `2695dee`, the last code commit; later commits change documentation only): **success**. The "Verify benchmark results are non-empty" step passed and listed the 4 benchmarks. A first run, `38173566957` (same head, success, guard step passed), landed on an Intel Xeon Platinum 8573C runner, so it was repeated to compare on the reference CPU.
+
+| Run | CPU (`machine_info`) | 2k | 3.5k | 5k | Entity detection 3k |
+|---|---|---|---|---|---|
+| Branch `38174221283` (`7c1b5fb`) | AMD EPYC 7763 | 0.443 s | 0.761 s | 1.122 s | 0.689 s |
+| Reference `37963988214` (10.3c close-out `8d25dbe`) | AMD EPYC 7763 | 0.442 s | 0.756 s | 1.116 s | 0.675 s |
+| Same code as the reference, `main` push `37975010879` (`5846419`) | AMD EPYC 7763 | 0.448 s | 0.765 s | 1.117 s | 0.682 s |
+| Branch, first run `38173566957` (not comparable) | Intel Xeon Platinum 8573C | 0.333 s | 0.566 s | 0.834 s | 0.488 s |
+
+On the same CPU the timings are unchanged within run-to-run variation (the two same-code reference runs differ by up to 0.009 s), well under the NFR1 threshold of 30 s. The new rules are one pass over the lines (salutations), a look at the text right after each organisation (organisation + place), and one pass over the document's tokens with interval lookups (short forms, aliases, first names).
+
+### Notes
+
+- Pseudonym continuity: the mapping schema is unchanged and the key still has no entity type. Split greetings give one key per name; an organisation with its place ("Zorbtech France") gets its own key, apart from "Zorbtech"; acronyms and defined aliases get their own key, so their pseudonym differs from the full name's. Upgrade note in CHANGELOG `[Unreleased]`.
+- README, FAQ, docs index and tutorials are not updated in this story (Epic 10 G7 interpretation).

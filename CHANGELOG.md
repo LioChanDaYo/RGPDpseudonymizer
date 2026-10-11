@@ -19,6 +19,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **People addressed in greetings, organisations with their country, short forms and defined aliases are now offered (Story 10.4).**
+  - **Greetings.** On a greeting line, each person is offered separately: "Zorbalia, Quentrel," used to be one candidate "Zorbalia, Quentrel" and is now two, "Zorbalia" and "Quentrel". A first name alone on a short line ending with a comma ("Zorbalia,"), or right after "Bonjour", "Merci", "Bonne initiative" or "Félicitations" at the start of a line ("Merci Zorbalia."), is offered as a person. Only known first names count, and only on such lines: the same first name in running text is not affected. The opener list is in `gdpr_pseudonymizer/resources/salutations.yaml`.
+  - **Organisation + place.** An organisation followed by its country, region or city ("Zorbtech France", "Zorbtech Paris", "Zorbtech UK") is offered as one organisation, and the place is still offered on its own. A job title such as "VP Europe" is never merged. UK, US, USA, UE and EU are listed in `gdpr_pseudonymizer/resources/place_abbreviations.yaml`.
+  - **Short forms.** An all-caps short form whose letters are the initials of an organisation named in the same text ("ZRQ" for "Zorbal Régionale Quentrix") is offered as an organisation wherever it stands alone, never inside a reference code ("PROP-2024-ZRQ-001") and never for a role word ("CEO", "VP").
+  - **Defined aliases.** A short name defined in a contract (`ci-après dénommée "ZORBTECH"`) is offered as an organisation at every occurrence, when it is the name of an organisation found in the same text.
+  - **First names used alone.** After a person is named in full ("Zorbalia Quentrel"), the first name used alone in the same document ("Zorbalia rejoint le comité") is offered as a person. A capitalised common word that is also that first name can be offered too (for example "Pierre" meaning stone, in a document that names a "Pierre …"): one more candidate to reject, never a name left in clear.
+  - **Smaller fixes.** A title-stripped exact match in the merge now needs one span inside the other, so in "Zorbalia Dr Zorbalia" both occurrences are covered; an organisation keyword followed by "de", "du", "des", "la", "le", "et", "&" or an elision ("Chambre de Commerce …") is detected whole.
+  - **Numbers.** CI accuracy run `38173542707` vs `37975010715` (identical to the 10.3c close-out run `37963522411`), same ground truth:
+    - precision 79.20% → 80.68%, recall 79.77% → 84.65%, F1 79.49% → 82.62%;
+    - PERSON F1 94.39% → 94.88%, LOCATION 77.43% → 77.66%, ORG 45.92% → 58.07%;
+    - misses 448 → 340 (PERSON 42 → 30, LOCATION 52 → 51, ORG 354 → 259), with no recall drop in any type. 79 of the 95 ORG misses removed come from one contract that defines two aliases.
+    - Paired delta (`scripts/accuracy_paired_delta.py`, same documents resampled together): the overall precision and F1 gains are outside the paired range (precision +1.48 points, range +0.51 to +2.64; F1 +3.13 points, range +0.65 to +6.68), and so are the ORG gains. The PERSON and LOCATION gains are within their paired ranges: they are recall fixes, not claimed as score gains.
+    - Held-out set (same run): recall 74.46% → 77.06% (ORG misses 28 → 22), F1 76.79% → 78.07%, precision 79.26% → 79.11% (two more PERSON candidates that are not annotated).
+  - **Upgrading: pseudonym continuity.** The mapping schema is unchanged. Keys are still the entity text with titles stripped (and prepositions, for places), whitespace collapsed, without the entity type.
+    - Split greetings: "Zorbalia, Quentrel" used to be one key; now each name has its own key ("Zorbalia", "Quentrel"), and an existing pseudonym for either name is reused. The old two-name key is no longer used.
+    - A first name newly offered on a greeting line, or used alone after the full name, gets the pseudonym already stored for that first name, or a new one; the existing person-name component match applies unchanged.
+    - Organisation + place: "Zorbtech France" is a new key, different from "Zorbtech", so the branch gets its own pseudonym. The place "France" keeps its own key; in the output, the organisation's replacement covers the place at that position.
+    - Short forms and defined aliases get their own key ("ZRQ", "ZORBTECH"), so their own pseudonym: the short form is no longer left in clear, but the output does not show that it is the same organisation as the full name.
+    - Recommendation: keep using the same mapping database across versions for consistent pseudonyms. Re-process with the previous version if byte-identical output with an old run is required.
+
 - **A name found by both detectors with different types is no longer dropped (Story 10.3c).**
   - **What you see.** The pattern-based detection and the language model sometimes find the same text with different types: the same span, or the same text once a title such as "Dr" is removed. For example, the patterns find LOCATION "Zorbaville" and the model finds ORG "Zorbaville". The pattern candidate used to be dropped silently. Now both candidates reach validation and you choose the right type.
     - The command-line validation marks the pattern candidate "(ambiguous)". The desktop app lists the two entries, without a marker.
