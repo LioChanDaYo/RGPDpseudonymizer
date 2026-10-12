@@ -1,0 +1,425 @@
+{
+  "document_name": "fe_25.txt",
+  "entities": [
+    {
+      "entity_text": "BANQUE COOPÉRATIVE DES RIVES",
+      "entity_type": "ORG",
+      "start_pos": 0,
+      "end_pos": 28
+    },
+    {
+      "entity_text": "Mireille Sékou",
+      "entity_type": "PERSON",
+      "start_pos": 266,
+      "end_pos": 280
+    },
+    {
+      "entity_text": "Adrien Basset",
+      "entity_type": "PERSON",
+      "start_pos": 309,
+      "end_pos": 322
+    },
+    {
+      "entity_text": "Lina Amari",
+      "entity_type": "PERSON",
+      "start_pos": 326,
+      "end_pos": 336
+    },
+    {
+      "entity_text": "Banque Coopérative des Rives",
+      "entity_type": "ORG",
+      "start_pos": 399,
+      "end_pos": 427
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 684,
+      "end_pos": 690
+    },
+    {
+      "entity_text": "Rennes",
+      "entity_type": "LOCATION",
+      "start_pos": 692,
+      "end_pos": 698
+    },
+    {
+      "entity_text": "Brest",
+      "entity_type": "LOCATION",
+      "start_pos": 700,
+      "end_pos": 705
+    },
+    {
+      "entity_text": "Vannes",
+      "entity_type": "LOCATION",
+      "start_pos": 709,
+      "end_pos": 715
+    },
+    {
+      "entity_text": "DSI Ouest Services",
+      "entity_type": "ORG",
+      "start_pos": 774,
+      "end_pos": 792
+    },
+    {
+      "entity_text": "Ouest",
+      "entity_type": "LOCATION",
+      "start_pos": 778,
+      "end_pos": 783
+    },
+    {
+      "entity_text": "Saint-Nazaire",
+      "entity_type": "LOCATION",
+      "start_pos": 855,
+      "end_pos": 868
+    },
+    {
+      "entity_text": "Lorient",
+      "entity_type": "LOCATION",
+      "start_pos": 874,
+      "end_pos": 881
+    },
+    {
+      "entity_text": "Quimper",
+      "entity_type": "LOCATION",
+      "start_pos": 940,
+      "end_pos": 947
+    },
+    {
+      "entity_text": "Angers",
+      "entity_type": "LOCATION",
+      "start_pos": 949,
+      "end_pos": 955
+    },
+    {
+      "entity_text": "Loire-Atlantique",
+      "entity_type": "LOCATION",
+      "start_pos": 978,
+      "end_pos": 994
+    },
+    {
+      "entity_text": "Banque Coopérative des Rives",
+      "entity_type": "ORG",
+      "start_pos": 1152,
+      "end_pos": 1180
+    },
+    {
+      "entity_text": "BANQUE COOPÉRATIVE DES RIVES",
+      "entity_type": "ORG",
+      "start_pos": 1210,
+      "end_pos": 1238
+    },
+    {
+      "entity_text": "Nantes Beaulieu",
+      "entity_type": "LOCATION",
+      "start_pos": 1400,
+      "end_pos": 1415
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 1481,
+      "end_pos": 1487
+    },
+    {
+      "entity_text": "Rennes Nord",
+      "entity_type": "LOCATION",
+      "start_pos": 1593,
+      "end_pos": 1604
+    },
+    {
+      "entity_text": "Rennes",
+      "entity_type": "LOCATION",
+      "start_pos": 1672,
+      "end_pos": 1678
+    },
+    {
+      "entity_text": "Rennes Centre",
+      "entity_type": "LOCATION",
+      "start_pos": 1769,
+      "end_pos": 1782
+    },
+    {
+      "entity_text": "Brest Kergaradec",
+      "entity_type": "LOCATION",
+      "start_pos": 1783,
+      "end_pos": 1799
+    },
+    {
+      "entity_text": "Brest",
+      "entity_type": "LOCATION",
+      "start_pos": 1872,
+      "end_pos": 1877
+    },
+    {
+      "entity_text": "Saint-Nazaire Port",
+      "entity_type": "LOCATION",
+      "start_pos": 1911,
+      "end_pos": 1929
+    },
+    {
+      "entity_text": "Saint-Nazaire",
+      "entity_type": "LOCATION",
+      "start_pos": 1990,
+      "end_pos": 2003
+    },
+    {
+      "entity_text": "Vannes République",
+      "entity_type": "LOCATION",
+      "start_pos": 2099,
+      "end_pos": 2116
+    },
+    {
+      "entity_text": "Vannes",
+      "entity_type": "LOCATION",
+      "start_pos": 2179,
+      "end_pos": 2185
+    },
+    {
+      "entity_text": "Quimper Ergué",
+      "entity_type": "LOCATION",
+      "start_pos": 2217,
+      "end_pos": 2230
+    },
+    {
+      "entity_text": "Quimper",
+      "entity_type": "LOCATION",
+      "start_pos": 2298,
+      "end_pos": 2305
+    },
+    {
+      "entity_text": "Saint-Nazaire Port",
+      "entity_type": "LOCATION",
+      "start_pos": 2344,
+      "end_pos": 2362
+    },
+    {
+      "entity_text": "Camille Orsini",
+      "entity_type": "PERSON",
+      "start_pos": 2447,
+      "end_pos": 2461
+    },
+    {
+      "entity_text": "La Poste",
+      "entity_type": "ORG",
+      "start_pos": 2594,
+      "end_pos": 2602
+    },
+    {
+      "entity_text": "Rennes Nord",
+      "entity_type": "LOCATION",
+      "start_pos": 2687,
+      "end_pos": 2698
+    },
+    {
+      "entity_text": "Rennes\nCentre",
+      "entity_type": "LOCATION",
+      "start_pos": 2746,
+      "end_pos": 2759
+    },
+    {
+      "entity_text": "Tomas Keller",
+      "entity_type": "PERSON",
+      "start_pos": 2786,
+      "end_pos": 2798
+    },
+    {
+      "entity_text": "Cesson-Sévigné",
+      "entity_type": "LOCATION",
+      "start_pos": 2841,
+      "end_pos": 2855
+    },
+    {
+      "entity_text": "Mutualia Gestion",
+      "entity_type": "ORG",
+      "start_pos": 3004,
+      "end_pos": 3020
+    },
+    {
+      "entity_text": "Banque de France",
+      "entity_type": "ORG",
+      "start_pos": 3089,
+      "end_pos": 3105
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 3099,
+      "end_pos": 3105
+    },
+    {
+      "entity_text": "Brest Kergaradec",
+      "entity_type": "LOCATION",
+      "start_pos": 3177,
+      "end_pos": 3193
+    },
+    {
+      "entity_text": "Sophie N'Diaye",
+      "entity_type": "PERSON",
+      "start_pos": 3195,
+      "end_pos": 3209
+    },
+    {
+      "entity_text": "Préfecture du Finistère",
+      "entity_type": "ORG",
+      "start_pos": 3268,
+      "end_pos": 3291
+    },
+    {
+      "entity_text": "Finistère",
+      "entity_type": "LOCATION",
+      "start_pos": 3282,
+      "end_pos": 3291
+    },
+    {
+      "entity_text": "Vannes République",
+      "entity_type": "LOCATION",
+      "start_pos": 3378,
+      "end_pos": 3395
+    },
+    {
+      "entity_text": "Julien Roux",
+      "entity_type": "PERSON",
+      "start_pos": 3397,
+      "end_pos": 3408
+    },
+    {
+      "entity_text": "Banque Coopérative des Rives",
+      "entity_type": "ORG",
+      "start_pos": 3520,
+      "end_pos": 3548
+    },
+    {
+      "entity_text": "BANQUE COOPÉRATIVE DES RIVES",
+      "entity_type": "ORG",
+      "start_pos": 3578,
+      "end_pos": 3606
+    },
+    {
+      "entity_text": "Caisse\nRégionale Armorique",
+      "entity_type": "ORG",
+      "start_pos": 4057,
+      "end_pos": 4083
+    },
+    {
+      "entity_text": "Livia Benattar",
+      "entity_type": "PERSON",
+      "start_pos": 4101,
+      "end_pos": 4115
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 4183,
+      "end_pos": 4189
+    },
+    {
+      "entity_text": "Rennes",
+      "entity_type": "LOCATION",
+      "start_pos": 4191,
+      "end_pos": 4197
+    },
+    {
+      "entity_text": "Brest",
+      "entity_type": "LOCATION",
+      "start_pos": 4201,
+      "end_pos": 4206
+    },
+    {
+      "entity_text": "Loire-Atlantique",
+      "entity_type": "LOCATION",
+      "start_pos": 4320,
+      "end_pos": 4336
+    },
+    {
+      "entity_text": "Rennes Nord",
+      "entity_type": "LOCATION",
+      "start_pos": 4373,
+      "end_pos": 4384
+    },
+    {
+      "entity_text": "Rennes Centre",
+      "entity_type": "LOCATION",
+      "start_pos": 4387,
+      "end_pos": 4400
+    },
+    {
+      "entity_text": "Saint-Nazaire Port",
+      "entity_type": "LOCATION",
+      "start_pos": 4432,
+      "end_pos": 4450
+    },
+    {
+      "entity_text": "Lorient",
+      "entity_type": "LOCATION",
+      "start_pos": 4454,
+      "end_pos": 4461
+    },
+    {
+      "entity_text": "Mireille Sékou",
+      "entity_type": "PERSON",
+      "start_pos": 4556,
+      "end_pos": 4570
+    },
+    {
+      "entity_text": "Nora Vignal",
+      "entity_type": "PERSON",
+      "start_pos": 4674,
+      "end_pos": 4685
+    },
+    {
+      "entity_text": "Karim\nEl Mansouri",
+      "entity_type": "PERSON",
+      "start_pos": 4723,
+      "end_pos": 4740
+    },
+    {
+      "entity_text": "Mireille Sékou",
+      "entity_type": "PERSON",
+      "start_pos": 4757,
+      "end_pos": 4771
+    },
+    {
+      "entity_text": "Banque Coopérative des Rives",
+      "entity_type": "ORG",
+      "start_pos": 4804,
+      "end_pos": 4832
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 4880,
+      "end_pos": 4886
+    },
+    {
+      "entity_text": "Caisse Régionale Armorique",
+      "entity_type": "ORG",
+      "start_pos": 5012,
+      "end_pos": 5038
+    },
+    {
+      "entity_text": "DSI Ouest Services",
+      "entity_type": "ORG",
+      "start_pos": 5040,
+      "end_pos": 5058
+    },
+    {
+      "entity_text": "Ouest",
+      "entity_type": "LOCATION",
+      "start_pos": 5044,
+      "end_pos": 5049
+    },
+    {
+      "entity_text": "Banque Coopérative des Rives",
+      "entity_type": "ORG",
+      "start_pos": 5131,
+      "end_pos": 5159
+    },
+    {
+      "entity_text": "Banque Coopérative des Rives",
+      "entity_type": "ORG",
+      "start_pos": 5232,
+      "end_pos": 5260
+    }
+  ]
+}

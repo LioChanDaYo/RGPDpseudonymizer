@@ -1,0 +1,725 @@
+{
+  "document_name": "fe_30.txt",
+  "entities": [
+    {
+      "entity_text": "Claire de Kerfent",
+      "entity_type": "PERSON",
+      "start_pos": 4,
+      "end_pos": 21
+    },
+    {
+      "entity_text": "Inès de Vauclerc",
+      "entity_type": "PERSON",
+      "start_pos": 60,
+      "end_pos": 76
+    },
+    {
+      "entity_text": "Niall McBride",
+      "entity_type": "PERSON",
+      "start_pos": 114,
+      "end_pos": 127
+    },
+    {
+      "entity_text": "Sofia del Río",
+      "entity_type": "PERSON",
+      "start_pos": 165,
+      "end_pos": 178
+    },
+    {
+      "entity_text": "Adrien Macé",
+      "entity_type": "PERSON",
+      "start_pos": 213,
+      "end_pos": 224
+    },
+    {
+      "entity_text": "Mistral Analytics",
+      "entity_type": "ORG",
+      "start_pos": 309,
+      "end_pos": 326
+    },
+    {
+      "entity_text": "ANNECY",
+      "entity_type": "LOCATION",
+      "start_pos": 357,
+      "end_pos": 363
+    },
+    {
+      "entity_text": "de Vauclerc",
+      "entity_type": "PERSON",
+      "start_pos": 380,
+      "end_pos": 391
+    },
+    {
+      "entity_text": "Niall",
+      "entity_type": "PERSON",
+      "start_pos": 401,
+      "end_pos": 406
+    },
+    {
+      "entity_text": "Groupe Hôtelier Belle-Rive",
+      "entity_type": "ORG",
+      "start_pos": 455,
+      "end_pos": 481
+    },
+    {
+      "entity_text": "Hôtel Belle-Rive Annecy",
+      "entity_type": "ORG",
+      "start_pos": 512,
+      "end_pos": 535
+    },
+    {
+      "entity_text": "Annecy",
+      "entity_type": "LOCATION",
+      "start_pos": 529,
+      "end_pos": 535
+    },
+    {
+      "entity_text": "Crédit Agricole des Savoie",
+      "entity_type": "ORG",
+      "start_pos": 615,
+      "end_pos": 641
+    },
+    {
+      "entity_text": "Savoie",
+      "entity_type": "LOCATION",
+      "start_pos": 635,
+      "end_pos": 641
+    },
+    {
+      "entity_text": "Mistral Analytics Ireland",
+      "entity_type": "ORG",
+      "start_pos": 711,
+      "end_pos": 736
+    },
+    {
+      "entity_text": "Ireland",
+      "entity_type": "LOCATION",
+      "start_pos": 729,
+      "end_pos": 736
+    },
+    {
+      "entity_text": "Dublin",
+      "entity_type": "LOCATION",
+      "start_pos": 753,
+      "end_pos": 759
+    },
+    {
+      "entity_text": "Mistral Analytics Germany",
+      "entity_type": "ORG",
+      "start_pos": 792,
+      "end_pos": 817
+    },
+    {
+      "entity_text": "Germany",
+      "entity_type": "LOCATION",
+      "start_pos": 810,
+      "end_pos": 817
+    },
+    {
+      "entity_text": "Berlin",
+      "entity_type": "LOCATION",
+      "start_pos": 826,
+      "end_pos": 832
+    },
+    {
+      "entity_text": "Genève Aéroport",
+      "entity_type": "LOCATION",
+      "start_pos": 836,
+      "end_pos": 851
+    },
+    {
+      "entity_text": "Madrid",
+      "entity_type": "LOCATION",
+      "start_pos": 876,
+      "end_pos": 882
+    },
+    {
+      "entity_text": "Sofia del Río",
+      "entity_type": "PERSON",
+      "start_pos": 884,
+      "end_pos": 897
+    },
+    {
+      "entity_text": "Horizon Events",
+      "entity_type": "ORG",
+      "start_pos": 911,
+      "end_pos": 925
+    },
+    {
+      "entity_text": "Niall McBride",
+      "entity_type": "PERSON",
+      "start_pos": 970,
+      "end_pos": 983
+    },
+    {
+      "entity_text": "Niall",
+      "entity_type": "PERSON",
+      "start_pos": 1050,
+      "end_pos": 1055
+    },
+    {
+      "entity_text": "Ewen MacLennan",
+      "entity_type": "PERSON",
+      "start_pos": 1079,
+      "end_pos": 1093
+    },
+    {
+      "entity_text": "Dublin",
+      "entity_type": "LOCATION",
+      "start_pos": 1119,
+      "end_pos": 1125
+    },
+    {
+      "entity_text": "Annecy",
+      "entity_type": "LOCATION",
+      "start_pos": 1154,
+      "end_pos": 1160
+    },
+    {
+      "entity_text": "Cork",
+      "entity_type": "LOCATION",
+      "start_pos": 1168,
+      "end_pos": 1172
+    },
+    {
+      "entity_text": "TransLac Haute-Savoie",
+      "entity_type": "ORG",
+      "start_pos": 1211,
+      "end_pos": 1232
+    },
+    {
+      "entity_text": "Haute-Savoie",
+      "entity_type": "LOCATION",
+      "start_pos": 1220,
+      "end_pos": 1232
+    },
+    {
+      "entity_text": "Claire de Kerfent",
+      "entity_type": "PERSON",
+      "start_pos": 1293,
+      "end_pos": 1310
+    },
+    {
+      "entity_text": "Groupe Hôtelier Belle-Rive",
+      "entity_type": "ORG",
+      "start_pos": 1346,
+      "end_pos": 1372
+    },
+    {
+      "entity_text": "Annecy",
+      "entity_type": "LOCATION",
+      "start_pos": 1400,
+      "end_pos": 1406
+    },
+    {
+      "entity_text": "Niall McBride",
+      "entity_type": "PERSON",
+      "start_pos": 1496,
+      "end_pos": 1509
+    },
+    {
+      "entity_text": "Inès de Vauclerc",
+      "entity_type": "PERSON",
+      "start_pos": 1581,
+      "end_pos": 1597
+    },
+    {
+      "entity_text": "Claire de Kerfent",
+      "entity_type": "PERSON",
+      "start_pos": 1638,
+      "end_pos": 1655
+    },
+    {
+      "entity_text": "Aline McCaron",
+      "entity_type": "PERSON",
+      "start_pos": 1692,
+      "end_pos": 1705
+    },
+    {
+      "entity_text": "Mistral Analytics",
+      "entity_type": "ORG",
+      "start_pos": 1764,
+      "end_pos": 1781
+    },
+    {
+      "entity_text": "Inès",
+      "entity_type": "PERSON",
+      "start_pos": 1819,
+      "end_pos": 1823
+    },
+    {
+      "entity_text": "Inès",
+      "entity_type": "PERSON",
+      "start_pos": 1832,
+      "end_pos": 1836
+    },
+    {
+      "entity_text": "Aline McCaron",
+      "entity_type": "PERSON",
+      "start_pos": 1919,
+      "end_pos": 1932
+    },
+    {
+      "entity_text": "Dublin",
+      "entity_type": "LOCATION",
+      "start_pos": 1951,
+      "end_pos": 1957
+    },
+    {
+      "entity_text": "Genève",
+      "entity_type": "LOCATION",
+      "start_pos": 2051,
+      "end_pos": 2057
+    },
+    {
+      "entity_text": "Hugo van der Meer",
+      "entity_type": "PERSON",
+      "start_pos": 2081,
+      "end_pos": 2098
+    },
+    {
+      "entity_text": "Ewen MacLennan",
+      "entity_type": "PERSON",
+      "start_pos": 2138,
+      "end_pos": 2152
+    },
+    {
+      "entity_text": "Sofia del Río",
+      "entity_type": "PERSON",
+      "start_pos": 2195,
+      "end_pos": 2208
+    },
+    {
+      "entity_text": "Horizon Events",
+      "entity_type": "ORG",
+      "start_pos": 2214,
+      "end_pos": 2228
+    },
+    {
+      "entity_text": "Madrid",
+      "entity_type": "LOCATION",
+      "start_pos": 2276,
+      "end_pos": 2282
+    },
+    {
+      "entity_text": "London",
+      "entity_type": "LOCATION",
+      "start_pos": 2299,
+      "end_pos": 2305
+    },
+    {
+      "entity_text": "Claire",
+      "entity_type": "PERSON",
+      "start_pos": 2334,
+      "end_pos": 2340
+    },
+    {
+      "entity_text": "Ireland",
+      "entity_type": "LOCATION",
+      "start_pos": 2407,
+      "end_pos": 2414
+    },
+    {
+      "entity_text": "Niall",
+      "entity_type": "PERSON",
+      "start_pos": 2469,
+      "end_pos": 2474
+    },
+    {
+      "entity_text": "Inès de Vauclerc",
+      "entity_type": "PERSON",
+      "start_pos": 2503,
+      "end_pos": 2519
+    },
+    {
+      "entity_text": "Niall",
+      "entity_type": "PERSON",
+      "start_pos": 2539,
+      "end_pos": 2544
+    },
+    {
+      "entity_text": "Niall",
+      "entity_type": "PERSON",
+      "start_pos": 2556,
+      "end_pos": 2561
+    },
+    {
+      "entity_text": "Aline",
+      "entity_type": "PERSON",
+      "start_pos": 2590,
+      "end_pos": 2595
+    },
+    {
+      "entity_text": "Hôtel Belle-Rive Annecy",
+      "entity_type": "ORG",
+      "start_pos": 2650,
+      "end_pos": 2673
+    },
+    {
+      "entity_text": "Annecy",
+      "entity_type": "LOCATION",
+      "start_pos": 2667,
+      "end_pos": 2673
+    },
+    {
+      "entity_text": "Genève Aéroport",
+      "entity_type": "LOCATION",
+      "start_pos": 2917,
+      "end_pos": 2932
+    },
+    {
+      "entity_text": "Annecy",
+      "entity_type": "LOCATION",
+      "start_pos": 2935,
+      "end_pos": 2941
+    },
+    {
+      "entity_text": "Dublin",
+      "entity_type": "LOCATION",
+      "start_pos": 3025,
+      "end_pos": 3031
+    },
+    {
+      "entity_text": "Berlin",
+      "entity_type": "LOCATION",
+      "start_pos": 3083,
+      "end_pos": 3089
+    },
+    {
+      "entity_text": "Claire",
+      "entity_type": "PERSON",
+      "start_pos": 3091,
+      "end_pos": 3097
+    },
+    {
+      "entity_text": "TransLac Haute-Savoie",
+      "entity_type": "ORG",
+      "start_pos": 3110,
+      "end_pos": 3131
+    },
+    {
+      "entity_text": "Haute-Savoie",
+      "entity_type": "LOCATION",
+      "start_pos": 3119,
+      "end_pos": 3131
+    },
+    {
+      "entity_text": "Inès",
+      "entity_type": "PERSON",
+      "start_pos": 3158,
+      "end_pos": 3162
+    },
+    {
+      "entity_text": "Inès de Vauclerc",
+      "entity_type": "PERSON",
+      "start_pos": 3167,
+      "end_pos": 3183
+    },
+    {
+      "entity_text": "Groupe Hôtelier Belle-Rive",
+      "entity_type": "ORG",
+      "start_pos": 3210,
+      "end_pos": 3236
+    },
+    {
+      "entity_text": "Sofia del Río",
+      "entity_type": "PERSON",
+      "start_pos": 3317,
+      "end_pos": 3330
+    },
+    {
+      "entity_text": "Claire de Kerfent",
+      "entity_type": "PERSON",
+      "start_pos": 3368,
+      "end_pos": 3385
+    },
+    {
+      "entity_text": "Inès de Vauclerc",
+      "entity_type": "PERSON",
+      "start_pos": 3387,
+      "end_pos": 3403
+    },
+    {
+      "entity_text": "Annecy",
+      "entity_type": "LOCATION",
+      "start_pos": 3454,
+      "end_pos": 3460
+    },
+    {
+      "entity_text": "Claire",
+      "entity_type": "PERSON",
+      "start_pos": 3467,
+      "end_pos": 3473
+    },
+    {
+      "entity_text": "Inès",
+      "entity_type": "PERSON",
+      "start_pos": 3483,
+      "end_pos": 3487
+    },
+    {
+      "entity_text": "Claire",
+      "entity_type": "PERSON",
+      "start_pos": 3496,
+      "end_pos": 3502
+    },
+    {
+      "entity_text": "Horizon Events",
+      "entity_type": "ORG",
+      "start_pos": 3530,
+      "end_pos": 3544
+    },
+    {
+      "entity_text": "Mistral Analytics Ireland",
+      "entity_type": "ORG",
+      "start_pos": 3600,
+      "end_pos": 3625
+    },
+    {
+      "entity_text": "Ireland",
+      "entity_type": "LOCATION",
+      "start_pos": 3618,
+      "end_pos": 3625
+    },
+    {
+      "entity_text": "Niall McBride",
+      "entity_type": "PERSON",
+      "start_pos": 3777,
+      "end_pos": 3790
+    },
+    {
+      "entity_text": "Dublin",
+      "entity_type": "LOCATION",
+      "start_pos": 3793,
+      "end_pos": 3799
+    },
+    {
+      "entity_text": "Aline McCaron",
+      "entity_type": "PERSON",
+      "start_pos": 3800,
+      "end_pos": 3813
+    },
+    {
+      "entity_text": "Dublin",
+      "entity_type": "LOCATION",
+      "start_pos": 3816,
+      "end_pos": 3822
+    },
+    {
+      "entity_text": "Ewen MacLennan",
+      "entity_type": "PERSON",
+      "start_pos": 3823,
+      "end_pos": 3837
+    },
+    {
+      "entity_text": "Cork",
+      "entity_type": "LOCATION",
+      "start_pos": 3840,
+      "end_pos": 3844
+    },
+    {
+      "entity_text": "Marta de la Hoz",
+      "entity_type": "PERSON",
+      "start_pos": 3845,
+      "end_pos": 3860
+    },
+    {
+      "entity_text": "Madrid",
+      "entity_type": "LOCATION",
+      "start_pos": 3863,
+      "end_pos": 3869
+    },
+    {
+      "entity_text": "Hugo van der Meer",
+      "entity_type": "PERSON",
+      "start_pos": 3870,
+      "end_pos": 3887
+    },
+    {
+      "entity_text": "Marta de la Hoz",
+      "entity_type": "PERSON",
+      "start_pos": 3996,
+      "end_pos": 4011
+    },
+    {
+      "entity_text": "Groupe Hôtelier\nBelle-Rive",
+      "entity_type": "ORG",
+      "start_pos": 4072,
+      "end_pos": 4098
+    },
+    {
+      "entity_text": "del Río",
+      "entity_type": "PERSON",
+      "start_pos": 4127,
+      "end_pos": 4134
+    },
+    {
+      "entity_text": "Sofia del Río",
+      "entity_type": "PERSON",
+      "start_pos": 4151,
+      "end_pos": 4164
+    },
+    {
+      "entity_text": "Horizon Events",
+      "entity_type": "ORG",
+      "start_pos": 4165,
+      "end_pos": 4179
+    },
+    {
+      "entity_text": "Madrid",
+      "entity_type": "LOCATION",
+      "start_pos": 4181,
+      "end_pos": 4187
+    },
+    {
+      "entity_text": "Madrid",
+      "entity_type": "LOCATION",
+      "start_pos": 4216,
+      "end_pos": 4222
+    },
+    {
+      "entity_text": "Inès de Vauclerc",
+      "entity_type": "PERSON",
+      "start_pos": 4272,
+      "end_pos": 4288
+    },
+    {
+      "entity_text": "Adrien Macé",
+      "entity_type": "PERSON",
+      "start_pos": 4327,
+      "end_pos": 4338
+    },
+    {
+      "entity_text": "Claire de Kerfent",
+      "entity_type": "PERSON",
+      "start_pos": 4340,
+      "end_pos": 4357
+    },
+    {
+      "entity_text": "Claire",
+      "entity_type": "PERSON",
+      "start_pos": 4423,
+      "end_pos": 4429
+    },
+    {
+      "entity_text": "Rivel",
+      "entity_type": "PERSON",
+      "start_pos": 4500,
+      "end_pos": 4505
+    },
+    {
+      "entity_text": "Belle-Rive",
+      "entity_type": "ORG",
+      "start_pos": 4519,
+      "end_pos": 4529
+    },
+    {
+      "entity_text": "Genève",
+      "entity_type": "LOCATION",
+      "start_pos": 4623,
+      "end_pos": 4629
+    },
+    {
+      "entity_text": "Dublin",
+      "entity_type": "LOCATION",
+      "start_pos": 4636,
+      "end_pos": 4642
+    },
+    {
+      "entity_text": "Aline McCaron",
+      "entity_type": "PERSON",
+      "start_pos": 4744,
+      "end_pos": 4757
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 4904,
+      "end_pos": 4910
+    },
+    {
+      "entity_text": "Switzerland",
+      "entity_type": "LOCATION",
+      "start_pos": 4914,
+      "end_pos": 4925
+    },
+    {
+      "entity_text": "Annecy",
+      "entity_type": "LOCATION",
+      "start_pos": 4960,
+      "end_pos": 4966
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 4968,
+      "end_pos": 4972
+    },
+    {
+      "entity_text": "Lausanne",
+      "entity_type": "LOCATION",
+      "start_pos": 4977,
+      "end_pos": 4985
+    },
+    {
+      "entity_text": "Niall McBride",
+      "entity_type": "PERSON",
+      "start_pos": 5031,
+      "end_pos": 5044
+    },
+    {
+      "entity_text": "Mistral\n> Analytics Ireland",
+      "entity_type": "ORG",
+      "start_pos": 5066,
+      "end_pos": 5093
+    },
+    {
+      "entity_text": "Ireland",
+      "entity_type": "LOCATION",
+      "start_pos": 5086,
+      "end_pos": 5093
+    },
+    {
+      "entity_text": "Dublin",
+      "entity_type": "LOCATION",
+      "start_pos": 5106,
+      "end_pos": 5112
+    },
+    {
+      "entity_text": "Luxembourg",
+      "entity_type": "LOCATION",
+      "start_pos": 5145,
+      "end_pos": 5155
+    },
+    {
+      "entity_text": "Aline McCaron",
+      "entity_type": "PERSON",
+      "start_pos": 5230,
+      "end_pos": 5243
+    },
+    {
+      "entity_text": "Mistral Analytics Ireland",
+      "entity_type": "ORG",
+      "start_pos": 5258,
+      "end_pos": 5283
+    },
+    {
+      "entity_text": "Ireland",
+      "entity_type": "LOCATION",
+      "start_pos": 5276,
+      "end_pos": 5283
+    },
+    {
+      "entity_text": "Dublin",
+      "entity_type": "LOCATION",
+      "start_pos": 5307,
+      "end_pos": 5313
+    },
+    {
+      "entity_text": "Ireland",
+      "entity_type": "LOCATION",
+      "start_pos": 5317,
+      "end_pos": 5324
+    }
+  ]
+}

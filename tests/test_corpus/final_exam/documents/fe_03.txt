@@ -1,0 +1,98 @@
+GROUPE AEROVAL - COMITE DE PILOTAGE SOUS-TRAITANCE
+Compte rendu export PDF / diffusion interne uniquement
+Site de Toulouse, 18 rue des Alliages, 31100 Toulouse
+
+Réunion du 07/10/2026 - salle Météore B, 09:05 - 11:42
+Objet : alignement charge 2027, plans qualité et transferts inter-
+filiales pour les lots nacelles, supports hydrauliques et carters.
+
+Présents / Fonction / Entité / Lieu
+Claire de Vaugrenier | DG | Groupe Aéroval | Toulouse
+Malik Ben Aroua | DAF | Aéroval France | Toulouse
+Elisa Van den Broeck | RAF | Aéroval Belgique | Liège
+Inès da Costa | DQ | Aéroval Espagne | Séville
+Thomas von Linden | COO | Aéroval Allemagne | Hambourg
+Arnaud Le Gal | PMO | Groupe Aéroval | Mérignac
+Nadia Terki | QHSE | Nexavion Maroc | Casablanca
+Pavel Horak | DSI | Aéroval Tchéquie | Brno
+
+Absents excusés : Samira El Morabet, DRH Groupe Aéroval, retenue à
+Bordeaux ; Joël Fernandez, achats, déplacement client en Occitanie.
+
+1. Ouverture
+Claire de Vaugrenier rappelle que le comité n'est pas un point
+commercial mais un arbitrage industriel. Les écarts de livraison
+signalés par Aéroval France et Aéroval Espagne restent acceptables
+sur septembre, sauf pour les supports HY-44 dont le retard cumulé
+atteint neuf jours. Mme de Vaugrenier demande que le reporting soit
+ramené à une page, avec les risques réels et pas les "couleurs
+automatiques" du fichier partagé.
+
+2. Charge et capacités
+Thomas von Linden indique que Aéroval Allemagne peut reprendre
+vingt-quatre ensembles du lot C14 à partir de Hambourg, à condition
+que les outillages soient libérés par Mérignac avant le 24 octobre.
+Inès da Costa confirme que Séville garde la série courte pour le
+programme Altair, car les opérateurs y sont déjà qualifiés. Malik
+Ben Aroua, DAF, demande de chiffrer l'écart transport entre Espagne
+et Allemagne avant validation.
+
+Tableau relevé en séance :
+Lot ; Site émetteur ; Site receveur ; Responsable ; Date cible ; Note
+HY-44 ; Aéroval France ; Aéroval Belgique ; Van den Broeck RAF ;
+15/11/2026 ; contrôle dimensionnel à refaire à Liège
+C14 ; Aéroval France ; Aéroval Allemagne ; von Linden COO ;
+24/10/2026 ; départ outillages depuis Mérignac, caisse 7B
+NX-09 ; Nexavion Maroc ; Aéroval Espagne ; Terki QHSE ;
+02/12/2026 ; validation procédés peinture, audit Séville
+IT flux ; Groupe Aéroval ; Aéroval Tchéquie ; Horak DSI ;
+31/10/2026 ; accès ERP depuis Brno, droits limités
+
+3. Qualité fournisseurs
+Inès da Costa signale trois non-conformités récurrentes sur les
+bagues reçues du fournisseur Helion Composites. La DQ Aéroval
+Espagne propose de bloquer le niveau 2 tant que le certificat matière
+ne comporte pas les deux températures d'essai. Nadia Terki ajoute
+que Nexavion Maroc a observé le même défaut à Casablanca, mais sans
+impact sur les pièces livrées à Toulouse.
+
+Décision : Arnaud Le Gal consolide les fiches 8D. Délai vendredi
+09/10/2026 à 16:00. Copie à Claire de Vaugrenier et à la DQ Inès da
+Costa. Les réponses Helion Composites seront classées dans Teams,
+dossier "COPIL OCT", pas dans les courriels individuels.
+
+4. Finance et contrats
+Malik Ben Aroua présente un écart de 186 400 euros sur l'enveloppe
+transfert. La part transport France-Allemagne est plus élevée que
+prévu, surtout pour les caisses chauffées au départ de Bordeaux.
+Elisa Van den Broeck conteste le taux horaire appliqué à Liège :
+Aéroval Belgique facture selon l'accord signé en mars, non selon le
+barème provisoire de Groupe Aéroval. Mme Van den Broeck transmettra
+le tableau corrigé.
+
+5. Systèmes et données
+Pavel Horak, DSI, confirme que le connecteur ERP fonctionne entre
+Brno et Toulouse, mais pas encore avec Hambourg. La DSI Groupe
+Aéroval ouvrira un ticket prioritaire. Thomas von Linden demande
+que les droits de lecture soient donnés à ses planificateurs, sans
+accès aux prix. Claire de Vaugrenier valide le principe, sous réserve
+de l'accord de Malik Ben Aroua.
+
+Actions retenues
+A1 - Le Gal PMO : planning consolidé multi-sites, version 4, avant
+le 12/10/2026, diffusion Groupe Aéroval.
+A2 - da Costa DQ : note qualité bagues Helion Composites, avec avis
+Aéroval Espagne et Nexavion Maroc.
+A3 - Ben Aroua DAF : simulation coût Allemagne, Belgique, Maroc,
+ligne par ligne, avant comité budgétaire.
+A4 - Horak DSI : droits ERP Brno/Hambourg/Toulouse, statut quotidien
+jusqu'à résolution.
+A5 - de Vaugrenier DG : arbitrage final sur C14 après réception des
+chiffres DAF et des réserves qualité.
+
+Fin de séance : 11:42. Prochain comité prévu à Mérignac le
+04/11/2026, bâtiment Aile Nord, 6 avenue du Lac Sec, 33700 Mérignac.
+
+GROUPE AEROVAL - page 1/1 - document interne
+SAS au capital de 4 800 000 euros - siège : 18 rue des Alliages,
+31100 Toulouse - contact : secretariat.direction@aeroval-groupe.fr

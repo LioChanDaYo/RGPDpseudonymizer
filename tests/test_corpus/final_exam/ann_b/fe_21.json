@@ -1,0 +1,551 @@
+{
+  "document_name": "fe_21.txt",
+  "entities": [
+    {
+      "entity_text": "rue des Aigrettes",
+      "entity_type": "LOCATION",
+      "start_pos": 54,
+      "end_pos": 71
+    },
+    {
+      "entity_text": "Sète",
+      "entity_type": "LOCATION",
+      "start_pos": 79,
+      "end_pos": 83
+    },
+    {
+      "entity_text": "Camille ROUSSEL",
+      "entity_type": "PERSON",
+      "start_pos": 174,
+      "end_pos": 189
+    },
+    {
+      "entity_text": "Naïma Belkacem",
+      "entity_type": "PERSON",
+      "start_pos": 244,
+      "end_pos": 258
+    },
+    {
+      "entity_text": "Communauté Littorale des Étangs",
+      "entity_type": "ORG",
+      "start_pos": 292,
+      "end_pos": 323
+    },
+    {
+      "entity_text": "Région Occitanie",
+      "entity_type": "ORG",
+      "start_pos": 325,
+      "end_pos": 341
+    },
+    {
+      "entity_text": "Occitanie",
+      "entity_type": "LOCATION",
+      "start_pos": 332,
+      "end_pos": 341
+    },
+    {
+      "entity_text": "Préfecture de l'Hérault",
+      "entity_type": "ORG",
+      "start_pos": 343,
+      "end_pos": 366
+    },
+    {
+      "entity_text": "Hérault",
+      "entity_type": "LOCATION",
+      "start_pos": 359,
+      "end_pos": 366
+    },
+    {
+      "entity_text": "Atout France",
+      "entity_type": "ORG",
+      "start_pos": 368,
+      "end_pos": 380
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 374,
+      "end_pos": 380
+    },
+    {
+      "entity_text": "Office départemental du\ntourisme du Grand Littoral",
+      "entity_type": "ORG",
+      "start_pos": 514,
+      "end_pos": 564
+    },
+    {
+      "entity_text": "Grand Littoral",
+      "entity_type": "LOCATION",
+      "start_pos": 550,
+      "end_pos": 564
+    },
+    {
+      "entity_text": "Frontignan-Plage",
+      "entity_type": "LOCATION",
+      "start_pos": 640,
+      "end_pos": 656
+    },
+    {
+      "entity_text": "Mèze",
+      "entity_type": "LOCATION",
+      "start_pos": 660,
+      "end_pos": 664
+    },
+    {
+      "entity_text": "Sète",
+      "entity_type": "LOCATION",
+      "start_pos": 855,
+      "end_pos": 859
+    },
+    {
+      "entity_text": "Agde",
+      "entity_type": "LOCATION",
+      "start_pos": 861,
+      "end_pos": 865
+    },
+    {
+      "entity_text": "Balaruc-les-Bains",
+      "entity_type": "LOCATION",
+      "start_pos": 867,
+      "end_pos": 884
+    },
+    {
+      "entity_text": "Marseillan",
+      "entity_type": "LOCATION",
+      "start_pos": 888,
+      "end_pos": 898
+    },
+    {
+      "entity_text": "Camille Roussel",
+      "entity_type": "PERSON",
+      "start_pos": 995,
+      "end_pos": 1010
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 1111,
+      "end_pos": 1115
+    },
+    {
+      "entity_text": "Toulouse",
+      "entity_type": "LOCATION",
+      "start_pos": 1117,
+      "end_pos": 1125
+    },
+    {
+      "entity_text": "Montpellier",
+      "entity_type": "LOCATION",
+      "start_pos": 1129,
+      "end_pos": 1140
+    },
+    {
+      "entity_text": "Sète",
+      "entity_type": "LOCATION",
+      "start_pos": 1192,
+      "end_pos": 1196
+    },
+    {
+      "entity_text": "Agde",
+      "entity_type": "LOCATION",
+      "start_pos": 1243,
+      "end_pos": 1247
+    },
+    {
+      "entity_text": "Balaruc-les-Bains",
+      "entity_type": "LOCATION",
+      "start_pos": 1294,
+      "end_pos": 1311
+    },
+    {
+      "entity_text": "Mèze",
+      "entity_type": "LOCATION",
+      "start_pos": 1345,
+      "end_pos": 1349
+    },
+    {
+      "entity_text": "Frontignan-Plage",
+      "entity_type": "LOCATION",
+      "start_pos": 1396,
+      "end_pos": 1412
+    },
+    {
+      "entity_text": "Observatoire Touristique Local",
+      "entity_type": "ORG",
+      "start_pos": 1465,
+      "end_pos": 1495
+    },
+    {
+      "entity_text": "SNCF Connect",
+      "entity_type": "ORG",
+      "start_pos": 1575,
+      "end_pos": 1587
+    },
+    {
+      "entity_text": "Sète",
+      "entity_type": "LOCATION",
+      "start_pos": 1647,
+      "end_pos": 1651
+    },
+    {
+      "entity_text": "Agde",
+      "entity_type": "LOCATION",
+      "start_pos": 1655,
+      "end_pos": 1659
+    },
+    {
+      "entity_text": "Hugo Ferran",
+      "entity_type": "PERSON",
+      "start_pos": 1669,
+      "end_pos": 1680
+    },
+    {
+      "entity_text": "Pixel Marin Conseil",
+      "entity_type": "ORG",
+      "start_pos": 1752,
+      "end_pos": 1771
+    },
+    {
+      "entity_text": "OFFICE DÉPARTEMENTAL DU TOURISME DU GRAND LITTORAL",
+      "entity_type": "ORG",
+      "start_pos": 1819,
+      "end_pos": 1869
+    },
+    {
+      "entity_text": "GRAND LITTORAL",
+      "entity_type": "LOCATION",
+      "start_pos": 1855,
+      "end_pos": 1869
+    },
+    {
+      "entity_text": "Office départemental du tourisme du Grand Littoral",
+      "entity_type": "ORG",
+      "start_pos": 1990,
+      "end_pos": 2040
+    },
+    {
+      "entity_text": "Grand Littoral",
+      "entity_type": "LOCATION",
+      "start_pos": 2026,
+      "end_pos": 2040
+    },
+    {
+      "entity_text": "Aline Verdière",
+      "entity_type": "PERSON",
+      "start_pos": 2076,
+      "end_pos": 2090
+    },
+    {
+      "entity_text": "Mèze",
+      "entity_type": "LOCATION",
+      "start_pos": 2196,
+      "end_pos": 2200
+    },
+    {
+      "entity_text": "Amar",
+      "entity_type": "PERSON",
+      "start_pos": 2206,
+      "end_pos": 2210
+    },
+    {
+      "entity_text": "place des Halles",
+      "entity_type": "LOCATION",
+      "start_pos": 2334,
+      "end_pos": 2350
+    },
+    {
+      "entity_text": "Belgique",
+      "entity_type": "LOCATION",
+      "start_pos": 2396,
+      "end_pos": 2404
+    },
+    {
+      "entity_text": "Suisse",
+      "entity_type": "LOCATION",
+      "start_pos": 2406,
+      "end_pos": 2412
+    },
+    {
+      "entity_text": "Allemagne",
+      "entity_type": "LOCATION",
+      "start_pos": 2414,
+      "end_pos": 2423
+    },
+    {
+      "entity_text": "Espagne",
+      "entity_type": "LOCATION",
+      "start_pos": 2427,
+      "end_pos": 2434
+    },
+    {
+      "entity_text": "Barcelone",
+      "entity_type": "LOCATION",
+      "start_pos": 2475,
+      "end_pos": 2484
+    },
+    {
+      "entity_text": "Sète",
+      "entity_type": "LOCATION",
+      "start_pos": 2530,
+      "end_pos": 2534
+    },
+    {
+      "entity_text": "Occitanie",
+      "entity_type": "LOCATION",
+      "start_pos": 2555,
+      "end_pos": 2564
+    },
+    {
+      "entity_text": "Police municipale",
+      "entity_type": "ORG",
+      "start_pos": 2616,
+      "end_pos": 2633
+    },
+    {
+      "entity_text": "Sète",
+      "entity_type": "LOCATION",
+      "start_pos": 2637,
+      "end_pos": 2641
+    },
+    {
+      "entity_text": "Direction départementale des territoires et de la mer",
+      "entity_type": "ORG",
+      "start_pos": 2652,
+      "end_pos": 2705
+    },
+    {
+      "entity_text": "Hôteliers du Bassin Sud",
+      "entity_type": "ORG",
+      "start_pos": 2752,
+      "end_pos": 2775
+    },
+    {
+      "entity_text": "Bassin Sud",
+      "entity_type": "LOCATION",
+      "start_pos": 2765,
+      "end_pos": 2775
+    },
+    {
+      "entity_text": "Marseillan",
+      "entity_type": "LOCATION",
+      "start_pos": 2843,
+      "end_pos": 2853
+    },
+    {
+      "entity_text": "Vic-la-Gardiole",
+      "entity_type": "LOCATION",
+      "start_pos": 2857,
+      "end_pos": 2872
+    },
+    {
+      "entity_text": "Rivage Culture Production",
+      "entity_type": "ORG",
+      "start_pos": 3023,
+      "end_pos": 3048
+    },
+    {
+      "entity_text": "Sète",
+      "entity_type": "LOCATION",
+      "start_pos": 3089,
+      "end_pos": 3093
+    },
+    {
+      "entity_text": "Tomas Varela",
+      "entity_type": "PERSON",
+      "start_pos": 3096,
+      "end_pos": 3108
+    },
+    {
+      "entity_text": "Communauté Littorale des Étangs",
+      "entity_type": "ORG",
+      "start_pos": 3183,
+      "end_pos": 3214
+    },
+    {
+      "entity_text": "Région Occitanie",
+      "entity_type": "ORG",
+      "start_pos": 3276,
+      "end_pos": 3292
+    },
+    {
+      "entity_text": "Occitanie",
+      "entity_type": "LOCATION",
+      "start_pos": 3283,
+      "end_pos": 3292
+    },
+    {
+      "entity_text": "Montpellier",
+      "entity_type": "LOCATION",
+      "start_pos": 3367,
+      "end_pos": 3378
+    },
+    {
+      "entity_text": "Béziers",
+      "entity_type": "LOCATION",
+      "start_pos": 3382,
+      "end_pos": 3389
+    },
+    {
+      "entity_text": "DataMôle Services",
+      "entity_type": "ORG",
+      "start_pos": 3511,
+      "end_pos": 3528
+    },
+    {
+      "entity_text": "Nîmes",
+      "entity_type": "LOCATION",
+      "start_pos": 3588,
+      "end_pos": 3593
+    },
+    {
+      "entity_text": "Naïma Belkacem",
+      "entity_type": "PERSON",
+      "start_pos": 3595,
+      "end_pos": 3609
+    },
+    {
+      "entity_text": "OFFICE DÉPARTEMENTAL DU TOURISME DU GRAND LITTORAL",
+      "entity_type": "ORG",
+      "start_pos": 3711,
+      "end_pos": 3761
+    },
+    {
+      "entity_text": "GRAND LITTORAL",
+      "entity_type": "LOCATION",
+      "start_pos": 3747,
+      "end_pos": 3761
+    },
+    {
+      "entity_text": "Frontignan-Plage",
+      "entity_type": "LOCATION",
+      "start_pos": 3870,
+      "end_pos": 3886
+    },
+    {
+      "entity_text": "Hugo\nFerran",
+      "entity_type": "PERSON",
+      "start_pos": 3888,
+      "end_pos": 3899
+    },
+    {
+      "entity_text": "avenue du Port Neuf",
+      "entity_type": "LOCATION",
+      "start_pos": 3941,
+      "end_pos": 3960
+    },
+    {
+      "entity_text": "rue des Salines",
+      "entity_type": "LOCATION",
+      "start_pos": 3970,
+      "end_pos": 3985
+    },
+    {
+      "entity_text": "Communauté Littorale des\nÉtangs",
+      "entity_type": "ORG",
+      "start_pos": 4011,
+      "end_pos": 4042
+    },
+    {
+      "entity_text": "Sète",
+      "entity_type": "LOCATION",
+      "start_pos": 4179,
+      "end_pos": 4183
+    },
+    {
+      "entity_text": "Pixel Marin Conseil",
+      "entity_type": "ORG",
+      "start_pos": 4199,
+      "end_pos": 4218
+    },
+    {
+      "entity_text": "Atout France",
+      "entity_type": "ORG",
+      "start_pos": 4271,
+      "end_pos": 4283
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 4277,
+      "end_pos": 4283
+    },
+    {
+      "entity_text": "Agde",
+      "entity_type": "LOCATION",
+      "start_pos": 4384,
+      "end_pos": 4388
+    },
+    {
+      "entity_text": "Mèze",
+      "entity_type": "LOCATION",
+      "start_pos": 4392,
+      "end_pos": 4396
+    },
+    {
+      "entity_text": "Balaruc-les-Bains",
+      "entity_type": "LOCATION",
+      "start_pos": 4437,
+      "end_pos": 4454
+    },
+    {
+      "entity_text": "Claire Nivet",
+      "entity_type": "PERSON",
+      "start_pos": 4573,
+      "end_pos": 4585
+    },
+    {
+      "entity_text": "Sète",
+      "entity_type": "LOCATION",
+      "start_pos": 4796,
+      "end_pos": 4800
+    },
+    {
+      "entity_text": "Camille ROUSSEL",
+      "entity_type": "PERSON",
+      "start_pos": 4821,
+      "end_pos": 4836
+    },
+    {
+      "entity_text": "Office départemental du tourisme du Grand Littoral",
+      "entity_type": "ORG",
+      "start_pos": 4870,
+      "end_pos": 4920
+    },
+    {
+      "entity_text": "Grand Littoral",
+      "entity_type": "LOCATION",
+      "start_pos": 4906,
+      "end_pos": 4920
+    },
+    {
+      "entity_text": "rue des Aigrettes",
+      "entity_type": "LOCATION",
+      "start_pos": 4924,
+      "end_pos": 4941
+    },
+    {
+      "entity_text": "Sète",
+      "entity_type": "LOCATION",
+      "start_pos": 4949,
+      "end_pos": 4953
+    },
+    {
+      "entity_text": "Naïma BELKACEM",
+      "entity_type": "PERSON",
+      "start_pos": 5012,
+      "end_pos": 5026
+    },
+    {
+      "entity_text": "Office départemental du\ntourisme du Grand Littoral",
+      "entity_type": "ORG",
+      "start_pos": 5160,
+      "end_pos": 5210
+    },
+    {
+      "entity_text": "Grand Littoral",
+      "entity_type": "LOCATION",
+      "start_pos": 5196,
+      "end_pos": 5210
+    }
+  ]
+}

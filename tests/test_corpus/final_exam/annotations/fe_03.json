@@ -1,0 +1,803 @@
+{
+  "document_name": "fe_03.txt",
+  "entities": [
+    {
+      "entity_text": "GROUPE AEROVAL",
+      "entity_type": "ORG",
+      "start_pos": 0,
+      "end_pos": 14
+    },
+    {
+      "entity_text": "Toulouse",
+      "entity_type": "LOCATION",
+      "start_pos": 114,
+      "end_pos": 122
+    },
+    {
+      "entity_text": "rue des Alliages",
+      "entity_type": "LOCATION",
+      "start_pos": 127,
+      "end_pos": 143
+    },
+    {
+      "entity_text": "Toulouse",
+      "entity_type": "LOCATION",
+      "start_pos": 151,
+      "end_pos": 159
+    },
+    {
+      "entity_text": "Claire de Vaugrenier",
+      "entity_type": "PERSON",
+      "start_pos": 387,
+      "end_pos": 407
+    },
+    {
+      "entity_text": "Groupe Aéroval",
+      "entity_type": "ORG",
+      "start_pos": 415,
+      "end_pos": 429
+    },
+    {
+      "entity_text": "Toulouse",
+      "entity_type": "LOCATION",
+      "start_pos": 432,
+      "end_pos": 440
+    },
+    {
+      "entity_text": "Malik Ben Aroua",
+      "entity_type": "PERSON",
+      "start_pos": 441,
+      "end_pos": 456
+    },
+    {
+      "entity_text": "Aéroval France",
+      "entity_type": "ORG",
+      "start_pos": 465,
+      "end_pos": 479
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 473,
+      "end_pos": 479
+    },
+    {
+      "entity_text": "Toulouse",
+      "entity_type": "LOCATION",
+      "start_pos": 482,
+      "end_pos": 490
+    },
+    {
+      "entity_text": "Elisa Van den Broeck",
+      "entity_type": "PERSON",
+      "start_pos": 491,
+      "end_pos": 511
+    },
+    {
+      "entity_text": "Aéroval Belgique",
+      "entity_type": "ORG",
+      "start_pos": 520,
+      "end_pos": 536
+    },
+    {
+      "entity_text": "Belgique",
+      "entity_type": "LOCATION",
+      "start_pos": 528,
+      "end_pos": 536
+    },
+    {
+      "entity_text": "Liège",
+      "entity_type": "LOCATION",
+      "start_pos": 539,
+      "end_pos": 544
+    },
+    {
+      "entity_text": "Inès da Costa",
+      "entity_type": "PERSON",
+      "start_pos": 545,
+      "end_pos": 558
+    },
+    {
+      "entity_text": "Aéroval Espagne",
+      "entity_type": "ORG",
+      "start_pos": 566,
+      "end_pos": 581
+    },
+    {
+      "entity_text": "Espagne",
+      "entity_type": "LOCATION",
+      "start_pos": 574,
+      "end_pos": 581
+    },
+    {
+      "entity_text": "Séville",
+      "entity_type": "LOCATION",
+      "start_pos": 584,
+      "end_pos": 591
+    },
+    {
+      "entity_text": "Thomas von Linden",
+      "entity_type": "PERSON",
+      "start_pos": 592,
+      "end_pos": 609
+    },
+    {
+      "entity_text": "Aéroval Allemagne",
+      "entity_type": "ORG",
+      "start_pos": 618,
+      "end_pos": 635
+    },
+    {
+      "entity_text": "Allemagne",
+      "entity_type": "LOCATION",
+      "start_pos": 626,
+      "end_pos": 635
+    },
+    {
+      "entity_text": "Hambourg",
+      "entity_type": "LOCATION",
+      "start_pos": 638,
+      "end_pos": 646
+    },
+    {
+      "entity_text": "Arnaud Le Gal",
+      "entity_type": "PERSON",
+      "start_pos": 647,
+      "end_pos": 660
+    },
+    {
+      "entity_text": "Groupe Aéroval",
+      "entity_type": "ORG",
+      "start_pos": 669,
+      "end_pos": 683
+    },
+    {
+      "entity_text": "Mérignac",
+      "entity_type": "LOCATION",
+      "start_pos": 686,
+      "end_pos": 694
+    },
+    {
+      "entity_text": "Nadia Terki",
+      "entity_type": "PERSON",
+      "start_pos": 695,
+      "end_pos": 706
+    },
+    {
+      "entity_text": "Nexavion Maroc",
+      "entity_type": "ORG",
+      "start_pos": 716,
+      "end_pos": 730
+    },
+    {
+      "entity_text": "Maroc",
+      "entity_type": "LOCATION",
+      "start_pos": 725,
+      "end_pos": 730
+    },
+    {
+      "entity_text": "Casablanca",
+      "entity_type": "LOCATION",
+      "start_pos": 733,
+      "end_pos": 743
+    },
+    {
+      "entity_text": "Pavel Horak",
+      "entity_type": "PERSON",
+      "start_pos": 744,
+      "end_pos": 755
+    },
+    {
+      "entity_text": "Aéroval Tchéquie",
+      "entity_type": "ORG",
+      "start_pos": 764,
+      "end_pos": 780
+    },
+    {
+      "entity_text": "Tchéquie",
+      "entity_type": "LOCATION",
+      "start_pos": 772,
+      "end_pos": 780
+    },
+    {
+      "entity_text": "Brno",
+      "entity_type": "LOCATION",
+      "start_pos": 783,
+      "end_pos": 787
+    },
+    {
+      "entity_text": "Samira El Morabet",
+      "entity_type": "PERSON",
+      "start_pos": 807,
+      "end_pos": 824
+    },
+    {
+      "entity_text": "Groupe Aéroval",
+      "entity_type": "ORG",
+      "start_pos": 830,
+      "end_pos": 844
+    },
+    {
+      "entity_text": "Bordeaux",
+      "entity_type": "LOCATION",
+      "start_pos": 856,
+      "end_pos": 864
+    },
+    {
+      "entity_text": "Joël Fernandez",
+      "entity_type": "PERSON",
+      "start_pos": 867,
+      "end_pos": 881
+    },
+    {
+      "entity_text": "Occitanie",
+      "entity_type": "LOCATION",
+      "start_pos": 913,
+      "end_pos": 922
+    },
+    {
+      "entity_text": "Claire de Vaugrenier",
+      "entity_type": "PERSON",
+      "start_pos": 938,
+      "end_pos": 958
+    },
+    {
+      "entity_text": "Aéroval France",
+      "entity_type": "ORG",
+      "start_pos": 1079,
+      "end_pos": 1093
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 1087,
+      "end_pos": 1093
+    },
+    {
+      "entity_text": "Aéroval Espagne",
+      "entity_type": "ORG",
+      "start_pos": 1097,
+      "end_pos": 1112
+    },
+    {
+      "entity_text": "Espagne",
+      "entity_type": "LOCATION",
+      "start_pos": 1105,
+      "end_pos": 1112
+    },
+    {
+      "entity_text": "de Vaugrenier",
+      "entity_type": "PERSON",
+      "start_pos": 1223,
+      "end_pos": 1236
+    },
+    {
+      "entity_text": "Thomas von Linden",
+      "entity_type": "PERSON",
+      "start_pos": 1388,
+      "end_pos": 1405
+    },
+    {
+      "entity_text": "Aéroval Allemagne",
+      "entity_type": "ORG",
+      "start_pos": 1418,
+      "end_pos": 1435
+    },
+    {
+      "entity_text": "Allemagne",
+      "entity_type": "LOCATION",
+      "start_pos": 1426,
+      "end_pos": 1435
+    },
+    {
+      "entity_text": "Hambourg",
+      "entity_type": "LOCATION",
+      "start_pos": 1497,
+      "end_pos": 1505
+    },
+    {
+      "entity_text": "Mérignac",
+      "entity_type": "LOCATION",
+      "start_pos": 1557,
+      "end_pos": 1565
+    },
+    {
+      "entity_text": "Inès da Costa",
+      "entity_type": "PERSON",
+      "start_pos": 1587,
+      "end_pos": 1600
+    },
+    {
+      "entity_text": "Séville",
+      "entity_type": "LOCATION",
+      "start_pos": 1614,
+      "end_pos": 1621
+    },
+    {
+      "entity_text": "Malik\nBen Aroua",
+      "entity_type": "PERSON",
+      "start_pos": 1712,
+      "end_pos": 1727
+    },
+    {
+      "entity_text": "Espagne",
+      "entity_type": "LOCATION",
+      "start_pos": 1778,
+      "end_pos": 1785
+    },
+    {
+      "entity_text": "Allemagne",
+      "entity_type": "LOCATION",
+      "start_pos": 1789,
+      "end_pos": 1798
+    },
+    {
+      "entity_text": "Aéroval France",
+      "entity_type": "ORG",
+      "start_pos": 1923,
+      "end_pos": 1937
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 1931,
+      "end_pos": 1937
+    },
+    {
+      "entity_text": "Aéroval Belgique",
+      "entity_type": "ORG",
+      "start_pos": 1940,
+      "end_pos": 1956
+    },
+    {
+      "entity_text": "Belgique",
+      "entity_type": "LOCATION",
+      "start_pos": 1948,
+      "end_pos": 1956
+    },
+    {
+      "entity_text": "Van den Broeck",
+      "entity_type": "PERSON",
+      "start_pos": 1959,
+      "end_pos": 1973
+    },
+    {
+      "entity_text": "Liège",
+      "entity_type": "LOCATION",
+      "start_pos": 2027,
+      "end_pos": 2032
+    },
+    {
+      "entity_text": "Aéroval France",
+      "entity_type": "ORG",
+      "start_pos": 2039,
+      "end_pos": 2053
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 2047,
+      "end_pos": 2053
+    },
+    {
+      "entity_text": "Aéroval Allemagne",
+      "entity_type": "ORG",
+      "start_pos": 2056,
+      "end_pos": 2073
+    },
+    {
+      "entity_text": "Allemagne",
+      "entity_type": "LOCATION",
+      "start_pos": 2064,
+      "end_pos": 2073
+    },
+    {
+      "entity_text": "von Linden",
+      "entity_type": "PERSON",
+      "start_pos": 2076,
+      "end_pos": 2086
+    },
+    {
+      "entity_text": "Mérignac",
+      "entity_type": "LOCATION",
+      "start_pos": 2131,
+      "end_pos": 2139
+    },
+    {
+      "entity_text": "Nexavion Maroc",
+      "entity_type": "ORG",
+      "start_pos": 2159,
+      "end_pos": 2173
+    },
+    {
+      "entity_text": "Maroc",
+      "entity_type": "LOCATION",
+      "start_pos": 2168,
+      "end_pos": 2173
+    },
+    {
+      "entity_text": "Aéroval Espagne",
+      "entity_type": "ORG",
+      "start_pos": 2176,
+      "end_pos": 2191
+    },
+    {
+      "entity_text": "Espagne",
+      "entity_type": "LOCATION",
+      "start_pos": 2184,
+      "end_pos": 2191
+    },
+    {
+      "entity_text": "Terki",
+      "entity_type": "PERSON",
+      "start_pos": 2194,
+      "end_pos": 2199
+    },
+    {
+      "entity_text": "Séville",
+      "entity_type": "LOCATION",
+      "start_pos": 2256,
+      "end_pos": 2263
+    },
+    {
+      "entity_text": "Groupe Aéroval",
+      "entity_type": "ORG",
+      "start_pos": 2274,
+      "end_pos": 2288
+    },
+    {
+      "entity_text": "Aéroval Tchéquie",
+      "entity_type": "ORG",
+      "start_pos": 2291,
+      "end_pos": 2307
+    },
+    {
+      "entity_text": "Tchéquie",
+      "entity_type": "LOCATION",
+      "start_pos": 2299,
+      "end_pos": 2307
+    },
+    {
+      "entity_text": "Horak",
+      "entity_type": "PERSON",
+      "start_pos": 2310,
+      "end_pos": 2315
+    },
+    {
+      "entity_text": "Brno",
+      "entity_type": "LOCATION",
+      "start_pos": 2352,
+      "end_pos": 2356
+    },
+    {
+      "entity_text": "Inès da Costa",
+      "entity_type": "PERSON",
+      "start_pos": 2398,
+      "end_pos": 2411
+    },
+    {
+      "entity_text": "Helion Composites",
+      "entity_type": "ORG",
+      "start_pos": 2491,
+      "end_pos": 2508
+    },
+    {
+      "entity_text": "Aéroval\nEspagne",
+      "entity_type": "ORG",
+      "start_pos": 2516,
+      "end_pos": 2531
+    },
+    {
+      "entity_text": "Espagne",
+      "entity_type": "LOCATION",
+      "start_pos": 2524,
+      "end_pos": 2531
+    },
+    {
+      "entity_text": "Nadia Terki",
+      "entity_type": "PERSON",
+      "start_pos": 2641,
+      "end_pos": 2652
+    },
+    {
+      "entity_text": "Nexavion Maroc",
+      "entity_type": "ORG",
+      "start_pos": 2664,
+      "end_pos": 2678
+    },
+    {
+      "entity_text": "Maroc",
+      "entity_type": "LOCATION",
+      "start_pos": 2673,
+      "end_pos": 2678
+    },
+    {
+      "entity_text": "Casablanca",
+      "entity_type": "LOCATION",
+      "start_pos": 2706,
+      "end_pos": 2716
+    },
+    {
+      "entity_text": "Toulouse",
+      "entity_type": "LOCATION",
+      "start_pos": 2760,
+      "end_pos": 2768
+    },
+    {
+      "entity_text": "Arnaud Le Gal",
+      "entity_type": "PERSON",
+      "start_pos": 2782,
+      "end_pos": 2795
+    },
+    {
+      "entity_text": "Claire de Vaugrenier",
+      "entity_type": "PERSON",
+      "start_pos": 2864,
+      "end_pos": 2884
+    },
+    {
+      "entity_text": "Inès da\nCosta",
+      "entity_type": "PERSON",
+      "start_pos": 2896,
+      "end_pos": 2909
+    },
+    {
+      "entity_text": "Helion Composites",
+      "entity_type": "ORG",
+      "start_pos": 2924,
+      "end_pos": 2941
+    },
+    {
+      "entity_text": "Malik Ben Aroua",
+      "entity_type": "PERSON",
+      "start_pos": 3051,
+      "end_pos": 3066
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 3147,
+      "end_pos": 3153
+    },
+    {
+      "entity_text": "Allemagne",
+      "entity_type": "LOCATION",
+      "start_pos": 3154,
+      "end_pos": 3163
+    },
+    {
+      "entity_text": "Bordeaux",
+      "entity_type": "LOCATION",
+      "start_pos": 3239,
+      "end_pos": 3247
+    },
+    {
+      "entity_text": "Elisa Van den Broeck",
+      "entity_type": "PERSON",
+      "start_pos": 3249,
+      "end_pos": 3269
+    },
+    {
+      "entity_text": "Liège",
+      "entity_type": "LOCATION",
+      "start_pos": 3306,
+      "end_pos": 3311
+    },
+    {
+      "entity_text": "Aéroval Belgique",
+      "entity_type": "ORG",
+      "start_pos": 3314,
+      "end_pos": 3330
+    },
+    {
+      "entity_text": "Belgique",
+      "entity_type": "LOCATION",
+      "start_pos": 3322,
+      "end_pos": 3330
+    },
+    {
+      "entity_text": "Groupe Aéroval",
+      "entity_type": "ORG",
+      "start_pos": 3403,
+      "end_pos": 3417
+    },
+    {
+      "entity_text": "Van den Broeck",
+      "entity_type": "PERSON",
+      "start_pos": 3423,
+      "end_pos": 3437
+    },
+    {
+      "entity_text": "Pavel Horak",
+      "entity_type": "PERSON",
+      "start_pos": 3494,
+      "end_pos": 3505
+    },
+    {
+      "entity_text": "Brno",
+      "entity_type": "LOCATION",
+      "start_pos": 3560,
+      "end_pos": 3564
+    },
+    {
+      "entity_text": "Toulouse",
+      "entity_type": "LOCATION",
+      "start_pos": 3568,
+      "end_pos": 3576
+    },
+    {
+      "entity_text": "Hambourg",
+      "entity_type": "LOCATION",
+      "start_pos": 3599,
+      "end_pos": 3607
+    },
+    {
+      "entity_text": "Groupe\nAéroval",
+      "entity_type": "ORG",
+      "start_pos": 3616,
+      "end_pos": 3630
+    },
+    {
+      "entity_text": "Thomas von Linden",
+      "entity_type": "PERSON",
+      "start_pos": 3662,
+      "end_pos": 3679
+    },
+    {
+      "entity_text": "Claire de Vaugrenier",
+      "entity_type": "PERSON",
+      "start_pos": 3771,
+      "end_pos": 3791
+    },
+    {
+      "entity_text": "Malik Ben Aroua",
+      "entity_type": "PERSON",
+      "start_pos": 3840,
+      "end_pos": 3855
+    },
+    {
+      "entity_text": "Le Gal",
+      "entity_type": "PERSON",
+      "start_pos": 3880,
+      "end_pos": 3886
+    },
+    {
+      "entity_text": "Groupe Aéroval",
+      "entity_type": "ORG",
+      "start_pos": 3967,
+      "end_pos": 3981
+    },
+    {
+      "entity_text": "da Costa",
+      "entity_type": "PERSON",
+      "start_pos": 3988,
+      "end_pos": 3996
+    },
+    {
+      "entity_text": "Helion Composites",
+      "entity_type": "ORG",
+      "start_pos": 4022,
+      "end_pos": 4039
+    },
+    {
+      "entity_text": "Aéroval Espagne",
+      "entity_type": "ORG",
+      "start_pos": 4051,
+      "end_pos": 4066
+    },
+    {
+      "entity_text": "Espagne",
+      "entity_type": "LOCATION",
+      "start_pos": 4059,
+      "end_pos": 4066
+    },
+    {
+      "entity_text": "Nexavion Maroc",
+      "entity_type": "ORG",
+      "start_pos": 4070,
+      "end_pos": 4084
+    },
+    {
+      "entity_text": "Maroc",
+      "entity_type": "LOCATION",
+      "start_pos": 4079,
+      "end_pos": 4084
+    },
+    {
+      "entity_text": "Ben Aroua",
+      "entity_type": "PERSON",
+      "start_pos": 4091,
+      "end_pos": 4100
+    },
+    {
+      "entity_text": "Allemagne",
+      "entity_type": "LOCATION",
+      "start_pos": 4123,
+      "end_pos": 4132
+    },
+    {
+      "entity_text": "Belgique",
+      "entity_type": "LOCATION",
+      "start_pos": 4134,
+      "end_pos": 4142
+    },
+    {
+      "entity_text": "Maroc",
+      "entity_type": "LOCATION",
+      "start_pos": 4144,
+      "end_pos": 4149
+    },
+    {
+      "entity_text": "Horak",
+      "entity_type": "PERSON",
+      "start_pos": 4198,
+      "end_pos": 4203
+    },
+    {
+      "entity_text": "Brno",
+      "entity_type": "LOCATION",
+      "start_pos": 4221,
+      "end_pos": 4225
+    },
+    {
+      "entity_text": "Hambourg",
+      "entity_type": "LOCATION",
+      "start_pos": 4226,
+      "end_pos": 4234
+    },
+    {
+      "entity_text": "Toulouse",
+      "entity_type": "LOCATION",
+      "start_pos": 4235,
+      "end_pos": 4243
+    },
+    {
+      "entity_text": "de Vaugrenier",
+      "entity_type": "PERSON",
+      "start_pos": 4287,
+      "end_pos": 4300
+    },
+    {
+      "entity_text": "Mérignac",
+      "entity_type": "LOCATION",
+      "start_pos": 4436,
+      "end_pos": 4444
+    },
+    {
+      "entity_text": "Aile Nord",
+      "entity_type": "LOCATION",
+      "start_pos": 4469,
+      "end_pos": 4478
+    },
+    {
+      "entity_text": "avenue du Lac Sec",
+      "entity_type": "LOCATION",
+      "start_pos": 4482,
+      "end_pos": 4499
+    },
+    {
+      "entity_text": "Mérignac",
+      "entity_type": "LOCATION",
+      "start_pos": 4507,
+      "end_pos": 4515
+    },
+    {
+      "entity_text": "GROUPE AEROVAL",
+      "entity_type": "ORG",
+      "start_pos": 4518,
+      "end_pos": 4532
+    },
+    {
+      "entity_text": "rue des Alliages",
+      "entity_type": "LOCATION",
+      "start_pos": 4610,
+      "end_pos": 4626
+    },
+    {
+      "entity_text": "Toulouse",
+      "entity_type": "LOCATION",
+      "start_pos": 4634,
+      "end_pos": 4642
+    }
+  ]
+}

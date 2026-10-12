@@ -1,0 +1,557 @@
+{
+  "document_name": "fe_19.txt",
+  "entities": [
+    {
+      "entity_text": "Claire Dervaux",
+      "entity_type": "PERSON",
+      "start_pos": 5,
+      "end_pos": 19
+    },
+    {
+      "entity_text": "Nora Benyahia",
+      "entity_type": "PERSON",
+      "start_pos": 101,
+      "end_pos": 114
+    },
+    {
+      "entity_text": "Étienne Rigal",
+      "entity_type": "PERSON",
+      "start_pos": 160,
+      "end_pos": 173
+    },
+    {
+      "entity_text": "Rezé",
+      "entity_type": "LOCATION",
+      "start_pos": 266,
+      "end_pos": 270
+    },
+    {
+      "entity_text": "Nora",
+      "entity_type": "PERSON",
+      "start_pos": 280,
+      "end_pos": 284
+    },
+    {
+      "entity_text": "Salma Kouider",
+      "entity_type": "PERSON",
+      "start_pos": 317,
+      "end_pos": 330
+    },
+    {
+      "entity_text": "Orial Expertise",
+      "entity_type": "ORG",
+      "start_pos": 446,
+      "end_pos": 461
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 521,
+      "end_pos": 527
+    },
+    {
+      "entity_text": "Rezé",
+      "entity_type": "LOCATION",
+      "start_pos": 531,
+      "end_pos": 535
+    },
+    {
+      "entity_text": "Mairie de Rezé",
+      "entity_type": "ORG",
+      "start_pos": 656,
+      "end_pos": 670
+    },
+    {
+      "entity_text": "Rezé",
+      "entity_type": "LOCATION",
+      "start_pos": 666,
+      "end_pos": 670
+    },
+    {
+      "entity_text": "Ateliers",
+      "entity_type": "LOCATION",
+      "start_pos": 708,
+      "end_pos": 716
+    },
+    {
+      "entity_text": "Étienne",
+      "entity_type": "PERSON",
+      "start_pos": 818,
+      "end_pos": 825
+    },
+    {
+      "entity_text": "Garage Rive Sud",
+      "entity_type": "ORG",
+      "start_pos": 886,
+      "end_pos": 901
+    },
+    {
+      "entity_text": "Sud",
+      "entity_type": "LOCATION",
+      "start_pos": 898,
+      "end_pos": 901
+    },
+    {
+      "entity_text": "Claire DERVAUX",
+      "entity_type": "PERSON",
+      "start_pos": 904,
+      "end_pos": 918
+    },
+    {
+      "entity_text": "Mutuelle Sereine Atlantique",
+      "entity_type": "ORG",
+      "start_pos": 952,
+      "end_pos": 979
+    },
+    {
+      "entity_text": "Parc",
+      "entity_type": "LOCATION",
+      "start_pos": 993,
+      "end_pos": 997
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 1005,
+      "end_pos": 1011
+    },
+    {
+      "entity_text": "Nora Benyahia",
+      "entity_type": "PERSON",
+      "start_pos": 1107,
+      "end_pos": 1120
+    },
+    {
+      "entity_text": "Claire Dervaux",
+      "entity_type": "PERSON",
+      "start_pos": 1201,
+      "end_pos": 1215
+    },
+    {
+      "entity_text": "Rezé",
+      "entity_type": "LOCATION",
+      "start_pos": 1310,
+      "end_pos": 1314
+    },
+    {
+      "entity_text": "Claire",
+      "entity_type": "PERSON",
+      "start_pos": 1324,
+      "end_pos": 1330
+    },
+    {
+      "entity_text": "Kouider",
+      "entity_type": "PERSON",
+      "start_pos": 1361,
+      "end_pos": 1368
+    },
+    {
+      "entity_text": "AutoSecours Atlantique",
+      "entity_type": "ORG",
+      "start_pos": 1412,
+      "end_pos": 1434
+    },
+    {
+      "entity_text": "Orial",
+      "entity_type": "ORG",
+      "start_pos": 1449,
+      "end_pos": 1454
+    },
+    {
+      "entity_text": "Ateliers",
+      "entity_type": "LOCATION",
+      "start_pos": 1481,
+      "end_pos": 1489
+    },
+    {
+      "entity_text": "Rezé",
+      "entity_type": "LOCATION",
+      "start_pos": 1497,
+      "end_pos": 1501
+    },
+    {
+      "entity_text": "Saint-Herblain",
+      "entity_type": "LOCATION",
+      "start_pos": 1534,
+      "end_pos": 1548
+    },
+    {
+      "entity_text": "Salma Kouider",
+      "entity_type": "PERSON",
+      "start_pos": 1609,
+      "end_pos": 1622
+    },
+    {
+      "entity_text": "Ilias\nMerini",
+      "entity_type": "PERSON",
+      "start_pos": 1731,
+      "end_pos": 1743
+    },
+    {
+      "entity_text": "Nora",
+      "entity_type": "PERSON",
+      "start_pos": 1866,
+      "end_pos": 1870
+    },
+    {
+      "entity_text": "Étienne Rigal",
+      "entity_type": "PERSON",
+      "start_pos": 1879,
+      "end_pos": 1892
+    },
+    {
+      "entity_text": "Nora Benyahia",
+      "entity_type": "PERSON",
+      "start_pos": 1972,
+      "end_pos": 1985
+    },
+    {
+      "entity_text": "Kouider Salma",
+      "entity_type": "PERSON",
+      "start_pos": 2057,
+      "end_pos": 2070
+    },
+    {
+      "entity_text": "Mutuelle Sereine Atlantique",
+      "entity_type": "ORG",
+      "start_pos": 2073,
+      "end_pos": 2100
+    },
+    {
+      "entity_text": "Benyahia",
+      "entity_type": "PERSON",
+      "start_pos": 2117,
+      "end_pos": 2125
+    },
+    {
+      "entity_text": "Livia Pommard",
+      "entity_type": "PERSON",
+      "start_pos": 2253,
+      "end_pos": 2266
+    },
+    {
+      "entity_text": "Kouider",
+      "entity_type": "PERSON",
+      "start_pos": 2321,
+      "end_pos": 2328
+    },
+    {
+      "entity_text": "Merini",
+      "entity_type": "PERSON",
+      "start_pos": 2338,
+      "end_pos": 2344
+    },
+    {
+      "entity_text": "Étienne RIGAL",
+      "entity_type": "PERSON",
+      "start_pos": 2366,
+      "end_pos": 2379
+    },
+    {
+      "entity_text": "Orial Expertise",
+      "entity_type": "ORG",
+      "start_pos": 2390,
+      "end_pos": 2405
+    },
+    {
+      "entity_text": "Plaine",
+      "entity_type": "LOCATION",
+      "start_pos": 2422,
+      "end_pos": 2428
+    },
+    {
+      "entity_text": "Saint-Herblain",
+      "entity_type": "LOCATION",
+      "start_pos": 2436,
+      "end_pos": 2450
+    },
+    {
+      "entity_text": "ORIAL EXPERTISE",
+      "entity_type": "ORG",
+      "start_pos": 2477,
+      "end_pos": 2492
+    },
+    {
+      "entity_text": "Mutuelle Sereine Atlantique",
+      "entity_type": "ORG",
+      "start_pos": 2548,
+      "end_pos": 2575
+    },
+    {
+      "entity_text": "Salma Kouider",
+      "entity_type": "PERSON",
+      "start_pos": 2586,
+      "end_pos": 2599
+    },
+    {
+      "entity_text": "Ateliers",
+      "entity_type": "LOCATION",
+      "start_pos": 2630,
+      "end_pos": 2638
+    },
+    {
+      "entity_text": "Rezé",
+      "entity_type": "LOCATION",
+      "start_pos": 2646,
+      "end_pos": 2650
+    },
+    {
+      "entity_text": "Mutuelle Sereine Atlantique",
+      "entity_type": "ORG",
+      "start_pos": 2755,
+      "end_pos": 2782
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 2792,
+      "end_pos": 2798
+    },
+    {
+      "entity_text": "Rezé",
+      "entity_type": "LOCATION",
+      "start_pos": 2848,
+      "end_pos": 2852
+    },
+    {
+      "entity_text": "Étienne Rigal",
+      "entity_type": "PERSON",
+      "start_pos": 2857,
+      "end_pos": 2870
+    },
+    {
+      "entity_text": "Salma Kouider",
+      "entity_type": "PERSON",
+      "start_pos": 2887,
+      "end_pos": 2900
+    },
+    {
+      "entity_text": "Ilias Merini",
+      "entity_type": "PERSON",
+      "start_pos": 2916,
+      "end_pos": 2928
+    },
+    {
+      "entity_text": "AutoSecours Atlantique",
+      "entity_type": "ORG",
+      "start_pos": 2974,
+      "end_pos": 2996
+    },
+    {
+      "entity_text": "LumiNord Ouest",
+      "entity_type": "ORG",
+      "start_pos": 3173,
+      "end_pos": 3187
+    },
+    {
+      "entity_text": "Kouider",
+      "entity_type": "PERSON",
+      "start_pos": 3227,
+      "end_pos": 3234
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 3282,
+      "end_pos": 3288
+    },
+    {
+      "entity_text": "Comptoir Ménager Loire",
+      "entity_type": "ORG",
+      "start_pos": 3294,
+      "end_pos": 3316
+    },
+    {
+      "entity_text": "Sami Azzouz",
+      "entity_type": "PERSON",
+      "start_pos": 3351,
+      "end_pos": 3362
+    },
+    {
+      "entity_text": "ORIAL EXPERTISE",
+      "entity_type": "ORG",
+      "start_pos": 3453,
+      "end_pos": 3468
+    },
+    {
+      "entity_text": "Mutuelle Sereine Atlantique",
+      "entity_type": "ORG",
+      "start_pos": 3524,
+      "end_pos": 3551
+    },
+    {
+      "entity_text": "Météo France",
+      "entity_type": "ORG",
+      "start_pos": 3625,
+      "end_pos": 3637
+    },
+    {
+      "entity_text": "Loire-Atlantique",
+      "entity_type": "LOCATION",
+      "start_pos": 3682,
+      "end_pos": 3698
+    },
+    {
+      "entity_text": "Gaëlle Tissot",
+      "entity_type": "PERSON",
+      "start_pos": 3791,
+      "end_pos": 3804
+    },
+    {
+      "entity_text": "Ateliers",
+      "entity_type": "LOCATION",
+      "start_pos": 3829,
+      "end_pos": 3837
+    },
+    {
+      "entity_text": "Pont-Rousseau",
+      "entity_type": "LOCATION",
+      "start_pos": 3903,
+      "end_pos": 3916
+    },
+    {
+      "entity_text": "Garage Rive Sud",
+      "entity_type": "ORG",
+      "start_pos": 4004,
+      "end_pos": 4019
+    },
+    {
+      "entity_text": "Sud",
+      "entity_type": "LOCATION",
+      "start_pos": 4016,
+      "end_pos": 4019
+    },
+    {
+      "entity_text": "LumiNord Ouest",
+      "entity_type": "ORG",
+      "start_pos": 4072,
+      "end_pos": 4086
+    },
+    {
+      "entity_text": "LumiNord Ouest",
+      "entity_type": "ORG",
+      "start_pos": 4213,
+      "end_pos": 4227
+    },
+    {
+      "entity_text": "Préfecture de\nLoire-Atlantique",
+      "entity_type": "ORG",
+      "start_pos": 4353,
+      "end_pos": 4383
+    },
+    {
+      "entity_text": "Loire-Atlantique",
+      "entity_type": "LOCATION",
+      "start_pos": 4367,
+      "end_pos": 4383
+    },
+    {
+      "entity_text": "Mairie de Rezé",
+      "entity_type": "ORG",
+      "start_pos": 4393,
+      "end_pos": 4407
+    },
+    {
+      "entity_text": "Rezé",
+      "entity_type": "LOCATION",
+      "start_pos": 4403,
+      "end_pos": 4407
+    },
+    {
+      "entity_text": "ORIAL EXPERTISE",
+      "entity_type": "ORG",
+      "start_pos": 4418,
+      "end_pos": 4433
+    },
+    {
+      "entity_text": "Mutuelle Sereine Atlantique",
+      "entity_type": "ORG",
+      "start_pos": 4489,
+      "end_pos": 4516
+    },
+    {
+      "entity_text": "Mutuelle Sereine\nAtlantique",
+      "entity_type": "ORG",
+      "start_pos": 4933,
+      "end_pos": 4960
+    },
+    {
+      "entity_text": "Orial Expertise",
+      "entity_type": "ORG",
+      "start_pos": 4993,
+      "end_pos": 5008
+    },
+    {
+      "entity_text": "Salma Kouider",
+      "entity_type": "PERSON",
+      "start_pos": 5044,
+      "end_pos": 5057
+    },
+    {
+      "entity_text": "Rezé",
+      "entity_type": "LOCATION",
+      "start_pos": 5202,
+      "end_pos": 5206
+    },
+    {
+      "entity_text": "Ilias Merini",
+      "entity_type": "PERSON",
+      "start_pos": 5353,
+      "end_pos": 5365
+    },
+    {
+      "entity_text": "Rezé",
+      "entity_type": "LOCATION",
+      "start_pos": 5422,
+      "end_pos": 5426
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 5490,
+      "end_pos": 5496
+    },
+    {
+      "entity_text": "Salma Kouider",
+      "entity_type": "PERSON",
+      "start_pos": 5499,
+      "end_pos": 5512
+    },
+    {
+      "entity_text": "Ateliers",
+      "entity_type": "LOCATION",
+      "start_pos": 5523,
+      "end_pos": 5531
+    },
+    {
+      "entity_text": "Rezé",
+      "entity_type": "LOCATION",
+      "start_pos": 5538,
+      "end_pos": 5542
+    },
+    {
+      "entity_text": "Mutuelle Sereine Atlantique",
+      "entity_type": "ORG",
+      "start_pos": 5584,
+      "end_pos": 5611
+    },
+    {
+      "entity_text": "Orial Expertise",
+      "entity_type": "ORG",
+      "start_pos": 5722,
+      "end_pos": 5737
+    },
+    {
+      "entity_text": "Mutuelle Sereine Atlantique",
+      "entity_type": "ORG",
+      "start_pos": 5787,
+      "end_pos": 5814
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 5816,
+      "end_pos": 5822
+    }
+  ]
+}

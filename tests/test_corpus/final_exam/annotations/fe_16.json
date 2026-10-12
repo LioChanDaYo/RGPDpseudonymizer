@@ -1,0 +1,641 @@
+{
+  "document_name": "fe_16.txt",
+  "entities": [
+    {
+      "entity_text": "ASSOCIATION HORIZON SECOURS",
+      "entity_type": "ORG",
+      "start_pos": 0,
+      "end_pos": 27
+    },
+    {
+      "entity_text": "rue des Tilleuls",
+      "entity_type": "LOCATION",
+      "start_pos": 39,
+      "end_pos": 55
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 63,
+      "end_pos": 67
+    },
+    {
+      "entity_text": "Maison des Associations",
+      "entity_type": "LOCATION",
+      "start_pos": 183,
+      "end_pos": 206
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 208,
+      "end_pos": 212
+    },
+    {
+      "entity_text": "7e",
+      "entity_type": "LOCATION",
+      "start_pos": 213,
+      "end_pos": 215
+    },
+    {
+      "entity_text": "Claire MAVOUNI",
+      "entity_type": "PERSON",
+      "start_pos": 360,
+      "end_pos": 374
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 390,
+      "end_pos": 394
+    },
+    {
+      "entity_text": "Étienne Carrel",
+      "entity_type": "PERSON",
+      "start_pos": 423,
+      "end_pos": 437
+    },
+    {
+      "entity_text": "Villeurbanne",
+      "entity_type": "LOCATION",
+      "start_pos": 452,
+      "end_pos": 464
+    },
+    {
+      "entity_text": "Nadia Benchik",
+      "entity_type": "PERSON",
+      "start_pos": 484,
+      "end_pos": 497
+    },
+    {
+      "entity_text": "Marseille",
+      "entity_type": "LOCATION",
+      "start_pos": 513,
+      "end_pos": 522
+    },
+    {
+      "entity_text": "Paulo Neri",
+      "entity_type": "PERSON",
+      "start_pos": 548,
+      "end_pos": 558
+    },
+    {
+      "entity_text": "Paris",
+      "entity_type": "LOCATION",
+      "start_pos": 578,
+      "end_pos": 583
+    },
+    {
+      "entity_text": "Sibel Arikan",
+      "entity_type": "PERSON",
+      "start_pos": 602,
+      "end_pos": 614
+    },
+    {
+      "entity_text": "Sibel Arikan",
+      "entity_type": "PERSON",
+      "start_pos": 615,
+      "end_pos": 627
+    },
+    {
+      "entity_text": "Lille",
+      "entity_type": "LOCATION",
+      "start_pos": 648,
+      "end_pos": 653
+    },
+    {
+      "entity_text": "Romain Tual",
+      "entity_type": "PERSON",
+      "start_pos": 672,
+      "end_pos": 683
+    },
+    {
+      "entity_text": "Calais",
+      "entity_type": "LOCATION",
+      "start_pos": 709,
+      "end_pos": 715
+    },
+    {
+      "entity_text": "Anaïs Ferrand",
+      "entity_type": "PERSON",
+      "start_pos": 736,
+      "end_pos": 749
+    },
+    {
+      "entity_text": "Chișinău",
+      "entity_type": "LOCATION",
+      "start_pos": 770,
+      "end_pos": 778
+    },
+    {
+      "entity_text": "Moldavie",
+      "entity_type": "LOCATION",
+      "start_pos": 803,
+      "end_pos": 811
+    },
+    {
+      "entity_text": "Association Horizon Secours",
+      "entity_type": "ORG",
+      "start_pos": 859,
+      "end_pos": 886
+    },
+    {
+      "entity_text": "Croix-Rouge française",
+      "entity_type": "ORG",
+      "start_pos": 889,
+      "end_pos": 910
+    },
+    {
+      "entity_text": "Médecins du Monde",
+      "entity_type": "ORG",
+      "start_pos": 913,
+      "end_pos": 930
+    },
+    {
+      "entity_text": "Préfecture du Rhône",
+      "entity_type": "ORG",
+      "start_pos": 933,
+      "end_pos": 952
+    },
+    {
+      "entity_text": "Rhône",
+      "entity_type": "LOCATION",
+      "start_pos": 947,
+      "end_pos": 952
+    },
+    {
+      "entity_text": "Ville de Lyon",
+      "entity_type": "ORG",
+      "start_pos": 955,
+      "end_pos": 968
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 964,
+      "end_pos": 968
+    },
+    {
+      "entity_text": "Banque Solidaire Atlantique",
+      "entity_type": "ORG",
+      "start_pos": 971,
+      "end_pos": 998
+    },
+    {
+      "entity_text": "UNICEF",
+      "entity_type": "ORG",
+      "start_pos": 1001,
+      "end_pos": 1007
+    },
+    {
+      "entity_text": "Humanité Logistique",
+      "entity_type": "ORG",
+      "start_pos": 1010,
+      "end_pos": 1029
+    },
+    {
+      "entity_text": "Solidarités Nord-Sud",
+      "entity_type": "ORG",
+      "start_pos": 1032,
+      "end_pos": 1052
+    },
+    {
+      "entity_text": "Calais",
+      "entity_type": "LOCATION",
+      "start_pos": 1169,
+      "end_pos": 1175
+    },
+    {
+      "entity_text": "Marseille",
+      "entity_type": "LOCATION",
+      "start_pos": 1179,
+      "end_pos": 1188
+    },
+    {
+      "entity_text": "Moldavie",
+      "entity_type": "LOCATION",
+      "start_pos": 1224,
+      "end_pos": 1232
+    },
+    {
+      "entity_text": "Roumanie",
+      "entity_type": "LOCATION",
+      "start_pos": 1239,
+      "end_pos": 1247
+    },
+    {
+      "entity_text": "Claire Mavouni",
+      "entity_type": "PERSON",
+      "start_pos": 1346,
+      "end_pos": 1360
+    },
+    {
+      "entity_text": "Préfecture du Rhône",
+      "entity_type": "ORG",
+      "start_pos": 1409,
+      "end_pos": 1428
+    },
+    {
+      "entity_text": "Rhône",
+      "entity_type": "LOCATION",
+      "start_pos": 1423,
+      "end_pos": 1428
+    },
+    {
+      "entity_text": "Ville de Lyon",
+      "entity_type": "ORG",
+      "start_pos": 1487,
+      "end_pos": 1500
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 1496,
+      "end_pos": 1500
+    },
+    {
+      "entity_text": "Nadia",
+      "entity_type": "PERSON",
+      "start_pos": 1529,
+      "end_pos": 1534
+    },
+    {
+      "entity_text": "Association Horizon Secours",
+      "entity_type": "ORG",
+      "start_pos": 1603,
+      "end_pos": 1630
+    },
+    {
+      "entity_text": "Étienne Carrel",
+      "entity_type": "PERSON",
+      "start_pos": 1699,
+      "end_pos": 1713
+    },
+    {
+      "entity_text": "Banque Solidaire\nAtlantique",
+      "entity_type": "ORG",
+      "start_pos": 1759,
+      "end_pos": 1786
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 1922,
+      "end_pos": 1926
+    },
+    {
+      "entity_text": "Humanité Logistique",
+      "entity_type": "ORG",
+      "start_pos": 1939,
+      "end_pos": 1958
+    },
+    {
+      "entity_text": "Lille",
+      "entity_type": "LOCATION",
+      "start_pos": 2029,
+      "end_pos": 2034
+    },
+    {
+      "entity_text": "Calais",
+      "entity_type": "LOCATION",
+      "start_pos": 2044,
+      "end_pos": 2050
+    },
+    {
+      "entity_text": "Humanité Logistique",
+      "entity_type": "ORG",
+      "start_pos": 2105,
+      "end_pos": 2124
+    },
+    {
+      "entity_text": "Imprimerie du Canal",
+      "entity_type": "ORG",
+      "start_pos": 2174,
+      "end_pos": 2193
+    },
+    {
+      "entity_text": "Marseille",
+      "entity_type": "LOCATION",
+      "start_pos": 2195,
+      "end_pos": 2204
+    },
+    {
+      "entity_text": "Solidarités Nord-Sud",
+      "entity_type": "ORG",
+      "start_pos": 2235,
+      "end_pos": 2255
+    },
+    {
+      "entity_text": "Maison des Associations",
+      "entity_type": "LOCATION",
+      "start_pos": 2300,
+      "end_pos": 2323
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 2325,
+      "end_pos": 2329
+    },
+    {
+      "entity_text": "Paulo Neri",
+      "entity_type": "PERSON",
+      "start_pos": 2362,
+      "end_pos": 2372
+    },
+    {
+      "entity_text": "UNICEF",
+      "entity_type": "ORG",
+      "start_pos": 2386,
+      "end_pos": 2392
+    },
+    {
+      "entity_text": "Romain",
+      "entity_type": "PERSON",
+      "start_pos": 2424,
+      "end_pos": 2430
+    },
+    {
+      "entity_text": "Paris",
+      "entity_type": "LOCATION",
+      "start_pos": 2459,
+      "end_pos": 2464
+    },
+    {
+      "entity_text": "Médecins du Monde",
+      "entity_type": "ORG",
+      "start_pos": 2534,
+      "end_pos": 2551
+    },
+    {
+      "entity_text": "Calais",
+      "entity_type": "LOCATION",
+      "start_pos": 2602,
+      "end_pos": 2608
+    },
+    {
+      "entity_text": "Romain Tual",
+      "entity_type": "PERSON",
+      "start_pos": 2634,
+      "end_pos": 2645
+    },
+    {
+      "entity_text": "Calais",
+      "entity_type": "LOCATION",
+      "start_pos": 2677,
+      "end_pos": 2683
+    },
+    {
+      "entity_text": "Marseille",
+      "entity_type": "LOCATION",
+      "start_pos": 2738,
+      "end_pos": 2747
+    },
+    {
+      "entity_text": "Nadia",
+      "entity_type": "PERSON",
+      "start_pos": 2749,
+      "end_pos": 2754
+    },
+    {
+      "entity_text": "la Belle de Mai",
+      "entity_type": "LOCATION",
+      "start_pos": 2805,
+      "end_pos": 2820
+    },
+    {
+      "entity_text": "Italie",
+      "entity_type": "LOCATION",
+      "start_pos": 2867,
+      "end_pos": 2873
+    },
+    {
+      "entity_text": "Croix-Rouge française",
+      "entity_type": "ORG",
+      "start_pos": 2878,
+      "end_pos": 2899
+    },
+    {
+      "entity_text": "Calais",
+      "entity_type": "LOCATION",
+      "start_pos": 3029,
+      "end_pos": 3035
+    },
+    {
+      "entity_text": "Romain Tual",
+      "entity_type": "PERSON",
+      "start_pos": 3038,
+      "end_pos": 3049
+    },
+    {
+      "entity_text": "Marseille",
+      "entity_type": "LOCATION",
+      "start_pos": 3096,
+      "end_pos": 3105
+    },
+    {
+      "entity_text": "Nadia Benchik",
+      "entity_type": "PERSON",
+      "start_pos": 3108,
+      "end_pos": 3121
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 3175,
+      "end_pos": 3179
+    },
+    {
+      "entity_text": "Claire MAVOUNI",
+      "entity_type": "PERSON",
+      "start_pos": 3182,
+      "end_pos": 3196
+    },
+    {
+      "entity_text": "Chișinău",
+      "entity_type": "LOCATION",
+      "start_pos": 3255,
+      "end_pos": 3263
+    },
+    {
+      "entity_text": "Anaïs Ferrand",
+      "entity_type": "PERSON",
+      "start_pos": 3266,
+      "end_pos": 3279
+    },
+    {
+      "entity_text": "Anaïs Ferrand",
+      "entity_type": "PERSON",
+      "start_pos": 3335,
+      "end_pos": 3348
+    },
+    {
+      "entity_text": "Chișinău",
+      "entity_type": "LOCATION",
+      "start_pos": 3386,
+      "end_pos": 3394
+    },
+    {
+      "entity_text": "Bucarest",
+      "entity_type": "LOCATION",
+      "start_pos": 3467,
+      "end_pos": 3475
+    },
+    {
+      "entity_text": "Iași",
+      "entity_type": "LOCATION",
+      "start_pos": 3485,
+      "end_pos": 3489
+    },
+    {
+      "entity_text": "Claire",
+      "entity_type": "PERSON",
+      "start_pos": 3536,
+      "end_pos": 3542
+    },
+    {
+      "entity_text": "Association Horizon Secours",
+      "entity_type": "ORG",
+      "start_pos": 3590,
+      "end_pos": 3617
+    },
+    {
+      "entity_text": "Roumanie",
+      "entity_type": "LOCATION",
+      "start_pos": 3642,
+      "end_pos": 3650
+    },
+    {
+      "entity_text": "Humanité Logistique",
+      "entity_type": "ORG",
+      "start_pos": 3718,
+      "end_pos": 3737
+    },
+    {
+      "entity_text": "Solidarités Nord-Sud",
+      "entity_type": "ORG",
+      "start_pos": 3779,
+      "end_pos": 3799
+    },
+    {
+      "entity_text": "Paulo",
+      "entity_type": "PERSON",
+      "start_pos": 3893,
+      "end_pos": 3898
+    },
+    {
+      "entity_text": "Médecins du Monde",
+      "entity_type": "ORG",
+      "start_pos": 3975,
+      "end_pos": 3992
+    },
+    {
+      "entity_text": "Calais",
+      "entity_type": "LOCATION",
+      "start_pos": 4072,
+      "end_pos": 4078
+    },
+    {
+      "entity_text": "Ville de Lyon",
+      "entity_type": "ORG",
+      "start_pos": 4118,
+      "end_pos": 4131
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 4127,
+      "end_pos": 4131
+    },
+    {
+      "entity_text": "Claire MAVOUNI",
+      "entity_type": "PERSON",
+      "start_pos": 4136,
+      "end_pos": 4150
+    },
+    {
+      "entity_text": "Humanité Logistique",
+      "entity_type": "ORG",
+      "start_pos": 4190,
+      "end_pos": 4209
+    },
+    {
+      "entity_text": "Moldavie",
+      "entity_type": "LOCATION",
+      "start_pos": 4264,
+      "end_pos": 4272
+    },
+    {
+      "entity_text": "Nadia",
+      "entity_type": "PERSON",
+      "start_pos": 4340,
+      "end_pos": 4345
+    },
+    {
+      "entity_text": "Marseille",
+      "entity_type": "LOCATION",
+      "start_pos": 4412,
+      "end_pos": 4421
+    },
+    {
+      "entity_text": "Étienne",
+      "entity_type": "PERSON",
+      "start_pos": 4423,
+      "end_pos": 4430
+    },
+    {
+      "entity_text": "Romain",
+      "entity_type": "PERSON",
+      "start_pos": 4475,
+      "end_pos": 4481
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 4522,
+      "end_pos": 4526
+    },
+    {
+      "entity_text": "Paris",
+      "entity_type": "LOCATION",
+      "start_pos": 4555,
+      "end_pos": 4560
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 4628,
+      "end_pos": 4632
+    },
+    {
+      "entity_text": "Association Horizon Secours",
+      "entity_type": "ORG",
+      "start_pos": 4663,
+      "end_pos": 4690
+    },
+    {
+      "entity_text": "Claire MAVOUNI",
+      "entity_type": "PERSON",
+      "start_pos": 4692,
+      "end_pos": 4706
+    },
+    {
+      "entity_text": "rue des Tilleuls",
+      "entity_type": "LOCATION",
+      "start_pos": 4721,
+      "end_pos": 4737
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 4745,
+      "end_pos": 4749
+    },
+    {
+      "entity_text": "Nadia Benchik",
+      "entity_type": "PERSON",
+      "start_pos": 4792,
+      "end_pos": 4805
+    }
+  ]
+}

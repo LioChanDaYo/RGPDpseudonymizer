@@ -1,0 +1,659 @@
+{
+  "document_name": "fe_15.txt",
+  "entities": [
+    {
+      "entity_text": "CCI RIVES DE LOIRE",
+      "entity_type": "ORG",
+      "start_pos": 0,
+      "end_pos": 18
+    },
+    {
+      "entity_text": "LOIRE",
+      "entity_type": "LOCATION",
+      "start_pos": 13,
+      "end_pos": 18
+    },
+    {
+      "entity_text": "Toronto",
+      "entity_type": "LOCATION",
+      "start_pos": 87,
+      "end_pos": 94
+    },
+    {
+      "entity_text": "Montréal",
+      "entity_type": "LOCATION",
+      "start_pos": 97,
+      "end_pos": 105
+    },
+    {
+      "entity_text": "Boston",
+      "entity_type": "LOCATION",
+      "start_pos": 108,
+      "end_pos": 114
+    },
+    {
+      "entity_text": "CCI",
+      "entity_type": "ORG",
+      "start_pos": 210,
+      "end_pos": 213
+    },
+    {
+      "entity_text": "Salma KERRAD",
+      "entity_type": "PERSON",
+      "start_pos": 248,
+      "end_pos": 260
+    },
+    {
+      "entity_text": "Atelier Valsec France",
+      "entity_type": "ORG",
+      "start_pos": 422,
+      "end_pos": 443
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 437,
+      "end_pos": 443
+    },
+    {
+      "entity_text": "Norah LECONTE",
+      "entity_type": "PERSON",
+      "start_pos": 466,
+      "end_pos": 479
+    },
+    {
+      "entity_text": "TOURS",
+      "entity_type": "LOCATION",
+      "start_pos": 583,
+      "end_pos": 588
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 591,
+      "end_pos": 597
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 801,
+      "end_pos": 807
+    },
+    {
+      "entity_text": "Banque Populaire Val de France",
+      "entity_type": "ORG",
+      "start_pos": 869,
+      "end_pos": 899
+    },
+    {
+      "entity_text": "Tours",
+      "entity_type": "LOCATION",
+      "start_pos": 908,
+      "end_pos": 913
+    },
+    {
+      "entity_text": "LECONTE Norah",
+      "entity_type": "PERSON",
+      "start_pos": 1016,
+      "end_pos": 1029
+    },
+    {
+      "entity_text": "McALLISTER Evan",
+      "entity_type": "PERSON",
+      "start_pos": 1089,
+      "end_pos": 1104
+    },
+    {
+      "entity_text": "MACÉ Lina",
+      "entity_type": "PERSON",
+      "start_pos": 1165,
+      "end_pos": 1174
+    },
+    {
+      "entity_text": "Rossi Marco",
+      "entity_type": "PERSON",
+      "start_pos": 1236,
+      "end_pos": 1247
+    },
+    {
+      "entity_text": "MacAllister",
+      "entity_type": "PERSON",
+      "start_pos": 1367,
+      "end_pos": 1378
+    },
+    {
+      "entity_text": "Mc Allister",
+      "entity_type": "PERSON",
+      "start_pos": 1399,
+      "end_pos": 1410
+    },
+    {
+      "entity_text": "Evan McALLISTER",
+      "entity_type": "PERSON",
+      "start_pos": 1466,
+      "end_pos": 1481
+    },
+    {
+      "entity_text": "Atelier Valsec France",
+      "entity_type": "ORG",
+      "start_pos": 1488,
+      "end_pos": 1509
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 1503,
+      "end_pos": 1509
+    },
+    {
+      "entity_text": "Toronto",
+      "entity_type": "LOCATION",
+      "start_pos": 1634,
+      "end_pos": 1641
+    },
+    {
+      "entity_text": "Nordline Hospitality Canada",
+      "entity_type": "ORG",
+      "start_pos": 1644,
+      "end_pos": 1671
+    },
+    {
+      "entity_text": "Canada",
+      "entity_type": "LOCATION",
+      "start_pos": 1665,
+      "end_pos": 1671
+    },
+    {
+      "entity_text": "Priya Chandrasekhar",
+      "entity_type": "PERSON",
+      "start_pos": 1674,
+      "end_pos": 1693
+    },
+    {
+      "entity_text": "Toronto",
+      "entity_type": "LOCATION",
+      "start_pos": 1719,
+      "end_pos": 1726
+    },
+    {
+      "entity_text": "GreenBridge Kitchens Ontario",
+      "entity_type": "ORG",
+      "start_pos": 1729,
+      "end_pos": 1757
+    },
+    {
+      "entity_text": "Ontario",
+      "entity_type": "LOCATION",
+      "start_pos": 1750,
+      "end_pos": 1757
+    },
+    {
+      "entity_text": "Samira Ouellet",
+      "entity_type": "PERSON",
+      "start_pos": 1760,
+      "end_pos": 1774
+    },
+    {
+      "entity_text": "Montréal",
+      "entity_type": "LOCATION",
+      "start_pos": 1795,
+      "end_pos": 1803
+    },
+    {
+      "entity_text": "Caisse Horizon Québec",
+      "entity_type": "ORG",
+      "start_pos": 1806,
+      "end_pos": 1827
+    },
+    {
+      "entity_text": "Québec",
+      "entity_type": "LOCATION",
+      "start_pos": 1821,
+      "end_pos": 1827
+    },
+    {
+      "entity_text": "Martin McKENZIE",
+      "entity_type": "PERSON",
+      "start_pos": 1830,
+      "end_pos": 1845
+    },
+    {
+      "entity_text": "Montréal",
+      "entity_type": "LOCATION",
+      "start_pos": 1871,
+      "end_pos": 1879
+    },
+    {
+      "entity_text": "Alimex Conseil Canada",
+      "entity_type": "ORG",
+      "start_pos": 1882,
+      "end_pos": 1903
+    },
+    {
+      "entity_text": "Canada",
+      "entity_type": "LOCATION",
+      "start_pos": 1897,
+      "end_pos": 1903
+    },
+    {
+      "entity_text": "Claire Dupré",
+      "entity_type": "PERSON",
+      "start_pos": 1906,
+      "end_pos": 1918
+    },
+    {
+      "entity_text": "Boston",
+      "entity_type": "LOCATION",
+      "start_pos": 1939,
+      "end_pos": 1945
+    },
+    {
+      "entity_text": "FreshPort Equipment États-Unis",
+      "entity_type": "ORG",
+      "start_pos": 1948,
+      "end_pos": 1978
+    },
+    {
+      "entity_text": "États-Unis",
+      "entity_type": "LOCATION",
+      "start_pos": 1968,
+      "end_pos": 1978
+    },
+    {
+      "entity_text": "Javier de la Mota",
+      "entity_type": "PERSON",
+      "start_pos": 1981,
+      "end_pos": 1998
+    },
+    {
+      "entity_text": "Boston",
+      "entity_type": "LOCATION",
+      "start_pos": 2029,
+      "end_pos": 2035
+    },
+    {
+      "entity_text": "Consulat général de France à Boston",
+      "entity_type": "ORG",
+      "start_pos": 2038,
+      "end_pos": 2073
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 2058,
+      "end_pos": 2064
+    },
+    {
+      "entity_text": "Boston",
+      "entity_type": "LOCATION",
+      "start_pos": 2067,
+      "end_pos": 2073
+    },
+    {
+      "entity_text": "Cambridge",
+      "entity_type": "LOCATION",
+      "start_pos": 2112,
+      "end_pos": 2121
+    },
+    {
+      "entity_text": "BayLabo Services Massachusetts",
+      "entity_type": "ORG",
+      "start_pos": 2124,
+      "end_pos": 2154
+    },
+    {
+      "entity_text": "Massachusetts",
+      "entity_type": "LOCATION",
+      "start_pos": 2141,
+      "end_pos": 2154
+    },
+    {
+      "entity_text": "Heather MacDONNELL",
+      "entity_type": "PERSON",
+      "start_pos": 2157,
+      "end_pos": 2175
+    },
+    {
+      "entity_text": "CCI",
+      "entity_type": "ORG",
+      "start_pos": 2204,
+      "end_pos": 2207
+    },
+    {
+      "entity_text": "Nordline Hospitality Canada",
+      "entity_type": "ORG",
+      "start_pos": 2212,
+      "end_pos": 2239
+    },
+    {
+      "entity_text": "Canada",
+      "entity_type": "LOCATION",
+      "start_pos": 2233,
+      "end_pos": 2239
+    },
+    {
+      "entity_text": "MACÉ Lina",
+      "entity_type": "PERSON",
+      "start_pos": 2326,
+      "end_pos": 2335
+    },
+    {
+      "entity_text": "GreenBridge Kitchens Ontario",
+      "entity_type": "ORG",
+      "start_pos": 2344,
+      "end_pos": 2372
+    },
+    {
+      "entity_text": "Ontario",
+      "entity_type": "LOCATION",
+      "start_pos": 2365,
+      "end_pos": 2372
+    },
+    {
+      "entity_text": "Le Havre",
+      "entity_type": "LOCATION",
+      "start_pos": 2404,
+      "end_pos": 2412
+    },
+    {
+      "entity_text": "Norah Leconte",
+      "entity_type": "PERSON",
+      "start_pos": 2421,
+      "end_pos": 2434
+    },
+    {
+      "entity_text": "Toronto",
+      "entity_type": "LOCATION",
+      "start_pos": 2468,
+      "end_pos": 2475
+    },
+    {
+      "entity_text": "Caisse Horizon Québec",
+      "entity_type": "ORG",
+      "start_pos": 2479,
+      "end_pos": 2500
+    },
+    {
+      "entity_text": "Québec",
+      "entity_type": "LOCATION",
+      "start_pos": 2494,
+      "end_pos": 2500
+    },
+    {
+      "entity_text": "Martin McKenzie",
+      "entity_type": "PERSON",
+      "start_pos": 2503,
+      "end_pos": 2518
+    },
+    {
+      "entity_text": "FreshPort Equipment États-Unis",
+      "entity_type": "ORG",
+      "start_pos": 2588,
+      "end_pos": 2618
+    },
+    {
+      "entity_text": "États-Unis",
+      "entity_type": "LOCATION",
+      "start_pos": 2608,
+      "end_pos": 2618
+    },
+    {
+      "entity_text": "Cuisine Nova\n  Belgique",
+      "entity_type": "ORG",
+      "start_pos": 2641,
+      "end_pos": 2664
+    },
+    {
+      "entity_text": "Belgique",
+      "entity_type": "LOCATION",
+      "start_pos": 2656,
+      "end_pos": 2664
+    },
+    {
+      "entity_text": "Atelier Valsec France",
+      "entity_type": "ORG",
+      "start_pos": 2798,
+      "end_pos": 2819
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 2813,
+      "end_pos": 2819
+    },
+    {
+      "entity_text": "Tours",
+      "entity_type": "LOCATION",
+      "start_pos": 2875,
+      "end_pos": 2880
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 2882,
+      "end_pos": 2888
+    },
+    {
+      "entity_text": "Oumou Traoré",
+      "entity_type": "PERSON",
+      "start_pos": 2955,
+      "end_pos": 2967
+    },
+    {
+      "entity_text": "Norah LECONTE",
+      "entity_type": "PERSON",
+      "start_pos": 3024,
+      "end_pos": 3037
+    },
+    {
+      "entity_text": "AXA France",
+      "entity_type": "ORG",
+      "start_pos": 3097,
+      "end_pos": 3107
+    },
+    {
+      "entity_text": "CCI Rives de Loire",
+      "entity_type": "ORG",
+      "start_pos": 3211,
+      "end_pos": 3229
+    },
+    {
+      "entity_text": "Loire",
+      "entity_type": "LOCATION",
+      "start_pos": 3224,
+      "end_pos": 3229
+    },
+    {
+      "entity_text": "Montréal",
+      "entity_type": "LOCATION",
+      "start_pos": 3271,
+      "end_pos": 3279
+    },
+    {
+      "entity_text": "Boston",
+      "entity_type": "LOCATION",
+      "start_pos": 3320,
+      "end_pos": 3326
+    },
+    {
+      "entity_text": "CCI Rives de Loire",
+      "entity_type": "ORG",
+      "start_pos": 3624,
+      "end_pos": 3642
+    },
+    {
+      "entity_text": "Loire",
+      "entity_type": "LOCATION",
+      "start_pos": 3637,
+      "end_pos": 3642
+    },
+    {
+      "entity_text": "Business France Canada",
+      "entity_type": "ORG",
+      "start_pos": 3734,
+      "end_pos": 3756
+    },
+    {
+      "entity_text": "Canada",
+      "entity_type": "LOCATION",
+      "start_pos": 3750,
+      "end_pos": 3756
+    },
+    {
+      "entity_text": "Chambre de commerce du Montréal métropolitain",
+      "entity_type": "ORG",
+      "start_pos": 3758,
+      "end_pos": 3803
+    },
+    {
+      "entity_text": "Massachusetts Export Center États-Unis",
+      "entity_type": "ORG",
+      "start_pos": 3805,
+      "end_pos": 3843
+    },
+    {
+      "entity_text": "États-Unis",
+      "entity_type": "LOCATION",
+      "start_pos": 3833,
+      "end_pos": 3843
+    },
+    {
+      "entity_text": "Norah LECONTE",
+      "entity_type": "PERSON",
+      "start_pos": 3979,
+      "end_pos": 3992
+    },
+    {
+      "entity_text": "Evan McALLISTER",
+      "entity_type": "PERSON",
+      "start_pos": 4207,
+      "end_pos": 4222
+    },
+    {
+      "entity_text": "FreshPort Equipment États-Unis",
+      "entity_type": "ORG",
+      "start_pos": 4283,
+      "end_pos": 4313
+    },
+    {
+      "entity_text": "États-Unis",
+      "entity_type": "LOCATION",
+      "start_pos": 4303,
+      "end_pos": 4313
+    },
+    {
+      "entity_text": "Marco Rossi",
+      "entity_type": "PERSON",
+      "start_pos": 4315,
+      "end_pos": 4326
+    },
+    {
+      "entity_text": "Alimex Conseil Canada",
+      "entity_type": "ORG",
+      "start_pos": 4367,
+      "end_pos": 4388
+    },
+    {
+      "entity_text": "Canada",
+      "entity_type": "LOCATION",
+      "start_pos": 4382,
+      "end_pos": 4388
+    },
+    {
+      "entity_text": "Lina MACÉ",
+      "entity_type": "PERSON",
+      "start_pos": 4420,
+      "end_pos": 4429
+    },
+    {
+      "entity_text": "Salma KERRAD",
+      "entity_type": "PERSON",
+      "start_pos": 4626,
+      "end_pos": 4638
+    },
+    {
+      "entity_text": "AXA France",
+      "entity_type": "ORG",
+      "start_pos": 4670,
+      "end_pos": 4680
+    },
+    {
+      "entity_text": "Salma KERRAD",
+      "entity_type": "PERSON",
+      "start_pos": 4691,
+      "end_pos": 4703
+    },
+    {
+      "entity_text": "McAllister",
+      "entity_type": "PERSON",
+      "start_pos": 4759,
+      "end_pos": 4769
+    },
+    {
+      "entity_text": "Didier VANNIER",
+      "entity_type": "PERSON",
+      "start_pos": 4772,
+      "end_pos": 4786
+    },
+    {
+      "entity_text": "Fatima BELHADI",
+      "entity_type": "PERSON",
+      "start_pos": 4846,
+      "end_pos": 4860
+    },
+    {
+      "entity_text": "Didier VANNIER",
+      "entity_type": "PERSON",
+      "start_pos": 4921,
+      "end_pos": 4935
+    },
+    {
+      "entity_text": "Evan McAllister",
+      "entity_type": "PERSON",
+      "start_pos": 5045,
+      "end_pos": 5060
+    },
+    {
+      "entity_text": "CCI Rives de Loire",
+      "entity_type": "ORG",
+      "start_pos": 5087,
+      "end_pos": 5105
+    },
+    {
+      "entity_text": "Loire",
+      "entity_type": "LOCATION",
+      "start_pos": 5100,
+      "end_pos": 5105
+    },
+    {
+      "entity_text": "CCI",
+      "entity_type": "ORG",
+      "start_pos": 5157,
+      "end_pos": 5160
+    },
+    {
+      "entity_text": "Salma KERRAD",
+      "entity_type": "PERSON",
+      "start_pos": 5163,
+      "end_pos": 5175
+    },
+    {
+      "entity_text": "CCI RIVES DE LOIRE",
+      "entity_type": "ORG",
+      "start_pos": 5211,
+      "end_pos": 5229
+    },
+    {
+      "entity_text": "LOIRE",
+      "entity_type": "LOCATION",
+      "start_pos": 5224,
+      "end_pos": 5229
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 5262,
+      "end_pos": 5268
+    }
+  ]
+}

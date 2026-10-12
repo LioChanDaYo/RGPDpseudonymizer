@@ -1,0 +1,111 @@
+LABORATOIRES ASTERION SANTE
+Direction Qualité Réseau - 18 rue des Ateliers, 69007 Lyon
+Tél. 04 72 18 44 90 - qualite.reseau@asterion-sante.fr
+
+COMPTE RENDU - COMITE QUALITE RESEAU PRODUCTION
+Réunion du 05/10/2026, 09:00-11:35, salle Lavoisier + Teams
+Rédigé par : Inès ROUHANI, assistante AQ
+
+Objet : suivi des écarts majeurs, lots bloqués et harmonisation des CAPA
+Sites concernés : Lyon, Cork, Bâle, Lisbonne, Singapour
+
+Présents | Fonction | Organisation / site | Commentaire
+Claire BERNOT | QP | Laboratoires Asterion Santé, Lyon | préside
+Sofiane AMRANI | AQ | Asterion Santé, Lyon | libération formes sèches
+Marta SILVESTRI | CQ | Asterion Pharma Italia, Milan | en visio, coupure 10 min
+Hugo KELLER | DQ | Asterion Schweiz AG, Bâle | procédures emballage
+Niamh MacDairmid | QP | Asterion Ireland Ltd, Cork | audit client vendredi
+Lamine OULD NACER | RA | Asterion Santé, Lyon | point EMA/ANSM
+Beatriz Costa | SUPPLY | Lusomed Embalagens, Lisbonne |
+Kenji Morita | QA | Pacific Fillworks, Singapour | connexion tardive
+Excusés | fonction | motif
+Karima EL MANSOURI | RH | déplacement à Toulouse
+Arnaud PELLETAN | R&D | essais stabilité à Grenoble
+
+1. OUVERTURE
+
+Claire BERNOT rappelle que le comité est exceptionnel, à la suite
+des trois réclamations reçues en septembre sur les blisters du lot
+FQ26-1187. Le lot est fabriqué à Lyon, conditionné en partie à Cork
+et contrôlé par le laboratoire CQ de Bâle. L’ANSM a été informée par
+notification du 28/09/2026 ; aucun rappel n’est demandé à ce stade.
+
+Sofiane AMRANI AQ indique que les dossiers papier copiés depuis le
+site de Cork ne sont pas complets : deux pages du contrôle visuel
+manquent, et la signature de Niamh MacDairmid QP apparaît sur un
+scan de mauvaise qualité. Niamh confirme que l’original est dans
+l’armoire qualité du bâtiment B à Cork, route de l’Aéroport.
+
+2. POINTS D’ECARTS
+
+Réf. | Site | Description | Responsable | échéance | statut
+E-26-441 | Lyon | variation humidité granulation, salle G2 |
+Sofiane AMRANI AQ | 14/10/2026 | ouvert
+E-26-452 | Cork | double étiquette sur palette export Inde |
+Niamh MacDairmid QP | 17/10/2026 | ouvert
+E-26-459 | Bâle | oubli de lecture second témoin HPLC |
+Hugo KELLER DQ / Marta SILVESTRI CQ | 21/10/2026 | analyse
+E-26-463 | Singapour | température 9,1 C quai réception |
+Kenji Morita QA | 12/10/2026 | clos sous réserve
+
+Note manuscrite recopiée : “voir si le transporteur BalticRoute
+Logistics Pologne a bien transmis le graphe complet, pas seulement
+PDF résumé”. Lamine OULD NACER RA demande que la mention Pologne
+figure dans la CAPA, car le flux part ensuite vers Varsovie et
+Prague avant retour des échantillons à Lyon.
+
+3. DECISIONS
+
+Le comité valide le maintien du blocage pour 18 palettes du lot
+FQ26-1187, stockées chez Asterion Ireland Ltd à Cork. Les palettes
+destinées à la Belgique restent sous quarantaine chez TransNord
+Pharma, entrepôt de Charleroi. Le lot témoin conservé à Lyon sera
+réouvert le 06/10 par Sofiane, en présence de Claire BERNOT QP.
+
+Marta SILVESTRI CQ signale que la méthode M-CTRL-224 n’est pas
+identique entre Milan et Bâle. Hugo KELLER DQ doit proposer une
+version unique, avec annexe spécifique pour les équipements de
+Asterion Schweiz AG. Délai demandé : avant le comité mensuel du
+27/10/2026.
+
+Kenji Morita QA ajoute que Pacific Fillworks Singapour utilise
+encore le modèle d’étiquette 2024. Claire demande un arrêt immédiat
+de ce modèle pour les commandes envoyées vers Malaisie et Australie.
+Beatriz Costa, pour Lusomed Embalagens Portugal, vérifiera aussi les
+gabarits imprimés à Lisbonne.
+
+4. ACTIONS A SUIVRE
+
+Action | Pilote | Copie | Date cible
+A1 récupérer les deux pages manquantes du contrôle visuel |
+Niamh MacDairmid QP | Claire BERNOT, Sofiane AMRANI | 07/10
+A2 comparer M-CTRL-224 Milan/Bâle/Lyon |
+Hugo KELLER DQ | Marta SILVESTRI CQ | 18/10
+A3 joindre les graphes température complets Cork-Varsovie-Prague |
+Beatriz Costa | Lamine OULD NACER RA | 10/10
+A4 mettre à jour l’étiquette export pour Pacific Fillworks Singapour |
+Kenji Morita QA | DQ Hugo KELLER | 15/10
+A5 préparer note autorités si tendance confirmée |
+Lamine OULD NACER RA | QP Claire BERNOT | 20/10
+
+5. DIVERS
+
+Claire BERNOT demande de limiter les échanges parallèles par mail :
+les versions de fichiers circulent avec des noms différents, par ex.
+“deviation_final2” et “final_final Cork”. Inès ROUHANI centralisera
+les pièces dans QualiBox, dossier RESEAU_Q4_2026. Les équipes de
+Lyon, Cork, Bâle et Singapour recevront le lien après validation.
+
+Fin de séance : 11:35.
+Prochaine réunion : 12/10/2026, 14:00, Teams, invitation envoyée par
+Inès ROUHANI.
+
+Validé le 06/10/2026 par :
+Claire BERNOT
+QP Groupe - Laboratoires Asterion Santé
+18 rue des Ateliers, 69007 Lyon
+claire.bernot@asterion-sante.fr - 04 72 18 45 12
+
+Diffusion : participants, Direction Industrielle, AQ sites, RA Europe
+Document interne - Laboratoires Asterion Santé - ne pas transférer
+hors réseau sans accord de la Direction Qualité.

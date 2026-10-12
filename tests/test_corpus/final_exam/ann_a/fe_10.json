@@ -1,0 +1,731 @@
+{
+  "document_name": "fe_10.txt",
+  "entities": [
+    {
+      "entity_text": "FÉDÉRATION INTERCLUBS DE SPORTS URBAINS",
+      "entity_type": "ORG",
+      "start_pos": 0,
+      "end_pos": 39
+    },
+    {
+      "entity_text": "AC Rive-Bleue",
+      "entity_type": "ORG",
+      "start_pos": 327,
+      "end_pos": 340
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 343,
+      "end_pos": 349
+    },
+    {
+      "entity_text": "Claire Ménard",
+      "entity_type": "PERSON",
+      "start_pos": 352,
+      "end_pos": 365
+    },
+    {
+      "entity_text": "Union Glisse des Docks",
+      "entity_type": "ORG",
+      "start_pos": 450,
+      "end_pos": 472
+    },
+    {
+      "entity_text": "Marseille",
+      "entity_type": "LOCATION",
+      "start_pos": 475,
+      "end_pos": 484
+    },
+    {
+      "entity_text": "Sami El Khatib",
+      "entity_type": "PERSON",
+      "start_pos": 487,
+      "end_pos": 501
+    },
+    {
+      "entity_text": "Nabila Rahouni",
+      "entity_type": "PERSON",
+      "start_pos": 570,
+      "end_pos": 584
+    },
+    {
+      "entity_text": "Roller Club du Parc",
+      "entity_type": "ORG",
+      "start_pos": 585,
+      "end_pos": 604
+    },
+    {
+      "entity_text": "Dijon",
+      "entity_type": "LOCATION",
+      "start_pos": 607,
+      "end_pos": 612
+    },
+    {
+      "entity_text": "Patrice VALLIER",
+      "entity_type": "PERSON",
+      "start_pos": 615,
+      "end_pos": 630
+    },
+    {
+      "entity_text": "Cercle Nord Roue",
+      "entity_type": "ORG",
+      "start_pos": 690,
+      "end_pos": 706
+    },
+    {
+      "entity_text": "Élan Trottinette Angers",
+      "entity_type": "ORG",
+      "start_pos": 707,
+      "end_pos": 730
+    },
+    {
+      "entity_text": "Angers",
+      "entity_type": "LOCATION",
+      "start_pos": 724,
+      "end_pos": 730
+    },
+    {
+      "entity_text": "Angers",
+      "entity_type": "LOCATION",
+      "start_pos": 733,
+      "end_pos": 739
+    },
+    {
+      "entity_text": "Lise Bruneau",
+      "entity_type": "PERSON",
+      "start_pos": 742,
+      "end_pos": 754
+    },
+    {
+      "entity_text": "Skate Horizon",
+      "entity_type": "ORG",
+      "start_pos": 815,
+      "end_pos": 828
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 831,
+      "end_pos": 835
+    },
+    {
+      "entity_text": "Miguel Da Silva",
+      "entity_type": "PERSON",
+      "start_pos": 838,
+      "end_pos": 853
+    },
+    {
+      "entity_text": "Miguel",
+      "entity_type": "PERSON",
+      "start_pos": 921,
+      "end_pos": 927
+    },
+    {
+      "entity_text": "Collectif Roue Libre",
+      "entity_type": "ORG",
+      "start_pos": 928,
+      "end_pos": 948
+    },
+    {
+      "entity_text": "Rennes",
+      "entity_type": "LOCATION",
+      "start_pos": 951,
+      "end_pos": 957
+    },
+    {
+      "entity_text": "Anne-Laure Pottier",
+      "entity_type": "PERSON",
+      "start_pos": 960,
+      "end_pos": 978
+    },
+    {
+      "entity_text": "Maëlle Corre",
+      "entity_type": "PERSON",
+      "start_pos": 1117,
+      "end_pos": 1129
+    },
+    {
+      "entity_text": "rue des Tonneliers",
+      "entity_type": "LOCATION",
+      "start_pos": 1148,
+      "end_pos": 1166
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 1174,
+      "end_pos": 1180
+    },
+    {
+      "entity_text": "Ronan Corre",
+      "entity_type": "PERSON",
+      "start_pos": 1183,
+      "end_pos": 1194
+    },
+    {
+      "entity_text": "AC Rive-Bleue",
+      "entity_type": "ORG",
+      "start_pos": 1212,
+      "end_pos": 1225
+    },
+    {
+      "entity_text": "Yacine Morlet",
+      "entity_type": "PERSON",
+      "start_pos": 1226,
+      "end_pos": 1239
+    },
+    {
+      "entity_text": "avenue du Littoral",
+      "entity_type": "LOCATION",
+      "start_pos": 1257,
+      "end_pos": 1275
+    },
+    {
+      "entity_text": "Marseille",
+      "entity_type": "LOCATION",
+      "start_pos": 1283,
+      "end_pos": 1292
+    },
+    {
+      "entity_text": "Farah Morlet",
+      "entity_type": "PERSON",
+      "start_pos": 1295,
+      "end_pos": 1307
+    },
+    {
+      "entity_text": "Union Glisse des Docks",
+      "entity_type": "ORG",
+      "start_pos": 1325,
+      "end_pos": 1347
+    },
+    {
+      "entity_text": "TOMAS BERTOLI",
+      "entity_type": "PERSON",
+      "start_pos": 1348,
+      "end_pos": 1361
+    },
+    {
+      "entity_text": "rue des Jardins",
+      "entity_type": "LOCATION",
+      "start_pos": 1380,
+      "end_pos": 1395
+    },
+    {
+      "entity_text": "Dijon",
+      "entity_type": "LOCATION",
+      "start_pos": 1403,
+      "end_pos": 1408
+    },
+    {
+      "entity_text": "Giulia Bertoli",
+      "entity_type": "PERSON",
+      "start_pos": 1411,
+      "end_pos": 1425
+    },
+    {
+      "entity_text": "Roller Club du Parc",
+      "entity_type": "ORG",
+      "start_pos": 1443,
+      "end_pos": 1462
+    },
+    {
+      "entity_text": "Nina Kermadec",
+      "entity_type": "PERSON",
+      "start_pos": 1463,
+      "end_pos": 1476
+    },
+    {
+      "entity_text": "impasse des Platanes",
+      "entity_type": "LOCATION",
+      "start_pos": 1494,
+      "end_pos": 1514
+    },
+    {
+      "entity_text": "Angers",
+      "entity_type": "LOCATION",
+      "start_pos": 1522,
+      "end_pos": 1528
+    },
+    {
+      "entity_text": "Olivier Kermadec",
+      "entity_type": "PERSON",
+      "start_pos": 1531,
+      "end_pos": 1547
+    },
+    {
+      "entity_text": "Élan Trottinette Angers",
+      "entity_type": "ORG",
+      "start_pos": 1565,
+      "end_pos": 1588
+    },
+    {
+      "entity_text": "Angers",
+      "entity_type": "LOCATION",
+      "start_pos": 1582,
+      "end_pos": 1588
+    },
+    {
+      "entity_text": "Ibrahim Chergui",
+      "entity_type": "PERSON",
+      "start_pos": 1589,
+      "end_pos": 1604
+    },
+    {
+      "entity_text": "cours Charial",
+      "entity_type": "LOCATION",
+      "start_pos": 1623,
+      "end_pos": 1636
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 1644,
+      "end_pos": 1648
+    },
+    {
+      "entity_text": "Samira Chergui",
+      "entity_type": "PERSON",
+      "start_pos": 1651,
+      "end_pos": 1665
+    },
+    {
+      "entity_text": "Skate Horizon",
+      "entity_type": "ORG",
+      "start_pos": 1683,
+      "end_pos": 1696
+    },
+    {
+      "entity_text": "Louise GUILLOU",
+      "entity_type": "PERSON",
+      "start_pos": 1697,
+      "end_pos": 1711
+    },
+    {
+      "entity_text": "rue de la Prairie",
+      "entity_type": "LOCATION",
+      "start_pos": 1730,
+      "end_pos": 1747
+    },
+    {
+      "entity_text": "Rennes",
+      "entity_type": "LOCATION",
+      "start_pos": 1755,
+      "end_pos": 1761
+    },
+    {
+      "entity_text": "Martin Guillou",
+      "entity_type": "PERSON",
+      "start_pos": 1764,
+      "end_pos": 1778
+    },
+    {
+      "entity_text": "Collectif Roue Libre",
+      "entity_type": "ORG",
+      "start_pos": 1796,
+      "end_pos": 1816
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 1861,
+      "end_pos": 1867
+    },
+    {
+      "entity_text": "Maëlle Corre",
+      "entity_type": "PERSON",
+      "start_pos": 1959,
+      "end_pos": 1971
+    },
+    {
+      "entity_text": "AC Rive-Bleue",
+      "entity_type": "ORG",
+      "start_pos": 1974,
+      "end_pos": 1987
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 2031,
+      "end_pos": 2037
+    },
+    {
+      "entity_text": "Yacine Morlet",
+      "entity_type": "PERSON",
+      "start_pos": 2044,
+      "end_pos": 2057
+    },
+    {
+      "entity_text": "Union Glisse des Docks",
+      "entity_type": "ORG",
+      "start_pos": 2060,
+      "end_pos": 2082
+    },
+    {
+      "entity_text": "Rezé",
+      "entity_type": "LOCATION",
+      "start_pos": 2135,
+      "end_pos": 2139
+    },
+    {
+      "entity_text": "TOMAS BERTOLI",
+      "entity_type": "PERSON",
+      "start_pos": 2146,
+      "end_pos": 2159
+    },
+    {
+      "entity_text": "Roller Club du Parc",
+      "entity_type": "ORG",
+      "start_pos": 2162,
+      "end_pos": 2181
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 2233,
+      "end_pos": 2239
+    },
+    {
+      "entity_text": "Nina Kermadec",
+      "entity_type": "PERSON",
+      "start_pos": 2246,
+      "end_pos": 2259
+    },
+    {
+      "entity_text": "Élan Trottinette Angers",
+      "entity_type": "ORG",
+      "start_pos": 2262,
+      "end_pos": 2285
+    },
+    {
+      "entity_text": "Angers",
+      "entity_type": "LOCATION",
+      "start_pos": 2279,
+      "end_pos": 2285
+    },
+    {
+      "entity_text": "Angers",
+      "entity_type": "LOCATION",
+      "start_pos": 2339,
+      "end_pos": 2345
+    },
+    {
+      "entity_text": "Ibrahim Chergui",
+      "entity_type": "PERSON",
+      "start_pos": 2362,
+      "end_pos": 2377
+    },
+    {
+      "entity_text": "Skate Horizon",
+      "entity_type": "ORG",
+      "start_pos": 2380,
+      "end_pos": 2393
+    },
+    {
+      "entity_text": "Saint-Sébastien-sur-Loire",
+      "entity_type": "LOCATION",
+      "start_pos": 2446,
+      "end_pos": 2471
+    },
+    {
+      "entity_text": "Louise GUILLOU",
+      "entity_type": "PERSON",
+      "start_pos": 2478,
+      "end_pos": 2492
+    },
+    {
+      "entity_text": "Collectif Roue Libre",
+      "entity_type": "ORG",
+      "start_pos": 2495,
+      "end_pos": 2515
+    },
+    {
+      "entity_text": "Anne-Laure",
+      "entity_type": "PERSON",
+      "start_pos": 2561,
+      "end_pos": 2571
+    },
+    {
+      "entity_text": "Ronan Corre",
+      "entity_type": "PERSON",
+      "start_pos": 2702,
+      "end_pos": 2713
+    },
+    {
+      "entity_text": "Maëlle Corre",
+      "entity_type": "PERSON",
+      "start_pos": 2716,
+      "end_pos": 2728
+    },
+    {
+      "entity_text": "Fédération Interclubs de Sports Urbains",
+      "entity_type": "ORG",
+      "start_pos": 2786,
+      "end_pos": 2825
+    },
+    {
+      "entity_text": "Nabila Rahouni",
+      "entity_type": "PERSON",
+      "start_pos": 2826,
+      "end_pos": 2840
+    },
+    {
+      "entity_text": "Yacine Morlet",
+      "entity_type": "PERSON",
+      "start_pos": 2843,
+      "end_pos": 2856
+    },
+    {
+      "entity_text": "Union\nGlisse des Docks",
+      "entity_type": "ORG",
+      "start_pos": 2897,
+      "end_pos": 2919
+    },
+    {
+      "entity_text": "Olivier Kermadec",
+      "entity_type": "PERSON",
+      "start_pos": 2936,
+      "end_pos": 2952
+    },
+    {
+      "entity_text": "Nina Kermadec",
+      "entity_type": "PERSON",
+      "start_pos": 2955,
+      "end_pos": 2968
+    },
+    {
+      "entity_text": "Camille Kermadec",
+      "entity_type": "PERSON",
+      "start_pos": 3013,
+      "end_pos": 3029
+    },
+    {
+      "entity_text": "Samira Chergui",
+      "entity_type": "PERSON",
+      "start_pos": 3057,
+      "end_pos": 3071
+    },
+    {
+      "entity_text": "Ibrahim Chergui",
+      "entity_type": "PERSON",
+      "start_pos": 3074,
+      "end_pos": 3089
+    },
+    {
+      "entity_text": "AC Rive-Bleue",
+      "entity_type": "ORG",
+      "start_pos": 3289,
+      "end_pos": 3302
+    },
+    {
+      "entity_text": "Claire Ménard",
+      "entity_type": "PERSON",
+      "start_pos": 3323,
+      "end_pos": 3336
+    },
+    {
+      "entity_text": "Hugo Salen",
+      "entity_type": "PERSON",
+      "start_pos": 3339,
+      "end_pos": 3349
+    },
+    {
+      "entity_text": "Union Glisse des Docks",
+      "entity_type": "ORG",
+      "start_pos": 3360,
+      "end_pos": 3382
+    },
+    {
+      "entity_text": "Sami El Khatib",
+      "entity_type": "PERSON",
+      "start_pos": 3401,
+      "end_pos": 3415
+    },
+    {
+      "entity_text": "Roller Club du Parc",
+      "entity_type": "ORG",
+      "start_pos": 3424,
+      "end_pos": 3443
+    },
+    {
+      "entity_text": "Patrice VALLIER",
+      "entity_type": "PERSON",
+      "start_pos": 3463,
+      "end_pos": 3478
+    },
+    {
+      "entity_text": "Élan Trottinette Angers",
+      "entity_type": "ORG",
+      "start_pos": 3495,
+      "end_pos": 3518
+    },
+    {
+      "entity_text": "Angers",
+      "entity_type": "LOCATION",
+      "start_pos": 3512,
+      "end_pos": 3518
+    },
+    {
+      "entity_text": "Lise Bruneau",
+      "entity_type": "PERSON",
+      "start_pos": 3532,
+      "end_pos": 3544
+    },
+    {
+      "entity_text": "Skate Horizon",
+      "entity_type": "ORG",
+      "start_pos": 3553,
+      "end_pos": 3566
+    },
+    {
+      "entity_text": "Miguel Da Silva",
+      "entity_type": "PERSON",
+      "start_pos": 3587,
+      "end_pos": 3602
+    },
+    {
+      "entity_text": "Collectif Roue Libre",
+      "entity_type": "ORG",
+      "start_pos": 3625,
+      "end_pos": 3645
+    },
+    {
+      "entity_text": "Anne-Laure Pottier",
+      "entity_type": "PERSON",
+      "start_pos": 3666,
+      "end_pos": 3684
+    },
+    {
+      "entity_text": "Patrice VALLIER",
+      "entity_type": "PERSON",
+      "start_pos": 3733,
+      "end_pos": 3748
+    },
+    {
+      "entity_text": "Tomas",
+      "entity_type": "PERSON",
+      "start_pos": 3765,
+      "end_pos": 3770
+    },
+    {
+      "entity_text": "Marseille",
+      "entity_type": "LOCATION",
+      "start_pos": 3861,
+      "end_pos": 3870
+    },
+    {
+      "entity_text": "Sami",
+      "entity_type": "PERSON",
+      "start_pos": 3872,
+      "end_pos": 3876
+    },
+    {
+      "entity_text": "boulevard des Écoles",
+      "entity_type": "LOCATION",
+      "start_pos": 3908,
+      "end_pos": 3928
+    },
+    {
+      "entity_text": "Maison des Associations",
+      "entity_type": "LOCATION",
+      "start_pos": 3954,
+      "end_pos": 3977
+    },
+    {
+      "entity_text": "Ville de Nantes",
+      "entity_type": "ORG",
+      "start_pos": 3984,
+      "end_pos": 3999
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 3993,
+      "end_pos": 3999
+    },
+    {
+      "entity_text": "MAIF Associations",
+      "entity_type": "ORG",
+      "start_pos": 4141,
+      "end_pos": 4158
+    },
+    {
+      "entity_text": "Roller Club du Parc",
+      "entity_type": "ORG",
+      "start_pos": 4198,
+      "end_pos": 4217
+    },
+    {
+      "entity_text": "Rennes",
+      "entity_type": "LOCATION",
+      "start_pos": 4242,
+      "end_pos": 4248
+    },
+    {
+      "entity_text": "Hélène Arnaud",
+      "entity_type": "PERSON",
+      "start_pos": 4352,
+      "end_pos": 4365
+    },
+    {
+      "entity_text": "Fédération Interclubs de Sports Urbains",
+      "entity_type": "ORG",
+      "start_pos": 4366,
+      "end_pos": 4405
+    },
+    {
+      "entity_text": "rue des Ateliers",
+      "entity_type": "LOCATION",
+      "start_pos": 4409,
+      "end_pos": 4425
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 4433,
+      "end_pos": 4439
+    },
+    {
+      "entity_text": "AC Rive-Bleue",
+      "entity_type": "ORG",
+      "start_pos": 4515,
+      "end_pos": 4528
+    },
+    {
+      "entity_text": "Union Glisse des Docks",
+      "entity_type": "ORG",
+      "start_pos": 4530,
+      "end_pos": 4552
+    },
+    {
+      "entity_text": "Roller Club\ndu Parc",
+      "entity_type": "ORG",
+      "start_pos": 4554,
+      "end_pos": 4573
+    },
+    {
+      "entity_text": "Élan Trottinette Angers",
+      "entity_type": "ORG",
+      "start_pos": 4575,
+      "end_pos": 4598
+    },
+    {
+      "entity_text": "Angers",
+      "entity_type": "LOCATION",
+      "start_pos": 4592,
+      "end_pos": 4598
+    },
+    {
+      "entity_text": "Skate Horizon",
+      "entity_type": "ORG",
+      "start_pos": 4600,
+      "end_pos": 4613
+    },
+    {
+      "entity_text": "Collectif Roue Libre",
+      "entity_type": "ORG",
+      "start_pos": 4615,
+      "end_pos": 4635
+    }
+  ]
+}

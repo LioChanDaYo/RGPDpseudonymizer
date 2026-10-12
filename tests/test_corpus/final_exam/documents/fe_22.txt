@@ -1,0 +1,138 @@
+RÉSEAU ALPES ÉNERGIES - AUDIT PARTENAIRES 2026
+Direction Conformité et Déploiement - version export PDF
+Siège : 18 rue des Grives, 69007 Lyon | Tél. 04 72 18 64 09
+
+RAPPORT DE CONTRÔLE INTERMÉDIAIRE
+Périmètre : partenaires pose, raccordement et accueil client
+Région : Auvergne-Rhône-Alpes, avec points de passage à Genève
+Période contrôlée : 03/06/2026 au 25/09/2026
+
+Rédaction : Clémence de Launay, auditrice réseau
+Validation terrain : Hugo van der Velde, responsable secteur EST
+Diffusion : COMEX RÉSEAU ALPES ÉNERGIES, DAF, DPO, DEX
+
+1. SYNTHÈSE
+
+Le contrôle porte sur 14 partenaires actifs de Réseau Alpes Énergies,
+dont 9 sous convention cadre et 5 sous avenant provisoire. Les visites
+ont été conduites à Lyon, Grenoble, Valence, Chambéry et Annecy. Deux
+entretiens de comparaison ont aussi été réalisés à Genève et Turin,
+pour les flux transfrontaliers pilotés par Asterion Maintenance Suisse
+et RhoNéo Italie.
+
+L’état général du réseau est acceptable, mais hétérogène. Les écarts
+les plus fréquents concernent la traçabilité des habilitations, la
+remontée tardive des incidents client et l’usage de modèles de devis
+non alignés avec la charte 2026. Ces constats avaient déjà été signalés
+par Inès da Costa lors du comité de Grenoble du 17/07/2026.
+
+RÉSEAU ALPES ÉNERGIES - Audit partenaires 2026          Page 1 / 3
+Document interne - ne pas diffuser hors contrat sans accord écrit
+
+
+2. PARTENAIRES ET SITES VISITÉS
+
+Nom partenaire                 Pays / région       Site contrôlé
+Solevia France                 France              42 avenue du Pré Clair,
+                                                   38000 Grenoble
+Asterion Maintenance Suisse    Suisse              16 chemin des Rives,
+                                                   1201 Genève
+HelioRive Espagne              Espagne             contrôle documentaire
+                                                   depuis Lyon
+NordGrid Belgique              Belgique            bureau de Bruxelles,
+                                                   réunion à distance
+RhoNéo Italie                  Italie              9 via delle Serre,
+                                                   10125 Turin
+Atelier Kilowatt Dauphiné      Isère               dépôt de Voiron
+Savoisola                      Savoie              5 rue du Nant, Chambéry
+
+Chez Solevia France, le dossier de 11 techniciens sur 38 ne comportait
+pas l’attestation d’accueil sécurité signée. Madame de Launay a vérifié
+un échantillon complémentaire le 14/09/2026 ; trois fiches ont été
+corrigées le jour même par Nora Benyellès. Chez Asterion Maintenance
+Suisse, les habilitations électriques sont complètes, mais les numéros
+de chantier ne sont pas repris dans l’outil CRISTA, ce qui rend le
+suivi de Genève à Lyon inutilement lent.
+
+Hugo van der Velde note que RhoNéo Italie respecte mieux le délai de
+prévenance que les équipes françaises : 94 % des interventions de Turin
+sont confirmées à J-2. L’écart inverse apparaît sur la satisfaction
+client, car les messages envoyés depuis Turin ne reprennent pas toujours
+le nom commercial Réseau Alpes Énergies.
+
+3. POINTS D’ÉCART
+
+ÉCART 01 - Documents contractuels
+Le modèle d’avenant utilisé par NordGrid Belgique n’intègre pas la
+clause de réversibilité ajoutée en mai 2026. L’ancienne version a été
+retrouvée dans trois dossiers clients de Bruxelles. Malik de Souza,
+juriste contrats, demande une reprise complète avant le 30/10/2026.
+
+ÉCART 02 - Suivi des réclamations
+À Valence, l’équipe de LumaPose Rhône a conservé un fichier Excel
+local nommé "retours-chauds-final-v3". Ce fichier contient 27 lignes
+non réconciliées avec la base ORION. La responsable locale, Sarah
+du Mesnil, indique que le transfert hebdomadaire était "prévu mais
+pas calé". Cette pratique doit cesser immédiatement.
+
+ÉCART 03 - Sous-traitance de second rang
+Asterion Maintenance Suisse a mobilisé deux techniciens externes à
+Lausanne sans notification préalable à Réseau Alpes Énergies. Mathis
+von Arx a transmis après coup les certificats, mais le processus reste
+non conforme. Pour HelioRive Espagne, aucun cas équivalent n’a été
+détecté sur la période, malgré une vérification des bons de Barcelone.
+
+RÉSEAU ALPES ÉNERGIES - Audit partenaires 2026          Page 2 / 3
+Document interne - ne pas diffuser hors contrat sans accord écrit
+
+
+4. OBSERVATIONS DE GOUVERNANCE
+
+Les interlocuteurs rencontrés sont globalement disponibles, sauf chez
+Savoisola où deux rendez-vous à Chambéry ont été reportés moins de
+24 heures avant l’audit. Le pilotage mensuel par Réseau Alpes Énergies
+gagne en régularité, mais les comptes rendus restent trop narratifs.
+Clémence de Launay recommande un format plus court, avec indicateurs
+par partenaire : délai, réclamation, non-conformité, reprise facture.
+
+Lors de la réunion de clôture à Lyon, Hugo van der Velde a demandé que
+les partenaires étrangers soient suivis dans un onglet séparé, car les
+règles de TVA et d’assurance ne sont pas identiques pour Asterion
+Maintenance Suisse, RhoNéo Italie et HelioRive Espagne. La DAF a validé
+le principe, sous réserve d’une revue par Malik de Souza.
+
+5. ACTIONS DEMANDÉES
+
+Action                                      Responsable        Échéance
+Mettre à jour les avenants NordGrid        Malik de Souza      30/10
+Reprendre les habilitations Solevia        Nora Benyellès      15/11
+Fermer le fichier local Valence            Sarah du Mesnil     20/10
+Créer l’onglet partenaires étrangers       Inès da Costa       05/11
+Contrôler les sous-traitants Genève        Mathis von Arx      12/11
+
+6. CONCLUSION
+
+Le réseau reste exploitable sans suspension de partenaire. Toutefois,
+Réseau Alpes Énergies doit renforcer le contrôle documentaire avant le
+pic d’hiver, surtout pour les interventions urgentes à Grenoble, Annecy
+et Genève. Une revue courte sera organisée à Lyon le 18/11/2026 avec
+Solevia France, Asterion Maintenance Suisse et NordGrid Belgique. Les
+écarts non levés seront présentés au comité risques de décembre.
+
+Fait à Lyon, le 28 septembre 2026
+
+Clémence de Launay
+Auditrice réseau partenaires
+RÉSEAU ALPES ÉNERGIES
+18 rue des Grives, 69007 Lyon
+c.delaunay@reseau-alpes-energies.example
+04 72 18 64 31
+
+Vu pour diffusion interne,
+
+Hugo van der Velde
+Responsable secteur EST
+h.vandervelde@reseau-alpes-energies.example
+
+RÉSEAU ALPES ÉNERGIES - Audit partenaires 2026          Page 3 / 3
+SAS au capital de 4 800 000 euros - RCS Lyon 829 461 773

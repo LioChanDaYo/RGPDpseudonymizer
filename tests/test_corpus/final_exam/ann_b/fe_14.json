@@ -1,0 +1,731 @@
+{
+  "document_name": "fe_14.txt",
+  "entities": [
+    {
+      "entity_text": "Inès Berrada",
+      "entity_type": "PERSON",
+      "start_pos": 5,
+      "end_pos": 17
+    },
+    {
+      "entity_text": "Fiona MacAllan",
+      "entity_type": "PERSON",
+      "start_pos": 53,
+      "end_pos": 67
+    },
+    {
+      "entity_text": "Rachid McKenna",
+      "entity_type": "PERSON",
+      "start_pos": 99,
+      "end_pos": 113
+    },
+    {
+      "entity_text": "Camille Orsini",
+      "entity_type": "PERSON",
+      "start_pos": 152,
+      "end_pos": 166
+    },
+    {
+      "entity_text": "Nadia El Khatib",
+      "entity_type": "PERSON",
+      "start_pos": 201,
+      "end_pos": 216
+    },
+    {
+      "entity_text": "Marrakech",
+      "entity_type": "LOCATION",
+      "start_pos": 288,
+      "end_pos": 297
+    },
+    {
+      "entity_text": "Fiona",
+      "entity_type": "PERSON",
+      "start_pos": 339,
+      "end_pos": 344
+    },
+    {
+      "entity_text": "Rachid",
+      "entity_type": "PERSON",
+      "start_pos": 354,
+      "end_pos": 360
+    },
+    {
+      "entity_text": "Medina Prod Service",
+      "entity_type": "ORG",
+      "start_pos": 404,
+      "end_pos": 423
+    },
+    {
+      "entity_text": "Fiona",
+      "entity_type": "PERSON",
+      "start_pos": 480,
+      "end_pos": 485
+    },
+    {
+      "entity_text": "Marrakech",
+      "entity_type": "LOCATION",
+      "start_pos": 532,
+      "end_pos": 541
+    },
+    {
+      "entity_text": "Essaouira",
+      "entity_type": "LOCATION",
+      "start_pos": 547,
+      "end_pos": 556
+    },
+    {
+      "entity_text": "Paris",
+      "entity_type": "LOCATION",
+      "start_pos": 577,
+      "end_pos": 582
+    },
+    {
+      "entity_text": "CDG",
+      "entity_type": "LOCATION",
+      "start_pos": 583,
+      "end_pos": 586
+    },
+    {
+      "entity_text": "Casablanca",
+      "entity_type": "LOCATION",
+      "start_pos": 590,
+      "end_pos": 600
+    },
+    {
+      "entity_text": "Marrakech",
+      "entity_type": "LOCATION",
+      "start_pos": 625,
+      "end_pos": 634
+    },
+    {
+      "entity_text": "Nadia El Khatib",
+      "entity_type": "PERSON",
+      "start_pos": 696,
+      "end_pos": 711
+    },
+    {
+      "entity_text": "Marrakech",
+      "entity_type": "LOCATION",
+      "start_pos": 735,
+      "end_pos": 744
+    },
+    {
+      "entity_text": "Samir Laafiri",
+      "entity_type": "PERSON",
+      "start_pos": 770,
+      "end_pos": 783
+    },
+    {
+      "entity_text": "Casablanca",
+      "entity_type": "LOCATION",
+      "start_pos": 807,
+      "end_pos": 817
+    },
+    {
+      "entity_text": "Ilyas Benomar",
+      "entity_type": "PERSON",
+      "start_pos": 839,
+      "end_pos": 852
+    },
+    {
+      "entity_text": "Marrakech",
+      "entity_type": "LOCATION",
+      "start_pos": 876,
+      "end_pos": 885
+    },
+    {
+      "entity_text": "Tarek Mouhli",
+      "entity_type": "PERSON",
+      "start_pos": 917,
+      "end_pos": 929
+    },
+    {
+      "entity_text": "Ouarzazate",
+      "entity_type": "LOCATION",
+      "start_pos": 953,
+      "end_pos": 963
+    },
+    {
+      "entity_text": "Leïla Amsalem",
+      "entity_type": "PERSON",
+      "start_pos": 1022,
+      "end_pos": 1035
+    },
+    {
+      "entity_text": "Essaouira",
+      "entity_type": "LOCATION",
+      "start_pos": 1059,
+      "end_pos": 1068
+    },
+    {
+      "entity_text": "Atelier Brume Films",
+      "entity_type": "ORG",
+      "start_pos": 1085,
+      "end_pos": 1104
+    },
+    {
+      "entity_text": "Rachid McKenna",
+      "entity_type": "PERSON",
+      "start_pos": 1106,
+      "end_pos": 1120
+    },
+    {
+      "entity_text": "Camille\nOrsini",
+      "entity_type": "PERSON",
+      "start_pos": 1145,
+      "end_pos": 1159
+    },
+    {
+      "entity_text": "Centre du Cinéma Marocain",
+      "entity_type": "ORG",
+      "start_pos": 1194,
+      "end_pos": 1219
+    },
+    {
+      "entity_text": "Fiona MacAllan",
+      "entity_type": "PERSON",
+      "start_pos": 1267,
+      "end_pos": 1281
+    },
+    {
+      "entity_text": "Samir",
+      "entity_type": "PERSON",
+      "start_pos": 1288,
+      "end_pos": 1293
+    },
+    {
+      "entity_text": "Inès Berrada",
+      "entity_type": "PERSON",
+      "start_pos": 1351,
+      "end_pos": 1363
+    },
+    {
+      "entity_text": "Atelier Brume Films",
+      "entity_type": "ORG",
+      "start_pos": 1388,
+      "end_pos": 1407
+    },
+    {
+      "entity_text": "rue des Ateliers",
+      "entity_type": "LOCATION",
+      "start_pos": 1411,
+      "end_pos": 1427
+    },
+    {
+      "entity_text": "Paris",
+      "entity_type": "LOCATION",
+      "start_pos": 1435,
+      "end_pos": 1440
+    },
+    {
+      "entity_text": "Fiona MacAllan",
+      "entity_type": "PERSON",
+      "start_pos": 1494,
+      "end_pos": 1508
+    },
+    {
+      "entity_text": "Inès Berrada",
+      "entity_type": "PERSON",
+      "start_pos": 1579,
+      "end_pos": 1591
+    },
+    {
+      "entity_text": "Nadia El Khatib",
+      "entity_type": "PERSON",
+      "start_pos": 1628,
+      "end_pos": 1643
+    },
+    {
+      "entity_text": "Rachid McKenna",
+      "entity_type": "PERSON",
+      "start_pos": 1667,
+      "end_pos": 1681
+    },
+    {
+      "entity_text": "Marrakech",
+      "entity_type": "LOCATION",
+      "start_pos": 1736,
+      "end_pos": 1745
+    },
+    {
+      "entity_text": "Inès",
+      "entity_type": "PERSON",
+      "start_pos": 1771,
+      "end_pos": 1775
+    },
+    {
+      "entity_text": "Nadia",
+      "entity_type": "PERSON",
+      "start_pos": 1786,
+      "end_pos": 1791
+    },
+    {
+      "entity_text": "Medina Prod Service",
+      "entity_type": "ORG",
+      "start_pos": 1805,
+      "end_pos": 1824
+    },
+    {
+      "entity_text": "Marrakech",
+      "entity_type": "LOCATION",
+      "start_pos": 1853,
+      "end_pos": 1862
+    },
+    {
+      "entity_text": "bureau communal de Médina Marrakech",
+      "entity_type": "ORG",
+      "start_pos": 1928,
+      "end_pos": 1963
+    },
+    {
+      "entity_text": "Médina Marrakech",
+      "entity_type": "LOCATION",
+      "start_pos": 1947,
+      "end_pos": 1963
+    },
+    {
+      "entity_text": "Nadia",
+      "entity_type": "PERSON",
+      "start_pos": 2006,
+      "end_pos": 2011
+    },
+    {
+      "entity_text": "Rachid",
+      "entity_type": "PERSON",
+      "start_pos": 2068,
+      "end_pos": 2074
+    },
+    {
+      "entity_text": "Casablanca",
+      "entity_type": "LOCATION",
+      "start_pos": 2094,
+      "end_pos": 2104
+    },
+    {
+      "entity_text": "Marrakech",
+      "entity_type": "LOCATION",
+      "start_pos": 2107,
+      "end_pos": 2116
+    },
+    {
+      "entity_text": "Ouarzazate",
+      "entity_type": "LOCATION",
+      "start_pos": 2119,
+      "end_pos": 2129
+    },
+    {
+      "entity_text": "rue des Dunes",
+      "entity_type": "LOCATION",
+      "start_pos": 2185,
+      "end_pos": 2198
+    },
+    {
+      "entity_text": "Tazenakht",
+      "entity_type": "LOCATION",
+      "start_pos": 2279,
+      "end_pos": 2288
+    },
+    {
+      "entity_text": "Atlas Line\nProduction",
+      "entity_type": "ORG",
+      "start_pos": 2338,
+      "end_pos": 2359
+    },
+    {
+      "entity_text": "Riad Safra Bleu",
+      "entity_type": "ORG",
+      "start_pos": 2415,
+      "end_pos": 2430
+    },
+    {
+      "entity_text": "Marrakech",
+      "entity_type": "LOCATION",
+      "start_pos": 2433,
+      "end_pos": 2442
+    },
+    {
+      "entity_text": "Inès",
+      "entity_type": "PERSON",
+      "start_pos": 2458,
+      "end_pos": 2462
+    },
+    {
+      "entity_text": "Rachid",
+      "entity_type": "PERSON",
+      "start_pos": 2464,
+      "end_pos": 2470
+    },
+    {
+      "entity_text": "Camille",
+      "entity_type": "PERSON",
+      "start_pos": 2472,
+      "end_pos": 2479
+    },
+    {
+      "entity_text": "Kasbah du Palmier",
+      "entity_type": "ORG",
+      "start_pos": 2480,
+      "end_pos": 2497
+    },
+    {
+      "entity_text": "Ouarzazate",
+      "entity_type": "LOCATION",
+      "start_pos": 2500,
+      "end_pos": 2510
+    },
+    {
+      "entity_text": "Dar Lalla Nour",
+      "entity_type": "ORG",
+      "start_pos": 2545,
+      "end_pos": 2559
+    },
+    {
+      "entity_text": "Essaouira",
+      "entity_type": "LOCATION",
+      "start_pos": 2562,
+      "end_pos": 2571
+    },
+    {
+      "entity_text": "Fiona MacAllan",
+      "entity_type": "PERSON",
+      "start_pos": 2602,
+      "end_pos": 2616
+    },
+    {
+      "entity_text": "Atlas Line Production Maroc",
+      "entity_type": "ORG",
+      "start_pos": 2639,
+      "end_pos": 2666
+    },
+    {
+      "entity_text": "Maroc",
+      "entity_type": "LOCATION",
+      "start_pos": 2661,
+      "end_pos": 2666
+    },
+    {
+      "entity_text": "rue du Port",
+      "entity_type": "LOCATION",
+      "start_pos": 2673,
+      "end_pos": 2684
+    },
+    {
+      "entity_text": "avenue des Oliviers",
+      "entity_type": "LOCATION",
+      "start_pos": 2688,
+      "end_pos": 2707
+    },
+    {
+      "entity_text": "Casablanca",
+      "entity_type": "LOCATION",
+      "start_pos": 2709,
+      "end_pos": 2719
+    },
+    {
+      "entity_text": "Rachid McKenna",
+      "entity_type": "PERSON",
+      "start_pos": 2746,
+      "end_pos": 2760
+    },
+    {
+      "entity_text": "Fiona",
+      "entity_type": "PERSON",
+      "start_pos": 2779,
+      "end_pos": 2784
+    },
+    {
+      "entity_text": "Inès",
+      "entity_type": "PERSON",
+      "start_pos": 2835,
+      "end_pos": 2839
+    },
+    {
+      "entity_text": "Atelier Brume Films",
+      "entity_type": "ORG",
+      "start_pos": 2843,
+      "end_pos": 2862
+    },
+    {
+      "entity_text": "Paris",
+      "entity_type": "LOCATION",
+      "start_pos": 2894,
+      "end_pos": 2899
+    },
+    {
+      "entity_text": "Maëlle Kermadec",
+      "entity_type": "PERSON",
+      "start_pos": 2926,
+      "end_pos": 2941
+    },
+    {
+      "entity_text": "Maroc",
+      "entity_type": "LOCATION",
+      "start_pos": 2960,
+      "end_pos": 2965
+    },
+    {
+      "entity_text": "Camille",
+      "entity_type": "PERSON",
+      "start_pos": 2983,
+      "end_pos": 2990
+    },
+    {
+      "entity_text": "Air France",
+      "entity_type": "ORG",
+      "start_pos": 3008,
+      "end_pos": 3018
+    },
+    {
+      "entity_text": "Studio Canal Docs",
+      "entity_type": "ORG",
+      "start_pos": 3069,
+      "end_pos": 3086
+    },
+    {
+      "entity_text": "Marrakech",
+      "entity_type": "LOCATION",
+      "start_pos": 3109,
+      "end_pos": 3118
+    },
+    {
+      "entity_text": "Atlas Line Production",
+      "entity_type": "ORG",
+      "start_pos": 3249,
+      "end_pos": 3270
+    },
+    {
+      "entity_text": "Al Amal Tissage",
+      "entity_type": "ORG",
+      "start_pos": 3391,
+      "end_pos": 3406
+    },
+    {
+      "entity_text": "Essaouira",
+      "entity_type": "LOCATION",
+      "start_pos": 3435,
+      "end_pos": 3444
+    },
+    {
+      "entity_text": "Nadia",
+      "entity_type": "PERSON",
+      "start_pos": 3473,
+      "end_pos": 3478
+    },
+    {
+      "entity_text": "Maroc\n> Telecom",
+      "entity_type": "ORG",
+      "start_pos": 3533,
+      "end_pos": 3548
+    },
+    {
+      "entity_text": "Casablanca",
+      "entity_type": "LOCATION",
+      "start_pos": 3565,
+      "end_pos": 3575
+    },
+    {
+      "entity_text": "Rachid",
+      "entity_type": "PERSON",
+      "start_pos": 3602,
+      "end_pos": 3608
+    },
+    {
+      "entity_text": "Nadia El Khatib",
+      "entity_type": "PERSON",
+      "start_pos": 3616,
+      "end_pos": 3631
+    },
+    {
+      "entity_text": "Rachid McKenna",
+      "entity_type": "PERSON",
+      "start_pos": 3658,
+      "end_pos": 3672
+    },
+    {
+      "entity_text": "Fiona MacAllan",
+      "entity_type": "PERSON",
+      "start_pos": 3711,
+      "end_pos": 3725
+    },
+    {
+      "entity_text": "Brume",
+      "entity_type": "ORG",
+      "start_pos": 3811,
+      "end_pos": 3816
+    },
+    {
+      "entity_text": "Rachid",
+      "entity_type": "PERSON",
+      "start_pos": 3823,
+      "end_pos": 3829
+    },
+    {
+      "entity_text": "Salma",
+      "entity_type": "PERSON",
+      "start_pos": 3859,
+      "end_pos": 3864
+    },
+    {
+      "entity_text": "Ouarzazate",
+      "entity_type": "LOCATION",
+      "start_pos": 3958,
+      "end_pos": 3968
+    },
+    {
+      "entity_text": "Samir Laafiri",
+      "entity_type": "PERSON",
+      "start_pos": 3970,
+      "end_pos": 3983
+    },
+    {
+      "entity_text": "Nadia",
+      "entity_type": "PERSON",
+      "start_pos": 4035,
+      "end_pos": 4040
+    },
+    {
+      "entity_text": "Salma Oukacha",
+      "entity_type": "PERSON",
+      "start_pos": 4073,
+      "end_pos": 4086
+    },
+    {
+      "entity_text": "Nadia El Khatib",
+      "entity_type": "PERSON",
+      "start_pos": 4141,
+      "end_pos": 4156
+    },
+    {
+      "entity_text": "Brume",
+      "entity_type": "ORG",
+      "start_pos": 4202,
+      "end_pos": 4207
+    },
+    {
+      "entity_text": "Nadia",
+      "entity_type": "PERSON",
+      "start_pos": 4217,
+      "end_pos": 4222
+    },
+    {
+      "entity_text": "Medina Prod Service",
+      "entity_type": "ORG",
+      "start_pos": 4329,
+      "end_pos": 4348
+    },
+    {
+      "entity_text": "Marrakech",
+      "entity_type": "LOCATION",
+      "start_pos": 4350,
+      "end_pos": 4359
+    },
+    {
+      "entity_text": "Atlas Line Production Maroc",
+      "entity_type": "ORG",
+      "start_pos": 4391,
+      "end_pos": 4418
+    },
+    {
+      "entity_text": "Maroc",
+      "entity_type": "LOCATION",
+      "start_pos": 4413,
+      "end_pos": 4418
+    },
+    {
+      "entity_text": "Casablanca",
+      "entity_type": "LOCATION",
+      "start_pos": 4420,
+      "end_pos": 4430
+    },
+    {
+      "entity_text": "Tarek Mouhli Auto",
+      "entity_type": "ORG",
+      "start_pos": 4466,
+      "end_pos": 4483
+    },
+    {
+      "entity_text": "Marrakech",
+      "entity_type": "LOCATION",
+      "start_pos": 4485,
+      "end_pos": 4494
+    },
+    {
+      "entity_text": "Ouarzazate",
+      "entity_type": "LOCATION",
+      "start_pos": 4495,
+      "end_pos": 4505
+    },
+    {
+      "entity_text": "Ilyas Benomar",
+      "entity_type": "PERSON",
+      "start_pos": 4532,
+      "end_pos": 4545
+    },
+    {
+      "entity_text": "Marrakech",
+      "entity_type": "LOCATION",
+      "start_pos": 4547,
+      "end_pos": 4556
+    },
+    {
+      "entity_text": "Comptoir des Épices Sud",
+      "entity_type": "ORG",
+      "start_pos": 4586,
+      "end_pos": 4609
+    },
+    {
+      "entity_text": "Sud",
+      "entity_type": "LOCATION",
+      "start_pos": 4606,
+      "end_pos": 4609
+    },
+    {
+      "entity_text": "Essaouira",
+      "entity_type": "LOCATION",
+      "start_pos": 4611,
+      "end_pos": 4620
+    },
+    {
+      "entity_text": "Fiona MacAllan",
+      "entity_type": "PERSON",
+      "start_pos": 4651,
+      "end_pos": 4665
+    },
+    {
+      "entity_text": "McKenna",
+      "entity_type": "PERSON",
+      "start_pos": 4730,
+      "end_pos": 4737
+    },
+    {
+      "entity_text": "Marrakech",
+      "entity_type": "LOCATION",
+      "start_pos": 4791,
+      "end_pos": 4800
+    },
+    {
+      "entity_text": "Suisse",
+      "entity_type": "LOCATION",
+      "start_pos": 4832,
+      "end_pos": 4838
+    },
+    {
+      "entity_text": "Léman Média Suisse",
+      "entity_type": "ORG",
+      "start_pos": 4866,
+      "end_pos": 4884
+    },
+    {
+      "entity_text": "Suisse",
+      "entity_type": "LOCATION",
+      "start_pos": 4878,
+      "end_pos": 4884
+    },
+    {
+      "entity_text": "Salma",
+      "entity_type": "PERSON",
+      "start_pos": 4970,
+      "end_pos": 4975
+    }
+  ]
+}

@@ -1,0 +1,713 @@
+{
+  "document_name": "fe_27.txt",
+  "entities": [
+    {
+      "entity_text": "ARBORIAL INGÉNIERIE",
+      "entity_type": "ORG",
+      "start_pos": 0,
+      "end_pos": 19
+    },
+    {
+      "entity_text": "Ker-Lann",
+      "entity_type": "LOCATION",
+      "start_pos": 132,
+      "end_pos": 140
+    },
+    {
+      "entity_text": "Rennes",
+      "entity_type": "LOCATION",
+      "start_pos": 142,
+      "end_pos": 148
+    },
+    {
+      "entity_text": "Ille-et-Vilaine",
+      "entity_type": "LOCATION",
+      "start_pos": 150,
+      "end_pos": 165
+    },
+    {
+      "entity_text": "rue des Ateliers",
+      "entity_type": "LOCATION",
+      "start_pos": 257,
+      "end_pos": 273
+    },
+    {
+      "entity_text": "Rennes",
+      "entity_type": "LOCATION",
+      "start_pos": 275,
+      "end_pos": 281
+    },
+    {
+      "entity_text": "Élodie Marrec",
+      "entity_type": "PERSON",
+      "start_pos": 294,
+      "end_pos": 307
+    },
+    {
+      "entity_text": "Arborial Ingénierie",
+      "entity_type": "ORG",
+      "start_pos": 314,
+      "end_pos": 333
+    },
+    {
+      "entity_text": "SITERMA Énergies",
+      "entity_type": "ORG",
+      "start_pos": 388,
+      "end_pos": 404
+    },
+    {
+      "entity_text": "Métropole de Rennes",
+      "entity_type": "ORG",
+      "start_pos": 409,
+      "end_pos": 428
+    },
+    {
+      "entity_text": "Rennes",
+      "entity_type": "LOCATION",
+      "start_pos": 422,
+      "end_pos": 428
+    },
+    {
+      "entity_text": "Clara SOARES",
+      "entity_type": "PERSON",
+      "start_pos": 638,
+      "end_pos": 650
+    },
+    {
+      "entity_text": "Irène Vairon",
+      "entity_type": "PERSON",
+      "start_pos": 781,
+      "end_pos": 793
+    },
+    {
+      "entity_text": "Arborial Ingénierie",
+      "entity_type": "ORG",
+      "start_pos": 809,
+      "end_pos": 828
+    },
+    {
+      "entity_text": "Malik Benfodil",
+      "entity_type": "PERSON",
+      "start_pos": 854,
+      "end_pos": 868
+    },
+    {
+      "entity_text": "SITERMA Énergies",
+      "entity_type": "ORG",
+      "start_pos": 882,
+      "end_pos": 898
+    },
+    {
+      "entity_text": "Clara SOARES",
+      "entity_type": "PERSON",
+      "start_pos": 927,
+      "end_pos": 939
+    },
+    {
+      "entity_text": "Métropole de Rennes",
+      "entity_type": "ORG",
+      "start_pos": 955,
+      "end_pos": 974
+    },
+    {
+      "entity_text": "Rennes",
+      "entity_type": "LOCATION",
+      "start_pos": 968,
+      "end_pos": 974
+    },
+    {
+      "entity_text": "Junho Park",
+      "entity_type": "PERSON",
+      "start_pos": 1000,
+      "end_pos": 1010
+    },
+    {
+      "entity_text": "Kalyx Mesures",
+      "entity_type": "ORG",
+      "start_pos": 1028,
+      "end_pos": 1041
+    },
+    {
+      "entity_text": "Sofia Darzi",
+      "entity_type": "PERSON",
+      "start_pos": 1075,
+      "end_pos": 1086
+    },
+    {
+      "entity_text": "Atelier Nord-Est",
+      "entity_type": "ORG",
+      "start_pos": 1103,
+      "end_pos": 1119
+    },
+    {
+      "entity_text": "Émilie Chauvet",
+      "entity_type": "PERSON",
+      "start_pos": 1148,
+      "end_pos": 1162
+    },
+    {
+      "entity_text": "Bureau Veritas",
+      "entity_type": "ORG",
+      "start_pos": 1176,
+      "end_pos": 1190
+    },
+    {
+      "entity_text": "Romain Kerguelen",
+      "entity_type": "PERSON",
+      "start_pos": 1221,
+      "end_pos": 1237
+    },
+    {
+      "entity_text": "Enedis",
+      "entity_type": "ORG",
+      "start_pos": 1249,
+      "end_pos": 1255
+    },
+    {
+      "entity_text": "Nadia Rami",
+      "entity_type": "PERSON",
+      "start_pos": 1294,
+      "end_pos": 1304
+    },
+    {
+      "entity_text": "Arborial Ingénierie",
+      "entity_type": "ORG",
+      "start_pos": 1322,
+      "end_pos": 1341
+    },
+    {
+      "entity_text": "Tobias Keller",
+      "entity_type": "PERSON",
+      "start_pos": 1367,
+      "end_pos": 1380
+    },
+    {
+      "entity_text": "CEREMA",
+      "entity_type": "ORG",
+      "start_pos": 1395,
+      "end_pos": 1401
+    },
+    {
+      "entity_text": "Émilie Chauvet",
+      "entity_type": "PERSON",
+      "start_pos": 1451,
+      "end_pos": 1465
+    },
+    {
+      "entity_text": "CEREMA",
+      "entity_type": "ORG",
+      "start_pos": 1528,
+      "end_pos": 1534
+    },
+    {
+      "entity_text": "Arborial Ingénierie",
+      "entity_type": "ORG",
+      "start_pos": 1640,
+      "end_pos": 1659
+    },
+    {
+      "entity_text": "Irène Vairon",
+      "entity_type": "PERSON",
+      "start_pos": 1726,
+      "end_pos": 1738
+    },
+    {
+      "entity_text": "SITERMA\nÉnergies",
+      "entity_type": "ORG",
+      "start_pos": 1782,
+      "end_pos": 1798
+    },
+    {
+      "entity_text": "DREAL Bretagne",
+      "entity_type": "ORG",
+      "start_pos": 1856,
+      "end_pos": 1870
+    },
+    {
+      "entity_text": "Bretagne",
+      "entity_type": "LOCATION",
+      "start_pos": 1862,
+      "end_pos": 1870
+    },
+    {
+      "entity_text": "Rennes",
+      "entity_type": "LOCATION",
+      "start_pos": 1940,
+      "end_pos": 1946
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 1950,
+      "end_pos": 1956
+    },
+    {
+      "entity_text": "Ker-Lann",
+      "entity_type": "LOCATION",
+      "start_pos": 2040,
+      "end_pos": 2048
+    },
+    {
+      "entity_text": "Malik\nBenfodil",
+      "entity_type": "PERSON",
+      "start_pos": 2050,
+      "end_pos": 2064
+    },
+    {
+      "entity_text": "SITERMA Énergies",
+      "entity_type": "ORG",
+      "start_pos": 2093,
+      "end_pos": 2109
+    },
+    {
+      "entity_text": "Clara SOARES",
+      "entity_type": "PERSON",
+      "start_pos": 2196,
+      "end_pos": 2208
+    },
+    {
+      "entity_text": "Métropole de Rennes",
+      "entity_type": "ORG",
+      "start_pos": 2224,
+      "end_pos": 2243
+    },
+    {
+      "entity_text": "Rennes",
+      "entity_type": "LOCATION",
+      "start_pos": 2237,
+      "end_pos": 2243
+    },
+    {
+      "entity_text": "Nadia Rami",
+      "entity_type": "PERSON",
+      "start_pos": 2362,
+      "end_pos": 2372
+    },
+    {
+      "entity_text": "Bretagne",
+      "entity_type": "LOCATION",
+      "start_pos": 2441,
+      "end_pos": 2449
+    },
+    {
+      "entity_text": "Météo-France",
+      "entity_type": "ORG",
+      "start_pos": 2467,
+      "end_pos": 2479
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 2473,
+      "end_pos": 2479
+    },
+    {
+      "entity_text": "Bruz",
+      "entity_type": "LOCATION",
+      "start_pos": 2535,
+      "end_pos": 2539
+    },
+    {
+      "entity_text": "Romain Kerguelen",
+      "entity_type": "PERSON",
+      "start_pos": 2692,
+      "end_pos": 2708
+    },
+    {
+      "entity_text": "Enedis",
+      "entity_type": "ORG",
+      "start_pos": 2737,
+      "end_pos": 2743
+    },
+    {
+      "entity_text": "Tobias Keller",
+      "entity_type": "PERSON",
+      "start_pos": 2801,
+      "end_pos": 2814
+    },
+    {
+      "entity_text": "Rennes",
+      "entity_type": "LOCATION",
+      "start_pos": 2844,
+      "end_pos": 2850
+    },
+    {
+      "entity_text": "Noyal-Châtillon",
+      "entity_type": "LOCATION",
+      "start_pos": 2864,
+      "end_pos": 2879
+    },
+    {
+      "entity_text": "Junho Park",
+      "entity_type": "PERSON",
+      "start_pos": 2898,
+      "end_pos": 2908
+    },
+    {
+      "entity_text": "Kalyx Mesures",
+      "entity_type": "ORG",
+      "start_pos": 2951,
+      "end_pos": 2964
+    },
+    {
+      "entity_text": "Sofia Darzi",
+      "entity_type": "PERSON",
+      "start_pos": 3011,
+      "end_pos": 3022
+    },
+    {
+      "entity_text": "Atelier Nord-Est",
+      "entity_type": "ORG",
+      "start_pos": 3038,
+      "end_pos": 3054
+    },
+    {
+      "entity_text": "Irène Vairon",
+      "entity_type": "PERSON",
+      "start_pos": 3131,
+      "end_pos": 3143
+    },
+    {
+      "entity_text": "Bureau Veritas",
+      "entity_type": "ORG",
+      "start_pos": 3181,
+      "end_pos": 3195
+    },
+    {
+      "entity_text": "Arborial Ingénierie",
+      "entity_type": "ORG",
+      "start_pos": 3234,
+      "end_pos": 3253
+    },
+    {
+      "entity_text": "Arborial Ingénierie",
+      "entity_type": "ORG",
+      "start_pos": 3327,
+      "end_pos": 3346
+    },
+    {
+      "entity_text": "Malik",
+      "entity_type": "PERSON",
+      "start_pos": 3376,
+      "end_pos": 3381
+    },
+    {
+      "entity_text": "SITERMA Énergies",
+      "entity_type": "ORG",
+      "start_pos": 3470,
+      "end_pos": 3486
+    },
+    {
+      "entity_text": "Clara",
+      "entity_type": "PERSON",
+      "start_pos": 3488,
+      "end_pos": 3493
+    },
+    {
+      "entity_text": "Métropole de Rennes",
+      "entity_type": "ORG",
+      "start_pos": 3535,
+      "end_pos": 3554
+    },
+    {
+      "entity_text": "Rennes",
+      "entity_type": "LOCATION",
+      "start_pos": 3548,
+      "end_pos": 3554
+    },
+    {
+      "entity_text": "Romain Kerguelen",
+      "entity_type": "PERSON",
+      "start_pos": 3651,
+      "end_pos": 3667
+    },
+    {
+      "entity_text": "Enedis",
+      "entity_type": "ORG",
+      "start_pos": 3736,
+      "end_pos": 3742
+    },
+    {
+      "entity_text": "Irène",
+      "entity_type": "PERSON",
+      "start_pos": 3834,
+      "end_pos": 3839
+    },
+    {
+      "entity_text": "Nadia",
+      "entity_type": "PERSON",
+      "start_pos": 3850,
+      "end_pos": 3855
+    },
+    {
+      "entity_text": "Sofia Darzi",
+      "entity_type": "PERSON",
+      "start_pos": 3923,
+      "end_pos": 3934
+    },
+    {
+      "entity_text": "Bruz",
+      "entity_type": "LOCATION",
+      "start_pos": 4046,
+      "end_pos": 4050
+    },
+    {
+      "entity_text": "Tobias Keller",
+      "entity_type": "PERSON",
+      "start_pos": 4090,
+      "end_pos": 4103
+    },
+    {
+      "entity_text": "Junho Park",
+      "entity_type": "PERSON",
+      "start_pos": 4174,
+      "end_pos": 4184
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 4212,
+      "end_pos": 4218
+    },
+    {
+      "entity_text": "Rennes",
+      "entity_type": "LOCATION",
+      "start_pos": 4491,
+      "end_pos": 4497
+    },
+    {
+      "entity_text": "Ker-Lann",
+      "entity_type": "LOCATION",
+      "start_pos": 4554,
+      "end_pos": 4562
+    },
+    {
+      "entity_text": "Arborial Ingénierie",
+      "entity_type": "ORG",
+      "start_pos": 4566,
+      "end_pos": 4585
+    },
+    {
+      "entity_text": "SITERMA Énergies",
+      "entity_type": "ORG",
+      "start_pos": 4637,
+      "end_pos": 4653
+    },
+    {
+      "entity_text": "Malik Benfodil",
+      "entity_type": "PERSON",
+      "start_pos": 4660,
+      "end_pos": 4674
+    },
+    {
+      "entity_text": "Métropole de Rennes",
+      "entity_type": "ORG",
+      "start_pos": 4705,
+      "end_pos": 4724
+    },
+    {
+      "entity_text": "Rennes",
+      "entity_type": "LOCATION",
+      "start_pos": 4718,
+      "end_pos": 4724
+    },
+    {
+      "entity_text": "Agence de l'eau Loire-Bretagne",
+      "entity_type": "ORG",
+      "start_pos": 4787,
+      "end_pos": 4817
+    },
+    {
+      "entity_text": "Loire-Bretagne",
+      "entity_type": "LOCATION",
+      "start_pos": 4803,
+      "end_pos": 4817
+    },
+    {
+      "entity_text": "Émilie Chauvet",
+      "entity_type": "PERSON",
+      "start_pos": 4841,
+      "end_pos": 4855
+    },
+    {
+      "entity_text": "Bureau Veritas",
+      "entity_type": "ORG",
+      "start_pos": 4874,
+      "end_pos": 4888
+    },
+    {
+      "entity_text": "DREAL\nBretagne",
+      "entity_type": "ORG",
+      "start_pos": 4972,
+      "end_pos": 4986
+    },
+    {
+      "entity_text": "Bretagne",
+      "entity_type": "LOCATION",
+      "start_pos": 4978,
+      "end_pos": 4986
+    },
+    {
+      "entity_text": "Clara SOARES",
+      "entity_type": "PERSON",
+      "start_pos": 5057,
+      "end_pos": 5069
+    },
+    {
+      "entity_text": "préfecture\nd'Ille-et-Vilaine",
+      "entity_type": "ORG",
+      "start_pos": 5102,
+      "end_pos": 5130
+    },
+    {
+      "entity_text": "Ille-et-Vilaine",
+      "entity_type": "LOCATION",
+      "start_pos": 5115,
+      "end_pos": 5130
+    },
+    {
+      "entity_text": "Élodie Marrec",
+      "entity_type": "PERSON",
+      "start_pos": 5301,
+      "end_pos": 5314
+    },
+    {
+      "entity_text": "Irène",
+      "entity_type": "PERSON",
+      "start_pos": 5341,
+      "end_pos": 5346
+    },
+    {
+      "entity_text": "Malik",
+      "entity_type": "PERSON",
+      "start_pos": 5348,
+      "end_pos": 5353
+    },
+    {
+      "entity_text": "Clara",
+      "entity_type": "PERSON",
+      "start_pos": 5355,
+      "end_pos": 5360
+    },
+    {
+      "entity_text": "Sofia",
+      "entity_type": "PERSON",
+      "start_pos": 5362,
+      "end_pos": 5367
+    },
+    {
+      "entity_text": "Nadia",
+      "entity_type": "PERSON",
+      "start_pos": 5369,
+      "end_pos": 5374
+    },
+    {
+      "entity_text": "Romain",
+      "entity_type": "PERSON",
+      "start_pos": 5376,
+      "end_pos": 5382
+    },
+    {
+      "entity_text": "DREAL Bretagne",
+      "entity_type": "ORG",
+      "start_pos": 5452,
+      "end_pos": 5466
+    },
+    {
+      "entity_text": "Bretagne",
+      "entity_type": "LOCATION",
+      "start_pos": 5458,
+      "end_pos": 5466
+    },
+    {
+      "entity_text": "CEREMA",
+      "entity_type": "ORG",
+      "start_pos": 5469,
+      "end_pos": 5475
+    },
+    {
+      "entity_text": "Irène Vairon",
+      "entity_type": "PERSON",
+      "start_pos": 5490,
+      "end_pos": 5502
+    },
+    {
+      "entity_text": "Arborial Ingénierie",
+      "entity_type": "ORG",
+      "start_pos": 5505,
+      "end_pos": 5524
+    },
+    {
+      "entity_text": "rue des Ateliers",
+      "entity_type": "LOCATION",
+      "start_pos": 5530,
+      "end_pos": 5546
+    },
+    {
+      "entity_text": "Rennes",
+      "entity_type": "LOCATION",
+      "start_pos": 5554,
+      "end_pos": 5560
+    },
+    {
+      "entity_text": "Malik Benfodil",
+      "entity_type": "PERSON",
+      "start_pos": 5561,
+      "end_pos": 5575
+    },
+    {
+      "entity_text": "SITERMA Énergies",
+      "entity_type": "ORG",
+      "start_pos": 5578,
+      "end_pos": 5594
+    },
+    {
+      "entity_text": "avenue des Chênes",
+      "entity_type": "LOCATION",
+      "start_pos": 5599,
+      "end_pos": 5616
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 5624,
+      "end_pos": 5628
+    },
+    {
+      "entity_text": "Clara SOARES",
+      "entity_type": "PERSON",
+      "start_pos": 5629,
+      "end_pos": 5641
+    },
+    {
+      "entity_text": "Métropole de Rennes",
+      "entity_type": "ORG",
+      "start_pos": 5644,
+      "end_pos": 5663
+    },
+    {
+      "entity_text": "Rennes",
+      "entity_type": "LOCATION",
+      "start_pos": 5657,
+      "end_pos": 5663
+    },
+    {
+      "entity_text": "Rennes",
+      "entity_type": "LOCATION",
+      "start_pos": 5666,
+      "end_pos": 5672
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 5674,
+      "end_pos": 5680
+    },
+    {
+      "entity_text": "Élodie Marrec",
+      "entity_type": "PERSON",
+      "start_pos": 5681,
+      "end_pos": 5694
+    }
+  ]
+}

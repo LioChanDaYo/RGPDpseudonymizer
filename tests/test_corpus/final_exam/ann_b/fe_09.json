@@ -1,0 +1,419 @@
+{
+  "document_name": "fe_09.txt",
+  "entities": [
+    {
+      "entity_text": "SAMU 44",
+      "entity_type": "ORG",
+      "start_pos": 155,
+      "end_pos": 162
+    },
+    {
+      "entity_text": "ARS Pays de la Loire",
+      "entity_type": "ORG",
+      "start_pos": 164,
+      "end_pos": 184
+    },
+    {
+      "entity_text": "Pays de la Loire",
+      "entity_type": "LOCATION",
+      "start_pos": 168,
+      "end_pos": 184
+    },
+    {
+      "entity_text": "Claire",
+      "entity_type": "PERSON",
+      "start_pos": 289,
+      "end_pos": 295
+    },
+    {
+      "entity_text": "Claire BERNAT",
+      "entity_type": "PERSON",
+      "start_pos": 304,
+      "end_pos": 317
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 383,
+      "end_pos": 389
+    },
+    {
+      "entity_text": "Saint-Herblain",
+      "entity_type": "LOCATION",
+      "start_pos": 393,
+      "end_pos": 407
+    },
+    {
+      "entity_text": "Thomas LE GALL",
+      "entity_type": "PERSON",
+      "start_pos": 472,
+      "end_pos": 486
+    },
+    {
+      "entity_text": "Samira KHELIFA",
+      "entity_type": "PERSON",
+      "start_pos": 500,
+      "end_pos": 514
+    },
+    {
+      "entity_text": "Hôpital des Dunes",
+      "entity_type": "ORG",
+      "start_pos": 631,
+      "end_pos": 648
+    },
+    {
+      "entity_text": "Clinique Saint-Estuaire",
+      "entity_type": "ORG",
+      "start_pos": 659,
+      "end_pos": 682
+    },
+    {
+      "entity_text": "Maël RIVIERE",
+      "entity_type": "PERSON",
+      "start_pos": 696,
+      "end_pos": 708
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 1194,
+      "end_pos": 1200
+    },
+    {
+      "entity_text": "Lise MARCADE",
+      "entity_type": "PERSON",
+      "start_pos": 1206,
+      "end_pos": 1218
+    },
+    {
+      "entity_text": "Saint-Herblain",
+      "entity_type": "LOCATION",
+      "start_pos": 1278,
+      "end_pos": 1292
+    },
+    {
+      "entity_text": "Ahmed NAJAR",
+      "entity_type": "PERSON",
+      "start_pos": 1298,
+      "end_pos": 1309
+    },
+    {
+      "entity_text": "Rezé",
+      "entity_type": "LOCATION",
+      "start_pos": 1363,
+      "end_pos": 1367
+    },
+    {
+      "entity_text": "Océane VALLIN",
+      "entity_type": "PERSON",
+      "start_pos": 1374,
+      "end_pos": 1387
+    },
+    {
+      "entity_text": "Saint-Nazaire",
+      "entity_type": "LOCATION",
+      "start_pos": 1440,
+      "end_pos": 1453
+    },
+    {
+      "entity_text": "Hugo MAREK",
+      "entity_type": "PERSON",
+      "start_pos": 1459,
+      "end_pos": 1469
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 1529,
+      "end_pos": 1535
+    },
+    {
+      "entity_text": "noah filippi",
+      "entity_type": "PERSON",
+      "start_pos": 1541,
+      "end_pos": 1553
+    },
+    {
+      "entity_text": "La Baule",
+      "entity_type": "LOCATION",
+      "start_pos": 1611,
+      "end_pos": 1619
+    },
+    {
+      "entity_text": "Jeanne VALLET",
+      "entity_type": "PERSON",
+      "start_pos": 1625,
+      "end_pos": 1638
+    },
+    {
+      "entity_text": "Vannes",
+      "entity_type": "LOCATION",
+      "start_pos": 1682,
+      "end_pos": 1688
+    },
+    {
+      "entity_text": "Pontchâteau",
+      "entity_type": "LOCATION",
+      "start_pos": 1703,
+      "end_pos": 1714
+    },
+    {
+      "entity_text": "Agnès ROUBAUD",
+      "entity_type": "PERSON",
+      "start_pos": 1721,
+      "end_pos": 1734
+    },
+    {
+      "entity_text": "Agnès",
+      "entity_type": "PERSON",
+      "start_pos": 1791,
+      "end_pos": 1796
+    },
+    {
+      "entity_text": "Roubaud",
+      "entity_type": "PERSON",
+      "start_pos": 1804,
+      "end_pos": 1811
+    },
+    {
+      "entity_text": "Hugo MAREK",
+      "entity_type": "PERSON",
+      "start_pos": 1990,
+      "end_pos": 2000
+    },
+    {
+      "entity_text": "Samira KHELIFA",
+      "entity_type": "PERSON",
+      "start_pos": 2074,
+      "end_pos": 2088
+    },
+    {
+      "entity_text": "Groupe Hospitalier Rives et Brumes",
+      "entity_type": "ORG",
+      "start_pos": 2182,
+      "end_pos": 2216
+    },
+    {
+      "entity_text": "Clinique Saint-Estuaire",
+      "entity_type": "ORG",
+      "start_pos": 2232,
+      "end_pos": 2255
+    },
+    {
+      "entity_text": "RIVIERE",
+      "entity_type": "PERSON",
+      "start_pos": 2620,
+      "end_pos": 2627
+    },
+    {
+      "entity_text": "Rennes",
+      "entity_type": "LOCATION",
+      "start_pos": 2665,
+      "end_pos": 2671
+    },
+    {
+      "entity_text": "Nadia BENSAID",
+      "entity_type": "PERSON",
+      "start_pos": 2748,
+      "end_pos": 2761
+    },
+    {
+      "entity_text": "ARS Pays de la Loire",
+      "entity_type": "ORG",
+      "start_pos": 2763,
+      "end_pos": 2783
+    },
+    {
+      "entity_text": "Pays de la Loire",
+      "entity_type": "LOCATION",
+      "start_pos": 2767,
+      "end_pos": 2783
+    },
+    {
+      "entity_text": "SAMU 44",
+      "entity_type": "ORG",
+      "start_pos": 2856,
+      "end_pos": 2863
+    },
+    {
+      "entity_text": "Olivier CHAN",
+      "entity_type": "PERSON",
+      "start_pos": 2900,
+      "end_pos": 2912
+    },
+    {
+      "entity_text": "Saint-Nazaire",
+      "entity_type": "LOCATION",
+      "start_pos": 3025,
+      "end_pos": 3038
+    },
+    {
+      "entity_text": "Saint-Herblain",
+      "entity_type": "LOCATION",
+      "start_pos": 3115,
+      "end_pos": 3129
+    },
+    {
+      "entity_text": "Sacha PELTIER",
+      "entity_type": "PERSON",
+      "start_pos": 3154,
+      "end_pos": 3167
+    },
+    {
+      "entity_text": "Bruxelles",
+      "entity_type": "LOCATION",
+      "start_pos": 3220,
+      "end_pos": 3229
+    },
+    {
+      "entity_text": "Nordvia Services",
+      "entity_type": "ORG",
+      "start_pos": 3312,
+      "end_pos": 3328
+    },
+    {
+      "entity_text": "Clinique Saint-Estuaire",
+      "entity_type": "ORG",
+      "start_pos": 3359,
+      "end_pos": 3382
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 3445,
+      "end_pos": 3451
+    },
+    {
+      "entity_text": "Rezé",
+      "entity_type": "LOCATION",
+      "start_pos": 3500,
+      "end_pos": 3504
+    },
+    {
+      "entity_text": "Olivier CHAN",
+      "entity_type": "PERSON",
+      "start_pos": 3758,
+      "end_pos": 3770
+    },
+    {
+      "entity_text": "Samira KHELIFA",
+      "entity_type": "PERSON",
+      "start_pos": 3781,
+      "end_pos": 3795
+    },
+    {
+      "entity_text": "Thomas LE GALL",
+      "entity_type": "PERSON",
+      "start_pos": 3806,
+      "end_pos": 3820
+    },
+    {
+      "entity_text": "Karim DOUCET",
+      "entity_type": "PERSON",
+      "start_pos": 3831,
+      "end_pos": 3843
+    },
+    {
+      "entity_text": "Maël RIVIERE",
+      "entity_type": "PERSON",
+      "start_pos": 3901,
+      "end_pos": 3913
+    },
+    {
+      "entity_text": "Agnès ROUBAUD",
+      "entity_type": "PERSON",
+      "start_pos": 3924,
+      "end_pos": 3937
+    },
+    {
+      "entity_text": "Océane VALLIN",
+      "entity_type": "PERSON",
+      "start_pos": 3948,
+      "end_pos": 3961
+    },
+    {
+      "entity_text": "Karim",
+      "entity_type": "PERSON",
+      "start_pos": 4140,
+      "end_pos": 4145
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 4195,
+      "end_pos": 4201
+    },
+    {
+      "entity_text": "Saint-Herblain",
+      "entity_type": "LOCATION",
+      "start_pos": 4203,
+      "end_pos": 4217
+    },
+    {
+      "entity_text": "Saint-Nazaire",
+      "entity_type": "LOCATION",
+      "start_pos": 4221,
+      "end_pos": 4234
+    },
+    {
+      "entity_text": "Thomas",
+      "entity_type": "PERSON",
+      "start_pos": 4273,
+      "end_pos": 4279
+    },
+    {
+      "entity_text": "Groupe Hospitalier Rives et Brumes",
+      "entity_type": "ORG",
+      "start_pos": 4356,
+      "end_pos": 4390
+    },
+    {
+      "entity_text": "Clinique Saint-Estuaire",
+      "entity_type": "ORG",
+      "start_pos": 4392,
+      "end_pos": 4415
+    },
+    {
+      "entity_text": "Nordvia Services",
+      "entity_type": "ORG",
+      "start_pos": 4419,
+      "end_pos": 4435
+    },
+    {
+      "entity_text": "CHU de Nantes",
+      "entity_type": "ORG",
+      "start_pos": 4451,
+      "end_pos": 4464
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 4458,
+      "end_pos": 4464
+    },
+    {
+      "entity_text": "Elise MORNAY",
+      "entity_type": "PERSON",
+      "start_pos": 4561,
+      "end_pos": 4573
+    },
+    {
+      "entity_text": "GROUPE HOSPITALIER RIVES ET BRUMES",
+      "entity_type": "ORG",
+      "start_pos": 4602,
+      "end_pos": 4636
+    },
+    {
+      "entity_text": "rue des Vignes Claires",
+      "entity_type": "LOCATION",
+      "start_pos": 4640,
+      "end_pos": 4662
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 4670,
+      "end_pos": 4676
+    }
+  ]
+}

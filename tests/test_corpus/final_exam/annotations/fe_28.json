@@ -1,0 +1,533 @@
+{
+  "document_name": "fe_28.txt",
+  "entities": [
+    {
+      "entity_text": "TRANSBORDE OUEST LOGISTIQUE",
+      "entity_type": "ORG",
+      "start_pos": 0,
+      "end_pos": 27
+    },
+    {
+      "entity_text": "rue des Entrepots",
+      "entity_type": "LOCATION",
+      "start_pos": 73,
+      "end_pos": 90
+    },
+    {
+      "entity_text": "Rennes",
+      "entity_type": "LOCATION",
+      "start_pos": 98,
+      "end_pos": 104
+    },
+    {
+      "entity_text": "Nord-Rive Fret",
+      "entity_type": "ORG",
+      "start_pos": 257,
+      "end_pos": 271
+    },
+    {
+      "entity_text": "Transborde Ouest Logistique",
+      "entity_type": "ORG",
+      "start_pos": 383,
+      "end_pos": 410
+    },
+    {
+      "entity_text": "Ouest",
+      "entity_type": "LOCATION",
+      "start_pos": 394,
+      "end_pos": 399
+    },
+    {
+      "entity_text": "Rennes",
+      "entity_type": "LOCATION",
+      "start_pos": 445,
+      "end_pos": 451
+    },
+    {
+      "entity_text": "Lorient",
+      "entity_type": "LOCATION",
+      "start_pos": 453,
+      "end_pos": 460
+    },
+    {
+      "entity_text": "Vannes",
+      "entity_type": "LOCATION",
+      "start_pos": 462,
+      "end_pos": 468
+    },
+    {
+      "entity_text": "Saint-Brieuc",
+      "entity_type": "LOCATION",
+      "start_pos": 472,
+      "end_pos": 484
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 525,
+      "end_pos": 531
+    },
+    {
+      "entity_text": "Brest",
+      "entity_type": "LOCATION",
+      "start_pos": 535,
+      "end_pos": 540
+    },
+    {
+      "entity_text": "Solenne GARNIER",
+      "entity_type": "PERSON",
+      "start_pos": 665,
+      "end_pos": 680
+    },
+    {
+      "entity_text": "Bretagne",
+      "entity_type": "LOCATION",
+      "start_pos": 726,
+      "end_pos": 734
+    },
+    {
+      "entity_text": "Rennes",
+      "entity_type": "LOCATION",
+      "start_pos": 755,
+      "end_pos": 761
+    },
+    {
+      "entity_text": "Denis RAVAL",
+      "entity_type": "PERSON",
+      "start_pos": 801,
+      "end_pos": 812
+    },
+    {
+      "entity_text": "Denis",
+      "entity_type": "PERSON",
+      "start_pos": 839,
+      "end_pos": 844
+    },
+    {
+      "entity_text": "Claire BOUVET",
+      "entity_type": "PERSON",
+      "start_pos": 938,
+      "end_pos": 951
+    },
+    {
+      "entity_text": "Ronan MacBrice",
+      "entity_type": "PERSON",
+      "start_pos": 962,
+      "end_pos": 976
+    },
+    {
+      "entity_text": "Lorient",
+      "entity_type": "LOCATION",
+      "start_pos": 1030,
+      "end_pos": 1037
+    },
+    {
+      "entity_text": "Ronan MacBrice",
+      "entity_type": "PERSON",
+      "start_pos": 1159,
+      "end_pos": 1173
+    },
+    {
+      "entity_text": "Sonia KERLAU",
+      "entity_type": "PERSON",
+      "start_pos": 1229,
+      "end_pos": 1241
+    },
+    {
+      "entity_text": "GARNIER Solenne",
+      "entity_type": "PERSON",
+      "start_pos": 1460,
+      "end_pos": 1475
+    },
+    {
+      "entity_text": "Rennes",
+      "entity_type": "LOCATION",
+      "start_pos": 1486,
+      "end_pos": 1492
+    },
+    {
+      "entity_text": "Bretagne",
+      "entity_type": "LOCATION",
+      "start_pos": 1523,
+      "end_pos": 1531
+    },
+    {
+      "entity_text": "MacBrice Ronan",
+      "entity_type": "PERSON",
+      "start_pos": 1532,
+      "end_pos": 1546
+    },
+    {
+      "entity_text": "Lorient",
+      "entity_type": "LOCATION",
+      "start_pos": 1558,
+      "end_pos": 1565
+    },
+    {
+      "entity_text": "Lorient",
+      "entity_type": "LOCATION",
+      "start_pos": 1586,
+      "end_pos": 1593
+    },
+    {
+      "entity_text": "McAven Lea",
+      "entity_type": "PERSON",
+      "start_pos": 1604,
+      "end_pos": 1614
+    },
+    {
+      "entity_text": "Vannes",
+      "entity_type": "LOCATION",
+      "start_pos": 1630,
+      "end_pos": 1636
+    },
+    {
+      "entity_text": "Cork",
+      "entity_type": "LOCATION",
+      "start_pos": 1666,
+      "end_pos": 1670
+    },
+    {
+      "entity_text": "Rennes",
+      "entity_type": "LOCATION",
+      "start_pos": 1671,
+      "end_pos": 1677
+    },
+    {
+      "entity_text": "EL MADI Samir",
+      "entity_type": "PERSON",
+      "start_pos": 1678,
+      "end_pos": 1691
+    },
+    {
+      "entity_text": "Saint-Brieuc",
+      "entity_type": "LOCATION",
+      "start_pos": 1704,
+      "end_pos": 1716
+    },
+    {
+      "entity_text": "de Sousa Tiago",
+      "entity_type": "PERSON",
+      "start_pos": 1751,
+      "end_pos": 1765
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 1777,
+      "end_pos": 1783
+    },
+    {
+      "entity_text": "TRANSBORDE OUEST LOGISTIQUE",
+      "entity_type": "ORG",
+      "start_pos": 1821,
+      "end_pos": 1848
+    },
+    {
+      "entity_text": "OUEST",
+      "entity_type": "LOCATION",
+      "start_pos": 1832,
+      "end_pos": 1837
+    },
+    {
+      "entity_text": "Nord-Rive Fret",
+      "entity_type": "ORG",
+      "start_pos": 1946,
+      "end_pos": 1960
+    },
+    {
+      "entity_text": "Cork",
+      "entity_type": "LOCATION",
+      "start_pos": 2028,
+      "end_pos": 2032
+    },
+    {
+      "entity_text": "Nord-Rive Fret",
+      "entity_type": "ORG",
+      "start_pos": 2045,
+      "end_pos": 2059
+    },
+    {
+      "entity_text": "Caen",
+      "entity_type": "LOCATION",
+      "start_pos": 2086,
+      "end_pos": 2090
+    },
+    {
+      "entity_text": "Dublin",
+      "entity_type": "LOCATION",
+      "start_pos": 2112,
+      "end_pos": 2118
+    },
+    {
+      "entity_text": "Transborde Ouest Logistique",
+      "entity_type": "ORG",
+      "start_pos": 2138,
+      "end_pos": 2165
+    },
+    {
+      "entity_text": "Ouest",
+      "entity_type": "LOCATION",
+      "start_pos": 2149,
+      "end_pos": 2154
+    },
+    {
+      "entity_text": "Irlande",
+      "entity_type": "LOCATION",
+      "start_pos": 2220,
+      "end_pos": 2227
+    },
+    {
+      "entity_text": "Bretagne",
+      "entity_type": "LOCATION",
+      "start_pos": 2284,
+      "end_pos": 2292
+    },
+    {
+      "entity_text": "Cork",
+      "entity_type": "LOCATION",
+      "start_pos": 2334,
+      "end_pos": 2338
+    },
+    {
+      "entity_text": "Lea McAven",
+      "entity_type": "PERSON",
+      "start_pos": 2345,
+      "end_pos": 2355
+    },
+    {
+      "entity_text": "Cork",
+      "entity_type": "LOCATION",
+      "start_pos": 2377,
+      "end_pos": 2381
+    },
+    {
+      "entity_text": "Vannes",
+      "entity_type": "LOCATION",
+      "start_pos": 2449,
+      "end_pos": 2455
+    },
+    {
+      "entity_text": "Transborde Ouest Logistique",
+      "entity_type": "ORG",
+      "start_pos": 2488,
+      "end_pos": 2515
+    },
+    {
+      "entity_text": "Ouest",
+      "entity_type": "LOCATION",
+      "start_pos": 2499,
+      "end_pos": 2504
+    },
+    {
+      "entity_text": "Nord-Rive Fret",
+      "entity_type": "ORG",
+      "start_pos": 2535,
+      "end_pos": 2549
+    },
+    {
+      "entity_text": "Rennes",
+      "entity_type": "LOCATION",
+      "start_pos": 2579,
+      "end_pos": 2585
+    },
+    {
+      "entity_text": "Lea McAven",
+      "entity_type": "PERSON",
+      "start_pos": 2587,
+      "end_pos": 2597
+    },
+    {
+      "entity_text": "Aline MORET",
+      "entity_type": "PERSON",
+      "start_pos": 2618,
+      "end_pos": 2629
+    },
+    {
+      "entity_text": "Vannes",
+      "entity_type": "LOCATION",
+      "start_pos": 2667,
+      "end_pos": 2673
+    },
+    {
+      "entity_text": "Nantes Atlantique",
+      "entity_type": "LOCATION",
+      "start_pos": 2675,
+      "end_pos": 2692
+    },
+    {
+      "entity_text": "Cork\nAirport",
+      "entity_type": "LOCATION",
+      "start_pos": 2696,
+      "end_pos": 2708
+    },
+    {
+      "entity_text": "Eoghan McNulty",
+      "entity_type": "PERSON",
+      "start_pos": 2854,
+      "end_pos": 2868
+    },
+    {
+      "entity_text": "Sara O'KELLY",
+      "entity_type": "PERSON",
+      "start_pos": 2876,
+      "end_pos": 2888
+    },
+    {
+      "entity_text": "Nord-Rive Fret",
+      "entity_type": "ORG",
+      "start_pos": 2912,
+      "end_pos": 2926
+    },
+    {
+      "entity_text": "Rennes",
+      "entity_type": "LOCATION",
+      "start_pos": 2946,
+      "end_pos": 2952
+    },
+    {
+      "entity_text": "Eoghan\nMcNulty",
+      "entity_type": "PERSON",
+      "start_pos": 2974,
+      "end_pos": 2988
+    },
+    {
+      "entity_text": "Saint-Brieuc",
+      "entity_type": "LOCATION",
+      "start_pos": 3030,
+      "end_pos": 3042
+    },
+    {
+      "entity_text": "Samir EL MADI",
+      "entity_type": "PERSON",
+      "start_pos": 3062,
+      "end_pos": 3075
+    },
+    {
+      "entity_text": "Sara O'KELLY",
+      "entity_type": "PERSON",
+      "start_pos": 3077,
+      "end_pos": 3089
+    },
+    {
+      "entity_text": "Rennes",
+      "entity_type": "LOCATION",
+      "start_pos": 3131,
+      "end_pos": 3137
+    },
+    {
+      "entity_text": "Camille LEROUX",
+      "entity_type": "PERSON",
+      "start_pos": 3162,
+      "end_pos": 3176
+    },
+    {
+      "entity_text": "Cesson-Sevigne",
+      "entity_type": "LOCATION",
+      "start_pos": 3203,
+      "end_pos": 3217
+    },
+    {
+      "entity_text": "Rennes",
+      "entity_type": "LOCATION",
+      "start_pos": 3349,
+      "end_pos": 3355
+    },
+    {
+      "entity_text": "Nord-Rive Fret",
+      "entity_type": "ORG",
+      "start_pos": 3413,
+      "end_pos": 3427
+    },
+    {
+      "entity_text": "Rennes",
+      "entity_type": "LOCATION",
+      "start_pos": 3513,
+      "end_pos": 3519
+    },
+    {
+      "entity_text": "Saint-Brieuc",
+      "entity_type": "LOCATION",
+      "start_pos": 3524,
+      "end_pos": 3536
+    },
+    {
+      "entity_text": "Lorient",
+      "entity_type": "LOCATION",
+      "start_pos": 3539,
+      "end_pos": 3546
+    },
+    {
+      "entity_text": "Ronan MacBrice",
+      "entity_type": "PERSON",
+      "start_pos": 3587,
+      "end_pos": 3601
+    },
+    {
+      "entity_text": "Samir EL MADI",
+      "entity_type": "PERSON",
+      "start_pos": 3608,
+      "end_pos": 3621
+    },
+    {
+      "entity_text": "France Travail Bretagne",
+      "entity_type": "ORG",
+      "start_pos": 3635,
+      "end_pos": 3658
+    },
+    {
+      "entity_text": "Bretagne",
+      "entity_type": "LOCATION",
+      "start_pos": 3650,
+      "end_pos": 3658
+    },
+    {
+      "entity_text": "TRANSBORDE OUEST LOGISTIQUE",
+      "entity_type": "ORG",
+      "start_pos": 3731,
+      "end_pos": 3758
+    },
+    {
+      "entity_text": "OUEST",
+      "entity_type": "LOCATION",
+      "start_pos": 3742,
+      "end_pos": 3747
+    },
+    {
+      "entity_text": "Rennes",
+      "entity_type": "LOCATION",
+      "start_pos": 4119,
+      "end_pos": 4125
+    },
+    {
+      "entity_text": "Lorient",
+      "entity_type": "LOCATION",
+      "start_pos": 4147,
+      "end_pos": 4154
+    },
+    {
+      "entity_text": "Claire BOUVET",
+      "entity_type": "PERSON",
+      "start_pos": 4188,
+      "end_pos": 4201
+    },
+    {
+      "entity_text": "Transborde Ouest Logistique",
+      "entity_type": "ORG",
+      "start_pos": 4237,
+      "end_pos": 4264
+    },
+    {
+      "entity_text": "rue des Entrepots",
+      "entity_type": "LOCATION",
+      "start_pos": 4267,
+      "end_pos": 4284
+    },
+    {
+      "entity_text": "Rennes",
+      "entity_type": "LOCATION",
+      "start_pos": 4293,
+      "end_pos": 4299
+    }
+  ]
+}

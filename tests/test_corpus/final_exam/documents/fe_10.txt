@@ -1,0 +1,87 @@
+FÉDÉRATION INTERCLUBS DE SPORTS URBAINS
+Bordereau de licences et engagements - saison 2026/2027
+Export du fichier "retours clubs" au 08/10/2026, version reçue au secrétariat.
+Les lignes incomplètes restent à vérifier par les correspondants locaux.
+
+Club ; Ville ; Référent ; Type dossier ; N° licence ; Catégorie ; Observation
+AC Rive-Bleue ; Nantes ; Claire Ménard ; renouvellement ; RB-26-1842 ; senior F ;
+certificat médical reçu, photo manquante
+Union Glisse des Docks ; Marseille ; Sami El Khatib ; création ; GD-26-0771 ;
+U18 M ; autorisation parentale signée par Nabila Rahouni
+Roller Club du Parc ; Dijon ; Patrice VALLIER ; mutation ; RP-26-0993 ; senior M ;
+ancien club déclaré : Cercle Nord Roue
+Élan Trottinette Angers ; Angers ; Lise Bruneau ; renouvellement ; ET-26-0428 ;
+U15 F ; règlement CB validé
+Skate Horizon ; Lyon ; Miguel Da Silva ; création ; SH-26-1306 ; U21 M ;
+adresse à corriger, voir mail de Miguel
+Collectif Roue Libre ; Rennes ; Anne-Laure Pottier ; renouvellement ; CR-26-0514 ;
+senior F ; OK assurance incluse
+
+IDENTITÉ DU LICENCIÉ(E) | DATE NAISS. | ADRESSE | CONTACT URGENCE | CLUB
+Maëlle Corre ; 14/03/2009 ; 18 rue des Tonneliers, 44000 Nantes ;
+Ronan Corre 06 41 27 85 19 ; AC Rive-Bleue
+Yacine Morlet ; 22/11/2007 ; 6 avenue du Littoral, 13002 Marseille ;
+Farah Morlet 07 66 18 43 52 ; Union Glisse des Docks
+TOMAS BERTOLI ; 05/05/1998 ; 39 rue des Jardins, 21000 Dijon ;
+Giulia Bertoli 06 73 90 11 28 ; Roller Club du Parc
+Nina Kermadec ; 17/08/2012 ; 4 impasse des Platanes, 49100 Angers ;
+Olivier Kermadec 06 22 14 09 63 ; Élan Trottinette Angers
+Ibrahim Chergui ; 30/01/2006 ; 12 cours Charial, 69003 Lyon ;
+Samira Chergui 07 58 21 44 07 ; Skate Horizon
+Louise GUILLOU ; 09/09/1995 ; 28 rue de la Prairie, 35000 Rennes ;
+Martin Guillou 06 35 12 88 04 ; Collectif Roue Libre
+
+ÉPREUVES DEMANDÉES  -  Trophée des Berges, Nantes, 21 et 22 novembre 2026
+Dossard prévu ; Nom ; Club ; Samedi ; Dimanche ; Hébergement
+014 ; Maëlle Corre ; AC Rive-Bleue ; slalom vitesse ; relais mixte ;
+famille, Nantes
+021 ; Yacine Morlet ; Union Glisse des Docks ; street parcours ; sprint ;
+auberge La Passerelle, Rezé
+037 ; TOMAS BERTOLI ; Roller Club du Parc ; endurance 12 km ; non ;
+arrivée vendredi gare de Nantes
+044 ; Nina Kermadec ; Élan Trottinette Angers ; initiation encadrée ;
+atelier maniabilité ; retour Angers soir même
+058 ; Ibrahim Chergui ; Skate Horizon ; street parcours ; relais mixte ;
+hôtel Loire Sud, Saint-Sébastien-sur-Loire
+063 ; Louise GUILLOU ; Collectif Roue Libre ; endurance 12 km ; sprint ;
+à confirmer par Anne-Laure
+
+AUTORISATIONS ET OPTIONS
+Nom du responsable légal ; Licencié(e) concerné(e) ; Droit image ; Transport club ;
+Commentaires saisis
+Ronan Corre ; Maëlle Corre ; oui ; oui ; autorise publication photos sur site de
+la Fédération Interclubs de Sports Urbains
+Nabila Rahouni ; Yacine Morlet ; non ; oui ; demande facture au nom de Union
+Glisse des Docks, section jeunes
+Olivier Kermadec ; Nina Kermadec ; oui ; non ; prise en charge par sa tante,
+Camille Kermadec, à 17h30 devant le gymnase
+Samira Chergui ; Ibrahim Chergui ; oui ; oui ; allergies alimentaires indiquées,
+sans arachide, prévenir le stand restauration
+
+PIÈCES JOINTES CONTRÔLÉES PAR LE SECRÉTARIAT
+Club	Assurance collective	Paiement	Liste éducateurs	Statut
+AC Rive-Bleue	OUI	virement 184,00	Claire Ménard / Hugo Salen	à valider
+Union Glisse des Docks	OUI	chèque 226,00	Sami El Khatib	complet
+Roller Club du Parc	NON	virement 92,00	Patrice VALLIER	relance envoyée
+Élan Trottinette Angers	OUI	CB 46,00	Lise Bruneau	complet
+Skate Horizon	OUI	virement 138,00	Miguel Da Silva	attente reçu bancaire
+Collectif Roue Libre	OUI	virement groupé	Anne-Laure Pottier	complet
+
+NOTES INTERNES, COPIÉES DU TABLEUR :
+- Patrice VALLIER écrit le nom de Tomas en majuscules sur tous les formulaires ;
+ne pas modifier avant édition des badges.
+- Pour Marseille, Sami confirme que le car partira du boulevard des Écoles à
+06:10, arrêt devant la Maison des Associations.
+- La Ville de Nantes prête les barrières mobiles mais la convention doit repasser
+par le service des sports avant le 30 octobre.
+- Assurance : contrat cadre chez MAIF Associations, attestation 2026 reçue pour
+tous sauf Roller Club du Parc.
+- Les fiches papier de Rennes ont été scannées de travers ; relire les numéros
+avant import dans GestLicences.
+
+Responsable saisie : Hélène Arnaud
+Fédération Interclubs de Sports Urbains
+14 rue des Ateliers, 44200 Nantes
+Tél. 02 49 38 16 72 - licences@fisu-clubs.fr
+Version transmise aux clubs : AC Rive-Bleue, Union Glisse des Docks, Roller Club
+du Parc, Élan Trottinette Angers, Skate Horizon, Collectif Roue Libre

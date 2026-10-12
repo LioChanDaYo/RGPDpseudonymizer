@@ -1,0 +1,605 @@
+{
+  "document_name": "fe_05.txt",
+  "entities": [
+    {
+      "entity_text": "Régie Urbaine Val-de-Seille",
+      "entity_type": "ORG",
+      "start_pos": 0,
+      "end_pos": 27
+    },
+    {
+      "entity_text": "Val-de-Seille",
+      "entity_type": "LOCATION",
+      "start_pos": 14,
+      "end_pos": 27
+    },
+    {
+      "entity_text": "rue des Ateliers",
+      "entity_type": "LOCATION",
+      "start_pos": 120,
+      "end_pos": 136
+    },
+    {
+      "entity_text": "Nancy",
+      "entity_type": "LOCATION",
+      "start_pos": 138,
+      "end_pos": 143
+    },
+    {
+      "entity_text": "Claire Bensaïd",
+      "entity_type": "PERSON",
+      "start_pos": 222,
+      "end_pos": 236
+    },
+    {
+      "entity_text": "Régie\nUrbaine Val-de-Seille",
+      "entity_type": "ORG",
+      "start_pos": 467,
+      "end_pos": 494
+    },
+    {
+      "entity_text": "Val-de-Seille",
+      "entity_type": "LOCATION",
+      "start_pos": 481,
+      "end_pos": 494
+    },
+    {
+      "entity_text": "Nabil Kerras",
+      "entity_type": "PERSON",
+      "start_pos": 504,
+      "end_pos": 516
+    },
+    {
+      "entity_text": "Varnon",
+      "entity_type": "PERSON",
+      "start_pos": 610,
+      "end_pos": 616
+    },
+    {
+      "entity_text": "Laxou",
+      "entity_type": "LOCATION",
+      "start_pos": 672,
+      "end_pos": 677
+    },
+    {
+      "entity_text": "Claire Bensaïd",
+      "entity_type": "PERSON",
+      "start_pos": 680,
+      "end_pos": 694
+    },
+    {
+      "entity_text": "Nabil Kerras",
+      "entity_type": "PERSON",
+      "start_pos": 764,
+      "end_pos": 776
+    },
+    {
+      "entity_text": "Nancy",
+      "entity_type": "LOCATION",
+      "start_pos": 808,
+      "end_pos": 813
+    },
+    {
+      "entity_text": "Vandœuvre-lès-Nancy",
+      "entity_type": "LOCATION",
+      "start_pos": 848,
+      "end_pos": 867
+    },
+    {
+      "entity_text": "Transdev",
+      "entity_type": "ORG",
+      "start_pos": 900,
+      "end_pos": 908
+    },
+    {
+      "entity_text": "Metz",
+      "entity_type": "LOCATION",
+      "start_pos": 912,
+      "end_pos": 916
+    },
+    {
+      "entity_text": "Régie Urbaine Val-de-\nSeille",
+      "entity_type": "ORG",
+      "start_pos": 943,
+      "end_pos": 971
+    },
+    {
+      "entity_text": "Val-de-\nSeille",
+      "entity_type": "LOCATION",
+      "start_pos": 957,
+      "end_pos": 971
+    },
+    {
+      "entity_text": "Claire Bensaïd",
+      "entity_type": "PERSON",
+      "start_pos": 1005,
+      "end_pos": 1019
+    },
+    {
+      "entity_text": "Nabil Kerras",
+      "entity_type": "PERSON",
+      "start_pos": 1064,
+      "end_pos": 1076
+    },
+    {
+      "entity_text": "Nancy",
+      "entity_type": "LOCATION",
+      "start_pos": 1120,
+      "end_pos": 1125
+    },
+    {
+      "entity_text": "place de la Gare",
+      "entity_type": "LOCATION",
+      "start_pos": 1158,
+      "end_pos": 1174
+    },
+    {
+      "entity_text": "Essey-lès-Nancy",
+      "entity_type": "LOCATION",
+      "start_pos": 1194,
+      "end_pos": 1209
+    },
+    {
+      "entity_text": "Métropole du Grand Nancy",
+      "entity_type": "ORG",
+      "start_pos": 1306,
+      "end_pos": 1330
+    },
+    {
+      "entity_text": "Grand Nancy",
+      "entity_type": "LOCATION",
+      "start_pos": 1319,
+      "end_pos": 1330
+    },
+    {
+      "entity_text": "SNCF",
+      "entity_type": "ORG",
+      "start_pos": 1445,
+      "end_pos": 1449
+    },
+    {
+      "entity_text": "Régie Urbaine Val-de-Seille",
+      "entity_type": "ORG",
+      "start_pos": 1452,
+      "end_pos": 1479
+    },
+    {
+      "entity_text": "Val-de-Seille",
+      "entity_type": "LOCATION",
+      "start_pos": 1466,
+      "end_pos": 1479
+    },
+    {
+      "entity_text": "Claire Bensaïd",
+      "entity_type": "PERSON",
+      "start_pos": 1518,
+      "end_pos": 1532
+    },
+    {
+      "entity_text": "Nabil Kerras",
+      "entity_type": "PERSON",
+      "start_pos": 1572,
+      "end_pos": 1584
+    },
+    {
+      "entity_text": "Élise Varnon",
+      "entity_type": "PERSON",
+      "start_pos": 1594,
+      "end_pos": 1606
+    },
+    {
+      "entity_text": "Sophie Laneret",
+      "entity_type": "PERSON",
+      "start_pos": 1646,
+      "end_pos": 1660
+    },
+    {
+      "entity_text": "Sophie",
+      "entity_type": "PERSON",
+      "start_pos": 1675,
+      "end_pos": 1681
+    },
+    {
+      "entity_text": "Région Grand Est",
+      "entity_type": "ORG",
+      "start_pos": 1733,
+      "end_pos": 1749
+    },
+    {
+      "entity_text": "Grand Est",
+      "entity_type": "LOCATION",
+      "start_pos": 1740,
+      "end_pos": 1749
+    },
+    {
+      "entity_text": "Nancy",
+      "entity_type": "LOCATION",
+      "start_pos": 1818,
+      "end_pos": 1823
+    },
+    {
+      "entity_text": "Claire Bensaïd",
+      "entity_type": "PERSON",
+      "start_pos": 1907,
+      "end_pos": 1921
+    },
+    {
+      "entity_text": "Nabil Kerras",
+      "entity_type": "PERSON",
+      "start_pos": 1965,
+      "end_pos": 1977
+    },
+    {
+      "entity_text": "Laxou",
+      "entity_type": "LOCATION",
+      "start_pos": 2041,
+      "end_pos": 2046
+    },
+    {
+      "entity_text": "Nancy",
+      "entity_type": "LOCATION",
+      "start_pos": 2059,
+      "end_pos": 2064
+    },
+    {
+      "entity_text": "place de la Gare",
+      "entity_type": "LOCATION",
+      "start_pos": 2109,
+      "end_pos": 2125
+    },
+    {
+      "entity_text": "Vandœuvre-lès-Nancy",
+      "entity_type": "LOCATION",
+      "start_pos": 2150,
+      "end_pos": 2169
+    },
+    {
+      "entity_text": "avenue du Canal",
+      "entity_type": "LOCATION",
+      "start_pos": 2194,
+      "end_pos": 2209
+    },
+    {
+      "entity_text": "CPAM",
+      "entity_type": "ORG",
+      "start_pos": 2371,
+      "end_pos": 2375
+    },
+    {
+      "entity_text": "SNCF",
+      "entity_type": "ORG",
+      "start_pos": 2385,
+      "end_pos": 2389
+    },
+    {
+      "entity_text": "Claire Bensaïd",
+      "entity_type": "PERSON",
+      "start_pos": 2467,
+      "end_pos": 2481
+    },
+    {
+      "entity_text": "Nabil Kerras",
+      "entity_type": "PERSON",
+      "start_pos": 2534,
+      "end_pos": 2546
+    },
+    {
+      "entity_text": "Service Médical Inter-\nlignes",
+      "entity_type": "ORG",
+      "start_pos": 2578,
+      "end_pos": 2607
+    },
+    {
+      "entity_text": "Bruno Amzali",
+      "entity_type": "PERSON",
+      "start_pos": 2612,
+      "end_pos": 2624
+    },
+    {
+      "entity_text": "Imane Gherbi",
+      "entity_type": "PERSON",
+      "start_pos": 2698,
+      "end_pos": 2710
+    },
+    {
+      "entity_text": "Strasbourg",
+      "entity_type": "LOCATION",
+      "start_pos": 2754,
+      "end_pos": 2764
+    },
+    {
+      "entity_text": "CTS",
+      "entity_type": "ORG",
+      "start_pos": 2837,
+      "end_pos": 2840
+    },
+    {
+      "entity_text": "Régie\nUrbaine Val-de-Seille",
+      "entity_type": "ORG",
+      "start_pos": 2871,
+      "end_pos": 2898
+    },
+    {
+      "entity_text": "Val-de-Seille",
+      "entity_type": "LOCATION",
+      "start_pos": 2885,
+      "end_pos": 2898
+    },
+    {
+      "entity_text": "Claire Bensaïd",
+      "entity_type": "PERSON",
+      "start_pos": 3007,
+      "end_pos": 3021
+    },
+    {
+      "entity_text": "Nabil Kerras",
+      "entity_type": "PERSON",
+      "start_pos": 3041,
+      "end_pos": 3053
+    },
+    {
+      "entity_text": "Essey-lès-Nancy",
+      "entity_type": "LOCATION",
+      "start_pos": 3105,
+      "end_pos": 3120
+    },
+    {
+      "entity_text": "Vandœuvre-lès-Nancy",
+      "entity_type": "LOCATION",
+      "start_pos": 3155,
+      "end_pos": 3174
+    },
+    {
+      "entity_text": "Nancy",
+      "entity_type": "LOCATION",
+      "start_pos": 3216,
+      "end_pos": 3221
+    },
+    {
+      "entity_text": "place\nde la Gare",
+      "entity_type": "LOCATION",
+      "start_pos": 3241,
+      "end_pos": 3257
+    },
+    {
+      "entity_text": "SNCF",
+      "entity_type": "ORG",
+      "start_pos": 3305,
+      "end_pos": 3309
+    },
+    {
+      "entity_text": "Régie Urbaine Val-de-Seille",
+      "entity_type": "ORG",
+      "start_pos": 3382,
+      "end_pos": 3409
+    },
+    {
+      "entity_text": "Val-de-Seille",
+      "entity_type": "LOCATION",
+      "start_pos": 3396,
+      "end_pos": 3409
+    },
+    {
+      "entity_text": "Claire Bensaïd",
+      "entity_type": "PERSON",
+      "start_pos": 3448,
+      "end_pos": 3462
+    },
+    {
+      "entity_text": "Varnon",
+      "entity_type": "PERSON",
+      "start_pos": 3544,
+      "end_pos": 3550
+    },
+    {
+      "entity_text": "Nabil Kerras",
+      "entity_type": "PERSON",
+      "start_pos": 3554,
+      "end_pos": 3566
+    },
+    {
+      "entity_text": "Élise",
+      "entity_type": "PERSON",
+      "start_pos": 3569,
+      "end_pos": 3574
+    },
+    {
+      "entity_text": "Métropole du Grand Nancy",
+      "entity_type": "ORG",
+      "start_pos": 3649,
+      "end_pos": 3673
+    },
+    {
+      "entity_text": "Grand Nancy",
+      "entity_type": "LOCATION",
+      "start_pos": 3662,
+      "end_pos": 3673
+    },
+    {
+      "entity_text": "Région Grand\nEst",
+      "entity_type": "ORG",
+      "start_pos": 3680,
+      "end_pos": 3696
+    },
+    {
+      "entity_text": "Grand\nEst",
+      "entity_type": "LOCATION",
+      "start_pos": 3687,
+      "end_pos": 3696
+    },
+    {
+      "entity_text": "Lucas Pradel",
+      "entity_type": "PERSON",
+      "start_pos": 3760,
+      "end_pos": 3772
+    },
+    {
+      "entity_text": "Nancy",
+      "entity_type": "LOCATION",
+      "start_pos": 3856,
+      "end_pos": 3861
+    },
+    {
+      "entity_text": "Laxou",
+      "entity_type": "LOCATION",
+      "start_pos": 3863,
+      "end_pos": 3868
+    },
+    {
+      "entity_text": "Essey-lès-Nancy",
+      "entity_type": "LOCATION",
+      "start_pos": 3870,
+      "end_pos": 3885
+    },
+    {
+      "entity_text": "Claire Bensaïd",
+      "entity_type": "PERSON",
+      "start_pos": 3981,
+      "end_pos": 3995
+    },
+    {
+      "entity_text": "Nabil Kerras",
+      "entity_type": "PERSON",
+      "start_pos": 4032,
+      "end_pos": 4044
+    },
+    {
+      "entity_text": "Nancy",
+      "entity_type": "LOCATION",
+      "start_pos": 4094,
+      "end_pos": 4099
+    },
+    {
+      "entity_text": "Vandœuvre-lès-Nancy",
+      "entity_type": "LOCATION",
+      "start_pos": 4108,
+      "end_pos": 4127
+    },
+    {
+      "entity_text": "Régie\nUrbaine Val-de-Seille",
+      "entity_type": "ORG",
+      "start_pos": 4228,
+      "end_pos": 4255
+    },
+    {
+      "entity_text": "Val-de-Seille",
+      "entity_type": "LOCATION",
+      "start_pos": 4242,
+      "end_pos": 4255
+    },
+    {
+      "entity_text": "Métropole du Grand Nancy",
+      "entity_type": "ORG",
+      "start_pos": 4272,
+      "end_pos": 4296
+    },
+    {
+      "entity_text": "Grand Nancy",
+      "entity_type": "LOCATION",
+      "start_pos": 4285,
+      "end_pos": 4296
+    },
+    {
+      "entity_text": "Imane",
+      "entity_type": "PERSON",
+      "start_pos": 4396,
+      "end_pos": 4401
+    },
+    {
+      "entity_text": "Bruno",
+      "entity_type": "PERSON",
+      "start_pos": 4405,
+      "end_pos": 4410
+    },
+    {
+      "entity_text": "Claire Bensaïd",
+      "entity_type": "PERSON",
+      "start_pos": 4510,
+      "end_pos": 4524
+    },
+    {
+      "entity_text": "Nabil Kerras",
+      "entity_type": "PERSON",
+      "start_pos": 4568,
+      "end_pos": 4580
+    },
+    {
+      "entity_text": "Toul",
+      "entity_type": "LOCATION",
+      "start_pos": 4611,
+      "end_pos": 4615
+    },
+    {
+      "entity_text": "Nancy",
+      "entity_type": "LOCATION",
+      "start_pos": 4644,
+      "end_pos": 4649
+    },
+    {
+      "entity_text": "A31",
+      "entity_type": "LOCATION",
+      "start_pos": 4667,
+      "end_pos": 4670
+    },
+    {
+      "entity_text": "Samira Kerras",
+      "entity_type": "PERSON",
+      "start_pos": 4682,
+      "end_pos": 4695
+    },
+    {
+      "entity_text": "clinique des Rives",
+      "entity_type": "ORG",
+      "start_pos": 4712,
+      "end_pos": 4730
+    },
+    {
+      "entity_text": "Villers-lès-Nancy",
+      "entity_type": "LOCATION",
+      "start_pos": 4734,
+      "end_pos": 4751
+    },
+    {
+      "entity_text": "Claire Bensaïd",
+      "entity_type": "PERSON",
+      "start_pos": 4878,
+      "end_pos": 4892
+    },
+    {
+      "entity_text": "Nabil",
+      "entity_type": "PERSON",
+      "start_pos": 4902,
+      "end_pos": 4907
+    },
+    {
+      "entity_text": "Nabil Kerras",
+      "entity_type": "PERSON",
+      "start_pos": 4994,
+      "end_pos": 5006
+    },
+    {
+      "entity_text": "Claire",
+      "entity_type": "PERSON",
+      "start_pos": 5015,
+      "end_pos": 5021
+    },
+    {
+      "entity_text": "Régie Urbaine Val-de-Seille",
+      "entity_type": "ORG",
+      "start_pos": 5221,
+      "end_pos": 5248
+    },
+    {
+      "entity_text": "Val-de-Seille",
+      "entity_type": "LOCATION",
+      "start_pos": 5235,
+      "end_pos": 5248
+    },
+    {
+      "entity_text": "Atelier Mosaïque Conseil",
+      "entity_type": "ORG",
+      "start_pos": 5277,
+      "end_pos": 5301
+    }
+  ]
+}

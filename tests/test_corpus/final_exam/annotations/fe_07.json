@@ -1,0 +1,509 @@
+{
+  "document_name": "fe_07.txt",
+  "entities": [
+    {
+      "entity_text": "NOVA MARCHE PROXIMITE",
+      "entity_type": "ORG",
+      "start_pos": 0,
+      "end_pos": 21
+    },
+    {
+      "entity_text": "Ouest",
+      "entity_type": "LOCATION",
+      "start_pos": 190,
+      "end_pos": 195
+    },
+    {
+      "entity_text": "NOVA MARCHE PROXIMITE",
+      "entity_type": "ORG",
+      "start_pos": 682,
+      "end_pos": 703
+    },
+    {
+      "entity_text": "Rennes",
+      "entity_type": "LOCATION",
+      "start_pos": 707,
+      "end_pos": 713
+    },
+    {
+      "entity_text": "Vannes",
+      "entity_type": "LOCATION",
+      "start_pos": 715,
+      "end_pos": 721
+    },
+    {
+      "entity_text": "Nantes Est",
+      "entity_type": "LOCATION",
+      "start_pos": 723,
+      "end_pos": 733
+    },
+    {
+      "entity_text": "Angers Nord",
+      "entity_type": "LOCATION",
+      "start_pos": 735,
+      "end_pos": 746
+    },
+    {
+      "entity_text": "Tours Beaulieu",
+      "entity_type": "LOCATION",
+      "start_pos": 748,
+      "end_pos": 762
+    },
+    {
+      "entity_text": "Poitiers Centre",
+      "entity_type": "LOCATION",
+      "start_pos": 764,
+      "end_pos": 779
+    },
+    {
+      "entity_text": "Limoges Carnot",
+      "entity_type": "LOCATION",
+      "start_pos": 781,
+      "end_pos": 795
+    },
+    {
+      "entity_text": "La Rochelle Port-Neuf",
+      "entity_type": "LOCATION",
+      "start_pos": 797,
+      "end_pos": 818
+    },
+    {
+      "entity_text": "Niort Souché",
+      "entity_type": "LOCATION",
+      "start_pos": 822,
+      "end_pos": 834
+    },
+    {
+      "entity_text": "Bordeaux Lac",
+      "entity_type": "LOCATION",
+      "start_pos": 852,
+      "end_pos": 864
+    },
+    {
+      "entity_text": "Bayonne",
+      "entity_type": "LOCATION",
+      "start_pos": 868,
+      "end_pos": 875
+    },
+    {
+      "entity_text": "Nouvelle-Aquitaine",
+      "entity_type": "LOCATION",
+      "start_pos": 948,
+      "end_pos": 966
+    },
+    {
+      "entity_text": "Rennes Cleunay",
+      "entity_type": "LOCATION",
+      "start_pos": 1087,
+      "end_pos": 1101
+    },
+    {
+      "entity_text": "Marion Taleb",
+      "entity_type": "PERSON",
+      "start_pos": 1104,
+      "end_pos": 1116
+    },
+    {
+      "entity_text": "Claire PÉRIN",
+      "entity_type": "PERSON",
+      "start_pos": 1119,
+      "end_pos": 1131
+    },
+    {
+      "entity_text": "Vannes Kerlann",
+      "entity_type": "LOCATION",
+      "start_pos": 1155,
+      "end_pos": 1169
+    },
+    {
+      "entity_text": "Arnaud KERVIEL",
+      "entity_type": "PERSON",
+      "start_pos": 1172,
+      "end_pos": 1186
+    },
+    {
+      "entity_text": "Thomas Molina",
+      "entity_type": "PERSON",
+      "start_pos": 1189,
+      "end_pos": 1202
+    },
+    {
+      "entity_text": "Nantes Est",
+      "entity_type": "LOCATION",
+      "start_pos": 1230,
+      "end_pos": 1240
+    },
+    {
+      "entity_text": "Laure Benyahia",
+      "entity_type": "PERSON",
+      "start_pos": 1243,
+      "end_pos": 1257
+    },
+    {
+      "entity_text": "Claire PÉRIN",
+      "entity_type": "PERSON",
+      "start_pos": 1260,
+      "end_pos": 1272
+    },
+    {
+      "entity_text": "Angers Nord",
+      "entity_type": "LOCATION",
+      "start_pos": 1300,
+      "end_pos": 1311
+    },
+    {
+      "entity_text": "Karim Belkacem",
+      "entity_type": "PERSON",
+      "start_pos": 1314,
+      "end_pos": 1328
+    },
+    {
+      "entity_text": "Agathe Rolin",
+      "entity_type": "PERSON",
+      "start_pos": 1331,
+      "end_pos": 1343
+    },
+    {
+      "entity_text": "Tours Beaulieu",
+      "entity_type": "LOCATION",
+      "start_pos": 1377,
+      "end_pos": 1391
+    },
+    {
+      "entity_text": "Elise Moreau",
+      "entity_type": "PERSON",
+      "start_pos": 1394,
+      "end_pos": 1406
+    },
+    {
+      "entity_text": "Thomas Molina",
+      "entity_type": "PERSON",
+      "start_pos": 1409,
+      "end_pos": 1422
+    },
+    {
+      "entity_text": "Poitiers Centre",
+      "entity_type": "LOCATION",
+      "start_pos": 1445,
+      "end_pos": 1460
+    },
+    {
+      "entity_text": "Hugo Ferrand",
+      "entity_type": "PERSON",
+      "start_pos": 1463,
+      "end_pos": 1475
+    },
+    {
+      "entity_text": "Simon AUBRY",
+      "entity_type": "PERSON",
+      "start_pos": 1478,
+      "end_pos": 1489
+    },
+    {
+      "entity_text": "Limoges Carnot",
+      "entity_type": "LOCATION",
+      "start_pos": 1514,
+      "end_pos": 1528
+    },
+    {
+      "entity_text": "Nadia ROUX",
+      "entity_type": "PERSON",
+      "start_pos": 1531,
+      "end_pos": 1541
+    },
+    {
+      "entity_text": "Agathe Rolin",
+      "entity_type": "PERSON",
+      "start_pos": 1544,
+      "end_pos": 1556
+    },
+    {
+      "entity_text": "La Rochelle Port-Neuf",
+      "entity_type": "LOCATION",
+      "start_pos": 1586,
+      "end_pos": 1607
+    },
+    {
+      "entity_text": "Yann Lecerf",
+      "entity_type": "PERSON",
+      "start_pos": 1610,
+      "end_pos": 1621
+    },
+    {
+      "entity_text": "Simon AUBRY",
+      "entity_type": "PERSON",
+      "start_pos": 1624,
+      "end_pos": 1635
+    },
+    {
+      "entity_text": "Niort Souché",
+      "entity_type": "LOCATION",
+      "start_pos": 1659,
+      "end_pos": 1671
+    },
+    {
+      "entity_text": "Inès Cherkaoui",
+      "entity_type": "PERSON",
+      "start_pos": 1674,
+      "end_pos": 1688
+    },
+    {
+      "entity_text": "Claire PÉRIN",
+      "entity_type": "PERSON",
+      "start_pos": 1691,
+      "end_pos": 1703
+    },
+    {
+      "entity_text": "Saint-Herblain",
+      "entity_type": "LOCATION",
+      "start_pos": 2323,
+      "end_pos": 2337
+    },
+    {
+      "entity_text": "Rennes",
+      "entity_type": "LOCATION",
+      "start_pos": 2379,
+      "end_pos": 2385
+    },
+    {
+      "entity_text": "Poitiers",
+      "entity_type": "LOCATION",
+      "start_pos": 2389,
+      "end_pos": 2397
+    },
+    {
+      "entity_text": "Sophie Marin",
+      "entity_type": "PERSON",
+      "start_pos": 2399,
+      "end_pos": 2411
+    },
+    {
+      "entity_text": "Marion Taleb",
+      "entity_type": "PERSON",
+      "start_pos": 2433,
+      "end_pos": 2445
+    },
+    {
+      "entity_text": "Hugo\nFerrand",
+      "entity_type": "PERSON",
+      "start_pos": 2449,
+      "end_pos": 2461
+    },
+    {
+      "entity_text": "Saint-Lô",
+      "entity_type": "LOCATION",
+      "start_pos": 2618,
+      "end_pos": 2626
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 3040,
+      "end_pos": 3046
+    },
+    {
+      "entity_text": "Claire PÉRIN",
+      "entity_type": "PERSON",
+      "start_pos": 3140,
+      "end_pos": 3152
+    },
+    {
+      "entity_text": "Thomas Molina",
+      "entity_type": "PERSON",
+      "start_pos": 3186,
+      "end_pos": 3199
+    },
+    {
+      "entity_text": "Sophie Marin",
+      "entity_type": "PERSON",
+      "start_pos": 3232,
+      "end_pos": 3244
+    },
+    {
+      "entity_text": "Julien Ndao",
+      "entity_type": "PERSON",
+      "start_pos": 3258,
+      "end_pos": 3269
+    },
+    {
+      "entity_text": "Marion Taleb",
+      "entity_type": "PERSON",
+      "start_pos": 3291,
+      "end_pos": 3303
+    },
+    {
+      "entity_text": "Rennes Cleunay",
+      "entity_type": "LOCATION",
+      "start_pos": 3305,
+      "end_pos": 3319
+    },
+    {
+      "entity_text": "Laure Benyahia",
+      "entity_type": "PERSON",
+      "start_pos": 3322,
+      "end_pos": 3336
+    },
+    {
+      "entity_text": "Nantes Est",
+      "entity_type": "LOCATION",
+      "start_pos": 3338,
+      "end_pos": 3348
+    },
+    {
+      "entity_text": "Karim Belkacem",
+      "entity_type": "PERSON",
+      "start_pos": 3351,
+      "end_pos": 3365
+    },
+    {
+      "entity_text": "Angers Nord",
+      "entity_type": "LOCATION",
+      "start_pos": 3367,
+      "end_pos": 3378
+    },
+    {
+      "entity_text": "Nadia ROUX",
+      "entity_type": "PERSON",
+      "start_pos": 3381,
+      "end_pos": 3391
+    },
+    {
+      "entity_text": "Limoges Carnot",
+      "entity_type": "LOCATION",
+      "start_pos": 3393,
+      "end_pos": 3407
+    },
+    {
+      "entity_text": "FraisVal\nCoop",
+      "entity_type": "ORG",
+      "start_pos": 3585,
+      "end_pos": 3598
+    },
+    {
+      "entity_text": "Laiteries du Bocage",
+      "entity_type": "ORG",
+      "start_pos": 3600,
+      "end_pos": 3619
+    },
+    {
+      "entity_text": "Bocage",
+      "entity_type": "LOCATION",
+      "start_pos": 3613,
+      "end_pos": 3619
+    },
+    {
+      "entity_text": "Transports Hélianthe",
+      "entity_type": "ORG",
+      "start_pos": 3621,
+      "end_pos": 3641
+    },
+    {
+      "entity_text": "Banque Populaire Grand\nOuest",
+      "entity_type": "ORG",
+      "start_pos": 3645,
+      "end_pos": 3673
+    },
+    {
+      "entity_text": "Grand\nOuest",
+      "entity_type": "LOCATION",
+      "start_pos": 3662,
+      "end_pos": 3673
+    },
+    {
+      "entity_text": "Bretagne",
+      "entity_type": "LOCATION",
+      "start_pos": 3863,
+      "end_pos": 3871
+    },
+    {
+      "entity_text": "Benoît\nLe Gall",
+      "entity_type": "PERSON",
+      "start_pos": 3900,
+      "end_pos": 3914
+    },
+    {
+      "entity_text": "Transports Hélianthe",
+      "entity_type": "ORG",
+      "start_pos": 3920,
+      "end_pos": 3940
+    },
+    {
+      "entity_text": "Lorient",
+      "entity_type": "LOCATION",
+      "start_pos": 3952,
+      "end_pos": 3959
+    },
+    {
+      "entity_text": "Centre",
+      "entity_type": "LOCATION",
+      "start_pos": 3977,
+      "end_pos": 3983
+    },
+    {
+      "entity_text": "Amélie Duarte",
+      "entity_type": "PERSON",
+      "start_pos": 4005,
+      "end_pos": 4018
+    },
+    {
+      "entity_text": "Tours",
+      "entity_type": "LOCATION",
+      "start_pos": 4041,
+      "end_pos": 4046
+    },
+    {
+      "entity_text": "Orléans",
+      "entity_type": "LOCATION",
+      "start_pos": 4083,
+      "end_pos": 4090
+    },
+    {
+      "entity_text": "NOVA",
+      "entity_type": "ORG",
+      "start_pos": 4490,
+      "end_pos": 4494
+    },
+    {
+      "entity_text": "Sophie Marin",
+      "entity_type": "PERSON",
+      "start_pos": 4572,
+      "end_pos": 4584
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 4885,
+      "end_pos": 4891
+    },
+    {
+      "entity_text": "Claire PÉRIN",
+      "entity_type": "PERSON",
+      "start_pos": 4909,
+      "end_pos": 4921
+    },
+    {
+      "entity_text": "NOVA MARCHE PROXIMITE",
+      "entity_type": "ORG",
+      "start_pos": 4953,
+      "end_pos": 4974
+    },
+    {
+      "entity_text": "rue des Ateliers",
+      "entity_type": "LOCATION",
+      "start_pos": 4978,
+      "end_pos": 4994
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 5002,
+      "end_pos": 5008
+    },
+    {
+      "entity_text": "NOVA MARCHE PROXIMITE",
+      "entity_type": "ORG",
+      "start_pos": 5116,
+      "end_pos": 5137
+    }
+  ]
+}

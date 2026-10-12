@@ -1,0 +1,527 @@
+{
+  "document_name": "fe_02.txt",
+  "entities": [
+    {
+      "entity_text": "COOPERATIVE DES RIVES VERTES",
+      "entity_type": "ORG",
+      "start_pos": 0,
+      "end_pos": 28
+    },
+    {
+      "entity_text": "rue des Vergers",
+      "entity_type": "LOCATION",
+      "start_pos": 97,
+      "end_pos": 112
+    },
+    {
+      "entity_text": "Niort",
+      "entity_type": "LOCATION",
+      "start_pos": 120,
+      "end_pos": 125
+    },
+    {
+      "entity_text": "Deux-Sèvres",
+      "entity_type": "LOCATION",
+      "start_pos": 290,
+      "end_pos": 301
+    },
+    {
+      "entity_text": "La Crèche",
+      "entity_type": "LOCATION",
+      "start_pos": 355,
+      "end_pos": 364
+    },
+    {
+      "entity_text": "Coopérative des Rives Vertes",
+      "entity_type": "ORG",
+      "start_pos": 369,
+      "end_pos": 397
+    },
+    {
+      "entity_text": "Mauzé-sur-le-\nMignon",
+      "entity_type": "LOCATION",
+      "start_pos": 487,
+      "end_pos": 507
+    },
+    {
+      "entity_text": "Parthenay",
+      "entity_type": "LOCATION",
+      "start_pos": 509,
+      "end_pos": 518
+    },
+    {
+      "entity_text": "Fontenay-le-Comte",
+      "entity_type": "LOCATION",
+      "start_pos": 522,
+      "end_pos": 539
+    },
+    {
+      "entity_text": "Niort",
+      "entity_type": "LOCATION",
+      "start_pos": 579,
+      "end_pos": 584
+    },
+    {
+      "entity_text": "Aline Bertheau",
+      "entity_type": "PERSON",
+      "start_pos": 645,
+      "end_pos": 659
+    },
+    {
+      "entity_text": "Yacine\nMokrani",
+      "entity_type": "PERSON",
+      "start_pos": 661,
+      "end_pos": 675
+    },
+    {
+      "entity_text": "Claire N'Diaye",
+      "entity_type": "PERSON",
+      "start_pos": 679,
+      "end_pos": 693
+    },
+    {
+      "entity_text": "Orial Audit Atlantique",
+      "entity_type": "ORG",
+      "start_pos": 749,
+      "end_pos": 771
+    },
+    {
+      "entity_text": "Coopérative des Rives Vertes",
+      "entity_type": "ORG",
+      "start_pos": 940,
+      "end_pos": 968
+    },
+    {
+      "entity_text": "Niort Nord",
+      "entity_type": "LOCATION",
+      "start_pos": 1269,
+      "end_pos": 1279
+    },
+    {
+      "entity_text": "L. Ravel",
+      "entity_type": "PERSON",
+      "start_pos": 1289,
+      "end_pos": 1297
+    },
+    {
+      "entity_text": "La Crèche",
+      "entity_type": "LOCATION",
+      "start_pos": 1354,
+      "end_pos": 1363
+    },
+    {
+      "entity_text": "I. Sokolova",
+      "entity_type": "PERSON",
+      "start_pos": 1374,
+      "end_pos": 1385
+    },
+    {
+      "entity_text": "Mauzé",
+      "entity_type": "LOCATION",
+      "start_pos": 1516,
+      "end_pos": 1521
+    },
+    {
+      "entity_text": "O. Bellagh",
+      "entity_type": "PERSON",
+      "start_pos": 1536,
+      "end_pos": 1546
+    },
+    {
+      "entity_text": "Parthenay",
+      "entity_type": "LOCATION",
+      "start_pos": 1602,
+      "end_pos": 1611
+    },
+    {
+      "entity_text": "H. Perrault",
+      "entity_type": "PERSON",
+      "start_pos": 1622,
+      "end_pos": 1633
+    },
+    {
+      "entity_text": "Fontenay-le-Comte",
+      "entity_type": "LOCATION",
+      "start_pos": 1690,
+      "end_pos": 1707
+    },
+    {
+      "entity_text": "Sofia Mendes",
+      "entity_type": "PERSON",
+      "start_pos": 1710,
+      "end_pos": 1722
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 1771,
+      "end_pos": 1777
+    },
+    {
+      "entity_text": "Niort Nord",
+      "entity_type": "LOCATION",
+      "start_pos": 1791,
+      "end_pos": 1801
+    },
+    {
+      "entity_text": "Saintes",
+      "entity_type": "LOCATION",
+      "start_pos": 1873,
+      "end_pos": 1880
+    },
+    {
+      "entity_text": "DRAAF Nouvelle-Aquitaine",
+      "entity_type": "ORG",
+      "start_pos": 1910,
+      "end_pos": 1934
+    },
+    {
+      "entity_text": "Nouvelle-Aquitaine",
+      "entity_type": "LOCATION",
+      "start_pos": 1916,
+      "end_pos": 1934
+    },
+    {
+      "entity_text": "Transport Logisèvre",
+      "entity_type": "ORG",
+      "start_pos": 1998,
+      "end_pos": 2017
+    },
+    {
+      "entity_text": "Saintes",
+      "entity_type": "LOCATION",
+      "start_pos": 2048,
+      "end_pos": 2055
+    },
+    {
+      "entity_text": "Niort",
+      "entity_type": "LOCATION",
+      "start_pos": 2059,
+      "end_pos": 2064
+    },
+    {
+      "entity_text": "Claire N'Diaye",
+      "entity_type": "PERSON",
+      "start_pos": 2267,
+      "end_pos": 2281
+    },
+    {
+      "entity_text": "Parthenay",
+      "entity_type": "LOCATION",
+      "start_pos": 2309,
+      "end_pos": 2318
+    },
+    {
+      "entity_text": "Coopérative des Rives Vertes",
+      "entity_type": "ORG",
+      "start_pos": 2408,
+      "end_pos": 2436
+    },
+    {
+      "entity_text": "BioMarché Centre-Ouest",
+      "entity_type": "ORG",
+      "start_pos": 2619,
+      "end_pos": 2641
+    },
+    {
+      "entity_text": "Centre-Ouest",
+      "entity_type": "LOCATION",
+      "start_pos": 2629,
+      "end_pos": 2641
+    },
+    {
+      "entity_text": "SAS\nLes Moulins du Bocage",
+      "entity_type": "ORG",
+      "start_pos": 2725,
+      "end_pos": 2750
+    },
+    {
+      "entity_text": "Banque Populaire Grand Ouest",
+      "entity_type": "ORG",
+      "start_pos": 2824,
+      "end_pos": 2852
+    },
+    {
+      "entity_text": "Grand Ouest",
+      "entity_type": "LOCATION",
+      "start_pos": 2841,
+      "end_pos": 2852
+    },
+    {
+      "entity_text": "BioMarché Centre-Ouest",
+      "entity_type": "ORG",
+      "start_pos": 3047,
+      "end_pos": 3069
+    },
+    {
+      "entity_text": "Centre-Ouest",
+      "entity_type": "LOCATION",
+      "start_pos": 3057,
+      "end_pos": 3069
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 3079,
+      "end_pos": 3085
+    },
+    {
+      "entity_text": "SAS Les Moulins du Bocage",
+      "entity_type": "ORG",
+      "start_pos": 3121,
+      "end_pos": 3146
+    },
+    {
+      "entity_text": "Bressuire",
+      "entity_type": "LOCATION",
+      "start_pos": 3153,
+      "end_pos": 3162
+    },
+    {
+      "entity_text": "Cantines du Marais",
+      "entity_type": "ORG",
+      "start_pos": 3195,
+      "end_pos": 3213
+    },
+    {
+      "entity_text": "Niort",
+      "entity_type": "LOCATION",
+      "start_pos": 3227,
+      "end_pos": 3232
+    },
+    {
+      "entity_text": "GIE Froid Atlantique",
+      "entity_type": "ORG",
+      "start_pos": 3277,
+      "end_pos": 3297
+    },
+    {
+      "entity_text": "La Rochelle",
+      "entity_type": "LOCATION",
+      "start_pos": 3309,
+      "end_pos": 3320
+    },
+    {
+      "entity_text": "Chambre d'agriculture",
+      "entity_type": "ORG",
+      "start_pos": 3357,
+      "end_pos": 3378
+    },
+    {
+      "entity_text": "Niort",
+      "entity_type": "LOCATION",
+      "start_pos": 3389,
+      "end_pos": 3394
+    },
+    {
+      "entity_text": "Chambre d'agriculture des Deux-Sèvres",
+      "entity_type": "ORG",
+      "start_pos": 3463,
+      "end_pos": 3500
+    },
+    {
+      "entity_text": "Deux-Sèvres",
+      "entity_type": "LOCATION",
+      "start_pos": 3489,
+      "end_pos": 3500
+    },
+    {
+      "entity_text": "Aline Bertheau",
+      "entity_type": "PERSON",
+      "start_pos": 3569,
+      "end_pos": 3583
+    },
+    {
+      "entity_text": "Melle",
+      "entity_type": "LOCATION",
+      "start_pos": 3637,
+      "end_pos": 3642
+    },
+    {
+      "entity_text": "Lycée agricole de Melle",
+      "entity_type": "ORG",
+      "start_pos": 3660,
+      "end_pos": 3683
+    },
+    {
+      "entity_text": "Melle",
+      "entity_type": "LOCATION",
+      "start_pos": 3678,
+      "end_pos": 3683
+    },
+    {
+      "entity_text": "Mauzé-sur-le-Mignon",
+      "entity_type": "LOCATION",
+      "start_pos": 3865,
+      "end_pos": 3884
+    },
+    {
+      "entity_text": "Yacine Mokrani",
+      "entity_type": "PERSON",
+      "start_pos": 3948,
+      "end_pos": 3962
+    },
+    {
+      "entity_text": "Lucien Ravel",
+      "entity_type": "PERSON",
+      "start_pos": 4026,
+      "end_pos": 4038
+    },
+    {
+      "entity_text": "Niort",
+      "entity_type": "LOCATION",
+      "start_pos": 4062,
+      "end_pos": 4067
+    },
+    {
+      "entity_text": "Parthenay",
+      "entity_type": "LOCATION",
+      "start_pos": 4282,
+      "end_pos": 4291
+    },
+    {
+      "entity_text": "Fontenay-le-Comte",
+      "entity_type": "LOCATION",
+      "start_pos": 4363,
+      "end_pos": 4380
+    },
+    {
+      "entity_text": "La Crèche",
+      "entity_type": "LOCATION",
+      "start_pos": 4445,
+      "end_pos": 4454
+    },
+    {
+      "entity_text": "Niort",
+      "entity_type": "LOCATION",
+      "start_pos": 4524,
+      "end_pos": 4529
+    },
+    {
+      "entity_text": "Mauzé",
+      "entity_type": "LOCATION",
+      "start_pos": 4532,
+      "end_pos": 4537
+    },
+    {
+      "entity_text": "Coopérative des Rives Vertes",
+      "entity_type": "ORG",
+      "start_pos": 4574,
+      "end_pos": 4602
+    },
+    {
+      "entity_text": "La Crèche",
+      "entity_type": "LOCATION",
+      "start_pos": 4820,
+      "end_pos": 4829
+    },
+    {
+      "entity_text": "GIE Froid Atlantique",
+      "entity_type": "ORG",
+      "start_pos": 4831,
+      "end_pos": 4851
+    },
+    {
+      "entity_text": "Irina Sokolova",
+      "entity_type": "PERSON",
+      "start_pos": 4925,
+      "end_pos": 4939
+    },
+    {
+      "entity_text": "Omar Bellagh",
+      "entity_type": "PERSON",
+      "start_pos": 5047,
+      "end_pos": 5059
+    },
+    {
+      "entity_text": "Parthenay",
+      "entity_type": "LOCATION",
+      "start_pos": 5164,
+      "end_pos": 5173
+    },
+    {
+      "entity_text": "Hugo Perrault",
+      "entity_type": "PERSON",
+      "start_pos": 5258,
+      "end_pos": 5271
+    },
+    {
+      "entity_text": "Coopérative des Rives Vertes",
+      "entity_type": "ORG",
+      "start_pos": 5491,
+      "end_pos": 5519
+    },
+    {
+      "entity_text": "Niort",
+      "entity_type": "LOCATION",
+      "start_pos": 5671,
+      "end_pos": 5676
+    },
+    {
+      "entity_text": "Région\nNouvelle-Aquitaine",
+      "entity_type": "ORG",
+      "start_pos": 5730,
+      "end_pos": 5755
+    },
+    {
+      "entity_text": "Nouvelle-Aquitaine",
+      "entity_type": "LOCATION",
+      "start_pos": 5737,
+      "end_pos": 5755
+    },
+    {
+      "entity_text": "Aline Bertheau",
+      "entity_type": "PERSON",
+      "start_pos": 5821,
+      "end_pos": 5835
+    },
+    {
+      "entity_text": "Niort",
+      "entity_type": "LOCATION",
+      "start_pos": 5867,
+      "end_pos": 5872
+    },
+    {
+      "entity_text": "salle des Prairies",
+      "entity_type": "LOCATION",
+      "start_pos": 5874,
+      "end_pos": 5892
+    },
+    {
+      "entity_text": "Aline Bertheau",
+      "entity_type": "PERSON",
+      "start_pos": 5926,
+      "end_pos": 5940
+    },
+    {
+      "entity_text": "Yacine Mokrani",
+      "entity_type": "PERSON",
+      "start_pos": 5978,
+      "end_pos": 5992
+    },
+    {
+      "entity_text": "Coopérative des Rives Vertes",
+      "entity_type": "ORG",
+      "start_pos": 6079,
+      "end_pos": 6107
+    },
+    {
+      "entity_text": "rue des Vergers",
+      "entity_type": "LOCATION",
+      "start_pos": 6113,
+      "end_pos": 6128
+    },
+    {
+      "entity_text": "Niort",
+      "entity_type": "LOCATION",
+      "start_pos": 6136,
+      "end_pos": 6141
+    },
+    {
+      "entity_text": "Coopérative des Rives Vertes",
+      "entity_type": "ORG",
+      "start_pos": 6216,
+      "end_pos": 6244
+    }
+  ]
+}

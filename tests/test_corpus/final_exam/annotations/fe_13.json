@@ -1,0 +1,413 @@
+{
+  "document_name": "fe_13.txt",
+  "entities": [
+    {
+      "entity_text": "LYSORA LOGICIELS SAS",
+      "entity_type": "ORG",
+      "start_pos": 0,
+      "end_pos": 20
+    },
+    {
+      "entity_text": "rue des Ateliers",
+      "entity_type": "LOCATION",
+      "start_pos": 76,
+      "end_pos": 92
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 100,
+      "end_pos": 104
+    },
+    {
+      "entity_text": "LYSORA LOGICIELS SAS",
+      "entity_type": "ORG",
+      "start_pos": 281,
+      "end_pos": 301
+    },
+    {
+      "entity_text": "rue des Ateliers",
+      "entity_type": "LOCATION",
+      "start_pos": 390,
+      "end_pos": 406
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 414,
+      "end_pos": 418
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 448,
+      "end_pos": 452
+    },
+    {
+      "entity_text": "Camille Roussel",
+      "entity_type": "PERSON",
+      "start_pos": 504,
+      "end_pos": 519
+    },
+    {
+      "entity_text": "Agence Terrale Auvergne",
+      "entity_type": "ORG",
+      "start_pos": 584,
+      "end_pos": 607
+    },
+    {
+      "entity_text": "Auvergne",
+      "entity_type": "LOCATION",
+      "start_pos": 599,
+      "end_pos": 607
+    },
+    {
+      "entity_text": "passage des Vignes",
+      "entity_type": "LOCATION",
+      "start_pos": 657,
+      "end_pos": 675
+    },
+    {
+      "entity_text": "Clermont-Ferrand",
+      "entity_type": "LOCATION",
+      "start_pos": 683,
+      "end_pos": 699
+    },
+    {
+      "entity_text": "Nadim Belarbi",
+      "entity_type": "PERSON",
+      "start_pos": 725,
+      "end_pos": 738
+    },
+    {
+      "entity_text": "Lysora Logiciels",
+      "entity_type": "ORG",
+      "start_pos": 962,
+      "end_pos": 978
+    },
+    {
+      "entity_text": "Auvergne-Rhône-Alpes",
+      "entity_type": "LOCATION",
+      "start_pos": 1069,
+      "end_pos": 1089
+    },
+    {
+      "entity_text": "Clermont-\nFerrand",
+      "entity_type": "LOCATION",
+      "start_pos": 1233,
+      "end_pos": 1250
+    },
+    {
+      "entity_text": "Valence",
+      "entity_type": "LOCATION",
+      "start_pos": 1252,
+      "end_pos": 1259
+    },
+    {
+      "entity_text": "Grenoble",
+      "entity_type": "LOCATION",
+      "start_pos": 1263,
+      "end_pos": 1271
+    },
+    {
+      "entity_text": "Agence Terrale Auvergne",
+      "entity_type": "ORG",
+      "start_pos": 1438,
+      "end_pos": 1461
+    },
+    {
+      "entity_text": "Auvergne",
+      "entity_type": "LOCATION",
+      "start_pos": 1453,
+      "end_pos": 1461
+    },
+    {
+      "entity_text": "Puy-de-Dôme",
+      "entity_type": "LOCATION",
+      "start_pos": 1550,
+      "end_pos": 1561
+    },
+    {
+      "entity_text": "Rhône",
+      "entity_type": "LOCATION",
+      "start_pos": 1568,
+      "end_pos": 1573
+    },
+    {
+      "entity_text": "Lysora\nLogiciels",
+      "entity_type": "ORG",
+      "start_pos": 1604,
+      "end_pos": 1620
+    },
+    {
+      "entity_text": "Infogérance Monts",
+      "entity_type": "ORG",
+      "start_pos": 1698,
+      "end_pos": 1715
+    },
+    {
+      "entity_text": "allée du Canal",
+      "entity_type": "LOCATION",
+      "start_pos": 1719,
+      "end_pos": 1733
+    },
+    {
+      "entity_text": "Clermont-Ferrand",
+      "entity_type": "LOCATION",
+      "start_pos": 1743,
+      "end_pos": 1759
+    },
+    {
+      "entity_text": "Lysora Logiciels",
+      "entity_type": "ORG",
+      "start_pos": 1804,
+      "end_pos": 1820
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 1823,
+      "end_pos": 1827
+    },
+    {
+      "entity_text": "Banque Populaire",
+      "entity_type": "ORG",
+      "start_pos": 1866,
+      "end_pos": 1882
+    },
+    {
+      "entity_text": "Paris",
+      "entity_type": "LOCATION",
+      "start_pos": 1924,
+      "end_pos": 1929
+    },
+    {
+      "entity_text": "LYSORA LOGICIELS SAS",
+      "entity_type": "ORG",
+      "start_pos": 1932,
+      "end_pos": 1952
+    },
+    {
+      "entity_text": "rue des Ateliers",
+      "entity_type": "LOCATION",
+      "start_pos": 2008,
+      "end_pos": 2024
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 2032,
+      "end_pos": 2036
+    },
+    {
+      "entity_text": "Clermont-Ferrand",
+      "entity_type": "LOCATION",
+      "start_pos": 2403,
+      "end_pos": 2419
+    },
+    {
+      "entity_text": "Élodie Chenet",
+      "entity_type": "PERSON",
+      "start_pos": 2458,
+      "end_pos": 2471
+    },
+    {
+      "entity_text": "Florent Masson",
+      "entity_type": "PERSON",
+      "start_pos": 2499,
+      "end_pos": 2513
+    },
+    {
+      "entity_text": "Lysora Logiciels",
+      "entity_type": "ORG",
+      "start_pos": 2560,
+      "end_pos": 2576
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 2690,
+      "end_pos": 2696
+    },
+    {
+      "entity_text": "Sarah Oukil",
+      "entity_type": "PERSON",
+      "start_pos": 2867,
+      "end_pos": 2878
+    },
+    {
+      "entity_text": "Lysora",
+      "entity_type": "ORG",
+      "start_pos": 2888,
+      "end_pos": 2894
+    },
+    {
+      "entity_text": "Nadim Belarbi",
+      "entity_type": "PERSON",
+      "start_pos": 2899,
+      "end_pos": 2912
+    },
+    {
+      "entity_text": "Lysora Logiciels",
+      "entity_type": "ORG",
+      "start_pos": 3351,
+      "end_pos": 3367
+    },
+    {
+      "entity_text": "Inès Barrois",
+      "entity_type": "PERSON",
+      "start_pos": 3704,
+      "end_pos": 3716
+    },
+    {
+      "entity_text": "Agence Terrale Auvergne",
+      "entity_type": "ORG",
+      "start_pos": 3741,
+      "end_pos": 3764
+    },
+    {
+      "entity_text": "Auvergne",
+      "entity_type": "LOCATION",
+      "start_pos": 3756,
+      "end_pos": 3764
+    },
+    {
+      "entity_text": "Lysora Logiciels",
+      "entity_type": "ORG",
+      "start_pos": 3967,
+      "end_pos": 3983
+    },
+    {
+      "entity_text": "CNIL",
+      "entity_type": "ORG",
+      "start_pos": 4062,
+      "end_pos": 4066
+    },
+    {
+      "entity_text": "LYSORA LOGICIELS SAS",
+      "entity_type": "ORG",
+      "start_pos": 4162,
+      "end_pos": 4182
+    },
+    {
+      "entity_text": "rue des Ateliers",
+      "entity_type": "LOCATION",
+      "start_pos": 4238,
+      "end_pos": 4254
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 4262,
+      "end_pos": 4266
+    },
+    {
+      "entity_text": "Lysora Logiciels",
+      "entity_type": "ORG",
+      "start_pos": 4418,
+      "end_pos": 4434
+    },
+    {
+      "entity_text": "Auvergne-Rhône-Alpes",
+      "entity_type": "LOCATION",
+      "start_pos": 4754,
+      "end_pos": 4774
+    },
+    {
+      "entity_text": "Lysora Logiciels",
+      "entity_type": "ORG",
+      "start_pos": 4831,
+      "end_pos": 4847
+    },
+    {
+      "entity_text": "Camille Roussel",
+      "entity_type": "PERSON",
+      "start_pos": 5040,
+      "end_pos": 5055
+    },
+    {
+      "entity_text": "Élodie Chenet",
+      "entity_type": "PERSON",
+      "start_pos": 5059,
+      "end_pos": 5072
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 5123,
+      "end_pos": 5127
+    },
+    {
+      "entity_text": "LYSORA LOGICIELS SAS",
+      "entity_type": "ORG",
+      "start_pos": 5185,
+      "end_pos": 5205
+    },
+    {
+      "entity_text": "Agence Terrale Auvergne",
+      "entity_type": "ORG",
+      "start_pos": 5224,
+      "end_pos": 5247
+    },
+    {
+      "entity_text": "Auvergne",
+      "entity_type": "LOCATION",
+      "start_pos": 5239,
+      "end_pos": 5247
+    },
+    {
+      "entity_text": "Camille ROUSSEL",
+      "entity_type": "PERSON",
+      "start_pos": 5249,
+      "end_pos": 5264
+    },
+    {
+      "entity_text": "Nadim BELARBI",
+      "entity_type": "PERSON",
+      "start_pos": 5289,
+      "end_pos": 5302
+    },
+    {
+      "entity_text": "Lysora Logiciels SAS",
+      "entity_type": "ORG",
+      "start_pos": 5457,
+      "end_pos": 5477
+    },
+    {
+      "entity_text": "rue des Ateliers",
+      "entity_type": "LOCATION",
+      "start_pos": 5481,
+      "end_pos": 5497
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 5504,
+      "end_pos": 5508
+    },
+    {
+      "entity_text": "Agence Terrale Auvergne",
+      "entity_type": "ORG",
+      "start_pos": 5537,
+      "end_pos": 5560
+    },
+    {
+      "entity_text": "Auvergne",
+      "entity_type": "LOCATION",
+      "start_pos": 5552,
+      "end_pos": 5560
+    },
+    {
+      "entity_text": "passage des Vignes",
+      "entity_type": "LOCATION",
+      "start_pos": 5563,
+      "end_pos": 5581
+    },
+    {
+      "entity_text": "Clermont-Ferrand",
+      "entity_type": "LOCATION",
+      "start_pos": 5588,
+      "end_pos": 5604
+    }
+  ]
+}

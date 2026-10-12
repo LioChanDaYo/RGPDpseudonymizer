@@ -1,0 +1,653 @@
+{
+  "document_name": "fe_26.txt",
+  "entities": [
+    {
+      "entity_text": "CABINET ARBORES DROIT DES AFFAIRES",
+      "entity_type": "ORG",
+      "start_pos": 0,
+      "end_pos": 34
+    },
+    {
+      "entity_text": "Claire Nivelle",
+      "entity_type": "PERSON",
+      "start_pos": 141,
+      "end_pos": 155
+    },
+    {
+      "entity_text": "MAISON CLAIRVAL SAS",
+      "entity_type": "ORG",
+      "start_pos": 190,
+      "end_pos": 209
+    },
+    {
+      "entity_text": "Maison Clairval SAS",
+      "entity_type": "ORG",
+      "start_pos": 237,
+      "end_pos": 256
+    },
+    {
+      "entity_text": "rue des Tilleuls",
+      "entity_type": "LOCATION",
+      "start_pos": 334,
+      "end_pos": 350
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 358,
+      "end_pos": 362
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 387,
+      "end_pos": 391
+    },
+    {
+      "entity_text": "Léonie de Brémont",
+      "entity_type": "PERSON",
+      "start_pos": 457,
+      "end_pos": 474
+    },
+    {
+      "entity_text": "Léonie de Brémont",
+      "entity_type": "PERSON",
+      "start_pos": 487,
+      "end_pos": 504
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 531,
+      "end_pos": 537
+    },
+    {
+      "entity_text": "passage des Vignes",
+      "entity_type": "LOCATION",
+      "start_pos": 551,
+      "end_pos": 569
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 577,
+      "end_pos": 583
+    },
+    {
+      "entity_text": "Marc du Sault",
+      "entity_type": "PERSON",
+      "start_pos": 598,
+      "end_pos": 611
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 634,
+      "end_pos": 638
+    },
+    {
+      "entity_text": "impasse du Verger",
+      "entity_type": "LOCATION",
+      "start_pos": 652,
+      "end_pos": 669
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 677,
+      "end_pos": 681
+    },
+    {
+      "entity_text": "Inès del Monte",
+      "entity_type": "PERSON",
+      "start_pos": 694,
+      "end_pos": 708
+    },
+    {
+      "entity_text": "Marseille",
+      "entity_type": "LOCATION",
+      "start_pos": 732,
+      "end_pos": 741
+    },
+    {
+      "entity_text": "rue du Port-Neuf",
+      "entity_type": "LOCATION",
+      "start_pos": 756,
+      "end_pos": 772
+    },
+    {
+      "entity_text": "Marseille",
+      "entity_type": "LOCATION",
+      "start_pos": 780,
+      "end_pos": 789
+    },
+    {
+      "entity_text": "Sacha van der Linde",
+      "entity_type": "PERSON",
+      "start_pos": 804,
+      "end_pos": 823
+    },
+    {
+      "entity_text": "Bruxelles",
+      "entity_type": "LOCATION",
+      "start_pos": 850,
+      "end_pos": 859
+    },
+    {
+      "entity_text": "Belgique",
+      "entity_type": "LOCATION",
+      "start_pos": 861,
+      "end_pos": 869
+    },
+    {
+      "entity_text": "allée des Frênes",
+      "entity_type": "LOCATION",
+      "start_pos": 884,
+      "end_pos": 900
+    },
+    {
+      "entity_text": "Lille",
+      "entity_type": "LOCATION",
+      "start_pos": 908,
+      "end_pos": 913
+    },
+    {
+      "entity_text": "Cabinet\nArbores Droit des Affaires",
+      "entity_type": "ORG",
+      "start_pos": 1027,
+      "end_pos": 1061
+    },
+    {
+      "entity_text": "Banque Populaire Auvergne Rhône Alpes",
+      "entity_type": "ORG",
+      "start_pos": 1067,
+      "end_pos": 1104
+    },
+    {
+      "entity_text": "Auvergne Rhône Alpes",
+      "entity_type": "LOCATION",
+      "start_pos": 1084,
+      "end_pos": 1104
+    },
+    {
+      "entity_text": "Nora Kacem",
+      "entity_type": "PERSON",
+      "start_pos": 1132,
+      "end_pos": 1142
+    },
+    {
+      "entity_text": "Greffe du tribunal de commerce\nde Lyon",
+      "entity_type": "ORG",
+      "start_pos": 1149,
+      "end_pos": 1187
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 1183,
+      "end_pos": 1187
+    },
+    {
+      "entity_text": "Maison Clairval SAS",
+      "entity_type": "ORG",
+      "start_pos": 1361,
+      "end_pos": 1380
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 1500,
+      "end_pos": 1504
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 1506,
+      "end_pos": 1512
+    },
+    {
+      "entity_text": "Marseille",
+      "entity_type": "LOCATION",
+      "start_pos": 1514,
+      "end_pos": 1523
+    },
+    {
+      "entity_text": "Lille",
+      "entity_type": "LOCATION",
+      "start_pos": 1527,
+      "end_pos": 1532
+    },
+    {
+      "entity_text": "Saint-Étienne",
+      "entity_type": "LOCATION",
+      "start_pos": 1564,
+      "end_pos": 1577
+    },
+    {
+      "entity_text": "de Brémont",
+      "entity_type": "PERSON",
+      "start_pos": 1612,
+      "end_pos": 1622
+    },
+    {
+      "entity_text": "Maison Clairval SAS",
+      "entity_type": "ORG",
+      "start_pos": 1649,
+      "end_pos": 1668
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 1758,
+      "end_pos": 1764
+    },
+    {
+      "entity_text": "Bruxelles",
+      "entity_type": "LOCATION",
+      "start_pos": 1778,
+      "end_pos": 1787
+    },
+    {
+      "entity_text": "Milan",
+      "entity_type": "LOCATION",
+      "start_pos": 1791,
+      "end_pos": 1796
+    },
+    {
+      "entity_text": "du Sault",
+      "entity_type": "PERSON",
+      "start_pos": 1881,
+      "end_pos": 1889
+    },
+    {
+      "entity_text": "Saint-Étienne",
+      "entity_type": "LOCATION",
+      "start_pos": 1939,
+      "end_pos": 1952
+    },
+    {
+      "entity_text": "del Monte",
+      "entity_type": "PERSON",
+      "start_pos": 1961,
+      "end_pos": 1970
+    },
+    {
+      "entity_text": "Épiceries du Levant SARL",
+      "entity_type": "ORG",
+      "start_pos": 2006,
+      "end_pos": 2030
+    },
+    {
+      "entity_text": "Marchés Clairs Distribution",
+      "entity_type": "ORG",
+      "start_pos": 2032,
+      "end_pos": 2059
+    },
+    {
+      "entity_text": "Les Vergers du Midi",
+      "entity_type": "ORG",
+      "start_pos": 2078,
+      "end_pos": 2097
+    },
+    {
+      "entity_text": "Midi",
+      "entity_type": "LOCATION",
+      "start_pos": 2093,
+      "end_pos": 2097
+    },
+    {
+      "entity_text": "van der Linde",
+      "entity_type": "PERSON",
+      "start_pos": 2108,
+      "end_pos": 2121
+    },
+    {
+      "entity_text": "FoodCraft Belgium SRL",
+      "entity_type": "ORG",
+      "start_pos": 2148,
+      "end_pos": 2169
+    },
+    {
+      "entity_text": "Belgium",
+      "entity_type": "LOCATION",
+      "start_pos": 2158,
+      "end_pos": 2165
+    },
+    {
+      "entity_text": "Logistica Nord Italia Srl",
+      "entity_type": "ORG",
+      "start_pos": 2173,
+      "end_pos": 2198
+    },
+    {
+      "entity_text": "Nord Italia",
+      "entity_type": "LOCATION",
+      "start_pos": 2183,
+      "end_pos": 2194
+    },
+    {
+      "entity_text": "Maison Clairval SAS",
+      "entity_type": "ORG",
+      "start_pos": 2261,
+      "end_pos": 2280
+    },
+    {
+      "entity_text": "de Brémont",
+      "entity_type": "PERSON",
+      "start_pos": 2554,
+      "end_pos": 2564
+    },
+    {
+      "entity_text": "du Sault",
+      "entity_type": "PERSON",
+      "start_pos": 2578,
+      "end_pos": 2586
+    },
+    {
+      "entity_text": "del Monte",
+      "entity_type": "PERSON",
+      "start_pos": 2598,
+      "end_pos": 2607
+    },
+    {
+      "entity_text": "van der Linde",
+      "entity_type": "PERSON",
+      "start_pos": 2623,
+      "end_pos": 2636
+    },
+    {
+      "entity_text": "Maison Clairval SAS",
+      "entity_type": "ORG",
+      "start_pos": 2839,
+      "end_pos": 2858
+    },
+    {
+      "entity_text": "Karim Viala",
+      "entity_type": "PERSON",
+      "start_pos": 2973,
+      "end_pos": 2984
+    },
+    {
+      "entity_text": "Carrefour Proximité France",
+      "entity_type": "ORG",
+      "start_pos": 3100,
+      "end_pos": 3126
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 3120,
+      "end_pos": 3126
+    },
+    {
+      "entity_text": "Banque Populaire Auvergne Rhône\nAlpes",
+      "entity_type": "ORG",
+      "start_pos": 3128,
+      "end_pos": 3165
+    },
+    {
+      "entity_text": "Auvergne Rhône\nAlpes",
+      "entity_type": "LOCATION",
+      "start_pos": 3145,
+      "end_pos": 3165
+    },
+    {
+      "entity_text": "FoodCraft Belgium SRL",
+      "entity_type": "ORG",
+      "start_pos": 3167,
+      "end_pos": 3188
+    },
+    {
+      "entity_text": "Belgium",
+      "entity_type": "LOCATION",
+      "start_pos": 3177,
+      "end_pos": 3184
+    },
+    {
+      "entity_text": "Logistica Nord Italia Srl",
+      "entity_type": "ORG",
+      "start_pos": 3192,
+      "end_pos": 3217
+    },
+    {
+      "entity_text": "Nord Italia",
+      "entity_type": "LOCATION",
+      "start_pos": 3202,
+      "end_pos": 3213
+    },
+    {
+      "entity_text": "Tribunal de commerce de Lyon",
+      "entity_type": "ORG",
+      "start_pos": 3368,
+      "end_pos": 3396
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 3392,
+      "end_pos": 3396
+    },
+    {
+      "entity_text": "Centre de médiation des entreprises de Lyon",
+      "entity_type": "ORG",
+      "start_pos": 3446,
+      "end_pos": 3489
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 3485,
+      "end_pos": 3489
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 3499,
+      "end_pos": 3503
+    },
+    {
+      "entity_text": "Léonie de Brémont",
+      "entity_type": "PERSON",
+      "start_pos": 3571,
+      "end_pos": 3588
+    },
+    {
+      "entity_text": "Marc du Sault",
+      "entity_type": "PERSON",
+      "start_pos": 3596,
+      "end_pos": 3609
+    },
+    {
+      "entity_text": "Inès del Monte",
+      "entity_type": "PERSON",
+      "start_pos": 3610,
+      "end_pos": 3624
+    },
+    {
+      "entity_text": "Sacha van der Linde",
+      "entity_type": "PERSON",
+      "start_pos": 3635,
+      "end_pos": 3654
+    },
+    {
+      "entity_text": "Maison Clairval SAS",
+      "entity_type": "ORG",
+      "start_pos": 3660,
+      "end_pos": 3679
+    },
+    {
+      "entity_text": "Léonie de Brémont",
+      "entity_type": "PERSON",
+      "start_pos": 3681,
+      "end_pos": 3698
+    },
+    {
+      "entity_text": "DE BRÉMONT Léonie",
+      "entity_type": "PERSON",
+      "start_pos": 3803,
+      "end_pos": 3820
+    },
+    {
+      "entity_text": "passage des Vignes",
+      "entity_type": "LOCATION",
+      "start_pos": 3836,
+      "end_pos": 3854
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 3856,
+      "end_pos": 3862
+    },
+    {
+      "entity_text": "DU SAULT Marc",
+      "entity_type": "PERSON",
+      "start_pos": 3935,
+      "end_pos": 3948
+    },
+    {
+      "entity_text": "impasse du Verger",
+      "entity_type": "LOCATION",
+      "start_pos": 3974,
+      "end_pos": 3991
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 3993,
+      "end_pos": 3997
+    },
+    {
+      "entity_text": "DEL MONTE Inès",
+      "entity_type": "PERSON",
+      "start_pos": 4066,
+      "end_pos": 4080
+    },
+    {
+      "entity_text": "rue du Port-Neuf",
+      "entity_type": "LOCATION",
+      "start_pos": 4107,
+      "end_pos": 4123
+    },
+    {
+      "entity_text": "Marseille",
+      "entity_type": "LOCATION",
+      "start_pos": 4125,
+      "end_pos": 4134
+    },
+    {
+      "entity_text": "VAN DER LINDE Sacha",
+      "entity_type": "PERSON",
+      "start_pos": 4198,
+      "end_pos": 4217
+    },
+    {
+      "entity_text": "allée des Frênes",
+      "entity_type": "LOCATION",
+      "start_pos": 4238,
+      "end_pos": 4254
+    },
+    {
+      "entity_text": "Lille",
+      "entity_type": "LOCATION",
+      "start_pos": 4256,
+      "end_pos": 4261
+    },
+    {
+      "entity_text": "Viala Karim",
+      "entity_type": "PERSON",
+      "start_pos": 4336,
+      "end_pos": 4347
+    },
+    {
+      "entity_text": "rue des Écoles",
+      "entity_type": "LOCATION",
+      "start_pos": 4373,
+      "end_pos": 4387
+    },
+    {
+      "entity_text": "Villeurbanne",
+      "entity_type": "LOCATION",
+      "start_pos": 4389,
+      "end_pos": 4401
+    },
+    {
+      "entity_text": "Maison Clairval SAS",
+      "entity_type": "ORG",
+      "start_pos": 4560,
+      "end_pos": 4579
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 4582,
+      "end_pos": 4586
+    },
+    {
+      "entity_text": "Banque Populaire Auvergne Rhône Alpes",
+      "entity_type": "ORG",
+      "start_pos": 4639,
+      "end_pos": 4676
+    },
+    {
+      "entity_text": "Auvergne Rhône Alpes",
+      "entity_type": "LOCATION",
+      "start_pos": 4656,
+      "end_pos": 4676
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 4679,
+      "end_pos": 4683
+    },
+    {
+      "entity_text": "INSEE",
+      "entity_type": "ORG",
+      "start_pos": 4764,
+      "end_pos": 4769
+    },
+    {
+      "entity_text": "Paris",
+      "entity_type": "LOCATION",
+      "start_pos": 4772,
+      "end_pos": 4777
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 4816,
+      "end_pos": 4820
+    },
+    {
+      "entity_text": "Parc d'activités des Plaines",
+      "entity_type": "LOCATION",
+      "start_pos": 4847,
+      "end_pos": 4875
+    },
+    {
+      "entity_text": "Saint-Étienne",
+      "entity_type": "LOCATION",
+      "start_pos": 4877,
+      "end_pos": 4890
+    },
+    {
+      "entity_text": "Nora Kacem",
+      "entity_type": "PERSON",
+      "start_pos": 4926,
+      "end_pos": 4936
+    },
+    {
+      "entity_text": "Cabinet Arbores Droit des Affaires",
+      "entity_type": "ORG",
+      "start_pos": 5018,
+      "end_pos": 5052
+    },
+    {
+      "entity_text": "Nora Kacem",
+      "entity_type": "PERSON",
+      "start_pos": 5065,
+      "end_pos": 5075
+    }
+  ]
+}
