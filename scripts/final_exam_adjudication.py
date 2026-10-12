@@ -8,6 +8,7 @@ Sub-commands (Dev Notes "PR B Design")::
     merge --workspace <dir>
     report --workspace <dir>
     guard-report --workspace <dir> --annotations <dir>
+    serve --workspace <dir> [--port 8765] [--open] [--guidelines <GUIDELINES.md>]
 
 Every sub-command prints ids, paths, counts and hashes only, never document
 or annotation text. Every error prints ``ERROR <id> <ExceptionClass>`` (the
@@ -24,10 +25,14 @@ from __future__ import annotations
 import argparse
 import html
 import json
+import os
 import random
 import re
+import socket
 import sys
+import webbrowser
 from dataclasses import dataclass
+from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -1027,6 +1032,1104 @@ def cmd_guard_report(workspace: Path, annotations: Path) -> int:
 
 
 # ---------------------------------------------------------------------------
+# serve: one group at a time in the browser (story precision, 2026-10-12)
+# ---------------------------------------------------------------------------
+#
+# A local, stdlib-only server for Lionel's adjudication. It reads and writes
+# the same decisions.tsv, occurrences.tsv and spotcheck.tsv as the TSV route,
+# with the same groups, ids and refusal rules (apply_decision,
+# apply_spotcheck), so `merge` is unchanged. It prints its URL and request
+# counts only; an error prints its class and an anonymous id, never text.
+
+DEFAULT_PORT = 8765
+PORT_TRIES = 20
+GUIDELINES_PATH = REPO_ROOT / "tests" / "test_corpus" / "annotations" / "GUIDELINES.md"
+SPOT_HEADER = "document\tcorrection\tnote"
+SPOT_DONE = "NONE"
+
+
+def atomic_write_text(path: Path, text: str) -> None:
+    """Write ``text`` to a temporary file next to ``path``, then replace it.
+
+    A crash before the replace leaves ``path`` as it was; a stale temporary
+    file is overwritten by the next write and never read.
+    """
+    tmp = path.with_name(f".{path.name}.tmp")
+    with open(tmp, "w", encoding="utf-8", newline="\n") as f:
+        f.write(text)
+        f.flush()
+        os.fsync(f.fileno())
+    os.replace(tmp, path)
+
+
+def clean_note(note: str) -> str:
+    """One line, no tab: a note must not break the TSV."""
+    return " ".join(str(note).replace("\t", " ").split())
+
+
+def _rows_text(header: str, rows: list[list[str]]) -> str:
+    return "\n".join([header] + ["\t".join(r) for r in rows]) + "\n"
+
+
+def _pad(cells: list[str], n: int) -> list[str]:
+    return (cells + [""] * n)[:n]
+
+
+def guidelines_html(path: Path) -> str:
+    """A small Markdown renderer for GUIDELINES.md (headings, lists, tables,
+    bold, inline code). The file holds rules only, no exam content."""
+
+    def inline(s: str) -> str:
+        s = html.escape(s)
+        s = re.sub(r"`([^`]+)`", r"<code>\1</code>", s)
+        return re.sub(r"\*\*([^*]+)\*\*", r"<b>\1</b>", s)
+
+    out: list[str] = []
+    in_list = in_table = False
+    for line in path.read_text(encoding="utf-8").split("\n"):
+        stripped = line.strip()
+        if in_list and not stripped.startswith("- "):
+            out.append("</ul>")
+            in_list = False
+        if in_table and not stripped.startswith("|"):
+            out.append("</table>")
+            in_table = False
+        if not stripped:
+            continue
+        if stripped.startswith("#"):
+            level = min(len(stripped) - len(stripped.lstrip("#")), 4)
+            out.append(f"<h{level}>{inline(stripped.lstrip('#').strip())}</h{level}>")
+        elif stripped.startswith("- "):
+            if not in_list:
+                out.append("<ul>")
+                in_list = True
+            out.append(f"<li>{inline(stripped[2:])}</li>")
+        elif stripped.startswith("|"):
+            cells = [c.strip() for c in stripped.strip("|").split("|")]
+            if all(re.fullmatch(r":?-{3,}:?", c) for c in cells):
+                continue
+            if not in_table:
+                out.append("<table>")
+                in_table = True
+            out.append(
+                "<tr>" + "".join(f"<td>{inline(c)}</td>" for c in cells) + "</tr>"
+            )
+        elif stripped == "---":
+            out.append("<hr>")
+        else:
+            out.append(f"<p>{inline(stripped)}</p>")
+    if in_list:
+        out.append("</ul>")
+    if in_table:
+        out.append("</table>")
+    return "\n".join(out)
+
+
+class AdjudicationApp:
+    """The adjudication state behind ``serve``: the workspace's groups and the
+    three decision files, resumed from whatever they already contain."""
+
+    def __init__(self, workspace: Path, guidelines: Path = GUIDELINES_PATH) -> None:
+        self.workspace = workspace
+        self.guidelines = guidelines
+        self.groups, self.texts = build_groups(workspace)
+        self.by_gid = {g.gid: g for g in self.groups}
+        self.by_did = {d.did: (g, d) for g in self.groups for d in g.members}
+        self.requests = 0
+        self.saves = 0
+        self.dec_rows = self._load(
+            "decisions.tsv", DECISIONS_HEADER, 5, [g.gid for g in self.groups]
+        )
+        self.occ_rows = self._load(
+            "occurrences.tsv",
+            OCCURRENCES_HEADER,
+            5,
+            [d.did for g in self.groups for d in g.members],
+        )
+        halves = load_manifest(workspace)
+        self.spot_docs = sorted(spotcheck_documents(halves))
+        self.spot_rows = [
+            _pad(cells, 3)
+            for _, cells in read_tsv(workspace / "spotcheck.tsv", SPOT_HEADER)
+        ]
+        if any(r[0] not in self.spot_docs for r in self.spot_rows):
+            raise DecisionError("unknown spot-check document", where="spotcheck.tsv")
+        self.spot_named: dict[str, dict[str, Span]] = {}
+        for doc_id in self.spot_docs:
+            _, agreed, _ = doc_state(workspace, doc_id)
+            self.spot_named[doc_id] = agreed_ids(doc_id, agreed)
+            self.texts.setdefault(
+                doc_id,
+                (workspace / "documents" / f"{doc_id}.txt").read_text(encoding="utf-8"),
+            )
+
+    def _load(
+        self, name: str, header: str, width: int, expected: list[str]
+    ) -> dict[str, list[str]]:
+        """Rows keyed by their first cell, in file order; the ids must be exactly
+        the ones `view` wrote."""
+        rows: dict[str, list[str]] = {}
+        for where, cells in read_tsv(self.workspace / name, header):
+            cells = _pad(cells, width)
+            if cells[0] in rows:
+                raise DecisionError("duplicate row", where=where)
+            rows[cells[0]] = cells
+        if list(rows) != expected:
+            raise DecisionError("rows differ from the view", where=name)
+        return rows
+
+    # -- decisions --------------------------------------------------------
+
+    def _check(self, members: tuple[Disagreement, ...], code: str, note: str) -> None:
+        if code in ("", SPLIT):
+            return
+        if code == "?":
+            if not note:
+                raise DecisionError("a note is required with ?", where=members[0].did)
+            return
+        for d in members:
+            if code == "BOTH" and d.cls == "type":
+                raise DecisionError(
+                    "BOTH is not allowed on a type group: one span cannot have two types",
+                    where=d.did,
+                )
+            if code in ("A", "BOTH") and d.a is None:
+                raise DecisionError("A has no span here", where=d.did)
+            if code in ("B", "BOTH") and d.b is None:
+                raise DecisionError("B has no span here", where=d.did)
+            apply_decision(self.texts[d.did.split("-")[0]], d, code)
+
+    def _occurrence_done(self, did: str) -> bool:
+        code = self.occ_rows[did][3]
+        return bool(code) and code != "?"
+
+    def _group_done(self, g: Group) -> bool:
+        code = self.dec_rows[g.gid][3]
+        if code == SPLIT:
+            return all(self._occurrence_done(d.did) for d in g.members)
+        return bool(code) and code != "?"
+
+    def progress(self) -> dict[str, int]:
+        unsure = sum(1 for r in self.dec_rows.values() if r[3] == "?")
+        unsure += sum(
+            1
+            for g in self.groups
+            if self.dec_rows[g.gid][3] == SPLIT
+            for d in g.members
+            if self.occ_rows[d.did][3] == "?"
+        )
+        return {
+            "decided": sum(1 for g in self.groups if self._group_done(g)),
+            "total": len(self.groups),
+            "unsure": unsure,
+            "spot_finished": sum(1 for d in self.spot_docs if self._spot_finished(d)),
+            "spot_total": len(self.spot_docs),
+        }
+
+    def _write_decisions(self) -> None:
+        atomic_write_text(
+            self.workspace / "decisions.tsv",
+            _rows_text(DECISIONS_HEADER, list(self.dec_rows.values())),
+        )
+        atomic_write_text(
+            self.workspace / "occurrences.tsv",
+            _rows_text(OCCURRENCES_HEADER, list(self.occ_rows.values())),
+        )
+        self.saves += 1
+
+    def set_group(self, gid: str, code: str, note: str) -> dict[str, object]:
+        if gid not in self.by_gid:
+            raise DecisionError("unknown group", where="-")
+        g = self.by_gid[gid]
+        code, note = str(code).strip(), clean_note(note)
+        self._check(g.members, code, note)
+        self.dec_rows[gid][3] = code
+        self.dec_rows[gid][4] = note
+        if code != SPLIT:
+            for d in g.members:
+                self.occ_rows[d.did][3] = ""
+        self._write_decisions()
+        return self.group_json(g)
+
+    def set_occurrence(self, did: str, code: str, note: str) -> dict[str, object]:
+        if did not in self.by_did:
+            raise DecisionError("unknown occurrence", where="-")
+        g, d = self.by_did[did]
+        if self.dec_rows[g.gid][3] != SPLIT:
+            raise DecisionError("the group is not split", where=did)
+        code, note = str(code).strip(), clean_note(note)
+        if code == SPLIT:
+            raise DecisionError("SPLIT is not an occurrence code", where=did)
+        self._check((d,), code, note)
+        self.occ_rows[did][3] = code
+        self.occ_rows[did][4] = note
+        self._write_decisions()
+        return self.group_json(g)
+
+    # -- spot-check -------------------------------------------------------
+
+    def _spot_finished(self, doc_id: str) -> bool:
+        codes = [r[1] for r in self.spot_rows if r[0] == doc_id]
+        return bool(codes) and all(codes)
+
+    def set_spotcheck(
+        self, doc_id: str, corrections: list[dict[str, str]], finished: bool
+    ) -> dict[str, object]:
+        """Replace one document's rows. Until it is finished, the document keeps
+        an empty row, which `merge` refuses; finished with no finding is NONE."""
+        if doc_id not in self.spot_docs:
+            raise DecisionError("unknown spot-check document", where="-")
+        rows = [
+            [doc_id, str(c.get("code", "")).strip(), clean_note(c.get("note", ""))]
+            for c in corrections
+        ]
+        if any(not r[1] or r[1] == SPOT_DONE for r in rows):
+            raise DecisionError("empty or NONE correction", where=doc_id)
+        spans = list(self.spot_named[doc_id].values())
+        for n, r in enumerate(rows, start=1):
+            try:
+                spans, _, _ = apply_spotcheck(
+                    self.texts[doc_id], doc_id, spans, self.spot_named[doc_id], r[1]
+                )
+            except DecisionError as exc:
+                raise DecisionError(exc.args[0], where=f"{doc_id}#{n}") from exc
+        if finished and not rows:
+            rows = [[doc_id, SPOT_DONE, ""]]
+        elif not finished:
+            rows.append([doc_id, "", ""])
+        others = {d: [r for r in self.spot_rows if r[0] == d] for d in self.spot_docs}
+        others[doc_id] = rows
+        self.spot_rows = [r for d in self.spot_docs for r in others[d]]
+        atomic_write_text(
+            self.workspace / "spotcheck.tsv", _rows_text(SPOT_HEADER, self.spot_rows)
+        )
+        self.saves += 1
+        return self.spot_json(doc_id)
+
+    # -- JSON for the page --------------------------------------------------
+
+    def _occurrence_json(self, d: Disagreement) -> dict[str, object]:
+        text = self.texts[d.did.split("-")[0]]
+        lo, hi = snippet_window(text, d)
+        clo, chi = context_window(text, d.start, d.end)
+
+        def rel(s: Span | None, base: int) -> list[int] | None:
+            return None if s is None else [s.start - base, s.end - base]
+
+        return {
+            "did": d.did,
+            "doc": d.did.split("-")[0],
+            "a_text": d.a.text if d.a else None,
+            "b_text": d.b.text if d.b else None,
+            "a_type": d.a.etype if d.a else None,
+            "b_type": d.b.etype if d.b else None,
+            "snip": {"text": text[lo:hi], "a": rel(d.a, lo), "b": rel(d.b, lo)},
+            "ctx": {"text": text[clo:chi], "start": d.start - clo, "end": d.end - clo},
+            "decision": self.occ_rows[d.did][3],
+            "note": self.occ_rows[d.did][4],
+        }
+
+    def group_json(self, g: Group) -> dict[str, object]:
+        first = g.members[0]
+        return {
+            "gid": g.gid,
+            "cls": g.cls,
+            "count": len(g.members),
+            "a_type": g.key[1] if g.key[1] != "-" else None,
+            "b_type": g.key[3] if g.key[3] != "-" else None,
+            "a_text": first.a.text if first.a else None,
+            "b_text": first.b.text if first.b else None,
+            "decision": self.dec_rows[g.gid][3],
+            "note": self.dec_rows[g.gid][4],
+            "done": self._group_done(g),
+            "occurrences": [self._occurrence_json(d) for d in g.members],
+        }
+
+    def spot_json(self, doc_id: str) -> dict[str, object]:
+        rows = [r for r in self.spot_rows if r[0] == doc_id]
+        return {
+            "doc": doc_id,
+            "text": self.texts[doc_id],
+            "spans": [
+                {
+                    "id": sid,
+                    "start": s.start,
+                    "end": s.end,
+                    "type": s.etype,
+                    "text": s.text,
+                }
+                for sid, s in self.spot_named[doc_id].items()
+            ],
+            "corrections": [
+                {"code": r[1], "note": r[2]} for r in rows if r[1] and r[1] != SPOT_DONE
+            ],
+            "finished": self._spot_finished(doc_id),
+        }
+
+    def state(self) -> dict[str, object]:
+        return {
+            "groups": [self.group_json(g) for g in self.groups],
+            "spot": [self.spot_json(d) for d in self.spot_docs],
+            "progress": self.progress(),
+            "types": list(TYPES),
+        }
+
+
+class _Handler(BaseHTTPRequestHandler):
+    server_version = "FinalExamAdjudication/1"
+    app: AdjudicationApp
+    origins: frozenset[str]
+
+    def log_message(self, fmt: str, *args: object) -> None:
+        """No request lines: paths and bodies are never printed."""
+
+    def _send(self, status: int, body: bytes, ctype: str) -> None:
+        self.send_response(status)
+        self.send_header("Content-Type", ctype)
+        self.send_header("Content-Length", str(len(body)))
+        self.send_header("Cache-Control", "no-store")
+        self.end_headers()
+        self.wfile.write(body)
+
+    def _json(self, status: int, data: object) -> None:
+        self._send(
+            status,
+            json.dumps(data, ensure_ascii=False).encode("utf-8"),
+            "application/json; charset=utf-8",
+        )
+
+    def _allowed(self) -> bool:
+        host = self.headers.get("Host", "")
+        origin = self.headers.get("Origin")
+        hosts = {o.split("//", 1)[1] for o in self.origins}
+        return host in hosts and (origin is None or origin in self.origins)
+
+    def _count(self) -> None:
+        app = self.app
+        app.requests += 1
+        if app.requests % 25 == 0:
+            print(f"requests={app.requests} saves={app.saves}", flush=True)
+
+    def do_GET(self) -> None:  # noqa: N802
+        self._count()
+        if not self._allowed():
+            self._json(403, {"error": "Forbidden"})
+            return
+        try:
+            if self.path == "/":
+                self._send(200, UI_HTML.encode("utf-8"), "text/html; charset=utf-8")
+            elif self.path == "/api/state":
+                self._json(200, self.app.state())
+            elif self.path == "/api/guidelines":
+                body = guidelines_html(self.app.guidelines).encode("utf-8")
+                self._send(200, body, "text/html; charset=utf-8")
+            else:
+                self._json(404, {"error": "NotFound"})
+        except Exception as exc:  # noqa: BLE001 - class only (Error Output)
+            print(f"ERROR - {type(exc).__name__}", flush=True)
+            self._json(500, {"error": type(exc).__name__})
+
+    def do_POST(self) -> None:  # noqa: N802
+        self._count()
+        if not self._allowed():
+            self._json(403, {"error": "Forbidden"})
+            return
+        try:
+            length = int(self.headers.get("Content-Length", "0"))
+            data = json.loads(self.rfile.read(length).decode("utf-8") or "{}")
+            app = self.app
+            if self.path == "/api/group":
+                group = app.set_group(
+                    data["gid"], data["decision"], data.get("note", "")
+                )
+                self._json(200, {"group": group, "progress": app.progress()})
+            elif self.path == "/api/occurrence":
+                group = app.set_occurrence(
+                    data["did"], data["decision"], data.get("note", "")
+                )
+                self._json(200, {"group": group, "progress": app.progress()})
+            elif self.path == "/api/spotcheck":
+                doc = app.set_spotcheck(
+                    data["doc"],
+                    list(data.get("corrections", [])),
+                    bool(data["finished"]),
+                )
+                self._json(200, {"doc": doc, "progress": app.progress()})
+            else:
+                self._json(404, {"error": "NotFound"})
+        except AnonymousError as exc:
+            print(f"ERROR {exc.where} {type(exc).__name__}", flush=True)
+            self._json(
+                400,
+                {
+                    "error": type(exc).__name__,
+                    "where": exc.where,
+                    "reason": exc.args[0],
+                },
+            )
+        except Exception as exc:  # noqa: BLE001 - class only (Error Output)
+            print(f"ERROR - {type(exc).__name__}", flush=True)
+            self._json(500, {"error": type(exc).__name__})
+
+
+class _Server(HTTPServer):
+    """No port sharing: with SO_REUSEADDR, Windows would let a second server
+    bind a port already in use, and the fallback would never happen."""
+
+    allow_reuse_address = False
+
+    def server_bind(self) -> None:
+        if hasattr(socket, "SO_EXCLUSIVEADDRUSE"):
+            self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
+        super().server_bind()
+
+
+def make_server(app: AdjudicationApp, port: int = DEFAULT_PORT) -> HTTPServer:
+    """Bind 127.0.0.1 on ``port``, or the next free one (``port=0``: any)."""
+    last: OSError | None = None
+    for candidate in [0] if port == 0 else range(port, port + PORT_TRIES):
+        try:
+            server = _Server(("127.0.0.1", candidate), _Handler)
+        except OSError as exc:
+            last = exc
+            continue
+        bound = server.server_address[1]
+        handler = type(
+            "Handler",
+            (_Handler,),
+            {
+                "app": app,
+                "origins": frozenset(
+                    {f"http://127.0.0.1:{bound}", f"http://localhost:{bound}"}
+                ),
+            },
+        )
+        server.RequestHandlerClass = handler
+        return server
+    raise last if last else OSError("no free port")
+
+
+def cmd_serve(workspace: Path, port: int, open_browser: bool, guidelines: Path) -> int:
+    app = AdjudicationApp(workspace, guidelines)
+    server = make_server(app, port)
+    url = f"http://127.0.0.1:{server.server_address[1]}/"
+    print(f"serve url={url}", flush=True)
+    print("Close this window (or press Ctrl+C) to stop.", flush=True)
+    if open_browser:
+        webbrowser.open(url)
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        pass
+    finally:
+        server.server_close()
+        print(f"stopped requests={app.requests} saves={app.saves}", flush=True)
+    return 0
+
+
+UI_HTML = r"""<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Final exam adjudication</title>
+<style>
+:root { --a: #cfe8ff; --a-strong: #2b7bd6; --b: #ffe2b8; --b-strong: #d9822b; --g: #d8f5d0; --ink: #1d1f24; --muted: #646a73; --line: #d9dce1; --bg: #f7f8fa; --ok: #2e8b57; --warn: #b54708; }
+* { box-sizing: border-box; }
+body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--ink); background: var(--bg); }
+header { display: flex; gap: 12px; align-items: center; padding: 10px 16px; background: #fff; border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 5; flex-wrap: wrap; }
+header .tabs button { font-size: 15px; padding: 6px 14px; border: 1px solid var(--line); background: #fff; border-radius: 6px; cursor: pointer; }
+header .tabs button.on { background: var(--ink); color: #fff; }
+#progress { font-weight: 600; }
+#status { color: var(--muted); font-size: 14px; min-width: 120px; }
+#status.err { color: var(--warn); font-weight: 600; }
+.spacer { flex: 1; }
+main { max-width: 1100px; margin: 0 auto; padding: 16px; }
+.card { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin-bottom: 14px; }
+.head { display: flex; gap: 14px; align-items: baseline; flex-wrap: wrap; }
+.gid { font-size: 22px; font-weight: 700; }
+.pill { font-size: 13px; padding: 2px 8px; border-radius: 99px; background: #eef0f3; }
+.decision { font-size: 15px; }
+.decision b { font-size: 18px; }
+.sides { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+.side { border-radius: 8px; padding: 12px; }
+.side.a { background: var(--a); }
+.side.b { background: var(--b); }
+.side .who { font-size: 13px; color: var(--muted); }
+.side .txt { font-size: 24px; font-weight: 600; word-break: break-word; }
+.side .typ { font-size: 16px; font-weight: 600; }
+.side.none .txt { color: var(--muted); font-weight: 400; font-style: italic; }
+.occ { border-top: 1px solid var(--line); padding: 8px 0; }
+.occ .id { font-size: 12px; color: var(--muted); }
+.occ .line { font-family: ui-monospace, Consolas, monospace; font-size: 14px; white-space: pre-wrap; margin: 2px 0; }
+.occ .lab { display: inline-block; width: 18px; font-weight: 700; }
+mark.a { background: var(--a); outline: 2px solid var(--a-strong); }
+mark.b { background: var(--b); outline: 2px solid var(--b-strong); }
+mark.g { background: var(--g); }
+mark.cur { outline: 3px solid var(--ink); }
+mark.r { background: #f6c9c9; text-decoration: line-through; }
+.buttons { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.buttons button { font-size: 17px; padding: 12px 16px; border-radius: 8px; border: 1px solid var(--line); background: #fff; cursor: pointer; min-width: 92px; }
+.buttons button:hover:not(:disabled) { background: #eef0f3; }
+.buttons button:disabled { opacity: 0.45; cursor: not-allowed; }
+.buttons button.chosen { background: var(--ink); color: #fff; }
+.buttons .k { display: block; font-size: 11px; color: var(--muted); }
+.buttons button.chosen .k { color: #ccc; }
+.why { font-size: 13px; color: var(--warn); margin-top: 6px; }
+textarea { width: 100%; font: inherit; font-size: 15px; padding: 8px; border-radius: 6px; border: 1px solid var(--line); min-height: 44px; }
+.nav { display: flex; gap: 8px; align-items: center; justify-content: space-between; margin-top: 10px; }
+.small { font-size: 13px; color: var(--muted); }
+#guide { position: fixed; top: 54px; right: 0; bottom: 0; width: min(560px, 92vw); overflow: auto; background: #fff; border-left: 1px solid var(--line); padding: 12px 18px; z-index: 6; font-size: 14px; }
+#guide table { border-collapse: collapse; } #guide td { border: 1px solid var(--line); padding: 2px 6px; vertical-align: top; }
+#modal { position: fixed; inset: 0; background: rgba(0,0,0,0.35); display: flex; align-items: center; justify-content: center; z-index: 10; }
+#modal .box { background: #fff; border-radius: 10px; padding: 18px; width: min(640px, 94vw); }
+#modal input[type=text] { width: 100%; font-size: 18px; padding: 8px; }
+.doctext { font-family: ui-monospace, Consolas, monospace; font-size: 14px; white-space: pre-wrap; max-height: 60vh; overflow: auto; border: 1px solid var(--line); border-radius: 8px; padding: 10px; background: #fff; }
+.spotgrid { display: grid; grid-template-columns: 3fr 2fr; gap: 14px; }
+.list li { margin: 4px 0; }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<header>
+  <div class="tabs"><button id="tab-dis" class="on">Disagreements</button> <button id="tab-spot">Spot-check</button></div>
+  <span id="progress"></span>
+  <span class="spacer"></span>
+  <span id="status">loading…</span>
+  <div class="tabs"><button id="btn-guide">Guidelines (G)</button></div>
+</header>
+<main id="main"></main>
+<aside id="guide" hidden></aside>
+<div id="modal" hidden></div>
+<script>
+"use strict";
+let S = null;            // state from the server
+let mode = "dis";        // "dis" | "split" | "spot"
+let gi = 0;              // current group
+let oi = 0;              // current occurrence (split mode)
+let showAll = false;
+let sdoc = 0, sspan = 0; // spot-check position
+let modalKeys = null;    // key handler while a dialog is open
+const TYPES = ["PERSON", "LOCATION", "ORG"];
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
+
+function status(msg, err) { const el = $("status"); el.textContent = msg; el.className = err ? "err" : ""; }
+
+async function api(path, body) {
+  const opts = body === undefined ? {} : {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)};
+  const r = await fetch(path, opts);
+  let data = {};
+  try { data = await r.json(); } catch (e) { data = {error: "BadResponse"}; }
+  return {ok: r.ok, data};
+}
+
+function refusal(d) { return (d.reason ? d.reason : d.error || "refused") + (d.where && d.where !== "-" ? " (" + d.where + ")" : ""); }
+
+function isDone(g) {
+  if (g.decision === "SPLIT") return g.occurrences.every((o) => o.decision && o.decision !== "?");
+  return !!g.decision && g.decision !== "?";
+}
+
+function showProgress() {
+  const p = S.progress;
+  $("progress").textContent = `${p.decided}/${p.total} decided` + (p.unsure ? ` · ${p.unsure} unsure` : "") + ` · spot-check ${p.spot_finished}/${p.spot_total}`;
+}
+
+async function load() {
+  const r = await api("/api/state");
+  if (!r.ok) { status("could not load: " + refusal(r.data), true); return; }
+  S = r.data;
+  const first = S.groups.findIndex((g) => !isDone(g));
+  gi = first >= 0 ? first : 0;
+  showProgress();
+  status("ready");
+  render();
+}
+
+function render() {
+  $("tab-dis").className = mode === "spot" ? "" : "on";
+  $("tab-spot").className = mode === "spot" ? "on" : "";
+  if (mode === "spot") return renderSpot();
+  if (!S.groups.length) { $("main").innerHTML = '<div class="card">No disagreement.</div>'; return; }
+  if (mode === "split") return renderSplit();
+  renderGroup();
+}
+
+function sideHtml(label, cls, text, type) {
+  if (text === null || text === undefined) return `<div class="side ${cls} none"><div class="who">${label}</div><div class="txt">no span</div></div>`;
+  return `<div class="side ${cls}"><div class="who">${label}</div><div class="txt">${esc(text)}</div><div class="typ">${esc(type)}</div></div>`;
+}
+
+function snipLine(snip, range, cls) {
+  const t = snip.text;
+  if (!range) return esc(t) + ' <span class="small">(no span)</span>';
+  const [s, e] = [Math.max(0, range[0]), Math.min(t.length, range[1])];
+  return esc(t.slice(0, s)) + `<mark class="${cls}">` + esc(t.slice(s, e)) + "</mark>" + esc(t.slice(e));
+}
+
+function occHtml(o, extra) {
+  return `<div class="occ"><div class="id">${esc(o.did)}${extra || ""}</div>` +
+    `<div class="line"><span class="lab">A</span>${snipLine(o.snip, o.snip.a, "a")}</div>` +
+    `<div class="line"><span class="lab">B</span>${snipLine(o.snip, o.snip.b, "b")}</div></div>`;
+}
+
+function btn(id, label, key, opts) {
+  const o = opts || {};
+  return `<button id="${id}" ${o.disabled ? "disabled" : ""} class="${o.chosen ? "chosen" : ""}" title="${esc(o.why || "")}">${label}<span class="k">${key}</span></button>`;
+}
+
+function availability(subject) {
+  // subject: a group or one occurrence; both carry a_text / b_text
+  const isType = (mode === "split" ? S.groups[gi].cls : subject.cls) === "type";
+  return {
+    A: subject.a_text === null ? "A has no span here" : "",
+    B: subject.b_text === null ? "B has no span here" : "",
+    BOTH: isType ? "BOTH is not allowed on a type group: one span cannot have two types"
+      : (subject.a_text === null || subject.b_text === null) ? "BOTH needs a span on each side" : "",
+  };
+}
+
+function decisionButtons(current, av, withSplit) {
+  let h = '<div class="buttons">';
+  h += btn("d-A", "A", "A or 1", {disabled: !!av.A, why: av.A, chosen: current === "A"});
+  h += btn("d-B", "B", "B or 2", {disabled: !!av.B, why: av.B, chosen: current === "B"});
+  h += btn("d-BOTH", "BOTH", "3", {disabled: !!av.BOTH, why: av.BOTH, chosen: current === "BOTH"});
+  h += btn("d-NONE", "NONE", "N or 0", {chosen: current === "NONE"});
+  h += btn("d-FIX", "FIX…", "F", {chosen: current.startsWith("FIX:")});
+  if (withSplit) h += btn("d-SPLIT", "SPLIT", "S", {chosen: current === "SPLIT"});
+  h += btn("d-UNSURE", "Unsure ?", "?", {chosen: current === "?"});
+  h += btn("d-CLEAR", "Clear", "Backspace", {disabled: !current});
+  h += "</div>";
+  const why = [av.A, av.B, av.BOTH].filter(Boolean);
+  if (why.length) h += `<div class="why">${why.map(esc).join(" · ")}</div>`;
+  return h;
+}
+
+function renderGroup() {
+  const g = S.groups[gi];
+  const av = availability(g);
+  let h = `<div class="card"><div class="head"><span class="gid">${esc(g.gid)}</span><span class="pill">${esc(g.cls)}</span>` +
+    `<span class="pill">${g.count} occurrence${g.count > 1 ? "s" : ""}</span>` +
+    `<span class="decision">decision: <b>${g.decision ? esc(g.decision) : "—"}</b>${isDone(g) ? " ✓" : ""}</span>` +
+    `<span class="spacer"></span><span class="small">group ${gi + 1} of ${S.groups.length}</span></div>`;
+  h += `<div class="sides">${sideHtml("A", "a", g.a_text, g.a_type)}${sideHtml("B", "b", g.b_text, g.b_type)}</div>`;
+  h += decisionButtons(g.decision, av, true);
+  h += `<div style="margin-top:10px"><label class="small" for="note">Note (Tab), optional; required with ?</label><textarea id="note" placeholder="rule ids only, e.g. L1, Q4">${esc(g.note)}</textarea></div>`;
+  h += '<div class="nav">' + btn("n-prev", "← Previous", "←") + btn("n-und", "Next undecided", "U") + btn("n-next", "Next →", "→") + "</div></div>";
+  h += '<div class="card"><div class="small">Occurrences (A in blue, B in orange)</div>';
+  const shown = showAll || g.occurrences.length <= 3 ? g.occurrences : g.occurrences.slice(0, 3);
+  shown.forEach((o) => { h += occHtml(o, g.decision === "SPLIT" ? ` · ${o.decision ? esc(o.decision) : "undecided"}` : ""); });
+  if (shown.length < g.occurrences.length) h += `<div class="buttons">${btn("n-all", `Show all ${g.occurrences.length}`, "")}</div>`;
+  h += "</div>";
+  $("main").innerHTML = h;
+  wireDecisionButtons(false);
+  $("n-prev").onclick = () => go(-1);
+  $("n-next").onclick = () => go(1);
+  $("n-und").onclick = nextUndecided;
+  if ($("n-all")) $("n-all").onclick = () => { showAll = true; render(); };
+  $("note").onblur = saveNoteIfDecided;
+}
+
+function renderSplit() {
+  const g = S.groups[gi];
+  const o = g.occurrences[oi];
+  const av = availability(o);
+  let h = `<div class="card"><div class="head"><span class="gid">${esc(g.gid)} · SPLIT</span><span class="pill">${esc(g.cls)}</span>` +
+    `<span class="pill">occurrence ${oi + 1} of ${g.occurrences.length}</span>` +
+    `<span class="decision">decision: <b>${o.decision ? esc(o.decision) : "—"}</b></span>` +
+    `<span class="spacer"></span>${btn("s-back", "Back to the group", "Esc")}</div>`;
+  h += `<div class="sides">${sideHtml("A", "a", o.a_text, o.a_type)}${sideHtml("B", "b", o.b_text, o.b_type)}</div>`;
+  h += occHtml(o, "");
+  h += decisionButtons(o.decision, av, false);
+  h += `<div style="margin-top:10px"><label class="small" for="note">Note (Tab), optional; required with ?</label><textarea id="note">${esc(o.note)}</textarea></div>`;
+  h += '<div class="nav">' + btn("n-prev", "← Previous", "←") + btn("n-next", "Next →", "→") + "</div></div>";
+  $("main").innerHTML = h;
+  wireDecisionButtons(true);
+  $("n-prev").onclick = () => { oi = Math.max(0, oi - 1); render(); };
+  $("n-next").onclick = () => { oi = Math.min(g.occurrences.length - 1, oi + 1); render(); };
+  $("s-back").onclick = leaveSplit;
+  $("note").onblur = saveNoteIfDecided;
+}
+
+function wireDecisionButtons(split) {
+  const on = (id, f) => { const el = $(id); if (el) el.onclick = f; };
+  on("d-A", () => decide("A", true));
+  on("d-B", () => decide("B", true));
+  on("d-BOTH", () => decide("BOTH", true));
+  on("d-NONE", () => decide("NONE", true));
+  on("d-FIX", openFix);
+  on("d-SPLIT", enterSplit);
+  on("d-UNSURE", () => decide("?", false));
+  on("d-CLEAR", () => decide("", false));
+}
+
+function noteValue() { const el = $("note"); return el ? el.value.trim() : ""; }
+
+async function decide(code, advance) {
+  const g = S.groups[gi];
+  const note = noteValue();
+  if (code === "?" && !note) { status("write a note first: ? needs one", true); $("note").focus(); return; }
+  if (mode !== "split" && g.decision === "SPLIT" && code !== "SPLIT" && g.occurrences.some((o) => o.decision)
+      && !window.confirm("This clears the per-occurrence decisions of this group. Continue?")) return;
+  let r;
+  if (mode === "split") r = await api("/api/occurrence", {did: g.occurrences[oi].did, decision: code, note});
+  else r = await api("/api/group", {gid: g.gid, decision: code, note});
+  if (!r.ok) { status("refused: " + refusal(r.data), true); return; }
+  S.groups[gi] = r.data.group;
+  S.progress = r.data.progress;
+  showProgress();
+  status(code ? `saved ${mode === "split" ? r.data.group.occurrences[oi].did : g.gid}: ${code}` : "cleared");
+  if (advance) {
+    if (mode === "split") {
+      const occ = S.groups[gi].occurrences;
+      const next = occ.findIndex((o, k) => k > oi && !(o.decision && o.decision !== "?"));
+      const any = occ.findIndex((o) => !(o.decision && o.decision !== "?"));
+      if (next >= 0) oi = next; else if (any >= 0) oi = any; else { mode = "dis"; showAll = false; nextUndecided(); return; }
+    } else { nextUndecided(); return; }
+  }
+  render();
+}
+
+async function saveNoteIfDecided() {
+  const g = S.groups[gi];
+  const cur = mode === "split" ? g.occurrences[oi] : g;
+  const note = noteValue();
+  if (!cur.decision || note === cur.note) return;
+  const r = mode === "split"
+    ? await api("/api/occurrence", {did: cur.did, decision: cur.decision, note})
+    : await api("/api/group", {gid: g.gid, decision: cur.decision, note});
+  if (!r.ok) { status("note refused: " + refusal(r.data), true); return; }
+  S.groups[gi] = r.data.group;
+  status("note saved");
+}
+
+function go(step) {
+  gi = (gi + step + S.groups.length) % S.groups.length;
+  showAll = false;
+  render();
+  window.scrollTo(0, 0);
+}
+
+function nextUndecided() {
+  const n = S.groups.length;
+  for (let k = 1; k <= n; k++) {
+    const j = (gi + k) % n;
+    if (!isDone(S.groups[j])) { gi = j; showAll = false; render(); window.scrollTo(0, 0); return; }
+  }
+  status("every group is decided");
+  render();
+}
+
+async function enterSplit() {
+  const g = S.groups[gi];
+  if (g.decision !== "SPLIT") {
+    const r = await api("/api/group", {gid: g.gid, decision: "SPLIT", note: noteValue()});
+    if (!r.ok) { status("refused: " + refusal(r.data), true); return; }
+    S.groups[gi] = r.data.group;
+    S.progress = r.data.progress;
+    showProgress();
+  }
+  mode = "split";
+  const first = S.groups[gi].occurrences.findIndex((o) => !(o.decision && o.decision !== "?"));
+  oi = first >= 0 ? first : 0;
+  status("split: decide each occurrence");
+  render();
+}
+
+function leaveSplit() { mode = "dis"; render(); }
+
+// ---- FIX dialog --------------------------------------------------------
+
+function overlapsAll(text, occs) {
+  // mirrors the merge: the text must occur in the context and overlap the disagreement
+  const bad = [];
+  occs.forEach((o) => {
+    const c = o.ctx.text;
+    let i = c.indexOf(text), hit = false;
+    while (text && i >= 0) { if (i < o.ctx.end && i + text.length > o.ctx.start) { hit = true; break; } i = c.indexOf(text, i + 1); }
+    if (!hit) bad.push(o.did);
+  });
+  return bad;
+}
+
+function openFix() {
+  const g = S.groups[gi];
+  const subject = mode === "split" ? g.occurrences[oi] : g;
+  const targets = mode === "split" ? [g.occurrences[oi]] : g.occurrences;
+  let type = subject.a_type || subject.b_type || "PERSON";
+  const box = $("modal");
+  box.innerHTML = `<div class="box"><h3>FIX: annotate the right text</h3>` +
+    `<div class="buttons">${TYPES.map((t, k) => btn("t-" + t, t, ["P", "L", "O"][k], {chosen: t === type})).join("")}</div>` +
+    `<p class="small">Text, exactly as in the document (case, accents, spaces):</p><input type="text" id="fix-text">` +
+    `<div class="buttons">${btn("fix-a", "Use A's text", "", {disabled: subject.a_text === null})}${btn("fix-b", "Use B's text", "", {disabled: subject.b_text === null})}</div>` +
+    `<div id="fix-check" class="small"></div>` +
+    `<div class="buttons">${btn("fix-ok", "Save FIX", "Enter")}${mode === "split" ? "" : btn("fix-split", "Switch to SPLIT", "")}${btn("fix-cancel", "Cancel", "Esc")}</div></div>`;
+  box.hidden = false;
+  const input = $("fix-text");
+  input.value = subject.a_text !== null ? subject.a_text : (subject.b_text || "");
+  const check = () => {
+    const bad = overlapsAll(input.value, targets);
+    const el = $("fix-check");
+    if (!input.value) { el.textContent = "type the text"; el.className = "why"; return false; }
+    if (bad.length) { el.textContent = `not found over ${bad.length} of ${targets.length} occurrence(s) (${bad.slice(0, 5).join(", ")}${bad.length > 5 ? "…" : ""}): ` + (mode === "split" ? "change the text" : "split the group"); el.className = "why"; return false; }
+    el.textContent = `matches all ${targets.length} occurrence(s)`; el.className = "small"; return true;
+  };
+  const setType = (t) => { type = t; TYPES.forEach((x) => { $("t-" + x).className = x === t ? "chosen" : ""; }); };
+  TYPES.forEach((t) => { $("t-" + t).onclick = () => setType(t); });
+  $("fix-a").onclick = () => { input.value = subject.a_text; check(); };
+  $("fix-b").onclick = () => { input.value = subject.b_text; check(); };
+  input.oninput = check;
+  const close = () => { box.hidden = true; box.innerHTML = ""; modalKeys = null; };
+  const save = async () => { if (!check()) return; close(); await decide(`FIX:${type}:${input.value}`, true); };
+  $("fix-ok").onclick = save;
+  $("fix-cancel").onclick = close;
+  if ($("fix-split")) $("fix-split").onclick = async () => { close(); await enterSplit(); };
+  modalKeys = (e) => {
+    if (e.key === "Escape") { e.preventDefault(); close(); }
+    else if (e.key === "Enter") { e.preventDefault(); save(); }
+    else if (document.activeElement !== input) {
+      const t = {p: "PERSON", l: "LOCATION", o: "ORG"}[e.key.toLowerCase()];
+      if (t) { e.preventDefault(); setType(t); }
+    }
+  };
+  check();
+  input.focus();
+  input.select();
+}
+
+// ---- spot-check --------------------------------------------------------
+
+function verdicts(doc) {
+  // span id -> {kind, value}; plus the MISSING list
+  const v = {}, missing = [];
+  doc.corrections.forEach((c) => {
+    const [kind, ...rest] = c.code.split(":");
+    if (kind === "MISSING") missing.push(c.code);
+    else if (kind === "REMOVE") v[rest[0]] = {kind, value: ""};
+    else if (kind === "RETYPE") v[rest[0]] = {kind, value: rest[1]};
+    else if (kind === "BOUNDARY") v[rest[0]] = {kind, value: rest.slice(1).join(":")};
+  });
+  return {v, missing};
+}
+
+function corrections(doc, v, missing) {
+  const out = [];
+  doc.spans.forEach((s) => {
+    const x = v[s.id];
+    if (!x) return;
+    if (x.kind === "REMOVE") out.push({code: `REMOVE:${s.id}`, note: ""});
+    if (x.kind === "RETYPE") out.push({code: `RETYPE:${s.id}:${x.value}`, note: ""});
+    if (x.kind === "BOUNDARY") out.push({code: `BOUNDARY:${s.id}:${x.value}`, note: ""});
+  });
+  missing.forEach((m) => out.push({code: m, note: ""}));
+  return out;
+}
+
+async function saveSpot(v, missing, finished) {
+  const doc = S.spot[sdoc];
+  const r = await api("/api/spotcheck", {doc: doc.doc, corrections: corrections(doc, v, missing), finished});
+  if (!r.ok) { status("refused: " + refusal(r.data), true); return false; }
+  S.spot[sdoc] = r.data.doc;
+  S.progress = r.data.progress;
+  showProgress();
+  status(finished ? `${doc.doc} finished` : "saved");
+  return true;
+}
+
+function renderSpot() {
+  if (!S.spot.length) { $("main").innerHTML = '<div class="card">No spot-check document.</div>'; return; }
+  const doc = S.spot[sdoc];
+  sspan = Math.min(sspan, Math.max(0, doc.spans.length - 1));
+  const {v, missing} = verdicts(doc);
+  const cur = doc.spans[sspan];
+  // document pane with every agreed span marked
+  let pos = 0, body = "";
+  doc.spans.forEach((s, k) => {
+    if (s.start < pos) return; // nested or crossing spans: listed on the right only
+    const x = v[s.id];
+    const cls = "g" + (k === sspan ? " cur" : "") + (x && x.kind === "REMOVE" ? " r" : "");
+    body += esc(doc.text.slice(pos, s.start)) + `<mark class="${cls}" id="span-${k}">${esc(doc.text.slice(s.start, s.end))}</mark>`;
+    pos = s.end;
+  });
+  body += esc(doc.text.slice(pos));
+  let h = '<div class="card"><div class="head">' +
+    S.spot.map((d, k) => btn("doc-" + k, `${esc(d.doc)}${d.finished ? " ✓" : ""}`, k === sdoc ? "current" : "", {chosen: k === sdoc})).join("") +
+    '<span class="spacer"></span><span class="small">Look for mistakes both annotators made.</span></div></div>';
+  h += `<div class="spotgrid"><div><div class="doctext" id="doctext">${body}</div>` +
+    `<div class="buttons">${btn("m-add", "Add MISSING from selection", "M")}</div></div><div class="card">`;
+  if (cur) {
+    const x = v[cur.id];
+    h += `<div class="head"><span class="gid">${esc(cur.id)}</span><span class="pill">${esc(cur.type)}</span><span class="small">span ${sspan + 1} of ${doc.spans.length}</span></div>` +
+      `<div class="side ${x && x.kind === "REMOVE" ? "" : "a"}" style="margin-top:10px"><div class="txt">${esc(cur.text)}</div></div>` +
+      `<p>verdict: <b>${x ? esc(x.kind + (x.value ? " " + x.value : "")) : "OK"}</b></p>` +
+      '<div class="buttons">' + btn("v-ok", "OK, next", "Enter or →") + btn("v-r", "Remove", "R", {chosen: x && x.kind === "REMOVE"}) +
+      btn("v-t", "Retype…", "T", {chosen: x && x.kind === "RETYPE"}) + btn("v-x", "Boundary…", "X", {chosen: x && x.kind === "BOUNDARY"}) +
+      btn("v-clear", "Clear", "Backspace", {disabled: !x}) + btn("v-prev", "← Previous", "←") + "</div>";
+  } else h += "<p>No agreed span in this document.</p>";
+  h += `<h4>MISSING (${missing.length})</h4><ul class="list">` + missing.map((m, k) => `<li>${esc(m)} <button id="miss-${k}">remove</button></li>`).join("") + "</ul>";
+  h += `<div class="buttons">${btn("v-done", doc.finished ? "Finished ✓ (save again)" : "Finish this document", "D")}</div>` +
+    '<p class="small">A document counts only when you press Finish. No finding: just Finish, it writes NONE.</p></div></div>';
+  $("main").innerHTML = h;
+  S.spot.forEach((d, k) => { $("doc-" + k).onclick = () => { sdoc = k; sspan = 0; render(); }; });
+  const el = $("span-" + sspan);
+  if (el) el.scrollIntoView({block: "center"});
+  const on = (id, f) => { const b = $(id); if (b) b.onclick = f; };
+  on("v-ok", spotNext);
+  on("v-r", () => setVerdict({kind: "REMOVE", value: ""}));
+  on("v-t", openRetype);
+  on("v-x", openBoundary);
+  on("v-clear", () => setVerdict(null));
+  on("v-prev", () => { sspan = Math.max(0, sspan - 1); render(); });
+  on("v-done", finishDoc);
+  on("m-add", addMissing);
+  missing.forEach((m, k) => on("miss-" + k, async () => { const x = verdicts(doc); x.missing.splice(k, 1); await saveSpot(x.v, x.missing, doc.finished); render(); }));
+}
+
+function spotNext() {
+  const doc = S.spot[sdoc];
+  if (sspan < doc.spans.length - 1) { sspan += 1; render(); }
+  else status("last span: press Finish (D) when this document is done");
+}
+
+async function setVerdict(x) {
+  const doc = S.spot[sdoc];
+  const cur = doc.spans[sspan];
+  if (!cur) return;
+  const st = verdicts(doc);
+  if (x) st.v[cur.id] = x; else delete st.v[cur.id];
+  if (await saveSpot(st.v, st.missing, doc.finished) && x) spotNext(); else render();
+}
+
+function typeDialog(title, onPick) {
+  const box = $("modal");
+  box.innerHTML = `<div class="box"><h3>${esc(title)}</h3><div class="buttons">${TYPES.map((t, k) => btn("t-" + t, t, ["P", "L", "O"][k])).join("")}${btn("t-cancel", "Cancel", "Esc")}</div></div>`;
+  box.hidden = false;
+  const close = () => { box.hidden = true; box.innerHTML = ""; modalKeys = null; };
+  TYPES.forEach((t) => { $("t-" + t).onclick = () => { close(); onPick(t); }; });
+  $("t-cancel").onclick = close;
+  modalKeys = (e) => {
+    const t = {p: "PERSON", l: "LOCATION", o: "ORG"}[e.key.toLowerCase()];
+    if (e.key === "Escape") { e.preventDefault(); close(); }
+    else if (t) { e.preventDefault(); close(); onPick(t); }
+  };
+}
+
+function openRetype() {
+  const cur = S.spot[sdoc].spans[sspan];
+  if (cur) typeDialog(`Retype ${cur.id} to:`, (t) => setVerdict({kind: "RETYPE", value: t}));
+}
+
+function textDialog(title, value, onSave) {
+  const box = $("modal");
+  box.innerHTML = `<div class="box"><h3>${esc(title)}</h3><input type="text" id="dlg-text"><div class="buttons">${btn("dlg-ok", "Save", "Enter")}${btn("dlg-cancel", "Cancel", "Esc")}</div></div>`;
+  box.hidden = false;
+  const input = $("dlg-text");
+  input.value = value;
+  const close = () => { box.hidden = true; box.innerHTML = ""; modalKeys = null; };
+  const save = () => { const v = input.value; if (!v) return; close(); onSave(v); };
+  $("dlg-ok").onclick = save;
+  $("dlg-cancel").onclick = close;
+  modalKeys = (e) => {
+    if (e.key === "Escape") { e.preventDefault(); close(); }
+    else if (e.key === "Enter") { e.preventDefault(); save(); }
+  };
+  input.focus();
+  input.select();
+}
+
+function openBoundary() {
+  const cur = S.spot[sdoc].spans[sspan];
+  if (cur) textDialog(`Right extent for ${cur.id} (exact text, overlapping it):`, cur.text, (t) => setVerdict({kind: "BOUNDARY", value: t}));
+}
+
+function addMissing() {
+  const sel = window.getSelection();
+  const text = sel ? sel.toString() : "";
+  const doc = S.spot[sdoc];
+  if (!text.trim() || !$("doctext").contains(sel.anchorNode)) { status("select the missing text in the document first", true); return; }
+  if (doc.text.indexOf(text) < 0) { status("the selection must be plain document text", true); return; }
+  typeDialog("MISSING: type of the selected text", async (t) => {
+    const st = verdicts(doc);
+    const code = `MISSING:${t}:${text}`;
+    if (!st.missing.includes(code)) st.missing.push(code);
+    await saveSpot(st.v, st.missing, doc.finished);
+    render();
+  });
+}
+
+async function finishDoc() {
+  const doc = S.spot[sdoc];
+  const st = verdicts(doc);
+  if (await saveSpot(st.v, st.missing, true)) {
+    const next = S.spot.findIndex((d) => !d.finished);
+    if (next >= 0) { sdoc = next; sspan = 0; }
+  }
+  render();
+}
+
+// ---- guidelines, tabs, keys --------------------------------------------
+
+async function toggleGuide() {
+  const g = $("guide");
+  if (g.hidden && !g.dataset.loaded) {
+    const r = await fetch("/api/guidelines");
+    g.innerHTML = r.ok ? await r.text() : "<p>could not load the guidelines</p>";
+    g.dataset.loaded = "1";
+  }
+  g.hidden = !g.hidden;
+}
+
+$("btn-guide").onclick = toggleGuide;
+$("tab-dis").onclick = () => { mode = "dis"; render(); };
+$("tab-spot").onclick = () => { mode = "spot"; render(); };
+
+document.addEventListener("keydown", (e) => {
+  if (!S) return;
+  if (modalKeys) { modalKeys(e); return; }
+  const typing = document.activeElement && ["TEXTAREA", "INPUT"].includes(document.activeElement.tagName);
+  if (typing) { if (e.key === "Escape") document.activeElement.blur(); return; }
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const k = e.key;
+  if (k === "g" || k === "G") { e.preventDefault(); toggleGuide(); return; }
+  if (mode === "spot") {
+    const map = {Enter: spotNext, ArrowRight: spotNext, ArrowLeft: () => { sspan = Math.max(0, sspan - 1); render(); },
+      r: () => setVerdict({kind: "REMOVE", value: ""}), t: openRetype, x: openBoundary, m: addMissing,
+      d: finishDoc, Backspace: () => setVerdict(null)};
+    const f = map[k] || map[k.toLowerCase()];
+    if (f) { e.preventDefault(); f(); }
+    return;
+  }
+  const g = S.groups[gi];
+  const subject = mode === "split" ? g.occurrences[oi] : g;
+  const av = availability(subject);
+  const guarded = (code) => { if (av[code]) status(av[code], true); else decide(code, true); };
+  const map = {
+    ArrowLeft: () => (mode === "split" ? (oi = Math.max(0, oi - 1), render()) : go(-1)),
+    ArrowRight: () => (mode === "split" ? (oi = Math.min(g.occurrences.length - 1, oi + 1), render()) : go(1)),
+    a: () => guarded("A"), "1": () => guarded("A"),
+    b: () => guarded("B"), "2": () => guarded("B"),
+    "3": () => guarded("BOTH"),
+    n: () => decide("NONE", true), "0": () => decide("NONE", true),
+    f: openFix,
+    "?": () => decide("?", false),
+    Backspace: () => decide("", false),
+    Tab: () => $("note").focus(),
+    Escape: () => (mode === "split" ? leaveSplit() : null),
+  };
+  if (mode === "dis") { map.s = enterSplit; map.u = nextUndecided; }
+  const f = map[k] || map[k.toLowerCase()];
+  if (f) { e.preventDefault(); f(); }
+});
+
+load();
+</script>
+</body>
+</html>
+"""
+
+
+# ---------------------------------------------------------------------------
 # entry point
 # ---------------------------------------------------------------------------
 
@@ -1052,6 +2155,11 @@ def build_parser() -> argparse.ArgumentParser:
                 action="store_true",
                 help="overwrite decisions.tsv, occurrences.tsv and spotcheck.tsv",
             )
+    srv = sub.add_parser("serve")
+    srv.add_argument("--workspace", required=True, type=Path)
+    srv.add_argument("--port", type=int, default=DEFAULT_PORT)
+    srv.add_argument("--open", action="store_true", help="open the default browser")
+    srv.add_argument("--guidelines", type=Path, default=GUIDELINES_PATH)
     grd = sub.add_parser("guard-report")
     grd.add_argument("--workspace", required=True, type=Path)
     grd.add_argument(
@@ -1075,6 +2183,8 @@ def main(argv: list[str] | None = None) -> int:
             return cmd_merge(args.workspace)
         if args.command == "report":
             return cmd_report(args.workspace)
+        if args.command == "serve":
+            return cmd_serve(args.workspace, args.port, args.open, args.guidelines)
         if args.command == "guard-report":
             return cmd_guard_report(args.workspace, args.annotations)
         raise ValueError("unknown command")

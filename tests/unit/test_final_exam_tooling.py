@@ -13,6 +13,11 @@ import logging
 import re
 import shutil
 import sys
+import threading
+import urllib.error
+import urllib.request
+from collections.abc import Iterator
+from contextlib import contextmanager
 from pathlib import Path
 from types import ModuleType
 
@@ -878,3 +883,302 @@ def test_new_labels_match_no_regular_extraction_pattern() -> None:
     for line in lines:
         assert not any(re.search(p, line) for p in patterns)
     assert sum(1 for line in lines if re.match(r"^\[FINAL-EXAM", line)) == 12
+
+
+# ---------------------------------------------------------------------------
+# serve: the browser adjudication (story precision, 2026-10-12), invented text
+# ---------------------------------------------------------------------------
+
+
+@contextmanager
+def _served(ws: Path, tmp_path: Path) -> Iterator[str]:
+    guide = tmp_path / "GUIDELINES.md"
+    _write(
+        guide,
+        "# Rules\n\n- **G1.** Zorbaville is a place.\n\n| id | rule |\n|---|---|\n| L1 | places |\n",
+    )
+    app = adj.AdjudicationApp(ws, guide)
+    server = adj.make_server(app, 0)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        yield f"http://127.0.0.1:{server.server_address[1]}"
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=5)
+
+
+def _call(
+    base: str, path: str, body: object = None, headers: dict[str, str] | None = None
+) -> tuple[int, bytes]:
+    data = None if body is None else json.dumps(body).encode("utf-8")
+    req = urllib.request.Request(
+        base + path,
+        data=data,
+        headers={"Content-Type": "application/json", **(headers or {})},
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            return resp.status, resp.read()
+    except urllib.error.HTTPError as err:
+        return err.code, err.read()
+
+
+def _post(base: str, path: str, body: object) -> tuple[int, dict[str, object]]:
+    status, raw = _call(base, path, body)
+    return status, json.loads(raw.decode("utf-8"))
+
+
+def _viewed(ws: Path) -> Path:
+    assert adj.main(["view", "--workspace", str(ws)]) == 0
+    return ws
+
+
+def test_serve_loads_saves_and_resumes(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    ws = _viewed(_group_workspace(tmp_path))
+    with _served(ws, tmp_path) as base:
+        status, page = _call(base, "/")
+        assert status == 200 and b"<title>Final exam adjudication</title>" in page
+        status, guide = _call(base, "/api/guidelines")
+        assert status == 200 and b"<h1>Rules</h1>" in guide and b"<td>L1</td>" in guide
+        status, raw = _call(base, "/api/state")
+        state = json.loads(raw.decode("utf-8"))
+        assert [g["gid"] for g in state["groups"]] == ["g001", "g002"]
+        assert state["progress"]["decided"] == 0 and len(state["spot"]) == 3
+        assert (
+            _post(base, "/api/group", {"gid": "g001", "decision": "A", "note": "L1"})[0]
+            == 200
+        )
+        status, data = _post(
+            base, "/api/group", {"gid": "g002", "decision": "B", "note": ""}
+        )
+        assert status == 200 and data["progress"]["decided"] == 2  # type: ignore[index]
+    rows = (ws / "decisions.tsv").read_text(encoding="utf-8").splitlines()
+    assert rows == [
+        "group\tclass\tcount\tdecision\tnote",
+        "g001\tone-sided\t3\tA\tL1",
+        "g002\ttype\t2\tB\t",
+    ]
+    resumed = adj.AdjudicationApp(ws, tmp_path / "GUIDELINES.md")
+    assert resumed.progress()["decided"] == 2
+    assert [g["decision"] for g in resumed.state()["groups"]] == ["A", "B"]  # type: ignore[index]
+
+
+def test_atomic_write_survives_a_crash(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    ws = _viewed(_group_workspace(tmp_path))
+    before = (ws / "decisions.tsv").read_bytes()
+    app = adj.AdjudicationApp(ws, tmp_path / "missing.md")
+
+    def crash(*_: object) -> None:
+        raise OSError("disk gone")
+
+    monkeypatch.setattr(adj.os, "replace", crash)
+    with pytest.raises(OSError):
+        app.set_group("g001", "A", "")
+    monkeypatch.undo()
+    # the real file is untouched; the half-written temporary file is ignored
+    assert (ws / "decisions.tsv").read_bytes() == before
+    assert (ws / ".decisions.tsv.tmp").exists()
+    resumed = adj.AdjudicationApp(ws, tmp_path / "missing.md")
+    assert resumed.progress()["decided"] == 0
+    resumed.set_group("g001", "A", "")
+    assert not (ws / ".decisions.tsv.tmp").exists()
+    assert "g001\tone-sided\t3\tA\t" in (ws / "decisions.tsv").read_text(
+        encoding="utf-8"
+    )
+
+
+def test_serve_refuses_both_on_a_type_group(tmp_path: Path) -> None:
+    ws = _viewed(_group_workspace(tmp_path))
+    before = (ws / "decisions.tsv").read_bytes()
+    with _served(ws, tmp_path) as base:
+        status, data = _post(base, "/api/group", {"gid": "g002", "decision": "BOTH"})
+    assert status == 400 and data["where"] == "grp_01-d002"
+    assert "type group" in str(data["reason"])
+    assert (ws / "decisions.tsv").read_bytes() == before
+
+
+def test_serve_fix_must_overlap_every_occurrence(tmp_path: Path) -> None:
+    ws = _viewed(_case_workspace(tmp_path))
+    with _served(ws, tmp_path) as base:
+        fix = {"gid": "g001", "decision": "FIX:ORG:Zorbal Quentrix", "note": ""}
+        status, data = _post(base, "/api/group", fix)
+        assert status == 400 and data["where"] == "fx_02-d001"
+        assert _post(base, "/api/group", {"gid": "g001", "decision": "SPLIT"})[0] == 200
+        ok = {"did": "fx_01-d001", "decision": "FIX:ORG:Zorbal Quentrix"}
+        assert _post(base, "/api/occurrence", ok)[0] == 200
+        assert (
+            _post(base, "/api/occurrence", {"did": "fx_02-d001", "decision": "A"})[0]
+            == 200
+        )
+    _set_spotcheck(ws)
+    assert adj.main(["merge", "--workspace", str(ws)]) == 0
+    assert ("ZORBAL QUENTRIX", "ORG") in _types(ws, "fx_02")
+
+
+def test_serve_split_round_trip(tmp_path: Path) -> None:
+    ws = _viewed(_group_workspace(tmp_path))
+    with _served(ws, tmp_path) as base:
+        unsplit = {"did": "grp_01-d001", "decision": "A"}
+        assert _post(base, "/api/occurrence", unsplit)[0] == 400
+        assert _post(base, "/api/group", {"gid": "g001", "decision": "SPLIT"})[0] == 200
+        assert (
+            _post(base, "/api/occurrence", {"did": "grp_01-d001", "decision": "SPLIT"})[
+                0
+            ]
+            == 400
+        )
+        assert (
+            _post(base, "/api/occurrence", {"did": "grp_01-d001", "decision": "?"})[0]
+            == 400
+        )
+        unsure = {"did": "grp_01-d001", "decision": "?", "note": "between L1\tand O4"}
+        status, data = _post(base, "/api/occurrence", unsure)
+        assert status == 200 and data["progress"]["unsure"] == 1  # type: ignore[index]
+        rows = (ws / "occurrences.tsv").read_text(encoding="utf-8").splitlines()
+        assert rows[1].split("\t")[3:] == ["?", "between L1 and O4"]  # no tab in a note
+        for did, code in (
+            ("grp_01-d001", "A"),
+            ("grp_01-d003", "A"),
+            ("grp_02-d001", "NONE"),
+        ):
+            assert (
+                _post(base, "/api/occurrence", {"did": did, "decision": code})[0] == 200
+            )
+        rows = (ws / "occurrences.tsv").read_text(encoding="utf-8").splitlines()
+        assert [r.split("\t")[3] for r in rows[1:]] == ["A", "A", "NONE", "", ""]
+        # leaving SPLIT clears the per-occurrence codes, as the merge requires
+        assert _post(base, "/api/group", {"gid": "g001", "decision": "A"})[0] == 200
+    rows = (ws / "occurrences.tsv").read_text(encoding="utf-8").splitlines()
+    assert [r.split("\t")[3] for r in rows[1:]] == ["", "", "", "", ""]
+
+
+def test_merge_after_serve_equals_hand_edited_files(tmp_path: Path) -> None:
+    served = _viewed(_group_workspace(tmp_path / "s"))
+    by_hand = _viewed(_group_workspace(tmp_path / "h"))
+    with _served(served, tmp_path) as base:
+        assert _post(base, "/api/group", {"gid": "g001", "decision": "SPLIT"})[0] == 200
+        for did, code in (
+            ("grp_01-d001", "A"),
+            ("grp_01-d003", "A"),
+            ("grp_02-d001", "NONE"),
+        ):
+            assert (
+                _post(base, "/api/occurrence", {"did": did, "decision": code})[0] == 200
+            )
+        assert _post(base, "/api/group", {"gid": "g002", "decision": "A"})[0] == 200
+        for doc in ("grp_01", "grp_02"):
+            body = {"doc": doc, "corrections": [], "finished": True}
+            assert _post(base, "/api/spotcheck", body)[0] == 200
+        missing = {"code": "MISSING:PERSON:Tralvio", "note": ""}
+        body = {"doc": "grp_03", "corrections": [missing], "finished": True}
+        assert _post(base, "/api/spotcheck", body)[0] == 400  # not a whole free word
+    _set_groups(by_hand, {"g001": "SPLIT", "g002": "A"})
+    _set_occurrences(
+        by_hand, {"grp_01-d001": "A", "grp_01-d003": "A", "grp_02-d001": "NONE"}
+    )
+    _set_spotcheck(by_hand)
+    assert (
+        adj.AdjudicationApp(served, tmp_path / "x.md").progress()["spot_finished"] == 2
+    )
+    with _served(served, tmp_path) as base:
+        body = {"doc": "grp_03", "corrections": [], "finished": True}
+        assert _post(base, "/api/spotcheck", body)[0] == 200
+    for name in adj.DECISION_FILES:
+        assert (served / name).read_bytes() == (by_hand / name).read_bytes()
+    assert adj.main(["merge", "--workspace", str(served)]) == 0
+    assert adj.main(["merge", "--workspace", str(by_hand)]) == 0
+    for doc in _GROUP_DOCS:
+        name = f"{doc}.json"
+        assert (served / "annotations" / name).read_bytes() == (
+            by_hand / "annotations" / name
+        ).read_bytes()
+
+
+def test_serve_spotcheck_rows_and_unfinished_documents(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    ws = _viewed(_group_workspace(tmp_path))
+    app = adj.AdjudicationApp(ws, tmp_path / "x.md")
+    agreed = next(iter(app.spot_named["grp_03"]))
+    app.set_spotcheck("grp_03", [{"code": f"RETYPE:{agreed}:ORG", "note": ""}], False)
+    app.set_spotcheck("grp_01", [], True)
+    app.set_spotcheck("grp_02", [], True)
+    rows = (ws / "spotcheck.tsv").read_text(encoding="utf-8").splitlines()
+    assert rows[1:] == [
+        "grp_01\tNONE\t",
+        "grp_02\tNONE\t",
+        f"grp_03\tRETYPE:{agreed}:ORG\t",
+        "grp_03\t\t",
+    ]
+    _set_groups(ws, {"g001": "A", "g002": "B"})
+    capsys.readouterr()
+    # an unfinished document keeps its empty row: the merge refuses it
+    assert adj.main(["merge", "--workspace", str(ws)]) == 1
+    assert capsys.readouterr().out.strip() == "ERROR spotcheck.tsv:5 DecisionError"
+    app.set_spotcheck("grp_03", [{"code": f"RETYPE:{agreed}:ORG", "note": ""}], True)
+    assert adj.main(["merge", "--workspace", str(ws)]) == 0
+    assert _types(ws, "grp_03") == [("Tralvio Zendrak", "ORG")]
+    with pytest.raises(adj.DecisionError) as info:
+        app.set_spotcheck(
+            "grp_01", [{"code": "MISSING:ORG:Quentrax", "note": ""}], True
+        )
+    assert info.value.where == "grp_01#1"
+
+
+def test_serve_prints_no_content(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    ws = _viewed(_group_workspace(tmp_path))
+    capsys.readouterr()
+    with _served(ws, tmp_path) as base:
+        for _ in range(12):
+            _call(base, "/api/state")
+            _call(base, "/")
+        _post(base, "/api/group", {"gid": "g002", "decision": "BOTH"})
+        _post(base, "/api/group", {"gid": "g001", "decision": "FIX:ORG:Zorbaland"})
+        _post(
+            base, "/api/group", {"gid": "g001", "decision": "A", "note": "Zorbaville"}
+        )
+        _call(base, "/api/group", {"gid": "g001"})
+    out = capsys.readouterr()
+    lines = (out.out + out.err).splitlines()
+    allowed = re.compile(r"^(requests=\d+ saves=\d+|ERROR [\w#/:.-]+ \w+)$")
+    assert lines and all(allowed.match(line) for line in lines), lines
+    assert "requests=25 saves=0" in lines  # the 25th request is the first POST
+    assert not any(s in out.out + out.err for s in ("Zorba", "Quentr", "Tralvio", "L1"))
+
+
+def test_serve_refuses_foreign_host_and_origin(tmp_path: Path) -> None:
+    ws = _viewed(_group_workspace(tmp_path))
+    with _served(ws, tmp_path) as base:
+        assert (
+            _call(base, "/api/state", headers={"Host": "zorbaville.example"})[0] == 403
+        )
+        body = {"gid": "g001", "decision": "A"}
+        assert (
+            _call(base, "/api/group", body, {"Origin": "http://zorbaville.example"})[0]
+            == 403
+        )
+        assert _call(base, "/api/group", body, {"Origin": base})[0] == 200
+
+
+def test_make_server_falls_back_to_the_next_port(tmp_path: Path) -> None:
+    ws = _viewed(_group_workspace(tmp_path))
+    app = adj.AdjudicationApp(ws, tmp_path / "x.md")
+    first = adj.make_server(app, 0)
+    try:
+        port = first.server_address[1]
+        second = adj.make_server(app, port)
+        try:
+            assert second.server_address[1] != port
+            assert second.server_address[0] == "127.0.0.1"
+        finally:
+            second.server_close()
+    finally:
+        first.server_close()
