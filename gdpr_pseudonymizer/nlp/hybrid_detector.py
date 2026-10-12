@@ -15,6 +15,7 @@ import dataclasses
 import functools
 import json
 import re
+import unicodedata
 from dataclasses import dataclass
 
 import yaml
@@ -29,6 +30,8 @@ from gdpr_pseudonymizer.resources import (
     LOCATION_NOISE_FILTER_PATH,
     ORG_ROLE_FILTER_PATH,
     PERSON_BOUNDARIES_PATH,
+    PLACE_ABBREVIATIONS_PATH,
+    SALUTATIONS_PATH,
 )
 from gdpr_pseudonymizer.utils.french_patterns import (
     FRENCH_TITLE_PATTERN,
@@ -197,6 +200,133 @@ def load_location_noise_filter() -> frozenset[str]:
     with open(LOCATION_NOISE_FILTER_PATH, encoding="utf-8") as f:
         data = yaml.safe_load(f)
     return frozenset(e["term"].casefold() for e in data["terms"])
+
+
+# ---------------------------------------------------------------------------
+# Salutation lines (Story 10.4, AC1-AC3)
+# ---------------------------------------------------------------------------
+
+# A name token: capitalised, hyphen allowed. A "known first name" is a name
+# token for which the name dictionary knows the whole token.
+_NAME_TOKEN = f"[{_UPPER}][{_UPPER}{_LOWER}]*(?:-[{_UPPER}][{_UPPER}{_LOWER}]*)*"
+# Shape 1: one or two names alone on the line, ending with a comma
+_SHAPE1_RE = re.compile(
+    f"({_NAME_TOKEN})(?:{HSPACE}*,{HSPACE}*({_NAME_TOKEN}))?{HSPACE}*,{HSPACE}*$"
+)
+# Shape 2, after the opener: two names, else one, then , . ! or the line end
+_OPENER_TWO_NAMES_RE = re.compile(
+    f"({_NAME_TOKEN}){HSPACE}*,{HSPACE}*({_NAME_TOKEN})(?=[,.!]|{HSPACE}*$)",
+    re.MULTILINE,
+)
+_OPENER_ONE_NAME_RE = re.compile(f"({_NAME_TOKEN})(?=[,.!]|{HSPACE}*$)", re.MULTILINE)
+# A PERSON span "X, Y" (AC1)
+_NAME_PAIR_RE = re.compile(f"({_NAME_TOKEN}){HSPACE}*,{HSPACE}*({_NAME_TOKEN})")
+_HSPACE_STR = " \t\u00a0\u202f"
+
+
+@dataclass(frozen=True)
+class Salutations:
+    """Opener list and shape-1 length limit loaded from ``salutations.yaml``."""
+
+    max_line_length: int
+    openers: tuple[tuple[str, str], ...]  # (term, kind)
+    opener_re: re.Pattern[str]
+
+
+@functools.lru_cache(maxsize=1)
+def load_salutations() -> Salutations:
+    """Load the salutation resource once (Story 10.4, AC2).
+
+    An opener matches at the start of a line, case as written; a space in a
+    term matches any run of horizontal whitespace. One or more horizontal
+    whitespace must follow it.
+    """
+    with open(SALUTATIONS_PATH, encoding="utf-8") as f:
+        data = yaml.safe_load(f)
+    openers = tuple((e["term"], e["kind"]) for e in data["openers"])
+    alternatives = "|".join(
+        f"(?P<o{i}>{(HSPACE + '+').join(re.escape(w) for w in term.split())})"
+        for i, (term, _kind) in enumerate(openers)
+    )
+    return Salutations(
+        max_line_length=int(data["max_line_length"]),
+        openers=openers,
+        opener_re=re.compile(f"(?:{alternatives}){HSPACE}+"),
+    )
+
+
+@dataclass(frozen=True)
+class _SalutationLine:
+    """A salutation line: its shape (1 or 2), the opener kind ("names" for
+    shape 1), the (start, end) of its one or two names, and whether a comma
+    follows the last name."""
+
+    start: int
+    end: int
+    shape: int
+    kind: str
+    names: tuple[tuple[int, int], ...]
+    comma_after: bool
+
+
+# ---------------------------------------------------------------------------
+# Document-level detections after the final merge (Story 10.4, AC5)
+# ---------------------------------------------------------------------------
+
+# A standalone all-caps token of 2 to 6 letters, never joined to a letter,
+# digit or hyphen (so never inside a reference code such as "REF-2024-AB-01")
+_ACRONYM_RE = re.compile(f"(?<![\\w-])([{_UPPER}]{{2,6}})(?![\\w-])")
+# A name token standing alone (an elided "d'" before it is allowed)
+_NAME_TOKEN_RE = re.compile(f"(?<![\\w-]){_NAME_TOKEN}(?![\\w-])")
+# Lower-case connectors of the organizations pattern, skipped by the initials
+_INITIALS_CONNECTORS = frozenset({"de", "du", "des", "la", "le", "et", "&"})
+_ELISION_PREFIX_RE = re.compile(r"^[dlDL]['’]")
+# A defined alias (Slice D): one or more capitalised tokens, quoted after
+# "ci-après [dénommé(e)(s)|désigné(e)]"
+_ALIAS = f"(?:[{_UPPER}][\\w&'’.-]*(?:{HSPACE}+[{_UPPER}][\\w&'’.-]*)*)"
+_DEFINITION_CLAUSE_RE = re.compile(
+    f"[Cc]i-après{HSPACE}+(?:(?:dénommée?|désignée?|dénommés|dénommées){HSPACE}+)?"
+    f'(?:["“«]{HSPACE}*)({_ALIAS})(?:{HSPACE}*["”»])'
+)
+# An alias that starts with one of these is a role noun, never taken
+_ALIAS_ARTICLES = frozenset({"le", "la", "les", "l'", "l’", "un", "une"})
+
+
+def _fold(text: str) -> str:
+    """Accents removed, case-folded."""
+    return "".join(
+        c for c in unicodedata.normalize("NFD", text) if not unicodedata.combining(c)
+    ).casefold()
+
+
+def _org_initials(text: str) -> str | None:
+    """Initials of an organisation name (Story 10.4, R-ACR).
+
+    The first letters of the capitalised words of the title-stripped text,
+    skipping the connectors de, du, des, la, le, et, & and a leading elision
+    (d', l'). None when fewer than two capitalised words remain.
+    """
+    words: list[str] = []
+    for token in strip_french_titles(text).split():
+        if token in _INITIALS_CONNECTORS:
+            continue
+        token = _ELISION_PREFIX_RE.sub("", token)
+        if token[:1].isupper():
+            words.append(token)
+    if len(words) < 2:
+        return None
+    return "".join(word[0] for word in words)
+
+
+def _line_spans(text: str) -> list[tuple[int, int]]:
+    """(start, end) of every line, split at ``_LINE_BREAK_RE``."""
+    spans: list[tuple[int, int]] = []
+    pos = 0
+    for match in _LINE_BREAK_RE.finditer(text):
+        spans.append((pos, match.start()))
+        pos = match.end()
+    spans.append((pos, len(text)))
+    return spans
 
 
 # A LOCATION whose whole text is one of these is a fragment (Story 10.3b);
@@ -426,6 +556,85 @@ def load_org_role_filter() -> OrgRoleFilter:
     )
 
 
+# vp_regions entries that are not places on their own: scope and compass words
+# (Story 10.4, AC4)
+_VP_NOT_PLACES = frozenset(
+    {
+        "International",
+        "Monde",
+        "Global",
+        "Worldwide",
+        "Nord",
+        "North",
+        "Sud",
+        "South",
+        "Est",
+        "East",
+        "Ouest",
+        "West",
+    }
+)
+
+
+@functools.lru_cache(maxsize=1)
+def load_place_abbreviations() -> tuple[str, ...]:
+    """Load the place abbreviations once (Story 10.4, AC4; GUIDELINES Q14, A5)."""
+    with open(PLACE_ABBREVIATIONS_PATH, encoding="utf-8") as f:
+        data = yaml.safe_load(f)
+    return tuple(e["term"] for e in data["terms"])
+
+
+@functools.lru_cache(maxsize=1)
+def _org_place_phrases() -> tuple[tuple[str, str], ...]:
+    """(place, source) for the organisation + place merge, longest first.
+
+    Sources: the countries and regions of the geography resource, the place
+    entries of ``vp_regions`` (scope and compass words excluded), the cities
+    of the geography resource, and the place abbreviations. A place listed
+    twice keeps its first source.
+    """
+    with open(FRENCH_GEOGRAPHY_PATH, encoding="utf-8") as f:
+        geography = json.load(f)
+    with open(ORG_ROLE_FILTER_PATH, encoding="utf-8") as f:
+        roles = yaml.safe_load(f)
+    places: dict[str, str] = {}
+    for place in _load_geography_region_words():
+        places.setdefault(place, "country_region")
+    for entry in roles["vp_regions"]:
+        if entry["term"] not in _VP_NOT_PLACES:
+            places.setdefault(entry["term"], "country_region")
+    for place in geography.get("cities", []):
+        places.setdefault(place, "city")
+    for place in load_place_abbreviations():
+        places.setdefault(place, "abbreviation")
+    return tuple(sorted(places.items(), key=lambda item: len(item[0]), reverse=True))
+
+
+def _place_after(
+    text: str, start: int, phrases: tuple[tuple[str, str], ...]
+) -> tuple[int, str] | None:
+    """(end, source) of the listed place that starts at ``start``, if any.
+
+    The place starts with an upper-case letter in the text and is not followed
+    by a letter; it equals the list entry case-insensitively, or exactly for
+    an abbreviation. The longest entry wins.
+    """
+    if start >= len(text) or not text[start].isupper():
+        return None
+    for phrase, source in phrases:
+        end = start + len(phrase)
+        candidate = text[start:end]
+        if source == "abbreviation":
+            if candidate != phrase:
+                continue
+        elif candidate.casefold() != phrase.casefold():
+            continue
+        if end < len(text) and text[end].isalpha():
+            continue
+        return end, source
+    return None
+
+
 def _vp_remainder(text: str, prefixes: tuple[str, ...]) -> str | None:
     """Return the text after a VP prefix ("" for a bare prefix), else None.
 
@@ -523,7 +732,9 @@ class HybridDetector(EntityDetector):
         4. Return combined entity list
 
     Deduplication Rules:
-        - Exact overlap (same span or same title-stripped text) → Keep spaCy entity
+        - Exact match (same span, or same title-stripped text with one span
+          inside the other) → same type: keep the spaCy entity; different
+          types: keep both, flag the regex entity (Story 10.3c, 10.4)
         - No overlap → Keep both entities
         - Different-type partial overlap → Flag regex entity as ambiguous, keep both
         - Same-type overlap → One span kept (Story 10.2 AC1, PR #81 review):
@@ -620,6 +831,13 @@ class HybridDetector(EntityDetector):
 
         logger.debug("regex_detection_complete", entities_found=len(regex_entities))
 
+        # Story 10.4 (AC2): a known first name alone on a salutation line, or
+        # after a greeting, thanks or compliment opener, joins the regex list
+        salutation_lines = self._salutation_lines(text)
+        regex_entities = regex_entities + self._salutation_names(
+            text, salutation_lines, spacy_entities, regex_entities
+        )
+
         # Step 3: PERSON boundaries before the merge, on both sources (Story
         # 10.3b AC4-AC6, AC9): particles, Mc/Mac, trailing roles. The ORG and
         # LOCATION spans of both lists block a particle extension.
@@ -633,6 +851,14 @@ class HybridDetector(EntityDetector):
         )
         regex_entities, regex_guards = self._fix_person_boundaries(
             regex_entities, text, blockers
+        )
+        # Story 10.4 (AC1): "X, Y" on a salutation line, both known first
+        # names → two PERSONs, on both lists
+        spacy_entities, spacy_guards = self._split_salutation_pairs(
+            spacy_entities, spacy_guards, text, salutation_lines
+        )
+        regex_entities, regex_guards = self._split_salutation_pairs(
+            regex_entities, regex_guards, text, salutation_lines
         )
         # The merge flags regex entities in place: keep pristine copies in case
         # a guarded trim is refused and the document is merged once more
@@ -658,6 +884,14 @@ class HybridDetector(EntityDetector):
                     spacy_entities, pristine_regex, text
                 )
 
+        # Story 10.4 (AC5): detections that need the document's final list
+        added = self._document_level_entities(text, merged_entities)
+        if added:
+            merged_entities = self._dedup_same_type_overlaps(
+                merged_entities + added, text
+            )
+            merged_entities.sort(key=lambda e: e.start_pos)
+
         logger.info(
             "hybrid_detection_complete",
             spacy_count=len(spacy_entities),
@@ -676,8 +910,9 @@ class HybridDetector(EntityDetector):
         """Merge spaCy and regex entities with deduplication logic.
 
         Deduplication Rules (the first overlapping spaCy entity decides):
-            - Exact match (same span, or same text once titles are stripped),
-              same type → Keep spaCy entity (prefer NLP confidence)
+            - Exact match (same span, or same text once titles are stripped
+              with one span inside the other, Story 10.4 R-NEST), same type →
+              Keep spaCy entity (prefer NLP confidence)
             - Exact match, different types → Keep both, flag the regex entity
               as ambiguous (Story 10.3c AC1); checked before the Cabinet case.
               Except a hyphenated PERSON with no known first name (R-HYPH-FN,
@@ -689,8 +924,10 @@ class HybridDetector(EntityDetector):
               pass below keeps one (Story 10.2 AC1)
             - Special case: Regex ORG with "Cabinet" overlapping spaCy PERSON → Prefer ORG
 
-        Post-filters, in order: title-only PERSON, label words, ORG roles
-        (AC3), same-type overlap dedup (AC1), then sort by start position.
+        Post-filters, in order: title-only PERSON, label words, LOCATION
+        noise, ORG roles (AC3), organisation + place (Story 10.4 AC4),
+        same-type overlap dedup (AC1), the line-break split, W-JOIN and the
+        late role trim, then sort by start position.
 
         Args:
             spacy_entities: Entities detected by spaCy
@@ -796,6 +1033,10 @@ class HybridDetector(EntityDetector):
         # Filter out job titles / role acronyms detected as ORG (Story 10.2 AC3)
         merged = self._filter_org_roles(merged, text)
 
+        # Organisation + place → one ORG, the place keeping its LOCATION
+        # (Story 10.4 AC4, R-OPC)
+        merged = self._merge_org_places(merged, text)
+
         # Keep one entity per same-type overlap (Story 10.2 AC1)
         merged = self._dedup_same_type_overlaps(merged, text)
 
@@ -807,6 +1048,7 @@ class HybridDetector(EntityDetector):
             merged = self._filter_label_words(merged)
             merged = self._filter_location_noise(merged, text)
             merged = self._filter_org_roles(merged, text)
+            merged = self._merge_org_places(merged, text)
             merged = self._dedup_same_type_overlaps(merged, text)
 
         # Re-join a PERSON name hard-wrapped over one line (Story 10.3a W-JOIN),
@@ -1059,6 +1301,328 @@ class HybridDetector(EntityDetector):
     def _known_first_name(self, word: str) -> bool:
         names = self.regex_matcher.name_dictionary or _default_name_dictionary()
         return names.is_first_name(word)
+
+    def _is_known_name_token(self, word: str) -> bool:
+        """A known first name in the text (Story 10.4): capitalised there,
+        and the whole token is a dictionary first name."""
+        return bool(word) and word[0].isupper() and self._known_first_name(word)
+
+    def _salutation_lines(self, text: str) -> list[_SalutationLine]:
+        """The salutation lines of a document (Story 10.4, AC precisions).
+
+        Shape 1: after removing leading and trailing horizontal whitespace,
+        the line is one or two known first names (comma-separated) followed
+        by a comma, and is at most ``max_line_length`` characters long.
+        Shape 2 (tried when shape 1 does not apply): after optional leading
+        horizontal whitespace, an opener of ``salutations.yaml``, then two
+        known first names "N, N" or one, followed by , . ! or the end of the
+        line. One pass over the lines.
+        """
+        lists = load_salutations()
+        found: list[_SalutationLine] = []
+        for start, end in _line_spans(text):
+            line = text[start:end]
+            body = start + len(line) - len(line.lstrip(_HSPACE_STR))
+            shape1 = _SHAPE1_RE.fullmatch(text, body, end)
+            if shape1:
+                names = tuple(
+                    (shape1.start(g), shape1.end(g)) for g in (1, 2) if shape1.group(g)
+                )
+                if all(self._is_known_name_token(text[a:b]) for a, b in names):
+                    if len(line.strip(_HSPACE_STR)) <= lists.max_line_length:
+                        found.append(
+                            _SalutationLine(start, end, 1, "names", names, True)
+                        )
+                    continue
+            opener = lists.opener_re.match(text, body, end)
+            if opener is None:
+                continue
+            kind = lists.openers[int(str(opener.lastgroup)[1:])][1]
+            two = _OPENER_TWO_NAMES_RE.match(text, opener.end(), end)
+            if (
+                two
+                and self._is_known_name_token(two.group(1))
+                and self._is_known_name_token(two.group(2))
+            ):
+                names = ((two.start(1), two.end(1)), (two.start(2), two.end(2)))
+                comma = text[two.end() : two.end() + 1] == ","
+                found.append(_SalutationLine(start, end, 2, kind, names, comma))
+                continue
+            one = _OPENER_ONE_NAME_RE.match(text, opener.end(), end)
+            if one and self._is_known_name_token(one.group(1)):
+                comma = text[one.end() : one.end() + 1] == ","
+                found.append(
+                    _SalutationLine(
+                        start, end, 2, kind, ((one.start(1), one.end(1)),), comma
+                    )
+                )
+        return found
+
+    def _document_level_entities(
+        self, text: str, entities: list[DetectedEntity]
+    ) -> list[DetectedEntity]:
+        """Story 10.4 rules that read the final merged list of the document,
+        in order: R-ACR, R-DEF-NAME, then R-FN-DOC. Each sees the previous
+        additions. They only add detections, and an addition overlaps no
+        detection."""
+        added: list[DetectedEntity] = []
+        added += self._org_acronyms(text, entities + added)
+        added += self._defined_aliases(text, entities + added)
+        added += self._document_first_names(text, entities + added)
+        return added
+
+    @staticmethod
+    def _defined_aliases(
+        text: str, entities: list[DetectedEntity]
+    ) -> list[DetectedEntity]:
+        """R-DEF-NAME (Story 10.4, Slice D; Lionel, STOP R Q1): an alias that
+        the text defines ('ci-après dénommée "ZORBTECH"') becomes an ORG at
+        every standalone occurrence (same case) that overlaps no detection,
+        when the alias, accents and case aside, is the title-stripped text or
+        the first word of an ORG detection of the same document. An alias
+        that starts with an article ("le Client", "la Société") is never
+        taken. No alias list: the tie is the organisation named in the same
+        text (GUIDELINES Q18)."""
+        org_names: dict[str, DetectedEntity] = {}
+        for entity in sorted(
+            (e for e in entities if e.entity_type == "ORG"), key=lambda e: e.end_pos
+        ):
+            core = strip_french_titles(entity.text)
+            if core:
+                org_names.setdefault(_fold(core), entity)
+                org_names.setdefault(_fold(core.split()[0]), entity)
+        if not org_names:
+            return []
+        aliases: dict[str, int] = {}
+        for clause in _DEFINITION_CLAUSE_RE.finditer(text):
+            alias = clause.group(1)
+            first = alias.split()[0].casefold()
+            if first in _ALIAS_ARTICLES or first.startswith(("l'", "l’")):
+                continue
+            if _fold(alias) in org_names:
+                aliases.setdefault(alias, clause.start(1))
+        if not aliases:
+            return []
+        index = _SpanIndex.of(entities)
+        added: list[DetectedEntity] = []
+        for alias, definition_start in aliases.items():
+            pattern = re.compile(f"(?<![\\w-]){re.escape(alias)}(?![\\w-])")
+            for match in pattern.finditer(text):
+                start, end = match.start(), match.end()
+                if index.overlaps(start, end) or any(
+                    a.start_pos < end and start < a.end_pos for a in added
+                ):
+                    continue
+                added.append(
+                    DetectedEntity(
+                        text=alias,
+                        entity_type="ORG",
+                        start_pos=start,
+                        end_pos=end,
+                        confidence=0.70,
+                        source="regex",
+                    )
+                )
+                logger.debug(
+                    "org_alias_added",
+                    start=start,
+                    end=end,
+                    definition_start=definition_start,
+                )
+        return added
+
+    @staticmethod
+    def _org_acronyms(
+        text: str, entities: list[DetectedEntity]
+    ) -> list[DetectedEntity]:
+        """R-ACR (Story 10.4, AC5): a standalone all-caps token of 2-6 letters
+        whose letters are the initials of an ORG detection of the same
+        document becomes an ORG, at every occurrence that overlaps no
+        detection (GUIDELINES Q18). A token that is a role for the 10.2 role
+        test (a role acronym or a VP prefix) is skipped. No acronym list: the
+        tie is the organisation named in the same text."""
+        initials: dict[str, DetectedEntity] = {}
+        for entity in entities:
+            if entity.entity_type == "ORG":
+                found = _org_initials(entity.text)
+                if found:
+                    initials.setdefault(_fold(found).upper(), entity)
+        if not initials:
+            return []
+        index = _SpanIndex.of(entities)
+        added: list[DetectedEntity] = []
+        for match in _ACRONYM_RE.finditer(text):
+            token = match.group(1)
+            org = initials.get(_fold(token).upper())
+            if org is None or match_org_role(token) is not None:
+                continue
+            if index.overlaps(match.start(), match.end()):
+                continue
+            added.append(
+                DetectedEntity(
+                    text=token,
+                    entity_type="ORG",
+                    start_pos=match.start(),
+                    end_pos=match.end(),
+                    confidence=0.70,
+                    source="regex",
+                )
+            )
+            logger.debug(
+                "org_acronym_added",
+                start=match.start(),
+                end=match.end(),
+                org_start=org.start_pos,
+                org_end=org.end_pos,
+            )
+        return added
+
+    def _document_first_names(
+        self, text: str, entities: list[DetectedEntity]
+    ) -> list[DetectedEntity]:
+        """R-FN-DOC (Story 10.4, AC5): a known first name that overlaps no
+        detection and equals the first token (titles stripped) of a PERSON
+        detection of two or more tokens in the same document becomes a PERSON,
+        at every such occurrence (GUIDELINES Q8). Lower-case words never
+        fire; a capitalised common word fires only in a document that names
+        a person with that first name (accepted by Lionel, STOP R Q2)."""
+        firsts: dict[str, DetectedEntity] = {}
+        for entity in entities:
+            if entity.entity_type == "PERSON":
+                tokens = strip_french_titles(entity.text).split()
+                if len(tokens) >= 2:
+                    firsts.setdefault(tokens[0].strip(",;:"), entity)
+        if not firsts:
+            return []
+        index = _SpanIndex.of(entities)
+        added: list[DetectedEntity] = []
+        for match in _NAME_TOKEN_RE.finditer(text):
+            name = match.group()
+            person = firsts.get(name)
+            if person is None or not self._is_known_name_token(name):
+                continue
+            if index.overlaps(match.start(), match.end()):
+                continue
+            added.append(
+                DetectedEntity(
+                    text=name,
+                    entity_type="PERSON",
+                    start_pos=match.start(),
+                    end_pos=match.end(),
+                    confidence=0.80,
+                    source="regex",
+                )
+            )
+            logger.debug(
+                "document_first_name_added",
+                start=match.start(),
+                end=match.end(),
+                person_start=person.start_pos,
+                person_end=person.end_pos,
+            )
+        return added
+
+    @staticmethod
+    def _salutation_names(
+        text: str,
+        lines: list[_SalutationLine],
+        spacy_entities: list[DetectedEntity],
+        regex_entities: list[DetectedEntity],
+    ) -> list[DetectedEntity]:
+        """R-SAL-BARE (Story 10.4, AC2): each name of a salutation line that no
+        PERSON of either list contains becomes a regex PERSON (confidence
+        0.80). Only adds detections."""
+        persons = [
+            (e.start_pos, e.end_pos)
+            for e in spacy_entities + regex_entities
+            if e.entity_type == "PERSON"
+        ]
+        added: list[DetectedEntity] = []
+        for line in lines:
+            for start, end in line.names:
+                if any(a <= start and end <= b for a, b in persons):
+                    continue
+                persons.append((start, end))
+                added.append(
+                    DetectedEntity(
+                        text=text[start:end],
+                        entity_type="PERSON",
+                        start_pos=start,
+                        end_pos=end,
+                        confidence=0.80,
+                        source="regex",
+                    )
+                )
+                logger.debug(
+                    "salutation_name_added",
+                    shape=line.shape,
+                    opener_kind=line.kind,
+                    start=start,
+                    end=end,
+                )
+        return added
+
+    def _split_salutation_pairs(
+        self,
+        entities: list[DetectedEntity],
+        guards: list[_RoleGuard],
+        text: str,
+        lines: list[_SalutationLine],
+    ) -> tuple[list[DetectedEntity], list[_RoleGuard]]:
+        """R-SAL-SPLIT (Story 10.4, AC1): a PERSON span "X, Y" that is exactly
+        the two names of a salutation line whose names end with a comma, both
+        known first names, is replaced in place by PERSON X and PERSON Y.
+        Elsewhere (running text, "Last, First") the span is unchanged. The
+        guards of the list are re-indexed to the new positions."""
+        pairs = {
+            (line.names[0][0], line.names[1][1])
+            for line in lines
+            if len(line.names) == 2 and line.comma_after
+        }
+        if not pairs:
+            return entities, guards
+        out: list[DetectedEntity] = []
+        new_index: dict[int, int] = {}
+        for index, entity in enumerate(entities):
+            new_index[index] = len(out)
+            match = (
+                _NAME_PAIR_RE.fullmatch(text, entity.start_pos, entity.end_pos)
+                if entity.entity_type == "PERSON"
+                and (entity.start_pos, entity.end_pos) in pairs
+                else None
+            )
+            if (
+                match is None
+                or not self._is_known_name_token(match.group(1))
+                or not self._is_known_name_token(match.group(2))
+            ):
+                out.append(entity)
+                continue
+            for group in (1, 2):
+                out.append(
+                    dataclasses.replace(
+                        entity,
+                        text=match.group(group),
+                        start_pos=match.start(group),
+                        end_pos=match.end(group),
+                        is_ambiguous=False,
+                    )
+                )
+            logger.debug(
+                "salutation_name_split",
+                source=entity.source,
+                old_start=entity.start_pos,
+                old_end=entity.end_pos,
+                first_start=match.start(1),
+                first_end=match.end(1),
+                second_start=match.start(2),
+                second_end=match.end(2),
+            )
+        if len(out) == len(entities):
+            return out, guards
+        return out, [
+            dataclasses.replace(guard, index=new_index[guard.index]) for guard in guards
+        ]
 
     def _is_hyphen_name_without_first_name(self, entity: DetectedEntity) -> bool:
         """R-HYPH-FN (Story 10.3c AC3): a PERSON whose title-stripped text is
@@ -1600,6 +2164,75 @@ class HybridDetector(EntityDetector):
         return filtered
 
     @staticmethod
+    def _merge_org_places(
+        entities: list[DetectedEntity], text: str | None
+    ) -> list[DetectedEntity]:
+        """R-OPC (Story 10.4, AC4): an ORG followed, on the same line, by one
+        horizontal whitespace and a listed place becomes one ORG over both.
+
+        The merged text must not be a role (``match_org_role``), so "VP" +
+        "Europe" is never merged (the role filter ran before). The place keeps
+        its own LOCATION (GUIDELINES Q3, G7): an existing LOCATION with the
+        place's exact span is kept, otherwise one is emitted. Runs after
+        ``_filter_org_roles``, before the same-type dedup.
+        """
+        if text is None:
+            return entities
+        phrases = _org_place_phrases()
+        locations = {
+            (e.start_pos, e.end_pos) for e in entities if e.entity_type == "LOCATION"
+        }
+        out: list[DetectedEntity] = []
+        emitted: list[DetectedEntity] = []
+        for entity in entities:
+            if (
+                entity.entity_type != "ORG"
+                or entity.end_pos + 1 >= len(text)
+                or text[entity.end_pos] not in _HSPACE_CHARS
+            ):
+                out.append(entity)
+                continue
+            place_start = entity.end_pos + 1
+            place = _place_after(text, place_start, phrases)
+            if place is None:
+                out.append(entity)
+                continue
+            place_end, source = place
+            merged_text = text[entity.start_pos : place_end]
+            if match_org_role(merged_text) is not None:
+                out.append(entity)
+                continue
+            out.append(
+                dataclasses.replace(
+                    entity, text=merged_text, end_pos=place_end, is_ambiguous=False
+                )
+            )
+            location_emitted = (place_start, place_end) not in locations
+            if location_emitted:
+                emitted.append(
+                    DetectedEntity(
+                        text=text[place_start:place_end],
+                        entity_type="LOCATION",
+                        start_pos=place_start,
+                        end_pos=place_end,
+                        confidence=entity.confidence,
+                        source=entity.source,
+                    )
+                )
+                locations.add((place_start, place_end))
+            logger.debug(
+                "org_place_merged",
+                source=entity.source,
+                org_start=entity.start_pos,
+                org_end=entity.end_pos,
+                place_start=place_start,
+                place_end=place_end,
+                place_source=source,
+                location_emitted=location_emitted,
+            )
+        return out + emitted
+
+    @staticmethod
     def _place_entities(
         entity: DetectedEntity, places: list[str], text: str | None
     ) -> list[DetectedEntity]:
@@ -2098,18 +2731,22 @@ class HybridDetector(EntityDetector):
         return strip_french_titles(text)
 
     def _is_exact_match(self, e1: DetectedEntity, e2: DetectedEntity) -> bool:
-        """Check if two entities have identical span OR normalized text.
+        """Check if two entities have identical span OR nested normalized text.
 
         Checks both positional exact match and normalized text match to handle
         cases where one detector includes a title and the other doesn't
         (e.g., "Dr. Marie Dubois" from regex vs "Marie Dubois" from spaCy).
+        The normalized-text match also requires one span to contain the other
+        (Story 10.4, R-NEST): in "Zorbalia Dr Zorbalia", "Zorbalia Dr" and
+        "Dr Zorbalia" are two occurrences, not one.
 
         Args:
             e1: First entity
             e2: Second entity
 
         Returns:
-            True if entities have same start/end positions OR same normalized text
+            True if entities have same start/end positions, OR same normalized
+            text and one span contains the other
         """
         # Check positional exact match
         if e1.start_pos == e2.start_pos and e1.end_pos == e2.end_pos:
@@ -2118,7 +2755,9 @@ class HybridDetector(EntityDetector):
         # Check normalized text match (strips titles for comparison)
         # This handles "Dr. Marie Dubois" == "Marie Dubois" cases
         if self._normalize_entity_text(e1.text) == self._normalize_entity_text(e2.text):
-            return True
+            return (e1.start_pos <= e2.start_pos and e2.end_pos <= e1.end_pos) or (
+                e2.start_pos <= e1.start_pos and e1.end_pos <= e2.end_pos
+            )
 
         return False
 

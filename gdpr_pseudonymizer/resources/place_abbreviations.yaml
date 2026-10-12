@@ -1,0 +1,14 @@
+# Place abbreviations for the organisation + place merge (Story 10.4, AC4).
+# Matched exactly, in capitals. GUIDELINES Q14 and A5: these abbreviations are
+# always LOCATION. Read only by the organisation + place merge (R-OPC); not
+# added to french_geography.json (it would change the geography matching
+# everywhere) nor to org_role_filter.yaml (it would change the VP-form
+# filter). Never add held-out strings.
+# Frozen list: Story 10.4 Task 2. Changes go back through the story.
+
+terms:
+  - {term: "UK", why: "GUIDELINES Q14: US, USA, UK, UE are always LOCATION, every occurrence"}
+  - {term: "US", why: "GUIDELINES Q14: US, USA, UK, UE are always LOCATION, every occurrence"}
+  - {term: "USA", why: "GUIDELINES Q14: US, USA, UK, UE are always LOCATION, every occurrence"}
+  - {term: "UE", why: "GUIDELINES Q14: US, USA, UK, UE are always LOCATION, every occurrence"}
+  - {term: "EU", why: "GUIDELINES A5: EU is treated like UE (always LOCATION)"}

@@ -118,7 +118,7 @@ These notes sit outside the normative Gates block above and do not change its te
 | 10.2: Same-Type Overlap Dedup + ORG Role Filter | HIGH | 1 week | F1, F2 | Done (PR #81) |
 | 10.3a: Boundaries & Run-On Spans (split from 10.3, Lionel, 2026-10-06) | MED | 0.5-1 week | 10.2 handoff, REL-004 | Done (PR #84) |
 | 10.3b: Particles, Roles & LOCATION Noise (split from 10.3, Lionel, 2026-10-06) | MED | 0.5-1 week (re-estimated after STOP R, 2026-10-07) | F6, F7 | Done (PR #87, `bab6717`) |
-| 10.3c: Type-Aware Exact Match in Merge (added at 10.3a STOP R, Lionel, 2026-10-06) | MED | 0.5 week | 10.3a STOP R | Draft |
+| 10.3c: Type-Aware Exact Match in Merge (added at 10.3a STOP R, Lionel, 2026-10-06) | MED | 0.5 week | 10.3a STOP R | Done (PR #91, `5846419`) |
 | 10.4: Greetings + Org-Plus-Country | MED | 0.5-1 week | F8, F9 | Draft |
 | 10.5: DB Init Safety (data-layer hardening, added by Lionel, 2026-10-07) | LOW | 0.5 week | PR #83 finding | Draft |
 | 10.6: Final-Exam Set and Confidence Ranges (added by Lionel, 2026-10-07) | HIGH | 2-3 weeks elapsed, in parallel | Overfitting check, close-out evidence | In Progress (PR A merged, #89) |
@@ -151,6 +151,7 @@ Numbers come only from CI runs; each line cites its run ID. Full verbatim lines 
 | 10.2 | `37385301566`, reproduced on `main` by `37424140809` | P 77.35% / R 78.33% / F1 77.84% | F1 72.36% | PR #81 |
 | 10.3a | `37459114468` (head `39ab544`), reproduced on `main` by `37480506234` at `ac354cc` | P 77.64% / R 79.32% / F1 78.47% | F1 76.44% | PR #84 |
 | 10.3b | `37641796495` (run D), reproduced on `main` by `37678069251` | P 79.24% / R 79.59% / F1 79.41% | F1 76.79% | PR #87 (`bab6717`) |
+| 10.3c | `37963522411` (run P, head `8d25dbe`), reproduced on `main` by `37975010715` | P 79.20% / R 79.77% / F1 79.49% | F1 76.79% | PR #91 (`5846419`) |
 
 - **10.2 recall (G3):** Lionel accepted recall bounds of FN PERSON +21 / LOCATION +4 / ORG +16 versus 10.1 (`37189862679`). Run `37385301566` is inside them: FN PERSON +21 / LOCATION +4 / ORG +10.
 - **10.2 held-out ORG recall:** Lionel accepted the drop (held-out ORG FN 28 → 34, `37189862679` → `37385301566`). It is tracked in 10.3a (AC7).
@@ -160,8 +161,10 @@ Numbers come only from CI runs; each line cites its run ID. Full verbatim lines 
 - **10.3a QA:** PR #84 merged before QA. The post-merge QA gate is PASS (`docs/qa/gates/10.3a-boundaries-run-on-spans.yml`, PR #85). Its REQ-001 finding is routed to 10.4 (see "Candidate item" there).
 - **10.3b close-out:** PR #87 merged as `bab6717`. Close-out run D `37641796495`, reproduced by the `main` push run `37678069251`. Main P 0.7924 / R 0.7959 / F1 0.7941, TP 1763 / FP 462 / FN 452 (PERSON 44 / LOCATION 54 / ORG 354). Held-out F1 0.7679, FN 59 (PERSON 15 / LOCATION 16 / ORG 28), FP 45. NFR1: performance run `37641855606` (AMD EPYC 7763).
 - **10.6 PR A (confidence ranges):** PR #89 merged as `6abf858`. G1 run `37856056081`, QA re-run `37860150044`. The eight existing lines are byte-identical to `37678069251` (AC2). Ranges added: `[CI95 …]` lines, unit=document, 10,000 resamples, seed 20261008. The `main` push run `37891970847` on `6abf858` is the JSON-bearing baseline for 10.3c's paired delta (AC3).
+- **10.3c close-out:** PR #91 merged as `5846419`. Close-out run P `37963522411` (head `8d25dbe`), reproduced by the `main` push run `37975010715` (16 lines identical; carries `accuracy-per-document.json`). Main P 0.7920 / R 0.7977 / F1 0.7949, TP 1767 / FP 464 / FN 448 (PERSON 42 / LOCATION 52 / ORG 354). Held-out F1 0.7679, FN 59 (PERSON 15 / LOCATION 16 / ORG 28), FP 45. NFR1: performance run `37963988214` (AMD EPYC 7763). STOP R (Lionel, 2026-10-09): R-HYPH-FN adopted; the type-blind mapping lookup became Story 10.7.
 - **10.6 final exam (close-out):** committed as plain files at `<commit>`, with the documents' sha256 matching the freeze record; scored once in run `<run id>` at `<commit>` (ledger `tests/test_corpus/final_exam/RUNS.md`). Fill in at close-out with the pasted `[FINAL-EXAM …]` lines (overall, planted half, natural half) and their CI95 lines.
-- **Current baseline for 10.3c:** main push run `37891970847` on `6abf858` (same lines as 10.3b close-out run D; carries `accuracy-per-document.json`).
+- **Baseline used by 10.3c:** main push run `37891970847` on `6abf858` (same lines as 10.3b close-out run D; carries `accuracy-per-document.json`).
+- **Current baseline for 10.4:** main push run `37975010715` on `5846419` (same 16 lines as 10.3c close-out run P `37963522411`; carries `accuracy-per-document.json`).
 
 ---
 
@@ -388,10 +391,10 @@ Re-estimated after STOP R on 2026-10-07 (it was 1-1.5 weeks while the C2 removal
 1. **AC1 — Split salutations:** a PERSON span of the form "X, Y," (e.g. "Laurent, Marie,") on a salutation line is split into two PERSON entities when both X and Y are known first names (name dictionary). If either is not a known first name, today's behaviour is kept. The interaction with the `last_first_names` pattern (`require_known_first_name`) is documented and tested.
 2. **AC2 — Bare first name on a salutation line:** a known first name is detected as PERSON when it stands alone on a line followed by a comma ("Marie,") or follows a greeting or thanks opener ("Bonjour Marie", "Merci Laurent", "Bonne initiative Laurent."). The story defines "salutation line" precisely (opener list, maximum line length) as a resource, not a hard-coded string. The opener resource must state explicitly whether non-greeting phrases such as "Bonne initiative Laurent." (a compliment, not a salutation) are in scope; the call is left to the story but must be written down.
 3. **AC3:** The new bare-first-name rule of AC2 fires only in salutation contexts; existing detection of these names is unchanged. Unit tests cover first names that are also common words (e.g. "Rose", "Pierre", "Claire") in running text, proving the new rule does not fire there.
-4. **AC4 — Org + country:** an ORG immediately followed by a country or region name ("France", "Europe", and others listed in the story) is merged into a single ORG span ("Microsoft France"), when the approved guidelines annotate it that way. The merge runs after the 10.2 role filter and never merges a role token (e.g. "VP" + "Europe" is never merged into an ORG); a unit test proves it.
+4. **AC4 — Org + country:** an ORG immediately followed by a country, region or city name ("France", "Europe", "UK", "Paris", and others listed in the story) is merged into a single ORG span ("Microsoft France"), and the place keeps its own nested LOCATION ("France"), as the approved guidelines annotate it (GUIDELINES Q3 and G7, decided by Lionel at STOP A, 2026-10-02; G7's meaning test added by amendment A2, 2026-10-03). The merge runs after the 10.2 role filter and never merges a role token (e.g. "VP" + "Europe" is never merged into an ORG); a unit test proves it.
 5. **AC5 — Restore carried coverage losses (from 10.2; moved from 10.3a at STOP R, Lionel, 2026-10-06):** two main-corpus annotations that have had no covering detection since 10.2 regain coverage, each by a generic rule (no lexicon entry built from the corpus string):
    - PERSON "Pierre" (`hr_announcement`): a bare known first name at the start of an indented sentence, covered today by no detection. The rule must keep AC3 true (no firing on first names in running text); if both cannot hold, the annotation is reported as still uncovered, with the reason and Lionel's sign-off.
-   - ORG "BRS": an alias that the text defines for an organisation, covered in v2.2 only by a junk span. Coverage comes from the alias being tied to its defining ORG in the text, not from listing "BRS".
+   - ORG "BRS": an abbreviation of an organisation named in the same text ("Banque Régionale du Sud"), covered in v2.2 only by a junk span. Coverage comes from tying the abbreviation to that ORG in the text, not from listing "BRS".
    - The coverage table at close-out reports both annotations as restored or still uncovered.
 6. **AC6:** Unit tests for each rule, including `email_chain.txt`-style fixtures written for the tests (not copied from the held-out set) and invented-name fixtures for the two AC5 cases.
 7. **AC7 — Gates:** G1 (main and held-out), G2, G3 versus the previous merged baseline (10.3c close-out), G4, G5, G6 (plus NFR1 timing unchanged: existing perf test green), G7 per the Epic 10 G7 interpretation (Lionel, 2026-10-02): before/after recorded in the QA report in this story; README/README.fr, FAQ, docs index and tutorials are updated at Epic 10 close-out, not per story. CHANGELOG [Unreleased] entry describing the behaviour change, regardless of G7, including an upgrade note on pseudonym continuity (see Risk Mitigation).
@@ -410,13 +413,14 @@ Not an AC. The 10.4 story decides whether to take each part in or leave it to la
   - What it does: the prefix form accepts connectors or an elision right after the keyword, so names such as "Chambre d'Agriculture d'Eure-et-Loir" or "Cour d'Appel de Paris" are covered whole.
   - Why it sits here: it changes the same `organizations` prefix pattern (`detection_patterns.yaml:88`) and shares REQ-001's elision-after-keyword case, so the two are handled together. It covers only that case; REQ-001's other limits (7+ words, "& Co.", 3+ connectors) stay as listed above.
   - Size: 0 change on the main corpus in the 10.3b dry-run (local, not a CI result); +1 ORG TP in the earlier 10.3a dry-run.
+- **Normalized-text exact match without containment** (10.3c QA gate, routed to 10.4 by the orchestrator, 2026-10-09): the merge's normalized-text match does not require one span to contain the other ("Zorbalia Dr Zorbalia"), so one occurrence of a name can stay in clear. 0 main-corpus case (0 non-nested pairs among 1,662 exact matches).
 - **Related:** F10 (ORG recall) and the R-KWC row, both in Out of Scope.
 
 ### Integration Points
 
 - `gdpr_pseudonymizer/nlp/hybrid_detector.py`, `gdpr_pseudonymizer/nlp/regex_matcher.py`
 - `gdpr_pseudonymizer/nlp/name_dictionary.py`
-- `gdpr_pseudonymizer/resources/detection_patterns.yaml` — salutation openers, country/region list
+- `gdpr_pseudonymizer/resources/salutations.yaml` (new): openers and line-length limit; place names read from `french_geography.json` and `org_role_filter.yaml`; `detection_patterns.yaml` only for a candidate item taken in
 
 ### Estimated Effort: 0.5-1 week
 

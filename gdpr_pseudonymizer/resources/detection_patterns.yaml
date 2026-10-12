@@ -85,8 +85,8 @@ patterns:
           - "Solutions SCOP"
           - "TechCorp Association"
           - "Marie Curie Fondation"
-      - pattern: '\b(Société|Entreprise|Cabinet|Groupe|Compagnie|Association|Fondation|Institut|Consortium|Fédération|Syndicat|Chambre|Mutuelle|Coopérative|Ordre|Caisse|Union|Confédération|Agence|Comité|Commission|Ligue)[ \t\u00A0\u202F]+([A-ZÀ-ÖØ-ÞĀ-ſ](?:[A-ZÀ-ÖØ-ÞĀ-ſa-zß-öø-ÿĀ-ſ0-9]|[&''’.\-](?=[A-ZÀ-ÖØ-ÞĀ-ſa-zß-öø-ÿĀ-ſ0-9]))*(?:[ \t\u00A0\u202F](?:(?:de|du|des|la|le|et|&)[ \t\u00A0\u202F]){0,2}(?:[dl][''’])?[A-ZÀ-ÖØ-ÞĀ-ſ](?:[A-ZÀ-ÖØ-ÞĀ-ſa-zß-öø-ÿĀ-ſ0-9]|[&''’.\-](?=[A-ZÀ-ÖØ-ÞĀ-ſa-zß-öø-ÿĀ-ſ0-9]))*){0,5})'
-        description: "Organization with prefix keyword (22 prefixes), same name shape as above (Story 10.3a R-ORG)"
+      - pattern: '\b(Société|Entreprise|Cabinet|Groupe|Compagnie|Association|Fondation|Institut|Consortium|Fédération|Syndicat|Chambre|Mutuelle|Coopérative|Ordre|Caisse|Union|Confédération|Agence|Comité|Commission|Ligue)[ \t\u00A0\u202F]+(?:(?:de|du|des|la|le|et|&)[ \t\u00A0\u202F]){0,2}(?:[dl][''’])?([A-ZÀ-ÖØ-ÞĀ-ſ](?:[A-ZÀ-ÖØ-ÞĀ-ſa-zß-öø-ÿĀ-ſ0-9]|[&''’.\-](?=[A-ZÀ-ÖØ-ÞĀ-ſa-zß-öø-ÿĀ-ſ0-9]))*(?:[ \t\u00A0\u202F](?:(?:de|du|des|la|le|et|&)[ \t\u00A0\u202F]){0,2}(?:[dl][''’])?[A-ZÀ-ÖØ-ÞĀ-ſ](?:[A-ZÀ-ÖØ-ÞĀ-ſa-zß-öø-ÿĀ-ſ0-9]|[&''’.\-](?=[A-ZÀ-ÖØ-ÞĀ-ſa-zß-öø-ÿĀ-ſ0-9]))*){0,5})'
+        description: "Organization with prefix keyword (22 prefixes), same name shape as above (Story 10.3a R-ORG); 1-2 connectors and/or an elision may follow the keyword, as in Chambre de Commerce (Story 10.4 R-KWC)"
         examples:
           - "Société TechCorp"
           - "Entreprise Dubois"

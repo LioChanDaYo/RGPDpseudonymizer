@@ -1,0 +1,17 @@
+# Salutation openers (Story 10.4, AC2). A salutation line is either one or two
+# known first names alone on a line, ending with a comma (shape 1, at most
+# max_line_length characters once leading and trailing horizontal whitespace
+# is removed), or an opener below at the start of a line, followed by one or
+# two known first names and then , . ! or the end of the line (shape 2).
+# Compliment and thanks openers are in scope (GUIDELINES Q1). Every entry
+# needs a `why` that holds for any French business text. Never add an entry
+# because it appeared in the corpus alone; never add held-out strings.
+# Frozen list: Story 10.4 Task 2. Changes go back through the story.
+
+max_line_length: 40   # shape 1 only; two names and two commas fit
+
+openers:              # case as written; a space matches any horizontal whitespace
+  - {term: "Bonjour", kind: greeting, why: "standard French greeting that opens an e-mail or a letter addressed to a person"}
+  - {term: "Merci", kind: thanks, why: "thanks addressed to a person by first name"}
+  - {term: "Bonne initiative", kind: compliment, why: "compliment addressed to a person by first name; GUIDELINES Q1 names this form"}
+  - {term: "Félicitations", kind: compliment, why: "congratulations addressed to a person by first name"}
