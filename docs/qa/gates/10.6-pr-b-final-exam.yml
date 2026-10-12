@@ -1,0 +1,68 @@
+schema: 1
+story: '10.6'
+story_title: 'Final-Exam Set and Confidence Ranges (PR B: final-exam set)'
+scope: 'PR B: AC4-AC8 and the PR B part of AC10 (tasks B0-B13), PR #92 at head 0eff214, rebased on main 2d4a029 (Story 10.4 merged). AC9 (close-out, B14-B15) is after the merge and not reviewed. B8 was reviewed on 2026-10-10 (QA Results); this gate re-checks it after the rebase.'
+gate: PASS
+status_reason: 'Every B13.4 check passes from hashes, GitHub metadata and QA-dispatched runs: the 91 frozen lines equal the record pushed before 10.4 merged, all 124 committed blobs match FINGERPRINTS.sha256, the adjudicated annotations regenerate byte for byte from the committed decisions, the guard passes on all 4 legs, and the dummy re-run 38319306124 reproduces B8. No defect found; the only open items are B14-side reminders and doc ticks.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-10-12T23:05:00Z'
+
+waiver: { active: false }
+
+merge_blockers: []
+
+top_issues: []
+
+quality_score: 100
+expires: '2026-10-26T23:05:00Z'
+
+evidence:
+  g4_file_scope: 'git diff --name-only origin/main...HEAD: 31 paths outside the exam folder plus 127 in tests/test_corpus/final_exam/, all allowed by Dev Notes File Locations. Nothing under gdpr_pseudonymizer/. tests/test_corpus/annotations/GUIDELINES.md unchanged (no amendment). .github/workflows/accuracy.yaml, tests/accuracy/final_exam.py and scripts/final_exam_fingerprints.py unchanged since the B8 review.'
+  fingerprints:
+    freeze_order: 'Freeze commit 564bbc6 (committer date 2026-10-10T08:59:53Z) was the PR head when PR CI started on it at 2026-10-10T08:59:58Z-09:00:01Z (runs 38039821589, 38039824450, 38039824452). PR #93 (Story 10.4) merged 2026-10-12T06:23:38Z (merge commit 2d4a029). The rebase rewrote 564bbc6 as f692fd8; the Freeze Record list is byte-identical at 564bbc6, f692fd8 and HEAD.'
+    freeze_list_hash: 'The 91-line list in the story at 564bbc6 hashes to c568b070bb0b5d9ecc7a4b9e9640881d27b90cafd02d074288758088751ee7d6, the recorded sha256 of freeze.sha256.'
+    committed_record: 'tests/test_corpus/final_exam/FINGERPRINTS.sha256: 124 lines, sha256 faea9dc9dc9163bb4ae7e26fd789870f20ee398694e3b06a9d29f16333815005 (= Commit Record), unchanged since 40692ff. Lines 1-91 = the Freeze Record list at 564bbc6 (diff empty). Lines 92-124 = the Commit Record block (diff empty): 30 annotations and the 3 TSVs.'
+    checks: 'In the folder: sha256sum -c --quiet exit 0 (124 OK, 0 not OK); scripts/final_exam_fingerprints.py check gives OK 124 (no unlisted file in a listed folder). The 124 committed blobs (git cat-file) match their lines: 124/124, so the ubuntu checkout of the scored run will pass the fingerprint step. .gitattributes gives text=auto eol=lf.'
+    regeneration: 'merge --g5-keep-longer on a temp copy outside the repo regenerates the 30 annotations whose sha256 equal the committed lines (30/30), with the recorded counts (A=28 B=304 BOTH=66 FIX=2 NONE=7; [G5] resolved=83, 36 groups). report --g5-keep-longer equals the story''s "Agreement and Spot-Check" block byte for byte. The default (strict) merge refuses: ERROR g015/fe_03-d001 DecisionError. Temp copy deleted.'
+  load_paths: 'accuracy.yaml push paths are gdpr_pseudonymizer/nlp/**, tests/accuracy/**, tests/test_corpus/annotations/**, tests/test_corpus/held_out/** only. tests/accuracy/conftest.py:28-37 names annotations, interview_transcripts, business_documents and held_out only. tests/unit/test_annotation_integrity.py sets main and held_out only. The held-out guard reads MAIN_TEXT_DIRS and held_out/annotations, and searches resources and tests/unit. A repo-wide search for test_corpus finds one recursive glob, scripts/benchmark_hybrid.py:49 (a manual tool, not in CI, already reaching held_out; it prints detector counts only).'
+  b12_3_identity: 'QA downloaded 38316923770 (dispatch on PR B, 40692ff, attempt 1) and 38212303870 (push on main, 2d4a029, attempt 1). The 16 lines (E1, E2 and the 8 [CI95 ...] lines) are identical; the JSON is identical except run_id and commit; 0 FINAL-EXAM lines in either. The whole output differs only in the collected count (26/27), the TestFinalExamMetrics SKIPPED line and the totals. 40692ff..0eff214 changes CHANGELOG, the QA report and the story only.'
+  guard: 'tests/unit/final_exam_leakage_allowlist.json: 157 entries, 157 distinct (path, sha256) pairs, 85 distinct hashes, 14 files, keys path and sha256 only (no string). The 14 files were last changed between 2026-01-18 and 2026-10-07 (git log), before the exam was written on 2026-10-09; Story 10.4 touched none of them. At head 0eff214 (CI - Test Matrix 38317500000), test_final_exam_set_has_final_exam_only_strings and test_no_final_exam_only_string_in_resources_or_unit_tests PASSED on ubuntu 3.11, ubuntu 3.10, macos 3.12 and windows 3.12.'
+  dummy_rerun: '38319306124 (QA dispatch, final_exam=dummy, head 0eff214, attempt 1, success): accuracy skipped, final_exam success, one accuracy-results artifact holding the three usual files; first line fingerprints_sha256=0d6461aa...5f58 (= the fixture record); ledger rows=0 scored=0, OK 17; the 16 lines equal 38316923770 and 38212303870; the JSON equals main except run_id and commit; the 24 FINAL-EXAM lines equal QA''s local run on the rebased code and the B8 run 38042167180; ACCURACY_LOG_LEVEL CRITICAL, --tb=short, no structlog line; leak scan of the fixture''s 18 strings and 26 lines over the artifact and log: 0 hits.'
+  b8_3_lionel: 'Lionel''s two dispatches, checked from their logs: 38174225568 (final exam, force_failure false, ref story/10.6-pr-b-final-exam) stops at Check inputs with "the final exam runs on main only"; 38210291009 (final exam, force_failure true) stops at Check inputs with "force_failure is accepted only with final_exam=dummy". No artifact for either.'
+  b14_preflight: 'Count-only, booleans printed: the committed manifest parses with final_exam.load_manifest, target is real, halves natural 15 / planted 15, documents/ and annotations/ stems equal the manifest ids, FINAL_EXAM_EXPECTED_DOCS=30 matches, force_failure is not honoured on the real target. RUNS.md passes ledger-check (rows=0 scored=0).'
+  gold_integrity: 'The main corpus''s own checker (test_annotation_integrity.annotation_errors) run count-only on the 30 adjudicated files: 0 errors in 0 documents (offsets, padding, duplicates, G5, G7). All 329 cross-type overlaps are LOCATION inside ORG, the one overlap G7 allows.'
+  no_score: 'No final-exam score in the CHANGELOG, the QA report, the story, the PR body or the commit messages (FINAL-EXAM appears only as a label or as "0 FINAL-EXAM lines"). The guard''s own matching run over those texts, by hash only: PR B''s added lines hold 0 final-exam-only strings. Hits in CHANGELOG, the QA report, the epic and four old gate files (1.8, 5.2, 5.3, 10.3b) are in text already present before the exam was written (checked at 5846419 and bab6717): coincidences, like the allowlisted ones.'
+  code_review_since_b8: 'ADJ-001 (FIX must overlap its own disagreement), ADJ-002 (view refuses to overwrite without --force), ADJ-003 (AnonymousError: ERROR <id> <Class>; TSVs read as utf-8-sig) and LED-001 (separate dummy-run table) are fixed, each with unit tests. serve binds 127.0.0.1, checks Host and Origin, logs no request line, answers errors with fixed reasons and anonymous ids, escapes every text it renders, loads nothing external, and writes atomically. The G5 step keeps the longer nested same-type span only with --g5-keep-longer, always refuses a partial same-type overlap, leaves cross-type nesting alone, and the default (strict) merge and the page refuse BOTH on a boundary group.'
+  tests: 'Locally (Windows toolchain): test_final_exam_tooling.py, test_final_exam_leakage.py, test_held_out_leakage.py and test_annotation_integrity.py give 120 passed, 0 skipped (76 in the two final-exam files). Held-out-blind check of the 412 tokens added to the tests and fixture since B8: 373 not in the main corpus, all identifiers, English words or invented names.'
+  ci: 'PR #92 head 0eff214: CI - Test Matrix 38317500000 (lint and 4 test legs), Code Quality 38317499965 and CodeQL 38317495181 all succeeded on run_attempt 1.'
+  isolation: 'QA opened only README.md, RUNS.md and FINGERPRINTS.sha256 in tests/test_corpus/final_exam/. Scripts read the exam files in five count-only runs (sha256sum and check; merge and report on a deleted temp copy; the B14 preflight; the integrity counts; the guard matching over docs, by hash). None printed exam text. The dev''s count-only read of the manifest and its carriage-return count are not an isolation breach in substance: the manifest holds the plan already in the story, and a byte count shows no content.'
+  trace:
+    ac_covered: [4, 5, 6, 7, 8, 10]
+    ac_gaps: []
+    not_in_scope: [1, 2, 3, 9]
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'No exam-text channel found: public CI output is aggregate or anonymous (B8, re-run 38319306124), the guard reports path and hash, serve is local-only with Host/Origin checks, and docs added by PR B hold no final-exam-only string.'
+  performance:
+    status: PASS
+    notes: 'No product change. The dummy job runs in about 4 minutes.'
+  reliability:
+    status: PASS
+    notes: 'The fingerprint chain holds from the freeze to the committed blobs, the annotations regenerate byte for byte from the decisions, and the B14 loading path is preflighted on the real manifest.'
+  maintainability:
+    status: PASS
+    notes: 'Tooling is covered by 76 unit tests on invented data. scripts/final_exam_adjudication.py is now 2374 lines, about 600 of them the embedded page; acceptable for a one-shot tool that Epic 9 will reuse.'
+
+recommendations:
+  immediate: []
+  future:
+    - action: 'B14.3: besides the lines, check that the artifact''s first line reads fingerprints_sha256=faea9dc9dc9163bb4ae7e26fd789870f20ee398694e3b06a9d29f16333815005 (Commit Record) and that no commit after 40692ff touched tests/test_corpus/final_exam/ except RUNS.md. The job''s sha256sum check reads a record that sits in the same folder, so it cannot catch a file edited together with its line.'
+      refs: ['.github/workflows/accuracy.yaml:157-160, :200', 'story B14.3']
+    - action: 'B14.2: add the RUNS.md row as soon as the scored run ends. The ledger check stops a second dispatch only once that row is on main (no approval gate since B3.9).'
+      refs: ['story B14.2', 'tests/test_corpus/final_exam/RUNS.md']
+    - action: 'Tick B7.4 (the invariant is now proven by B11.1 and this review) and B13.4.'
+      refs: ['story Tasks B7.4, B13.4']
+    - action: 'Epic 9 (Q7, the exam becomes a held-out set): confine scripts/benchmark_hybrid.py''s recursive glob of tests/test_corpus to the main-corpus folders, so it no longer runs the detector over held_out/ or final_exam/.'
+      refs: ['scripts/benchmark_hybrid.py:49, :237']
