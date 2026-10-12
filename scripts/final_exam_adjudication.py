@@ -5,8 +5,8 @@ Sub-commands (Dev Notes "PR B Design")::
     convert --docs <dir> --raw <dir> --out <dir> --flags <file> [<id>...]
     agreement --a <dir> --b <dir>
     view --workspace <dir>
-    merge --workspace <dir>
-    report --workspace <dir>
+    merge --workspace <dir> [--g5-keep-longer]
+    report --workspace <dir> [--g5-keep-longer]
     guard-report --workspace <dir> --annotations <dir>
     serve --workspace <dir> [--port 8765] [--open] [--guidelines <GUIDELINES.md>]
 
@@ -79,6 +79,10 @@ class AnonymousError(Exception):
 
 class DecisionError(AnonymousError):
     """An empty, unknown or inapplicable adjudication code (B10.1)."""
+
+
+class G5Error(AnonymousError):
+    """Same-type spans that overlap after the merge (GUIDELINES G5)."""
 
 
 class OverwriteError(AnonymousError):
@@ -774,7 +778,17 @@ def _parse_type(value: str) -> str:
     return value
 
 
-def apply_decision(text: str, d: Disagreement, code: str) -> list[Span]:
+G5_REASON = "G5: two spans of the same type cannot overlap"
+
+
+def apply_decision(
+    text: str, d: Disagreement, code: str, allow_both_boundary: bool = False
+) -> list[Span]:
+    """The spans one decision keeps. ``BOTH`` is refused on a ``type`` group
+    (two types on one span) and on a ``boundary`` group (G5), unless the merge
+    runs with Lionel's 2026-10-12 rule (``--g5-keep-longer``)."""
+    if code == "BOTH" and d.cls == "boundary" and not allow_both_boundary:
+        raise DecisionError(G5_REASON, where=d.did)
     if code == "A" and d.a is not None:
         return [d.a]
     if code == "B" and d.b is not None:
@@ -905,16 +919,136 @@ def read_decisions(workspace: Path, groups: list[Group]) -> dict[str, str]:
     return decisions
 
 
+@dataclass
+class G5Stats:
+    """Counts of the G5 step: same-type spans nested in a longer one, dropped."""
+
+    resolved: dict[str, int]
+    origins: dict[str, int]
+    groups: set[str]
+    duplicates: int = 0
+
+    @property
+    def total(self) -> int:
+        return sum(self.resolved.values())
+
+
+G5_ORIGINS = ("both_boundary", "b_one_sided", "other")
+Origin = tuple[str, str, str]  # (group id, applied code, class)
+
+
+def _overlaps(a: Span, b: Span) -> bool:
+    return a.start < b.end and b.start < a.end
+
+
+def same_type_overlaps(spans: list[Span]) -> int:
+    """Count of same-type overlapping pairs (G5); a separate check."""
+    return sum(
+        1
+        for i, a in enumerate(spans)
+        for b in spans[i + 1 :]
+        if a.etype == b.etype and _overlaps(a, b)
+    )
+
+
+def _origin_kind(dropped: Origin | None, kept: Origin | None) -> str:
+    if dropped and kept and dropped[0] == kept[0] and dropped[1] == "BOTH":
+        return "both_boundary" if dropped[2] == "boundary" else "other"
+    if any(o and o[1] == "B" and o[2] == "one-sided" for o in (dropped, kept)):
+        return "b_one_sided"
+    return "other"
+
+
+def resolve_g5(
+    spans_by_doc: dict[str, list[Span]],
+    origin: dict[tuple[str, int, int, str], Origin],
+    keep_longer: bool,
+) -> tuple[dict[str, list[Span]], G5Stats]:
+    """GUIDELINES G5 after every decision (Lionel, 2026-10-12, "Keep the longer one").
+
+    Per document and type, a span inside a longer same-type span is dropped and
+    the longer one kept (with ``keep_longer``; otherwise it is refused). A
+    partial same-type overlap is always refused. Cross-type overlaps (G7) are
+    untouched. Errors name anonymous group ids only (``agreed`` for spans both
+    annotators had).
+    """
+    stats = G5Stats({t: 0 for t in TYPES}, {k: 0 for k in G5_ORIGINS}, set())
+    partial: set[str] = set()
+    partial_n = 0
+    nested: set[str] = set()
+    nested_n = 0
+    out: dict[str, list[Span]] = {}
+
+    def gid(doc: str, s: Span) -> str:
+        o = origin.get((doc, s.start, s.end, s.etype))
+        return o[0] if o else "agreed"
+
+    for doc in sorted(spans_by_doc):
+        spans = spans_by_doc[doc]
+        kept_all: list[Span] = [s for s in spans if s.etype not in TYPES]
+        for etype in TYPES:
+            same = [s for s in spans if s.etype == etype]
+            container: dict[Span, Span] = {}
+            for s in same:
+                around = [
+                    o
+                    for o in same
+                    if o.start <= s.start
+                    and s.end <= o.end
+                    and (o.start, o.end) != (s.start, s.end)
+                ]
+                if around:
+                    container[s] = min(
+                        around, key=lambda o: (o.end - o.start, o.start, o.end)
+                    )
+            for s, c in sorted(container.items(), key=lambda kv: kv[0].sort_key()):
+                if not keep_longer:
+                    nested_n += 1
+                    nested.update({gid(doc, s), gid(doc, c)})
+                    continue
+                o_s = origin.get((doc, s.start, s.end, s.etype))
+                o_c = origin.get((doc, c.start, c.end, c.etype))
+                stats.resolved[etype] += 1
+                stats.origins[_origin_kind(o_s, o_c)] += 1
+                stats.groups.update(o[0] for o in (o_s, o_c) if o)
+            kept = [s for s in same if s not in container] if keep_longer else same
+            for i, a in enumerate(kept):
+                for b in kept[i + 1 :]:
+                    if _overlaps(a, b) and a not in container and b not in container:
+                        inside = (a.start <= b.start and b.end <= a.end) or (
+                            b.start <= a.start and a.end <= b.end
+                        )
+                        if not inside:
+                            partial_n += 1
+                            partial.update({gid(doc, a), gid(doc, b)})
+            kept_all += kept
+        out[doc] = sorted(kept_all, key=Span.sort_key)
+    if partial_n:
+        raise G5Error(
+            "partial same-type overlap",
+            where=f"partial={partial_n}:{','.join(sorted(partial))}",
+        )
+    if nested_n:
+        raise G5Error(
+            "nested same-type spans",
+            where=f"nested={nested_n}:{','.join(sorted(nested))}",
+        )
+    if keep_longer and any(same_type_overlaps(s) for s in out.values()):
+        raise G5Error("G5 check failed after resolution", where="g5")
+    return out, stats
+
+
 def merge_workspace(
-    workspace: Path,
-) -> tuple[dict[str, list[Span]], dict[str, int], dict[str, int], int]:
+    workspace: Path, g5_keep_longer: bool = False
+) -> tuple[dict[str, list[Span]], dict[str, int], dict[str, int], int, G5Stats]:
     """Adjudicated spans per document, decision counts (per disagreement),
-    spot-check counts and MISSING occurrences added."""
+    spot-check counts, MISSING occurrences added and the G5 step's counts."""
     ids = doc_ids(workspace)
     halves = load_manifest(workspace)
     groups, _ = build_groups(workspace)
     decisions = read_decisions(workspace, groups)
     gid_of = {d.did: g.gid for g in groups for d in g.members}
+    cls_of = {d.did: g.cls for g in groups for d in g.members}
     spot_rows = read_tsv(workspace / "spotcheck.tsv", "document\tcorrection\tnote")
     spot_docs = sorted(spotcheck_documents(halves))
     spot_codes: dict[str, list[tuple[str, str]]] = {d: [] for d in spot_docs}
@@ -928,20 +1062,30 @@ def merge_workspace(
     code_counts: dict[str, int] = {}
     spot_counts = {c: 0 for c in SPOT_CLASSES}
     missing_added = 0
-    result: dict[str, list[Span]] = {}
+    duplicates = 0
+    merged: dict[str, list[Span]] = {}
+    origin: dict[tuple[str, int, int, str], Origin] = {}
     for doc_id in ids:
         text, agreed, disagreements = doc_state(workspace, doc_id)
         spans = list(agreed)
+        agreed_keys = {(s.start, s.end, s.etype) for s in agreed}
         for d in disagreements:
             code = decisions[d.did]
             try:
-                spans += apply_decision(text, d, code)
+                kept = apply_decision(text, d, code, allow_both_boundary=g5_keep_longer)
             except DecisionError as exc:
                 raise DecisionError(
                     "decision refused", f"{gid_of[d.did]}/{d.did}"
                 ) from exc
             key = code.split(":", 1)[0]
             code_counts[key] = code_counts.get(key, 0) + 1
+            for s in kept:
+                if (s.start, s.end, s.etype) not in agreed_keys:
+                    origin.setdefault(
+                        (doc_id, s.start, s.end, s.etype),
+                        (gid_of[d.did], key, cls_of[d.did]),
+                    )
+            spans += kept
         named = agreed_ids(doc_id, agreed)
         for where, code in spot_codes.get(doc_id, []):
             try:
@@ -952,12 +1096,28 @@ def merge_workspace(
                 spot_counts[cls] += 1
             missing_added += added
         unique = {(s.start, s.end, s.etype): s for s in spans}
-        result[doc_id] = sorted(unique.values(), key=Span.sort_key)
-    return result, code_counts, spot_counts, missing_added
+        duplicates += len(spans) - len(unique)
+        merged[doc_id] = sorted(unique.values(), key=Span.sort_key)
+    result, g5 = resolve_g5(merged, origin, g5_keep_longer)
+    g5.duplicates = duplicates
+    return result, code_counts, spot_counts, missing_added, g5
 
 
-def cmd_merge(workspace: Path) -> int:
-    result, code_counts, spot_counts, missing_added = merge_workspace(workspace)
+def g5_line(g5: G5Stats) -> str:
+    return (
+        f"[G5] resolved={g5.total} "
+        + " ".join(f"{t}={g5.resolved[t]}" for t in TYPES)
+        + " "
+        + " ".join(f"{k}={g5.origins[k]}" for k in G5_ORIGINS)
+        + f" duplicates_collapsed={g5.duplicates} groups={len(g5.groups)}"
+        + (" " + " ".join(sorted(g5.groups)) if g5.groups else "")
+    )
+
+
+def cmd_merge(workspace: Path, g5_keep_longer: bool = False) -> int:
+    result, code_counts, spot_counts, missing_added, g5 = merge_workspace(
+        workspace, g5_keep_longer
+    )
     out = workspace / "annotations"
     out.mkdir(exist_ok=True)
     totals = {t: 0 for t in TYPES}
@@ -990,13 +1150,16 @@ def cmd_merge(workspace: Path) -> int:
         + " ".join(f"{k}={v}" for k, v in spot_counts.items())
         + f" missing_occurrences_added={missing_added}"
     )
+    print("merge " + g5_line(g5))
     return 0
 
 
-def cmd_report(workspace: Path) -> int:
+def cmd_report(workspace: Path, g5_keep_longer: bool = False) -> int:
     for line in agreement_lines(workspace / "ann_a", workspace / "ann_b"):
         print(line)
-    _, code_counts, spot_counts, missing_added = merge_workspace(workspace)
+    _, code_counts, spot_counts, missing_added, g5 = merge_workspace(
+        workspace, g5_keep_longer
+    )
     groups, _ = build_groups(workspace)
     n_groups, single, multi = group_counts(groups)
     split = sum(
@@ -1011,6 +1174,7 @@ def cmd_report(workspace: Path) -> int:
         + " ".join(f"{k}={v}" for k, v in spot_counts.items())
         + f" missing_occurrences_added={missing_added}"
     )
+    print(g5_line(g5))
     return 0
 
 
@@ -1188,6 +1352,8 @@ class AdjudicationApp:
                 raise DecisionError("a note is required with ?", where=members[0].did)
             return
         for d in members:
+            if code == "BOTH" and d.cls == "boundary":
+                raise DecisionError(G5_REASON, where=d.did)
             if code == "BOTH" and d.cls == "type":
                 raise DecisionError(
                     "BOTH is not allowed on a type group: one span cannot have two types",
@@ -1686,6 +1852,7 @@ function availability(subject) {
     A: subject.a_text === null ? "A has no span here" : "",
     B: subject.b_text === null ? "B has no span here" : "",
     BOTH: isType ? "BOTH is not allowed on a type group: one span cannot have two types"
+      : (mode === "split" ? S.groups[gi].cls : subject.cls) === "boundary" ? "G5: two spans of the same type cannot overlap"
       : (subject.a_text === null || subject.b_text === null) ? "BOTH needs a span on each side" : "",
   };
 }
@@ -2155,6 +2322,12 @@ def build_parser() -> argparse.ArgumentParser:
                 action="store_true",
                 help="overwrite decisions.tsv, occurrences.tsv and spotcheck.tsv",
             )
+        else:
+            sp.add_argument(
+                "--g5-keep-longer",
+                action="store_true",
+                help="G5: keep the longer of nested same-type spans (Lionel, 2026-10-12)",
+            )
     srv = sub.add_parser("serve")
     srv.add_argument("--workspace", required=True, type=Path)
     srv.add_argument("--port", type=int, default=DEFAULT_PORT)
@@ -2180,9 +2353,9 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "view":
             return cmd_view(args.workspace, args.force)
         if args.command == "merge":
-            return cmd_merge(args.workspace)
+            return cmd_merge(args.workspace, args.g5_keep_longer)
         if args.command == "report":
-            return cmd_report(args.workspace)
+            return cmd_report(args.workspace, args.g5_keep_longer)
         if args.command == "serve":
             return cmd_serve(args.workspace, args.port, args.open, args.guidelines)
         if args.command == "guard-report":

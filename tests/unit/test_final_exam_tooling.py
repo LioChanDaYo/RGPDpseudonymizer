@@ -1173,12 +1173,148 @@ def test_make_server_falls_back_to_the_next_port(tmp_path: Path) -> None:
     app = adj.AdjudicationApp(ws, tmp_path / "x.md")
     first = adj.make_server(app, 0)
     try:
-        port = first.server_address[1]
-        second = adj.make_server(app, port)
+        busy = first.server_address[1]
+        second = adj.make_server(app, busy)
         try:
-            assert second.server_address[1] != port
+            assert second.server_address[1] != busy
             assert second.server_address[0] == "127.0.0.1"
         finally:
             second.server_close()
     finally:
         first.server_close()
+
+
+# ---------------------------------------------------------------------------
+# G5 (Lionel, 2026-10-12, "Keep the longer one"), invented text only
+# ---------------------------------------------------------------------------
+
+
+def _span(start: int, end: int, etype: str, doc: str = "zz_01") -> object:
+    return adj.Span(doc, start, end, etype, "x" * (end - start))
+
+
+def test_g5_keeps_the_longer_of_nested_same_type_spans() -> None:
+    outer, inner = _span(0, 15, "ORG"), _span(0, 7, "ORG")
+    origin = {
+        ("zz_01", 0, 7, "ORG"): ("g001", "BOTH", "boundary"),
+        ("zz_01", 0, 15, "ORG"): ("g001", "BOTH", "boundary"),
+    }
+    out, stats = adj.resolve_g5({"zz_01": [inner, outer]}, origin, True)
+    assert out["zz_01"] == [outer]
+    assert stats.resolved == {"PERSON": 0, "LOCATION": 0, "ORG": 1}
+    assert stats.origins == {"both_boundary": 1, "b_one_sided": 0, "other": 0}
+    assert stats.groups == {"g001"}
+
+
+def test_g5_keeps_cross_type_nesting_and_is_deterministic() -> None:
+    org, loc = _span(0, 20, "ORG"), _span(9, 20, "LOCATION")
+    spans = {"zz_01": [loc, org], "zz_02": [_span(3, 9, "PERSON", "zz_02")]}
+    first = adj.resolve_g5(spans, {}, True)
+    second = adj.resolve_g5(spans, {}, True)
+    assert first[0] == second[0]
+    assert first[0]["zz_01"] == [org, loc]  # G7: a LOCATION inside an ORG stays
+    assert first[1].total == 0
+
+
+def test_g5_refuses_a_partial_same_type_overlap() -> None:
+    a, b = _span(0, 10, "LOCATION"), _span(5, 15, "LOCATION")
+    origin = {("zz_01", 5, 15, "LOCATION"): ("g007", "B", "one-sided")}
+    with pytest.raises(adj.G5Error) as info:
+        adj.resolve_g5({"zz_01": [a, b]}, origin, True)
+    assert info.value.where == "partial=1:agreed,g007"
+
+
+def test_g5_strict_mode_refuses_anything_nested() -> None:
+    outer, inner = _span(0, 15, "PERSON"), _span(4, 9, "PERSON")
+    origin = {("zz_01", 4, 9, "PERSON"): ("g003", "B", "one-sided")}
+    with pytest.raises(adj.G5Error) as info:
+        adj.resolve_g5({"zz_01": [outer, inner]}, origin, False)
+    assert info.value.where == "nested=1:agreed,g003"
+
+
+def test_both_on_a_boundary_group_is_refused_unless_keep_longer(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    ws = _workspace(tmp_path)  # the dummy fixture: g002 is a boundary group
+    adj.main(["view", "--workspace", str(ws)])
+    _set_groups(ws, {"g001": "A", "g002": "BOTH", "g003": "NONE"})
+    _set_spotcheck(ws)
+    capsys.readouterr()
+    assert adj.main(["merge", "--workspace", str(ws)]) == 1
+    assert capsys.readouterr().out.strip() == "ERROR g002/dummy_01-d002 DecisionError"
+    assert adj.main(["merge", "--workspace", str(ws), "--g5-keep-longer"]) == 0
+    out = capsys.readouterr().out
+    assert "merge [G5] resolved=1 PERSON=1 LOCATION=0 ORG=0 both_boundary=1" in out
+    assert "groups=1 g002" in out
+    texts = [t for t, k in _types(ws, "dummy_01") if k == "PERSON"]
+    assert "Zorbalia QUENTREL" in texts and "Zorbalia" not in texts  # the longer one
+    assert "Zorba" not in out and "Quentr" not in out
+    assert all(
+        adj.same_type_overlaps(
+            [
+                adj.Span("d", e["start_pos"], e["end_pos"], e["entity_type"], "")
+                for e in json.loads(p.read_text(encoding="utf-8"))["entities"]
+            ]
+        )
+        == 0
+        for p in (ws / "annotations").glob("*.json")
+    )
+    assert adj.main(["report", "--workspace", str(ws), "--g5-keep-longer"]) == 0
+    assert "[G5] resolved=1" in capsys.readouterr().out
+
+
+def test_serve_refuses_both_on_a_boundary_group(tmp_path: Path) -> None:
+    ws = _viewed(_workspace(tmp_path))
+    with _served(ws, tmp_path) as base:
+        status, data = _post(base, "/api/group", {"gid": "g002", "decision": "BOTH"})
+    assert status == 400 and data["where"] == "dummy_01-d002"
+    assert data["reason"] == "G5: two spans of the same type cannot overlap"
+
+
+def test_strict_merge_refuses_a_one_sided_span_nested_in_an_agreed_one(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    ws = tmp_path / "nws"
+    text = "Signature : Zorbal Quentrix SA, Zorbaville.\n"
+    docs = {
+        "nz_01": (
+            "planted",
+            [("Zorbal Quentrix SA", "ORG", 0)],
+            [("Zorbal Quentrix SA", "ORG", 0), ("Quentrix", "ORG", 0)],
+        ),
+        "nz_02": (
+            "natural",
+            [("Zorbaville", "LOCATION", 0)],
+            [("Zorbaville", "LOCATION", 0)],
+        ),
+        "nz_03": (
+            "natural",
+            [("Zorbaville", "LOCATION", 0)],
+            [("Zorbaville", "LOCATION", 0)],
+        ),
+    }
+    documents = []
+    for doc_id, (half, a, b) in docs.items():
+        _write(ws / "documents" / f"{doc_id}.txt", text)
+        for folder, specs in (("ann_a", a), ("ann_b", b)):
+            _write(
+                ws / folder / f"{doc_id}.json",
+                json.dumps(
+                    {"document_name": f"{doc_id}.txt", "entities": _spans(text, specs)}
+                ),
+            )
+        documents.append({"id": doc_id, "half": half})
+    _write(
+        ws / "manifest.json", json.dumps({"target": "dummy", "documents": documents})
+    )
+    adj.main(["view", "--workspace", str(ws)])
+    _set_groups(ws, {"g001": "B"})
+    _set_spotcheck(ws)
+    capsys.readouterr()
+    assert adj.main(["merge", "--workspace", str(ws)]) == 1
+    assert capsys.readouterr().out.strip() == "ERROR nested=1:agreed,g001 G5Error"
+    assert adj.main(["merge", "--workspace", str(ws), "--g5-keep-longer"]) == 0
+    out = capsys.readouterr().out
+    assert "resolved=1 PERSON=0 LOCATION=0 ORG=1 both_boundary=0 b_one_sided=1" in out
+    assert _types(ws, "nz_01") == [("Zorbal Quentrix SA", "ORG")]
+    assert "Quentrix" not in out and "Zorba" not in out
