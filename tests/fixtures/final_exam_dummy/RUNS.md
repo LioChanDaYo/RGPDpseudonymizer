@@ -16,3 +16,5 @@ The ledger table above takes only `scored`, `infra-failure` or `rerun`, and none
 | 38042214591 | adad4e9 | 2026-10-10 | `final_exam=foo` | failure, intended | Check inputs | B8.3: bad input |
 | 38042353260 | 8bdc439 | 2026-10-10 | `final_exam=dummy` | failure, intended | Ledger check | B8.3: throw-away `scored` row, reverted in 3f8674b |
 | 38042399414 | be2b926 | 2026-10-10 | `final_exam=dummy` | failure, intended | Fingerprint check | B8.3: throw-away edit of `dummy_04.txt`, reverted in e38193c |
+| 38174225568 | f120530 | 2026-10-11 | `final_exam="final exam"` (PR B branch) | failure, intended | Check inputs | B8.3: main-only check; dispatched by Lionel |
+| 38210291009 | f120530 | 2026-10-12 | `final_exam="final exam"`, `force_failure=true` | failure, intended | Check inputs | B8.3: force_failure only with dummy; dispatched by Lionel |
