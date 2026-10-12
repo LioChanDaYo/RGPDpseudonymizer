@@ -17,6 +17,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Script.** `scripts/accuracy_paired_delta.py delta` gives the paired range of the change between two runs (same documents, resampled together), so a story can say whether a gain is outside it. `recompute` rebuilds the main-corpus range lines from the JSON.
   - **Numbers.** CI accuracy run `37856056081`: the eight existing lines are byte-identical to `37678069251`. For example, main-corpus F1 79.41% has the range 76.34%–82.64%; held-out F1 76.79% has 72.22%–81.77% (6 documents).
 
+- **Final-exam set and its CI job (Story 10.6 PR B).** Benchmark side only: no detector or scorer change, and no number changes.
+  - **The set.** `tests/test_corpus/final_exam/`: 30 synthetic French documents, written by GPT from a brief Lionel approved. 15 carry the known hard cases and 15 are natural.
+    - Two models (GPT and Gemini) annotated them independently under the annotation guidelines, and Lionel adjudicated the disagreements.
+    - The files are committed as plain text with their sha256 fingerprints (`FINGERPRINTS.sha256`), checked against the record frozen before Story 10.4 merged.
+  - **Scored once.** The `final_exam` job of `accuracy.yaml` runs only on a manual dispatch with `final_exam="final exam"` on `main`.
+    - It checks the ledger (`RUNS.md`) and the fingerprints, then prints `[FINAL-EXAM …]` lines (all documents, planted half, natural half) with their `[CI95 FINAL-EXAM …]` lines.
+    - The regular accuracy job is unchanged and never loads the set. The exam's figures are published once, at Epic 10 close-out.
+  - **Guard.** `tests/unit/test_final_exam_leakage.py` fails if a final-exam-only string appears in the detector resources or the unit tests. It reports paths and hashes only, and its allowlist needs Lionel's approval.
+  - **Tooling.**
+    - `scripts/final_exam_fingerprints.py` (record, check, ledger check).
+    - `scripts/final_exam_adjudication.py` (convert, agreement, grouped adjudication files, a local adjudication page, merge with a G5 check, report).
+    - A dummy fixture (`tests/fixtures/final_exam_dummy/`) for proving the job without spending the real run.
+
 ### Changed
 
 - **People addressed in greetings, organisations with their country, short forms and defined aliases are now offered (Story 10.4).**
