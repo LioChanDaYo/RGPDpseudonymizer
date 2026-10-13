@@ -119,9 +119,9 @@ These notes sit outside the normative Gates block above and do not change its te
 | 10.3a: Boundaries & Run-On Spans (split from 10.3, Lionel, 2026-10-06) | MED | 0.5-1 week | 10.2 handoff, REL-004 | Done (PR #84) |
 | 10.3b: Particles, Roles & LOCATION Noise (split from 10.3, Lionel, 2026-10-06) | MED | 0.5-1 week (re-estimated after STOP R, 2026-10-07) | F6, F7 | Done (PR #87, `bab6717`) |
 | 10.3c: Type-Aware Exact Match in Merge (added at 10.3a STOP R, Lionel, 2026-10-06) | MED | 0.5 week | 10.3a STOP R | Done (PR #91, `5846419`) |
-| 10.4: Greetings + Org-Plus-Country | MED | 0.5-1 week | F8, F9 | Draft |
+| 10.4: Greetings + Org-Plus-Country | MED | 0.5-1 week | F8, F9 | Done (PR #93, `2d4a029`) |
 | 10.5: DB Init Safety (data-layer hardening, added by Lionel, 2026-10-07) | LOW | 0.5 week | PR #83 finding | Draft |
-| 10.6: Final-Exam Set and Confidence Ranges (added by Lionel, 2026-10-07) | HIGH | 2-3 weeks elapsed, in parallel | Overfitting check, close-out evidence | In Progress (PR A merged, #89) |
+| 10.6: Final-Exam Set and Confidence Ranges (added by Lionel, 2026-10-07) | HIGH | 2-3 weeks elapsed, in parallel | Overfitting check, close-out evidence | Done (PRs #89, #92, #94, #95) |
 | 10.7: Type-Aware Mapping Lookup (data layer, added by Lionel at 10.3c STOP R, 2026-10-09) | MED | 0.5-1 week | 10.3c STOP R | Draft |
 
 **Total Estimated Duration:** 5.5-8.5 weeks; 10.6 runs in parallel (2-3 weeks elapsed) and close-out waits for its adjudication after 10.4 merges, then its commit and one scored run
@@ -152,6 +152,8 @@ Numbers come only from CI runs; each line cites its run ID. Full verbatim lines 
 | 10.3a | `37459114468` (head `39ab544`), reproduced on `main` by `37480506234` at `ac354cc` | P 77.64% / R 79.32% / F1 78.47% | F1 76.44% | PR #84 |
 | 10.3b | `37641796495` (run D), reproduced on `main` by `37678069251` | P 79.24% / R 79.59% / F1 79.41% | F1 76.79% | PR #87 (`bab6717`) |
 | 10.3c | `37963522411` (run P, head `8d25dbe`), reproduced on `main` by `37975010715` | P 79.20% / R 79.77% / F1 79.49% | F1 76.79% | PR #91 (`5846419`) |
+| 10.4 | `38173542707` (run K, head `7c1b5fb`, code `2695dee`), reproduced on `main` by `38212303870` | P 80.68% / R 84.65% / F1 82.62% | F1 78.07% | PR #93 (`2d4a029`) |
+| 10.6 final exam | `38382553368` (the one scored run, on `main` `c63a7b6`) | Final exam: P 62.33% / R 60.57% / F1 61.44% (CI95 F1 59.26-63.56%); main-corpus lines same as `38212303870` | F1 78.07% (same as 10.4) | PR #92 (`c63a7b6`); ledger PR #94 (`91b500d`) |
 
 - **10.2 recall (G3):** Lionel accepted recall bounds of FN PERSON +21 / LOCATION +4 / ORG +16 versus 10.1 (`37189862679`). Run `37385301566` is inside them: FN PERSON +21 / LOCATION +4 / ORG +10.
 - **10.2 held-out ORG recall:** Lionel accepted the drop (held-out ORG FN 28 → 34, `37189862679` → `37385301566`). It is tracked in 10.3a (AC7).
@@ -162,9 +164,40 @@ Numbers come only from CI runs; each line cites its run ID. Full verbatim lines 
 - **10.3b close-out:** PR #87 merged as `bab6717`. Close-out run D `37641796495`, reproduced by the `main` push run `37678069251`. Main P 0.7924 / R 0.7959 / F1 0.7941, TP 1763 / FP 462 / FN 452 (PERSON 44 / LOCATION 54 / ORG 354). Held-out F1 0.7679, FN 59 (PERSON 15 / LOCATION 16 / ORG 28), FP 45. NFR1: performance run `37641855606` (AMD EPYC 7763).
 - **10.6 PR A (confidence ranges):** PR #89 merged as `6abf858`. G1 run `37856056081`, QA re-run `37860150044`. The eight existing lines are byte-identical to `37678069251` (AC2). Ranges added: `[CI95 …]` lines, unit=document, 10,000 resamples, seed 20261008. The `main` push run `37891970847` on `6abf858` is the JSON-bearing baseline for 10.3c's paired delta (AC3).
 - **10.3c close-out:** PR #91 merged as `5846419`. Close-out run P `37963522411` (head `8d25dbe`), reproduced by the `main` push run `37975010715` (16 lines identical; carries `accuracy-per-document.json`). Main P 0.7920 / R 0.7977 / F1 0.7949, TP 1767 / FP 464 / FN 448 (PERSON 42 / LOCATION 52 / ORG 354). Held-out F1 0.7679, FN 59 (PERSON 15 / LOCATION 16 / ORG 28), FP 45. NFR1: performance run `37963988214` (AMD EPYC 7763). STOP R (Lionel, 2026-10-09): R-HYPH-FN adopted; the type-blind mapping lookup became Story 10.7.
-- **10.6 final exam (close-out):** committed as plain files at `<commit>`, with the documents' sha256 matching the freeze record; scored once in run `<run id>` at `<commit>` (ledger `tests/test_corpus/final_exam/RUNS.md`). Fill in at close-out with the pasted `[FINAL-EXAM …]` lines (overall, planted half, natural half) and their CI95 lines.
+- **10.4 close-out:** PR #93 merged as `2d4a029`. Close-out run K `38173542707` (head `7c1b5fb`, a docs-only commit on code `2695dee`), reproduced by the `main` push run `38212303870` (16 lines identical; carries `accuracy-per-document.json`). Main P 0.8068 / R 0.8465 / F1 0.8262, TP 1875 / FP 449 / FN 340 (PERSON 30 / LOCATION 51 / ORG 259). Held-out F1 0.7807, FN 53 (PERSON 15 / LOCATION 16 / ORG 22), FP 47. NFR1: performance run `38174221283` (AMD EPYC 7763). STOP R (Lionel, 2026-10-10): R-DEF-NAME, R-FN-DOC and refined R-ACR adopted. REQ-001 (greeting shapes) deferred to Epic 9 (Lionel, 2026-10-12).
+- **10.6 PR B (final-exam set):** PR #92 merged as `c63a7b6`. Its squash message carried throw-away skip-CI titles, so no push workflow ran on `c63a7b6`. Its tree equals PR head `f4c4a7b`, which was 9/9 green, and a manual regular run on `main`, `38383159395`, equals `38212303870` (16 lines). Ledger PR #94 merged as `91b500d`.
+- **10.6 final exam (close-out):** committed as plain files at `40692ff` (B11.4, on PR #92; on `main` as `c63a7b6`), with the documents' sha256 matching the freeze record (the scored run's first line: `fingerprints_sha256=faea9dc9…5005`). Scored once in run `38382553368` at `c63a7b6`, dispatched by Lionel on 2026-10-13 (ledger `tests/test_corpus/final_exam/RUNS.md`, PR #94). QA B14.3: PASS. Lines from that run's `accuracy-results`, verbatim:
+  ```
+  [FINAL-EXAM Overall] P=0.6233 R=0.6057 F1=0.6144 TP=1977 FP=1195 FN=1287 FN%=39.43 FP%=37.67
+  [CI95 FINAL-EXAM Overall] P=[0.5956,0.6496] R=[0.5838,0.6281] F1=[0.5926,0.6356] unit=document docs=30 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+  [FINAL-EXAM PERSON] P=0.6744 R=0.7098 F1=0.6917 TP=729 FP=352 FN=298
+  [CI95 FINAL-EXAM PERSON] P=[0.6240,0.7190] R=[0.6473,0.7651] F1=[0.6393,0.7365] unit=document docs=30 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+  [FINAL-EXAM LOCATION] P=0.6727 R=0.7019 F1=0.6870 TP=1003 FP=488 FN=426
+  [CI95 FINAL-EXAM LOCATION] P=[0.6360,0.7077] R=[0.6708,0.7324] F1=[0.6562,0.7159] unit=document docs=30 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+  [FINAL-EXAM ORG] P=0.4083 R=0.3032 F1=0.3480 TP=245 FP=355 FN=563
+  [CI95 FINAL-EXAM ORG] P=[0.3486,0.4686] R=[0.2490,0.3613] F1=[0.2955,0.3997] unit=document docs=30 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+  [FINAL-EXAM PLANTED Overall] P=0.6257 R=0.6065 F1=0.6160 TP=1085 FP=649 FN=704 FN%=39.35 FP%=37.43
+  [CI95 FINAL-EXAM PLANTED Overall] P=[0.5852,0.6634] R=[0.5839,0.6315] F1=[0.5873,0.6437] unit=document docs=15 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+  [FINAL-EXAM NATURAL Overall] P=0.6203 R=0.6047 F1=0.6124 TP=892 FP=546 FN=583 FN%=39.53 FP%=37.97
+  [CI95 FINAL-EXAM NATURAL Overall] P=[0.5848,0.6582] R=[0.5668,0.6449] F1=[0.5806,0.6452] unit=document docs=15 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+  ```
+- **Public number (Lionel, 2026-10-13, 10.6 AC9):** "Final exam as headline (Recommended)".
 - **Baseline used by 10.3c:** main push run `37891970847` on `6abf858` (same lines as 10.3b close-out run D; carries `accuracy-per-document.json`).
-- **Current baseline for 10.4:** main push run `37975010715` on `5846419` (same 16 lines as 10.3c close-out run P `37963522411`; carries `accuracy-per-document.json`).
+- **Baseline used by 10.4:** main push run `37975010715` on `5846419` (same 16 lines as 10.3c close-out run P `37963522411`; carries `accuracy-per-document.json`).
+- **Epic 10 detector close-out / Epic 9 starting point:** main `38212303870` (main corpus + held-out) and the final exam `38382553368`. Overall lines of `38212303870`, verbatim:
+  ```
+  [Overall] P=0.8068 R=0.8465 F1=0.8262 TP=1875 FP=449 FN=340 FN%=15.35 FP%=19.32
+  [CI95 Overall] P=[0.7782,0.8402] R=[0.8230,0.8659] F1=[0.8054,0.8461] unit=document docs=25 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+  [HELD-OUT Overall] P=0.7911 R=0.7706 F1=0.7807 TP=178 FP=47 FN=53 FN%=22.94 FP%=20.89
+  [CI95 HELD-OUT Overall] P=[0.7194,0.8564] R=[0.7130,0.8286] F1=[0.7216,0.8342] unit=document docs=6 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+  ```
+- **Carried to Epic 9:**
+  - **REQ-001 (10.4 QA gate, greeting shapes):** French spacing before "!" and "et" between two names on a greeting line are not covered.
+  - **Corpus glob (10.6 PR B QA, B13):** confine `scripts/benchmark_hybrid.py`'s recursive `tests/test_corpus` glob (`:49`, `:237`) to the main-corpus folders before the exam becomes a held-out set.
+  - **Q7:** the scored exam becomes a second held-out set (aggregate-only, never opened). The held-out isolation rules then apply to it and its plain-text guard stays active (10.6 B15.3). Epic 9 writes a new blind exam for its own close-out.
+  - **Guard hash list (B16):** the guard's committed allowlist (`tests/unit/final_exam_leakage_allowlist.json`, 157 path and sha256 pairs, approved by Lionel 2026-10-13) stores plain sha256 of exam-only keys, with no salt. It reveals nothing beyond the plain files already in the repo. If Epic 9 reuses this guard for its own blind exam, it decides whether a committed hash list needs a salt.
+  - **Headline finding:** the main-vs-exam gap. F1 is 0.8262 on the main corpus (`38212303870`) and 0.6144 on the final exam (`38382553368`), about 21 points.
+- **Still open in Epic 10:** 10.5 (DB init safety) and 10.7 (type-aware mapping lookup). Both are data-layer stories outside the detector chain, so neither moves the close-out baseline. The epic is not closed.
 
 ---
 
