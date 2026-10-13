@@ -1,0 +1,132 @@
+LYSORA LOGICIELS SAS                                CONTRAT N° LL-26-418
+12 rue des Ateliers, 69007 Lyon                     version signée PDF
+SIREN 824 731 506 - contact@lysora-logiciels.fr     Page 1 / 3
+
+CONTRAT DE LICENCE ET DE MAINTENANCE LOGICIELLE
+
+Entre les soussignés :
+
+LYSORA LOGICIELS SAS, société par actions simplifiée au capital
+de 180 000 euros, dont le siège est situé 12 rue des Ateliers,
+69007 Lyon, immatriculée au registre de Lyon sous le numéro
+824 731 506, représentée par Madame Camille Roussel, directrice
+commerciale, ci-après dénommée le Prestataire,
+
+et
+
+Agence Terrale Auvergne, établissement de coordination régionale
+situé 8 passage des Vignes, 63000 Clermont-Ferrand, représenté
+par Monsieur Nadim Belarbi, responsable des systèmes métiers,
+ci-après dénommé le Client,
+
+il a été convenu ce qui suit.
+
+ARTICLE 1 - OBJET
+Le présent contrat a pour objet la concession d'une licence d'uti-
+lisation du logiciel ORBIS PARC, édité par Lysora Logiciels, ainsi
+que la fourniture des services de maintenance associés pour les
+sites du Client en Auvergne-Rhône-Alpes. Le logiciel permet le
+suivi des demandes internes, la gestion des habilitations et la
+production de tableaux de bord destinés aux services de Clermont-
+Ferrand, Valence et Grenoble.
+
+ARTICLE 2 - PERIMETRE
+La licence porte sur 145 comptes nominatifs, dont 30 comptes
+administrateurs. Les accès sont réservés aux agents et prestataires
+désignés par Agence Terrale Auvergne. Toute mise à disposition à
+un organisme tiers, y compris une association partenaire du
+Puy-de-Dôme ou du Rhône, nécessite un accord écrit de Lysora
+Logiciels.
+
+Les environnements concernés sont les suivants :
+- production hébergée par Infogérance Monts, 3 allée du Canal,
+  63100 Clermont-Ferrand ;
+- recette hébergée dans le nuage privé de Lysora Logiciels à Lyon ;
+- sauvegarde externalisée auprès de Banque Populaire, service
+  coffre numérique entreprises, Paris.
+
+LYSORA LOGICIELS SAS                                CONTRAT N° LL-26-418
+12 rue des Ateliers, 69007 Lyon                     version signée PDF
+SIREN 824 731 506 - contact@lysora-logiciels.fr     Page 2 / 3
+
+ARTICLE 3 - DUREE
+Le contrat prend effet le 1er novembre 2026 pour une durée initiale
+de trente-six mois. Il sera renouvelable par période annuelle, sauf
+dénonciation par lettre recommandée avec un préavis de trois mois.
+La première revue de service se tiendra à Clermont-Ferrand avant
+le 20 janvier 2027, avec Madame Élodie Chenet pour le Client et
+Monsieur Florent Masson pour le Prestataire.
+
+ARTICLE 4 - MAINTENANCE
+Lysora Logiciels assure une maintenance corrective et évolutive du
+logiciel ORBIS PARC du lundi au vendredi, hors jours fériés en
+France, de 8 h 30 à 18 h 00. Les incidents bloquants sont pris en
+charge dans un délai de quatre heures ouvrées. Les autres demandes
+sont analysées selon la file convenue entre Sarah Oukil, support
+Lysora, et Nadim Belarbi.
+
+Le Client transmet les signalements par le portail support
+support.lysora-logiciels.fr ou, en cas d'indisponibilité, par courriel
+à assistance@lysora-logiciels.fr. Les fichiers contenant des données
+personnelles ne doivent pas être envoyés sans chiffrement préalable.
+
+ARTICLE 5 - PRIX ET FACTURATION
+Le prix annuel de la licence et de la maintenance est fixé à
+quarante-deux mille six cents euros hors taxes. La facture sera
+émise par Lysora Logiciels au 15 novembre de chaque année et
+adressée à factures@terrale-auvergne.fr. Le règlement interviendra
+par virement bancaire dans un délai de trente jours fin de mois.
+
+Le bon de commande initial porte la référence ATA-DAF-2026-771.
+Tout dépassement du nombre de comptes fera l'objet d'un avenant
+établi après validation écrite de Madame Inès Barrois, service
+financier de l'Agence Terrale Auvergne.
+
+ARTICLE 6 - CONFIDENTIALITE ET DONNEES
+Chaque partie s'engage à conserver confidentiels les documents,
+codes d'accès, rapports et informations techniques communiqués
+dans le cadre du présent contrat. Lysora Logiciels déclare appliquer
+des mesures de sécurité conformes aux recommandations de la CNIL.
+Le Client demeure responsable des informations saisies par ses
+utilisateurs dans ORBIS PARC.
+
+LYSORA LOGICIELS SAS                                CONTRAT N° LL-26-418
+12 rue des Ateliers, 69007 Lyon                     version signée PDF
+SIREN 824 731 506 - contact@lysora-logiciels.fr     Page 3 / 3
+
+ARTICLE 7 - RESPONSABILITE
+La responsabilité de Lysora Logiciels est limitée aux dommages
+directs prouvés, dans la limite du montant payé par le Client sur
+les douze derniers mois. Aucune partie ne pourra être tenue pour
+responsable d'un retard dû à un événement de force majeure, à une
+coupure générale des réseaux ou à une décision d'une autorité
+administrative affectant la région Auvergne-Rhône-Alpes.
+
+ARTICLE 8 - FIN DU CONTRAT
+À l'expiration du contrat, Lysora Logiciels remettra au Client une
+copie exploitable des données au format CSV et supprimera les
+environnements actifs dans un délai de quarante-cinq jours. Un
+procès-verbal de restitution sera signé par Camille Roussel et
+Élodie Chenet, ou leurs remplaçants désignés par écrit.
+
+Fait à Lyon, le 9 octobre 2026, en deux exemplaires originaux.
+
+Pour LYSORA LOGICIELS SAS              Pour Agence Terrale Auvergne
+
+Camille ROUSSEL                         Nadim BELARBI
+Directrice commerciale                  Responsable des systèmes métiers
+Signature :                             Signature :
+
+Adresse de correspondance :
+Lysora Logiciels SAS
+12 rue des Ateliers
+69007 Lyon
+Téléphone : 04 78 62 19 44
+
+Agence Terrale Auvergne
+8 passage des Vignes
+63000 Clermont-Ferrand
+Téléphone : 04 73 51 06 28
+
+Document interne - reproduction limitée aux parties signataires
+et aux conseils mandatés. Version papier issue d'un export PDF.

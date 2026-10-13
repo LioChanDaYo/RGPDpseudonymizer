@@ -1237,3 +1237,41 @@ On the same CPU the timings are unchanged within run-to-run variation (the two s
 
 - Pseudonym continuity: the mapping schema is unchanged and the key still has no entity type. Split greetings give one key per name; an organisation with its place ("Zorbtech France") gets its own key, apart from "Zorbtech"; acronyms and defined aliases get their own key, so their pseudonym differs from the full name's. Upgrade note in CHANGELOG `[Unreleased]`.
 - README, FAQ, docs index and tutorials are not updated in this story (Epic 10 G7 interpretation).
+
+## Final-exam set (Story 10.6 PR B, 2026-10-13)
+
+**A blind test set, not scored yet.** PR B adds the final exam, its tooling, a CI job that scores it, and a leakage guard. There is no detector, scorer or main-corpus change (G4), and nothing below comes from scoring the exam. The exam is scored exactly once, at Epic 10 close-out, by a manual dispatch of the `final_exam` job on `main` with Lionel's recorded go (AC8). Its figures are published then (AC9).
+
+**The set** (`tests/test_corpus/final_exam/`, committed as plain files on 2026-10-13):
+- **30 synthetic French documents**, 15 planted and 15 natural.
+  - They were written by GPT (`gpt-5.5` via `codex exec`) from a brief Lionel approved on 2026-10-09. The brief contains no GUIDELINES text and no corpus text.
+  - The planted half carries the six known hard-case categories, each in 6 documents. The natural half has none deliberately.
+  - Formats: email threads with quoted replies, PDF-style hard line breaks, tables flattened to text, mixed case, headers and signatures.
+- **Annotation:** two independent annotations under `GUIDELINES.md`, by GPT (`gpt-5.5`) and Gemini (`gemini-3.1-pro-preview`). The detector did not pre-annotate, and no Claude agent annotated.
+- **Freeze:** the sha256 of the documents, both annotations and the manifest were recorded on 2026-10-10, before Story 10.4 merged. The committed `FINGERPRINTS.sha256` keeps those 91 lines unchanged.
+- **Replacements and exceptions:** 3 planted documents were replaced during annotation, because annotator B ran out of output tokens twice on each. One document keeps 947 words, against the brief's 900-word limit, by Lionel's decision.
+
+**Inter-annotator agreement** (pairwise span F1 with the scorer's matching: exact text and type after `_match_key`, one-to-one), from `scripts/final_exam_adjudication.py report`:
+
+```
+[AGREEMENT Overall] F1=0.9227 matched=2882 a_only=103 b_only=380
+[AGREEMENT PERSON] F1=0.9645 matched=964 a_only=8 b_only=63
+[AGREEMENT LOCATION] F1=0.8959 matched=1209 a_only=54 b_only=227
+[AGREEMENT ORG] F1=0.9154 matched=709 a_only=41 b_only=90
+[DISAGREEMENTS] total=407 type=8 boundary=67 other=1 one-sided=331
+```
+
+**Adjudication (Lionel, 2026-10-12):**
+- The 407 disagreements form 192 groups of identical cases. Lionel decided each group, splitting one.
+- Decisions applied, per disagreement: A 28, B 304, BOTH 66, FIX 2, NONE 7. No unsure case is left.
+- **Nested same-type spans (GUIDELINES G5):** 83 pairs, resolved by Lionel's rule "keep the longer one" (PERSON 8, LOCATION 46, ORG 29).
+- **Ground truth:** PERSON 1027, LOCATION 1429, ORG 808.
+
+**Spot-check (AC5):** 3 documents where both annotators agreed (272 agreed spans), checked by Lionel: 0 shared errors (MISSING 0, REMOVE 0, RETYPE 0, BOUNDARY 0).
+
+**Guard:** `tests/unit/test_final_exam_leakage.py` runs on every CI run. Lionel allowlisted 157 hits on 2026-10-13: 85 strings in name and place dictionaries, pseudonym lists and older unit tests, all last changed before the exam was written.
+
+### Notes
+
+- The regular accuracy job never loads the set: `tests/test_corpus/final_exam/` is outside `accuracy.yaml`'s push paths and every loader. B12.3 shows that the regular run on the PR B branch is identical to `main`.
+- README, FAQ, docs index and tutorials are not updated in this story until close-out (Epic 10 G7 interpretation).

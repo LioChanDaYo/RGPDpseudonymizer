@@ -1,0 +1,141 @@
+De: Oriane Lemoine <oriane.lemoine@arpege-market.fr>
+À: Malik Ferhani <malik.ferhani@arpege-market.fr>; Jeanne van der Velde <j.vandervelde@arpege-market.fr>
+Cc: Lila Ben Ayed <l.benayed@arpege-market.fr>
+Date: vendredi 9 octobre 2026 18:42
+Objet: RE: offre PlaceOuverte / paiement - à relire avant lundi
+
+Bonjour Malik, bonjour Jeanne,
+
+Merci Malik pour le retour rapide. J’ai repris la proposition reçue de
+PlaceOuverte et les lignes de frais envoyées par PayNova Belgique. Il
+reste un écart sur le panier moyen en Belgique et sur les flux qui
+passeraient par SwiftBank Irlande, surtout pour Dublin.
+
+Jeanne, peux-tu vérifier ce week-end si le seuil de réserve demandé par
+Cartlane Espagne est compatible avec nos ventes test de Lille et Lyon ?
+Lila me dit que la clause 4.2 a été copiée depuis le PDF et que les
+retours à la ligne sont restés cassés.
+
+-- extrait collé du PDF reçu à 16:07 --
+
+PLACEOUVERTE - proposition commerciale provisoire
+Arpège Market SAS / canal mode et maison
+Version transmise depuis Paris, validité 15 jours
+
+Pays couvert | partenaire encaissement | commission variable
+France        | PayNova France          | 1,20 % + 0,18 EUR
+Belgique      | PayNova Belgique        | 1,35 % + 0,20 EUR
+Espagne       | Cartlane Espagne        | 1,48 % + 0,22 EUR
+Irlande       | SwiftBank Irlande       | 1,52 % + 0,25 EUR
+
+Le règlement des transactions confirmées à Bruxelles, Madrid et Dublin
+sera opéré en J+3 ouvrés, sous réserve des contrôles de conformité
+effectués par PlaceOuverte Europe. Les remboursements clients déclen-
+chés depuis l’interface vendeur seront refacturés au marchand.
+
+Page 2/4 - Offre non signée - PlaceOuverte Europe
+
+Les incidents de fraude au-delà de 0,45 % du volume mensuel donnent
+lieu à une revue opérationnelle avec Arpège Market SAS, PayNova
+Belgique et, le cas échéant, Cartlane Espagne. Le rapport est adressé
+au responsable compte dans les cinq jours ouvrés.
+
+Cordialement,
+
+Oriane LEMOINE
+Responsable partenariats - Arpège Market SAS
+18 rue des Ateliers, 69007 Lyon
++33 4 78 42 19 66
+
+
+De: Malik Ferhani <malik.ferhani@arpege-market.fr>
+Envoyé: vendredi 9 octobre 2026 17:58
+À: Oriane Lemoine; Jeanne van der Velde
+Cc: Lila Ben Ayed
+Objet: Re: offre PlaceOuverte / paiement - à relire avant lundi
+
+Salut Oriane,
+
+Merci Oriane, j’ai regardé vite entre deux points avec PlaceOuverte
+France. Pour moi, on ne peut pas accepter la réserve glissante de
+35 000 EUR si SwiftBank Irlande garde en plus 8 % sur Dublin. C’est
+trop lourd pour un lancement.
+
+> Bonjour Malik,
+> Ci-dessous la réponse de Paolo de Sousa côté PlaceOuverte.
+> Il insiste pour recevoir nos commentaires avant lundi 12 h.
+> OL
+
+Je mets mes remarques en vrac :
+- demander à PayNova Belgique de confirmer le plafond Bruxelles ;
+- refuser la facturation séparée du reporting Espagne ;
+- garder Banque Neuve Rhône comme compte principal à Lyon ;
+- éviter de citer Paris comme seul centre de décision, sinon Cartlane
+  Espagne va demander un avenant local.
+
+Jeanne, tu peux appeler Paolo de Sousa lundi matin ? Il répond mieux
+quand c’est financier et pas seulement juridique.
+
+Malik
+
+
+De: Jeanne van der Velde <j.vandervelde@arpege-market.fr>
+Envoyé: vendredi 9 octobre 2026 16:31
+À: Malik Ferhani; Oriane Lemoine
+Objet: TR: offre PlaceOuverte / paiement - à relire avant lundi
+
+Bonjour Malik, bonjour Oriane,
+
+Merci Jeanne ? je me remercie moi-même, le vendredi soir c’est
+magnifique. Plus sérieusement, voici le fil complet avec le PDF. J’ai
+aussi demandé à Lila Ben Ayed de comparer les frais PayNova France et
+PayNova Belgique dans notre tableau de marge.
+
+Début du message transféré :
+
+De: Paolo de Sousa <paolo.desousa@placeouverte-partners.eu>
+À: Jeanne van der Velde <j.vandervelde@arpege-market.fr>
+Date: vendredi 9 octobre 2026 15:54
+Objet: Offre rev. 3 - Arpège Market SAS
+
+Chère Jeanne,
+
+Merci Jeanne pour l’échange de ce matin avec Malik Ferhani. PlaceOuverte
+Europe confirme l’intérêt d’ouvrir le pilote avant le 3 novembre, avec
+un premier périmètre France, Belgique et Espagne. Pour l’Irlande, notre
+équipe de Dublin attend encore la validation de SwiftBank Irlande.
+
+Nous avons intégré les volumes transmis par Arpège Market SAS pour
+Lille, Lyon et Bruxelles. La grille jointe reste provisoire, mais
+PayNova Belgique a donné un accord oral sur le seuil de 120 000 EUR.
+
+Si vous validez les points principaux, Cartlane Espagne préparera le
+contrat local à Madrid. Pour Paris, aucun document séparé n’est requis.
+
+Bien cordialement,
+
+Paolo de Sousa
+Partner Manager - PlaceOuverte Europe
+Avenue des Saisons 44, 1050 Bruxelles
++32 2 409 18 72
+
+
+> De: Lila Ben Ayed <l.benayed@arpege-market.fr>
+> Date: vendredi 9 octobre 2026 14:12
+> À: Jeanne van der Velde
+> Objet: points paiement
+>
+> Hello Jeanne,
+> j’ai mis à jour la colonne “risque” pour PayNova France, PayNova
+> Belgique et SwiftBank Irlande. Sur la Belgique, le taux paraît OK,
+> mais il manque la phrase sur les rétrofacturations clients.
+> Pour l’Espagne, Cartlane Espagne applique un minimum mensuel que je
+> ne vois pas dans le PDF. A vérifier avec Paolo.
+>
+> Lila
+
+Jeanne VAN DER VELDE
+Directrice financière - Arpège Market SAS
+18 rue des Ateliers, 69007 Lyon
+Standard : +33 4 78 42 19 60
+Mentions internes : diffusion limitée négociation partenaires.

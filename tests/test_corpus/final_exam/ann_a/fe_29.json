@@ -1,0 +1,539 @@
+{
+  "document_name": "fe_29.txt",
+  "entities": [
+    {
+      "entity_text": "Élodie Marin",
+      "entity_type": "PERSON",
+      "start_pos": 5,
+      "end_pos": 17
+    },
+    {
+      "entity_text": "Nadir BELKACEM",
+      "entity_type": "PERSON",
+      "start_pos": 115,
+      "end_pos": 129
+    },
+    {
+      "entity_text": "Camille Sorel",
+      "entity_type": "PERSON",
+      "start_pos": 161,
+      "end_pos": 174
+    },
+    {
+      "entity_text": "Inès",
+      "entity_type": "PERSON",
+      "start_pos": 427,
+      "end_pos": 431
+    },
+    {
+      "entity_text": "Rezé",
+      "entity_type": "LOCATION",
+      "start_pos": 460,
+      "end_pos": 464
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 516,
+      "end_pos": 522
+    },
+    {
+      "entity_text": "Clinique Vétérinaire des Canaux",
+      "entity_type": "ORG",
+      "start_pos": 525,
+      "end_pos": 556
+    },
+    {
+      "entity_text": "BELKACEM",
+      "entity_type": "PERSON",
+      "start_pos": 562,
+      "end_pos": 570
+    },
+    {
+      "entity_text": "Sonia Kermarrec",
+      "entity_type": "PERSON",
+      "start_pos": 573,
+      "end_pos": 588
+    },
+    {
+      "entity_text": "Lucien Roche",
+      "entity_type": "PERSON",
+      "start_pos": 591,
+      "end_pos": 603
+    },
+    {
+      "entity_text": "Rezé",
+      "entity_type": "LOCATION",
+      "start_pos": 638,
+      "end_pos": 642
+    },
+    {
+      "entity_text": "Cabinet VetLys Sud",
+      "entity_type": "ORG",
+      "start_pos": 645,
+      "end_pos": 663
+    },
+    {
+      "entity_text": "Sud",
+      "entity_type": "LOCATION",
+      "start_pos": 660,
+      "end_pos": 663
+    },
+    {
+      "entity_text": "Anaïs Bruni",
+      "entity_type": "PERSON",
+      "start_pos": 669,
+      "end_pos": 680
+    },
+    {
+      "entity_text": "Inès Varela",
+      "entity_type": "PERSON",
+      "start_pos": 683,
+      "end_pos": 694
+    },
+    {
+      "entity_text": "Inès Varela",
+      "entity_type": "PERSON",
+      "start_pos": 697,
+      "end_pos": 708
+    },
+    {
+      "entity_text": "Saint-Herblain",
+      "entity_type": "LOCATION",
+      "start_pos": 743,
+      "end_pos": 757
+    },
+    {
+      "entity_text": "Unité VetLys Ouest",
+      "entity_type": "ORG",
+      "start_pos": 760,
+      "end_pos": 778
+    },
+    {
+      "entity_text": "Ouest",
+      "entity_type": "LOCATION",
+      "start_pos": 773,
+      "end_pos": 778
+    },
+    {
+      "entity_text": "Camille Sorel",
+      "entity_type": "PERSON",
+      "start_pos": 781,
+      "end_pos": 794
+    },
+    {
+      "entity_text": "Malo Girard",
+      "entity_type": "PERSON",
+      "start_pos": 797,
+      "end_pos": 808
+    },
+    {
+      "entity_text": "Brest",
+      "entity_type": "LOCATION",
+      "start_pos": 853,
+      "end_pos": 858
+    },
+    {
+      "entity_text": "Léa Hamon",
+      "entity_type": "PERSON",
+      "start_pos": 887,
+      "end_pos": 896
+    },
+    {
+      "entity_text": "Léa Hamon",
+      "entity_type": "PERSON",
+      "start_pos": 899,
+      "end_pos": 908
+    },
+    {
+      "entity_text": "Comptoir Animal Atlantique",
+      "entity_type": "ORG",
+      "start_pos": 982,
+      "end_pos": 1008
+    },
+    {
+      "entity_text": "rue des Tilleuls",
+      "entity_type": "LOCATION",
+      "start_pos": 1062,
+      "end_pos": 1078
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 1086,
+      "end_pos": 1092
+    },
+    {
+      "entity_text": "Medipattes Distribution",
+      "entity_type": "ORG",
+      "start_pos": 1096,
+      "end_pos": 1119
+    },
+    {
+      "entity_text": "rue des Tilleuls",
+      "entity_type": "LOCATION",
+      "start_pos": 1205,
+      "end_pos": 1221
+    },
+    {
+      "entity_text": "VétoStock",
+      "entity_type": "ORG",
+      "start_pos": 1225,
+      "end_pos": 1234
+    },
+    {
+      "entity_text": "Groupe VetLys",
+      "entity_type": "ORG",
+      "start_pos": 1283,
+      "end_pos": 1296
+    },
+    {
+      "entity_text": "allée du Marché",
+      "entity_type": "LOCATION",
+      "start_pos": 1312,
+      "end_pos": 1327
+    },
+    {
+      "entity_text": "Rezé",
+      "entity_type": "LOCATION",
+      "start_pos": 1335,
+      "end_pos": 1339
+    },
+    {
+      "entity_text": "Camille",
+      "entity_type": "PERSON",
+      "start_pos": 1342,
+      "end_pos": 1349
+    },
+    {
+      "entity_text": "Saint-Herblain",
+      "entity_type": "LOCATION",
+      "start_pos": 1383,
+      "end_pos": 1397
+    },
+    {
+      "entity_text": "Malo",
+      "entity_type": "PERSON",
+      "start_pos": 1430,
+      "end_pos": 1434
+    },
+    {
+      "entity_text": "Romain Bessac",
+      "entity_type": "PERSON",
+      "start_pos": 1437,
+      "end_pos": 1450
+    },
+    {
+      "entity_text": "Élodie MARIN",
+      "entity_type": "PERSON",
+      "start_pos": 1501,
+      "end_pos": 1513
+    },
+    {
+      "entity_text": "Groupe VetLys",
+      "entity_type": "ORG",
+      "start_pos": 1544,
+      "end_pos": 1557
+    },
+    {
+      "entity_text": "Clinique Vétérinaire des Canaux",
+      "entity_type": "ORG",
+      "start_pos": 1558,
+      "end_pos": 1589
+    },
+    {
+      "entity_text": "rue des Tilleuls",
+      "entity_type": "LOCATION",
+      "start_pos": 1593,
+      "end_pos": 1609
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 1618,
+      "end_pos": 1624
+    },
+    {
+      "entity_text": "Inès Varela",
+      "entity_type": "PERSON",
+      "start_pos": 1679,
+      "end_pos": 1690
+    },
+    {
+      "entity_text": "Élodie Marin",
+      "entity_type": "PERSON",
+      "start_pos": 1759,
+      "end_pos": 1771
+    },
+    {
+      "entity_text": "Nadir BELKACEM",
+      "entity_type": "PERSON",
+      "start_pos": 1805,
+      "end_pos": 1819
+    },
+    {
+      "entity_text": "Élodie",
+      "entity_type": "PERSON",
+      "start_pos": 1890,
+      "end_pos": 1896
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 1917,
+      "end_pos": 1923
+    },
+    {
+      "entity_text": "Rezé",
+      "entity_type": "LOCATION",
+      "start_pos": 1935,
+      "end_pos": 1939
+    },
+    {
+      "entity_text": "Sonia",
+      "entity_type": "PERSON",
+      "start_pos": 1998,
+      "end_pos": 2003
+    },
+    {
+      "entity_text": "Kerjean",
+      "entity_type": "PERSON",
+      "start_pos": 2043,
+      "end_pos": 2050
+    },
+    {
+      "entity_text": "La Roche-sur-Yon",
+      "entity_type": "LOCATION",
+      "start_pos": 2083,
+      "end_pos": 2099
+    },
+    {
+      "entity_text": "Angers",
+      "entity_type": "LOCATION",
+      "start_pos": 2182,
+      "end_pos": 2188
+    },
+    {
+      "entity_text": "Rezé",
+      "entity_type": "LOCATION",
+      "start_pos": 2239,
+      "end_pos": 2243
+    },
+    {
+      "entity_text": "Anaïs Bruni",
+      "entity_type": "PERSON",
+      "start_pos": 2268,
+      "end_pos": 2279
+    },
+    {
+      "entity_text": "Medipattes Distribution",
+      "entity_type": "ORG",
+      "start_pos": 2501,
+      "end_pos": 2524
+    },
+    {
+      "entity_text": "Rennes",
+      "entity_type": "LOCATION",
+      "start_pos": 2558,
+      "end_pos": 2564
+    },
+    {
+      "entity_text": "Groupe VetLys",
+      "entity_type": "ORG",
+      "start_pos": 2680,
+      "end_pos": 2693
+    },
+    {
+      "entity_text": "Comptoir Animal Atlantique",
+      "entity_type": "ORG",
+      "start_pos": 2699,
+      "end_pos": 2725
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 2774,
+      "end_pos": 2780
+    },
+    {
+      "entity_text": "Brest",
+      "entity_type": "LOCATION",
+      "start_pos": 2792,
+      "end_pos": 2797
+    },
+    {
+      "entity_text": "Brest",
+      "entity_type": "LOCATION",
+      "start_pos": 2804,
+      "end_pos": 2809
+    },
+    {
+      "entity_text": "Zoovia",
+      "entity_type": "ORG",
+      "start_pos": 2811,
+      "end_pos": 2817
+    },
+    {
+      "entity_text": "Banque Populaire Services Pro",
+      "entity_type": "ORG",
+      "start_pos": 2881,
+      "end_pos": 2910
+    },
+    {
+      "entity_text": "passage des Entrepôts",
+      "entity_type": "LOCATION",
+      "start_pos": 3006,
+      "end_pos": 3027
+    },
+    {
+      "entity_text": "Rennes",
+      "entity_type": "LOCATION",
+      "start_pos": 3036,
+      "end_pos": 3042
+    },
+    {
+      "entity_text": "Camille Sorel",
+      "entity_type": "PERSON",
+      "start_pos": 3080,
+      "end_pos": 3093
+    },
+    {
+      "entity_text": "Nadir BELKACEM",
+      "entity_type": "PERSON",
+      "start_pos": 3164,
+      "end_pos": 3178
+    },
+    {
+      "entity_text": "Élodie Marin",
+      "entity_type": "PERSON",
+      "start_pos": 3210,
+      "end_pos": 3222
+    },
+    {
+      "entity_text": "Nadir",
+      "entity_type": "PERSON",
+      "start_pos": 3271,
+      "end_pos": 3276
+    },
+    {
+      "entity_text": "Élodie",
+      "entity_type": "PERSON",
+      "start_pos": 3278,
+      "end_pos": 3284
+    },
+    {
+      "entity_text": "Malo Girard",
+      "entity_type": "PERSON",
+      "start_pos": 3403,
+      "end_pos": 3414
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 3466,
+      "end_pos": 3472
+    },
+    {
+      "entity_text": "Romain Bessac",
+      "entity_type": "PERSON",
+      "start_pos": 3528,
+      "end_pos": 3541
+    },
+    {
+      "entity_text": "Paris",
+      "entity_type": "LOCATION",
+      "start_pos": 3594,
+      "end_pos": 3599
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 3663,
+      "end_pos": 3669
+    },
+    {
+      "entity_text": "Nadir BELKACEM",
+      "entity_type": "PERSON",
+      "start_pos": 3729,
+      "end_pos": 3743
+    },
+    {
+      "entity_text": "Inès",
+      "entity_type": "PERSON",
+      "start_pos": 3876,
+      "end_pos": 3880
+    },
+    {
+      "entity_text": "Élodie",
+      "entity_type": "PERSON",
+      "start_pos": 3906,
+      "end_pos": 3912
+    },
+    {
+      "entity_text": "Comptoir Animal Atlantique",
+      "entity_type": "ORG",
+      "start_pos": 4032,
+      "end_pos": 4058
+    },
+    {
+      "entity_text": "Medipattes Distribution",
+      "entity_type": "ORG",
+      "start_pos": 4060,
+      "end_pos": 4083
+    },
+    {
+      "entity_text": "Zoovia",
+      "entity_type": "ORG",
+      "start_pos": 4089,
+      "end_pos": 4095
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 4106,
+      "end_pos": 4112
+    },
+    {
+      "entity_text": "Lucien Roche",
+      "entity_type": "PERSON",
+      "start_pos": 4143,
+      "end_pos": 4155
+    },
+    {
+      "entity_text": "Sonia Kermarrec",
+      "entity_type": "PERSON",
+      "start_pos": 4188,
+      "end_pos": 4203
+    },
+    {
+      "entity_text": "Nadir BELKACEM",
+      "entity_type": "PERSON",
+      "start_pos": 4286,
+      "end_pos": 4300
+    },
+    {
+      "entity_text": "Clinique Vétérinaire des Canaux",
+      "entity_type": "ORG",
+      "start_pos": 4325,
+      "end_pos": 4356
+    },
+    {
+      "entity_text": "Groupe VetLys",
+      "entity_type": "ORG",
+      "start_pos": 4359,
+      "end_pos": 4372
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 4374,
+      "end_pos": 4380
+    },
+    {
+      "entity_text": "Loire-Atlantique",
+      "entity_type": "LOCATION",
+      "start_pos": 4383,
+      "end_pos": 4399
+    }
+  ]
+}

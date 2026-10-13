@@ -12,7 +12,7 @@ from collections import defaultdict
 
 import pytest
 
-from tests.accuracy import bootstrap
+from tests.accuracy import bootstrap, final_exam
 from tests.accuracy.conftest import (
     AccuracyMetrics,
     DocumentResult,
@@ -503,3 +503,39 @@ class TestConfidenceRanges:
                 f"{label}: JSON sums TP/FP/FN={sums}, "
                 f"aggregate TP/FP/FN={(m.tp, m.fp, m.fn)}"
             )
+
+
+# ===========================================================================
+# Final exam — Story 10.6 PR B (AC 8)
+# ===========================================================================
+
+
+@pytest.mark.accuracy
+@pytest.mark.slow
+@pytest.mark.skipif(
+    final_exam.final_exam_root() is None, reason="FINAL_EXAM_DIR not set"
+)
+class TestFinalExamMetrics:
+    """AC8 (Story 10.6): the final exam, scored in the ``final_exam`` job only.
+
+    Its only fixture is ``hybrid_detector``: the documents are loaded and
+    scored inside the test body, so a failing test has no exam data to print.
+    Output is the 12 aggregate point lines and their 12 CI95 lines. Asserts
+    compare plain integers only.
+    """
+
+    def test_final_exam_metrics(self, hybrid_detector: object) -> None:
+        root = final_exam.final_exam_root()
+        assert root is not None
+        manifest = final_exam.load_manifest(root)
+        scored = final_exam.score_final_exam(hybrid_detector, root, manifest)
+        n_docs = len(scored)
+        n_planted = sum(1 for half, _ in scored if half == "planted")
+        n_natural = n_docs - n_planted
+        expected = final_exam.expected_docs(manifest)
+        assert n_docs == expected, f"Expected {expected} documents, got {n_docs}"
+        assert n_planted > 0, "No planted document"
+        assert n_natural > 0, "No natural document"
+        print("\n" + "\n".join(final_exam.report_lines(scored)))
+        if final_exam.force_failure(manifest):
+            raise RuntimeError("forced failure")

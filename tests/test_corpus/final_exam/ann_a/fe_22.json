@@ -1,0 +1,725 @@
+{
+  "document_name": "fe_22.txt",
+  "entities": [
+    {
+      "entity_text": "RÉSEAU ALPES ÉNERGIES",
+      "entity_type": "ORG",
+      "start_pos": 0,
+      "end_pos": 21
+    },
+    {
+      "entity_text": "rue des Grives",
+      "entity_type": "LOCATION",
+      "start_pos": 115,
+      "end_pos": 129
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 137,
+      "end_pos": 141
+    },
+    {
+      "entity_text": "Auvergne-Rhône-Alpes",
+      "entity_type": "LOCATION",
+      "start_pos": 269,
+      "end_pos": 289
+    },
+    {
+      "entity_text": "Genève",
+      "entity_type": "LOCATION",
+      "start_pos": 316,
+      "end_pos": 322
+    },
+    {
+      "entity_text": "Clémence de Launay",
+      "entity_type": "PERSON",
+      "start_pos": 381,
+      "end_pos": 399
+    },
+    {
+      "entity_text": "Hugo van der Velde",
+      "entity_type": "PERSON",
+      "start_pos": 439,
+      "end_pos": 457
+    },
+    {
+      "entity_text": "RÉSEAU ALPES ÉNERGIES",
+      "entity_type": "ORG",
+      "start_pos": 501,
+      "end_pos": 522
+    },
+    {
+      "entity_text": "Réseau Alpes Énergies",
+      "entity_type": "ORG",
+      "start_pos": 599,
+      "end_pos": 620
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 713,
+      "end_pos": 717
+    },
+    {
+      "entity_text": "Grenoble",
+      "entity_type": "LOCATION",
+      "start_pos": 719,
+      "end_pos": 727
+    },
+    {
+      "entity_text": "Valence",
+      "entity_type": "LOCATION",
+      "start_pos": 729,
+      "end_pos": 736
+    },
+    {
+      "entity_text": "Chambéry",
+      "entity_type": "LOCATION",
+      "start_pos": 738,
+      "end_pos": 746
+    },
+    {
+      "entity_text": "Annecy",
+      "entity_type": "LOCATION",
+      "start_pos": 750,
+      "end_pos": 756
+    },
+    {
+      "entity_text": "Genève",
+      "entity_type": "LOCATION",
+      "start_pos": 814,
+      "end_pos": 820
+    },
+    {
+      "entity_text": "Turin",
+      "entity_type": "LOCATION",
+      "start_pos": 824,
+      "end_pos": 829
+    },
+    {
+      "entity_text": "Asterion Maintenance Suisse",
+      "entity_type": "ORG",
+      "start_pos": 874,
+      "end_pos": 901
+    },
+    {
+      "entity_text": "Suisse",
+      "entity_type": "LOCATION",
+      "start_pos": 895,
+      "end_pos": 901
+    },
+    {
+      "entity_text": "RhoNéo Italie",
+      "entity_type": "ORG",
+      "start_pos": 905,
+      "end_pos": 918
+    },
+    {
+      "entity_text": "Italie",
+      "entity_type": "LOCATION",
+      "start_pos": 912,
+      "end_pos": 918
+    },
+    {
+      "entity_text": "Inès da Costa",
+      "entity_type": "PERSON",
+      "start_pos": 1202,
+      "end_pos": 1215
+    },
+    {
+      "entity_text": "Grenoble",
+      "entity_type": "LOCATION",
+      "start_pos": 1234,
+      "end_pos": 1242
+    },
+    {
+      "entity_text": "RÉSEAU ALPES ÉNERGIES",
+      "entity_type": "ORG",
+      "start_pos": 1259,
+      "end_pos": 1280
+    },
+    {
+      "entity_text": "Solevia France",
+      "entity_type": "ORG",
+      "start_pos": 1492,
+      "end_pos": 1506
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 1500,
+      "end_pos": 1506
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 1523,
+      "end_pos": 1529
+    },
+    {
+      "entity_text": "Grenoble",
+      "entity_type": "LOCATION",
+      "start_pos": 1624,
+      "end_pos": 1632
+    },
+    {
+      "entity_text": "Asterion Maintenance Suisse",
+      "entity_type": "ORG",
+      "start_pos": 1633,
+      "end_pos": 1660
+    },
+    {
+      "entity_text": "Suisse",
+      "entity_type": "LOCATION",
+      "start_pos": 1654,
+      "end_pos": 1660
+    },
+    {
+      "entity_text": "Suisse",
+      "entity_type": "LOCATION",
+      "start_pos": 1664,
+      "end_pos": 1670
+    },
+    {
+      "entity_text": "Genève",
+      "entity_type": "LOCATION",
+      "start_pos": 1761,
+      "end_pos": 1767
+    },
+    {
+      "entity_text": "HelioRive Espagne",
+      "entity_type": "ORG",
+      "start_pos": 1768,
+      "end_pos": 1785
+    },
+    {
+      "entity_text": "Espagne",
+      "entity_type": "LOCATION",
+      "start_pos": 1778,
+      "end_pos": 1785
+    },
+    {
+      "entity_text": "Espagne",
+      "entity_type": "LOCATION",
+      "start_pos": 1799,
+      "end_pos": 1806
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 1899,
+      "end_pos": 1903
+    },
+    {
+      "entity_text": "NordGrid Belgique",
+      "entity_type": "ORG",
+      "start_pos": 1904,
+      "end_pos": 1921
+    },
+    {
+      "entity_text": "Belgique",
+      "entity_type": "LOCATION",
+      "start_pos": 1913,
+      "end_pos": 1921
+    },
+    {
+      "entity_text": "Belgique",
+      "entity_type": "LOCATION",
+      "start_pos": 1935,
+      "end_pos": 1943
+    },
+    {
+      "entity_text": "Bruxelles",
+      "entity_type": "LOCATION",
+      "start_pos": 1965,
+      "end_pos": 1974
+    },
+    {
+      "entity_text": "RhoNéo Italie",
+      "entity_type": "ORG",
+      "start_pos": 2046,
+      "end_pos": 2059
+    },
+    {
+      "entity_text": "Italie",
+      "entity_type": "LOCATION",
+      "start_pos": 2053,
+      "end_pos": 2059
+    },
+    {
+      "entity_text": "Italie",
+      "entity_type": "LOCATION",
+      "start_pos": 2077,
+      "end_pos": 2083
+    },
+    {
+      "entity_text": "Turin",
+      "entity_type": "LOCATION",
+      "start_pos": 2173,
+      "end_pos": 2178
+    },
+    {
+      "entity_text": "Atelier Kilowatt Dauphiné",
+      "entity_type": "ORG",
+      "start_pos": 2179,
+      "end_pos": 2204
+    },
+    {
+      "entity_text": "Dauphiné",
+      "entity_type": "LOCATION",
+      "start_pos": 2196,
+      "end_pos": 2204
+    },
+    {
+      "entity_text": "Isère",
+      "entity_type": "LOCATION",
+      "start_pos": 2210,
+      "end_pos": 2215
+    },
+    {
+      "entity_text": "Voiron",
+      "entity_type": "LOCATION",
+      "start_pos": 2239,
+      "end_pos": 2245
+    },
+    {
+      "entity_text": "Savoisola",
+      "entity_type": "ORG",
+      "start_pos": 2246,
+      "end_pos": 2255
+    },
+    {
+      "entity_text": "Savoie",
+      "entity_type": "LOCATION",
+      "start_pos": 2277,
+      "end_pos": 2283
+    },
+    {
+      "entity_text": "Chambéry",
+      "entity_type": "LOCATION",
+      "start_pos": 2312,
+      "end_pos": 2320
+    },
+    {
+      "entity_text": "Solevia France",
+      "entity_type": "ORG",
+      "start_pos": 2327,
+      "end_pos": 2341
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 2335,
+      "end_pos": 2341
+    },
+    {
+      "entity_text": "de Launay",
+      "entity_type": "PERSON",
+      "start_pos": 2445,
+      "end_pos": 2454
+    },
+    {
+      "entity_text": "Nora Benyellès",
+      "entity_type": "PERSON",
+      "start_pos": 2559,
+      "end_pos": 2573
+    },
+    {
+      "entity_text": "Asterion Maintenance\nSuisse",
+      "entity_type": "ORG",
+      "start_pos": 2580,
+      "end_pos": 2607
+    },
+    {
+      "entity_text": "Suisse",
+      "entity_type": "LOCATION",
+      "start_pos": 2601,
+      "end_pos": 2607
+    },
+    {
+      "entity_text": "Genève",
+      "entity_type": "LOCATION",
+      "start_pos": 2748,
+      "end_pos": 2754
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 2757,
+      "end_pos": 2761
+    },
+    {
+      "entity_text": "Hugo van der Velde",
+      "entity_type": "PERSON",
+      "start_pos": 2781,
+      "end_pos": 2799
+    },
+    {
+      "entity_text": "RhoNéo Italie",
+      "entity_type": "ORG",
+      "start_pos": 2809,
+      "end_pos": 2822
+    },
+    {
+      "entity_text": "Italie",
+      "entity_type": "LOCATION",
+      "start_pos": 2816,
+      "end_pos": 2822
+    },
+    {
+      "entity_text": "Turin",
+      "entity_type": "LOCATION",
+      "start_pos": 2916,
+      "end_pos": 2921
+    },
+    {
+      "entity_text": "Turin",
+      "entity_type": "LOCATION",
+      "start_pos": 3030,
+      "end_pos": 3035
+    },
+    {
+      "entity_text": "Réseau Alpes Énergies",
+      "entity_type": "ORG",
+      "start_pos": 3081,
+      "end_pos": 3102
+    },
+    {
+      "entity_text": "NordGrid Belgique",
+      "entity_type": "ORG",
+      "start_pos": 3190,
+      "end_pos": 3207
+    },
+    {
+      "entity_text": "Belgique",
+      "entity_type": "LOCATION",
+      "start_pos": 3199,
+      "end_pos": 3207
+    },
+    {
+      "entity_text": "Bruxelles",
+      "entity_type": "LOCATION",
+      "start_pos": 3336,
+      "end_pos": 3345
+    },
+    {
+      "entity_text": "Malik de Souza",
+      "entity_type": "PERSON",
+      "start_pos": 3347,
+      "end_pos": 3361
+    },
+    {
+      "entity_text": "Valence",
+      "entity_type": "LOCATION",
+      "start_pos": 3468,
+      "end_pos": 3475
+    },
+    {
+      "entity_text": "LumaPose Rhône",
+      "entity_type": "ORG",
+      "start_pos": 3489,
+      "end_pos": 3503
+    },
+    {
+      "entity_text": "Rhône",
+      "entity_type": "LOCATION",
+      "start_pos": 3498,
+      "end_pos": 3503
+    },
+    {
+      "entity_text": "Sarah\ndu Mesnil",
+      "entity_type": "PERSON",
+      "start_pos": 3661,
+      "end_pos": 3676
+    },
+    {
+      "entity_text": "Asterion Maintenance Suisse",
+      "entity_type": "ORG",
+      "start_pos": 3829,
+      "end_pos": 3856
+    },
+    {
+      "entity_text": "Suisse",
+      "entity_type": "LOCATION",
+      "start_pos": 3850,
+      "end_pos": 3856
+    },
+    {
+      "entity_text": "Lausanne",
+      "entity_type": "LOCATION",
+      "start_pos": 3896,
+      "end_pos": 3904
+    },
+    {
+      "entity_text": "Réseau Alpes Énergies",
+      "entity_type": "ORG",
+      "start_pos": 3935,
+      "end_pos": 3956
+    },
+    {
+      "entity_text": "Mathis\nvon Arx",
+      "entity_type": "PERSON",
+      "start_pos": 3958,
+      "end_pos": 3972
+    },
+    {
+      "entity_text": "HelioRive Espagne",
+      "entity_type": "ORG",
+      "start_pos": 4055,
+      "end_pos": 4072
+    },
+    {
+      "entity_text": "Espagne",
+      "entity_type": "LOCATION",
+      "start_pos": 4065,
+      "end_pos": 4072
+    },
+    {
+      "entity_text": "Barcelone",
+      "entity_type": "LOCATION",
+      "start_pos": 4163,
+      "end_pos": 4172
+    },
+    {
+      "entity_text": "RÉSEAU ALPES ÉNERGIES",
+      "entity_type": "ORG",
+      "start_pos": 4175,
+      "end_pos": 4196
+    },
+    {
+      "entity_text": "Savoisola",
+      "entity_type": "ORG",
+      "start_pos": 4412,
+      "end_pos": 4421
+    },
+    {
+      "entity_text": "Chambéry",
+      "entity_type": "LOCATION",
+      "start_pos": 4444,
+      "end_pos": 4452
+    },
+    {
+      "entity_text": "Réseau Alpes Énergies",
+      "entity_type": "ORG",
+      "start_pos": 4528,
+      "end_pos": 4549
+    },
+    {
+      "entity_text": "Clémence de Launay",
+      "entity_type": "PERSON",
+      "start_pos": 4619,
+      "end_pos": 4637
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 4791,
+      "end_pos": 4795
+    },
+    {
+      "entity_text": "Hugo van der Velde",
+      "entity_type": "PERSON",
+      "start_pos": 4797,
+      "end_pos": 4815
+    },
+    {
+      "entity_text": "Asterion\nMaintenance Suisse",
+      "entity_type": "ORG",
+      "start_pos": 4958,
+      "end_pos": 4985
+    },
+    {
+      "entity_text": "Suisse",
+      "entity_type": "LOCATION",
+      "start_pos": 4979,
+      "end_pos": 4985
+    },
+    {
+      "entity_text": "RhoNéo Italie",
+      "entity_type": "ORG",
+      "start_pos": 4987,
+      "end_pos": 5000
+    },
+    {
+      "entity_text": "Italie",
+      "entity_type": "LOCATION",
+      "start_pos": 4994,
+      "end_pos": 5000
+    },
+    {
+      "entity_text": "HelioRive Espagne",
+      "entity_type": "ORG",
+      "start_pos": 5004,
+      "end_pos": 5021
+    },
+    {
+      "entity_text": "Espagne",
+      "entity_type": "LOCATION",
+      "start_pos": 5014,
+      "end_pos": 5021
+    },
+    {
+      "entity_text": "Malik de Souza",
+      "entity_type": "PERSON",
+      "start_pos": 5081,
+      "end_pos": 5095
+    },
+    {
+      "entity_text": "Malik de Souza",
+      "entity_type": "PERSON",
+      "start_pos": 5235,
+      "end_pos": 5249
+    },
+    {
+      "entity_text": "Nora Benyellès",
+      "entity_type": "PERSON",
+      "start_pos": 5304,
+      "end_pos": 5318
+    },
+    {
+      "entity_text": "Valence",
+      "entity_type": "LOCATION",
+      "start_pos": 5354,
+      "end_pos": 5361
+    },
+    {
+      "entity_text": "Sarah du Mesnil",
+      "entity_type": "PERSON",
+      "start_pos": 5373,
+      "end_pos": 5388
+    },
+    {
+      "entity_text": "Inès da Costa",
+      "entity_type": "PERSON",
+      "start_pos": 5442,
+      "end_pos": 5455
+    },
+    {
+      "entity_text": "Genève",
+      "entity_type": "LOCATION",
+      "start_pos": 5497,
+      "end_pos": 5503
+    },
+    {
+      "entity_text": "Mathis von Arx",
+      "entity_type": "PERSON",
+      "start_pos": 5511,
+      "end_pos": 5525
+    },
+    {
+      "entity_text": "Réseau Alpes Énergies",
+      "entity_type": "ORG",
+      "start_pos": 5623,
+      "end_pos": 5644
+    },
+    {
+      "entity_text": "Grenoble",
+      "entity_type": "LOCATION",
+      "start_pos": 5749,
+      "end_pos": 5757
+    },
+    {
+      "entity_text": "Annecy",
+      "entity_type": "LOCATION",
+      "start_pos": 5759,
+      "end_pos": 5765
+    },
+    {
+      "entity_text": "Genève",
+      "entity_type": "LOCATION",
+      "start_pos": 5769,
+      "end_pos": 5775
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 5811,
+      "end_pos": 5815
+    },
+    {
+      "entity_text": "Solevia France",
+      "entity_type": "ORG",
+      "start_pos": 5835,
+      "end_pos": 5849
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 5843,
+      "end_pos": 5849
+    },
+    {
+      "entity_text": "Asterion Maintenance Suisse",
+      "entity_type": "ORG",
+      "start_pos": 5851,
+      "end_pos": 5878
+    },
+    {
+      "entity_text": "Suisse",
+      "entity_type": "LOCATION",
+      "start_pos": 5872,
+      "end_pos": 5878
+    },
+    {
+      "entity_text": "NordGrid Belgique",
+      "entity_type": "ORG",
+      "start_pos": 5882,
+      "end_pos": 5899
+    },
+    {
+      "entity_text": "Belgique",
+      "entity_type": "LOCATION",
+      "start_pos": 5891,
+      "end_pos": 5899
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 5978,
+      "end_pos": 5982
+    },
+    {
+      "entity_text": "Clémence de Launay",
+      "entity_type": "PERSON",
+      "start_pos": 6006,
+      "end_pos": 6024
+    },
+    {
+      "entity_text": "RÉSEAU ALPES ÉNERGIES",
+      "entity_type": "ORG",
+      "start_pos": 6054,
+      "end_pos": 6075
+    },
+    {
+      "entity_text": "rue des Grives",
+      "entity_type": "LOCATION",
+      "start_pos": 6079,
+      "end_pos": 6093
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 6101,
+      "end_pos": 6105
+    },
+    {
+      "entity_text": "Hugo van der Velde",
+      "entity_type": "PERSON",
+      "start_pos": 6191,
+      "end_pos": 6209
+    },
+    {
+      "entity_text": "RÉSEAU ALPES ÉNERGIES",
+      "entity_type": "ORG",
+      "start_pos": 6279,
+      "end_pos": 6300
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 6386,
+      "end_pos": 6390
+    }
+  ]
+}

@@ -1,0 +1,539 @@
+{
+  "document_name": "fe_12.txt",
+  "entities": [
+    {
+      "entity_text": "Nadia Rehal",
+      "entity_type": "PERSON",
+      "start_pos": 5,
+      "end_pos": 16
+    },
+    {
+      "entity_text": "Julien Pavoine",
+      "entity_type": "PERSON",
+      "start_pos": 51,
+      "end_pos": 65
+    },
+    {
+      "entity_text": "Soraya Belkacem",
+      "entity_type": "PERSON",
+      "start_pos": 105,
+      "end_pos": 120
+    },
+    {
+      "entity_text": "Etienne Charrier",
+      "entity_type": "PERSON",
+      "start_pos": 157,
+      "end_pos": 173
+    },
+    {
+      "entity_text": "Tomasz Wrona",
+      "entity_type": "PERSON",
+      "start_pos": 208,
+      "end_pos": 220
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 303,
+      "end_pos": 309
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 461,
+      "end_pos": 467
+    },
+    {
+      "entity_text": "Morinax Bâtiment",
+      "entity_type": "ORG",
+      "start_pos": 469,
+      "end_pos": 485
+    },
+    {
+      "entity_text": "Métropole de Nantes",
+      "entity_type": "ORG",
+      "start_pos": 537,
+      "end_pos": 556
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 550,
+      "end_pos": 556
+    },
+    {
+      "entity_text": "Soltherm Services",
+      "entity_type": "ORG",
+      "start_pos": 775,
+      "end_pos": 792
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 829,
+      "end_pos": 835
+    },
+    {
+      "entity_text": "Julien Pavoine",
+      "entity_type": "PERSON",
+      "start_pos": 852,
+      "end_pos": 866
+    },
+    {
+      "entity_text": "Alcia Cloisons",
+      "entity_type": "ORG",
+      "start_pos": 910,
+      "end_pos": 924
+    },
+    {
+      "entity_text": "Soraya Belkacem",
+      "entity_type": "PERSON",
+      "start_pos": 984,
+      "end_pos": 999
+    },
+    {
+      "entity_text": "Feropex",
+      "entity_type": "ORG",
+      "start_pos": 1038,
+      "end_pos": 1045
+    },
+    {
+      "entity_text": "Tomasz Wrona",
+      "entity_type": "PERSON",
+      "start_pos": 1112,
+      "end_pos": 1124
+    },
+    {
+      "entity_text": "Bureau Veritas",
+      "entity_type": "ORG",
+      "start_pos": 1164,
+      "end_pos": 1178
+    },
+    {
+      "entity_text": "Ouali",
+      "entity_type": "PERSON",
+      "start_pos": 1255,
+      "end_pos": 1260
+    },
+    {
+      "entity_text": "Enedis",
+      "entity_type": "ORG",
+      "start_pos": 1297,
+      "end_pos": 1303
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 1360,
+      "end_pos": 1366
+    },
+    {
+      "entity_text": "Julien",
+      "entity_type": "PERSON",
+      "start_pos": 1430,
+      "end_pos": 1436
+    },
+    {
+      "entity_text": "Soltherm Services",
+      "entity_type": "ORG",
+      "start_pos": 1477,
+      "end_pos": 1494
+    },
+    {
+      "entity_text": "Etienne",
+      "entity_type": "PERSON",
+      "start_pos": 1517,
+      "end_pos": 1524
+    },
+    {
+      "entity_text": "Feropex",
+      "entity_type": "ORG",
+      "start_pos": 1564,
+      "end_pos": 1571
+    },
+    {
+      "entity_text": "Nadia Rehal",
+      "entity_type": "PERSON",
+      "start_pos": 1622,
+      "end_pos": 1633
+    },
+    {
+      "entity_text": "Morinax Bâtiment",
+      "entity_type": "ORG",
+      "start_pos": 1656,
+      "end_pos": 1672
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 1698,
+      "end_pos": 1704
+    },
+    {
+      "entity_text": "Julien Pavoine",
+      "entity_type": "PERSON",
+      "start_pos": 1755,
+      "end_pos": 1769
+    },
+    {
+      "entity_text": "Nadia Rehal",
+      "entity_type": "PERSON",
+      "start_pos": 1851,
+      "end_pos": 1862
+    },
+    {
+      "entity_text": "Soraya Belkacem",
+      "entity_type": "PERSON",
+      "start_pos": 1898,
+      "end_pos": 1913
+    },
+    {
+      "entity_text": "Etienne Charrier",
+      "entity_type": "PERSON",
+      "start_pos": 1946,
+      "end_pos": 1962
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 2028,
+      "end_pos": 2034
+    },
+    {
+      "entity_text": "Nadia",
+      "entity_type": "PERSON",
+      "start_pos": 2072,
+      "end_pos": 2077
+    },
+    {
+      "entity_text": "Soltherm Services",
+      "entity_type": "ORG",
+      "start_pos": 2085,
+      "end_pos": 2102
+    },
+    {
+      "entity_text": "Saint-Nazaire",
+      "entity_type": "LOCATION",
+      "start_pos": 2164,
+      "end_pos": 2177
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 2241,
+      "end_pos": 2247
+    },
+    {
+      "entity_text": "Karim Vassel",
+      "entity_type": "PERSON",
+      "start_pos": 2285,
+      "end_pos": 2297
+    },
+    {
+      "entity_text": "Etienne",
+      "entity_type": "PERSON",
+      "start_pos": 2345,
+      "end_pos": 2352
+    },
+    {
+      "entity_text": "Feropex",
+      "entity_type": "ORG",
+      "start_pos": 2392,
+      "end_pos": 2399
+    },
+    {
+      "entity_text": "Alcia Cloisons",
+      "entity_type": "ORG",
+      "start_pos": 2496,
+      "end_pos": 2510
+    },
+    {
+      "entity_text": "Julien Pavoine",
+      "entity_type": "PERSON",
+      "start_pos": 2668,
+      "end_pos": 2682
+    },
+    {
+      "entity_text": "Soltherm Services",
+      "entity_type": "ORG",
+      "start_pos": 2683,
+      "end_pos": 2700
+    },
+    {
+      "entity_text": "Rezé",
+      "entity_type": "LOCATION",
+      "start_pos": 2713,
+      "end_pos": 2717
+    },
+    {
+      "entity_text": "Soraya Belkacem",
+      "entity_type": "PERSON",
+      "start_pos": 2725,
+      "end_pos": 2740
+    },
+    {
+      "entity_text": "Nadia Rehal",
+      "entity_type": "PERSON",
+      "start_pos": 2776,
+      "end_pos": 2787
+    },
+    {
+      "entity_text": "Julien Pavoine",
+      "entity_type": "PERSON",
+      "start_pos": 2819,
+      "end_pos": 2833
+    },
+    {
+      "entity_text": "Etienne Charrier",
+      "entity_type": "PERSON",
+      "start_pos": 2877,
+      "end_pos": 2893
+    },
+    {
+      "entity_text": "Tomasz Wrona",
+      "entity_type": "PERSON",
+      "start_pos": 2928,
+      "end_pos": 2940
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 3030,
+      "end_pos": 3036
+    },
+    {
+      "entity_text": "Alcia Cloisons",
+      "entity_type": "ORG",
+      "start_pos": 3089,
+      "end_pos": 3103
+    },
+    {
+      "entity_text": "Promatel Ouest",
+      "entity_type": "ORG",
+      "start_pos": 3162,
+      "end_pos": 3176
+    },
+    {
+      "entity_text": "Ouest",
+      "entity_type": "LOCATION",
+      "start_pos": 3171,
+      "end_pos": 3176
+    },
+    {
+      "entity_text": "Angers",
+      "entity_type": "LOCATION",
+      "start_pos": 3212,
+      "end_pos": 3218
+    },
+    {
+      "entity_text": "Rachid Temsamani",
+      "entity_type": "PERSON",
+      "start_pos": 3233,
+      "end_pos": 3249
+    },
+    {
+      "entity_text": "Morinax Bâtiment",
+      "entity_type": "ORG",
+      "start_pos": 3412,
+      "end_pos": 3428
+    },
+    {
+      "entity_text": "Soraya",
+      "entity_type": "PERSON",
+      "start_pos": 3537,
+      "end_pos": 3543
+    },
+    {
+      "entity_text": "Nadia Rehal",
+      "entity_type": "PERSON",
+      "start_pos": 3552,
+      "end_pos": 3563
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 3632,
+      "end_pos": 3638
+    },
+    {
+      "entity_text": "Soltherm Services",
+      "entity_type": "ORG",
+      "start_pos": 3693,
+      "end_pos": 3710
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 3747,
+      "end_pos": 3753
+    },
+    {
+      "entity_text": "Alcia Cloisons",
+      "entity_type": "ORG",
+      "start_pos": 3770,
+      "end_pos": 3784
+    },
+    {
+      "entity_text": "Feropex",
+      "entity_type": "ORG",
+      "start_pos": 3844,
+      "end_pos": 3851
+    },
+    {
+      "entity_text": "Etienne Charrier",
+      "entity_type": "PERSON",
+      "start_pos": 3938,
+      "end_pos": 3954
+    },
+    {
+      "entity_text": "Morinax Bâtiment",
+      "entity_type": "ORG",
+      "start_pos": 3957,
+      "end_pos": 3973
+    },
+    {
+      "entity_text": "Malika Ouali",
+      "entity_type": "PERSON",
+      "start_pos": 4005,
+      "end_pos": 4017
+    },
+    {
+      "entity_text": "Etienne Charrier",
+      "entity_type": "PERSON",
+      "start_pos": 4057,
+      "end_pos": 4073
+    },
+    {
+      "entity_text": "Charrier",
+      "entity_type": "PERSON",
+      "start_pos": 4150,
+      "end_pos": 4158
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 4361,
+      "end_pos": 4367
+    },
+    {
+      "entity_text": "Rehal",
+      "entity_type": "PERSON",
+      "start_pos": 4417,
+      "end_pos": 4422
+    },
+    {
+      "entity_text": "Malika Ouali",
+      "entity_type": "PERSON",
+      "start_pos": 4462,
+      "end_pos": 4474
+    },
+    {
+      "entity_text": "Nadia Rehal",
+      "entity_type": "PERSON",
+      "start_pos": 4482,
+      "end_pos": 4493
+    },
+    {
+      "entity_text": "Soltherm Services",
+      "entity_type": "ORG",
+      "start_pos": 4800,
+      "end_pos": 4817
+    },
+    {
+      "entity_text": "Karim Vassel",
+      "entity_type": "PERSON",
+      "start_pos": 4846,
+      "end_pos": 4858
+    },
+    {
+      "entity_text": "Julien",
+      "entity_type": "PERSON",
+      "start_pos": 4874,
+      "end_pos": 4880
+    },
+    {
+      "entity_text": "Alcia Cloisons",
+      "entity_type": "ORG",
+      "start_pos": 4903,
+      "end_pos": 4917
+    },
+    {
+      "entity_text": "Soraya Belkacem",
+      "entity_type": "PERSON",
+      "start_pos": 4946,
+      "end_pos": 4961
+    },
+    {
+      "entity_text": "Feropex",
+      "entity_type": "ORG",
+      "start_pos": 5010,
+      "end_pos": 5017
+    },
+    {
+      "entity_text": "Tomasz Wrona",
+      "entity_type": "PERSON",
+      "start_pos": 5063,
+      "end_pos": 5075
+    },
+    {
+      "entity_text": "Bureau Veritas",
+      "entity_type": "ORG",
+      "start_pos": 5120,
+      "end_pos": 5134
+    },
+    {
+      "entity_text": "Malika Ouali",
+      "entity_type": "PERSON",
+      "start_pos": 5155,
+      "end_pos": 5167
+    },
+    {
+      "entity_text": "Enedis",
+      "entity_type": "ORG",
+      "start_pos": 5202,
+      "end_pos": 5208
+    },
+    {
+      "entity_text": "Etienne",
+      "entity_type": "PERSON",
+      "start_pos": 5306,
+      "end_pos": 5313
+    },
+    {
+      "entity_text": "Servilift Atlantique",
+      "entity_type": "ORG",
+      "start_pos": 5354,
+      "end_pos": 5374
+    },
+    {
+      "entity_text": "Atlantique",
+      "entity_type": "LOCATION",
+      "start_pos": 5364,
+      "end_pos": 5374
+    },
+    {
+      "entity_text": "Tomasz",
+      "entity_type": "PERSON",
+      "start_pos": 5387,
+      "end_pos": 5393
+    },
+    {
+      "entity_text": "Feropex",
+      "entity_type": "ORG",
+      "start_pos": 5429,
+      "end_pos": 5436
+    },
+    {
+      "entity_text": "Nadia Rehal",
+      "entity_type": "PERSON",
+      "start_pos": 5497,
+      "end_pos": 5508
+    },
+    {
+      "entity_text": "Morinax Bâtiment",
+      "entity_type": "ORG",
+      "start_pos": 5509,
+      "end_pos": 5525
+    }
+  ]
+}

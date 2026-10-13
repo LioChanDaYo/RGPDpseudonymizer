@@ -1,0 +1,635 @@
+{
+  "document_name": "fe_04.txt",
+  "entities": [
+    {
+      "entity_text": "Claire Bessadet",
+      "entity_type": "PERSON",
+      "start_pos": 5,
+      "end_pos": 20
+    },
+    {
+      "entity_text": "Karim Sennane",
+      "entity_type": "PERSON",
+      "start_pos": 63,
+      "end_pos": 76
+    },
+    {
+      "entity_text": "Maud Lorian",
+      "entity_type": "PERSON",
+      "start_pos": 114,
+      "end_pos": 125
+    },
+    {
+      "entity_text": "Inès Robaldo",
+      "entity_type": "PERSON",
+      "start_pos": 163,
+      "end_pos": 175
+    },
+    {
+      "entity_text": "ATELIERS SOLVANE",
+      "entity_type": "ORG",
+      "start_pos": 297,
+      "end_pos": 313
+    },
+    {
+      "entity_text": "Karim",
+      "entity_type": "PERSON",
+      "start_pos": 323,
+      "end_pos": 328
+    },
+    {
+      "entity_text": "Saint-Herblain",
+      "entity_type": "LOCATION",
+      "start_pos": 513,
+      "end_pos": 527
+    },
+    {
+      "entity_text": "Centre Formavenir Atlantique",
+      "entity_type": "ORG",
+      "start_pos": 529,
+      "end_pos": 557
+    },
+    {
+      "entity_text": "Atlantique",
+      "entity_type": "LOCATION",
+      "start_pos": 547,
+      "end_pos": 557
+    },
+    {
+      "entity_text": "Maud Lorian",
+      "entity_type": "PERSON",
+      "start_pos": 585,
+      "end_pos": 596
+    },
+    {
+      "entity_text": "Sami Harrouch",
+      "entity_type": "PERSON",
+      "start_pos": 615,
+      "end_pos": 628
+    },
+    {
+      "entity_text": "Ateliers Solvane",
+      "entity_type": "ORG",
+      "start_pos": 661,
+      "end_pos": 677
+    },
+    {
+      "entity_text": "bâtiment Loire",
+      "entity_type": "LOCATION",
+      "start_pos": 734,
+      "end_pos": 748
+    },
+    {
+      "entity_text": "Nora Kessari",
+      "entity_type": "PERSON",
+      "start_pos": 822,
+      "end_pos": 834
+    },
+    {
+      "entity_text": "Ateliers Solvane",
+      "entity_type": "ORG",
+      "start_pos": 836,
+      "end_pos": 852
+    },
+    {
+      "entity_text": "Saint-Herblain",
+      "entity_type": "LOCATION",
+      "start_pos": 854,
+      "end_pos": 868
+    },
+    {
+      "entity_text": "Hugo Perrial",
+      "entity_type": "PERSON",
+      "start_pos": 878,
+      "end_pos": 890
+    },
+    {
+      "entity_text": "Ateliers Solvane",
+      "entity_type": "ORG",
+      "start_pos": 892,
+      "end_pos": 908
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 910,
+      "end_pos": 916
+    },
+    {
+      "entity_text": "Djamila Tersen",
+      "entity_type": "PERSON",
+      "start_pos": 935,
+      "end_pos": 949
+    },
+    {
+      "entity_text": "Sodeva Pack",
+      "entity_type": "ORG",
+      "start_pos": 951,
+      "end_pos": 962
+    },
+    {
+      "entity_text": "Rezé",
+      "entity_type": "LOCATION",
+      "start_pos": 964,
+      "end_pos": 968
+    },
+    {
+      "entity_text": "Romain Lachaud",
+      "entity_type": "PERSON",
+      "start_pos": 978,
+      "end_pos": 992
+    },
+    {
+      "entity_text": "MecaFluide Ouest",
+      "entity_type": "ORG",
+      "start_pos": 994,
+      "end_pos": 1010
+    },
+    {
+      "entity_text": "Ouest",
+      "entity_type": "LOCATION",
+      "start_pos": 1005,
+      "end_pos": 1010
+    },
+    {
+      "entity_text": "Rennes",
+      "entity_type": "LOCATION",
+      "start_pos": 1012,
+      "end_pos": 1018
+    },
+    {
+      "entity_text": "OPCO 2i",
+      "entity_type": "ORG",
+      "start_pos": 1027,
+      "end_pos": 1034
+    },
+    {
+      "entity_text": "Léna Brizat",
+      "entity_type": "PERSON",
+      "start_pos": 1043,
+      "end_pos": 1054
+    },
+    {
+      "entity_text": "Ateliers Solvane",
+      "entity_type": "ORG",
+      "start_pos": 1056,
+      "end_pos": 1072
+    },
+    {
+      "entity_text": "Saint-Herblain",
+      "entity_type": "LOCATION",
+      "start_pos": 1074,
+      "end_pos": 1088
+    },
+    {
+      "entity_text": "Tariq Ounadi",
+      "entity_type": "PERSON",
+      "start_pos": 1098,
+      "end_pos": 1110
+    },
+    {
+      "entity_text": "Sodeva Pack",
+      "entity_type": "ORG",
+      "start_pos": 1112,
+      "end_pos": 1123
+    },
+    {
+      "entity_text": "Vertou",
+      "entity_type": "LOCATION",
+      "start_pos": 1125,
+      "end_pos": 1131
+    },
+    {
+      "entity_text": "Maud",
+      "entity_type": "PERSON",
+      "start_pos": 1219,
+      "end_pos": 1223
+    },
+    {
+      "entity_text": "Claire BESSADET",
+      "entity_type": "PERSON",
+      "start_pos": 1370,
+      "end_pos": 1385
+    },
+    {
+      "entity_text": "Centre Formavenir Atlantique",
+      "entity_type": "ORG",
+      "start_pos": 1410,
+      "end_pos": 1438
+    },
+    {
+      "entity_text": "Atlantique",
+      "entity_type": "LOCATION",
+      "start_pos": 1428,
+      "end_pos": 1438
+    },
+    {
+      "entity_text": "rue des Alizés",
+      "entity_type": "LOCATION",
+      "start_pos": 1442,
+      "end_pos": 1456
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 1464,
+      "end_pos": 1470
+    },
+    {
+      "entity_text": "Karim Sennane",
+      "entity_type": "PERSON",
+      "start_pos": 1633,
+      "end_pos": 1646
+    },
+    {
+      "entity_text": "Claire Bessadet",
+      "entity_type": "PERSON",
+      "start_pos": 1716,
+      "end_pos": 1731
+    },
+    {
+      "entity_text": "Inès Robaldo",
+      "entity_type": "PERSON",
+      "start_pos": 1775,
+      "end_pos": 1787
+    },
+    {
+      "entity_text": "ATELIERS SOLVANE",
+      "entity_type": "ORG",
+      "start_pos": 1878,
+      "end_pos": 1894
+    },
+    {
+      "entity_text": "Claire",
+      "entity_type": "PERSON",
+      "start_pos": 1904,
+      "end_pos": 1910
+    },
+    {
+      "entity_text": "Saint-Herblain",
+      "entity_type": "LOCATION",
+      "start_pos": 2009,
+      "end_pos": 2023
+    },
+    {
+      "entity_text": "rue du Port-Neuf",
+      "entity_type": "LOCATION",
+      "start_pos": 2120,
+      "end_pos": 2136
+    },
+    {
+      "entity_text": "Inès",
+      "entity_type": "PERSON",
+      "start_pos": 2186,
+      "end_pos": 2190
+    },
+    {
+      "entity_text": "France Travail",
+      "entity_type": "ORG",
+      "start_pos": 2307,
+      "end_pos": 2321
+    },
+    {
+      "entity_text": "Hugo Perrial",
+      "entity_type": "PERSON",
+      "start_pos": 2407,
+      "end_pos": 2419
+    },
+    {
+      "entity_text": "Romain Lachaud",
+      "entity_type": "PERSON",
+      "start_pos": 2510,
+      "end_pos": 2524
+    },
+    {
+      "entity_text": "MecaFluide Ouest",
+      "entity_type": "ORG",
+      "start_pos": 2535,
+      "end_pos": 2551
+    },
+    {
+      "entity_text": "Ouest",
+      "entity_type": "LOCATION",
+      "start_pos": 2546,
+      "end_pos": 2551
+    },
+    {
+      "entity_text": "OPCO 2i",
+      "entity_type": "ORG",
+      "start_pos": 2593,
+      "end_pos": 2600
+    },
+    {
+      "entity_text": "Karim SENNANE",
+      "entity_type": "PERSON",
+      "start_pos": 2603,
+      "end_pos": 2616
+    },
+    {
+      "entity_text": "Ateliers Solvane",
+      "entity_type": "ORG",
+      "start_pos": 2653,
+      "end_pos": 2669
+    },
+    {
+      "entity_text": "rue du Port-Neuf",
+      "entity_type": "LOCATION",
+      "start_pos": 2672,
+      "end_pos": 2688
+    },
+    {
+      "entity_text": "Saint-Herblain",
+      "entity_type": "LOCATION",
+      "start_pos": 2696,
+      "end_pos": 2710
+    },
+    {
+      "entity_text": "Claire Bessadet",
+      "entity_type": "PERSON",
+      "start_pos": 2751,
+      "end_pos": 2766
+    },
+    {
+      "entity_text": "Karim Sennane",
+      "entity_type": "PERSON",
+      "start_pos": 2806,
+      "end_pos": 2819
+    },
+    {
+      "entity_text": "Maud Lorian",
+      "entity_type": "PERSON",
+      "start_pos": 2827,
+      "end_pos": 2838
+    },
+    {
+      "entity_text": "Sami Harrouch",
+      "entity_type": "PERSON",
+      "start_pos": 2840,
+      "end_pos": 2853
+    },
+    {
+      "entity_text": "ATELIERS SOLVANE",
+      "entity_type": "ORG",
+      "start_pos": 2909,
+      "end_pos": 2925
+    },
+    {
+      "entity_text": "Karim",
+      "entity_type": "PERSON",
+      "start_pos": 2938,
+      "end_pos": 2943
+    },
+    {
+      "entity_text": "Saint-Herblain",
+      "entity_type": "LOCATION",
+      "start_pos": 3130,
+      "end_pos": 3144
+    },
+    {
+      "entity_text": "Centre Formavenir Atlantique",
+      "entity_type": "ORG",
+      "start_pos": 3172,
+      "end_pos": 3200
+    },
+    {
+      "entity_text": "Atlantique",
+      "entity_type": "LOCATION",
+      "start_pos": 3190,
+      "end_pos": 3200
+    },
+    {
+      "entity_text": "Ateliers Solvane",
+      "entity_type": "ORG",
+      "start_pos": 3265,
+      "end_pos": 3281
+    },
+    {
+      "entity_text": "Sodeva Pack",
+      "entity_type": "ORG",
+      "start_pos": 3317,
+      "end_pos": 3328
+    },
+    {
+      "entity_text": "DREETS Pays de la Loire",
+      "entity_type": "ORG",
+      "start_pos": 3335,
+      "end_pos": 3358
+    },
+    {
+      "entity_text": "Pays de la Loire",
+      "entity_type": "LOCATION",
+      "start_pos": 3342,
+      "end_pos": 3358
+    },
+    {
+      "entity_text": "Maud",
+      "entity_type": "PERSON",
+      "start_pos": 3429,
+      "end_pos": 3433
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 3619,
+      "end_pos": 3625
+    },
+    {
+      "entity_text": "Nantes Métropole",
+      "entity_type": "ORG",
+      "start_pos": 3619,
+      "end_pos": 3635
+    },
+    {
+      "entity_text": "Karim",
+      "entity_type": "PERSON",
+      "start_pos": 3721,
+      "end_pos": 3726
+    },
+    {
+      "entity_text": "Claire",
+      "entity_type": "PERSON",
+      "start_pos": 3762,
+      "end_pos": 3768
+    },
+    {
+      "entity_text": "Inès Robaldo",
+      "entity_type": "PERSON",
+      "start_pos": 3790,
+      "end_pos": 3802
+    },
+    {
+      "entity_text": "SOLVANE INDUSTRIE",
+      "entity_type": "ORG",
+      "start_pos": 3805,
+      "end_pos": 3822
+    },
+    {
+      "entity_text": "Inès Robaldo",
+      "entity_type": "PERSON",
+      "start_pos": 3854,
+      "end_pos": 3866
+    },
+    {
+      "entity_text": "Karim Sennane",
+      "entity_type": "PERSON",
+      "start_pos": 3904,
+      "end_pos": 3917
+    },
+    {
+      "entity_text": "Formavenir",
+      "entity_type": "ORG",
+      "start_pos": 4031,
+      "end_pos": 4041
+    },
+    {
+      "entity_text": "karim",
+      "entity_type": "PERSON",
+      "start_pos": 4043,
+      "end_pos": 4048
+    },
+    {
+      "entity_text": "Claire",
+      "entity_type": "PERSON",
+      "start_pos": 4076,
+      "end_pos": 4082
+    },
+    {
+      "entity_text": "Saint-Herblain",
+      "entity_type": "LOCATION",
+      "start_pos": 4225,
+      "end_pos": 4239
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 4333,
+      "end_pos": 4339
+    },
+    {
+      "entity_text": "Léna Brizat",
+      "entity_type": "PERSON",
+      "start_pos": 4373,
+      "end_pos": 4384
+    },
+    {
+      "entity_text": "Carsat",
+      "entity_type": "ORG",
+      "start_pos": 4464,
+      "end_pos": 4470
+    },
+    {
+      "entity_text": "Maud",
+      "entity_type": "PERSON",
+      "start_pos": 4503,
+      "end_pos": 4507
+    },
+    {
+      "entity_text": "Inès ROBALDO",
+      "entity_type": "PERSON",
+      "start_pos": 4579,
+      "end_pos": 4591
+    },
+    {
+      "entity_text": "Solvane Industrie",
+      "entity_type": "ORG",
+      "start_pos": 4608,
+      "end_pos": 4625
+    },
+    {
+      "entity_text": "allée des Sablons",
+      "entity_type": "LOCATION",
+      "start_pos": 4649,
+      "end_pos": 4666
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 4674,
+      "end_pos": 4680
+    },
+    {
+      "entity_text": "Inès",
+      "entity_type": "PERSON",
+      "start_pos": 4723,
+      "end_pos": 4727
+    },
+    {
+      "entity_text": "Centre Formavenir Atlantique",
+      "entity_type": "ORG",
+      "start_pos": 4742,
+      "end_pos": 4770
+    },
+    {
+      "entity_text": "Atlantique",
+      "entity_type": "LOCATION",
+      "start_pos": 4760,
+      "end_pos": 4770
+    },
+    {
+      "entity_text": "OPCO 2i",
+      "entity_type": "ORG",
+      "start_pos": 4948,
+      "end_pos": 4955
+    },
+    {
+      "entity_text": "MecaFluide Ouest",
+      "entity_type": "ORG",
+      "start_pos": 4981,
+      "end_pos": 4997
+    },
+    {
+      "entity_text": "Ouest",
+      "entity_type": "LOCATION",
+      "start_pos": 4992,
+      "end_pos": 4997
+    },
+    {
+      "entity_text": "Rennes",
+      "entity_type": "LOCATION",
+      "start_pos": 5012,
+      "end_pos": 5018
+    },
+    {
+      "entity_text": "Maud Lorian",
+      "entity_type": "PERSON",
+      "start_pos": 5102,
+      "end_pos": 5113
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 5146,
+      "end_pos": 5152
+    },
+    {
+      "entity_text": "Chronopost",
+      "entity_type": "ORG",
+      "start_pos": 5209,
+      "end_pos": 5219
+    },
+    {
+      "entity_text": "Saint-Herblain",
+      "entity_type": "LOCATION",
+      "start_pos": 5222,
+      "end_pos": 5236
+    },
+    {
+      "entity_text": "Claire Bessadet",
+      "entity_type": "PERSON",
+      "start_pos": 5263,
+      "end_pos": 5278
+    },
+    {
+      "entity_text": "Centre Formavenir Atlantique",
+      "entity_type": "ORG",
+      "start_pos": 5281,
+      "end_pos": 5309
+    },
+    {
+      "entity_text": "Atlantique",
+      "entity_type": "LOCATION",
+      "start_pos": 5299,
+      "end_pos": 5309
+    }
+  ]
+}

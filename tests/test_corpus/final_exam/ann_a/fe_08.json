@@ -1,0 +1,611 @@
+{
+  "document_name": "fe_08.txt",
+  "entities": [
+    {
+      "entity_text": "PORTAZUR MANUTENTION SAS",
+      "entity_type": "ORG",
+      "start_pos": 0,
+      "end_pos": 24
+    },
+    {
+      "entity_text": "rue des Bassins Secs",
+      "entity_type": "LOCATION",
+      "start_pos": 28,
+      "end_pos": 48
+    },
+    {
+      "entity_text": "Marseille",
+      "entity_type": "LOCATION",
+      "start_pos": 56,
+      "end_pos": 65
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 67,
+      "end_pos": 73
+    },
+    {
+      "entity_text": "PortAzur Manutention SAS",
+      "entity_type": "ORG",
+      "start_pos": 231,
+      "end_pos": 255
+    },
+    {
+      "entity_text": "Marseille",
+      "entity_type": "LOCATION",
+      "start_pos": 280,
+      "end_pos": 289
+    },
+    {
+      "entity_text": "rue des Bassins Secs",
+      "entity_type": "LOCATION",
+      "start_pos": 337,
+      "end_pos": 357
+    },
+    {
+      "entity_text": "Marseille",
+      "entity_type": "LOCATION",
+      "start_pos": 365,
+      "end_pos": 374
+    },
+    {
+      "entity_text": "France",
+      "entity_type": "LOCATION",
+      "start_pos": 376,
+      "end_pos": 382
+    },
+    {
+      "entity_text": "Claire MAVRIAN",
+      "entity_type": "PERSON",
+      "start_pos": 404,
+      "end_pos": 418
+    },
+    {
+      "entity_text": "Nadir BELKACEM",
+      "entity_type": "PERSON",
+      "start_pos": 434,
+      "end_pos": 448
+    },
+    {
+      "entity_text": "Marévia Shipping Espagne",
+      "entity_type": "ORG",
+      "start_pos": 487,
+      "end_pos": 511
+    },
+    {
+      "entity_text": "Espagne",
+      "entity_type": "LOCATION",
+      "start_pos": 504,
+      "end_pos": 511
+    },
+    {
+      "entity_text": "Compagnie Marévia Holding",
+      "entity_type": "ORG",
+      "start_pos": 549,
+      "end_pos": 574
+    },
+    {
+      "entity_text": "Calle Muelle\nNorte",
+      "entity_type": "LOCATION",
+      "start_pos": 600,
+      "end_pos": 618
+    },
+    {
+      "entity_text": "Valencia",
+      "entity_type": "LOCATION",
+      "start_pos": 629,
+      "end_pos": 637
+    },
+    {
+      "entity_text": "Espagne",
+      "entity_type": "LOCATION",
+      "start_pos": 639,
+      "end_pos": 646
+    },
+    {
+      "entity_text": "Inès\nSANTORO",
+      "entity_type": "PERSON",
+      "start_pos": 668,
+      "end_pos": 680
+    },
+    {
+      "entity_text": "Rafael OTERO",
+      "entity_type": "PERSON",
+      "start_pos": 718,
+      "end_pos": 730
+    },
+    {
+      "entity_text": "Marseille",
+      "entity_type": "LOCATION",
+      "start_pos": 813,
+      "end_pos": 822
+    },
+    {
+      "entity_text": "Valencia",
+      "entity_type": "LOCATION",
+      "start_pos": 824,
+      "end_pos": 832
+    },
+    {
+      "entity_text": "Tanger Med",
+      "entity_type": "LOCATION",
+      "start_pos": 861,
+      "end_pos": 871
+    },
+    {
+      "entity_text": "Maroc",
+      "entity_type": "LOCATION",
+      "start_pos": 873,
+      "end_pos": 878
+    },
+    {
+      "entity_text": "Marévia Shipping Espagne",
+      "entity_type": "ORG",
+      "start_pos": 941,
+      "end_pos": 965
+    },
+    {
+      "entity_text": "Espagne",
+      "entity_type": "LOCATION",
+      "start_pos": 958,
+      "end_pos": 965
+    },
+    {
+      "entity_text": "Marseille",
+      "entity_type": "LOCATION",
+      "start_pos": 1137,
+      "end_pos": 1146
+    },
+    {
+      "entity_text": "Rotterdam",
+      "entity_type": "LOCATION",
+      "start_pos": 1221,
+      "end_pos": 1230
+    },
+    {
+      "entity_text": "Pays-Bas",
+      "entity_type": "LOCATION",
+      "start_pos": 1232,
+      "end_pos": 1240
+    },
+    {
+      "entity_text": "PortAzur Manutention SAS",
+      "entity_type": "ORG",
+      "start_pos": 1269,
+      "end_pos": 1293
+    },
+    {
+      "entity_text": "Douanes françaises",
+      "entity_type": "ORG",
+      "start_pos": 1405,
+      "end_pos": 1423
+    },
+    {
+      "entity_text": "SIVEP Marseille Port",
+      "entity_type": "ORG",
+      "start_pos": 1471,
+      "end_pos": 1491
+    },
+    {
+      "entity_text": "Marseille",
+      "entity_type": "LOCATION",
+      "start_pos": 1477,
+      "end_pos": 1486
+    },
+    {
+      "entity_text": "Liora BENATTAR",
+      "entity_type": "PERSON",
+      "start_pos": 1497,
+      "end_pos": 1511
+    },
+    {
+      "entity_text": "Claire MAVRIAN",
+      "entity_type": "PERSON",
+      "start_pos": 1784,
+      "end_pos": 1798
+    },
+    {
+      "entity_text": "PortAzur Manutention SAS",
+      "entity_type": "ORG",
+      "start_pos": 1811,
+      "end_pos": 1835
+    },
+    {
+      "entity_text": "Nadir BELKACEM",
+      "entity_type": "PERSON",
+      "start_pos": 1857,
+      "end_pos": 1871
+    },
+    {
+      "entity_text": "PortAzur Manutention SAS",
+      "entity_type": "ORG",
+      "start_pos": 1884,
+      "end_pos": 1908
+    },
+    {
+      "entity_text": "Inès SANTORO",
+      "entity_type": "PERSON",
+      "start_pos": 1999,
+      "end_pos": 2011
+    },
+    {
+      "entity_text": "Marévia Shipping Espagne",
+      "entity_type": "ORG",
+      "start_pos": 2026,
+      "end_pos": 2050
+    },
+    {
+      "entity_text": "Espagne",
+      "entity_type": "LOCATION",
+      "start_pos": 2043,
+      "end_pos": 2050
+    },
+    {
+      "entity_text": "Rafael OTERO",
+      "entity_type": "PERSON",
+      "start_pos": 2074,
+      "end_pos": 2086
+    },
+    {
+      "entity_text": "Marévia Shipping Espagne",
+      "entity_type": "ORG",
+      "start_pos": 2101,
+      "end_pos": 2125
+    },
+    {
+      "entity_text": "Espagne",
+      "entity_type": "LOCATION",
+      "start_pos": 2118,
+      "end_pos": 2125
+    },
+    {
+      "entity_text": "Samir EL HADDANI",
+      "entity_type": "PERSON",
+      "start_pos": 2216,
+      "end_pos": 2232
+    },
+    {
+      "entity_text": "Marévia Shipping Maroc",
+      "entity_type": "ORG",
+      "start_pos": 2243,
+      "end_pos": 2265
+    },
+    {
+      "entity_text": "Maroc",
+      "entity_type": "LOCATION",
+      "start_pos": 2260,
+      "end_pos": 2265
+    },
+    {
+      "entity_text": "Marta VELASCO",
+      "entity_type": "PERSON",
+      "start_pos": 2292,
+      "end_pos": 2305
+    },
+    {
+      "entity_text": "Compagnie Marévia Holding",
+      "entity_type": "ORG",
+      "start_pos": 2319,
+      "end_pos": 2344
+    },
+    {
+      "entity_text": "Rafael OTERO",
+      "entity_type": "PERSON",
+      "start_pos": 2460,
+      "end_pos": 2472
+    },
+    {
+      "entity_text": "Espagne",
+      "entity_type": "LOCATION",
+      "start_pos": 2539,
+      "end_pos": 2546
+    },
+    {
+      "entity_text": "Marévia Shipping\nEspagne",
+      "entity_type": "ORG",
+      "start_pos": 2550,
+      "end_pos": 2574
+    },
+    {
+      "entity_text": "Espagne",
+      "entity_type": "LOCATION",
+      "start_pos": 2567,
+      "end_pos": 2574
+    },
+    {
+      "entity_text": "Inès\nSANTORO",
+      "entity_type": "PERSON",
+      "start_pos": 2624,
+      "end_pos": 2636
+    },
+    {
+      "entity_text": "Marseille",
+      "entity_type": "LOCATION",
+      "start_pos": 2969,
+      "end_pos": 2978
+    },
+    {
+      "entity_text": "Hambourg",
+      "entity_type": "LOCATION",
+      "start_pos": 3039,
+      "end_pos": 3047
+    },
+    {
+      "entity_text": "Allemagne",
+      "entity_type": "LOCATION",
+      "start_pos": 3049,
+      "end_pos": 3058
+    },
+    {
+      "entity_text": "Gênes",
+      "entity_type": "LOCATION",
+      "start_pos": 3070,
+      "end_pos": 3075
+    },
+    {
+      "entity_text": "Italie",
+      "entity_type": "LOCATION",
+      "start_pos": 3077,
+      "end_pos": 3083
+    },
+    {
+      "entity_text": "PortAzur Manutention SAS",
+      "entity_type": "ORG",
+      "start_pos": 3150,
+      "end_pos": 3174
+    },
+    {
+      "entity_text": "Marévia Shipping Espagne",
+      "entity_type": "ORG",
+      "start_pos": 3220,
+      "end_pos": 3244
+    },
+    {
+      "entity_text": "Espagne",
+      "entity_type": "LOCATION",
+      "start_pos": 3237,
+      "end_pos": 3244
+    },
+    {
+      "entity_text": "Calle Muelle Norte",
+      "entity_type": "LOCATION",
+      "start_pos": 3259,
+      "end_pos": 3277
+    },
+    {
+      "entity_text": "Valencia",
+      "entity_type": "LOCATION",
+      "start_pos": 3288,
+      "end_pos": 3296
+    },
+    {
+      "entity_text": "Espagne",
+      "entity_type": "LOCATION",
+      "start_pos": 3298,
+      "end_pos": 3305
+    },
+    {
+      "entity_text": "Banque Populaire Méditerranée",
+      "entity_type": "ORG",
+      "start_pos": 3427,
+      "end_pos": 3456
+    },
+    {
+      "entity_text": "PortAzur Manutention SAS",
+      "entity_type": "ORG",
+      "start_pos": 3568,
+      "end_pos": 3592
+    },
+    {
+      "entity_text": "Météo-France",
+      "entity_type": "ORG",
+      "start_pos": 3766,
+      "end_pos": 3778
+    },
+    {
+      "entity_text": "Inès SANTORO",
+      "entity_type": "PERSON",
+      "start_pos": 3830,
+      "end_pos": 3842
+    },
+    {
+      "entity_text": "Nadir BELKACEM",
+      "entity_type": "PERSON",
+      "start_pos": 3852,
+      "end_pos": 3866
+    },
+    {
+      "entity_text": "Douanes françaises",
+      "entity_type": "ORG",
+      "start_pos": 4100,
+      "end_pos": 4118
+    },
+    {
+      "entity_text": "Tanger Med",
+      "entity_type": "LOCATION",
+      "start_pos": 4146,
+      "end_pos": 4156
+    },
+    {
+      "entity_text": "Maroc",
+      "entity_type": "LOCATION",
+      "start_pos": 4158,
+      "end_pos": 4163
+    },
+    {
+      "entity_text": "Samir EL HADDANI",
+      "entity_type": "PERSON",
+      "start_pos": 4165,
+      "end_pos": 4181
+    },
+    {
+      "entity_text": "PortAzur Manutention SAS",
+      "entity_type": "ORG",
+      "start_pos": 4254,
+      "end_pos": 4278
+    },
+    {
+      "entity_text": "Claire MAVRIAN",
+      "entity_type": "PERSON",
+      "start_pos": 4505,
+      "end_pos": 4519
+    },
+    {
+      "entity_text": "Inès SANTORO",
+      "entity_type": "PERSON",
+      "start_pos": 4521,
+      "end_pos": 4533
+    },
+    {
+      "entity_text": "Rafael OTERO",
+      "entity_type": "PERSON",
+      "start_pos": 4535,
+      "end_pos": 4547
+    },
+    {
+      "entity_text": "Liora BENATTAR",
+      "entity_type": "PERSON",
+      "start_pos": 4551,
+      "end_pos": 4565
+    },
+    {
+      "entity_text": "PortAzur Manutention SAS",
+      "entity_type": "ORG",
+      "start_pos": 4693,
+      "end_pos": 4717
+    },
+    {
+      "entity_text": "Marévia Shipping Espagne",
+      "entity_type": "ORG",
+      "start_pos": 4761,
+      "end_pos": 4785
+    },
+    {
+      "entity_text": "Espagne",
+      "entity_type": "LOCATION",
+      "start_pos": 4778,
+      "end_pos": 4785
+    },
+    {
+      "entity_text": "Claire MAVRIAN",
+      "entity_type": "PERSON",
+      "start_pos": 5113,
+      "end_pos": 5127
+    },
+    {
+      "entity_text": "Marta\nVELASCO",
+      "entity_type": "PERSON",
+      "start_pos": 5134,
+      "end_pos": 5147
+    },
+    {
+      "entity_text": "Marseille",
+      "entity_type": "LOCATION",
+      "start_pos": 5244,
+      "end_pos": 5253
+    },
+    {
+      "entity_text": "Marseille",
+      "entity_type": "LOCATION",
+      "start_pos": 5367,
+      "end_pos": 5376
+    },
+    {
+      "entity_text": "PortAzur Manutention SAS",
+      "entity_type": "ORG",
+      "start_pos": 5451,
+      "end_pos": 5475
+    },
+    {
+      "entity_text": "Claire MAVRIAN",
+      "entity_type": "PERSON",
+      "start_pos": 5476,
+      "end_pos": 5490
+    },
+    {
+      "entity_text": "Nadir BELKACEM",
+      "entity_type": "PERSON",
+      "start_pos": 5547,
+      "end_pos": 5561
+    },
+    {
+      "entity_text": "Marévia Shipping Espagne",
+      "entity_type": "ORG",
+      "start_pos": 5619,
+      "end_pos": 5643
+    },
+    {
+      "entity_text": "Espagne",
+      "entity_type": "LOCATION",
+      "start_pos": 5636,
+      "end_pos": 5643
+    },
+    {
+      "entity_text": "Inès SANTORO",
+      "entity_type": "PERSON",
+      "start_pos": 5644,
+      "end_pos": 5656
+    },
+    {
+      "entity_text": "Marévia Shipping Espagne",
+      "entity_type": "ORG",
+      "start_pos": 5730,
+      "end_pos": 5754
+    },
+    {
+      "entity_text": "Espagne",
+      "entity_type": "LOCATION",
+      "start_pos": 5747,
+      "end_pos": 5754
+    },
+    {
+      "entity_text": "Calle Muelle Norte",
+      "entity_type": "LOCATION",
+      "start_pos": 5755,
+      "end_pos": 5773
+    },
+    {
+      "entity_text": "Valencia",
+      "entity_type": "LOCATION",
+      "start_pos": 5783,
+      "end_pos": 5791
+    },
+    {
+      "entity_text": "Espagne",
+      "entity_type": "LOCATION",
+      "start_pos": 5792,
+      "end_pos": 5799
+    },
+    {
+      "entity_text": "Compagnie Marévia Holding Europe",
+      "entity_type": "ORG",
+      "start_pos": 5837,
+      "end_pos": 5869
+    },
+    {
+      "entity_text": "Europe",
+      "entity_type": "LOCATION",
+      "start_pos": 5863,
+      "end_pos": 5869
+    },
+    {
+      "entity_text": "Marévia Shipping Maroc",
+      "entity_type": "ORG",
+      "start_pos": 5873,
+      "end_pos": 5895
+    },
+    {
+      "entity_text": "Maroc",
+      "entity_type": "LOCATION",
+      "start_pos": 5890,
+      "end_pos": 5895
+    },
+    {
+      "entity_text": "PortAzur",
+      "entity_type": "ORG",
+      "start_pos": 5915,
+      "end_pos": 5923
+    }
+  ]
+}

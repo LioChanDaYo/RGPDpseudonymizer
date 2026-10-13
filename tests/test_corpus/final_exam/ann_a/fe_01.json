@@ -1,0 +1,695 @@
+{
+  "document_name": "fe_01.txt",
+  "entities": [
+    {
+      "entity_text": "Soraya Bendriss",
+      "entity_type": "PERSON",
+      "start_pos": 5,
+      "end_pos": 20
+    },
+    {
+      "entity_text": "Claire de Vautrin",
+      "entity_type": "PERSON",
+      "start_pos": 95,
+      "end_pos": 112
+    },
+    {
+      "entity_text": "Malik van den Broeck",
+      "entity_type": "PERSON",
+      "start_pos": 149,
+      "end_pos": 169
+    },
+    {
+      "entity_text": "ANEM",
+      "entity_type": "ORG",
+      "start_pos": 229,
+      "end_pos": 233
+    },
+    {
+      "entity_text": "HDC",
+      "entity_type": "ORG",
+      "start_pos": 258,
+      "end_pos": 261
+    },
+    {
+      "entity_text": "Lille",
+      "entity_type": "LOCATION",
+      "start_pos": 328,
+      "end_pos": 333
+    },
+    {
+      "entity_text": "Claire",
+      "entity_type": "PERSON",
+      "start_pos": 343,
+      "end_pos": 349
+    },
+    {
+      "entity_text": "Malik",
+      "entity_type": "PERSON",
+      "start_pos": 359,
+      "end_pos": 364
+    },
+    {
+      "entity_text": "Lila Kermadi",
+      "entity_type": "PERSON",
+      "start_pos": 396,
+      "end_pos": 408
+    },
+    {
+      "entity_text": "Lille",
+      "entity_type": "LOCATION",
+      "start_pos": 448,
+      "end_pos": 453
+    },
+    {
+      "entity_text": "Roubaix",
+      "entity_type": "LOCATION",
+      "start_pos": 665,
+      "end_pos": 672
+    },
+    {
+      "entity_text": "Lille",
+      "entity_type": "LOCATION",
+      "start_pos": 838,
+      "end_pos": 843
+    },
+    {
+      "entity_text": "Kermadi",
+      "entity_type": "PERSON",
+      "start_pos": 854,
+      "end_pos": 861
+    },
+    {
+      "entity_text": "Lille",
+      "entity_type": "LOCATION",
+      "start_pos": 916,
+      "end_pos": 921
+    },
+    {
+      "entity_text": "H. da Costa",
+      "entity_type": "PERSON",
+      "start_pos": 928,
+      "end_pos": 939
+    },
+    {
+      "entity_text": "ANEM",
+      "entity_type": "ORG",
+      "start_pos": 941,
+      "end_pos": 945
+    },
+    {
+      "entity_text": "Roubaix",
+      "entity_type": "LOCATION",
+      "start_pos": 989,
+      "end_pos": 996
+    },
+    {
+      "entity_text": "Lille",
+      "entity_type": "LOCATION",
+      "start_pos": 1063,
+      "end_pos": 1068
+    },
+    {
+      "entity_text": "Le Guen",
+      "entity_type": "PERSON",
+      "start_pos": 1078,
+      "end_pos": 1085
+    },
+    {
+      "entity_text": "Lille",
+      "entity_type": "LOCATION",
+      "start_pos": 1124,
+      "end_pos": 1129
+    },
+    {
+      "entity_text": "Hauts-de-France",
+      "entity_type": "LOCATION",
+      "start_pos": 1131,
+      "end_pos": 1146
+    },
+    {
+      "entity_text": "ANEM",
+      "entity_type": "ORG",
+      "start_pos": 1150,
+      "end_pos": 1154
+    },
+    {
+      "entity_text": "Malik",
+      "entity_type": "PERSON",
+      "start_pos": 1192,
+      "end_pos": 1197
+    },
+    {
+      "entity_text": "Hugo da Costa",
+      "entity_type": "PERSON",
+      "start_pos": 1228,
+      "end_pos": 1241
+    },
+    {
+      "entity_text": "Claire",
+      "entity_type": "PERSON",
+      "start_pos": 1264,
+      "end_pos": 1270
+    },
+    {
+      "entity_text": "Soraya BENDRISS",
+      "entity_type": "PERSON",
+      "start_pos": 1341,
+      "end_pos": 1356
+    },
+    {
+      "entity_text": "Office Habitat du Canal",
+      "entity_type": "ORG",
+      "start_pos": 1385,
+      "end_pos": 1408
+    },
+    {
+      "entity_text": "Lille",
+      "entity_type": "LOCATION",
+      "start_pos": 1434,
+      "end_pos": 1439
+    },
+    {
+      "entity_text": "Claire de Vautrin",
+      "entity_type": "PERSON",
+      "start_pos": 1519,
+      "end_pos": 1536
+    },
+    {
+      "entity_text": "Soraya Bendriss",
+      "entity_type": "PERSON",
+      "start_pos": 1608,
+      "end_pos": 1623
+    },
+    {
+      "entity_text": "Nora Halimi",
+      "entity_type": "PERSON",
+      "start_pos": 1633,
+      "end_pos": 1644
+    },
+    {
+      "entity_text": "Malik van den Broeck",
+      "entity_type": "PERSON",
+      "start_pos": 1650,
+      "end_pos": 1670
+    },
+    {
+      "entity_text": "de Vautrin",
+      "entity_type": "PERSON",
+      "start_pos": 1727,
+      "end_pos": 1737
+    },
+    {
+      "entity_text": "Lille",
+      "entity_type": "LOCATION",
+      "start_pos": 1753,
+      "end_pos": 1758
+    },
+    {
+      "entity_text": "Kermadi",
+      "entity_type": "PERSON",
+      "start_pos": 1804,
+      "end_pos": 1811
+    },
+    {
+      "entity_text": "MEL",
+      "entity_type": "ORG",
+      "start_pos": 1896,
+      "end_pos": 1899
+    },
+    {
+      "entity_text": "Nora HALIMI",
+      "entity_type": "PERSON",
+      "start_pos": 1958,
+      "end_pos": 1969
+    },
+    {
+      "entity_text": "Office Habitat du Canal",
+      "entity_type": "ORG",
+      "start_pos": 1976,
+      "end_pos": 1999
+    },
+    {
+      "entity_text": "Lille",
+      "entity_type": "LOCATION",
+      "start_pos": 2032,
+      "end_pos": 2037
+    },
+    {
+      "entity_text": "Roubaix",
+      "entity_type": "LOCATION",
+      "start_pos": 2040,
+      "end_pos": 2047
+    },
+    {
+      "entity_text": "Tourcoing",
+      "entity_type": "LOCATION",
+      "start_pos": 2050,
+      "end_pos": 2059
+    },
+    {
+      "entity_text": "Mairie de Lille",
+      "entity_type": "ORG",
+      "start_pos": 2086,
+      "end_pos": 2101
+    },
+    {
+      "entity_text": "Lille",
+      "entity_type": "LOCATION",
+      "start_pos": 2096,
+      "end_pos": 2101
+    },
+    {
+      "entity_text": "Halimi",
+      "entity_type": "PERSON",
+      "start_pos": 2284,
+      "end_pos": 2290
+    },
+    {
+      "entity_text": "Lila",
+      "entity_type": "PERSON",
+      "start_pos": 2357,
+      "end_pos": 2361
+    },
+    {
+      "entity_text": "Kermadi",
+      "entity_type": "PERSON",
+      "start_pos": 2364,
+      "end_pos": 2371
+    },
+    {
+      "entity_text": "Lille",
+      "entity_type": "LOCATION",
+      "start_pos": 2404,
+      "end_pos": 2409
+    },
+    {
+      "entity_text": "Office Habitat du Canal",
+      "entity_type": "ORG",
+      "start_pos": 2443,
+      "end_pos": 2466
+    },
+    {
+      "entity_text": "Ateliers Nord-Est Maintenance",
+      "entity_type": "ORG",
+      "start_pos": 2470,
+      "end_pos": 2499
+    },
+    {
+      "entity_text": "Mairie de Lille",
+      "entity_type": "ORG",
+      "start_pos": 2562,
+      "end_pos": 2577
+    },
+    {
+      "entity_text": "Lille",
+      "entity_type": "LOCATION",
+      "start_pos": 2572,
+      "end_pos": 2577
+    },
+    {
+      "entity_text": "Malik van den Broeck",
+      "entity_type": "PERSON",
+      "start_pos": 2613,
+      "end_pos": 2633
+    },
+    {
+      "entity_text": "Soraya Bendriss",
+      "entity_type": "PERSON",
+      "start_pos": 2702,
+      "end_pos": 2717
+    },
+    {
+      "entity_text": "Claire de Vautrin",
+      "entity_type": "PERSON",
+      "start_pos": 2719,
+      "end_pos": 2736
+    },
+    {
+      "entity_text": "ANEM",
+      "entity_type": "ORG",
+      "start_pos": 2742,
+      "end_pos": 2746
+    },
+    {
+      "entity_text": "Claire de Vautrin",
+      "entity_type": "PERSON",
+      "start_pos": 2794,
+      "end_pos": 2811
+    },
+    {
+      "entity_text": "Lille",
+      "entity_type": "LOCATION",
+      "start_pos": 2878,
+      "end_pos": 2883
+    },
+    {
+      "entity_text": "Soraya",
+      "entity_type": "PERSON",
+      "start_pos": 2893,
+      "end_pos": 2899
+    },
+    {
+      "entity_text": "ANEM",
+      "entity_type": "ORG",
+      "start_pos": 2919,
+      "end_pos": 2923
+    },
+    {
+      "entity_text": "Hugo da Costa",
+      "entity_type": "PERSON",
+      "start_pos": 2938,
+      "end_pos": 2951
+    },
+    {
+      "entity_text": "Roubaix",
+      "entity_type": "LOCATION",
+      "start_pos": 3112,
+      "end_pos": 3119
+    },
+    {
+      "entity_text": "Teresa van der Laan",
+      "entity_type": "PERSON",
+      "start_pos": 3167,
+      "end_pos": 3186
+    },
+    {
+      "entity_text": "Ateliers Nord-Est Maintenance",
+      "entity_type": "ORG",
+      "start_pos": 3219,
+      "end_pos": 3248
+    },
+    {
+      "entity_text": "Malik",
+      "entity_type": "PERSON",
+      "start_pos": 3301,
+      "end_pos": 3306
+    },
+    {
+      "entity_text": "Hugo da Costa",
+      "entity_type": "PERSON",
+      "start_pos": 3337,
+      "end_pos": 3350
+    },
+    {
+      "entity_text": "Claire",
+      "entity_type": "PERSON",
+      "start_pos": 3375,
+      "end_pos": 3381
+    },
+    {
+      "entity_text": "Soraya",
+      "entity_type": "PERSON",
+      "start_pos": 3458,
+      "end_pos": 3464
+    },
+    {
+      "entity_text": "ANEM",
+      "entity_type": "ORG",
+      "start_pos": 3516,
+      "end_pos": 3520
+    },
+    {
+      "entity_text": "Lille",
+      "entity_type": "LOCATION",
+      "start_pos": 3523,
+      "end_pos": 3528
+    },
+    {
+      "entity_text": "Kermadi",
+      "entity_type": "PERSON",
+      "start_pos": 3578,
+      "end_pos": 3585
+    },
+    {
+      "entity_text": "Lille",
+      "entity_type": "LOCATION",
+      "start_pos": 3662,
+      "end_pos": 3667
+    },
+    {
+      "entity_text": "Malik VAN DEN BROECK",
+      "entity_type": "PERSON",
+      "start_pos": 3689,
+      "end_pos": 3709
+    },
+    {
+      "entity_text": "Lille",
+      "entity_type": "LOCATION",
+      "start_pos": 3735,
+      "end_pos": 3740
+    },
+    {
+      "entity_text": "Office Habitat du Canal",
+      "entity_type": "ORG",
+      "start_pos": 3745,
+      "end_pos": 3768
+    },
+    {
+      "entity_text": "Lille",
+      "entity_type": "LOCATION",
+      "start_pos": 3811,
+      "end_pos": 3816
+    },
+    {
+      "entity_text": "Teresa van der Laan",
+      "entity_type": "PERSON",
+      "start_pos": 3864,
+      "end_pos": 3883
+    },
+    {
+      "entity_text": "Malik van den Broeck",
+      "entity_type": "PERSON",
+      "start_pos": 3956,
+      "end_pos": 3976
+    },
+    {
+      "entity_text": "Soraya Bendriss",
+      "entity_type": "PERSON",
+      "start_pos": 3978,
+      "end_pos": 3993
+    },
+    {
+      "entity_text": "Claire de Vautrin",
+      "entity_type": "PERSON",
+      "start_pos": 3999,
+      "end_pos": 4016
+    },
+    {
+      "entity_text": "Malik",
+      "entity_type": "PERSON",
+      "start_pos": 4105,
+      "end_pos": 4110
+    },
+    {
+      "entity_text": "Soraya",
+      "entity_type": "PERSON",
+      "start_pos": 4120,
+      "end_pos": 4126
+    },
+    {
+      "entity_text": "Hugo da Costa",
+      "entity_type": "PERSON",
+      "start_pos": 4153,
+      "end_pos": 4166
+    },
+    {
+      "entity_text": "Samir Bouziane",
+      "entity_type": "PERSON",
+      "start_pos": 4170,
+      "end_pos": 4184
+    },
+    {
+      "entity_text": "Lille",
+      "entity_type": "LOCATION",
+      "start_pos": 4293,
+      "end_pos": 4298
+    },
+    {
+      "entity_text": "Kermadi",
+      "entity_type": "PERSON",
+      "start_pos": 4320,
+      "end_pos": 4327
+    },
+    {
+      "entity_text": "ANEM",
+      "entity_type": "ORG",
+      "start_pos": 4437,
+      "end_pos": 4441
+    },
+    {
+      "entity_text": "Lille",
+      "entity_type": "LOCATION",
+      "start_pos": 4540,
+      "end_pos": 4545
+    },
+    {
+      "entity_text": "Fernand Le Guen",
+      "entity_type": "PERSON",
+      "start_pos": 4566,
+      "end_pos": 4581
+    },
+    {
+      "entity_text": "Teresa VAN DER LAAN",
+      "entity_type": "PERSON",
+      "start_pos": 4599,
+      "end_pos": 4618
+    },
+    {
+      "entity_text": "Ateliers Nord-Est Maintenance",
+      "entity_type": "ORG",
+      "start_pos": 4625,
+      "end_pos": 4654
+    },
+    {
+      "entity_text": "Hauts-de-France",
+      "entity_type": "LOCATION",
+      "start_pos": 4662,
+      "end_pos": 4677
+    },
+    {
+      "entity_text": "Roubaix",
+      "entity_type": "LOCATION",
+      "start_pos": 4703,
+      "end_pos": 4710
+    },
+    {
+      "entity_text": "Claire de Vautrin",
+      "entity_type": "PERSON",
+      "start_pos": 4760,
+      "end_pos": 4777
+    },
+    {
+      "entity_text": "Teresa van der Laan",
+      "entity_type": "PERSON",
+      "start_pos": 4852,
+      "end_pos": 4871
+    },
+    {
+      "entity_text": "Malik van den Broeck",
+      "entity_type": "PERSON",
+      "start_pos": 4873,
+      "end_pos": 4893
+    },
+    {
+      "entity_text": "Soraya Bendriss",
+      "entity_type": "PERSON",
+      "start_pos": 4895,
+      "end_pos": 4910
+    },
+    {
+      "entity_text": "Nora Halimi",
+      "entity_type": "PERSON",
+      "start_pos": 4920,
+      "end_pos": 4931
+    },
+    {
+      "entity_text": "HDC",
+      "entity_type": "ORG",
+      "start_pos": 4951,
+      "end_pos": 4954
+    },
+    {
+      "entity_text": "Teresa",
+      "entity_type": "PERSON",
+      "start_pos": 5020,
+      "end_pos": 5026
+    },
+    {
+      "entity_text": "Teresa",
+      "entity_type": "PERSON",
+      "start_pos": 5035,
+      "end_pos": 5041
+    },
+    {
+      "entity_text": "Malik",
+      "entity_type": "PERSON",
+      "start_pos": 5061,
+      "end_pos": 5066
+    },
+    {
+      "entity_text": "Soraya",
+      "entity_type": "PERSON",
+      "start_pos": 5133,
+      "end_pos": 5139
+    },
+    {
+      "entity_text": "Kermadi",
+      "entity_type": "PERSON",
+      "start_pos": 5187,
+      "end_pos": 5194
+    },
+    {
+      "entity_text": "Office Habitat du Canal",
+      "entity_type": "ORG",
+      "start_pos": 5275,
+      "end_pos": 5298
+    },
+    {
+      "entity_text": "HDC",
+      "entity_type": "ORG",
+      "start_pos": 5339,
+      "end_pos": 5342
+    },
+    {
+      "entity_text": "Ateliers Nord-Est Maintenance",
+      "entity_type": "ORG",
+      "start_pos": 5401,
+      "end_pos": 5430
+    },
+    {
+      "entity_text": "Nora Halimi",
+      "entity_type": "PERSON",
+      "start_pos": 5471,
+      "end_pos": 5482
+    },
+    {
+      "entity_text": "Claire DE VAUTRIN",
+      "entity_type": "PERSON",
+      "start_pos": 5529,
+      "end_pos": 5546
+    },
+    {
+      "entity_text": "Lille",
+      "entity_type": "LOCATION",
+      "start_pos": 5569,
+      "end_pos": 5574
+    },
+    {
+      "entity_text": "Office Habitat du Canal",
+      "entity_type": "ORG",
+      "start_pos": 5575,
+      "end_pos": 5598
+    },
+    {
+      "entity_text": "Lille",
+      "entity_type": "LOCATION",
+      "start_pos": 5624,
+      "end_pos": 5629
+    },
+    {
+      "entity_text": "Malik",
+      "entity_type": "PERSON",
+      "start_pos": 5641,
+      "end_pos": 5646
+    },
+    {
+      "entity_text": "Soraya",
+      "entity_type": "PERSON",
+      "start_pos": 5656,
+      "end_pos": 5662
+    },
+    {
+      "entity_text": "Hugo da Costa",
+      "entity_type": "PERSON",
+      "start_pos": 5690,
+      "end_pos": 5703
+    },
+    {
+      "entity_text": "Samir Bouziane",
+      "entity_type": "PERSON",
+      "start_pos": 5707,
+      "end_pos": 5721
+    }
+  ]
+}

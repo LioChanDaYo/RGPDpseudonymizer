@@ -1,0 +1,71 @@
+{
+  "document_name": "dummy_01.txt",
+  "entities": [
+    {
+      "entity_text": "Zorbalia Quentrel",
+      "entity_type": "PERSON",
+      "start_pos": 5,
+      "end_pos": 22
+    },
+    {
+      "entity_text": "Zorvane Quelbrix",
+      "entity_type": "PERSON",
+      "start_pos": 46,
+      "end_pos": 62
+    },
+    {
+      "entity_text": "Zorbaville",
+      "entity_type": "LOCATION",
+      "start_pos": 86,
+      "end_pos": 96
+    },
+    {
+      "entity_text": "Zorvane",
+      "entity_type": "ORG",
+      "start_pos": 106,
+      "end_pos": 113
+    },
+    {
+      "entity_text": "Quentrix SA",
+      "entity_type": "ORG",
+      "start_pos": 156,
+      "end_pos": 167
+    },
+    {
+      "entity_text": "Zorbaville",
+      "entity_type": "LOCATION",
+      "start_pos": 180,
+      "end_pos": 190
+    },
+    {
+      "entity_text": "Institut Zorbal",
+      "entity_type": "ORG",
+      "start_pos": 221,
+      "end_pos": 236
+    },
+    {
+      "entity_text": "Zorbalia",
+      "entity_type": "PERSON",
+      "start_pos": 253,
+      "end_pos": 261
+    },
+    {
+      "entity_text": "Quentrix SA",
+      "entity_type": "ORG",
+      "start_pos": 271,
+      "end_pos": 282
+    },
+    {
+      "entity_text": "Zorbaville",
+      "entity_type": "LOCATION",
+      "start_pos": 285,
+      "end_pos": 295
+    },
+    {
+      "entity_text": "Zorvane Quelbrix",
+      "entity_type": "PERSON",
+      "start_pos": 309,
+      "end_pos": 325
+    }
+  ]
+}

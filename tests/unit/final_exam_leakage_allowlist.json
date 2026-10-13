@@ -1,0 +1,633 @@
+{
+  "_comment": "Story 10.6 B11.2 (Lionel, 2026-10-13, \"ok, so allow then\"): (file path, sha256 of the normalized final-exam-only string) pairs that already occurred in gdpr_pseudonymizer/resources/** or tests/unit/** before the final exam was written (every file last changed on or before 2026-10-07; the exam was written on 2026-10-09). A listed hash in any other file still fails the guard. Additions need Lionel's recorded approval in the story that makes them.",
+  "entries": [
+    {
+      "path": "gdpr_pseudonymizer/resources/french_gender_lookup.json",
+      "sha256": "128fbd3431d2306cb83fa0c5c8467acc84c78325d7d9631d4382b450ad7fbb0c"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_gender_lookup.json",
+      "sha256": "1a30ed961f81b1d86bad52343c93e738d8844095491d3f2d7bbc022ccd6b9512"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_gender_lookup.json",
+      "sha256": "1a614fda1b9477d9caaa3d6a4eb41fdaafbc920ee6af3bbee1570b288f2765cf"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_gender_lookup.json",
+      "sha256": "1d78b370ad96e7a8091888d902360187bdea87ab6a4af003ec63c791894513ec"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_gender_lookup.json",
+      "sha256": "2063d112e46b326178d70cf7aba81fad42a8bcd8e096d765cb6af02809dde325"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_gender_lookup.json",
+      "sha256": "24964a2764be8975c0958a4fa05e4040f9f76adb6f50bb8e290349ecc31f7a5f"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_gender_lookup.json",
+      "sha256": "25d4824df60545545311648b993309da936607a8fe537f5dc10b3fb38da31aab"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_gender_lookup.json",
+      "sha256": "36bac2631d17463d569eaf1b869e7bf8d40e4636fd8b2b778ee93f504baf6691"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_gender_lookup.json",
+      "sha256": "397b0066107f06a1f9025849f51e5e9d13075bddd40945bbaf011bbe94e6b524"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_gender_lookup.json",
+      "sha256": "3d73ccc0fe196a3edcf4cf94e3ec3e227f31b44d3f9839ed8175f3d98d7da74b"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_gender_lookup.json",
+      "sha256": "3f56e90b04e7a4b50e3ec2446c13055e9cb1d0851c17c9ce8a52ea3ca76623cc"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_gender_lookup.json",
+      "sha256": "51fc178c3b35d5500b623576f1d834a57c6e10353f6c6d27cd8340020b2e30c5"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_gender_lookup.json",
+      "sha256": "7575d0327b769137d68c848dd62c8099fdba0277badb9e1a9eac76258068f3bb"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_gender_lookup.json",
+      "sha256": "7d1745355140118284866bde4685b699a4e3cbfa8efa7941665d2b6274a3dcbc"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_gender_lookup.json",
+      "sha256": "86846e84f9bfb2053a4823193843d22a0be24a75d304d6f8a2e4d2fac445efaa"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_gender_lookup.json",
+      "sha256": "8888451bd656c1ea2f40625bc84764a700c86da67683794e0cdd081f240fcde3"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_gender_lookup.json",
+      "sha256": "9b563ac174cfb399c256a983f7ec2fcbfc64f9d2c7e8848ed18934fa65b59e61"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_gender_lookup.json",
+      "sha256": "9d8d7dcb8f6d4d71ffc8277e4a8a4326c93da239cace375d47c4a35830b3e88b"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_gender_lookup.json",
+      "sha256": "9f9a47fe61845e5c14fc5462006fc2ec4ab4a2d1e7489241be0a82739080a074"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_gender_lookup.json",
+      "sha256": "b21ec07effd3fe307782e2a1782ae771e601b303cef1548723a76c539f98f383"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_gender_lookup.json",
+      "sha256": "b368cc4a188036222d3f234ba7cc978eef5ccaf2985e4f21c4a04a32e9c9ff11"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_gender_lookup.json",
+      "sha256": "b816a16cd03774e0cefac03765680a33365d0b16060f67a2f7382a844f9c664f"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_gender_lookup.json",
+      "sha256": "b90d33f2b12789d32691050a2083be28eb99985601a1f1a72efc9232e49306fd"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_gender_lookup.json",
+      "sha256": "bc371452ed8c6bfe3f59ade5dc1d47a2c4f9152cb8a4227a3b00f9ac4dfab938"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_gender_lookup.json",
+      "sha256": "cbbceb385d79d5777e7149d96542520ae39328a63cf88e3e7c7ca53cf3bd9b92"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_gender_lookup.json",
+      "sha256": "d0f9b0b26aff2fccd28c49f60a008fa99ab98fee5942815757bef94357f01a41"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_gender_lookup.json",
+      "sha256": "d3038f35f15e94aca0f00df12468ec7632a1a4a24bc7bb61d1e2d43d3481c0f1"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_gender_lookup.json",
+      "sha256": "e6ae6e617178aca2cc02db3a7d188a1722d63c5857d1d654aaeee91fd7e2ef7f"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_geography.json",
+      "sha256": "0582f4223d9a3c16a6506ff31ea3a750731b48a3fd8374729ea68db07fc5bab0"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_geography.json",
+      "sha256": "0d1198af3b8cc5fa56ff4053d6c3ae51edba97f9c4ca56b4086cc71dc356bb59"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_geography.json",
+      "sha256": "112132db2ab7bac2c596593ce743842db67850ce812fba85ab096f408ec58816"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_geography.json",
+      "sha256": "128fbd3431d2306cb83fa0c5c8467acc84c78325d7d9631d4382b450ad7fbb0c"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_geography.json",
+      "sha256": "1382dca91398a112777fe6ac3527c92fe97f2c74f58e7f5eee97c7ea5ca88e43"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_geography.json",
+      "sha256": "170c4efbf64c7f3d1c56da92912158149e48b34b645f8caf509e79c30b6f34a7"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_geography.json",
+      "sha256": "1d78b370ad96e7a8091888d902360187bdea87ab6a4af003ec63c791894513ec"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_geography.json",
+      "sha256": "2322f33ead6487fd01e1bc6abffbe0790172d8d1cd1cd0145502e9244a899d65"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_geography.json",
+      "sha256": "34e7b02c8b31ea720cf8c314e1ca3410745650bc11d3fb5d4e55048d4dda3c63"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_geography.json",
+      "sha256": "3bae9665d6c839d02d12bf5003240764596001c00dc9badd12a8e0d321978040"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_geography.json",
+      "sha256": "3d5c17def30d50d1bd9778a6e04e2c92eb6fa494e26721b5166e974c0a51b957"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_geography.json",
+      "sha256": "3fdc3f868211feff655385d6991b6d5bd63cc1f489f4f2492c8d271417655a11"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_geography.json",
+      "sha256": "42b5ff547e7fbcec7929111f05983c8c0aebb9ed0ecc1108af2cc5a6662f9cad"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_geography.json",
+      "sha256": "44ee84bd90db9a883c1bf712f20a11bf531a0c387ae91dd8f618ed538b435558"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_geography.json",
+      "sha256": "5866c2b724b0b31ad560b9e127ebcfc9b7169905f42da4a6fc988561acf07ff0"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_geography.json",
+      "sha256": "59d0b8d9f1c68d47bf660c02f8545b69cce3c4808e9af3ce2941d18f093d2386"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_geography.json",
+      "sha256": "68ebccb43088c35af1d1729dc60fc2f9dd5813ad3736dd051ab0f3fd97d48084"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_geography.json",
+      "sha256": "69b60601ca00d2b5a1f3dec125570a37db10b0a25a5657f42bee853265b745d9"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_geography.json",
+      "sha256": "72ffeed29436be9975e725623f807d16080deed397d62510abd79d7065fcb45d"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_geography.json",
+      "sha256": "773c29af0c78856da2a42454ba1414a964a9c2c0abddac0b7a2aaa3d8e382262"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_geography.json",
+      "sha256": "77be7863fbaea2525b83584c01230a961df124ca1c89a2fca8389818e2fc02d4"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_geography.json",
+      "sha256": "7a3bf8ab7de24b152d77e1967fd5a08f2e06c09c66726978d7525a22f0f5e3c5"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_geography.json",
+      "sha256": "7bbc8b3c094d0db88e5ff629a16aaef730fab058bcecd845e0780efc7b5ead23"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_geography.json",
+      "sha256": "7c513fab4c8c8889451e5776e9239f964fd7f121748aa3165af0c80823c43ebd"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_geography.json",
+      "sha256": "801208007b07061bb40a0efb01566a5aefef7c2a67bc21ba6a308ffe617e8016"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_geography.json",
+      "sha256": "8601d391dab7c59999c12c6ffbce94a4bf6f6a0c7080b969d1aa83a4bb4387a1"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_geography.json",
+      "sha256": "86af5bb9041be105efc5408baf3bf99cc52982485845fec17ceaf8417ada965f"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_geography.json",
+      "sha256": "883ad210ad216f64336f21b1d9ecc55de81de225d83a4eb9a322fca29c30b293"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_geography.json",
+      "sha256": "8888451bd656c1ea2f40625bc84764a700c86da67683794e0cdd081f240fcde3"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_geography.json",
+      "sha256": "8d1971c05981ec63499ec2edc03010ff50ebf9b6f9093ff9c76082c1806ae6ef"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_geography.json",
+      "sha256": "935c40f6105de33168897428fb71589f27ac287c3142fb5f3372a4661fa197e0"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_geography.json",
+      "sha256": "9aac0a37fa0197fd4b7301fb6c3354a0fa3bd7a39b5ca3de023fedfdbf728062"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_geography.json",
+      "sha256": "a2638d20c6338432b3d3c3ad68b1295900384be90f1e74ba91217ba2e02aba9e"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_geography.json",
+      "sha256": "bbd8cfcd79653592d7ff04452d627fbd3941403f3d6ce1387ccf39f93d329731"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_geography.json",
+      "sha256": "bed6a302d50827a75f13ce2c01733be4cdda0e773e9599a866ce17eb8f247677"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_geography.json",
+      "sha256": "c1143705b37c3d419473fc304a6b5f4f19105e807c95bca911951a8442318f08"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_geography.json",
+      "sha256": "cb5013a8ac58a2dec5fbb16a580af444ffe96a76791a38adf83c0854cddebe1e"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_geography.json",
+      "sha256": "cdc4addf6b70467d56c82469186d7927a596523a742795f06fb573dff9a95294"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_geography.json",
+      "sha256": "d41a0eca16d120cf75a61b0cc152d5b8c0f671ee25a541b591e7daa1b4b0a878"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_geography.json",
+      "sha256": "da6ce37647c07c94d44fe2a8e87d5f23a7f0badf391be2d001c120de5b5dd66c"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_geography.json",
+      "sha256": "e37b24a328cb4fc4ed148ddb6ba66234a302f81166f1b378a2a45ac1d925ba02"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_geography.json",
+      "sha256": "e48e8ff38d580394404f251af4d3ac2cf8eae84ebaf6b8b20c4fc0ae4501c9e0"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_geography.json",
+      "sha256": "eccc16ba6e898ed7ea91c1b46ef21b37ce34520906364c090bb7b9a3322a23cc"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_geography.json",
+      "sha256": "ed5b606fa5c5929231d0c302e792e7839f4cfef0ec76eb04f62098d25cb52ddd"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_geography.json",
+      "sha256": "ee407a4ccfbd73eb081e8b25c7282db8e832afb9902f8ba286ec96655cf65247"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_names.json",
+      "sha256": "128fbd3431d2306cb83fa0c5c8467acc84c78325d7d9631d4382b450ad7fbb0c"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_names.json",
+      "sha256": "1a30ed961f81b1d86bad52343c93e738d8844095491d3f2d7bbc022ccd6b9512"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_names.json",
+      "sha256": "1a614fda1b9477d9caaa3d6a4eb41fdaafbc920ee6af3bbee1570b288f2765cf"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_names.json",
+      "sha256": "2063d112e46b326178d70cf7aba81fad42a8bcd8e096d765cb6af02809dde325"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_names.json",
+      "sha256": "24964a2764be8975c0958a4fa05e4040f9f76adb6f50bb8e290349ecc31f7a5f"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_names.json",
+      "sha256": "25d4824df60545545311648b993309da936607a8fe537f5dc10b3fb38da31aab"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_names.json",
+      "sha256": "36bac2631d17463d569eaf1b869e7bf8d40e4636fd8b2b778ee93f504baf6691"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_names.json",
+      "sha256": "397b0066107f06a1f9025849f51e5e9d13075bddd40945bbaf011bbe94e6b524"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_names.json",
+      "sha256": "3d73ccc0fe196a3edcf4cf94e3ec3e227f31b44d3f9839ed8175f3d98d7da74b"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_names.json",
+      "sha256": "3f56e90b04e7a4b50e3ec2446c13055e9cb1d0851c17c9ce8a52ea3ca76623cc"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_names.json",
+      "sha256": "51fc178c3b35d5500b623576f1d834a57c6e10353f6c6d27cd8340020b2e30c5"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_names.json",
+      "sha256": "9b563ac174cfb399c256a983f7ec2fcbfc64f9d2c7e8848ed18934fa65b59e61"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_names.json",
+      "sha256": "9d8d7dcb8f6d4d71ffc8277e4a8a4326c93da239cace375d47c4a35830b3e88b"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_names.json",
+      "sha256": "9f9a47fe61845e5c14fc5462006fc2ec4ab4a2d1e7489241be0a82739080a074"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_names.json",
+      "sha256": "a40e6fbada36b39bedabbd91067e7d0598b160884901629625b2c487456729ee"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_names.json",
+      "sha256": "b368cc4a188036222d3f234ba7cc978eef5ccaf2985e4f21c4a04a32e9c9ff11"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_names.json",
+      "sha256": "b816a16cd03774e0cefac03765680a33365d0b16060f67a2f7382a844f9c664f"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_names.json",
+      "sha256": "b9d2c6aa83d3350c11166d1471babd770e46257ac9dcd7a475c846489b5349fd"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_names.json",
+      "sha256": "bc371452ed8c6bfe3f59ade5dc1d47a2c4f9152cb8a4227a3b00f9ac4dfab938"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_names.json",
+      "sha256": "cbbceb385d79d5777e7149d96542520ae39328a63cf88e3e7c7ca53cf3bd9b92"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_names.json",
+      "sha256": "d0f9b0b26aff2fccd28c49f60a008fa99ab98fee5942815757bef94357f01a41"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/french_names.json",
+      "sha256": "fd9cc338eb508e0cc470b5da4f8f080bae2cd2757da67e8c5db985ab7248c6b2"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/org_role_filter.yaml",
+      "sha256": "e47ce92812da61f50dcd7e695a5a74c5dfbd77f23820b544cd835057b82bc048"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/pseudonyms/neutral.json",
+      "sha256": "0582f4223d9a3c16a6506ff31ea3a750731b48a3fd8374729ea68db07fc5bab0"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/pseudonyms/neutral.json",
+      "sha256": "128fbd3431d2306cb83fa0c5c8467acc84c78325d7d9631d4382b450ad7fbb0c"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/pseudonyms/neutral.json",
+      "sha256": "1382dca91398a112777fe6ac3527c92fe97f2c74f58e7f5eee97c7ea5ca88e43"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/pseudonyms/neutral.json",
+      "sha256": "170c4efbf64c7f3d1c56da92912158149e48b34b645f8caf509e79c30b6f34a7"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/pseudonyms/neutral.json",
+      "sha256": "1a30ed961f81b1d86bad52343c93e738d8844095491d3f2d7bbc022ccd6b9512"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/pseudonyms/neutral.json",
+      "sha256": "1d78b370ad96e7a8091888d902360187bdea87ab6a4af003ec63c791894513ec"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/pseudonyms/neutral.json",
+      "sha256": "24964a2764be8975c0958a4fa05e4040f9f76adb6f50bb8e290349ecc31f7a5f"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/pseudonyms/neutral.json",
+      "sha256": "36bac2631d17463d569eaf1b869e7bf8d40e4636fd8b2b778ee93f504baf6691"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/pseudonyms/neutral.json",
+      "sha256": "397b0066107f06a1f9025849f51e5e9d13075bddd40945bbaf011bbe94e6b524"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/pseudonyms/neutral.json",
+      "sha256": "3bae9665d6c839d02d12bf5003240764596001c00dc9badd12a8e0d321978040"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/pseudonyms/neutral.json",
+      "sha256": "3d73ccc0fe196a3edcf4cf94e3ec3e227f31b44d3f9839ed8175f3d98d7da74b"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/pseudonyms/neutral.json",
+      "sha256": "3f56e90b04e7a4b50e3ec2446c13055e9cb1d0851c17c9ce8a52ea3ca76623cc"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/pseudonyms/neutral.json",
+      "sha256": "51fc178c3b35d5500b623576f1d834a57c6e10353f6c6d27cd8340020b2e30c5"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/pseudonyms/neutral.json",
+      "sha256": "5866c2b724b0b31ad560b9e127ebcfc9b7169905f42da4a6fc988561acf07ff0"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/pseudonyms/neutral.json",
+      "sha256": "59d0b8d9f1c68d47bf660c02f8545b69cce3c4808e9af3ce2941d18f093d2386"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/pseudonyms/neutral.json",
+      "sha256": "68ebccb43088c35af1d1729dc60fc2f9dd5813ad3736dd051ab0f3fd97d48084"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/pseudonyms/neutral.json",
+      "sha256": "69b60601ca00d2b5a1f3dec125570a37db10b0a25a5657f42bee853265b745d9"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/pseudonyms/neutral.json",
+      "sha256": "72ffeed29436be9975e725623f807d16080deed397d62510abd79d7065fcb45d"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/pseudonyms/neutral.json",
+      "sha256": "7575d0327b769137d68c848dd62c8099fdba0277badb9e1a9eac76258068f3bb"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/pseudonyms/neutral.json",
+      "sha256": "773c29af0c78856da2a42454ba1414a964a9c2c0abddac0b7a2aaa3d8e382262"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/pseudonyms/neutral.json",
+      "sha256": "77be7863fbaea2525b83584c01230a961df124ca1c89a2fca8389818e2fc02d4"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/pseudonyms/neutral.json",
+      "sha256": "7a6f216d4f776996b261874d28b458aa584a6c6a8f54d577e1d2e6d00233f893"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/pseudonyms/neutral.json",
+      "sha256": "7d1745355140118284866bde4685b699a4e3cbfa8efa7941665d2b6274a3dcbc"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/pseudonyms/neutral.json",
+      "sha256": "8601d391dab7c59999c12c6ffbce94a4bf6f6a0c7080b969d1aa83a4bb4387a1"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/pseudonyms/neutral.json",
+      "sha256": "86846e84f9bfb2053a4823193843d22a0be24a75d304d6f8a2e4d2fac445efaa"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/pseudonyms/neutral.json",
+      "sha256": "883ad210ad216f64336f21b1d9ecc55de81de225d83a4eb9a322fca29c30b293"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/pseudonyms/neutral.json",
+      "sha256": "8888451bd656c1ea2f40625bc84764a700c86da67683794e0cdd081f240fcde3"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/pseudonyms/neutral.json",
+      "sha256": "95cea38877faa28b7968954cff4ec353ad782e4b35544cf4581397495ab06236"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/pseudonyms/neutral.json",
+      "sha256": "9aac0a37fa0197fd4b7301fb6c3354a0fa3bd7a39b5ca3de023fedfdbf728062"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/pseudonyms/neutral.json",
+      "sha256": "9d8d7dcb8f6d4d71ffc8277e4a8a4326c93da239cace375d47c4a35830b3e88b"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/pseudonyms/neutral.json",
+      "sha256": "9f9a47fe61845e5c14fc5462006fc2ec4ab4a2d1e7489241be0a82739080a074"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/pseudonyms/neutral.json",
+      "sha256": "a2638d20c6338432b3d3c3ad68b1295900384be90f1e74ba91217ba2e02aba9e"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/pseudonyms/neutral.json",
+      "sha256": "b20a9fd8ce6f3f8ebced86c74faa9bfbf5412487f68a7174237946cb9f3c0d33"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/pseudonyms/neutral.json",
+      "sha256": "b21ec07effd3fe307782e2a1782ae771e601b303cef1548723a76c539f98f383"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/pseudonyms/neutral.json",
+      "sha256": "b90d33f2b12789d32691050a2083be28eb99985601a1f1a72efc9232e49306fd"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/pseudonyms/neutral.json",
+      "sha256": "b9d2c6aa83d3350c11166d1471babd770e46257ac9dcd7a475c846489b5349fd"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/pseudonyms/neutral.json",
+      "sha256": "bbd8cfcd79653592d7ff04452d627fbd3941403f3d6ce1387ccf39f93d329731"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/pseudonyms/neutral.json",
+      "sha256": "bc371452ed8c6bfe3f59ade5dc1d47a2c4f9152cb8a4227a3b00f9ac4dfab938"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/pseudonyms/neutral.json",
+      "sha256": "c1143705b37c3d419473fc304a6b5f4f19105e807c95bca911951a8442318f08"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/pseudonyms/neutral.json",
+      "sha256": "c5c1764a8b1824b5edfbd61a37cdf9986496181ed11aafb84098fa602e3c20ac"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/pseudonyms/neutral.json",
+      "sha256": "cdc4addf6b70467d56c82469186d7927a596523a742795f06fb573dff9a95294"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/pseudonyms/neutral.json",
+      "sha256": "d0f9b0b26aff2fccd28c49f60a008fa99ab98fee5942815757bef94357f01a41"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/pseudonyms/neutral.json",
+      "sha256": "d1847121d877fd2e57bf34481dea098f21c1c777829a70ac35a6b0f921fe3d69"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/pseudonyms/neutral.json",
+      "sha256": "d3038f35f15e94aca0f00df12468ec7632a1a4a24bc7bb61d1e2d43d3481c0f1"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/pseudonyms/neutral.json",
+      "sha256": "da6ce37647c07c94d44fe2a8e87d5f23a7f0badf391be2d001c120de5b5dd66c"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/pseudonyms/neutral.json",
+      "sha256": "e37b24a328cb4fc4ed148ddb6ba66234a302f81166f1b378a2a45ac1d925ba02"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/pseudonyms/neutral.json",
+      "sha256": "e47ce92812da61f50dcd7e695a5a74c5dfbd77f23820b544cd835057b82bc048"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/pseudonyms/neutral.json",
+      "sha256": "e6ae6e617178aca2cc02db3a7d188a1722d63c5857d1d654aaeee91fd7e2ef7f"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/pseudonyms/neutral.json",
+      "sha256": "ef376b8f315b030ebdbe2a586de3d11052faa92b8a9c58c72c98324b2a54a6c6"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/pseudonyms/star_wars.json",
+      "sha256": "9d8d7dcb8f6d4d71ffc8277e4a8a4326c93da239cace375d47c4a35830b3e88b"
+    },
+    {
+      "path": "gdpr_pseudonymizer/resources/pseudonyms/star_wars.json",
+      "sha256": "cca00fd88d774fe5aee1be5ca1a1561b1672892011d8f48da6cc2c202181c5f9"
+    },
+    {
+      "path": "tests/unit/gui/test_results_screen.py",
+      "sha256": "efec50ffa58d25ca0cc3f716cee31acdea762a25a7458dfcdc36f11cbace4823"
+    },
+    {
+      "path": "tests/unit/pseudonym/test_gender_detector.py",
+      "sha256": "3f56e90b04e7a4b50e3ec2446c13055e9cb1d0851c17c9ce8a52ea3ca76623cc"
+    },
+    {
+      "path": "tests/unit/test_benchmark_nlp.py",
+      "sha256": "6089854c94ca5454b76be6752c562901a985f64c9a946f62976aeab593b83161"
+    },
+    {
+      "path": "tests/unit/test_entity_grouping.py",
+      "sha256": "34e7b02c8b31ea720cf8c314e1ca3410745650bc11d3fb5d4e55048d4dda3c63"
+    },
+    {
+      "path": "tests/unit/test_file_handler_csv.py",
+      "sha256": "1a614fda1b9477d9caaa3d6a4eb41fdaafbc920ee6af3bbee1570b288f2765cf"
+    },
+    {
+      "path": "tests/unit/test_file_handler_csv.py",
+      "sha256": "b61634d33948ee70cf80611670caf8df02881d585581adcc7574356458afa00f"
+    },
+    {
+      "path": "tests/unit/test_french_patterns.py",
+      "sha256": "34e7b02c8b31ea720cf8c314e1ca3410745650bc11d3fb5d4e55048d4dda3c63"
+    },
+    {
+      "path": "tests/unit/test_hybrid_particles_location_noise.py",
+      "sha256": "da6ce37647c07c94d44fe2a8e87d5f23a7f0badf391be2d001c120de5b5dd66c"
+    },
+    {
+      "path": "tests/unit/test_regex_matcher.py",
+      "sha256": "70cc4e5612ffe37c23b7fa6ceb1284fa793881371c9defbab11aa7aab473b8ba"
+    },
+    {
+      "path": "tests/unit/test_regex_matcher.py",
+      "sha256": "b61634d33948ee70cf80611670caf8df02881d585581adcc7574356458afa00f"
+    }
+  ]
+}

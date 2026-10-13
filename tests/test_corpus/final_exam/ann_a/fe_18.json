@@ -1,0 +1,551 @@
+{
+  "document_name": "fe_18.txt",
+  "entities": [
+    {
+      "entity_text": "CABINET NOVALYS RH",
+      "entity_type": "ORG",
+      "start_pos": 0,
+      "end_pos": 18
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 87,
+      "end_pos": 91
+    },
+    {
+      "entity_text": "Altéor Logistique",
+      "entity_type": "ORG",
+      "start_pos": 270,
+      "end_pos": 287
+    },
+    {
+      "entity_text": "Villeurbanne",
+      "entity_type": "LOCATION",
+      "start_pos": 308,
+      "end_pos": 320
+    },
+    {
+      "entity_text": "Grenoble",
+      "entity_type": "LOCATION",
+      "start_pos": 335,
+      "end_pos": 343
+    },
+    {
+      "entity_text": "Lyon Est",
+      "entity_type": "LOCATION",
+      "start_pos": 346,
+      "end_pos": 354
+    },
+    {
+      "entity_text": "Sarah Meziane",
+      "entity_type": "PERSON",
+      "start_pos": 398,
+      "end_pos": 411
+    },
+    {
+      "entity_text": "NOVALYS RH",
+      "entity_type": "ORG",
+      "start_pos": 425,
+      "end_pos": 435
+    },
+    {
+      "entity_text": "Idriss Kaïdi",
+      "entity_type": "PERSON",
+      "start_pos": 438,
+      "end_pos": 450
+    },
+    {
+      "entity_text": "Clara N'Goma",
+      "entity_type": "PERSON",
+      "start_pos": 476,
+      "end_pos": 488
+    },
+    {
+      "entity_text": "SARAH MEZIANE",
+      "entity_type": "PERSON",
+      "start_pos": 577,
+      "end_pos": 590
+    },
+    {
+      "entity_text": "Kaïdi",
+      "entity_type": "PERSON",
+      "start_pos": 609,
+      "end_pos": 614
+    },
+    {
+      "entity_text": "Altéor\nLogistique",
+      "entity_type": "ORG",
+      "start_pos": 702,
+      "end_pos": 719
+    },
+    {
+      "entity_text": "Novalys RH",
+      "entity_type": "ORG",
+      "start_pos": 755,
+      "end_pos": 765
+    },
+    {
+      "entity_text": "IDRISS KAÏDI",
+      "entity_type": "PERSON",
+      "start_pos": 768,
+      "end_pos": 780
+    },
+    {
+      "entity_text": "Sarah",
+      "entity_type": "PERSON",
+      "start_pos": 820,
+      "end_pos": 825
+    },
+    {
+      "entity_text": "Clara",
+      "entity_type": "PERSON",
+      "start_pos": 837,
+      "end_pos": 842
+    },
+    {
+      "entity_text": "Vénissieux",
+      "entity_type": "LOCATION",
+      "start_pos": 910,
+      "end_pos": 920
+    },
+    {
+      "entity_text": "MEZIANE",
+      "entity_type": "PERSON",
+      "start_pos": 964,
+      "end_pos": 971
+    },
+    {
+      "entity_text": "Synéra Data",
+      "entity_type": "ORG",
+      "start_pos": 1047,
+      "end_pos": 1058
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 1062,
+      "end_pos": 1066
+    },
+    {
+      "entity_text": "KAÏDI",
+      "entity_type": "PERSON",
+      "start_pos": 1105,
+      "end_pos": 1110
+    },
+    {
+      "entity_text": "Villeurbanne",
+      "entity_type": "LOCATION",
+      "start_pos": 1226,
+      "end_pos": 1238
+    },
+    {
+      "entity_text": "Grenoble",
+      "entity_type": "LOCATION",
+      "start_pos": 1240,
+      "end_pos": 1248
+    },
+    {
+      "entity_text": "Saint-Priest",
+      "entity_type": "LOCATION",
+      "start_pos": 1252,
+      "end_pos": 1264
+    },
+    {
+      "entity_text": "Synéra Data",
+      "entity_type": "ORG",
+      "start_pos": 1266,
+      "end_pos": 1277
+    },
+    {
+      "entity_text": "Rhonéa Frais",
+      "entity_type": "ORG",
+      "start_pos": 1379,
+      "end_pos": 1391
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 1395,
+      "end_pos": 1401
+    },
+    {
+      "entity_text": "Auvergne-Rhône-\nAlpes",
+      "entity_type": "LOCATION",
+      "start_pos": 1434,
+      "end_pos": 1455
+    },
+    {
+      "entity_text": "SARAH",
+      "entity_type": "PERSON",
+      "start_pos": 1458,
+      "end_pos": 1463
+    },
+    {
+      "entity_text": "Mistral Courses",
+      "entity_type": "ORG",
+      "start_pos": 1513,
+      "end_pos": 1528
+    },
+    {
+      "entity_text": "Marseille",
+      "entity_type": "LOCATION",
+      "start_pos": 1530,
+      "end_pos": 1539
+    },
+    {
+      "entity_text": "IDRISS",
+      "entity_type": "PERSON",
+      "start_pos": 1553,
+      "end_pos": 1559
+    },
+    {
+      "entity_text": "France Travail",
+      "entity_type": "ORG",
+      "start_pos": 1667,
+      "end_pos": 1681
+    },
+    {
+      "entity_text": "Boris TALBI",
+      "entity_type": "PERSON",
+      "start_pos": 1707,
+      "end_pos": 1718
+    },
+    {
+      "entity_text": "MEZIANE",
+      "entity_type": "PERSON",
+      "start_pos": 1778,
+      "end_pos": 1785
+    },
+    {
+      "entity_text": "Altéor\nLogistique",
+      "entity_type": "ORG",
+      "start_pos": 1833,
+      "end_pos": 1850
+    },
+    {
+      "entity_text": "Paris",
+      "entity_type": "LOCATION",
+      "start_pos": 1944,
+      "end_pos": 1949
+    },
+    {
+      "entity_text": "KAÏDI",
+      "entity_type": "PERSON",
+      "start_pos": 1971,
+      "end_pos": 1976
+    },
+    {
+      "entity_text": "Synéra Data",
+      "entity_type": "ORG",
+      "start_pos": 2063,
+      "end_pos": 2074
+    },
+    {
+      "entity_text": "Carrefour\nSupply Chain",
+      "entity_type": "ORG",
+      "start_pos": 2102,
+      "end_pos": 2124
+    },
+    {
+      "entity_text": "Lille",
+      "entity_type": "LOCATION",
+      "start_pos": 2150,
+      "end_pos": 2155
+    },
+    {
+      "entity_text": "Altéor Logistique",
+      "entity_type": "ORG",
+      "start_pos": 2204,
+      "end_pos": 2221
+    },
+    {
+      "entity_text": "SARAH MEZIANE",
+      "entity_type": "PERSON",
+      "start_pos": 2294,
+      "end_pos": 2307
+    },
+    {
+      "entity_text": "Julien Ravel",
+      "entity_type": "PERSON",
+      "start_pos": 2330,
+      "end_pos": 2342
+    },
+    {
+      "entity_text": "Villeurbanne",
+      "entity_type": "LOCATION",
+      "start_pos": 2370,
+      "end_pos": 2382
+    },
+    {
+      "entity_text": "Nadia Benhassa",
+      "entity_type": "PERSON",
+      "start_pos": 2429,
+      "end_pos": 2443
+    },
+    {
+      "entity_text": "Altéor Logistique",
+      "entity_type": "ORG",
+      "start_pos": 2451,
+      "end_pos": 2468
+    },
+    {
+      "entity_text": "Paris",
+      "entity_type": "LOCATION",
+      "start_pos": 2472,
+      "end_pos": 2477
+    },
+    {
+      "entity_text": "IDRISS KAÏDI",
+      "entity_type": "PERSON",
+      "start_pos": 2496,
+      "end_pos": 2508
+    },
+    {
+      "entity_text": "DHL",
+      "entity_type": "ORG",
+      "start_pos": 2556,
+      "end_pos": 2559
+    },
+    {
+      "entity_text": "Belgique",
+      "entity_type": "LOCATION",
+      "start_pos": 2581,
+      "end_pos": 2589
+    },
+    {
+      "entity_text": "SARAH",
+      "entity_type": "PERSON",
+      "start_pos": 2774,
+      "end_pos": 2779
+    },
+    {
+      "entity_text": "IDRISS",
+      "entity_type": "PERSON",
+      "start_pos": 2823,
+      "end_pos": 2829
+    },
+    {
+      "entity_text": "Rhonéa Frais",
+      "entity_type": "ORG",
+      "start_pos": 2907,
+      "end_pos": 2919
+    },
+    {
+      "entity_text": "Synéra Data",
+      "entity_type": "ORG",
+      "start_pos": 2942,
+      "end_pos": 2953
+    },
+    {
+      "entity_text": "APEC",
+      "entity_type": "ORG",
+      "start_pos": 3044,
+      "end_pos": 3048
+    },
+    {
+      "entity_text": "OPCO Mobilités",
+      "entity_type": "ORG",
+      "start_pos": 3101,
+      "end_pos": 3115
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 3118,
+      "end_pos": 3122
+    },
+    {
+      "entity_text": "MEZIANE",
+      "entity_type": "PERSON",
+      "start_pos": 3168,
+      "end_pos": 3175
+    },
+    {
+      "entity_text": "Synéra Data",
+      "entity_type": "ORG",
+      "start_pos": 3239,
+      "end_pos": 3250
+    },
+    {
+      "entity_text": "KAÏDI",
+      "entity_type": "PERSON",
+      "start_pos": 3285,
+      "end_pos": 3290
+    },
+    {
+      "entity_text": "Mélissa Karam",
+      "entity_type": "PERSON",
+      "start_pos": 3323,
+      "end_pos": 3336
+    },
+    {
+      "entity_text": "Vénissieux",
+      "entity_type": "LOCATION",
+      "start_pos": 3434,
+      "end_pos": 3444
+    },
+    {
+      "entity_text": "Lyon Part-Dieu",
+      "entity_type": "LOCATION",
+      "start_pos": 3461,
+      "end_pos": 3475
+    },
+    {
+      "entity_text": "SARAH MEZIANE",
+      "entity_type": "PERSON",
+      "start_pos": 3522,
+      "end_pos": 3535
+    },
+    {
+      "entity_text": "Altéor Logistique",
+      "entity_type": "ORG",
+      "start_pos": 3594,
+      "end_pos": 3611
+    },
+    {
+      "entity_text": "IDRISS",
+      "entity_type": "PERSON",
+      "start_pos": 3708,
+      "end_pos": 3714
+    },
+    {
+      "entity_text": "Villeurbanne",
+      "entity_type": "LOCATION",
+      "start_pos": 3782,
+      "end_pos": 3794
+    },
+    {
+      "entity_text": "Grenoble",
+      "entity_type": "LOCATION",
+      "start_pos": 3889,
+      "end_pos": 3897
+    },
+    {
+      "entity_text": "SARAH",
+      "entity_type": "PERSON",
+      "start_pos": 3941,
+      "end_pos": 3946
+    },
+    {
+      "entity_text": "IDRISS KAÏDI",
+      "entity_type": "PERSON",
+      "start_pos": 4047,
+      "end_pos": 4059
+    },
+    {
+      "entity_text": "Preventis\nSanté Travail",
+      "entity_type": "ORG",
+      "start_pos": 4176,
+      "end_pos": 4199
+    },
+    {
+      "entity_text": "Synéra Data",
+      "entity_type": "ORG",
+      "start_pos": 4283,
+      "end_pos": 4294
+    },
+    {
+      "entity_text": "SARAH MEZIANE",
+      "entity_type": "PERSON",
+      "start_pos": 4351,
+      "end_pos": 4364
+    },
+    {
+      "entity_text": "Idriss",
+      "entity_type": "PERSON",
+      "start_pos": 4372,
+      "end_pos": 4378
+    },
+    {
+      "entity_text": "Julien\nRavel",
+      "entity_type": "PERSON",
+      "start_pos": 4411,
+      "end_pos": 4423
+    },
+    {
+      "entity_text": "Altéor Logistique",
+      "entity_type": "ORG",
+      "start_pos": 4443,
+      "end_pos": 4460
+    },
+    {
+      "entity_text": "Villeurbanne",
+      "entity_type": "LOCATION",
+      "start_pos": 4512,
+      "end_pos": 4524
+    },
+    {
+      "entity_text": "IDRISS",
+      "entity_type": "PERSON",
+      "start_pos": 4559,
+      "end_pos": 4565
+    },
+    {
+      "entity_text": "Sarah",
+      "entity_type": "PERSON",
+      "start_pos": 4573,
+      "end_pos": 4578
+    },
+    {
+      "entity_text": "Clara",
+      "entity_type": "PERSON",
+      "start_pos": 4628,
+      "end_pos": 4633
+    },
+    {
+      "entity_text": "OPCO Mobilités",
+      "entity_type": "ORG",
+      "start_pos": 4657,
+      "end_pos": 4671
+    },
+    {
+      "entity_text": "MEZIANE",
+      "entity_type": "PERSON",
+      "start_pos": 4698,
+      "end_pos": 4705
+    },
+    {
+      "entity_text": "KAÏDI",
+      "entity_type": "PERSON",
+      "start_pos": 4735,
+      "end_pos": 4740
+    },
+    {
+      "entity_text": "NOVALYS RH",
+      "entity_type": "ORG",
+      "start_pos": 4780,
+      "end_pos": 4790
+    },
+    {
+      "entity_text": "Sarah MEZIANE",
+      "entity_type": "PERSON",
+      "start_pos": 4836,
+      "end_pos": 4849
+    },
+    {
+      "entity_text": "Novalys RH",
+      "entity_type": "ORG",
+      "start_pos": 4883,
+      "end_pos": 4893
+    },
+    {
+      "entity_text": "Lyon",
+      "entity_type": "LOCATION",
+      "start_pos": 4922,
+      "end_pos": 4926
+    },
+    {
+      "entity_text": "Novalys RH",
+      "entity_type": "ORG",
+      "start_pos": 5032,
+      "end_pos": 5042
+    },
+    {
+      "entity_text": "Altéor Logistique",
+      "entity_type": "ORG",
+      "start_pos": 5046,
+      "end_pos": 5063
+    }
+  ]
+}

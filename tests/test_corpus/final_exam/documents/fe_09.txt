@@ -1,0 +1,53 @@
+GROUPE HOSPITALIER RIVES ET BRUMES
+DIRECTION DES OPERATIONS - NOTE INTERNE
+A: Chefs de service, cadres de nuit, responsables de pôle
+Copie: DRH, DSI, CME, SAMU 44, ARS Pays de la Loire
+Date: 17/09/2026
+Objet: ajustement du tableau des astreintes médicales et techniques - octobre
+
+Bonjour Claire,
+
+Merci Claire BERNAT, CS Urgences, pour le retour rapide sur les doublons repérés sur Nantes et Saint-Herblain. La Direction générale a relu le projet transmis le 14/09, avec Thomas LE GALL, DAF, et Mme Samira KHELIFA, DRH. Il reste quelques points mal calés entre les sites, surtout quand le même médecin est indiqué à la fois sur l’Hôpital des Dunes et sur la Clinique Saint-Estuaire.
+
+Bonjour Dr Maël RIVIERE, merci aussi au DIM pour les extractions. Le tableau ci-dessous remplace la version “octobre_v3_finale_bis” déposée sur SharePoint. Les chefs de service doivent vérifier les lignes de leur périmètre avant vendredi 18 h, y compris les astreintes du week-end de la Toussaint. Les retours sont à envoyer à direction.ops@rives-brumes.fr, pas directement à la DSI, afin d’éviter trois listes concurrentes comme en août.
+
+SERVICE | SITE | REFERENT | ROLE | PERIODE | OBSERVATIONS
+Urgences | Nantes | Dr Lise MARCADE | CSU | 01-07/10 | présence renforcée samedi
+Réanimation | Saint-Herblain | Dr Ahmed NAJAR | PH | 03-04/10 | échange validé par CME
+Pédiatrie | Rezé | Mme Océane VALLIN | CDS | 05-11/10 | manque IDE nuit lundi
+Imagerie | Saint-Nazaire | M. Hugo MAREK | MERM | 12-18/10 | appeler DSI si panne PACS
+Biomédical | Nantes | m. noah filippi | RT | 19-25/10 | nom saisi en minuscule dans HRM
+Bloc | La Baule | Dr Jeanne VALLET | MAR | 24-25/10 | astreinte partagée avec Vannes
+Psychiatrie | Pontchâteau | Mme Agnès ROUBAUD | CSS | 26-31/10 | transport patient à confirmer
+
+Chère Agnès, merci Roubaud pour la correction envoyée hier soir; elle est intégrée, mais pas celle concernant la chambre d’isolement car elle relève du plan de continuité, pas du tableau d’astreinte. Cher Hugo MAREK, la mention “PACS” doit rester visible pour le standard de nuit. Bonjour Samira KHELIFA, peux-tu confirmer que les indemnités des PH remplaçants seront bien traitées par la paie du Groupe Hospitalier Rives et Brumes, et non par la Clinique Saint-Estuaire?
+
+Rappel de procédure, version DG:
+- le CS ou la CSS valide le besoin dans le service;
+- le PH responsable signe l’échange si deux médecins permutent;
+- la DRH contrôle le temps de repos;
+- la DSI confirme les astreintes applicatives, surtout pour Osiris Santé et Medilink France;
+- le DAF arbitre si une ligne génère un surcoût supérieur à 1 200 euros.
+
+MERCI Dr RIVIERE pour la remarque sur les internes de Rennes: ils ne doivent pas apparaître comme titulaires d’astreinte médicale. Merci Nadia BENSAID, ARS Pays de la Loire, pour la consigne reçue au téléphone: le contact départemental reste le SAMU 44, sauf activation régionale. Bonjour Olivier CHAN, DG adjoint, le standard demande une validation écrite car la note précédente avait été comprise différemment à Saint-Nazaire.
+
+Points à corriger avant diffusion aux équipes:
+1. La ligne “Réanimation / Saint-Herblain” mentionne encore le Dr Sacha PELTIER en PH, alors qu’il est absent du 02 au 06 octobre à Bruxelles.
+2. Le numéro d’appel biomédical 02 40 88 61 34 bascule vers l’ancien prestataire Nordvia Services; la DSI doit le fermer.
+3. La Clinique Saint-Estuaire veut ajouter une astreinte pharmacie, mais la PUI centrale de Nantes n’a pas confirmé.
+4. Le service de Pédiatrie de Rezé signale une impossibilité sur la nuit du 10, à voir avec la DRH.
+5. La CME demande que les changements tardifs soient horodatés, même quand ils viennent d’un chef de pôle.
+
+Pour éviter les confusions, les intitulés à utiliser sont les suivants: DG pour Olivier CHAN, DRH pour Samira KHELIFA, DAF pour Thomas LE GALL, DSI pour Karim DOUCET, CME pour l’instance médicale présidée localement par Dr Maël RIVIERE, CSS pour Agnès ROUBAUD, CDS pour Océane VALLIN, PH pour les praticiens hospitaliers, MAR pour les anesthésistes-réanimateurs. Ne pas écrire “directeur de garde” à la place de DG, ni “informatique” à la place de DSI.
+
+Bonjour Karim, merci de pousser la liste courte au standard de Nantes, Saint-Herblain et Saint-Nazaire, uniquement après mon feu vert. Merci Thomas, peux-tu joindre le budget estimatif à la prochaine version, en distinguant Groupe Hospitalier Rives et Brumes, Clinique Saint-Estuaire et Nordvia Services. La mention du CHU de Nantes doit rester dans la colonne “recours externe”, sans donner le nom d’un responsable.
+
+Signature:
+Elise MORNAY
+Directrice des opérations - GROUPE HOSPITALIER RIVES ET BRUMES
+18 rue des Vignes Claires, 44000 Nantes
+Tél. 02 41 73 58 09 / poste 7214
+elise.mornay@rives-brumes.fr
+
+Document interne - diffusion limitée DG, DRH, DSI, CME, chefs de service
+Version 4, saisie manuelle après réunion du 17/09/2026, 08:30

@@ -1,0 +1,647 @@
+{
+  "document_name": "fe_24.txt",
+  "entities": [
+    {
+      "entity_text": "VILLE DE BLOIS",
+      "entity_type": "ORG",
+      "start_pos": 0,
+      "end_pos": 14
+    },
+    {
+      "entity_text": "BLOIS",
+      "entity_type": "LOCATION",
+      "start_pos": 9,
+      "end_pos": 14
+    },
+    {
+      "entity_text": "Solène TARDY",
+      "entity_type": "PERSON",
+      "start_pos": 260,
+      "end_pos": 272
+    },
+    {
+      "entity_text": "Hôtel de Ville",
+      "entity_type": "LOCATION",
+      "start_pos": 291,
+      "end_pos": 305
+    },
+    {
+      "entity_text": "Blois",
+      "entity_type": "LOCATION",
+      "start_pos": 307,
+      "end_pos": 312
+    },
+    {
+      "entity_text": "Ateliers du Canal",
+      "entity_type": "ORG",
+      "start_pos": 373,
+      "end_pos": 390
+    },
+    {
+      "entity_text": "rue des Saules",
+      "entity_type": "LOCATION",
+      "start_pos": 413,
+      "end_pos": 427
+    },
+    {
+      "entity_text": "Blois",
+      "entity_type": "LOCATION",
+      "start_pos": 435,
+      "end_pos": 440
+    },
+    {
+      "entity_text": "Blois",
+      "entity_type": "LOCATION",
+      "start_pos": 698,
+      "end_pos": 703
+    },
+    {
+      "entity_text": "Nadia BELKACEM",
+      "entity_type": "PERSON",
+      "start_pos": 763,
+      "end_pos": 777
+    },
+    {
+      "entity_text": "allée des Tilleuls",
+      "entity_type": "LOCATION",
+      "start_pos": 831,
+      "end_pos": 849
+    },
+    {
+      "entity_text": "Blois",
+      "entity_type": "LOCATION",
+      "start_pos": 857,
+      "end_pos": 862
+    },
+    {
+      "entity_text": "Benoît LARQUET",
+      "entity_type": "PERSON",
+      "start_pos": 875,
+      "end_pos": 889
+    },
+    {
+      "entity_text": "Mirela PAVIC",
+      "entity_type": "PERSON",
+      "start_pos": 903,
+      "end_pos": 915
+    },
+    {
+      "entity_text": "Farid Amrani",
+      "entity_type": "PERSON",
+      "start_pos": 955,
+      "end_pos": 967
+    },
+    {
+      "entity_text": "Ville de Blois",
+      "entity_type": "ORG",
+      "start_pos": 1109,
+      "end_pos": 1123
+    },
+    {
+      "entity_text": "Blois",
+      "entity_type": "LOCATION",
+      "start_pos": 1118,
+      "end_pos": 1123
+    },
+    {
+      "entity_text": "Agglopolys",
+      "entity_type": "ORG",
+      "start_pos": 1198,
+      "end_pos": 1208
+    },
+    {
+      "entity_text": "Conseil départemental de Loir-et-Cher",
+      "entity_type": "ORG",
+      "start_pos": 1240,
+      "end_pos": 1277
+    },
+    {
+      "entity_text": "Loir-et-Cher",
+      "entity_type": "LOCATION",
+      "start_pos": 1265,
+      "end_pos": 1277
+    },
+    {
+      "entity_text": "Caisse d'Allocations Familiales",
+      "entity_type": "ORG",
+      "start_pos": 1323,
+      "end_pos": 1354
+    },
+    {
+      "entity_text": "Crédit Mutuel\nCentre-Val de Loire",
+      "entity_type": "ORG",
+      "start_pos": 1356,
+      "end_pos": 1389
+    },
+    {
+      "entity_text": "Centre-Val de Loire",
+      "entity_type": "LOCATION",
+      "start_pos": 1370,
+      "end_pos": 1389
+    },
+    {
+      "entity_text": "Fondation Arpège Solidaire",
+      "entity_type": "ORG",
+      "start_pos": 1391,
+      "end_pos": 1417
+    },
+    {
+      "entity_text": "Blois",
+      "entity_type": "LOCATION",
+      "start_pos": 1486,
+      "end_pos": 1491
+    },
+    {
+      "entity_text": "Maison de quartier Nord",
+      "entity_type": "LOCATION",
+      "start_pos": 1540,
+      "end_pos": 1563
+    },
+    {
+      "entity_text": "médiathèque Maurice-Genevoix",
+      "entity_type": "LOCATION",
+      "start_pos": 1565,
+      "end_pos": 1593
+    },
+    {
+      "entity_text": "salle polyvalente de Vienne",
+      "entity_type": "LOCATION",
+      "start_pos": 1595,
+      "end_pos": 1622
+    },
+    {
+      "entity_text": "collège Les Sablons",
+      "entity_type": "ORG",
+      "start_pos": 1624,
+      "end_pos": 1643
+    },
+    {
+      "entity_text": "parc des Mées",
+      "entity_type": "LOCATION",
+      "start_pos": 1645,
+      "end_pos": 1658
+    },
+    {
+      "entity_text": "Blois",
+      "entity_type": "LOCATION",
+      "start_pos": 1721,
+      "end_pos": 1726
+    },
+    {
+      "entity_text": "Nord",
+      "entity_type": "LOCATION",
+      "start_pos": 1748,
+      "end_pos": 1752
+    },
+    {
+      "entity_text": "Vienne",
+      "entity_type": "LOCATION",
+      "start_pos": 1754,
+      "end_pos": 1760
+    },
+    {
+      "entity_text": "Tours",
+      "entity_type": "LOCATION",
+      "start_pos": 1819,
+      "end_pos": 1824
+    },
+    {
+      "entity_text": "Radio\nCampus Tours",
+      "entity_type": "ORG",
+      "start_pos": 1867,
+      "end_pos": 1885
+    },
+    {
+      "entity_text": "Tours",
+      "entity_type": "LOCATION",
+      "start_pos": 1880,
+      "end_pos": 1885
+    },
+    {
+      "entity_text": "Maëlle RIGAUD",
+      "entity_type": "PERSON",
+      "start_pos": 2095,
+      "end_pos": 2108
+    },
+    {
+      "entity_text": "Ilyas KERROUCHE",
+      "entity_type": "PERSON",
+      "start_pos": 2112,
+      "end_pos": 2127
+    },
+    {
+      "entity_text": "Blois",
+      "entity_type": "LOCATION",
+      "start_pos": 2226,
+      "end_pos": 2231
+    },
+    {
+      "entity_text": "Ateliers du Canal",
+      "entity_type": "ORG",
+      "start_pos": 2296,
+      "end_pos": 2313
+    },
+    {
+      "entity_text": "Ville de Blois",
+      "entity_type": "ORG",
+      "start_pos": 2341,
+      "end_pos": 2355
+    },
+    {
+      "entity_text": "Blois",
+      "entity_type": "LOCATION",
+      "start_pos": 2350,
+      "end_pos": 2355
+    },
+    {
+      "entity_text": "Maëlle RIGAUD",
+      "entity_type": "PERSON",
+      "start_pos": 2577,
+      "end_pos": 2590
+    },
+    {
+      "entity_text": "Blois",
+      "entity_type": "LOCATION",
+      "start_pos": 2593,
+      "end_pos": 2598
+    },
+    {
+      "entity_text": "Ilyas KERROUCHE",
+      "entity_type": "PERSON",
+      "start_pos": 2641,
+      "end_pos": 2656
+    },
+    {
+      "entity_text": "Orléans",
+      "entity_type": "LOCATION",
+      "start_pos": 2659,
+      "end_pos": 2666
+    },
+    {
+      "entity_text": "Studio Loire Image",
+      "entity_type": "ORG",
+      "start_pos": 2711,
+      "end_pos": 2729
+    },
+    {
+      "entity_text": "Saint-Gervais-la-Forêt",
+      "entity_type": "LOCATION",
+      "start_pos": 2732,
+      "end_pos": 2754
+    },
+    {
+      "entity_text": "Voyages Duret Atlantique",
+      "entity_type": "ORG",
+      "start_pos": 2802,
+      "end_pos": 2826
+    },
+    {
+      "entity_text": "Blois",
+      "entity_type": "LOCATION",
+      "start_pos": 2829,
+      "end_pos": 2834
+    },
+    {
+      "entity_text": "Imprimerie des Halles",
+      "entity_type": "ORG",
+      "start_pos": 2873,
+      "end_pos": 2894
+    },
+    {
+      "entity_text": "Romorantin-Lanthenay",
+      "entity_type": "LOCATION",
+      "start_pos": 2897,
+      "end_pos": 2917
+    },
+    {
+      "entity_text": "Mutuelle Associative Ouest",
+      "entity_type": "ORG",
+      "start_pos": 2966,
+      "end_pos": 2992
+    },
+    {
+      "entity_text": "Nantes",
+      "entity_type": "LOCATION",
+      "start_pos": 2995,
+      "end_pos": 3001
+    },
+    {
+      "entity_text": "Marché du Quai",
+      "entity_type": "ORG",
+      "start_pos": 3039,
+      "end_pos": 3053
+    },
+    {
+      "entity_text": "Blois",
+      "entity_type": "LOCATION",
+      "start_pos": 3056,
+      "end_pos": 3061
+    },
+    {
+      "entity_text": "Farid Amrani",
+      "entity_type": "PERSON",
+      "start_pos": 3104,
+      "end_pos": 3116
+    },
+    {
+      "entity_text": "Ateliers du Canal",
+      "entity_type": "ORG",
+      "start_pos": 3119,
+      "end_pos": 3136
+    },
+    {
+      "entity_text": "Blois",
+      "entity_type": "LOCATION",
+      "start_pos": 3139,
+      "end_pos": 3144
+    },
+    {
+      "entity_text": "Ville de Blois",
+      "entity_type": "ORG",
+      "start_pos": 3257,
+      "end_pos": 3271
+    },
+    {
+      "entity_text": "Blois",
+      "entity_type": "LOCATION",
+      "start_pos": 3266,
+      "end_pos": 3271
+    },
+    {
+      "entity_text": "Agglopolys",
+      "entity_type": "ORG",
+      "start_pos": 3299,
+      "end_pos": 3309
+    },
+    {
+      "entity_text": "Conseil départemental de Loir-et-Cher",
+      "entity_type": "ORG",
+      "start_pos": 3349,
+      "end_pos": 3386
+    },
+    {
+      "entity_text": "Loir-et-Cher",
+      "entity_type": "LOCATION",
+      "start_pos": 3374,
+      "end_pos": 3386
+    },
+    {
+      "entity_text": "Caisse d'Allocations Familiales",
+      "entity_type": "ORG",
+      "start_pos": 3413,
+      "end_pos": 3444
+    },
+    {
+      "entity_text": "Ateliers du Canal",
+      "entity_type": "ORG",
+      "start_pos": 3488,
+      "end_pos": 3505
+    },
+    {
+      "entity_text": "Crédit Mutuel Centre-Val de Loire",
+      "entity_type": "ORG",
+      "start_pos": 3601,
+      "end_pos": 3634
+    },
+    {
+      "entity_text": "Centre-Val de Loire",
+      "entity_type": "LOCATION",
+      "start_pos": 3615,
+      "end_pos": 3634
+    },
+    {
+      "entity_text": "Nadia BELKACEM",
+      "entity_type": "PERSON",
+      "start_pos": 3934,
+      "end_pos": 3948
+    },
+    {
+      "entity_text": "allée des Tilleuls",
+      "entity_type": "LOCATION",
+      "start_pos": 3953,
+      "end_pos": 3971
+    },
+    {
+      "entity_text": "Blois",
+      "entity_type": "LOCATION",
+      "start_pos": 3973,
+      "end_pos": 3978
+    },
+    {
+      "entity_text": "Benoît LARQUET",
+      "entity_type": "PERSON",
+      "start_pos": 3995,
+      "end_pos": 4009
+    },
+    {
+      "entity_text": "rue du Moulin",
+      "entity_type": "LOCATION",
+      "start_pos": 4015,
+      "end_pos": 4028
+    },
+    {
+      "entity_text": "La Chaussée-Saint-Victor",
+      "entity_type": "LOCATION",
+      "start_pos": 4030,
+      "end_pos": 4054
+    },
+    {
+      "entity_text": "Mirela PAVIC",
+      "entity_type": "PERSON",
+      "start_pos": 4071,
+      "end_pos": 4083
+    },
+    {
+      "entity_text": "impasse des Glycines",
+      "entity_type": "LOCATION",
+      "start_pos": 4090,
+      "end_pos": 4110
+    },
+    {
+      "entity_text": "Vineuil",
+      "entity_type": "LOCATION",
+      "start_pos": 4112,
+      "end_pos": 4119
+    },
+    {
+      "entity_text": "Selma OUDIN",
+      "entity_type": "PERSON",
+      "start_pos": 4136,
+      "end_pos": 4147
+    },
+    {
+      "entity_text": "rue de la Gare",
+      "entity_type": "LOCATION",
+      "start_pos": 4155,
+      "end_pos": 4169
+    },
+    {
+      "entity_text": "Blois",
+      "entity_type": "LOCATION",
+      "start_pos": 4171,
+      "end_pos": 4176
+    },
+    {
+      "entity_text": "Nadia Belkacem",
+      "entity_type": "PERSON",
+      "start_pos": 4243,
+      "end_pos": 4257
+    },
+    {
+      "entity_text": "Ateliers du Canal",
+      "entity_type": "ORG",
+      "start_pos": 4295,
+      "end_pos": 4312
+    },
+    {
+      "entity_text": "Banque Populaire Val de France",
+      "entity_type": "ORG",
+      "start_pos": 4314,
+      "end_pos": 4344
+    },
+    {
+      "entity_text": "URSSAF",
+      "entity_type": "ORG",
+      "start_pos": 4368,
+      "end_pos": 4374
+    },
+    {
+      "entity_text": "Farid",
+      "entity_type": "PERSON",
+      "start_pos": 4380,
+      "end_pos": 4385
+    },
+    {
+      "entity_text": "Maison de quartier Nord",
+      "entity_type": "LOCATION",
+      "start_pos": 4414,
+      "end_pos": 4437
+    },
+    {
+      "entity_text": "Maison de quartier Nord",
+      "entity_type": "LOCATION",
+      "start_pos": 4529,
+      "end_pos": 4552
+    },
+    {
+      "entity_text": "Julien MORAT",
+      "entity_type": "PERSON",
+      "start_pos": 4574,
+      "end_pos": 4586
+    },
+    {
+      "entity_text": "Médiathèque de Blois",
+      "entity_type": "LOCATION",
+      "start_pos": 4601,
+      "end_pos": 4621
+    },
+    {
+      "entity_text": "Claire PESCHARD",
+      "entity_type": "PERSON",
+      "start_pos": 4644,
+      "end_pos": 4659
+    },
+    {
+      "entity_text": "Collège Les Sablons",
+      "entity_type": "ORG",
+      "start_pos": 4660,
+      "end_pos": 4679
+    },
+    {
+      "entity_text": "Amina CHERGUI",
+      "entity_type": "PERSON",
+      "start_pos": 4712,
+      "end_pos": 4725
+    },
+    {
+      "entity_text": "Radio Campus Tours",
+      "entity_type": "ORG",
+      "start_pos": 4726,
+      "end_pos": 4744
+    },
+    {
+      "entity_text": "Tours",
+      "entity_type": "LOCATION",
+      "start_pos": 4739,
+      "end_pos": 4744
+    },
+    {
+      "entity_text": "Hugo LEVREL",
+      "entity_type": "PERSON",
+      "start_pos": 4767,
+      "end_pos": 4778
+    },
+    {
+      "entity_text": "Association Passerelle Vienne",
+      "entity_type": "ORG",
+      "start_pos": 4779,
+      "end_pos": 4808
+    },
+    {
+      "entity_text": "Vienne",
+      "entity_type": "LOCATION",
+      "start_pos": 4802,
+      "end_pos": 4808
+    },
+    {
+      "entity_text": "Soraya MENDES",
+      "entity_type": "PERSON",
+      "start_pos": 4829,
+      "end_pos": 4842
+    },
+    {
+      "entity_text": "Direction régionale des affaires culturelles Centre-Val de Loire",
+      "entity_type": "ORG",
+      "start_pos": 4843,
+      "end_pos": 4907
+    },
+    {
+      "entity_text": "Centre-Val de Loire",
+      "entity_type": "LOCATION",
+      "start_pos": 4888,
+      "end_pos": 4907
+    },
+    {
+      "entity_text": "Nadia BELKACEM",
+      "entity_type": "PERSON",
+      "start_pos": 5005,
+      "end_pos": 5019
+    },
+    {
+      "entity_text": "Ateliers du Canal",
+      "entity_type": "ORG",
+      "start_pos": 5072,
+      "end_pos": 5089
+    },
+    {
+      "entity_text": "Ville de Blois",
+      "entity_type": "ORG",
+      "start_pos": 5161,
+      "end_pos": 5175
+    },
+    {
+      "entity_text": "Blois",
+      "entity_type": "LOCATION",
+      "start_pos": 5170,
+      "end_pos": 5175
+    },
+    {
+      "entity_text": "Blois",
+      "entity_type": "LOCATION",
+      "start_pos": 5267,
+      "end_pos": 5272
+    },
+    {
+      "entity_text": "N. Belkacem",
+      "entity_type": "PERSON",
+      "start_pos": 5302,
+      "end_pos": 5313
+    },
+    {
+      "entity_text": "Blois",
+      "entity_type": "LOCATION",
+      "start_pos": 5373,
+      "end_pos": 5378
+    }
+  ]
+}

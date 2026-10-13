@@ -1,0 +1,371 @@
+{
+  "schema_version": 1,
+  "target": "real",
+  "documents": [
+    {
+      "id": "fe_01",
+      "half": "planted",
+      "kind": "email thread",
+      "format": [
+        "email thread with quoted replies",
+        "headers and signatures",
+        "mixed case"
+      ],
+      "categories": [
+        "Greetings",
+        "Surname particles",
+        "Role acronyms"
+      ],
+      "length_exception": {
+        "words": 947,
+        "bound": "400-900",
+        "approved": "Lionel 2026-10-10",
+        "sha256": "ac3d50931428e7e199a7400bb8af615616f7c82c2a7d18f9b52ef11e4f83ebaf"
+      }
+    },
+    {
+      "id": "fe_02",
+      "half": "natural",
+      "kind": "report",
+      "format": [
+        "PDF-style hard line breaks",
+        "table flattened to text"
+      ],
+      "categories": []
+    },
+    {
+      "id": "fe_03",
+      "half": "planted",
+      "kind": "meeting minutes",
+      "format": [
+        "PDF-style hard line breaks",
+        "table flattened to text",
+        "mixed case"
+      ],
+      "categories": [
+        "Role acronyms",
+        "Surname particles",
+        "Organisation plus country"
+      ]
+    },
+    {
+      "id": "fe_04",
+      "half": "natural",
+      "kind": "email thread",
+      "format": [
+        "email thread with quoted replies",
+        "headers and signatures",
+        "mixed case"
+      ],
+      "categories": []
+    },
+    {
+      "id": "fe_05",
+      "half": "natural",
+      "kind": "interview transcript",
+      "format": [
+        "PDF-style hard line breaks"
+      ],
+      "categories": []
+    },
+    {
+      "id": "fe_06",
+      "half": "planted",
+      "kind": "interview transcript",
+      "format": [
+        "mixed case",
+        "headers and signatures"
+      ],
+      "categories": [
+        "Greetings",
+        "Mc/Mac surnames",
+        "Foreign places"
+      ]
+    },
+    {
+      "id": "fe_07",
+      "half": "natural",
+      "kind": "memo",
+      "format": [
+        "headers and signatures",
+        "mixed case"
+      ],
+      "categories": []
+    },
+    {
+      "id": "fe_08",
+      "half": "planted",
+      "kind": "contract",
+      "format": [
+        "PDF-style hard line breaks",
+        "mixed case",
+        "headers and signatures"
+      ],
+      "categories": [
+        "Organisation plus country",
+        "Foreign places",
+        "Role acronyms"
+      ]
+    },
+    {
+      "id": "fe_09",
+      "half": "planted",
+      "kind": "memo",
+      "format": [
+        "headers and signatures",
+        "mixed case"
+      ],
+      "categories": [
+        "Greetings",
+        "Role acronyms"
+      ]
+    },
+    {
+      "id": "fe_10",
+      "half": "natural",
+      "kind": "form",
+      "format": [
+        "table flattened to text",
+        "mixed case"
+      ],
+      "categories": []
+    },
+    {
+      "id": "fe_11",
+      "half": "planted",
+      "kind": "report",
+      "format": [
+        "PDF-style hard line breaks",
+        "table flattened to text"
+      ],
+      "categories": [
+        "Foreign places",
+        "Organisation plus country",
+        "Mc/Mac surnames"
+      ]
+    },
+    {
+      "id": "fe_12",
+      "half": "natural",
+      "kind": "email thread",
+      "format": [
+        "email thread with quoted replies",
+        "table flattened to text"
+      ],
+      "categories": []
+    },
+    {
+      "id": "fe_13",
+      "half": "natural",
+      "kind": "contract",
+      "format": [
+        "PDF-style hard line breaks",
+        "mixed case",
+        "headers and signatures"
+      ],
+      "categories": []
+    },
+    {
+      "id": "fe_14",
+      "half": "planted",
+      "kind": "email thread",
+      "format": [
+        "email thread with quoted replies",
+        "table flattened to text"
+      ],
+      "categories": [
+        "Greetings",
+        "Mc/Mac surnames",
+        "Foreign places"
+      ]
+    },
+    {
+      "id": "fe_15",
+      "half": "planted",
+      "kind": "form",
+      "format": [
+        "table flattened to text",
+        "mixed case"
+      ],
+      "categories": [
+        "Role acronyms",
+        "Mc/Mac surnames",
+        "Organisation plus country"
+      ]
+    },
+    {
+      "id": "fe_16",
+      "half": "natural",
+      "kind": "meeting minutes",
+      "format": [
+        "headers and signatures",
+        "table flattened to text"
+      ],
+      "categories": []
+    },
+    {
+      "id": "fe_17",
+      "half": "planted",
+      "kind": "meeting minutes",
+      "format": [
+        "headers and signatures",
+        "table flattened to text"
+      ],
+      "categories": [
+        "Role acronyms",
+        "Foreign places"
+      ]
+    },
+    {
+      "id": "fe_18",
+      "half": "natural",
+      "kind": "interview transcript",
+      "format": [
+        "mixed case",
+        "headers and signatures"
+      ],
+      "categories": []
+    },
+    {
+      "id": "fe_19",
+      "half": "natural",
+      "kind": "email thread",
+      "format": [
+        "email thread with quoted replies",
+        "headers and signatures",
+        "PDF-style hard line breaks"
+      ],
+      "categories": []
+    },
+    {
+      "id": "fe_20",
+      "half": "planted",
+      "kind": "email thread",
+      "format": [
+        "email thread with quoted replies",
+        "headers and signatures",
+        "PDF-style hard line breaks"
+      ],
+      "categories": [
+        "Greetings",
+        "Organisation plus country"
+      ]
+    },
+    {
+      "id": "fe_21",
+      "half": "natural",
+      "kind": "report",
+      "format": [
+        "PDF-style hard line breaks",
+        "mixed case",
+        "headers and signatures"
+      ],
+      "categories": []
+    },
+    {
+      "id": "fe_22",
+      "half": "planted",
+      "kind": "report",
+      "format": [
+        "PDF-style hard line breaks",
+        "mixed case",
+        "headers and signatures"
+      ],
+      "categories": [
+        "Organisation plus country",
+        "Surname particles"
+      ]
+    },
+    {
+      "id": "fe_23",
+      "half": "planted",
+      "kind": "interview transcript",
+      "format": [
+        "PDF-style hard line breaks"
+      ],
+      "categories": [
+        "Surname particles",
+        "Foreign places"
+      ]
+    },
+    {
+      "id": "fe_24",
+      "half": "natural",
+      "kind": "form",
+      "format": [
+        "mixed case",
+        "table flattened to text"
+      ],
+      "categories": []
+    },
+    {
+      "id": "fe_25",
+      "half": "natural",
+      "kind": "memo",
+      "format": [
+        "PDF-style hard line breaks",
+        "headers and signatures"
+      ],
+      "categories": []
+    },
+    {
+      "id": "fe_26",
+      "half": "planted",
+      "kind": "contract",
+      "format": [
+        "mixed case",
+        "table flattened to text"
+      ],
+      "categories": [
+        "Surname particles"
+      ]
+    },
+    {
+      "id": "fe_27",
+      "half": "natural",
+      "kind": "meeting minutes",
+      "format": [
+        "PDF-style hard line breaks",
+        "table flattened to text",
+        "mixed case"
+      ],
+      "categories": []
+    },
+    {
+      "id": "fe_28",
+      "half": "planted",
+      "kind": "memo",
+      "format": [
+        "PDF-style hard line breaks",
+        "headers and signatures"
+      ],
+      "categories": [
+        "Mc/Mac surnames"
+      ]
+    },
+    {
+      "id": "fe_29",
+      "half": "natural",
+      "kind": "email thread",
+      "format": [
+        "email thread with quoted replies",
+        "mixed case"
+      ],
+      "categories": []
+    },
+    {
+      "id": "fe_30",
+      "half": "planted",
+      "kind": "email thread",
+      "format": [
+        "email thread with quoted replies",
+        "mixed case"
+      ],
+      "categories": [
+        "Greetings",
+        "Surname particles",
+        "Mc/Mac surnames"
+      ]
+    }
+  ]
+}

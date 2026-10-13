@@ -1,0 +1,115 @@
+ARBORIAL INGÉNIERIE - COMPTE RENDU DE RÉUNION
+Projet : démarrage études techniques / unité de valorisation
+Site pressenti : zone de Ker-Lann, Rennes (Ille-et-Vilaine)
+Réf. dossier : AI-24-1187-KL / version export PDF 1.2
+
+Date : 18/09/2026        Lieu : 12 rue des Ateliers, Rennes
+Rédaction : Élodie Marrec, PMO, Arborial Ingénierie
+
+OBJET
+Réunion de lancement du projet KER-LANN 2 avec SITERMA Énergies,
+la Métropole de Rennes et les bureaux d'études associés. Le présent
+compte rendu reprend les points échangés en salle B204, avec les
+corrections reçues le 21/09 par courriel. Les lignes de budget
+proviennent du tableau transmis par Clara SOARES, donc attention aux
+libellés raccourcis.
+
+PARTICIPANTS
+Nom                         Organisation              Rôle        Présence
+Irène Vairon                Arborial Ingénierie        cheffe proj.  oui
+Malik Benfodil              SITERMA Énergies           resp. actif   oui
+Clara SOARES                Métropole de Rennes        référente     oui
+Junho Park                  Kalyx Mesures              acoustique    visio
+Sofia Darzi                 Atelier Nord-Est           archi         oui
+Émilie Chauvet              Bureau Veritas             contrôle      non
+Romain Kerguelen            Enedis                     raccordement  oui
+Nadia Rami                  Arborial Ingénierie        hydraulique   oui
+Tobias Keller               CEREMA                     avis voirie   oui
+
+Excusée : Émilie Chauvet a demandé que son avis écrit soit joint au
+prochain envoi. Le CEREMA souhaite recevoir le plan masse avant mardi,
+même si le niveau de détail reste provisoire.
+
+Page 1 / 3 - Arborial Ingénierie - diffusion interne et partenaires
+
+1. CONTEXTE RAPPELÉ EN SÉANCE
+Irène Vairon ouvre la séance à 09:12. Elle rappelle que SITERMA
+Énergies veut sécuriser le calendrier avant le dépôt auprès de la
+DREAL Bretagne. Le périmètre couvre l'avant-projet, les hypothèses de
+trafic depuis Rennes et Nantes, le diagnostic sols sur la parcelle
+nord et une note d'intégration pour la zone de Ker-Lann. Malik
+Benfodil précise que la direction de SITERMA Énergies attend un point
+coûts au 30 octobre, sans chiffrage définitif des ouvrages enterrés.
+
+Clara SOARES indique que la Métropole de Rennes demandera une lecture
+spécifique sur les eaux pluviales, car le bassin existant déborde déjà
+lors des épisodes forts. Nadia Rami répond que les données de pluie
+seront comparées avec les séries de Bretagne disponibles chez
+Météo-France. Une remarque est faite sur le cheminement piéton vers
+Bruz : il ne doit pas être traité comme un sujet secondaire.
+
+2. TABLEAU DES PREMIÈRES ACTIONS
+Action ; Pilote ; Échéance ; Remarques
+Relever réseaux secs ; Romain Kerguelen ; 02/10/2026 ; attente plan
+Enedis basse tension, format DWG à vérifier
+Hypothèses trafic ; Tobias Keller ; 09/10/2026 ; inclure accès Rennes
+et échangeur Noyal-Châtillon
+Note acoustique ; Junho Park ; 16/10/2026 ; mesures nuit demandées
+par Kalyx Mesures, prévoir autorisation portail
+Plan masse v0 ; Sofia Darzi ; 25/09/2026 ; Atelier Nord-Est enverra
+une version A3, orientation à reprendre côté sud
+Synthèse risques ; Irène Vairon ; 23/10/2026 ; intégrer observations
+Bureau Veritas si reçues avant clôture
+
+Page 2 / 3 - Arborial Ingénierie - compte rendu provisoire
+
+3. POINTS DISCUTÉS
+Le calendrier présenté par Arborial Ingénierie est jugé tendu mais
+tenable. Malik demande de ne pas afficher une date de consultation
+travaux avant validation interne de SITERMA Énergies. Clara souhaite
+qu'un jalon soit ajouté avec la Métropole de Rennes, semaine 46, pour
+éviter un retour tardif des services voirie.
+
+Sur le raccordement électrique, Romain Kerguelen signale que le poste
+le plus proche n'est pas forcément disponible. Enedis transmettra un
+avis de principe, sans engagement, après réception de la puissance
+appelée. Irène demande à Nadia de consolider la fiche besoins
+énergie/eau avant le 26 septembre.
+
+Sofia Darzi présente deux variantes d'implantation. La variante B
+libère un recul plus confortable vers les habitations de Bruz, mais
+elle complique les flux camions. Tobias Keller recommande de garder
+les deux options jusqu'à la première simulation. Junho Park rappelle
+que les mesures à Nantes sur un site comparable avaient montré un
+effet de souffle non prévu près des quais ; ce point sera seulement
+une alerte méthodologique, pas une conclusion.
+
+4. DÉCISIONS
+- Variante A conservée comme base de travail, variante B en secours.
+- Une visite terrain est fixée à Rennes le 29/09, rendez-vous 08:45
+  devant le portail nord de Ker-Lann.
+- Arborial Ingénierie centralise les documents sur l'espace projet,
+  et SITERMA Énergies nomme Malik Benfodil comme validateur unique.
+- La Métropole de Rennes recevra un jeu de plans simplifié avant tout
+  échange avec l'Agence de l'eau Loire-Bretagne.
+
+5. SUJETS EN ATTENTE
+Émilie Chauvet doit confirmer si Bureau Veritas intervient dès la
+phase esquisse ou seulement après stabilisation du programme. La DREAL
+Bretagne n'a pas encore répondu sur le niveau attendu pour l'étude de
+dangers. Clara SOARES vérifiera le contact utile à la préfecture
+d'Ille-et-Vilaine, sans engagement formel à ce stade.
+
+Page 3 / 3 - export automatique, mise en page non garantie
+
+PROCHAINE RÉUNION
+Mardi 06/10/2026, 14:00 - visio Teams, lien envoyé par Élodie Marrec.
+Participants souhaités : Irène, Malik, Clara, Sofia, Nadia, Romain.
+Ordre du jour : plan masse, réseaux, planning dépôt, points ouverts
+DREAL Bretagne / CEREMA.
+
+Diffusion :
+Irène Vairon - Arborial Ingénierie - 12 rue des Ateliers, 35000 Rennes
+Malik Benfodil - SITERMA Énergies - 4 avenue des Chênes, 69007 Lyon
+Clara SOARES - Métropole de Rennes - Rennes, France
+Élodie Marrec - pmo@arborial-ingenierie.example - 02 48 71 03 66
