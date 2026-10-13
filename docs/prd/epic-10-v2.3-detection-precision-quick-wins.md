@@ -120,7 +120,7 @@ These notes sit outside the normative Gates block above and do not change its te
 | 10.3b: Particles, Roles & LOCATION Noise (split from 10.3, Lionel, 2026-10-06) | MED | 0.5-1 week (re-estimated after STOP R, 2026-10-07) | F6, F7 | Done (PR #87, `bab6717`) |
 | 10.3c: Type-Aware Exact Match in Merge (added at 10.3a STOP R, Lionel, 2026-10-06) | MED | 0.5 week | 10.3a STOP R | Done (PR #91, `5846419`) |
 | 10.4: Greetings + Org-Plus-Country | MED | 0.5-1 week | F8, F9 | Done (PR #93, `2d4a029`) |
-| 10.5: DB Init Safety (data-layer hardening, added by Lionel, 2026-10-07) | LOW | 0.5 week | PR #83 finding | Draft |
+| 10.5: DB Init Safety (data-layer hardening, added by Lionel, 2026-10-07) | MED (raised from LOW by the PM, 2026-10-13) | 0.5 week | PR #83 finding | Draft |
 | 10.6: Final-Exam Set and Confidence Ranges (added by Lionel, 2026-10-07) | HIGH | 2-3 weeks elapsed, in parallel | Overfitting check, close-out evidence | Done (PRs #89, #92, #94, #95) |
 | 10.7: Type-Aware Mapping Lookup (data layer, added by Lionel at 10.3c STOP R, 2026-10-09) | MED | 0.5-1 week | 10.3c STOP R | Draft |
 
@@ -468,13 +468,16 @@ Not an AC. The 10.4 story decides whether to take each part in or leave it to la
 **I want** a failed initialization never to delete a database that another process just created,
 **so that** I do not lose the winner's mappings and passphrase setup to a race.
 
-**Priority:** LOW — rare: it needs two processes initializing the same new DB at the same moment. Single CLI or GUI runs initialize once.
+**Priority:** MEDIUM (raised from LOW by the PM, 2026-10-13, after the SM probe) — rare in interactive use: it needs two processes initializing the same new DB at the same moment, and single CLI or GUI runs initialize once. For this story's own case, a script that starts several first runs on the same new database, it is not rare: two processes started together lost the database in 40 of 40 SM probe pairs on Linux.
 **Change type:** Data-layer only. No file under `gdpr_pseudonymizer/nlp/`, `gdpr_pseudonymizer/resources/`, `tests/accuracy/` or `tests/test_corpus/` changes.
 **Ordering:** outside the detector chain. It changes no detection, so it has no accuracy baseline and may run before, between or after the detector stories. It does not move the epic close-out baseline.
 
 ### Context
 
-`init_database` (`gdpr_pseudonymizer/data/database.py:60`) checks that `db_path` does not exist, creates it, and on **any** exception deletes `db_path` (`database.py:180-184`, "Clean up partial database file on failure"). If two processes create the same new database at once, the loser's cleanup can delete the winner's freshly created file. PR #83 (open at the time of writing) makes index creation idempotent (`CREATE INDEX IF NOT EXISTS`). That only moves the loser's failure to the metadata key collision; the delete stays.
+`init_database` (`gdpr_pseudonymizer/data/database.py:60`) checks that `db_path` does not exist, creates it, and on **any** exception deletes `db_path` (`database.py:192-196`, "Clean up partial database file on failure"; line numbers at `main` `51d8429`). If two processes create the same new database at once, the loser's cleanup can delete the winner's freshly created file. PR #83 (merged as `5790970`, 2026-10-06) made index creation idempotent (`CREATE INDEX IF NOT EXISTS`). In a real concurrent start, most losers fail earlier, at table creation (`create_all`, `database.py:100`), which #83 did not cover, and others at the metadata key collision (10.5 SM probe on Linux: 31 of 40 at `create_all`, 7 at the metadata insert, 2 with both processes failing). Either way, the delete stays.
+
+- **Windows behaves differently:** the loser's delete fails (WinError 32) and the loser crashes with a raw `PermissionError`; the winner's file survives by accident. The paragraph above describes the POSIX outcome. AC2 covers both.
+- **AC4's "still leaves no partial file" is the target state, not today's behaviour:** today a late failure in a single, uncontended initialization leaves `-wal`/`-shm` files (Linux) or the partial `mappings.db` plus a `PermissionError` (Windows). AC4 holds after the fix.
 
 ### Acceptance Criteria
 
@@ -494,6 +497,11 @@ Not an AC. The 10.4 story decides whether to take each part in or leave it to la
 
 - `gdpr_pseudonymizer/data/database.py` — `init_database` cleanup path
 - `tests/unit/` or `tests/integration/` — concurrent-initialization test
+
+### Follow-ups Found by the 10.5 SM (not ACs, 2026-10-13)
+
+- **GUI passphrase message on any "12" (backlog):** the GUI workers show "La phrase secrète doit contenir au moins 12 caractères." for any `ValueError` whose message contains "12" (`gui/workers/detection_worker.py:109`, `gui/workers/processing_worker.py:102`), including any database path that contains "12". Pre-existing, not part of the init race.
+- **Stale architecture sketch:** the `init_database` sketch in `docs/architecture/9-database-schema.md` §9.4 lists an `encryption_algorithm` metadata key and JSON-encoded values. The code stores four keys as plain strings (`database.py:161-180`). Docs follow-up for the architect or PM.
 
 ### Estimated Effort: 0.5 week
 
