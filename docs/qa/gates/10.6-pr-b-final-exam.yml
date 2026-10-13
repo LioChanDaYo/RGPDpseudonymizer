@@ -5,7 +5,7 @@ scope: 'PR B: AC4-AC8 and the PR B part of AC10 (tasks B0-B13), PR #92 at head 0
 gate: PASS
 status_reason: 'Every B13.4 check passes from hashes, GitHub metadata and QA-dispatched runs: the 91 frozen lines equal the record pushed before 10.4 merged, all 124 committed blobs match FINGERPRINTS.sha256, the adjudicated annotations regenerate byte for byte from the committed decisions, the guard passes on all 4 legs, and the dummy re-run 38319306124 reproduces B8. No defect found; the only open items are B14-side reminders and doc ticks.'
 reviewer: 'Quinn (Test Architect)'
-updated: '2026-10-12T23:05:00Z'
+updated: '2026-10-13T10:40:00Z'
 
 waiver: { active: false }
 
@@ -36,6 +36,7 @@ evidence:
   tests: 'Locally (Windows toolchain): test_final_exam_tooling.py, test_final_exam_leakage.py, test_held_out_leakage.py and test_annotation_integrity.py give 120 passed, 0 skipped (76 in the two final-exam files). Held-out-blind check of the 412 tokens added to the tests and fixture since B8: 373 not in the main corpus, all identifiers, English words or invented names.'
   ci: 'PR #92 head 0eff214: CI - Test Matrix 38317500000 (lint and 4 test legs), Code Quality 38317499965 and CodeQL 38317495181 all succeeded on run_attempt 1.'
   isolation: 'QA opened only README.md, RUNS.md and FINGERPRINTS.sha256 in tests/test_corpus/final_exam/. Scripts read the exam files in five count-only runs (sha256sum and check; merge and report on a deleted temp copy; the B14 preflight; the integrity counts; the guard matching over docs, by hash). None printed exam text. The dev''s count-only read of the manifest and its carriage-return count are not an isolation breach in substance: the manifest holds the plan already in the story, and a byte count shows no content.'
+  b14_3_scored_run: 'Post-merge G2 (2026-10-13), QA''s own download of 38382553368 (Lionel''s workflow_dispatch on main at c63a7b6, attempt 1, success; accuracy skipped, final_exam success, one accuracy-results). First line final_exam_target=real fingerprints_sha256=faea9dc9...5005 (= Commit Record); ledger rows=0 scored=0 and OK 124 before scoring. No commit after 40692ff touched tests/test_corpus/final_exam/ except the squash merge c63a7b6, whose folder diff against 40692ff and whole-tree diff against f4c4a7b are empty. The regular 16 lines are byte-identical to 38212303870. 12 [FINAL-EXAM ...] lines, each followed by its [CI95 FINAL-EXAM ...] line: P/R/F1 and FN%/FP% recompute from TP/FP/FN; per-type counts sum to Overall in each scope; planted + natural = all; gold TP+FN = 3264 (PERSON 1027, LOCATION 1429, ORG 808); docs=30 and docs=15; seed 20261008, 10000 resamples; every point inside its range; 0 undefined. The JSON is the main corpus only (25 documents) and equals 38212303870 except run_id and commit; the XML has no captured output. Leak scan, by hash, of 1227 entity strings, 2482 document lines of 20+ characters and 1012 final-exam-only keys over the job log and the 3 artifact files: 0 hits. The CI95 lines cannot be recomputed from the artifact, by design: it holds no per-document final-exam data. Ledger row (PR #94) matches the run; ledger-check gives rows=1 scored=1.'
   trace:
     ac_covered: [4, 5, 6, 7, 8, 10]
     ac_gaps: []
@@ -66,3 +67,5 @@ recommendations:
       refs: ['story Tasks B7.4, B13.4']
     - action: 'Epic 9 (Q7, the exam becomes a held-out set): confine scripts/benchmark_hybrid.py''s recursive glob of tests/test_corpus to the main-corpus folders, so it no longer runs the detector over held_out/ or final_exam/.'
       refs: ['scripts/benchmark_hybrid.py:49, :237']
+    - action: 'Throw-away commits must not carry [skip ci] in their titles, or the PR must be squashed with an edited message. The squash of #92 (c63a7b6) kept the four [skip ci] titles of QA''s B8.3 throw-away commits in its body, so every push workflow on main was skipped (CI matrix, Code Quality, accuracy; docs.yaml did not redeploy the site). c63a7b6''s tree equals f4c4a7b, which was 9/9 green, and the manual regular run 38383159395 on main matches 38212303870 on all 16 lines; the docs site still needs a docs.yaml dispatch or the next docs push.'
+      refs: ['c63a7b6 commit message', '.github/workflows/ci.yaml, code-quality.yaml, docs.yaml, accuracy.yaml (push triggers)']
