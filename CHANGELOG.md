@@ -140,6 +140,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Two runs creating the same new mapping database at once no longer lose it (Story 10.5).**
+  - Two runs that create the same new mapping database at the same moment no longer lose it. The first run's database (its mappings and passphrase setup) is always kept; the second run stops with "Database already exists". Before, on Linux and macOS, the second run could delete the database the first one had just created; on Windows, it stopped with an unexpected file-access error.
+  - A failed or interrupted (Ctrl+C) database creation no longer leaves a partial database, or its `-wal`/`-shm` files, behind.
+  - **Upgrading:** existing databases are not opened, changed or migrated by this fix. The schema version stays 1.0.0. No action needed.
+
 - **A hard-wrapped name keeps one pseudonym; the wrapped-name join is faster (10.3a QA follow-up).**
   - **One key per name.** The mapping key now turns every run of whitespace (line break, tab, no-break space, repeated spaces) into one space, after titles (and, for places, prepositions) are stripped. "Zorbalia⏎Quentrix", joined by the 10.3a hard-wrapped-name rule, and "Zorbalia Quentrix" now share one mapping row and one pseudonym. Before, the wrapped spelling got a row of its own and, through the pseudonym collision check, a second pseudonym for the same person. The validation preview and the known-entity check use the same key, so the preview matches the output.
   - **Speed.** The wrapped-name join no longer scans the whole candidate list once per person name. With 8,000 person candidates it took 4.9 s and now takes 0.04 s or less (same machine). Its output is unchanged.
