@@ -32,6 +32,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Public accuracy figures now lead with the blind final exam (Story 10.6, Epic 10 close-out).** README, README.fr, the FAQ, the docs home page and the tutorial state F1 61.4% (95% range 59.3–63.6%) and recall 60.6% on 30 unseen documents written by a different author (CI run `38382553368`), with 82.6% on the development corpus and 78.1% on the held-out set as context (CI run `38212303870`). The previous figure (F1 58.53%, v2.2.0) stays in the historical table.
+
 - **People addressed in greetings, organisations with their country, short forms and defined aliases are now offered (Story 10.4).**
   - **Greetings.** On a greeting line, each person is offered separately: "Zorbalia, Quentrel," used to be one candidate "Zorbalia, Quentrel" and is now two, "Zorbalia" and "Quentrel". A first name alone on a short line ending with a comma ("Zorbalia,"), or right after "Bonjour", "Merci", "Bonne initiative" or "Félicitations" at the start of a line ("Merci Zorbalia."), is offered as a person. Only known first names count, and only on such lines: the same first name in running text is not affected. The opener list is in `gdpr_pseudonymizer/resources/salutations.yaml`.
   - **Organisation + place.** An organisation followed by its country, region or city ("Zorbtech France", "Zorbtech Paris", "Zorbtech UK") is offered as one organisation, and the place is still offered on its own. A job title such as "VP Europe" is never merged. UK, US, USA, UE and EU are listed in `gdpr_pseudonymizer/resources/place_abbreviations.yaml`.

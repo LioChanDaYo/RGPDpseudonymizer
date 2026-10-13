@@ -1,0 +1,51 @@
+schema: 1
+story: '10.6'
+story_title: 'Final-Exam Set and Confidence Ranges (B15 close-out: public figures, G7)'
+scope: 'PR #95 (docs only) at head e604ef1 on main 91b500d: dev commit abc16d4 (B15 close-out in the story, QA report section, G7 public docs, CHANGELOG line) and PM commits e7e806b, dd96a69, e604ef1 (epic Close-Out Record and Story List, Epic 9 carry-overs, the 10.4 REQ-001 record). The scored run itself was checked at B14.3 (QA Results, 2026-10-13).'
+gate: PASS
+status_reason: 'Every public figure traces to run 38382553368 (final exam) or 38212303870 (main and held-out) and is rounded right in both languages; the public text is exactly Lionel''s approved wording, with no "4 in 10" clause and nothing added; all 96 pasted metric lines are byte-identical to the artifacts; the epic''s protected sections are unchanged. No defect found.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-10-13T15:40:00Z'
+
+waiver: { active: false }
+
+merge_blockers: []
+
+top_issues: []
+
+quality_score: 100
+expires: '2026-10-27T15:40:00Z'
+
+evidence:
+  figures: 'From QA''s own downloads. Final exam 38382553368: [FINAL-EXAM Overall] P=0.6233 R=0.6057 F1=0.6144 FN%=39.43; CI95 F1=[0.5926,0.6356]; PERSON F1=0.6917, LOCATION 0.6870, ORG 0.3480; planted F1 0.6160, natural 0.6124. Main 38212303870: [Overall] F1=0.8262, [HELD-OUT Overall] F1=0.7807. Public values 61.4, 59.3-63.6, 60.6, 62.3, 69.2, 68.7, 34.8, 82.6 and 78.1 (and 39.4 in the QA report) are each the source value rounded to one decimal (no value sits on a rounding boundary); the French text uses decimal commas (61,4 %, 59,3-63,6 %). Every decimal in the added public lines maps to one of these values or to unchanged history (58.53, 59.97, 48.42, 73.98, 29.5). Run IDs cited: 38382553368 (17x) and 38212303870 (9x), nothing else.'
+  wording: 'A script compared every added line in README, README.fr, docs/faq*, docs/index*, docs/tutorial* and CHANGELOG with r106b/public-wording.md (the text Lionel approved with "OK, go"). Each added line is an approved line or contains one. The text around the 20 approved fragments that sit inside longer lines (for example "Improving this is a priority", "(hybrid approach: ...)" inside point 3, the FAQ sentences inside their paragraphs) already exists on main, unchanged. No line outside the approved text; no approved line missing. Neither "4 in 10", "4 noms sur 10", "peu familiers" nor "unfamiliar documents" appears in any public file. The FAQ sentence reads exactly "With 60.6% recall on unseen documents (CI run 38382553368), the detector does not find every name on its own." and its French equivalent.'
+  history_58_53: 'In the public docs 58.53% / 58,53 % appears only in the historical table row (relabelled "Hybrid (v2.2.0)") and the scoring note that compares with it; the CHANGELOG and QA report say it stays in the historical table. Older figures (59.97%, 59% recall) remain only in historical documents (docs/release-announcement-v1.1.md, docs/nlp-benchmark-report.md). No "~59%", "~74%" or "~80% recall" claim remains in the user docs.'
+  pasted_lines: 'Every metric line added to docs/qa/ner-accuracy-report.md (40), the 10.6 story (40) and the epic (16) is byte-identical to a line of 38382553368 or 38212303870 (the 16 regular lines are identical in both runs and in 38383159395).'
+  epic_protected: 'sha256 of each section from its "## " heading to the line before the next "## " heading, plus a newline (the method that reproduces the reference values at 4299e28): Product Constraints 81fc81ca5694d48c, Gates eb5c245ef017fc55, Cross-Story Rules 4ad3e787caaea345 at 4299e28, main 91b500d and PR head e604ef1. The PR changes only the Story List and the Close-Out Record.'
+  exposure: 'The guard''s 1012 final-exam-only strings, matched by hash over every line the PR adds, its 4 commit messages and the PR body: 0 hits. Final-exam content is aggregate only; the one id mentioned is "fe_01 keeps 947 words", already in the Freeze Record. No [skip ci] (or other skip marker) in any commit title or body, or in the PR body.'
+  run_k_followup: 'Main push run 38212303870 (2d4a029) equals 10.4 close-out run K 38173542707 on all 16 lines, and their JSONs are identical except run_id and commit (QA download). QA ticked that follow-up in the 10.4 story''s QA Results checklist.'
+  ci: 'At e604ef1: lint, Code Quality 38422117988 and CodeQL 38422111492 green on attempt 1; CI - Test Matrix 38422118047 (lint and the 4 test legs, macOS included) succeeded on attempt 1: 9/9 green. Main 91b500d: Code Quality and Documentation (the docs site redeploy that c63a7b6 skipped) succeeded; its CI - Test Matrix attempt 2 had macOS still running.'
+  trace:
+    ac_covered: [9, 10]
+    ac_gaps: []
+    not_in_scope: [1, 2, 3, 4, 5, 6, 7, 8]
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'Docs only; no final-exam content beyond aggregates, no exam string by hash.'
+  performance:
+    status: PASS
+    notes: 'No code change.'
+  reliability:
+    status: PASS
+    notes: 'Every public number cites its CI run and traces to it.'
+  maintainability:
+    status: PASS
+    notes: 'English and French texts carry the same figures; history stays labelled as history.'
+
+recommendations:
+  immediate: []
+  future:
+    - action: 'Optional wording nuance for a later docs pass: the QA report says the hard cases "are not where the score is lost"; planted 0.616 and natural 0.612 have overlapping ranges, so "make no measurable difference" would say the same with less inference. Not part of the public text.'
+      refs: ['docs/qa/ner-accuracy-report.md (section "Final exam (Story 10.6, scored 2026-10-13)", "Planted vs natural")']

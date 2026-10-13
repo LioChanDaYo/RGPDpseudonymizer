@@ -1275,3 +1275,81 @@ On the same CPU the timings are unchanged within run-to-run variation (the two s
 
 - The regular accuracy job never loads the set: `tests/test_corpus/final_exam/` is outside `accuracy.yaml`'s push paths and every loader. B12.3 shows that the regular run on the PR B branch is identical to `main`.
 - README, FAQ, docs index and tutorials are not updated in this story until close-out (Epic 10 G7 interpretation).
+
+## Final exam (Story 10.6, scored 2026-10-13)
+
+**The one scored run of the final exam:** CI run `38382553368`.
+- It was a `workflow_dispatch` on `main` at `c63a7b6` (PR #92's merge), started on 2026-10-13 at 10:19 UTC by Lionel, with his recorded go ("i'm giving my go").
+- Its ledger is `tests/test_corpus/final_exam/RUNS.md`.
+- The first line of `accuracy-output.txt` is `final_exam_target=real fingerprints_sha256=faea9dc9dc9163bb4ae7e26fd789870f20ee398694e3b06a9d29f16333815005`, the committed `FINGERPRINTS.sha256`. The job checked every fingerprint before scoring.
+- QA's own check of the run (G2, B14.3): PASS.
+
+### Lines from `accuracy-output.txt`, verbatim
+
+```
+[FINAL-EXAM Overall] P=0.6233 R=0.6057 F1=0.6144 TP=1977 FP=1195 FN=1287 FN%=39.43 FP%=37.67
+[CI95 FINAL-EXAM Overall] P=[0.5956,0.6496] R=[0.5838,0.6281] F1=[0.5926,0.6356] unit=document docs=30 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[FINAL-EXAM PERSON] P=0.6744 R=0.7098 F1=0.6917 TP=729 FP=352 FN=298
+[CI95 FINAL-EXAM PERSON] P=[0.6240,0.7190] R=[0.6473,0.7651] F1=[0.6393,0.7365] unit=document docs=30 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[FINAL-EXAM LOCATION] P=0.6727 R=0.7019 F1=0.6870 TP=1003 FP=488 FN=426
+[CI95 FINAL-EXAM LOCATION] P=[0.6360,0.7077] R=[0.6708,0.7324] F1=[0.6562,0.7159] unit=document docs=30 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[FINAL-EXAM ORG] P=0.4083 R=0.3032 F1=0.3480 TP=245 FP=355 FN=563
+[CI95 FINAL-EXAM ORG] P=[0.3486,0.4686] R=[0.2490,0.3613] F1=[0.2955,0.3997] unit=document docs=30 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[FINAL-EXAM PLANTED Overall] P=0.6257 R=0.6065 F1=0.6160 TP=1085 FP=649 FN=704 FN%=39.35 FP%=37.43
+[CI95 FINAL-EXAM PLANTED Overall] P=[0.5852,0.6634] R=[0.5839,0.6315] F1=[0.5873,0.6437] unit=document docs=15 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[FINAL-EXAM PLANTED PERSON] P=0.6661 R=0.6941 F1=0.6798 TP=397 FP=199 FN=175
+[CI95 FINAL-EXAM PLANTED PERSON] P=[0.5869,0.7356] R=[0.6000,0.7715] F1=[0.5984,0.7487] unit=document docs=15 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[FINAL-EXAM PLANTED LOCATION] P=0.6982 R=0.7050 F1=0.7016 TP=576 FP=249 FN=241
+[CI95 FINAL-EXAM PLANTED LOCATION] P=[0.6505,0.7419] R=[0.6608,0.7447] F1=[0.6586,0.7394] unit=document docs=15 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[FINAL-EXAM PLANTED ORG] P=0.3578 R=0.2800 F1=0.3142 TP=112 FP=201 FN=288
+[CI95 FINAL-EXAM PLANTED ORG] P=[0.2844,0.4353] R=[0.1934,0.3743] F1=[0.2344,0.3919] unit=document docs=15 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[FINAL-EXAM NATURAL Overall] P=0.6203 R=0.6047 F1=0.6124 TP=892 FP=546 FN=583 FN%=39.53 FP%=37.97
+[CI95 FINAL-EXAM NATURAL Overall] P=[0.5848,0.6582] R=[0.5668,0.6449] F1=[0.5806,0.6452] unit=document docs=15 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[FINAL-EXAM NATURAL PERSON] P=0.6845 R=0.7297 F1=0.7064 TP=332 FP=153 FN=123
+[CI95 FINAL-EXAM NATURAL PERSON] P=[0.6200,0.7383] R=[0.6476,0.7982] F1=[0.6390,0.7566] unit=document docs=15 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[FINAL-EXAM NATURAL LOCATION] P=0.6411 R=0.6977 F1=0.6682 TP=427 FP=239 FN=185
+[CI95 FINAL-EXAM NATURAL LOCATION] P=[0.5932,0.6895] R=[0.6537,0.7446] F1=[0.6303,0.7070] unit=document docs=15 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[FINAL-EXAM NATURAL ORG] P=0.4634 R=0.3260 F1=0.3827 TP=133 FP=154 FN=275
+[CI95 FINAL-EXAM NATURAL ORG] P=[0.3698,0.5544] R=[0.2634,0.3966] F1=[0.3171,0.4481] unit=document docs=15 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+```
+
+The same run printed the regular 16 lines unchanged. They are byte-identical to `main` run `38212303870` at `2d4a029`, the 10.4 merge:
+
+```
+[Overall] P=0.8068 R=0.8465 F1=0.8262 TP=1875 FP=449 FN=340 FN%=15.35 FP%=19.32
+[PERSON] P=0.9219 R=0.9774 F1=0.9488 TP=1298 FP=110 FN=30
+[LOCATION] P=0.7491 R=0.8061 F1=0.7766 TP=212 FP=71 FN=51
+[ORG] P=0.5766 R=0.5849 F1=0.5807 TP=365 FP=268 FN=259
+[HELD-OUT Overall] P=0.7911 R=0.7706 F1=0.7807 TP=178 FP=47 FN=53 FN%=22.94 FP%=20.89
+[HELD-OUT PERSON] P=0.8661 R=0.8661 F1=0.8661 TP=97 FP=15 FN=15
+[HELD-OUT LOCATION] P=0.7761 R=0.7647 F1=0.7704 TP=52 FP=15 FN=16
+[HELD-OUT ORG] P=0.6304 R=0.5686 F1=0.5979 TP=29 FP=17 FN=22
+[CI95 Overall] P=[0.7782,0.8402] R=[0.8230,0.8659] F1=[0.8054,0.8461] unit=document docs=25 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[CI95 PERSON] P=[0.9104,0.9361] R=[0.9632,0.9884] F1=[0.9410,0.9580] unit=document docs=25 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[CI95 LOCATION] P=[0.6519,0.8275] R=[0.7570,0.8589] F1=[0.7136,0.8290] unit=document docs=25 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[CI95 ORG] P=[0.4801,0.6652] R=[0.4844,0.6800] F1=[0.4876,0.6635] unit=document docs=25 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[CI95 HELD-OUT Overall] P=[0.7194,0.8564] R=[0.7130,0.8286] F1=[0.7216,0.8342] unit=document docs=6 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[CI95 HELD-OUT PERSON] P=[0.8065,0.9256] R=[0.8000,0.9355] F1=[0.8441,0.8973] unit=document docs=6 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[CI95 HELD-OUT LOCATION] P=[0.6719,0.8939] R=[0.6866,0.8281] F1=[0.6870,0.8516] unit=document docs=6 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[CI95 HELD-OUT ORG] P=[0.4286,0.7692] R=[0.3261,0.7606] F1=[0.3704,0.7500] unit=document docs=6 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+```
+
+### Reading the result
+
+- **Headline (Lionel, B15.2):** final-exam F1 61.4% (95% range 59.3–63.6%), precision 62.3%, recall 60.6%. 39.4% of the annotated entities are missed (`FN%`).
+- **By type:** PERSON F1 69.2%, LOCATION 68.7%, ORG 34.8%. Organisations remain the weak point.
+- **Planted vs natural:** F1 0.616 on the 15 documents seeded with the known hard cases, 0.612 on the 15 natural ones. The hard cases Epic 10 targeted are not where the score is lost: the drop from the development corpus comes from unfamiliar documents in general.
+- **Context:** the same detector scores F1 82.6% on the development corpus and 78.1% on the 6-document held-out set (CI run `38212303870`). The gap to 61.4% measures how far the rules fit the documents they were built on.
+
+### Caveats
+
+- **Synthetic documents.** GPT (`gpt-5.5`) wrote all 30 documents from a brief Lionel approved. Real documents may score differently.
+- **Replacements (N1 bias note).** 3 planted documents were replaced during annotation, because Gemini (annotator B, `gemini-3.1-pro-preview` at temperature 0) hit its output-token limit twice on each. The replacements may favour planted documents that are easier to annotate.
+- **One length exception.** One document keeps 947 words, against the brief's 900 (Lionel, 2026-10-10).
+- **G5, "keep the longer one".** At the merge, 83 nested same-type pairs (PERSON 8, LOCATION 46, ORG 29) were resolved by keeping the longer span (Lionel, 2026-10-12). Where the shorter span was the right one, the ground truth is wrong there.
+- **Ground truth.** It comes from two model annotations; Lionel adjudicated their 407 disagreements in 192 groups and spot-checked 3 documents, finding 0 shared errors. Errors both models share in the other 27 documents can remain.
+- **Scored once.** The numbers were not used for any decision or tuning, except Lionel's choice of the public figure (B15.2).
+
+### Public number (B15.2)
+
+Lionel chose, on 2026-10-13: **"Final exam as headline (Recommended)"**. README, README.fr, the FAQ, the docs home page and the tutorial lead with the final exam and give the development-corpus and held-out figures as context, all from these runs. The previous figure (F1 58.53%, v2.2.0) stays in the README's historical table.

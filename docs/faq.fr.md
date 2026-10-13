@@ -8,19 +8,19 @@
 
 ### Quelle précision puis-je attendre de la détection automatique ?
 
-Le pipeline hybride de détection (NLP + expressions régulières) identifie automatiquement environ 74 % des entités dans un texte français (rappel 73,98 %, F1 58,53 % sur notre corpus de 25 documents). Les noms d'organisations sont le point faible. Nous prévoyons d'améliorer ces chiffres. Cette étape sert de pré-filtrage -- **vous vérifiez et validez chaque entité** au cours du processus de validation obligatoire.
+Sur 30 documents français inédits, écrits par un autre auteur dans des formats peu soignés (un examen final à l'aveugle, évalué une seule fois), le pipeline hybride de détection (NLP + expressions régulières + dictionnaire géographique) atteint un F1 de 61,4 % (intervalle à 95 % : 59,3–63,6 %) et un rappel de 60,6 % (exécution CI 38382553368). Sur notre corpus de développement, il atteint 82,6 %, et 78,1 % sur un jeu réservé (exécution CI 38212303870) ; ces deux ensembles sont plus proches des documents sur lesquels les règles ont été construites. Les noms d'organisations sont le point faible (F1 ORG de 34,8 % à l'examen final). Nous prévoyons d'améliorer ces chiffres. Cette étape sert de pré-filtrage -- **vous vérifiez et validez chaque entité** au cours du processus de validation obligatoire.
 
 Après validation humaine, la précision atteint **100 %** puisque vous contrôlez la décision finale pour chaque entité.
 
 ### Pourquoi la précision du NER est-elle si faible ?
 
-Le modèle spaCy `fr_core_news_lg` a été entraîné principalement sur des textes journalistiques, pas sur des transcriptions d'entretiens ou des documents commerciaux. Les modèles linguistiques spécifiques à un domaine (registres conversationnels, formalité mixte) réduisent la précision en utilisation directe. Un test d'évaluation portant sur 25 documents français contenant 1 855 entités a mesuré un F1 de 29,5 % pour spaCy seul. L'approche hybride (expressions régulières, dictionnaires de noms et de lieux) atteint 58,53 % F1 en v2.2.0 (calculé comme l'application traite les titres et les prépositions). L'amélioration de la détection est prévue, avec un modèle français affiné comme objectif de la v3.0.
+Le modèle spaCy `fr_core_news_lg` a été entraîné principalement sur des textes journalistiques, pas sur des transcriptions d'entretiens ou des documents commerciaux. Les modèles linguistiques spécifiques à un domaine (registres conversationnels, formalité mixte) réduisent la précision en utilisation directe. Un test d'évaluation portant sur 25 documents français contenant 1 855 entités a mesuré un F1 de 29,5 % pour spaCy seul. L'approche hybride (expressions régulières, dictionnaires de noms et de lieux) atteint 82,6 % F1 sur notre corpus de développement, mais 61,4 % sur 30 documents inédits écrits par un autre auteur (exécutions CI 38212303870 et 38382553368). L'amélioration de la détection est prévue, avec un modèle français affiné comme objectif de la v3.0.
 
 Un affinage basé sur des données de validation du monde réel est prévu pour la v3.0 (ciblant un F1 de 70-85 %).
 
 ### Pourquoi la validation est-elle obligatoire ?
 
-Parce que la détection IA rate des entités. Avec un rappel d'environ 80 %, environ un cinquième des entités ne seraient pas détectées sans examen humain. Pour la conformité RGPD, manquer ne serait-ce qu'une entité de données personnelles pourrait constituer une violation de données. La validation obligatoire garantit **aucun faux négatif**.
+Parce que la détection IA rate des entités. Avec un rappel de 60,6 % sur des documents inédits (exécution CI 38382553368), le détecteur ne trouve pas tous les noms à lui seul. Pour la conformité RGPD, manquer ne serait-ce qu'une entité de données personnelles pourrait constituer une violation de données. La validation obligatoire garantit **aucun faux négatif**.
 
 ### Comment traiter uniquement certains types d'entités ?
 

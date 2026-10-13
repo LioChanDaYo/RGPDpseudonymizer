@@ -30,7 +30,7 @@ GDPR Pseudonymizer est un **outil conçu pour la confidentialité**. Il associe 
 
 ### IA + relecture humaine
 
-- **Détection hybride** — l'IA repère environ 74 % des entités (NLP + expressions régulières + dictionnaire géographique, F1 58,53 %) ; amélioration prévue
+- **Détection hybride** — NLP + expressions régulières + dictionnaire géographique : F1 de 61,4 % sur 30 documents inédits (exécution CI 38382553368), 82,6 % sur notre corpus de développement ; amélioration prévue
 - **Validation obligatoire** — vous vérifiez et confirmez chaque entité (précision finale de 100 %)
 - **Interface de validation rapide** — raccourcis clavier, actions groupées, moins de 2 min par document
 - **Regroupement des variantes** — les formes apparentées (« Marie Dubois », « Pr. Dubois », « Dubois ») sont fusionnées en un seul élément à valider
