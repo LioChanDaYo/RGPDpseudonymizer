@@ -1,0 +1,121 @@
+schema: 1
+story: '10.8'
+story_title: 'Desktop App Type-Aware Candidate Keys (10.3c regression)'
+scope: 'PR #97 at head 10ddd62 on main 51d8429: tests-first 2a9a19a, fix 5b85bf7, CHANGELOG 11b284f, Dev Agent Record 10ddd62; PM epic commits f7637a2 and 9047ec0 (docs/prd only); SM/PO story commits.'
+gate: PASS
+status_reason: 'The fix is the Fix Design as written, every consumer re-checked, and the tests-first proof holds: the same 15 tests xfailed on all four legs of 38465530185 and each fails on its intended assertion with --runxfail on 2a9a19a, then all pass at 5b85bf7 and 10ddd62. QA probe 7.3 passes on every item (three types at one span 24/24 orders, both Zorbaville orders, single-document and batch rejects, longer variant, undo/redo, editor click); the findings in 10.8 itself are low. Three pre-existing desktop leak paths found while probing (batch Previous then validate, batch Previous then Next, hand-added row) are reported for Lionel; 10.8 does not cause or worsen any of them.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-10-13T22:04:00Z'
+
+waiver: { active: false }
+
+merge_blockers: []
+
+top_issues:
+  - id: 'TEST-001'
+    severity: low
+    finding: 'Four existing test fixtures still build preview maps with the old "{text}_{start}" string key: tests/unit/gui/test_validation_state_grouping.py:57, tests/unit/gui/test_detection_worker.py:67 (a mocked return value), tests/unit/gui/test_processing_screen.py:135 and tests/integration/gui/conftest.py:102. The story left them unchanged on purpose (AC5: no assertion reads them, and they pass). After 10.8 these keys never match, so those fixtures silently give their rows no preview, and mypy does not check tests, so nothing flags it.'
+    suggested_action: 'In a later housekeeping commit, build them with candidate_key(...) so a future test that reads a preview from these fixtures does not get an empty one by surprise.'
+    refs: ['tests/unit/gui/test_validation_state_grouping.py:57', 'tests/unit/gui/test_detection_worker.py:67', 'tests/unit/gui/test_processing_screen.py:135', 'tests/integration/gui/conftest.py:102']
+    suggested_owner: dev
+  - id: 'MNT-001'
+    severity: low
+    finding: 'The batch path hands the preview map to ValidationScreen.set_context through **kwargs read as dict[str, Any] (gui/screens/validation.py:341, :363), so mypy cannot see the key type there. Today the only writer is build_pseudonym_previews (batch.py:896), which is typed, so the AC1 claim "mypy flags any stale reader or writer" holds for every real call site (QA mutation check below), but not for a future writer that builds the map by hand and passes it through set_context.'
+    suggested_action: 'Information; no change needed for 10.8.'
+    refs: ['gdpr_pseudonymizer/gui/screens/validation.py:341', 'gdpr_pseudonymizer/gui/screens/validation.py:363']
+    suggested_owner: dev
+
+pre_existing_findings:
+  # Found during QA probe 7.3. None is caused or made worse by 10.8; all are identical
+  # on the unfixed code (2a9a19a, product tree identical to 51d8429) and the code involved
+  # is unchanged since v2.2.0 (git diff v2.2.0 51d8429 on batch.py, validation.py and
+  # batch_worker.py is empty). Not merge blockers for 10.8 (story Task 7.3: "A finding
+  # outside that is reported, not a fail"). Routing is Lionel's call.
+  - id: 'PRE-001'
+    severity: high
+    finding: 'Batch validation, "Précédent" then "Valider et continuer": the list of the document shown (the previous one) is sent as the result of the document the batch is waiting on. That document is then written with the previous document''s positions: its own names stay in clear (partly or fully) and its text is damaged. Probe with the real BatchWorker thread, only detection replaced: doc 1 "Quentrel Zorbalia rejoint le projet. Le contrat est signé avec Quentrel Zorbalia." came out as "<org pseudonym>orbalia rej<org pseudonym>ojet. Le contrat est signé avec Quentrel Zorbalia."; the batch summary still says the document was processed. Same on both trees. Since Story 6.7.3 (v2.0.0), whose AC says re-submitting a previous document "replaces the stored result but does not re-trigger the worker"; the code stores it under the current index (batch.py:928) and wakes the worker with it (batch.py:950). The button is visible and enabled on the previous document (validation.py:319).'
+    suggested_action: 'Lionel: own story before the next release (recommended), or later. Smallest safe fix: on a previous document, disable "Valider et continuer" or make it store the result for the shown document without calling submit_validation_result; add a test that drives Précédent then the button.'
+    refs: ['gdpr_pseudonymizer/gui/screens/batch.py:928', 'gdpr_pseudonymizer/gui/screens/batch.py:950', 'gdpr_pseudonymizer/gui/screens/validation.py:695-713', 'gdpr_pseudonymizer/gui/screens/validation.py:777-786', 'gdpr_pseudonymizer/gui/screens/validation.py:319', 'docs/stories/6.7.3.batch-validation-workflow.story.md:43']
+    suggested_owner: po
+  - id: 'PRE-002'
+    severity: medium
+    finding: 'Batch validation, "Précédent" then "Suivant": the current document is rebuilt from its detections, so every accept and reject already made on it is lost (rows back to "to review", except names already in the mapping database). "Valider et continuer" sends only confirmed rows and gives no warning about rows still to review, so if the user does not review again, those names stay in clear. Probe (real worker): two confirmed rows were pending again after Suivant; validating then wrote doc 1 unchanged, both names in clear. Visible on screen (the rows show as to review), same on both trees.'
+    suggested_action: 'With PRE-001: keep the current document''s review state across Précédent/Suivant, or warn before validating with rows still to review.'
+    refs: ['gdpr_pseudonymizer/gui/screens/validation.py:715-733', 'gdpr_pseudonymizer/gui/screens/batch.py:900-914', 'gdpr_pseudonymizer/gui/models/validation_state.py:327-358']
+    suggested_owner: po
+  - id: 'PRE-003'
+    severity: medium
+    finding: 'The dev''s out-of-scope finding, confirmed. A row added by hand whose text and type match a detected group of more than one row: "Rejeter" on the added row (right-click menu, or Delete in navigation mode) rejects the detected rows of that group instead; the added row stays "added" and is replaced, the detected places are not replaced and stay in clear. "Accepter" on it confirms the detected rows (harmless). The panel shows the detected rows turning rejected; undo restores them. Batch path (one row per occurrence): happens for any name detected at least twice in the document. Probe: ORG "Zorbaville" detected at 0 and 21 and accepted, ORG "Zorbaville" added at 33, reject the added row: rows 0 and 21 REJECTED, sent [ORG 33], two "Zorbaville" left in clear; identical on both trees. 10.8 narrows it, never widens it: with a pair present, at 51d8429 the reject also reached the LOCATION row (two left in clear), at 10ddd62 only the ORG rows (one left in clear); in single-document validation it happened at 51d8429 when the text had two types, and cannot happen at 10ddd62 (each (text, type) group has one row there). Present in v2.2.0 (text-only group).'
+    suggested_action: 'Lionel: where it goes (a small story, or Story 10.9, which works on the same function). Likely fix: a row without a stored key acts on itself only (validation_state.py:164-176), plus a test.'
+    refs: ['gdpr_pseudonymizer/gui/models/validation_state.py:132-176', 'gdpr_pseudonymizer/gui/widgets/entity_editor.py:384-386', 'gdpr_pseudonymizer/gui/widgets/entity_editor.py:474-475', 'gdpr_pseudonymizer/gui/widgets/entity_editor.py:553-558']
+    suggested_owner: po
+  - id: 'PRE-004'
+    severity: low
+    finding: 'Not a leak. A custom pseudonym set in the desktop app ("Changer le pseudonyme") is shown in the list but never reaches finalization: expand_validated_entities and get_validated_entities return entities without it, and the output uses the generated pseudonym. Probe E: "Quentrix Zorbal" absent from the output on both trees.'
+    suggested_action: 'PM: check the intent and file a backlog item if it should apply.'
+    refs: ['gdpr_pseudonymizer/gui/models/validation_state.py:416-423', 'gdpr_pseudonymizer/gui/screens/validation.py:828-843']
+    suggested_owner: po
+
+quality_score: 100
+expires: '2026-10-27T22:04:00Z'
+
+evidence:
+  tests_first_ci:
+    run: '38465530185 (CI - Test Matrix, head 2a9a19a, success)'
+    legs: 'job logs read by QA: ubuntu 3.10 "2419 passed, 15 xfailed"; ubuntu 3.11 "2419 passed, 15 xfailed"; macos 3.12 "2419 passed, 15 xfailed"; windows 3.12 "2272 passed, 1 skipped, 15 xfailed"'
+    xfail_set: 'the 15 XFAIL ids extracted from each leg are byte-identical across the four legs (same md5) and are exactly T1-T9 with their parameters; T10-T12 PASSED on every leg; no XPASS, FAILED or ERROR line'
+    markers: '9 markers at 2a9a19a (8 GUI + 1 core), each strict=True and raises=AssertionError; 5b85bf7 removes them and adds no line to either new file'
+  runxfail_local: 'QA throwaway clone of 2a9a19a (sparse, held_out and final_exam not checked out), Windows Python 3.11.9, package path checked: 15 failed, 3 passed. Failing lines: T1 :194 expansion (org_first [LOCATION 0 x2], location_first [ORG 0, ORG 21] x2); T2 :226 and T3 :255 and T4 :281 and T6 :333 (other type REJECTED); T5 :300 (one variant entry "Zorbaville_0"); T7 :360/:361 (both rows show one preview, after the non-empty precondition); T8 :402 (ORG rows REJECTED); T9 core :70 (one preview entry). Each is the intended assertion after the worker-finished and row-shape preconditions. Without --runxfail: 3 passed, 15 xfailed.'
+  fix_ci:
+    run_fix: '38467798358 (head 5b85bf7): ubuntu 3.10/3.11/macos "2434 passed", windows "2287 passed, 1 skipped", 0 XFAIL lines'
+    run_head: '38470030335 (head 10ddd62): same counts, 0 XFAIL lines; gh pr checks 97: 9/9 pass'
+  diff_vs_fix_design: 'one key function candidate_key -> tuple (text, start_pos, entity_type) in validation/models.py:89-101; previews and variant map keyed by it (document_processor.py:788, detection_worker.py:161); _candidate_key_by_id filled once at init (validation_state.py:95-96); group index (text, type) (:101-102) through _group_ids (:164-176); expansion and ranges through _variant_key (:178), stored key except text-edited and hand-added rows; _validated_rows wraps the old loop and get_validated_entities returns the same list; preview values, classify_known_entities, bulk actions, undo commands unchanged; batch.py unchanged'
+  stale_key_grep: 'f"{text}_{start}" style keys left in gdpr_pseudonymizer/: only validation/context_precomputer.py:78 and :95 (Consumer Trace #24; the context depends only on the span, so both types of a pair get the same correct context)'
+  mypy_mutation: 'QA clone of 10ddd62 with six stale string-key readers/writers put back (expansion, ranges, preview read, group lookup, variant-map write, preview-map write): mypy gdpr_pseudonymizer reports 12 errors covering all six (index and comparison-overlap under strict_equality); unmutated tree: "Success: no issues found in 103 source files"'
+  consumer_trace: 'rows #2, #4, #7, #8, #12, #13 aware at 5b85bf7 (code read and probes A-D, I); #24 harmless as written; #26 position-based, probe I; #19 display only, probe G; #5, #9, #20, #25 text-only as documented (10.7); #16, #17 computed lookup with the type'
+  probe_7_3: 'invented names only, headless Qt, outside the repo (rgpd-analysis/r108/qa/probes), run on 10ddd62 and on the unfixed clone:'
+  probe_A_three_types: 'PERSON, ORG and LOCATION "Zorbalia" at 0 plus ORG at 19, all 24 input orders: 24/24 pass on 10ddd62 (3 preview entries, 3 variant entries, 4 ranges each on its own row, accept-all sends each (type, span) once and leaves no "Zorbalia", rejecting any one type leaves the other two pending and sends only their positions); 24/24 fail at 51d8429 ([LOCATION 0] x3, one "Zorbalia" left)'
+  probe_B_zorbaville: 'org_first sends [ORG 0, ORG 21, LOCATION 0], location_first [LOCATION 0, ORG 0, ORG 21], each once, no "Zorbaville" left; unfixed: [LOCATION 0, LOCATION 0] with one left / every ORG position twice'
+  probe_C_reject: 'single-document and batch, both orders: rejecting LOCATION leaves ORG pending and sends ORG 0 and 21; rejecting ORG leaves LOCATION pending and sends LOCATION 0 (the ORG at 21 stays, as the user rejected the only type found there); unfixed: every reject reaches all rows of the text'
+  probe_D_longer_variant: 'ORG "Zorbaville" at 0 and "Zorbaville SA" at 21 (ORG clustering keeps them as two rows) with LOCATION "Zorbaville" at 0, and with LOCATION "Zorbaville SA" at 21, both orders, single-document and batch: every criterion holds'
+  probe_E_type_change: 'retype LOCATION to ORG then custom pseudonym, ORG accepted: sends ORG 0 twice and ORG 21 once, nothing left (the duplicate is the user''s retype; replacement is by position, harmless); retype ORG to PERSON: sends PERSON 0, ORG 21, LOCATION 0 (desktop retypes the edited row only, Consumer Trace #15); a reject on a retyped row reaches only that row (PO N5)'
+  probe_F_undo_redo: 'type change undo/redo restores type, state, expansion and ranges; reject/accept undo/redo restores only the group acted on; batch group undo restores both ORG rows together and not the LOCATION'
+  probe_G_batch_prev_next: 'real BatchWorker thread and real screens, only detection replaced: doc 0 with a pair, LOCATION row retyped to PERSON, ORG group accepted, validated: doc 0 sent [ORG 0, ORG 21, PERSON 0], nothing left. Previous: every doc 0 row shows as known and confirmed with the stored pseudonym (the names are in the database by then), so the N6 empty preview does not even show in this flow; display only either way. Found PRE-001 and PRE-002 here.'
+  probe_H_added_row: 'see PRE-003'
+  probe_I_editor: 'click and right-click at a same-span pair select one row (the later one in the list); "Rejeter" from that menu rejects only that row''s type; position 25 maps to the ORG row; unfixed org_first has no highlight at 25 and the reject reaches both rows'
+  existing_tests: 'git diff 51d8429 HEAD -- tests/: two new files plus key-only edits in tests/unit/test_document_processor.py (3 tests: assert/lookup by candidate_key(entities[0]), same values) and tests/unit/gui/conftest.py (fixture key), each with a 10.8 AC1 comment; no other existing test touched'
+  strings: 'non-docstring literals in the two new files: invented names, the passphrase, file names, type and source identifiers, and 11 real words; scripts/accuracy_heldout_blind_check.py on those 11: checked=11 not_in_main_corpus=0; both leakage guards 15 passed locally; both allowlists unchanged; no time, sleep or wait in the new tests'
+  g6_local: 'Windows, main poetry venv, PYTHONPATH at the worktree: ruff check . exit 0; black --check . 291 files unchanged; mypy gdpr_pseudonymizer no issues in 103 files; new tests 18 passed; tests/unit/gui + tests/integration/gui + test_document_processor + validation unit and integration files, -m "not slow" -n 4: 543 passed'
+  scope: 'git diff --stat main...HEAD: 5 product files, 4 test files, CHANGELOG, story, docs/prd (only in PM commits f7637a2 and 9047ec0); empty for batch.py, nlp/, resources/, utils/, __init__.py, data/, cli/, tests/accuracy/, tests/test_corpus/, .github/, pyproject.toml, poetry.lock, README*, QA report'
+  changelog: 'Fixed entry matches the S1 wording (each row its own preview entry, title included; the suggested pseudonym type-aware with 10.7); CHANGELOG.md:71 corrected as given; "never in a release" holds (no tag contains 5846419); "older (in v2.2.0)" holds (_text_group_index in v2.2.0); "single-document and batch" confirmed by probe C'
+  commit_texts: 'no skip marker in the nine branch commit messages or in the PR title and body'
+  isolation: 'QA never opened, listed or searched held_out/ or final_exam/; the throwaway clones were sparse without them and were removed'
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+    ac_gaps: []
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'Closes the 10.3c desktop leak path (an occurrence of a confirmed name left in clear) in single-document and batch validation. No log line added. The pre-existing leak paths found in review are listed under pre_existing_findings; none is touched by this diff.'
+  performance:
+    status: PASS
+    notes: 'Keys built once per row at init; every lookup is a dictionary access; no extra pass per row.'
+  reliability:
+    status: PASS
+    notes: 'Stored keys keep a retyped or re-pseudonymized row expanding to its group (T10, T11, probes E and F); undo/redo consistent.'
+  maintainability:
+    status: PASS
+    notes: 'Tuple key with one constructor; mypy strict catches stale string keys at every real call site (mutation check). Low: four test fixtures still hold dead string keys (TEST-001).'
+
+recommendations:
+  immediate: []
+  future:
+    - action: 'PRE-001 (high, pre-existing since v2.0.0): Lionel decides the routing; recommended as its own story before the next release, since the same release ships 10.8 and 10.9 as leak fixes.'
+      refs: ['gdpr_pseudonymizer/gui/screens/batch.py:928', 'gdpr_pseudonymizer/gui/screens/batch.py:950']
+    - action: 'PRE-002 and PRE-003 (medium, pre-existing): Lionel decides the routing (with PRE-001, with Story 10.9, or backlog).'
+      refs: ['gdpr_pseudonymizer/gui/screens/validation.py:715-733', 'gdpr_pseudonymizer/gui/models/validation_state.py:164-176']
+    - action: 'TEST-001: move the four dead string keys in test fixtures to candidate_key in a housekeeping commit.'
+      refs: ['tests/unit/gui/test_validation_state_grouping.py:57', 'tests/integration/gui/conftest.py:102']
+    - action: 'After the merge, the main push fires performance.yaml (core/ changed); it should be green. No accuracy run fires (expected).'
+      refs: ['.github/workflows/performance.yaml']
