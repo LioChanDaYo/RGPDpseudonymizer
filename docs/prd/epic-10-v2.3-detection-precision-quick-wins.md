@@ -660,9 +660,9 @@ This story adds a second, larger, blind "final exam" set, written by a different
 **I want** each type to get its own pseudonym and its own mapping row, and a text already known under one type to reach validation when it shows up under another,
 **so that** the type I choose during validation is the type that is stored and pseudonymized.
 
-**Priority:** MEDIUM — no text is left in clear today, but 10.3c keeps more different-type pairs, and for those the type choice can be lost.
+**Priority:** MEDIUM — no text is left in clear today in the CLI (the desktop app's same-span case is Story 10.8), but 10.3c keeps more different-type pairs, and for those the type choice can be lost.
 **Change type:** `core/` and data layer, plus the callers that look up by name in `cli/` and `gui/` (AC4). No file under `gdpr_pseudonymizer/nlp/`, `gdpr_pseudonymizer/resources/`, `tests/accuracy/` or `tests/test_corpus/` changes.
-**Ordering:** outside the detector chain, like 10.5. It changes no detection, so it has no accuracy baseline and may run in any slot. It does not move the epic close-out baseline. Its effect shows most once 10.3c has merged.
+**Ordering:** outside the detector chain, like 10.5. It changes no detection, so it has no accuracy baseline and may run in any slot. It does not move the epic close-out baseline. Its effect shows most once 10.3c has merged. It merges after Story 10.8, which fixes the desktop app's text-only keys.
 
 ### Context
 
@@ -671,13 +671,14 @@ At `main` `4f3cf30`, mapping keys carry no entity type:
 - `Entity.full_name` is unique on its own (`gdpr_pseudonymizer/data/models.py:38`). Each row stores an `entity_type` (`:31`), but no lookup uses it.
 - `SQLiteMappingRepository.find_by_full_name` (`gdpr_pseudonymizer/data/repositories/mapping_repository.py:148`) queries by the encrypted text only.
 - In `gdpr_pseudonymizer/core/document_processor.py`, `_normalize_entity_text` (`:211`) builds the key from the text alone (titles stripped, and prepositions for LOCATION). Three places then look it up without the type: the validation preview and its `preview_cache` (`:254`), the known/unknown split before validation (`:297-308`), and `_resolve_pseudonyms` with its per-run `entity_cache` (`:489`, lookup `:507`).
-- Other callers look up by name alone too: `delete-mapping` (`gdpr_pseudonymizer/cli/commands/delete_mapping.py:118`), `import-mappings` (`gdpr_pseudonymizer/cli/commands/import_mappings.py:164`), the GUI known-entity check (`gdpr_pseudonymizer/gui/models/validation_state.py:111`), the repository's race fallback (`mapping_repository.py:345`) and `delete_entity_by_full_name` (`:388`).
+- Other callers look up by name alone too: `delete-mapping` (`gdpr_pseudonymizer/cli/commands/delete_mapping.py:118`, and its delete call at `:146`), `import-mappings` (`gdpr_pseudonymizer/cli/commands/import_mappings.py:164`), the GUI known-entity check (`gdpr_pseudonymizer/gui/models/validation_state.py:111`), the repository's race fallback (`mapping_repository.py:345`) and `delete_entity_by_full_name` (`:388`).
+- `build_pseudonym_previews` (`core/document_processor.py:759-802`, key `:786`) fills the desktop app's preview map through the same validation preview (`:254`); its callers are `gui/workers/detection_worker.py:199` and `gui/screens/batch.py:896`. The desktop app also keys three per-run maps without the type: the preview map (read at `validation_state.py:86-88`), the variant map (`gui/workers/detection_worker.py:154-157`, read at `validation_state.py:313-331`) and the same-text group that accept and reject act on (`validation_state.py:89-93`, `:128`, `:144`). Story 10.8 keys these three on type (they were AC9 of the 10.7 SM draft).
 
 Consequences once 10.3c keeps both detections of a different-type pair:
 
 - If the user confirms both, they share one pseudonym and one database row.
 - If the text is already in the database, both are auto-accepted as known and never shown, so the type choice never reaches the user.
-- No text is left in clear: every confirmed occurrence is still replaced.
+- In the CLI, no text is left in clear: every confirmed occurrence is still replaced. In the desktop app, the text-only variant map can drop one type's occurrences from finalization, so one can stay in clear (10.7 SM probe; 0 positions on the main corpus). Story 10.8 fixes that before 10.7.
 
 ### Acceptance Criteria
 
@@ -703,7 +704,13 @@ Consequences once 10.3c keeps both detections of a different-type pair:
 - `gdpr_pseudonymizer/data/repositories/mapping_repository.py` — lookups by name (`find_by_full_name`, the race fallback, `delete_entity_by_full_name`)
 - `gdpr_pseudonymizer/data/models.py`, `gdpr_pseudonymizer/data/database.py` — row key and `schema_version`, if the AC3 rule needs them
 - `gdpr_pseudonymizer/cli/commands/delete_mapping.py`, `gdpr_pseudonymizer/cli/commands/import_mappings.py`, `gdpr_pseudonymizer/gui/models/validation_state.py` — other name lookups (AC4)
+- `gdpr_pseudonymizer/gui/workers/detection_worker.py`, `gdpr_pseudonymizer/gui/screens/batch.py` — callers of `build_pseudonym_previews` (`:199`, `:896`); the desktop app's text-only keys themselves are Story 10.8
 - `tests/unit/` or `tests/integration/` — AC5 tests
+
+### Follow-ups Found by the 10.7 SM (not ACs, 2026-10-13)
+
+- **Stale architecture docs:** `docs/architecture/6-components.md:158` says `schema_version` is "checked on open", but `open_database` never reads it. `docs/architecture/9-database-schema.md` §9.1 says Fernet (AES-128-CBC + HMAC), while the code uses AES-256-SIV (`data/encryption.py`, as §9.3 of the same document shows); its table definition (§9.2) has no `UNIQUE (full_name)` and has a `CHECK (entity_type IN …)` that the code does not create. Docs follow-up for the architect or PM, after 10.7 STOP C (§9.2 changes with the schema if Lionel picks a schema change).
+- **`import-mappings` "Replace existing mapping?" never replaces** (`cli/commands/import_mappings.py:178-205`): answering yes saves a new row, the save hits the unique key, and the row is counted as skipped. Pre-existing, not a type-awareness change. Carried as an Epic 9 or backlog item, not fixed in 10.7.
 
 ### Estimated Effort: 0.5-1 week (the upper end if the AC3 rule is a migration)
 
@@ -798,6 +805,7 @@ Story 10.8 (Desktop app type-aware keys)  --- 0.5 week, before 10.7 --- no accur
 
 - [ ] Existing APIs remain unchanged (`EntityDetector`, `DetectedEntity`, CLI flags, GUI)
 - [ ] Database schema changes: none (mapping table schema untouched; mapping keys may change, because span changes in 10.2-10.4 change the normalized entity text — see the pseudonym-continuity risk). Exception: Story 10.7 changes how mapping rows are keyed (today `full_name` is unique on its own); whether that takes a schema change depends on the continuity rule Lionel decides at its STOP (10.7 AC3)
+- [ ] Database schema after 10.7: updated after 10.7 STOP C, with the rule Lionel picks (10.7 AC3)
 - [ ] UI changes: none; validation stays mandatory
 - [ ] Performance impact is minimal (post-filters are linear in the number of detections; single-document NFR1 still met)
 
