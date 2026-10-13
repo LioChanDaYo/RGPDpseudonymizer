@@ -192,7 +192,8 @@ Numbers come only from CI runs; each line cites its run ID. Full verbatim lines 
   [CI95 HELD-OUT Overall] P=[0.7194,0.8564] R=[0.7130,0.8286] F1=[0.7216,0.8342] unit=document docs=6 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
   ```
 - **Carried to Epic 9:**
-  - **REQ-001 (10.4 QA gate, greeting shapes):** French spacing before "!" and "et" between two names on a greeting line are not covered.
+  - **REQ-001 (10.4 QA gate, greeting shapes):** French spacing before "!" and "et" between two names on a greeting line are not covered. Deferred by Lionel, 2026-10-12 (10.4 story, Decisions Recorded).
+  - **REQ-002 (10.4 QA gate, role + place):** a spelled-out French role that spaCy types ORG merges with a following place ("Directeur France" becomes one ORG; the LOCATION "France" is kept). No main-corpus case; noted with the QA lows.
   - **Corpus glob (10.6 PR B QA, B13):** confine `scripts/benchmark_hybrid.py`'s recursive `tests/test_corpus` glob (`:49`, `:237`) to the main-corpus folders before the exam becomes a held-out set.
   - **Q7:** the scored exam becomes a second held-out set (aggregate-only, never opened). The held-out isolation rules then apply to it and its plain-text guard stays active (10.6 B15.3). Epic 9 writes a new blind exam for its own close-out.
   - **Guard hash list (B16):** the guard's committed allowlist (`tests/unit/final_exam_leakage_allowlist.json`, 157 path and sha256 pairs, approved by Lionel 2026-10-13) stores plain sha256 of exam-only keys, with no salt. It reveals nothing beyond the plain files already in the repo. If Epic 9 reuses this guard for its own blind exam, it decides whether a committed hash list needs a salt.
