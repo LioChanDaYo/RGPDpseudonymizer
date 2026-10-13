@@ -172,14 +172,6 @@ def db_path(tmp_path: Path) -> str:
 # ----------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=(
-        "Story 10.8: reproduces the pair's occurrences dropped or retyped at "
-        "finalization on the unfixed keys; fixed in Task 2"
-    ),
-)
 @pytest.mark.parametrize("order", PAIR_ORDERS)
 def test_pair_confirmed_finalizes_every_occurrence(
     qtbot, db_path: str, tmp_path: Path, order: str  # type: ignore[no-untyped-def]
@@ -205,14 +197,6 @@ def test_pair_confirmed_finalizes_every_occurrence(
     assert PAIR_NAME not in output.read_text(encoding="utf-8")
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=(
-        "Story 10.8: reproduces a LOCATION reject reaching the ORG row on the "
-        "unfixed keys; fixed in Task 2"
-    ),
-)
 @pytest.mark.parametrize("order", PAIR_ORDERS)
 def test_reject_location_keeps_org(
     qtbot, db_path: str, order: str  # type: ignore[no-untyped-def]
@@ -234,14 +218,6 @@ def test_reject_location_keeps_org(
     ]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=(
-        "Story 10.8: reproduces an ORG reject reaching the LOCATION row on the "
-        "unfixed keys; fixed in Task 2"
-    ),
-)
 @pytest.mark.parametrize("order", PAIR_ORDERS)
 def test_reject_org_keeps_location(
     qtbot, db_path: str, order: str  # type: ignore[no-untyped-def]
@@ -258,14 +234,6 @@ def test_reject_org_keeps_location(
     assert _spans(state.expand_validated_entities()) == [("LOCATION", 0, 10)]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=(
-        "Story 10.8: reproduces an undo restoring both types of the pair on "
-        "the unfixed keys; fixed in Task 2"
-    ),
-)
 def test_undo_restores_only_that_type(
     qtbot, db_path: str  # type: ignore[no-untyped-def]
 ) -> None:
@@ -282,14 +250,6 @@ def test_undo_restores_only_that_type(
     assert location.state == REJECTED
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=(
-        "Story 10.8: reproduces one variant-map entry for the pair on the "
-        "unfixed keys; fixed in Task 2"
-    ),
-)
 @pytest.mark.parametrize("order", PAIR_ORDERS)
 def test_variant_map_and_ranges_per_type(
     qtbot, db_path: str, order: str  # type: ignore[no-untyped-def]
@@ -310,14 +270,6 @@ def test_variant_map_and_ranges_per_type(
     }
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=(
-        "Story 10.8: reproduces a reject reaching the other type at another "
-        "place on the unfixed keys; fixed in Task 2"
-    ),
-)
 def test_same_text_two_types_two_places(
     qtbot, db_path: str  # type: ignore[no-untyped-def]
 ) -> None:
@@ -333,14 +285,6 @@ def test_same_text_two_types_two_places(
     assert rows["ORG"].state == PENDING
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=(
-        "Story 10.8: reproduces one preview string for both rows of the pair "
-        "on the unfixed keys; fixed in Task 2"
-    ),
-)
 @pytest.mark.parametrize("order", PREVIEW_ORDERS)
 def test_each_row_shows_its_own_preview(
     qtbot, db_path: str, order: str  # type: ignore[no-untyped-def]
@@ -361,14 +305,6 @@ def test_each_row_shows_its_own_preview(
     assert not org_preview.startswith("Dr ")
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=(
-        "Story 10.8: reproduces a batch reject reaching every row of the text "
-        "on the unfixed keys; fixed in Task 2"
-    ),
-)
 def test_batch_path_reject_one_type_keeps_the_other(
     qtbot, main_window: MainWindow, db_path: str  # type: ignore[no-untyped-def]
 ) -> None:

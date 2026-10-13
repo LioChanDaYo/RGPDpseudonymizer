@@ -53,14 +53,6 @@ def db_path(tmp_path: Path) -> str:
     return path
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=(
-        "Story 10.8: reproduces one preview entry for the pair on the unfixed "
-        "keys; fixed in Task 2"
-    ),
-)
 @pytest.mark.parametrize("order", ["person_first", "org_first"])
 def test_build_pseudonym_previews_one_entry_per_type(db_path: str, order: str) -> None:
     """T9 (AC1): two entries, and exactly one carries the "Dr " title."""

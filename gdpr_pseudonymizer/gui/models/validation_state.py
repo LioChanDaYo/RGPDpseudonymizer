@@ -14,9 +14,11 @@ from PySide6.QtGui import QUndoCommand, QUndoStack
 
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 from gdpr_pseudonymizer.validation.models import (
+    CandidateKey,
     EntityReview,
     EntityReviewState,
     ValidationSession,
+    candidate_key,
 )
 
 if TYPE_CHECKING:
@@ -39,13 +41,19 @@ class GUIValidationState(QObject):
         self._session = ValidationSession(document_path="", document_text="")
         self._undo_stack = QUndoStack(self)
         self._known_entity_ids: set[str] = set()
-        self._pseudonym_previews: dict[str, str] = {}
+        self._pseudonym_previews: dict[CandidateKey, str] = {}
         # Map entity_id -> EntityReview for fast lookup
         self._reviews_by_id: dict[str, EntityReview] = {}
-        # Variant occurrence map: canonical key → all DetectedEntity instances
-        self._variant_occurrences: dict[str, list[DetectedEntity]] = {}
-        # Text-based grouping index: entity_text → [entity_id, ...]
-        self._text_group_index: dict[str, list[str]] = {}
+        # Variant occurrence map: canonical candidate key (text, start_pos,
+        # entity_type) → all DetectedEntity instances
+        self._variant_occurrences: dict[CandidateKey, list[DetectedEntity]] = {}
+        # Candidate key of each detected row, taken once at init (Story 10.8).
+        # Type and text edits change review.entity in place, so expansion,
+        # ranges and group actions read this key, never one recomputed from
+        # the edited row. Rows added by hand have none.
+        self._candidate_key_by_id: dict[str, CandidateKey] = {}
+        # Same-text grouping index: (entity_text, entity_type) → [entity_id, ...]
+        self._group_index: dict[tuple[str, str], list[str]] = {}
 
     @property
     def undo_stack(self) -> QUndoStack:
@@ -72,25 +80,26 @@ class GUIValidationState(QObject):
         self._pseudonym_previews = dict(detection_result.pseudonym_previews)
         self._variant_occurrences = dict(detection_result.variant_occurrences or {})
         self._reviews_by_id.clear()
+        self._candidate_key_by_id.clear()
         self._known_entity_ids.clear()
         self._undo_stack.clear()
 
         for entity in detection_result.detected_entities:
             self._session.add_entity(entity)
 
-        # Build id lookup and text-based grouping index
-        self._text_group_index.clear()
+        # Build id lookup, stored candidate keys and the (text, type) grouping
+        # index. Each row's key is computed once, here (Story 10.8).
+        self._group_index.clear()
         for review in self._session._entity_reviews:
             self._reviews_by_id[review.entity_id] = review
+            key = candidate_key(review.entity)
+            self._candidate_key_by_id[review.entity_id] = key
             # Set pseudonym preview
-            key = f"{review.entity.text}_{review.entity.start_pos}"
             if key in self._pseudonym_previews:
                 review.suggested_pseudonym = self._pseudonym_previews[key]
-            # Build text grouping index (exact match, case-sensitive)
-            text = review.entity.text
-            if text not in self._text_group_index:
-                self._text_group_index[text] = []
-            self._text_group_index[text].append(review.entity_id)
+            # Build (text, type) grouping index (exact text, case-sensitive)
+            group_key = (key[0], key[2])
+            self._group_index.setdefault(group_key, []).append(review.entity_id)
 
     def classify_known_entities(self, db_path: str, passphrase: str) -> None:
         """Check which entities exist in the mapping DB and auto-accept them.
@@ -121,11 +130,11 @@ class GUIValidationState(QObject):
     # ------------------------------------------------------------------
 
     def accept_entity(self, entity_id: str) -> None:
-        """Mark entity (and all same-text occurrences) as confirmed."""
+        """Mark entity (and all rows of the same text and type) as confirmed."""
         review = self._reviews_by_id.get(entity_id)
         if review is None:
             return
-        group_ids = self._text_group_index.get(review.entity.text, [entity_id])
+        group_ids = self._group_ids(review)
         if len(group_ids) > 1:
             self._undo_stack.beginMacro("Accepter le groupe")
             for eid in group_ids:
@@ -137,11 +146,11 @@ class GUIValidationState(QObject):
             self._undo_stack.push(cmd)
 
     def reject_entity(self, entity_id: str) -> None:
-        """Mark entity (and all same-text occurrences) as rejected."""
+        """Mark entity (and all rows of the same text and type) as rejected."""
         review = self._reviews_by_id.get(entity_id)
         if review is None:
             return
-        group_ids = self._text_group_index.get(review.entity.text, [entity_id])
+        group_ids = self._group_ids(review)
         if len(group_ids) > 1:
             self._undo_stack.beginMacro("Rejeter le groupe")
             for eid in group_ids:
@@ -151,6 +160,37 @@ class GUIValidationState(QObject):
         else:
             cmd = _SingleActionCommand(self, entity_id, EntityReviewState.REJECTED)
             self._undo_stack.push(cmd)
+
+    def _group_ids(self, review: EntityReview) -> list[str]:
+        """Ids of the rows that one accept or reject acts on: same text and type.
+
+        A detected row uses the key stored at init, so a group action on a
+        retyped row acts on its original (text, type) group. A row added by
+        hand has no stored key and uses its current text and type.
+        """
+        key = self._candidate_key_by_id.get(review.entity_id)
+        if key is not None:
+            group_key = (key[0], key[2])
+        else:
+            group_key = (review.entity.text, review.entity.entity_type)
+        return self._group_index.get(group_key, [review.entity_id])
+
+    def _variant_key(
+        self, review: EntityReview, entity: DetectedEntity
+    ) -> CandidateKey:
+        """Key of a row's occurrences in the variant map.
+
+        A detected row uses the key stored at init, so a type change or a
+        custom pseudonym still reaches every occurrence of its group. A row
+        whose text the user edited and a row added by hand keep the computed
+        lookup, now with the type: ``entity`` is the entity sent to
+        finalization (expansion) or ``review.entity`` (highlight ranges).
+        """
+        if not review.user_modification:
+            key = self._candidate_key_by_id.get(review.entity_id)
+            if key is not None:
+                return key
+        return candidate_key(entity)
 
     def modify_entity_text(
         self,
@@ -284,48 +324,63 @@ class GUIValidationState(QObject):
                 counts["added"] += 1
         return counts
 
-    def get_validated_entities(self) -> list[DetectedEntity]:
-        """Final entity list for finalization (excludes rejected)."""
-        result: list[DetectedEntity] = []
+    def _validated_rows(self) -> list[tuple[EntityReview, DetectedEntity]]:
+        """(row, entity sent to finalization) for every row kept by the user.
+
+        Rejected and pending rows are skipped. A row whose text the user
+        edited gives a new entity with the edited text.
+        """
+        rows: list[tuple[EntityReview, DetectedEntity]] = []
         for review in self._session._entity_reviews:
             if review.state == EntityReviewState.REJECTED:
                 continue
             if review.state == EntityReviewState.PENDING:
                 continue
             if review.user_modification:
-                result.append(
-                    DetectedEntity(
-                        text=review.user_modification,
-                        entity_type=review.entity.entity_type,
-                        start_pos=review.entity.start_pos,
-                        end_pos=review.entity.end_pos,
-                        confidence=review.entity.confidence,
-                        gender=review.entity.gender,
-                        is_ambiguous=review.entity.is_ambiguous,
-                        source=review.entity.source,
-                        context_label=review.entity.context_label,
+                rows.append(
+                    (
+                        review,
+                        DetectedEntity(
+                            text=review.user_modification,
+                            entity_type=review.entity.entity_type,
+                            start_pos=review.entity.start_pos,
+                            end_pos=review.entity.end_pos,
+                            confidence=review.entity.confidence,
+                            gender=review.entity.gender,
+                            is_ambiguous=review.entity.is_ambiguous,
+                            source=review.entity.source,
+                            context_label=review.entity.context_label,
+                        ),
                     )
                 )
             else:
-                result.append(review.entity)
-        return result
+                rows.append((review, review.entity))
+        return rows
+
+    def get_validated_entities(self) -> list[DetectedEntity]:
+        """Final entity list for finalization (excludes rejected)."""
+        return [entity for _, entity in self._validated_rows()]
 
     def expand_validated_entities(self) -> list[DetectedEntity]:
         """Expand validated canonical entities to include all variant occurrences.
 
-        For CONFIRMED entities whose canonical key exists in the variant map,
-        replaces the single canonical with ALL occurrences (at all positions)
-        so every instance in the document gets pseudonymized.
+        For validated rows whose candidate key (text, start_pos, entity_type)
+        exists in the variant map, replaces the single canonical with ALL
+        occurrences (at all positions) so every instance in the document gets
+        pseudonymized. A detected row is looked up with the key stored at init,
+        so a row whose type or pseudonym the user changed still expands.
 
-        MODIFIED and ADDED entities are kept as-is (single position).
+        Rows whose text the user edited and rows added by hand are looked up
+        with a key computed from the entity sent to finalization, so they are
+        normally kept as-is (single position).
         """
-        validated = self.get_validated_entities()
+        validated = self._validated_rows()
         if not self._variant_occurrences:
-            return validated
+            return [entity for _, entity in validated]
 
         expanded: list[DetectedEntity] = []
-        for entity in validated:
-            key = f"{entity.text}_{entity.start_pos}"
+        for review, entity in validated:
+            key = self._variant_key(review, entity)
             if key in self._variant_occurrences:
                 expanded.extend(self._variant_occurrences[key])
             else:
@@ -337,11 +392,13 @@ class GUIValidationState(QObject):
 
         Variant occurrences share the same entity_id as their canonical entity,
         so highlights/clicks on any occurrence map back to the same review row.
+        The variant map is keyed by text, start and type, so each type of a
+        same-span pair maps its own occurrences to its own row.
         """
         ranges: list[tuple[int, int, str]] = []
         for review in self._session._entity_reviews:
             canonical = review.entity
-            key = f"{canonical.text}_{canonical.start_pos}"
+            key = self._variant_key(review, canonical)
 
             if key in self._variant_occurrences:
                 for occ in self._variant_occurrences[key]:

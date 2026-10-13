@@ -6,6 +6,7 @@ import uuid
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
+from typing import TypeAlias
 
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 
@@ -83,6 +84,21 @@ class EntityGroup:
     def cycle_context(self) -> None:
         """Move to next context in group (cycles back to start)."""
         self.current_context_index = (self.current_context_index + 1) % self.count
+
+
+CandidateKey: TypeAlias = tuple[str, int, str]  # (text, start_pos, entity_type)
+
+
+def candidate_key(entity: DetectedEntity) -> CandidateKey:
+    """Per-run key of one candidate in the desktop app: text, start and type.
+
+    Keys the pseudonym preview map, the variant occurrence map and (as its
+    text and type) the same-text group of one desktop validation, so the two
+    types of a same-span pair stay separate candidates (Story 10.8). The
+    group key ``(text, entity_type)`` has the shape of
+    ``EntityGroup.unique_key``. This is not the mapping-database key.
+    """
+    return (entity.text, entity.start_pos, entity.entity_type)
 
 
 class EntityReviewState(Enum):

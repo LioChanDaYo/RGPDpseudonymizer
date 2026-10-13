@@ -44,6 +44,7 @@ from gdpr_pseudonymizer.utils.tabular_reader import (
     read_csv_structured,
     read_excel_structured,
 )
+from gdpr_pseudonymizer.validation.models import CandidateKey, candidate_key
 from gdpr_pseudonymizer.validation.workflow import run_validation_workflow
 
 # Configure logging (NO sensitive data)
@@ -759,7 +760,7 @@ class DocumentProcessor:
     def build_pseudonym_previews(
         self,
         detected_entities: list[DetectedEntity],
-    ) -> dict[str, str]:
+    ) -> dict[CandidateKey, str]:
         """Generate pseudonym previews for detected entities.
 
         Opens a database session to look up existing mappings and generate
@@ -772,7 +773,8 @@ class DocumentProcessor:
             detected_entities: Entities from detect_entities()
 
         Returns:
-            Dict mapping entity_key (text_startpos) to pseudonym preview string
+            Dict mapping each candidate's key (text, start_pos, entity_type),
+            from ``candidate_key``, to its pseudonym preview string
         """
         import re
 
@@ -781,9 +783,9 @@ class DocumentProcessor:
         with open_database(self.db_path, self.passphrase) as db_session:
             ctx = self._init_processing_context(db_session)
             assigner = self._build_pseudonym_assigner(ctx)
-            previews: dict[str, str] = {}
+            previews: dict[CandidateKey, str] = {}
             for entity in detected_entities:
-                key = f"{entity.text}_{entity.start_pos}"
+                key = candidate_key(entity)
                 base_pseudonym = assigner(entity)
 
                 # Preserve title prefix for PERSON entities (same logic as CLI)
