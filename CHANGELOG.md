@@ -68,7 +68,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Paired delta (`scripts/accuracy_paired_delta.py`, same documents resampled together): the overall recall gain is outside the paired range (+0.18 points, range +0.05 to +0.33). The precision and F1 changes are within their paired ranges, so they are not claimed as gains.
     - Held-out set (same run): unchanged (F1 76.79%, recall 74.46%).
   - **Upgrading: pseudonym continuity.** The mapping schema is unchanged. Keys are still the entity text with titles stripped (and prepositions, for places), whitespace collapsed, **without the entity type**.
-    - If you confirm both candidates of a pair (say LOCATION "Zorbaville" and ORG "Zorbaville"), they share one key: the first one resolved gets or creates the row, the second reuses its pseudonym. One row is stored, with the first one's type. Rejecting one candidate gives the earlier result for the other.
+    - If you confirm both candidates of a pair (say LOCATION "Zorbaville" and ORG "Zorbaville"), they share one key: the first one resolved gets or creates the row, the second reuses its pseudonym. One row is stored, with the first one's type. Rejecting one candidate gives the earlier result for the other, in the command line and, since Story 10.8, in the desktop app (see "Fixed").
     - If the key is already in your database, whatever its type, both candidates are accepted automatically with the stored pseudonym, as known entities, and neither is shown for review. The output is the same as before: the same stored pseudonym, and at the same position the same replacement.
     - Making the lookup type-aware is planned as a separate story (10.7, Type-Aware Mapping Lookup).
     - Recommendation: keep using the same mapping database across versions for consistent pseudonyms. Re-process with the previous version if byte-identical output with an old run is required.
@@ -139,6 +139,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Recommendation: keep using the same mapping database across versions for consistent pseudonyms. Re-process with v2.2 if byte-identical output with an old run is required.
 
 ### Fixed
+
+- **Desktop app: a name found at one place with two types is two separate candidates again (Story 10.8).** Since Story 10.3c, the same text at the same place can be offered with two types, for example ORG "Zorbaville" and LOCATION "Zorbaville". The desktop app kept one entry per text and place, so the two types got in each other's way:
+  - accepting or rejecting one type changed the other one too;
+  - both rows showed the same pseudonym preview;
+  - when both were accepted, the places of one type could be dropped: with ORG "Zorbaville" found twice and LOCATION "Zorbaville" found at the first place, the second "Zorbaville" stayed in clear in the output.
+  - Now each type is its own candidate, with its own places, its own highlights and its own accept or reject, in single-document and batch validation, and each row now has its own preview entry, title included; the suggested pseudonym itself becomes type-aware with Story 10.7. This part came with Story 10.3c and was never in a release.
+  - Also fixed, older (in v2.2.0): when one text was found with different types at different places, accepting or rejecting one type changed the other too.
+  - The command-line validation was not affected. Detection, the mapping database and its schema do not change, and no accuracy figure changes.
 
 - **Two runs creating the same new mapping database at once no longer lose it (Story 10.5).**
   - Two runs that create the same new mapping database at the same moment no longer lose it. The first run's database (its mappings and passphrase setup) is always kept; the second run stops with "Database already exists". Before, on Linux and macOS, the second run could delete the database the first one had just created; on Windows, it stopped with an unexpected file-access error.
