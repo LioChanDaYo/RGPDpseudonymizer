@@ -3,7 +3,7 @@
 **Epic Goal:** Raise detection precision and make the accuracy benchmark trustworthy with local, deterministic changes to the hybrid detector and the ground-truth corpus, without lowering recall. The user-facing value is fewer false entities to reject during the (mandatory) validation step and a benchmark whose numbers can be believed.
 
 **Target Release:** v2.3.0 candidate. **No release is part of this epic.** v2.3.0 ships only on Lionel's explicit go, through a separate release story.
-**Duration:** Estimated 5.5-8.5 weeks (10.1 is annotation-labor-bound; 10.3 split into 10.3a and 10.3b, and 10.3c added, Lionel, 2026-10-06; 10.5 added, Lionel, 2026-10-07; 10.3b re-estimated after its STOP R, 2026-10-07; 10.7 added, Lionel, 2026-10-09); 10.6 runs in parallel (2-3 weeks elapsed) and close-out waits for its adjudication after 10.4 merges, then its commit and one scored run
+**Duration:** Estimated 6-9 weeks (10.1 is annotation-labor-bound; 10.3 split into 10.3a and 10.3b, and 10.3c added, Lionel, 2026-10-06; 10.5 added, Lionel, 2026-10-07; 10.3b re-estimated after its STOP R, 2026-10-07; 10.7 added, Lionel, 2026-10-09; 10.8 added, Lionel, 2026-10-13); 10.6 runs in parallel (2-3 weeks elapsed) and close-out waits for its adjudication after 10.4 merges, then its commit and one scored run
 **Predecessor:** v2.2.0 + accuracy scorer fix (#77), commit `fceef65`
 **Successor:** Epic 9 (v3.0) starts from this epic's merged close-out baseline.
 
@@ -123,8 +123,9 @@ These notes sit outside the normative Gates block above and do not change its te
 | 10.5: DB Init Safety (data-layer hardening, added by Lionel, 2026-10-07) | MED (raised from LOW by the PM, 2026-10-13) | 0.5 week | PR #83 finding | Draft |
 | 10.6: Final-Exam Set and Confidence Ranges (added by Lionel, 2026-10-07) | HIGH | 2-3 weeks elapsed, in parallel | Overfitting check, close-out evidence | Done (PRs #89, #92, #94, #95) |
 | 10.7: Type-Aware Mapping Lookup (data layer, added by Lionel at 10.3c STOP R, 2026-10-09) | MED | 0.5-1 week | 10.3c STOP R | Draft |
+| 10.8: Desktop App Type-Aware Candidate Keys (10.3c regression, added by Lionel, 2026-10-13) | HIGH | 0.5 week | 10.7 SM finding | Draft |
 
-**Total Estimated Duration:** 5.5-8.5 weeks; 10.6 runs in parallel (2-3 weeks elapsed) and close-out waits for its adjudication after 10.4 merges, then its commit and one scored run
+**Total Estimated Duration:** 6-9 weeks; 10.6 runs in parallel (2-3 weeks elapsed) and close-out waits for its adjudication after 10.4 merges, then its commit and one scored run
 
 ---
 
@@ -198,7 +199,7 @@ Numbers come only from CI runs; each line cites its run ID. Full verbatim lines 
   - **Q7:** the scored exam becomes a second held-out set (aggregate-only, never opened). The held-out isolation rules then apply to it and its plain-text guard stays active (10.6 B15.3). Epic 9 writes a new blind exam for its own close-out.
   - **Guard hash list (B16):** the guard's committed allowlist (`tests/unit/final_exam_leakage_allowlist.json`, 157 path and sha256 pairs, approved by Lionel 2026-10-13) stores plain sha256 of exam-only keys, with no salt. It reveals nothing beyond the plain files already in the repo. If Epic 9 reuses this guard for its own blind exam, it decides whether a committed hash list needs a salt.
   - **Headline finding:** the main-vs-exam gap. F1 is 0.8262 on the main corpus (`38212303870`) and 0.6144 on the final exam (`38382553368`), about 21 points.
-- **Still open in Epic 10:** 10.5 (DB init safety) and 10.7 (type-aware mapping lookup). Both are data-layer stories outside the detector chain, so neither moves the close-out baseline. The epic is not closed.
+- **Still open in Epic 10:** 10.5 (DB init safety), 10.7 (type-aware mapping lookup) and 10.8 (desktop app type-aware candidate keys, added 2026-10-13, to fix before any release). None is a detector story, so none moves the close-out baseline. The epic is not closed.
 
 ---
 
@@ -708,6 +709,56 @@ Consequences once 10.3c keeps both detections of a different-type pair:
 
 ---
 
+## Story 10.8: Desktop App Type-Aware Candidate Keys (10.3c regression)
+
+**Added by Lionel, 2026-10-13** ("Fix now, own story (Recommended)"), from the 10.7 SM's finding at `main` `51d8429`. The 10.7 SM draft (`55a87e4`) had this as its AC9. It moves here, so the fix does not wait for 10.7's continuity decision.
+
+**As a** desktop-app user reviewing a name found at one place with two types,
+**I want** each type to be its own candidate, with its own preview, its own occurrences and its own accept or reject,
+**so that** rejecting one type keeps the other, and no occurrence of a name I confirmed is left in clear.
+
+**Priority:** HIGH — it is a leak path in the desktop app: an occurrence of a confirmed name can stay in clear. It must be fixed before any release. It is on `main` only (since 10.3c), unreleased.
+**Change type:** desktop app and core preview keys only. No detection change, so G1, G3 and G5 are N/A. No file under `gdpr_pseudonymizer/nlp/`, `gdpr_pseudonymizer/resources/`, `tests/accuracy/` or `tests/test_corpus/` changes. If any file the accuracy suite loads is touched, one regular accuracy run on the branch shows the 16 lines identical to `38212303870`.
+**Ordering:** outside the detector chain, like 10.5 and 10.7. It merges before 10.7 and does not depend on 10.7's continuity decision (10.7 AC3).
+
+### Context
+
+Since 10.3c (R-MX), one span can be kept with two types: the regex detection is flagged ambiguous and both reach validation. At `main` `51d8429`:
+
+- The desktop app keys two per-run maps as `"{text}_{start}"`, without the type: the preview map built by `build_pseudonym_previews` (`gdpr_pseudonymizer/core/document_processor.py:786`, read at `gdpr_pseudonymizer/gui/models/validation_state.py:86`) and the variant map (`gdpr_pseudonymizer/gui/workers/detection_worker.py:156`, read at `validation_state.py:328` for finalization and `:344` for highlights).
+- The same-text group that accept and reject act on is keyed by text alone (`validation_state.py:89-93`, used at `:128` and `:144`).
+- So for a pair at one span, the second type's entry overwrites the first, and rejecting one type rejects both. This contradicts the 10.3c CHANGELOG `[Unreleased]` line "Rejecting one candidate gives the earlier result for the other".
+- **Probe (10.7 SM, invented name):** ORG "Zorbaville" at 0 and at 21, plus LOCATION "Zorbaville" at 0, came out of finalization as [LOCATION 0, LOCATION 0]. The ORG at 21 would stay in clear.
+- **Main corpus (10.4 close-out detections, local, not a CI result):** 11 spans with two types, 8 key collisions in 5 documents, 0 positions left in clear.
+- **The CLI is not affected:** it already groups by (text, type) (`gdpr_pseudonymizer/validation/models.py:416`).
+
+### Acceptance Criteria
+
+1. **AC1 — Keys include the type:** the preview map and the variant map key on text, start and type, and the same-text group keys on text and type, as the CLI groups already do. This covers `build_pseudonym_previews`, `detection_worker.py`, `validation_state.py` and every caller and reader of these maps (including `gui/screens/batch.py:896`).
+2. **AC2 — The probe case and its reverse:** ORG "Zorbaville" at 0 and at 21 with LOCATION "Zorbaville" at 0 finalizes to every occurrence with its own type, in both list orders. No occurrence is dropped or retyped.
+3. **AC3 — Rejecting one type keeps the other:** accepting or rejecting one type of a same-span pair changes only that type's group; the other type keeps its state.
+4. **AC4 — No variant-map collision:** two variant groups with the same canonical text and start but different types get separate entries, and the highlight ranges map each occurrence to its own review row.
+5. **AC5 — Tests first, invented names only:** unit tests for AC1–AC4 use invented names only. Run on the unchanged code, every test of a changed behaviour fails; the dev records the list. The fix then makes them pass. Existing GUI and CLI validation tests stay green.
+6. **AC6 — CHANGELOG:** CHANGELOG `[Unreleased]` corrects the 10.3c line "Rejecting one candidate gives the earlier result for the other", so that it holds for the desktop app too, and records the desktop-app fix.
+7. **AC7 — Gates:**
+   - **G1, G3 and G5 are N/A:** there is no detection change. The PR states this explicitly. If any file the accuracy suite loads is touched, one regular `accuracy.yaml` run on the branch shows the 16 lines identical to `38212303870`, cited by ID.
+   - **G4:** desktop app and core preview keys only, never in the same PR as a detector change.
+   - **G2:** QA re-runs the AC5 tests, checks out the tests-first commit to see them fail on the old code, and reads the diff. QA's gate comes before the merge.
+   - **G6** applies in full (black, ruff, mypy, unit tests, full CI green).
+   - **G7:** no headline number changes, so no QA report or docs update. CHANGELOG as AC6.
+
+### Integration Points
+
+- `gdpr_pseudonymizer/core/document_processor.py` — `build_pseudonym_previews` (`:759`, key at `:786`)
+- `gdpr_pseudonymizer/gui/workers/detection_worker.py` — variant map (`:156`), previews call (`:199`)
+- `gdpr_pseudonymizer/gui/models/validation_state.py` — preview read (`:86`), same-text group (`:89-93`, `:128`, `:144`), finalization (`:328`), highlight ranges (`:344`)
+- `gdpr_pseudonymizer/gui/screens/batch.py` — previews call (`:896`)
+- `tests/unit/` — AC5 tests; `CHANGELOG.md` — AC6
+
+### Estimated Effort: 0.5 week
+
+---
+
 ## Execution Sequence
 
 ```
@@ -720,6 +771,7 @@ Story 10.4 (Greetings + org+country)      --- Week 6-6.5  ---  baseline = 10.3c 
 Story 10.5 (DB init safety)               --- 0.5 week, any slot --- no accuracy baseline (data layer)
 Story 10.6 (Final-exam set + ranges)      --- parallel ---  PR A early; frozen + model-annotated before 10.4 merges; adjudicated after 10.4, then committed and scored once
 Story 10.7 (Type-aware mapping lookup)    --- 0.5-1 week, any slot --- no accuracy baseline (data layer)
+Story 10.8 (Desktop app type-aware keys)  --- 0.5 week, before 10.7 --- no accuracy baseline (desktop app)
 ```
 
 **Strictly sequential:** 10.1 → 10.2 → 10.3a → 10.3b → 10.3c → 10.4. Each story's baseline is the previous story's merged close-out G1 run. No parallel detector stories: overlapping changes would make G3/G4 attribution impossible.
@@ -729,6 +781,8 @@ Story 10.7 (Type-aware mapping lookup)    --- 0.5-1 week, any slot --- no accura
 **Story 10.6** is outside the detector chain too. PR A (ranges) changes no metric line and should land before 10.3c, so 10.3c and 10.4 report ranges. PR B's documents are frozen, and both model annotations are done, before 10.4 merges. Nothing in 10.3c or 10.4 may draw on them. Lionel adjudicates after 10.4 merges, and close-out waits for his adjudication. The documents and adjudicated annotations are then committed as plain files (fingerprints checked against the freeze record) and scored exactly once, and that run is part of the Epic 10 close-out evidence.
 
 **Story 10.7** is outside the chain, like 10.5: it changes no detection (data layer only), so it has no accuracy baseline and can merge at any point without affecting G3/G4 attribution. Its effect shows most once 10.3c has merged.
+
+**Story 10.8** is outside the chain too: it changes no detection (desktop app and core preview keys), so it has no accuracy baseline. It merges before 10.7 and does not wait for 10.7's continuity decision.
 
 **Epic close-out baseline:** the 10.4 merged G1 run (main + held-out) is the baseline Epic 9 starts from, together with the one final-exam run (10.6) and its ranges.
 
@@ -756,6 +810,7 @@ Story 10.7 (Type-aware mapping lookup)    --- 0.5-1 week, any slot --- no accura
 | Unsupported accuracy claims in docs | LOW | HIGH | G1/G2/G7; the arithmetic estimate is never published |
 | Pseudonym continuity across versions: span changes in 10.2, 10.3a, 10.3b, 10.3c and 10.4 re-key mapping entries (normalized text), so a user keeping a v2.2 mapping DB can get a new pseudonym for the same entity. Mapping lookups are type-blind: for a key already in the database, both 10.3c candidates are auto-accepted with the stored pseudonym, the same as today (Story 10.7 makes the lookup type-aware) | MEDIUM | MEDIUM | CHANGELOG [Unreleased] entry with an upgrade note in each of 10.2, 10.3a, 10.3b, 10.3c and 10.4 explaining the effect; schema unchanged |
 | Pseudonym continuity for existing databases under 10.7: databases created before 10.7 hold one row per text, so a type-aware lookup could give an existing entity a new pseudonym in a document processed before | MEDIUM | MEDIUM | 10.7 AC3: the continuity rule (migration, read-compatibility or another) is Lionel's decision at 10.7's STOP; no existing row is deleted or given a new pseudonym; tested on a database written by the pre-10.7 code (AC5); CHANGELOG upgrade note |
+| Desktop app merges a same-span pair of two types (10.3c regression): text-only keys let the second type overwrite the first and one reject act on both, so an occurrence of a confirmed name can stay in clear | MEDIUM | HIGH | Story 10.8 (HIGH, before any release; on `main` only, unreleased): preview map, variant map and same-text group keyed on type; tests first with invented names; QA before merge. The CLI is not affected (`validation/models.py:416`) |
 | Final-exam set seen or used before close-out (leak) | LOW | HIGH | Kept in a workspace outside the repo until 10.4 merges, so no rule writer (agent, or Lionel at STOP R) can draw on it during detector work; Lionel sees no content before 10.4 merges; sha256 fingerprints recorded at freeze and checked at commit and before the scored run; adjudication view from a deterministic script that agents never read; plain files committed only after adjudication, outside every regular accuracy path; plain-text leakage guard on every CI run from that commit (its first run checks every file 10.3c and 10.4 added); no exam text in public CI logs; isolation rule restated in every later story (10.6 AC5-AC8). No encryption: it guarded nothing beyond this (Q5 reversed, Lionel, 2026-10-09) |
 | Final-exam score well below main or held-out | MEDIUM | MEDIUM | It is information, not a failure: no tuning in response inside Epic 10. Lionel picks the public number (10.6 AC9). The gap goes to Epic 9 as evidence |
 | Double annotation and adjudication delay close-out | MEDIUM | MEDIUM | 10.6 starts now, in parallel; both annotations are model runs, done before 10.4 merges; Lionel adjudicates only the disagreements plus a spot-check of about 3 agreed documents (10.6 AC5); close-out waits for that adjudication, the commit and one scored run, not for any further detector story |
@@ -770,7 +825,7 @@ Story 10.7 (Type-aware mapping lookup)    --- 0.5-1 week, any slot --- no accura
 
 ## Definition of Done
 
-- [ ] All 9 stories (10.1, 10.2, 10.3a, 10.3b, 10.3c, 10.4, 10.5, 10.6, 10.7) completed with acceptance criteria met (10.5 and 10.7: G1/G3/G5 N/A, no detection change; 10.6: G1/G3/G5 N/A for building the set, its scored-once run is a G1 run)
+- [ ] All 10 stories (10.1, 10.2, 10.3a, 10.3b, 10.3c, 10.4, 10.5, 10.6, 10.7, 10.8) completed with acceptance criteria met (10.5, 10.7 and 10.8: G1/G3/G5 N/A, no detection change; 10.6: G1/G3/G5 N/A for building the set, its scored-once run is a G1 run)
 - [ ] Every story closed with a cited G1 run and an independent G2 check
 - [ ] No unapproved recall drop (G3) at any story
 - [ ] Held-out set exists and is reported for 10.2, 10.3a, 10.3b, 10.3c and 10.4 (G5)
@@ -812,7 +867,7 @@ Relabelled to v2.4 (Lionel, 2026-10-02). Epic 8 was titled "v2.2 — Output Form
 - This is an enhancement to an existing system running Python 3.10-3.12, spaCy 3.7 `fr_core_news_lg` + regex hybrid detection, Poetry, pytest, GitHub Actions.
 - Integration points: `HybridDetector` merge and post-filters, regex patterns and resource lexicons, the accuracy suite (`tests/accuracy/`), the annotation corpus and `scripts/auto_annotate_corpus.py`.
 - Existing patterns to follow: post-filters as `HybridDetector` methods; lists and patterns in `gdpr_pseudonymizer/resources/`; structured logging without entity text beyond current practice.
-- Critical compatibility requirements: the product constraints and gates G1-G7 above, verbatim; the guidelines approval stop inside 10.1; strict 10.1 → 10.2 → 10.3a → 10.3b → 10.3c → 10.4 order for detector stories (10.5 and 10.7, data-layer stories, sit outside that chain; 10.7's continuity rule is Lionel's decision at its STOP), each baseline the previous merged close-out G1 run (10.3 was split into 10.3a and 10.3b, and 10.3c was added at 10.3a STOP R, Lionel, 2026-10-06; see "Course Correction" and "Close-Out Record").
+- Critical compatibility requirements: the product constraints and gates G1-G7 above, verbatim; the guidelines approval stop inside 10.1; strict 10.1 → 10.2 → 10.3a → 10.3b → 10.3c → 10.4 order for detector stories (10.5 and 10.7, data-layer stories, and 10.8, desktop app keys, sit outside that chain; 10.8 merges before 10.7; 10.7's continuity rule is Lionel's decision at its STOP), each baseline the previous merged close-out G1 run (10.3 was split into 10.3a and 10.3b, and 10.3c was added at 10.3a STOP R, Lionel, 2026-10-06; see "Course Correction" and "Close-Out Record").
 - Story 10.6 (final exam and ranges) runs outside the detector chain. Its documents are frozen and model-annotated before 10.4 merges, adjudicated by Lionel after 10.4 merges, then committed as plain files and scored once. From the start of 10.6 authoring, every story's Dev Notes forbid opening, listing or grepping the final-exam material (its workspace outside the repo and `tests/test_corpus/final_exam/`), next to the held-out isolation rule. Final-exam numbers exist only after close-out and are never used for a decision or for tuning inside Epic 10.
 - Each story must include verification that existing functionality remains intact (full CI green, recall guard).
 
