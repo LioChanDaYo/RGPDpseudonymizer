@@ -41,8 +41,8 @@ def _assert_winner_db(db_path: Path, winner_pass: str, loser_pass: str) -> None:
 
     It exists, opens with the winner's passphrase, holds exactly the four
     metadata keys (schema_version "1.0.0", kdf_iterations "100000"), and
-    rejects the loser's passphrase. Every failure is an AssertionError, so a
-    strict xfail with raises=AssertionError only accepts a real assertion.
+    rejects the loser's passphrase. Every failure is an AssertionError (AC6:
+    the tests-first commit's strict xfails accepted real assertions only).
     """
     assert db_path.exists(), f"no database file at {db_path}"
     try:
@@ -246,15 +246,6 @@ class TestDatabaseInitialization:
     # below replaces it with a real competitor between the existence check and
     # the create. The #83 "CREATE INDEX IF NOT EXISTS" statements stay in
     # init_database.
-    @pytest.mark.xfail(
-        strict=True,
-        raises=AssertionError,
-        reason=(
-            "Story 10.5: reproduces the loser deleting the winner's database "
-            "(POSIX) or raising PermissionError (Windows) on the unfixed "
-            "init_database; fixed in Task 2"
-        ),
-    )
     def test_init_database_competitor_between_check_and_create(
         self, tmp_path: Path
     ) -> None:
@@ -299,15 +290,6 @@ class TestDatabaseInitialization:
             assert str(outcome).startswith("Database already exists"), str(outcome)
             assert _file_state(db_path) == before
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=AssertionError,
-        reason=(
-            "Story 10.5: reproduces a late failure leaving -wal/-shm (POSIX) or "
-            "the database plus a PermissionError (Windows) on the unfixed "
-            "init_database; fixed in Task 2"
-        ),
-    )
     def test_init_database_late_failure_leaves_nothing(self, tmp_path: Path) -> None:
         """T3: a failure at the metadata step leaves no file behind."""
         db_path = tmp_path / "mappings.db"
@@ -338,14 +320,6 @@ class TestDatabaseInitialization:
         assert str(outcome).startswith("Database initialization failed"), str(outcome)
         assert sorted(os.listdir(tmp_path)) == []
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=AssertionError,
-        reason=(
-            "Story 10.5: reproduces a Ctrl+C leaving a partial database on the "
-            "unfixed init_database; fixed in Task 2"
-        ),
-    )
     def test_init_database_interrupt_cleans_up(self, tmp_path: Path) -> None:
         """T5: a KeyboardInterrupt is re-raised unwrapped and leaves no file."""
         db_path = tmp_path / "mappings.db"
@@ -361,14 +335,6 @@ class TestDatabaseInitialization:
     @pytest.mark.skipif(
         sys.platform == "win32",
         reason="Windows: the held descriptor stops the file being replaced",
-    )
-    @pytest.mark.xfail(
-        strict=True,
-        raises=AssertionError,
-        reason=(
-            "Story 10.5: reproduces the cleanup deleting a file that replaced "
-            "the call's own on the unfixed init_database; fixed in Task 2"
-        ),
     )
     def test_init_database_cleanup_spares_replaced_file(self, tmp_path: Path) -> None:
         """T6: the cleanup never deletes a file that replaced the call's own."""
@@ -390,15 +356,6 @@ class TestDatabaseInitialization:
         assert db_path.exists(), "the replacement file was deleted"
         assert db_path.read_bytes() == b"other"
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=AssertionError,
-        reason=(
-            "Story 10.5: reproduces a cleanup error masking the original error "
-            "(or no cleanup-failure log) on the unfixed init_database; fixed in "
-            "Task 2"
-        ),
-    )
     def test_init_database_cleanup_error_never_masks_original(
         self, tmp_path: Path
     ) -> None:

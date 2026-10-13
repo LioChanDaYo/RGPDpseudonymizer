@@ -24,8 +24,6 @@ from pathlib import Path
 from typing import Any
 from unittest.mock import patch
 
-import pytest
-
 from tests.unit.test_database import PASS_A, PASS_B, _assert_winner_db
 
 RACE_ITERATIONS = 20
@@ -188,15 +186,6 @@ def _run_children(
     return reports
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=(
-        "Story 10.5: reproduces the loser's cleanup deleting the winner's "
-        "database (POSIX) or raising PermissionError (Windows) on the unfixed "
-        "init_database; fixed in Task 2"
-    ),
-)
 def test_concurrent_init_forced_interleaving(tmp_path: Path) -> None:
     """T9: B passes the fast path before A creates the file; A must win."""
     db_path = tmp_path / "mappings.db"
@@ -241,15 +230,6 @@ def _race_iteration_problem(
     return None
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=(
-        "Story 10.5: reproduces the race losing the database (POSIX) or the "
-        "loser raising PermissionError (Windows) on the unfixed init_database; "
-        "fixed in Task 2"
-    ),
-)
 def test_concurrent_init_race_loop(tmp_path: Path) -> None:
     """T10 (AC3): 20 barrier-started races, each with exactly one winner."""
     paths = []
