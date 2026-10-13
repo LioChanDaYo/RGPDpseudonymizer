@@ -92,7 +92,7 @@ GDPR Pseudonymizer est un **outil CLI et GUI conçu pour la confidentialité**. 
 - ✅ **Aucune télémétrie** — Ni collecte analytique, ni rapport d'erreur, ni communication externe
 
 ### 🤝 **IA + relecture humaine**
-- ✅ **Détection hybride** — L'IA repère environ 74 % des entités (NLP + expressions régulières + dictionnaire géographique ; la validation rattrape le reste). L'améliorer est une priorité
+- ✅ **Détection hybride** — NLP + expressions régulières + dictionnaire géographique : F1 de 61,4 % sur 30 documents inédits (exécution CI 38382553368). L'améliorer est une priorité
 - ✅ **Validation obligatoire** — Vous vérifiez et confirmez chaque entité (précision finale de 100 %)
 - ✅ **Interface de validation rapide** — Interface CLI enrichie avec raccourcis clavier, moins de 2 min par document
 - ✅ **Parcours intelligent** — Regroupement des entités par type (PERSON → ORG → LOCATION) avec affichage du contexte
@@ -154,7 +154,7 @@ pip install gdpr-pseudonymizer[formats]
 - 📦 **Exécutables autonomes** — Installeur Windows .exe, DMG macOS (Apple Silicon), AppImage Linux — Python non requis
 - ♿ **Accessibilité WCAG 2.1 AA** — Navigation au clavier, lecteurs d'écran, mode contraste élevé
 - 🌐 **Interface française** — Interface GUI FR/EN complète avec changement de langue en temps réel
-- 🤖 **Détection assistée par IA** — La détection hybride NLP + regex repère environ 74 % des entités (F1 ~59 % sur notre corpus de test) ; la validation rattrape le reste
+- 🤖 **Détection assistée par IA** — La détection hybride NLP + regex atteint un F1 de 61,4 % (rappel 60,6 %) sur 30 documents inédits écrits par un autre auteur (exécution CI 38382553368)
 - ✅ **Relecture humaine obligatoire** — Vous vérifiez toutes les entités (précision finale 100 %)
 - 🔒 **Traitement 100 % local** — Vos données ne quittent jamais votre machine
 - 📄 **Support PDF/DOCX** — Traitement direct des fichiers PDF et DOCX (extras optionnels)
@@ -166,7 +166,7 @@ pip install gdpr-pseudonymizer[formats]
 
 **Ce qu'elle ne propose pas :**
 - ❌ Un traitement entièrement automatique sans intervention
-- ❌ Une précision IA supérieure à 85 % (actuellement : environ 59 % F1 avec l'approche hybride — nous prévoyons de l'améliorer)
+- ❌ Une précision IA supérieure à 85 % (actuellement : F1 de 61,4 % sur des documents inédits, 82,6 % sur notre corpus de développement — nous prévoyons de l'améliorer)
 - ❌ Un mode sans validation (la relecture est obligatoire)
 
 ### Feuille de route
@@ -182,7 +182,7 @@ pip install gdpr-pseudonymizer[formats]
 **v2.2 (T3 2026) — VERSION ACTUELLE :** Choix du modèle spaCy, changement de type d'entité en validation CLI, corrections de délimitation des entités, correctif d'installation (SQLAlchemy < 2.1)
 
 **v3.0 (2027+) :** Précision NLP et automatisation
-- Modèle NER français affiné (objectif F1 70-85 %, contre ~59 % actuellement)
+- Modèle NER français affiné (objectif F1 70-85 %, contre 61,4 % sur des documents inédits actuellement)
 - Option `--no-validate` pour les traitements à haute confiance
 - Traitement automatique à partir d'un seuil de confiance (objectif F1 85 %+)
 - Prise en charge multilingue (anglais, espagnol, allemand)
@@ -331,6 +331,20 @@ GDPR_PSEUDO_LANG=fr gdpr-pseudo --help
 
 ## 🔬 Détails techniques
 
+### Précision de la détection (Epic 10, octobre 2026)
+
+**Sur des documents inédits : F1 de 61,4 %** (intervalle à 95 % : 59,3–63,6 %), rappel 60,6 %, précision 62,3 %. Il s'agit d'un examen final à l'aveugle : 30 documents français écrits par un autre auteur, dans des formats peu soignés (fils d'e-mails avec réponses citées, retours à la ligne de PDF, tableaux aplatis en texte, casse mélangée), évalués une seule fois (exécution CI 38382553368). Par type : PERSON 69,2 % F1, LOCATION 68,7 %, ORG 34,8 % ; les organisations restent le point faible.
+
+**Pour situer :** F1 de 82,6 % sur le corpus de développement (25 documents) et de 78,1 % sur un jeu réservé (6 documents) (exécution CI 38212303870). Ces deux ensembles sont plus proches des documents sur lesquels les règles ont été construites.
+
+Comment l'examen final a été construit, et ses limites :
+- Un LLM (GPT) a écrit les 30 documents à partir d'un cahier des charges qui nommait les cas difficiles à inclure, sans citer aucun texte du corpus.
+- Deux modèles (GPT et Gemini) les ont annotés indépendamment, et le mainteneur a tranché leurs désaccords.
+- Le jeu a été figé avant la dernière modification de la détection, puis évalué une seule fois.
+- Les documents sont synthétiques : des documents réels peuvent donner un autre résultat.
+
+Détails : [docs/qa/ner-accuracy-report.md](docs/qa/ner-accuracy-report.md).
+
 ### Choix de la bibliothèque NLP (Story 1.2 — terminé)
 
 Après un benchmark approfondi sur 25 documents français (entretiens et documents professionnels, 1 737 entités annotées) :
@@ -339,15 +353,15 @@ Après un benchmark approfondi sur 25 documents français (entretiens et documen
 |----------|----------|-----------|--------|-------|
 | **spaCy seul** `fr_core_news_lg` | 29,5 % | 27,0 % | 32,7 % | Ligne de base (Story 1.2) |
 | **Hybride** (spaCy + regex) | 59,97 % | 48,17 % | 79,45 % | Story 5.3 (voir la note sur le calcul) |
-| **Hybride, actuel (v2.2.0)** | **58,53 %** | 48,42 % | 73,98 % | Calculé comme l'application normalise les entités |
+| **Hybride (v2.2.0)** | **58,53 %** | 48,42 % | 73,98 % | Calculé comme l'application normalise les entités |
 
 Par type d'entité (v2.2.0) : PERSON 72,9 % F1, LOCATION 45,0 %, ORG 12,9 %. La détection des organisations est le point faible : des intitulés de poste comme CTO, DPO ou RSSI sont souvent pris pour des entreprises.
 
-**Comment ces chiffres sont calculés (corrigé en octobre 2026).** L'application retire les titres et les prépositions avant de pseudonymiser (« Mme Isabelle Moreau » est traitée comme « Isabelle Moreau », « à Paris » comme « Paris »), et le benchmark évalue désormais les détections de la même façon. Jusque-là, l'évaluateur comparait le texte brut : chaque « Mme Isabelle Moreau » correctement détectée comptait comme un oubli plus une fausse alerte. Avec ce calcul strict, le même détecteur mesurait environ 32 % F1, un chiffre brièvement publié sur cette page en octobre 2026 ; il sous-estimait la détection en usage réel. Le chiffre de la Story 5.3 (59,97 %) semble avoir été mesuré avec une comparaison tenant compte des titres, et il est cohérent avec les 58,53 % d'aujourd'hui. Tous les chiffres du tableau ci-dessus sont reproductibles avec `pytest tests/accuracy -m accuracy -s`.
+**Comment ces chiffres sont calculés (corrigé en octobre 2026).** L'application retire les titres et les prépositions avant de pseudonymiser (« Mme Isabelle Moreau » est traitée comme « Isabelle Moreau », « à Paris » comme « Paris »), et le benchmark évalue désormais les détections de la même façon. Jusque-là, l'évaluateur comparait le texte brut : chaque « Mme Isabelle Moreau » correctement détectée comptait comme un oubli plus une fausse alerte. Avec ce calcul strict, le même détecteur mesurait environ 32 % F1, un chiffre brièvement publié sur cette page en octobre 2026 ; il sous-estimait la détection en usage réel. Le chiffre de la Story 5.3 (59,97 %) semble avoir été mesuré avec une comparaison tenant compte des titres, et il est cohérent avec les 58,53 % de la v2.2.0. Chaque chiffre du tableau ci-dessus a été mesuré avec `pytest tests/accuracy -m accuracy -s` sur la version qu'il indique.
 
 **Deux précautions de lecture.** Ces chiffres proviennent d'un seul corpus de 25 documents français (entretiens et documents professionnels), dont une partie de la vérité terrain a été annotée automatiquement avec les propres expressions régulières de l'outil, ce qui fausse les résultats dans les deux sens. Et ils ne mesurent que la *pré-détection* : c'est la validation obligatoire qui garantit un résultat final correct.
 
-**Nous prévoyons d'améliorer ces chiffres**, à commencer par la détection des organisations, ainsi que le corpus qui la mesure. Un modèle NER français affiné reste l'objectif de la v3.0 (F1 70-85 %).
+**L'Epic 10 (octobre 2026)** a réparé ce corpus de test à partir de consignes d'annotation écrites, ajouté un jeu réservé et l'examen final à l'aveugle ci-dessus, et amélioré la détection des organisations. Un modèle NER français affiné reste l'objectif de la v3.0 (F1 70-85 %).
 
 **Progression de la précision :** Story 7.5 a ajouté 12 mots-clés de détection ORG, la désambiguïsation POS pour le dictionnaire géographique et 7 lieux internationaux — réduisant le taux de faux négatifs LOCATION de 27,42 % à 12,90 %.
 
@@ -410,7 +424,7 @@ L'interface de validation offre un parcours intuitif piloté au clavier pour pas
 **En détail :**
 1. **Solidité juridique au regard du RGPD** — La relecture humaine fournit une piste d'audit opposable
 2. **Aucun faux négatif** — L'IA laisse passer des entités ; l'humain les rattrape (couverture à 100 %)
-3. **Limites actuelles du NLP** — Les modèles français sur des documents d'entretiens ou professionnels : 29,5 % F1 de base (approche hybride : environ 59 % F1, 74 % de rappel ; les organisations sont le point faible ; amélioration prévue)
+3. **Limites actuelles du NLP** — Les modèles français sur des documents d'entretiens ou professionnels : 29,5 % F1 de base (approche hybride : F1 de 61,4 % et rappel de 60,6 % sur des documents inédits, F1 de 82,6 % sur notre corpus de développement ; les organisations sont le point faible ; amélioration prévue)
 4. **Mieux que les alternatives :**
    - ✅ **vs rédaction manuelle :** Plus de 50 % de temps gagné grâce à la détection préalable
    - ✅ **vs services cloud :** Traitement 100 % local, aucune fuite de données
@@ -586,7 +600,7 @@ Ce projet est distribué sous la [licence MIT](LICENSE).
 - ⚠️ Testez rigoureusement avant toute mise en production
 
 **Limitations actuelles :**
-- Détection IA : environ 59 % F1 aujourd'hui (pas 85 %+) ; amélioration prévue
+- Détection IA : F1 de 61,4 % sur des documents inédits (82,6 % sur notre corpus de développement), pas 85 %+ ; amélioration prévue
 - Validation requise pour TOUS les documents (pas facultative)
 - Documents en français uniquement (anglais, espagnol, etc. dans les versions futures)
 - Formats supportés : .txt, .md, .pdf, .docx, .xlsx, .csv (PDF/DOCX/Excel nécessitent des extras optionnels : `pip install gdpr-pseudonymizer[formats]`)
@@ -715,7 +729,7 @@ La suite de tests d'intégration couvre :
 | **Bugs critiques trouvés** | 1 (Story 2.8) | ✅ RÉSOLU — Epic 3 débloqué |
 | **Corpus de test** | 25 documents, 1 737 entités | ✅ Complet (après nettoyage) |
 | **Précision NLP (ligne de base)** | 29,5 % F1 (spaCy seul) | ✅ Mesuré (Story 1.2) |
-| **Précision hybride (NLP+Regex)** | 58,53 % F1 (v2.2.0) | ⚠️ Sous l'objectif — amélioration prévue |
+| **Précision hybride (NLP+Regex)** | F1 de 61,4 % sur des documents inédits (examen final, exécution CI 38382553368) ; 82,6 % sur le corpus de développement, 78,1 % sur le jeu réservé (exécution CI 38212303870) | ⚠️ Sous l'objectif — amélioration prévue |
 | **Précision finale (IA+Humain)** | 100 % (validé) | 🎯 Par conception |
 | **Bibliothèques de pseudonymes** | 3 thèmes (2 426 noms + 240 lieux + 588 organisations) | ✅ Stories 2.1, 3.0, 4.6 terminées |
 | **Résolution par composition** | Opérationnelle (réutilisation des composants + suppression des titres + noms composés) | ✅ Stories 2.2, 2.3 terminées |

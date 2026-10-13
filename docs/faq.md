@@ -8,19 +8,19 @@
 
 ### What accuracy should I expect from the automatic detection?
 
-The hybrid detection pipeline (NLP + regex + geography dictionary) automatically identifies approximately 74% of entities in French text (recall 73.98%, F1 58.53% on our 25-document benchmark). Organisation names are the weak point. We plan to improve these figures. This is a pre-filtering step -- **you review and confirm every entity** during the mandatory validation workflow.
+On 30 unseen French documents written by a different author in messy formats (a blind final exam, scored once), the hybrid detection pipeline (NLP + regex + geography dictionary) reaches F1 61.4% (95% range 59.3–63.6%) and recall 60.6% (CI run 38382553368). On our development corpus it reaches 82.6%, and 78.1% on a held-out set (CI run 38212303870); both are closer to the documents the rules were built on. Organisation names are the weak point (ORG F1 34.8% on the final exam). We plan to improve these figures. This is a pre-filtering step -- **you review and confirm every entity** during the mandatory validation workflow.
 
 After human validation, accuracy is **100%** because you control the final decision for every entity.
 
 ### Why is the NER accuracy so low?
 
-The spaCy `fr_core_news_lg` model was trained primarily on news text, not interview transcripts or business documents. Domain-specific language patterns (conversational registers, mixed formality) reduce out-of-the-box accuracy. A benchmark on 25 French documents with 1,855 entities measured 29.5% F1 for spaCy alone. The hybrid approach (regex patterns, name and geography dictionaries) reaches 58.53% F1 in v2.2.0 (scored the way the app handles titles and prepositions). Improving detection is planned, with a fine-tuned French model as the v3.0 target.
+The spaCy `fr_core_news_lg` model was trained primarily on news text, not interview transcripts or business documents. Domain-specific language patterns (conversational registers, mixed formality) reduce out-of-the-box accuracy. A benchmark on 25 French documents with 1,855 entities measured 29.5% F1 for spaCy alone. The hybrid approach (regex patterns, name and geography dictionaries) reaches 82.6% F1 on our development corpus, but 61.4% on 30 unseen documents by a different author (CI runs 38212303870 and 38382553368). Improving detection is planned, with a fine-tuned French model as the v3.0 target.
 
 Fine-tuning with real-world validation data is planned for v3.0 (targeting 70-85% F1).
 
 ### Why is validation mandatory?
 
-Because the AI detection misses entities. With ~80% recall, roughly one in five entities would go undetected without human review. For GDPR compliance, missing even one personal data entity could constitute a data breach. Mandatory validation ensures **zero false negatives**.
+Because the AI detection misses entities. With 60.6% recall on unseen documents (CI run 38382553368), the detector does not find every name on its own. For GDPR compliance, missing even one personal data entity could constitute a data breach. Mandatory validation ensures **zero false negatives**.
 
 ### How do I process only specific entity types?
 
