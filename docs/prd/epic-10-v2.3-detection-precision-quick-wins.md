@@ -728,7 +728,10 @@ Since 10.3c (R-MX), one span can be kept with two types: the regex detection is 
 - The desktop app keys two per-run maps as `"{text}_{start}"`, without the type: the preview map built by `build_pseudonym_previews` (`gdpr_pseudonymizer/core/document_processor.py:786`, read at `gdpr_pseudonymizer/gui/models/validation_state.py:86`) and the variant map (`gdpr_pseudonymizer/gui/workers/detection_worker.py:156`, read at `validation_state.py:328` for finalization and `:344` for highlights).
 - The same-text group that accept and reject act on is keyed by text alone (`validation_state.py:89-93`, used at `:128` and `:144`).
 - So for a pair at one span, the second type's entry overwrites the first, and rejecting one type rejects both. This contradicts the 10.3c CHANGELOG `[Unreleased]` line "Rejecting one candidate gives the earlier result for the other".
-- **Probe (10.7 SM, invented name):** ORG "Zorbaville" at 0 and at 21, plus LOCATION "Zorbaville" at 0, came out of finalization as [LOCATION 0, LOCATION 0]. The ORG at 21 would stay in clear.
+- **Probe (10.7 and 10.8 SM probes, invented name; re-run by the PM on 2026-10-13 on code identical to `51d8429`):** ORG "Zorbaville" at 0 and at 21, plus LOCATION "Zorbaville" at 0, came out of finalization as [LOCATION 0, LOCATION 0]. The ORG at 21 would stay in clear.
+  - **Reverse order** (LOCATION listed first): accepting both sent [ORG 0, ORG 21, ORG 0, ORG 21]. The LOCATION was retyped to ORG, and the ORG positions were sent twice.
+  - **Batch screen** (one row per detection, no variant map): the same-text group held all three rows, so rejecting the LOCATION row also rejected both ORG rows, and nothing was sent for "Zorbaville".
+- **Previews (PO S1):** after 10.8, each row gets its own preview entry, title included. The suggested pseudonym itself becomes type-aware only with Story 10.7; until then, a row of one type can show a pseudonym drawn for the other type (the assigner's per-run cache is type-blind).
 - **Main corpus (10.4 close-out detections, local, not a CI result):** 11 spans with two types, 8 key collisions in 5 documents, 0 positions left in clear.
 - **The CLI is not affected:** it already groups by (text, type) (`gdpr_pseudonymizer/validation/models.py:416`).
 
@@ -738,7 +741,7 @@ Since 10.3c (R-MX), one span can be kept with two types: the regex detection is 
 2. **AC2 — The probe case and its reverse:** ORG "Zorbaville" at 0 and at 21 with LOCATION "Zorbaville" at 0 finalizes to every occurrence with its own type, in both list orders. No occurrence is dropped or retyped.
 3. **AC3 — Rejecting one type keeps the other:** accepting or rejecting one type of a same-span pair changes only that type's group; the other type keeps its state.
 4. **AC4 — No variant-map collision:** two variant groups with the same canonical text and start but different types get separate entries, and the highlight ranges map each occurrence to its own review row.
-5. **AC5 — Tests first, invented names only:** unit tests for AC1–AC4 use invented names only. Run on the unchanged code, every test of a changed behaviour fails; the dev records the list. The fix then makes them pass. Existing GUI and CLI validation tests stay green.
+5. **AC5 — Tests first, invented names only:** unit tests for AC1–AC4 use invented names only. Run on the unchanged code, every test of a changed behaviour fails; the dev records the list. The fix then makes them pass. Existing GUI and CLI validation tests stay green; tests that build the review list's key by hand change only how they build it.
 6. **AC6 — CHANGELOG:** CHANGELOG `[Unreleased]` corrects the 10.3c line "Rejecting one candidate gives the earlier result for the other", so that it holds for the desktop app too, and records the desktop-app fix.
 7. **AC7 — Gates:**
    - **G1, G3 and G5 are N/A:** there is no detection change. The PR states this explicitly. If any file the accuracy suite loads is touched, one regular `accuracy.yaml` run on the branch shows the 16 lines identical to `38212303870`, cited by ID.
@@ -753,6 +756,9 @@ Since 10.3c (R-MX), one span can be kept with two types: the regex detection is 
 - `gdpr_pseudonymizer/gui/workers/detection_worker.py` — variant map (`:156`), previews call (`:199`)
 - `gdpr_pseudonymizer/gui/models/validation_state.py` — preview read (`:86`), same-text group (`:89-93`, `:128`, `:144`), finalization (`:328`), highlight ranges (`:344`)
 - `gdpr_pseudonymizer/gui/screens/batch.py` — previews call (`:896`)
+- `gdpr_pseudonymizer/validation/models.py` — the key function `candidate_key()` (new; the CLI's grouping is unchanged)
+- `gdpr_pseudonymizer/gui/screens/validation.py` — the `set_context` docstring line (`:332`) only
+- Existing tests, key construction only (AC5): `tests/unit/test_document_processor.py::TestBuildPseudonymPreviews` `test_happy_path_new_entities` (`:628-629`), `test_existing_mapping` (`:690`) and `test_title_preservation` (`:753-755`); and `tests/unit/gui/test_validation_state.py::TestGUIValidationStateInit::test_pseudonym_previews_assigned`, through the shared fixture `sample_detection_result` (`tests/unit/gui/conftest.py:134-155`)
 - `tests/unit/` — AC5 tests; `CHANGELOG.md` — AC6
 
 ### Estimated Effort: 0.5 week
