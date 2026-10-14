@@ -148,6 +148,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Also fixed, older (in v2.2.0): when one text was found with different types at different places, accepting or rejecting one type changed the other too.
   - The command-line validation was not affected. Detection, the mapping database and its schema do not change, and no accuracy figure changes.
 
+- **Desktop app: editing a name now applies to every occurrence of it, as in the CLI (Story 10.9).** In the review list, a name found at several places is one row. Editing its text used to change only the place the row stood for, and the name was not pseudonymized at its other places: it stayed in clear in the output. This was in every desktop release since v2.0.0.
+  - Now the edit applies to every occurrence of that name and type, each place adjusted to the edited text, as the command line does. Where the edited text is not found at a place, that place keeps its detected span and is still pseudonymized. One undo reverts the whole edit, and the highlights show exactly the places that will be pseudonymized.
+  - In batch validation, where each place is its own row, the edit reaches every row with the same name and type, as accept and reject already do.
+  - A correction of a name or of its type never reaches a place you rejected: if "Zorbal" is also found inside the place name "Saint-Zorbal" and you reject that place, correcting the name elsewhere leaves "Saint-Zorbal" as it is.
+  - Changing the type of a name in the desktop app now applies to every occurrence too, as in the command line.
+  - The edit dialog now places the edited text as the command line does: where it overlaps the name, otherwise on the name's own place. Before, it could put the edit on another place of the name nearby.
+  - After an edit, the edit dialog now opens on the edited name, so a second edit builds on the first: after extending "Zorbalia" to "Quentrix Zorbalia", adding a title no longer leaves "Quentrix" in clear at any place.
+  - The command-line validation was not affected. Detection, the mapping database and its schema do not change, and no accuracy figure changes.
+
 - **Two runs creating the same new mapping database at once no longer lose it (Story 10.5).**
   - Two runs that create the same new mapping database at the same moment no longer lose it. The first run's database (its mappings and passphrase setup) is always kept; the second run stops with "Database already exists". Before, on Linux and macOS, the second run could delete the database the first one had just created; on Windows, it stopped with an unexpected file-access error.
   - A failed or interrupted (Ctrl+C) database creation no longer leaves a partial database, or its `-wal`/`-shm` files, behind.
