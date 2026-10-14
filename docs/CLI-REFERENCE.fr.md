@@ -467,6 +467,8 @@ Supprime une correspondance de la base de données (effacement au titre de l'art
 
 Supprimer une correspondance transforme la pseudonymisation en **anonymisation** : sans correspondance, le pseudonyme ne peut plus être relié à une personne identifiable, et les données sortent du champ d'application du RGPD.
 
+Un nom peut être enregistré sous plusieurs types, une ligne par type : la suppression par nom affiche toutes les lignes de ce nom, puis les supprime toutes (une entrée d'audit ERASURE par ligne) ; `--id` supprime une seule ligne et indique les lignes du même nom qui restent.
+
 **Syntaxe :**
 ```bash
 gdpr-pseudo delete-mapping [NOM_ENTITE] [OPTIONS]

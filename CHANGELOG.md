@@ -32,6 +32,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Same name, two types: separate pseudonyms (Story 10.7).** The mapping database now keeps one row per name and type. Detection does not change, and no accuracy figure changes.
+  - **Same name, two types.** "Zorbaville" the town and "Zorbaville" the company now get two pseudonyms and two rows. Before, they shared one row and one pseudonym.
+  - **Known under one type, found under another.** A name stored under one type and found under another type now reaches review. Before, it was accepted without review, with the stored pseudonym. The same name with the same type is still accepted without review, with its stored pseudonym.
+  - **One place, both types confirmed.** When one place is found with two types and both are confirmed, both rows are stored, each with its own pseudonym. At that place the output shows one pseudonym, the first in the validated list (a type already in the database comes before one confirmed during review), as before. At the other places, each type's occurrences get that type's pseudonym.
+  - **Batch runs** (`batch` with several workers) have no review: a name found under two types gets one pseudonym per type.
+  - **`delete-mapping "Name"`** lists every row with that name (one per type) and deletes all of them, with one erasure audit entry per row. `delete-mapping --id` deletes one row and says how many rows of the same name remain, and their types. The erasure audit entry records the deleted name, as before.
+  - **`import-mappings`** skips (or asks about) a name only when the target database holds it with the same type. The same name with another type is imported as its own row.
+  - **Desktop app.** A name already in the database is recognised as known with the same key and type as on the command line, so a form with a title ("Dr Zorbalia") is known when "Zorbalia" is stored as a person. Before, the desktop app compared the raw text, under any type. Names found twice at one place with two types are Story 10.8's fix (see "Fixed").
+  - **Upgrading: existing databases are converted once.**
+    - The first time this version opens a database made by an earlier version, it converts the file in place to the new format. Any open does it: processing, the read-only commands (`list-entities`, `list-mappings`, `stats`, `export`, `validate-mappings`), the source database of `import-mappings`, the passphrase check of `destroy-table`, the desktop app, and a backup copy you open.
+    - Every stored pseudonym is kept, with its name, type and id. The database's schema version becomes 1.1.0.
+    - The conversion is all or nothing. If it cannot be made (read-only file or folder, full disk, file used by another program), the command stops with a message and the file is unchanged.
+    - When several `batch` workers start on a database made by an earlier version, it is converted once, before they start. A program that opens the database during a conversion waits for it to finish.
+    - Occurrences that earlier documents had under another type got the stored pseudonym. Processed again, they reach review and, if confirmed, get their own pseudonym.
+    - **Going back:** after the conversion, opening the database with version 2.2 or older is unsafe. That version looks names up without their type, and its `delete-mapping` removes one row of a name without saying that another remains. Copy your database file before upgrading if you may need to go back; such a copy also keeps names you erase later.
+    - Recommendation, as before: keep using the same mapping database across versions for consistent pseudonyms.
+
 - **Public accuracy figures now lead with the blind final exam (Story 10.6, Epic 10 close-out).** README, README.fr, the FAQ, the docs home page and the tutorial state F1 61.4% (95% range 59.3–63.6%) and recall 60.6% on 30 unseen documents written by a different author (CI run `38382553368`), with 82.6% on the development corpus and 78.1% on the held-out set as context (CI run `38212303870`). The previous figure (F1 58.53%, v2.2.0) stays in the historical table.
 
 - **People addressed in greetings, organisations with their country, short forms and defined aliases are now offered (Story 10.4).**
@@ -52,7 +69,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - A first name newly offered on a greeting line, or used alone after the full name, gets the pseudonym already stored for that first name, or a new one; the existing person-name component match applies unchanged.
     - Organisation + place: "Zorbtech France" is a new key, different from "Zorbtech", so the branch gets its own pseudonym. The place "France" keeps its own key; in the output, the organisation's replacement covers the place at that position.
     - Short forms and defined aliases get their own key ("ZRQ", "ZORBTECH"), so their own pseudonym: the short form is no longer left in clear, but the output does not show that it is the same organisation as the full name.
-    - Making the lookup type-aware is planned as a separate story (10.7, Type-Aware Mapping Lookup).
+    - The lookup became type-aware with Story 10.7: see "Same name, two types: separate pseudonyms (Story 10.7)" above.
     - Recommendation: keep using the same mapping database across versions for consistent pseudonyms. Re-process with the previous version if byte-identical output with an old run is required.
 
 - **A name found by both detectors with different types is no longer dropped (Story 10.3c).**
@@ -70,7 +87,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Upgrading: pseudonym continuity.** The mapping schema is unchanged. Keys are still the entity text with titles stripped (and prepositions, for places), whitespace collapsed, **without the entity type**.
     - If you confirm both candidates of a pair (say LOCATION "Zorbaville" and ORG "Zorbaville"), they share one key: the first one resolved gets or creates the row, the second reuses its pseudonym. One row is stored, with the first one's type. Rejecting one candidate gives the earlier result for the other, in the command line and, since Story 10.8, in the desktop app (see "Fixed").
     - If the key is already in your database, whatever its type, both candidates are accepted automatically with the stored pseudonym, as known entities, and neither is shown for review. The output is the same as before: the same stored pseudonym, and at the same position the same replacement.
-    - Making the lookup type-aware is planned as a separate story (10.7, Type-Aware Mapping Lookup).
+    - The lookup became type-aware with Story 10.7: see "Same name, two types: separate pseudonyms (Story 10.7)" above.
     - Recommendation: keep using the same mapping database across versions for consistent pseudonyms. Re-process with the previous version if byte-identical output with an old run is required.
 
 - **Fewer false places; names with particles or Mc/Mac kept whole; trailing roles trimmed (Story 10.3b).**
