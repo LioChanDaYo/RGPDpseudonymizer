@@ -772,6 +772,12 @@ Since 10.3c (R-MX), one span can be kept with two types: the regex detection is 
 
 **Added by Lionel, 2026-10-13** ("Own story, before release (Recommended)"). The option text he saw: "New small story 10.9. Desktop edit applies to all occurrences, like the CLI. Must land before the next release. 10.8 stays narrow (keys only). Tests first, invented names." From the 10.8 SM's finding at `main` `51d8429`.
 
+**Decisions (Lionel, 2026-10-14), each the recommendation; the 10.9 story records the questions word for word:**
+
+- **Q1, the desktop type change: "Fold into 10.9 (Recommended)".** A desktop type change applies to every occurrence of that name, as in the command line (10.9 story, AC9).
+- **UX-001: "Fix in 10.9 (Rec.)".** QA found that the edit dialog reopened on the detected text ("Valmont") instead of the user's edit ("Quentrix Valmont"), so a second edit silently dropped the first. Preview he saw: reopening shows the latest edit ("Quentrix Valmont"); a second edit builds on it; the whole name is replaced at every place (10.9 story, AC10).
+- **Rejected places: "Skip rejected places (Rec.)".** "Zorbal" is found three times; the third is part of "Saint-Zorbal", which the user rejects on its own; a correction on another row also reached the rejected row (output "Saint-[pseudonym]"). Preview he saw: rows 1 and 2 corrected and pseudonymized; Saint-Zorbal stays rejected, left as is. A correction or a type change never reaches a place the user rejected (10.9 story, AC11; 10.10 follows).
+
 **As a** desktop-app user correcting a detected name in the review list,
 **I want** my edit to apply to every occurrence of that name and type, as it does in the CLI,
 **so that** no other occurrence of the name is left in clear.
@@ -818,6 +824,15 @@ At `main` `51d8429`:
 
 **Q3, GRP-001 (Lionel, 2026-10-14): "Every place (Rec.)"**, the recommendation. Question asked: "10.10, one more. The detector finds "Quentrel Zorbalia" at two places and misses a third, which you add by hand. Then you correct the name to "Quentrel Zorbalia Quentrix". Should that correction reach every place of the name, whether the detector found it or you added it? Accept and reject always stay on the row you click; that is the fix for the earlier reject bug." The preview he saw: correct any one of [found] [found] [added by you] → all three become "Quentrel Zorbalia Quentrix", one pseudonym; accept / reject → only the row you click.
 
+**Further decisions on the same rule (Lionel, 2026-10-14), each the recommendation:**
+
+- **Q3 correction, accept and reject on found places: "Keep group action (Rec.)".** The Q3 wording "Accept and reject always stay on the row you click" was wrong for detected rows. Preview he saw: accept or reject a found place → both found places; accept or reject the added place → that place only; correct the name anywhere → all three.
+- **Group accept and a place rejected on its own: "Skip rejected (Rec.)".** Preview: accept row 1 again → rows 1 and 2 accepted, Saint-Zorbal stays rejected; clicking Saint-Zorbal itself accepts it.
+- **Q5, group reject and a place accepted or corrected on its own: "Skip your own (Rec.)".** Preview: the person's place, accepted on its own, stays accepted when rejecting from row 2; rows 2 and 3 rejected; a group accept then a group reject → all rejected.
+- **Q6, "Accepter les déjà connues" and rejected places: "Skip rejected (Rec.)".** Preview: Saint-Zorbal stays rejected, left as is; corrected places keep their correction and their "modifié" label.
+- **Q7, accept after a mistaken group reject: "Whole group back (Rec.)".** Preview: reject the group by mistake → all 3 rejected; accept row 1 → all 3 accepted again; Saint-Zorbal, rejected on its own earlier, stays rejected.
+- **Ctrl+Shift+R (PO P1): "Stay rejected (Rec.)".** Preview: Ctrl+Shift+R → rows 2 and 3 rejected; correcting the person's name → row 1 corrected, rows 2 and 3 stay rejected (Saint-Zorbal as is). Ctrl+Shift+A is unchanged.
+
 **As a** desktop-app user reviewing a batch of documents,
 **I want** "Précédent", "Suivant" and "Valider et continuer" to keep each document's own decisions and positions, and an action on a name I added by hand to act on that name,
 **so that** no name is left in clear and no document is written with another document's positions.
@@ -845,7 +860,7 @@ At `main` `e16d15a`. QA's probes (`rgpd-analysis/r108/qa/probes/`; invented name
 
 1. **AC1 — PRE-001:** "Valider et continuer" always applies to the document it belongs to, or is blocked with a clear message. A list built on one document is never stored for, or sent as the result of, another document, and a re-submit of a previous document never wakes the worker.
 2. **AC2 — PRE-002:** navigating with "Précédent" and "Suivant", in any order and any number of times, never loses a decision already made on a document (accept, reject, edit, type change, added row).
-3. **AC3 — PRE-003 (edit rule per Lionel's Q3, 2026-10-14):** accept and reject on a row added by hand act on that row only. The rule: for accept and reject, a row with no stored candidate key (a row added by hand) is its own group of one, so accept and reject on it reach no other row; detected rows keep 10.8's grouping by their stored (text, type) key, which never includes a hand-added row. A text correction or a type change on any row, found or added by hand, reaches every row of the same name and type, found or added by hand: they all take the corrected text or type and get one pseudonym.
+3. **AC3 — PRE-003 (Lionel, 2026-10-14: Q3, its correction, group accept, Q5, Q6, Q7 and Ctrl+Shift+R):** accept and reject on a row added by hand act on that row only. The rule: for accept and reject, a row with no stored candidate key (a row added by hand) is its own group of one, so accept and reject on it reach no other row; detected rows keep 10.8's grouping by their stored (text, type) key, which never includes a hand-added row. A text correction or a type change on any row, found or added by hand, reaches every row of the same name and type, found or added by hand, except a row the user rejected on its own: they all take the corrected text or type and get one pseudonym. A group accept skips rows the user rejected on its own; a group reject skips rows the user accepted or corrected on its own; "Accepter les déjà connues" (`accept_all_known`) takes only rows still to review; Ctrl+Shift+R counts as the user's own reject. The story's AC14 carries the detail.
 4. **AC4 — Tests first, invented names only:** the tests are committed before the fix. PRE-001 and PRE-002 are tested through the real batch path (real `BatchScreen`, `ValidationScreen` and `BatchWorker` thread, only detection replaced), as in QA's probe. Each expected failure is an `assert` on the captured outcome, made after the test's preconditions hold, and each failing test is marked `xfail(strict=True, raises=AssertionError)` on the old code, so a harness error shows as a plain FAILED (the 10.5 pattern). The fix removes the markers. Existing GUI and CLI validation tests stay green.
 5. **AC5 — CHANGELOG:** CHANGELOG `[Unreleased]` gets a "Fixed" entry for the three defects in desktop batch review.
 6. **AC6 — Gates:**
@@ -867,7 +882,7 @@ At `main` `e16d15a`. QA's probes (`rgpd-analysis/r108/qa/probes/`; invented name
 
 ### Follow-ups Found by the 10.10 SM and PO (not ACs, 2026-10-14)
 
-All pre-existing; none is in 10.10's scope. Backlog unless Lionel routes one elsewhere.
+None is in 10.10's scope. Backlog unless Lionel routes one elsewhere. (a)–(j) are pre-existing; (k)–(m) were added on 2026-10-14 from the 10.9 QA gate, a local test run and the 10.10 PO review.
 
 - **(a)** The batch-validation texts (for example "Valider et continuer") have no English translation (`gui/i18n/en.ts`).
 - **(b)** At `gui/screens/batch.py:699-708`, disconnecting a signal that is not connected makes PySide6 warn instead of raising, so the `except RuntimeError` guards never fire.
@@ -879,6 +894,9 @@ All pre-existing; none is in 10.10's scope. Backlog unless Lionel routes one els
 - **(h)** The "validation per document" checkbox is never remembered: `batch_validate_per_document` is not in `_DEFAULT_CONFIG` (`gui/config.py:14-27`), and saving keeps only the keys listed there.
 - **(i)** CHANGELOG `[Unreleased]` needs harmonising before the release: once 10.7 ships, 10.5's "The schema version stays 1.0.0" and the 10.3c and 10.4 continuity bullets ("The mapping schema is unchanged … without the entity type") are stale.
 - **(j)** `docs/architecture/9-database-schema.md` needs the (text, type) key and schema version 1.1.0 after 10.7.
+- **(k) TEST-FLAKE-001:** `tests/unit/test_final_exam_tooling.py::test_serve_refuses_foreign_host_and_origin` fails with a Windows-local `ConnectionAbortedError` under load; it is green on CI.
+- **(l) 10.9 DOC-002** (`docs/qa/gates/10.9-gui-edit-all-occurrences.yml`, low): three texts still say "detected span" where 10.9's step 12 keeps the previous edit's span: the 10.9 story's Consumer Trace #6 and #7, and `CHANGELOG.md:152` ("keeps its detected span").
+- **(m)** No visible cue when a group action skips places the user decided on their own (10.10 AC3). The PO's toast wordings are a backlog note only, not approved text.
 
 ### Estimated Effort: 0.5-1 week (the real-worker tests are the long pole)
 
