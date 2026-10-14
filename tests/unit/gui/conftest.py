@@ -155,3 +155,12 @@ def sample_detection_result(
         input_file="test_document.txt",
         detection_time_seconds=1.5,
     )
+
+
+@pytest.fixture(autouse=True)
+def _isolate_gui_config(tmp_path, monkeypatch):  # type: ignore[no-untyped-def]
+    """Keep every GUI test away from the user's real settings file (.gdpr-pseudo.yaml)."""
+    monkeypatch.setattr(
+        "gdpr_pseudonymizer.gui.config._config_path",
+        lambda: tmp_path / ".gdpr-pseudo.yaml",
+    )
