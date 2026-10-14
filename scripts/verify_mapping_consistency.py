@@ -38,7 +38,7 @@ def verify_mapping_consistency(db_path: str, passphrase: str) -> None:
 
         # Test 2: Check for Marie Dubois (should appear in docs 1, 3, 7)
         print("\nTest 2: Cross-Document Entity - Marie Dubois")
-        marie_entities = repo.find_by_full_name("Marie Dubois")
+        marie_entities = repo.find_by_full_name_and_type("Marie Dubois", "PERSON")
         if marie_entities:
             print("  [OK] Found 1 entity entry for 'Marie Dubois'")
             print(f"      Pseudonym: {marie_entities.pseudonym_full}")
@@ -48,7 +48,7 @@ def verify_mapping_consistency(db_path: str, passphrase: str) -> None:
 
         # Test 3: Check for Pierre Lefebvre (should appear in docs 1, 9)
         print("\nTest 3: Cross-Document Entity - Pierre Lefebvre")
-        pierre_entities = repo.find_by_full_name("Pierre Lefebvre")
+        pierre_entities = repo.find_by_full_name_and_type("Pierre Lefebvre", "PERSON")
         if pierre_entities:
             print("  [OK] Found 1 entity entry for 'Pierre Lefebvre'")
             print(f"      Pseudonym: {pierre_entities.pseudonym_full}")

@@ -160,8 +160,12 @@ def import_mappings_command(
             target_repo = SQLiteMappingRepository(target_session)
 
             for entity in source_entities:
-                # Check for existing entity
-                existing = target_repo.find_by_full_name(entity.full_name)
+                # Check for existing entity: a duplicate is the same text and
+                # the same type (Story 10.7, AC4); the same text under another
+                # type is imported as its own row
+                existing = target_repo.find_by_full_name_and_type(
+                    entity.full_name, entity.entity_type
+                )
 
                 if existing:
                     if skip_duplicates:
