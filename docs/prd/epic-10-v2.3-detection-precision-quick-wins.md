@@ -3,7 +3,7 @@
 **Epic Goal:** Raise detection precision and make the accuracy benchmark trustworthy with local, deterministic changes to the hybrid detector and the ground-truth corpus, without lowering recall. The user-facing value is fewer false entities to reject during the (mandatory) validation step and a benchmark whose numbers can be believed.
 
 **Target Release:** v2.3.0 candidate. **No release is part of this epic.** v2.3.0 ships only on Lionel's explicit go, through a separate release story.
-**Duration:** Estimated 6.5-9.5 weeks (10.1 is annotation-labor-bound; 10.3 split into 10.3a and 10.3b, and 10.3c added, Lionel, 2026-10-06; 10.5 added, Lionel, 2026-10-07; 10.3b re-estimated after its STOP R, 2026-10-07; 10.7 added, Lionel, 2026-10-09; 10.8 and 10.9 added, Lionel, 2026-10-13); 10.6 runs in parallel (2-3 weeks elapsed) and close-out waits for its adjudication after 10.4 merges, then its commit and one scored run
+**Duration:** Estimated 7-10.5 weeks (10.1 is annotation-labor-bound; 10.3 split into 10.3a and 10.3b, and 10.3c added, Lionel, 2026-10-06; 10.5 added, Lionel, 2026-10-07; 10.3b re-estimated after its STOP R, 2026-10-07; 10.7 added, Lionel, 2026-10-09; 10.8 and 10.9 added, Lionel, 2026-10-13; 10.10 added, Lionel, 2026-10-14); 10.6 runs in parallel (2-3 weeks elapsed) and close-out waits for its adjudication after 10.4 merges, then its commit and one scored run
 **Predecessor:** v2.2.0 + accuracy scorer fix (#77), commit `fceef65`
 **Successor:** Epic 9 (v3.0) starts from this epic's merged close-out baseline.
 
@@ -120,13 +120,14 @@ These notes sit outside the normative Gates block above and do not change its te
 | 10.3b: Particles, Roles & LOCATION Noise (split from 10.3, Lionel, 2026-10-06) | MED | 0.5-1 week (re-estimated after STOP R, 2026-10-07) | F6, F7 | Done (PR #87, `bab6717`) |
 | 10.3c: Type-Aware Exact Match in Merge (added at 10.3a STOP R, Lionel, 2026-10-06) | MED | 0.5 week | 10.3a STOP R | Done (PR #91, `5846419`) |
 | 10.4: Greetings + Org-Plus-Country | MED | 0.5-1 week | F8, F9 | Done (PR #93, `2d4a029`) |
-| 10.5: DB Init Safety (data-layer hardening, added by Lionel, 2026-10-07) | MED (raised from LOW by the PM, 2026-10-13) | 0.5 week | PR #83 finding | Draft |
+| 10.5: DB Init Safety (data-layer hardening, added by Lionel, 2026-10-07) | MED (raised from LOW by the PM, 2026-10-13) | 0.5 week | PR #83 finding | Done (PR #96, `67807c2`) |
 | 10.6: Final-Exam Set and Confidence Ranges (added by Lionel, 2026-10-07) | HIGH | 2-3 weeks elapsed, in parallel | Overfitting check, close-out evidence | Done (PRs #89, #92, #94, #95) |
-| 10.7: Type-Aware Mapping Lookup (data layer, added by Lionel at 10.3c STOP R, 2026-10-09) | MED | 0.5-1 week | 10.3c STOP R | Draft |
-| 10.8: Desktop App Type-Aware Candidate Keys (10.3c regression, added by Lionel, 2026-10-13) | HIGH | 0.5 week | 10.7 SM finding | Draft |
-| 10.9: Desktop App Edit Applies to Every Occurrence (added by Lionel, 2026-10-13) | HIGH | 0.5 week | 10.8 SM finding | Draft |
+| 10.7: Type-Aware Mapping Lookup (data layer, added by Lionel at 10.3c STOP R, 2026-10-09) | MED | 0.5-1 week | 10.3c STOP R | In review (PR #99, QA PASS, awaiting merge) |
+| 10.8: Desktop App Type-Aware Candidate Keys (10.3c regression, added by Lionel, 2026-10-13) | HIGH | 0.5 week | 10.7 SM finding | Done (PR #97, `e16d15a`) |
+| 10.9: Desktop App Edit Applies to Every Occurrence (added by Lionel, 2026-10-13) | HIGH | 0.5 week | 10.8 SM finding | Done (PR #98, `49d4daa`) |
+| 10.10: Desktop Batch Review Fixes (added by Lionel, 2026-10-14) | HIGH | 0.5-1 week | 10.8 QA pre-existing findings PRE-001 to PRE-003 | Draft |
 
-**Total Estimated Duration:** 6.5-9.5 weeks; 10.6 runs in parallel (2-3 weeks elapsed) and close-out waits for its adjudication after 10.4 merges, then its commit and one scored run
+**Total Estimated Duration:** 7-10.5 weeks; 10.6 runs in parallel (2-3 weeks elapsed) and close-out waits for its adjudication after 10.4 merges, then its commit and one scored run
 
 ---
 
@@ -200,7 +201,8 @@ Numbers come only from CI runs; each line cites its run ID. Full verbatim lines 
   - **Q7:** the scored exam becomes a second held-out set (aggregate-only, never opened). The held-out isolation rules then apply to it and its plain-text guard stays active (10.6 B15.3). Epic 9 writes a new blind exam for its own close-out.
   - **Guard hash list (B16):** the guard's committed allowlist (`tests/unit/final_exam_leakage_allowlist.json`, 157 path and sha256 pairs, approved by Lionel 2026-10-13) stores plain sha256 of exam-only keys, with no salt. It reveals nothing beyond the plain files already in the repo. If Epic 9 reuses this guard for its own blind exam, it decides whether a committed hash list needs a salt.
   - **Headline finding:** the main-vs-exam gap. F1 is 0.8262 on the main corpus (`38212303870`) and 0.6144 on the final exam (`38382553368`), about 21 points.
-- **Still open in Epic 10:** 10.5 (DB init safety), 10.7 (type-aware mapping lookup), 10.8 (desktop app type-aware candidate keys) and 10.9 (desktop app edit applies to every occurrence); 10.8 and 10.9 land before the next release. None is a detector story, so none moves the close-out baseline. The epic is not closed.
+- **Merged since the detector close-out:** 10.5 (PR #96, `67807c2`), 10.8 (PR #97, `e16d15a`) and 10.9 (PR #98, `49d4daa`). None is a detector story.
+- **Still open in Epic 10:** 10.7 (type-aware mapping lookup; PR #99, QA PASS, awaiting merge) and 10.10 (desktop batch review fixes; before any release). **Planned, to be added:** Story 10.11, "Changer le pseudonyme" stored in the mapping database and used in every output, after 10.7 (Lionel, 2026-10-14: "Make it work (new story)"; not the recommendation); its section comes on its own branch. None of these is a detector story, so none moves the close-out baseline. The epic is not closed.
 
 ---
 
@@ -810,6 +812,55 @@ At `main` `51d8429`:
 
 ---
 
+## Story 10.10: Desktop Batch Review Fixes
+
+**Added by Lionel, 2026-10-14.** PRE-001: "Own story, before release (Recommended)". PRE-002 and PRE-003: "Into 10.10 (Recommended)", so the story covers all three. They are QA's pre-existing findings on Story 10.8 (`docs/qa/gates/10.8-gui-type-aware-candidate-keys.yml`, `pre_existing_findings`), not caused by 10.8.
+
+**As a** desktop-app user reviewing a batch of documents,
+**I want** "Précédent", "Suivant" and "Valider et continuer" to keep each document's own decisions and positions, and an action on a name I added by hand to act on that name,
+**so that** no name is left in clear and no document is written with another document's positions.
+
+**Priority:** HIGH — three leak paths in desktop batch review; PRE-001 also damages the output text. They must land before any release. None is a 10.3c regression: QA found the code involved unchanged since v2.2.0, and PRE-001 contradicts Story 6.7.3 (v2.0.0).
+**Change type:** desktop batch review only. No detection change, so G1, G3 and G5 are N/A. No file under `gdpr_pseudonymizer/nlp/`, `gdpr_pseudonymizer/resources/`, `tests/accuracy/` or `tests/test_corpus/` changes. If any file the accuracy suite loads is touched, one regular accuracy run on the branch shows the 16 lines identical to `38212303870`.
+**Ordering:** outside the detector chain. It may run in parallel with Story 10.9, never in the same PR; if both touch `gui/models/validation_state.py`, the second to merge rebases. PRE-003's fix changes the group lookup that 10.9's edit also uses (`_group_ids`, `validation_state.py:164-176`): once 10.10 stops grouping a hand-added row with detected rows, 10.9's edit on such a row follows automatically (10.9 story, Consumer Trace #14).
+
+### Context
+
+At `main` `e16d15a`. QA's probes (`rgpd-analysis/r108/qa/probes/`; invented names, local, not CI results) were re-run by the PM against this commit on 2026-10-14, with the same results.
+
+- **PRE-001 (HIGH), "Précédent" then "Valider et continuer":** on a previous document the button is shown and enabled (`gui/screens/validation.py:319`), and in batch mode it emits that document's validated list (`_on_finalize`, `:777-786`). `BatchScreen._on_validation_complete` stores the list under the index of the document the worker is waiting on (`gui/screens/batch.py:928-929`) and wakes the worker with it (`:950`). That document is then written with the earlier document's positions. Story 6.7.3 (v2.0.0) says re-submitting a previous document "replaces the stored result but does not re-trigger the worker" (`docs/stories/6.7.3.batch-validation-workflow.story.md:43`).
+  - **Real-worker probe** (real `BatchWorker` thread, only detection replaced): doc 1 "Quentrel Zorbalia rejoint le projet. Le contrat est signé avec Quentrel Zorbalia." came out as "<org pseudonym>orbalia rej<org pseudonym>ojet. Le contrat est signé avec Quentrel Zorbalia.": the second occurrence in clear, the first partly, the text damaged. The result stored for doc 1 was doc 0's list. QA reports that the batch summary still says the document was processed.
+- **PRE-002 (MEDIUM), "Précédent" then "Suivant":** the navigation reloads the cached detection context (`validation.py:695-733`; the cache is filled at `batch.py:900-914`), so the current document is rebuilt and every accept and reject already made on it is lost (rows back to "to review", except names already in the mapping database). "Valider et continuer" sends only confirmed rows (`validation_state.py:327-358`) and gives no warning about rows still to review. Probe: both confirmed rows of doc 1 were pending again after "Suivant"; validating wrote doc 1 unchanged, both names in clear.
+- **PRE-003 (MEDIUM), an action on a hand-added row:** a row added by hand has no stored candidate key, so `_group_ids` (`validation_state.py:164-176`) uses its current text and type and returns the detected group of that (text, type), which does not contain the added row. When that group has more than one row, "Rejeter" on the added row (right-click menu, `gui/widgets/entity_editor.py:384-386`; Delete in navigation mode, `:474-475`, `:553-558`) rejects the detected rows instead; the added row stays "added" and is sent, and the detected occurrences stay in clear. "Accepter" confirms the detected rows instead (harmless).
+  - **Batch probe:** ORG "Zorbaville" detected at 0 and 21 and accepted, ORG "Zorbaville" added at 33, "Rejeter" on the added row: rows 0 and 21 REJECTED, [ORG 33] sent, two "Zorbaville" left in clear.
+  - 10.8 narrowed it: single-document validation has one row per (text, type) group, so it no longer happens there. In batch review (one row per occurrence) it happens for any name detected at least twice in the document. Present in v2.2.0.
+
+### Acceptance Criteria
+
+1. **AC1 — PRE-001:** "Valider et continuer" always applies to the document it belongs to, or is blocked with a clear message. A list built on one document is never stored for, or sent as the result of, another document, and a re-submit of a previous document never wakes the worker.
+2. **AC2 — PRE-002:** navigating with "Précédent" and "Suivant", in any order and any number of times, never loses a decision already made on a document (accept, reject, edit, type change, added row).
+3. **AC3 — PRE-003:** an action on a row added by hand acts on that row only. The rule: a row with no stored candidate key (a row added by hand) is its own group of one, so accept, reject and edit on it reach no other row. Detected rows keep 10.8's grouping by their stored (text, type) key, which never includes a hand-added row.
+4. **AC4 — Tests first, invented names only:** the tests are committed before the fix. PRE-001 and PRE-002 are tested through the real batch path (real `BatchScreen`, `ValidationScreen` and `BatchWorker` thread, only detection replaced), as in QA's probe. Each expected failure is an `assert` on the captured outcome, made after the test's preconditions hold, and each failing test is marked `xfail(strict=True, raises=AssertionError)` on the old code, so a harness error shows as a plain FAILED (the 10.5 pattern). The fix removes the markers. Existing GUI and CLI validation tests stay green.
+5. **AC5 — CHANGELOG:** CHANGELOG `[Unreleased]` gets a "Fixed" entry for the three defects in desktop batch review.
+6. **AC6 — Gates:**
+   - **G1, G3 and G5 are N/A:** there is no detection change. The PR states this explicitly. If any file the accuracy suite loads is touched, one regular `accuracy.yaml` run on the branch shows the 16 lines identical to `38212303870`, cited by ID.
+   - **G4:** desktop batch review only, never in the same PR as a detector change or as Story 10.9.
+   - **G2:** QA re-runs the AC4 tests, checks out the tests-first commit to see them fail on the old code, and reads the diff. QA's gate comes before the merge.
+   - **G6** applies in full (black, ruff, mypy, unit tests, full CI green).
+   - **G7:** no headline number changes, so no QA report or docs update. CHANGELOG as AC5.
+
+### Integration Points
+
+- `gdpr_pseudonymizer/gui/screens/batch.py` — `_on_validation_complete` (`:919`, store `:928-929`, worker wake-up `:950`), the context cache (`:900-914`)
+- `gdpr_pseudonymizer/gui/screens/validation.py` — the button on a previous document (`:319`), `_on_prev_doc` / `_on_next_doc` (`:695-733`), `_on_finalize` (`:777-786`)
+- `gdpr_pseudonymizer/gui/models/validation_state.py` — `_group_ids` (`:164-176`), `_validated_rows` (`:327-358`)
+- `gdpr_pseudonymizer/gui/widgets/entity_editor.py` — the reject actions (`:384-386`, `:474-475`, `:553-558`), read only unless the fix needs them
+- `tests/unit/gui/` or `tests/integration/gui/` — AC4 tests; `CHANGELOG.md` — AC5
+
+### Estimated Effort: 0.5-1 week (the real-worker tests are the long pole)
+
+---
+
 ## Execution Sequence
 
 ```
@@ -824,6 +875,7 @@ Story 10.6 (Final-exam set + ranges)      --- parallel ---  PR A early; frozen +
 Story 10.7 (Type-aware mapping lookup)    --- 0.5-1 week, any slot --- no accuracy baseline (data layer)
 Story 10.8 (Desktop app type-aware keys)  --- 0.5 week, before 10.7 --- no accuracy baseline (desktop app)
 Story 10.9 (Edit at every occurrence)     --- 0.5 week, after 10.8 --- no accuracy baseline (desktop app)
+Story 10.10 (Batch review fixes)          --- 0.5-1 week, parallel to 10.9 --- no accuracy baseline (desktop app)
 ```
 
 **Strictly sequential:** 10.1 → 10.2 → 10.3a → 10.3b → 10.3c → 10.4. Each story's baseline is the previous story's merged close-out G1 run. No parallel detector stories: overlapping changes would make G3/G4 attribution impossible.
@@ -837,6 +889,8 @@ Story 10.9 (Edit at every occurrence)     --- 0.5 week, after 10.8 --- no accura
 **Story 10.8** is outside the chain too: it changes no detection (desktop app and core preview keys), so it has no accuracy baseline. It merges before 10.7 and does not wait for 10.7's continuity decision.
 
 **Story 10.9** is outside the chain too: it changes no detection (desktop app review only), so it has no accuracy baseline. It goes after Story 10.8, because both change `gui/models/validation_state.py`, and never in the same PR as 10.8.
+
+**Story 10.10** is outside the chain too: it changes no detection (desktop batch review only), so it has no accuracy baseline. It may run in parallel with 10.9, never in the same PR; if both touch `gui/models/validation_state.py`, the second to merge rebases.
 
 **Epic close-out baseline:** the 10.4 merged G1 run (main + held-out) is the baseline Epic 9 starts from, together with the one final-exam run (10.6) and its ranges.
 
@@ -866,6 +920,7 @@ Story 10.9 (Edit at every occurrence)     --- 0.5 week, after 10.8 --- no accura
 | Pseudonym continuity for existing databases under 10.7: databases created before 10.7 hold one row per text, so a type-aware lookup could give an existing entity a new pseudonym in a document processed before | MEDIUM | MEDIUM | 10.7 AC3: the continuity rule (migration, read-compatibility or another) is Lionel's decision at 10.7's STOP; no existing row is deleted or given a new pseudonym; tested on a database written by the pre-10.7 code (AC5); CHANGELOG upgrade note |
 | Desktop app merges a same-span pair of two types (10.3c regression): text-only keys let the second type overwrite the first and one reject act on both, so an occurrence of a confirmed name can stay in clear | MEDIUM | HIGH | Story 10.8 (HIGH, before any release; on `main` only, unreleased): preview map, variant map and same-text group keyed on type; tests first with invented names; QA before merge. The CLI is not affected (`validation/models.py:416`) |
 | Desktop app edit leaves other occurrences in clear: editing a name in the review list changes one occurrence, and the others are not pseudonymized (since v2.0.0; not a 10.3c regression) | MEDIUM | HIGH | Story 10.9 (HIGH, before the next release): an edit applies to every occurrence of that name and type, as in the CLI (`validation/workflow.py:242-259`); tests first with invented names; QA before merge |
+| Desktop batch review leaks (pre-existing, found by QA on 10.8): "Précédent" then "Valider et continuer" writes the waiting document with an earlier document's positions (names in clear, text damaged); "Précédent" then "Suivant" drops decisions already made; a reject on a hand-added row rejects the detected rows | MEDIUM | HIGH | Story 10.10 (HIGH, before any release): each document's result and decisions stay its own; a hand-added row acts on itself only; tests first through the real batch worker, with invented names; QA before merge |
 | Final-exam set seen or used before close-out (leak) | LOW | HIGH | Kept in a workspace outside the repo until 10.4 merges, so no rule writer (agent, or Lionel at STOP R) can draw on it during detector work; Lionel sees no content before 10.4 merges; sha256 fingerprints recorded at freeze and checked at commit and before the scored run; adjudication view from a deterministic script that agents never read; plain files committed only after adjudication, outside every regular accuracy path; plain-text leakage guard on every CI run from that commit (its first run checks every file 10.3c and 10.4 added); no exam text in public CI logs; isolation rule restated in every later story (10.6 AC5-AC8). No encryption: it guarded nothing beyond this (Q5 reversed, Lionel, 2026-10-09) |
 | Final-exam score well below main or held-out | MEDIUM | MEDIUM | It is information, not a failure: no tuning in response inside Epic 10. Lionel picks the public number (10.6 AC9). The gap goes to Epic 9 as evidence |
 | Double annotation and adjudication delay close-out | MEDIUM | MEDIUM | 10.6 starts now, in parallel; both annotations are model runs, done before 10.4 merges; Lionel adjudicates only the disagreements plus a spot-check of about 3 agreed documents (10.6 AC5); close-out waits for that adjudication, the commit and one scored run, not for any further detector story |
@@ -880,7 +935,7 @@ Story 10.9 (Edit at every occurrence)     --- 0.5 week, after 10.8 --- no accura
 
 ## Definition of Done
 
-- [ ] All 11 stories (10.1, 10.2, 10.3a, 10.3b, 10.3c, 10.4, 10.5, 10.6, 10.7, 10.8, 10.9) completed with acceptance criteria met (10.5, 10.7, 10.8 and 10.9: G1/G3/G5 N/A, no detection change; 10.6: G1/G3/G5 N/A for building the set, its scored-once run is a G1 run)
+- [ ] All 12 stories (10.1, 10.2, 10.3a, 10.3b, 10.3c, 10.4, 10.5, 10.6, 10.7, 10.8, 10.9, 10.10) completed with acceptance criteria met (10.5, 10.7, 10.8, 10.9 and 10.10: G1/G3/G5 N/A, no detection change; 10.6: G1/G3/G5 N/A for building the set, its scored-once run is a G1 run)
 - [ ] Every story closed with a cited G1 run and an independent G2 check
 - [ ] No unapproved recall drop (G3) at any story
 - [ ] Held-out set exists and is reported for 10.2, 10.3a, 10.3b, 10.3c and 10.4 (G5)
