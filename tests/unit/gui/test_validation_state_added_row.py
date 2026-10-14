@@ -51,14 +51,6 @@ EDITED = [(p, p + len(EDIT)) for p in P3]
 SAINT = "Zorbal a signé avec Zorbal. Le projet est à Saint-Zorbal."
 PS = [0, SAINT.find("Zorbal", 1), SAINT.find("Saint-Zorbal") + 6]
 
-_XFAIL = "Story 10.10: reproduces {} on the unfixed batch review; fixed in Task 2"
-
-
-def _xfail(failure: str) -> pytest.MarkDecorator:
-    return pytest.mark.xfail(
-        strict=True, raises=AssertionError, reason=_XFAIL.format(failure)
-    )
-
 
 def _at(text: str, name: str, entity_type: str, start: int) -> DetectedEntity:
     assert text[start : start + len(name)] == name, "PRE: entity slice"
@@ -151,7 +143,6 @@ def _h_entities() -> list[DetectedEntity]:
     return [_at(H_TEXT, "Zorbaville", "ORG", 0), _at(H_TEXT, "Zorbaville", "ORG", 21)]
 
 
-@_xfail("a reject on a hand-added row rejecting the detected rows (PRE-003)")
 def test_reject_on_added_row_acts_on_it_only(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path
 ) -> None:
@@ -177,7 +168,6 @@ def test_reject_on_added_row_acts_on_it_only(  # type: ignore[no-untyped-def]
     assert [d0.state, d21.state] == [CONFIRMED, CONFIRMED]
 
 
-@_xfail("an accept on a hand-added row accepting the detected rows (PRE-003)")
 def test_accept_on_added_row_acts_on_it_only(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path
 ) -> None:
@@ -303,7 +293,6 @@ def _one_pseudonym_everywhere(written: str) -> bool:
     return not any(p in written for p in ("Quentrel", "Zorbalia", "Quentrix"))
 
 
-@_xfail("a correction on a found name not reaching the added place (AC13)")
 @pytest.mark.parametrize("mode", ["single", "batch"])
 def test_edit_on_found_name_reaches_added_place(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, mode
@@ -331,7 +320,6 @@ def test_edit_on_added_place_reaches_found_name(  # type: ignore[no-untyped-def]
     assert _one_pseudonym_everywhere(written), written
 
 
-@_xfail("a type change on a found name not reaching the added place (AC13)")
 @pytest.mark.parametrize("mode", ["single", "batch"])
 def test_type_change_on_found_name_reaches_added_place(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, mode
@@ -449,10 +437,7 @@ def _saint_shape(written: str, marks: str) -> bool:
 @pytest.mark.parametrize(
     "case",
     [
-        pytest.param(
-            "batch_rejected_alone",
-            marks=_xfail("a group accept re-accepting a place rejected on its own"),
-        ),
+        "batch_rejected_alone",
         "batch_clicked_rejected_row",
         "single_hand_rejected",
     ],
@@ -498,7 +483,6 @@ def test_group_accept_skips_a_rejected_place(  # type: ignore[no-untyped-def]
     assert _saint_shape(written, marks), written
 
 
-@_xfail("a group reject rejecting a place decided on its own (Q5)")
 @pytest.mark.parametrize("case", ["batch_ticked_accept", "batch_own_pseudonym"])
 def test_group_reject_skips_a_place_decided_on_its_own(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, case
@@ -545,7 +529,6 @@ def test_group_reject_after_group_accept_rejects_every_place(  # type: ignore[no
     assert _write(tmp_path, db, SAINT, sent) == SAINT
 
 
-@_xfail("'Accepter les déjà connues' accepting rejected or corrected places (Q6)")
 @pytest.mark.parametrize("mode", ["batch", "single"])
 def test_accept_all_known_skips_rejected_and_corrected_places(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, mode
@@ -591,10 +574,7 @@ def test_accept_all_known_skips_rejected_and_corrected_places(  # type: ignore[n
     "case",
     [
         "all_back",
-        pytest.param(
-            "own_rejected_stays",
-            marks=_xfail("a group accept re-accepting a place rejected on its own"),
-        ),
+        "own_rejected_stays",
     ],
 )
 def test_group_accept_brings_back_places_rejected_by_the_group(  # type: ignore[no-untyped-def]
@@ -627,7 +607,6 @@ def test_group_accept_brings_back_places_rejected_by_the_group(  # type: ignore[
     assert _saint_shape(written, marks), written
 
 
-@_xfail("a correction skipping a place rejected only by its group (Q7)")
 def test_correction_reaches_places_rejected_by_the_group(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path
 ) -> None:
@@ -663,7 +642,6 @@ def test_correction_reaches_places_rejected_by_the_group(  # type: ignore[no-unt
     assert all("Quentr" not in g and "orbal" not in g for g in match.groups()), written
 
 
-@_xfail("undo and redo losing the decisions made on one place (Q5-Q7)")
 @pytest.mark.parametrize("case", ["undo_clears", "undo_restores", "undo_correction"])
 def test_undo_and_redo_restore_the_memory(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, case
@@ -748,10 +726,7 @@ def test_undo_and_redo_restore_the_memory(  # type: ignore[no-untyped-def]
     "then",
     [
         "correction",
-        pytest.param(
-            "group_accept",
-            marks=_xfail("a group accept reaching places rejected with Ctrl+Shift+R"),
-        ),
+        "group_accept",
     ],
 )
 def test_places_rejected_with_ctrl_shift_r_stay_rejected(  # type: ignore[no-untyped-def]

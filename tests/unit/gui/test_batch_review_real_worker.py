@@ -59,14 +59,6 @@ REJECTED = EntityReviewState.REJECTED
 MODIFIED = EntityReviewState.MODIFIED
 ADDED = EntityReviewState.ADDED
 
-_XFAIL = "Story 10.10: reproduces {} on the unfixed batch review; fixed in Task 2"
-
-
-def _xfail(failure: str) -> pytest.MarkDecorator:
-    return pytest.mark.xfail(
-        strict=True, raises=AssertionError, reason=_XFAIL.format(failure)
-    )
-
 
 def _at(
     text: str,
@@ -292,7 +284,6 @@ DOC0_SPANS = [(0, 10), (21, 31)]
 # ---------------------------------------------------------------------------
 
 
-@_xfail("doc 1 written with doc 0's positions (PRE-001)")
 @pytest.mark.parametrize("how", ["button", "handler"])
 def test_prev_then_validate_never_sends_to_waiting_doc(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, how
@@ -370,7 +361,6 @@ def test_batch_without_going_back_unchanged(  # type: ignore[no-untyped-def]
 # ---------------------------------------------------------------------------
 
 
-@_xfail("the accepts lost by 'Précédent' then 'Suivant' (PRE-002)")
 def test_prev_next_keeps_accepts(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path
 ) -> None:
@@ -400,7 +390,6 @@ def test_prev_next_keeps_accepts(  # type: ignore[no-untyped-def]
     assert_clean(batch.output(1), DOC1, DOC1_SPANS, DOC1_BANNED)
 
 
-@_xfail("every decision lost by two round trips (PRE-002)")
 def test_every_decision_kind_survives_two_round_trips(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path
 ) -> None:
@@ -469,7 +458,6 @@ def test_every_decision_kind_survives_two_round_trips(  # type: ignore[no-untype
     assert record["after"] == [record["before"], record["before"]]
 
 
-@_xfail("an earlier document shown without its decisions (PRE-002)")
 def test_previous_document_shows_its_decisions(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path
 ) -> None:
@@ -519,7 +507,6 @@ def _single_result(
     return result
 
 
-@_xfail("a single document left in batch mode after a batch run (AC11)")
 @pytest.mark.parametrize("ending", ["batch_completed", "cancelled_from_earlier_doc"])
 def test_single_document_after_batch_run_leaves_batch_mode(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, ending
@@ -569,7 +556,6 @@ class _NoDialog:
         return 0
 
 
-@_xfail("a single document written over the waiting batch document (AC1, AC11)")
 def test_single_document_opened_during_batch_never_reaches_worker(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, monkeypatch
 ) -> None:

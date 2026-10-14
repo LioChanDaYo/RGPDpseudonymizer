@@ -41,6 +41,7 @@ from gdpr_pseudonymizer.utils.logger import get_logger
 
 if TYPE_CHECKING:
     from gdpr_pseudonymizer.gui.main_window import MainWindow
+    from gdpr_pseudonymizer.gui.models.validation_state import GUIValidationState
     from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 
 logger = get_logger(__name__)
@@ -60,6 +61,11 @@ class BatchScreen(QWidget):
         self._cumulative_validation_time: float = 0.0
         self._docs_completed: int = 0
         self._is_paused: bool = False
+        # Story 10.10: the document the worker waits on (taken from its own
+        # validation_required), and the review state of each document shown
+        # in this batch run, kept for "Précédent" and "Suivant".
+        self._awaiting_doc_index: int | None = None
+        self._review_states: dict[int, GUIValidationState] = {}
 
         self._build_ui()
 
@@ -647,6 +653,8 @@ class BatchScreen(QWidget):
         self._validation_pause_start: float | None = None
         self._validation_results: dict[int, list[DetectedEntity]] = {}
         self._validation_contexts: dict[int, dict[str, Any]] = {}
+        self._review_states = {}
+        self._awaiting_doc_index = None
         self._doc_table.setRowCount(len(self._files))
         for row, fp in enumerate(self._files):
             self._doc_table.setItem(row, 0, QTableWidgetItem(str(row + 1)))
@@ -768,6 +776,7 @@ class BatchScreen(QWidget):
             return
 
         self._worker = None
+        self._awaiting_doc_index = None
         self._batch_result = result
 
         # Update doc table with final results
@@ -808,6 +817,7 @@ class BatchScreen(QWidget):
     def _on_error(self, error_msg: str) -> None:
         """Handle fatal worker error."""
         self._worker = None
+        self._awaiting_doc_index = None
 
         # Clear cached passphrase on auth errors so user can retry
         if "passphrase" in error_msg.lower() or "decrypt" in error_msg.lower():
@@ -912,25 +922,36 @@ class BatchScreen(QWidget):
             "total_docs": total_docs,
         }
         self._validation_contexts[doc_index] = context
+        self._awaiting_doc_index = doc_index
 
         # Navigate to ValidationScreen in batch mode
         self._main_window.navigate_to("validation", **context)
 
-    def _on_validation_complete(self, validated_entities: object) -> None:
+    def _on_validation_complete(
+        self, doc_index: int, validated_entities: object
+    ) -> None:
         """Handle validation_complete signal from ValidationScreen.
 
-        Stores validated entities, submits them to the worker, and navigates
-        back to the batch processing phase.
+        Only the list of the document the worker waits on is accepted (Story
+        10.10): a list built on another document is refused before anything
+        is stored, submitted or navigated. Otherwise the list is stored under
+        its document, submitted to the worker, and the screen goes back to
+        the batch processing phase. The cached context keeps the detections
+        the document's kept review state was built from.
         """
         entity_list: list[DetectedEntity] = validated_entities  # type: ignore[assignment]
 
-        # Track which doc was validated (current awaiting index)
-        current_doc_idx = self._docs_completed
-        self._validation_results[current_doc_idx] = entity_list
+        if doc_index != self._awaiting_doc_index:
+            logger.warning(
+                "batch_validation_result_refused",
+                doc_index=doc_index,
+                awaiting_doc_index=self._awaiting_doc_index,
+            )
+            return
+        self._awaiting_doc_index = None
 
-        # Update cached context with validated entities (FUNC-001)
-        if current_doc_idx in self._validation_contexts:
-            self._validation_contexts[current_doc_idx]["entities"] = entity_list
+        current_doc_idx = doc_index
+        self._validation_results[current_doc_idx] = entity_list
 
         # Exclude validation pause time from ETA calculation
         if self._validation_pause_start is not None:
@@ -950,6 +971,19 @@ class BatchScreen(QWidget):
             self._worker.submit_validation_result(entity_list)
 
         self._main_window.navigate_to("batch")
+
+    @property
+    def awaiting_doc_index(self) -> int | None:
+        """Index of the document the worker waits on, or None (Story 10.10)."""
+        return self._awaiting_doc_index
+
+    def review_state(self, doc_index: int) -> GUIValidationState | None:
+        """Review state kept for a document of this batch run (Story 10.10)."""
+        return self._review_states.get(doc_index)
+
+    def store_review_state(self, doc_index: int, state: GUIValidationState) -> None:
+        """Keep a document's review state for "Précédent" and "Suivant"."""
+        self._review_states[doc_index] = state
 
     # ------------------------------------------------------------------
     # Summary Phase Logic
