@@ -1,0 +1,131 @@
+schema: 1
+story: '10.10'
+story_title: 'Desktop Batch Review Fixes'
+scope: 'PR #100, pre-merge G2 at head fc95786 on main 49d4daa (Story 10.9 merged; Story 10.7, PR #99, still open). Commits reviewed: test-only conftest fixture b2ef449, tests-first 5b4477d, fix 7c27207, CHANGELOG and Dev Agent Record fc95786.'
+gate: PASS
+status_reason: 'The fix is the Fix Design as written and closes all three leak paths (PRE-001, PRE-002, PRE-003) plus AC11''s single-document paths, with Lionel''s group rules (Q3, its correction, Q5, Q6, Q7, Ctrl+Shift+R) in force. Tests first proven again locally (25 AssertionErrors, each on the line the dev recorded, after its preconditions; 15 guards pass) and on all four CI legs; the head is 9/9 green on attempt 1. 79 headless probes through the real batch worker or the real finalization (plus QA 10.9''s 42) wrote clean output files on the head and caught the defects on the unfixed code. The merge with #99 is clean. Only low, pre-existing observations remain.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-10-14T23:02:25Z'
+
+waiver: { active: false }
+
+merge_blockers: []
+
+merge_notes:
+  - 'Merge order with PR #99 (Story 10.7): git merge-tree is clean in both orders (tree 0c30ee7). Whichever of #99 and #100 merges second must update its branch from main and get a green CI before its own merge.'
+  - 'The merge waits for Lionel (story Task 7.5). QA never merges.'
+
+top_issues:
+  - id: 'OBS-001'
+    severity: low
+    finding: 'Pre-existing, not a 10.10 regression. BatchScreen._validation_results keeps the very DetectedEntity objects of the document''s review (get_validated_entities returns review.entity for every row that is not edited, validation_state.py:662-682), so a change made on an earlier document (A1: shown, not applied) also changes that document''s stored list. QA probe R5: after "Modifier le texte" on doc 0, _validation_results[0] reads ORG (0, 12) instead of (0, 10). The written file does not change (the worker finalized doc 0 before doc 1 was shown) and _validation_results has no reader in gdpr_pseudonymizer/ (Consumer Trace #13). The unfixed code shows the same (its rebuilt state reused the stored list).'
+    suggested_action: 'Backlog only: if a reader of _validation_results is ever added, store a copy (for example [dataclasses.replace(e) for e in entity_list] at batch.py:954).'
+    refs: ['gdpr_pseudonymizer/gui/screens/batch.py:954', 'gdpr_pseudonymizer/gui/models/validation_state.py:662-682']
+    suggested_owner: dev
+  - id: 'OBS-002'
+    severity: low
+    finding: 'Pre-existing, outside 10.10''s ACs. In a batch where a document fails to read (continue on error), "◀ Précédent" on the next document is shown and enabled but does nothing: _on_prev_doc only looks for the cached context of doc_index - 1 (validation.py:804-822), and the unreadable document has none. QA probe R7: on doc 2, the click stays on doc 2; doc 0 and doc 2 are written from their own decisions, doc 1 has no output and the summary says "Erreur". No leak.'
+    suggested_action: 'Backlog: let "Précédent" skip to the nearest earlier document with a cached context, or hide it when there is none.'
+    refs: ['gdpr_pseudonymizer/gui/screens/validation.py:804-822', 'gdpr_pseudonymizer/gui/screens/validation.py:860-882']
+    suggested_owner: po
+  - id: 'TEST-001'
+    severity: low
+    finding: 'T12 answers the single document''s confirmation with "no", so it never checks that the single document opened while a batch waits is written. QA probes R10 (Ctrl+O, the recent-files menu, and the home screen reached by "◀ Retour") and R12 (after a batch) finalize it through the real FinalizationWorker: written clean, one pseudonym, and the waiting batch document then written from its own list with its decisions kept.'
+    suggested_action: 'Optional, next time the file is edited: answer "yes" in T12 and assert the single document''s pseudonymized content. Not a merge condition.'
+    refs: ['tests/unit/gui/test_batch_review_real_worker.py:559-604']
+    suggested_owner: dev
+  - id: 'TEST-ENV-001'
+    severity: low
+    finding: 'Known since 10.9 and recorded by the dev: tests/integration/test_ner_title_improvements.py reads tests/test_corpus/interview_transcripts/interview_05.txt (main corpus) relative to the working folder, so a run from a scratch folder reports 4 errors. CI runs from the repository root and is not affected; the file run from the worktree: 7 passed.'
+    suggested_action: 'Backlog: build the path from the test file''s location.'
+    refs: ['tests/integration/test_ner_title_improvements.py']
+    suggested_owner: dev
+
+handed_off:
+  - id: 'EPIC-FOLLOWUP-F'
+    owner: 'Epic 10 Follow-up (f)'
+    note: 'After a single document is opened while a batch waits, the app offers no way back to the waiting document (the batch worker stays blocked). Out of 10.10''s scope by the story (Fix Design AC11). QA reached the waiting document again with navigate_to("validation", **its cached context), as T12 does, and its kept decisions were all there.'
+  - id: 'EPIC-FOLLOWUP-E'
+    owner: 'Epic 10 Follow-up (e)'
+    note: 'The live table still says "Traité" for a document whose finalization failed until the summary says "Erreur" (probe R8). Known; the AC12 line on that document says "validé", which stays true.'
+
+deviation_rulings:
+  dev_helpers: 'IN SCOPE. _decided_alone_id (the id form of _decided_alone) and _own_after (the one flag rule shared by _SingleActionCommand, _ModifyTextCommand and _ChangeTypeCommand) are private helpers inside the File Locations row for validation_state.py; they implement Fix Design AC14 step 2 exactly.'
+  is_awaiting_requires_state: 'ACCEPTED. _is_awaiting_document also requires a shown state that is not None: stricter than the Fix Design shape, never looser.'
+  notice_through_tr: 'ACCEPTED. AC12''s text goes through self.tr() like the screen''s other French texts; gui/i18n/ is unchanged, so the French source string is what shows. Byte check below.'
+  step_indicator_on_reattach: 'ACCEPTED (dev Completion Notes (a)). A re-attach does not reset the step indicator; nothing else on the validation screen changes it, so nothing visible changes.'
+
+coupling:
+  story_10_7_pr_99:
+    merge_tree: 'git merge-tree --write-tree fc95786 b5e0f99 (PR #99 head) and the reverse order: clean, tree 0c30ee7; auto-merged CHANGELOG.md, docs/prd/epic-10-v2.3-detection-precision-quick-wins.md and gdpr_pseudonymizer/gui/models/validation_state.py. classify_known_entities in the merged file is 10.7''s type-aware lookup, untouched by 10.10; the CHANGELOG keeps 10.7 under Changed and 10.8, 10.9, 10.10 in that order under Fixed; no conflict marker in the epic.'
+    merged_tree_checked: 'merged tree exported with git archive (no commit, no corpus folder): tests/unit/gui + tests/integration/gui -m "not slow" -n 4: 484 passed (444 + 40), plus 10.9''s CLI test 1 passed; the two 10.10 files alone: 40 passed; mypy gdpr_pseudonymizer: no issues in 104 files; ruff on gdpr_pseudonymizer and tests/unit/gui: clean.'
+    order: 'Whichever merges second updates its branch (merge_notes).'
+
+quality_score: 100
+expires: '2026-10-28T23:02:25Z'
+
+evidence:
+  tests_reviewed: 40
+  risks_identified: 4
+  tests_first_local:
+    runxfail: 'QA worktree of 5b4477d (git worktree add, detached), the two new files with --runxfail: 25 failed, 15 passed. Every failure an AssertionError, none at a "PRE:" precondition, each on the line the Debug Log records: T1[button], T1[handler] :328 (helper :149); T3 :398; T4 :467 (helper :149); T5 :494; T11 x2 :558; T12 :612 (helper :151); T6 :167; T7 :191; T13 x2 :315; T15 x2 :346; T17[batch_rejected_alone] :478; T18 x2 :527; T20[batch] :569; T20[single] :584; T21[own_rejected_stays] :620; T22 :648; T23 x3 :742; T24[group_accept] :779. Each line carries the "expected failure" comment (multi-line asserts at :569, :620, :648). The 15 passing are exactly the guards: T2, T8, T9, T10, T14 x2, T16 x3, T17[batch_clicked_rejected_row], T17[single_hand_rejected], T19 x2, T21[all_back], T24[correction].'
+    with_markers: '5b4477d plain: 15 passed, 25 xfailed.'
+    markers: 'git diff 5b4477d fc95786 -- tests/: the 7c27207 diff only removes the _xfail helper, its 14 decorators (6 + 8) and the 3 pytest.param marks (now plain ids); no assertion or other test line changes; fc95786 touches no test. No existing test edited.'
+    conftest_commit: 'b2ef449 adds the Task 1.0 fixture to both GUI conftests, byte-identical to the story''s text, nothing else. GUI suites (tests/unit/gui + tests/integration/gui, -m "not slow" -n 4): 440 on main 49d4daa, 440 on b2ef449, 480 at the head (440 + 40).'
+  ci:
+    5b4477d: 'CI - Test Matrix 38640983129 attempt 1 success: ubuntu 3.11 "2478 passed, 25 xfailed"; ubuntu 3.10 "2478 passed, 25 xfailed"; macos 3.12 "2478 passed, 25 xfailed"; windows 3.12 "2329 passed, 3 skipped, 25 xfailed"; Code Quality 38640983118 success'
+    7c27207: 'CI - Test Matrix 38643024670 attempt 1 success: "2503 passed" x3; windows "2354 passed, 3 skipped"; 0 xfailed; Code Quality 38643024666 success'
+    head_fc95786: 'CI - Test Matrix 38644891703 attempt 1 success (lint; ubuntu 3.11 "2503 passed in 251.71s"; ubuntu 3.10 "2503 passed in 381.70s"; macos 3.12 "2503 passed in 744.08s"; windows 3.12 "2354 passed, 3 skipped in 214.44s"); Code Quality 38644891758 attempt 1 success (quality); CodeQL "PR #100" 38644887484 attempt 1 success (Analyze actions, Analyze python, CodeQL). gh pr checks 100: 9/9 pass. Reruns: none.'
+    skip_markers: 'none in the 16 commit titles and bodies of main..fc95786, nor in the PR title and body (also checked for prose variants).'
+  diff_vs_fix_design:
+    ac1: 'batch.py: _awaiting_doc_index and _review_states created in __init__ and reset in _launch_worker; set from the worker''s own validation_required (:925) before navigating; cleared on accept, in _on_finished and _on_error; awaiting_doc_index, review_state, store_review_state. validation_complete = Signal(int, object); _on_validation_complete(doc_index, list) refuses another index before it stores, submits or navigates, and logs batch_validation_result_refused with the two indices only (no entity text); the FUNC-001 cache overwrite is gone. validation.py: _is_awaiting_document (waiting index and the identity guard), _apply_batch_document_rule run last in set_context, _on_finalize guarded in batch mode and emitting (doc_index, list).'
+    ac2: 'set_context re-attaches the kept state (_attach_review: no init_from_detection_result, no classify_known_entities, no signal connection) or builds it with _begin_review (today''s start_validation body) and stores it.'
+    ac3: '_group_ids: a row without a stored key is a group of one; a detected row keeps its (text, type) group of detected rows.'
+    ac11: 'start_validation (the single-document entry) leaves batch mode first: batch header, "Annuler le lot" and the line hidden, "◀ Retour" shown, retranslateUi, then _begin_review. processing.py, home.py and main_window.py unchanged.'
+    ac13: '_hand_key_by_id (filled and emptied by _AddEntityCommand), _name_key, _action_rows rewritten: the row first, always; every other row of the same fixed name and type, found or added; skipping another row rejected on its own; docstring rewritten; _group_ids stays the accept and reject group.'
+    ac14: '_own_ids on GUIValidationState (not EntityReview); _KEPT, _DROPPED, _same_kind, _decided_alone, _set_own; every command that changes a row saves and restores the flag (_SingleActionCommand, _ModifyTextCommand, _ChangeTypeCommand, _ChangePseudonymCommand always own, _AddEntityCommand adds and removes); accept_entity skips another row rejected on its own, reject_entity another row accepted or corrected on its own, the row clicked always changes; alone=True only in the one-command branches; bulk_accept/bulk_reject default alone=True; _handle_bulk_action(alone=True) with Ctrl+Shift+A passing False and Ctrl+Shift+R unchanged; accept_all_known takes PENDING known rows only.'
+    a1: 'gui/widgets/ unchanged: the editor menu, keys and panel act on an earlier document (probe R5).'
+    scope: 'git diff --stat main...fc95786: the three product files, the two new test files, the two conftests, CHANGELOG.md, the story and the two docs/prd files: all in File Locations. The Task 6.1 path set (nlp, resources, utils, __init__.py, data, cli, core, validation, gui/workers, gui/widgets, gui/i18n, tests/accuracy, tests/test_corpus, .github, pyproject.toml, poetry.lock) plus scripts/, main_window.py, home.py and processing.py: empty. None of the 13 files the accuracy suite loads, so G1 is N/A and no accuracy run is needed.'
+    product_text: 'The only new user text is AC12''s line. Other new literals are a log event name, an object name and docstrings. The line''s text in validation.py, after joining its string literals, is byte-identical (160 bytes) to AC12''s string in the story and to the text Lionel approved.'
+  g6_local: 'Windows, main poetry venv, PYTHONPATH at the worktree, USERPROFILE/HOME at r110/qa/home: ruff check (gdpr_pseudonymizer, tests/unit, tests/integration, scripts): exit 0; black --check on the same: 277 files unchanged; mypy --config-file mypy.ini gdpr_pseudonymizer: no issues in 103 files; tests/unit + tests/integration -m "not slow" -n 4 --dist loadscope from a scratch cwd: 2488 passed, 11 skipped, 4 errors (TEST-ENV-001; that file from the worktree: 7 passed).'
+  isolation: 'both leakage guards: 15 passed; both allowlists unchanged (git diff main...HEAD empty); "Traité" in the new test is the app''s own status text (batch.py self.tr("Traité")), already asserted by tests/unit/gui/test_batch_screen.py:274 on main. QA never opened, listed, read or grepped held_out/ or final_exam/ (the QA worktree checkout of 5b4477d holds them as files on disk, untouched); local lint was pointed at code folders only; the merged and comparison trees were exported without tests/test_corpus; invented names only.'
+  settings_isolation: 'every runner: USERPROFILE and HOME at r110/qa/home, TEMP/TMP at r110/qa/tmp for probes, a scratch cwd (except lint, the leakage guards and the cwd-dependent re-run, which ran in the worktree), and the r109 qa_isolation plugin (copied) that points gdpr_pseudonymizer.gui.config._config_path at tmp_path; the probe conftest also carries the Task 1.0 fixture. No .gdpr-pseudo.yaml appeared in the scratch home, the scratch cwd or the worktree. The user''s settings file was never opened, listed or touched.'
+  consumer_trace: 'all 30 rows re-read against the diff at fc95786 (Task 7.4 asks for three): each "After the fix" column holds. Checked closely: #11/#12 (hand-off: only the waiting document, refusal before store/submit/navigate, index carried by the signal), #19 (summary: doc 1 "2", "Traité"; probe R9 and T1 (5)), #23/#28 (single document after or during a batch leaves batch mode; the identity guard refuses a stale screen: probes R10 x3, R11, R12), #13 (still no reader of _validation_results; OBS-001), #26 and #30 (rules probes).'
+  changelog: 'The 10.10 bullet under [Unreleased] ### Fixed is byte-identical to Dev Notes "CHANGELOG Entry", after 10.8''s and 10.9''s bullets; it covers PRE-001, PRE-002 and PRE-003 (AC5) plus AC11, AC13 and AC14, quotes no text of the new line, and states no accuracy figure. 10.9''s rejected-places sub-bullet changes in exactly the two phrases of Task 5.1.'
+  probes:
+    harness: 'r110/qa/probes (outside the repo): qa110_harness.py, test_probe_110_flows.py, test_probe_110_rules.py. Real BatchScreen, ValidationScreen and BatchWorker thread, only DocumentProcessor._detect_and_filter_entities replaced; real finalization; for single documents the real DetectionWorker (detect_entities replaced, the model check patched to "installed") and the real FinalizationWorker. User routes: editor menu and signals, keys in navigation mode, the panel''s list selection and "Accepter les déjà connues", the Ctrl+Shift+A/R and Ctrl+Z/Y shortcuts, the edit and pseudonym dialogs answered. Every written file checked: the text outside the expected spans byte-identical, a non-empty replacement holding no name part at each expected span, one pseudonym where the name is one. The same probes ran on the unfixed code (QA worktree of 5b4477d, product code = main 49d4daa) for contrast.'
+    r108_real_batch_adapted: 'PASS x3 at the head. prev_then_validate: the click on doc 0 is refused (screen still validation, doc 0, button disabled, line visible with AC12''s exact text, nothing stored for doc 1), then "Suivant ▶" and the waiting document''s button: doc 1 written with its own positions [(PERSON, 0, 17), (PERSON, 63, 80)], no name part, every other character unchanged. prev_next_then_validate: doc 1''s accepts unchanged after "Suivant ▶", written clean. no_prev_control: the same files as on the unfixed code (same spans replaced, same results; pseudonyms are drawn per run). Unfixed: the first two FAIL (doc 1 damaged or in clear), the control PASSES. Adaptation: after the refused click the probe no longer waits for the batch to end (it would time out by design).'
+    r108_H_added_row: 'PASS at the head (8 cases, kept review state cleared between batch cases): an accept or a reject on the added row changes that row only, in single-document and batch validation. Unfixed: the 4 batch cases FAIL (the detected rows rejected; "Zorbaville" in clear).'
+    flows: 'R3 three documents, "◀ Précédent" twice then "Suivant ▶" twice: each earlier document shows the decisions it was validated with, button disabled and line shown; the waiting one active with its decisions; three files from their own lists. R4 Ctrl+Z, Précédent/Suivant, Ctrl+Z, Ctrl+Y, Précédent/Suivant, Ctrl+Y: states CPP, CRR, CPP, CPP, PPP, CPP, CPP, CRR and the row memory [0] restored at each step; written "X a signé avec Zorbal. Le projet est à Saint-Zorbal.". R5 earlier document through the menu ("Rejeter", "Modifier le texte...") and keys (Enter, Delete in navigation mode): the shown state changes (CCM, RRM, CCM, CCR, MMR), stays with doc 0 on revisit, button disabled and line shown throughout, nothing stored or navigated, doc 0''s file not rewritten, doc 1 kept and written clean (one check recorded OBS-001). R6 "Annuler le lot" from an earlier document (button, dialog answered): cancelled, no doc 1 output; then a single document is in single-document mode. R7 unreadable middle document: doc 0 and doc 2 written from their own lists, doc 1 none, "Erreur" (OBS-002). R8 finalization failure on doc 0, then "Précédent" to it: button disabled, AC12 line ("validé"), doc 1 clean, summary doc 0 "Erreur", doc 1 "2"/"Traité". R9 summary [doc0 3 Traité, doc1 2 Traité] and exported report "doc1.txt: OK | 2 entités" after a refused click. R10 single document while the batch waits, by Ctrl+O, by the recent-files menu, and from the home screen reached by "◀ Retour" from settings: single-document mode ("Finaliser ▶", "◀ Retour", no header, no line), written clean through the real finalization, nothing stored for doc 1; back on the waiting document its accepts are there and it is written from its own list. R11 the same screen forced back into batch mode: the identity guard alone refuses the handler and the button; doc 1 then written clean. R12 single document after a batch run: single-document mode, written. All 16 PASS at the head except R5''s OBS-001 check; unfixed: 14 FAIL, 2 PASS (the control and R7).'
+    rules: '29 cases x (no navigation, a Précédent/Suivant round trip after every step) = 58 batch items, each walked back with Ctrl+Z to the start and forward with Ctrl+Y (states, types and row memory compared at every step), then validated and the written file checked: 58/58 PASS at the head (the two H accept/reject cases re-run with a first document that does not store "Zorbaville", after a probe-design error, 4/4 PASS). Covered: Q3/C a correction or a type change from a found or a hand-added row reaches every place, in either order and twice in a row, one pseudonym, one undo; the Q3 correction (accept/reject on a found place = its found group, on an added place = that place); PRE-003 on H; item 4 (a found place rejected through the list, or a hand-added place rejected, then a correction elsewhere: left as is); AC14 (b) group accept skips Saint-Zorbal rejected alone, clicking it accepts it; Q5 (a place accepted through the list, or with its own pseudonym, survives a group reject; accept then reject the group rejects all); Q7 (whole group back after a mistaken group reject, except a place rejected alone; the same with a type change and with a text correction, T22''s case); Q6 (known name: rejected stays rejected, corrected stays "modifié" with its type); Ctrl+Shift+R (then a correction, or "Accepter" again, or a click on one of its places: the others stay rejected and are left as is); Ctrl+Shift+A follows the group; the list selection makes each decision its own. Single-document validation, 5 cases through the real finalization: 5/5 PASS. Unfixed: 52 FAIL, 11 PASS (the 10.9-era guards).'
+    regression_10_9_probes: 'QA 10.9''s 42 probes (r109 probe_109.py, probe_109b.py; capture adapted to the new two-argument signal) at the head: 40 PASS. The two others change by design: P06b (Précédent then Valider) is now refused (AC1); A05 (group reject, then a correction on one place) now reaches the places rejected only by the group (Q7, "Corrections follow the same rule"), as the 10.9 gate foresaw. K01 now leaves Saint-Zorbal rejected after a second group accept; P05e (GRP-001) now writes all three places with one pseudonym; 10.9''s T17 (4 cases) passes.'
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+    ac_gaps: []
+    notes: 'AC1 T1 x2, T12 + R1, R3, R5, R7-R11; AC2 T3, T4, T5 + R1, R3, R4, rules (nav); AC3 T6-T10 + R2, rules; AC4/AC7 tests first proven locally and on 4 CI legs; AC5 CHANGELOG; AC6 G1/G3/G5 N/A by path check, G2 this gate, G4 scope, G6 green, G7 CHANGELOG only; AC8 T2, T8, T9 + every existing test unchanged; AC9 Consumer Trace re-checked; AC10 strings and guards; AC11 T11 x2, T12 + R6, R10 x3, R11, R12; AC12 byte check; AC13 T10, T13-T16, T22 + rules; AC14 T17-T24 + rules and the undo/redo walks.'
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'The leak paths are closed: a list built on one document is never stored for or sent as the result of another (refusal plus identity guard); decisions survive navigation; a hand-added row''s accept or reject never touches detected rows; a correction reaches every place of the name except places rejected on their own; group actions keep decisions made on one place. Every probe file holds no name part except places the user rejected. The new log line carries two indices only.'
+  performance:
+    status: PASS
+    notes: 'One review state per shown document for the run (the context cache already holds the text); a re-attach is cheaper than the old rebuild (no database open for the known-entity pass). Deciding which rows an action passes over takes one set lookup per row.'
+  reliability:
+    status: PASS
+    notes: 'Undo and redo restore states, types and each row''s memory exactly, across navigation; a refused click leaves the worker waiting and the batch finishable from its waiting document; cancel, a read error and a finalization error behave. No harness timeout in any probe at the head.'
+  maintainability:
+    status: PASS
+    notes: 'Small private helpers with docstrings citing Lionel''s answers; the memory lives in GUIValidationState, not the shared core model; mypy strict clean on the head and on the merge with 10.7.'
+
+recommendations:
+  immediate: []
+  future:
+    - action: 'OBS-001: if _validation_results ever gets a reader, store a copy of the list.'
+      refs: ['gdpr_pseudonymizer/gui/screens/batch.py:954']
+    - action: 'OBS-002: backlog item for "Précédent" after an unreadable document.'
+      refs: ['gdpr_pseudonymizer/gui/screens/validation.py:804-822']
+    - action: 'TEST-001: optionally assert in T12 that the single document is written.'
+      refs: ['tests/unit/gui/test_batch_review_real_worker.py:559-604']
+    - action: 'TEST-ENV-001: make test_ner_title_improvements.py build its corpus path from its own location.'
+      refs: ['tests/integration/test_ner_title_improvements.py']
