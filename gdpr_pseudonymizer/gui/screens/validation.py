@@ -31,6 +31,7 @@ from gdpr_pseudonymizer.gui.widgets.entity_editor import EntityEditor
 from gdpr_pseudonymizer.gui.widgets.entity_panel import EntityPanel
 from gdpr_pseudonymizer.gui.widgets.step_indicator import StepMode
 from gdpr_pseudonymizer.utils.logger import get_logger
+from gdpr_pseudonymizer.validation.workflow import ValidationWorkflow
 
 if TYPE_CHECKING:
     from gdpr_pseudonymizer.gui.main_window import MainWindow
@@ -512,7 +513,7 @@ class ValidationScreen(QWidget):
 
     def _on_entity_state_changed(self, entity_id: str) -> None:
         """Update both widgets when an entity's state changes."""
-        self._editor.refresh_entity(entity_id)
+        self._editor.refresh_all()
         self._panel.update_entity_row(entity_id)
         self._update_status_label()
 
@@ -568,25 +569,20 @@ class ValidationScreen(QWidget):
         if review is None:
             return
 
+        current = review.user_modification or review.entity.text
         text, ok = QInputDialog.getText(
             self,
             self.tr("Modifier le texte de l'entité"),
             self.tr("Nouveau texte :"),
-            text=review.entity.text,
+            text=current,
         )
-        if ok and text and text != review.entity.text:
-            # Find new text near original position
+        if ok and text and text != current:
+            # The CLI's rule (Story 10.9): the edited text where it overlaps
+            # the row's span, else the row's own span.
             doc_text = self._validation_state.session.document_text
-            search_start = max(0, review.entity.start_pos - 200)
-            search_end = min(len(doc_text), review.entity.end_pos + 200)
-            search_region = doc_text[search_start:search_end]
-            idx = search_region.find(text)
-            if idx >= 0:
-                new_start = search_start + idx
-                new_end = new_start + len(text)
-            else:
-                new_start = review.entity.start_pos
-                new_end = new_start + len(text)
+            new_start, new_end = ValidationWorkflow._locate_modified_span(
+                doc_text, review.entity, text
+            )
             self._validation_state.modify_entity_text(
                 entity_id, text, new_start, new_end
             )
