@@ -750,14 +750,6 @@ def _row_facts(row: EntityReview) -> tuple[object, ...]:
     )
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=(
-        "Story 10.9: a correction reaches a place the user rejected on c0d087c "
-        "(Lionel 2026-10-14); fixed in Task 14"
-    ),
-)
 @pytest.mark.parametrize(
     ("mode", "action"),
     [("single", "text"), ("single", "type"), ("batch", "text"), ("batch", "type")],

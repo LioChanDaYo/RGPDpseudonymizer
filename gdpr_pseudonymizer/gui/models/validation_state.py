@@ -207,13 +207,17 @@ class GUIValidationState(QObject):
         row of the name; in single-document validation a detected row is
         alone, and a row added by hand joins the detected row of its text and
         type.
+
+        Another row the user rejected is skipped, so a correction never
+        reaches a place the user rejected; the row acted on is always kept,
+        whatever its state (Story 10.9 AC11; Lionel, 2026-10-14).
         """
         rows = [review]
         for eid in self._group_ids(review):
             if eid == review.entity_id:
                 continue
             other = self._reviews_by_id.get(eid)
-            if other is not None:
+            if other is not None and other.state != EntityReviewState.REJECTED:
                 rows.append(other)
         return rows
 
