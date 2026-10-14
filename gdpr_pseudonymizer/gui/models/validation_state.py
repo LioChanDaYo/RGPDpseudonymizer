@@ -553,7 +553,8 @@ class GUIValidationState(QObject):
 
         A row whose text the user edited expands to every occurrence of its
         group, each on its edited span or, where the edited text is absent,
-        its detected span (Story 10.9). Rows added by hand are looked up with
+        the span it had before that edit: the previous edit's, else the
+        detected one (Story 10.9). Rows added by hand are looked up with
         a key computed from the entity sent to finalization, so they normally
         stay single.
         """
