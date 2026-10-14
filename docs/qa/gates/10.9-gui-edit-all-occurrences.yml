@@ -1,0 +1,149 @@
+schema: 1
+story: '10.9'
+story_title: 'Desktop App Edit Applies to Every Occurrence'
+scope: 'PR #98 at head a30557b on main e16d15a: tests-first a988f19, fix 828e7b8, CHANGELOG f2f12a1, Dev Agent Record a30557b; rebased epic commit f2f0f4f (docs/prd only); SM/PO story commits.'
+gate: CONCERNS
+status_reason: 'The fix is the Fix Design as written and it closes the leak: the 9 tests-first failures are proven on every CI leg and locally on their cited lines, everything is green at the head, and every QA probe writes a clean output file, including the dev''s item 4 (the same place sent twice is replaced once; the text is unchanged). Two medium concerns: the editor does not redraw its highlights after an edit, so the CHANGELOG line "the highlights show exactly the places that will be pseudonymized" is false in the running app (UI-001, fix or reword before merge); and the edit dialog re-opens on the detected text, so a second edit can silently undo the first one at every place (UX-001, Lionel decides).'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-10-14T12:16:15Z'
+
+waiver: { active: false }
+
+merge_blockers:
+  - 'UI-001: either make the editor rebuild its ranges on a state change (one line, plus a screen-level test), or remove the highlight clause from the CHANGELOG entry. Not both needed. Routing: dev, with the PM/SM widening File Locations for the one line.'
+
+decisions_for_lionel:
+  - 'UX-001: fold the dialog pre-fill fix into 10.9 (small, same file), or a follow-up story before the release. QA recommends folding it in.'
+
+top_issues:
+  - id: 'UI-001'
+    severity: medium
+    finding: 'The editor''s highlight ranges are not rebuilt after a text edit, a type change or an undo. EntityEditor caches the ranges (_entity_ranges) and rebuilds them only in set_validation_state and refresh_all (add or remove a row); a state change goes ValidationScreen._on_entity_state_changed -> EntityEditor.refresh_entity, which re-applies highlights over the old cache (validation.py:514-518; entity_editor.py:113-119, :192-204, :219). Probe P01/P13 on the real screen, EXT text, row edited through the dialog to "Quentrel Zorbalia Quentrix": the state sends and get_all_entity_ranges returns (0,26),(72,98), but the editor still holds (0,17),(72,89); a click on the second "Quentrix" (pos 90) selects nothing; the add-entity menu is offered there. P12: after a second edit the editor still shows the first detected spans. After refresh_all() the editor matches the state. So AC1''s function-level precision holds (T5), but the CHANGELOG clause "the highlights show exactly the places that will be pseudonymized" is not what the user sees, and Consumer Trace #8 (editor part), #19 (tooltip) and #20 (click lookup) "after the fix" are not delivered; Task 4.1 recorded all 21 rows as holding. Pre-existing refresh gap (same code since v2.0); no leak and no text damage: the output follows the state, not the editor.'
+    suggested_action: 'gdpr_pseudonymizer/gui/screens/validation.py:516, in _on_entity_state_changed: replace self._editor.refresh_entity(entity_id) with self._editor.refresh_all() (rebuilds _entity_ranges and _nav_entity_ids from get_all_entity_ranges, then re-applies highlights; cost one pass over the rows per state change). Test first, as a strict xfail on the unfixed code: EXT through start_validation, _show_modify_text_dialog with getText patched -> sorted((s, e) for s, e, _ in screen._editor._entity_ranges) == [(0, 26), (72, 98)] and screen._editor._entity_at_position(90) == row id; after undo_stack.undo() the editor ranges are [(0, 17), (72, 89)]. Check keyboard navigation (Tab) still walks the rows after the change. Alternative if the PM keeps 10.9 narrow: delete "and the highlights show exactly the places that will be pseudonymized" from the CHANGELOG sub-bullet and correct Consumer Trace #8, #19, #20, and file the refresh as a follow-up.'
+    refs: ['gdpr_pseudonymizer/gui/screens/validation.py:514-518', 'gdpr_pseudonymizer/gui/widgets/entity_editor.py:113-119', 'gdpr_pseudonymizer/gui/widgets/entity_editor.py:192-204', 'gdpr_pseudonymizer/gui/widgets/entity_editor.py:324-334', 'CHANGELOG.md:152']
+    suggested_owner: dev
+  - id: 'UX-001'
+    severity: medium
+    finding: 'Dev deviation (5) is not only cosmetic. The edit dialog is pre-filled with review.entity.text, the detected text, and compares against it (validation.py:576, :578); every other place of the name is re-derived from its detected span on each call (by design, step 4). So a second edit started from what the dialog shows replaces the first edit everywhere. Probe P12 (TITLED: "Dr Quentrel Zorbalia Quentrix ..." twice, "Quentrel Zorbalia" detected at both): edit 1 to "Quentrel Zorbalia Quentrix" covers both places; the dialog re-opens on "Quentrel Zorbalia"; the user adds the title -> "Dr Quentrel Zorbalia"; the written file reads "Dr <pseudonym> Quentrix rejoint le projet. ... Dr <pseudonym> Quentrix." with "Quentrix" back in clear at both places. With UI-001 the editor shows no change either way. P04c: a second edit absent at one place falls back to the detected span there and uncovers what edit 1 covered. Pressing OK on the unchanged pre-fill is a no-op (edit kept). Not a 10.9 regression (the pre-fill is unchanged since Story 6.4), but 10.9 makes the loss reach every place.'
+    suggested_action: 'Lionel decides. Recommended fix in _show_modify_text_dialog (validation.py:572-578): current = review.user_modification or review.entity.text; pre-fill with current; apply when ok and text and text != current. The span rule and the state need no change. Test: two dialog edits where the second starts from the pre-fill, assert the pre-fill equals the first edit and no part of the name is left in the written file.'
+    refs: ['gdpr_pseudonymizer/gui/screens/validation.py:572-587', 'gdpr_pseudonymizer/gui/models/validation_state.py:406-448']
+    suggested_owner: po
+  - id: 'GRP-001'
+    severity: low
+    finding: 'An edit on a detected row does not reach a row added by hand with the same text and type. Probe P05e (THREE: the name at three places, the detector finds two, the user adds the third by hand, then edits the detected row to "Quentrel Zorbalia Quentrix"): the third place keeps "Quentrel Zorbalia", so "Quentrix" stays in clear there and the place gets a second pseudonym in the same document. The other direction works (P05d: editing the hand row reaches the detected row). This follows the group rule as written (the group index is fixed at init and never holds hand rows, as for accept and reject; AC1 precisions define the group as the variant group or the batch (text, type) group), so it is not a fail of 10.9, and it is not a regression (before 10.9 the edit reached no other place). But the CHANGELOG says "every occurrence of that name and type", and once 10.10 makes a hand row a group of one, neither direction will reach the other.'
+    suggested_action: 'PM: decide whether an edit or type change on a detected row should also reach hand rows of the same (text, type) (natural home: Story 10.10, which redefines hand-row groups), or reword the CHANGELOG to "every detected occurrence".'
+    refs: ['gdpr_pseudonymizer/gui/models/validation_state.py:166-178', 'gdpr_pseudonymizer/gui/models/validation_state.py:197-213']
+    suggested_owner: po
+  - id: 'DOC-001'
+    severity: low
+    finding: 'Consumer Trace #17 says 10.8''s stored key and group helper are unchanged; _variant_key changed (the user_modification guard is gone). The change is behaviour-neutral (see deviation ruling 1) and the dev disclosed it in Completion Notes point 1. Task 4.1''s "all 21 rows hold" is also not right for #8, #19 and #20 (UI-001).'
+    suggested_action: 'Correct the two rows when the story is next edited.'
+    refs: ['docs/stories/10.9.gui-edit-all-occurrences.story.md:381']
+    suggested_owner: dev
+
+deviation_rulings:
+  d1_variant_key_guard: 'CORRECT. The guard is dead on every path. _variant_key has two callers, expand_validated_entities (validation_state.py:498) and get_all_entity_ranges (:549), and both handle a row with user_modification first and continue (:494-497, :531-547). Batch: the expansion returns before any lookup when there is no variant map (:489-490); batch ranges reach _variant_key only for unedited rows. Rows restored by Précédent/Suivant are rebuilt by set_context -> init_from_detection_result with fresh reviews; in gui/ only _ModifyTextCommand ever sets user_modification (:640, :649), and probe P06 shows the restored rows with user_modification None. Only Consumer Trace #17 is out of date (DOC-001).'
+  d2_action_rows: 'CORRECT. Exactly Fix Design step 3''s row list (the row first, then _group_ids without it); text edit and type change share it, so the two cannot drift; private; an unknown id gives [] and falls to the single-command branch, a no-op command as before. It is the seam Story 10.10 changes (coupling below).'
+  d3_edited_entity_fallback: 'CORRECT. All three call sites are guarded by "if review.user_modification" (:462, :494 through _validated_rows, :531), so the fallback is unreachable; it satisfies mypy (str | None). An empty edit is falsy and counts as no edit everywhere, before and after. get_validated_entities returns the same list (T8, T9, every existing test unchanged and green).'
+  d5_dialog_prefill: 'USER-FACING, for Lionel: see UX-001.'
+  d7_epic_story_list: 'NOTED. The rebased epic keeps "Draft" for 10.5 and 10.8 (main''s text). PM commit 8e879d5 (on the local 10.10 branch, not yet on origin) changes both rows to "Done (PR #96, 67807c2)" and "Done (PR #97, e16d15a)"; the later merge resolves it.'
+
+item4_written_output:
+  verdict: 'PASS. The text is not damaged.'
+  why: '_apply_replacements sorts by (start, longest first) and keeps a span only if it overlaps none already kept (document_processor.py:558-596), so an identical second span is dropped, and a shorter span at the same start loses to the longer one.'
+  P05a: 'EXT, hand row added at 72-89 (PERSON, the detected occurrence), then edited through the dialog: both rows MODIFIED; sent [(0,26), (72,98), (72,98)]; written "<p> rejoint le projet. Le contrat est signé avec <p>." with one pseudonym, the text outside the two spans byte-identical, no name part left. One undo reverts both rows (hand ADDED, detected CONFIRMED).'
+  P05b: 'same, the detected row edited instead: sent (0,26), (72,98) and the unedited hand row (72,89): written clean.'
+  P05c_P05c2: 'hand row at the canonical''s own place 0-17, either row edited: duplicates at 0 and 72, written clean. In P05c2 the unedited hand row expands through the variant map and sends the canonical object, whose span the edit moved in place, as (0, 26) with the text "Quentrel Zorbalia": a text/span mismatch, pre-existing (10.8 lookup), API-only, output clean.'
+  P05d: 'hand row at a place the detector missed (125-142), edited: the hand row and the detected row both edited; all three places sent and written clean.'
+  reachable_in_the_ui: 'The editor offers "Ajouter comme entité" only for a selection that overlaps no highlighted range (entity_editor.py:361-367, :431-435); every detected place is highlighted, so a hand row exactly on a detected place is reachable only through the API (as in the dev''s probe), or, with UI-001, on an unhighlighted extension such as "Quentrix", which overlaps the sent span and is dropped harmlessly.'
+
+coupling:
+  story_10_7_pr_99:
+    merge_tree: 'git merge-tree --write-tree a30557b origin/story/10.7-type-aware-mapping-lookup (702a655): clean, tree 579c8ff, no conflict in either order; auto-merged CHANGELOG.md, docs/prd/epic-10-v2.3-detection-precision-quick-wins.md and gdpr_pseudonymizer/gui/models/validation_state.py (10.7 edits classify_known_entities, 10.9 other functions).'
+    merged_tree_checked: 'the merged tree exported with git archive (no commit created): tests/unit/gui, both 10.9 test files, tests/unit/test_document_processor.py and 10.7''s test_type_aware_document_processor.py, -m "not slow and not spacy": 453 passed; mypy gdpr_pseudonymizer on the merged package: no issues in 104 files.'
+    note_for_second_to_merge: 'No text conflict. Re-run the suites after the rebase; with 10.9''s type change at every place, a retyped name has one type everywhere, so 10.7''s type-aware lookup gives it one pseudonym.'
+  story_10_10:
+    merge_tree_now: 'against the local branch story/10.10-batch-review-fixes (66b1820, docs only, not on origin): conflicts in docs/prd/epic-10-v2.3-detection-precision-quick-wins.md and docs/prd/epic-list.md only, as 10.10''s story predicts.'
+    assumptions_10_10_changes:
+      - '10.9 takes its edit and type-change rows from _group_ids through _action_rows (validation_state.py:197-213). It assumes a hand-added row joins the detected rows of its (text, type) (Fix Design step 3, AC1 precisions "one exception in single-document validation", Consumer Trace #14). 10.10 AC3 makes a row without a stored key a group of one: after 10.10, an edit or type change on a hand row reaches that row only (10.10 T10 is written to fail with 10.9 on the base). Probes P05a and P05d will then change: the detected row is no longer edited with the hand row.'
+      - 'Edits on detected rows never reach hand rows before or after 10.10 (GRP-001).'
+      - 'Code conflict risk: 10.10 edits _group_ids (validation_state.py:166-178); 10.9 changed _variant_key right after it (:180-195) and put _action_rows next (:197). 10.10''s story calls the conflict at :164-193 conditional on exactly this, so the second to merge should expect it. Resolution as 10.10 says: 10.10''s _group_ids body, 10.9''s code everywhere else.'
+      - 'PRE-001 reproduced on this head (probe P06b): after an edit on document 0, "Précédent" then "Valider" stored document 0''s positions for document 1 and wrote document 1 as "<p>le projet. Le contrat est signé avec Quentrel <p>" (text damaged, "Quentrel" in clear). Same defect class as on 10.8; Story 10.10''s, not a 10.9 fail.'
+
+quality_score: 80
+expires: '2026-10-28T12:16:15Z'
+
+evidence:
+  tests_first_ci:
+    run: '38553744408 (CI - Test Matrix, head a988f19, attempt 1, success)'
+    legs: 'job logs read by QA: ubuntu 3.10 "2446 passed, 9 xfailed"; ubuntu 3.11 "2446 passed, 9 xfailed"; macos 3.12 "2446 passed, 9 xfailed"; windows 3.12 "2297 passed, 3 skipped, 9 xfailed"'
+    markers: '9 markers at a988f19, each strict=True and raises=AssertionError; a988f19 changes only the two new test files against e16d15a; git diff a988f19 828e7b8 -- tests/ removes the 9 markers and changes no other line; f2f12a1 and a30557b touch only CHANGELOG.md and the story'
+  runxfail_local: 'QA worktree of a988f19 (rgpd-analysis/r109/qa/wt-a988f19, separate from every other worktree), Windows Python 3.11.9, package path checked, --runxfail: 9 failed, 3 passed. Each failure an AssertionError on the cited line after its preconditions: T1 :227 (missing (72,98)), T2 :255 (missing (72,89)), T3 :283 (missing (69,86)), T4 :312 (missing (72,98)), T5 :344 (range (72,89) instead of (72,98)), T6 :366 (row 72 PENDING, None), T7 :423 (missing (66,83)), T11 :492 (PERSON at 63), T12 :520 (row 63 PERSON, PENDING). T8, T9, T10 passed. Without --runxfail: 3 passed, 9 xfailed.'
+  fix_ci:
+    run_fix: '38555713048 (head 828e7b8, attempt 1): ubuntu 3.10/3.11/macos "2455 passed", windows "2306 passed, 3 skipped", 0 xfailed'
+    run_head: '38557765609 (head a30557b, attempt 1): same counts, 0 xfailed; Code Quality 38557765603 attempt 1 success; CodeQL (PR #98 dynamic) 38557761036 attempt 1 success; gh pr checks 98: 9/9 pass (Analyze actions, Analyze python, CodeQL, lint, quality, 4 test legs)'
+  diff_vs_fix_design: 'dialog: _locate_modified_span (validation.py:582); modify_entity_text: one command for one row, else one macro "Modifier le texte du groupe" over _action_rows, edited row with the caller''s span, others with the CLI rule on their own span (:215-250); _edited_entity (:388) and _edited_occurrences (:406) computed per call, no new state, the row''s own occurrence is the edited entity (identity), lookup by the stored 10.8 key; expansion: edited rows through _edited_occurrences, a retyped row sends every occurrence with its type via dataclasses.replace, the variant map never changed (:488-517); ranges: edited rows give exactly the sent spans (:529-547); change_entity_type: macro "Changer le type du groupe" over the same rows (:257-275); get_validated_entities output unchanged; _ModifyTextCommand, _ChangeTypeCommand, _ChangePseudonymCommand, _AddEntityCommand and validation/workflow.py unchanged'
+  scope: 'git diff --name-only main...HEAD: CHANGELOG.md, the two docs/prd files (rebased epic commit), the story, validation_state.py, validation.py, the two new test files. Task 6.1 path set (nlp/, resources/, utils/, __init__.py, data/, cli/, core/, validation/, tests/accuracy/, tests/test_corpus/, .github/): empty. None of the 13 files the accuracy suite loads is touched, so no G1 run is needed.'
+  g6_local: 'Windows, main poetry venv, PYTHONPATH at the worktree, USERPROFILE/HOME at rgpd-analysis/r109/qa/home: ruff check . exit 0; black --check . 294 files unchanged; mypy gdpr_pseudonymizer no issues in 103 files; new tests 12 passed; tests/unit + tests/integration -m "not slow" -n 4 from a scratch cwd: 2440 passed, 11 skipped, 4 errors, all four FileNotFoundError on a cwd-relative main-corpus path in tests/integration/test_ner_title_improvements.py (harness artefact of the scratch cwd); that file re-run from the worktree cwd: 7 passed. tests/accuracy and tests/performance not run locally (CI ran them).'
+  isolation: 'both leakage guards 15 passed locally and green on CI; both allowlists unchanged (git diff main...HEAD empty); QA never opened, listed, read or grepped tests/test_corpus/held_out/ or tests/test_corpus/final_exam/; invented names only in every probe'
+  byte_check: 'the dev''s byte_check.ts re-run by QA at a30557b: every copied block matches the rebased epic except the G7 interpretation heading (#### in the story, ### in the epic), the SM''s nesting'
+  commit_texts: 'no skip marker in the branch commit messages or in the PR title and body (one regex hit, "No CI rerun", is plain text)'
+  settings_isolation: 'Every QA runner sets USERPROFILE and HOME to rgpd-analysis/r109/qa/home and runs from a scratch cwd with no .gdpr-pseudo.yaml, and loads an autouse plugin that points gdpr_pseudonymizer.gui.config._config_path at the test''s tmp_path; the probe conftest does the same. C:\Users\devea\.gdpr-pseudo.yaml was last modified at 2026-10-14 13:27:30 +02:00, before QA ran anything, and its mtime and size (270 bytes) were unchanged after every QA run. QA did not open or restore it. Earlier GUI test runs by other agents (the dev''s g6.bat ran from the worktree with the real home) can write it: a pre-existing harness defect of the repo''s GUI tests, not of this story.'
+  probe_7_3: 'rgpd-analysis/r109/qa/probes/probe_109.py, 24 probes, 24 passed, headless; real worker (only detect_entities replaced), real screen and dialog (getText patched), real finalization: single document through _on_finalize -> FinalizationWorker -> written temp file; batch through validation_complete -> BatchScreen._on_validation_complete -> finalize_document as batch_worker.py:376. Each written file checked: the text outside the expected spans byte-identical and in order, one pseudonym per edited name, no invented-name part left.'
+  probe_results:
+    P01_multi_place_edit: 'PASS: sent (0,26),(72,98), written clean (editor stale: UI-001)'
+    P02_edit_then_type: 'PASS: ORG (0,26),(72,98); undo -> PERSON edited; undo -> detected, row CONFIRMED; two redos back; written clean'
+    P03_type_then_edit: 'PASS: same end state; undo -> ORG detected; undo -> PERSON detected; written clean'
+    P04_two_edits_single: 'PASS: two edits, two undos, two redos, each step the expected expansion and ranges; written clean (title included)'
+    P04b_two_edits_batch: 'PASS: both rows follow each macro; two undos -> both PENDING, nothing sent; two redos; written clean; summary modified=2 (Consumer Trace #21, cosmetic)'
+    P04c_second_edit_absent: 'OBSERVATION: second edit absent at 72 -> detected span (72,89), "Quentrix" back in clear there (CLI rule; see UX-001)'
+    P05_item4: 'PASS: see item4_written_output'
+    P05e_edit_detected_with_hand_row: 'OBSERVATION: GRP-001'
+    P06_batch_prev_next: 'PASS: doc 0 edited and written clean; Précédent shows doc 0 with its edited spans; Suivant shows doc 1; doc 1 written clean; results stored under the right index'
+    P06b_prev_then_valider: 'PRE-001 (Story 10.10): doc 1 written with doc 0''s positions, text damaged'
+    P07_surname_only: 'PASS: "Zorbalia" alone at 72 joins the row; edit sends (0,26) and (72,80) with the edit; ranges the same; undo restores; written clean'
+    P07b_surname_type_change: 'PASS: ORG at both places, written clean'
+    P08_found_at_one_place: 'PASS: (0,26),(72,89), written clean'
+    P09_name_found_once: 'PASS: (0,26), ranges (0,26), undo restores, written clean'
+    P10a_type_undo_single: 'PASS: ORG at both; undo -> PERSON at both, row CONFIRMED; written clean'
+    P10b_type_undo_batch: 'PASS: both rows ORG MODIFIED; undo -> both PERSON PENDING; redo; written clean'
+    P11_batch_edit_written: 'PASS: edit on the second row reaches the first; list stored for doc 0 equals the list sent; written clean'
+    P12_second_dialog: 'OBSERVATION: UX-001'
+    P13_editor_ranges: 'OBSERVATION: UI-001'
+    P14_two_spellings_dialog: 'PASS: (0,17),(66,83); "Dr " kept once; written clean'
+  consumer_trace: 'all 21 rows checked against the diff: #1-#7, #9-#16, #18, #21 hold as the "After the fix" column says (probes above); #8 holds for get_all_entity_ranges but not for the editor, #19 and #20 not delivered (UI-001); #17 out of date (DOC-001). Line claims of Task 4.1 re-checked: batch emit validation.py:779, expansion :823, entity_editor.py:192-204 (:201), tooltip :268-281, _entity_at_position :324-334, get_summary validation_state.py:368.'
+  changelog: 'AC3 Fixed line present, right after 10.8''s, wording as Dev Notes "CHANGELOG Entry"; no accuracy figure; one clause not true in the running app (UI-001); "every occurrence of that name and type" does not cover hand-added rows (GRP-001)'
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 8, 9]
+    ac_gaps: [7]
+    notes: 'AC1 T1-T7 plus probes; AC2/AC5 tests-first proven locally and on CI; AC3 CHANGELOG (UI-001 clause); AC4 gates (G1/G3/G5 N/A confirmed by path check, G6 green); AC6 T8-T10 and every existing test unchanged; AC7 partial: Consumer Trace #8 (editor), #19, #20 do not hold (UI-001); AC8 strings and guards; AC9 T11-T12 plus P02, P03, P07b, P10a, P10b'
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'Closes the desktop leak: an edit or type change now reaches every place of the name, single-document and batch, written output clean in every probe. Remaining leak paths are pre-existing and routed: UX-001 (second edit), GRP-001 (hand rows), PRE-001 (10.10). No log line added.'
+  performance:
+    status: PASS
+    notes: 'Each edited occurrence is one bounded find in a window of about three name lengths, per expansion and per ranges call; no pass over all rows per row.'
+  reliability:
+    status: CONCERNS
+    notes: 'Undo/redo consistent in every probe. The editor display lags the state after an edit (UI-001).'
+  maintainability:
+    status: PASS
+    notes: 'Derived occurrences with no new state; one shared row helper for edit and type change; mypy strict clean on the head and on the merge with 10.7.'
+
+recommendations:
+  immediate:
+    - action: 'UI-001: make the editor rebuild its ranges on a state change (validation.py:516, refresh_entity -> refresh_all) with a strict-xfail-first screen test, or remove the highlight clause from the CHANGELOG and correct Consumer Trace #8, #19, #20.'
+      refs: ['gdpr_pseudonymizer/gui/screens/validation.py:514-518', 'CHANGELOG.md:152']
+    - action: 'UX-001: Lionel decides before the merge (fold into 10.9, recommended, or a follow-up story before the release).'
+      refs: ['gdpr_pseudonymizer/gui/screens/validation.py:572-587']
+  future:
+    - action: 'GRP-001: PM decides with Story 10.10 whether an action on a detected row should reach hand rows of the same (text, type), or the CHANGELOG says "every detected occurrence".'
+      refs: ['gdpr_pseudonymizer/gui/models/validation_state.py:166-213']
+    - action: 'DOC-001: correct Consumer Trace #17 (and #8, #19, #20 per UI-001) when the story is next edited.'
+      refs: ['docs/stories/10.9.gui-edit-all-occurrences.story.md:372-384']
+    - action: 'Second of 10.9 and 10.10 to merge: expect the _group_ids/_variant_key adjacency conflict (validation_state.py:166-197) and re-run 10.9''s probes P05a/P05d, whose behaviour 10.10 changes by design.'
+      refs: ['gdpr_pseudonymizer/gui/models/validation_state.py:166-213']
+    - action: 'Repo harness: GUI tests write the real user settings file (gui/config.py:32-38; MainWindow and SettingsScreen save on construction). An autouse conftest fixture patching gdpr_pseudonymizer.gui.config._config_path to tmp_path would close it for every agent.'
+      refs: ['gdpr_pseudonymizer/gui/config.py:32-38', 'tests/unit/gui/conftest.py']
