@@ -26,8 +26,8 @@ from gdpr_pseudonymizer.exceptions import CorruptedDatabaseError
 PASS_A = "zorbalia_pass_A_123!"
 PASS_B = "quentrix_pass_B_456!"
 
-# The four metadata keys a new database holds (schema_version "1.0.0").
-# Story 10.7 changes them here, in one place, if its rule needs to.
+# The four metadata keys a new database holds (schema_version "1.1.0" since
+# Story 10.7, AC3; rule (a) adds no metadata key).
 WINNER_METADATA_KEYS = {
     "schema_version",
     "encryption_salt",
@@ -40,7 +40,7 @@ def _assert_winner_db(db_path: Path, winner_pass: str, loser_pass: str) -> None:
     """Assert the winner's database is intact (Story 10.5, AC2).
 
     It exists, opens with the winner's passphrase, holds exactly the four
-    metadata keys (schema_version "1.0.0", kdf_iterations "100000"), and
+    metadata keys (schema_version "1.1.0", kdf_iterations "100000"), and
     rejects the loser's passphrase. Every failure is an AssertionError (AC6:
     the tests-first commit's strict xfails accepted real assertions only).
     """
@@ -55,7 +55,8 @@ def _assert_winner_db(db_path: Path, winner_pass: str, loser_pass: str) -> None:
             f"the database does not open with the winner's passphrase: {exc!r}"
         ) from exc
     assert set(values) == WINNER_METADATA_KEYS, sorted(values)
-    assert values["schema_version"] == "1.0.0", values["schema_version"]
+    # Story 10.7, AC3: a database created by 10.7 writes schema_version "1.1.0"
+    assert values["schema_version"] == "1.1.0", values["schema_version"]
     assert values["kdf_iterations"] == "100000", values["kdf_iterations"]
     try:
         loser_session = open_database(str(db_path), loser_pass)
@@ -129,7 +130,8 @@ class TestDatabaseInitialization:
 
             # Verify values
             schema_version = next(m for m in metadata if m.key == "schema_version")
-            assert schema_version.value == "1.0.0"
+            # Story 10.7, AC3: a database created by 10.7 writes "1.1.0"
+            assert schema_version.value == "1.1.0"
 
             kdf_iterations = next(m for m in metadata if m.key == "kdf_iterations")
             assert int(kdf_iterations.value) == 100000
