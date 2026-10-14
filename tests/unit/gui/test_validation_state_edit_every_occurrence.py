@@ -686,3 +686,157 @@ def test_batch_second_edit_absent_at_a_place_keeps_the_first_edit(
         ("PERSON", 3, 29, EDIT),
         ("PERSON", 75, 101, EDIT),
     ]
+
+
+# ----------------------------------------------------------------------
+# T17: second amendment (AC11; Lionel, 2026-10-14): a correction skips the
+# places the user rejected
+# ----------------------------------------------------------------------
+
+SURNAME = "Zorbal"
+TITLED_SURNAME = "Dr Zorbal"
+REJECTED = EntityReviewState.REJECTED
+ADDED = EntityReviewState.ADDED
+
+# Batch: PERSON "Zorbal" at 3, 58 and 97; the third is inside the place name.
+SAINT_TEXT = (
+    "Dr Zorbal rejoint le projet. "
+    "Le contrat est signé avec Dr Zorbal. "
+    "Le projet est signé avec Saint-Zorbal."
+)
+# Single document: the detector finds "Zorbal" at 60 only (inside the place
+# name) and misses the person at 3.
+SAINT_SINGLE_TEXT = (
+    "Dr Zorbal rejoint le projet. Le projet est signé avec Saint-Zorbal."
+)
+SAINT_TAIL = "Le projet est signé avec Saint-Zorbal."
+
+
+def _batch_three_rows(
+    main_window: MainWindow,
+    db_path: str,
+    document_text: str,
+    entities: list[DetectedEntity],
+) -> tuple[GUIValidationState, list[EntityReview]]:
+    """Batch-screen state (one row per occurrence); preconditions: three PENDING."""
+    main_window.navigate_to("batch")
+    batch_screen = main_window.stack.currentWidget()
+    assert isinstance(batch_screen, BatchScreen)
+    # Normally set by _launch_worker before the worker starts.
+    batch_screen._db_path = db_path
+    batch_screen._passphrase = PASSPHRASE
+    batch_screen._validation_contexts = {}
+
+    batch_screen._on_validation_required(entities, document_text, 0, 1)
+
+    validation_screen = main_window.stack.currentWidget()
+    assert isinstance(validation_screen, ValidationScreen)
+    state = validation_screen.validation_state
+    assert state is not None
+    rows = sorted(state.get_all_entities(), key=lambda r: r.entity.start_pos)
+    assert len(rows) == 3
+    assert [r.state for r in rows] == [PENDING, PENDING, PENDING]
+    return state, rows
+
+
+def _row_facts(row: EntityReview) -> tuple[object, ...]:
+    return (
+        row.state,
+        row.user_modification,
+        row.entity.text,
+        row.entity.entity_type,
+        row.entity.start_pos,
+        row.entity.end_pos,
+    )
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason=(
+        "Story 10.9: a correction reaches a place the user rejected on c0d087c "
+        "(Lionel 2026-10-14); fixed in Task 14"
+    ),
+)
+@pytest.mark.parametrize(
+    ("mode", "action"),
+    [("single", "text"), ("single", "type"), ("batch", "text"), ("batch", "type")],
+)
+def test_correction_skips_rejected_places(
+    qtbot,  # type: ignore[no-untyped-def]
+    main_window: MainWindow,
+    db_path: str,
+    tmp_path: Path,
+    mode: str,
+    action: str,
+) -> None:
+    """T17 (AC11): a correction or a type change never reaches a rejected row."""
+    from gdpr_pseudonymizer.validation.workflow import ValidationWorkflow
+
+    others: list[EntityReview] = []
+    if mode == "batch":
+        text = SAINT_TEXT
+        entities = [_entity(text, SURNAME, nth) for nth in range(3)]
+        state, rows = _batch_three_rows(main_window, db_path, text, entities)
+        assert [(r.entity.start_pos, r.entity.end_pos) for r in rows] == [
+            (3, 9),
+            (58, 64),
+            (97, 103),
+        ]
+        acted, rejected = rows[0], rows[2]
+        others = [rows[1]]
+        state.accept_entity(acted.entity_id)  # the found group
+        assert [r.state for r in rows] == [CONFIRMED, CONFIRMED, CONFIRMED]
+        state.bulk_reject([rejected.entity_id])  # the place-name place alone
+        assert [r.state for r in rows] == [CONFIRMED, CONFIRMED, REJECTED]
+    else:
+        text = SAINT_SINGLE_TEXT
+        result = _detect(db_path, text, [_entity(text, SURNAME, 1)])
+        state, rejected = _single_row(result, [(60, 66)])
+        state.accept_entity(rejected.entity_id)
+        state.reject_entity(rejected.entity_id)  # the place-name place
+        assert rejected.state == REJECTED
+        hand_id = state.add_entity(SURNAME, "PERSON", 3, 9)  # the missed place
+        hand = state.get_review(hand_id)
+        assert hand is not None
+        assert hand.state == ADDED
+        acted = hand
+    rejected_before = _row_facts(rejected)
+    assert rejected_before == (
+        REJECTED,
+        None,
+        SURNAME,
+        "PERSON",
+        rejected.entity.start_pos,
+        rejected.entity.end_pos,
+    )
+    before = {r.entity_id: _row_facts(r) for r in state.get_all_entities()}
+    index = state.undo_stack.index()
+    if action == "text":
+        span = ValidationWorkflow._locate_modified_span(
+            text, acted.entity, TITLED_SURNAME
+        )
+        assert span == (0, 9)
+
+    if action == "text":
+        state.modify_entity_text(acted.entity_id, TITLED_SURNAME, *span)
+    else:
+        state.change_entity_type(acted.entity_id, "ORG")
+
+    assert _row_facts(rejected) == rejected_before
+    assert acted.state == MODIFIED
+    for other in others:
+        assert other.state == MODIFIED
+    sent = (
+        state.get_validated_entities()
+        if mode == "batch"
+        else state.expand_validated_entities()
+    )
+    assert all(e.start_pos != rejected.entity.start_pos for e in sent)
+    output = _finalize(db_path, tmp_path, text, sent)
+    assert output.endswith(SAINT_TAIL)
+    assert output.count(SURNAME) == 1
+
+    state.undo_stack.undo()
+    assert state.undo_stack.index() == index
+    assert {r.entity_id: _row_facts(r) for r in state.get_all_entities()} == before
