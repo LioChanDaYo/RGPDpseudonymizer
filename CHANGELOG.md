@@ -153,6 +153,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - In batch validation, where each place is its own row, the edit reaches every row with the same name and type, as accept and reject already do.
   - Changing the type of a name in the desktop app now applies to every occurrence too, as in the command line.
   - The edit dialog now places the edited text as the command line does: where it overlaps the name, otherwise on the name's own place. Before, it could put the edit on another place of the name nearby.
+  - After an edit, the edit dialog now opens on the edited name, so a second edit builds on the first: after extending "Zorbalia" to "Quentrix Zorbalia", adding a title no longer leaves "Quentrix" in clear at any place.
   - The command-line validation was not affected. Detection, the mapping database and its schema do not change, and no accuracy figure changes.
 
 - **Two runs creating the same new mapping database at once no longer lose it (Story 10.5).**
