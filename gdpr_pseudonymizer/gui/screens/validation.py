@@ -513,7 +513,7 @@ class ValidationScreen(QWidget):
 
     def _on_entity_state_changed(self, entity_id: str) -> None:
         """Update both widgets when an entity's state changes."""
-        self._editor.refresh_entity(entity_id)
+        self._editor.refresh_all()
         self._panel.update_entity_row(entity_id)
         self._update_status_label()
 
@@ -569,13 +569,14 @@ class ValidationScreen(QWidget):
         if review is None:
             return
 
+        current = review.user_modification or review.entity.text
         text, ok = QInputDialog.getText(
             self,
             self.tr("Modifier le texte de l'entité"),
             self.tr("Nouveau texte :"),
-            text=review.entity.text,
+            text=current,
         )
-        if ok and text and text != review.entity.text:
+        if ok and text and text != current:
             # The CLI's rule (Story 10.9): the edited text where it overlaps
             # the row's span, else the row's own span.
             doc_text = self._validation_state.session.document_text

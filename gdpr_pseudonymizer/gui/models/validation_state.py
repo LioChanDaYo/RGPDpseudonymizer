@@ -56,6 +56,10 @@ class GUIValidationState(QObject):
         self._candidate_key_by_id: dict[str, CandidateKey] = {}
         # Same-text grouping index: (entity_text, entity_type) → [entity_id, ...]
         self._group_index: dict[tuple[str, str], list[str]] = {}
+        # Spans of the occurrences of a text-edited row, in its variant
+        # group's order, set by each edit's command (Story 10.9). A second
+        # edit is placed from these spans, not from the detected ones.
+        self._edited_spans_by_id: dict[str, list[tuple[int, int]]] = {}
 
     @property
     def undo_stack(self) -> QUndoStack:
@@ -83,6 +87,7 @@ class GUIValidationState(QObject):
         self._variant_occurrences = dict(detection_result.variant_occurrences or {})
         self._reviews_by_id.clear()
         self._candidate_key_by_id.clear()
+        self._edited_spans_by_id.clear()
         self._known_entity_ids.clear()
         self._undo_stack.clear()
 
@@ -226,9 +231,11 @@ class GUIValidationState(QObject):
         too, each on the span the CLI's rule gives on its own current span;
         the whole edit is one undo macro, as group accept and reject are. In
         single-document validation the row stands for every occurrence of
-        its variant group: the other occurrences are derived from the row at
-        finalization (``expand_validated_entities``), so one command reverts
-        them all.
+        its variant group: each other occurrence's span is placed with the
+        CLI's rule from its current span (the previous edit's, else the
+        detected one) and stored with the row's one command
+        (``_occurrence_spans_for_edit``), so one undo reverts them all and a
+        second edit builds on the first (Story 10.9).
         """
         review = self._reviews_by_id.get(entity_id)
         rows = self._action_rows(review) if review is not None else []
@@ -242,12 +249,67 @@ class GUIValidationState(QObject):
                     start, end = ValidationWorkflow._locate_modified_span(
                         document_text, row.entity, new_text
                     )
-                cmd = _ModifyTextCommand(self, row.entity_id, new_text, start, end)
+                spans = self._occurrence_spans_for_edit(row, new_text, (start, end))
+                cmd = _ModifyTextCommand(
+                    self, row.entity_id, new_text, start, end, occurrence_spans=spans
+                )
                 self._undo_stack.push(cmd)
             self._undo_stack.endMacro()
         else:
-            cmd = _ModifyTextCommand(self, entity_id, new_text, new_start, new_end)
+            spans = (
+                self._occurrence_spans_for_edit(review, new_text, (new_start, new_end))
+                if review is not None
+                else None
+            )
+            cmd = _ModifyTextCommand(
+                self, entity_id, new_text, new_start, new_end, occurrence_spans=spans
+            )
             self._undo_stack.push(cmd)
+
+    def _occurrence_spans_for_edit(
+        self, review: EntityReview, new_text: str, own_span: tuple[int, int]
+    ) -> list[tuple[int, int]] | None:
+        """Span of each occurrence of a row's variant group after an edit.
+
+        Returns ``None`` when the row has no stored key or the key has no
+        variant entry (batch rows, rows added by hand). Otherwise, in the
+        group's order: ``own_span`` for the row's own occurrence, and for
+        every other occurrence the span the CLI's rule gives from its current
+        span: the span the row's previous edit gave it when the row has a
+        text edit, else its detected span (Story 10.9).
+        """
+        key = self._candidate_key_by_id.get(review.entity_id)
+        if key is None or key not in self._variant_occurrences:
+            return None
+        occurrences = self._variant_occurrences[key]
+        current = (
+            self._edited_spans_by_id.get(review.entity_id)
+            if review.user_modification
+            else None
+        )
+        if current is not None and len(current) != len(occurrences):
+            current = None
+        document_text = self._session.document_text
+        spans: list[tuple[int, int]] = []
+        for index, occurrence in enumerate(occurrences):
+            if occurrence is review.entity:
+                spans.append(own_span)
+                continue
+            anchor = (
+                occurrence
+                if current is None
+                else dataclasses.replace(
+                    occurrence,
+                    start_pos=current[index][0],
+                    end_pos=current[index][1],
+                )
+            )
+            spans.append(
+                ValidationWorkflow._locate_modified_span(
+                    document_text, anchor, new_text
+                )
+            )
+        return spans
 
     def change_pseudonym(self, entity_id: str, new_pseudonym: str) -> None:
         """Override suggested pseudonym for an entity."""
@@ -412,24 +474,34 @@ class GUIValidationState(QObject):
         ``None`` when the row has no stored key or the key has no variant
         entry (batch rows, rows added by hand). Otherwise, in the group's
         order: ``edited`` for the row's own occurrence, and for every other
-        occurrence a new entity with the edited text, the row's current type
-        and the span the CLI's rule gives on that occurrence's detected span
-        (the edited text where it overlaps it, else the detected span). It is
-        derived from the row on each call, so undo and redo of the one edit
-        command revert and re-apply every occurrence.
+        occurrence a new entity with the edited text and the row's current
+        type. Its span is the one the edit's command stored
+        (``_occurrence_spans_for_edit``); without a stored list, the span the
+        CLI's rule gives on the occurrence's detected span (the edited text
+        where it overlaps it, else the detected span). The text, type and
+        other fields are taken on each call, and the stored spans are set and
+        restored by the edit's one command, so undo and redo revert and
+        re-apply every occurrence.
         """
         key = self._candidate_key_by_id.get(review.entity_id)
         if key is None or key not in self._variant_occurrences:
             return None
         document_text = self._session.document_text
+        group = self._variant_occurrences[key]
+        stored = self._edited_spans_by_id.get(review.entity_id)
+        if stored is not None and len(stored) != len(group):
+            stored = None
         occurrences: list[DetectedEntity] = []
-        for occurrence in self._variant_occurrences[key]:
+        for index, occurrence in enumerate(group):
             if occurrence is review.entity:
                 occurrences.append(edited)
                 continue
-            start, end = ValidationWorkflow._locate_modified_span(
-                document_text, occurrence, edited.text
-            )
+            if stored is not None:
+                start, end = stored[index]
+            else:
+                start, end = ValidationWorkflow._locate_modified_span(
+                    document_text, occurrence, edited.text
+                )
             occurrences.append(
                 DetectedEntity(
                     text=edited.text,
@@ -616,6 +688,7 @@ class _ModifyTextCommand(QUndoCommand):
         new_text: str,
         new_start: int,
         new_end: int,
+        occurrence_spans: list[tuple[int, int]] | None = None,
     ) -> None:
         super().__init__("Modifier le texte")
         self._state = state
@@ -623,6 +696,9 @@ class _ModifyTextCommand(QUndoCommand):
         self._new_text = new_text
         self._new_start = new_start
         self._new_end = new_end
+        # Spans of the row's occurrences after this edit (Story 10.9).
+        self._new_spans = occurrence_spans
+        self._old_spans: list[tuple[int, int]] | None = None
         self._old_text: str | None = None
         self._old_start: int = 0
         self._old_end: int = 0
@@ -637,6 +713,9 @@ class _ModifyTextCommand(QUndoCommand):
             self._old_end = review.entity.end_pos
             self._old_state = review.state
             self._old_modification = review.user_modification
+            self._old_spans = self._state._edited_spans_by_id.get(self._entity_id)
+            if self._new_spans is not None:
+                self._state._edited_spans_by_id[self._entity_id] = list(self._new_spans)
             review.user_modification = self._new_text
             review.entity.start_pos = self._new_start
             review.entity.end_pos = self._new_end
@@ -646,6 +725,10 @@ class _ModifyTextCommand(QUndoCommand):
     def undo(self) -> None:
         review = self._state._reviews_by_id.get(self._entity_id)
         if review:
+            if self._old_spans is None:
+                self._state._edited_spans_by_id.pop(self._entity_id, None)
+            else:
+                self._state._edited_spans_by_id[self._entity_id] = self._old_spans
             review.user_modification = self._old_modification
             review.entity.start_pos = self._old_start
             review.entity.end_pos = self._old_end

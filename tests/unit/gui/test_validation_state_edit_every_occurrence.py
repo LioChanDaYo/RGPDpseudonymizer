@@ -529,11 +529,6 @@ def _dialog(
     return shown[0]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.9 amendment: reproduces QA UX-001 on 9c5dee2; fixed in Task 9",
-)
 def test_second_dialog_edit_builds_on_the_first(
     qtbot,  # type: ignore[no-untyped-def]
     main_window: MainWindow,
@@ -574,11 +569,6 @@ def test_second_dialog_edit_builds_on_the_first(
     assert _dialog(screen, row.entity_id, ok=False) == NAME
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.9 amendment: reproduces QA UI-001 on 9c5dee2; fixed in Task 9",
-)
 def test_editor_highlights_follow_every_change(
     qtbot, main_window: MainWindow, db_path: str  # type: ignore[no-untyped-def]
 ) -> None:
@@ -614,11 +604,6 @@ def test_editor_highlights_follow_every_change(
     assert editor_ranges() == sent_spans() == [(0, 26), (72, 98)]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.9 amendment: reproduces QA UX-001 on 9c5dee2; fixed in Task 9",
-)
 def test_second_edit_absent_at_a_place_keeps_the_first_edit(
     qtbot, db_path: str, tmp_path: Path  # type: ignore[no-untyped-def]
 ) -> None:
