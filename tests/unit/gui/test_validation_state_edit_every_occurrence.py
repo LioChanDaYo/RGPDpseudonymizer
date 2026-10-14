@@ -455,3 +455,249 @@ def test_batch_type_change_applies_to_every_row(
         ("PERSON", PENDING),
         ("PERSON", PENDING),
     ]
+
+
+# ----------------------------------------------------------------------
+# T13-T16: amendment after QA (UX-001, UI-001): a second edit builds on the
+# first, and the editor's highlights follow every change
+# ----------------------------------------------------------------------
+
+TITLED_EDIT = "Dr Quentrel Zorbalia Quentrix"
+NAME_PARTS = ("Quentrel", "Zorbalia", "Quentrix")
+
+# PERSON "Quentrel Zorbalia" at 3 and 78; the title is at both places.
+TITLED_TEXT = (
+    "Dr Quentrel Zorbalia Quentrix rejoint le projet. "
+    "Le contrat est signé avec Dr Quentrel Zorbalia Quentrix."
+)
+# PERSON "Quentrel Zorbalia" at 3 and 75; the title is at the first place only.
+ONE_TITLE_TEXT = (
+    "Dr Quentrel Zorbalia Quentrix rejoint le projet. "
+    "Le contrat est signé avec Quentrel Zorbalia Quentrix."
+)
+
+
+def _screen_row(
+    main_window: MainWindow,
+    result: DetectionResult,
+    expected_spans: list[tuple[int, int]],
+) -> tuple[ValidationScreen, GUIValidationState, EntityReview]:
+    """The real validation screen; preconditions: one row, its variant entry."""
+    assert result.variant_occurrences is not None
+    [occurrences] = list(result.variant_occurrences.values())
+    assert [(o.start_pos, o.end_pos) for o in occurrences] == expected_spans
+    idx = main_window._screens.get("validation")
+    assert idx is not None
+    screen = main_window.stack.widget(idx)
+    assert isinstance(screen, ValidationScreen)
+    screen.start_validation(result)
+    state = screen.validation_state
+    assert state is not None
+    rows = state.get_all_entities()
+    assert len(rows) == 1
+    return screen, state, rows[0]
+
+
+def _dialog(
+    screen: ValidationScreen,
+    entity_id: str,
+    *,
+    typed: str | None = None,
+    prefix: str = "",
+    ok: bool = True,
+) -> str:
+    """Open the real edit dialog once; return what it showed (the pre-fill).
+
+    The user's reply is ``typed`` when given, else ``prefix`` followed by
+    what the dialog shows; ``ok=False`` is Cancel. Precondition: the patched
+    ``getText`` was called exactly once (a missed patch opens a modal dialog).
+    """
+    shown: list[str] = []
+
+    def _get_text(*args: object, **kwargs: object) -> tuple[str, bool]:
+        text = kwargs.get("text")
+        assert isinstance(text, str)
+        shown.append(text)
+        return (typed if typed is not None else prefix + text), ok
+
+    with patch(
+        "gdpr_pseudonymizer.gui.screens.validation.QInputDialog.getText",
+        side_effect=_get_text,
+    ) as get_text:
+        screen._show_modify_text_dialog(entity_id)
+    assert get_text.call_count == 1
+    return shown[0]
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 10.9 amendment: reproduces QA UX-001 on 9c5dee2; fixed in Task 9",
+)
+def test_second_dialog_edit_builds_on_the_first(
+    qtbot,  # type: ignore[no-untyped-def]
+    main_window: MainWindow,
+    db_path: str,
+    tmp_path: Path,
+) -> None:
+    """T13 (AC10, UX-001): the dialog re-opens on the edit and builds on it."""
+    result = _detect(db_path, TITLED_TEXT, _two_places(TITLED_TEXT))
+    screen, state, row = _screen_row(main_window, result, [(3, 20), (78, 95)])
+    state.accept_entity(row.entity_id)
+    # Edit 1: the user types the longer name.
+    assert _dialog(screen, row.entity_id, typed=EDIT) == NAME
+    assert _sent(state.expand_validated_entities()) == [
+        ("PERSON", 3, 29, EDIT),
+        ("PERSON", 78, 104, EDIT),
+    ]
+
+    # Edit 2: the user adds the title to what the dialog shows.
+    prefill = _dialog(screen, row.entity_id, prefix="Dr ")
+
+    assert prefill == EDIT
+    expanded = state.expand_validated_entities()
+    assert _sent(expanded) == [
+        ("PERSON", 0, 29, TITLED_EDIT),
+        ("PERSON", 75, 104, TITLED_EDIT),
+    ]
+    output = _finalize(db_path, tmp_path, TITLED_TEXT, expanded)
+    for part in NAME_PARTS:
+        assert part not in output
+    # OK on the unchanged text changes nothing.
+    index = state.undo_stack.index()
+    assert _dialog(screen, row.entity_id) == TITLED_EDIT
+    assert state.undo_stack.index() == index
+    # After an undo the dialog opens on whatever text is current (Cancel).
+    state.undo_stack.undo()
+    assert _dialog(screen, row.entity_id, ok=False) == EDIT
+    state.undo_stack.undo()
+    assert _dialog(screen, row.entity_id, ok=False) == NAME
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 10.9 amendment: reproduces QA UI-001 on 9c5dee2; fixed in Task 9",
+)
+def test_editor_highlights_follow_every_change(
+    qtbot, main_window: MainWindow, db_path: str  # type: ignore[no-untyped-def]
+) -> None:
+    """T14 (AC1 highlights, AC7; UI-001): the editor's ranges follow the state."""
+    result = _detect(db_path, EXT_TEXT, _two_places(EXT_TEXT))
+    screen, state, row = _screen_row(main_window, result, [(0, 17), (72, 89)])
+    state.accept_entity(row.entity_id)
+    second_quentrix = EXT_TEXT.find("Quentrix", 72)
+
+    def editor_ranges() -> list[tuple[int, int]]:
+        return sorted((start, end) for start, end, _ in screen.editor._entity_ranges)
+
+    def sent_spans() -> list[tuple[int, int]]:
+        return sorted(
+            (e.start_pos, e.end_pos) for e in state.expand_validated_entities()
+        )
+
+    assert editor_ranges() == [(0, 17), (72, 89)]
+    _dialog(screen, row.entity_id, typed=EDIT)
+    assert sent_spans() == [(0, 26), (72, 98)]
+
+    assert editor_ranges() == [(0, 26), (72, 98)]
+    assert screen.editor._entity_at_position(second_quentrix) == row.entity_id
+
+    screen._handle_entity_action(row.entity_id, "change_type:ORG")
+    assert editor_ranges() == sent_spans() == [(0, 26), (72, 98)]
+    state.undo_stack.undo()  # the type change
+    assert editor_ranges() == sent_spans() == [(0, 26), (72, 98)]
+    state.undo_stack.undo()  # the edit
+    assert editor_ranges() == sent_spans() == [(0, 17), (72, 89)]
+    assert screen.editor._entity_at_position(second_quentrix) is None
+    state.undo_stack.redo()  # the edit again
+    assert editor_ranges() == sent_spans() == [(0, 26), (72, 98)]
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 10.9 amendment: reproduces QA UX-001 on 9c5dee2; fixed in Task 9",
+)
+def test_second_edit_absent_at_a_place_keeps_the_first_edit(
+    qtbot, db_path: str, tmp_path: Path  # type: ignore[no-untyped-def]
+) -> None:
+    """T15 (AC10, UX-001): a place keeps the first edit's span, not the detected one."""
+    from gdpr_pseudonymizer.validation.workflow import ValidationWorkflow
+
+    result = _detect(db_path, ONE_TITLE_TEXT, _two_places(ONE_TITLE_TEXT))
+    state, row = _single_row(result, [(3, 20), (75, 92)])
+    state.accept_entity(row.entity_id)
+    state.modify_entity_text(row.entity_id, EDIT, 3, 29)
+    assert _sent(state.expand_validated_entities()) == [
+        ("PERSON", 3, 29, EDIT),
+        ("PERSON", 75, 101, EDIT),
+    ]
+    span = ValidationWorkflow._locate_modified_span(
+        ONE_TITLE_TEXT, row.entity, TITLED_EDIT
+    )
+    assert span == (0, 29)
+
+    state.modify_entity_text(row.entity_id, TITLED_EDIT, *span)
+
+    expanded = state.expand_validated_entities()
+    assert _sent(expanded) == [
+        ("PERSON", 0, 29, TITLED_EDIT),
+        ("PERSON", 75, 101, TITLED_EDIT),
+    ]
+    assert sorted((s, e) for s, e, _ in state.get_all_entity_ranges()) == [
+        (0, 29),
+        (75, 101),
+    ]
+    output = _finalize(db_path, tmp_path, ONE_TITLE_TEXT, expanded)
+    for part in NAME_PARTS:
+        assert part not in output
+
+    state.undo_stack.undo()
+    assert _sent(state.expand_validated_entities()) == [
+        ("PERSON", 3, 29, EDIT),
+        ("PERSON", 75, 101, EDIT),
+    ]
+    state.undo_stack.undo()
+    assert _sent(state.expand_validated_entities()) == [
+        ("PERSON", 3, 20, NAME),
+        ("PERSON", 75, 92, NAME),
+    ]
+    state.undo_stack.redo()
+    state.undo_stack.redo()
+    assert _sent(state.expand_validated_entities()) == [
+        ("PERSON", 0, 29, TITLED_EDIT),
+        ("PERSON", 75, 101, TITLED_EDIT),
+    ]
+
+
+def test_batch_second_edit_absent_at_a_place_keeps_the_first_edit(
+    qtbot, main_window: MainWindow, db_path: str  # type: ignore[no-untyped-def]
+) -> None:
+    """T16 (AC10, guard): in batch each row already keeps the first edit's span."""
+    from gdpr_pseudonymizer.validation.workflow import ValidationWorkflow
+
+    state, rows = _batch_rows(
+        main_window, db_path, ONE_TITLE_TEXT, _two_places(ONE_TITLE_TEXT)
+    )
+    state.modify_entity_text(rows[0].entity_id, EDIT, 3, 29)
+    assert _sent(state.get_validated_entities()) == [
+        ("PERSON", 3, 29, EDIT),
+        ("PERSON", 75, 101, EDIT),
+    ]
+    span = ValidationWorkflow._locate_modified_span(
+        ONE_TITLE_TEXT, rows[0].entity, TITLED_EDIT
+    )
+    assert span == (0, 29)
+
+    state.modify_entity_text(rows[0].entity_id, TITLED_EDIT, *span)
+
+    assert _sent(state.get_validated_entities()) == [
+        ("PERSON", 0, 29, TITLED_EDIT),
+        ("PERSON", 75, 101, TITLED_EDIT),
+    ]
+    state.undo_stack.undo()
+    assert _sent(state.get_validated_entities()) == [
+        ("PERSON", 3, 29, EDIT),
+        ("PERSON", 75, 101, EDIT),
+    ]
