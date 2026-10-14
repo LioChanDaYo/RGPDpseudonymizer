@@ -6,6 +6,7 @@ core validation models with Qt undo/redo and signal infrastructure.
 
 from __future__ import annotations
 
+import dataclasses
 import uuid
 from typing import TYPE_CHECKING
 
@@ -20,6 +21,7 @@ from gdpr_pseudonymizer.validation.models import (
     ValidationSession,
     candidate_key,
 )
+from gdpr_pseudonymizer.validation.workflow import ValidationWorkflow
 
 if TYPE_CHECKING:
     from gdpr_pseudonymizer.gui.workers.detection_worker import DetectionResult
@@ -182,15 +184,33 @@ class GUIValidationState(QObject):
 
         A detected row uses the key stored at init, so a type change or a
         custom pseudonym still reaches every occurrence of its group. A row
-        whose text the user edited and a row added by hand keep the computed
-        lookup, now with the type: ``entity`` is the entity sent to
-        finalization (expansion) or ``review.entity`` (highlight ranges).
+        added by hand keeps the computed lookup, with the type: ``entity`` is
+        the entity sent to finalization (expansion) or ``review.entity``
+        (highlight ranges). A row whose text the user edited does not come
+        here: see ``_edited_occurrences`` (Story 10.9).
         """
-        if not review.user_modification:
-            key = self._candidate_key_by_id.get(review.entity_id)
-            if key is not None:
-                return key
+        key = self._candidate_key_by_id.get(review.entity_id)
+        if key is not None:
+            return key
         return candidate_key(entity)
+
+    def _action_rows(self, review: EntityReview) -> list[EntityReview]:
+        """Rows one text edit or type change acts on (Story 10.9).
+
+        The row itself first, then every other row of its (text, type) group,
+        the group accept and reject use. In batch validation that is every
+        row of the name; in single-document validation a detected row is
+        alone, and a row added by hand joins the detected row of its text and
+        type.
+        """
+        rows = [review]
+        for eid in self._group_ids(review):
+            if eid == review.entity_id:
+                continue
+            other = self._reviews_by_id.get(eid)
+            if other is not None:
+                rows.append(other)
+        return rows
 
     def modify_entity_text(
         self,
@@ -199,9 +219,35 @@ class GUIValidationState(QObject):
         new_start: int,
         new_end: int,
     ) -> None:
-        """Modify entity text/boundaries."""
-        cmd = _ModifyTextCommand(self, entity_id, new_text, new_start, new_end)
-        self._undo_stack.push(cmd)
+        """Modify entity text/boundaries at every occurrence of the name.
+
+        The edited row takes the span its caller passes. In batch
+        validation every other row of its (text, type) group takes the edit
+        too, each on the span the CLI's rule gives on its own current span;
+        the whole edit is one undo macro, as group accept and reject are. In
+        single-document validation the row stands for every occurrence of
+        its variant group: the other occurrences are derived from the row at
+        finalization (``expand_validated_entities``), so one command reverts
+        them all.
+        """
+        review = self._reviews_by_id.get(entity_id)
+        rows = self._action_rows(review) if review is not None else []
+        if len(rows) > 1:
+            document_text = self._session.document_text
+            self._undo_stack.beginMacro("Modifier le texte du groupe")
+            for row in rows:
+                if row is review:
+                    start, end = new_start, new_end
+                else:
+                    start, end = ValidationWorkflow._locate_modified_span(
+                        document_text, row.entity, new_text
+                    )
+                cmd = _ModifyTextCommand(self, row.entity_id, new_text, start, end)
+                self._undo_stack.push(cmd)
+            self._undo_stack.endMacro()
+        else:
+            cmd = _ModifyTextCommand(self, entity_id, new_text, new_start, new_end)
+            self._undo_stack.push(cmd)
 
     def change_pseudonym(self, entity_id: str, new_pseudonym: str) -> None:
         """Override suggested pseudonym for an entity."""
@@ -209,9 +255,24 @@ class GUIValidationState(QObject):
         self._undo_stack.push(cmd)
 
     def change_entity_type(self, entity_id: str, new_type: str) -> None:
-        """Change entity type (e.g. PERSON -> ORG)."""
-        cmd = _ChangeTypeCommand(self, entity_id, new_type)
-        self._undo_stack.push(cmd)
+        """Change entity type (e.g. PERSON -> ORG) at every occurrence.
+
+        The same rows as a text edit: in batch validation every row of the
+        (text, type) group, as one undo macro. In single-document validation
+        the row's other occurrences take its type at finalization
+        (``expand_validated_entities``), as in the CLI (Story 10.9).
+        """
+        review = self._reviews_by_id.get(entity_id)
+        rows = self._action_rows(review) if review is not None else []
+        if len(rows) > 1:
+            self._undo_stack.beginMacro("Changer le type du groupe")
+            for row in rows:
+                cmd = _ChangeTypeCommand(self, row.entity_id, new_type)
+                self._undo_stack.push(cmd)
+            self._undo_stack.endMacro()
+        else:
+            cmd = _ChangeTypeCommand(self, entity_id, new_type)
+            self._undo_stack.push(cmd)
 
     def add_entity(
         self,
@@ -324,6 +385,68 @@ class GUIValidationState(QObject):
                 counts["added"] += 1
         return counts
 
+    def _edited_entity(self, review: EntityReview) -> DetectedEntity:
+        """The entity sent for a row whose text the user edited.
+
+        The edited text, the row's current type and its (moved) span; the
+        other fields come from the row's entity.
+        """
+        return DetectedEntity(
+            text=review.user_modification or review.entity.text,
+            entity_type=review.entity.entity_type,
+            start_pos=review.entity.start_pos,
+            end_pos=review.entity.end_pos,
+            confidence=review.entity.confidence,
+            gender=review.entity.gender,
+            is_ambiguous=review.entity.is_ambiguous,
+            source=review.entity.source,
+            context_label=review.entity.context_label,
+        )
+
+    def _edited_occurrences(
+        self, review: EntityReview, edited: DetectedEntity
+    ) -> list[DetectedEntity] | None:
+        """Every occurrence of a text-edited row, each with the edit (Story 10.9).
+
+        Looks up the row's variant group with the key stored at init. Returns
+        ``None`` when the row has no stored key or the key has no variant
+        entry (batch rows, rows added by hand). Otherwise, in the group's
+        order: ``edited`` for the row's own occurrence, and for every other
+        occurrence a new entity with the edited text, the row's current type
+        and the span the CLI's rule gives on that occurrence's detected span
+        (the edited text where it overlaps it, else the detected span). It is
+        derived from the row on each call, so undo and redo of the one edit
+        command revert and re-apply every occurrence.
+        """
+        key = self._candidate_key_by_id.get(review.entity_id)
+        if key is None or key not in self._variant_occurrences:
+            return None
+        document_text = self._session.document_text
+        occurrences: list[DetectedEntity] = []
+        for occurrence in self._variant_occurrences[key]:
+            if occurrence is review.entity:
+                occurrences.append(edited)
+                continue
+            start, end = ValidationWorkflow._locate_modified_span(
+                document_text, occurrence, edited.text
+            )
+            occurrences.append(
+                DetectedEntity(
+                    text=edited.text,
+                    entity_type=edited.entity_type,
+                    start_pos=start,
+                    end_pos=end,
+                    confidence=occurrence.confidence,
+                    gender=occurrence.gender,
+                    is_ambiguous=occurrence.is_ambiguous,
+                    source=occurrence.source,
+                    context_label=occurrence.context_label,
+                )
+            )
+        if not any(o is edited for o in occurrences):
+            occurrences.insert(0, edited)
+        return occurrences
+
     def _validated_rows(self) -> list[tuple[EntityReview, DetectedEntity]]:
         """(row, entity sent to finalization) for every row kept by the user.
 
@@ -337,22 +460,7 @@ class GUIValidationState(QObject):
             if review.state == EntityReviewState.PENDING:
                 continue
             if review.user_modification:
-                rows.append(
-                    (
-                        review,
-                        DetectedEntity(
-                            text=review.user_modification,
-                            entity_type=review.entity.entity_type,
-                            start_pos=review.entity.start_pos,
-                            end_pos=review.entity.end_pos,
-                            confidence=review.entity.confidence,
-                            gender=review.entity.gender,
-                            is_ambiguous=review.entity.is_ambiguous,
-                            source=review.entity.source,
-                            context_label=review.entity.context_label,
-                        ),
-                    )
-                )
+                rows.append((review, self._edited_entity(review)))
             else:
                 rows.append((review, review.entity))
         return rows
@@ -368,11 +476,14 @@ class GUIValidationState(QObject):
         exists in the variant map, replaces the single canonical with ALL
         occurrences (at all positions) so every instance in the document gets
         pseudonymized. A detected row is looked up with the key stored at init,
-        so a row whose type or pseudonym the user changed still expands.
+        so a row whose type or pseudonym the user changed still expands. A
+        retyped row sends every occurrence with its current type.
 
-        Rows whose text the user edited and rows added by hand are looked up
-        with a key computed from the entity sent to finalization, so they are
-        normally kept as-is (single position).
+        A row whose text the user edited expands to every occurrence of its
+        group, each on its edited span or, where the edited text is absent,
+        its detected span (Story 10.9). Rows added by hand are looked up with
+        a key computed from the entity sent to finalization, so they normally
+        stay single.
         """
         validated = self._validated_rows()
         if not self._variant_occurrences:
@@ -380,11 +491,29 @@ class GUIValidationState(QObject):
 
         expanded: list[DetectedEntity] = []
         for review, entity in validated:
+            if review.user_modification:
+                occurrences = self._edited_occurrences(review, entity)
+                expanded.extend(occurrences if occurrences is not None else [entity])
+                continue
             key = self._variant_key(review, entity)
-            if key in self._variant_occurrences:
-                expanded.extend(self._variant_occurrences[key])
-            else:
+            if key not in self._variant_occurrences:
                 expanded.append(entity)
+                continue
+            row_type = review.entity.entity_type
+            stored = self._candidate_key_by_id.get(review.entity_id)
+            if stored is not None and stored[2] != row_type:
+                # Retyped row: every occurrence takes the row's type (Story
+                # 10.9); the variant map itself is never changed.
+                expanded.extend(
+                    (
+                        occurrence
+                        if occurrence is review.entity
+                        else dataclasses.replace(occurrence, entity_type=row_type)
+                    )
+                    for occurrence in self._variant_occurrences[key]
+                )
+            else:
+                expanded.extend(self._variant_occurrences[key])
         return expanded
 
     def get_all_entity_ranges(self) -> list[tuple[int, int, str]]:
@@ -393,10 +522,29 @@ class GUIValidationState(QObject):
         Variant occurrences share the same entity_id as their canonical entity,
         so highlights/clicks on any occurrence map back to the same review row.
         The variant map is keyed by text, start and type, so each type of a
-        same-span pair maps its own occurrences to its own row.
+        same-span pair maps its own occurrences to its own row. A row whose
+        text the user edited gives exactly the spans finalization sends for
+        it (Story 10.9).
         """
         ranges: list[tuple[int, int, str]] = []
         for review in self._session._entity_reviews:
+            if review.user_modification:
+                occurrences = self._edited_occurrences(
+                    review, self._edited_entity(review)
+                )
+                if occurrences is None:
+                    ranges.append(
+                        (
+                            review.entity.start_pos,
+                            review.entity.end_pos,
+                            review.entity_id,
+                        )
+                    )
+                else:
+                    ranges.extend(
+                        (o.start_pos, o.end_pos, review.entity_id) for o in occurrences
+                    )
+                continue
             canonical = review.entity
             key = self._variant_key(review, canonical)
 

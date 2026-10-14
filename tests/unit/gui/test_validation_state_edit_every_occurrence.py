@@ -205,14 +205,6 @@ def db_path(tmp_path: Path) -> str:
 # ----------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=(
-        "Story 10.9: reproduces the edit sent at one occurrence only on the "
-        "unfixed edit path; fixed in Task 2"
-    ),
-)
 def test_edit_applies_to_every_occurrence(
     qtbot, db_path: str, tmp_path: Path  # type: ignore[no-untyped-def]
 ) -> None:
@@ -233,14 +225,6 @@ def test_edit_applies_to_every_occurrence(
         assert part not in output
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=(
-        "Story 10.9: reproduces the place without the edited text dropped on "
-        "the unfixed edit path; fixed in Task 2"
-    ),
-)
 def test_edit_absent_at_a_place_keeps_its_span(
     qtbot, db_path: str, tmp_path: Path  # type: ignore[no-untyped-def]
 ) -> None:
@@ -261,14 +245,6 @@ def test_edit_absent_at_a_place_keeps_its_span(
         assert part not in output
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=(
-        "Story 10.9: reproduces the shrunk edit sent at one occurrence only on "
-        "the unfixed edit path; fixed in Task 2"
-    ),
-)
 def test_edit_moves_each_span(
     qtbot, db_path: str, tmp_path: Path  # type: ignore[no-untyped-def]
 ) -> None:
@@ -290,14 +266,6 @@ def test_edit_moves_each_span(
         assert part not in output
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=(
-        "Story 10.9: reproduces the edit sent at one occurrence only, before "
-        "undo, on the unfixed edit path; fixed in Task 2"
-    ),
-)
 def test_one_undo_reverts_the_whole_edit(
     qtbot, db_path: str  # type: ignore[no-untyped-def]
 ) -> None:
@@ -323,14 +291,6 @@ def test_one_undo_reverts_the_whole_edit(
     assert _sent(state.expand_validated_entities()) == edited
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=(
-        "Story 10.9: reproduces the highlight at the unedited span (72, 89) on "
-        "the unfixed edit path; fixed in Task 2"
-    ),
-)
 def test_highlights_match_what_is_sent(
     qtbot, db_path: str  # type: ignore[no-untyped-def]
 ) -> None:
@@ -347,14 +307,6 @@ def test_highlights_match_what_is_sent(
     }
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=(
-        "Story 10.9: reproduces the other batch row left PENDING on the "
-        "unfixed edit path; fixed in Task 2"
-    ),
-)
 def test_batch_edit_applies_to_every_row(
     qtbot, main_window: MainWindow, db_path: str  # type: ignore[no-untyped-def]
 ) -> None:
@@ -380,14 +332,6 @@ def test_batch_edit_applies_to_every_row(
     assert state.get_validated_entities() == []
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=(
-        "Story 10.9: reproduces the dialog's edit landing on the other "
-        "spelling (0, 17) only on the unfixed edit path; fixed in Task 2"
-    ),
-)
 def test_dialog_edit_on_two_spellings(
     qtbot,  # type: ignore[no-untyped-def]
     main_window: MainWindow,
@@ -471,14 +415,6 @@ def test_edit_then_reject_sends_nothing(
 # ----------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=(
-        "Story 10.9: reproduces the type change sent at one occurrence only "
-        "(PERSON at 63) on the unfixed type-change path; fixed in Task 2"
-    ),
-)
 def test_type_change_applies_to_every_occurrence(
     qtbot, db_path: str  # type: ignore[no-untyped-def]
 ) -> None:
@@ -501,14 +437,6 @@ def test_type_change_applies_to_every_occurrence(
     ]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=(
-        "Story 10.9: reproduces the other batch row left PERSON and PENDING "
-        "on the unfixed type-change path; fixed in Task 2"
-    ),
-)
 def test_batch_type_change_applies_to_every_row(
     qtbot, main_window: MainWindow, db_path: str  # type: ignore[no-untyped-def]
 ) -> None:

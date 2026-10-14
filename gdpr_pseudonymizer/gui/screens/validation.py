@@ -31,6 +31,7 @@ from gdpr_pseudonymizer.gui.widgets.entity_editor import EntityEditor
 from gdpr_pseudonymizer.gui.widgets.entity_panel import EntityPanel
 from gdpr_pseudonymizer.gui.widgets.step_indicator import StepMode
 from gdpr_pseudonymizer.utils.logger import get_logger
+from gdpr_pseudonymizer.validation.workflow import ValidationWorkflow
 
 if TYPE_CHECKING:
     from gdpr_pseudonymizer.gui.main_window import MainWindow
@@ -575,18 +576,12 @@ class ValidationScreen(QWidget):
             text=review.entity.text,
         )
         if ok and text and text != review.entity.text:
-            # Find new text near original position
+            # The CLI's rule (Story 10.9): the edited text where it overlaps
+            # the row's span, else the row's own span.
             doc_text = self._validation_state.session.document_text
-            search_start = max(0, review.entity.start_pos - 200)
-            search_end = min(len(doc_text), review.entity.end_pos + 200)
-            search_region = doc_text[search_start:search_end]
-            idx = search_region.find(text)
-            if idx >= 0:
-                new_start = search_start + idx
-                new_end = new_start + len(text)
-            else:
-                new_start = review.entity.start_pos
-                new_end = new_start + len(text)
+            new_start, new_end = ValidationWorkflow._locate_modified_span(
+                doc_text, review.entity, text
+            )
             self._validation_state.modify_entity_text(
                 entity_id, text, new_start, new_end
             )
