@@ -1,0 +1,56 @@
+schema: 1
+story: '10.5'
+story_title: 'DB Init Safety'
+gate: PASS
+status_reason: 'Pre-merge review at 091103a. The tests-first commit failed exactly the seven intended tests on their assertions on every CI leg (6 on Windows, where T6 is skipped), and the fix follows the Fix Design step by step. QA''s own probes on Linux and Windows (two- and three-process races, CLI init/process/batch at once, real Ctrl+C, read-only and missing directories, pre-existing files, a forced re-create) never lost the first database, and every second run stopped with "Database already exists".'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-10-13T22:07:57Z'
+
+waiver: { active: false }
+
+merge_blockers: []
+
+top_issues: []
+
+quality_score: 100
+expires: '2026-10-27T22:07:57Z'
+
+evidence:
+  gates: 'G1, G3 and G5 N/A (no detection change; nothing under nlp/, resources/, tests/accuracy/ or tests/test_corpus/ changed). G4 trivially held. G7 = the CHANGELOG [Unreleased] Fixed entry only.'
+  tests_first_ci: 'run 38448038596 at 2f4501f, attempt 1, every leg green. Read from the job logs: Ubuntu 3.11 "2418 passed, 7 xfailed", Ubuntu 3.10 "2418 passed, 7 xfailed", macOS 3.12 "2418 passed, 7 xfailed", Windows 3.12 "2270 passed, 3 skipped, 6 xfailed". The XFAIL lines name exactly T1 competitor_between_check_and_create, T3 late_failure_leaves_nothing, T5 interrupt_cleans_up, T6 cleanup_spares_replaced_file (SKIPPED on Windows, with T8), T7 cleanup_error_never_masks_original, T9 concurrent_init_forced_interleaving and T10 concurrent_init_race_loop. 0 FAILED, 0 XPASS on every leg. All seven markers are xfail(strict=True, raises=AssertionError), so any other exception would have shown as FAILED. Between 2f4501f and d0e6c78 the tests changed only by removing the markers (and one docstring sentence)'
+  fix_ci: 'd0e6c78: CI 38450328974 attempt 1, every leg green, 0 xfailed (Ubuntu 3.11 2425 passed, Ubuntu 3.10 2425 passed, macOS 2425 passed, Windows 2276 passed + 3 skipped); the 29 database tests PASSED on Linux and macOS, 27 on Windows. Performance 38450333133 (AMD EPYC 9V45, at d0e6c78) succeeded. 091103a: CI 38456264674, Code Quality 38456265011, CodeQL 38456261613, all attempt 1, all green; gh pr checks 96: 9/9 pass'
+  no_skip_marker: 'no skip-CI marker in any commit message on the branch, in the PR title or in the PR body'
+  fix_design_check: 'exclusive create os.open(O_CREAT|O_EXCL|O_WRONLY, 0o644) after the key derivation (database.py:182, helper :69-84); FileExistsError raises the unchanged "Database already exists" ValueError chained from it, and any other OSError raises the wrapped Exception, both before the try; the try is the next statement; the descriptor is held to the end and closed after engine.dispose() on success (finally) and after the dispose and identity check on failure (inner finally); cleanup order: dispose, identity (samestat of fstat(fd) and stat(db_path), False on OSError), close, then os.unlink of the main file and then the -wal, -shm and -journal files, only if ours; the first error stops the delete step, so sidecars go only with our own main file; dispose and delete errors are logged once as database_init_cleanup_failed with step and error_type only, never replacing the original; Exception is wrapped as before, and KeyboardInterrupt/SystemExit are re-raised unwrapped by a bare raise; schema_version stays "1.0.0" and the four metadata keys are untouched (the metadata block is not in the diff); open_database and every caller are unchanged'
+  dev_deviations: '(1) a missing main file is fine at cleanup: matters only if a third party deletes the file between the identity check and the delete; acceptable. (2) the harness also fails on a child that exited non-zero: stricter, fine. (3) a missing directory now reports the OS error, including the path, instead of SQLite''s "unable to open database file"; same type and prefix, the callers behave as before. The existing "already exists" message already carries the path. (4) PASS_A, PASS_B and _assert_winner_db live in test_database.py and are imported by the concurrency test: one place to change for 10.7'
+  probes_linux: 'throwaway /tmp uv venv (Python 3.11.15, SQLite 3.50.4, SQLAlchemy 2.0.51, cryptography 50.0.1, structlog 23.3.0, as locked), package copied from the branch and from 51d8429, deleted afterwards. Spawned workers behind a Barrier: 100/100 two-process and 50/50 three-process iterations met AC3 (one winner, the file opens with the winner''s passphrase and rejects the others, every loser ValueError "Database already exists" caused by FileExistsError, no sidecar left). The base code failed 20/20 (the database missing, or no winner). Real SIGINT at random moments, 200 runs: 93 interrupted with an empty directory, 107 finished with a complete database, 0 partial and 0 zero-byte files (base code, 60 runs: 16 partial and 1 zero-byte). KeyboardInterrupt injected at create_engine, create_all and encrypt_canary: unwrapped, directory empty. Read-only directory: wrapped Exception (cause PermissionError), nothing created. Pre-existing zero-byte file, real database and directory: ValueError, untouched (listing, sha256 and mtime equal). Missing directory: wrapped Exception. A forced re-create racing an init, 40 runs: one database, intact. A delete of the first call''s file mid-init, then a second init, 40 runs: the first call''s database kept (SQLite re-creates the path), the second stops with "already exists". The new tests pass serially and under -n 4 --dist loadscope (29 passed), and T9 and T10 passed 3 more times'
+  probes_windows: 'poetry venv, Python 3.11: 100/100 two-process and 50/50 three-process iterations met AC3. KeyboardInterrupt at the three steps: unwrapped, directory empty. Pre-existing file, database and directory untouched; missing directory: wrapped Exception. Forced re-create race, 30 runs: one database, intact. A delete of the first call''s file mid-init: refused with PermissionError [WinError 32] (the held descriptor), and the first database kept, 30/30'
+  probes_cli: 'Windows, default mappings.db in a temporary CWD (never the repo''s), two commands started together. init x12: one exit 0 and one exit 1 "Database initialization failed: Database already exists at mappings.db", and the database opens with the winner''s passphrase, 12/12. process x3 and batch x3 on a missing database: the loser exits 1 with the same message and the winner''s database is intact (batch winners processed their document, exit 0); 6/6. In 5 earlier process pairs (stopped at the interactive validation step), the database also opened with one passphrase only'
+  tests_review: 'the #83 test test_init_database_index_creation_idempotent is removed (not edited), with a comment where it stood citing 10.5 AC1/AC2 and why its Path mock hid the delete; no other existing test changed (only its now-unused Metadata import went); no sleep and no elapsed-time assert; the timeouts are hang guards that end in RuntimeError, never in an assertion; strings are invented passphrases, file names and identifiers; held-out and final-exam leakage guards pass (15 passed locally, green in CI)'
+  scope: 'git diff --stat main...HEAD: CHANGELOG.md, docs/prd/epic-10 (PM commit eaac99d only), the story, data/database.py, tests/unit/test_database.py, tests/unit/test_database_init_concurrency.py, all within File Locations. Empty for nlp/, resources/, tests/accuracy/, tests/test_corpus/, tests/integration/, .github/, cli/, gui/, exceptions.py, models.py and both leakage allowlists'
+  changelog: '[Unreleased] Fixed entry: accurate (probes confirm the first database is kept and the second run stops with "Database already exists"; Windows'' old file-access error; no partial file after a failure or Ctrl+C; upgrade note: no migration, schema 1.0.0). "No longer leaves a partial database" holds in QA''s 200 real-Ctrl+C runs; the story''s documented residual (an interrupt in the few bytecodes right after the create can leave a 0-byte file) was never hit'
+  g6_local: 'Windows: ruff exit 0, black 290 files unchanged, mypy no issues (103 files), the two database files plus both leakage guards 42 passed + 2 skipped, and twice under -n 4 --dist loadscope 27 passed + 2 skipped. Linux: 29 passed serially and under -n 4'
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8]
+    ac_gaps: []
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'The cleanup deletes only the file this call created, and its sidecars only with it; a pre-existing or concurrently created database is never touched (probes: 0 losses in 330 race iterations on two OSes). The new log event carries step and error type only, no path or passphrase.'
+  performance:
+    status: PASS
+    notes: 'One extra open/fstat/stat/close per initialization; performance run 38450333133 green. No detection path changed.'
+  reliability:
+    status: PASS
+    notes: 'Deterministic T9 plus the 20-iteration T10; no flake in 5 local T9/T10 runs on Linux, 2 under xdist on Windows, or in CI. A real Ctrl+C leaves nothing behind. The known residuals (open during the winner''s metadata write, the identity-to-delete window, an interrupt right after the create) are documented in the story; none deletes a database.'
+  maintainability:
+    status: PASS
+    notes: 'Four small private helpers, a docstring that states the guarantee, a "never move this close earlier" comment for 10.7, and one shared test helper.'
+
+recommendations:
+  immediate: []
+  future:
+    - action: 'After the merge, the push performance run on main (fires for gdpr_pseudonymizer/data/**) must be green.'
+      refs: ['.github/workflows/performance.yaml']
+    - action: 'Story 10.7 keeps the descriptor close after engine.dispose() and the "1.0.0"/four-key assumptions in _assert_winner_db in step with any schema change.'
+      refs: ['gdpr_pseudonymizer/data/database.py:280-302', 'tests/unit/test_database.py']

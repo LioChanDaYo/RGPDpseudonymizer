@@ -1,6 +1,13 @@
 """Unit tests for database initialization and session management."""
 
+from __future__ import annotations
+
 import base64
+import hashlib
+import os
+import sqlite3
+import stat
+import sys
 from pathlib import Path
 from unittest.mock import patch
 
@@ -12,8 +19,70 @@ from gdpr_pseudonymizer.data.database import (
     open_database,
 )
 from gdpr_pseudonymizer.data.encryption import EncryptionService
-from gdpr_pseudonymizer.data.models import Metadata
+from gdpr_pseudonymizer.data.models import Base, Metadata
 from gdpr_pseudonymizer.exceptions import CorruptedDatabaseError
+
+# Story 10.5: invented passphrases for the two competing initializations.
+PASS_A = "zorbalia_pass_A_123!"
+PASS_B = "quentrix_pass_B_456!"
+
+# The four metadata keys a new database holds (schema_version "1.0.0").
+# Story 10.7 changes them here, in one place, if its rule needs to.
+WINNER_METADATA_KEYS = {
+    "schema_version",
+    "encryption_salt",
+    "kdf_iterations",
+    "passphrase_canary",
+}
+
+
+def _assert_winner_db(db_path: Path, winner_pass: str, loser_pass: str) -> None:
+    """Assert the winner's database is intact (Story 10.5, AC2).
+
+    It exists, opens with the winner's passphrase, holds exactly the four
+    metadata keys (schema_version "1.0.0", kdf_iterations "100000"), and
+    rejects the loser's passphrase. Every failure is an AssertionError (AC6:
+    the tests-first commit's strict xfails accepted real assertions only).
+    """
+    assert db_path.exists(), f"no database file at {db_path}"
+    try:
+        with open_database(str(db_path), winner_pass) as db_session:
+            values = {
+                row.key: row.value for row in db_session.session.query(Metadata).all()
+            }
+    except Exception as exc:
+        raise AssertionError(
+            f"the database does not open with the winner's passphrase: {exc!r}"
+        ) from exc
+    assert set(values) == WINNER_METADATA_KEYS, sorted(values)
+    assert values["schema_version"] == "1.0.0", values["schema_version"]
+    assert values["kdf_iterations"] == "100000", values["kdf_iterations"]
+    try:
+        loser_session = open_database(str(db_path), loser_pass)
+    except ValueError as exc:
+        assert "Incorrect passphrase" in str(exc), repr(exc)
+    except Exception as exc:
+        raise AssertionError(
+            f"the loser's passphrase raised {exc!r}, not 'Incorrect passphrase'"
+        ) from exc
+    else:
+        loser_session.close()
+        raise AssertionError("the loser's passphrase opened the winner's database")
+
+
+def _run_init(db_path: Path, passphrase: str) -> BaseException | None:
+    """Call init_database and return what it raised (None on success)."""
+    try:
+        init_database(str(db_path), passphrase)
+    except BaseException as exc:
+        return exc
+    return None
+
+
+def _file_state(db_path: Path) -> tuple[str, int, list[str]]:
+    """sha256, st_mtime_ns and the directory listing, to prove nothing changed."""
+    digest = hashlib.sha256(db_path.read_bytes()).hexdigest()
+    return digest, db_path.stat().st_mtime_ns, sorted(os.listdir(db_path.parent))
 
 
 class TestDatabaseInitialization:
@@ -169,33 +238,173 @@ class TestDatabaseInitialization:
             )
             assert len({row[0] for row in result}) == 7
 
-    def test_init_database_index_creation_idempotent(self, tmp_path: Path) -> None:
-        """Index DDL tolerates a DB whose indexes already exist (TEST-002).
+    # Story 10.5 (AC1, AC2): the PR #83 test
+    # test_init_database_index_creation_idempotent stood here. It patched Path
+    # in database.py to replay an initialization on an existing database, and
+    # that mock also made the failure cleanup's exists() return False, so it
+    # hid the very delete of the other call's database that 10.5 removes. T1
+    # below replaces it with a real competitor between the existence check and
+    # the create. The #83 "CREATE INDEX IF NOT EXISTS" statements stay in
+    # init_database.
+    def test_init_database_competitor_between_check_and_create(
+        self, tmp_path: Path
+    ) -> None:
+        """T1: a competitor creates the database between the check and the create."""
+        db_path = tmp_path / "mappings.db"
+        real_generate_salt = EncryptionService.generate_salt
+        competitor_ran = False
 
-        Simulates two processes initializing the same new DB at once: both
-        pass the existence check before either has created the file. The
-        loser must not fail on "index ... already exists".
-        """
-        db_path = tmp_path / "test.db"
-        passphrase = "test_passphrase_123!"
+        def competitor_then_salt() -> bytes:
+            # Runs after the outer call passed its existence check.
+            nonlocal competitor_ran
+            if not competitor_ran:
+                competitor_ran = True
+                init_database(str(db_path), PASS_A)
+            return real_generate_salt()
 
-        init_database(str(db_path), passphrase)
+        with patch.object(
+            EncryptionService, "generate_salt", side_effect=competitor_then_salt
+        ):
+            outcome = _run_init(db_path, PASS_B)
 
-        # Bypass the existence guard to replay schema creation on the same file
-        with patch("gdpr_pseudonymizer.data.database.Path") as mock_path:
-            mock_path.return_value.exists.return_value = False
-            with pytest.raises(Exception) as exc_info:
-                init_database(str(db_path), passphrase)
+        assert competitor_ran
+        assert isinstance(outcome, ValueError), repr(outcome)
+        assert str(outcome).startswith("Database already exists"), str(outcome)
+        assert isinstance(outcome.__cause__, FileExistsError), repr(outcome.__cause__)
+        _assert_winner_db(db_path, PASS_A, PASS_B)
 
-        # Schema + index steps pass; only the metadata insert collides
-        message = str(exc_info.value)
-        assert "already exists" not in message
-        assert "idx_" not in message
-        assert "metadata" in message
+    def test_init_database_existing_file_untouched(self, tmp_path: Path) -> None:
+        """T2: an existing database, or a 0-byte file, is never touched."""
+        made = tmp_path / "made" / "mappings.db"
+        made.parent.mkdir()
+        init_database(str(made), PASS_A)
+        empty = tmp_path / "empty" / "mappings.db"
+        empty.parent.mkdir()
+        empty.write_bytes(b"")
 
-        # First DB is still valid and opens with its passphrase
-        with open_database(str(db_path), passphrase) as db_session:
-            assert db_session.session.query(Metadata).count() == 4
+        for db_path in (made, empty):
+            before = _file_state(db_path)
+            outcome = _run_init(db_path, PASS_B)
+
+            assert isinstance(outcome, ValueError), repr(outcome)
+            assert str(outcome).startswith("Database already exists"), str(outcome)
+            assert _file_state(db_path) == before
+
+    def test_init_database_late_failure_leaves_nothing(self, tmp_path: Path) -> None:
+        """T3: a failure at the metadata step leaves no file behind."""
+        db_path = tmp_path / "mappings.db"
+
+        with patch.object(
+            EncryptionService,
+            "encrypt_canary",
+            side_effect=RuntimeError("injected canary failure"),
+        ):
+            outcome = _run_init(db_path, PASS_A)
+
+        assert type(outcome) is Exception, repr(outcome)
+        assert str(outcome).startswith("Database initialization failed"), str(outcome)
+        assert sorted(os.listdir(tmp_path)) == []
+
+    def test_init_database_schema_failure_leaves_nothing(self, tmp_path: Path) -> None:
+        """T4: a failure at the schema step leaves no file behind."""
+        db_path = tmp_path / "mappings.db"
+
+        with patch.object(
+            Base.metadata,
+            "create_all",
+            side_effect=RuntimeError("injected schema failure"),
+        ):
+            outcome = _run_init(db_path, PASS_A)
+
+        assert type(outcome) is Exception, repr(outcome)
+        assert str(outcome).startswith("Database initialization failed"), str(outcome)
+        assert sorted(os.listdir(tmp_path)) == []
+
+    def test_init_database_interrupt_cleans_up(self, tmp_path: Path) -> None:
+        """T5: a KeyboardInterrupt is re-raised unwrapped and leaves no file."""
+        db_path = tmp_path / "mappings.db"
+
+        with patch.object(
+            EncryptionService, "encrypt_canary", side_effect=KeyboardInterrupt
+        ):
+            outcome = _run_init(db_path, PASS_A)
+
+        assert type(outcome) is KeyboardInterrupt, repr(outcome)
+        assert sorted(os.listdir(tmp_path)) == []
+
+    @pytest.mark.skipif(
+        sys.platform == "win32",
+        reason="Windows: the held descriptor stops the file being replaced",
+    )
+    def test_init_database_cleanup_spares_replaced_file(self, tmp_path: Path) -> None:
+        """T6: the cleanup never deletes a file that replaced the call's own."""
+        db_path = tmp_path / "mappings.db"
+
+        def replace_then_fail(*args: object, **kwargs: object) -> None:
+            if db_path.exists():
+                db_path.unlink()
+            db_path.write_bytes(b"other")
+            raise RuntimeError("injected engine failure")
+
+        with patch(
+            "gdpr_pseudonymizer.data.database.create_engine",
+            side_effect=replace_then_fail,
+        ):
+            outcome = _run_init(db_path, PASS_A)
+
+        assert type(outcome) is Exception, repr(outcome)
+        assert db_path.exists(), "the replacement file was deleted"
+        assert db_path.read_bytes() == b"other"
+
+    def test_init_database_cleanup_error_never_masks_original(
+        self, tmp_path: Path
+    ) -> None:
+        """T7: a failing delete is logged once and never replaces the original."""
+        db_path = tmp_path / "mappings.db"
+
+        with (
+            patch.object(
+                EncryptionService,
+                "encrypt_canary",
+                side_effect=RuntimeError("injected canary failure"),
+            ),
+            patch("os.unlink", side_effect=PermissionError("injected unlink failure")),
+            patch(
+                "gdpr_pseudonymizer.data.database.logger", create=True
+            ) as mock_logger,
+        ):
+            outcome = _run_init(db_path, PASS_A)
+
+        assert type(outcome) is Exception, repr(outcome)
+        assert "injected canary failure" in str(outcome), str(outcome)
+        warnings = mock_logger.warning.call_args_list
+        assert len(warnings) == 1, warnings
+        args, kwargs = warnings[0]
+        assert args == ("database_init_cleanup_failed",), args
+        assert kwargs.get("step") == "delete", kwargs
+        assert kwargs.get("error_type") == "PermissionError", kwargs
+        assert not {"path", "db_path", "passphrase"} & set(kwargs), kwargs
+        for value in kwargs.values():
+            assert str(db_path) not in str(value), kwargs
+            assert PASS_A not in str(value), kwargs
+
+    @pytest.mark.skipif(sys.platform == "win32", reason="POSIX permission bits only")
+    def test_init_database_file_mode_matches_sqlite(self, tmp_path: Path) -> None:
+        """T8: a new database has the mode SQLite gives a file it creates."""
+        db_path = tmp_path / "mappings.db"
+        init_database(str(db_path), PASS_A)
+
+        reference = tmp_path / "reference.db"
+        connection = sqlite3.connect(str(reference))
+        try:
+            connection.execute("CREATE TABLE reference_table (value INTEGER)")
+            connection.commit()
+        finally:
+            connection.close()
+
+        assert stat.S_IMODE(db_path.stat().st_mode) == stat.S_IMODE(
+            reference.stat().st_mode
+        )
 
     def test_init_database_canary_encrypted_correctly(self, tmp_path: Path) -> None:
         """Test passphrase canary is encrypted and stored correctly."""

@@ -7,6 +7,7 @@ managing encryption keys, and handling database sessions with proper resource cl
 from __future__ import annotations
 
 import base64
+import os
 from pathlib import Path
 
 from sqlalchemy import create_engine, text
@@ -16,6 +17,9 @@ from sqlalchemy.orm import Session, sessionmaker
 from gdpr_pseudonymizer.data.encryption import EncryptionService
 from gdpr_pseudonymizer.data.models import Base, Metadata
 from gdpr_pseudonymizer.exceptions import CorruptedDatabaseError
+from gdpr_pseudonymizer.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 class DatabaseSession:
@@ -57,19 +61,99 @@ class DatabaseSession:
         self.close()
 
 
+def _already_exists_message(db_path: str) -> str:
+    """Message of the ValueError raised when db_path already exists."""
+    return f"Database already exists at {db_path}. Use open_database() to open existing database."
+
+
+def _create_exclusively(db_path: str) -> int:
+    """Create db_path, failing if it exists, and return the open descriptor.
+
+    Mode 0o644 is SQLite's own default for a file it creates, so the on-disk
+    permissions are those of a database SQLite would have created itself.
+
+    Raises:
+        ValueError: If db_path already exists (another call created it)
+        Exception: If the file cannot be created (missing directory, permissions)
+    """
+    try:
+        return os.open(db_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o644)
+    except FileExistsError as exc:
+        raise ValueError(_already_exists_message(db_path)) from exc
+    except OSError as e:
+        raise Exception(f"Database initialization failed: {e}") from e
+
+
+def _dispose_quietly(engine: Engine | None) -> None:
+    """Dispose engine on the failure path; log a failure, never raise it."""
+    if engine is None:
+        return
+    try:
+        engine.dispose()
+    except Exception as err:
+        logger.warning(
+            "database_init_cleanup_failed",
+            step="dispose",
+            error_type=type(err).__name__,
+        )
+
+
+def _is_same_file(fd: int, db_path: str) -> bool:
+    """True if db_path is still the file open as fd (False if either stat fails)."""
+    try:
+        return os.path.samestat(os.fstat(fd), os.stat(db_path))
+    except OSError:
+        return False
+
+
+def _delete_quietly(db_path: str) -> None:
+    """Delete db_path, then its SQLite sidecars; log a failure, never raise it.
+
+    The first error stops the step, so a sidecar is never deleted while its
+    main file stays. A missing file is fine.
+    """
+    try:
+        for path in (
+            db_path,
+            f"{db_path}-wal",
+            f"{db_path}-shm",
+            f"{db_path}-journal",
+        ):
+            try:
+                os.unlink(path)
+            except FileNotFoundError:
+                pass
+    except Exception as err:
+        logger.warning(
+            "database_init_cleanup_failed",
+            step="delete",
+            error_type=type(err).__name__,
+        )
+
+
 def init_database(db_path: str, passphrase: str) -> None:
     """Initialize a new encrypted SQLite database.
 
     Creates database schema, enables SQLite optimizations (WAL mode, foreign keys),
     and stores encryption parameters in metadata table.
 
+    The file is created exclusively (``O_CREAT | O_EXCL``) after the key
+    derivation, and its descriptor stays open until the call ends. If another
+    call or process created ``db_path`` first, this call raises the "Database
+    already exists" ``ValueError`` and touches nothing. On failure, the engine
+    is disposed first, then ``db_path`` and its ``-wal``, ``-shm`` and
+    ``-journal`` files are deleted only if ``db_path`` is still the file this
+    call created: the function never deletes a file it did not create.
+
     Args:
         db_path: Path to database file (will be created)
         passphrase: User passphrase for encryption (min 12 characters)
 
     Raises:
-        ValueError: If passphrase invalid or database already exists
+        ValueError: If passphrase invalid or database already exists (also when
+            another process creates it during this call)
         Exception: If database creation fails
+        KeyboardInterrupt: Re-raised unwrapped, after the same cleanup
 
     Example:
         >>> init_database("mapping.db", "my_secure_passphrase_123!")
@@ -82,16 +166,20 @@ def init_database(db_path: str, passphrase: str) -> None:
     # Check if database already exists
     db_file = Path(db_path)
     if db_file.exists():
-        raise ValueError(
-            f"Database already exists at {db_path}. Use open_database() to open existing database."
-        )
+        raise ValueError(_already_exists_message(db_path))
 
-    # Generate salt and create encryption service
+    # Generate salt and create encryption service (before the file exists, so
+    # the slow key derivation never runs while a half-built file is visible)
     salt = EncryptionService.generate_salt()
     encryption_service = EncryptionService(
         passphrase, salt, EncryptionService.PBKDF2_ITERATIONS
     )
 
+    engine: Engine | None = None
+    # Exclusive create: ValueError if the file exists by now. The descriptor
+    # stays open until the call ends, so the file's identity cannot be reused
+    # (POSIX) and no other process can delete or replace it (Windows).
+    fd = _create_exclusively(db_path)
     try:
         # Create SQLAlchemy engine
         engine = create_engine(f"sqlite:///{db_path}")
@@ -189,11 +277,29 @@ def init_database(db_path: str, passphrase: str) -> None:
 
         engine.dispose()
 
-    except Exception as e:
-        # Clean up partial database file on failure
-        if db_file.exists():
-            db_file.unlink()
-        raise Exception(f"Database initialization failed: {e}") from e
+    except BaseException as exc:
+        # Clean up this call's own partial database, and nothing else
+        try:
+            # Dispose first: on Windows an open connection blocks the delete
+            _dispose_quietly(engine)
+            # Identity from the still-open descriptor: is db_path still ours?
+            ours = _is_same_file(fd, db_path)
+        finally:
+            # Close only after the dispose: on POSIX, closing any descriptor
+            # on a file drops every fcntl lock this process holds on it,
+            # SQLite's included. Never move this close earlier.
+            os.close(fd)
+            fd = -1
+        if ours:
+            _delete_quietly(db_path)
+        if isinstance(exc, Exception):
+            raise Exception(f"Database initialization failed: {exc}") from exc
+        # KeyboardInterrupt, SystemExit: re-raised unwrapped
+        raise
+    finally:
+        if fd >= 0:
+            # Success: closed after engine.dispose() (see above)
+            os.close(fd)
 
 
 def open_database(db_path: str, passphrase: str) -> DatabaseSession:
