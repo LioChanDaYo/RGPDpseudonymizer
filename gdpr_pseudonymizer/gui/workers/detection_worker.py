@@ -18,6 +18,7 @@ from gdpr_pseudonymizer.utils.logger import get_logger
 
 if TYPE_CHECKING:
     from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
+    from gdpr_pseudonymizer.validation.models import CandidateKey
 
 logger = get_logger(__name__)
 
@@ -28,16 +29,17 @@ class DetectionResult:
 
     document_text: str
     detected_entities: list[DetectedEntity]
-    pseudonym_previews: dict[str, str]
+    pseudonym_previews: dict[CandidateKey, str]
     entity_type_counts: dict[str, int]
     db_path: str
     passphrase: str
     theme: str
     input_file: str
     detection_time_seconds: float
-    # Maps canonical entity key ("{text}_{start_pos}") to ALL occurrences
-    # in that variant group — used to expand back during finalization.
-    variant_occurrences: dict[str, list[DetectedEntity]] | None = None
+    # Maps canonical entity key (candidate_key: text, start_pos, entity_type)
+    # to ALL occurrences in that variant group — used to expand back during
+    # finalization.
+    variant_occurrences: dict[CandidateKey, list[DetectedEntity]] | None = None
 
 
 class DetectionWorker(QRunnable):
@@ -88,6 +90,7 @@ class DetectionWorker(QRunnable):
         from gdpr_pseudonymizer.core.document_processor import DocumentProcessor
         from gdpr_pseudonymizer.data.database import init_database
         from gdpr_pseudonymizer.exceptions import FileProcessingError
+        from gdpr_pseudonymizer.validation.models import candidate_key
 
         start_time = time.time()
 
@@ -151,10 +154,11 @@ class DetectionWorker(QRunnable):
 
             # Build variant occurrence map: canonical key → all occurrences
             # so finalization can expand back to every position in the document.
-            variant_occurrences: dict[str, list[DetectedEntity]] = {}
+            # Keyed by type too: two groups can share a canonical text and start
+            # only if their types differ (Story 10.8).
+            variant_occurrences: dict[CandidateKey, list[DetectedEntity]] = {}
             for canonical, all_occ, _ in variant_groups:
-                key = f"{canonical.text}_{canonical.start_pos}"
-                variant_occurrences[key] = all_occ
+                variant_occurrences[candidate_key(canonical)] = all_occ
 
             # Extract canonical entities (longest form) for display
             detected_entities = [canonical for canonical, _, _ in variant_groups]

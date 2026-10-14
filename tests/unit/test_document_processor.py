@@ -16,6 +16,7 @@ from gdpr_pseudonymizer.core.document_processor import DocumentProcessor
 from gdpr_pseudonymizer.data.models import Entity
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 from gdpr_pseudonymizer.pseudonym.assignment_engine import PseudonymAssignment
+from gdpr_pseudonymizer.validation.models import candidate_key
 
 
 class TestDocumentProcessor:
@@ -625,8 +626,9 @@ class TestBuildPseudonymPreviews:
             ]
             previews = processor.build_pseudonym_previews(entities)
 
-        assert "Marie Dubois_0" in previews
-        assert previews["Marie Dubois_0"] == "Leia Organa"
+        # Story 10.8 AC1: previews are keyed by candidate_key (text, start, type).
+        assert candidate_key(entities[0]) in previews
+        assert previews[candidate_key(entities[0])] == "Leia Organa"
 
     @patch("gdpr_pseudonymizer.core.document_processor.GenderDetector")
     @patch("gdpr_pseudonymizer.core.document_processor.CompositionalPseudonymEngine")
@@ -687,7 +689,8 @@ class TestBuildPseudonymPreviews:
             ]
             previews = processor.build_pseudonym_previews(entities)
 
-        assert previews["Marie Dubois_0"] == "Leia Organa"
+        # Story 10.8 AC1: previews are keyed by candidate_key (text, start, type).
+        assert previews[candidate_key(entities[0])] == "Leia Organa"
 
     @patch("gdpr_pseudonymizer.core.document_processor.GenderDetector")
     @patch("gdpr_pseudonymizer.core.document_processor.CompositionalPseudonymEngine")
@@ -750,7 +753,8 @@ class TestBuildPseudonymPreviews:
             ]
             previews = processor.build_pseudonym_previews(entities)
 
-        key = "Dr. Marie Dubois_0"
+        # Story 10.8 AC1: previews are keyed by candidate_key (text, start, type).
+        key = candidate_key(entities[0])
         assert key in previews
         assert previews[key].startswith("Dr.")
 

@@ -13,6 +13,7 @@ from gdpr_pseudonymizer.gui.config import _DEFAULT_CONFIG
 from gdpr_pseudonymizer.gui.main_window import MainWindow
 from gdpr_pseudonymizer.gui.workers.detection_worker import DetectionResult
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
+from gdpr_pseudonymizer.validation.models import CandidateKey, candidate_key
 
 
 @pytest.fixture()
@@ -138,9 +139,10 @@ def sample_detection_result(
     tmp_path: object,
 ) -> DetectionResult:
     """DetectionResult factory fixture with sample data."""
-    previews: dict[str, str] = {}
+    previews: dict[CandidateKey, str] = {}
     for entity in sample_entities:
-        key = f"{entity.text}_{entity.start_pos}"
+        # Story 10.8 AC1: previews are keyed by candidate_key (text, start, type).
+        key = candidate_key(entity)
         previews[key] = f"Pseudo_{entity.text.replace(' ', '_')}"
     return DetectionResult(
         document_text=sample_document_text,

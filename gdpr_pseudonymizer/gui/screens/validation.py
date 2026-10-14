@@ -329,7 +329,7 @@ class ValidationScreen(QWidget):
             entities: list[DetectedEntity]
             document_text: str
             document_path: str
-            pseudonym_previews: dict[str, str]
+            pseudonym_previews: dict[CandidateKey, str] (from candidate_key)
             db_path: str
             passphrase: str
             batch_mode: bool (default False)
