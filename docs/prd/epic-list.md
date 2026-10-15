@@ -62,7 +62,7 @@
 
 ---
 
-### Epic 10: v2.3 — Detection Precision Quick Wins
+### Epic 10: v2.3 — Detection Precision Quick Wins ✅ COMPLETE (2026-10-15; release pending Lionel's go)
 
 **Goal:** Raise detection precision and benchmark trustworthiness with local, deterministic changes (benchmark repair + held-out set, same-type overlap dedup, ORG role filter, LOCATION noise and name-boundary rules, salutation and org-plus-country handling), without lowering recall. Baseline: F1 58.53% at commit `fceef65` (CI run 37013929807). Sequenced before Epic 9; no release inside the epic.
 
@@ -175,21 +175,21 @@
 - [ ] Fine-tuned model package available for installation
 
 **Epic 10 DoD:**
-- [ ] Annotation guidelines approved by Lionel and applied to the whole corpus; held-out set (≥5 documents) scored separately
-- [ ] Same-type overlap dedup and ORG role filter shipped (10.2)
-- [ ] Line-break span boundaries and run-on regex shapes fixed (10.3a, split from 10.3, Lionel, 2026-10-06)
-- [ ] LOCATION noise filters and name-boundary rules shipped (10.3b, split from 10.3, Lionel, 2026-10-06)
-- [ ] Type-aware exact match in the merge shipped (10.3c, added at 10.3a STOP R, Lionel, 2026-10-06)
-- [ ] Salutation splitting / bare first names and org-plus-country merge shipped (10.4)
-- [ ] DB init no longer deletes a database another process created (10.5, data-layer hardening, Lionel, 2026-10-07)
-- [ ] Mapping lookup is type-aware: the same text under another type gets its own pseudonym and row; continuity for existing databases as Lionel decides at the story's STOP (10.7, data layer, added by Lionel at 10.3c STOP R, 2026-10-09)
-- [ ] Desktop app keys candidates by type: one span found with two types gives two candidates, rejecting one keeps the other, and no confirmed occurrence is dropped (10.8, 10.3c regression, before any release, added by Lionel, 2026-10-13)
-- [ ] Desktop app edit applies to every occurrence of the name and type, as in the CLI; no other occurrence is left in clear (10.9, before the next release, added by Lionel, 2026-10-13)
-- [ ] Desktop batch review keeps each document's own result and decisions, and an action on a hand-added row acts on that row only (10.10: PRE-001 to PRE-003, before any release, added by Lionel, 2026-10-14)
-- [ ] A custom pseudonym ("Changer le pseudonyme", CLI [C]) is used in the written file and stored for later documents (10.11, after 10.7, before any release; added by Lionel, 2026-10-14)
-- [ ] Final-exam set (10.6): 30 documents frozen and annotated by two models before 10.4 merged, adjudicated by Lionel after 10.4 merged, then committed as plain files (documents' sha256 checked against the freeze record; no encryption, Lionel, 2026-10-09) and scored exactly once at close-out; accuracy output carries 95% bootstrap ranges; Lionel picks the public figure among main, held-out and final exam
-- [ ] Every story closed with a cited CI accuracy run (G1), independent QA check (G2), no unapproved recall drop (G3), held-out numbers (G5, 10.2, 10.3a, 10.3b, 10.3c, 10.4)
-- [ ] Close-out baseline recorded as Epic 9's starting point, with the `[Overall]`/`[PERSON]`/`[LOCATION]`/`[ORG]`/`[HELD-OUT …]` lines pasted into the QA report (`accuracy-results` artifacts are kept 30 days, `.github/workflows/accuracy.yaml:83`), not just the run ID; no release cut without Lionel's go
+- [x] Annotation guidelines approved by Lionel and applied to the whole corpus; held-out set (≥5 documents) scored separately
+- [x] Same-type overlap dedup and ORG role filter shipped (10.2)
+- [x] Line-break span boundaries and run-on regex shapes fixed (10.3a, split from 10.3, Lionel, 2026-10-06)
+- [x] LOCATION noise filters and name-boundary rules shipped (10.3b, split from 10.3, Lionel, 2026-10-06)
+- [x] Type-aware exact match in the merge shipped (10.3c, added at 10.3a STOP R, Lionel, 2026-10-06)
+- [x] Salutation splitting / bare first names and org-plus-country merge shipped (10.4)
+- [x] DB init no longer deletes a database another process created (10.5, data-layer hardening, Lionel, 2026-10-07)
+- [x] Mapping lookup is type-aware: the same text under another type gets its own pseudonym and row; continuity for existing databases as Lionel decides at the story's STOP (10.7, data layer, added by Lionel at 10.3c STOP R, 2026-10-09)
+- [x] Desktop app keys candidates by type: one span found with two types gives two candidates, rejecting one keeps the other, and no confirmed occurrence is dropped (10.8, 10.3c regression, before any release, added by Lionel, 2026-10-13)
+- [x] Desktop app edit applies to every occurrence of the name and type, as in the CLI; no other occurrence is left in clear (10.9, before the next release, added by Lionel, 2026-10-13)
+- [x] Desktop batch review keeps each document's own result and decisions, and an action on a hand-added row acts on that row only (10.10: PRE-001 to PRE-003, before any release, added by Lionel, 2026-10-14)
+- [x] A custom pseudonym ("Changer le pseudonyme", CLI [C]) is used in the written file and stored for later documents (10.11, after 10.7, before any release; added by Lionel, 2026-10-14)
+- [x] Final-exam set (10.6): 30 documents frozen and annotated by two models before 10.4 merged, adjudicated by Lionel after 10.4 merged, then committed as plain files (documents' sha256 checked against the freeze record; no encryption, Lionel, 2026-10-09) and scored exactly once at close-out; accuracy output carries 95% bootstrap ranges; Lionel picks the public figure among main, held-out and final exam
+- [x] Every story closed with a cited CI accuracy run (G1), independent QA check (G2), no unapproved recall drop (G3), held-out numbers (G5, 10.2, 10.3a, 10.3b, 10.3c, 10.4)
+- [x] Close-out baseline recorded as Epic 9's starting point, with the `[Overall]`/`[PERSON]`/`[LOCATION]`/`[ORG]`/`[HELD-OUT …]` lines pasted into the QA report (`accuracy-results` artifacts are kept 30 days, `.github/workflows/accuracy.yaml:83`), not just the run ID; no release cut without Lionel's go
 
 ---
 

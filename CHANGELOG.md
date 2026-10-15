@@ -64,7 +64,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - misses 448 → 340 (PERSON 42 → 30, LOCATION 52 → 51, ORG 354 → 259), with no recall drop in any type. 79 of the 95 ORG misses removed come from one contract that defines two aliases.
     - Paired delta (`scripts/accuracy_paired_delta.py`, same documents resampled together): the overall precision and F1 gains are outside the paired range (precision +1.48 points, range +0.51 to +2.64; F1 +3.13 points, range +0.65 to +6.68), and so are the ORG gains. The PERSON and LOCATION gains are within their paired ranges: they are recall fixes, not claimed as score gains.
     - Held-out set (same run): recall 74.46% → 77.06% (ORG misses 28 → 22), F1 76.79% → 78.07%, precision 79.26% → 79.11% (two more PERSON candidates that are not annotated).
-  - **Upgrading: pseudonym continuity.** The mapping schema is unchanged. Keys are still the entity text with titles stripped (and prepositions, for places), whitespace collapsed, without the entity type.
+  - **Upgrading: pseudonym continuity.** This story does not change the mapping schema; Story 10.7 does: one row per name and type, schema version 1.1.0, and existing databases are converted once (see "Same name, two types: separate pseudonyms (Story 10.7)" above). Keys are the entity text with titles stripped (and prepositions, for places), whitespace collapsed, together with the entity type.
     - Split greetings: "Zorbalia, Quentrel" used to be one key; now each name has its own key ("Zorbalia", "Quentrel"), and an existing pseudonym for either name is reused. The old two-name key is no longer used.
     - A first name newly offered on a greeting line, or used alone after the full name, gets the pseudonym already stored for that first name, or a new one; the existing person-name component match applies unchanged.
     - Organisation + place: "Zorbtech France" is a new key, different from "Zorbtech", so the branch gets its own pseudonym. The place "France" keeps its own key; in the output, the organisation's replacement covers the place at that position.
@@ -84,9 +84,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - misses 452 → 448 (PERSON 44 → 42, LOCATION 54 → 52, ORG 354 → 354), with no recall drop in any type.
     - Paired delta (`scripts/accuracy_paired_delta.py`, same documents resampled together): the overall recall gain is outside the paired range (+0.18 points, range +0.05 to +0.33). The precision and F1 changes are within their paired ranges, so they are not claimed as gains.
     - Held-out set (same run): unchanged (F1 76.79%, recall 74.46%).
-  - **Upgrading: pseudonym continuity.** The mapping schema is unchanged. Keys are still the entity text with titles stripped (and prepositions, for places), whitespace collapsed, **without the entity type**.
-    - If you confirm both candidates of a pair (say LOCATION "Zorbaville" and ORG "Zorbaville"), they share one key: the first one resolved gets or creates the row, the second reuses its pseudonym. One row is stored, with the first one's type. Rejecting one candidate gives the earlier result for the other, in the command line and, since Story 10.8, in the desktop app (see "Fixed").
-    - If the key is already in your database, whatever its type, both candidates are accepted automatically with the stored pseudonym, as known entities, and neither is shown for review. The output is the same as before: the same stored pseudonym, and at the same position the same replacement.
+  - **Upgrading: pseudonym continuity.** This story does not change the mapping schema; Story 10.7 does: one row per name and type, schema version 1.1.0, and existing databases are converted once (see "Same name, two types: separate pseudonyms (Story 10.7)" above). Keys are the entity text with titles stripped (and prepositions, for places), whitespace collapsed, together with the entity type.
+    - If you confirm both candidates of a pair (say LOCATION "Zorbaville" and ORG "Zorbaville"), each type gets its own row and its own pseudonym (Story 10.7; see "One place, both types confirmed" above). Rejecting one candidate gives the earlier result for the other, in the command line and, since Story 10.8, in the desktop app (see "Fixed").
+    - If the name is already in your database under one of the two types, that candidate is accepted automatically with its stored pseudonym, as a known entity, and the other type reaches review (Story 10.7).
     - The lookup became type-aware with Story 10.7: see "Same name, two types: separate pseudonyms (Story 10.7)" above.
     - Recommendation: keep using the same mapping database across versions for consistent pseudonyms. Re-process with the previous version if byte-identical output with an old run is required.
 
@@ -106,7 +106,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - PERSON F1 93.87% → 94.31%, LOCATION 71.94% → 76.98% (false places 109 → 71), ORG 46.00% (unchanged);
     - misses 458 → 452 (PERSON 50 → 44, LOCATION 54 → 54, ORG 354 → 354), with no recall drop in any type.
     - Held-out set (same run): F1 76.44% → 76.79%, recall unchanged (74.46%).
-  - **Upgrading: pseudonym continuity.** The mapping schema is unchanged. Keys are still the entity text with titles stripped (and prepositions, for places), whitespace collapsed.
+  - **Upgrading: pseudonym continuity.** This story does not change the mapping schema; Story 10.7 does: one row per name and type, schema version 1.1.0, and existing databases are converted once (see "Same name, two types: separate pseudonyms (Story 10.7)" above). Keys are the entity text with titles stripped (and prepositions, for places), whitespace collapsed, together with the entity type.
     - A completed name ("Jean-Zorbal Le Quentrix" instead of "Jean-Zorbal Le") gets its own key. An existing database keeps the row of the truncated form, and the full name gets its own row or is resolved by component matching. Spaces do not matter: a particle joined by a no-break space gives the same key as one joined by a plain space.
     - A name without its trailing role ("Zorbalia" instead of "Zorbalia, Responsable") has the bare name as its key. An existing database may already hold it, in which case the person keeps the pseudonym it already has.
     - Rows for common words and fragments offered as places in earlier versions ("CONFORME", "à Dr") stay in the database but are no longer applied.
@@ -122,7 +122,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - PERSON F1 93.82% → 93.87%, LOCATION 71.94% (unchanged), ORG 43.31% → 46.00%;
     - misses 480 → 458 (PERSON 53 → 50, LOCATION 54 → 54, ORG 373 → 354), with no recall drop in any type.
     - Held-out set (same run): F1 72.36% → 76.44%, recall 69.70% → 74.46%.
-  - **Upgrading: pseudonym continuity.** The mapping schema is unchanged.
+  - **Upgrading: pseudonym continuity.** This story does not change the mapping schema; Story 10.7 does: one row per name and type, schema version 1.1.0, and existing databases are converted once (see "Same name, two types: separate pseudonyms (Story 10.7)" above).
     - Mapping keys are the normalized entity text, so the new, shorter spans have different keys from the old run-on ones. An organisation now comes out alone ("Institut Zorbal") instead of inside a sentence-long span. Its key is the bare name, which an existing database may already hold from other documents, so it may reuse that pseudonym. The old run-on keys stay in the database but are no longer applied.
     - A name that ran into the next line ("Zorbalia Quentrix⏎Directeur") is now offered without the next line. Its key is the bare name.
     - A run-on organisation span that v2.2 / 10.2 cut back at a sentence start may now be kept whole, when cutting it would leave a capitalised first word unreplaced.
@@ -147,7 +147,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - 3 annotated names lose coverage compared with v2.2. One organisation name is now partly unreplaced (a span merged across a heading line, then cut at the line break), and two short names were covered in v2.2 only by accident, inside a wrong-type span that is now cut back.
     - All three are handed to the next story (10.3).
   - **Held-out set** (same run): F1 61.51% → 72.36%, with recall 72.29% → 69.70%.
-  - **Upgrading: pseudonym continuity.** The mapping schema is unchanged.
+  - **Upgrading: pseudonym continuity.** This story does not change the mapping schema; Story 10.7 does: one row per name and type, schema version 1.1.0, and existing databases are converted once (see "Same name, two types: separate pseudonyms (Story 10.7)" above).
     - Existing mapping databases keep working: rows created by v2.2 are still found by exact key, so an entity already mapped keeps its pseudonym.
     - Fragments are no longer offered. v2.2 could show both "Jean-Luc" and "Jean-Luc Martin" at the same place, and accepting both created two mapping rows, although the output only used the longer one. Now only one is offered there, so no row is created for the fragment.
     - New databases can differ from old ones for short forms. In a project started with this version, a later standalone "Jean-Luc" no longer finds a row created from an overlapping fragment. It is resolved by component matching or gets a new pseudonym. A document processed with v2.2 and re-processed with a fresh database can therefore show a different pseudonym for such short forms.
@@ -166,7 +166,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - The command-line validation was not affected. Detection, the mapping database and its schema do not change, and no accuracy figure changes.
 
 - **Desktop app: editing a name now applies to every occurrence of it, as in the CLI (Story 10.9).** In the review list, a name found at several places is one row. Editing its text used to change only the place the row stood for, and the name was not pseudonymized at its other places: it stayed in clear in the output. This was in every desktop release since v2.0.0.
-  - Now the edit applies to every occurrence of that name and type, each place adjusted to the edited text, as the command line does. Where the edited text is not found at a place, that place keeps its detected span and is still pseudonymized. One undo reverts the whole edit, and the highlights show exactly the places that will be pseudonymized.
+  - Now the edit applies to every occurrence of that name and type, each place adjusted to the edited text, as the command line does. Where the edited text is not found at a place, that place keeps its current span (the span an earlier edit gave it, otherwise its detected span) and is still pseudonymized. One undo reverts the whole edit, and the highlights show exactly the places that will be pseudonymized.
   - In batch validation, where each place is its own row, the edit reaches every row with the same name and type, as accept and reject already do.
   - A correction of a name or of its type never reaches a place you rejected on its own: if "Zorbal" is also found inside the place name "Saint-Zorbal" and you reject that place on its own, correcting the name elsewhere leaves "Saint-Zorbal" as it is.
   - Changing the type of a name in the desktop app now applies to every occurrence too, as in the command line.
@@ -189,18 +189,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Some pseudonyms are refused, with a message that says why: for a name that already has a stored pseudonym (it keeps it; remove the name from the database first to change it); when the first or last name already has a part in the database (your pseudonym must use it); when it, or a part of it, is already used for another name; or when it is a capitalised word of the document or a name stored in the database.
   - Correcting a name, or changing its type, removes the pseudonym you set on it; set it again if you want it.
   - In the command-line review, going back to a name with [P] and pressing Space no longer loses a correction you made with [E], and no longer leaves a name you rejected and then accepted in clear. These were in every version.
-  - Detection, the database schema and the accuracy figures do not change.
+  - Detection, the database schema and the accuracy figures do not change. A pseudonym you set is stored with the theme "custom", which `list-mappings` (and its exports), `validate-mappings`, `delete-mapping` and `stats` show.
 
 - **Two runs creating the same new mapping database at once no longer lose it (Story 10.5).**
   - Two runs that create the same new mapping database at the same moment no longer lose it. The first run's database (its mappings and passphrase setup) is always kept; the second run stops with "Database already exists". Before, on Linux and macOS, the second run could delete the database the first one had just created; on Windows, it stopped with an unexpected file-access error.
   - A failed or interrupted (Ctrl+C) database creation no longer leaves a partial database, or its `-wal`/`-shm` files, behind.
-  - **Upgrading:** existing databases are not opened, changed or migrated by this fix. The schema version stays 1.0.0. No action needed.
+  - **Upgrading:** this fix does not change existing databases. Story 10.7 converts them once to schema version 1.1.0 (see "Same name, two types: separate pseudonyms (Story 10.7)" above). No action needed for this fix.
 
 - **A hard-wrapped name keeps one pseudonym; the wrapped-name join is faster (10.3a QA follow-up).**
   - **One key per name.** The mapping key now turns every run of whitespace (line break, tab, no-break space, repeated spaces) into one space, after titles (and, for places, prepositions) are stripped. "Zorbalia⏎Quentrix", joined by the 10.3a hard-wrapped-name rule, and "Zorbalia Quentrix" now share one mapping row and one pseudonym. Before, the wrapped spelling got a row of its own and, through the pseudonym collision check, a second pseudonym for the same person. The validation preview and the known-entity check use the same key, so the preview matches the output.
   - **Speed.** The wrapped-name join no longer scans the whole candidate list once per person name. With 8,000 person candidates it took 4.9 s and now takes 0.04 s or less (same machine). Its output is unchanged.
   - **Detection is unchanged.** The main-corpus detections are identical (2,263), and CI accuracy run `37506971042` matches `37480506234` (main) on all eight metric lines, held-out included.
-  - **Upgrading: pseudonym continuity.** The mapping schema is unchanged.
+  - **Upgrading: pseudonym continuity.** This story does not change the mapping schema; Story 10.7 does: one row per name and type, schema version 1.1.0, and existing databases are converted once (see "Same name, two types: separate pseudonyms (Story 10.7)" above).
     - Names previously stored with unusual spacing (no-break space, line break, tab, double space) receive a new pseudonym once after upgrading; single-space names are unaffected. Every main-corpus detection has a single-space key.
     - After that one change the new pseudonym is stable, whichever spacing a later document uses. New rows are always stored with single spaces. The old rows stay in the database but are no longer applied. Check such names during validation of the first documents processed after the upgrade.
 

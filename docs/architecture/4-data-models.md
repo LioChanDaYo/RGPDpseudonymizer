@@ -18,7 +18,7 @@ Based on the PRD requirements (FR4-5, FR8-12) and the tech stack (SQLAlchemy 2.0
 - `first_seen_timestamp`: datetime - When first detected (audit trail)
 - `gender`: str (optional: male/female/neutral/unknown) - For gender-preserving pseudonyms
 - `confidence_score`: float (0.0-1.0) - NER confidence if available
-- `theme`: str - Pseudonym library used (neutral/star_wars/lotr)
+- `theme`: str - Pseudonym library used (neutral/star_wars/lotr), or `custom` for a pseudonym the user set (Story 10.11)
 - `is_ambiguous`: bool - Component match had low confidence (Risk #3 mitigation)
 - `ambiguity_reason`: str (optional) - "Compound name" / "Partial match" / "Title prefix" (Risk #3 mitigation)
 

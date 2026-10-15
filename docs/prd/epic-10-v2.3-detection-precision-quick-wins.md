@@ -114,19 +114,19 @@ These notes sit outside the normative Gates block above and do not change its te
 
 | Story | Priority | Est. Duration | Source | Status |
 |-------|----------|---------------|--------|--------|
-| 10.1: Benchmark Repair + Held-Out Set | HIGH | 1.5-2.5 weeks | F3, F4, F5, F2 (junk) | Done (PR #79) |
-| 10.2: Same-Type Overlap Dedup + ORG Role Filter | HIGH | 1 week | F1, F2 | Done (PR #81) |
-| 10.3a: Boundaries & Run-On Spans (split from 10.3, Lionel, 2026-10-06) | MED | 0.5-1 week | 10.2 handoff, REL-004 | Done (PR #84) |
+| 10.1: Benchmark Repair + Held-Out Set | HIGH | 1.5-2.5 weeks | F3, F4, F5, F2 (junk) | Done (PR #79, `d4b7105`) |
+| 10.2: Same-Type Overlap Dedup + ORG Role Filter | HIGH | 1 week | F1, F2 | Done (PR #81, `f75ad9a`) |
+| 10.3a: Boundaries & Run-On Spans (split from 10.3, Lionel, 2026-10-06) | MED | 0.5-1 week | 10.2 handoff, REL-004 | Done (PR #84, `ac354cc`) |
 | 10.3b: Particles, Roles & LOCATION Noise (split from 10.3, Lionel, 2026-10-06) | MED | 0.5-1 week (re-estimated after STOP R, 2026-10-07) | F6, F7 | Done (PR #87, `bab6717`) |
 | 10.3c: Type-Aware Exact Match in Merge (added at 10.3a STOP R, Lionel, 2026-10-06) | MED | 0.5 week | 10.3a STOP R | Done (PR #91, `5846419`) |
 | 10.4: Greetings + Org-Plus-Country | MED | 0.5-1 week | F8, F9 | Done (PR #93, `2d4a029`) |
 | 10.5: DB Init Safety (data-layer hardening, added by Lionel, 2026-10-07) | MED (raised from LOW by the PM, 2026-10-13) | 0.5 week | PR #83 finding | Done (PR #96, `67807c2`) |
-| 10.6: Final-Exam Set and Confidence Ranges (added by Lionel, 2026-10-07) | HIGH | 2-3 weeks elapsed, in parallel | Overfitting check, close-out evidence | Done (PRs #89, #92, #94, #95) |
+| 10.6: Final-Exam Set and Confidence Ranges (added by Lionel, 2026-10-07) | HIGH | 2-3 weeks elapsed, in parallel | Overfitting check, close-out evidence | Done (PRs #89 `6abf858`, #92 `c63a7b6`, #94 `91b500d`, #95 `51d8429`) |
 | 10.7: Type-Aware Mapping Lookup (data layer, added by Lionel at 10.3c STOP R, 2026-10-09) | MED | 0.5-1 week | 10.3c STOP R | Done (PR #99, `acb7bdd`) |
 | 10.8: Desktop App Type-Aware Candidate Keys (10.3c regression, added by Lionel, 2026-10-13) | HIGH | 0.5 week | 10.7 SM finding | Done (PR #97, `e16d15a`) |
 | 10.9: Desktop App Edit Applies to Every Occurrence (added by Lionel, 2026-10-13) | HIGH | 0.5 week | 10.8 SM finding | Done (PR #98, `49d4daa`) |
 | 10.10: Desktop Batch Review Fixes (added by Lionel, 2026-10-14) | HIGH | 0.5-1 week | 10.8 QA pre-existing findings PRE-001 to PRE-003 | Done (PR #100, `eee4d41`) |
-| 10.11: Custom Pseudonym Stored and Used (added by Lionel, 2026-10-14; not the recommendation) | HIGH (proposed) | 1.5 weeks (re-estimated after the PO review, 2026-10-15) | 10.8 QA PRE-004; Lionel 2026-10-14 | Approved (amended after QA FAIL; dev next) |
+| 10.11: Custom Pseudonym Stored and Used (added by Lionel, 2026-10-14; not the recommendation) | HIGH (proposed) | 1.5 weeks (re-estimated after the PO review, 2026-10-15) | 10.8 QA PRE-004; Lionel 2026-10-14 | Done (PR #101, `b2042c7`) |
 
 **Total Estimated Duration:** 8.5-12 weeks; 10.6 runs in parallel (2-3 weeks elapsed) and close-out waits for its adjudication after 10.4 merges, then its commit and one scored run
 
@@ -202,8 +202,22 @@ Numbers come only from CI runs; each line cites its run ID. Full verbatim lines 
   - **Q7:** the scored exam becomes a second held-out set (aggregate-only, never opened). The held-out isolation rules then apply to it and its plain-text guard stays active (10.6 B15.3). Epic 9 writes a new blind exam for its own close-out.
   - **Guard hash list (B16):** the guard's committed allowlist (`tests/unit/final_exam_leakage_allowlist.json`, 157 path and sha256 pairs, approved by Lionel 2026-10-13) stores plain sha256 of exam-only keys, with no salt. It reveals nothing beyond the plain files already in the repo. If Epic 9 reuses this guard for its own blind exam, it decides whether a committed hash list needs a salt.
   - **Headline finding:** the main-vs-exam gap. F1 is 0.8262 on the main corpus (`38212303870`) and 0.6144 on the final exam (`38382553368`), about 21 points.
-- **Merged since the detector close-out:** 10.5 (PR #96, `67807c2`), 10.8 (PR #97, `e16d15a`), 10.9 (PR #98, `49d4daa`), 10.7 (PR #99, `acb7bdd`) and 10.10 (PR #100, `eee4d41`). None is a detector story.
-- **Still open in Epic 10:** 10.11 (custom pseudonym stored and used; Lionel, 2026-10-14: "Make it work (new story)", not the recommendation; Lionel's decisions Q1–Q4, Q-B to Q-F, Q-C2 and Q-A recorded on 2026-10-15, scope includes two older CLI review leaks (Q-F); story amended after QA's FAIL (MW-001, GUARD-001; Lionel's Q-G, Q-H, Q-I), dev next; before any release). It is not a detector story, so it does not move the close-out baseline. The epic is not closed.
+- **Stories after the detector close-out (none changes detection, so G1, G3 and G5 are N/A and the close-out baseline above stands):**
+
+  | Story | PR, merge commit | Final gate (`docs/qa/gates/`) | Gate history | QA trace (`docs/qa/assessments/`) |
+  |---|---|---|---|---|
+  | 10.5 DB init safety | #96, `67807c2` | `10.5-db-init-safety.yml`: **PASS** | PASS (pre-merge, `091103a`) | `10.5-trace-20261015.md` |
+  | 10.7 Type-aware mapping lookup | #99, `acb7bdd` | `10.7-type-aware-mapping-lookup.yml`: **PASS** | PASS (pre-merge, `702a655`) | `10.7-trace-20261015.md` |
+  | 10.8 Desktop type-aware candidate keys | #97, `e16d15a` | `10.8-gui-type-aware-candidate-keys.yml`: **PASS** | PASS (pre-merge, `10ddd62`) | `10.8-trace-20261015.md` |
+  | 10.9 Desktop edit at every occurrence | #98, `49d4daa` | `10.9-gui-edit-all-occurrences.yml`: **PASS** | CONCERNS at `a30557b` → PASS at `56b600e` after two amendments | `10.9-trace-20261015.md` |
+  | 10.10 Desktop batch review fixes | #100, `eee4d41` | `10.10-batch-review-fixes.yml`: **PASS** | PASS (pre-merge, `fc95786`) | `10.10-trace-20261015.md` |
+  | 10.11 Custom pseudonym stored and used | #101, `b2042c7` | `10.11-custom-pseudonym.yml`: **PASS** | CONCERNS at `5c02ba9` → FAIL at `e8cb76a` (MW-001) → PASS at `af5b23b` after the amendment | `10.11-trace-20261015.md` |
+
+- **QA close-out (Quinn, 2026-10-15, at `main` `b2042c7`):** `docs/qa/assessments/epic-10-close-out-summary.md`. Every Epic 10 story has a final gate of PASS; 75 of the 76 ACs of the six stories above are covered (38 by tests, 37 by process evidence) and one is N/A (10.7 AC9, moved to 10.8). Main CI on `b2042c7` is green on attempt 1 (five workflows). Eleven leak paths found during the epic were each fixed after a failing test was committed first.
+- **Epic NFR verdicts (QA, `docs/qa/assessments/epic-10-nfr-20261015.md`; quality score 70):** security/privacy **CONCERNS**, reliability **CONCERNS**, maintainability **CONCERNS**, performance **PASS** (NFR1 on `b2042c7`: 5,000 words in 0.87 s mean, target 30 s). QA: none of the CONCERNS is a regression, and none leaves a confirmed name in clear.
+- **Follow-ups, consolidated:** every story's follow-ups and open gate items are consolidated in QA's backlog B1–B42 (`docs/qa/assessments/epic-10-close-out-summary.md`, "Consolidated Backlog"), also pointed to from `docs/qa/backlog.md`. Nothing there is scheduled by this close-out.
+- **Release decisions for Lionel (QA):** B1 (the erasure audit entry keeps the erased name), B2 (batch "Valider et continuer" gives no warning about rows still to review) and B14 (`CHANGELOG.md` `[Unreleased]` harmonisation; the close-out branch proposes the text for his review), before a v2.3.0 release.
+- **Still open in Epic 10:** nothing. Every story is merged (10.11 last, PR #101, `b2042c7`). The v2.3.0 release is not part of the epic; it waits for Lionel's explicit go (separate release story).
 
 ---
 
@@ -1098,19 +1112,19 @@ Story 10.11 (Custom pseudonym used)       --- 1.5 weeks, after 10.7 and 10.10 --
 
 ## Definition of Done
 
-- [ ] All 13 stories (10.1, 10.2, 10.3a, 10.3b, 10.3c, 10.4, 10.5, 10.6, 10.7, 10.8, 10.9, 10.10, 10.11) completed with acceptance criteria met (10.5, 10.7, 10.8, 10.9, 10.10 and 10.11: G1/G3/G5 N/A, no detection change; 10.6: G1/G3/G5 N/A for building the set, its scored-once run is a G1 run)
-- [ ] Every story closed with a cited G1 run and an independent G2 check
-- [ ] No unapproved recall drop (G3) at any story
-- [ ] Held-out set exists and is reported for 10.2, 10.3a, 10.3b, 10.3c and 10.4 (G5)
-- [ ] `GUIDELINES.md` approved by Lionel and applied to the whole corpus
-- [ ] black, ruff, mypy clean; full CI green (G6)
-- [ ] QA report updated with the before/after at every story, and CHANGELOG `[Unreleased]` entries per story (G7)
-- [ ] At Epic 10 close-out, README/README.fr, `docs/faq*.md`, `docs/index*.md` and `docs/tutorial*.md` updated once from the final G1 run (G7 interpretation, Lionel, 2026-10-02)
-- [ ] Close-out baseline recorded as Epic 9's starting point: run ID plus the pasted `[Overall]`/`[PERSON]`/`[LOCATION]`/`[ORG]`/`[HELD-OUT …]` lines in the QA report (`accuracy-results` artifacts are kept 30 days, `retention-days: 30` in `.github/workflows/accuracy.yaml`, so the run ID alone is not enough)
-- [ ] Accuracy output reports 95% bootstrap ranges (unit=document) per type for main and held-out, with the eight existing lines unchanged (10.6 PR A)
-- [ ] Final-exam set (10.6): 30 documents frozen and annotated independently by two models before 10.4 merged, with sha256 recorded; inter-annotator agreement and the spot-check finding reported; adjudicated by Lionel after 10.4 merged; then committed as plain files under `tests/test_corpus/final_exam/`, with the documents' sha256 matching the freeze record, and scored exactly once at close-out: run ID, ledger entry and pasted `[FINAL-EXAM …]` lines (overall, planted half, natural half) in the QA report
-- [ ] Public headline figure chosen by Lionel among main, held-out and final exam, with its range (G7 interpretation)
-- [ ] No release cut (v2.3.0 only on Lionel's explicit go)
+- [x] All 13 stories (10.1, 10.2, 10.3a, 10.3b, 10.3c, 10.4, 10.5, 10.6, 10.7, 10.8, 10.9, 10.10, 10.11) completed with acceptance criteria met (10.5, 10.7, 10.8, 10.9, 10.10 and 10.11: G1/G3/G5 N/A, no detection change; 10.6: G1/G3/G5 N/A for building the set, its scored-once run is a G1 run)
+- [x] Every story closed with a cited G1 run and an independent G2 check
+- [x] No unapproved recall drop (G3) at any story
+- [x] Held-out set exists and is reported for 10.2, 10.3a, 10.3b, 10.3c and 10.4 (G5)
+- [x] `GUIDELINES.md` approved by Lionel and applied to the whole corpus
+- [x] black, ruff, mypy clean; full CI green (G6)
+- [x] QA report updated with the before/after at every story, and CHANGELOG `[Unreleased]` entries per story (G7)
+- [x] At Epic 10 close-out, README/README.fr, `docs/faq*.md`, `docs/index*.md` and `docs/tutorial*.md` updated once from the final G1 run (G7 interpretation, Lionel, 2026-10-02)
+- [x] Close-out baseline recorded as Epic 9's starting point: run ID plus the pasted `[Overall]`/`[PERSON]`/`[LOCATION]`/`[ORG]`/`[HELD-OUT …]` lines in the QA report (`accuracy-results` artifacts are kept 30 days, `retention-days: 30` in `.github/workflows/accuracy.yaml`, so the run ID alone is not enough)
+- [x] Accuracy output reports 95% bootstrap ranges (unit=document) per type for main and held-out, with the eight existing lines unchanged (10.6 PR A)
+- [x] Final-exam set (10.6): 30 documents frozen and annotated independently by two models before 10.4 merged, with sha256 recorded; inter-annotator agreement and the spot-check finding reported; adjudicated by Lionel after 10.4 merged; then committed as plain files under `tests/test_corpus/final_exam/`, with the documents' sha256 matching the freeze record, and scored exactly once at close-out: run ID, ledger entry and pasted `[FINAL-EXAM …]` lines (overall, planted half, natural half) in the QA report
+- [x] Public headline figure chosen by Lionel among main, held-out and final exam, with its range (G7 interpretation)
+- [x] No release cut (v2.3.0 only on Lionel's explicit go)
 
 ---
 
@@ -1148,6 +1162,6 @@ The epic should maintain system integrity while delivering higher detection prec
 
 ---
 
-**Document Status:** DRAFT
+**Document Status:** Done (2026-10-15; release pending Lionel's go)
 **Created:** 2026-10-02
 **Author:** John (PM)

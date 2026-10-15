@@ -155,7 +155,7 @@ Based on the architectural patterns, tech stack, and module interfaces defined a
 - **Passphrase Canary:** Store encrypted verification string to validate passphrase on database open (Risk #1 mitigation)
 - **WAL Mode:** SQLite Write-Ahead Logging enables concurrent reads by worker processes while main process writes
 - **No Connection Pooling:** Single writer (main process) negates need for pool
-- **Schema Versioning:** `Metadata.schema_version` checked on open, enables future Alembic migrations (Risk #4 mitigation)
+- **Schema Versioning:** `Metadata.schema_version` is read on open: a database made before Story 10.7 ("1.0.0") is converted once to "1.1.0", in one transaction, by `_ensure_current_schema` (`gdpr_pseudonymizer/data/database.py:551`); see `9-database-schema.md` §9.5. No Alembic (Risk #4 mitigation)
 
 ---
 

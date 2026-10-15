@@ -8,9 +8,13 @@ This section consolidates the data models from Section 4, providing concrete dat
 
 **ORM:** SQLAlchemy 2.0+ (modern async-ready API)
 
-**Encryption:** Application-level column encryption using Fernet (AES-128-CBC + HMAC)
+**Encryption:** Application-level column encryption using AES-256-SIV (deterministic, authenticated; `gdpr_pseudonymizer/data/encryption.py`), see §9.3
 
-**Schema Version:** 1.0.0 (tracked in `metadata` table)
+**Schema Version:** 1.1.0 since Story 10.7 (`SCHEMA_VERSION`, `gdpr_pseudonymizer/data/database.py:36`), tracked in the `metadata` table under `schema_version`. A database made before Story 10.7 holds 1.0.0 and is converted once, on its first open by a 10.7 or later version (§9.5).
+
+**Entity key:** one row per text and type: `UNIQUE (full_name, entity_type)`, named `uq_entities_full_name_entity_type` (`gdpr_pseudonymizer/data/models.py:30-34`). The same text under two types has two rows and two pseudonyms (Story 10.7). Before 10.7, `full_name` was unique on its own.
+
+**Theme values (`entities.theme`):** the pseudonym library theme of a generated pseudonym (`neutral`, `star_wars`, `lotr`), or `custom` for a pseudonym the user set (Story 10.11; `CUSTOM_THEME`, `gdpr_pseudonymizer/core/custom_pseudonym.py:53`, written at `gdpr_pseudonymizer/core/document_processor.py:469`). Later runs use `custom` to find the custom values the library does not track. The schema is the same for both.
 
 ---
 
@@ -18,7 +22,7 @@ This section consolidates the data models from Section 4, providing concrete dat
 
 ```sql
 -- ============================================
--- GDPR Pseudonymizer Database Schema v1.0.0
+-- GDPR Pseudonymizer Database Schema v1.1.0
 -- ============================================
 
 -- Enable foreign key constraints
@@ -48,11 +52,12 @@ CREATE TABLE entities (
     first_seen_timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     gender TEXT,
     confidence_score REAL,
-    theme TEXT NOT NULL,
+    theme TEXT NOT NULL,                  -- library theme, or 'custom' (Story 10.11)
     is_ambiguous BOOLEAN NOT NULL DEFAULT 0,
     ambiguity_reason TEXT,
 
-    CHECK (entity_type IN ('PERSON', 'LOCATION', 'ORG'))
+    -- Story 10.7: one row per (text, type); entity_type is PERSON, LOCATION or ORG (no CHECK in the code)
+    CONSTRAINT uq_entities_full_name_entity_type UNIQUE (full_name, entity_type)
 );
 
 -- Indexes for performance
@@ -77,9 +82,9 @@ CREATE TABLE operations (
     entity_count INTEGER NOT NULL,
     processing_time_seconds REAL NOT NULL,
     success BOOLEAN NOT NULL,
-    error_message TEXT,
+    error_message TEXT
 
-    CHECK (operation_type IN ('PROCESS', 'BATCH', 'VALIDATE', 'IMPORT', 'EXPORT', 'DESTROY'))
+    -- operation_type values written by the code: PROCESS, BATCH, ERASURE (no CHECK in the code)
 );
 
 CREATE INDEX idx_operations_timestamp ON operations(timestamp);
@@ -98,7 +103,7 @@ CREATE TABLE metadata (
 -- - 'passphrase_canary': Encrypted verification string
 -- - 'encryption_salt': Salt for PBKDF2
 -- - 'kdf_iterations': PBKDF2 iteration count
--- - 'schema_version': Database schema version
+-- - 'schema_version': Database schema version ('1.1.0'; '1.0.0' before Story 10.7)
 -- - 'file:{path}:hash': File hash for idempotency
 ```
 
@@ -213,10 +218,10 @@ def init_database(db_path: str, passphrase: str) -> None:
     session = Session()
 
     try:
-        session.add(Metadata(key='schema_version', value=json.dumps('1.0.0')))
+        # Values are plain strings; four keys (gdpr_pseudonymizer/data/database.py:244-264)
+        session.add(Metadata(key='schema_version', value=SCHEMA_VERSION))  # '1.1.0'
         session.add(Metadata(key='encryption_salt', value=base64.b64encode(salt).decode('ascii')))
-        session.add(Metadata(key='kdf_iterations', value=json.dumps(100000)))
-        session.add(Metadata(key='encryption_algorithm', value=json.dumps('AES-256-SIV')))
+        session.add(Metadata(key='kdf_iterations', value=str(EncryptionService.PBKDF2_ITERATIONS)))
 
         # Passphrase canary (validates correct passphrase on database open)
         # Encrypted with AES-SIV deterministic encryption
@@ -230,6 +235,18 @@ def init_database(db_path: str, passphrase: str) -> None:
     finally:
         session.close()
 ```
+
+---
+
+### 9.5 Schema Conversion (Story 10.7)
+
+A database made before Story 10.7 is converted once, on its first open by a 10.7 or later version (`open_database`, `gdpr_pseudonymizer/data/database.py:301`, which calls `_ensure_current_schema` at `:399`, after the passphrase check).
+
+- **Recognition** (`_is_pre_10_7`, `:444-470`): a pre-10.7 file holds `schema_version` "1.0.0" and a unique index on `full_name` alone. A 10.7 file holds neither and is left alone. If only one of the two holds, the open stops with `DatabaseConversionError` and nothing is changed.
+- **One transaction** (`_ensure_current_schema`, `:551-612`): its own `sqlite3` connection in autocommit mode (`isolation_level=None`), a busy timeout of 30 s (`CONVERSION_BUSY_TIMEOUT_SECONDS`, `:40`), and an explicit `BEGIN IMMEDIATE` (`_begin_immediate`, `:473`). Inside it the file is checked again, so a second process that waited for the lock finds it converted and changes nothing.
+- **The rebuild** (`_rebuild_entities_table`, `:488-515`): creates `entities_new` with the current definition, copies every row by named columns, values as stored (nothing is decrypted), compares the row counts, drops the old table, renames the new one and recreates the indexes. Then `schema_version` is set to "1.1.0" (`_write_schema_version`, `:518`) and the transaction commits.
+- **Failure:** any error rolls the transaction back, so the tables, indexes and rows are as before and the file is never deleted; the open stops with `DatabaseConversionError` and a message naming the likely cause.
+- **Going back:** a converted file is unsafe to open with version 2.2 or older, which looks names up by text alone. No automatic copy is kept.
 
 ---
 
