@@ -26,6 +26,20 @@ from gdpr_pseudonymizer.validation.workflow import ValidationWorkflow
 if TYPE_CHECKING:
     from gdpr_pseudonymizer.gui.workers.detection_worker import DetectionResult
 
+# The kinds of decision a row can hold (Story 10.10, AC14): kept (the row is
+# sent: accepted, corrected, added) or dropped (rejected). Pending is neither.
+_KEPT = frozenset(
+    {EntityReviewState.CONFIRMED, EntityReviewState.MODIFIED, EntityReviewState.ADDED}
+)
+_DROPPED = frozenset({EntityReviewState.REJECTED})
+
+
+def _same_kind(old: EntityReviewState | None, new: EntityReviewState) -> bool:
+    """True when a row's decision stays kept, or stays dropped."""
+    if old is None:
+        return False
+    return (old in _KEPT and new in _KEPT) or (old in _DROPPED and new in _DROPPED)
+
 
 class GUIValidationState(QObject):
     """Manages validation state for the GUI, wrapping core ValidationSession.
@@ -60,6 +74,20 @@ class GUIValidationState(QObject):
         # group's order, set by each edit's command (Story 10.9). A second
         # edit is placed from these spans, not from the detected ones.
         self._edited_spans_by_id: dict[str, list[tuple[int, int]]] = {}
+        # Name and type of each row added by hand, as it was added (Story
+        # 10.10, Lionel's Q3): the name a correction or a type change groups
+        # it by, fixed like a detected row's stored key, because a type
+        # change retypes the row in place.
+        self._hand_key_by_id: dict[str, tuple[str, str]] = {}
+        # Ids of the rows whose current decision is their own: made on that
+        # place alone (Story 10.10 AC14; Lionel, 2026-10-14, Q5-Q7 and
+        # Ctrl+Shift+R). That is a row ticked in the list and accepted or
+        # rejected, a row rejected with Ctrl+Shift+R, a row added by hand, a
+        # custom pseudonym, and an accept, reject, correction or type change
+        # that reached that row only. A group action skips another row's own
+        # opposite decision. Every command that changes a row saves and
+        # restores the row's flag, so undo and redo keep it exact.
+        self._own_ids: set[str] = set()
 
     @property
     def undo_stack(self) -> QUndoStack:
@@ -88,6 +116,8 @@ class GUIValidationState(QObject):
         self._reviews_by_id.clear()
         self._candidate_key_by_id.clear()
         self._edited_spans_by_id.clear()
+        self._hand_key_by_id.clear()
+        self._own_ids.clear()
         self._known_entity_ids.clear()
         self._undo_stack.clear()
 
@@ -146,11 +176,23 @@ class GUIValidationState(QObject):
     # ------------------------------------------------------------------
 
     def accept_entity(self, entity_id: str) -> None:
-        """Mark entity (and all rows of the same text and type) as confirmed."""
+        """Mark entity (and the other rows of its group) as confirmed.
+
+        The row clicked is always accepted. Another row of its group
+        (``_group_ids``) is accepted too, except a row the user rejected on
+        its own: a place rejected only with its group comes back with the
+        group (Story 10.10 AC14 (b); Lionel, 2026-10-14, "Skip rejected" and
+        Q7 "Whole group back"). The accept is the row's own when it reaches
+        that row only; otherwise every row it reaches follows the group.
+        """
         review = self._reviews_by_id.get(entity_id)
         if review is None:
             return
-        group_ids = self._group_ids(review)
+        group_ids = [
+            eid
+            for eid in self._group_ids(review)
+            if eid == entity_id or not self._decided_alone_id(eid, _DROPPED)
+        ]
         if len(group_ids) > 1:
             self._undo_stack.beginMacro("Accepter le groupe")
             for eid in group_ids:
@@ -158,15 +200,30 @@ class GUIValidationState(QObject):
                 self._undo_stack.push(cmd)
             self._undo_stack.endMacro()
         else:
-            cmd = _SingleActionCommand(self, entity_id, EntityReviewState.CONFIRMED)
+            cmd = _SingleActionCommand(
+                self, entity_id, EntityReviewState.CONFIRMED, alone=True
+            )
             self._undo_stack.push(cmd)
 
     def reject_entity(self, entity_id: str) -> None:
-        """Mark entity (and all rows of the same text and type) as rejected."""
+        """Mark entity (and the other rows of its group) as rejected.
+
+        The row clicked is always rejected. Another row of its group
+        (``_group_ids``) is rejected too, except a row the user accepted or
+        corrected on its own (Story 10.10 AC14 (c); Lionel's Q5, 2026-10-14,
+        "Skip your own"). A row that only followed a group action follows
+        this one, so accepting a name and then rejecting it from any place
+        rejects every place. The reject is the row's own when it reaches that
+        row only; otherwise every row it reaches follows the group.
+        """
         review = self._reviews_by_id.get(entity_id)
         if review is None:
             return
-        group_ids = self._group_ids(review)
+        group_ids = [
+            eid
+            for eid in self._group_ids(review)
+            if eid == entity_id or not self._decided_alone_id(eid, _KEPT)
+        ]
         if len(group_ids) > 1:
             self._undo_stack.beginMacro("Rejeter le groupe")
             for eid in group_ids:
@@ -174,22 +231,45 @@ class GUIValidationState(QObject):
                 self._undo_stack.push(cmd)
             self._undo_stack.endMacro()
         else:
-            cmd = _SingleActionCommand(self, entity_id, EntityReviewState.REJECTED)
+            cmd = _SingleActionCommand(
+                self, entity_id, EntityReviewState.REJECTED, alone=True
+            )
             self._undo_stack.push(cmd)
 
     def _group_ids(self, review: EntityReview) -> list[str]:
-        """Ids of the rows that one accept or reject acts on: same text and type.
+        """Ids of the rows that one accept or reject acts on.
 
-        A detected row uses the key stored at init, so a group action on a
-        retyped row acts on its original (text, type) group. A row added by
-        hand has no stored key and uses its current text and type.
+        A detected row uses the key stored at init: its group is every
+        detected row of that (text, type), so a group action on a retyped
+        row acts on its original group. A row added by hand has no stored
+        key and is a group of one, so an accept or a reject on it never
+        reaches a detected row (Story 10.10 AC3). The index holds detected
+        rows only, so a detected row's group never holds a row added by hand.
+        Corrections and type changes use ``_action_rows`` instead.
         """
         key = self._candidate_key_by_id.get(review.entity_id)
-        if key is not None:
-            group_key = (key[0], key[2])
+        if key is None:
+            return [review.entity_id]
+        return self._group_index.get((key[0], key[2]), [review.entity_id])
+
+    def _decided_alone(
+        self, review: EntityReview, kinds: frozenset[EntityReviewState]
+    ) -> bool:
+        """Whether the row holds a decision of ``kinds`` made on its own (AC14)."""
+        return review.entity_id in self._own_ids and review.state in kinds
+
+    def _decided_alone_id(
+        self, entity_id: str, kinds: frozenset[EntityReviewState]
+    ) -> bool:
+        review = self._reviews_by_id.get(entity_id)
+        return review is not None and self._decided_alone(review, kinds)
+
+    def _set_own(self, entity_id: str, own: bool) -> None:
+        """Record whether a row's current decision is its own (AC14)."""
+        if own:
+            self._own_ids.add(entity_id)
         else:
-            group_key = (review.entity.text, review.entity.entity_type)
-        return self._group_index.get(group_key, [review.entity_id])
+            self._own_ids.discard(entity_id)
 
     def _variant_key(
         self, review: EntityReview, entity: DetectedEntity
@@ -208,26 +288,48 @@ class GUIValidationState(QObject):
             return key
         return candidate_key(entity)
 
+    def _name_key(self, review: EntityReview) -> tuple[str, str] | None:
+        """(text, type) a row's corrections and type changes group it by.
+
+        A detected row: its stored key (Story 10.8). A row added by hand: the
+        text and type it was added with (Story 10.10). Both are fixed when
+        the row is created, so a type change or a text edit never moves a
+        row out of its group.
+        """
+        key = self._candidate_key_by_id.get(review.entity_id)
+        if key is not None:
+            return (key[0], key[2])
+        return self._hand_key_by_id.get(review.entity_id)
+
     def _action_rows(self, review: EntityReview) -> list[EntityReview]:
-        """Rows one text edit or type change acts on (Story 10.9).
+        """Rows one text edit or type change acts on (Stories 10.9, 10.10).
 
-        The row itself first, then every other row of its (text, type) group,
-        the group accept and reject use. In batch validation that is every
-        row of the name; in single-document validation a detected row is
-        alone, and a row added by hand joins the detected row of its text and
-        type.
+        The row itself first, always, whatever its state; then every other
+        row of the same name and type (``_name_key``), found by the detector
+        or added by hand (Lionel's Q3 on Story 10.10). In batch validation
+        that is every row of the name; in single-document validation it is
+        the detected row of the name (which stands for its variant
+        occurrences) and the rows added by hand.
 
-        Another row the user rejected is skipped, so a correction never
-        reaches a place the user rejected; the row acted on is always kept,
-        whatever its state (Story 10.9 AC11; Lionel, 2026-10-14).
+        Another row the user rejected on its own is skipped, so a correction
+        never reaches a place the user rejected on that place; a row rejected
+        only with its group is reached and takes the correction (Story 10.10
+        AC14 (d); Lionel, 2026-10-14, Q7, which refines Story 10.9's rule of
+        skipping every rejected row).
+
+        Accept and reject do not use this: they use ``_group_ids``, where a
+        row added by hand is alone.
         """
         rows = [review]
-        for eid in self._group_ids(review):
-            if eid == review.entity_id:
+        name = self._name_key(review)
+        if name is None:
+            return rows
+        for other in self._session._entity_reviews:
+            if other is review or self._name_key(other) != name:
                 continue
-            other = self._reviews_by_id.get(eid)
-            if other is not None and other.state != EntityReviewState.REJECTED:
-                rows.append(other)
+            if self._decided_alone(other, _DROPPED):
+                continue
+            rows.append(other)
         return rows
 
     def modify_entity_text(
@@ -248,7 +350,10 @@ class GUIValidationState(QObject):
         CLI's rule from its current span (the previous edit's, else the
         detected one) and stored with the row's one command
         (``_occurrence_spans_for_edit``), so one undo reverts them all and a
-        second edit builds on the first (Story 10.9).
+        second edit builds on the first (Story 10.9). The rows are those of
+        ``_action_rows``: every place of the name and type, found or added
+        by hand, except another place rejected on its own (Story 10.10). The
+        edit is the row's own when it reaches that row only.
         """
         review = self._reviews_by_id.get(entity_id)
         rows = self._action_rows(review) if review is not None else []
@@ -275,7 +380,13 @@ class GUIValidationState(QObject):
                 else None
             )
             cmd = _ModifyTextCommand(
-                self, entity_id, new_text, new_start, new_end, occurrence_spans=spans
+                self,
+                entity_id,
+                new_text,
+                new_start,
+                new_end,
+                occurrence_spans=spans,
+                alone=True,
             )
             self._undo_stack.push(cmd)
 
@@ -335,7 +446,10 @@ class GUIValidationState(QObject):
         The same rows as a text edit: in batch validation every row of the
         (text, type) group, as one undo macro. In single-document validation
         the row's other occurrences take its type at finalization
-        (``expand_validated_entities``), as in the CLI (Story 10.9).
+        (``expand_validated_entities``), as in the CLI (Story 10.9). Rows
+        added by hand of the same name and type take it too, and another
+        row rejected on its own is skipped (``_action_rows``, Story 10.10).
+        The change is the row's own when it reaches that row only.
         """
         review = self._reviews_by_id.get(entity_id)
         rows = self._action_rows(review) if review is not None else []
@@ -346,7 +460,7 @@ class GUIValidationState(QObject):
                 self._undo_stack.push(cmd)
             self._undo_stack.endMacro()
         else:
-            cmd = _ChangeTypeCommand(self, entity_id, new_type)
+            cmd = _ChangeTypeCommand(self, entity_id, new_type, alone=True)
             self._undo_stack.push(cmd)
 
     def add_entity(
@@ -362,23 +476,39 @@ class GUIValidationState(QObject):
         self._undo_stack.push(cmd)
         return entity_id
 
-    def bulk_accept(self, entity_ids: list[str]) -> None:
-        """Accept multiple entities as a single undoable action."""
+    def bulk_accept(self, entity_ids: list[str], alone: bool = True) -> None:
+        """Accept multiple entities as a single undoable action.
+
+        Acts on exactly the rows given. ``alone`` (Story 10.10 AC14): True
+        (the default) when the rows were ticked one by one in the list, so
+        each accept is that row's own; Ctrl+Shift+A passes False, so its
+        accepts follow the group.
+        """
         if not entity_ids:
             return
         self._undo_stack.beginMacro("Accepter la sélection")
         for eid in entity_ids:
-            cmd = _SingleActionCommand(self, eid, EntityReviewState.CONFIRMED)
+            cmd = _SingleActionCommand(
+                self, eid, EntityReviewState.CONFIRMED, alone=alone
+            )
             self._undo_stack.push(cmd)
         self._undo_stack.endMacro()
 
-    def bulk_reject(self, entity_ids: list[str]) -> None:
-        """Reject multiple entities as a single undoable action."""
+    def bulk_reject(self, entity_ids: list[str], alone: bool = True) -> None:
+        """Reject multiple entities as a single undoable action.
+
+        Acts on exactly the rows given. ``alone`` (Story 10.10 AC14): True
+        (the default) for the rows ticked in the list and for Ctrl+Shift+R,
+        so each reject is that row's own (Lionel, 2026-10-14, "Stay
+        rejected").
+        """
         if not entity_ids:
             return
         self._undo_stack.beginMacro("Rejeter la sélection")
         for eid in entity_ids:
-            cmd = _SingleActionCommand(self, eid, EntityReviewState.REJECTED)
+            cmd = _SingleActionCommand(
+                self, eid, EntityReviewState.REJECTED, alone=alone
+            )
             self._undo_stack.push(cmd)
         self._undo_stack.endMacro()
 
@@ -398,12 +528,18 @@ class GUIValidationState(QObject):
             self._undo_stack.endMacro()
 
     def accept_all_known(self) -> None:
-        """Accept all known entities."""
+        """Accept the known entities still to review.
+
+        Only pending rows: a rejected place stays rejected, and a corrected
+        place keeps its correction and stays "modifié" (Story 10.10 AC14
+        (e); Lionel's Q6, 2026-10-14, "Skip rejected"). The accepts follow
+        the group.
+        """
         ids = [
             r.entity_id
             for r in self._session._entity_reviews
             if r.entity_id in self._known_entity_ids
-            and r.state != EntityReviewState.CONFIRMED
+            and r.state == EntityReviewState.PENDING
         ]
         if ids:
             self._undo_stack.beginMacro("Accepter les déjà connues")
@@ -662,6 +798,23 @@ class GUIValidationState(QObject):
 # ------------------------------------------------------------------
 
 
+def _own_after(
+    state: GUIValidationState,
+    entity_id: str,
+    alone: bool,
+    old_own: bool,
+    old_state: EntityReviewState | None,
+    new_state: EntityReviewState,
+) -> None:
+    """Set a row's flag after a command changed it (Story 10.10 AC14 (a)).
+
+    The decision is the row's own when the action was aimed at that row
+    alone; otherwise the row keeps its flag only if it had one and its
+    decision stays of the same kind (kept, or dropped).
+    """
+    state._set_own(entity_id, alone or (old_own and _same_kind(old_state, new_state)))
+
+
 class _SingleActionCommand(QUndoCommand):
     """Accept or reject a single entity."""
 
@@ -670,6 +823,7 @@ class _SingleActionCommand(QUndoCommand):
         state: GUIValidationState,
         entity_id: str,
         new_state: EntityReviewState,
+        alone: bool = False,
     ) -> None:
         label = "Accepter" if new_state == EntityReviewState.CONFIRMED else "Rejeter"
         super().__init__(label)
@@ -677,18 +831,32 @@ class _SingleActionCommand(QUndoCommand):
         self._entity_id = entity_id
         self._new_state = new_state
         self._old_state: EntityReviewState | None = None
+        # Story 10.10: whether the action is aimed at this row alone, and the
+        # row's flag before the action (restored by undo).
+        self._alone = alone
+        self._old_own = False
 
     def redo(self) -> None:
         review = self._state._reviews_by_id.get(self._entity_id)
         if review:
             self._old_state = review.state
+            self._old_own = self._entity_id in self._state._own_ids
             review.state = self._new_state
+            _own_after(
+                self._state,
+                self._entity_id,
+                self._alone,
+                self._old_own,
+                self._old_state,
+                self._new_state,
+            )
             self._state.state_changed.emit(self._entity_id)
 
     def undo(self) -> None:
         review = self._state._reviews_by_id.get(self._entity_id)
         if review and self._old_state is not None:
             review.state = self._old_state
+            self._state._set_own(self._entity_id, self._old_own)
             self._state.state_changed.emit(self._entity_id)
 
 
@@ -703,6 +871,7 @@ class _ModifyTextCommand(QUndoCommand):
         new_start: int,
         new_end: int,
         occurrence_spans: list[tuple[int, int]] | None = None,
+        alone: bool = False,
     ) -> None:
         super().__init__("Modifier le texte")
         self._state = state
@@ -718,6 +887,9 @@ class _ModifyTextCommand(QUndoCommand):
         self._old_end: int = 0
         self._old_state: EntityReviewState | None = None
         self._old_modification: str | None = None
+        # Story 10.10: as in _SingleActionCommand.
+        self._alone = alone
+        self._old_own = False
 
     def redo(self) -> None:
         review = self._state._reviews_by_id.get(self._entity_id)
@@ -728,12 +900,21 @@ class _ModifyTextCommand(QUndoCommand):
             self._old_state = review.state
             self._old_modification = review.user_modification
             self._old_spans = self._state._edited_spans_by_id.get(self._entity_id)
+            self._old_own = self._entity_id in self._state._own_ids
             if self._new_spans is not None:
                 self._state._edited_spans_by_id[self._entity_id] = list(self._new_spans)
             review.user_modification = self._new_text
             review.entity.start_pos = self._new_start
             review.entity.end_pos = self._new_end
             review.state = EntityReviewState.MODIFIED
+            _own_after(
+                self._state,
+                self._entity_id,
+                self._alone,
+                self._old_own,
+                self._old_state,
+                EntityReviewState.MODIFIED,
+            )
             self._state.state_changed.emit(self._entity_id)
 
     def undo(self) -> None:
@@ -748,6 +929,7 @@ class _ModifyTextCommand(QUndoCommand):
             review.entity.end_pos = self._old_end
             if self._old_state is not None:
                 review.state = self._old_state
+            self._state._set_own(self._entity_id, self._old_own)
             self._state.state_changed.emit(self._entity_id)
 
 
@@ -766,14 +948,19 @@ class _ChangePseudonymCommand(QUndoCommand):
         self._new_pseudonym = new_pseudonym
         self._old_pseudonym: str | None = None
         self._old_state: EntityReviewState | None = None
+        # Story 10.10: a custom pseudonym acts on one row, so it is always
+        # the row's own decision; undo restores the flag it had.
+        self._old_own = False
 
     def redo(self) -> None:
         review = self._state._reviews_by_id.get(self._entity_id)
         if review:
             self._old_pseudonym = review.custom_pseudonym
             self._old_state = review.state
+            self._old_own = self._entity_id in self._state._own_ids
             review.custom_pseudonym = self._new_pseudonym
             review.state = EntityReviewState.MODIFIED
+            self._state._set_own(self._entity_id, True)
             self._state.state_changed.emit(self._entity_id)
 
     def undo(self) -> None:
@@ -782,6 +969,7 @@ class _ChangePseudonymCommand(QUndoCommand):
             review.custom_pseudonym = self._old_pseudonym
             if self._old_state is not None:
                 review.state = self._old_state
+            self._state._set_own(self._entity_id, self._old_own)
             self._state.state_changed.emit(self._entity_id)
 
 
@@ -793,6 +981,7 @@ class _ChangeTypeCommand(QUndoCommand):
         state: GUIValidationState,
         entity_id: str,
         new_type: str,
+        alone: bool = False,
     ) -> None:
         super().__init__("Changer le type")
         self._state = state
@@ -800,14 +989,26 @@ class _ChangeTypeCommand(QUndoCommand):
         self._new_type = new_type
         self._old_type: str | None = None
         self._old_state: EntityReviewState | None = None
+        # Story 10.10: as in _SingleActionCommand.
+        self._alone = alone
+        self._old_own = False
 
     def redo(self) -> None:
         review = self._state._reviews_by_id.get(self._entity_id)
         if review:
             self._old_type = review.entity.entity_type
             self._old_state = review.state
+            self._old_own = self._entity_id in self._state._own_ids
             review.entity.entity_type = self._new_type
             review.state = EntityReviewState.MODIFIED
+            _own_after(
+                self._state,
+                self._entity_id,
+                self._alone,
+                self._old_own,
+                self._old_state,
+                EntityReviewState.MODIFIED,
+            )
             self._state.state_changed.emit(self._entity_id)
 
     def undo(self) -> None:
@@ -817,6 +1018,7 @@ class _ChangeTypeCommand(QUndoCommand):
                 review.entity.entity_type = self._old_type
             if self._old_state is not None:
                 review.state = self._old_state
+            self._state._set_own(self._entity_id, self._old_own)
             self._state.state_changed.emit(self._entity_id)
 
 
@@ -859,10 +1061,16 @@ class _AddEntityCommand(QUndoCommand):
         self._state._session._entity_reviews.append(review)
         self._state._session.entities.append(entity)
         self._state._reviews_by_id[self._entity_id] = review
+        # Story 10.10: the row's fixed name and type for corrections, and an
+        # added row is the user's own decision.
+        self._state._hand_key_by_id[self._entity_id] = (self._text, self._entity_type)
+        self._state._own_ids.add(self._entity_id)
         self._state.entity_added.emit(self._entity_id)
 
     def undo(self) -> None:
         review = self._state._reviews_by_id.pop(self._entity_id, None)
+        self._state._hand_key_by_id.pop(self._entity_id, None)
+        self._state._own_ids.discard(self._entity_id)
         if review:
             self._state._session._entity_reviews.remove(review)
             if review.entity in self._state._session.entities:

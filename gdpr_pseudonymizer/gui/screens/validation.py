@@ -35,6 +35,7 @@ from gdpr_pseudonymizer.validation.workflow import ValidationWorkflow
 
 if TYPE_CHECKING:
     from gdpr_pseudonymizer.gui.main_window import MainWindow
+    from gdpr_pseudonymizer.gui.screens.batch import BatchScreen
     from gdpr_pseudonymizer.gui.workers.detection_worker import DetectionResult
 
 logger = get_logger(__name__)
@@ -43,8 +44,8 @@ logger = get_logger(__name__)
 class ValidationScreen(QWidget):
     """Screen for interactive entity validation before pseudonymization."""
 
-    # Signals for batch mode orchestration
-    validation_complete = Signal(object)
+    # Signals for batch mode orchestration: (document index, validated list)
+    validation_complete = Signal(int, object)
     batch_cancel_requested = Signal()
 
     def __init__(self, main_window: MainWindow) -> None:
@@ -108,6 +109,15 @@ class ValidationScreen(QWidget):
 
         self._batch_header.setVisible(False)
         layout.addWidget(self._batch_header)
+
+        # Batch mode line under the header (Story 10.10): shown only on a
+        # document other than the one the batch waits on.
+        self._batch_notice = QLabel("")
+        self._batch_notice.setObjectName("batchDocumentNotice")
+        self._batch_notice.setWordWrap(True)
+        self._batch_notice.setContentsMargins(16, 0, 16, 8)
+        self._batch_notice.setVisible(False)
+        layout.addWidget(self._batch_notice)
 
         # Splitter: editor | panel
         self._splitter = QSplitter(Qt.Orientation.Horizontal)
@@ -205,6 +215,14 @@ class ValidationScreen(QWidget):
         self._prev_btn.setText(self.tr("\u25c0 Précédent"))
         self._next_btn.setText(self.tr("Suivant \u25b6"))
         self._batch_cancel_btn.setText(self.tr("Annuler le lot"))
+        # Text approved by Lionel on 2026-10-14 (Story 10.10 AC12).
+        self._batch_notice.setText(
+            self.tr(
+                "Ce document a déjà été validé. Les modifications faites ici "
+                "ne seront pas appliquées. Revenez au document en attente de "
+                "validation avec le bouton Suivant."
+            )
+        )
 
         # Finalize button text depends on batch mode state (CODE-003)
         if self._batch_mode:
@@ -282,11 +300,26 @@ class ValidationScreen(QWidget):
     # ------------------------------------------------------------------
 
     def start_validation(self, detection_result: DetectionResult) -> None:
-        """Initialize validation with detection results.
+        """Initialize validation of a single document with detection results.
+
+        This is the single-document entry (``processing.py``: Ctrl+O, the
+        recent files, the home screen). It leaves any batch mode left by an
+        earlier or a waiting batch first, so the document's list goes to its
+        own finalization and never to the batch screen (Story 10.10 AC11).
 
         Args:
             detection_result: Result from DetectionWorker
         """
+        self._batch_mode = False
+        self._batch_header.setVisible(False)
+        self._batch_cancel_btn.setVisible(False)
+        self._batch_notice.setVisible(False)
+        self._back_btn.setVisible(True)
+        self.retranslateUi()
+        self._begin_review(detection_result)
+
+    def _begin_review(self, detection_result: DetectionResult) -> None:
+        """Build a new review state for a document and show it."""
         self._detection_result = detection_result
 
         # Create validation state
@@ -378,10 +411,80 @@ class ValidationScreen(QWidget):
             entity_type_counts={},
             detection_time_seconds=0.0,
         )
-        self.start_validation(detection_result)
+
+        # Story 10.10: in batch mode each document keeps its review state for
+        # the batch run. A document shown before is re-attached as it was left
+        # (decisions, memory of each row, undo history), with no rebuild and
+        # no known-entity pass; a document shown for the first time is built
+        # and kept.
+        batch = self._batch_screen() if self._batch_mode else None
+        kept = batch.review_state(self._doc_index) if batch is not None else None
+        if kept is not None:
+            self._attach_review(kept, detection_result)
+        else:
+            self._begin_review(detection_result)
+            if batch is not None and self._validation_state is not None:
+                batch.store_review_state(self._doc_index, self._validation_state)
+        self._apply_batch_document_rule()
 
         # Reconfigure focus order with batch widgets
         setup_focus_order_validation(self)
+
+    def _attach_review(
+        self, state: GUIValidationState, detection_result: DetectionResult
+    ) -> None:
+        """Show a document's kept review state again (Story 10.10).
+
+        The state's signals were connected once, when it was built.
+        """
+        self._detection_result = detection_result
+        self._validation_state = state
+        self._editor.set_validation_state(state)
+        self._panel.set_validation_state(state)
+        self._update_status_label()
+        self._finalize_progress.setVisible(False)
+        self._finalize_label.setVisible(False)
+        self._back_btn.setEnabled(True)
+
+    def _batch_screen(self) -> BatchScreen | None:
+        """The main window's batch screen, if there is one."""
+        batch_idx = self._main_window._screens.get("batch")
+        if batch_idx is None:
+            return None
+        widget = self._main_window.stack.widget(batch_idx)
+        from gdpr_pseudonymizer.gui.screens.batch import BatchScreen
+
+        return widget if isinstance(widget, BatchScreen) else None
+
+    def _is_awaiting_document(self) -> bool:
+        """Whether the shown review is the one the batch worker waits on.
+
+        The shown document must be the waiting one, and the review shown
+        must be the one the batch screen keeps for it (the identity guard),
+        so a single document shown with stale batch fields is refused too
+        (Story 10.10 AC1).
+        """
+        batch = self._batch_screen()
+        return (
+            batch is not None
+            and self._validation_state is not None
+            and batch.awaiting_doc_index == self._doc_index
+            and batch.review_state(self._doc_index) is self._validation_state
+        )
+
+    def _apply_batch_document_rule(self) -> None:
+        """Only the waiting document can be validated (Story 10.10 AC1).
+
+        On any other document of the batch, the finalize button is disabled
+        and the line under the header says why; its actions stay available
+        and their changes stay with that document's review.
+        """
+        if not self._batch_mode:
+            self._batch_notice.setVisible(False)
+            return
+        awaiting = self._is_awaiting_document()
+        self._finalize_btn.setEnabled(awaiting)
+        self._batch_notice.setVisible(not awaiting)
 
     @property
     def editor(self) -> EntityEditor:
@@ -474,21 +577,30 @@ class ValidationScreen(QWidget):
         text = doc_text[start_pos:end_pos]
         self._validation_state.add_entity(text, entity_type, start_pos, end_pos)
 
-    def _handle_bulk_action(self, action: str, entity_ids: list[str]) -> None:
-        """Route bulk actions from panel to validation state."""
+    def _handle_bulk_action(
+        self, action: str, entity_ids: list[str], alone: bool = True
+    ) -> None:
+        """Route bulk actions from panel to validation state.
+
+        ``alone`` (Story 10.10): whether each accepted or rejected row's
+        decision is the user's own, made on that place. True for the rows
+        ticked in the list and for Ctrl+Shift+R (the default; Lionel,
+        2026-10-14, "Stay rejected"); Ctrl+Shift+A passes False, so its
+        accepts follow the group.
+        """
         if self._validation_state is None:
             return
 
         from gdpr_pseudonymizer.gui.widgets.toast import Toast
 
         if action == "accept":
-            self._validation_state.bulk_accept(entity_ids)
+            self._validation_state.bulk_accept(entity_ids, alone=alone)
             Toast.show_message(
                 qarg(self.tr("%1 entités acceptées"), str(len(entity_ids))),
                 self._main_window,
             )
         elif action == "reject":
-            self._validation_state.bulk_reject(entity_ids)
+            self._validation_state.bulk_reject(entity_ids, alone=alone)
             Toast.show_message(
                 qarg(self.tr("%1 entités rejetées"), str(len(entity_ids))),
                 self._main_window,
@@ -649,7 +761,8 @@ class ValidationScreen(QWidget):
         if not pending_ids:
             return
 
-        self._handle_bulk_action("accept", pending_ids)
+        # Story 10.10: these accepts follow the group (not the user's own).
+        self._handle_bulk_action("accept", pending_ids, alone=False)
 
     def _on_reject_all(self) -> None:
         """Reject all pending entities (Ctrl+Shift+R)."""
@@ -776,9 +889,14 @@ class ValidationScreen(QWidget):
             return
 
         if self._batch_mode:
-            # In batch mode: emit validated entities for BatchScreen orchestration
+            # In batch mode: emit the document's index and its validated
+            # entities for BatchScreen orchestration. Only the document the
+            # worker waits on can be validated (Story 10.10 AC1): a guard
+            # behind the disabled button.
+            if not self._is_awaiting_document():
+                return
             validated = self._validation_state.get_validated_entities()
-            self.validation_complete.emit(validated)
+            self.validation_complete.emit(self._doc_index, validated)
             return
 
         from gdpr_pseudonymizer.gui.widgets.confirm_dialog import ConfirmDialog
