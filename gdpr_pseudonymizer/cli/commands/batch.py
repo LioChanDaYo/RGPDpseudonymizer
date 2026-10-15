@@ -41,6 +41,8 @@ from gdpr_pseudonymizer.cli.validators import (
     validate_theme_or_exit,
 )
 from gdpr_pseudonymizer.core.document_processor import DocumentProcessor
+from gdpr_pseudonymizer.data.database import open_database
+from gdpr_pseudonymizer.exceptions import DatabaseConversionError
 from gdpr_pseudonymizer.utils.logger import configure_logging, get_logger
 
 # Configure logging
@@ -451,6 +453,10 @@ def batch_command(
         # Initialize database if needed
         ensure_database(effective_db_path, resolved_passphrase, console)
 
+        # Open it once before any document: a pre-10.7 file is converted here,
+        # once, before any worker opens it (Story 10.7, AC3)
+        _convert_database_before_workers(effective_db_path, resolved_passphrase)
+
         # Determine processing mode based on workers parameter
         actual_workers = min(cpu_count(), effective_workers, 8)
         actual_workers = max(1, actual_workers)
@@ -712,6 +718,35 @@ def batch_command(
             "Check file permissions and try again.",
         )
         sys.exit(2)
+
+
+def _convert_database_before_workers(db_path: str, passphrase: str) -> None:
+    """Open the database once before any document is processed (Story 10.7).
+
+    A database made before Story 10.7 is converted by its first open, so it
+    is converted here, once, before the workers start. A conversion that
+    cannot be made stops the run before any document, with its message. Any
+    other open error is left to the per-document processing, as before.
+
+    Args:
+        db_path: Path to the database (created by ensure_database if missing)
+        passphrase: Database passphrase
+    """
+    if not Path(db_path).exists():
+        return
+    try:
+        with open_database(db_path, passphrase):
+            pass
+    except DatabaseConversionError as e:
+        format_error_message(
+            "Database Conversion Failed",
+            str(e),
+            "Make the database file and its folder writable, free some disk "
+            "space or close other programs using it, then run the command again.",
+        )
+        sys.exit(1)
+    except Exception as e:
+        logger.info("batch_database_precheck_skipped", error_type=type(e).__name__)
 
 
 def _display_batch_summary(result: BatchResult) -> None:

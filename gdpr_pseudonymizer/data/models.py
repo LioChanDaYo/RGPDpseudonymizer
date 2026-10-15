@@ -6,7 +6,7 @@ import uuid
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import JSON, Boolean, DateTime, Float, Integer, String
+from sqlalchemy import JSON, Boolean, DateTime, Float, Integer, String, UniqueConstraint
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -21,9 +21,17 @@ class Entity(Base):
 
     This table stores the mapping between real entities (names, locations, organizations)
     and their assigned pseudonyms. All sensitive fields will be encrypted at rest.
+
+    A row is identified by its text and its type (Story 10.7): the same text
+    under two types has two rows and two pseudonyms.
     """
 
     __tablename__ = "entities"
+    __table_args__ = (
+        UniqueConstraint(
+            "full_name", "entity_type", name="uq_entities_full_name_entity_type"
+        ),
+    )
 
     id: Mapped[str] = mapped_column(
         String, primary_key=True, default=lambda: str(uuid.uuid4())
@@ -35,7 +43,7 @@ class Entity(Base):
     # Encrypted fields (encryption logic in Epic 2)
     first_name: Mapped[str | None] = mapped_column(String, nullable=True)  # PERSON only
     last_name: Mapped[str | None] = mapped_column(String, nullable=True)  # PERSON only
-    full_name: Mapped[str] = mapped_column(String, nullable=False, unique=True)
+    full_name: Mapped[str] = mapped_column(String, nullable=False)
     pseudonym_first: Mapped[str | None] = mapped_column(String, nullable=True)
     pseudonym_last: Mapped[str | None] = mapped_column(String, nullable=True)
     pseudonym_full: Mapped[str] = mapped_column(String, nullable=False)

@@ -18,6 +18,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
+from gdpr_pseudonymizer.core.mapping_key import mapping_key
 from gdpr_pseudonymizer.data.database import DatabaseSession, open_database
 from gdpr_pseudonymizer.data.models import Entity, Operation
 from gdpr_pseudonymizer.data.repositories.audit_repository import AuditRepository
@@ -217,20 +218,20 @@ class DocumentProcessor:
         breaks, tabs, no-break spaces, repeated spaces) to one space, so a
         name hard-wrapped over a line break gets the same key as its one-line
         spelling (10.3a QA REL-001). A key with single spaces only is
-        unchanged. Used for DB lookups and pseudonym assignment, and by the
-        validation preview and known-entity check, so all three agree.
+        unchanged. Used for DB lookups and pseudonym assignment, by the
+        validation preview and the known-entity check, and by the desktop
+        app's known-entity check, so they all agree: they all call
+        ``mapping_key`` (Story 10.7). A mapping row is identified by this key
+        and the entity type.
 
         Args:
-            ctx: Processing context with compositional engine
+            ctx: Processing context (unused; kept for the callers)
             entity: Detected entity to normalize
 
         Returns:
             Stripped entity text ready for lookup/assignment
         """
-        text = ctx.compositional_engine.strip_titles(entity.text)
-        if entity.entity_type == "LOCATION":
-            text = ctx.compositional_engine.strip_prepositions(text)
-        return " ".join(text.split())
+        return mapping_key(entity.text, entity.entity_type)
 
     def _build_pseudonym_assigner(
         self, ctx: _ProcessingContext
@@ -247,17 +248,22 @@ class DocumentProcessor:
         Returns:
             Callable that maps DetectedEntity -> pseudonym preview string
         """
-        preview_cache: dict[str, str] = {}
+        # Keyed on (mapping key, entity type): each type of a text gets its
+        # own preview (Story 10.7, AC2)
+        preview_cache: dict[tuple[str, str], str] = {}
 
         def pseudonym_assigner(entity: DetectedEntity) -> str:
             entity_text_stripped = DocumentProcessor._normalize_entity_text(ctx, entity)
 
-            existing_entity = ctx.mapping_repo.find_by_full_name(entity_text_stripped)
+            existing_entity = ctx.mapping_repo.find_by_full_name_and_type(
+                entity_text_stripped, entity.entity_type
+            )
             if existing_entity:
                 return existing_entity.pseudonym_full
 
-            if entity_text_stripped in preview_cache:
-                return preview_cache[entity_text_stripped]
+            cache_key = (entity_text_stripped, entity.entity_type)
+            if cache_key in preview_cache:
+                return preview_cache[cache_key]
 
             try:
                 assignment = ctx.compositional_engine.assign_compositional_pseudonym(
@@ -265,7 +271,7 @@ class DocumentProcessor:
                     entity_type=entity.entity_type,
                     gender=None,
                 )
-                preview_cache[entity_text_stripped] = assignment.pseudonym_full
+                preview_cache[cache_key] = assignment.pseudonym_full
                 return assignment.pseudonym_full
             except (ValueError, RuntimeError) as e:
                 logger.warning(
@@ -295,14 +301,18 @@ class DocumentProcessor:
             )
             return detected_entities
 
-        # Separate entities into known (auto-accept) and unknown (need validation)
+        # Separate entities into known (auto-accept) and unknown (need validation).
+        # Known means stored under the same type (Story 10.7, AC2): a text
+        # stored only under another type reaches validation.
         known_entities: list[DetectedEntity] = []
         unknown_entities: list[DetectedEntity] = []
 
         for entity in detected_entities:
             entity_text_stripped = self._normalize_entity_text(ctx, entity)
 
-            existing = ctx.mapping_repo.find_by_full_name(entity_text_stripped)
+            existing = ctx.mapping_repo.find_by_full_name_and_type(
+                entity_text_stripped, entity.entity_type
+            )
             if existing:
                 known_entities.append(entity)
             else:
@@ -475,6 +485,80 @@ class DocumentProcessor:
         )
         return assignment.pseudonym_full, new_entity
 
+    @staticmethod
+    def _pseudonyms_of_other_types(
+        ctx: _ProcessingContext,
+        entity_text_stripped: str,
+        entity_type: str,
+        entity_cache: dict[tuple[str, str], str],
+    ) -> set[str]:
+        """Pseudonyms a mapping key already has under other types (Story 10.7).
+
+        Stored rows of the key under another type, and this run's pseudonyms
+        of the key under another type.
+        """
+        taken = {
+            stored.pseudonym_full
+            for stored in ctx.mapping_repo.find_all_by_full_name(entity_text_stripped)
+            if stored.entity_type != entity_type
+        }
+        taken.update(
+            pseudonym
+            for (key, key_type), pseudonym in entity_cache.items()
+            if key == entity_text_stripped and key_type != entity_type
+        )
+        return taken
+
+    @staticmethod
+    def _assign_untaken_pseudonym(
+        ctx: _ProcessingContext,
+        new_entity: Entity,
+        taken: set[str],
+    ) -> tuple[str, Entity]:
+        """Give a new row a pseudonym that its key has under no other type.
+
+        Story 10.7, AC1: two rows of one key never share a pseudonym. A
+        standalone PERSON component reuses a stored component without the
+        library's used-pseudonym check (``_handle_standalone_component``), so
+        it can equal the pseudonym of the same text under another type when
+        the library's name and place lists overlap. The row then gets a fresh
+        pseudonym from the library, whose collision check skips every
+        pseudonym it has handed out, and keeps no component link (so the
+        stored component mapping of the name is not changed).
+
+        Raises:
+            RuntimeError: If the library gives no untaken pseudonym
+        """
+        for _attempt in range(len(taken) + 1):
+            assignment = ctx.pseudonym_manager.assign_pseudonym(
+                entity_type=new_entity.entity_type, gender=None
+            )
+            if assignment.pseudonym_full not in taken:
+                break
+        else:
+            raise RuntimeError("no pseudonym left that differs from the other types")
+        logger.info(
+            "pseudonym_reassigned_for_type",
+            entity_type=new_entity.entity_type,
+            other_types=len(taken),
+        )
+        untaken = Entity(
+            entity_type=new_entity.entity_type,
+            first_name=None,
+            last_name=None,
+            full_name=new_entity.full_name,
+            pseudonym_first=None,
+            pseudonym_last=None,
+            pseudonym_full=assignment.pseudonym_full,
+            first_seen_timestamp=new_entity.first_seen_timestamp,
+            gender=new_entity.gender,
+            confidence_score=new_entity.confidence_score,
+            theme=new_entity.theme,
+            is_ambiguous=new_entity.is_ambiguous,
+            ambiguity_reason=new_entity.ambiguity_reason,
+        )
+        return assignment.pseudonym_full, untaken
+
     def _resolve_pseudonyms(
         self,
         ctx: _ProcessingContext,
@@ -487,7 +571,9 @@ class DocumentProcessor:
         )
         replacements: list[tuple[int, int, str]] = []
         new_entities: list[Entity] = []
-        entity_cache: dict[str, str] = {}
+        # Keyed on (mapping key, entity type): one row and one pseudonym per
+        # pair (Story 10.7, AC1, AC2)
+        entity_cache: dict[tuple[str, str], str] = {}
         entities_new = 0
         entities_reused = 0
         type_counts: dict[str, int] = {}
@@ -500,19 +586,25 @@ class DocumentProcessor:
             )
             entity_text_stripped = self._normalize_entity_text(ctx, entity)
             type_counts[entity.entity_type] = type_counts.get(entity.entity_type, 0) + 1
+            cache_key = (entity_text_stripped, entity.entity_type)
 
-            if entity_text_stripped in entity_cache:
-                pseudonym = entity_cache[entity_text_stripped]
+            if cache_key in entity_cache:
+                pseudonym = entity_cache[cache_key]
                 entities_reused += 1
             else:
-                existing_entity = ctx.mapping_repo.find_by_full_name(
-                    entity_text_stripped
+                existing_entity = ctx.mapping_repo.find_by_full_name_and_type(
+                    entity_text_stripped, entity.entity_type
                 )
                 if existing_entity:
                     pseudonym = existing_entity.pseudonym_full
-                    entity_cache[entity_text_stripped] = pseudonym
+                    entity_cache[cache_key] = pseudonym
                     entities_reused += 1
                 else:
+                    # Pseudonyms this text already has under other types: a new
+                    # one must differ from them (Story 10.7, AC1)
+                    taken = self._pseudonyms_of_other_types(
+                        ctx, entity_text_stripped, entity.entity_type, entity_cache
+                    )
                     component_match = (
                         self._check_component_match(
                             ctx, entity_text_stripped, new_entities
@@ -520,15 +612,19 @@ class DocumentProcessor:
                         if entity.entity_type == "PERSON"
                         else None
                     )
-                    if component_match:
+                    if component_match and component_match not in taken:
                         pseudonym = component_match
-                        entity_cache[entity_text_stripped] = pseudonym
+                        entity_cache[cache_key] = pseudonym
                         entities_reused += 1
                     else:
                         pseudonym, new_entity = self._assign_new_pseudonym(
                             ctx, entity, entity_text_stripped
                         )
-                        entity_cache[entity_text_stripped] = pseudonym
+                        if pseudonym in taken:
+                            pseudonym, new_entity = self._assign_untaken_pseudonym(
+                                ctx, new_entity, taken
+                            )
+                        entity_cache[cache_key] = pseudonym
                         new_entities.append(new_entity)
                         entities_new += 1
 

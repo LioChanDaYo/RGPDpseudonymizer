@@ -467,6 +467,8 @@ Delete an entity mapping from the database (GDPR Article 17 erasure).
 
 Deleting a mapping converts pseudonymization into **anonymization**: without the mapping, the pseudonym cannot be linked to an identifiable individual, placing the data outside GDPR scope.
 
+A name can be stored under several types, one row each: deleting by name lists every row of the name, then removes them all (one ERASURE audit entry per row); `--id` removes one row and reports the rows of the same name that remain.
+
 **Usage:**
 ```bash
 gdpr-pseudo delete-mapping [ENTITY_NAME] [OPTIONS]

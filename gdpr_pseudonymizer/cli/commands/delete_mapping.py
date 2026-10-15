@@ -1,7 +1,10 @@
 """Delete-mapping command for GDPR Article 17 erasure.
 
-This command deletes a specific entity mapping from the database,
-converting pseudonymization into anonymization for GDPR compliance.
+This command deletes entity mappings from the database, converting
+pseudonymization into anonymization for GDPR compliance. A name can be stored
+under several types, one row each (Story 10.7): deleting by name deletes every
+row of the name; deleting by --id deletes one row and says which rows of the
+same name remain.
 """
 
 from __future__ import annotations
@@ -58,6 +61,10 @@ def delete_mapping_command(
     without the mapping, the pseudonym cannot be linked to an identifiable
     individual, placing the data outside GDPR scope.
 
+    By name, every row of the name is deleted (one per type it is stored
+    under), each listed first. By --id, one row is deleted, and the rows of
+    the same name under other types are reported.
+
     Examples:
         # Delete by entity name
         gdpr-pseudo delete-mapping "Marie Dupont" --db mappings.db
@@ -113,13 +120,15 @@ def delete_mapping_command(
             repo = SQLiteMappingRepository(db_session)
             audit_repo = AuditRepository(db_session.session)
 
-            # Find entity first (for confirmation display)
+            # Find entities first (for confirmation display). By name: every
+            # row of the name, one per type (Story 10.7, AC4).
             if entity_name:
-                entity = repo.find_by_full_name(entity_name)
+                entities = repo.find_all_by_full_name(entity_name)
             else:
-                entity = _find_entity_by_id(repo, entity_id)  # type: ignore[arg-type]
+                found = _find_entity_by_id(repo, entity_id)  # type: ignore[arg-type]
+                entities = [found] if found is not None else []
 
-            if entity is None:
+            if not entities:
                 identifier = entity_name or entity_id
                 format_error_message(
                     "Entity Not Found",
@@ -130,7 +139,7 @@ def delete_mapping_command(
 
             # Display confirmation prompt (unless --force)
             if not force:
-                _display_confirmation(entity)
+                _display_confirmation(entities)
                 confirmation = Prompt.ask(
                     "Type 'yes' to confirm permanent deletion",
                     default="",
@@ -141,13 +150,15 @@ def delete_mapping_command(
                     )
                     sys.exit(0)
 
-            # Perform deletion (use entity.id for --id to handle partial UUIDs)
+            # Perform deletion: by name, every row in one transaction; by id,
+            # that row (entity.id handles partial UUIDs)
             if entity_name:
-                deleted = repo.delete_entity_by_full_name(entity_name)
+                deleted_rows = repo.delete_entities_by_full_name(entity_name)
             else:
-                deleted = repo.delete_entity_by_id(entity.id)
+                one = repo.delete_entity_by_id(entities[0].id)
+                deleted_rows = [one] if one is not None else []
 
-            if deleted is None:
+            if not deleted_rows:
                 format_error_message(
                     "Deletion Failed",
                     "Entity was not found during deletion (may have been deleted concurrently).",
@@ -155,49 +166,65 @@ def delete_mapping_command(
                 )
                 sys.exit(1)
 
-            # Create ERASURE audit log entry (Task 5.1.3)
+            # Create one ERASURE audit log entry per deleted row (Task 5.1.3)
             elapsed = time.monotonic() - start_time
-            operation = Operation(
-                id=str(uuid.uuid4()),
-                timestamp=datetime.now(timezone.utc),
-                operation_type="ERASURE",
-                files_processed=[],
-                user_modifications={
-                    "deleted_entity_id": deleted.id,
-                    "deleted_entity_name": deleted.full_name,
-                    "deleted_entity_type": deleted.entity_type,
-                    "reason": reason,
-                },
-                model_name="N/A",
-                model_version="N/A",
-                theme_selected=deleted.theme,
-                entity_count=1,
-                processing_time_seconds=round(elapsed, 3),
-                success=True,
-            )
-            audit_repo.log_operation(operation)
+            operations: list[Operation] = []
+            for deleted in deleted_rows:
+                operation = Operation(
+                    id=str(uuid.uuid4()),
+                    timestamp=datetime.now(timezone.utc),
+                    operation_type="ERASURE",
+                    files_processed=[],
+                    user_modifications={
+                        "deleted_entity_id": deleted.id,
+                        "deleted_entity_name": deleted.full_name,
+                        "deleted_entity_type": deleted.entity_type,
+                        "reason": reason,
+                    },
+                    model_name="N/A",
+                    model_version="N/A",
+                    theme_selected=deleted.theme,
+                    entity_count=1,
+                    processing_time_seconds=round(elapsed, 3),
+                    success=True,
+                )
+                audit_repo.log_operation(operation)
+                operations.append(operation)
 
             # Success output
-            console.print(
-                "\n[bold green]Entity mapping deleted successfully.[/bold green]"
-            )
-            console.print(
-                f"  [bold]Entity:[/bold] {deleted.full_name} ({deleted.entity_type})"
-            )
-            console.print(f"  [bold]Pseudonym:[/bold] {deleted.pseudonym_full}")
-            console.print(
-                f"\n[dim]The pseudonym '{deleted.pseudonym_full}' is now permanently anonymous.[/dim]"
-            )
-            console.print(
-                f"[dim]ERASURE audit log entry created (operation {operation.id[:8]}...).[/dim]"
-            )
+            if len(deleted_rows) == 1:
+                console.print(
+                    "\n[bold green]Entity mapping deleted successfully.[/bold green]"
+                )
+            else:
+                console.print(
+                    f"\n[bold green]{len(deleted_rows)} entity mappings deleted "
+                    "successfully.[/bold green]"
+                )
+            for deleted, operation in zip(deleted_rows, operations):
+                console.print(
+                    f"  [bold]Entity:[/bold] {deleted.full_name} ({deleted.entity_type})"
+                )
+                console.print(f"  [bold]Pseudonym:[/bold] {deleted.pseudonym_full}")
+                console.print(
+                    f"\n[dim]The pseudonym '{deleted.pseudonym_full}' is now permanently anonymous.[/dim]"
+                )
+                console.print(
+                    f"[dim]ERASURE audit log entry created (operation {operation.id[:8]}...).[/dim]"
+                )
 
-            logger.info(
-                "entity_deleted",
-                entity_id=deleted.id,
-                entity_type=deleted.entity_type,
-                reason=reason,
-            )
+                logger.info(
+                    "entity_deleted",
+                    entity_id=deleted.id,
+                    entity_type=deleted.entity_type,
+                    reason=reason,
+                )
+
+            # By id: tell the user which rows of the same name remain
+            if not entity_name:
+                remaining = repo.find_all_by_full_name(deleted_rows[0].full_name)
+                if remaining:
+                    _display_remaining(remaining)
 
     except FileNotFoundError:
         format_error_message(
@@ -260,24 +287,62 @@ def _find_entity_by_id(repo: SQLiteMappingRepository, entity_id: str) -> Entity 
     return None
 
 
-def _display_confirmation(entity: Entity) -> None:
-    """Display entity details and deletion warning.
+def _display_confirmation(entities: list[Entity]) -> None:
+    """Display the details of every row to delete and the deletion warning.
 
     Args:
-        entity: Entity to display
+        entities: Entities to display (one row per type of the name)
     """
     console.print("\n[bold red]WARNING: PERMANENT DELETION[/bold red]\n")
-    console.print("You are about to delete the following entity mapping:\n")
-    console.print(f"  [bold]Name:[/bold]       {entity.full_name}")
-    console.print(f"  [bold]Type:[/bold]       {entity.entity_type}")
-    console.print(f"  [bold]Pseudonym:[/bold]  {entity.pseudonym_full}")
-    console.print(f"  [bold]Theme:[/bold]      {entity.theme}")
-    if entity.first_seen_timestamp:
+    if len(entities) == 1:
+        console.print("You are about to delete the following entity mapping:\n")
+    else:
         console.print(
-            f"  [bold]First seen:[/bold] {entity.first_seen_timestamp.strftime('%Y-%m-%d %H:%M')}"
+            f"You are about to delete the following {len(entities)} entity "
+            "mappings (one per type of this name):\n"
         )
+    for index, entity in enumerate(entities):
+        if index:
+            console.print()
+        console.print(f"  [bold]Name:[/bold]       {entity.full_name}")
+        console.print(f"  [bold]Type:[/bold]       {entity.entity_type}")
+        console.print(f"  [bold]Pseudonym:[/bold]  {entity.pseudonym_full}")
+        console.print(f"  [bold]Theme:[/bold]      {entity.theme}")
+        if entity.first_seen_timestamp:
+            console.print(
+                f"  [bold]First seen:[/bold] {entity.first_seen_timestamp.strftime('%Y-%m-%d %H:%M')}"
+            )
+    if len(entities) == 1:
+        console.print(
+            f"\n[yellow]This will permanently delete the mapping. "
+            f"The pseudonym '{entities[0].pseudonym_full}' will become permanently "
+            f"anonymous. This cannot be undone.[/yellow]\n"
+        )
+    else:
+        pseudonyms = ", ".join(f"'{entity.pseudonym_full}'" for entity in entities)
+        console.print(
+            f"\n[yellow]This will permanently delete these {len(entities)} "
+            f"mappings. The pseudonyms {pseudonyms} will become permanently "
+            f"anonymous. This cannot be undone.[/yellow]\n"
+        )
+
+
+def _display_remaining(remaining: list[Entity]) -> None:
+    """After a deletion by --id, report the rows of the same name that remain.
+
+    Args:
+        remaining: Rows still stored for the deleted row's name (other types)
+    """
+    count = len(remaining)
+    noun, verb, label = (
+        ("row", "remains", "type") if count == 1 else ("rows", "remain", "types")
+    )
+    types = ", ".join(entity.entity_type for entity in remaining)
     console.print(
-        f"\n[yellow]This will permanently delete the mapping. "
-        f"The pseudonym '{entity.pseudonym_full}' will become permanently "
-        f"anonymous. This cannot be undone.[/yellow]\n"
+        f"\n[yellow]{count} other {noun} with the same name {verb} "
+        f"({label}: {types}).[/yellow]"
+    )
+    console.print(
+        "[yellow]Delete one with 'gdpr-pseudo delete-mapping --id <uuid>', or every "
+        "row of the name with 'gdpr-pseudo delete-mapping \"<name>\"'.[/yellow]"
     )

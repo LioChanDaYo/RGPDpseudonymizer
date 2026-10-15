@@ -1,4 +1,8 @@
-"""Integration tests for encrypted database end-to-end workflows."""
+"""Integration tests for encrypted database end-to-end workflows.
+
+Story 10.7 (AC2): repository lookups take the entity type
+(``find_by_full_name_and_type``); the text-only lookup is gone.
+"""
 
 from pathlib import Path
 
@@ -49,7 +53,7 @@ class TestEncryptedDatabaseIntegration:
             assert saved.id is not None
 
             # Step 4: Query entity
-            found = repo.find_by_full_name("Marie Curie")
+            found = repo.find_by_full_name_and_type("Marie Curie", "PERSON")
             assert found is not None
             assert found.first_name == "Marie"
             assert found.pseudonym_full == "Leia Organa"
@@ -84,7 +88,7 @@ class TestEncryptedDatabaseIntegration:
         # Query in second session (after close)
         with open_database(str(db_path), passphrase) as db_session:
             repo = SQLiteMappingRepository(db_session)
-            found = repo.find_by_full_name("Albert Einstein")
+            found = repo.find_by_full_name_and_type("Albert Einstein", "PERSON")
 
             assert found is not None
             assert found.id == saved_id
@@ -112,9 +116,9 @@ class TestEncryptedDatabaseIntegration:
             repo.save(entity)
 
             # Query multiple times
-            result1 = repo.find_by_full_name("Test Person")
-            result2 = repo.find_by_full_name("Test Person")
-            result3 = repo.find_by_full_name("Test Person")
+            result1 = repo.find_by_full_name_and_type("Test Person", "PERSON")
+            result2 = repo.find_by_full_name_and_type("Test Person", "PERSON")
+            result3 = repo.find_by_full_name_and_type("Test Person", "PERSON")
 
             # All results should be identical
             assert result1 is not None
@@ -299,8 +303,8 @@ class TestEncryptedDatabaseIntegration:
                 repo2 = SQLiteMappingRepository(session2)
 
                 # Both sessions can read concurrently
-                result1 = repo1.find_by_full_name("Concurrent Test")
-                result2 = repo2.find_by_full_name("Concurrent Test")
+                result1 = repo1.find_by_full_name_and_type("Concurrent Test", "PERSON")
+                result2 = repo2.find_by_full_name_and_type("Concurrent Test", "PERSON")
 
                 assert result1 is not None
                 assert result2 is not None
@@ -341,7 +345,7 @@ class TestEncryptedDatabaseIntegration:
                 )
 
             # Query should be fast with index
-            result = repo.find_by_full_name("Person 5")
+            result = repo.find_by_full_name_and_type("Person 5", "PERSON")
             assert result is not None
             assert result.full_name == "Person 5"
 
@@ -393,11 +397,11 @@ class TestEncryptedDatabaseIntegration:
             assert len(result) == 2
 
             # Verify new entity was saved
-            batch_entity = repo.find_by_full_name("Batch Entity 1")
+            batch_entity = repo.find_by_full_name_and_type("Batch Entity 1", "PERSON")
             assert batch_entity is not None
             assert batch_entity.pseudonym_full == "Batch Pseudonym 1"
 
             # Verify duplicate used ORIGINAL pseudonym (not the new one)
-            original_entity = repo.find_by_full_name("First Entity")
+            original_entity = repo.find_by_full_name_and_type("First Entity", "PERSON")
             assert original_entity is not None
             assert original_entity.pseudonym_full == "First Pseudonym"  # Original!

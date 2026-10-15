@@ -8,18 +8,51 @@ from __future__ import annotations
 
 import base64
 import os
+import sqlite3
+import time
+from datetime import datetime, timezone
 from pathlib import Path
 
 from sqlalchemy import create_engine, text
+from sqlalchemy.dialects import sqlite as sqlite_dialect
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.schema import CreateTable
 
 from gdpr_pseudonymizer.data.encryption import EncryptionService
-from gdpr_pseudonymizer.data.models import Base, Metadata
-from gdpr_pseudonymizer.exceptions import CorruptedDatabaseError
+from gdpr_pseudonymizer.data.models import Base, Entity, Metadata
+from gdpr_pseudonymizer.exceptions import (
+    CorruptedDatabaseError,
+    DatabaseConversionError,
+)
 from gdpr_pseudonymizer.utils.logger import get_logger
 
 logger = get_logger(__name__)
+
+# Story 10.7 (rule (a)): a database created or converted by this version keys
+# its entities on (text, type) and holds schema_version "1.1.0". A database
+# made before 10.7 holds "1.0.0" and a unique key on the text alone; the first
+# open by this version converts it, once.
+SCHEMA_VERSION = "1.1.0"
+PRE_10_7_SCHEMA_VERSION = "1.0.0"
+
+# How long a process waits for another one's conversion (its write lock)
+CONVERSION_BUSY_TIMEOUT_SECONDS = 30.0
+
+# Indexes of init_database, also recreated by the conversion
+_ENTITY_INDEX_STATEMENTS = (
+    "CREATE INDEX IF NOT EXISTS idx_entities_full_name ON entities(full_name)",
+    "CREATE INDEX IF NOT EXISTS idx_entities_type ON entities(entity_type)",
+    "CREATE INDEX IF NOT EXISTS idx_entities_first_name ON entities(first_name)",
+    "CREATE INDEX IF NOT EXISTS idx_entities_last_name ON entities(last_name)",
+    # Partial index for ambiguous entities
+    "CREATE INDEX IF NOT EXISTS idx_entities_ambiguous ON entities(is_ambiguous) "
+    "WHERE is_ambiguous = 1",
+)
+_OPERATION_INDEX_STATEMENTS = (
+    "CREATE INDEX IF NOT EXISTS idx_operations_timestamp ON operations(timestamp)",
+    "CREATE INDEX IF NOT EXISTS idx_operations_type ON operations(operation_type)",
+)
 
 
 class DatabaseSession:
@@ -30,7 +63,7 @@ class DatabaseSession:
     Example:
         >>> with open_database("mapping.db", "my_passphrase") as db_session:
         ...     repo = SQLiteMappingRepository(db_session)
-        ...     entity = repo.find_by_full_name("Marie Dubois")
+        ...     entity = repo.find_by_full_name_and_type("Marie Dubois", "PERSON")
     """
 
     def __init__(
@@ -195,49 +228,12 @@ def init_database(db_path: str, passphrase: str) -> None:
             conn.execute(text("PRAGMA foreign_keys=ON"))
             conn.commit()
 
-        # Create indexes for query optimization
+        # Create indexes for query optimization: entity table indexes (for
+        # encrypted field queries), then operations table indexes (for audit
+        # queries)
         with engine.connect() as conn:
-            # Entity table indexes (for encrypted field queries)
-            conn.execute(
-                text(
-                    "CREATE INDEX IF NOT EXISTS idx_entities_full_name ON entities(full_name)"
-                )
-            )
-            conn.execute(
-                text(
-                    "CREATE INDEX IF NOT EXISTS idx_entities_type ON entities(entity_type)"
-                )
-            )
-            conn.execute(
-                text(
-                    "CREATE INDEX IF NOT EXISTS idx_entities_first_name ON entities(first_name)"
-                )
-            )
-            conn.execute(
-                text(
-                    "CREATE INDEX IF NOT EXISTS idx_entities_last_name ON entities(last_name)"
-                )
-            )
-            # Partial index for ambiguous entities
-            conn.execute(
-                text(
-                    "CREATE INDEX IF NOT EXISTS idx_entities_ambiguous ON entities(is_ambiguous) "
-                    "WHERE is_ambiguous = 1"
-                )
-            )
-
-            # Operations table indexes (for audit queries)
-            conn.execute(
-                text(
-                    "CREATE INDEX IF NOT EXISTS idx_operations_timestamp ON operations(timestamp)"
-                )
-            )
-            conn.execute(
-                text(
-                    "CREATE INDEX IF NOT EXISTS idx_operations_type ON operations(operation_type)"
-                )
-            )
-
+            for statement in _ENTITY_INDEX_STATEMENTS + _OPERATION_INDEX_STATEMENTS:
+                conn.execute(text(statement))
             conn.commit()
 
         # Initialize metadata table with encryption parameters
@@ -245,8 +241,8 @@ def init_database(db_path: str, passphrase: str) -> None:
         session = session_local()
 
         try:
-            # Store schema version
-            session.add(Metadata(key="schema_version", value="1.0.0"))
+            # Store schema version (Story 10.7: the (text, type) key)
+            session.add(Metadata(key="schema_version", value=SCHEMA_VERSION))
 
             # Store encryption salt (base64-encoded)
             session.add(
@@ -308,6 +304,12 @@ def open_database(db_path: str, passphrase: str) -> DatabaseSession:
     Loads encryption parameters from metadata, validates passphrase using canary,
     and returns database session ready for use.
 
+    A database made before Story 10.7 (one row per text) is converted to one
+    row per (text, type) right after the passphrase check, once, in one
+    transaction (rule (a)): every row keeps its id, type and pseudonym. If the
+    conversion cannot be made, the file is left unchanged and the open stops
+    with DatabaseConversionError.
+
     Args:
         db_path: Path to existing database file
         passphrase: User passphrase for decryption
@@ -319,6 +321,8 @@ def open_database(db_path: str, passphrase: str) -> DatabaseSession:
         FileNotFoundError: If database file doesn't exist
         ValueError: If passphrase incorrect
         CorruptedDatabaseError: If database metadata missing or invalid
+        DatabaseConversionError: If a pre-10.7 database cannot be converted, or
+            its schema version and table definition disagree (file unchanged)
 
     Example:
         >>> with open_database("mapping.db", "my_passphrase") as db_session:
@@ -388,10 +392,16 @@ def open_database(db_path: str, passphrase: str) -> DatabaseSession:
                 "Incorrect passphrase. Please check your passphrase and try again."
             )
 
+        # Story 10.7 (rule (a)): convert a pre-10.7 file once, after the
+        # passphrase check and before anything else uses it. The session's
+        # connection is released first; the session is used again afterwards.
+        session.close()
+        _ensure_current_schema(db_path)
+
         # Return database session with encryption service
         return DatabaseSession(engine, session, encryption_service)
 
-    except (ValueError, CorruptedDatabaseError) as e:
+    except (ValueError, CorruptedDatabaseError, DatabaseConversionError) as e:
         # Clean up on validation errors
         session.close()
         engine.dispose()
@@ -401,3 +411,202 @@ def open_database(db_path: str, passphrase: str) -> DatabaseSession:
         session.close()
         engine.dispose()
         raise Exception(f"Failed to open database: {e}") from e
+
+
+# ---------------------------------------------------------------------------
+# Story 10.7, rule (a): conversion of a pre-10.7 file, once, on open
+# ---------------------------------------------------------------------------
+
+
+def _read_schema_version(conn: sqlite3.Connection) -> str | None:
+    """The stored schema_version, or None if the row is missing."""
+    row = conn.execute(
+        "SELECT value FROM metadata WHERE \"key\" = 'schema_version'"
+    ).fetchone()
+    return None if row is None else str(row[0])
+
+
+def _unique_keys(conn: sqlite3.Connection) -> list[list[str]]:
+    """Columns of each UNIQUE index of the entities table (primary key excluded)."""
+    keys: list[list[str]] = []
+    for _seq, name, unique, origin, _partial in conn.execute(
+        "PRAGMA index_list('entities')"
+    ).fetchall():
+        if not unique or origin == "pk":
+            continue
+        quoted = '"' + str(name).replace('"', '""') + '"'
+        keys.append(
+            [str(info[2]) for info in conn.execute(f"PRAGMA index_info({quoted})")]
+        )
+    return keys
+
+
+def _is_pre_10_7(conn: sqlite3.Connection) -> bool:
+    """True for a pre-10.7 file, False for a 10.7 one.
+
+    A pre-10.7 file holds schema_version "1.0.0" and a unique index on the
+    text alone; a 10.7 file holds neither.
+
+    Raises:
+        DatabaseConversionError: If only one of the two holds (format not
+            recognised); nothing is changed
+    """
+    version = _read_schema_version(conn)
+    old_version = version == PRE_10_7_SCHEMA_VERSION
+    old_key = ["full_name"] in _unique_keys(conn)
+    if old_version and old_key:
+        return True
+    if not old_version and not old_key:
+        return False
+    logger.error(
+        "database_format_not_recognised",
+        schema_version=version,
+        unique_key_on_text_alone=old_key,
+    )
+    raise DatabaseConversionError(
+        "The database format is not recognised: its schema version "
+        f"({version if version is not None else 'missing'}) does not match its "
+        "table definition. The file was not changed."
+    )
+
+
+def _begin_immediate(conn: sqlite3.Connection) -> None:
+    """Start the conversion's transaction, taking the write lock at once."""
+    conn.execute("BEGIN IMMEDIATE")
+
+
+def _entities_table_sql(table_name: str) -> str:
+    """CREATE TABLE statement of the current Entity model, under table_name."""
+    statement = CreateTable(Entity.__table__)  # type: ignore[arg-type]
+    sql = str(statement.compile(dialect=sqlite_dialect.dialect())).strip()
+    prefix = "CREATE TABLE entities ("
+    if not sql.startswith(prefix):
+        raise RuntimeError("unexpected CREATE TABLE statement for entities")
+    return f"CREATE TABLE {table_name} (" + sql[len(prefix) :]
+
+
+def _rebuild_entities_table(conn: sqlite3.Connection) -> int:
+    """Rebuild the entities table with the (text, type) key; return its row count.
+
+    Creates the new table, copies every row by named columns (values as
+    stored, nothing decrypted), checks the row count, drops the old table,
+    renames the new one and recreates the indexes. Runs inside the caller's
+    transaction.
+    """
+    columns = [column.name for column in Entity.__table__.columns]
+    stored = [
+        str(row[1]) for row in conn.execute("PRAGMA table_info('entities')").fetchall()
+    ]
+    if sorted(stored) != sorted(columns):
+        raise RuntimeError("the entities table has unexpected columns")
+    column_list = ", ".join(columns)
+    before = int(conn.execute("SELECT COUNT(*) FROM entities").fetchone()[0])
+    conn.execute(_entities_table_sql("entities_new"))
+    conn.execute(
+        f"INSERT INTO entities_new ({column_list}) SELECT {column_list} FROM entities"
+    )
+    copied = int(conn.execute("SELECT COUNT(*) FROM entities_new").fetchone()[0])
+    if copied != before:
+        raise RuntimeError(f"row count mismatch: {before} before, {copied} copied")
+    conn.execute("DROP TABLE entities")
+    conn.execute("ALTER TABLE entities_new RENAME TO entities")
+    for statement in _ENTITY_INDEX_STATEMENTS:
+        conn.execute(statement)
+    return before
+
+
+def _write_schema_version(conn: sqlite3.Connection, version: str) -> None:
+    """Write schema_version; the last step of the conversion before COMMIT."""
+    stamp = datetime.now(timezone.utc).replace(tzinfo=None)
+    cursor = conn.execute(
+        "UPDATE metadata SET value = ?, updated_at = ? "
+        "WHERE \"key\" = 'schema_version'",
+        (version, stamp.strftime("%Y-%m-%d %H:%M:%S.%f")),
+    )
+    if cursor.rowcount != 1:
+        raise RuntimeError("schema_version row not found")
+
+
+def _conversion_failed_message(error: BaseException) -> str:
+    """User message of a failed conversion (no entity text, no file content)."""
+    detail = str(error).lower()
+    if isinstance(error, PermissionError) or "readonly" in detail:
+        cause = "the database file or its folder is read-only"
+    elif "locked" in detail or "busy" in detail:
+        cause = "another program is using the database"
+    elif "full" in detail or "disk" in detail:
+        cause = "the disk is full or cannot be written"
+    else:
+        cause = (
+            "the file or its folder is read-only, the disk is full, "
+            "or another program is using the database"
+        )
+    return (
+        "The database could not be converted to the new format "
+        "(one row per name and type). The file is unchanged. "
+        f"Likely cause: {cause}. ({type(error).__name__}: {error})"
+    )
+
+
+def _ensure_current_schema(db_path: str) -> bool:
+    """Convert a pre-10.7 file to the (text, type) key, once (Story 10.7, rule (a)).
+
+    Runs on its own connection in autocommit mode with an explicit
+    ``BEGIN IMMEDIATE``, so the whole conversion (the table rebuild and the
+    new schema_version) is one transaction: a failure at any point rolls back
+    every change and the file is left as it was. A second process waits for
+    the write lock (busy timeout), checks the file again inside its own
+    transaction, finds it converted and changes nothing.
+
+    Args:
+        db_path: Path to an existing database whose passphrase was checked
+
+    Returns:
+        True if this call converted the file, False if it had nothing to do
+
+    Raises:
+        DatabaseConversionError: If the conversion cannot be made, or the
+            format is not recognised; the file is unchanged
+    """
+    conn = sqlite3.connect(
+        db_path, timeout=CONVERSION_BUSY_TIMEOUT_SECONDS, isolation_level=None
+    )
+    try:
+        if not _is_pre_10_7(conn):
+            return False
+        started = time.monotonic()
+        try:
+            _begin_immediate(conn)
+            try:
+                if not _is_pre_10_7(conn):
+                    # Another process converted the file meanwhile
+                    conn.execute("ROLLBACK")
+                    return False
+                rows = _rebuild_entities_table(conn)
+                _write_schema_version(conn, SCHEMA_VERSION)
+                conn.execute("COMMIT")
+            except BaseException:
+                if conn.in_transaction:
+                    try:
+                        conn.execute("ROLLBACK")
+                    except sqlite3.Error as rollback_error:
+                        logger.error(
+                            "database_conversion_rollback_failed",
+                            error_type=type(rollback_error).__name__,
+                        )
+                raise
+        except DatabaseConversionError:
+            raise
+        except Exception as exc:
+            logger.error("database_conversion_failed", error_type=type(exc).__name__)
+            raise DatabaseConversionError(_conversion_failed_message(exc)) from exc
+        logger.info(
+            "database_converted",
+            rows=rows,
+            from_version=PRE_10_7_SCHEMA_VERSION,
+            to_version=SCHEMA_VERSION,
+            duration_seconds=round(time.monotonic() - started, 3),
+        )
+        return True
+    finally:
+        conn.close()

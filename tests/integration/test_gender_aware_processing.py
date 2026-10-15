@@ -7,6 +7,9 @@ End-to-end test verifying:
 - Unknown names get valid pseudonyms from combined list
 - Entity.gender field populated in database
 - Compound names handled correctly
+
+Story 10.7 (AC2): repository lookups take the entity type
+(``find_by_full_name_and_type``); the text-only lookup is gone.
 """
 
 from __future__ import annotations
@@ -117,27 +120,27 @@ class TestGenderAwareProcessing:
             repo = SQLiteMappingRepository(db_session)
 
             # Marie Dupont should have gender="female"
-            marie = repo.find_by_full_name("Marie Dupont")
+            marie = repo.find_by_full_name_and_type("Marie Dupont", "PERSON")
             assert marie is not None
             assert marie.gender == "female"
 
             # Jean Martin should have gender="male"
-            jean = repo.find_by_full_name("Jean Martin")
+            jean = repo.find_by_full_name_and_type("Jean Martin", "PERSON")
             assert jean is not None
             assert jean.gender == "male"
 
             # Marie-Claire Dubois should have gender="female" (compound, first component)
-            mc = repo.find_by_full_name("Marie-Claire Dubois")
+            mc = repo.find_by_full_name_and_type("Marie-Claire Dubois", "PERSON")
             assert mc is not None
             assert mc.gender == "female"
 
             # Unknown name should have gender=None
-            unknown = repo.find_by_full_name("Xyzabcdef Noname")
+            unknown = repo.find_by_full_name_and_type("Xyzabcdef Noname", "PERSON")
             assert unknown is not None
             assert unknown.gender is None
 
             # Paris (LOCATION) should have gender=None
-            paris = repo.find_by_full_name("Paris")
+            paris = repo.find_by_full_name_and_type("Paris", "LOCATION")
             assert paris is not None
             assert paris.gender is None
 
@@ -181,7 +184,7 @@ class TestGenderAwareProcessing:
         # Verify the pseudonym first name comes from the female list
         with open_database(test_db, passphrase) as db_session:
             repo = SQLiteMappingRepository(db_session)
-            entity = repo.find_by_full_name("Marie Dupont")
+            entity = repo.find_by_full_name_and_type("Marie Dupont", "PERSON")
             assert entity is not None
             assert entity.pseudonym_first in library.first_names["female"]
 
@@ -224,6 +227,6 @@ class TestGenderAwareProcessing:
 
         with open_database(test_db, passphrase) as db_session:
             repo = SQLiteMappingRepository(db_session)
-            entity = repo.find_by_full_name("Jean Martin")
+            entity = repo.find_by_full_name_and_type("Jean Martin", "PERSON")
             assert entity is not None
             assert entity.pseudonym_first in library.first_names["male"]

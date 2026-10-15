@@ -30,7 +30,11 @@ def _create_test_entity(**overrides: object) -> Entity:
 
 
 class TestDeleteEntityByFullName:
-    """Tests for delete_entity_by_full_name()."""
+    """Tests for delete_entities_by_full_name().
+
+    Story 10.7 (AC4): deletion by name removes every row of the name and
+    returns them all (a list), so no caller can erase part of a name.
+    """
 
     def test_delete_existing_entity_returns_decrypted(self, tmp_path: Path) -> None:
         """Deleting an existing entity returns the decrypted entity."""
@@ -42,9 +46,10 @@ class TestDeleteEntityByFullName:
             repo = SQLiteMappingRepository(db_session)
             repo.save(_create_test_entity())
 
-            deleted = repo.delete_entity_by_full_name("Marie Dupont")
+            deleted_rows = repo.delete_entities_by_full_name("Marie Dupont")
 
-            assert deleted is not None
+            assert len(deleted_rows) == 1
+            deleted = deleted_rows[0]
             assert deleted.full_name == "Marie Dupont"
             assert deleted.pseudonym_full == "Leia Organa"
             assert deleted.entity_type == "PERSON"
@@ -59,13 +64,13 @@ class TestDeleteEntityByFullName:
             repo = SQLiteMappingRepository(db_session)
             repo.save(_create_test_entity())
 
-            repo.delete_entity_by_full_name("Marie Dupont")
+            repo.delete_entities_by_full_name("Marie Dupont")
 
-            assert repo.find_by_full_name("Marie Dupont") is None
+            assert repo.find_all_by_full_name("Marie Dupont") == []
             assert len(repo.find_all()) == 0
 
-    def test_delete_nonexistent_returns_none(self, tmp_path: Path) -> None:
-        """Deleting a nonexistent entity returns None."""
+    def test_delete_nonexistent_returns_empty_list(self, tmp_path: Path) -> None:
+        """Deleting a nonexistent entity returns an empty list (Story 10.7, AC4)."""
         db_path = tmp_path / "test.db"
         passphrase = "test_passphrase_123!"
         init_database(str(db_path), passphrase)
@@ -73,8 +78,8 @@ class TestDeleteEntityByFullName:
         with open_database(str(db_path), passphrase) as db_session:
             repo = SQLiteMappingRepository(db_session)
 
-            result = repo.delete_entity_by_full_name("Nobody")
-            assert result is None
+            result = repo.delete_entities_by_full_name("Nobody")
+            assert result == []
 
     def test_delete_does_not_affect_other_entities(self, tmp_path: Path) -> None:
         """Deleting one entity leaves others intact."""
@@ -100,7 +105,7 @@ class TestDeleteEntityByFullName:
                 )
             )
 
-            repo.delete_entity_by_full_name("Marie Dupont")
+            repo.delete_entities_by_full_name("Marie Dupont")
 
             remaining = repo.find_all()
             assert len(remaining) == 1
@@ -138,7 +143,8 @@ class TestDeleteEntityById:
 
             repo.delete_entity_by_id(saved.id)
 
-            assert repo.find_by_full_name("Marie Dupont") is None
+            # Story 10.7 (AC4): no row of the name is left
+            assert repo.find_all_by_full_name("Marie Dupont") == []
 
     def test_delete_by_id_not_found(self, tmp_path: Path) -> None:
         """Deleting by nonexistent ID returns None."""
