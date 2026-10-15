@@ -25,6 +25,7 @@ from gdpr_pseudonymizer.core.custom_pseudonym import (
     Refusal,
     check_custom_pseudonym,
     custom_entity_fields,
+    document_words,
     finalization_message,
     fold,
     untracked_custom_values,
@@ -168,11 +169,12 @@ class DocumentProcessor:
         # NLP detector (initialized lazily)
         self._detector: HybridDetector | None = None
 
-        # Story 10.11 (AC3): folded values of custom pseudonyms that the
-        # library does not track (a one-word custom pseudonym of a person, a
-        # part stored without its real counterpart). Set per document by
-        # _reset_pseudonym_state, extended when a custom pseudonym is
-        # registered; a generated pseudonym never takes one of them.
+        # Story 10.11 (AC3, AC19): folded values a generated pseudonym must
+        # not take: every beginning and ending of a person's custom
+        # pseudonym, except a part one of its own real words already has
+        # (``untracked_custom_values``). Set per document by
+        # _reset_pseudonym_state, and again when this run's custom
+        # pseudonyms are registered.
         self._custom_taken: set[str] = set()
 
     def _get_detector(self) -> HybridDetector:
@@ -424,8 +426,9 @@ class DocumentProcessor:
         The last check: the database may have changed since the pseudonym
         was set. A refusal raises before anything is saved or written. Then
         each name gets its new row (saved with the run's other new rows),
-        the library marks its pseudonym and its bound parts as used, its
-        untracked values are kept, and the run's cache holds it, so every
+        the library marks its pseudonym and its bound parts as used, the
+        values a generated pseudonym must not take are kept (AC19), and the
+        run's cache holds it, so every
         occurrence of the name takes it and a lone first or last name of the
         run takes the matching part.
 
@@ -439,6 +442,7 @@ class DocumentProcessor:
             return set()
         stored = ctx.mapping_repo.find_all()
         names = sorted(custom_pseudonyms)
+        words = document_words(document_text)  # read once (QA PERF-001, PO A5)
         for name in names:
             others = {k: v for k, v in custom_pseudonyms.items() if k != name}
             refusal = check_custom_pseudonym(
@@ -448,10 +452,12 @@ class DocumentProcessor:
                 custom_pseudonyms[name],
                 document_text,
                 others,
+                words,
             )
             if refusal is not None:
                 logger.warning("custom_pseudonym_refused", reason=refusal.reason.value)
                 raise CustomPseudonymError(finalization_message(refusal))
+        custom_rows: list[Entity] = []
         for name in names:
             text, entity_type = name
             pseudonym = custom_pseudonyms[name]
@@ -461,12 +467,17 @@ class DocumentProcessor:
                 pseudonym_full=pseudonym,
                 first_seen_timestamp=datetime.now(timezone.utc),
                 theme=CUSTOM_THEME,
-                **custom_entity_fields(text, entity_type, pseudonym),
+                **custom_entity_fields(
+                    text, entity_type, pseudonym, stored, custom_pseudonyms
+                ),
             )
             ctx.pseudonym_manager.load_existing_mappings([row])
-            self._custom_taken |= untracked_custom_values([row])
             entity_cache[name] = pseudonym
             new_entities.append(row)
+            custom_rows.append(row)
+        # With every stored row, so that a value a real word already has as
+        # its part is not kept (QA GUARD-001, AC19)
+        self._custom_taken = untracked_custom_values([*stored, *custom_rows])
         logger.info("custom_pseudonyms_registered", count=len(names))
         return set(names)
 
@@ -622,8 +633,8 @@ class DocumentProcessor:
         return taken
 
     def _uses_custom_part(self, new_entity: Entity) -> bool:
-        """Whether a generated pseudonym, or one of its parts, is an untracked
-        value of a custom pseudonym (Story 10.11, AC3)."""
+        """Whether a generated pseudonym, or one of its parts, is a value of a
+        custom pseudonym that it must not take (Story 10.11, AC3, AC19)."""
         if not self._custom_taken:
             return False
         values = (
@@ -652,8 +663,8 @@ class DocumentProcessor:
         stored component mapping of the name is not changed).
 
         Story 10.11 (AC3): a draw whose pseudonym or part is in
-        ``custom_taken`` (the untracked values of custom pseudonyms, folded)
-        is drawn again too.
+        ``custom_taken`` (the values of custom pseudonyms it must not take,
+        folded; AC19) is drawn again too.
 
         Raises:
             RuntimeError: If the library gives no untaken pseudonym
@@ -859,7 +870,7 @@ class DocumentProcessor:
         ctx.pseudonym_manager.reset_preview_state()
         existing_entities = ctx.mapping_repo.find_all()
         ctx.pseudonym_manager.load_existing_mappings(existing_entities)
-        # Story 10.11 (AC3): the stored custom values the library does not track
+        # Story 10.11 (AC3, AC19): the stored custom values not to generate
         self._custom_taken = untracked_custom_values(existing_entities)
         logger.info(
             "pseudonym_manager_reset_after_validation",

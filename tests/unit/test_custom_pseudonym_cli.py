@@ -43,13 +43,6 @@ ONE = (
     "Quentrel Zorbalia a signé avec Zorbaville. Le contrat est avec Quentrel Zorbalia."
 )
 QZZ = "Quentrel Zorbalia a signé avec Zorbal."
-# The amendment's tests that fail on the code QA failed (Story 10.11, Task 8.1).
-_AMEND_XFAIL = pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.11 amendment: reproduces MW-001, GUARD-001 or the PO's A1-A4 on the unfixed code",
-)
-
 # The corrected name and the lone "Zorbal" of QZZ.
 QZZ_SPANS = [(0, len(QZ)), (QZZ.find("Zorbal."), QZZ.find("Zorbal.") + len("Zorbal"))]
 
@@ -515,7 +508,6 @@ def _store_qz(db: str, pseudonym_first: str, pseudonym_last: str) -> None:
         )
 
 
-@_AMEND_XFAIL
 def test_cli_two_word_stored_last_part_example_accepted(tmp_path: Path) -> None:
     """T38 (Q-D "Refuse", last name; QA MW-001): the real last name's stored
     part has two words; [C] shows one warning holding the example, then the
@@ -545,7 +537,6 @@ def test_cli_two_word_stored_last_part_example_accepted(tmp_path: Path) -> None:
     )
 
 
-@_AMEND_XFAIL
 def test_cli_own_part_on_lone_name_keeps_later_full_names(tmp_path: Path) -> None:
     """T36c (AC19; QA GUARD-001; the command line has no pre-filled value,
     so Q-H does not apply): [C] on a lone "Quentrel" typed with the part it
@@ -578,9 +569,7 @@ def test_cli_own_part_on_lone_name_keeps_later_full_names(tmp_path: Path) -> Non
     assert stored is not None and stored[3] == full_written and stored[4] == "Quorix"
 
 
-@pytest.mark.parametrize(
-    "case", [pytest.param("offered_first", marks=_AMEND_XFAIL), "offered_last"]
-)
+@pytest.mark.parametrize("case", ["offered_first", "offered_last"])
 def test_cli_generation_never_takes_a_beginning_or_ending(
     tmp_path: Path, case: str
 ) -> None:

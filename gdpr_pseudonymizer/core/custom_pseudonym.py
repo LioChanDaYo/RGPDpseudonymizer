@@ -10,21 +10,30 @@ finalization:
 
 - the custom pseudonym is normalized like a mapping key (titles and, for a
   place, a leading preposition removed; spaces collapsed);
-- for a person it is split at its last space into a first-name part and a
-  last-name part (Lionel's Q4); a one-word pseudonym has no parts;
+- for a person it is split into a first-name part and a last-name part
+  (Lionel's Q4 and Q-G): a part the real last or first name already has is
+  matched whole first; else at its last space, except that the library's own
+  last names of two or more words stay whole; a one-word pseudonym has no
+  parts;
 - it is checked against Lionel's rules, in this order: a name that already
   has a stored pseudonym keeps it (Q1); a real first or last name that
   already has a part keeps it (Q-D); it may not be, in whole or in part,
   another name's pseudonym (Q2); it may not be a real name: a capitalised
   word or words of the document, or a full name stored in the mapping
   database (Q2, Q-C, Q-C2). Capitals, accents and repeated spaces are
-  ignored when comparing (Q-C).
+  ignored when comparing (Q-C). For a person, every beginning and every
+  ending of the pseudonym (Q2) and every run of its words (Q-C; a linking
+  word followed by another word is not compared alone, Lionel's Q-I) are
+  checked, so the checks do not depend on where it is split (QA MW-001,
+  PO A1).
 
 Nothing here logs or raises with a name or a pseudonym in it.
 """
 
 from __future__ import annotations
 
+import functools
+import json
 import re
 import unicodedata
 from collections.abc import Callable, Iterable, Mapping
@@ -98,19 +107,76 @@ def normalize_custom_pseudonym(text: str, entity_type: str) -> str:
 
 
 def split_custom_pseudonym(
-    pseudonym: str, entity_type: str
+    pseudonym: str,
+    entity_type: str,
+    bound_first: str | None = None,
+    bound_last: str | None = None,
 ) -> tuple[str | None, str | None]:
-    """A person's custom pseudonym split at its last space (Lionel's Q4).
+    """A person's custom pseudonym split into a first-name part and a
+    last-name part (Lionel's Q4 and Q-G; AC17 (b)).
+
+    In this order: when the pseudonym ends with the part the real last name
+    already has (``bound_last``, as whole words), the split falls just
+    before it; else, when it starts with the part the real first name
+    already has (``bound_first``), just after it (QA MW-001, PO A2); else,
+    when it ends with one of the library's last names of two or more words,
+    just before that name (Q-G); else at its last space (Q4). At least one
+    word stays on each side; words are compared folded, and each part keeps
+    the spelling typed.
 
     Returns (first-name part, last-name part); (None, None) for a one-word
     pseudonym and for any other type.
     """
     if entity_type != "PERSON":
         return None, None
-    first, separator, last = pseudonym.rpartition(" ")
-    if not separator or not first or not last:
+    words = pseudonym.split()
+    if len(words) < 2:
         return None, None
-    return first, last
+    if bound_last and _ends_with(words, bound_last):
+        size = len(bound_last.split())
+        return " ".join(words[:-size]), " ".join(words[-size:])
+    if bound_first and _starts_with(words, bound_first):
+        size = len(bound_first.split())
+        return " ".join(words[:size]), " ".join(words[size:])
+    for library_name in library_two_word_last_names():
+        if _ends_with(words, library_name):
+            size = len(library_name.split())
+            return " ".join(words[:-size]), " ".join(words[-size:])
+    return " ".join(words[:-1]), words[-1]
+
+
+def _ends_with(words: list[str], part: str) -> bool:
+    """Whether ``words`` end with ``part``'s words (folded), with at least
+    one word before them."""
+    size = len(part.split())
+    return 0 < size < len(words) and fold(" ".join(words[-size:])) == fold(part)
+
+
+def _starts_with(words: list[str], part: str) -> bool:
+    """Whether ``words`` start with ``part``'s words (folded), with at least
+    one word after them."""
+    size = len(part.split())
+    return 0 < size < len(words) and fold(" ".join(words[:size])) == fold(part)
+
+
+@functools.cache
+def library_two_word_last_names() -> tuple[str, ...]:
+    """The library's last names of two or more words, folded, longest first
+    (Lionel's Q-G, "Keep the app's four whole").
+
+    Read from the pseudonym library files of every theme, once per process,
+    so the set follows the library; today the four of ``neutral.json``. A
+    small constant of the package: no document data is kept.
+    """
+    from gdpr_pseudonymizer.resources import PSEUDONYMS_DIR
+
+    names: set[str] = set()
+    for path in sorted(PSEUDONYMS_DIR.glob("*.json")):
+        data = json.loads(path.read_text(encoding="utf-8"))
+        for last_name in data.get("last_names", []):
+            if isinstance(last_name, str) and len(last_name.split()) >= 2:
+                names.add(fold(last_name))
+    return tuple(sorted(names, key=lambda name: (-len(name.split()), name)))
 
 
 def person_parts(name: str) -> tuple[str | None, str | None]:
@@ -138,7 +204,15 @@ _Value = tuple[str, str | None, bool]
 
 
 def _row_values(row: Entity) -> list[_Value]:
-    """A stored row's pseudonym values, each with the real text it stands for."""
+    """A stored row's pseudonym values, each with the real text it stands for.
+
+    A person's custom pseudonym (theme ``custom``) gives the same values as
+    one of this review (``_custom_values``): every beginning and every
+    ending, the values the generation guard keeps, so the check is the same
+    in both directions (PO B1). A library row gives its full pseudonym and
+    its two stored parts."""
+    if row.theme == CUSTOM_THEME and row.entity_type == "PERSON":
+        return _custom_values(row.full_name, row.entity_type, row.pseudonym_full)
     values: list[_Value] = [(row.pseudonym_full, row.full_name, True)]
     if row.pseudonym_first:
         values.append((row.pseudonym_first, row.first_name, False))
@@ -148,16 +222,22 @@ def _row_values(row: Entity) -> list[_Value]:
 
 
 def _custom_values(name: str, entity_type: str, pseudonym: str) -> list[_Value]:
-    """A custom pseudonym's values: the full one for the name, and for a
-    person both parts after the split, each with the real first or last name
-    it stands for. The last part on a one-word name stands for no real text
-    (PO R1)."""
+    """The values a custom pseudonym is compared with (Q2; AC17 (c)).
+
+    The full pseudonym, for the name; for a person also every beginning (one
+    or more whole words, for the real first name) and every ending (for the
+    real last name; on a one-word name it stands for no real text, PO R1).
+    For two words these are the full pseudonym and its two parts; none of
+    them depends on where the pseudonym is split (QA MW-001, PO A1). An
+    organisation's or a place's has the full value only (PO A3)."""
     values: list[_Value] = [(pseudonym, name, True)]
-    first, last = split_custom_pseudonym(pseudonym, entity_type)
-    if first and last:
-        real_first, real_last = person_parts(name)
-        values.append((first, real_first, False))
-        values.append((last, real_last, False))
+    if entity_type != "PERSON":
+        return values
+    words = pseudonym.split()
+    real_first, real_last = person_parts(name)
+    for size in range(1, len(words)):
+        values.append((" ".join(words[:size]), real_first, False))
+        values.append((" ".join(words[-size:]), real_last, False))
     return values
 
 
@@ -200,7 +280,35 @@ def _separator_kind(gap: str) -> str:
     return "other:" + fold(gap)
 
 
-def _capitalised_occurrence(candidate: str, document_text: str) -> bool:
+@dataclass(frozen=True)
+class DocumentWords:
+    """A document's words, read once per check or per finalization (QA
+    PERF-001, PO A5): their spans, their folded forms and, for each folded
+    word, the positions where it occurs. Nothing keeps it after the check.
+    """
+
+    text: str
+    spans: tuple[tuple[int, int], ...]
+    folded: tuple[str, ...]
+    where: Mapping[str, tuple[int, ...]]
+
+
+def document_words(document_text: str) -> DocumentWords:
+    """Read a document's words once (``DocumentWords``)."""
+    spans = tuple(token.span() for token in _WORD.finditer(document_text))
+    folded = tuple(fold(document_text[start:end]) for start, end in spans)
+    where: dict[str, list[int]] = {}
+    for position, word in enumerate(folded):
+        where.setdefault(word, []).append(position)
+    return DocumentWords(
+        document_text,
+        spans,
+        folded,
+        {word: tuple(positions) for word, positions in where.items()},
+    )
+
+
+def _capitalised_occurrence(candidate: str, words: DocumentWords) -> bool:
     """Whether ``candidate`` occurs in the document as a real name (Q-C).
 
     Its words occur as consecutive whole words of the document, with the
@@ -216,16 +324,15 @@ def _capitalised_occurrence(candidate: str, document_text: str) -> bool:
         _separator_kind(candidate[a.end() : b.start()])
         for a, b in zip(wanted_tokens, wanted_tokens[1:])
     ]
-    tokens = list(_WORD.finditer(document_text))
-    folded = [fold(token.group()) for token in tokens]
+    text, spans, folded = words.text, words.spans, words.folded
     size = len(wanted)
-    for start in range(len(tokens) - size + 1):
-        if folded[start : start + size] != wanted:
+    for start in words.where.get(wanted[0], ()):
+        if list(folded[start : start + size]) != wanted:
             continue
-        if not tokens[start].group()[0].isupper():
+        if not text[spans[start][0]].isupper():
             continue
         gaps = [
-            _separator_kind(document_text[tokens[j].end() : tokens[j + 1].start()])
+            _separator_kind(text[spans[j][1] : spans[j + 1][0]])
             for j in range(start, start + size - 1)
         ]
         if gaps == wanted_gaps:
@@ -233,13 +340,72 @@ def _capitalised_occurrence(candidate: str, document_text: str) -> bool:
     return False
 
 
-def _bound_parts(
-    rows: list[Entity], other_customs: Mapping[NameKey, str]
-) -> dict[tuple[str, str], str]:
-    """(folded real first or last name, "first" or "last") -> the part it
-    already has: from the stored person rows, then from this review's other
-    custom pseudonyms. The first one read wins (Dev Notes, PO F6)."""
-    bound: dict[tuple[str, str], str] = {}
+# Small linking words (Lionel's Q-I, "Not alone (Rec.)"), compared folded.
+LINKING_WORDS = frozenset(
+    {
+        "da",
+        "das",
+        "de",
+        "del",
+        "della",
+        "des",
+        "di",
+        "do",
+        "dos",
+        "du",
+        "la",
+        "le",
+        "les",
+        "van",
+        "von",
+        "der",
+    }
+)
+
+
+def _word_runs(pseudonym: str, entity_type: str) -> list[str]:
+    """The runs of words compared with real names (Q-C, Q-C2; PO A1, A3).
+
+    For a person, every run of consecutive whole words: the full pseudonym
+    first, then longer runs before shorter ones, left to right. For an
+    organisation or a place, the full pseudonym only.
+    """
+    if entity_type != "PERSON":
+        return [pseudonym]
+    words = pseudonym.split()
+    return [
+        " ".join(words[start : start + size])
+        for size in range(len(words), 0, -1)
+        for start in range(len(words) - size + 1)
+    ]
+
+
+def _document_runs(pseudonym: str, entity_type: str) -> list[str]:
+    """The runs compared with the document (Q-C as Lionel's Q-I refines it):
+    ``_word_runs`` without a linking word that another word of the
+    pseudonym follows, on its own. The words around it, every longer run
+    that holds it and a linking word at the end are kept."""
+    if entity_type != "PERSON":
+        return [pseudonym]
+    words = pseudonym.split()
+    return [
+        " ".join(words[start : start + size])
+        for size in range(len(words), 0, -1)
+        for start in range(len(words) - size + 1)
+        if not (
+            size == 1 and start < len(words) - 1 and fold(words[start]) in LINKING_WORDS
+        )
+    ]
+
+
+# (folded real first or last name, "first" or "last") -> the part it has
+_Bound = dict[tuple[str, str], str]
+
+
+def _stored_bound(rows: list[Entity]) -> _Bound:
+    """The parts the real first and last names already have in the stored
+    person rows. The first one read wins (Dev Notes, PO F6)."""
+    bound: _Bound = {}
     for row in rows:
         if row.entity_type != "PERSON":
             continue
@@ -247,8 +413,25 @@ def _bound_parts(
             bound.setdefault((fold(row.first_name), "first"), row.pseudonym_first)
         if row.last_name and row.pseudonym_last:
             bound.setdefault((fold(row.last_name), "last"), row.pseudonym_last)
+    return bound
+
+
+def _bound_of(bound: _Bound, name: str) -> tuple[str | None, str | None]:
+    """The parts a name's real first and last name already have."""
+    real_first, real_last = person_parts(name)
+    first = bound.get((fold(real_first), "first")) if real_first else None
+    last = bound.get((fold(real_last), "last")) if real_last else None
+    return first, last
+
+
+def _bound_parts(stored: _Bound, other_customs: Mapping[NameKey, str]) -> _Bound:
+    """The stored parts, then the parts this review's other custom
+    pseudonyms give (each split with its own real names' stored parts)."""
+    bound = dict(stored)
     for (other_name, other_type), other in other_customs.items():
-        first, last = split_custom_pseudonym(other, other_type)
+        first, last = split_custom_pseudonym(
+            other, other_type, *_bound_of(stored, other_name)
+        )
         if not first or not last:
             continue
         real_first, real_last = person_parts(other_name)
@@ -260,26 +443,24 @@ def _bound_parts(
 
 
 def _part_refusal(
-    rows: list[Entity],
-    others: Mapping[NameKey, str],
-    name: str,
-    entity_type: str,
-    pseudonym: str,
+    bound: _Bound, name: str, entity_type: str, pseudonym: str
 ) -> Refusal | None:
     """Q-D: a real first or last name that already has a part keeps it.
 
-    Only for a person and a custom pseudonym of two or more words. One
-    refusal per attempt, the first name checked first. The example takes the
-    required part and, for the other side, the part that side already has,
-    else the part typed, so the example is accepted by this rule (PO F3).
+    Only for a person and a custom pseudonym of two or more words, split
+    with the parts the real names already have, so a part of several words
+    is matched whole (QA MW-001, PO A2). One refusal per attempt, the first
+    name checked first. The example takes the required part and, for the
+    other side, the part that side already has, else the part typed, so the
+    example is accepted by this rule (PO F3).
     """
-    first, last = split_custom_pseudonym(pseudonym, entity_type)
+    bound_first, bound_last = _bound_of(bound, name)
+    first, last = split_custom_pseudonym(
+        pseudonym, entity_type, bound_first, bound_last
+    )
     if not first or not last:
         return None
-    bound = _bound_parts(rows, others)
     real_first, real_last = person_parts(name)
-    bound_first = bound.get((fold(real_first), "first")) if real_first else None
-    bound_last = bound.get((fold(real_last), "last")) if real_last else None
     example = f"{bound_first or first} {bound_last or last}"
     if real_first and bound_first is not None and fold(bound_first) != fold(first):
         return Refusal(
@@ -309,6 +490,7 @@ def check_custom_pseudonym(
     pseudonym: str,
     document_text: str,
     other_customs: Mapping[NameKey, str],
+    words: DocumentWords | None = None,
 ) -> Refusal | None:
     """The first rule a custom pseudonym breaks, or None if it is accepted.
 
@@ -321,6 +503,8 @@ def check_custom_pseudonym(
         document_text: The document's text (Q-C)
         other_customs: This review's custom pseudonyms of other names,
             keyed by (mapping key, type); the name's own entry is ignored
+        words: The document's words, when the caller checks several custom
+            pseudonyms of one document (finalization); else read here
 
     Returns:
         The refusal (Q1, Q-D, Q2, then Q-C), or None
@@ -334,7 +518,8 @@ def check_custom_pseudonym(
     others = {
         key: value for key, value in other_customs.items() if key != (name, entity_type)
     }
-    part_refusal = _part_refusal(rows, others, name, entity_type, pseudonym)
+    bound = _bound_parts(_stored_bound(rows), others)
+    part_refusal = _part_refusal(bound, name, entity_type, pseudonym)
     if part_refusal is not None:  # Q-D
         return part_refusal
     mine = _custom_values(name, entity_type, pseudonym)
@@ -344,18 +529,20 @@ def check_custom_pseudonym(
                 CustomPseudonymRefusal.PSEUDONYM_TAKEN, pseudonym, row.full_name
             )
     for (other_name, other_type), other in others.items():  # Q2: this review
+        # every beginning and ending, as its stored row will give (PO B1)
         if _clash(mine, _custom_values(other_name, other_type, other)):
             return Refusal(
                 CustomPseudonymRefusal.PSEUDONYM_TAKEN, pseudonym, other_name
             )
-    candidates = [value for value, _real, _full in mine]
-    for candidate in candidates:  # Q2, Q-C: a real name of the document
-        if _capitalised_occurrence(candidate, document_text):
-            return Refusal(CustomPseudonymRefusal.REAL_NAME, pseudonym, candidate)
+    if words is None:
+        words = document_words(document_text)
+    for run in _document_runs(pseudonym, entity_type):  # Q2, Q-C, Q-I
+        if _capitalised_occurrence(run, words):
+            return Refusal(CustomPseudonymRefusal.REAL_NAME, pseudonym, run)
     stored_names = {fold(row.full_name) for row in rows}
-    for candidate in candidates:  # Q-C2: a full name stored in the database
-        if fold(candidate) in stored_names:
-            return Refusal(CustomPseudonymRefusal.REAL_NAME, pseudonym, candidate)
+    for run in _word_runs(pseudonym, entity_type):  # Q-C2: a stored full name
+        if fold(run) in stored_names:
+            return Refusal(CustomPseudonymRefusal.REAL_NAME, pseudonym, run)
     return None
 
 
@@ -372,12 +559,20 @@ def _engine_ambiguity(name: str, entity_type: str) -> tuple[bool, str | None]:
     return False, None
 
 
-def custom_entity_fields(name: str, entity_type: str, pseudonym: str) -> dict[str, Any]:
+def custom_entity_fields(
+    name: str,
+    entity_type: str,
+    pseudonym: str,
+    stored_rows: Iterable[Entity] = (),
+    other_customs: Mapping[NameKey, str] | None = None,
+) -> dict[str, Any]:
     """The name parts, pseudonym parts and ambiguity of a custom row (AC2).
 
     For a person with a custom pseudonym of two or more words: the real
     first and last name as the engine reads them, and the pseudonym's parts
-    split at its last space. On a one-word name the last part has no real
+    as ``split_custom_pseudonym`` splits it, with the parts the real names
+    already have in ``stored_rows`` or in this run's other custom
+    pseudonyms (AC17 (b)). On a one-word name the last part has no real
     counterpart (``last_name`` None). A one-word custom pseudonym, a place
     and an organisation have no parts.
     """
@@ -387,7 +582,15 @@ def custom_entity_fields(name: str, entity_type: str, pseudonym: str) -> dict[st
         "pseudonym_first": None,
         "pseudonym_last": None,
     }
-    first, last = split_custom_pseudonym(pseudonym, entity_type)
+    others = {
+        key: value
+        for key, value in (other_customs or {}).items()
+        if key != (name, entity_type)
+    }
+    bound = _bound_parts(_stored_bound(list(stored_rows)), others)
+    first, last = split_custom_pseudonym(
+        pseudonym, entity_type, *_bound_of(bound, name)
+    )
     if first and last:
         real_first, real_last = person_parts(name)
         fields.update(
@@ -403,24 +606,45 @@ def custom_entity_fields(name: str, entity_type: str, pseudonym: str) -> dict[st
 
 
 def untracked_custom_values(rows: Iterable[Entity]) -> set[str]:
-    """Folded values of custom rows that the library does not track (AC3).
+    """Folded values a later generated pseudonym must not take (AC19).
 
-    The library marks a part as used only when it is stored next to its real
-    part. A one-word custom pseudonym of a person, and a part stored without
-    its real counterpart (the last part on a one-word name), are not marked,
-    so finalization keeps them here and never generates them again.
+    For each custom row of a person: every beginning and every ending of its
+    pseudonym (one or more whole words, the whole one included), except a
+    value that one of the row's own real words (its real first or last
+    name, as ``person_parts`` reads its ``full_name``) already has as a part
+    in ``rows``: its own stored parts, or the part the same real word has in
+    another row (QA GUARD-001). The library keeps those for their real word
+    and gives them to no other; the rest it does not track, so finalization
+    keeps them here and draws again a generated pseudonym that has one (QA
+    GUARD-001, PO A1). Pass every stored row, with this run's custom rows.
     """
+    rows = list(rows)
+    # folded real first or last name -> the folded parts it has
+    parts_of: dict[str, set[str]] = {}
+    for row in rows:
+        if row.entity_type != "PERSON":
+            continue
+        if row.first_name and row.pseudonym_first:
+            parts_of.setdefault(fold(row.first_name), set()).add(
+                fold(row.pseudonym_first)
+            )
+        if row.last_name and row.pseudonym_last:
+            parts_of.setdefault(fold(row.last_name), set()).add(
+                fold(row.pseudonym_last)
+            )
     taken: set[str] = set()
     for row in rows:
         if row.theme != CUSTOM_THEME or row.entity_type != "PERSON":
             continue
-        if not row.pseudonym_first and not row.pseudonym_last:
-            if " " not in row.pseudonym_full:
-                taken.add(fold(row.pseudonym_full))
-        if row.pseudonym_first and not row.first_name:
-            taken.add(fold(row.pseudonym_first))
-        if row.pseudonym_last and not row.last_name:
-            taken.add(fold(row.pseudonym_last))
+        own: set[str] = set()
+        for real in person_parts(row.full_name):
+            if real:
+                own |= parts_of.get(fold(real), set())
+        words = row.pseudonym_full.split()
+        for size in range(1, len(words) + 1):
+            for value in (" ".join(words[:size]), " ".join(words[-size:])):
+                if fold(value) not in own:
+                    taken.add(fold(value))
     return taken
 
 

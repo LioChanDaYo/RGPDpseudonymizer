@@ -85,14 +85,6 @@ DOC1 = (
 )
 
 
-# The amendment's tests that fail on the code QA failed (Story 10.11, Task 8.1).
-_AMEND_XFAIL = pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.11 amendment: reproduces MW-001, GUARD-001 or the PO's A1-A4 on the unfixed code",
-)
-
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -650,8 +642,8 @@ def test_same_custom_for_two_names_is_refused(  # type: ignore[no-untyped-def]
         "other_last_name",
         "same_first_name",
         "one_word_name",
-        pytest.param("other_last_name_two_words", marks=_AMEND_XFAIL),
-        pytest.param("one_word_name_two_words", marks=_AMEND_XFAIL),
+        "other_last_name_two_words",
+        "one_word_name_two_words",
     ],
 )
 def test_part_of_another_names_pseudonym(  # type: ignore[no-untyped-def]
@@ -699,9 +691,9 @@ def test_part_of_another_names_pseudonym(  # type: ignore[no-untyped-def]
     [
         "first_name",
         "last_name",
-        pytest.param("both", marks=_AMEND_XFAIL),
-        pytest.param("last_name_two_words", marks=_AMEND_XFAIL),
-        pytest.param("both_two_words", marks=_AMEND_XFAIL),
+        "both",
+        "last_name_two_words",
+        "both_two_words",
         "first_two_words",
     ],
 )
@@ -1056,7 +1048,6 @@ def test_dialog_refuses_a_stored_name_in_batch(  # type: ignore[no-untyped-def]
 # ---------------------------------------------------------------------------
 
 
-@_AMEND_XFAIL
 @pytest.mark.parametrize("case", ["last_name_later_run", "first_name_same_run"])
 def test_own_part_set_on_lone_name_keeps_later_full_names(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, monkeypatch, case
@@ -1129,7 +1120,7 @@ def test_own_part_set_on_lone_name_keeps_later_full_names(  # type: ignore[no-un
 @pytest.mark.parametrize(
     "case",
     [
-        pytest.param("one_of_the_library_names", marks=_AMEND_XFAIL),
+        "one_of_the_library_names",
         "not_a_library_name",
     ],
 )
@@ -1176,7 +1167,6 @@ def test_three_word_pseudonym_parts(  # type: ignore[no-untyped-def]
     assert output.read_text(encoding="utf-8") == f"{parts[1]} a signé avec {parts[0]}."
 
 
-@_AMEND_XFAIL
 def test_library_two_word_last_names_are_read_from_the_library() -> None:
     """T37b (Lionel's Q-G): the two-word last names kept whole are the
     library's own, read from its files (no surname is written in this
@@ -1220,9 +1210,9 @@ def _refused_and_not_written(  # type: ignore[no-untyped-def]
 @pytest.mark.parametrize(
     "case",
     [
-        pytest.param("head", marks=_AMEND_XFAIL),
+        "head",
         "tail",
-        pytest.param("stored_three_words", marks=_AMEND_XFAIL),
+        "stored_three_words",
     ],
 )
 def test_beginning_or_ending_is_another_names_part(  # type: ignore[no-untyped-def]
@@ -1265,10 +1255,10 @@ def test_beginning_or_ending_is_another_names_part(  # type: ignore[no-untyped-d
 @pytest.mark.parametrize(
     "case",
     [
-        pytest.param("first_word", marks=_AMEND_XFAIL),
-        pytest.param("middle_word", marks=_AMEND_XFAIL),
+        "first_word",
+        "middle_word",
         "last_word",
-        pytest.param("stored_full_name", marks=_AMEND_XFAIL),
+        "stored_full_name",
     ],
 )
 def test_any_word_run_is_a_real_name(  # type: ignore[no-untyped-def]
@@ -1301,9 +1291,9 @@ def test_any_word_run_is_a_real_name(  # type: ignore[no-untyped-def]
 @pytest.mark.parametrize(
     "case",
     [
-        pytest.param("new_name", marks=_AMEND_XFAIL),
-        pytest.param("known_name", marks=_AMEND_XFAIL),
-        pytest.param("spaces_only", marks=_AMEND_XFAIL),
+        "new_name",
+        "known_name",
+        "spaces_only",
         "case_changed",
     ],
 )
@@ -1350,7 +1340,6 @@ def test_ok_without_change_does_nothing(  # type: ignore[no-untyped-def]
         assert written == "Quorix Velmar a signé le contrat."
 
 
-@_AMEND_XFAIL
 @pytest.mark.parametrize("case", ["two_word_bound_first", "one_word_bound_first"])
 def test_bound_first_part_matched_whole(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, monkeypatch, case
@@ -1398,9 +1387,9 @@ QI_DOC = (
     "typed, refused",
     [
         ("Xantor Le Vellion", False),
-        pytest.param("Le Velmar", False, marks=_AMEND_XFAIL),
+        ("Le Velmar", False),
         ("Xantor De Velmar", False),
-        pytest.param("Xantor Zorbaville Le Vellion", True, marks=_AMEND_XFAIL),
+        ("Xantor Zorbaville Le Vellion", True),
         ("Xantor Le Velmor", True),
         ("Xantor Le", True),
     ],

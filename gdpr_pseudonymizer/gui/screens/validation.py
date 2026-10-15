@@ -711,7 +711,8 @@ class ValidationScreen(QWidget):
         Story 10.11: the pseudonym is normalized like a mapping key and
         checked (Lionel's Q1, Q2, Q-C, Q-D) against the mapping database,
         this document and the review's other custom pseudonyms. A refused
-        pseudonym changes nothing; a message says why (Lionel's Q-A).
+        pseudonym changes nothing; a message says why (Lionel's Q-A). OK on
+        the pre-filled value without a change does nothing (Lionel's Q-H).
         """
         if self._validation_state is None:
             return
@@ -729,6 +730,11 @@ class ValidationScreen(QWidget):
             return
         pseudonym = normalize_custom_pseudonym(text, review.entity.entity_type)
         if not pseudonym:
+            return
+        # Lionel's Q-H (AC21): OK on the pre-filled pseudonym without a change
+        # works like Cancel, compared in the form that would be stored and
+        # written (extra spaces or a title are no change; capitals are)
+        if pseudonym == normalize_custom_pseudonym(current, review.entity.entity_type):
             return
         detection = self._detection_result
         refusal = self._validation_state.custom_pseudonym_refusal(
