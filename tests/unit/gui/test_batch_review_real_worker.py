@@ -433,7 +433,7 @@ def test_every_decision_kind_survives_two_round_trips(  # type: ignore[no-untype
             MODIFIED,
             REJECTED,
             MODIFIED,
-            CONFIRMED,
+            MODIFIED,  # Story 10.11 (Lionel's Q3): the custom pseudonym reaches it
             ADDED,
         ], "PRE: the decisions made"
         record["before"] = _rows(state)

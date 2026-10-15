@@ -1355,6 +1355,31 @@ ou cliquez pour ouvrir</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../screens/validation.py" line="761"/>
+        <source>Ce nom a déjà un pseudonyme enregistré dans votre base de correspondances : « %1 ». Ce pseudonyme est conservé. Pour en choisir un autre, supprimez ce nom de la base (menu Outils › Base de correspondances...), puis traitez à nouveau le document.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../screens/validation.py" line="772"/>
+        <source>Le prénom « %1 » est déjà remplacé par « %2 ». Votre pseudonyme doit donc avoir « %2 » pour prénom, par exemple « %3 ».</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../screens/validation.py" line="778"/>
+        <source>Le nom de famille « %1 » est déjà remplacé par « %2 ». Votre pseudonyme doit donc avoir « %2 » pour nom de famille, par exemple « %3 ».</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../screens/validation.py" line="786"/>
+        <source>« %1 » (ou une partie de ce pseudonyme) est déjà utilisé pour un autre nom : « %2 ». Deux noms différents ne peuvent pas partager un pseudonyme : choisissez-en un autre.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../screens/validation.py" line="796"/>
+        <source>« %2 » figure dans ce document ou dans votre base de correspondances : « %1 » pourrait être pris pour un vrai nom. Choisissez-en un autre.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../screens/validation.py" line="409"/>
         <source>Annulé</source>
         <translation type="unfinished"></translation>

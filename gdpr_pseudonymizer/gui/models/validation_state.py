@@ -13,6 +13,12 @@ from typing import TYPE_CHECKING
 from PySide6.QtCore import QObject, Signal
 from PySide6.QtGui import QUndoCommand, QUndoStack
 
+from gdpr_pseudonymizer.core.custom_pseudonym import (
+    NameKey,
+    Refusal,
+    check_custom_pseudonym,
+)
+from gdpr_pseudonymizer.core.mapping_key import mapping_key
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 from gdpr_pseudonymizer.validation.models import (
     CandidateKey,
@@ -82,11 +88,12 @@ class GUIValidationState(QObject):
         # Ids of the rows whose current decision is their own: made on that
         # place alone (Story 10.10 AC14; Lionel, 2026-10-14, Q5-Q7 and
         # Ctrl+Shift+R). That is a row ticked in the list and accepted or
-        # rejected, a row rejected with Ctrl+Shift+R, a row added by hand, a
-        # custom pseudonym, and an accept, reject, correction or type change
-        # that reached that row only. A group action skips another row's own
-        # opposite decision. Every command that changes a row saves and
-        # restores the row's flag, so undo and redo keep it exact.
+        # rejected, a row rejected with Ctrl+Shift+R, a row added by hand,
+        # and an accept, reject, correction, type change or custom pseudonym
+        # (Story 10.11, Lionel's Q-B) that reached that row only. A group
+        # action skips another row's own opposite decision. Every command
+        # that changes a row saves and restores the row's flag, so undo and
+        # redo keep it exact.
         self._own_ids: set[str] = set()
 
     @property
@@ -436,9 +443,129 @@ class GUIValidationState(QObject):
         return spans
 
     def change_pseudonym(self, entity_id: str, new_pseudonym: str) -> None:
-        """Override suggested pseudonym for an entity."""
-        cmd = _ChangePseudonymCommand(self, entity_id, new_pseudonym)
-        self._undo_stack.push(cmd)
+        """Set a custom pseudonym at every place of the name (Story 10.11).
+
+        The rows of ``_pseudonym_rows`` (Lionel's Q3): the row itself, then
+        every other row of the same name as the written file reads it, found
+        or added by hand, except another row rejected on its own; one undo
+        reverts them all. Like a correction (Lionel's Q-B), it is the row's
+        own decision when it reaches that row only; when it reaches several
+        rows they follow the group.
+
+        The checks of Lionel's Q1, Q2, Q-C and Q-D are made before, by
+        ``custom_pseudonym_refusal``; undo and redo never open the database.
+        """
+        review = self._reviews_by_id.get(entity_id)
+        rows = self._pseudonym_rows(review) if review is not None else []
+        if len(rows) > 1:
+            self._undo_stack.beginMacro("Changer le pseudonyme du groupe")
+            for row in rows:
+                cmd = _ChangePseudonymCommand(self, row.entity_id, new_pseudonym)
+                self._undo_stack.push(cmd)
+            self._undo_stack.endMacro()
+        else:
+            cmd = _ChangePseudonymCommand(self, entity_id, new_pseudonym, alone=True)
+            self._undo_stack.push(cmd)
+
+    def _mapping_name(self, review: EntityReview) -> NameKey | None:
+        """A row's fixed name (``_name_key``) read as the written file reads
+        it: (mapping key of its text, its type) (Story 10.11)."""
+        name = self._name_key(review)
+        if name is None:
+            return None
+        return (mapping_key(name[0], name[1]), name[1])
+
+    def _pseudonym_rows(self, review: EntityReview) -> list[EntityReview]:
+        """Rows one custom pseudonym acts on (Story 10.11, Lionel's Q3).
+
+        ``_action_rows``' rule, with the name compared by mapping key, so a
+        titled form of the name ("M. Zorbal" next to "Zorbal") is the same
+        name, as it is in the written file: the row itself first, always;
+        then every other row of the name, found or added by hand, except a
+        row rejected on its own.
+        """
+        rows = [review]
+        name = self._mapping_name(review)
+        if name is None:
+            return rows
+        for other in self._session._entity_reviews:
+            if other is review or self._mapping_name(other) != name:
+                continue
+            if self._decided_alone(other, _DROPPED):
+                continue
+            rows.append(other)
+        return rows
+
+    @staticmethod
+    def _sent_name(review: EntityReview) -> NameKey:
+        """(mapping key, type) of the entity a row sends to finalization: its
+        edited text or its detected text, and its current type (10.11)."""
+        text = review.user_modification or review.entity.text
+        entity_type = review.entity.entity_type
+        return (mapping_key(text, entity_type), entity_type)
+
+    def get_custom_pseudonyms(self) -> dict[NameKey, str]:
+        """The custom pseudonym of each name sent to finalization (10.11).
+
+        Keyed by ``_sent_name``; the first row of a name that holds one
+        gives it, so the file holds one pseudonym per name and type.
+        """
+        customs: dict[NameKey, str] = {}
+        for review, _entity in self._validated_rows():
+            if review.custom_pseudonym:
+                customs.setdefault(self._sent_name(review), review.custom_pseudonym)
+        return customs
+
+    def custom_pseudonym_refusal(
+        self, entity_id: str, pseudonym: str, db_path: str, passphrase: str
+    ) -> Refusal | None:
+        """The rule a custom pseudonym breaks for a row's name, or None.
+
+        Checks Lionel's Q1, Q-D, Q2 and Q-C (Story 10.11) against the mapping
+        database, this document and the review's other custom pseudonyms.
+        The database is opened here, as the known-entity pass does; when it
+        cannot be opened, only this document and this review are checked,
+        and finalization checks the rest.
+
+        Args:
+            entity_id: The row the pseudonym is set on
+            pseudonym: The normalized custom pseudonym
+            db_path: Path to the mapping database ("" when there is none)
+            passphrase: Database passphrase
+        """
+        review = self._reviews_by_id.get(entity_id)
+        if review is None:
+            return None
+        name = self._sent_name(review)
+        others: dict[NameKey, str] = {}
+        for other in self._session._entity_reviews:
+            if not other.custom_pseudonym:
+                continue
+            if other.state == EntityReviewState.REJECTED:
+                continue
+            key = self._sent_name(other)
+            if key != name:
+                others.setdefault(key, other.custom_pseudonym)
+        stored = None
+        if db_path:
+            try:
+                from gdpr_pseudonymizer.data.database import open_database
+                from gdpr_pseudonymizer.data.repositories.mapping_repository import (
+                    SQLiteMappingRepository,
+                )
+
+                with open_database(db_path, passphrase) as db_session:
+                    stored = SQLiteMappingRepository(db_session).find_all()
+            except Exception:
+                stored = None  # finalization checks the database again
+        return check_custom_pseudonym(
+            stored,
+            name[0],
+            name[1],
+            pseudonym,
+            self._session.document_text,
+            others,
+        )
 
     def change_entity_type(self, entity_id: str, new_type: str) -> None:
         """Change entity type (e.g. PERSON -> ORG) at every occurrence.
@@ -887,6 +1014,7 @@ class _ModifyTextCommand(QUndoCommand):
         self._old_end: int = 0
         self._old_state: EntityReviewState | None = None
         self._old_modification: str | None = None
+        self._old_custom: str | None = None
         # Story 10.10: as in _SingleActionCommand.
         self._alone = alone
         self._old_own = False
@@ -894,6 +1022,10 @@ class _ModifyTextCommand(QUndoCommand):
     def redo(self) -> None:
         review = self._state._reviews_by_id.get(self._entity_id)
         if review:
+            # Story 10.11 (Lionel's Q-E): a correction removes the row's
+            # custom pseudonym; undo brings it back.
+            self._old_custom = review.custom_pseudonym
+            review.custom_pseudonym = None
             self._old_text = review.entity.text
             self._old_start = review.entity.start_pos
             self._old_end = review.entity.end_pos
@@ -925,6 +1057,7 @@ class _ModifyTextCommand(QUndoCommand):
             else:
                 self._state._edited_spans_by_id[self._entity_id] = self._old_spans
             review.user_modification = self._old_modification
+            review.custom_pseudonym = self._old_custom
             review.entity.start_pos = self._old_start
             review.entity.end_pos = self._old_end
             if self._old_state is not None:
@@ -941,6 +1074,7 @@ class _ChangePseudonymCommand(QUndoCommand):
         state: GUIValidationState,
         entity_id: str,
         new_pseudonym: str,
+        alone: bool = False,
     ) -> None:
         super().__init__("Changer le pseudonyme")
         self._state = state
@@ -948,8 +1082,10 @@ class _ChangePseudonymCommand(QUndoCommand):
         self._new_pseudonym = new_pseudonym
         self._old_pseudonym: str | None = None
         self._old_state: EntityReviewState | None = None
-        # Story 10.10: a custom pseudonym acts on one row, so it is always
-        # the row's own decision; undo restores the flag it had.
+        # Story 10.11 (Lionel's Q-B): like a correction, the row's own
+        # decision when it reaches that row only (as in
+        # _SingleActionCommand); undo restores the flag it had.
+        self._alone = alone
         self._old_own = False
 
     def redo(self) -> None:
@@ -960,7 +1096,14 @@ class _ChangePseudonymCommand(QUndoCommand):
             self._old_own = self._entity_id in self._state._own_ids
             review.custom_pseudonym = self._new_pseudonym
             review.state = EntityReviewState.MODIFIED
-            self._state._set_own(self._entity_id, True)
+            _own_after(
+                self._state,
+                self._entity_id,
+                self._alone,
+                self._old_own,
+                self._old_state,
+                EntityReviewState.MODIFIED,
+            )
             self._state.state_changed.emit(self._entity_id)
 
     def undo(self) -> None:
@@ -989,6 +1132,7 @@ class _ChangeTypeCommand(QUndoCommand):
         self._new_type = new_type
         self._old_type: str | None = None
         self._old_state: EntityReviewState | None = None
+        self._old_custom: str | None = None
         # Story 10.10: as in _SingleActionCommand.
         self._alone = alone
         self._old_own = False
@@ -996,6 +1140,10 @@ class _ChangeTypeCommand(QUndoCommand):
     def redo(self) -> None:
         review = self._state._reviews_by_id.get(self._entity_id)
         if review:
+            # Story 10.11 (Lionel's Q-E): a type change removes the row's
+            # custom pseudonym; undo brings it back.
+            self._old_custom = review.custom_pseudonym
+            review.custom_pseudonym = None
             self._old_type = review.entity.entity_type
             self._old_state = review.state
             self._old_own = self._entity_id in self._state._own_ids
@@ -1014,6 +1162,7 @@ class _ChangeTypeCommand(QUndoCommand):
     def undo(self) -> None:
         review = self._state._reviews_by_id.get(self._entity_id)
         if review:
+            review.custom_pseudonym = self._old_custom
             if self._old_type is not None:
                 review.entity.entity_type = self._old_type
             if self._old_state is not None:

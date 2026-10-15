@@ -40,10 +40,14 @@ class FinalizationWorker(QRunnable):
         passphrase: str,
         theme: str,
         input_path: str,
+        custom_pseudonyms: dict[tuple[str, str], str] | None = None,
     ) -> None:
         super().__init__()
         self.signals = WorkerSignals()
         self._validated_entities = validated_entities
+        # Story 10.11: the review's custom pseudonyms, keyed by (mapping key,
+        # type) of the name sent
+        self._custom_pseudonyms = custom_pseudonyms
         self._document_text = document_text
         self._db_path = db_path
         self._passphrase = passphrase
@@ -98,11 +102,21 @@ class FinalizationWorker(QRunnable):
                 passphrase=self._passphrase,
                 theme=self._theme,
             )
-            result = processor.finalize_document(
-                document_text=self._document_text,
-                validated_entities=self._validated_entities,
-                output_path=self._output_path,
-            )
+            if self._custom_pseudonyms:
+                # Story 10.11: passed on only when the review holds one, so a
+                # review without one calls finalize_document as before
+                result = processor.finalize_document(
+                    document_text=self._document_text,
+                    validated_entities=self._validated_entities,
+                    output_path=self._output_path,
+                    custom_pseudonyms=self._custom_pseudonyms,
+                )
+            else:
+                result = processor.finalize_document(
+                    document_text=self._document_text,
+                    validated_entities=self._validated_entities,
+                    output_path=self._output_path,
+                )
         except Exception as e:
             error_str = str(e)
             logger.error("finalization_failed", error=error_str)

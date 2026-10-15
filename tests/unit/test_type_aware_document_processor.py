@@ -108,6 +108,7 @@ class _ReviewRecorder:
         document_text: str,
         document_path: str = "",
         pseudonym_assigner: Any = None,
+        **kwargs: Any,
     ) -> list[DetectedEntity]:
         self.reviewed.extend(entities)
         return list(entities)

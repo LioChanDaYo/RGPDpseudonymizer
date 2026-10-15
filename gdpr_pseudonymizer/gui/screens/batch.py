@@ -928,18 +928,25 @@ class BatchScreen(QWidget):
         self._main_window.navigate_to("validation", **context)
 
     def _on_validation_complete(
-        self, doc_index: int, validated_entities: object
+        self,
+        doc_index: int,
+        validated_entities: object,
+        custom_pseudonyms: object = None,
     ) -> None:
         """Handle validation_complete signal from ValidationScreen.
 
         Only the list of the document the worker waits on is accepted (Story
         10.10): a list built on another document is refused before anything
         is stored, submitted or navigated. Otherwise the list is stored under
-        its document, submitted to the worker, and the screen goes back to
-        the batch processing phase. The cached context keeps the detections
-        the document's kept review state was built from.
+        its document, submitted to the worker with the review's custom
+        pseudonyms (Story 10.11), and the screen goes back to the batch
+        processing phase. The cached context keeps the detections the
+        document's kept review state was built from.
         """
         entity_list: list[DetectedEntity] = validated_entities  # type: ignore[assignment]
+        customs: dict[tuple[str, str], str] | None = (
+            custom_pseudonyms if isinstance(custom_pseudonyms, dict) else None
+        )
 
         if doc_index != self._awaiting_doc_index:
             logger.warning(
@@ -968,7 +975,7 @@ class BatchScreen(QWidget):
 
         # Submit to worker and navigate back
         if self._worker is not None:
-            self._worker.submit_validation_result(entity_list)
+            self._worker.submit_validation_result(entity_list, customs)
 
         self._main_window.navigate_to("batch")
 

@@ -22,6 +22,11 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from gdpr_pseudonymizer.core.custom_pseudonym import (
+    CustomPseudonymRefusal,
+    Refusal,
+    normalize_custom_pseudonym,
+)
 from gdpr_pseudonymizer.gui.accessibility.focus_manager import (
     setup_focus_order_validation,
 )
@@ -44,8 +49,9 @@ logger = get_logger(__name__)
 class ValidationScreen(QWidget):
     """Screen for interactive entity validation before pseudonymization."""
 
-    # Signals for batch mode orchestration: (document index, validated list)
-    validation_complete = Signal(int, object)
+    # Signals for batch mode orchestration: (document index, validated list,
+    # custom pseudonyms of the names sent; Story 10.11)
+    validation_complete = Signal(int, object, object)
     batch_cancel_requested = Signal()
 
     def __init__(self, main_window: MainWindow) -> None:
@@ -700,7 +706,14 @@ class ValidationScreen(QWidget):
             )
 
     def _show_change_pseudonym_dialog(self, entity_id: str) -> None:
-        """Show dialog to change pseudonym."""
+        """Show dialog to change pseudonym.
+
+        Story 10.11: the pseudonym is normalized like a mapping key and
+        checked (Lionel's Q1, Q2, Q-C, Q-D) against the mapping database,
+        this document and the review's other custom pseudonyms. A refused
+        pseudonym changes nothing; a message says why (Lionel's Q-A). OK on
+        the pre-filled value without a change does nothing (Lionel's Q-H).
+        """
         if self._validation_state is None:
             return
         current = self._validation_state.get_pseudonym(entity_id)
@@ -710,8 +723,90 @@ class ValidationScreen(QWidget):
             self.tr("Nouveau pseudonyme :"),
             text=current,
         )
-        if ok and text:
-            self._validation_state.change_pseudonym(entity_id, text)
+        if not (ok and text):
+            return
+        review = self._validation_state.get_review(entity_id)
+        if review is None:
+            return
+        pseudonym = normalize_custom_pseudonym(text, review.entity.entity_type)
+        if not pseudonym:
+            return
+        # Lionel's Q-H (AC21): OK on the pre-filled pseudonym without a change
+        # works like Cancel, compared in the form that would be stored and
+        # written (extra spaces or a title are no change; capitals are)
+        if pseudonym == normalize_custom_pseudonym(current, review.entity.entity_type):
+            return
+        detection = self._detection_result
+        refusal = self._validation_state.custom_pseudonym_refusal(
+            entity_id,
+            pseudonym,
+            detection.db_path if detection is not None else "",
+            detection.passphrase if detection is not None else "",
+        )
+        if refusal is not None:
+            from gdpr_pseudonymizer.gui.widgets.confirm_dialog import ConfirmDialog
+
+            ConfirmDialog.informational(
+                self.tr("Changer le pseudonyme"),
+                self._custom_refusal_text(refusal),
+                parent=self._main_window,
+            ).exec()
+            return
+        self._validation_state.change_pseudonym(entity_id, pseudonym)
+
+    def _custom_refusal_text(self, refusal: Refusal) -> str:
+        """The message of a refused custom pseudonym (Story 10.11).
+
+        The texts Lionel approved on 2026-10-15 (Q-A), with their
+        placeholders: the stored pseudonym (Q1); the real first or last
+        name, its part and an example (Q-D); the pseudonym and the other
+        name (Q2); the pseudonym and the word or words found (Q-C).
+        """
+        if refusal.reason is CustomPseudonymRefusal.ALREADY_STORED:
+            return qarg(
+                self.tr(
+                    "Ce nom a déjà un pseudonyme enregistré dans votre base de "
+                    "correspondances : « %1 ». Ce pseudonyme est conservé. Pour "
+                    "en choisir un autre, supprimez ce nom de la base (menu "
+                    "Outils › Base de correspondances...), puis traitez à "
+                    "nouveau le document."
+                ),
+                refusal.other,
+            )
+        if refusal.reason is CustomPseudonymRefusal.PART_BOUND:
+            if refusal.kind == "first":
+                template = self.tr(
+                    "Le prénom « %1 » est déjà remplacé par « %2 ». Votre "
+                    "pseudonyme doit donc avoir « %2 » pour prénom, par "
+                    "exemple « %3 »."
+                )
+            else:
+                template = self.tr(
+                    "Le nom de famille « %1 » est déjà remplacé par « %2 ». "
+                    "Votre pseudonyme doit donc avoir « %2 » pour nom de "
+                    "famille, par exemple « %3 »."
+                )
+            return qarg(template, refusal.other, refusal.required, refusal.example)
+        if refusal.reason is CustomPseudonymRefusal.PSEUDONYM_TAKEN:
+            return qarg(
+                self.tr(
+                    "« %1 » (ou une partie de ce pseudonyme) est déjà utilisé "
+                    "pour un autre nom : « %2 ». Deux noms différents ne "
+                    "peuvent pas partager un pseudonyme : choisissez-en un "
+                    "autre."
+                ),
+                refusal.pseudonym,
+                refusal.other,
+            )
+        return qarg(
+            self.tr(
+                "« %2 » figure dans ce document ou dans votre base de "
+                "correspondances : « %1 » pourrait être pris pour un vrai nom. "
+                "Choisissez-en un autre."
+            ),
+            refusal.pseudonym,
+            refusal.other,
+        )
 
     # ------------------------------------------------------------------
     # Undo / Redo
@@ -896,7 +991,13 @@ class ValidationScreen(QWidget):
             if not self._is_awaiting_document():
                 return
             validated = self._validation_state.get_validated_entities()
-            self.validation_complete.emit(self._doc_index, validated)
+            # Story 10.11: the custom pseudonyms of the names sent go with
+            # the list (passed on to finalization only when there is one)
+            self.validation_complete.emit(
+                self._doc_index,
+                validated,
+                self._validation_state.get_custom_pseudonyms(),
+            )
             return
 
         from gdpr_pseudonymizer.gui.widgets.confirm_dialog import ConfirmDialog
@@ -955,6 +1056,7 @@ class ValidationScreen(QWidget):
             passphrase=self._detection_result.passphrase,
             theme=self._detection_result.theme,
             input_path=self._detection_result.input_file,
+            custom_pseudonyms=self._validation_state.get_custom_pseudonyms(),
         )
         worker.signals.progress.connect(self._on_finalize_progress)
         worker.signals.finished.connect(self._on_finalize_finished)

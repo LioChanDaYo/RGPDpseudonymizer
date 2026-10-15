@@ -1,0 +1,293 @@
+schema: 1
+story: '10.11'
+story_title: 'Custom Pseudonym Stored and Used'
+scope: 'PR #101, re-review (Task 8.5) at head af5b23b on main eee4d41, after QA''s FAIL at e8cb76a. Commits reviewed: the SM/PO/PM docs commits f51ab0a..1283d3e (docs/ only), tests-first 8bb197e, fix 5a58adc, Task 8 Dev Agent Record af5b23b. The first review (CONCERNS at 26ebcb0, then FAIL at e8cb76a) is kept below under history and first_review.'
+gate: PASS
+status_reason: 'The amendment closes both findings of the FAIL. MW-001: the checks no longer depend on the split (every beginning, ending and run of words, in both directions), a bound part is matched whole and the library''s two-word last names stay whole (Lionel''s Q-G), so "Xantor Da Silva" is refused while "Da Silva" stands for another person and Q-D''s example is accepted at once; T9 and T9b store fixed parts, and nothing in the new tests reads a random draw where a two-word surname could change the outcome. GUARD-001: the guard keeps a part for its own real word, so a later full name keeps its part on the two paths left after Q-H (CLI [C], desktop change to the part), and OK unchanged now does nothing (Q-H). Tests first proven again (24 AssertionErrors on their marked lines after their preconditions, 15 guards; markers removed only in 5a58adc, no assertion changed); the 39 amendment tests passed 20 runs in a row and the full suite three times; 50 new end-to-end probes and the 76 of the first review pass on the written files and the stored rows (one first-review expectation changed by Q-H, as T9b[both]); the PO''s probes give the prototype''s output line for line; texts byte-identical, gui/i18n unchanged; no 10.9/10.10 regression beyond Q3/Q-B. Only low items remain.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-10-15T18:50:43Z'
+
+waiver: { active: false }
+
+history:
+  - review: 'first review, 2026-10-15T11:47:55Z (head 5c02ba9, gate commit 26ebcb0)'
+    gate: CONCERNS
+    quality_score: 80
+    reason: 'MW-001 (medium) and GUARD-001 (medium) found by end-to-end probes; no leak.'
+  - review: 'first review, raised 2026-10-15 (gate commit e8cb76a)'
+    gate: FAIL
+    quality_score: 70
+    reason: 'MW-001 raised to high and a merge blocker: four of the new tests reused a randomly generated last-name part and failed when it had a space (CI run 38730457990, Windows, attempt 1; not infrastructure, no rerun). GUARD-001 medium. Lionel: "Fix before merge (Rec.)".'
+  - review: 're-review, Task 8.5 (head af5b23b)'
+    gate: PASS
+    quality_score: 100
+    reason: 'MW-001 and GUARD-001 fixed and pinned by tests that do not depend on a random draw; Lionel''s Q-G, Q-H and Q-I hold end to end; only low items remain.'
+
+merge_blockers: []
+
+merge_notes:
+  - 'The merge waits for Lionel (story Tasks 7.5 and 8.5). QA never merges.'
+  - 'This gate commit starts its own CI run on the PR; it changes docs only. The orchestrator checks it green before the merge.'
+
+top_issues:
+  - id: 'OBS-002'
+    severity: low
+    finding: 'Pre-existing 10.7 design, now reachable through AC19: when a generated pseudonym is drawn again (_assign_untaken_pseudonym), the new draw keeps no component link, so a later full name whose compositional draw happens to take an untracked custom value (for example a random last name "Silva" while "Xantor Da Silva" is stored) loses the part its first name already has (probe A09: after "Xantor Da Silva" is stored for "Quentrel Zorbalia", "Quentrel Zorbix a signé. Le contrat est avec Quentrel." with its last-name draw forced to "Silva" is written "Yasmine Alexandre a signé. Le contrat est avec Xantor.", stored without parts). It needs that random draw (about 1 in 500 per affected last-name draw), never the user''s choice, and nothing leaks.'
+    suggested_action: 'Backlog: redraw only the clashing part (keep the bound first or last part) in _assign_untaken_pseudonym.'
+    refs: ['gdpr_pseudonymizer/core/document_processor.py:648-690', 'gdpr_pseudonymizer/core/document_processor.py:635-646']
+    suggested_owner: dev
+  - id: 'DOC-001'
+    severity: low
+    finding: 'Dev Notes "CHANGELOG Entry" still has "(split at its last space)"; CHANGELOG.md has Task 8.2''s "(split at its last space; the app''s own two-word last names, such as Da Silva, stay whole)", as Task 8.2 instructs (QA: CHANGELOG == the entry with Task 8.2''s edit, byte for byte).'
+    suggested_action: 'SM, at the next story edit: copy Task 8.2''s phrase into Dev Notes "CHANGELOG Entry". No code or CHANGELOG change.'
+    refs: ['docs/stories/10.11.custom-pseudonym.story.md', 'CHANGELOG.md']
+    suggested_owner: sm
+  - id: 'OBS-001'
+    severity: low
+    finding: 'Unchanged from the first review (PO O1, AC17 (d) as written): an organisation or place given "Saint Zorbal" while the document says "Saint-Zorbal" is accepted; with A3, an organisation''s or place''s pseudonym that holds a capitalised word of the document among other words is also accepted.'
+    suggested_action: 'Backlog for the PO.'
+    refs: ['gdpr_pseudonymizer/core/custom_pseudonym.py:366-401']
+    suggested_owner: po
+  - id: 'RESIDUALS'
+    severity: low
+    finding: 'Accepted by the PO and Lionel, recorded: a word in the middle of another person''s custom pseudonym is not compared (follow-up (i); PO probe "Zed Quovan" accepted, both directions); a linking word that is also a whole surname ("Le", "Do", "Du") is not checked alone when another word follows it (Q-I); the list''s preview and the file can differ for a name that is not stored (follow-up (h), pre-existing).'
+    suggested_action: 'Epic follow-ups (h) and (i); nothing for 10.11.'
+    refs: ['docs/prd/epic-10-v2.3-detection-precision-quick-wins.md']
+    suggested_owner: po
+  - id: 'TEST-ENV-001'
+    severity: low
+    finding: 'Known: test_ner_title_improvements.py needs the repository root as working folder (4 errors from QA''s scratch folder); with QA''s long scratch TEMP, test_config_show''s "(not found)" wraps under xdist (passes with the default TEMP and on CI).'
+    suggested_action: 'Backlog as before.'
+    refs: ['tests/integration/test_ner_title_improvements.py', 'tests/unit/cli/commands/test_config_show.py:264']
+    suggested_owner: dev
+
+
+resolved_issues:
+  - id: 'MW-001'
+    status: resolved
+    severity: high
+    finding: 'First review: a stored last-name part with a space defeated the Q2 part check and the Q-D example, and made four tests flaky. Re-review: refused, accepted and written as Lionel''s rules say with the invented "Da Velmar" and the library''s "Da Silva", "Le Gall" and "Espírito Santo", on the desktop single document, the real batch worker and the CLI (probes A01 x3, A02 x6, A08, A08c; D04m and D05m of the first review now show the example accepted and the clash refused). T9/T9b store fixed parts.'
+    refs: ['gdpr_pseudonymizer/core/custom_pseudonym.py:109-179', 'gdpr_pseudonymizer/core/custom_pseudonym.py:206-266', 'gdpr_pseudonymizer/core/custom_pseudonym.py:366-546']
+    suggested_owner: dev
+  - id: 'GUARD-001'
+    status: resolved
+    severity: medium
+    finding: 'First review: a one-word custom pseudonym equal to its own word''s stored part made later full names lose that part. Re-review: the desktop''s pre-filled confirmation now does nothing (Q-H; D12 x2 now inert, a later "Quentrel Zorbix" written "Quorix …" as on main); the CLI''s [C] with the part (A06 x2) and a desktop change from another pseudonym to the part (A06b x2) keep the part in the later full name, in the file and its stored row.'
+    refs: ['gdpr_pseudonymizer/core/custom_pseudonym.py:608-648', 'gdpr_pseudonymizer/core/document_processor.py:480', 'gdpr_pseudonymizer/core/document_processor.py:874', 'gdpr_pseudonymizer/gui/screens/validation.py:734-738']
+    suggested_owner: dev
+  - id: 'PERF-001'
+    status: resolved
+    severity: low
+    finding: 'First review: the document was tokenized again for each candidate. Re-review: document_words reads it once per check and once per finalization; QA''s measure in evidence.performance.'
+    refs: ['gdpr_pseudonymizer/core/custom_pseudonym.py:283-308', 'gdpr_pseudonymizer/core/document_processor.py:445']
+    suggested_owner: dev
+handed_off:
+  - id: 'BACKLOG-EN-QM'
+    owner: 'Lionel (backlog item)'
+    note: 'Unchanged since the first review: main''s en.qm predates Story 7.4, so three file-dialog filters show in French in English mode; a plain pyside6-lrelease would fix it; outside AC18, not in 10.11. gui/i18n/ is unchanged by the amendment (git diff 5c02ba9 af5b23b -- gdpr_pseudonymizer/gui/i18n/ is empty).'
+  - id: 'PO-NOTE-Q1-ROUTE-OUT'
+    owner: 'Epic 10 Follow-up (f) (same mechanism)'
+    note: 'Unchanged since the first review (probe B07 x2): following Q1''s route out mid-batch leaves the batch worker blocked on that document; nothing written wrongly, no name in clear; the user processes the document again, as the message says.'
+
+deviation_rulings:
+  dev_helpers: 'IN SCOPE (first review, unchanged); the amendment''s helpers (_ends_with, _starts_with, library_two_word_last_names, DocumentWords, document_words, _word_runs, _document_runs, LINKING_WORDS, _stored_bound, _bound_of) are Fix design 1-7 as written.'
+  finalization_message_period: 'ACCEPTED (first review, unchanged).'
+  finalize_document_tabular: 'ACCEPTED (first review, unchanged).'
+  undo_macro_label: 'ACCEPTED (first review, unchanged).'
+  guard_set_assignment: 'ACCEPTED. _register_custom_pseudonyms SETS _custom_taken = untracked_custom_values([*stored, *custom_rows]) where the SM prototype added it to the set _reset_pseudonym_state had just computed from the same rows. Equivalent apart from the AC19 case: over 20,000 random invented row sets (tools/guard_equiv.py) the dev''s set is always a subset of the prototype''s union, and every value only the union holds (in 597 draws) is a stored custom value that this run''s custom rows now give to that row''s own real word as a part, which AC19 says not to keep. End to end, the set at registration equals the set the next run''s _reset_pseudonym_state reads from the database; with a stored one-word custom "Zorbix" -> "Zedra" and this run''s "Zorbix Quovan" -> "Zedra Silva", the prototype''s union would have kept "zedra" (tools/guard_union.py), the dev''s set and the next run drop it.'
+  qh_compare_form: 'ACCEPTED (Fix design 8): OK unchanged compares normalize_custom_pseudonym(typed) with normalize_custom_pseudonym(pre-filled): extra spaces and a title are no change, capitals are (probe A04 x5, A04b x2; T42).'
+
+quality_score: 100
+expires: '2026-10-29T18:50:43Z'
+
+evidence:
+  tests_reviewed: 39
+  risks_identified: 4
+  tests_first_local:
+    runxfail: 'Sparse QA worktree of 8bb197e (no tests/test_corpus/held_out or final_exam), the three new files with --runxfail: 24 failed, 65 passed. Every failure an AssertionError on a line marked "# expected failure", none at or after a "PRE:" precondition (tools/fail_lines.ts, logs/am_tf_fail_lines.txt): review :686 x2 (T9 two-word), :772 x3 (T9b both, last_name_two_words, both_two_words), :1118 and :1120 (T36), :1165 (T37), :1195 (T37b), :1209 x6 (the shared refusal helper: T39 head, stored_three_words; T40 first_word, middle_word, stored_full_name; T44 real_name_around), :1344 x3 (T42), :1385 x2 (T43), :1437 (T44 linking_word_first); CLI :536 (T38), :576 (T36c), :641 (T41 offered_first). Equal to the Debug Log''s lines. The 15 guards pass; the 50 tests of the first round pass on that code.'
+    with_markers: '8bb197e plain: 65 passed, 24 xfailed. Head af5b23b: 89 passed.'
+    markers: 'git diff 8bb197e 5a58adc -- tests/: only the two _AMEND_XFAIL definitions, five decorators and the pytest.param marks removed (ids and tuples kept); no assert line added or removed. af5b23b touches no test.'
+    t9_t9b: '8bb197e rewrites T9 and T9b in place: fixed stored rows (_store_qz, _store_row; "Quorix Velmar", "Quorix Le Velmar", "Quovan Delmor", "Quovan Le Delmor", "Xantor Quovan Velmar"), no _store_earlier, no generated part read; their parameters kept, the new ones added; T9b[both] expects Q-H. No other existing test of the PR changes (diff hunks: T9, T9b, the new helpers and the appended tests).'
+  determinism:
+    loop20: 'The 39 amendment tests (T9 x5, T9b x6, T36 x2, T36c, T37 x2, T37b, T38, T39 x3, T40 x4, T41 x2, T42 x4, T43 x2, T44 x6), one pytest call per run, 20 runs in a row: "39 passed" each time (logs/am_loop20.log).'
+    full_suite_x3: 'tests/unit + tests/integration -m "not slow" -n 4 --dist loadscope, three runs: 2629 passed, 11 skipped, 1 failed, 4 errors each time, the same environment-only items (TEST-ENV-001); both leakage guards pass.'
+    random_draws: 'The new test files call no random or secrets function except T41''s patched secrets.choice (first call offered, then the real one). The generated values they still read: T5 and T21 a stored pseudonym typed for a Q1 refusal; T6 and T26 an ORG pseudonym typed for a Q2 refusal (two full values always clash); T11, T29 and T33 a first-name part (no first name of the three libraries has a space). None can change an assertion.'
+  ci:
+    8bb197e: 'CI - Test Matrix 38777096269 attempt 1 success: ubuntu 3.11 "2621 passed, 24 xfailed"; ubuntu 3.10 "2621 passed, 24 xfailed"; macos 3.12 "2621 passed, 24 xfailed"; windows 3.12 "2472 passed, 3 skipped, 24 xfailed"; every XFAIL in the new files, no XPASS, nothing deselected.'
+    5a58adc: 'CI - Test Matrix 38780148148 attempt 1 success: "2645 passed" x3, windows "2496 passed, 3 skipped"; 0 xfailed.'
+    af5b23b: 'CI - Test Matrix 38782481788 attempt 1 success (ubuntu 3.10 "2645 passed in 222.32s", windows 3.12 "2496 passed, 3 skipped in 418.91s", macos 3.12 "2645 passed in 862.06s", ubuntu 3.11 "2645 passed in 476.31s"); Code Quality 38782481790 success; CodeQL "PR #101" 38782473613 success. Reruns: none.'
+    e8cb76a: 'QA''s FAIL commit: CI - Test Matrix 38733084805, Code Quality 38733084789, CodeQL 38733079719, all attempt 1 success.'
+    skip_markers: 'none in the eight commit titles and bodies of e8cb76a..af5b23b, nor in the PR title and body.'
+  diff_vs_amendment: 'Fix design 1-8 as written: split_custom_pseudonym with bound_first and bound_last and the library''s two-word names (folded, read once from resources/pseudonyms/*.json); _custom_values with every beginning and ending, _row_values giving stored custom person rows the same values (B1), a library row its full and two parts; _word_runs, _document_runs (LINKING_WORDS, Q-I) and the Q-C2 comparison on every run; _part_refusal and custom_entity_fields splitting with the stored and the run''s bound parts; untracked_custom_values keeping every beginning and ending except own parts; document_words read once per check and per finalization; Q-H one comparison in _show_change_pseudonym_dialog. The command line, the batch screens and workers, gui/i18n and the texts are unchanged; no new log line.'
+  scope: 'git diff 5c02ba9 af5b23b: core/custom_pseudonym.py, core/document_processor.py, gui/screens/validation.py, the two test files, CHANGELOG.md and docs; the Task 6.1 path set, resources/, validation/, gui/i18n/, the allowlists, .github/, pyproject.toml and poetry.lock: empty. None of the 13 files the accuracy suite loads (resources/ is read, not changed), so no accuracy run.'
+  g6_local: 'ruff check . exit 0; black --check . 310 files unchanged; mypy gdpr_pseudonymizer: no issues in 105 source files.'
+  texts: 'tools/texts_check.py on the head: TEXTS_OK (the five French self.tr sources, en.ts, fr.ts, the five CLI lines, the four reasons; en.qm gives the approved English; self.tr literals: exactly the five added since main). The Q-A block and "Approved Texts" parse identically at 5c02ba9 and af5b23b. git diff 5c02ba9 af5b23b -- gdpr_pseudonymizer/gui/i18n/ is empty. CHANGELOG.md equals Dev Notes "CHANGELOG Entry" with Task 8.2''s phrase, byte for byte (DOC-001).'
+  probes:
+    harness: 'r111/qa/probes, as in the first review, plus test_probe_111_amend.py (51 items). Desktop: real DetectionWorker, ValidationScreen, editor menu with the dialog answered, real FinalizationWorker; batch: real BatchScreen and BatchWorker; CLI: the real Typer app. Checks on the written file and the stored rows; refusals compared with the approved text.'
+    amendment: 'A01 x3 (Q-D example with "Da Velmar", "Da Silva", "Espírito Santo": refused with the example, example accepted at once, written, stored with the part whole, a later lone "Zorbalia" takes it); A02 x6 ("Xantor Da Velmar", "Xantor Da Silva", "Xantor Le Gall" refused for "Zorbal" and "Quentrix Zorbal"; no shared surname later); A03 x7 desktop and A03c x5 CLI (Q-G splits: "Xantor"+"Da Silva", "xantor"+"da silva", "Xantor"+"Espirito Santo", "Xantor"+"Espírito Santo", "Xantor Da"+"Velmar", "Xantor"+"Le Gall", "Da"+"Silva"; later lone names take the parts); A04 x5 and A04b x2 (Q-H: new name, known name with no Q1 message, extra spaces, title: nothing changes, row not custom; capitals: a custom pseudonym; batch too); A05 x6 desktop and A05c x6 CLI (Q-I, the PO''s six cases with real surnames on « Quentrel Zorbalia a signé. Le contrat est signé avec Zorbaville. M. Le Goff a signé. »: three accepted and stored, three refused with « Zorbaville », « Le Goff », « Le »); A06 x2 CLI and A06b x2 desktop (GUARD-001''s remaining paths: the later full name keeps the part, in the file and its row); A06c x2 (D12''s pre-filled confirmation now inert; later full name as on main); A07 x2 (a generated name offered "Da Silva" or "Silva" does not take it); A08 batch and A08c CLI (MW-001 through the real worker and the CLI). 50 PASS; A09 records OBS-002.'
+    first_review_rerun: 'The 76 probes of the first review on the head: 75 PASS. D04[both] differs by design: under Q-H the example "Quorix Delmor" is the pre-filled value, so OK on it changes nothing and the row is generated (theme neutral), written "Quorix Delmor" with its parts, exactly T9b[both]''s rewrite. D04m: the example "Xantor Da Velmar" now accepted; D05m x2: "Xantor Da Velmar" now refused, later "Da Velmar a signé avec Pedro Hoarau."; D12 x2: OK on the pre-filled part changes nothing, later "Quorix Colomb a signé. Le contrat est avec Quorix." and "Samuel Velmar a signé. Le contrat est avec Velmar.".'
+    po_probes: 'The PO''s probe_core.py, probe_qd_first.py, probe_v16_extra.py (r111/po/v16/probe) and probe_v17.py (r111/po/v17/probe) on the head: every line equals the SM''s proto6 output (r111/sm/po_probes_v17.txt) and the PO''s v1.7 prototype output, except the line printing a randomly generated name (GEN doc2). B1 both ways ("Xantor Zed", "Zed Velmar" refused; "Zed Quovan" accepted), the split order, the library''s names (da costa, da silva, espirito santo, le gall), Q-I''s cases, and D_FIRST_WORD, D_MIDDLE_WORD, C2_CONTAINS_STORED_FULL refused: the holes of the PO''s v1.5 table stay closed.'
+    regression_10_9_10_10: 'QA 10.10''s 79 probes on the head: verdicts identical to main''s except q5_own_pseudonym_survives_group_reject (with and without navigation), Q3 + Q-B as in the first review. QA 10.9''s 42 probes: 40 pass, P06b and A05 as 10.10 designed.'
+  performance: 'tools/perf_check.py (5,000 rows, a 140,000-word document, invented data): find_all 0.25 s; one set-time check 0.35 s (0.78 s on 5c02ba9); 20 re-checks with the document read once, as finalization does, 3.18 s (16 s on 5c02ba9).'
+  isolation: 'Every runner: USERPROFILE and HOME at r111/qa/home, TEMP/TMP at r111/qa/tmp, scratch cwd, the qa_isolation plugin; probes assert the scratch home. The scratch home holds only .cache and AppData; C:\Users\devea\.gdpr-pseudo.yaml was never opened (modification time still 2026-10-14 13:27). QA''s worktrees of 5a408d2, eee4d41 and 8bb197e are sparse checkouts without held_out/ and final_exam/; QA never opened, listed or grepped them.'
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+    ac_gaps: []
+    notes: 'First review''s trace (first_review.evidence.trace) holds; amendment: AC2/AC17 (b) T9b x6, T37 x2, T37b, T38, T43 x2 + A01, A03, A03c, A08, A08c; AC3/AC17 (c) T9 x5, T39 x3 + A02, PO probes; AC17 (d) T40 x4, T44 x6 + A05, A05c; AC19 T36 x2, T36c, T41 x2 + A06, A06b, A06c, A07; AC20 the T9/T9b rewrite, the 20-run loop, three full suites; AC21 T42 x4, T9b[both] + A04, A04b.'
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'No name left in clear on any path; refusals and the finalization error as in the first review. The clash checks are now independent of the split (both ways), so two people no longer share a two-word surname. No new log line.'
+  performance:
+    status: PASS
+    notes: 'The document is read once per check and once per finalization: one check 0.35 s and a 20-pseudonym finalization 3.18 s on a 140k-word document with 5,000 rows. Nothing more is read without a custom pseudonym.'
+  reliability:
+    status: PASS
+    notes: 'The FAIL''s cause is gone: the tests no longer depend on a random draw (20 runs, three full suites, CI green on every leg). Undo, navigation, batch and the finalization error behave. OBS-002 (low) is the pre-existing redraw design.'
+  maintainability:
+    status: PASS
+    notes: 'One shared module, docstrings citing Lionel''s answers and the PO''s findings; the library''s two-word names read from its files; mypy strict clean.'
+
+recommendations:
+  immediate: []
+  future:
+    - action: 'OBS-002: in _assign_untaken_pseudonym, redraw only the clashing part and keep the bound part.'
+      refs: ['gdpr_pseudonymizer/core/document_processor.py:648-690']
+    - action: 'DOC-001: copy Task 8.2''s phrase into Dev Notes "CHANGELOG Entry".'
+      refs: ['docs/stories/10.11.custom-pseudonym.story.md']
+    - action: 'BACKLOG-EN-QM, OBS-001 (PO O1), follow-ups (h) and (i), TEST-ENV-001: backlog, unchanged.'
+      refs: ['gdpr_pseudonymizer/gui/i18n/en.qm', 'docs/prd/epic-10-v2.3-detection-precision-quick-wins.md']
+
+first_review:
+  note: The first reviews gate record as committed at e8cb76a (CONCERNS at 26ebcb0, raised to FAIL at e8cb76a), kept verbatim below.
+  schema: 1
+  story: '10.11'
+  story_title: 'Custom Pseudonym Stored and Used'
+  scope: 'PR #101, pre-merge G2 at head 5c02ba9 on main eee4d41 (Story 10.10 merged). Commits reviewed: tests-first 5a408d2, fix 43e5a44, CHANGELOG and Dev Agent Record 5c02ba9 (plus the PM/SM docs commits 207bfc0..312a1bf, docs/ only).'
+  gate: FAIL
+  status_reason: 'Raised from CONCERNS to FAIL after the QA commit''s own CI: MW-001 also makes four of the new tests fail whenever the randomly generated last-name part has a space, and it turned CI red on 26ebcb0 (Windows, attempt 1; not an infrastructure failure, so no rerun). A red check is fixed inside the PR, and only the MW-001 fix (product code) removes the cause. Before that: the fix is the Fix Design as written: a custom pseudonym is now written at every place, stored split at its last space, reused later, refused with Lionel''s exact texts, and the command-line review keeps the last decision. Tests first proven again locally (50 AssertionErrors, each on its marked line, after its preconditions; 6 guards pass) and on all four CI legs; 71 end-to-end probes on written files and mapping rows pass, and QA 10.9/10.10''s probes show no regression beyond Lionel''s Q3/Q-B change. Two medium findings, both found by probes and both outside the tests: MW-001 (a stored last-name part with a space, as the library''s "Da Silva", "Le Gall", "Da Costa", "Espírito Santo", defeats the Q2 part check and the Q-D example) and GUARD-001 (the AC3 guard drops the part of a later full name when a one-word custom pseudonym equals that name''s own stored part). Nothing leaks in either case.'
+  reviewer: 'Quinn (Test Architect)'
+  updated: '2026-10-15T11:47:55Z'
+
+  waiver: { active: false }
+
+  merge_blockers:
+    - 'MW-001: four new tests fail whenever the random generated last-name part they reuse has a space (red on 26ebcb0, Windows); fix MW-001 in this PR, then a green CI on the new head.'
+
+  merge_notes:
+    - 'FAIL because of the flaky red CI, not because of a leak: no name is left in clear on any path QA tried, and every Lionel rule holds on single-word parts. MW-001 and GUARD-001 are small, local fixes in core/custom_pseudonym.py (and one call in document_processor.py); MW-001 part (b) needs Lionel''s word on how a multi-word last-name part is split (it refines Q4''s "split at the last space"). Merging without the MW-001 fix would leave the four tests red in about one CI run in eight, on main too. QA recommends fixing both in this PR, then QA again on the fixes.'
+    - 'The merge waits for Lionel (story Task 7.5). QA never merges.'
+
+  top_issues:
+    - id: 'MW-001'
+      severity: high
+      finding: 'AC17 (b) and (c) compare a custom pseudonym''s parts split at its last space with the stored parts, but the neutral library has four last names with a space ("Da Silva", "Le Gall", "Da Costa", "Espírito Santo"), stored whole as pseudonym_last. (c) hole: when "Quentrel Zorbalia" is stored with the last part "Da Velmar" (invented, same shape), "Xantor Da Velmar" is ACCEPTED for "Zorbal" and for "Quentrix Zorbal" (split "Xantor Da" / "Velmar", neither equal to "Da Velmar"); a later "Zorbalia a signé avec Zorbal." is written "Da Velmar a signé avec Xantor Da Velmar.": two different people show the same surname, the merge Lionel''s Q2 refuses ("two people would merge in the output") and the Task 7.3 pass criterion "no two names share a pseudonym or a part" (probe D05m x2; it also happened by chance in a random run with a generated "Da Costa"). (b) dead end: for "Quentrix Zorbalia" every two-word pseudonym is refused; the example the message offers, "Xantor Da Velmar", is refused again with the example "Xantor Da Da Velmar" (probe D04m), so AC17 (b)''s "the example is always accepted" fails. Only a one-word pseudonym gets through. About 0.8% of generated last names (4/500), and "Da Silva"/"Da Costa" are common choices for a pseudonym a user types. The same defect makes the PR''s own tests flaky: T9[other_last_name] and T9[one_word_name] type "Xantor <stored pseudonym_last>", T9b[last_name] and T9b[both] expect the example built from it, and the stored part comes from a random generated pseudonym; when it has a space the refusal does not happen (T9) or the example is refused again (T9b). CI on the QA commit 26ebcb0 (run 38730457990, attempt 1): windows-latest job 116407248508 "1 failed, 2462 passed, 3 skipped", T9[other_last_name] at test_custom_pseudonym_review.py:630 (no message shown). Four exposed draws per leg, four legs: about one CI run in eight goes red.'
+      suggested_action: 'In core/custom_pseudonym.py treat a stored part that has a space as one unit: (c) in _clash (or before it), also refuse when another real name''s multi-word pseudonym_last P satisfies fold(custom).endswith(" " + fold(P)) or fold(custom) == fold(P) (and the same with startswith for a multi-word pseudonym_first), with that row''s full_name as %2 of text 4, no new text; (b) in _part_refusal, accept when the bound last part B has a space and fold(custom).endswith(" " + fold(B)), and in split_custom_pseudonym/custom_entity_fields split before B in that case so pseudonym_last == B. Part (b) refines Q4''s "split at the last space": Lionel to confirm before the dev changes it. Tests: D05m and D04m''s shapes with invented "Da Velmar" (refused; example accepted and stored with pseudonym_last "Da Velmar"). The fix also removes the T9/T9b flakiness; the dev may in addition give T9 and T9b fixed stored parts (as QA''s probes do) so that they no longer depend on the random draw.'
+      refs: ['gdpr_pseudonymizer/core/custom_pseudonym.py:100-113', 'gdpr_pseudonymizer/core/custom_pseudonym.py:150-185', 'gdpr_pseudonymizer/core/custom_pseudonym.py:262-302', 'gdpr_pseudonymizer/core/custom_pseudonym.py:375-402', 'gdpr_pseudonymizer/resources/pseudonyms/neutral.json']
+      suggested_owner: po
+    - id: 'GUARD-001'
+      severity: medium
+      finding: 'Regression against main in a narrow, plausible path. "Changer le pseudonyme" on a lone first name whose dialog is pre-filled with its stored part ("Quentrel" -> "Quorix", from "Quentrel Zorbalia" stored as "Quorix Velmar"), confirmed as is, stores a one-word custom row ("Quentrel", PERSON, "Quorix", no parts, theme custom), so untracked_custom_values marks "quorix" as untracked. "Quorix" is in fact tracked: it is the same real word''s own part. A later "Quentrel Zorbix a signé. Le contrat est avec Quentrel." then has its compositional pseudonym ("Quorix <last>", shown in the review) redrawn without component links: written "Jérémie Sanchez a signé. Le contrat est avec Quorix." (main writes "Quorix Gonçalves a signé. Le contrat est avec Quorix."); the stored row of "Quentrel Zorbix" has no parts; the list preview and the file differ. Same for a lone last name ("Zorbalia" -> "Velmar": "Clarence Gerard ... avec Velmar" vs main "Erin Velmar ... avec Velmar"). Probe D12 x2 on the head and on main. Story 2.8''s "one real name, one part" consistency is lost for every later full name with that first or last name; nothing leaks.'
+      suggested_action: 'core/custom_pseudonym.py untracked_custom_values: do not add a one-word custom pseudonym_full when it equals (folded) the part the same real word already has in the rows given (a PERSON row with first_name == full_name and that pseudonym_first, or last_name == full_name and that pseudonym_last); core/document_processor.py _register_custom_pseudonyms: call it with the stored rows plus the new row (untracked_custom_values([*stored, row])) instead of [row]. Test: lone "Quentrel" set to its stored part, then "Quentrel Zorbix" written with that part first and its row bound.'
+      refs: ['gdpr_pseudonymizer/core/custom_pseudonym.py:405-424', 'gdpr_pseudonymizer/core/document_processor.py:467', 'gdpr_pseudonymizer/core/document_processor.py:624-635']
+      suggested_owner: dev
+    - id: 'PERF-001'
+      severity: low
+      finding: '_capitalised_occurrence tokenizes and folds the whole document for each candidate (the pseudonym and its two parts), and finalization re-checks every custom pseudonym. Measured (tools/perf_check.py, invented data): 5000 rows, 140k-word document: find_all 0.25 s, one set-time check 0.78 s, finalization re-check of 20 custom pseudonyms 16 s. Realistic documents (a few thousand words, a few custom pseudonyms) stay well under a second.'
+      suggested_action: 'Backlog, or with MW-001: fold and tokenize the document once per check (or once per finalization) and pass the token list in.'
+      refs: ['gdpr_pseudonymizer/core/custom_pseudonym.py:203-233', 'gdpr_pseudonymizer/core/document_processor.py:441-454']
+      suggested_owner: dev
+    - id: 'OBS-001'
+      severity: low
+      finding: 'PO O1, recorded by the dev as backlog and AC17 (d) as written (the candidate''s own separator must match): an organisation or a place given "Saint Zorbal" in a document that says "Saint-Zorbal" is accepted (ORG and LOCATION: no refusal); a person is refused through its part "Zorbal".'
+      suggested_action: 'Backlog for the PO, as the dev recorded.'
+      refs: ['gdpr_pseudonymizer/core/custom_pseudonym.py:191-233']
+      suggested_owner: po
+    - id: 'TEST-ENV-001'
+      severity: low
+      finding: 'Known since 10.9: tests/integration/test_ner_title_improvements.py reads its main-corpus file relative to the working folder (4 errors from a scratch cwd). New, QA environment only: with TEMP set to QA''s long scratch path, tests/unit/cli/commands/test_config_show.py::test_displays_config_files_status fails under xdist because Rich wraps "(not found)" across lines; with the default TEMP it passes on the head and on main (23/23 each), and CI passes it.'
+      suggested_action: 'Backlog as in 10.10 (build the corpus path from the test file''s location). Nothing for 10.11.'
+      refs: ['tests/integration/test_ner_title_improvements.py', 'tests/unit/cli/commands/test_config_show.py:264']
+      suggested_owner: dev
+
+  handed_off:
+    - id: 'BACKLOG-EN-QM'
+      owner: 'Lionel (backlog item)'
+      note: 'The dev''s en.qm note is verified. main''s en.qm was last built at Story 7.2 (7fa82c5); Story 7.4 (aeebcae) changed three file-dialog filters in en.ts without rebuilding it, so BatchScreen, DropZone and MainWindow show "Documents (*.txt *.md *.pdf *.docx *.xlsx *.csv);;Tous (*)" in French in English mode today (QTranslator on main''s en.qm: empty for those three; en.ts holds "...;;All (*)"). The committed head en.qm differs from main''s in exactly the five approved texts (QTranslator over all 312 en.ts messages) and still lacks the three filters; a plain pyside6-lrelease of the head en.ts would turn them to English (tools/qm_plain.py: "Generated 312 translation(s)", all three "...;;All (*)"). A visible change outside AC18, so not in 10.11: a backlog item to rebuild en.qm with plain lrelease. QA did not fix it.'
+    - id: 'PO-NOTE-Q1-ROUTE-OUT'
+      owner: 'Epic 10 Follow-up (f) (same mechanism)'
+      note: 'Report, not a fail. A desktop batch waiting on a document whose name is stored: "Changer le pseudonyme" shows Q1''s text (route: Outils › Base de correspondances...). Following it mid-batch (probe B07 x2): the database screen opens, the row is removed, « ◀ Retour » goes to the home screen; the batch worker stays blocked on that document, nothing is written for it or the documents after it, and no menu or button leads back to it. If the user then presses the home screen''s batch button, the screen is reset and drops its reference to the blocked worker (still waiting until the app quits), so the waiting document can no longer be validated: the user processes it again, as the message says. Nothing is written wrongly and no name is left in clear. QA reached the waiting document with navigate_to("validation", **its cached context), as 10.10''s QA did: its decisions were kept, the same pseudonym was then accepted (the row was gone) and written at both places, stored with theme custom, and the next document was processed.'
+
+  deviation_rulings:
+    dev_helpers: 'IN SCOPE. NameKey, PseudonymChecker, _bound_parts, _part_refusal, _sent_entity, _sent_name, _group_custom_pseudonym and _with_title are private helpers or aliases inside the File Locations rows; they implement Fix Design steps exactly.'
+    finalization_message_period: 'ACCEPTED. The Q-A block writes "... can no longer be used: … Nothing was written."; the code writes the reason followed by a period ("...: it, or a part of it, is now used for another name. Nothing was written."). This is the PO''s own full expansion (r111/po/po_validation_111_notes.md:320-322) and the only grammatical substitution; the four reasons are byte-identical.'
+    finalize_document_tabular: 'ACCEPTED. Left unchanged (Fix Design 5 lets the dev choose; no caller, follow-up (d)).'
+    undo_macro_label: 'ACCEPTED. beginMacro("Changer le pseudonyme du groupe") follows the existing macro labels ("Modifier le texte du groupe", "Changer le type du groupe"); undo texts are never shown (no undoText, createUndoAction or QUndoView in gui/), so it is not user copy.'
+
+  quality_score: 70
+  expires: '2026-10-29T11:47:55Z'
+
+  evidence:
+    tests_reviewed: 56
+    risks_identified: 5
+    tests_first_local:
+      runxfail: 'QA worktree of 5a408d2 (git worktree add --no-checkout, sparse checkout without tests/test_corpus/held_out and final_exam), the three new files with --runxfail: 50 failed, 6 passed. Every failure an AssertionError on a line carrying the "# expected failure" comment, each marked line hit (review 21/21, batch worker 6/6, CLI 10/10), none at a "PRE:" precondition (PRE asserts after a failing line belong to a later stage or another parametrized branch: T3, T4, T7c, T34). Lines equal the Debug Log''s: T1 :342, T2 :378, T3 :399, T4 :428, T5 :472, T6 :499, T7 x8 :562, T7c :601 x2 and :608 x2, T8 :628, T9 x2 :682, T9b x3 :746, T10 :775, T11 :817, T13 :867, T14 :918, T16 :960, T17 :983, T19 :1020, T20 :1047, T21 :1071; T22 :222, T23 :261, T24 :294, T16b :328, T19b :355, T20b :386; T25 :182, T26 :229, T27 :258, T30 :320, T31 :350, T32 :374, T33 :402, T34 :455 and :489 x2, T35 :526. The 6 passing are exactly the guards T9[same_first_name], T12, T15, T18, T28, T29 (QA tool tools/fail_lines.ts, logs/tf_fail_lines.txt).'
+      with_markers: '5a408d2 plain: 6 passed, 50 xfailed. Head 5c02ba9: 56 passed.'
+      markers: 'git diff 5a408d2 43e5a44 on the three new files removes only the 34 @pytest.mark.xfail decorators, the _T9_XFAIL definition and its two pytest.param marks (now plain ids); no assertion or other line changes; 5c02ba9 touches no test.'
+      existing_tests: 'Exactly the three edits of Dev Notes "Existing Tests", in 43e5a44: test_batch_review_real_worker.py T4 fifth state CONFIRMED -> MODIFIED with the comment "# Story 10.11 (Lionel''s Q3): the custom pseudonym reaches it"; test_validation_state_added_row.py case batch_own_pseudonym: bulk_reject([r2, r3]) before change_pseudonym(r1), precondition [MODIFIED, REJECTED, REJECTED], expected unchanged, comment citing 10.11; test_type_aware_document_processor.py _ReviewRecorder.__call__ gains **kwargs: Any. No other existing test changed.'
+    ci:
+      5a408d2: 'CI - Test Matrix 38719135696 attempt 1 success: ubuntu 3.11 "2562 passed, 50 xfailed"; ubuntu 3.10 "2562 passed, 50 xfailed"; macos 3.12 "2562 passed, 50 xfailed"; windows 3.12 "2413 passed, 3 skipped, 50 xfailed"; each log''s 50 XFAIL lines all in the three new files, no XPASS.'
+      43e5a44: 'CI - Test Matrix 38721458578 attempt 1 success: "2612 passed" x3, windows "2463 passed, 3 skipped"; 0 xfailed.'
+      head_5c02ba9: 'CI - Test Matrix 38723517446 attempt 1 success (lint; ubuntu 3.10 "2612 passed in 278.58s"; windows 3.12 "2463 passed, 3 skipped in 513.48s"; macos 3.12 "2612 passed in 178.29s"; ubuntu 3.11 "2612 passed in 430.63s"); Code Quality (quality) pass; CodeQL (Analyze actions, Analyze python, CodeQL) pass. gh pr checks 101: 9/9 pass. Reruns: none.'
+      qa_commit_26ebcb0: 'CI - Test Matrix 38730457990 attempt 1 FAILURE: lint, ubuntu 3.11, ubuntu 3.10 and macos 3.12 success; windows 3.12 (job 116407248508) "1 failed, 2462 passed, 3 skipped": T9[other_last_name] (MW-001, the random generated last part had a space). Not an infrastructure failure: no rerun. Code Quality 38730457959 success; CodeQL "PR #101" 38730453210 success.'
+      qa_commit_603cb7c: 'CI - Test Matrix 38730596557 attempt 1 success (lint and the four test legs); Code Quality 38730596490 attempt 1 success; CodeQL 38730592461 attempt 1 success. Green by the draw, not by a fix. This gate update gets its own run, which the orchestrator checks.'
+      skip_markers: 'none in the 11 commit titles and bodies of eee4d41..5c02ba9, nor in the PR title and body (prose variants checked too).'
+    diff_vs_fix_design: 'One module of checks (core/custom_pseudonym.py check_custom_pseudonym, AC17 order a, b, c, d) used by the desktop dialog (GUIValidationState.custom_pseudonym_refusal, database opened there, None on failure), the command line''s [C] (DocumentProcessor._build_custom_pseudonym_checker) and finalization (_register_custom_pseudonyms: the last check, CustomPseudonymError before anything is saved, then the rows, load_existing_mappings, _custom_taken and the cache, before the loop). A refusal changes nothing (states, customs and undo stack identical in every desktop refusal probe; the CLI redisplays the group). Reach = _action_rows'' rule by mapping key (_pseudonym_rows), one macro; the flag by _own_after (AC16). _ModifyTextCommand and _ChangeTypeCommand drop and restore custom_pseudonym in the same command. Hand-offs pass the side map only when not empty (batch worker, finalization worker), so finalize_document is called exactly as before without one (AC13). get_validated_entities follows the current state; change_entity_type retypes the entity sent; mark_modified drops the custom pseudonym. Two new log events carry a reason code or a count only. Nothing outside File Locations; the Task 6.1 path set, scripts/, validation/ui.py and validation/actions.py: empty.'
+    g6_local: 'Windows, main poetry venv, PYTHONPATH at the worktree, USERPROFILE/HOME at r111/qa/home: ruff check . exit 0; black --check . 310 files unchanged; mypy gdpr_pseudonymizer: no issues in 105 source files; tests/unit + tests/integration -m "not slow" -n 4 --dist loadscope from a scratch cwd: 2596 passed, 11 skipped, 1 failed, 4 errors, all environment-caused (TEST-ENV-001; the failing config_show test passes 23/23 with the default TEMP, on the head and on main).'
+    isolation: 'Task 6.1 paths and the 13 files the accuracy suite loads untouched (tests/accuracy imports nlp/ and utils/ only), so no accuracy run; both allowlists unchanged (git diff eee4d41...5c02ba9 empty); both leakage guards pass in the head suite and on CI. QA''s worktrees of 5a408d2 and eee4d41 are sparse checkouts without tests/test_corpus/held_out and final_exam; QA never opened, listed, read or grepped them. Probes outside the repo, invented names and pseudonyms only (Quentrel, Zorbalia, Zorbal, Quentrix, Zorbaville, Zorbéville, Velmor, Zorbix; Xantor, Vellion, Xantorville, Xantorix, Quorix, Velmar, Quovan, Delmor, "Da Velmar").'
+    settings_isolation: 'every runner sets USERPROFILE and HOME to r111/qa/home and TEMP/TMP to r111/qa/tmp, runs from r111/qa/cwd (lint: the worktree), and loads the qa_isolation plugin (copied from r110) that points gdpr_pseudonymizer.gui.config._config_path at tmp_path; the probe conftest also carries _isolate_gui_config; each probe asserts Path.home() is the scratch home. The scratch home holds only .cache and AppData. C:\Users\devea\.gdpr-pseudo.yaml was never opened, listed or touched.'
+    consumer_trace: 'All 33 rows re-read against the diff at 5c02ba9; each "After the fix" column holds, and the dev''s three extra places (the two get_custom_pseudonyms, the dialog''s swallowed open failure, finalize_document_tabular unchanged) are as recorded. Checked closely (Task 7.4 asks for three): #12 batch hand-off (Signal(int, object, object), 10.10''s refusal of another document first, the worker clears both under the mutex; probes B01-B07); #15/#17/#19 finalization (last check, registration before generation, guard, custom row with theme custom; probes D10 x4, B06, C06, C05); #26/#26b/#27 command line (last decision, [T] from the entity sent; probes C04 x5, C07).'
+    changelog: 'The 10.11 bullet under [Unreleased] ### Fixed, after 10.10''s, is byte-identical to Dev Notes "CHANGELOG Entry" (7 lines); it covers AC7''s three points, quotes none of AC18''s texts and states no accuracy figure. No README, faq, index, tutorial, gui-guide or methodology change; the advertised lines still describe the feature accurately (AC8).'
+    approved_texts: 'tools/texts_check.py (TEXTS_OK), against the Q-A block and "Approved Texts" parsed from the story: the five French self.tr sources of ValidationScreen._custom_refusal_text (ast, literals joined, in rule order) byte-identical; en.ts: one entry each, context ValidationScreen, translation = the approved English; fr.ts: one unfinished empty entry each; the five command-line lines rendered with %1-%3 byte-identical; the four finalization reasons identical (message shape: see deviation_rulings); theme "custom". en.qm through QTranslator returns the approved English for all five French sources; fr.qm returns none and is byte-identical to main''s. self.tr literals in gui/, main vs head: exactly the five added, none removed. Shown in the app: the five French texts with their placeholders (probes D03-D08, B01, B05, B07), the five English ones in English mode (D11), the CLI lines (C02, C07), the finalization error in the desktop window (D10 x4), the batch status tooltip and report (B06), the CLI "Error:" line and stats'' last operation (C06).'
+    theme_custom: 'Probe C08 through the real CLI: list-mappings shows "custom" in its Theme column; list-mappings --export writes theme=custom (CSV, its one format); validate-mappings --interactive shows "Theme: custom"; stats'' Theme Distribution "custom 1"; delete-mapping shows "Theme: custom" and removes the row; import-mappings copies the row with theme custom and its parts. Nothing in the package validates a stored theme (data/models.py theme is a plain String; load_existing_mappings and stats read it without a list of allowed values).'
+    probes:
+      harness: 'r111/qa/probes (outside the repo): qa111_harness.py, approved.py, test_probe_111_desktop.py, test_probe_111_batch.py, test_probe_111_cli.py. Desktop: the real DetectionWorker (detect_entities replaced), ValidationScreen, the editor menu "Changer le pseudonyme" and "Modifier le texte..." with the dialog answered, type submenu, panel ticks, Ctrl+Z/Ctrl+Y, the real FinalizationWorker; batch through the real BatchScreen and BatchWorker thread (only _detect_and_filter_entities replaced), "◀ Précédent"/"Suivant ▶". Command line: the real Typer app through CliRunner (process, batch --workers 1, list-mappings, validate-mappings, delete-mapping, stats, import-mappings), detection, keys and typed answers replaced. Every check on the written file and the stored rows; refusals compared with the approved text. Results: 71 PASS, 5 recorded findings (D04m, D05m x2, D12 x2), 0 FAIL (logs/probe111_results.jsonl).'
+      desktop_single: 'D01 written at both places, stored (Quentrel Zorbalia, Quentrel, Zorbalia, Xantor Vellion, Xantor, Vellion, custom), list-mappings shows it, a later document shows it as known and writes [Xantor Vellion, Vellion, Xantor]; typed "M. Xantor  Vellion" normalized. D02 one-word (no parts; a later lone "Zorbalia" gets its own), ORG and LOCATION ("à Xantorville" stored "Xantorville", written "à Xantorville"), titled form "Xantor Vellion a signé avec M. Xantor Vellion.". Refusals, each one message equal to the approved text and nothing changed, file and row without the refused value: D03 Q1; D04 Q-D first, last, both, the example then accepted at once and stored; D05 Q2 another name''s pseudonym, a part of it, the last part on a one-word name, the same pseudonym or one-word pseudonym for two names of one document; D06 Q-C x11 (capitalised word, lowercase typed, a part, the name itself, accentless and upper-case typed against « Zorbéville », the three hyphenated cases, Lionel''s two refused preview cases); D07 Lionel''s two accepted preview cases written; D08 Lionel''s Q-C2 preview (stored full name refused, "Xantor Zorbalia" and "Quentrel Vellion" accepted) and a stored ORG name refused. D09 Q-E: a correction removes it, one undo restores both the old name and the pseudonym, redo, set again and written; a type change removes it, one undo restores both. D10 x4: the database changes during the review (each refusal kind): one error window "CustomPseudonymError: " + the approved text, no results screen, nothing stored, the temporary file empty, the review kept.'
+      desktop_batch: 'B01 three documents: Q3 reach [M, M, R] with Saint-Zorbal rejected on its own, one undo reverts both, redo; "Xantor a signé avec Xantor. Le projet est à Saint-Zorbal."; doc 1 shows the stored one-word "Xantor" as known, refuses "Xantor Vellion" (its part "Xantor" stands for "Zorbal") with the approved text, takes "Quorix Vellion" on both places, keeps it over "◀ Précédent"/"Suivant ▶"; doc 2 writes the parts "Quorix a signé avec Vellion et Xantor.". B02 Lionel''s Q-B preview: [M, M, M], a reject from row 2 -> [R, R, R], undo/redo, nothing replaced, nothing stored. B03 Q-B: titled [M, M] -> [R, M], written "Zorbal a signé avec M. Xantor Vellion."; hand-added [M, M, M] -> [R, R, M], only the added place written. B04 follow-up (e): one pseudonym in the file ("Saint-Xantorix"), the rejected-then-accepted row still lists the older one. B05 Q1 in batch. B06 finalization error in batch: doc 0 "Erreur", tooltip and exported report carry the approved text, no output, nothing stored for the name; doc 1 written. B07 the PO note (handed_off). B08 the pseudonym set through the menu on a place added by hand reaches both found places [M, M, M], one undo and redo, written at the three places, row split with theme custom.'
+      cli: 'C01 process: [C] typed "M. Xantor Vellion" -> written at the name and "Vellion" at the lone last name, row split with theme custom; a later run writes [Xantor Vellion, Xantor] and its review previews the lone "Quentrel" as "Xantor". C02 x15 refusals through [C] with the approved CLI line, the group shown again, nothing written or stored: Q1 after [E] into a stored name then [P] (the only CLI route), Q-D first/last/both with the example accepted, Q2 x4, Q-C x6 (hyphenated x3, accentless, lowercase typed), Q-C2. C03 [P] back to a titled group shows "M. Xantor Vellion". C04 AC11: [E][P]Space, [R][P]Space, [E][P][C], [E][P][T], [E][P][C][P]Space: the last decision written, no name part left, the correction kept. C05 R8: a one-word custom "Vellion" stored in run 1; run 2 (new process) with the library forced to offer "Vellion": generated "Florian Teles" (no "Vellion"); control with the row''s theme set to "neutral": "Laurine Vellion", so the theme marker is what carries the guard across runs. C06 finalization error: exit 1, "Error: CustomPseudonymError: A pseudonym you chose can no longer be used: it, or a part of it, is now used for another name. Nothing was written.", no file, no row, stats'' last operation "Failed" with it. C07 batch --workers 1: a.txt custom written, b.txt parts "Vellion a signé avec Xantor.", c.txt refused once (the pseudonym now stored for a.txt''s name) and generated. C08 theme custom (above).'
+      regression_10_9_10_10: 'QA 10.10''s probes (r110 rules + flows, copied) on main eee4d41 and on the head: 79/79 run on both; verdicts identical for 77 records; the two that differ are the case q5_own_pseudonym_survives_group_reject (with and without navigation): main MRR (10.10: a custom pseudonym acts on one row), head RRR with nothing replaced, exactly Lionel''s Q3 + Q-B preview and the story''s existing-test edit 2. QA 10.9''s 42 probes (capture adapted to the three-argument signal) on main and head: 40 pass on both; the same two (P06b, A05) fail on both, the changes 10.10 made by design. Generated pseudonyms differ per run and were masked.'
+    trace:
+      ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
+      ac_gaps: []
+      notes: 'AC1 T1, T2, T13, T16-T20, T16b, T19b, T20b, T22-T25 + D01, D02, B01-B04, B08, C01, C07; AC2 T1, T3, T4, T5, T9b, T11, T24, T25, T33 + D01-D04, B01, B05, C01, C02 (MW-001 for multi-word parts); AC3 T6-T10, T7c, T21, T26, T27, T34 + D05-D08, C02, C05 (MW-001, GUARD-001); AC4 T25-T35 + C01-C07; AC5 T11, T12, T16, T23, T29 + D09, B01; AC6/AC12 tests first proven locally and on 4 CI legs; AC7 CHANGELOG; AC8 docs unchanged; AC9/AC18 texts byte-checked and shown; AC10 G1/G3/G5 N/A by path check, G2 this gate, G4, G6 green, G7; AC11 T30-T32, T35 + C04; AC13 T15, T28 + regression probes; AC14 Consumer Trace; AC15 isolation; AC16 T16-T18 + B02, B03; AC17 T5-T10, T7c, T9b, T21, T26, T27, T33 + D03-D08, C02 (MW-001).'
+
+  nfr_validation:
+    security:
+      status: PASS
+      notes: 'No path writes a name in clear: refusals leave the generated or stored pseudonym, a database changed during the review stops finalization before anything is written or stored, and the CLI''s two old [P]+Space leaks are closed (C04). The new logs carry a reason code or a count; the finalization error names no name and no pseudonym. MW-001 and GUARD-001 are consistency findings (who looks like whom in the output), not leaks.'
+    performance:
+      status: PASS
+      notes: 'Without a custom pseudonym nothing more is read (registration returns at once; the untracked set comes from rows already read). With one: one find_all per dialog or [C] and per finalization. PERF-001 (low) for very long documents with many custom pseudonyms.'
+    reliability:
+      status: FAIL
+      notes: 'Undo/redo, navigation, batch and the finalization error all behave (B01-B07, D09, D10). FAIL: MW-001 makes the new tests flaky (red on 26ebcb0). Also MW-001 (AC17 (b)''s example guarantee and (c)''s part check fail on multi-word stored last parts) and GUARD-001 (a later full name loses its part; preview and file differ).'
+    maintainability:
+      status: PASS
+      notes: 'One shared module with docstrings citing Lionel''s answers; the side map keeps DetectedEntity and EntityReview unchanged; mypy strict clean; small private helpers.'
+
+  recommendations:
+    immediate:
+      - action: 'MW-001: compare multi-word stored parts as units in AC17 (b) and (c); Lionel confirms the split refinement for (b).'
+        refs: ['gdpr_pseudonymizer/core/custom_pseudonym.py']
+      - action: 'GUARD-001: do not mark a one-word custom value that is the same real word''s own stored part as untracked.'
+        refs: ['gdpr_pseudonymizer/core/custom_pseudonym.py:405-424', 'gdpr_pseudonymizer/core/document_processor.py:467']
+    future:
+      - action: 'BACKLOG-EN-QM: rebuild en.qm with a plain pyside6-lrelease (turns Story 7.4''s three file filters to English).'
+        refs: ['gdpr_pseudonymizer/gui/i18n/en.qm']
+      - action: 'PERF-001: tokenize and fold the document once per check or finalization.'
+        refs: ['gdpr_pseudonymizer/core/custom_pseudonym.py:203-233']
+      - action: 'OBS-001 (PO O1) and the epic follow-ups (a)-(g) stay backlog.'
+        refs: ['docs/prd/epic-10-v2.3-detection-precision-quick-wins.md']
+      - action: 'PO note: the Q1 route out abandons a waiting desktop batch (follow-up (f) mechanism); consider a way back to the waiting document.'
+        refs: ['gdpr_pseudonymizer/gui/screens/batch.py:93-102']
