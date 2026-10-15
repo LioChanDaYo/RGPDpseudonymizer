@@ -1,5 +1,5 @@
 """Story 10.11: a custom pseudonym in the command-line review, and the review's
-last decision (T25-T35).
+last decision (T25-T35; after QA's FAIL, T36c, T38 and T41).
 
 Each test runs ``DocumentProcessor.process_document`` with its interactive
 validation: detection is replaced, the keys ([C], [E], [T], [R], [P], Space)
@@ -21,8 +21,10 @@ from unittest.mock import patch
 
 import pytest
 
+import gdpr_pseudonymizer.pseudonym.library_manager as library_module
 from gdpr_pseudonymizer.core.document_processor import DocumentProcessor
 from gdpr_pseudonymizer.data.database import init_database, open_database
+from gdpr_pseudonymizer.data.models import Entity
 from gdpr_pseudonymizer.data.repositories.mapping_repository import (
     SQLiteMappingRepository,
 )
@@ -41,6 +43,13 @@ ONE = (
     "Quentrel Zorbalia a signé avec Zorbaville. Le contrat est avec Quentrel Zorbalia."
 )
 QZZ = "Quentrel Zorbalia a signé avec Zorbal."
+# The amendment's tests that fail on the code QA failed (Story 10.11, Task 8.1).
+_AMEND_XFAIL = pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 10.11 amendment: reproduces MW-001, GUARD-001 or the PO's A1-A4 on the unfixed code",
+)
+
 # The corrected name and the lone "Zorbal" of QZZ.
 QZZ_SPANS = [(0, len(QZ)), (QZZ.find("Zorbal."), QZZ.find("Zorbal.") + len("Zorbal"))]
 
@@ -480,3 +489,157 @@ def test_cli_type_change_after_correction_keeps_it(tmp_path: Path) -> None:
     name = _replacements(written, QZZ, QZZ_SPANS)[0]
     assert "orbal" not in name and "Quentrel" not in name, written  # expected failure
     assert _stored(db, QZ, "ORG") is not None
+
+
+# ---------------------------------------------------------------------------
+# Amendment after QA's FAIL (Task 8): MW-001, GUARD-001, the PO's A1. Stored
+# rows with fixed parts (AC20).
+# ---------------------------------------------------------------------------
+
+
+def _store_qz(db: str, pseudonym_first: str, pseudonym_last: str) -> None:
+    """ "Quentrel Zorbalia" stored with fixed parts, as the library stores a
+    row (a last part of two words is stored whole)."""
+    with open_database(db, PASSPHRASE) as session:
+        SQLiteMappingRepository(session).save(
+            Entity(
+                entity_type="PERSON",
+                full_name=QZ,
+                first_name="Quentrel",
+                last_name="Zorbalia",
+                pseudonym_full=f"{pseudonym_first} {pseudonym_last}",
+                pseudonym_first=pseudonym_first,
+                pseudonym_last=pseudonym_last,
+                theme="neutral",
+            )
+        )
+
+
+@_AMEND_XFAIL
+def test_cli_two_word_stored_last_part_example_accepted(tmp_path: Path) -> None:
+    """T38 (Q-D "Refuse", last name; QA MW-001): the real last name's stored
+    part has two words; [C] shows one warning holding the example, then the
+    example is accepted, written and stored with that part whole."""
+    db = _new_db(tmp_path)
+    _store_qz(db, "Quorix", "Le Velmar")
+    text = "Quentrix Zorbalia a signé le contrat."
+    good = "Xantor Le Velmar"
+    written, warnings = _cli(
+        tmp_path,
+        db,
+        "qd.txt",
+        text,
+        [_at(text, "Quentrix Zorbalia", "PERSON", 0)],
+        ["change_pseudonym", "change_pseudonym", "confirm"],
+        [CUSTOM, good],
+    )
+    assert len(warnings) == 1 and good in warnings[0], warnings  # expected failure
+    assert written == f"{good} a signé le contrat."
+    assert _stored(db, "Quentrix Zorbalia", "PERSON") == (
+        "Quentrix Zorbalia",
+        "Quentrix",
+        "Zorbalia",
+        good,
+        "Xantor",
+        "Le Velmar",
+    )
+
+
+@_AMEND_XFAIL
+def test_cli_own_part_on_lone_name_keeps_later_full_names(tmp_path: Path) -> None:
+    """T36c (AC19; QA GUARD-001; the command line has no pre-filled value,
+    so Q-H does not apply): [C] on a lone "Quentrel" typed with the part it
+    already has; a later run's "Quentrel Zorbix" still starts with it, in
+    the file and in its stored row."""
+    db = _new_db(tmp_path)
+    _store_qz(db, "Quorix", "Velmar")
+    text = "Quentrel a signé le contrat."
+    written, warnings = _cli(
+        tmp_path,
+        db,
+        "lone.txt",
+        text,
+        [_at(text, "Quentrel", "PERSON", 0)],
+        ["change_pseudonym"],
+        ["Quorix"],
+    )
+    assert written == "Quorix a signé le contrat." and warnings == [], "PRE: set"
+    later = "Quentrel Zorbix a signé. Le contrat est avec Quentrel."
+    entities = [
+        _at(later, "Quentrel Zorbix", "PERSON", 0),
+        _at(later, "Quentrel", "PERSON", later.rfind("Quentrel")),
+    ]
+    written2, _ = _cli(tmp_path, db, "later.txt", later, entities, ["confirm"], [])
+    assert written2 is not None, "PRE: later run"
+    full_written, lone_written = _replacements(written2, later, _spans(entities))
+    assert lone_written == "Quorix", "PRE: the lone name again"
+    assert full_written.startswith("Quorix "), full_written  # expected failure
+    stored = _stored(db, "Quentrel Zorbix", "PERSON")
+    assert stored is not None and stored[3] == full_written and stored[4] == "Quorix"
+
+
+@pytest.mark.parametrize(
+    "case", [pytest.param("offered_first", marks=_AMEND_XFAIL), "offered_last"]
+)
+def test_cli_generation_never_takes_a_beginning_or_ending(
+    tmp_path: Path, case: str
+) -> None:
+    """T41 (AC3, AC19; PO A1; core): after "Xantor Quovan Velmar" is stored
+    for "Quentrel Zorbalia" (parts "Xantor Quovan" + "Velmar"), the library is
+    made to offer "Xantor" (a first name) or "Velmar" (a last name) first for
+    a new name, through ``secrets.choice``, so its own check still runs: the
+    written name neither starts with "Xantor " nor ends with " Velmar", and
+    its stored row matches the file."""
+    db = _new_db(tmp_path)
+    first_doc = "Quentrel Zorbalia a signé le contrat."
+    result = DocumentProcessor(db_path=db, passphrase=PASSPHRASE).finalize_document(
+        first_doc,
+        [_at(first_doc, QZ, "PERSON", 0)],
+        str(tmp_path / "one.txt"),
+        custom_pseudonyms={(QZ, "PERSON"): "Xantor Quovan Velmar"},
+    )
+    assert result.success, "PRE: custom stored"
+    assert _stored(db, QZ, "PERSON") == (
+        QZ,
+        "Quentrel",
+        "Zorbalia",
+        "Xantor Quovan Velmar",
+        "Xantor Quovan",
+        "Velmar",
+    ), "PRE: stored with its parts"
+    offered, method, real = (
+        ("Xantor", "_select_first_name", "Quentrix")
+        if case == "offered_first"
+        else ("Velmar", "_select_last_name", "Zorbix")
+    )
+    original = getattr(library_module.LibraryBasedPseudonymManager, method)
+    real_choice = library_module.secrets.choice
+
+    def offering(self: Any, *args: Any, **kwargs: Any) -> Any:
+        if real not in args and real not in kwargs.values():
+            return original(self, *args, **kwargs)
+        calls = {"n": 0}
+
+        def choice(seq: Any) -> Any:
+            calls["n"] += 1
+            return offered if calls["n"] == 1 else real_choice(seq)
+
+        with patch.object(library_module.secrets, "choice", choice):
+            return original(self, *args, **kwargs)
+
+    later = "Quentrix Zorbix a signé le contrat."
+    output = tmp_path / "two.txt"
+    with patch.object(library_module.LibraryBasedPseudonymManager, method, offering):
+        result = DocumentProcessor(db_path=db, passphrase=PASSPHRASE).finalize_document(
+            later, [_at(later, "Quentrix Zorbix", "PERSON", 0)], str(output)
+        )
+    assert result.success, "PRE: later document"
+    written = _replacements(
+        output.read_text(encoding="utf-8"), later, [(0, len("Quentrix Zorbix"))]
+    )[0]
+    if case == "offered_first":
+        assert not written.startswith("Xantor "), written  # expected failure
+    else:
+        assert not written.endswith(" Velmar"), written  # expected failure
+    stored = _stored(db, "Quentrix Zorbix", "PERSON")
+    assert stored is not None and stored[3] == written
