@@ -3,7 +3,7 @@
 **Epic Goal:** Raise detection precision and make the accuracy benchmark trustworthy with local, deterministic changes to the hybrid detector and the ground-truth corpus, without lowering recall. The user-facing value is fewer false entities to reject during the (mandatory) validation step and a benchmark whose numbers can be believed.
 
 **Target Release:** v2.3.0 candidate. **No release is part of this epic.** v2.3.0 ships only on Lionel's explicit go, through a separate release story.
-**Duration:** Estimated 7-10.5 weeks (10.1 is annotation-labor-bound; 10.3 split into 10.3a and 10.3b, and 10.3c added, Lionel, 2026-10-06; 10.5 added, Lionel, 2026-10-07; 10.3b re-estimated after its STOP R, 2026-10-07; 10.7 added, Lionel, 2026-10-09; 10.8 and 10.9 added, Lionel, 2026-10-13; 10.10 added, Lionel, 2026-10-14); 10.6 runs in parallel (2-3 weeks elapsed) and close-out waits for its adjudication after 10.4 merges, then its commit and one scored run
+**Duration:** Estimated 7.5-11.5 weeks (10.1 is annotation-labor-bound; 10.3 split into 10.3a and 10.3b, and 10.3c added, Lionel, 2026-10-06; 10.5 added, Lionel, 2026-10-07; 10.3b re-estimated after its STOP R, 2026-10-07; 10.7 added, Lionel, 2026-10-09; 10.8 and 10.9 added, Lionel, 2026-10-13; 10.10 and 10.11 added, Lionel, 2026-10-14); 10.6 runs in parallel (2-3 weeks elapsed) and close-out waits for its adjudication after 10.4 merges, then its commit and one scored run
 **Predecessor:** v2.2.0 + accuracy scorer fix (#77), commit `fceef65`
 **Successor:** Epic 9 (v3.0) starts from this epic's merged close-out baseline.
 
@@ -122,12 +122,13 @@ These notes sit outside the normative Gates block above and do not change its te
 | 10.4: Greetings + Org-Plus-Country | MED | 0.5-1 week | F8, F9 | Done (PR #93, `2d4a029`) |
 | 10.5: DB Init Safety (data-layer hardening, added by Lionel, 2026-10-07) | MED (raised from LOW by the PM, 2026-10-13) | 0.5 week | PR #83 finding | Done (PR #96, `67807c2`) |
 | 10.6: Final-Exam Set and Confidence Ranges (added by Lionel, 2026-10-07) | HIGH | 2-3 weeks elapsed, in parallel | Overfitting check, close-out evidence | Done (PRs #89, #92, #94, #95) |
-| 10.7: Type-Aware Mapping Lookup (data layer, added by Lionel at 10.3c STOP R, 2026-10-09) | MED | 0.5-1 week | 10.3c STOP R | In review (PR #99, QA PASS, awaiting merge) |
+| 10.7: Type-Aware Mapping Lookup (data layer, added by Lionel at 10.3c STOP R, 2026-10-09) | MED | 0.5-1 week | 10.3c STOP R | Done (PR #99, `acb7bdd`) |
 | 10.8: Desktop App Type-Aware Candidate Keys (10.3c regression, added by Lionel, 2026-10-13) | HIGH | 0.5 week | 10.7 SM finding | Done (PR #97, `e16d15a`) |
 | 10.9: Desktop App Edit Applies to Every Occurrence (added by Lionel, 2026-10-13) | HIGH | 0.5 week | 10.8 SM finding | Done (PR #98, `49d4daa`) |
-| 10.10: Desktop Batch Review Fixes (added by Lionel, 2026-10-14) | HIGH | 0.5-1 week | 10.8 QA pre-existing findings PRE-001 to PRE-003 | Draft |
+| 10.10: Desktop Batch Review Fixes (added by Lionel, 2026-10-14) | HIGH | 0.5-1 week | 10.8 QA pre-existing findings PRE-001 to PRE-003 | Done (PR #100, `eee4d41`) |
+| 10.11: Custom Pseudonym Stored and Used (added by Lionel, 2026-10-14; not the recommendation) | HIGH (proposed) | 0.5-1 week | 10.8 QA PRE-004; Lionel 2026-10-14 | Draft (open questions for Lionel) |
 
-**Total Estimated Duration:** 7-10.5 weeks; 10.6 runs in parallel (2-3 weeks elapsed) and close-out waits for its adjudication after 10.4 merges, then its commit and one scored run
+**Total Estimated Duration:** 7.5-11.5 weeks; 10.6 runs in parallel (2-3 weeks elapsed) and close-out waits for its adjudication after 10.4 merges, then its commit and one scored run
 
 ---
 
@@ -201,8 +202,8 @@ Numbers come only from CI runs; each line cites its run ID. Full verbatim lines 
   - **Q7:** the scored exam becomes a second held-out set (aggregate-only, never opened). The held-out isolation rules then apply to it and its plain-text guard stays active (10.6 B15.3). Epic 9 writes a new blind exam for its own close-out.
   - **Guard hash list (B16):** the guard's committed allowlist (`tests/unit/final_exam_leakage_allowlist.json`, 157 path and sha256 pairs, approved by Lionel 2026-10-13) stores plain sha256 of exam-only keys, with no salt. It reveals nothing beyond the plain files already in the repo. If Epic 9 reuses this guard for its own blind exam, it decides whether a committed hash list needs a salt.
   - **Headline finding:** the main-vs-exam gap. F1 is 0.8262 on the main corpus (`38212303870`) and 0.6144 on the final exam (`38382553368`), about 21 points.
-- **Merged since the detector close-out:** 10.5 (PR #96, `67807c2`), 10.8 (PR #97, `e16d15a`) and 10.9 (PR #98, `49d4daa`). None is a detector story.
-- **Still open in Epic 10:** 10.7 (type-aware mapping lookup; PR #99, QA PASS, awaiting merge) and 10.10 (desktop batch review fixes; before any release). **Planned, to be added:** Story 10.11, "Changer le pseudonyme" stored in the mapping database and used in every output, after 10.7 (Lionel, 2026-10-14: "Make it work (new story)"; not the recommendation); its section comes on its own branch. None of these is a detector story, so none moves the close-out baseline. The epic is not closed.
+- **Merged since the detector close-out:** 10.5 (PR #96, `67807c2`), 10.8 (PR #97, `e16d15a`), 10.9 (PR #98, `49d4daa`), 10.7 (PR #99, `acb7bdd`) and 10.10 (PR #100, `eee4d41`). None is a detector story.
+- **Still open in Epic 10:** 10.11 (custom pseudonym stored and used; Lionel, 2026-10-14: "Make it work (new story)", not the recommendation; four open questions for Lionel before dev; before any release). It is not a detector story, so it does not move the close-out baseline. The epic is not closed.
 
 ---
 
@@ -911,6 +912,69 @@ None is in 10.10's scope. Backlog unless Lionel routes one elsewhere. (a)–(j) 
 
 ---
 
+## Story 10.11: Custom Pseudonym Stored and Used
+
+**Added by Lionel, 2026-10-14:** "Make it work (new story)". This was not the recommendation: the orchestrator had recommended a PM backlog item, because the feature leaks nothing. Lionel's meaning, as recorded in the orchestrator's decision log (2026-10-14 morning decisions): "Changer le pseudonyme" is stored in the mapping database and used in every output, so later documents keep it; a data-layer change, after 10.7. Lionel treats a documented feature that silently does nothing as a product-integrity defect, not a minor issue.
+
+**As a** user who sets a pseudonym of my own for a name during validation ("Changer le pseudonyme" in the desktop app, [C] in the CLI),
+**I want** the written file to use it, and later documents and runs to reuse it for that name,
+**so that** the feature the documentation advertises does what it says.
+
+**Priority:** HIGH (proposed by the PM), before release. The feature is advertised and silently does nothing: every confirmed name is still replaced, so nothing is left in clear, but with a generated pseudonym instead of the user's.
+**Change type:** desktop review, the CLI validation path and the mapping data layer. No detection change, so G1, G3 and G5 are N/A. No file under `gdpr_pseudonymizer/nlp/`, `gdpr_pseudonymizer/resources/`, `tests/accuracy/` or `tests/test_corpus/` changes. If any file the accuracy suite loads is touched, one regular accuracy run on the branch shows the 16 lines identical to `38212303870`.
+**Ordering:** outside the detector chain. After 10.7 (merged, `acb7bdd`), because the pseudonym is stored in the (text, type) row, and after 10.10 (merged, `eee4d41`), because it changes `gui/models/validation_state.py`. Lionel answers the open questions below before dev starts. Never in the same PR as a detector change.
+
+### Context
+
+At `main` `eee4d41`:
+
+- **Desktop app:** the editor's right-click menu "Changer le pseudonyme" (`gui/widgets/entity_editor.py:396-398`) opens a dialog (`gui/screens/validation.py:564-565`, `_show_change_pseudonym_dialog` `:702-714`) that calls `GUIValidationState.change_pseudonym` (`gui/models/validation_state.py:438-441`). Its `_ChangePseudonymCommand` (`:936-973`) sets `EntityReview.custom_pseudonym` (`validation/models.py:166`), marks the row MODIFIED and, since 10.10, records it as the row's own decision (comment `:951-952`, `_set_own` `:963`), so group actions do not undo it. The list shows it (`get_pseudonym`, `:786-793`).
+- **It never reaches the written file:** finalization sends plain detected entities, without the custom pseudonym (`_validated_rows` `:671-687`, `get_validated_entities` `:689-691`, `expand_validated_entities` `:693`; `validation.py:942` → `FinalizationWorker` → `finalize_document`, `core/document_processor.py:902`). `_resolve_pseudonyms` (`:562`) takes each name's pseudonym from the mapping database by (key, type) (`:595`) or generates one, one pseudonym per (key, type) per run (`entity_cache`, `:576`); it never sees the custom pseudonym.
+- **CLI, the same defect:** [C] in validation (`validation/ui.py:86-87`) asks for a pseudonym and sets it on every occurrence of the group (`validation/workflow.py:266-271`; `ValidationSession.change_pseudonym`, `validation/models.py:328-345`, which records a CHANGE_PSEUDONYM decision and marks the row CONFIRMED). `get_validated_entities` (`:348`) returns plain detected entities, so the CLI drops it too (`core/document_processor.py:336` → `_resolve_pseudonyms`). `ChangePseudonymAction.execute` (`validation/actions.py:131-134`) is a no-op ("Action handled by pseudonym assignment engine"), exported but unused.
+- **No version ever wrote it:** in every tag from `v1.0.0` to `v2.2.0`, and at `eee4d41`, nothing outside the two review models reads `custom_pseudonym`. The CLI field came with Story 1.7 (`d631a7d`), the desktop action with Story 6.4 (`2e541e0`). QA recorded it on 10.8 as PRE-004 (low, not a leak; `docs/qa/gates/10.8-gui-type-aware-candidate-keys.yml`).
+- **Advertised:** `README.md:384` and `:701`; `README.fr.md:383` and `:700`; `docs/gui-guide.md:123` and `docs/gui-guide.fr.md:123`; `docs/methodology.md:136` and `docs/methodology.fr.md:136`; `docs/tutorial.md:344`, `:357`, `:394` and `docs/tutorial.fr.md:344`, `:357`, `:394`.
+- **Data layer since 10.7:** one row per (text, type) (`data/models.py:30-33`), schema 1.1.0 (`data/database.py:36`). A row holds `pseudonym_full` and, for PERSON, `pseudonym_first` and `pseudonym_last` (`data/models.py:47-49`), which a later first or last name used alone reuses. The repository has no method that changes a stored pseudonym (`data/repositories/mapping_repository.py`: find, save and delete only).
+
+### Acceptance Criteria
+
+1. **AC1 — Used in the written file:** a custom pseudonym set in the desktop app or the CLI replaces that name, for that type, at every occurrence written (the file holds one pseudonym per name and type). A row rejected on its own is not written (10.10). Which rows of batch review show it is open question 3. The tests assert the written file, not the list.
+2. **AC2 — Stored and reused:** the custom pseudonym is stored in the mapping row for that (text, type), so later documents and later runs, in the desktop app and the CLI, reuse it. A name with no stored row gets a new row holding it. What happens when the name already has a stored pseudonym is open question 1; for a person, the first-name and last-name parts follow open question 4. Nothing is built for either case before Lionel answers.
+3. **AC3 — Collisions:** a custom pseudonym equal to another name's stored pseudonym, or to a real name in the document, is handled as Lionel decides (open question 2). Whatever the answer, two different names never end up with the same pseudonym without the user being told.
+4. **AC4 — The CLI is in scope:** the CLI's [C] (`validation/ui.py:86-87`) is advertised (`README.md:384`) and fails the same way, and Lionel asked for "every output". It gets AC1–AC3 too. The CLI keeps its flags and keys.
+5. **AC5 — Undo, redo and navigation:** in the desktop app, undo and redo of "Changer le pseudonyme" restore the previous pseudonym and the row's own-decision flag (10.10). In batch review, "Précédent" and "Suivant" keep it (10.10 AC2). Nothing is stored in the mapping database before the document is finalized, so an undone change is never stored.
+6. **AC6 — Tests first, invented names only:** the tests are committed before the fix, for the desktop app and the CLI. Each expected failure is an `assert` on the written output (and on the stored row), made after the test's preconditions hold, and each failing test is marked `xfail(strict=True, raises=AssertionError)` on the old code (the 10.5 pattern). The fix removes the markers. Existing tests stay green.
+7. **AC7 — CHANGELOG:** CHANGELOG `[Unreleased]` gets a "Fixed" entry: a custom pseudonym is now used in the written file and kept for later documents, with an upgrade note if a stored pseudonym can now change (open question 1).
+8. **AC8 — Docs:** the docs listed in Context keep advertising the feature, now accurately. A doc line changes only where it says something the fix does not do. G7 applies: no headline number changes.
+9. **AC9 — User copy:** any new visible text (a dialog line, a warning, a CLI message) is user copy that Lionel approves, word for word, before the story is done.
+10. **AC10 — Gates:**
+    - **G1, G3 and G5 are N/A:** there is no detection change. The PR states this explicitly. If any file the accuracy suite loads is touched, one regular `accuracy.yaml` run on the branch shows the 16 lines identical to `38212303870`, cited by ID.
+    - **G4:** never in the same PR as a detector change.
+    - **G2:** QA re-runs the AC6 tests, checks out the tests-first commit to see them fail on the old code, and reads the diff. QA's gate comes before the merge.
+    - **G6** applies in full (black, ruff, mypy, unit tests, full CI green).
+    - **G7:** no headline number changes. CHANGELOG as AC7, docs as AC8.
+
+### Open Questions for Lionel (asked one at a time; nothing is built for them before the answer)
+
+1. **A name that already has a stored pseudonym.** When you set your own pseudonym for a name that already has one in your mapping database (from an earlier document), what should happen? Recommendation: refuse, with a message that says why and how to do it anyway (remove the name with `delete-mapping`, then set your pseudonym). Replacing it would give the same person one pseudonym in the documents already written and another in new ones.
+2. **A pseudonym that clashes.** Your pseudonym could be the same as the pseudonym already given to another name, or the same as a real name in the document. Recommendation: refuse in both cases, with a message that names the clash. Two names sharing one pseudonym can no longer be told apart in the output, and a pseudonym equal to a real name makes the file read as if that person were mentioned.
+3. **Batch review: the other places of the same name.** In batch review each place of a name is its own row, but the written file can hold only one pseudonym per name and type. If you set your own pseudonym on one place, should the other places of that name and type show it too? Recommendation: yes, every place of that name and type, except a place you rejected on its own, as corrections already do (10.9, 10.10).
+4. **A person's first and last name.** For a person, the database also keeps a first-name part and a last-name part, so that a later mention of only the first or only the last name gets the matching part. If you set "Quentrix Zorbal" for "Marie Dubois", should a later "Dubois" alone become "Zorbal"? Recommendation: yes. Split your pseudonym at its last space: the part before for the first name, the part after for the last name. If your pseudonym is one word, keep it for the full name only; a later "Dubois" alone then gets its own generated pseudonym.
+
+### Integration Points
+
+- `gdpr_pseudonymizer/gui/models/validation_state.py` — `change_pseudonym` (`:438-441`), `_ChangePseudonymCommand` (`:936-973`), `_validated_rows` (`:671-687`), `expand_validated_entities` (`:693`)
+- `gdpr_pseudonymizer/gui/screens/validation.py` — the dialog (`:702-714`), finalization (`:942`)
+- `gdpr_pseudonymizer/validation/models.py` — `EntityReview.custom_pseudonym` (`:166`), `change_pseudonym` (`:328-345`), `get_validated_entities` (`:348`)
+- `gdpr_pseudonymizer/validation/workflow.py` (`:266-271`) and `validation/ui.py` (`:86-87`) — the CLI's [C]
+- `gdpr_pseudonymizer/validation/actions.py` — `ChangePseudonymAction` (`:118-134`, a no-op), kept or removed by the story with no behaviour change
+- `gdpr_pseudonymizer/core/document_processor.py` — `_run_validation` (`:286`), `_resolve_pseudonyms` (`:562`, cache `:576`, lookup `:595`), `finalize_document` (`:902`)
+- `gdpr_pseudonymizer/data/repositories/mapping_repository.py` — a method that changes a stored pseudonym, only if open question 1 allows replacing; `data/models.py` read only (no schema change expected)
+- `tests/unit/` and `tests/integration/` — AC6 tests; `CHANGELOG.md` — AC7; the docs in Context — AC8
+
+### Estimated Effort: 0.5-1 week (the upper end if Lionel allows replacing a stored pseudonym)
+
+---
+
 ## Execution Sequence
 
 ```
@@ -926,6 +990,7 @@ Story 10.7 (Type-aware mapping lookup)    --- 0.5-1 week, any slot --- no accura
 Story 10.8 (Desktop app type-aware keys)  --- 0.5 week, before 10.7 --- no accuracy baseline (desktop app)
 Story 10.9 (Edit at every occurrence)     --- 0.5 week, after 10.8 --- no accuracy baseline (desktop app)
 Story 10.10 (Batch review fixes)          --- 0.5-1 week, dev after 10.9 merges --- no accuracy baseline (desktop app)
+Story 10.11 (Custom pseudonym used)       --- 0.5-1 week, after 10.7 and 10.10 --- no accuracy baseline (desktop app + data layer)
 ```
 
 **Strictly sequential:** 10.1 → 10.2 → 10.3a → 10.3b → 10.3c → 10.4. Each story's baseline is the previous story's merged close-out G1 run. No parallel detector stories: overlapping changes would make G3/G4 attribution impossible.
@@ -941,6 +1006,8 @@ Story 10.10 (Batch review fixes)          --- 0.5-1 week, dev after 10.9 merges 
 **Story 10.9** is outside the chain too: it changes no detection (desktop app review only), so it has no accuracy baseline. It goes after Story 10.8, because both change `gui/models/validation_state.py`, and never in the same PR as 10.8.
 
 **Story 10.10** is outside the chain too: it changes no detection (desktop batch review only), so it has no accuracy baseline. Its dev work starts after 10.9 merges, because it changes 10.9's `_action_rows` and that function's docstring (Lionel's Q3, 2026-10-14); its story and PO work can run in parallel with 10.9. Never in the same PR as 10.9.
+
+**Story 10.11** is outside the chain too: it changes no detection (desktop review, the CLI validation path and the mapping data layer), so it has no accuracy baseline. It comes after 10.7 and 10.10 (both merged); Lionel answers its open questions before dev starts.
 
 **Epic close-out baseline:** the 10.4 merged G1 run (main + held-out) is the baseline Epic 9 starts from, together with the one final-exam run (10.6) and its ranges.
 
@@ -978,6 +1045,7 @@ Story 10.10 (Batch review fixes)          --- 0.5-1 week, dev after 10.9 merges 
 | Desktop app merges a same-span pair of two types (10.3c regression): text-only keys let the second type overwrite the first and one reject act on both, so an occurrence of a confirmed name can stay in clear | MEDIUM | HIGH | Story 10.8 (HIGH, before any release; on `main` only, unreleased): preview map, variant map and same-text group keyed on type; tests first with invented names; QA before merge. The CLI is not affected (`validation/models.py:416`) |
 | Desktop app edit leaves other occurrences in clear: editing a name in the review list changes one occurrence, and the others are not pseudonymized (since v2.0.0; not a 10.3c regression) | MEDIUM | HIGH | Story 10.9 (HIGH, before the next release): an edit applies to every occurrence of that name and type, as in the CLI (`validation/workflow.py:242-259`); tests first with invented names; QA before merge |
 | Desktop batch review leaks (pre-existing, found by QA on 10.8): "Précédent" then "Valider et continuer" writes the waiting document with an earlier document's positions (names in clear, text damaged); "Précédent" then "Suivant" drops decisions already made; a reject on a hand-added row rejects the detected rows | MEDIUM | HIGH | Story 10.10 (HIGH, before any release): each document's result and decisions stay its own; a hand-added row acts on itself only; tests first through the real batch worker, with invented names; QA before merge |
+| Custom pseudonym advertised but never used (every version since v1.0.0; QA PRE-004 on 10.8): the user believes the chosen pseudonym is in the file, but a generated one is written. A careless fix could give two names one pseudonym | HIGH (every use) | MEDIUM (no leak; wrong output, lost trust) | Story 10.11 (HIGH, before release): the pseudonym is used in the file and stored for that (text, type); tests assert the written output; clashes and an already-stored pseudonym follow Lionel's answers (10.11 open questions 1 and 2) |
 | Final-exam set seen or used before close-out (leak) | LOW | HIGH | Kept in a workspace outside the repo until 10.4 merges, so no rule writer (agent, or Lionel at STOP R) can draw on it during detector work; Lionel sees no content before 10.4 merges; sha256 fingerprints recorded at freeze and checked at commit and before the scored run; adjudication view from a deterministic script that agents never read; plain files committed only after adjudication, outside every regular accuracy path; plain-text leakage guard on every CI run from that commit (its first run checks every file 10.3c and 10.4 added); no exam text in public CI logs; isolation rule restated in every later story (10.6 AC5-AC8). No encryption: it guarded nothing beyond this (Q5 reversed, Lionel, 2026-10-09) |
 | Final-exam score well below main or held-out | MEDIUM | MEDIUM | It is information, not a failure: no tuning in response inside Epic 10. Lionel picks the public number (10.6 AC9). The gap goes to Epic 9 as evidence |
 | Double annotation and adjudication delay close-out | MEDIUM | MEDIUM | 10.6 starts now, in parallel; both annotations are model runs, done before 10.4 merges; Lionel adjudicates only the disagreements plus a spot-check of about 3 agreed documents (10.6 AC5); close-out waits for that adjudication, the commit and one scored run, not for any further detector story |
@@ -992,7 +1060,7 @@ Story 10.10 (Batch review fixes)          --- 0.5-1 week, dev after 10.9 merges 
 
 ## Definition of Done
 
-- [ ] All 12 stories (10.1, 10.2, 10.3a, 10.3b, 10.3c, 10.4, 10.5, 10.6, 10.7, 10.8, 10.9, 10.10) completed with acceptance criteria met (10.5, 10.7, 10.8, 10.9 and 10.10: G1/G3/G5 N/A, no detection change; 10.6: G1/G3/G5 N/A for building the set, its scored-once run is a G1 run)
+- [ ] All 13 stories (10.1, 10.2, 10.3a, 10.3b, 10.3c, 10.4, 10.5, 10.6, 10.7, 10.8, 10.9, 10.10, 10.11) completed with acceptance criteria met (10.5, 10.7, 10.8, 10.9, 10.10 and 10.11: G1/G3/G5 N/A, no detection change; 10.6: G1/G3/G5 N/A for building the set, its scored-once run is a G1 run)
 - [ ] Every story closed with a cited G1 run and an independent G2 check
 - [ ] No unapproved recall drop (G3) at any story
 - [ ] Held-out set exists and is reported for 10.2, 10.3a, 10.3b, 10.3c and 10.4 (G5)
