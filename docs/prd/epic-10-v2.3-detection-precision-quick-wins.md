@@ -3,7 +3,7 @@
 **Epic Goal:** Raise detection precision and make the accuracy benchmark trustworthy with local, deterministic changes to the hybrid detector and the ground-truth corpus, without lowering recall. The user-facing value is fewer false entities to reject during the (mandatory) validation step and a benchmark whose numbers can be believed.
 
 **Target Release:** v2.3.0 candidate. **No release is part of this epic.** v2.3.0 ships only on Lionel's explicit go, through a separate release story.
-**Duration:** Estimated 7.5-11.5 weeks (10.1 is annotation-labor-bound; 10.3 split into 10.3a and 10.3b, and 10.3c added, Lionel, 2026-10-06; 10.5 added, Lionel, 2026-10-07; 10.3b re-estimated after its STOP R, 2026-10-07; 10.7 added, Lionel, 2026-10-09; 10.8 and 10.9 added, Lionel, 2026-10-13; 10.10 and 10.11 added, Lionel, 2026-10-14); 10.6 runs in parallel (2-3 weeks elapsed) and close-out waits for its adjudication after 10.4 merges, then its commit and one scored run
+**Duration:** Estimated 8.5-12 weeks (10.1 is annotation-labor-bound; 10.3 split into 10.3a and 10.3b, and 10.3c added, Lionel, 2026-10-06; 10.5 added, Lionel, 2026-10-07; 10.3b re-estimated after its STOP R, 2026-10-07; 10.7 added, Lionel, 2026-10-09; 10.8 and 10.9 added, Lionel, 2026-10-13; 10.10 and 10.11 added, Lionel, 2026-10-14; 10.11 re-estimated after its PO review, 2026-10-15); 10.6 runs in parallel (2-3 weeks elapsed) and close-out waits for its adjudication after 10.4 merges, then its commit and one scored run
 **Predecessor:** v2.2.0 + accuracy scorer fix (#77), commit `fceef65`
 **Successor:** Epic 9 (v3.0) starts from this epic's merged close-out baseline.
 
@@ -126,9 +126,9 @@ These notes sit outside the normative Gates block above and do not change its te
 | 10.8: Desktop App Type-Aware Candidate Keys (10.3c regression, added by Lionel, 2026-10-13) | HIGH | 0.5 week | 10.7 SM finding | Done (PR #97, `e16d15a`) |
 | 10.9: Desktop App Edit Applies to Every Occurrence (added by Lionel, 2026-10-13) | HIGH | 0.5 week | 10.8 SM finding | Done (PR #98, `49d4daa`) |
 | 10.10: Desktop Batch Review Fixes (added by Lionel, 2026-10-14) | HIGH | 0.5-1 week | 10.8 QA pre-existing findings PRE-001 to PRE-003 | Done (PR #100, `eee4d41`) |
-| 10.11: Custom Pseudonym Stored and Used (added by Lionel, 2026-10-14; not the recommendation) | HIGH (proposed) | 0.5-1 week | 10.8 QA PRE-004; Lionel 2026-10-14 | Draft (PO GO with fixes; Lionel's Q-B to Q-F recorded; SM revising) |
+| 10.11: Custom Pseudonym Stored and Used (added by Lionel, 2026-10-14; not the recommendation) | HIGH (proposed) | 1.5 weeks (re-estimated after the PO review, 2026-10-15) | 10.8 QA PRE-004; Lionel 2026-10-14 | Approved (dev next) |
 
-**Total Estimated Duration:** 7.5-11.5 weeks; 10.6 runs in parallel (2-3 weeks elapsed) and close-out waits for its adjudication after 10.4 merges, then its commit and one scored run
+**Total Estimated Duration:** 8.5-12 weeks; 10.6 runs in parallel (2-3 weeks elapsed) and close-out waits for its adjudication after 10.4 merges, then its commit and one scored run
 
 ---
 
@@ -203,7 +203,7 @@ Numbers come only from CI runs; each line cites its run ID. Full verbatim lines 
   - **Guard hash list (B16):** the guard's committed allowlist (`tests/unit/final_exam_leakage_allowlist.json`, 157 path and sha256 pairs, approved by Lionel 2026-10-13) stores plain sha256 of exam-only keys, with no salt. It reveals nothing beyond the plain files already in the repo. If Epic 9 reuses this guard for its own blind exam, it decides whether a committed hash list needs a salt.
   - **Headline finding:** the main-vs-exam gap. F1 is 0.8262 on the main corpus (`38212303870`) and 0.6144 on the final exam (`38382553368`), about 21 points.
 - **Merged since the detector close-out:** 10.5 (PR #96, `67807c2`), 10.8 (PR #97, `e16d15a`), 10.9 (PR #98, `49d4daa`), 10.7 (PR #99, `acb7bdd`) and 10.10 (PR #100, `eee4d41`). None is a detector story.
-- **Still open in Epic 10:** 10.11 (custom pseudonym stored and used; Lionel, 2026-10-14: "Make it work (new story)", not the recommendation; Lionel's decisions Q1–Q4 and Q-B to Q-F recorded on 2026-10-15, scope includes two older CLI review leaks (Q-F), SM revising; before any release). It is not a detector story, so it does not move the close-out baseline. The epic is not closed.
+- **Still open in Epic 10:** 10.11 (custom pseudonym stored and used; Lionel, 2026-10-14: "Make it work (new story)", not the recommendation; Lionel's decisions Q1–Q4, Q-B to Q-F, Q-C2 and Q-A recorded on 2026-10-15, scope includes two older CLI review leaks (Q-F); story Approved, dev next; before any release). It is not a detector story, so it does not move the close-out baseline. The epic is not closed.
 
 ---
 
@@ -953,11 +953,11 @@ At `main` `eee4d41`:
     - **G2:** QA re-runs the AC6 tests, checks out the tests-first commit to see them fail on the old code, and reads the diff. QA's gate comes before the merge.
     - **G6** applies in full (black, ruff, mypy, unit tests, full CI green).
     - **G7:** no headline number changes. CHANGELOG as AC7, docs as AC8.
-11. **AC11 — The CLI review keeps the last decision (Q-F, PO R2):** in the CLI review, the last decision on a name counts, and a correction stays unless the user corrects the name again. Going back with [P] or the left arrow and pressing Space keeps an earlier [E] correction and writes it; a name rejected with [R] and then accepted with Space is written; [C] after [E] keeps both the correction and the custom pseudonym. Each case is tested first, with invented names, on the written file (AC6).
+11. **AC11 — The CLI review keeps the last decision (Q-F, PO R2 and F2):** in the CLI review, the last decision on a name counts, and a correction stays unless the user corrects the name again. Going back with [P] or the left arrow and pressing Space keeps an earlier [E] correction and writes it; a name rejected with [R] and then accepted with Space is written; [C] after [E] keeps both the correction and the custom pseudonym; a [T] type change after [E] keeps the correction (`ValidationSession.change_entity_type`, `validation/models.py:305-326`, builds the retyped entity from `modified_entity or entity`). Each case is tested first, with invented names, on the written file (AC6).
 
 ### Decisions Recorded (Lionel, 2026-10-15)
 
-The questions were asked one at a time, word for word, in the orchestrator's decision log. Each answer is the recommendation except Q-D. Q-A, the exact wording of the new texts, is asked last (AC9).
+The questions were asked one at a time, word for word, in the orchestrator's decision log. Each answer is the recommendation except Q-D.
 
 1. **Q1, a name that already has a stored pseudonym: "Refuse, explain (Rec.)".** Preview he saw: Marie Dubois is already stored as "Quentrel Zorbalia"; typing "Xantor Vellion" is refused, with a message saying the name already has a pseudonym from an earlier document and that, to change it, the name is first removed with `delete-mapping`. The message wording is user copy, approved separately (AC9).
 2. **Q2, a pseudonym that clashes: "Refuse both (Rec.)".** Preview: "Xantor Vellion", already the pseudonym of Paul Martin, is refused (two people would merge in the output); "Paul Martin" typed as a pseudonym while Paul Martin appears in this document is refused (it reads as the real person).
@@ -969,6 +969,8 @@ The questions were asked one at a time, word for word, in the orchestrator's dec
 7. **Q-D, a first or last name that already has a stored part: "Refuse" (NOT the recommendation, which was "Keeps its part").** Preview: "Quentrel Zorbalia" is stored as "Aubin Ferrand", so "Quentrel" alone is written "Aubin"; for "Quentrel Zorbal", "Xantor Vellion" is refused with a new message (to approve): the pseudonym must start with "Aubin", for example "Aubin Vellion". The symmetric case for a last name that already has a stored last-name part is stated by the SM and checked by the PO.
 8. **Q-E, a correction after a custom pseudonym: "Removed, set it again (Rec.)".** Preview: "Quentrel" found (the detector missed "Zorbalia"); "Xantor Vellion" set, then the name corrected to "Quentrel Zorbalia" → the pseudonym is removed; set again, it is checked against the new name. In the desktop app, one undo brings back the old name and its pseudonym.
 9. **Q-F, two older CLI leaks with [P] then Space: "Fix in 10.11 (Rec.)".** Preview, on « Quentrel Zorbalia a signé avec Zorbal. » (only "Quentrel" found): [E] "Quentrel Zorbalia", [P] back, Space → today the correction is lost and "Zorbalia" stays in clear; [R] "Quentrel", [P] back, Space → today left in clear although accepted last. After the fix, the last decision counts and a correction stays unless redone (AC11).
+10. **Q-C2, stored names for the real-name check: "Whole names only (Rec.)".** For the database part of the Q-C check, only full names already stored count; a stored first or last name alone does not (Lionel's Q-C had said "the names already in your mapping database"). Preview: "Quentrel Zorbalia" stored, not in this document → "Quentrel Zorbalia" refused; "Xantor Zorbalia" accepted; "Quentrel Vellion" accepted. In the document's own text the Q-C rule stays: any capitalised word counts.
+11. **Q-A, the exact texts: "Approve all (Rec.)".** Lionel approved the new texts word for word: the refusal messages in the desktop app (French and English) and the CLI, the rare finalization error, and the theme value "custom" in the CLI listings. The source is the 10.11 story, Dev Notes "Approved Texts"; the epic does not copy them (AC9).
 
 ### Integration Points
 
@@ -997,7 +999,7 @@ None is in 10.11's scope. Backlog unless Lionel routes one elsewhere.
 - **(f)** Rows created for a custom pseudonym set `is_ambiguous=False`, while generated rows of one-word and three-or-more-word names are ambiguous (PO R9). Match the engine, or note why not.
 - **(g)** A generated pseudonym for a one-word name leaves its last part untracked by the library, so a later generated pseudonym can reuse it (PO R8; pre-existing). 10.11 guards custom pseudonyms only (AC3).
 
-### Estimated Effort: 0.5-1 week (the refusal checks of Q1, Q2 and Q-D, the batch reach of Q3 and the CLI fixes of Q-F are the larger part)
+### Estimated Effort: 1.5 weeks (re-estimated after the PO review, 2026-10-15: the refusal checks of Q1, Q2, Q-C and Q-D, the batch reach of Q3 and the CLI fixes of Q-F are the larger part)
 
 ---
 
@@ -1016,7 +1018,7 @@ Story 10.7 (Type-aware mapping lookup)    --- 0.5-1 week, any slot --- no accura
 Story 10.8 (Desktop app type-aware keys)  --- 0.5 week, before 10.7 --- no accuracy baseline (desktop app)
 Story 10.9 (Edit at every occurrence)     --- 0.5 week, after 10.8 --- no accuracy baseline (desktop app)
 Story 10.10 (Batch review fixes)          --- 0.5-1 week, dev after 10.9 merges --- no accuracy baseline (desktop app)
-Story 10.11 (Custom pseudonym used)       --- 0.5-1 week, after 10.7 and 10.10 --- no accuracy baseline (desktop app + data layer)
+Story 10.11 (Custom pseudonym used)       --- 1.5 weeks, after 10.7 and 10.10 --- no accuracy baseline (desktop app + data layer)
 ```
 
 **Strictly sequential:** 10.1 → 10.2 → 10.3a → 10.3b → 10.3c → 10.4. Each story's baseline is the previous story's merged close-out G1 run. No parallel detector stories: overlapping changes would make G3/G4 attribution impossible.
@@ -1050,7 +1052,7 @@ Story 10.11 (Custom pseudonym used)       --- 0.5-1 week, after 10.7 and 10.10 -
   - **Several processes:** concurrent opens are serialised by the write lock (with a busy timeout); a process that waited sees the converted file and changes nothing.
   - **Failure:** if the conversion fails, the open stops with the new error class and the file is untouched.
   - **Going back:** opening a converted file with 2.2 or older is unsafe. The CHANGELOG tells users to copy their database file before upgrading if they may need to go back. No automatic copy is kept (a kept copy would still hold names erased later).
-- [ ] UI changes: none; validation stays mandatory. Exception: Story 10.11 adds refusal dialogs and texts in the desktop app, and refusal messages in the CLI, approved by Lionel (10.11 AC9); internally, `validation_complete` gains an argument
+- [ ] UI changes: none; validation stays mandatory. Exception, Story 10.11: the refusal messages Lionel approved word for word (desktop French and English, the CLI, the rare finalization error; Q-A, 2026-10-15); the theme value "custom" shown in `list-mappings` (and its exports), `validate-mappings`, `delete-mapping` and `stats`; internally, `validation_complete` gains an argument and `finalize_document` an optional one. The schema is unchanged and its version is not bumped
 - [ ] Performance impact is minimal (post-filters are linear in the number of detections; single-document NFR1 still met)
 
 ---
