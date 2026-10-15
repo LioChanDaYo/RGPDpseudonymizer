@@ -212,4 +212,5 @@ class TestErasureWorkflow:
         # Verify gone
         with open_database(db_path, PASSPHRASE) as db_session:
             repo = SQLiteMappingRepository(db_session)
-            assert repo.find_by_full_name("Marie Dupont") is None
+            # Story 10.7 (AC4): no row of the name is left
+            assert repo.find_all_by_full_name("Marie Dupont") == []

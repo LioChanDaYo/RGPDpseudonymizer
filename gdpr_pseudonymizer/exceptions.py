@@ -77,13 +77,25 @@ class DatabaseError(PseudonymizerError):
 
 
 class DuplicateEntityError(DatabaseError):
-    """Raised when attempting to save entity with duplicate full_name."""
+    """Raised when saving an entity whose (full_name, entity_type) is stored."""
 
     pass
 
 
 class CorruptedDatabaseError(DatabaseError):
     """Raised when database metadata is missing or invalid."""
+
+    pass
+
+
+class DatabaseConversionError(DatabaseError):
+    """Raised when a database made before Story 10.7 cannot be converted.
+
+    The conversion to one row per (name, type) runs once, on open, in one
+    transaction: when it fails, the file is left unchanged. Also raised when
+    the file's schema version and its table definition disagree, so the
+    format is not recognised.
+    """
 
     pass
 

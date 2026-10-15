@@ -68,7 +68,8 @@ class TestImportMappingsCommand:
             mock_open_db.return_value.__enter__ = MagicMock(return_value=MagicMock())
             mock_open_db.return_value.__exit__ = MagicMock(return_value=False)
             mock_repo.return_value.find_all.return_value = mock_entities
-            mock_repo.return_value.find_by_full_name.return_value = None
+            # Story 10.7 (AC4): a duplicate is the same text and the same type
+            mock_repo.return_value.find_by_full_name_and_type.return_value = None
 
             result = runner.invoke(
                 app,
@@ -179,7 +180,10 @@ class TestImportMappingsCommand:
             mock_open_db.return_value.__enter__ = MagicMock(return_value=MagicMock())
             mock_open_db.return_value.__exit__ = MagicMock(return_value=False)
             mock_repo.return_value.find_all.return_value = mock_entities
-            mock_repo.return_value.find_by_full_name.return_value = existing_entity
+            # Story 10.7 (AC4): a duplicate is the same text and the same type
+            mock_repo.return_value.find_by_full_name_and_type.return_value = (
+                existing_entity
+            )
 
             result = runner.invoke(
                 app,
@@ -268,7 +272,8 @@ class TestImportMappingsCommand:
             mock_open_db.return_value.__enter__ = MagicMock(return_value=MagicMock())
             mock_open_db.return_value.__exit__ = MagicMock(return_value=False)
             mock_repo.return_value.find_all.return_value = mock_entities
-            mock_repo.return_value.find_by_full_name.return_value = None
+            # Story 10.7 (AC4): a duplicate is the same text and the same type
+            mock_repo.return_value.find_by_full_name_and_type.return_value = None
             mock_repo.return_value.save.side_effect = Exception("Save failed")
 
             result = runner.invoke(

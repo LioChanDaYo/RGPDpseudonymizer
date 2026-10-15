@@ -80,7 +80,8 @@ class TestDeleteMappingCommand:
         # Verify entity is gone
         with open_database(db_path, PASSPHRASE) as db_session:
             repo = SQLiteMappingRepository(db_session)
-            assert repo.find_by_full_name("Marie Dupont") is None
+            # Story 10.7 (AC4): no row of the name is left
+            assert repo.find_all_by_full_name("Marie Dupont") == []
 
     def test_delete_by_id_with_confirmation(self, tmp_path: Path) -> None:
         """Delete entity by UUID with user confirmation."""
@@ -169,7 +170,8 @@ class TestDeleteMappingCommand:
         # Entity should still exist
         with open_database(db_path, PASSPHRASE) as db_session:
             repo = SQLiteMappingRepository(db_session)
-            assert repo.find_by_full_name("Marie Dupont") is not None
+            # Story 10.7 (AC4): the name's row is still stored
+            assert repo.find_all_by_full_name("Marie Dupont") != []
 
     def test_missing_both_name_and_id(self, tmp_path: Path) -> None:
         """Error when neither name nor --id provided."""

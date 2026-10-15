@@ -16,14 +16,32 @@ class MappingRepository(ABC):
     """
 
     @abstractmethod
-    def find_by_full_name(self, full_name: str) -> Entity | None:
-        """Find existing entity by full name for idempotency.
+    def find_by_full_name_and_type(
+        self, full_name: str, entity_type: str
+    ) -> Entity | None:
+        """Find the entity stored for a text under one type (Story 10.7).
+
+        A row is identified by its text and its type: the same text under
+        another type is another row, with its own pseudonym.
+
+        Args:
+            full_name: Complete entity name to search for
+            entity_type: Entity type (PERSON, LOCATION, ORG)
+
+        Returns:
+            Entity if found, None otherwise
+        """
+        pass
+
+    @abstractmethod
+    def find_all_by_full_name(self, full_name: str) -> list[Entity]:
+        """Find every entity stored for a text, whatever its type (Story 10.7).
 
         Args:
             full_name: Complete entity name to search for
 
         Returns:
-            Entity if found, None otherwise
+            Every matching entity, ordered by type (empty list if none)
         """
         pass
 
@@ -82,14 +100,18 @@ class MappingRepository(ABC):
         pass
 
     @abstractmethod
-    def delete_entity_by_full_name(self, full_name: str) -> Entity | None:
-        """Delete entity by full name.
+    def delete_entities_by_full_name(self, full_name: str) -> list[Entity]:
+        """Delete every entity stored for a text, whatever its type (Story 10.7).
+
+        All rows are deleted in one transaction, so a name is never erased in
+        part.
 
         Args:
-            full_name: Plaintext full name of entity to delete
+            full_name: Plaintext full name of the entities to delete
 
         Returns:
-            Decrypted entity that was deleted, or None if not found
+            Decrypted entities that were deleted, ordered by type (empty list
+            if none)
         """
         pass
 
@@ -145,26 +167,32 @@ class SQLiteMappingRepository(MappingRepository):
         self._session = db_session.session
         self._encryption = db_session.encryption
 
-    def find_by_full_name(self, full_name: str) -> Entity | None:
-        """Find entity by encrypted full name.
+    def find_by_full_name_and_type(
+        self, full_name: str, entity_type: str
+    ) -> Entity | None:
+        """Find the entity stored for an encrypted full name under one type.
 
         Args:
             full_name: Plaintext full name to search for
+            entity_type: Entity type (PERSON, LOCATION, ORG)
 
         Returns:
             Entity with decrypted fields, or None if not found
 
         Example:
-            >>> entity = repo.find_by_full_name("Marie Dubois")
+            >>> entity = repo.find_by_full_name_and_type("Marie Dubois", "PERSON")
             >>> print(entity.full_name)  # "Marie Dubois" (decrypted)
         """
         # Encrypt search term for deterministic lookup
         encrypted_full_name = self._encryption.encrypt(full_name)
 
-        # Query by encrypted field
+        # Query by encrypted field and type: one indexed query, (text, type) unique
         db_entity = (
             self._session.query(Entity)
-            .filter(Entity.full_name == encrypted_full_name)
+            .filter(
+                Entity.full_name == encrypted_full_name,
+                Entity.entity_type == entity_type,
+            )
             .first()
         )
 
@@ -173,6 +201,28 @@ class SQLiteMappingRepository(MappingRepository):
 
         # Decrypt and return
         return self._decrypt_entity(db_entity)
+
+    def find_all_by_full_name(self, full_name: str) -> list[Entity]:
+        """Find every entity stored for an encrypted full name, whatever its type.
+
+        Args:
+            full_name: Plaintext full name to search for
+
+        Returns:
+            Entities with decrypted fields, ordered by type (empty list if none)
+        """
+        return [self._decrypt_entity(e) for e in self._query_by_full_name(full_name)]
+
+    def _query_by_full_name(self, full_name: str) -> list[Entity]:
+        """Stored (encrypted) rows of a plaintext full name, ordered by type."""
+        encrypted_full_name = self._encryption.encrypt(full_name)
+        rows: list[Entity] = (
+            self._session.query(Entity)
+            .filter(Entity.full_name == encrypted_full_name)
+            .order_by(Entity.entity_type)
+            .all()
+        )
+        return rows
 
     def find_by_component(self, component: str, component_type: str) -> list[Entity]:
         """Find entities with matching encrypted name component.
@@ -227,7 +277,8 @@ class SQLiteMappingRepository(MappingRepository):
             Saved entity with plaintext fields and generated ID
 
         Raises:
-            DuplicateEntityError: If entity with same full_name exists
+            DuplicateEntityError: If an entity with the same full_name and
+                entity_type exists
             DatabaseError: If database operation fails
 
         Example:
@@ -340,9 +391,13 @@ class SQLiteMappingRepository(MappingRepository):
                 saved_entities.append(self._decrypt_entity(encrypted_entity))
 
             except IntegrityError:
-                # Entity already exists (race condition) - look it up
+                # Entity already exists (race condition) - look it up by its
+                # text and type (Story 10.7): a row of the same text under
+                # another type does not stop this one from being saved
                 self._session.rollback()
-                existing = self.find_by_full_name(entity.full_name)
+                existing = self.find_by_full_name_and_type(
+                    entity.full_name, entity.entity_type
+                )
                 if existing:
                     saved_entities.append(existing)
                 else:
@@ -385,36 +440,31 @@ class SQLiteMappingRepository(MappingRepository):
         # Decrypt and return
         return [self._decrypt_entity(e) for e in db_entities]
 
-    def delete_entity_by_full_name(self, full_name: str) -> Entity | None:
-        """Delete entity by encrypted full name.
+    def delete_entities_by_full_name(self, full_name: str) -> list[Entity]:
+        """Delete every entity stored for an encrypted full name, in one transaction.
 
         Args:
-            full_name: Plaintext full name of entity to delete
+            full_name: Plaintext full name of the entities to delete
 
         Returns:
-            Decrypted entity that was deleted, or None if not found
+            Decrypted entities that were deleted, ordered by type (empty list
+            if none)
 
         Raises:
-            DatabaseError: If database operation fails
+            DatabaseError: If database operation fails (nothing is deleted)
         """
         from sqlalchemy.exc import OperationalError
 
-        encrypted_full_name = self._encryption.encrypt(full_name)
-
-        db_entity = (
-            self._session.query(Entity)
-            .filter(Entity.full_name == encrypted_full_name)
-            .first()
-        )
-
-        if not db_entity:
-            return None
+        db_entities = self._query_by_full_name(full_name)
+        if not db_entities:
+            return []
 
         # Decrypt before deletion (needed for audit log / confirmation)
-        decrypted = self._decrypt_entity(db_entity)
+        decrypted = [self._decrypt_entity(e) for e in db_entities]
 
         try:
-            self._session.delete(db_entity)
+            for db_entity in db_entities:
+                self._session.delete(db_entity)
             self._session.commit()
         except OperationalError as e:
             self._session.rollback()

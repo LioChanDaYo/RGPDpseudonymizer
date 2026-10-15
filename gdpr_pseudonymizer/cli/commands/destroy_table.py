@@ -78,7 +78,14 @@ def _verify_passphrase(db_path: Path, passphrase: str) -> bool:
 
     Returns:
         True if passphrase is correct, False otherwise
+
+    Raises:
+        DatabaseConversionError: If the passphrase is correct but a database
+            made before Story 10.7 cannot be converted (file unchanged); its
+            own message is shown instead of "wrong passphrase"
     """
+    from gdpr_pseudonymizer.exceptions import DatabaseConversionError
+
     try:
         from gdpr_pseudonymizer.data.database import open_database
 
@@ -86,6 +93,8 @@ def _verify_passphrase(db_path: Path, passphrase: str) -> bool:
             # If we can open the database and the session is valid,
             # the passphrase is correct
             return session is not None
+    except DatabaseConversionError:
+        raise
     except Exception:
         return False
 

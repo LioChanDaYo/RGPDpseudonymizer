@@ -141,11 +141,17 @@ class GUIValidationState(QObject):
     def classify_known_entities(self, db_path: str, passphrase: str) -> None:
         """Check which entities exist in the mapping DB and auto-accept them.
 
+        An entity is known when its text, normalized with the core's mapping
+        key, is stored under its own type, as in the CLI (Story 10.7, AC4).
+        Errors are swallowed: when the database cannot be opened (a failed
+        conversion of a pre-10.7 file included), every entity stays pending.
+
         Args:
             db_path: Path to mapping database
             passphrase: Database passphrase
         """
         try:
+            from gdpr_pseudonymizer.core.mapping_key import mapping_key
             from gdpr_pseudonymizer.data.database import open_database
             from gdpr_pseudonymizer.data.repositories.mapping_repository import (
                 SQLiteMappingRepository,
@@ -154,7 +160,10 @@ class GUIValidationState(QObject):
             with open_database(db_path, passphrase) as db_session:
                 repo = SQLiteMappingRepository(db_session)
                 for review in self._session._entity_reviews:
-                    existing = repo.find_by_full_name(review.entity.text)
+                    entity_type = review.entity.entity_type
+                    existing = repo.find_by_full_name_and_type(
+                        mapping_key(review.entity.text, entity_type), entity_type
+                    )
                     if existing:
                         self._known_entity_ids.add(review.entity_id)
                         review.state = EntityReviewState.CONFIRMED

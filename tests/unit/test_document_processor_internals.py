@@ -192,7 +192,9 @@ class TestBuildPseudonymAssigner:
         """Returns a callable that accepts a DetectedEntity."""
 
         ctx = Mock()
-        ctx.mapping_repo.find_by_full_name.return_value = None
+        # Story 10.7 (AC1, AC2): lookups by (text, type) and the text's other-type rows
+        ctx.mapping_repo.find_by_full_name_and_type.return_value = None
+        ctx.mapping_repo.find_all_by_full_name.return_value = []
         ctx.compositional_engine.strip_titles.side_effect = lambda t: t
         ctx.compositional_engine.strip_prepositions.side_effect = lambda t: t
         assignment = Mock()
@@ -214,7 +216,8 @@ class TestBuildPseudonymAssigner:
         ctx.compositional_engine.strip_titles.side_effect = lambda t: t
         existing = Mock()
         existing.pseudonym_full = "Existing Pseudo"
-        ctx.mapping_repo.find_by_full_name.return_value = existing
+        # Story 10.7 (AC2): lookups by (text, type)
+        ctx.mapping_repo.find_by_full_name_and_type.return_value = existing
 
         processor = _make_processor()
         assigner = processor._build_pseudonym_assigner(ctx)
@@ -227,7 +230,9 @@ class TestBuildPseudonymAssigner:
         """Second call for same entity text returns cached preview."""
 
         ctx = Mock()
-        ctx.mapping_repo.find_by_full_name.return_value = None
+        # Story 10.7 (AC1, AC2): lookups by (text, type) and the text's other-type rows
+        ctx.mapping_repo.find_by_full_name_and_type.return_value = None
+        ctx.mapping_repo.find_all_by_full_name.return_value = []
         ctx.compositional_engine.strip_titles.side_effect = lambda t: t
         assignment = Mock()
         assignment.pseudonym_full = "Jean Dupont"
@@ -250,7 +255,9 @@ class TestBuildPseudonymAssigner:
         """Returns fallback preview string when assignment fails."""
 
         ctx = Mock()
-        ctx.mapping_repo.find_by_full_name.return_value = None
+        # Story 10.7 (AC1, AC2): lookups by (text, type) and the text's other-type rows
+        ctx.mapping_repo.find_by_full_name_and_type.return_value = None
+        ctx.mapping_repo.find_all_by_full_name.return_value = []
         ctx.compositional_engine.strip_titles.side_effect = lambda t: t
         ctx.compositional_engine.assign_compositional_pseudonym.side_effect = (
             RuntimeError
@@ -306,7 +313,8 @@ class TestRunValidation:
         unknown_entity = _make_entity("Pierre", "PERSON")
 
         # Marie exists in DB, Pierre doesn't
-        ctx.mapping_repo.find_by_full_name.side_effect = lambda name: (
+        # Story 10.7 (AC2): lookups by (text, type)
+        ctx.mapping_repo.find_by_full_name_and_type.side_effect = lambda name, _type: (
             Mock() if name == "Marie" else None
         )
 
@@ -334,7 +342,8 @@ class TestRunValidation:
         ctx.compositional_engine.strip_titles.side_effect = lambda t: t
 
         entity = _make_entity("Marie", "PERSON")
-        ctx.mapping_repo.find_by_full_name.return_value = Mock()
+        # Story 10.7 (AC2): lookups by (text, type)
+        ctx.mapping_repo.find_by_full_name_and_type.return_value = Mock()
 
         messages: list[str] = []
         processor = _make_processor()
@@ -492,7 +501,8 @@ class TestResolvePseudonyms:
         ctx.compositional_engine.strip_titles.side_effect = lambda t: t
         existing = Mock()
         existing.pseudonym_full = "Jean Dupont"
-        ctx.mapping_repo.find_by_full_name.return_value = existing
+        # Story 10.7 (AC2): lookups by (text, type)
+        ctx.mapping_repo.find_by_full_name_and_type.return_value = existing
 
         processor = _make_processor()
         result = processor._resolve_pseudonyms(
@@ -508,7 +518,9 @@ class TestResolvePseudonyms:
         """New entities get pseudonyms assigned via compositional engine."""
         ctx = Mock()
         ctx.compositional_engine.strip_titles.side_effect = lambda t: t
-        ctx.mapping_repo.find_by_full_name.return_value = None
+        # Story 10.7 (AC1, AC2): lookups by (text, type) and the text's other-type rows
+        ctx.mapping_repo.find_by_full_name_and_type.return_value = None
+        ctx.mapping_repo.find_all_by_full_name.return_value = []
         assignment = Mock()
         assignment.pseudonym_full = "Jean Dupont"
         assignment.pseudonym_first = "Jean"

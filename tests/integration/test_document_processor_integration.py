@@ -2,6 +2,9 @@
 
 Uses a real SQLiteMappingRepository (not mocks) to exercise the full
 process_document workflow: detection -> pseudonym assignment -> DB save -> output.
+
+Story 10.7 (AC2): repository lookups take the entity type
+(``find_by_full_name_and_type``); the text-only lookup is gone.
 """
 
 from __future__ import annotations
@@ -97,12 +100,12 @@ class TestDocumentProcessorIntegration:
         # Verify entities are saved in the real database
         with open_database(db_path, TEST_PASSPHRASE) as db_session:
             repo = SQLiteMappingRepository(db_session)
-            person = repo.find_by_full_name("Marie Dubois")
+            person = repo.find_by_full_name_and_type("Marie Dubois", "PERSON")
             assert person is not None
             assert person.entity_type == "PERSON"
             assert person.pseudonym_full is not None
 
-            location = repo.find_by_full_name("Paris")
+            location = repo.find_by_full_name_and_type("Paris", "LOCATION")
             assert location is not None
             assert location.entity_type == "LOCATION"
             assert location.pseudonym_full is not None

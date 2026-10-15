@@ -56,8 +56,13 @@ class TestSQLiteMappingRepository:
             assert saved.gender == "female"
             assert saved.confidence_score == 0.95
 
-    def test_find_by_full_name_returns_decrypted_entity(self, tmp_path: Path) -> None:
-        """Test find_by_full_name() returns entity with decrypted fields."""
+    def test_find_by_full_name_and_type_returns_decrypted_entity(
+        self, tmp_path: Path
+    ) -> None:
+        """Test find_by_full_name_and_type() returns entity with decrypted fields.
+
+        Story 10.7 (AC2): the lookup by text alone became a lookup by (text, type).
+        """
         db_path = tmp_path / "test.db"
         passphrase = "test_passphrase_123!"
         init_database(str(db_path), passphrase)
@@ -78,8 +83,8 @@ class TestSQLiteMappingRepository:
             )
             repo.save(entity)
 
-            # Find by full name
-            found = repo.find_by_full_name("Jean Martin")
+            # Find by full name and type
+            found = repo.find_by_full_name_and_type("Jean Martin", "PERSON")
 
             assert found is not None
             assert found.first_name == "Jean"
@@ -87,10 +92,13 @@ class TestSQLiteMappingRepository:
             assert found.full_name == "Jean Martin"
             assert found.pseudonym_full == "Luke Skywalker"
 
-    def test_find_by_full_name_returns_none_for_nonexistent(
+    def test_find_by_full_name_and_type_returns_none_for_nonexistent(
         self, tmp_path: Path
     ) -> None:
-        """Test find_by_full_name() returns None for non-existent entity."""
+        """Test find_by_full_name_and_type() returns None for a missing entity.
+
+        Story 10.7 (AC2): the lookup by text alone became a lookup by (text, type).
+        """
         db_path = tmp_path / "test.db"
         passphrase = "test_passphrase_123!"
         init_database(str(db_path), passphrase)
@@ -98,7 +106,7 @@ class TestSQLiteMappingRepository:
         with open_database(str(db_path), passphrase) as db_session:
             repo = SQLiteMappingRepository(db_session)
 
-            found = repo.find_by_full_name("Nonexistent Person")
+            found = repo.find_by_full_name_and_type("Nonexistent Person", "PERSON")
             assert found is None
 
     def test_find_by_component_first_name(self, tmp_path: Path) -> None:
@@ -431,7 +439,8 @@ class TestSQLiteMappingRepository:
         # Query in second session
         with open_database(str(db_path), passphrase) as db_session:
             repo = SQLiteMappingRepository(db_session)
-            found = repo.find_by_full_name("Cross Session Test")
+            # Story 10.7 (AC2): lookups by (text, type)
+            found = repo.find_by_full_name_and_type("Cross Session Test", "PERSON")
 
             assert found is not None
             assert found.full_name == "Cross Session Test"

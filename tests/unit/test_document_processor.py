@@ -115,7 +115,9 @@ class TestDocumentProcessor:
 
         # Mock mapping repository (no existing entities)
         mock_mapping_repo = Mock()
-        mock_mapping_repo.find_by_full_name.return_value = None
+        # Story 10.7 (AC1, AC2): lookups by (text, type) and the text's other-type rows
+        mock_mapping_repo.find_by_full_name_and_type.return_value = None
+        mock_mapping_repo.find_all_by_full_name.return_value = []
         mock_mapping_repo.find_all.return_value = []  # Story 2.8: No existing mappings
         mock_mapping_repo.save_batch.return_value = [
             Entity(
@@ -221,7 +223,8 @@ class TestDocumentProcessor:
         mock_detector.detect_entities.assert_called_once_with(input_text)
 
         # Assert: Database operations
-        assert mock_mapping_repo.find_by_full_name.call_count == 2
+        # Story 10.7 (AC2): one lookup by (text, type) per entity, as before
+        assert mock_mapping_repo.find_by_full_name_and_type.call_count == 2
         # Verify batch save was called once with 2 entities for transaction safety
         mock_mapping_repo.save_batch.assert_called_once()
         saved_entities = mock_mapping_repo.save_batch.call_args[0][0]
@@ -298,7 +301,8 @@ class TestDocumentProcessor:
         )
 
         mock_mapping_repo = Mock()
-        mock_mapping_repo.find_by_full_name.side_effect = [
+        # Story 10.7 (AC2): lookups by (text, type)
+        mock_mapping_repo.find_by_full_name_and_type.side_effect = [
             existing_person,
             existing_location,
         ]
@@ -607,7 +611,9 @@ class TestBuildPseudonymPreviews:
         mock_gender_class.return_value = mock_gender
 
         mock_mapping_repo = Mock()
-        mock_mapping_repo.find_by_full_name.return_value = None
+        # Story 10.7 (AC1, AC2): lookups by (text, type) and the text's other-type rows
+        mock_mapping_repo.find_by_full_name_and_type.return_value = None
+        mock_mapping_repo.find_all_by_full_name.return_value = []
         mock_mapping_repo.find_all.return_value = []
 
         with (
@@ -670,7 +676,8 @@ class TestBuildPseudonymPreviews:
         mock_gender_class.return_value = mock_gender
 
         mock_mapping_repo = Mock()
-        mock_mapping_repo.find_by_full_name.return_value = existing
+        # Story 10.7 (AC2): lookups by (text, type)
+        mock_mapping_repo.find_by_full_name_and_type.return_value = existing
         mock_mapping_repo.find_all.return_value = [existing]
 
         with (
@@ -731,7 +738,9 @@ class TestBuildPseudonymPreviews:
         mock_gender_class.return_value = mock_gender
 
         mock_mapping_repo = Mock()
-        mock_mapping_repo.find_by_full_name.return_value = None
+        # Story 10.7 (AC1, AC2): lookups by (text, type) and the text's other-type rows
+        mock_mapping_repo.find_by_full_name_and_type.return_value = None
+        mock_mapping_repo.find_all_by_full_name.return_value = []
         mock_mapping_repo.find_all.return_value = []
 
         with (
@@ -810,7 +819,9 @@ class TestFinalizeDocument:
         mock_gender_class.return_value = mock_gender
 
         mock_mapping_repo = Mock()
-        mock_mapping_repo.find_by_full_name.return_value = None
+        # Story 10.7 (AC1, AC2): lookups by (text, type) and the text's other-type rows
+        mock_mapping_repo.find_by_full_name_and_type.return_value = None
+        mock_mapping_repo.find_all_by_full_name.return_value = []
         mock_mapping_repo.find_all.return_value = []
         mock_mapping_repo.save_batch.return_value = []
 
@@ -997,7 +1008,9 @@ class TestErrorCases:
         mock_gender_class.return_value = mock_gender
 
         mock_mapping_repo = Mock()
-        mock_mapping_repo.find_by_full_name.return_value = None
+        # Story 10.7 (AC1, AC2): lookups by (text, type) and the text's other-type rows
+        mock_mapping_repo.find_by_full_name_and_type.return_value = None
+        mock_mapping_repo.find_all_by_full_name.return_value = []
         mock_mapping_repo.find_all.return_value = []
         mock_mapping_repo.save_batch.side_effect = DatabaseError("disk I/O error")
 
@@ -1064,7 +1077,9 @@ class TestErrorCases:
         mock_gender_class.return_value = mock_gender
 
         mock_mapping_repo = Mock()
-        mock_mapping_repo.find_by_full_name.return_value = None
+        # Story 10.7 (AC1, AC2): lookups by (text, type) and the text's other-type rows
+        mock_mapping_repo.find_by_full_name_and_type.return_value = None
+        mock_mapping_repo.find_all_by_full_name.return_value = []
         mock_mapping_repo.find_all.return_value = []
 
         mock_validation_workflow.side_effect = KeyboardInterrupt()
