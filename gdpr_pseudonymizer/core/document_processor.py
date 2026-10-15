@@ -14,10 +14,21 @@ from __future__ import annotations
 
 import re
 import time
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
+from gdpr_pseudonymizer.core.custom_pseudonym import (
+    CUSTOM_THEME,
+    NameKey,
+    PseudonymChecker,
+    Refusal,
+    check_custom_pseudonym,
+    custom_entity_fields,
+    finalization_message,
+    fold,
+    untracked_custom_values,
+)
 from gdpr_pseudonymizer.core.mapping_key import mapping_key
 from gdpr_pseudonymizer.data.database import DatabaseSession, open_database
 from gdpr_pseudonymizer.data.models import Entity, Operation
@@ -26,6 +37,7 @@ from gdpr_pseudonymizer.data.repositories.mapping_repository import (
     MappingRepository,
     SQLiteMappingRepository,
 )
+from gdpr_pseudonymizer.exceptions import CustomPseudonymError
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 from gdpr_pseudonymizer.nlp.hybrid_detector import HybridDetector
 from gdpr_pseudonymizer.nlp.model_names import resolve_spacy_model
@@ -155,6 +167,13 @@ class DocumentProcessor:
 
         # NLP detector (initialized lazily)
         self._detector: HybridDetector | None = None
+
+        # Story 10.11 (AC3): folded values of custom pseudonyms that the
+        # library does not track (a one-word custom pseudonym of a person, a
+        # part stored without its real counterpart). Set per document by
+        # _reset_pseudonym_state, extended when a custom pseudonym is
+        # registered; a generated pseudonym never takes one of them.
+        self._custom_taken: set[str] = set()
 
     def _get_detector(self) -> HybridDetector:
         """Get or initialize hybrid entity detector.
@@ -291,8 +310,14 @@ class DocumentProcessor:
         input_path: str,
         skip_validation: bool,
         pseudonym_assigner: Callable[[DetectedEntity], str],
+        custom_pseudonyms: dict[NameKey, str] | None = None,
     ) -> list[DetectedEntity]:
-        """Run entity validation workflow (interactive or auto-accept)."""
+        """Run entity validation workflow (interactive or auto-accept).
+
+        ``custom_pseudonyms``, when given, is filled with the custom
+        pseudonyms the user set in the review (Story 10.11), keyed by
+        (mapping key, type) of the name sent.
+        """
         if skip_validation:
             logger.info(
                 "validation_skipped",
@@ -338,6 +363,10 @@ class DocumentProcessor:
                     document_text=document_text,
                     document_path=input_path,
                     pseudonym_assigner=pseudonym_assigner,
+                    pseudonym_checker=self._build_custom_pseudonym_checker(
+                        ctx, document_text
+                    ),
+                    custom_pseudonyms=custom_pseudonyms,
                 )
             else:
                 validated_unknown = []
@@ -357,6 +386,89 @@ class DocumentProcessor:
         except KeyboardInterrupt:
             logger.info("validation_cancelled", reason="user_interrupt")
             raise
+
+    @staticmethod
+    def _build_custom_pseudonym_checker(
+        ctx: _ProcessingContext, document_text: str
+    ) -> PseudonymChecker:
+        """The command line's check of a custom pseudonym when it is set
+        (Story 10.11): the stored rows are read at each check."""
+
+        def checker(
+            name: str,
+            entity_type: str,
+            pseudonym: str,
+            other_customs: Mapping[NameKey, str],
+        ) -> Refusal | None:
+            return check_custom_pseudonym(
+                ctx.mapping_repo.find_all(),
+                name,
+                entity_type,
+                pseudonym,
+                document_text,
+                other_customs,
+            )
+
+        return checker
+
+    def _register_custom_pseudonyms(
+        self,
+        ctx: _ProcessingContext,
+        custom_pseudonyms: dict[NameKey, str],
+        document_text: str,
+        entity_cache: dict[tuple[str, str], str],
+        new_entities: list[Entity],
+    ) -> set[NameKey]:
+        """Check every custom pseudonym again, then register it first (10.11).
+
+        The last check: the database may have changed since the pseudonym
+        was set. A refusal raises before anything is saved or written. Then
+        each name gets its new row (saved with the run's other new rows),
+        the library marks its pseudonym and its bound parts as used, its
+        untracked values are kept, and the run's cache holds it, so every
+        occurrence of the name takes it and a lone first or last name of the
+        run takes the matching part.
+
+        Returns:
+            The names registered (their first occurrence counts as new)
+
+        Raises:
+            CustomPseudonymError: If a custom pseudonym breaks a rule
+        """
+        if not custom_pseudonyms:
+            return set()
+        stored = ctx.mapping_repo.find_all()
+        names = sorted(custom_pseudonyms)
+        for name in names:
+            others = {k: v for k, v in custom_pseudonyms.items() if k != name}
+            refusal = check_custom_pseudonym(
+                stored,
+                name[0],
+                name[1],
+                custom_pseudonyms[name],
+                document_text,
+                others,
+            )
+            if refusal is not None:
+                logger.warning("custom_pseudonym_refused", reason=refusal.reason.value)
+                raise CustomPseudonymError(finalization_message(refusal))
+        for name in names:
+            text, entity_type = name
+            pseudonym = custom_pseudonyms[name]
+            row = Entity(
+                entity_type=entity_type,
+                full_name=text,
+                pseudonym_full=pseudonym,
+                first_seen_timestamp=datetime.now(timezone.utc),
+                theme=CUSTOM_THEME,
+                **custom_entity_fields(text, entity_type, pseudonym),
+            )
+            ctx.pseudonym_manager.load_existing_mappings([row])
+            self._custom_taken |= untracked_custom_values([row])
+            entity_cache[name] = pseudonym
+            new_entities.append(row)
+        logger.info("custom_pseudonyms_registered", count=len(names))
+        return set(names)
 
     def _check_component_match(
         self,
@@ -509,11 +621,24 @@ class DocumentProcessor:
         )
         return taken
 
+    def _uses_custom_part(self, new_entity: Entity) -> bool:
+        """Whether a generated pseudonym, or one of its parts, is an untracked
+        value of a custom pseudonym (Story 10.11, AC3)."""
+        if not self._custom_taken:
+            return False
+        values = (
+            new_entity.pseudonym_full,
+            new_entity.pseudonym_first,
+            new_entity.pseudonym_last,
+        )
+        return any(value and fold(value) in self._custom_taken for value in values)
+
     @staticmethod
     def _assign_untaken_pseudonym(
         ctx: _ProcessingContext,
         new_entity: Entity,
         taken: set[str],
+        custom_taken: set[str] | None = None,
     ) -> tuple[str, Entity]:
         """Give a new row a pseudonym that its key has under no other type.
 
@@ -526,14 +651,26 @@ class DocumentProcessor:
         pseudonym it has handed out, and keeps no component link (so the
         stored component mapping of the name is not changed).
 
+        Story 10.11 (AC3): a draw whose pseudonym or part is in
+        ``custom_taken`` (the untracked values of custom pseudonyms, folded)
+        is drawn again too.
+
         Raises:
             RuntimeError: If the library gives no untaken pseudonym
         """
-        for _attempt in range(len(taken) + 1):
+        custom_taken = custom_taken or set()
+        for _attempt in range(len(taken) + len(custom_taken) + 1):
             assignment = ctx.pseudonym_manager.assign_pseudonym(
                 entity_type=new_entity.entity_type, gender=None
             )
-            if assignment.pseudonym_full not in taken:
+            parts = (
+                assignment.pseudonym_full,
+                assignment.pseudonym_first,
+                assignment.pseudonym_last,
+            )
+            if assignment.pseudonym_full not in taken and not any(
+                part and fold(part) in custom_taken for part in parts
+            ):
                 break
         else:
             raise RuntimeError("no pseudonym left that differs from the other types")
@@ -563,8 +700,16 @@ class DocumentProcessor:
         self,
         ctx: _ProcessingContext,
         validated_entities: list[DetectedEntity],
+        custom_pseudonyms: dict[NameKey, str] | None = None,
+        document_text: str = "",
     ) -> _ResolveResult:
-        """Resolve pseudonyms for all validated entities."""
+        """Resolve pseudonyms for all validated entities.
+
+        Story 10.11: the custom pseudonyms the user set, keyed by (mapping
+        key, type), are checked again and registered before any occurrence
+        is resolved (``_register_custom_pseudonyms``); ``document_text`` is
+        the text their real-name check reads.
+        """
         logger.info(
             "starting_entity_processing",
             validated_count=len(validated_entities),
@@ -577,6 +722,10 @@ class DocumentProcessor:
         entities_new = 0
         entities_reused = 0
         type_counts: dict[str, int] = {}
+        # Story 10.11: custom names whose first occurrence is still to come
+        custom_unseen = self._register_custom_pseudonyms(
+            ctx, custom_pseudonyms or {}, document_text, entity_cache, new_entities
+        )
 
         for entity in validated_entities:
             logger.debug(
@@ -590,7 +739,12 @@ class DocumentProcessor:
 
             if cache_key in entity_cache:
                 pseudonym = entity_cache[cache_key]
-                entities_reused += 1
+                if cache_key in custom_unseen:
+                    # A custom pseudonym's first occurrence counts as new
+                    custom_unseen.discard(cache_key)
+                    entities_new += 1
+                else:
+                    entities_reused += 1
             else:
                 existing_entity = ctx.mapping_repo.find_by_full_name_and_type(
                     entity_text_stripped, entity.entity_type
@@ -620,9 +774,9 @@ class DocumentProcessor:
                         pseudonym, new_entity = self._assign_new_pseudonym(
                             ctx, entity, entity_text_stripped
                         )
-                        if pseudonym in taken:
+                        if pseudonym in taken or self._uses_custom_part(new_entity):
                             pseudonym, new_entity = self._assign_untaken_pseudonym(
-                                ctx, new_entity, taken
+                                ctx, new_entity, taken, self._custom_taken
                             )
                         entity_cache[cache_key] = pseudonym
                         new_entities.append(new_entity)
@@ -705,6 +859,8 @@ class DocumentProcessor:
         ctx.pseudonym_manager.reset_preview_state()
         existing_entities = ctx.mapping_repo.find_all()
         ctx.pseudonym_manager.load_existing_mappings(existing_entities)
+        # Story 10.11 (AC3): the stored custom values the library does not track
+        self._custom_taken = untracked_custom_values(existing_entities)
         logger.info(
             "pseudonym_manager_reset_after_validation",
             existing_mappings_reloaded=len(existing_entities),
@@ -904,6 +1060,7 @@ class DocumentProcessor:
         document_text: str,
         validated_entities: list[DetectedEntity],
         output_path: str,
+        custom_pseudonyms: dict[NameKey, str] | None = None,
     ) -> ProcessingResult:
         """Phase 2: Resolve pseudonyms, apply replacements, write output.
 
@@ -914,6 +1071,8 @@ class DocumentProcessor:
             document_text: Original document text
             validated_entities: Entities approved by user (rejected excluded)
             output_path: Path to write pseudonymized output
+            custom_pseudonyms: The custom pseudonyms set in the review, keyed
+                by (mapping key, type) of the name sent (Story 10.11)
 
         Returns:
             ProcessingResult with success/failure details
@@ -923,7 +1082,12 @@ class DocumentProcessor:
             with open_database(self.db_path, self.passphrase) as db_session:
                 ctx = self._init_processing_context(db_session)
                 self._reset_pseudonym_state(ctx)
-                resolve_result = self._resolve_pseudonyms(ctx, validated_entities)
+                resolve_result = self._resolve_pseudonyms(
+                    ctx,
+                    validated_entities,
+                    custom_pseudonyms=custom_pseudonyms,
+                    document_text=document_text,
+                )
                 pseudonymized_text = self._apply_replacements(
                     document_text, resolve_result.replacements
                 )
@@ -966,6 +1130,7 @@ class DocumentProcessor:
             with open_database(self.db_path, self.passphrase) as db_session:
                 ctx = self._init_processing_context(db_session)
                 pseudonym_assigner = self._build_pseudonym_assigner(ctx)
+                custom_pseudonyms: dict[NameKey, str] = {}
                 validated_entities = self._run_validation(
                     ctx=ctx,
                     detected_entities=detected_entities,
@@ -973,9 +1138,15 @@ class DocumentProcessor:
                     input_path=input_path,
                     skip_validation=skip_validation,
                     pseudonym_assigner=pseudonym_assigner,
+                    custom_pseudonyms=custom_pseudonyms,
                 )
                 self._reset_pseudonym_state(ctx)
-                resolve_result = self._resolve_pseudonyms(ctx, validated_entities)
+                resolve_result = self._resolve_pseudonyms(
+                    ctx,
+                    validated_entities,
+                    custom_pseudonyms=custom_pseudonyms,
+                    document_text=document_text,
+                )
                 pseudonymized_text = self._apply_replacements(
                     document_text, resolve_result.replacements
                 )
@@ -1017,6 +1188,7 @@ class DocumentProcessor:
             with open_database(self.db_path, self.passphrase) as db_session:
                 ctx = self._init_processing_context(db_session)
                 pseudonym_assigner = self._build_pseudonym_assigner(ctx)
+                custom_pseudonyms: dict[NameKey, str] = {}
                 validated_entities = self._run_validation(
                     ctx=ctx,
                     detected_entities=detected_entities,
@@ -1024,9 +1196,15 @@ class DocumentProcessor:
                     input_path=input_path,
                     skip_validation=skip_validation,
                     pseudonym_assigner=pseudonym_assigner,
+                    custom_pseudonyms=custom_pseudonyms,
                 )
                 self._reset_pseudonym_state(ctx)
-                resolve_result = self._resolve_pseudonyms(ctx, validated_entities)
+                resolve_result = self._resolve_pseudonyms(
+                    ctx,
+                    validated_entities,
+                    custom_pseudonyms=custom_pseudonyms,
+                    document_text=document_text,
+                )
 
                 self._apply_tabular_replacements(
                     tabular_doc,

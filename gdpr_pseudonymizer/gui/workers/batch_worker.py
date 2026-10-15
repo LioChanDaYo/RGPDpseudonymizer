@@ -128,6 +128,8 @@ class BatchWorker(QRunnable):
         self._validation_condition = QWaitCondition()
         self._waiting_for_validation = False
         self._validated_entities: list[DetectedEntity] | None = None
+        # Story 10.11: the custom pseudonyms of the review, with the list
+        self._custom_pseudonyms: dict[tuple[str, str], str] | None = None
 
         # Track written output files for cancel cleanup (Task 1.8)
         self._written_files: list[Path] = []
@@ -155,7 +157,11 @@ class BatchWorker(QRunnable):
         # Also wake from validation wait so cancel takes effect
         self._validation_condition.wakeAll()
 
-    def submit_validation_result(self, entities: list[DetectedEntity]) -> None:
+    def submit_validation_result(
+        self,
+        entities: list[DetectedEntity],
+        custom_pseudonyms: dict[tuple[str, str], str] | None = None,
+    ) -> None:
         """Submit validated entities from the GUI thread to unblock the worker.
 
         Called from the GUI thread after the user finishes validation.
@@ -163,9 +169,12 @@ class BatchWorker(QRunnable):
 
         Args:
             entities: User-validated entity list to use for finalization.
+            custom_pseudonyms: The review's custom pseudonyms, keyed by
+                (mapping key, type) of the name sent (Story 10.11).
         """
         self._mutex.lock()
         self._validated_entities = entities
+        self._custom_pseudonyms = custom_pseudonyms
         self._validation_condition.wakeAll()
         self._mutex.unlock()
 
@@ -361,9 +370,11 @@ class BatchWorker(QRunnable):
         self._mutex.lock()
         self._waiting_for_validation = True
         self._validated_entities = None
+        self._custom_pseudonyms = None
         self._validation_condition.wait(self._mutex)
         self._waiting_for_validation = False
         validated = self._validated_entities
+        customs = self._custom_pseudonyms
         self._mutex.unlock()
 
         if self._cancelled:
@@ -372,7 +383,16 @@ class BatchWorker(QRunnable):
         if validated is None:
             return None
 
-        # Phase 2: Finalize with validated entities
+        # Phase 2: Finalize with validated entities. Story 10.11: the custom
+        # pseudonyms go with them only when the review holds one, so a review
+        # without one calls finalize_document exactly as before.
+        if customs:
+            return processor.finalize_document(
+                document_text=document_text,
+                validated_entities=validated,
+                output_path=str(output_file),
+                custom_pseudonyms=customs,
+            )
         result = processor.finalize_document(
             document_text=document_text,
             validated_entities=validated,

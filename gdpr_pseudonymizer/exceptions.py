@@ -57,6 +57,15 @@ class ValidationError(PseudonymizerError):
     pass
 
 
+class CustomPseudonymError(ValidationError):
+    """Raised when a custom pseudonym breaks a rule at finalization (Story 10.11).
+
+    The review refuses such a pseudonym when it is set; this is the last
+    check, made before anything is saved or written. Its message names no
+    name and no pseudonym.
+    """
+
+
 class FileProcessingError(PseudonymizerError):
     """Raised when file I/O operations fail.
 

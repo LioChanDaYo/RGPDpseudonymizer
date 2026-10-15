@@ -198,11 +198,6 @@ def _doc1_entities() -> list[DetectedEntity]:
     return [_at(DOC1, QZ, "PERSON", 0), _at(DOC1, QZ, "PERSON", DOC1.rfind(QZ))]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.11: reproduces the custom pseudonym never written in batch on the unfixed code; fixed in Task 2",
-)
 def test_batch_custom_written_at_every_place_and_stored(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path
 ) -> None:
@@ -230,11 +225,6 @@ def test_batch_custom_written_at_every_place_and_stored(  # type: ignore[no-unty
     )
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.11: reproduces the custom pseudonym never written in batch on the unfixed code; fixed in Task 2",
-)
 def test_batch_custom_survives_prev_next(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path
 ) -> None:
@@ -261,11 +251,6 @@ def test_batch_custom_survives_prev_next(  # type: ignore[no-untyped-def]
     assert written == [CUSTOM, CUSTOM], written  # expected failure
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.11: reproduces the custom pseudonym never written in batch on the unfixed code; fixed in Task 2",
-)
 def test_batch_later_document_reuses_custom(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path
 ) -> None:
@@ -296,11 +281,6 @@ def test_batch_later_document_reuses_custom(  # type: ignore[no-untyped-def]
     assert record["shown"][1] == CUSTOM
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.11: reproduces the custom pseudonym never written in batch (Lionel's Q3 preview) on the unfixed code; fixed in Task 2",
-)
 def test_lionel_q3_preview_written(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path
 ) -> None:
@@ -328,11 +308,6 @@ def test_lionel_q3_preview_written(  # type: ignore[no-untyped-def]
     assert written == expected, written  # expected failure
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.11: reproduces the custom pseudonym never written in batch (titled form) on the unfixed code; fixed in Task 2",
-)
 def test_titled_form_written(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path
 ) -> None:
@@ -355,11 +330,6 @@ def test_titled_form_written(  # type: ignore[no-untyped-def]
     assert written == expected, written  # expected failure
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.11: reproduces the custom pseudonym never written in batch (added row) on the unfixed code; fixed in Task 2",
-)
 def test_added_place_written(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path
 ) -> None:

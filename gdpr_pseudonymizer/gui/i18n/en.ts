@@ -1358,6 +1358,31 @@ or click to open</translation>
         <translation>New pseudonym:</translation>
     </message>
     <message>
+        <location filename="../screens/validation.py" line="761"/>
+        <source>Ce nom a déjà un pseudonyme enregistré dans votre base de correspondances : « %1 ». Ce pseudonyme est conservé. Pour en choisir un autre, supprimez ce nom de la base (menu Outils › Base de correspondances...), puis traitez à nouveau le document.</source>
+        <translation>This name already has a pseudonym in your mapping database: “%1”. That pseudonym is kept. To choose another one, remove the name from the database (Tools › Mapping database...), then process the document again.</translation>
+    </message>
+    <message>
+        <location filename="../screens/validation.py" line="772"/>
+        <source>Le prénom « %1 » est déjà remplacé par « %2 ». Votre pseudonyme doit donc avoir « %2 » pour prénom, par exemple « %3 ».</source>
+        <translation>The first name “%1” is already replaced by “%2”. Your pseudonym must therefore have “%2” as its first name, for example “%3”.</translation>
+    </message>
+    <message>
+        <location filename="../screens/validation.py" line="778"/>
+        <source>Le nom de famille « %1 » est déjà remplacé par « %2 ». Votre pseudonyme doit donc avoir « %2 » pour nom de famille, par exemple « %3 ».</source>
+        <translation>The last name “%1” is already replaced by “%2”. Your pseudonym must therefore have “%2” as its last name, for example “%3”.</translation>
+    </message>
+    <message>
+        <location filename="../screens/validation.py" line="786"/>
+        <source>« %1 » (ou une partie de ce pseudonyme) est déjà utilisé pour un autre nom : « %2 ». Deux noms différents ne peuvent pas partager un pseudonyme : choisissez-en un autre.</source>
+        <translation>“%1” (or a part of it) is already used for another name: “%2”. Two different names cannot share a pseudonym: choose another one.</translation>
+    </message>
+    <message>
+        <location filename="../screens/validation.py" line="796"/>
+        <source>« %2 » figure dans ce document ou dans votre base de correspondances : « %1 » pourrait être pris pour un vrai nom. Choisissez-en un autre.</source>
+        <translation>“%2” appears in this document or in your mapping database, so “%1” could be taken for a real name. Choose another one.</translation>
+    </message>
+    <message>
         <location filename="../screens/validation.py" line="409"/>
         <source>Annulé</source>
         <translation>Undone</translation>

@@ -158,11 +158,6 @@ def _qzz(first: str) -> list[DetectedEntity]:
     return [_at(QZZ, first, "PERSON", 0), _at(QZZ, "Zorbal", "PERSON", QZZ_SPANS[1][0])]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.11: reproduces the custom pseudonym never written in the CLI on the unfixed code; fixed in Task 2",
-)
 def test_cli_custom_written_stored_and_reused(tmp_path: Path) -> None:
     """T25 (AC4, AC1, AC2, Q4): [C] is written at the name, its lone last name
     takes the last part, the row is stored split, and a later run reuses the
@@ -197,11 +192,6 @@ def test_cli_custom_written_stored_and_reused(tmp_path: Path) -> None:
     assert _replacements(written2, CLI2, _spans(later)) == [CUSTOM, "Xantor"]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.11: reproduces no refusal for another name's pseudonym in the CLI (Q2) on the unfixed code; fixed in Task 2",
-)
 def test_cli_pseudonym_of_another_name_is_refused(tmp_path: Path) -> None:
     """T26 (Q2): the stored pseudonym of another name is refused with one
     warning; the document is still written, with another pseudonym."""
@@ -232,11 +222,6 @@ def test_cli_pseudonym_of_another_name_is_refused(tmp_path: Path) -> None:
     assert stored is not None and stored[3] != other[3]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.11: reproduces no refusal for a real name of the document in the CLI (Q2, Q-C) on the unfixed code; fixed in Task 2",
-)
 def test_cli_real_name_of_the_document_is_refused(tmp_path: Path) -> None:
     """T27 (Q2, Q-C): a real name of the document is refused with one
     warning."""
@@ -298,11 +283,6 @@ def test_cli_correction_after_custom_keeps_stored_pseudonym(tmp_path: Path) -> N
     assert _stored(db, QZ, "PERSON") == before
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.11: reproduces [C] after [E] losing the correction and the pseudonym on the unfixed code; fixed in Task 2",
-)
 def test_cli_custom_after_correction_keeps_both(tmp_path: Path) -> None:
     """T30 (AC11, PO R2): [E], [P], [C] keeps the correction and the
     pseudonym."""
@@ -328,11 +308,6 @@ def test_cli_custom_after_correction_keeps_both(tmp_path: Path) -> None:
     )
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.11: reproduces Space after [P] losing an [E] correction (Q-F) on the unfixed code; fixed in Task 2",
-)
 def test_cli_correction_kept_after_back_and_space(tmp_path: Path) -> None:
     """T31 (AC11, Q-F leak 1): [E], [P], Space keeps the correction."""
     db = _new_db(tmp_path)
@@ -351,11 +326,6 @@ def test_cli_correction_kept_after_back_and_space(tmp_path: Path) -> None:
     assert _stored(db, QZ, "PERSON") is not None
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.11: reproduces Space after [R] and [P] leaving the name in clear (Q-F) on the unfixed code; fixed in Task 2",
-)
 def test_cli_accept_after_reject_writes_the_name(tmp_path: Path) -> None:
     """T32 (AC11, Q-F leak 2): [R], [P], Space writes the name."""
     db = _new_db(tmp_path)
@@ -374,11 +344,6 @@ def test_cli_accept_after_reject_writes_the_name(tmp_path: Path) -> None:
     assert "Quentrel" not in name and "orbal" not in name, written  # expected failure
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.11: reproduces no refusal for a first name that has a stored part in the CLI (Q-D) on the unfixed code; fixed in Task 2",
-)
 def test_cli_name_with_a_stored_part_requires_it(tmp_path: Path) -> None:
     """T33 (Q-D "Refuse", first name): one warning, then the pseudonym that
     starts with the stored part is accepted, written and stored."""
@@ -411,11 +376,6 @@ def test_cli_name_with_a_stored_part_requires_it(tmp_path: Path) -> None:
     )
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.11: reproduces the custom pseudonym never written in the CLI on the unfixed code; fixed in Task 2",
-)
 @pytest.mark.parametrize(
     "case", ["last_part_same_run", "last_part_later_run", "one_word_later_run"]
 )
@@ -504,11 +464,6 @@ def test_cli_generated_never_reuses_a_custom_part(
     assert row is not None and "Vellion" not in (row[3].split() + [row[4], row[5]])
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.11: reproduces [T] after [E] losing the correction (PO F2) on the unfixed code; fixed in Task 2",
-)
 def test_cli_type_change_after_correction_keeps_it(tmp_path: Path) -> None:
     """T35 (AC11, PO F2): [E], [P], [T] keeps the correction."""
     db = _new_db(tmp_path)

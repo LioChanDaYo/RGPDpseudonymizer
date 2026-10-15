@@ -8,6 +8,7 @@ from datetime import datetime
 from enum import Enum
 from typing import TypeAlias
 
+from gdpr_pseudonymizer.core.mapping_key import mapping_key
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 
 
@@ -276,6 +277,9 @@ class ValidationSession:
             review.state = EntityReviewState.MODIFIED
             review.user_modification = modified.text
             review.modified_entity = modified
+            # Story 10.11 (Lionel's Q-E): a custom pseudonym belongs to the
+            # name it was set on; correcting the name or its type removes it.
+            review.custom_pseudonym = None
             self.user_decisions.append(
                 UserDecision(
                     entity_id=review.entity_id,
@@ -305,23 +309,31 @@ class ValidationSession:
     def change_entity_type(self, entity: DetectedEntity, new_type: str) -> None:
         """Change the type of an entity (e.g., a person detected as LOCATION).
 
-        Recorded as a modification: text and span are kept, only the type changes.
+        Recorded as a modification: text and span are kept, only the type
+        changes. The entity retyped is the one the review sends: an earlier
+        correction is kept (Story 10.11, AC11, PO F2).
 
         Args:
             entity: Entity to retype
             new_type: New entity type (PERSON, LOCATION, or ORG)
         """
+        review = self.get_entity_review(entity)
+        sent = (
+            review.modified_entity
+            if review is not None and review.modified_entity is not None
+            else entity
+        )
         self.mark_modified(
             entity,
             DetectedEntity(
-                text=entity.text,
+                text=sent.text,
                 entity_type=new_type,
-                start_pos=entity.start_pos,
-                end_pos=entity.end_pos,
-                confidence=entity.confidence,
-                gender=entity.gender,
+                start_pos=sent.start_pos,
+                end_pos=sent.end_pos,
+                confidence=sent.confidence,
+                gender=sent.gender,
                 is_ambiguous=False,
-                source=entity.source,
+                source=sent.source,
             ),
         )
 
@@ -348,58 +360,69 @@ class ValidationSession:
     def get_validated_entities(self) -> list[DetectedEntity]:
         """Get final list of validated entities after user review.
 
-        Includes confirmed and modified entities, excludes rejected entities,
-        includes manually added entities.
+        Each entity follows its last decision (Story 10.11, AC11): one whose
+        current state is confirmed or modified is sent, with its correction
+        whenever it has one; rejected and pending ones are not, and an
+        earlier reject no longer counts. Manually added entities are
+        included.
 
         Returns:
             List of validated entities ready for pseudonymization
         """
-        confirmed_ids = {
-            d.entity_id
-            for d in self.user_decisions
-            if d.action in ("CONFIRM", "MODIFY", "CHANGE_PSEUDONYM")
-        }
-        rejected_ids = {
-            d.entity_id for d in self.user_decisions if d.action == "REJECT"
-        }
         added_entities = [
             d.modified_entity
             for d in self.user_decisions
             if d.action == "ADD" and d.modified_entity
         ]
 
-        # Get confirmed/modified entities (excluding rejected)
         validated = []
         for review in self._entity_reviews:
-            if (
-                review.entity_id in confirmed_ids
-                and review.entity_id not in rejected_ids
+            if review.state not in (
+                EntityReviewState.CONFIRMED,
+                EntityReviewState.MODIFIED,
             ):
-                # Apply modifications if present
-                if (
-                    review.state == EntityReviewState.MODIFIED
-                    and review.modified_entity is not None
-                ):
-                    validated.append(review.modified_entity)
-                elif (
-                    review.state == EntityReviewState.MODIFIED
-                    and review.user_modification
-                ):
-                    # Create modified entity
-                    modified_entity = DetectedEntity(
-                        text=review.user_modification,
-                        entity_type=review.entity.entity_type,
-                        start_pos=review.entity.start_pos,
-                        end_pos=review.entity.end_pos,
-                        confidence=review.entity.confidence,
-                        gender=review.entity.gender,
-                        is_ambiguous=review.entity.is_ambiguous,
-                    )
-                    validated.append(modified_entity)
-                else:
-                    validated.append(review.entity)
+                continue
+            validated.append(self._sent_entity(review))
 
         return validated + added_entities
+
+    @staticmethod
+    def _sent_entity(review: EntityReview) -> DetectedEntity:
+        """The entity a kept review sends: its correction whenever it has one
+        (Story 10.11, AC11), else the detected entity."""
+        if review.modified_entity is not None:
+            return review.modified_entity
+        if review.state == EntityReviewState.MODIFIED and review.user_modification:
+            return DetectedEntity(
+                text=review.user_modification,
+                entity_type=review.entity.entity_type,
+                start_pos=review.entity.start_pos,
+                end_pos=review.entity.end_pos,
+                confidence=review.entity.confidence,
+                gender=review.entity.gender,
+                is_ambiguous=review.entity.is_ambiguous,
+            )
+        return review.entity
+
+    def get_custom_pseudonyms(self) -> dict[tuple[str, str], str]:
+        """Custom pseudonym of each name sent for finalization (Story 10.11).
+
+        Keyed by the mapping key of the entity a kept review sends and its
+        type; the first review of a name that holds one gives it.
+        """
+        customs: dict[tuple[str, str], str] = {}
+        for review in self._entity_reviews:
+            if not review.custom_pseudonym:
+                continue
+            if review.state not in (
+                EntityReviewState.CONFIRMED,
+                EntityReviewState.MODIFIED,
+            ):
+                continue
+            sent = self._sent_entity(review)
+            name = (mapping_key(sent.text, sent.entity_type), sent.entity_type)
+            customs.setdefault(name, review.custom_pseudonym)
+        return customs
 
     def get_entity_groups(self, entity_type: str | None = None) -> list[EntityGroup]:
         """Get entities grouped by variant forms of the same real-world entity.

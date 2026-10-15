@@ -317,11 +317,6 @@ def _saint(
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.11: reproduces the custom pseudonym never written on the unfixed code; fixed in Task 2",
-)
 def test_custom_pseudonym_written_and_stored(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, monkeypatch
 ) -> None:
@@ -351,11 +346,6 @@ def test_custom_pseudonym_written_and_stored(  # type: ignore[no-untyped-def]
     )
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.11: reproduces the custom pseudonym never written on the unfixed code; fixed in Task 2",
-)
 def test_lone_first_and_last_name_take_the_parts(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, monkeypatch
 ) -> None:
@@ -378,11 +368,6 @@ def test_lone_first_and_last_name_take_the_parts(  # type: ignore[no-untyped-def
     assert got == [CUSTOM, "Vellion", "Xantor"], written  # expected failure
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.11: reproduces the custom pseudonym never written on the unfixed code; fixed in Task 2",
-)
 def test_one_word_custom_pseudonym_has_no_parts(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, monkeypatch
 ) -> None:
@@ -407,11 +392,6 @@ def test_one_word_custom_pseudonym_has_no_parts(  # type: ignore[no-untyped-def]
     assert lone != "Xantor" and "orbal" not in lone, written2
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.11: reproduces the custom pseudonym never written on the unfixed code; fixed in Task 2",
-)
 def test_later_document_reuses_custom_and_parts(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, monkeypatch
 ) -> None:
@@ -450,11 +430,6 @@ def test_later_document_reuses_custom_and_parts(  # type: ignore[no-untyped-def]
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.11: reproduces no refusal for a stored name (Q1) on the unfixed code; fixed in Task 2",
-)
 def test_name_already_stored_is_refused(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, monkeypatch
 ) -> None:
@@ -478,11 +453,6 @@ def test_name_already_stored_is_refused(  # type: ignore[no-untyped-def]
     assert _stored(db, QZ, "PERSON") == before
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.11: reproduces no refusal for another name's pseudonym (Q2) on the unfixed code; fixed in Task 2",
-)
 def test_pseudonym_of_another_name_is_refused(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, monkeypatch
 ) -> None:
@@ -505,11 +475,6 @@ def test_pseudonym_of_another_name_is_refused(  # type: ignore[no-untyped-def]
     assert stored is not None and stored[3] != other[3]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.11: reproduces no refusal for a real name of the document (Q2, Q-C) on the unfixed code; fixed in Task 2",
-)
 @pytest.mark.parametrize(
     "case",
     [
@@ -569,11 +534,6 @@ def test_real_name_of_the_document_is_refused(  # type: ignore[no-untyped-def]
     assert stored is not None and stored[3] != typed
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.11: reproduces no refusal and no use of the custom pseudonym (Lionel's Q-C preview) on the unfixed code; fixed in Task 2",
-)
 @pytest.mark.parametrize(
     "typed, refused",
     [
@@ -608,11 +568,6 @@ def test_lionel_qc_preview(  # type: ignore[no-untyped-def]
     assert got == [typed], written  # expected failure
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.11: reproduces no refusal for one custom pseudonym on two names (Q2) on the unfixed code; fixed in Task 2",
-)
 def test_same_custom_for_two_names_is_refused(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, monkeypatch
 ) -> None:
@@ -635,19 +590,12 @@ def test_same_custom_for_two_names_is_refused(  # type: ignore[no-untyped-def]
     assert stored is not None and stored[3] != CUSTOM
 
 
-_T9_XFAIL = pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.11: reproduces no refusal for a part of another name's pseudonym (Q2, Story 2.8) on the unfixed code; fixed in Task 2",
-)
-
-
 @pytest.mark.parametrize(
     "case",
     [
-        pytest.param("other_last_name", marks=_T9_XFAIL),
+        "other_last_name",
         "same_first_name",
-        pytest.param("one_word_name", marks=_T9_XFAIL),
+        "one_word_name",
     ],
 )
 def test_part_of_another_names_pseudonym(  # type: ignore[no-untyped-def]
@@ -683,11 +631,6 @@ def test_part_of_another_names_pseudonym(  # type: ignore[no-untyped-def]
     assert row.custom_pseudonym is None
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.11: reproduces no refusal for a first or last name that has a stored part (Q-D) on the unfixed code; fixed in Task 2",
-)
 @pytest.mark.parametrize("kind", ["first_name", "last_name", "both"])
 def test_name_with_a_stored_part_requires_it(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, monkeypatch, kind
@@ -755,11 +698,6 @@ def test_name_with_a_stored_part_requires_it(  # type: ignore[no-untyped-def]
     assert _stored(db, name, "PERSON") == expected_row
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.11: reproduces no refusal for a name stored in the database (Q-C) on the unfixed code; fixed in Task 2",
-)
 def test_real_name_stored_in_database_is_refused(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, monkeypatch
 ) -> None:
@@ -787,11 +725,6 @@ def test_real_name_stored_in_database_is_refused(  # type: ignore[no-untyped-def
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.11: reproduces a correction that keeps the custom pseudonym (Q-E) on the unfixed code; fixed in Task 2",
-)
 def test_correction_removes_custom_pseudonym(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, monkeypatch
 ) -> None:
@@ -846,11 +779,6 @@ def test_undone_custom_pseudonym_is_never_stored(  # type: ignore[no-untyped-def
     assert stored is not None and stored[3] == parts[0]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.11: reproduces the custom pseudonym never written on the unfixed code; fixed in Task 2",
-)
 def test_custom_pseudonym_on_org_has_no_parts(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, monkeypatch
 ) -> None:
@@ -875,11 +803,6 @@ def test_custom_pseudonym_on_org_has_no_parts(  # type: ignore[no-untyped-def]
     )
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.11: reproduces a finalization that ignores a database changed meanwhile on the unfixed code; fixed in Task 2",
-)
 def test_database_changed_meanwhile_nothing_written(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, monkeypatch
 ) -> None:
@@ -942,11 +865,6 @@ def test_without_custom_pseudonym_unchanged(  # type: ignore[no-untyped-def]
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.11: reproduces a custom pseudonym that reaches one row only (Q3) on the unfixed code; fixed in Task 2",
-)
 def test_custom_reaches_every_place_undo_redo(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path
 ) -> None:
@@ -967,11 +885,6 @@ def test_custom_reaches_every_place_undo_redo(  # type: ignore[no-untyped-def]
     assert [r.custom_pseudonym for r in (r1, r2, r3)] == [CUSTOM, CUSTOM, None]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.11: reproduces a custom pseudonym that reaches one row only (Q3, Q-B) on the unfixed code; fixed in Task 2",
-)
 def test_custom_on_several_places_follows_the_group(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path
 ) -> None:
@@ -999,11 +912,6 @@ def test_custom_on_one_place_alone_stays_own(  # type: ignore[no-untyped-def]
     assert r1.custom_pseudonym == CUSTOM
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.11: reproduces a custom pseudonym that reaches one row only (Q3, titled form) on the unfixed code; fixed in Task 2",
-)
 def test_custom_reaches_titled_form(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path
 ) -> None:
@@ -1021,11 +929,6 @@ def test_custom_reaches_titled_form(  # type: ignore[no-untyped-def]
     assert [r1.state, r2.state] == [MODIFIED, MODIFIED]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.11: reproduces a custom pseudonym that reaches one row only (Q3, added row) on the unfixed code; fixed in Task 2",
-)
 def test_custom_on_added_place_reaches_found_places(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path
 ) -> None:
@@ -1048,11 +951,6 @@ def test_custom_on_added_place_reaches_found_places(  # type: ignore[no-untyped-
     assert [r1.state, r2.state] == [MODIFIED, MODIFIED]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.11: reproduces no refusal for a stored name in batch review (Q1) on the unfixed code; fixed in Task 2",
-)
 def test_dialog_refuses_a_stored_name_in_batch(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, monkeypatch
 ) -> None:

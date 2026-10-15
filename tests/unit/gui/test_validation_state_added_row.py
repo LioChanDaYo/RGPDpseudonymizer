@@ -499,12 +499,15 @@ def test_group_reject_skips_a_place_decided_on_its_own(  # type: ignore[no-untyp
         ], "PRE: accepted alone"
         expected = [CONFIRMED, REJECTED, REJECTED]
     else:
-        state.accept_entity(r1.entity_id)  # the group
+        # Story 10.11 (Lionel's Q3, Q-B): a custom pseudonym reaches every
+        # place of the name not rejected on its own, and is a place's own
+        # decision only when it reaches that place alone.
+        state.bulk_reject([r2.entity_id, r3.entity_id])  # both places on their own
         state.change_pseudonym(r1.entity_id, "Xantor Vellion")  # that place alone
         assert [r1.state, r2.state, r3.state] == [
             MODIFIED,
-            CONFIRMED,
-            CONFIRMED,
+            REJECTED,
+            REJECTED,
         ], "PRE: own pseudonym"
         expected = [MODIFIED, REJECTED, REJECTED]
     state.reject_entity(r2.entity_id)  # the group reject, from another row

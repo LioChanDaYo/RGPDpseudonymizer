@@ -11,10 +11,17 @@ import re
 from collections import defaultdict
 from collections.abc import Callable
 
+from gdpr_pseudonymizer.core.custom_pseudonym import (
+    NameKey,
+    PseudonymChecker,
+    cli_refusal_message,
+    normalize_custom_pseudonym,
+)
+from gdpr_pseudonymizer.core.mapping_key import mapping_key
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 from gdpr_pseudonymizer.utils.french_patterns import FRENCH_TITLE_PATTERN
 from gdpr_pseudonymizer.validation.context_precomputer import ContextPrecomputer
-from gdpr_pseudonymizer.validation.models import ValidationSession
+from gdpr_pseudonymizer.validation.models import EntityGroup, ValidationSession
 from gdpr_pseudonymizer.validation.ui import (
     FinalConfirmationScreen,
     HelpOverlay,
@@ -46,6 +53,8 @@ class ValidationWorkflow:
         document_text: str,
         document_path: str = "",
         pseudonym_assigner: Callable[[DetectedEntity], str] | None = None,
+        pseudonym_checker: PseudonymChecker | None = None,
+        custom_pseudonyms: dict[NameKey, str] | None = None,
     ) -> list[DetectedEntity]:
         """Execute the validation workflow.
 
@@ -54,6 +63,11 @@ class ValidationWorkflow:
             document_text: Full document text
             document_path: Path to document being validated
             pseudonym_assigner: Function to assign pseudonyms (optional)
+            pseudonym_checker: Checks a custom pseudonym set with [C]
+                (Story 10.11; optional)
+            custom_pseudonyms: When given, filled at the end with the custom
+                pseudonyms of the names sent, keyed by (mapping key, type)
+                (Story 10.11; optional)
 
         Returns:
             List of validated entities after user review
@@ -98,7 +112,9 @@ class ValidationWorkflow:
 
         # Step 2: Review entities by type (PERSON → ORG → LOCATION)
         try:
-            self._review_entities_by_type(session, pseudonym_assigner)
+            self._review_entities_by_type(
+                session, pseudonym_assigner, pseudonym_checker
+            )
         except KeyboardInterrupt as e:
             # If this was an intentional quit (from Q key), don't prompt again
             if str(e) == "User quit validation":
@@ -107,7 +123,14 @@ class ValidationWorkflow:
             if get_confirmation("Quit validation? Progress will be lost."):
                 raise
             # Continue if user cancels quit
-            return self.run(entities, document_text, document_path, pseudonym_assigner)
+            return self.run(
+                entities,
+                document_text,
+                document_path,
+                pseudonym_assigner,
+                pseudonym_checker,
+                custom_pseudonyms,
+            )
 
         # Step 3: Ambiguous entities are handled during review
 
@@ -118,10 +141,21 @@ class ValidationWorkflow:
         if not get_confirmation("Ready to process document with validated entities?"):
             display_info_message("Validation cancelled. Returning to review.")
             # Restart validation workflow
-            return self.run(entities, document_text, document_path, pseudonym_assigner)
+            return self.run(
+                entities,
+                document_text,
+                document_path,
+                pseudonym_assigner,
+                pseudonym_checker,
+                custom_pseudonyms,
+            )
 
-        # Step 5: Return validated entities
+        # Step 5: Return validated entities (and, Story 10.11, the custom
+        # pseudonyms of the names sent)
         validated_entities = session.get_validated_entities()
+        if custom_pseudonyms is not None:
+            custom_pseudonyms.clear()
+            custom_pseudonyms.update(session.get_custom_pseudonyms())
         display_info_message(
             f"Validation complete. Processing {len(validated_entities)} entities."
         )
@@ -155,12 +189,15 @@ class ValidationWorkflow:
         self,
         session: ValidationSession,
         pseudonym_assigner: Callable[[DetectedEntity], str] | None = None,
+        pseudonym_checker: PseudonymChecker | None = None,
     ) -> None:
         """Review entities by type in priority order using entity groups.
 
         Args:
             session: Validation session with entities
             pseudonym_assigner: Function to assign pseudonyms (optional)
+            pseudonym_checker: Checks a custom pseudonym set with [C]
+                (Story 10.11; optional)
         """
         # Review in priority order: PERSON → ORG → LOCATION
         priority_order = ["PERSON", "ORG", "LOCATION"]
@@ -194,7 +231,15 @@ class ValidationWorkflow:
                     context = self.context_precomputer.get_context_for_entity(
                         context_entity, session.context_cache
                     )
-                    pseudonym = self._get_pseudonym(current_entity, pseudonym_assigner)
+                    # Story 10.11 (PO R9): the group's custom pseudonym, with
+                    # the title prefix a suggestion has, in place of the
+                    # suggestion
+                    custom = self._group_custom_pseudonym(session, group)
+                    pseudonym = (
+                        self._with_title(current_entity, custom)
+                        if custom
+                        else self._get_pseudonym(current_entity, pseudonym_assigner)
+                    )
 
                     # Display ambiguous warning if needed
                     if current_entity.is_ambiguous:
@@ -265,10 +310,42 @@ class ValidationWorkflow:
 
                     elif action == "change_pseudonym":
                         new_pseudonym = get_text_input("Enter custom pseudonym")
-                        if new_pseudonym:
-                            # Apply custom pseudonym to all occurrences in group
+                        pseudonym = (
+                            normalize_custom_pseudonym(
+                                new_pseudonym, current_entity.entity_type
+                            )
+                            if new_pseudonym
+                            else ""
+                        )
+                        if pseudonym:
+                            # Story 10.11: the name is the entity the group's
+                            # representative sends (its correction kept)
+                            name = self._sent_name(session, current_entity)
+                            if pseudonym_checker is not None:
+                                others = {
+                                    key: value
+                                    for key, value in (
+                                        session.get_custom_pseudonyms().items()
+                                    )
+                                    if key != name
+                                }
+                                refusal = pseudonym_checker(
+                                    name[0], name[1], pseudonym, others
+                                )
+                                if refusal is not None:
+                                    display_warning_message(
+                                        cli_refusal_message(refusal)
+                                    )
+                                    continue  # Redisplay the same group
+                            # The occurrences that send the name take it; a
+                            # variant that sends another name (a lone first
+                            # or last name) is confirmed and gets the
+                            # matching part at finalization (Q4, PO R2)
                             for entity in group.occurrences:
-                                session.change_pseudonym(entity, new_pseudonym)
+                                if self._sent_name(session, entity) == name:
+                                    session.change_pseudonym(entity, pseudonym)
+                                else:
+                                    session.mark_confirmed(entity)
                         else:
                             for entity in group.occurrences:
                                 session.mark_confirmed(entity)
@@ -379,6 +456,38 @@ class ValidationWorkflow:
                     elif action == "invalid":
                         display_warning_message("Invalid key. Press H for help.")
                         continue
+
+    @staticmethod
+    def _sent_name(session: ValidationSession, entity: DetectedEntity) -> NameKey:
+        """(mapping key, type) of the entity an occurrence's review sends:
+        its correction when it has one, else the detected entity (10.11)."""
+        review = session.get_entity_review(entity)
+        sent = (
+            review.modified_entity
+            if review is not None and review.modified_entity is not None
+            else entity
+        )
+        return (mapping_key(sent.text, sent.entity_type), sent.entity_type)
+
+    @staticmethod
+    def _group_custom_pseudonym(session: ValidationSession, group: EntityGroup) -> str:
+        """The custom pseudonym of a group: the first occurrence's that holds
+        one, or "" (Story 10.11)."""
+        for entity in group.occurrences:
+            review = session.get_entity_review(entity)
+            if review is not None and review.custom_pseudonym:
+                return review.custom_pseudonym
+        return ""
+
+    @staticmethod
+    def _with_title(entity: DetectedEntity, pseudonym: str) -> str:
+        """A person's pseudonym with the entity's title prefix in front, as
+        ``_get_pseudonym`` shows a suggestion (Story 10.11, PO R9)."""
+        if entity.entity_type == "PERSON":
+            title_match = re.match(FRENCH_TITLE_PATTERN, entity.text, re.IGNORECASE)
+            if title_match:
+                return f"{title_match.group(0).rstrip()} {pseudonym}"
+        return pseudonym
 
     def _get_pseudonym(
         self,
@@ -557,6 +666,8 @@ def run_validation_workflow(
     document_text: str,
     document_path: str = "",
     pseudonym_assigner: Callable[[DetectedEntity], str] | None = None,
+    pseudonym_checker: PseudonymChecker | None = None,
+    custom_pseudonyms: dict[NameKey, str] | None = None,
 ) -> list[DetectedEntity]:
     """Execute interactive validation workflow.
 
@@ -567,6 +678,10 @@ def run_validation_workflow(
         document_text: Full document text
         document_path: Path to document being validated (optional)
         pseudonym_assigner: Function to assign pseudonyms (optional)
+        pseudonym_checker: Checks a custom pseudonym set with [C]
+            (Story 10.11; optional)
+        custom_pseudonyms: When given, filled with the custom pseudonyms of
+            the names sent, keyed by (mapping key, type) (Story 10.11)
 
     Returns:
         List of validated entities after user review
@@ -575,4 +690,11 @@ def run_validation_workflow(
         KeyboardInterrupt: If user cancels validation
     """
     workflow = ValidationWorkflow()
-    return workflow.run(entities, document_text, document_path, pseudonym_assigner)
+    return workflow.run(
+        entities,
+        document_text,
+        document_path,
+        pseudonym_assigner,
+        pseudonym_checker,
+        custom_pseudonyms,
+    )
