@@ -62,13 +62,13 @@
 
 ---
 
-### Epic 10: v2.3 — Detection Precision Quick Wins ✅ COMPLETE (2026-10-15; release pending Lionel's go)
+### Epic 10: v2.3 — Detection Precision Quick Wins (re-opened for two release blockers, Lionel 2026-10-16: Stories 10.12 and 10.13; 10.1 to 10.11 complete 2026-10-15)
 
 **Goal:** Raise detection precision and benchmark trustworthiness with local, deterministic changes (benchmark repair + held-out set, same-type overlap dedup, ORG role filter, LOCATION noise and name-boundary rules, salutation and org-plus-country handling), without lowering recall. Baseline: F1 58.53% at commit `fceef65` (CI run 37013929807). Sequenced before Epic 9; no release inside the epic.
 
 ---
 
-**Timeline: Epics 0-4: 14 weeks (v1.0 MVP). Epic 5: 6-7 weeks (v1.1). Epic 6: 10-14 weeks (v2.0). Epic 7: 4-6 weeks (v2.1). Epic 8: 5-7 weeks (v2.4). Epic 9: 8-12 weeks (v3.0). Epic 10: 8.5-12 weeks + 10.6 in parallel (v2.3 candidate, runs before Epic 9)**
+**Timeline: Epics 0-4: 14 weeks (v1.0 MVP). Epic 5: 6-7 weeks (v1.1). Epic 6: 10-14 weeks (v2.0). Epic 7: 4-6 weeks (v2.1). Epic 8: 5-7 weeks (v2.4). Epic 9: 8-12 weeks (v3.0). Epic 10: 9.5-13.5 weeks + 10.6 in parallel (v2.3 candidate, runs before Epic 9)**
 
 ---
 
@@ -187,6 +187,8 @@
 - [x] Desktop app edit applies to every occurrence of the name and type, as in the CLI; no other occurrence is left in clear (10.9, before the next release, added by Lionel, 2026-10-13)
 - [x] Desktop batch review keeps each document's own result and decisions, and an action on a hand-added row acts on that row only (10.10: PRE-001 to PRE-003, before any release, added by Lionel, 2026-10-14)
 - [x] A custom pseudonym ("Changer le pseudonyme", CLI [C]) is used in the written file and stored for later documents (10.11, after 10.7, before any release; added by Lionel, 2026-10-14)
+- [ ] The erasure log keeps no erased name: `delete-mapping` records date, row id, type and reason only (10.12, release blocker B1, Lionel 2026-10-16)
+- [ ] Desktop batch review warns before writing a document with names still to review (10.13, release blocker B2, Lionel 2026-10-16)
 - [x] Final-exam set (10.6): 30 documents frozen and annotated by two models before 10.4 merged, adjudicated by Lionel after 10.4 merged, then committed as plain files (documents' sha256 checked against the freeze record; no encryption, Lionel, 2026-10-09) and scored exactly once at close-out; accuracy output carries 95% bootstrap ranges; Lionel picks the public figure among main, held-out and final exam
 - [x] Every story closed with a cited CI accuracy run (G1), independent QA check (G2), no unapproved recall drop (G3), held-out numbers (G5, 10.2, 10.3a, 10.3b, 10.3c, 10.4)
 - [x] Close-out baseline recorded as Epic 9's starting point, with the `[Overall]`/`[PERSON]`/`[LOCATION]`/`[ORG]`/`[HELD-OUT …]` lines pasted into the QA report (`accuracy-results` artifacts are kept 30 days, `.github/workflows/accuracy.yaml:83`), not just the run ID; no release cut without Lionel's go
