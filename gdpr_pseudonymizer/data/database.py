@@ -2,6 +2,11 @@
 
 This module provides functions for creating and opening encrypted SQLite databases,
 managing encryption keys, and handling database sessions with proper resource cleanup.
+
+Opening an older file also removes erased names from its audit log and compacts
+it once (Story 10.12). Several processes can open it safely: removal waits for
+the write lock and re-checks inside its transaction; two processes may both
+compact the file, which is harmless.
 """
 
 from __future__ import annotations
@@ -13,7 +18,7 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine, event, text
 from sqlalchemy.dialects import sqlite as sqlite_dialect
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
@@ -38,6 +43,13 @@ PRE_10_7_SCHEMA_VERSION = "1.0.0"
 
 # How long a process waits for another one's conversion (its write lock)
 CONVERSION_BUSY_TIMEOUT_SECONDS = 30.0
+
+# Story 10.12 (Decisions Recorded, SM): SQLite's user_version marks a cleaned
+# file, not a metadata row. The due row records compaction still to do.
+ERASURE_LOG_CLEANED_USER_VERSION = 1
+ERASED_NAME_FIELD = "deleted_entity_name"
+COMPACTION_DUE_KEY = "erasure_log_compaction_due"
+COMPACTION_BUSY_TIMEOUT_SECONDS = 1.0
 
 # Indexes of init_database, also recreated by the conversion
 _ENTITY_INDEX_STATEMENTS = (
@@ -164,6 +176,37 @@ def _delete_quietly(db_path: str) -> None:
         )
 
 
+def _secure_delete_on_connect(
+    dbapi_connection: sqlite3.Connection, connection_record: object
+) -> None:
+    """Enable overwriting deleted data on every new pooled connection."""
+    cursor = dbapi_connection.cursor()
+    try:
+        cursor.execute("PRAGMA secure_delete=ON")
+    finally:
+        cursor.close()
+
+
+def _create_engine(db_path: str) -> Engine:
+    """Create an engine that overwrites deleted data on every connection."""
+    engine = create_engine(f"sqlite:///{db_path}")
+    event.listen(engine, "connect", _secure_delete_on_connect)
+    return engine
+
+
+def _connect(db_path: str, timeout: float) -> sqlite3.Connection:
+    """Open an autocommit connection with deleted-data overwriting enabled."""
+    conn = sqlite3.connect(db_path, timeout=timeout, isolation_level=None)
+    secure_delete_enabled = False
+    try:
+        conn.execute("PRAGMA secure_delete=ON")
+        secure_delete_enabled = True
+        return conn
+    finally:
+        if not secure_delete_enabled:
+            conn.close()
+
+
 def init_database(db_path: str, passphrase: str) -> None:
     """Initialize a new encrypted SQLite database.
 
@@ -215,7 +258,7 @@ def init_database(db_path: str, passphrase: str) -> None:
     fd = _create_exclusively(db_path)
     try:
         # Create SQLAlchemy engine
-        engine = create_engine(f"sqlite:///{db_path}")
+        engine = _create_engine(db_path)
 
         # Create all tables from models
         Base.metadata.create_all(engine)
@@ -226,6 +269,10 @@ def init_database(db_path: str, passphrase: str) -> None:
             conn.execute(text("PRAGMA journal_mode=WAL"))
             # Enable foreign key constraints
             conn.execute(text("PRAGMA foreign_keys=ON"))
+            # A new file needs neither erasure-log cleaning nor compaction
+            conn.execute(
+                text(f"PRAGMA user_version={ERASURE_LOG_CLEANED_USER_VERSION}")
+            )
             conn.commit()
 
         # Create indexes for query optimization: entity table indexes (for
@@ -310,6 +357,13 @@ def open_database(db_path: str, passphrase: str) -> DatabaseSession:
     conversion cannot be made, the file is left unchanged and the open stops
     with DatabaseConversionError.
 
+    After conversion, names earlier versions wrote into the erasure log are
+    removed once, then the file is compacted once. A failed removal raises
+    DatabaseConversionError when the log holds names. A failed compaction is
+    retried at the next open. Several processes are safe: removal waits for
+    another process's write lock and re-checks inside its transaction; two
+    processes may both compact the file, which is harmless.
+
     Args:
         db_path: Path to existing database file
         passphrase: User passphrase for decryption
@@ -322,7 +376,8 @@ def open_database(db_path: str, passphrase: str) -> DatabaseSession:
         ValueError: If passphrase incorrect
         CorruptedDatabaseError: If database metadata missing or invalid
         DatabaseConversionError: If a pre-10.7 database cannot be converted, or
-            its schema version and table definition disagree (file unchanged)
+            its schema version and table definition disagree (file unchanged),
+            or names in the erasure log cannot be removed (log unchanged)
 
     Example:
         >>> with open_database("mapping.db", "my_passphrase") as db_session:
@@ -335,7 +390,7 @@ def open_database(db_path: str, passphrase: str) -> DatabaseSession:
         raise FileNotFoundError(f"Database file not found: {db_path}")
 
     # Create engine and session
-    engine = create_engine(f"sqlite:///{db_path}")
+    engine = _create_engine(db_path)
 
     # Enable foreign keys (per-connection setting in SQLite)
     with engine.connect() as conn:
@@ -397,6 +452,8 @@ def open_database(db_path: str, passphrase: str) -> DatabaseSession:
         # connection is released first; the session is used again afterwards.
         session.close()
         _ensure_current_schema(db_path)
+        _clean_erasure_log(db_path)
+        _compact_if_due(db_path)
 
         # Return database session with encryption service
         return DatabaseSession(engine, session, encryption_service)
@@ -527,8 +584,8 @@ def _write_schema_version(conn: sqlite3.Connection, version: str) -> None:
         raise RuntimeError("schema_version row not found")
 
 
-def _conversion_failed_message(error: BaseException) -> str:
-    """User message of a failed conversion (no entity text, no file content)."""
+def _likely_cause(error: BaseException) -> str:
+    """Describe the likely cause of a failed database write."""
     detail = str(error).lower()
     if isinstance(error, PermissionError) or "readonly" in detail:
         cause = "the database file or its folder is read-only"
@@ -541,10 +598,28 @@ def _conversion_failed_message(error: BaseException) -> str:
             "the file or its folder is read-only, the disk is full, "
             "or another program is using the database"
         )
+    return cause
+
+
+def _conversion_failed_message(error: BaseException) -> str:
+    """User message of a failed conversion (no entity text, no file content)."""
+    cause = _likely_cause(error)
     return (
         "The database could not be converted to the new format "
         "(one row per name and type). The file is unchanged. "
         f"Likely cause: {cause}. ({type(error).__name__}: {error})"
+    )
+
+
+def _erasure_log_failed_message(error: BaseException) -> str:
+    """User message of a failed removal of names from the erasure log."""
+    message = (
+        "The names erased by earlier versions could not be removed from the "
+        "database's audit log, so the database was not opened. The audit log is "
+        "unchanged. Likely cause: %1. (%2)"
+    )
+    return message.replace("%1", _likely_cause(error)).replace(
+        "%2", f"{type(error).__name__}: {error}"
     )
 
 
@@ -568,9 +643,7 @@ def _ensure_current_schema(db_path: str) -> bool:
         DatabaseConversionError: If the conversion cannot be made, or the
             format is not recognised; the file is unchanged
     """
-    conn = sqlite3.connect(
-        db_path, timeout=CONVERSION_BUSY_TIMEOUT_SECONDS, isolation_level=None
-    )
+    conn = _connect(db_path, CONVERSION_BUSY_TIMEOUT_SECONDS)
     try:
         if not _is_pre_10_7(conn):
             return False
@@ -610,3 +683,145 @@ def _ensure_current_schema(db_path: str) -> bool:
         return True
     finally:
         conn.close()
+
+
+def _clean_erasure_log(db_path: str) -> bool:
+    """Remove erased names once, atomically, and mark compaction due (Story 10.12).
+
+    Uses its own autocommit connection with BEGIN IMMEDIATE. Several processes
+    are safe: removal waits up to CONVERSION_BUSY_TIMEOUT_SECONDS for another
+    process's write lock, then re-checks the mark inside its transaction.
+
+    Args:
+        db_path: Path to an existing database whose passphrase was checked
+
+    Returns:
+        True if this call cleaned and marked the file, False if already cleaned
+        or marking was deferred because no entry held a name
+
+    Raises:
+        DatabaseConversionError: If removal fails when names remain, or their
+            count cannot be read; the log is unchanged
+    """
+    conn: sqlite3.Connection | None = None
+    named = -1
+    started = time.monotonic()
+    name_path = f"$.{ERASED_NAME_FIELD}"
+    named_condition = (
+        "operation_type = 'ERASURE' AND CASE WHEN json_valid(user_modifications) "
+        "THEN json_type(user_modifications, ?) END IS NOT NULL"
+    )
+    named_count_sql = f"SELECT COUNT(*) FROM operations WHERE {named_condition}"
+    try:
+        conn = _connect(db_path, CONVERSION_BUSY_TIMEOUT_SECONDS)
+        try:
+            if (
+                conn.execute("PRAGMA user_version").fetchone()[0]
+                >= ERASURE_LOG_CLEANED_USER_VERSION
+            ):
+                return False
+            named = int(conn.execute(named_count_sql, (name_path,)).fetchone()[0])
+            _begin_immediate(conn)
+            if (
+                conn.execute("PRAGMA user_version").fetchone()[0]
+                >= ERASURE_LOG_CLEANED_USER_VERSION
+            ):
+                # Another process cleaned the file while this one waited
+                conn.execute("ROLLBACK")
+                return False
+            named = -1
+            named = int(conn.execute(named_count_sql, (name_path,)).fetchone()[0])
+            skipped = int(
+                conn.execute(
+                    "SELECT COUNT(*) FROM operations WHERE operation_type = 'ERASURE' "
+                    "AND user_modifications IS NOT NULL "
+                    "AND NOT json_valid(user_modifications)"
+                ).fetchone()[0]
+            )
+            removed = conn.execute(
+                "UPDATE operations SET user_modifications = "
+                f"json_remove(user_modifications, ?) WHERE {named_condition}",
+                (name_path, name_path),
+            ).rowcount
+            stamp = datetime.now(timezone.utc).replace(tzinfo=None)
+            conn.execute(
+                'INSERT OR REPLACE INTO metadata ("key", value, updated_at) '
+                "VALUES (?, ?, ?)",
+                (COMPACTION_DUE_KEY, "1", stamp.strftime("%Y-%m-%d %H:%M:%S.%f")),
+            )
+            conn.execute(f"PRAGMA user_version = {ERASURE_LOG_CLEANED_USER_VERSION}")
+            conn.execute("COMMIT")
+        except BaseException:
+            if conn.in_transaction:
+                try:
+                    conn.execute("ROLLBACK")
+                except Exception as rollback_error:
+                    logger.error(
+                        "erasure_log_cleaning_rollback_failed",
+                        error_type=type(rollback_error).__name__,
+                    )
+            raise
+        logger.info(
+            "erasure_log_cleaned",
+            removed=removed,
+            skipped=skipped,
+            duration_seconds=round(time.monotonic() - started, 3),
+        )
+        return True
+    except Exception as exc:
+        if named == 0:
+            logger.warning("erasure_log_mark_deferred", error_type=type(exc).__name__)
+            return False
+        logger.error("erasure_log_cleaning_failed", error_type=type(exc).__name__)
+        raise DatabaseConversionError(_erasure_log_failed_message(exc)) from exc
+    finally:
+        if conn is not None:
+            conn.close()
+
+
+def _compact_if_due(db_path: str) -> bool:
+    """Compact a cleaned file if due; failures never stop the open (Story 10.12).
+
+    VACUUM runs in autocommit on its own connection. The due row stays until a
+    TRUNCATE checkpoint completes, without waiting for readers. Several processes
+    may both compact the same file, which is harmless.
+
+    Args:
+        db_path: Path to an existing database whose passphrase was checked
+
+    Returns:
+        True if compaction completed, False if absent, pending or failed
+    """
+    started = time.monotonic()
+    try:
+        conn = _connect(db_path, COMPACTION_BUSY_TIMEOUT_SECONDS)
+        try:
+            due = conn.execute(
+                'SELECT value FROM metadata WHERE "key" = ?', (COMPACTION_DUE_KEY,)
+            ).fetchone()
+            if due is None:
+                return False
+            conn.execute("VACUUM")
+            conn.execute("PRAGMA busy_timeout = 0")
+            busy, log, checkpointed = conn.execute(
+                "PRAGMA wal_checkpoint(TRUNCATE)"
+            ).fetchone()
+            if busy or log != checkpointed:
+                logger.warning(
+                    "erasure_log_compaction_pending", reason="checkpoint_busy"
+                )
+                return False
+            timeout_ms = int(COMPACTION_BUSY_TIMEOUT_SECONDS * 1000)
+            conn.execute(f"PRAGMA busy_timeout = {timeout_ms}")
+            conn.execute('DELETE FROM metadata WHERE "key" = ?', (COMPACTION_DUE_KEY,))
+            conn.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+            logger.info(
+                "erasure_log_compacted",
+                duration_seconds=round(time.monotonic() - started, 3),
+            )
+            return True
+        finally:
+            conn.close()
+    except Exception as exc:
+        logger.warning("erasure_log_compaction_failed", error_type=type(exc).__name__)
+        return False

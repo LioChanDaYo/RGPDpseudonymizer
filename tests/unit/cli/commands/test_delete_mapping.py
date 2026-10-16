@@ -240,7 +240,8 @@ class TestDeleteMappingCommand:
             assert op.success is True
             assert op.entity_count == 1
             assert op.user_modifications is not None
-            assert op.user_modifications["deleted_entity_name"] == "Marie Dupont"
+            # Story 10.12 (AC1): the entry keeps the id, type and reason, not the name
+            assert "deleted_entity_name" not in op.user_modifications
             assert op.user_modifications["deleted_entity_type"] == "PERSON"
 
     def test_reason_stored_in_audit(self, tmp_path: Path) -> None:

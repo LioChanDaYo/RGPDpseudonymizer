@@ -3,7 +3,8 @@
 Provides comprehensive audit logging for all pseudonymization operations,
 including batch jobs, validation sessions, and individual document processing.
 
-Note: Operations table does NOT contain sensitive entity data, so no encryption needed.
+Note: ERASURE entries hold no name since Story 10.12. The operations table is
+not encrypted; free text (including --reason) and file names are stored as given.
 """
 
 from __future__ import annotations
@@ -23,8 +24,9 @@ class AuditRepository:
     """Repository for audit log operations.
 
     Tracks all pseudonymization operations with metadata for compliance,
-    debugging, and performance analysis. No encryption required as operations
-    contain metadata only, not sensitive entity information.
+    debugging, and performance analysis. ERASURE entries hold no name since
+    Story 10.12. The operations table is not encrypted; free text (including
+    --reason) and file names are stored as given.
 
     Example:
         >>> repo = AuditRepository(session)

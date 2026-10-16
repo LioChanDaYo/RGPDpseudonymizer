@@ -180,8 +180,8 @@ msgstr "Nom de l'entité à supprimer"
 msgid "Entity UUID to delete"
 msgstr "UUID de l'entité à supprimer"
 
-msgid "Reason for deletion (GDPR request reference)"
-msgstr "Motif de la suppression (référence de la demande RGPD)"
+msgid "Request reference, kept in the audit log (e.g. GDPR-REQ-2026-042); never the person's name"
+msgstr "Référence de la demande, conservée dans le journal d'audit (ex. : GDPR-REQ-2026-042) ; jamais le nom de la personne concernée"
 
 msgid "Skip confirmation prompt"
 msgstr "Ignorer la demande de confirmation"

@@ -604,7 +604,9 @@ def _delete_mapping(
         None,
         "--reason",
         "-r",
-        help=_("Reason for deletion (GDPR request reference)"),
+        help=_(
+            "Request reference, kept in the audit log (e.g. GDPR-REQ-2026-042); never the person's name"
+        ),
     ),
     force: bool = typer.Option(
         False,
