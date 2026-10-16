@@ -78,6 +78,25 @@ Story 7.5 cleaned `board_minutes.json` annotations but left the remaining 24 ann
 
 ---
 
+### EPIC10-BACKLOG: Epic 10 Consolidated Backlog (B1–B42)
+
+| Field | Value |
+|-------|-------|
+| **Source** | Epic 10 close-out QA (Quinn, 2026-10-15, at `main` `b2042c7`) |
+| **Severity** | Medium to Low, per item (B1–B3, B14 and B15 Medium; the rest Low) |
+| **Category** | Privacy, reliability, documentation, GUI / UX, tests |
+| **Affects** | Code and docs changed by Epic 10 (stories 10.1 to 10.11) |
+
+**Description:**
+The open items of every Epic 10 story (gate findings and the epic's follow-ups) are consolidated in one table, B1 to B42, with origin, severity and a suggested owner. They are not repeated here; nothing is scheduled by this entry. QA flags three as release decisions for Lionel before a v2.3.0 release: **B1** (the ERASURE audit entry keeps the erased name in clear), **B2** (batch "Valider et continuer" gives no warning about rows still to review) and **B14** (harmonising `CHANGELOG.md` `[Unreleased]`; the Epic 10 close-out branch proposes the text for his review).
+
+**Refs:**
+- `docs/qa/assessments/epic-10-close-out-summary.md` ("Consolidated Backlog")
+- `docs/qa/assessments/epic-10-nfr-20261015.md`
+- `docs/prd/epic-10-v2.3-detection-precision-quick-wins.md` (Close-Out Record)
+
+---
+
 ## Resolved Items
 
 | ID | Description | Resolved In | Date |
