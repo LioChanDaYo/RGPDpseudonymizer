@@ -198,6 +198,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Not changed: files already written by `export` or by a mapping export (`list-mappings --export`, the desktop app's CSV export), copies of a database that this version never opens, and text typed in `--reason`. The `--reason` help now asks for a request reference, never the person's name.
   - The CLI reference no longer says that the audit log is encrypted: it never was. Detection, the database schema and the accuracy figures do not change.
 
+- **Names still to review are announced before a document is written (Story 10.13).** A name you neither accept nor reject is not pseudonymized: it stays in plain text in the output file. Nothing said so before writing:
+  - In desktop batch review, "Valider et continuer" and "Valider et terminer" wrote the document at once. Now, when names still to review would stay in plain text, a window "Noms encore à vérifier" gives their number and asks first: "Annuler" returns to the review, nothing is written and the batch still waits on that document; "Continuer quand même" writes it as before.
+  - In single-document validation, "Finaliser" showed only the "Résumé de validation" window, whose counts leave these names out. Now the same window comes first, only when such names are left.
+  - In the command line, a name skipped with [N] (or the right or down arrow) and never decided was written in plain text, and the final summary did not show it. Now the summary ends with "⚠ Still to review: N (left in plain text)" when there are any.
+  - The number counts different names: a name found at several places counts once, and a name whose every place is covered by a name that is written (the same text accepted with another type at the same place) does not count, since nothing of it stays in plain text.
+  - In English, the window reads "Names still to review", with "Continue anyway" and "Cancel". Detection, the mapping database and its schema do not change, and no accuracy figure changes.
+
 - **Two runs creating the same new mapping database at once no longer lose it (Story 10.5).**
   - Two runs that create the same new mapping database at the same moment no longer lose it. The first run's database (its mappings and passphrase setup) is always kept; the second run stops with "Database already exists". Before, on Linux and macOS, the second run could delete the database the first one had just created; on Windows, it stopped with an unexpected file-access error.
   - A failed or interrupted (Ctrl+C) database creation no longer leaves a partial database, or its `-wal`/`-shm` files, behind.
