@@ -1422,6 +1422,28 @@ Continuer avec la pseudonymisation ?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../screens/validation.py" line="1054"/>
+        <source>Noms encore à vérifier</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../screens/validation.py" line="1056"/>
+        <source>Noms encore à vérifier dans ce document : %1.
+Un nom ni accepté ni rejeté n'est pas pseudonymisé : il reste en clair dans le fichier de sortie.
+Continuer quand même ?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../screens/validation.py" line="1064"/>
+        <source>Continuer quand même</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../screens/validation.py" line="1065"/>
+        <source>Annuler</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../screens/validation.py" line="495"/>
         <source>Pseudonymisation en cours...</source>
         <translation type="unfinished"></translation>

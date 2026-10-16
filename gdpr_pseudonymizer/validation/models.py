@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import uuid
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
@@ -100,6 +101,57 @@ def candidate_key(entity: DetectedEntity) -> CandidateKey:
     ``EntityGroup.unique_key``. This is not the mapping-database key.
     """
     return (entity.text, entity.start_pos, entity.entity_type)
+
+
+# Story 10.13: (cell, start, end), with an empty cell outside spreadsheets.
+Place: TypeAlias = tuple[str, int, int]
+NameOfReview: TypeAlias = tuple[str, str]  # (text, type)
+
+
+def place_of(entity: DetectedEntity) -> Place:
+    """Locate an occurrence for Story 10.13 (Lionel's decision, 2026-10-16)."""
+    return (entity.context_label or "", entity.start_pos, entity.end_pos)
+
+
+def written_places(sent: Iterable[DetectedEntity]) -> list[Place]:
+    """Apply finalization's overlap rule per cell for Story 10.13.
+
+    Lionel's decision of 2026-10-16 counts only spans actually replaced:
+    earlier starts win, with longer spans first when starts are equal.
+    """
+    kept_by_cell: dict[str, list[Place]] = {}
+    for place in sorted(
+        (place_of(entity) for entity in sent),
+        key=lambda item: (item[0], item[1], -item[2]),
+    ):
+        cell, start, end = place
+        kept = kept_by_cell.setdefault(cell, [])
+        if not any(not (end <= other[1] or start >= other[2]) for other in kept):
+            kept.append(place)
+    return [place for kept in kept_by_cell.values() for place in kept]
+
+
+def count_names_left_in_clear(
+    pending: Iterable[tuple[NameOfReview, Iterable[Place]]],
+    sent: Iterable[DetectedEntity],
+) -> int:
+    """Count distinct pending names left in clear for Story 10.13.
+
+    Per Lionel's decision of 2026-10-16, a place is covered only by one
+    containing written span in the same cell, regardless of entity type.
+    """
+    written = written_places(sent)
+    uncovered_names: set[NameOfReview] = set()
+    for name, places in pending:
+        for cell, start, end in places:
+            covered = any(
+                cell == written_cell and written_start <= start and end <= written_end
+                for written_cell, written_start, written_end in written
+            )
+            if not covered:
+                uncovered_names.add(name)
+                break
+    return len(uncovered_names)
 
 
 class EntityReviewState(Enum):
@@ -462,6 +514,30 @@ class ValidationSession:
 
         # Sort groups by position of first occurrence
         return sorted(groups, key=lambda g: g.occurrences[0].start_pos)
+
+    def names_left_in_clear(
+        self, sent_without_review: Iterable[DetectedEntity] = ()
+    ) -> int:
+        """Count pending review groups left in clear for Story 10.13.
+
+        Lionel's decision of 2026-10-16 includes pending occurrences only
+        and counts coverage by validated entities and names sent without review.
+
+        Args:
+            sent_without_review: Known entities written without review.
+        """
+        pending: list[tuple[NameOfReview, list[Place]]] = []
+        for group in self.get_entity_groups():
+            places: list[Place] = []
+            for entity in group.occurrences:
+                review = self.get_entity_review(entity)
+                if review is not None and review.state == EntityReviewState.PENDING:
+                    places.append(place_of(entity))
+            if places:
+                pending.append((group.unique_key, places))
+        return count_names_left_in_clear(
+            pending, [*self.get_validated_entities(), *sent_without_review]
+        )
 
     def get_summary_stats(self) -> dict[str, int]:
         """Get summary statistics of validation decisions.
