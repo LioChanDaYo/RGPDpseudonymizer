@@ -163,14 +163,6 @@ def assert_written_as_today(
     return list(match.groups())
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=(
-        "Story 10.13: no 'Still to review' line in the CLI summary on the unfixed "
-        "code; fixed in Task 2"
-    ),
-)
 @pytest.mark.parametrize(
     "skip_key", ["n", readchar.key.RIGHT, readchar.key.DOWN], ids=["n", "right", "down"]
 )
@@ -289,18 +281,7 @@ class PlannedCellDetector:
 @pytest.mark.parametrize(
     "case",
     [
-        pytest.param(
-            "other_cell",
-            marks=pytest.mark.xfail(
-                strict=True,
-                raises=AssertionError,
-                reason=(
-                    "Story 10.13: no 'Still to review' line for a cell left in clear "
-                    "on the unfixed code; fixed in Task 2"
-                ),
-            ),
-            id="other_cell",
-        ),
+        pytest.param("other_cell", id="other_cell"),
         pytest.param("same_cell", id="same_cell"),
     ],
 )

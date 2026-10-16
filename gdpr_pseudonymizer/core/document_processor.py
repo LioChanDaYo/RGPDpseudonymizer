@@ -369,6 +369,8 @@ class DocumentProcessor:
                         ctx, document_text
                     ),
                     custom_pseudonyms=custom_pseudonyms,
+                    # Names known in the mapping database are written without review.
+                    sent_without_review=known_entities,
                 )
             else:
                 validated_unknown = []

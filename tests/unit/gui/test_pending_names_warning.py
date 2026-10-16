@@ -261,12 +261,6 @@ class _Batch:
         return (self.out / f"doc{index}_pseudonymized.txt").read_text(encoding="utf-8")
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.13: no warning window before the batch writes a name still "
-    "to review on the unfixed code; fixed in Task 2",
-)
 def test_batch_cancel_sends_nothing_and_batch_waits(
     qtbot, main_window, tmp_path: Path, dialogs: _Dialogs
 ) -> None:  # type: ignore[no-untyped-def]
@@ -308,12 +302,6 @@ def test_batch_cancel_sends_nothing_and_batch_waits(
     assert output.count("Quentrelle") == 2
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.13: 'Valider et continuer' sends a name still to review "
-    "without a window on the unfixed code; fixed in Task 2",
-)
 def test_batch_continue_counts_one_name_and_writes_as_today(
     qtbot, main_window, tmp_path: Path, dialogs: _Dialogs
 ) -> None:  # type: ignore[no-untyped-def]
@@ -546,12 +534,6 @@ def _check_doc_p_rows(
     ["partial", "two_pieces", "dedup_dropped"],
     ids=["partial", "two_pieces", "dedup_dropped"],
 )
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.13: the summary window comes first and no warning counts "
-    "a name left in clear on the unfixed code; fixed in Task 2",
-)
 def test_count_rule_cases(
     qtbot, main_window, tmp_path: Path, dialogs: _Dialogs, case: str
 ) -> None:  # type: ignore[no-untyped-def]
@@ -615,12 +597,6 @@ def english(qapp, main_window) -> Iterator[None]:  # type: ignore[no-untyped-def
         switch_language(qapp, "fr")
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.13: 'Finaliser' shows only the summary window with a name "
-    "still to review on the unfixed code; fixed in Task 2",
-)
 def test_single_cancel_writes_nothing_then_continue(
     qtbot,
     main_window,
@@ -660,12 +636,6 @@ def test_single_cancel_writes_nothing_then_continue(
 
 
 @pytest.mark.parametrize("mode", ["batch", "single"], ids=["batch", "single"])
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.13: no English warning window on the unfixed code; "
-    "fixed in Task 2",
-)
 def test_english_texts(
     qtbot,
     main_window,

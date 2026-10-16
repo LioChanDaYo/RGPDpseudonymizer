@@ -24,8 +24,12 @@ from gdpr_pseudonymizer.validation.models import (
     CandidateKey,
     EntityReview,
     EntityReviewState,
+    NameOfReview,
+    Place,
     ValidationSession,
     candidate_key,
+    count_names_left_in_clear,
+    place_of,
 )
 from gdpr_pseudonymizer.validation.workflow import ValidationWorkflow
 
@@ -702,6 +706,24 @@ class GUIValidationState(QObject):
             for r in self._session._entity_reviews
             if r.state == EntityReviewState.PENDING
         )
+
+    def names_left_in_clear(self, sent: list[DetectedEntity]) -> int:
+        """Count pending names left in clear for Story 10.13 AC1.
+
+        Per Lionel's decision of 2026-10-16, a row's places are its variant
+        occurrences in single-document validation, else its own span.
+        ``sent`` is ``get_validated_entities()`` in batch mode and
+        ``expand_validated_entities()`` for a single document.
+        """
+        pending: list[tuple[NameOfReview, list[Place]]] = []
+        for review in self._session._entity_reviews:
+            if review.state != EntityReviewState.PENDING:
+                continue
+            key = self._variant_key(review, review.entity)
+            occurrences = self._variant_occurrences.get(key, [review.entity])
+            name = (review.entity.text, review.entity.entity_type)
+            pending.append((name, [place_of(entity) for entity in occurrences]))
+        return count_names_left_in_clear(pending, sent)
 
     def get_summary(self) -> dict[str, int]:
         """Summary counts: accepted, rejected, modified, added."""
