@@ -62,13 +62,13 @@
 
 ---
 
-### Epic 10: v2.3 — Detection Precision Quick Wins (re-opened for release blockers, Lionel 2026-10-16: Stories 10.12 to 10.16; 10.1 to 10.11 complete 2026-10-15)
+### Epic 10: v2.3 — Detection Precision Quick Wins (re-opened for release blockers, Lionel 2026-10-16: Stories 10.12 to 10.17; 10.1 to 10.11 complete 2026-10-15)
 
 **Goal:** Raise detection precision and benchmark trustworthiness with local, deterministic changes (benchmark repair + held-out set, same-type overlap dedup, ORG role filter, LOCATION noise and name-boundary rules, salutation and org-plus-country handling), without lowering recall. Baseline: F1 58.53% at commit `fceef65` (CI run 37013929807). Sequenced before Epic 9; no release inside the epic.
 
 ---
 
-**Timeline: Epics 0-4: 14 weeks (v1.0 MVP). Epic 5: 6-7 weeks (v1.1). Epic 6: 10-14 weeks (v2.0). Epic 7: 4-6 weeks (v2.1). Epic 8: 5-7 weeks (v2.4). Epic 9: 8-12 weeks (v3.0). Epic 10: 12-17.5 weeks + 10.6 in parallel (v2.3 candidate, runs before Epic 9)**
+**Timeline: Epics 0-4: 14 weeks (v1.0 MVP). Epic 5: 6-7 weeks (v1.1). Epic 6: 10-14 weeks (v2.0). Epic 7: 4-6 weeks (v2.1). Epic 8: 5-7 weeks (v2.4). Epic 9: 8-12 weeks (v3.0). Epic 10: 13-19 weeks + 10.6 in parallel (v2.3 candidate, runs before Epic 9)**
 
 ---
 
@@ -189,9 +189,10 @@
 - [x] A custom pseudonym ("Changer le pseudonyme", CLI [C]) is used in the written file and stored for later documents (10.11, after 10.7, before any release; added by Lionel, 2026-10-14)
 - [ ] The erasure log keeps no erased name: `delete-mapping` records date, row id, type and reason only; names already in the log are removed and the file compacted once on the first 2.3.0 open; every deletion overwrites the deleted data (10.12, release blocker B1, Lionel 2026-10-16)
 - [ ] A warning before writing a document with names still to review, in desktop batch review and single-document validation, and a line in the CLI's final summary, with the texts Lionel approved (10.13, release blocker B2, Lionel 2026-10-16)
-- [ ] Desktop app: one batch at a time, every batch hand-off tied to its run, and finalization works on copies of the review (10.14, Codex release review #1 and #4, Lionel 2026-10-16)
-- [ ] CLI: on Excel and CSV files, a name corrected with [E] or retyped with [T] is replaced in its cell (10.15, Codex release review #2, Lionel 2026-10-16)
+- [ ] Desktop app: opening a document or folder during a batch is refused with a message that leads back to the batch, every batch hand-off is tied to its run, and finalization works on copies of the review (10.14, Codex release review #1 and #4, Lionel 2026-10-16)
+- [ ] CLI: on Excel and CSV files, a name corrected with [E] or retyped with [T] is replaced in its cell, and a name added with [A] is replaced at every place of that name and type (10.15, Codex release review #2 and the PO's finding, Lionel 2026-10-16)
 - [ ] Custom pseudonyms: a name of the review counts whatever its capitals, the generation guard keeps roles and spellings, and the reach follows the current name (10.16, Codex release review #6, #7 and #8, Lionel 2026-10-16)
+- [ ] Desktop app: a name added by hand is replaced at every place of that name and type (10.17, the PO's finding, Lionel 2026-10-16)
 - [x] Final-exam set (10.6): 30 documents frozen and annotated by two models before 10.4 merged, adjudicated by Lionel after 10.4 merged, then committed as plain files (documents' sha256 checked against the freeze record; no encryption, Lionel, 2026-10-09) and scored exactly once at close-out; accuracy output carries 95% bootstrap ranges; Lionel picks the public figure among main, held-out and final exam
 - [x] Every story closed with a cited CI accuracy run (G1), independent QA check (G2), no unapproved recall drop (G3), held-out numbers (G5, 10.2, 10.3a, 10.3b, 10.3c, 10.4)
 - [x] Close-out baseline recorded as Epic 9's starting point, with the `[Overall]`/`[PERSON]`/`[LOCATION]`/`[ORG]`/`[HELD-OUT …]` lines pasted into the QA report (`accuracy-results` artifacts are kept 30 days, `.github/workflows/accuracy.yaml:83`), not just the run ID; no release cut without Lionel's go
