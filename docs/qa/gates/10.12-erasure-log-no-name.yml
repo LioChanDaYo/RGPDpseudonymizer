@@ -1,0 +1,118 @@
+schema: 1
+story: '10.12'
+story_title: 'Erasure Log Without the Erased Name'
+scope: 'PR #104, pre-merge review (Task 7, G2) at head c7749b2 on main 1f35dae. Commits reviewed: e54dd2e and 5878904 (story), tests first e32e0b3, T4''s conditional marker a7694e2, fix ee75ea9, CHANGELOG f96f08f, story cdbb444 and c7749b2 (docs only).'
+gate: PASS
+status_reason: 'Every AC holds on the written output. New CLI erasure entries hold id, type and reason only. After a CLI or desktop deletion, and after the first 2.3.0 open of QA''s own v2.2.0 file and of a main-written file (CLI and desktop, with a held reader and the retry), no plain, escaped or encrypted copy of an erased name is in the file, its -wal, its -shm or the exports. All 45 connections the package opened report secure_delete=1 on a platform whose default is 0. A read-only file stops with the approved Q-D text only when its log holds names. The 10.7 message and the screen output are unchanged, and the texts are byte-identical (DOC-001''s empty line aside). G2 holds: 14 AssertionErrors on their lines at a7694e2, T3 at :285 and T4 passing under a simulated Linux SQLite. 9 of QA''s 10 mutants are caught. Codex wrote every product and test line, two read-only gpt-6.1-sol reviews approve, and CI is green on every leg with the story''s per-leg counts. Three low items only.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-10-16T17:24:41Z'
+
+waiver: { active: false }
+
+merge_blockers: []
+
+merge_notes:
+  - 'The merge waits for Lionel (Task 7.5). QA never merges.'
+  - 'This gate commit (docs only) starts its own CI run on the PR; the orchestrator checks it green before the merge.'
+  - 'After the merge, the performance.yaml run that the data/ change fires on main must be green (CI Facts, NFR1); QA did not run it.'
+
+top_issues:
+  - id: 'DOC-001'
+    severity: low
+    finding: 'Q-C2 and Q-C3 are in both CLI references with one empty line added before the closing sentence ("Delete those exports ...", « Supprimez vous-même ... »), so that Markdown renders it outside the last bullet. That is the only difference from the asked text (probes/texts_1012.py). The orchestrator''s formatting ruling is recorded in the Dev Agent Record and the PR body. Notes for the PO and PM says the SM records such a change, and AC13 says byte for byte; Decisions Recorded and Approved Texts do not mention it.'
+    suggested_action: 'SM: record the ruling (no word changed) in Decisions Recorded / Approved Texts at the next story edit. Docs only; no code or doc text change.'
+    refs: ['docs/CLI-REFERENCE.md', 'docs/CLI-REFERENCE.fr.md', 'docs/stories/10.12.erasure-log-no-name.story.md']
+    suggested_owner: sm
+  - id: 'TEST-001'
+    severity: low
+    finding: 'No test pins PRAGMA secure_delete on the module''s own sqlite3 connections (_connect: the 10.7 conversion, the removal, the compaction). Mutant M2 (that pragma removed) passes the 17 new tests and the four data-layer suites. QA found no scenario where it shows on disk: the compaction rewrites the file, and the removal alone left no copy either. QA''s connection probe pins the property instead (33 _connect connections at 1 on the head, 0 on M2). On the Ubuntu legs T3 and T4 cannot catch M1 either, because the platform default already overwrites; only the Windows and macOS legs pin AC2.'
+    suggested_action: 'Backlog: one unit test reading PRAGMA secure_delete on a _connect connection and on an engine connection.'
+    refs: ['gdpr_pseudonymizer/data/database.py:179-207', 'tests/unit/test_erasure_log_no_name.py']
+    suggested_owner: dev
+  - id: 'RISK-001'
+    severity: low
+    finding: 'On an SQLite without the JSON functions, the first count in _clean_erasure_log raises while named is still -1. Every uncleaned file then stops with the Q-D text, even one whose log holds no name, and the likely cause given is the generic one. QA found no supported platform without them: SQLite builds them in by default since 3.38.0, the Windows and macOS Pythons bundle 3.45.1 and 3.49.1, and Ubuntu 22.04''s 3.37.2 is built with JSON1 (CI Facts). Code reading, not measured on such a platform.'
+    suggested_action: 'Backlog: name the cause (no JSON support) in the message, or treat a missing function like PO F1.'
+    refs: ['gdpr_pseudonymizer/data/database.py:688-779']
+    suggested_owner: dev
+
+quality_score: 100
+expires: '2026-10-30T17:24:41Z'
+
+evidence:
+  tests_reviewed: 17
+  risks_identified: 3
+  environment: 'Windows, the main Poetry environment (Python 3.11.9, SQLite 3.45.1, secure_delete default 0), through .bat runners with cmd.exe; PYTHONPATH = the tree under test; QT_QPA_PLATFORM=offscreen; USERPROFILE, HOME, APPDATA and LOCALAPPDATA = r1012/qa/home. Desktop probes patch gui.config._config_path to a scratch file. C:\Users\devea\.gdpr-pseudo.yaml was never opened (mtime still 2026-10-14 13:27). QA''s worktree of a7694e2 holds no tests/test_corpus/; held_out/ and final_exam/ were never opened, listed or grepped.'
+  g2:
+    runxfail_windows: 'r1012/qa/wt-a7694e2 (git diff 1f35dae a7694e2 -- gdpr_pseudonymizer/ is empty; both fixtures match the Test Plan''s sha256). With --runxfail: 14 failed, 3 passed. Each failure is an AssertionError on its expected-failure line, after the preconditions: T1 x2 :220 (extra key deleted_entity_name); T2[json] :253 {utf8: 1}; T2[csv] :254 {escaped: 1}; T3 x2 :284 {cipher_full: 3, cipher_first: 2, cipher_last: 2}; T5 x2 :359; T6 :431; T8 :470 (no due row); T9 x2 :520 (the open did not stop); T10 :609; T4 :162 at a7694e2 (:150 at e32e0b3). Guards T7, T11, T12 pass.'
+    with_markers: '3 passed, 14 xfailed, in one process and under -n 4 --dist loadscope.'
+    linux_simulated: 'QA''s plugin r1012/qa/sim_linux/qa_sim_linux_sqlite.py turns secure_delete on for every sqlite3/dbapi2 connection (WSL Ubuntu SQLite 3.45.1: compile option SECURE_DELETE, default 1). With --runxfail: 13 failed, 4 passed; T3 x2 at :285 with AssertionError {''escaped'': 1}, accepted per story v1.2 Task 7.2; T4 passes. With the markers: 4 passed, 13 xfailed. Not run on a real Linux machine; CI''s Ubuntu legs agree.'
+    ac9_markers: 'git diff e32e0b3 ee75ea9 on the two new files: the 14 xfail decorators and the GUI file''s import pytest removed, nothing else. a7694e2 adds only T4''s condition and helper, which the fix removes again. No assertion changed.'
+  mutants:
+    harness: 'r1012/qa/mut: copies of the head, one change each. Each runs the 17 new tests plus test_database.py, test_database_conversion.py, test_database_conversion_concurrency.py and test_database_init_concurrency.py. The unmutated copy gives 54 passed, 2 skipped.'
+    M1_engine_no_secure_delete: 'caught: T3 x2, T4'
+    M2_own_conn_no_secure_delete: 'NOT caught (TEST-001); QA''s probe sd_probe.py catches it (33 connections at 0)'
+    M3_no_compaction: 'caught: T5 x2, T6, T8, test_open_converts_pre_10_7_file'
+    M4_no_user_version_mark: 'caught: T7'
+    M5_F1_off: 'caught: T12'
+    M6_ignore_busy_checkpoint: 'caught: T8'
+    M7_no_json_valid_guard: 'caught: T10'
+    M8_init_no_user_version: 'caught: T11'
+    M9_due_row_other_key: 'caught: T5 x2, T6, T8, test_open_converts_pre_10_7_file'
+    M10_swallow_failure: 'caught: T9 x2'
+  end_to_end:
+    harness: 'r1012/qa/probes/e2e_1012.py (71 checks, 70 pass; the failing one is QA''s over-strict listing in e3, see below). The CLI is the real python -m gdpr_pseudonymizer.cli.main in its own process. The desktop is the real DatabaseScreen offscreen (_open_database, _delete_selected, thread-pool workers). Bytes checked: the file, its -wal, its -shm and the exports. Forms searched: UTF-8, \u-escaped, and the ciphertexts of full, first and last name. Invented names only.'
+    a_cli: 'New DB; delete by name (confirmation typed), then by --id (accented name), then export JSON and CSV: no form in the file, -wal, -shm or either export. Entry keys exactly id/type/reason, reason as typed, timestamp set. user_version 1, no due row. Exit codes 0/0/1 as on main. Screen output of all three runs identical to main 1f35dae''s (ids and timestamps normalised). Control: main leaves the names in the log and 3/2/2 ciphertexts.'
+    b_desktop: 'The screen deletes one row with no error; no form left. The desktop ERASURE entry is identical to main''s (count 1, user_modifications NULL). Control: main leaves 3/2/2.'
+    c_v220: 'QA''s own v2.2.0 file (git archive v2.2.0: CLI by name, CLI by --id of an accented name, one desktop deletion; schema 1.0.0, user_version 0, the names in the log, every person''s ciphertexts in the file). Opened once by the branch''s CLI, and a copy once from the desktop screen: no form of the 3 persons; every entry keeps every other field; metadata unchanged apart from schema_version 1.1.0; no due row; user_version 1; the live row reads back; exports clean. The second open changes nothing (sha256). Log events: database_converted, erasure_log_cleaned (removed 2, skipped 0), erasure_log_compacted once; no entity text.'
+    d_reader: 'A reader in another process: the first open succeeds and leaves the due row, user_version 1, and no name in any entry; the -wal (the compacted copy) holds no form. After the reader closes, the row is still due; the second open clears it and no form is left.'
+    e_read_only: 'e1, main-written schema-1.1.0 file with names, read-only: stats exits 2 under "Unexpected Error" with the approved Q-D text (%1 "the database file or its folder is read-only", %2 "OperationalError: attempt to write a readonly database"), no name; batch shows it under "Database Conversion Failed"; the desktop shows its generic message; the file is byte-identical; made writable, the next open cleans it. e2, the same with no name in its log: opens from the CLI and the desktop, file byte-identical and unmarked (PO F1). e3, read-only v2.2.0: stops at the 10.7 conversion with its own text, output identical to main''s, file byte-identical. The 0-byte -wal and the -shm left beside it are SQLite''s side files for a WAL file opened read-only; main leaves the same (probes/e3_sidefiles.py).'
+    f_help: 'delete-mapping --help with GDPR_PSEUDO_LANG=en and fr, and with --lang en and fr: the approved line in each language; the old line is gone.'
+    connections: 'probes/sd_probe.py wraps sqlite3.connect and dbapi2.connect. It covers init_database, the real CLI app in-process (delete by name and by --id, export x2, stats), the desktop worker, an old file opened twice, and a file opened with a held reader. 45 connections from package code, all secure_delete=1 (33 _connect, 11 open_database, 1 init_database). Controls: M1 12 at 0, M2 33 at 0. The removal alone, without the compaction, leaves no form.'
+  texts: 'probes/texts_1012.py cuts Q-A and Q-D from Lionel''s decision log and Q-B1 to Q-C3 from the question strings, then checks them at c7749b2. Q-B1 and Q-B2: once each. Q-C2 and Q-C3: once each, with the one empty line (DOC-001). Option rows: Q-A. The old passages and both encryption claims are gone. Q-A English in delete_mapping.py and cli/main.py; the cli.po msgid is English and the msgstr French, not fuzzy; cli.mo translates it, and only that entry and the header differ from main. The Q-D template equals the decision log''s text; %1 uses the 10.7 cause words, %2 is "Type: error" (6 error kinds). The 10.7 message is byte-identical to main''s (6 error kinds, plus the e3 CLI output).'
+  changelog: 'The story''s entry byte for byte, once, under [Unreleased] ### Fixed after 10.11''s bullet; line 40 corrected. The diff is the entry, one empty line and the line-40 replacement. Every claim matches QA''s measures (v1.0.0 has no deleted_entity_name, v1.1.0 has it). The -wal growth is approximate: 131,872 B for a 61,440 B v2.2.0 file in (d), conversion and compaction in one open; the PO measured about 1x on a 14.9 MB schema-1.1.0 file.'
+  consumer_trace: 'Re-checked at the head: #1, #5, #6 (a, c); #10 (b); #11 (d); #14 (sd_probe: the conversion''s _connect at 1); #17 (log_events.py); #25 (e1, e2). All as "After the fix".'
+  codex_rule:
+    sessions: 'All 12 sessions of the Dev Agent Record exist (~/.codex/sessions/2026/10/16/rollout-*-<id>.jsonl). Writers A, B, C, D1, D2, E1, E2, F, G, H: originator codex_exec, model gpt-6.1-sol, effort high, sandbox workspace-write, cwd this worktree; D2 has no task_complete (the recorded 300 s cap). R1 01a1454d-c31b-75a0-9c6e-5967b0c0fe7a and R2 01a1454e-a9d0-7b83-a2d6-2888c9ffafd1: sandbox read-only, gpt-6.1-sol, effort high, final message ending "VERDICT: APPROVE"; they reviewed f96f08f, whose code equals the head''s. The story splice (cdbb444, docs only) is session 01a1459e-eea4-7083-8197-98057443898b, named in its commit message.'
+    authorship: 'codex/authorship_1012.py: 887 added non-empty lines in code, tests, catalogue, docs and CHANGELOG. 836 are in the writers'' own apply_patch texts and commands; 34 only in the story, copied by Codex scripts (approved texts, CHANGELOG entry; D1 builds the Q-D literal from the story). The other 17 are black''s re-wrapping of Codex lines and the wrapper lines around the programmatic inserts (help=, msgid/msgstr, option rows, CHANGELOG line 40). No line from elsewhere.'
+    po_f2: 'No Codex command read r1012/sm or tests/test_corpus/; the mentions are the prompts'' prohibitions and the story text. Line similarity with the SM scaffolding: database.py vs proto_1012.diff 0.32, CLI tests vs sketch 0.23, GUI test 0.16; the shared runs are names and SQL from the Fix Design, and imports. No SM prototype code committed.'
+    pr: 'The PR body holds the PO F2 sentence word for word. No skip-CI marker in the commits origin/main..c7749b2, the PR title or the PR body.'
+  ci:
+    e32e0b3: '38916922292: windows "2499 passed, 3 skipped, 14 xfailed"; macos "2648 passed, 14 xfailed"; ubuntu 3.10 and 3.11 "1 failed, 2648 passed, 13 xfailed" (T4 [XPASS(strict)]).'
+    a7694e2: '38920221540: windows "2499 passed, 3 skipped, 14 xfailed"; macos "2648 passed, 14 xfailed"; ubuntu 3.10 and 3.11 "2649 passed, 13 xfailed" (T4 PASSED).'
+    ee75ea9: '38923189849: windows "2513 passed, 3 skipped"; macos, ubuntu 3.10, ubuntu 3.11 "2662 passed".'
+    f96f08f: '38923243879: the same counts.'
+    c7749b2: '38935730372 (head): windows "2513 passed, 3 skipped"; macos, ubuntu 3.10, ubuntu 3.11 "2662 passed"; each leg shows the 17 new tests PASSED (T12 not skipped). Lint job and Code Quality 38935730535 success (ruff; black 312 unchanged; mypy 105 files).'
+    notes: 'Read from the job logs. The xfailed lists hold exactly the 14 (13) new tests. The Windows skips are the 3 existing ones. The checkouts are each SHA merged into 1f35dae. No reruns.'
+  g6_local: 'Head: ruff 0; black 312 unchanged; mypy no issues in 105 files; pytest -m "not slow" -n 4 --dist loadscope: 2652 passed, 10 skipped; leakage guards 15 passed; worktree clean after every run.'
+  scope_check: 'git diff --stat origin/main...c7749b2: exactly the 18 files of File Locations. No nlp/, resources/, utils/, __init__.py, core/, gui/, tests/accuracy/, tests/test_corpus/, .github/, pyproject.toml, poetry.lock or allowlists. G1, G3, G5 N/A; G4 holds.'
+  existing_tests: 'Exactly the three edits of Dev Notes "Existing Tests" (the comment, the assert, 12 spaces), in ee75ea9.'
+  not_checked: 'A real Linux machine (simulated; CI''s Ubuntu legs); macOS locally (CI only); a failing VACUUM (code read only); a large v2.2.0 file''s peak -wal; the post-merge performance run; stale -wal frames when a process is killed between an insert and a delete (outside AC5''s scope).'
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+    ac_gaps: []
+    notes: 'AC1 T1, T2 + probe a. AC2 T3, T4 + probes a, b and connections (M2 only through QA''s probe, TEST-001). AC3 T5-T12 + probes c, d, e. AC4 and AC13 texts_1012.py + probe f. AC5, AC9, AC14 G2 + CI table. AC6 changelog. AC7 codex_rule. AC8 scope_check + CI. AC10 probes a, b, e3 against main + the existing-test edits. AC11 consumer_trace. AC12 the strings and the leakage guards.'
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'The erased name is gone from the log, the exports and the file bytes on every path QA ran. Every connection deletes with secure_delete. No log line carries entity text. A read-only file with names stops without opening. Residuals as documented: exports already written, copies never opened, --reason text, file-system copies, live -wal frames.'
+  performance:
+    status: PASS
+    notes: 'An already-cleaned file costs two more connections and two reads per open (PO F5). An old file is converted, cleaned and compacted once (about 1 s CLI open with a held reader, start included). Large-file timing and the post-merge performance run not measured by QA.'
+  reliability:
+    status: PASS
+    notes: 'All or nothing; the re-check inside BEGIN IMMEDIATE; a failed compaction never stops the open and is retried; a held reader leaves the row due; the 10.7 two-process test passes. Tests deterministic (no sleep, no random draw).'
+  maintainability:
+    status: PASS
+    notes: 'One helper per connection kind; shared _likely_cause; constants named; docstrings updated; mypy strict clean.'
+
+recommendations:
+  immediate: []
+  future:
+    - action: 'Record the Q-C2/Q-C3 empty-line ruling in Decisions Recorded / Approved Texts (DOC-001).'
+      refs: ['docs/stories/10.12.erasure-log-no-name.story.md']
+    - action: 'Unit test: PRAGMA secure_delete on _connect and engine connections (TEST-001).'
+      refs: ['gdpr_pseudonymizer/data/database.py']
+    - action: 'A clear cause, or the F1 path, when the JSON functions are missing (RISK-001).'
+      refs: ['gdpr_pseudonymizer/data/database.py']

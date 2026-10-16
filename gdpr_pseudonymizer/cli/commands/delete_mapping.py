@@ -49,7 +49,10 @@ def delete_mapping_command(
     ),
     entity_id: Optional[str] = typer.Option(None, "--id", help="Entity UUID to delete"),
     reason: Optional[str] = typer.Option(
-        None, "--reason", "-r", help="Reason for deletion (GDPR request reference)"
+        None,
+        "--reason",
+        "-r",
+        help="Request reference, kept in the audit log (e.g. GDPR-REQ-2026-042); never the person's name",
     ),
     force: bool = typer.Option(
         False, "--force/--no-force", "-f", help="Skip confirmation prompt"
@@ -176,8 +179,8 @@ def delete_mapping_command(
                     operation_type="ERASURE",
                     files_processed=[],
                     user_modifications={
+                        # Story 10.12: the unencrypted operations table keeps no name.
                         "deleted_entity_id": deleted.id,
-                        "deleted_entity_name": deleted.full_name,
                         "deleted_entity_type": deleted.entity_type,
                         "reason": reason,
                     },

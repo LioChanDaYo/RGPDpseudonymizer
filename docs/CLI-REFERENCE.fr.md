@@ -487,7 +487,7 @@ gdpr-pseudo delete-mapping [NOM_ENTITE] [OPTIONS]
 | `--db CHEMIN` | | `mappings.db` | Chemin de la base de données |
 | `--passphrase TEXTE` | `-p` | (saisie interactive) | Mot de passe de la base de données |
 | `--id TEXTE` | | | UUID de l'entité à supprimer (alternative au nom) |
-| `--reason TEXTE` | `-r` | | Motif de suppression (référence de la demande RGPD) |
+| `--reason TEXTE` | `-r` | | Référence de la demande, conservée dans le journal d'audit (ex. : GDPR-REQ-2026-042) ; jamais le nom de la personne concernée |
 | `--force` | `-f` | | Ne pas demander de confirmation |
 
 **Exemples :**
@@ -510,9 +510,11 @@ gdpr-pseudo delete-mapping "Marie Dupont" --db project.db
 
 **Traçabilité :**
 Chaque suppression crée une entrée `ERASURE` dans la table des opérations contenant :
-- Le nom, le type et l'identifiant de l'entité
+- Le type et l'identifiant de la ligne supprimée
 - L'horodatage de la suppression
-- Le motif éventuel (option `--reason`)
+- Le motif éventuel (option `--reason`) : la référence de la demande, jamais le nom de la personne
+
+L'entrée ne conserve pas le nom de la personne (depuis la version 2.3.0).
 
 ---
 
@@ -623,7 +625,7 @@ L'article 17 du RGPD confère aux personnes concernées le droit de demander la 
 
 2. **Suppression = anonymisation :** lorsqu'une correspondance est supprimée via `delete-mapping`, le lien entre le pseudonyme et l'identité réelle est définitivement détruit. Les documents pseudonymisés ne sont pas modifiés, mais ils deviennent **anonymes** : le pseudonyme « Leia Organa » ne peut plus être relié à « Marie Dupont ». Les données anonymes sortent du champ d'application du RGPD.
 
-3. **Traçabilité :** chaque suppression crée une entrée `ERASURE` dans le journal d'audit, qui enregistre quelle personne a été supprimée, à quelle date et pour quel motif. Cette entrée constitue la preuve que la demande d'effacement a bien été exécutée.
+3. **Traçabilité :** chaque suppression crée une entrée `ERASURE` dans le journal d'audit, qui enregistre la date, le type et l'identifiant de la ligne supprimée, et le motif donné avec `--reason`. Elle n'enregistre pas le nom de la personne : l'entrée prouve qu'une suppression a eu lieu, pas qui elle concernait.
 
 **Processus d'effacement :**
 
@@ -648,17 +650,21 @@ gdpr-pseudo export erasure_audit.json --type ERASURE
 - Les autres entités de la base **ne sont pas affectées** par la suppression
 - L'entrée du journal d'audit est conservée même après la suppression, et sert de preuve de conformité
 
-**Conservation de données personnelles dans le journal d'audit :**
+**Ce que conserve le journal d'audit après un effacement :**
 
-L'entrée `ERASURE` du journal d'audit conserve volontairement le **nom**, le **type** et l'**identifiant interne** de l'entité supprimée. C'est indispensable pour prouver qu'une demande d'effacement précise a bien été exécutée : sans cette information, il serait impossible de vérifier la conformité avec la demande RGPD d'origine.
+L'entrée `ERASURE` conserve la date, le type et l'identifiant interne de la ligne supprimée, et le motif donné avec `--reason`. Elle ne conserve pas le nom supprimé. La preuve qu'une demande a été traitée est la date, l'identifiant de la ligne, le type et la référence de votre demande saisie avec `--reason`. Si vous devez conserver l'identité de la personne, conservez-la dans votre propre registre des demandes, en dehors de cet outil.
 
-Cette conservation est justifiée au titre de l'article 17(3)(e) du RGPD (constatation, exercice ou défense de droits en justice) et de l'article 5(2) (principe de responsabilité : le responsable de traitement doit pouvoir démontrer sa conformité). Le journal d'audit constitue la preuve que le droit à l'effacement de la personne concernée a été exercé.
+Le journal d'audit n'est pas chiffré : ne saisissez jamais le nom de la personne dans `--reason`.
 
-Les données personnelles conservées dans le journal d'audit sont :
-- Protégées par le même chiffrement AES-256-SIV que l'ensemble de la base de données
-- Accessibles uniquement avec le mot de passe de la base
-- Minimales (nom et type uniquement, sans adresse, coordonnées ni autres données personnelles)
-- Nécessaires à la finalité légitime de preuve de conformité
+Depuis la version 2.3.0, chaque suppression écrase aussi par des zéros les données supprimées dans le fichier de la base. La première fois que la version 2.3.0 ouvre une base, elle retire les noms que les versions précédentes avaient écrits dans le journal d'audit, puis compacte le fichier une fois (le réécrit sans son espace inutilisé).
+
+Hors de portée de l'outil :
+- les exports du journal d'audit faits avec `export` avant le retrait des noms ;
+- les exports de correspondances (`list-mappings --export`, l'export CSV de l'application de bureau), qui contiennent forcément les noms ;
+- les copies de la base que la version 2.3.0 n'a jamais ouvertes ;
+- les noms saisis dans `--reason`, conservés tels quels.
+
+Supprimez vous-même ces exports et ces copies s'ils ne doivent pas conserver les noms.
 
 ---
 

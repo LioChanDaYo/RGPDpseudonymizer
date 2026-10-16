@@ -487,7 +487,7 @@ gdpr-pseudo delete-mapping [ENTITY_NAME] [OPTIONS]
 | `--db PATH` | | `mappings.db` | Database file path |
 | `--passphrase TEXT` | `-p` | (prompt) | Database passphrase |
 | `--id TEXT` | | | Entity UUID to delete (alternative to name) |
-| `--reason TEXT` | `-r` | | Reason for deletion (GDPR request reference) |
+| `--reason TEXT` | `-r` | | Request reference, kept in the audit log (e.g. GDPR-REQ-2026-042); never the person's name |
 | `--force` | `-f` | | Skip confirmation prompt |
 
 **Examples:**
@@ -510,9 +510,11 @@ gdpr-pseudo delete-mapping "Marie Dupont" --db project.db
 
 **Audit Trail:**
 Every deletion creates an `ERASURE` entry in the operations table with:
-- Entity name, type, and ID
+- The deleted row's type and ID
 - Deletion timestamp
-- Optional reason text (from `--reason` flag)
+- Optional reason text (from `--reason` flag): your request reference, never the person's name
+
+The entry does not keep the deleted name (since version 2.3.0).
 
 ---
 
@@ -623,7 +625,7 @@ GDPR Article 17 grants data subjects the right to request deletion of their pers
 
 2. **Deletion = Anonymization:** When a mapping is deleted via `delete-mapping`, the link between the pseudonym and the real identity is permanently destroyed. The pseudonymized documents remain unchanged, but they are now **anonymous** — the pseudonym "Leia Organa" can no longer be linked to "Marie Dupont". Anonymous data falls outside GDPR scope.
 
-3. **Audit Trail:** Every deletion creates an `ERASURE` audit log entry recording who was deleted, when, and why. This provides the compliance evidence that the erasure request was fulfilled.
+3. **Audit Trail:** Every deletion creates an `ERASURE` audit log entry recording when it happened, the deleted row's type and ID, and the reason given with `--reason`. It does not record the person's name: the entry proves that a deletion happened, not whom it concerned.
 
 **Erasure Workflow:**
 
@@ -648,17 +650,21 @@ gdpr-pseudo export erasure_audit.json --type ERASURE
 - Other entities in the database are **unaffected** by the deletion
 - The audit log entry persists even after deletion, providing compliance evidence
 
-**PII Retention in Audit Logs:**
+**What the Audit Log Keeps After an Erasure:**
 
-The `ERASURE` audit log entry intentionally retains the deleted entity's **name**, **type**, and **internal ID**. This is necessary to prove that a specific erasure request was fulfilled — without this information, there would be no way to verify compliance with the original GDPR request.
+The `ERASURE` entry keeps the date, the deleted row's type and internal ID, and the reason given with `--reason`. It does not keep the deleted name. Proof that a request was handled is the date, the row ID, the type and your own request reference in `--reason`. If you must keep the person's identity, keep it in your own request register, outside this tool.
 
-This retention is justified under GDPR Article 17(3)(e) (establishment, exercise, or defence of legal claims) and Article 5(2) (accountability principle — the controller must be able to demonstrate compliance). The audit log serves as evidence that the data subject's right to erasure was exercised.
+The audit log is not encrypted: never type the person's name in `--reason`.
 
-The retained PII in audit logs is:
-- Protected by the same AES-256-SIV encryption as all other database content
-- Accessible only with the database passphrase
-- Minimal (name and type only — no addresses, contact details, or other personal data)
-- Necessary for the legitimate purpose of compliance evidence
+Since version 2.3.0, every deletion also overwrites the deleted data with zeros in the database file. The first time version 2.3.0 opens a database, it removes the names that earlier versions wrote into the audit log, then compacts the file once (rewrites it without its unused space).
+
+Out of reach of the tool:
+- audit log exports made with `export` before the names were removed;
+- mapping exports (`list-mappings --export`, the desktop app's CSV export), which contain the names by design;
+- copies of the database that version 2.3.0 has never opened;
+- names typed in `--reason`, which are kept as typed.
+
+Delete those exports and copies yourself if they must not keep the names.
 
 ---
 
