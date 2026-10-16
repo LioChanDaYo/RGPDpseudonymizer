@@ -68,7 +68,7 @@
 
 ---
 
-**Timeline: Epics 0-4: 14 weeks (v1.0 MVP). Epic 5: 6-7 weeks (v1.1). Epic 6: 10-14 weeks (v2.0). Epic 7: 4-6 weeks (v2.1). Epic 8: 5-7 weeks (v2.4). Epic 9: 8-12 weeks (v3.0). Epic 10: 13.5-19.5 weeks + 10.6 in parallel (v2.3 candidate, runs before Epic 9)**
+**Timeline: Epics 0-4: 14 weeks (v1.0 MVP). Epic 5: 6-7 weeks (v1.1). Epic 6: 10-14 weeks (v2.0). Epic 7: 4-6 weeks (v2.1). Epic 8: 5-7 weeks (v2.4). Epic 9: 8-12 weeks (v3.0). Epic 10: 13.5-20 weeks + 10.6 in parallel (v2.3 candidate, runs before Epic 9)**
 
 ---
 
@@ -193,7 +193,7 @@
 - [ ] CLI: on Excel and CSV files, a name corrected with [E] or retyped with [T] is replaced in its cell, and a name added with [A] is replaced at every place of that name and type (10.15, Codex release review #2 and the PO's finding, Lionel 2026-10-16)
 - [ ] Custom pseudonyms: a name of the review counts whatever its capitals, the generation guard keeps roles and spellings, and the reach follows the current name (10.16, Codex release review #6, #7 and #8, Lionel 2026-10-16)
 - [ ] Desktop app: a name added by hand is replaced at every place of that name and type (10.17, the PO's finding, Lionel 2026-10-16)
-- [ ] CLI: when nothing is left to review, `process` and `batch --workers 1` ask whether to add a missed name before writing the file, and the false "All entities have existing mappings" line is gone (10.18, the 10.15 PO's finding, Lionel 2026-10-16)
+- [ ] CLI: when nothing is left to review, `process` and `batch --workers 1` ask, for each such file, whether to add a missed name before writing it; the false "All entities have existing mappings" line is gone; with no answer, that document stops with a clear line and nothing is written (10.18, the 10.15 PO's finding, Lionel 2026-10-16)
 - [x] Final-exam set (10.6): 30 documents frozen and annotated by two models before 10.4 merged, adjudicated by Lionel after 10.4 merged, then committed as plain files (documents' sha256 checked against the freeze record; no encryption, Lionel, 2026-10-09) and scored exactly once at close-out; accuracy output carries 95% bootstrap ranges; Lionel picks the public figure among main, held-out and final exam
 - [x] Every story closed with a cited CI accuracy run (G1), independent QA check (G2), no unapproved recall drop (G3), held-out numbers (G5, 10.2, 10.3a, 10.3b, 10.3c, 10.4)
 - [x] Close-out baseline recorded as Epic 9's starting point, with the `[Overall]`/`[PERSON]`/`[LOCATION]`/`[ORG]`/`[HELD-OUT …]` lines pasted into the QA report (`accuracy-results` artifacts are kept 30 days, `.github/workflows/accuracy.yaml:83`), not just the run ID; no release cut without Lionel's go
