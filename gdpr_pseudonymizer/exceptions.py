@@ -98,12 +98,13 @@ class CorruptedDatabaseError(DatabaseError):
 
 
 class DatabaseConversionError(DatabaseError):
-    """Raised when a database made before Story 10.7 cannot be converted.
+    """Raised when database conversion or erasure-log cleaning fails.
 
     The conversion to one row per (name, type) runs once, on open, in one
     transaction: when it fails, the file is left unchanged. Also raised when
     the file's schema version and its table definition disagree, so the
-    format is not recognised.
+    format is not recognised. Also covers a failed removal of erased names
+    from the audit log (Story 10.12); the log is left unchanged.
     """
 
     pass

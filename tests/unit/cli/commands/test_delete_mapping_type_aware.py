@@ -132,7 +132,8 @@ class TestDeleteByName:
         )
         assert [e["deleted_entity_type"] for e in erasures] == ["LOCATION", "ORG"]
         for erasure in erasures:
-            assert erasure["deleted_entity_name"] == "Zorbaville"
+            # Story 10.12 (AC1): the entry keeps the id, type and reason, not the name
+            assert "deleted_entity_name" not in erasure
             assert erasure["entity_count"] == 1
             assert erasure["success"] is True
             assert erasure["deleted_entity_id"]

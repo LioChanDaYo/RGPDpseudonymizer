@@ -12,7 +12,6 @@ from contextlib import closing
 from pathlib import Path
 from typing import Any
 
-import pytest
 from pytestqt.qtbot import QtBot
 
 from gdpr_pseudonymizer.data.database import init_database, open_database
@@ -23,15 +22,6 @@ from gdpr_pseudonymizer.data.repositories.mapping_repository import (
 )
 from gdpr_pseudonymizer.gui.workers.database_worker import DatabaseWorker
 
-
-def _platform_sqlite_leaves_deleted_data_in_place() -> bool:
-    with closing(sqlite3.connect(":memory:")) as connection:
-        return connection.execute("PRAGMA secure_delete").fetchone()[0] == 0
-
-
-PLATFORM_SQLITE_LEAVES_DELETED_DATA_IN_PLACE = (
-    _platform_sqlite_leaves_deleted_data_in_place()
-)
 PASSPHRASE = "zorbalia_desktop_pass_123!"
 P2_FULL_NAME = "Quentrelle Zébrandine"
 P2_FIRST_NAME = "Quentrelle"
@@ -120,17 +110,6 @@ def _read_erasure_rows(db_path: Path) -> list[dict[str, Any]]:
         return [dict(row) for row in rows]
 
 
-@pytest.mark.xfail(
-    PLATFORM_SQLITE_LEAVES_DELETED_DATA_IN_PLACE,
-    strict=True,
-    raises=AssertionError,
-    reason=(
-        "Story 10.12: reproduces desktop erased ciphertext in database bytes on "
-        "the unfixed code where the platform SQLite leaves deleted data in place "
-        "(Debian and Ubuntu build SQLite with SECURE_DELETE on, so the unfixed "
-        "desktop deletion already overwrites deleted data there); fixed in Task 2"
-    ),
-)
 def test_desktop_deletion_leaves_no_copy(tmp_path: Path, qtbot: QtBot) -> None:
     db_path = tmp_path / "mappings.db"
     p2_id = _seed(db_path)

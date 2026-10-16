@@ -193,14 +193,6 @@ def _delete_p2(
 
 
 @pytest.mark.parametrize("delete_by", ["by_name", "by_id"], ids=["by_name", "by_id"])
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=(
-        "Story 10.12: reproduces deleted_entity_name in erasure entry on the "
-        "unfixed code; fixed in Task 2"
-    ),
-)
 def test_new_erasure_entry_has_no_name(tmp_path: Path, delete_by: str) -> None:
     db_path = tmp_path / "mappings.db"
     stored = _seed(db_path)
@@ -226,14 +218,6 @@ def test_new_erasure_entry_has_no_name(tmp_path: Path, delete_by: str) -> None:
 
 
 @pytest.mark.parametrize("export_format", ["json", "csv"], ids=["json", "csv"])
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=(
-        "Story 10.12: reproduces erased name in audit export on the unfixed code; "
-        "fixed in Task 2"
-    ),
-)
 def test_export_holds_no_name(tmp_path: Path, export_format: str) -> None:
     db_path = tmp_path / "mappings.db"
     stored = _seed(db_path)
@@ -255,14 +239,6 @@ def test_export_holds_no_name(tmp_path: Path, export_format: str) -> None:
 
 
 @pytest.mark.parametrize("delete_by", ["by_name", "by_id"], ids=["by_name", "by_id"])
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=(
-        "Story 10.12: reproduces erased ciphertext in database bytes on the "
-        "unfixed code; fixed in Task 2"
-    ),
-)
 def test_deletion_leaves_no_copy_in_the_file(tmp_path: Path, delete_by: str) -> None:
     db_path = tmp_path / "mappings.db"
     stored = _seed(db_path)
@@ -336,14 +312,6 @@ def _assert_fixture_has_erased_names_and_copies(
     [(FIXTURE_V2_2_0, "1.0.0"), (FIXTURE_MAIN_1F35DAE, "1.1.0")],
     ids=["v2_2_0", "main_1f35dae"],
 )
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=(
-        "Story 10.12: reproduces erased names in old database bytes on the "
-        "unfixed code; fixed in Task 2"
-    ),
-)
 def test_old_file_first_open_removes_every_copy(
     tmp_path: Path, fixture_path: Path, schema_version: str
 ) -> None:
@@ -396,14 +364,6 @@ def test_old_file_first_open_removes_every_copy(
             )
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=(
-        "Story 10.12: reproduces erased ciphertext without log names on the "
-        "unfixed code; fixed in Task 2"
-    ),
-)
 def test_first_open_compacts_even_without_names(tmp_path: Path) -> None:
     db_path = _copy_fixture(FIXTURE_MAIN_1F35DAE, tmp_path)
     forms = _assert_fixture_has_erased_names_and_copies(db_path, "1.1.0")
@@ -446,14 +406,6 @@ def test_second_open_changes_nothing(tmp_path: Path) -> None:
     assert sorted(path.name for path in tmp_path.iterdir()) == listing_before
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=(
-        "Story 10.12: reproduces missing compaction due marker on the unfixed "
-        "code; fixed in Task 2"
-    ),
-)
 def test_reader_held_open_leaves_compaction_due_then_next_open_completes(
     tmp_path: Path,
 ) -> None:
@@ -489,14 +441,6 @@ def test_reader_held_open_leaves_compaction_due_then_next_open_completes(
     "fixture_path",
     [FIXTURE_V2_2_0, FIXTURE_MAIN_1F35DAE],
     ids=["v2_2_0", "main_1f35dae"],
-)
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=(
-        "Story 10.12: reproduces open after failed name removal on the unfixed "
-        "code; fixed in Task 2"
-    ),
 )
 def test_failed_removal_stops_the_open(tmp_path: Path, fixture_path: Path) -> None:
     db_path = _copy_fixture(fixture_path, tmp_path)
@@ -553,14 +497,6 @@ class _DatabaseLogRecorder:
         self.events.append(("exception", event, kwargs))
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=(
-        "Story 10.12: reproduces names retained beside malformed JSON on the "
-        "unfixed code; fixed in Task 2"
-    ),
-)
 def test_malformed_entry_is_skipped_and_counted(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
