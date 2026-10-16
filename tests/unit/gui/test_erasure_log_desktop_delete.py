@@ -23,6 +23,15 @@ from gdpr_pseudonymizer.data.repositories.mapping_repository import (
 )
 from gdpr_pseudonymizer.gui.workers.database_worker import DatabaseWorker
 
+
+def _platform_sqlite_leaves_deleted_data_in_place() -> bool:
+    with closing(sqlite3.connect(":memory:")) as connection:
+        return connection.execute("PRAGMA secure_delete").fetchone()[0] == 0
+
+
+PLATFORM_SQLITE_LEAVES_DELETED_DATA_IN_PLACE = (
+    _platform_sqlite_leaves_deleted_data_in_place()
+)
 PASSPHRASE = "zorbalia_desktop_pass_123!"
 P2_FULL_NAME = "Quentrelle Zébrandine"
 P2_FIRST_NAME = "Quentrelle"
@@ -112,11 +121,14 @@ def _read_erasure_rows(db_path: Path) -> list[dict[str, Any]]:
 
 
 @pytest.mark.xfail(
+    PLATFORM_SQLITE_LEAVES_DELETED_DATA_IN_PLACE,
     strict=True,
     raises=AssertionError,
     reason=(
         "Story 10.12: reproduces desktop erased ciphertext in database bytes on "
-        "the unfixed code; fixed in Task 2"
+        "the unfixed code where the platform SQLite leaves deleted data in place "
+        "(Debian and Ubuntu build SQLite with SECURE_DELETE on, so the unfixed "
+        "desktop deletion already overwrites deleted data there); fixed in Task 2"
     ),
 )
 def test_desktop_deletion_leaves_no_copy(tmp_path: Path, qtbot: QtBot) -> None:
