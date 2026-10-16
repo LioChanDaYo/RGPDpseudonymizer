@@ -1,0 +1,117 @@
+schema: 1
+story: '10.13'
+story_title: 'Warning Before Writing Names Still to Review'
+scope: 'PR #105, pre-merge review (Task 7, G2) at head e0fee3a on main 28f9079 (Story 10.12 merged into the branch at aaeb19a). Commits reviewed: 42643a0 and f469de3 (story), tests first 650ff0c, fix e70b936, merge aaeb19a, CHANGELOG b35abce, story e0fee3a (docs only).'
+gate: PASS
+status_reason: 'Every AC holds on real output: the approved window appears in French and in English before anything is sent in batch and before the summary window in single-document validation; the count is per name, by written places, per cell; Cancel sends, starts and stores nothing; Continue writes the file as before with exactly the counted names in clear; the CLI line is the panel''s last line above the question; no window or line when nothing is pending. G2 holds (12 AssertionErrors on their expected-failure lines at 650ff0c, 6 guards pass; the only test change to e70b936 is the removed markers). 9 of QA''s 11 mutants are caught by the committed tests; QA''s own probes catch the other 2. en.qm is byte-identical to QA''s own build; fr.qm unchanged. Codex wrote every product and test line, the CHANGELOG by script from the story, and two read-only gpt-6.1-sol reviews approve. CI green on every leg at 650ff0c (12 xfailed), e70b936 and e0fee3a. Low items only.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-10-16T22:03:32Z'
+
+waiver: { active: false }
+
+merge_blockers: []
+
+merge_notes:
+  - 'The merge waits for Lionel (Task 7.5). QA never merges.'
+  - 'This gate commit (docs only) starts its own CI run on the PR; the orchestrator checks it green before the merge.'
+  - 'For Lionel, facts only (no QA judgement): the committed product code follows the SM''s Fix Design code blocks closely. Of 106 added code lines (docstrings and comments excluded), 62 are identical to a line of the story''s Fix Design section, 16 near-identical, 28 different; ValidationScreen._confirm_names_left_in_clear is 23 of 23 identical. Details under evidence.codex_rule.similarity.'
+
+top_issues:
+  - id: 'TEST-001'
+    severity: low
+    finding: 'No committed test pins the single-document rule that a pending row''s places are its variant occurrences (AC precisions AC1). QA mutant M7 (a pending row''s places = its own span only) passes the 18 new tests and the 13 tests of test_validation_screen.py. The real effect is a leak without warning: LOCATION "Zorbaville" at two places is one row; ORG "Zorbaville" accepted at the first place only; with M7 the count is 0, only the summary window shows, and "Zorbaville" is written in clear at the second place. The product code at e0fee3a is right (QA probe QS3 and the PO''s E2-single pass); the gap is regression protection only, before 10.14, 10.16 and 10.17 change the same files.'
+    suggested_action: 'Backlog, through Codex: commit a test like the PO''s test_e2_half_covered_single (r1013/po/probe/test_po_edges_1013.py) or QA''s QS3 (r1013/qa/probes/test_qa_desktop_1013.py).'
+    refs: ['gdpr_pseudonymizer/gui/models/validation_state.py:710-726', 'tests/unit/gui/test_pending_names_warning.py']
+    suggested_owner: dev
+  - id: 'TEST-002'
+    severity: low
+    finding: 'No committed test pins sent_without_review being passed on when "No" at "Ready to process" restarts the review. QA mutant M8 (the "No" restart drops it) passes the 18 new tests and test_validation_ui.py, test_validation_models.py and test_validation_workflow_integration.py (90 tests). Effect: after "No", a place covered by a name known in the database is counted, and the second summary shows a false "⚠ Still to review: 1" (an over-warning, not a leak). QA probe QC6 catches it. The same restart calls are where Story 10.15''s rebase conflict is expected.'
+    suggested_action: 'Backlog, through Codex: a CLI test with a known name, "No" at the question, then the second summary without the line (QA probe QC6, r1013/qa/probes/test_qa_cli_1013.py). 10.15 re-runs T7 to T10 after its rebase; it could add this case.'
+    refs: ['gdpr_pseudonymizer/validation/workflow.py:136', 'gdpr_pseudonymizer/validation/workflow.py:142-147', 'gdpr_pseudonymizer/validation/workflow.py:159', 'tests/unit/test_pending_names_cli.py']
+    suggested_owner: dev
+  - id: 'PERF-001'
+    severity: low
+    finding: 'The count compares every pending place with every written place, and the CLI version looks each occurrence up with the linear get_entity_review. QA timing (tools/perf_1013.py, one review, half the names left): 0.13 s at 500 detected names, 0.60 s at 2,000, 3.70 s at 5,000 (get_summary_stats at the same point: 0.01, 0.18, 1.09 s). Not a problem for ordinary documents; noted for very large ones.'
+    suggested_action: 'Future, only if a user reports a slow final summary: index written places by cell and reviews by entity.'
+    refs: ['gdpr_pseudonymizer/validation/models.py:106-154', 'gdpr_pseudonymizer/validation/models.py:518-540']
+    suggested_owner: dev
+
+quality_score: 100
+expires: '2026-10-30T22:03:32Z'
+
+evidence:
+  tests_reviewed: 18
+  risks_identified: 3
+  environment: 'Windows, the main Poetry environment (Python 3.11.9, PySide6 6.7.3), through .bat runners with cmd.exe; PYTHONPATH = the tree under test; QT_QPA_PLATFORM=offscreen; USERPROFILE, HOME, APPDATA and LOCALAPPDATA = r1013/qa/home; a runner-only plugin (r1013/qa/tools/qa_iso_1013.py) and the probes'' autouse fixture point gui.config._config_path at each test''s tmp_path. C:\Users\devea\.gdpr-pseudo.yaml was never opened (mtime still 2026-10-14 13:27, 270 bytes). QA''s worktree of 650ff0c holds no tests/test_corpus/; held_out/ and final_exam/ were never opened, listed or grepped.'
+  g2:
+    worktree: 'r1013/qa/wt-650ff0c (git worktree of 650ff0c, checked out with the pathspec :(exclude)tests/test_corpus). git diff 1f35dae 650ff0c -- gdpr_pseudonymizer/ is empty.'
+    runxfail: '12 failed, 6 passed. Each failure is an AssertionError on its "# expected failure" line, after its preconditions (no PRE: failure): T1 :299 and T2 :353 assert [] == [warn_fr(1)]; T4 x3 :570 and T5 :651 [Résumé de validation window] == [warn_fr(1)]; T6[batch] :701 [] == [warn_en(1)]; T6[single] :701 [(Validation summary, ..., Confirm, Annuler)] == [warn_en(1)]; T7 x3 test_pending_names_cli.py:189 assert (0 == 1); T10[other_cell] :325 assert (0 == 1). Guards passing: T3[batch], T3[single], T8, T9[in_review], T9[known], T10[same_cell]. The lines are the ones the Dev Agent Record gives.'
+    with_markers: '6 passed, 12 xfailed, in one process and under -n 4 --dist loadscope.'
+    markers_only: 'git diff 650ff0c e70b936 -- tests/: six @pytest.mark.xfail(strict=True, raises=AssertionError, reason=...) decorators removed (T1, T2, T4, T5, T6, T7) and T10''s pytest.param("other_cell", marks=xfail(...), id="other_cell") replaced by pytest.param("other_cell", id="other_cell"). No assertion, precondition or helper changed. git diff e70b936 e0fee3a on the two test files: empty.'
+    linux: 'Not run locally on Linux (the Windows toolchain is the rule); the three non-Windows CI legs ran them (see ci).'
+  mutants:
+    harness: 'r1013/qa/mut/: git archive e0fee3a of the package and the needed test files, one change each (tools/make_mutants.py). Each runs the 18 new tests; the unmutated copy gives 18 passed.'
+    M1_names_not_places: 'every pending name counts, coverage ignored: caught (5): T3[batch], T3[single], T9[in_review], T9[known], T10[same_cell]'
+    M2_no_window_single: 'single-document window removed: caught (5): T4 x3, T5, T6[single]'
+    M3_batch_cancel_emits: 'batch Cancel still emits: caught (1): T1'
+    M4_single_cancel_continues: 'single-document Cancel still goes on to the summary: caught (2): T5, T6[single]'
+    M5_places_not_names: 'counts uncovered places, not names: caught (8): T1, T2, T5, T6 x2, T7 x3'
+    M6_overlap_covers: 'a written place that only overlaps covers: caught (2): T4[partial], T4[two_pieces]'
+    M7_own_span_only: 'NOT caught by the committed tests (TEST-001); caught by QA probe QS3 and the PO''s E2-single'
+    M8_restart_drops_known: 'NOT caught by the committed tests (TEST-002); caught by QA probe QC6'
+    M9_default_cancel_label: 'the window keeps the untranslated default "Annuler": caught (2): T6 x2'
+    M10_cli_line_not_last: 'CLI line first in the panel: caught (3): T7 x3'
+    M11_known_not_passed: '_run_validation without sent_without_review (SM m3 redone on the committed code): caught (1): T9[known]'
+  end_to_end:
+    harness: 'QA''s own probes, r1013/qa/probes/ (22 checks, never committed). Desktop: the real BatchScreen, ValidationScreen and BatchWorker thread, and the real DetectionWorker, ValidationScreen and FinalizationWorker; only detection replaced; every ConfirmDialog recorded and answered from a queue. CLI: the real Typer app (gdpr-pseudo process and batch --workers 1) through CliRunner, passphrase from the environment, the real review and Rich screens, the real Confirm.ask answered on stdin; only detection and readchar.readkey replaced. Assertions on the written files (txt, csv, xlsx) and on the mapping database rows. Invented names and main-corpus words only. At e0fee3a: 22 passed. At 650ff0c: 13 failed (every pending-name case), 9 passed (the no-window cases). On M7: QS3 fails only. On M8: QC6 fails only.'
+    qb1_batch_three_docs: 'Doc 0 (Quentrelle at 2 places left): "Valider et continuer ▶" shows the French window with 1. Cancel: validation screen current, no result stored, worker waiting, awaiting_doc_index 0, no output file, button enabled, database empty. Ctrl+Z after Cancel brings Zorbaville back to review: window with 2, Cancel again, still nothing written. Redo, Continue: doc 0 written with "Quentrelle" twice and nothing else in clear. Doc 1 (all decided): no window. Doc 2 (LOCATION Quentrix at 2 places, ORG accepted at the first only): "Valider et terminer ▶" shows the window with 1; Cancel; "◀ Précédent" shows doc 1 with the button disabled (a click does nothing); "Suivant ▶" returns to doc 2 with its decisions kept; Continue writes "Quentrix" once (the second place). Database: no row holds Quentrelle; no LOCATION Quentrix row.'
+    qb2_qb5_batch: 'Cancel then deciding the name: no further window, nothing in clear, the name stored. Cancel then "Annuler le lot": no output file, database empty. English: [en(1), en(1)] with "Cancel", file as counted. Every name decided, some rejected: no window (rejected names stay, as before).'
+    qs_single: 'QS1: a variant row (Zorbalia Quentrix + Quentrix) left: French window with 1; Cancel: no FinalizationWorker, still on validation, "Finaliser ▶" and "◀ Retour" enabled, database empty; Continue: window, then "Résumé de validation", output keeps both variants and replaces Quentrelle; database holds Quentrelle only. QS2 English: [en(1), en(1), Validation summary]. QS3: see TEST-001 (window with 1 at the head). QS4 every name decided: only the summary window. QS5 a pending name inside a place added by hand: only the summary window, nothing in clear.'
+    qc_cli: 'Printed output of the real CLI. QC1 [N]: the panel''s last line is "⚠ Still to review: 1 (left in plain text)", the one before it "Total entities to process: 2", printed before "Ready to process document with validated entities?"; output "Quentrelle" twice; database without Quentrelle. QC2 [N] on two groups: line with 2. QC3 [N] then [P] back and decide: no line. QC4 Shift+A: no line. QC5 "No" at the question: the review restarts and the second summary shows the line again; the question twice. QC6 a known ORG covering LOCATION Zorbaville: no line in either summary (also after "No"). QC7 a name rejected: no line. QC8 xlsx and csv: other_cell line with 1 and B1 kept "Zorbaville", same_cell no line and no "Zorbaville"; no LOCATION Zorbaville row in the database. QC9 batch --workers 1: the first document''s summary has the line, the second''s not.'
+    po_probes: 'Copies in r1013/qa/po_rerun (the 10.12 B2 probe with switch_language instead of install_translator; the CLI probe''s display wrapper accepts the new keyword). At e0fee3a, 20 passed: B2a window with 1 (pending rows 2, distinct names 1), output "Quentrelle" twice; B2b no window, no "Zorbaville"; single document French [window, Résumé de validation] and English [Names still to review ... Cancel, Validation summary]; CLI [N] one line with 1, and after "No" the line on the first summary only (the second review decides every name); PO edges E1 to E7 all pass. At 650ff0c: the B2 and CLI probes print no window and no line; edges E1, E2 x3, E3 x3, E5, E6 fail.'
+  texts: 'tools/texts_1013.py cuts the approved texts from Lionel''s Q2 block in the decision log and compares at e0fee3a: the four tr() sources of _confirm_names_left_in_clear (from the AST), STILL_TO_REVIEW_LINE, the four en.ts translations and the four fr.ts unfinished entries (context ValidationScreen, one entry each, locations 1054, 1056, 1064, 1065 = the tr() lines): all identical. No \u escape in the function or anywhere in the added lines. The story byte check: blocks 17 of 17 identical, approved strings 13 of 13.'
+  i18n: 'QA rebuilt en.qm from its own filtered copy of the head en.ts (the three "Documents (*.txt *.md *.pdf *.docx *.xlsx *.csv);;Tous (*)" entries of BatchScreen, DropZone and MainWindow removed, 15 lines): "Generated 313 translation(s)", byte-identical to the committed en.qm (fc /b). qm_compare over the 316 messages of the new en.ts, main''s en.qm against the committed one: messages=316 differing=4, the four new texts. Over main''s 312 messages: differing=0. The committed en.qm against a plain build with the filters: differing=3, the three filters, so they stay left out. fr.qm rebuilt: "Generated 0 translation(s)", byte-identical to main''s and to the committed one (16 bytes; not in the diff).'
+  changelog: 'The story''s CHANGELOG Entry block is in CHANGELOG.md once, byte for byte, under [Unreleased] ### Fixed, right after Story 10.12''s bullet, which is kept. Codex inserted it by script from the story (session 01a14698). Every claim matches QA''s measures (QB1, QS1, QS4, QC1, T7, T3, T9, QB4/QS2). No number.'
+  consumer_trace: 'Re-checked at e0fee3a: #1 and #2 (QB1, T1, T2: the count after _is_awaiting_document, before the emit), #3 (QB1: on doc 1 the button is disabled and a click shows nothing), #4 (QS1, T5), #5 and #12 (QC1, QC9), #7 (QC5), #10 (QC6, T9[known]), #15 (QS5), #19 (T4[dedup_dropped]). All as "After the fix". _on_finalize is the only path to validation_complete.emit and _start_finalization (grep of gui/).'
+  codex_rule:
+    sessions: 'All 13 session ids exist in ~/.codex/sessions/2026/10/16/ (12 in the Dev Agent Record table; the 13th, the splice 01a146a0-378f-7df0-b220-eb10aaf9ba36, is named in commit e0fee3a''s message, the table row "(this record)" carries no id). All: originator codex_exec, cli 0.162.1, model gpt-6.1-sol, effort high, cwd the worktree, task_complete. Writers (5 test, 3 fix, CHANGELOG, splice): sandbox workspace-write. 01a145a3 (probe), 01a1469d-e84a (review A) and 01a1469d-e905 (review B): sandbox read-only; A and B end "VERDICT: APPROVE" with "P0: none. P1: none. P2: none. P3: none." They reviewed 28f9079...b35abce, whose product and test code equals e0fee3a''s (git diff b35abce e0fee3a touches the story only).'
+    authorship: 'codex/authorship_1013.py (10.12 QA''s method): 1038 added non-empty lines in product code, .ts files, tests and CHANGELOG (28f9079...e0fee3a). 1032 are in the writing sessions'' own apply_patch texts and commands; 6 (the CHANGELOG entry) only in the story, copied by Codex''s script; 0 unmatched. Per file: models.py 63/63, ui.py 9/9, workflow.py 14/14, document_processor.py 2/2, validation_state.py 20/20, screens/validation.py 33/33, en.ts 24/24, fr.ts 22/22, GUI test 578/578, CLI test 267/267. The .qm files are lrelease output.'
+    sm_prototype: 'No Codex command read r1013/sm or anything under rgpd-analysis or tests/test_corpus: 81 shell commands scanned; the only matches are the pathspec exclusion '':!tests/test_corpus'' in review A''s git diff and the splice''s own record text. The prompts forbid both. Product lines that also occur in the SM prototype diff (63 of 187) all come from the story''s text (code blocks, inline code, approved texts) or from its prose (get_entity_groups, unique_key, the TYPE_CHECKING import, </message>); none is prototype-only. Test lines shared with the SM test sketch: 130 longer than 25 characters and not in the story; 93 of them already exist in the repository at 28f9079 (the _Batch harness of test_batch_review_real_worker.py the Test Plan points to), the other 37 are the Test Plan''s texts and assertions (DOC_A, DOC_P, warn_fr(1), "Quentrelle" twice). Whole-file line similarity with the sketch: GUI 0.26, CLI 0.17.'
+    similarity: 'codex/similarity_1013.py: each added Python line (28f9079...e0fee3a) against the closest line of the story''s Fix Design section (fenced blocks and inline code); identical = same text after indentation, near = difflib ratio >= 0.80. Code lines (docstrings and comments excluded): 106; identical 62 (58%), near 16 (15%), different 28 (26%). Docstrings and comments: 35, all Codex''s own wording (0 identical). Of the 79 lines of the story''s fenced blocks, 57 reappear identical or near. Per unit (identical/near/different): ValidationScreen._confirm_names_left_in_clear 23/0/0 (only the docstring differs); _on_finalize insertions 6/0/0 (the story''s two comments not carried over); GUIValidationState.names_left_in_clear 9/1/0 (o renamed entity); the validation_state.py imports 0/4/0; place_of and the Place and NameOfReview aliases 5/0/0; count_names_left_in_clear 9/1/6 (names renamed uncovered_names, the containment test split into a named covered = any(...) with unpacked tuple names); written_places 2/1/8 (restructured: a per-cell dict kept_by_cell instead of one list with a cell test; same sort key; same rule); ValidationSession.names_left_in_clear 3/4/8 (the story gives prose only; the code follows the prose and adds a review-is-None guard); FinalConfirmationScreen.display 1/1/2 plus the constant 1/0/0 (a warning local and extend(["", ...]) instead of the story''s single f-string); workflow.run 2/3/2 and run_validation_workflow 0/1/1 (the count called with the keyword sent_without_review= instead of the story''s positional argument); _run_validation 1/0/0; the TYPE_CHECKING import 0/0/1 (described in prose). QA does not judge whether this is acceptable; Lionel decides.'
+    pr: 'The PR body holds the Task 6.3 sentence word for word. No skip-CI marker in the commits origin/main..e0fee3a, the PR title or the PR body.'
+  ci:
+    650ff0c: '38938632682 (attempt 1, on the merge with 1f35dae): ubuntu 3.10 "2651 passed, 12 xfailed"; macos "2651 passed, 12 xfailed"; ubuntu 3.11 "2651 passed, 12 xfailed"; windows "2502 passed, 3 skipped, 12 xfailed". Each leg''s XFAIL list is exactly the 12. lint and Code Quality 38938632740 success (black 312 unchanged; mypy 105 files).'
+    e70b936: '38966669593 (attempt 1, merge with 1f35dae): macos, ubuntu 3.10, ubuntu 3.11 "2663 passed"; windows "2514 passed, 3 skipped"; 0 xfailed; the 18 new tests PASSED on each leg. Code Quality 38966669650 success.'
+    e0fee3a: '38970134375 (attempt 1, merge with 28f9079, the PR head): macos, ubuntu 3.10, ubuntu 3.11 "2680 passed"; windows "2531 passed, 3 skipped"; 0 xfailed; the 18 new tests PASSED on each leg; lint success (black 314 unchanged; mypy no issues in 105 files). Code Quality 38970134140 success.'
+    notes: 'Read from the job logs (r1013/qa/ci/job_*.log). The Windows skips are the 3 existing ones. No reruns on any of the three runs.'
+  g6_local: 'Head: ruff exit 0; black "314 files would be left unchanged"; mypy "Success: no issues found in 105 source files". pytest -m "not slow" -n 4 --dist loadscope from the worktree root: first run 1 failed, 2669 passed, 10 skipped: tests/unit/test_final_exam_tooling.py::test_serve_refuses_foreign_host_and_origin, ConnectionAbortedError (WinError 10053) from its local HTTP server while QA''s G2 run shared the machine; that test passed 3 of 3 alone. Second run, nothing else running: 2670 passed, 10 skipped (the dev''s number).. The worktree is clean after every run (the gitignored site/ aside).'
+  scope_check: 'git diff --name-only origin/main...e0fee3a: exactly the 13 files of File Locations and the File List (fr.qm unchanged). Task 6.1''s path list, the two leakage allowlists, .github/, pyproject.toml and poetry.lock: empty. None of the 13 files the accuracy suite loads is touched, so G1, G3 and G5 are N/A; G4 holds. No existing test changed.'
+  not_checked: 'A real Linux or macOS machine (CI only); the CLI on a real terminal (CliRunner, no console.clear effect); keyboard shortcuts as real key events (the probes click the buttons and call _on_undo, the Ctrl+Z handler); very large documents beyond the timing probe.'
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+    ac_gaps: []
+    notes: 'AC1 T2, T3, T4, T7, T9, T10 + QB1, QS1, QS3, QC2, QC8 (the variant rule only through QA''s probe: TEST-001). AC2 T1, T2, T6[batch] + QB1 to QB4. AC3 T4, T5, T6[single] + QS1, QS2, QS4. AC4 T7 to T10 + QC1 to QC9. AC5 texts + i18n + T6. AC6 G2 + CI. AC7 changelog. AC8 codex_rule. AC9 scope_check + CI + G2.'
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'The change is a warning only: nothing is accepted for the user. Cancel sends, starts and stores nothing (database rows checked). The count logs nothing; no log line carries entity text. The approved texts do not claim more than the count measures (B2b counted 0).'
+  performance:
+    status: PASS
+    notes: 'One count per click or per final summary. Quadratic in the number of places (PERF-001): 0.60 s at 2,000 detected names in the CLI, about three times the existing get_summary_stats.'
+  reliability:
+    status: PASS
+    notes: 'The window is modal and read before anything is sent; the batch keeps waiting after Cancel; Previous, Next, undo and "Annuler le lot" behave as before. Tests wait only on conditions; no sleep or wall-clock assert.'
+  maintainability:
+    status: PASS
+    notes: 'One shared pure count in validation/models.py fed with the list each path really sends; keyword arguments with defaults (10.15 rebase); docstrings name the story and Lionel''s decision. Two regression gaps (TEST-001, TEST-002).'
+
+recommendations:
+  immediate: []
+  future:
+    - action: 'Commit a single-document test for a pending row whose variant occurrences are only partly covered (TEST-001).'
+      refs: ['tests/unit/gui/test_pending_names_warning.py']
+    - action: 'Commit a CLI test for "No" at the question with a known name covering a pending place (TEST-002); a natural place is 10.15''s rebase.'
+      refs: ['tests/unit/test_pending_names_cli.py']
+    - action: 'Only on a user report: index written places by cell and reviews by entity (PERF-001).'
+      refs: ['gdpr_pseudonymizer/validation/models.py']
