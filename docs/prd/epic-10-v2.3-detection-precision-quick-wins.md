@@ -3,7 +3,7 @@
 **Epic Goal:** Raise detection precision and make the accuracy benchmark trustworthy with local, deterministic changes to the hybrid detector and the ground-truth corpus, without lowering recall. The user-facing value is fewer false entities to reject during the (mandatory) validation step and a benchmark whose numbers can be believed.
 
 **Target Release:** v2.3.0 candidate. **No release is part of this epic.** v2.3.0 ships only on Lionel's explicit go, through a separate release story.
-**Duration:** Estimated 9.5-13.5 weeks (10.1 is annotation-labor-bound; 10.3 split into 10.3a and 10.3b, and 10.3c added, Lionel, 2026-10-06; 10.5 added, Lionel, 2026-10-07; 10.3b re-estimated after its STOP R, 2026-10-07; 10.7 added, Lionel, 2026-10-09; 10.8 and 10.9 added, Lionel, 2026-10-13; 10.10 and 10.11 added, Lionel, 2026-10-14; 10.11 re-estimated after its PO review, 2026-10-15; 10.12 and 10.13 added as release blockers, Lionel, 2026-10-16); 10.6 runs in parallel (2-3 weeks elapsed) and close-out waits for its adjudication after 10.4 merges, then its commit and one scored run
+**Duration:** Estimated 12-17.5 weeks (10.1 is annotation-labor-bound; 10.3 split into 10.3a and 10.3b, and 10.3c added, Lionel, 2026-10-06; 10.5 added, Lionel, 2026-10-07; 10.3b re-estimated after its STOP R, 2026-10-07; 10.7 added, Lionel, 2026-10-09; 10.8 and 10.9 added, Lionel, 2026-10-13; 10.10 and 10.11 added, Lionel, 2026-10-14; 10.11 re-estimated after its PO review, 2026-10-15; 10.12 and 10.13 added as release blockers, Lionel, 2026-10-16; 10.12 and 10.13 re-estimated after Lionel's answers, and 10.14, 10.15 and 10.16 added from the Codex release review, Lionel, 2026-10-16); 10.6 runs in parallel (2-3 weeks elapsed) and close-out waits for its adjudication after 10.4 merges, then its commit and one scored run
 **Predecessor:** v2.2.0 + accuracy scorer fix (#77), commit `fceef65`
 **Successor:** Epic 9 (v3.0) starts from this epic's merged close-out baseline.
 
@@ -102,7 +102,7 @@ These notes sit outside the normative Gates block above and do not change its te
 ## Enhancement Details
 
 - **What's being changed:** (1) the benchmark is repaired against written annotation guidelines and gains a held-out set; (2) `HybridDetector` gets a same-type overlap rule and an ORG role filter; (3a) spans stop at line breaks and run-on regex name shapes are fixed; (3b) LOCATION noise filters and PERSON boundary rules for particles, Mc/Mac and trailing roles; (3c) the merge's exact-match check becomes type-aware; (4) salutation-aware first-name detection and ORG + country merging, plus two carried coverage losses restored; (6) a second, blind final-exam set written by a different author, kept outside the repo until 10.4 merges, then committed and scored once at close-out, plus bootstrap confidence ranges in the accuracy output.
-- **How it integrates:** all detector changes are post-processing steps or patterns inside the existing `HybridDetector` pipeline and its YAML/JSON resources. No public API, CLI flag, GUI screen, mapping-table schema or file format changes. Exception: Story 10.7 (data layer) changes how mapping rows are keyed, and with rule (a), "Convert once" (Lionel, 2026-10-13, 10.7 STOP C) the mapping table's unique key becomes (text, type); see Compatibility Requirements.
+- **How it integrates:** all detector changes are post-processing steps or patterns inside the existing `HybridDetector` pipeline and its YAML/JSON resources. No public API, CLI flag, GUI screen, mapping-table schema or file format changes. Exception: Story 10.7 (data layer) changes how mapping rows are keyed, and with rule (a), "Convert once" (Lionel, 2026-10-13, 10.7 STOP C) the mapping table's unique key becomes (text, type); see Compatibility Requirements. The release blockers 10.12 to 10.16 (2026-10-16) change no flag or screen; they add warning windows and one CLI line (10.13), a one-time cleaning of the erasure log on open (10.12) and fixes to review hand-offs (10.14 to 10.16); see Compatibility Requirements.
 - **Success criteria:**
   - Every story closes with a G1 run, G2 verification, no unapproved recall drop (G3) and held-out numbers (G5, from 10.2 on).
   - Overall precision on the repaired benchmark rises over the 10.1 close-out baseline by the end of 10.4, measured by G1 runs. No numeric precision target is set: the arithmetic estimate above is not a target.
@@ -127,10 +127,13 @@ These notes sit outside the normative Gates block above and do not change its te
 | 10.9: Desktop App Edit Applies to Every Occurrence (added by Lionel, 2026-10-13) | HIGH | 0.5 week | 10.8 SM finding | Done (PR #98, `49d4daa`) |
 | 10.10: Desktop Batch Review Fixes (added by Lionel, 2026-10-14) | HIGH | 0.5-1 week | 10.8 QA pre-existing findings PRE-001 to PRE-003 | Done (PR #100, `eee4d41`) |
 | 10.11: Custom Pseudonym Stored and Used (added by Lionel, 2026-10-14; not the recommendation) | HIGH (proposed) | 1.5 weeks (re-estimated after the PO review, 2026-10-15) | 10.8 QA PRE-004; Lionel 2026-10-14 | Done (PR #101, `b2042c7`) |
-| 10.12: Erasure Log Without the Erased Name (release blocker B1, added by Lionel, 2026-10-16) | HIGH (release blocker) | 0.5 week (1 week if old entries are cleaned) | QA backlog B1 | Draft (open question for Lionel) |
-| 10.13: Batch Review Warns Before Writing Names Still to Review (release blocker B2, added by Lionel, 2026-10-16) | HIGH (release blocker) | 0.5 week | QA backlog B2 | Draft (open questions for Lionel) |
+| 10.12: Erasure Log Without the Erased Name (release blocker B1, added by Lionel, 2026-10-16) | HIGH (release blocker) | 1 week | QA backlog B1; Codex release review #3 | Draft (Lionel's three answers recorded, 2026-10-16) |
+| 10.13: Warning Before Writing Names Still to Review (release blocker B2, added by Lionel, 2026-10-16; single document and CLI added by his Q1) | HIGH (release blocker) | 0.5-1 week | QA backlog B2 | Draft (Lionel's answers and approved texts recorded, 2026-10-16) |
+| 10.14: Desktop Batch and Finalization Hand-Offs (release blocker, added by Lionel, 2026-10-16) | HIGH (release blocker) | 1-1.5 weeks | Codex release review #1, #4 | Draft (two open questions for Lionel) |
+| 10.15: CLI Corrections on Spreadsheets (release blocker, added by Lionel, 2026-10-16) | HIGH (release blocker) | 0.5-1 week | Codex release review #2 | Draft |
+| 10.16: Custom Pseudonym Fixes (release blocker, added by Lionel, 2026-10-16) | HIGH (release blocker) | 0.5-1 week | Codex release review #6, #7, #8 | Draft |
 
-**Total Estimated Duration:** 9.5-13.5 weeks; 10.6 runs in parallel (2-3 weeks elapsed) and close-out waits for its adjudication after 10.4 merges, then its commit and one scored run
+**Total Estimated Duration:** 12-17.5 weeks; 10.6 runs in parallel (2-3 weeks elapsed) and close-out waits for its adjudication after 10.4 merges, then its commit and one scored run
 
 ---
 
@@ -220,7 +223,10 @@ Numbers come only from CI runs; each line cites its run ID. Full verbatim lines 
 - **Follow-ups, consolidated:** every story's follow-ups and open gate items are consolidated in QA's backlog B1–B42 (`docs/qa/assessments/epic-10-close-out-summary.md`, "Consolidated Backlog"), also pointed to from `docs/qa/backlog.md`. Nothing there is scheduled by this close-out.
 - **Release decisions for Lionel (QA):** B1 (the erasure audit entry keeps the erased name), B2 (batch "Valider et continuer" gives no warning about rows still to review) and B14 (`CHANGELOG.md` `[Unreleased]` harmonisation; the harmonised text is on `main` since #102, `fb7917c`), before a v2.3.0 release.
 - **Re-opened for two release blockers (Lionel, 2026-10-16):** B1 "Fix before release (Rec.)" → Story 10.12; B2 "Fix before release (Rec.)" → Story 10.13. Both are written through Codex.
-- **Still open in Epic 10:** 10.12 and 10.13, the two release blockers; stories 10.1 to 10.11 are merged (10.11 last, PR #101, `b2042c7`). The v2.3.0 release is not part of the epic; it waits for both and for Lionel's explicit go (separate release story).
+- **Codex release review (2026-10-16):** a `codex exec` review of `main` at `fb7917c` found ten problems, verdict NO-SHIP. QA reproduced each one on the real code with invented names (probes and logs kept outside the repository, in the orchestrator's analysis folder `r23codex/qa`). It found leaks that the QA close-out above had not: #1, #2 and #4. Lionel's answer: "Leaks + new 10.11 bugs (Rec.)".
+  - **Fixed before release:** #1 (a second batch mixes with the first) and #4 (finalization shares live entities with the review) → Story 10.14; #2 (CLI [E] and [T] on spreadsheets leave the name in clear) → Story 10.15; #3 (the erased name in the erasure log) is Story 10.12; #8 (the real-name check ignores lowercase reviewed names), #6 (the generation guard ignores roles and spellings) and #7 (a custom pseudonym spreads by detected names) → Story 10.16.
+  - **Later, backlog (Lionel: later):** #5, the final custom-pseudonym check is not atomic with saving, so two programs on one mapping database can store or write a pseudonym the other has (`core/document_processor.py:443`, `:801`; QA: its three probes with forced timing failed at `fb7917c`, and the one for generated pseudonyms also failed at v2.2.0, so that part is pre-existing; a natural stress run passed). The release notes can tell users to use one program at a time on a mapping database (user copy, Lionel approves it). #9, two programs opening a pre-10.7 file at the same moment: one can refuse a healthy file with the conversion error, because its first checks do not share one read (`data/database.py:454`, `:575`; QA: the probe with forced timing failed at `fb7917c`, a natural stress run passed; new with 10.7, unreleased). #10, the batch worker emits its request before it sets its wait state, so a submission or a cancel can be lost and the batch hangs (`gui/workers/batch_worker.py:365`; QA: a lost submission and a lost cancel, each failed at `fb7917c` and at v2.2.0, so pre-existing; the same as 10.10 follow-up (c)).
+- **Still open in Epic 10:** 10.12 to 10.16, the release blockers (B1, B2 and the Codex release review); stories 10.1 to 10.11 are merged (10.11 last, PR #101, `b2042c7`). The v2.3.0 release is not part of the epic; it waits for all five and for Lionel's explicit go (separate release story).
 
 ---
 
@@ -916,7 +922,7 @@ None is in 10.10's scope. Backlog unless Lionel routes one elsewhere. (a)–(j) 
 - **(c)** The worker's validation wait has no predicate loop, so a spurious wake-up ends the batch as if it were cancelled; `validation_required` is emitted before the mutex is taken (`gui/workers/batch_worker.py:356-367`).
 - **(d)** Batch "Valider et continuer" asks for no confirmation and gives no warning about rows still to review.
 - **(e)** The live document table shows "Traité" for a document whose finalization failed (`gui/screens/batch.py:748-751`); the summary says "Erreur".
-- **(f)** Ctrl+O during a batch leaves the waiting worker blocked with no way back. After 10.10 nothing leaks, but the batch cannot be resumed.
+- **(f)** Ctrl+O during a batch leaves the waiting worker blocked with no way back. After 10.10 nothing leaks, but the batch cannot be resumed. **Corrected 2026-10-16:** "nothing leaks" is wrong for a second batch started during a batch (File → "Ouvrir un dossier...", then "Démarrer"): its document can be written with the first batch's review, a name left in clear (Codex release review #1, reproduced by QA). Story 10.14 fixes it, and its open question 1 covers Ctrl+O during a batch too.
 - **(g)** "◀ Précédent" past a document that failed to read does nothing.
 - **(h)** The "validation per document" checkbox is never remembered: `batch_validate_per_document` is not in `_DEFAULT_CONFIG` (`gui/config.py:14-27`), and saving keeps only the keys listed there.
 - **(i)** CHANGELOG `[Unreleased]` needs harmonising before the release: once 10.7 ships, 10.5's "The schema version stays 1.0.0" and the 10.3c and 10.4 continuity bullets ("The mapping schema is unchanged … without the entity type") are stale.
@@ -1032,111 +1038,353 @@ None is in 10.11's scope. Backlog unless Lionel routes one elsewhere.
 
 ## Story 10.12: Erasure Log Without the Erased Name (release blocker B1)
 
-**Added by Lionel, 2026-10-16 (release blocker B1 for v2.3.0):** "Fix before release (Rec.)". The question he answered: "B1. When you delete a name from the mapping database with delete-mapping, the database's operation log still records that name. So a deletion request for a person leaves their name in the file. This has been the case in earlier versions too. Fix it before releasing 2.3.0?" The option he chose: "The log keeps a record that a deletion happened (date, row id, type), but not the name. A small story, written through Codex, with failing tests first." Found by QA at the Epic 10 close-out (backlog B1).
+**Added by Lionel, 2026-10-16 (release blocker B1 for v2.3.0):** "Fix before release (Rec.)". The question he answered: "B1. When you delete a name from the mapping database with delete-mapping, the database's operation log still records that name. So a deletion request for a person leaves their name in the file. This has been the case in earlier versions too. Fix it before releasing 2.3.0?" The option he chose: "The log keeps a record that a deletion happened (date, row id, type), but not the name. A small story, written through Codex, with failing tests first." Found by QA at the Epic 10 close-out (backlog B1). The same defect is #3 of the Codex release review (2026-10-16). Lionel answered the story's three questions on 2026-10-16, after the PO's review (Decisions Recorded).
 
 **As a** user who erases a person's name with `delete-mapping` (GDPR Article 17),
 **I want** the database to keep a record that the deletion happened, without the name,
 **so that** the erased person's name is no longer in the file.
 
 **Priority:** HIGH — release blocker for v2.3.0 (Lionel, 2026-10-16).
-**Change type:** the CLI erasure command and its audit entry; docs. No detection change, so G1, G3 and G5 are N/A. No file under `gdpr_pseudonymizer/nlp/`, `gdpr_pseudonymizer/resources/`, `tests/accuracy/` or `tests/test_corpus/` changes.
-**Ordering:** outside the detector chain. Independent of Story 10.13; never in the same PR. Both land before the v2.3.0 release. Open question 1 is answered before dev starts.
+**Change type:** the CLI erasure command and its audit entry; on open, a one-time removal of the names already in the log and one compaction of the file (data layer); deleted data overwritten at every deletion, in the CLI and the desktop app; the `--reason` help and the docs. No detection change, so G1, G3 and G5 are N/A. No file under `gdpr_pseudonymizer/nlp/`, `gdpr_pseudonymizer/resources/`, `tests/accuracy/` or `tests/test_corpus/` changes.
+**Ordering:** outside the detector chain. Independent of Stories 10.13 to 10.16 (no shared file); never in the same PR as another story. All five land before the v2.3.0 release.
 
 ### Context
 
-At `main` `fb7917c`:
+At `main` `fb7917c`. The PO checked every fact below on 2026-10-16 and measured the marked ones with probes on invented names (PO review notes for 10.12 and 10.13).
 
 - **What is written:** `delete-mapping` writes one ERASURE entry per deleted row into the `operations` table (`gdpr_pseudonymizer/cli/commands/delete_mapping.py:169-192`). Its `user_modifications` holds `deleted_entity_id`, `deleted_entity_name` (the erased text, `:180`), `deleted_entity_type` and `reason`; the entry also has the date, `theme_selected` and `entity_count`. The deleted rows come back decrypted (`data/repositories/mapping_repository.py`, `delete_entities_by_full_name`), so the name is stored as plain text.
-- **Not encrypted:** `user_modifications` is a JSON column (`data/models.py`, `Operation`), written as is by `AuditRepository.log_operation` (`data/repositories/audit_repository.py:52-77`). The module says the operations table holds no sensitive data and needs no encryption (`:6`, `:26-27`). So the name can be read from the file without the passphrase.
-- **Copied out by `export`:** `export` writes the audit log to JSON or CSV (`cli/commands/export.py:174-188`), `user_modifications` included (`audit_repository.py:286`, `:393-395`), so every exported file holds the erased names. `stats` shows only counts and the type of the last operation (`cli/commands/stats.py:104-173`); it shows no name.
-- **The desktop app:** its database screen also erases rows (`gui/workers/database_worker.py:244-306`). It writes one ERASURE entry with a count, and no name, no row id and no type (`:296-306`).
+- **Not encrypted (measured):** `user_modifications` is a JSON column (`data/models.py`, `Operation`), written as is by `AuditRepository.log_operation` (`data/repositories/audit_repository.py:52-77`). The module says the operations table holds no sensitive data and needs no encryption (`:6`, `:26-27`). Only the entity name and pseudonym columns are encrypted (`mapping_repository.py:551-556`); the operations, the metadata, the types and the themes are plain. After `delete-mapping` by name and by `--id`, both erased names could be read with plain `sqlite3`, without the passphrase. A name with an accent is stored escaped (`"Quentrelle Zébrandine"`), as `json.dumps` writes by default.
+- **Copied out by `export` (measured):** `export` writes the audit log to JSON or CSV (`cli/commands/export.py:174-190`), `user_modifications` included (`audit_repository.py:286`, `:393-395`). The JSON file holds the name in UTF-8 (`ensure_ascii=False`, `:310`); the CSV file holds it escaped (`json.dumps`, `:394`). Only exports that include the ERASURE entries hold names: `--type` and the date filters can leave them out. `stats` shows only counts and the type of the last operation (`cli/commands/stats.py:104-173`); it shows no name.
+- **Encrypted copies left by every deletion (measured):** after a deletion whose log entry holds no name, 7 encrypted copies of the person's name stay in the file: the full name 3 times (the table, `idx_entities_full_name`, the unique index), the first name twice, the last name twice. They sit in freed space inside pages still in use (`freelist_count` 0). The encryption is deterministic (AES-256-SIV, `data/encryption.py:1-10`): the same name always gives the same encrypted text, so anyone with the passphrase and a raw-byte reader can find them; the app never shows them. With `PRAGMA secure_delete=ON` on the deleting connection, 0 copies stay.
+- **The desktop app:** its database screen erases rows with the same function as `--id` (`gui/workers/database_worker.py:281`; `delete_mapping.py:158`), so its deletions leave the same encrypted copies. It writes one ERASURE entry with a count, and no name, row id or type (`:296-307`).
+- **Cleaning old entries (measured):** removing the names in one `BEGIN IMMEDIATE` transaction, then `VACUUM`, then `PRAGMA wal_checkpoint(TRUNCATE)`, leaves 0 copies of any form and a 0-byte `-wal`. `VACUUM` fails inside a transaction ("cannot VACUUM from within a transaction"), so it runs after the COMMIT. After `VACUUM` alone, the main file still holds the names until the checkpoint. A reader in another process makes the checkpoint report busy (`(1, 16, 0)`), and the names stay in the main file until that reader closes. The removal without `VACUUM` leaves the 7 encrypted copies of each erased person. On a 14.9 MB file (20,000 entity rows, 2,000 old entries): removal 0.009 s, `VACUUM` 0.101 s, checkpoint 0.002 s; the `-wal` grew to 14.8 MB during `VACUUM`.
+- **The 10.7 pattern:** `_ensure_current_schema` (`data/database.py:551-610`) runs on its own `sqlite3` connection in autocommit mode, takes `BEGIN IMMEDIATE`, checks the file again inside the transaction, and is all or nothing. A failure stops the open with `DatabaseConversionError` and leaves the file as it was (`open_database`, `:400-401`, `:404-408`). Every file of a released version (v2.2.0 and older) is converted by 10.7 on its first 2.3.0 open, so a file that 2.3.0 cannot write to already does not open.
+- **Out of reach of any fix in the app:** files already written by `export`; mapping exports, which hold `full_name` by design (`list-mappings --export`, `cli/commands/list_mappings.py:279-296`; the desktop CSV export, `database_worker.py:371-381`); copies of a database never opened by 2.3.0; names a user typed into `--reason`. Logs hold no name: structlog writes to stdout only (`utils/logger.py:28`), and its `entity_deleted` event holds the id, type and reason (`delete_mapping.py:216-221`); the success lines print the name to the terminal only (`:204-210`).
 - **Since v1.1.0:** the name field came with Story 5.1 (`29df6dd`, 2026-02-12), so every database whose user ran `delete-mapping` since v1.1.0 holds the erased names in its log.
-- **The docs say otherwise:** `docs/CLI-REFERENCE.md:510-514` and `:650-660` (and `docs/CLI-REFERENCE.fr.md:511` and `:651-660`) say the entry keeps the name on purpose, as proof of the erasure, and that the name is "protected by the same AES-256-SIV encryption as all other database content" and "accessible only with the database passphrase". The second claim is false: the operations table is not encrypted.
+- **This story reverses a deliberate design (Lionel, 2026-10-16):** Story 5.1 kept the name on purpose, as proof of the erasure. `docs/CLI-REFERENCE.md` says so in three passages: "Audit Trail" (`:511-515`, "Entity name, type, and ID"), the compliance list (`:626`, "recording who was deleted, when, and why") and "PII Retention in Audit Logs" (`:651-661`). That last passage justifies keeping the name under GDPR Article 17(3)(e) and Article 5(2) (`:653-655`), and says it is "Protected by the same AES-256-SIV encryption as all other database content" (`:658`) and "Accessible only with the database passphrase" (`:659`). Both claims are false (see "Not encrypted"). `docs/CLI-REFERENCE.fr.md` has the same passages at the same lines (`:626`: "quelle personne a été supprimée"). From 2.3.0 the log proves that a deletion happened, not whom it concerned.
+- **The `--reason` text:** kept as typed. Its help reads « Reason for deletion (GDPR request reference) » (`delete_mapping.py:52`); the docs' option table (`CLI-REFERENCE.md:490`, `CLI-REFERENCE.fr.md:490`) and examples use `GDPR-REQ-2026-042`.
 - **Three existing tests assert the name:** `tests/integration/test_erasure_workflow.py:159`, `tests/unit/cli/commands/test_delete_mapping.py:243`, `tests/unit/cli/commands/test_delete_mapping_type_aware.py:135`.
 
 ### Acceptance Criteria
 
 1. **AC1 — No name in a new erasure entry:** `delete-mapping`, by name and by `--id`, still writes one ERASURE entry per deleted row, with the date, the row id, the type and the reason, and with the erased name in no field of the entry. The same holds for the entry as `export` writes it (JSON and CSV). The deletion itself, the confirmation and the success lines on screen are unchanged.
-2. **AC2 — Entries written by earlier versions:** handled as Lionel decides (open question 1 below). Nothing is built for it before his answer.
-3. **AC3 — Docs:** the "Audit Trail" and "PII Retention in Audit Logs" passages of `docs/CLI-REFERENCE.md` and `docs/CLI-REFERENCE.fr.md` say what the entry keeps (date, row id, type, reason) and that it no longer keeps the name; the false encryption claim is removed; and a line asks users not to write the person's name in `--reason`. These are user texts that Lionel approves, word for word, before the story is done.
-4. **AC4 — Tests first, invented names only:** the tests are committed before the fix. Each expected failure is an `assert` on the stored `operations` rows (and on the `export` output), made after the test's preconditions hold, and each failing test is marked `xfail(strict=True, raises=AssertionError)` on the old code (the 10.5 pattern). The fix removes the markers. The three existing tests listed in Context change, each for that stated reason; no other existing test changes.
-5. **AC5 — CHANGELOG:** `[Unreleased]` gets a "Fixed" entry: the erasure log no longer keeps the erased name; what happens to entries written by earlier versions (open question 1); files already written by `export` are not changed. The 10.7 entry's sentence "The erasure audit entry records the deleted name, as before." is corrected.
-6. **AC6 — Codex:** the code is written through Codex (Forge, `ForgeProgress.ts`), as Lionel requires for customer-facing repositories, and the PR gets a `codex exec` review of its final diff before the merge command. If Codex cannot run, the work stops and Lionel is told; no Claude-written code is presented as Codex's.
-7. **AC7 — Gates:**
+2. **AC2 — Deleted data overwritten (Q2):** from 2.3.0, every connection the app opens to the mapping database has `PRAGMA secure_delete=ON`, so a deletion writes zeros over the deleted row and its index entries. This holds for `delete-mapping` (by name and by `--id`), for the desktop database screen and for the AC3 removal. Nothing changes on screen.
+3. **AC3 — Names already in the log (Q1):** on the first open by 2.3.0 of a file that has not been cleaned (whatever its schema version), after the passphrase check and the 10.7 conversion, the name is removed from every ERASURE entry; the date, row id, type, reason and every other field of the entry stay as they were. Then the file is compacted once.
+   - **Removal:** the 10.7 pattern: its own connection, autocommit, `BEGIN IMMEDIATE`, a check again inside the transaction, all or nothing. A second process that waited finds the work done and changes nothing. A failed removal stops the open with the 10.7 error class and leaves the file unchanged, as a failed 10.7 conversion does. This is the PM's reading of the 10.7 precedent: it adds no file that cannot be opened, since a file 2.3.0 cannot write to is already stopped by the conversion.
+   - **Compaction:** after the COMMIT, `VACUUM`, then `PRAGMA wal_checkpoint(TRUNCATE)`. It runs once per file, even when no name was found, because that also clears the encrypted copies left by earlier deletions (desktop deletions included).
+   - **Retry:** a metadata row, written in the removal transaction, records that the compaction is due. It is cleared only after a checkpoint that reports no busy page. A compaction that fails, or a checkpoint held up by another reader, is retried at the next open; it never stops the open.
+   - A file created by 2.3.0 needs neither step (the SM chooses how it is marked). The schema does not change and `schema_version` stays 1.1.0.
+4. **AC4 — Docs and help (Q3):** in `docs/CLI-REFERENCE.md` and `docs/CLI-REFERENCE.fr.md`:
+   - "Audit Trail" (`:511-515`) and the compliance list (`:626`) say what the entry keeps (date, row id, type, reason) and that it no longer keeps the name.
+   - "PII Retention in Audit Logs" (`:651-661`) is removed or rewritten. Both encryption bullets (`:658`, `:659`) go whatever happens, and the Article 17(3)(e) and 5(2) paragraph (`:653-655`) goes or is rewritten. Suggested line: proof that a request was handled is the date, the row id, the type and the user's own request reference in `--reason`; a user who must keep the person's identity keeps it in their own request register, outside this tool.
+   - The `--reason` help (`delete_mapping.py:52`) and the option rows (`:490`) ask for a request reference, never the person's name. Nothing is checked (Q3).
+   - The docs say what stays out of reach (Context).
+   - Every text here is user copy that Lionel approves, word for word, before the story is done.
+5. **AC5 — Tests first, invented names only:** the tests are committed before the fix. Each expected failure is an `assert` on the stored rows, the `export` output or the file's raw bytes, made after the test's preconditions hold, and each failing test is marked `xfail(strict=True, raises=AssertionError)` on the old code (the 10.5 pattern). The fix removes the markers. The tests cover:
+   - the stored `operations` rows and the `export` output (JSON and CSV) after a deletion by name and by `--id` (AC1);
+   - a raw-byte check of the file after a deletion by `delete-mapping` and by the desktop deletion worker (Q2): no copy of the name in UTF-8, in its `\u`-escaped form, or in the encrypted form the repository stores (full name, first name, last name);
+   - a raw-byte check of a file written in the old format, with ERASURE entries holding names (one with an accent), after its first 2.3.0 open (Q1): no copy in any of those forms; every other field of each entry unchanged; a second open changes nothing; a reader held open in another connection during the open leaves the compaction due, and the next open completes it;
+   - raw bytes are read only after every connection is closed, or after a TRUNCATE checkpoint, `-wal` file included.
+
+   The three existing tests listed in Context change, each for that stated reason; no other existing test changes.
+6. **AC6 — CHANGELOG:** `[Unreleased]` gets a "Fixed" entry: the erasure log no longer keeps the erased name; names already in the log are removed on the first open by 2.3.0 and the file is compacted once (the `-wal` file grows to about the size of the database while it does); every deletion now overwrites the deleted data; files already written by `export` or by a mapping export, and database copies never opened by 2.3.0, are not changed. The 10.7 entry's sentence "The erasure audit entry records the deleted name, as before." (`CHANGELOG.md:40`) is corrected.
+7. **AC7 — Codex:** the code is written through Codex (Forge, `ForgeProgress.ts`), as Lionel requires for customer-facing repositories. The tests-first commit is code too: it is written through Forge, or the final review below covers it explicitly. The PR gets a `codex exec` review of its final diff before the merge command. If Codex cannot run, the work stops and Lionel is told; no Claude-written code is presented as Codex's.
+8. **AC8 — Gates:**
    - **G1, G3 and G5 are N/A:** there is no detection change. The PR states this explicitly. If any file the accuracy suite loads is touched, one regular `accuracy.yaml` run on the branch shows the 16 lines identical to `38212303870`, cited by ID.
-   - **G4:** never in the same PR as a detector change, or as the other release-blocker story.
-   - **G2:** QA re-runs the AC4 tests, checks out the tests-first commit to see them fail on the old code, and reads the diff. QA's gate comes before the merge.
+   - **G4:** never in the same PR as a detector change, or as another Epic 10 story.
+   - **G2:** QA re-runs the AC5 tests, checks out the tests-first commit to see them fail on the old code, and reads the diff. QA's gate comes before the merge.
    - **G6** applies in full (black, ruff, mypy, unit tests, full CI green).
    - **G7:** no headline number changes. CHANGELOG and docs as above.
 
-### Open Questions for Lionel (the orchestrator asks them; nothing is built for them before the answer)
+### Decisions Recorded (Lionel, 2026-10-16)
 
-1. **The names already in the log of an existing database.** Every deletion made with `delete-mapping` since version 1.1.0 wrote the erased name into the log. After this fix, new deletions no longer do. What should happen to the names already there? Recommendation: remove them once, the first time version 2.3.0 opens the database, and keep the rest of each entry (date, row id, type, reason); then compact the file, so the removed names are really gone from it and not just hidden. Without this, every person erased before 2.3.0 stays named in the file. Names already copied out with `export` into a JSON or CSV file cannot be reached; the release notes say so. Other options: leave them and explain in the release notes how to remove them; or leave them.
+The PO reviewed the story and the questions first. The questions were asked one at a time, word for word, in the orchestrator's decision log. Each answer is the recommendation.
+
+1. **Q1, the names already in the log: "Remove and compact (Rec.)".** On the first open by 2.3.0, the name is removed from the old ERASURE entries; the date, row id, type and reason are kept; then the file is compacted once (`VACUUM`, then `wal_checkpoint(TRUNCATE)`). The message he saw: the old names can be read without the passphrase since 1.1.0; out of reach are exports, copies never opened by 2.3.0 and names typed in reasons. The other option was "Leave them". The PM's first draft also offered "leave them and explain how to remove them"; the PO showed it is not a real option (no supported command edits the log), and it was not asked.
+2. **Q2, overwriting deleted data: "Overwrite (Rec.)".** From 2.3.0, every deletion writes zeros over the deleted data (`PRAGMA secure_delete`), in the CLI and the desktop app. Nothing changes on screen. Measured: 7 encrypted copies left per deleted person today, 0 with it.
+3. **Q3, names in `--reason`: "Ask, don't check (Rec.)".** The `--reason` help (today « Reason for deletion (GDPR request reference) », `delete_mapping.py:52`) and the docs ask for a request reference, never the person's name. Nothing is checked. The wording is user copy for his approval with the other doc texts (AC4). The other option was "Also refuse the name".
 
 ### Integration Points
 
-- `gdpr_pseudonymizer/cli/commands/delete_mapping.py` — the ERASURE entry (`:169-192`, the name at `:180`)
+- `gdpr_pseudonymizer/cli/commands/delete_mapping.py` — the ERASURE entry (`:169-192`, the name at `:180`), the `--reason` help (`:52`)
 - `gdpr_pseudonymizer/data/repositories/audit_repository.py` — `log_operation` (`:52-77`), the export functions (`:224`, `:317`); the module note (`:6`, `:26-27`)
-- `gdpr_pseudonymizer/data/database.py` — only if open question 1 is answered "remove them once" (a one-time cleaning on open, beside the 10.7 conversion)
-- `gdpr_pseudonymizer/gui/workers/database_worker.py` — read only (its entry holds no name)
-- `docs/CLI-REFERENCE.md`, `docs/CLI-REFERENCE.fr.md` — AC3
-- `tests/` — AC4; `CHANGELOG.md` — AC5
+- `gdpr_pseudonymizer/data/database.py` — `open_database` (`:301`): `secure_delete` on every connection (AC2); the removal and compaction beside `_ensure_current_schema` (`:551`), and its metadata row (AC3)
+- `gdpr_pseudonymizer/gui/workers/database_worker.py` — its deletion (`:281`) gets `secure_delete` through the shared open; its ERASURE entry stays as it is
+- `docs/CLI-REFERENCE.md`, `docs/CLI-REFERENCE.fr.md` — AC4
+- `tests/` — AC5; `CHANGELOG.md` — AC6
 
-### Estimated Effort: 0.5 week (1 week if the old entries are cleaned on open)
+### Follow-ups Found by the PM and PO (not ACs, 2026-10-16)
+
+- **(a)** The desktop app's ERASURE entry holds a count only, no row id or type (`database_worker.py:296-307`), unlike the CLI's. Not a leak.
+- **(b)** Mapping exports (`list-mappings --export`, the desktop CSV export) hold names by design. The docs could remind users to delete them after use.
+- **(c)** Input file names in `files_processed` are the user's own naming (low).
+
+### Estimated Effort: 1 week (the one-time cleaning on open and its raw-byte tests are the larger part)
 
 ---
 
-## Story 10.13: Batch Review Warns Before Writing Names Still to Review (release blocker B2)
+## Story 10.13: Warning Before Writing Names Still to Review (release blocker B2)
 
-**Added by Lionel, 2026-10-16 (release blocker B2 for v2.3.0):** "Fix before release (Rec.)". The question he answered: "B2. In desktop batch review, "Valider et continuer" writes the document even when some names are still "to review" (neither accepted nor rejected). Those names stay in clear, and nothing warns you. Fix it before releasing 2.3.0?" The option he chose: "If names are still to review, a warning asks you to confirm before the document is written. The warning text comes to you for approval first. A small story, written through Codex, with failing tests first." Found by QA at the Epic 10 close-out (backlog B2; 10.10 follow-up (d)).
+**Added by Lionel, 2026-10-16 (release blocker B2 for v2.3.0):** "Fix before release (Rec.)". The question he answered: "B2. In desktop batch review, "Valider et continuer" writes the document even when some names are still "to review" (neither accepted nor rejected). Those names stay in clear, and nothing warns you. Fix it before releasing 2.3.0?" The option he chose: "If names are still to review, a warning asks you to confirm before the document is written. The warning text comes to you for approval first. A small story, written through Codex, with failing tests first." Found by QA at the Epic 10 close-out (backlog B2; 10.10 follow-up (d)). Lionel's Q1 (2026-10-16) extends it to single-document validation and the CLI, and he approved the texts word for word (Decisions Recorded).
 
-**As a** desktop-app user validating a batch of documents,
-**I want** a warning when I validate a document that still has names to review,
+**As a** user validating documents in the desktop app or the CLI,
+**I want** to be told, before a document is written, that some names are still to review,
 **so that** I do not leave names in clear without knowing it.
 
 **Priority:** HIGH — release blocker for v2.3.0 (Lionel, 2026-10-16).
-**Change type:** desktop batch review (and, if Lionel says so in open question 1, single-document validation and the CLI's final confirmation). No detection change, so G1, G3 and G5 are N/A. No file under `gdpr_pseudonymizer/nlp/`, `gdpr_pseudonymizer/resources/`, `tests/accuracy/` or `tests/test_corpus/` changes.
-**Ordering:** outside the detector chain. Independent of Story 10.12; never in the same PR. Both land before the v2.3.0 release. Open questions 1 and 2 are answered before dev starts.
+**Change type:** desktop batch review and single-document validation, the CLI's final summary, the desktop translations. No detection change, so G1, G3 and G5 are N/A. No file under `gdpr_pseudonymizer/nlp/`, `gdpr_pseudonymizer/resources/`, `tests/accuracy/` or `tests/test_corpus/` changes.
+**Ordering:** outside the detector chain. Independent of Stories 10.12 and 10.15. It changes `gui/screens/validation.py`, as Story 10.14 does: never in the same PR, and whichever merges second is rebased on the first. All five land before the v2.3.0 release.
+
+### Context
+
+At `main` `fb7917c`. The PO checked every fact below on 2026-10-16 and measured the marked ones with probes on invented names, through the real batch path (`BatchScreen`, `ValidationScreen`, `BatchWorker`), the real single-document path (`DetectionWorker`, `ValidationScreen`, `FinalizationWorker`) and the real CLI review.
+
+- **Batch review (measured, case B2a):** "Valider et continuer" and, on the last document, "Valider et terminer" (`gdpr_pseudonymizer/gui/screens/validation.py:236`, `:238`) both go through the batch branch of `_on_finalize` (`:986-1000`), which sends the validated list at once, with no window. The list holds confirmed, modified and added rows only (`gui/models/validation_state.py`, `_validated_rows`). In batch each place of a name is its own row (`CHANGELOG.md:180`). "Quentrelle" at 2 places, both rows still to review: no window; `get_pending_count()` gives 2 rows (`validation_state.py:698-704`) for 1 name; the output holds "Quentrelle" twice in clear.
+- **The same place under another type (measured, case B2b):** ORG "Zorbaville" accepted at 2 places, LOCATION "Zorbaville" at the same place left to review: pending count 1, no window, and no "Zorbaville" in the output, because the ORG pseudonym covers the place. A count of rows still to review would be wrong here.
+- **Single document (measured):** "Finaliser" (`validation.py:240`) shows the "Résumé de validation" window (`:1002-1028`): "Vous avez accepté %1 entités, rejeté %2, ajouté %3 manuellement et modifié %4 pseudonymes. / Continuer avec la pseudonymisation ?", buttons "Confirmer" and "Annuler" (`gui/widgets/confirm_dialog.py`). Its counts (`get_summary`, `validation_state.py:706-724`) have no "to review" count. One name still to review at 2 places: the window says 2 accepted, 0 rejected, 0 added, 0 modified, and the output holds the name twice in clear. In this mode rows are names already (variant grouping, `gui/workers/detection_worker.py:148-164`).
+- **English mode (measured):** the same window shows "Validation summary", "Confirm" and "Annuler": the cancel label is the dialog's untranslated default (`confirm_dialog.py:22`), and the factories never pass one. The batch buttons stay in French (QA backlog B21; 10.10 follow-up (a)). A `tr()` source written with a `\u` escape is extracted mangled and never translated (`gui/i18n/en.ts:1312` "Finaliser u25b6", `:661` "Toutes vu00e9rifiu00e9es"). The app has no Qt plural forms: it writes "(s)" on nouns and adjectives (`gui/i18n/translator.py:94`, `gui/screens/batch.py:584`) or plain plurals.
+- **CLI (measured):** [N] or the right or down arrow moves to the next name without a decision (`gdpr_pseudonymizer/validation/ui.py:92-93`, `validation/workflow.py:377-382`); on the last name of a type it does not move ("Already at last entity of this type", `:381`). A name skipped that way is not sent unless the user comes back to it with [P] and decides. The final screen (`FinalConfirmationScreen`, `validation/ui.py:343`) and the question "Ready to process document with validated entities?" (`validation/workflow.py:141`) count no names still to review. [N] on the first person, decisions on the rest: "Zorbalia Quentrix" stays in clear, and the final counts show 3 confirmed and no "to review".
+- **"No" at "Ready to process" (measured):** it restarts the review from the first name (`workflow.py:144` calls `self.run`, which builds a new `ValidationSession`, `:96`), so every decision is lost. Lionel was told on 2026-10-16; it stays as is.
+- **10.10 stays:** only the document the batch waits on can be validated (10.10 AC1); "Précédent" and "Suivant" keep each document's decisions (10.10 AC2).
+
+### Acceptance Criteria
+
+1. **AC1 — What is counted:** the number of different names (text and type) still to review that would be written in clear. One name counts once however many places it has (2 places of one name = 1). A name whose every place is entirely covered by a place that is written (accepted, corrected or added, under any type) does not count, since nothing of it stays in clear (case B2b). In batch review each place is a row; in single-document validation rows are names already; in the CLI a name skipped with [N] and never decided counts.
+2. **AC2 — Batch review:** "Valider et continuer" and "Valider et terminer", on a document whose count is 1 or more, show the warning window (AC5) before anything is sent. "Continuer quand même" sends the list and the document is written as today. "Annuler" returns to the review: nothing is sent to the batch, nothing is written, and the batch still waits on that document. With a count of 0, no window, as today.
+3. **AC3 — Single document:** "Finaliser", with a count of 1 or more, shows the same window before the "Résumé de validation" window. "Continuer quand même" goes on to the summary window, as today; "Annuler" returns to the review and nothing is written. With a count of 0, only the summary window, as today.
+4. **AC4 — CLI:** with a count of 1 or more, the final summary shows one line, above the question "Ready to process document with validated entities?": "⚠ Still to review: %1 (left in plain text)". With a count of 0, no line. The question and its "No" are unchanged.
+5. **AC5 — The approved texts (Lionel, 2026-10-16, word for word; " / " marks a new line; %1 is the AC1 count):**
+   - **French:** title « Noms encore à vérifier »; text « Noms encore à vérifier dans ce document : %1. » / « Un nom ni accepté ni rejeté n'est pas pseudonymisé : il reste en clair dans le fichier de sortie. » / « Continuer quand même ? »; buttons « Annuler » and « Continuer quand même ».
+   - **English:** title "Names still to review"; text "Names still to review in this document: %1." / "A name neither accepted nor rejected is not pseudonymized: it stays in plain text in the output file." / "Continue anyway?"; buttons "Cancel" and "Continue anyway".
+   - **CLI:** "⚠ Still to review: %1 (left in plain text)".
+   - The window passes its own translated cancel label, since the dialog's default "Annuler" is never translated. Its `tr()` sources are written without `\u` escapes, and `en.qm` is regenerated. Changing the default label of other windows is not in scope (follow-up (b)).
+6. **AC6 — Tests first, invented names only:** the tests are committed before the fix and run through the real paths: the real `BatchScreen`, `ValidationScreen` and `BatchWorker` thread, only detection replaced, as in 10.10; the real single-document path (`DetectionWorker`, `ValidationScreen`, `FinalizationWorker`); the real CLI review, driven by keys. Each expected failure is an `assert` on the window shown (its texts and its count) or on the CLI line, and on the written file, made after the test's preconditions hold, and each failing test is marked `xfail(strict=True, raises=AssertionError)` on the old code (the 10.5 pattern). The fix removes the markers. Cases:
+   - "Annuler" leaves no output, and in batch the batch still waits on the document;
+   - "Continuer quand même" writes the file as today;
+   - one name at 2 places counts 1 (B2a);
+   - the same place accepted under another type counts 0 and shows no window (B2b);
+   - in English mode the window shows the English texts, "Cancel" included;
+   - in the CLI, a name skipped with [N] gives the line with 1, and a review with every name decided gives no line.
+
+   Existing tests stay green.
+7. **AC7 — CHANGELOG:** `[Unreleased]` gets a "Fixed" entry: before a document is written with names still to review, batch review and single-document validation show a warning, and the CLI's final summary shows how many there are.
+8. **AC8 — Codex:** the code is written through Codex (Forge, `ForgeProgress.ts`), as Lionel requires for customer-facing repositories. The tests-first commit is code too: it is written through Forge, or the final review below covers it explicitly. The PR gets a `codex exec` review of its final diff before the merge command. If Codex cannot run, the work stops and Lionel is told; no Claude-written code is presented as Codex's.
+9. **AC9 — Gates:**
+   - **G1, G3 and G5 are N/A:** there is no detection change. The PR states this explicitly. If any file the accuracy suite loads is touched, one regular `accuracy.yaml` run on the branch shows the 16 lines identical to `38212303870`, cited by ID.
+   - **G4:** never in the same PR as a detector change, or as another Epic 10 story.
+   - **G2:** QA re-runs the AC6 tests, checks out the tests-first commit to see them fail on the old code, and reads the diff. QA's gate comes before the merge.
+   - **G6** applies in full (black, ruff, mypy, unit tests, full CI green).
+   - **G7:** no headline number changes. CHANGELOG as above.
+
+### Decisions Recorded (Lionel, 2026-10-16)
+
+The PO reviewed the story and the questions first. The questions were asked one at a time, word for word, in the orchestrator's decision log. Each answer is the recommendation.
+
+1. **Q1, where the warning comes: "Both (Rec.)".** Whenever a name still to review would be written in clear, the user is told first, with one rule everywhere. Preview: batch, the warning window before writing; single document, the same window before the summary window, only when names are left; CLI, one line in the final summary, "⚠ Still to review: 1 (left in plain text)". He was told that "No" at the CLI's "Ready to process" restarts the review and loses every decision; that stays as is. The other options were "Single document only" and "Batch only".
+2. **Q2a, the French text: "Approve (Rec.)".** Approved exactly as in AC5. %1 is the number of different names still to review that would be written in clear (2 places of one name = 1).
+3. **Q2b, the English text and the CLI line: "Approve (Rec.)".** Approved exactly as in AC5.
+
+These texts replace the PM's first proposal, which the PO found wrong in three ways: "Ils resteront en clair dans le fichier écrit" is false when the same place is accepted under another type (B2b); "%1 nom(s) … n'ont été … Ils" cannot agree with a count of 1; and the app says "fichier de sortie" (`batch.py:856`, `validation.py:947`), not "fichier écrit". At the first asking Lionel could not see the texts ("i can't see the texts, show them"); they were asked again with each text in the option preview.
+
+### Integration Points
+
+- `gdpr_pseudonymizer/gui/screens/validation.py` — `_on_finalize` (`:981-1028`): the batch branch (`:986-1000`) and the summary window (`:1002-1028`)
+- `gdpr_pseudonymizer/gui/models/validation_state.py` — the AC1 count, beside `get_pending_count` (`:698-704`) and `get_summary` (`:706-724`)
+- `gdpr_pseudonymizer/gui/widgets/confirm_dialog.py` — read only; the new window passes its `cancel_label`
+- `gdpr_pseudonymizer/gui/i18n/fr.ts`, `en.ts` and their `.qm` files — the approved texts
+- `gdpr_pseudonymizer/validation/workflow.py` (`:138-141`), `validation/ui.py` (`FinalConfirmationScreen`, `:343`) and `validation/models.py` (`ValidationSession`) — the CLI count and line
+- `tests/unit/`, `tests/integration/` — AC6; `CHANGELOG.md` — AC7
+
+### Follow-ups Found by the PO (not ACs, 2026-10-16)
+
+- **(a)** "No" at the CLI's "Ready to process" restarts the review and loses every decision (`workflow.py:144`, `:96`). Lionel was told; it stays as is.
+- **(b)** In English mode every confirm window shows "Annuler" (`confirm_dialog.py:22`), the "Résumé de validation" window included. With QA backlog B21 (batch buttons in French).
+- **(c)** [N] on the last name of a type does not move on (`workflow.py:381`).
+
+### Estimated Effort: 0.5-1 week (single-document validation and the CLI were added by Q1)
+
+---
+
+## Story 10.14: Desktop Batch and Finalization Hand-Offs (Codex release review #1 and #4)
+
+**Added by Lionel, 2026-10-16 (Codex release review):** "Leaks + new 10.11 bugs (Rec.)". The question he answered: "Codex review: which of the confirmed problems must be fixed before releasing 2.3.0? (Details in the previews; numbers are Codex's.)" In his preview, to fix before release: "1 second batch mixes with the first (leak)" and "4 edit during writing leaves part in clear"; later: 5, 9 and 10. The review (`codex exec`, verdict NO-SHIP) read `main` at `fb7917c` and found ten problems; QA reproduced each one on the real code with invented names (probes and logs kept outside the repository, in the orchestrator's analysis folder `r23codex/qa`). This story takes #1 and #4. #3 is Story 10.12, #2 is Story 10.15, #6, #7 and #8 are Story 10.16; #5, #9 and #10 are in the backlog (Close-Out Record).
+
+**As a** desktop-app user,
+**I want** each batch and each finalization to write exactly the review I validated,
+**so that** no name is left in clear because another run or a late change got mixed in.
+
+**Priority:** HIGH — release blocker for v2.3.0 (Lionel, 2026-10-16). Both are leaks (Codex P0).
+**Change type:** desktop app: the batch run's hand-offs between screen and worker, the finalization hand-off, and the review's controls while a document is written. No detection change, so G1, G3 and G5 are N/A. No file under `gdpr_pseudonymizer/nlp/`, `gdpr_pseudonymizer/resources/`, `tests/accuracy/` or `tests/test_corpus/` changes.
+**Ordering:** outside the detector chain. It changes `gui/screens/validation.py`, as 10.13 does, and possibly `gui/models/validation_state.py`, as 10.16 does: never in the same PR as either, and the later one is rebased on the earlier. Open questions 1 and 2 are answered before dev starts. Before the v2.3.0 release.
 
 ### Context
 
 At `main` `fb7917c`:
 
-- **Batch review:** "Valider et continuer" and, on the last document, "Valider et terminer" (`gdpr_pseudonymizer/gui/screens/validation.py:235-238`) both go through the batch branch of `_on_finalize` (`:986-1000`), which sends the validated list to the batch screen at once, with no dialog. The list holds confirmed, modified and added rows only (`gui/models/validation_state.py`, `_validated_rows`); a row still to review is not sent, so the name stays in clear in the written file.
-- **Single-document validation already has a confirmation, but it does not mention names still to review:** "Finaliser" (`validation.py:240`) shows the "Résumé de validation" dialog (`:1002-1028`): "Vous avez accepté %1 entités, rejeté %2, ajouté %3 manuellement et modifié %4 pseudonymes. / Continuer avec la pseudonymisation ?", buttons "Confirmer" and "Annuler" (`gui/widgets/confirm_dialog.py`). Its counts (`get_summary`, `validation_state.py:705-724`) have no "to review" count, so names still to review are also written in clear there, without a word.
-- **The CLI has a related gap:** [N] or the right or down arrow moves to the next name without a decision (`gdpr_pseudonymizer/validation/ui.py:93`, `validation/workflow.py:377-382`). A name skipped that way is never sent, and the final screen (`FinalConfirmationScreen`, `validation/ui.py:343`) and its question "Ready to process document with validated entities?" (`validation/workflow.py:141`) count no names still to review.
-- **10.10 stays:** only the document the batch waits on can be validated (10.10 AC1); "Précédent" and "Suivant" keep each document's decisions (10.10 AC2).
+- **#1, a second batch mixes with the first (Codex P0).**
+  - **Code:** a new batch replaces the worker without stopping or disconnecting the old one (`gui/screens/batch.py:624`, `_launch_worker`: the kept reviews are emptied at `:656`, the new worker is set at `:676`), and the old worker's `validation_required` stays connected to the screen. The kept review and the submission guard identify a document by its index only, not by its run (`gui/screens/validation.py:427`, `batch.review_state(self._doc_index)`; `batch.py:951`, `doc_index != self._awaiting_doc_index`). Nothing stops a second run: File → "Ouvrir un dossier..." (Ctrl+Shift+O, `gui/main_window.py:140`; `_on_open_folder`, `:391-397`) opens the batch screen while a batch runs.
+  - **QA's reproduction:** batch A running; batch B started from File → "Ouvrir un dossier..." and "Démarrer" while A is detecting; the test chooses which worker's signal arrives first.
+    - **A's signal first:** at `eee4d41` (10.10) and at `fb7917c`, B shows A's review ("Zorbal Quentrix signe le contrat A.", the same review object after B's own signal). "Valider et continuer" sends A's positions to B's worker. B's output at `eee4d41`: "Yasmine Seixast signé par Vorlan Mestrix.": B's name in clear and B's text damaged (at `fb7917c`: "Douglas Brancot signé par Vorlan Mestrix."). A's worker waits forever. At `49d4daa` (10.9) and v2.2.0 this order passes.
+    - **B's signal first:** at v2.2.0 the screen then shows A's document, and validating it writes B's output with A's positions: "Éliza Carret signé par Vorlan Mestrix.". At `fb7917c` this order passes.
+  - **So:** two runs at once have leaked in every version tested; 10.10's kept reviews changed which order leaks. 10.10 follow-up (f), "After 10.10 nothing leaks", is wrong for this path (corrected there).
+- **#4, finalization shares live entities with the review (Codex P0).**
+  - **Code:** single-document finalization gives the worker the review's own entity objects (`validation.py:1043`, `expand_validated_entities`; `gui/workers/finalization_worker.py:47` keeps the list as given) and the review's custom pseudonyms. While the document is written only "Finaliser" and "Retour" are disabled (`validation.py:1045-1046`); the editor, the list and undo stay enabled (measured by QA).
+  - **QA's reproduction** (failed at `fb7917c` and at v2.2.0, so pre-existing; since 10.11 it also reaches custom pseudonyms): « Zorbal Quentrix signe le contrat. », the name corrected to « Zorbal » while the worker runs. Output "Louane Sousa Quentrix signe le contrat." with a generated pseudonym, and "Xantor Vellion Quentrix signe le contrat." with the custom pseudonym "Xantor Vellion": the surname stays in clear while the database holds the full name. At v2.2.0, an undo of a type change during writing also wrote a name the user sent as PERSON as an ORG; at `fb7917c` that case passes.
+  - **Batch:** the list the batch screen sends to its worker is built from the same review objects (`validation.py:986-1000` → `batch.py:978`, `submit_validation_result`). Not reproduced as a leak, since the screen leaves the review while the worker writes; the same rule applies.
+- **Not in this story:** #10, the batch worker's lost wake-up (`gui/workers/batch_worker.py:365`; 10.10 follow-up (c)), is in the backlog (Lionel: later). The run identifier must not make it worse.
 
 ### Acceptance Criteria
 
-1. **AC1 — A warning before writing:** in desktop batch review, "Valider et continuer" and "Valider et terminer", on a document with names still to review, show a warning that says how many names are still to review and that they will stay in clear, and asks to confirm. Confirming writes the document as today; cancelling returns to the review, and nothing is sent to the batch and nothing is written. A document with no name to review is written with no warning, as today.
-2. **AC2 — Where else:** single-document validation and the CLI's final confirmation follow open question 1. Nothing is built for them before Lionel's answer.
-3. **AC3 — The text:** the warning's title, message and buttons, in French and English (and the CLI line, if open question 1 brings the CLI in), are user texts that Lionel approves, word for word, before the story is done (open question 2).
-4. **AC4 — Tests first, invented names only:** the tests are committed before the fix and run through the real batch path (the real `BatchScreen`, `ValidationScreen` and `BatchWorker` thread, only detection replaced), as in 10.10. Each expected failure is an `assert` on the dialog shown (with its count) and on the written file, made after the test's preconditions hold, and each failing test is marked `xfail(strict=True, raises=AssertionError)` on the old code (the 10.5 pattern): cancel leaves no output and the batch still waiting; confirm writes the file as today. The fix removes the markers. Existing tests stay green.
-5. **AC5 — CHANGELOG:** `[Unreleased]` gets a "Fixed" entry for the warning.
-6. **AC6 — Codex:** the code is written through Codex (Forge, `ForgeProgress.ts`), as Lionel requires for customer-facing repositories, and the PR gets a `codex exec` review of its final diff before the merge command. If Codex cannot run, the work stops and Lionel is told; no Claude-written code is presented as Codex's.
-7. **AC7 — Gates:**
+1. **AC1 — One batch at a time (#1):** while a batch runs (from "Démarrer" until its summary), opening another document or folder by any route (the File menu and its shortcuts, the recent files, the home screen's buttons and drop zone) is handled as Lionel decides in open question 1. A second worker never runs beside the first.
+2. **AC2 — Every hand-off tied to its run (#1):** each batch run has its own identifier, carried by every signal of its worker, every kept review and every submission. A signal from a worker that is not the current run's is ignored (logged without any name); a kept review is attached only within its own run; a list goes only to the worker of the run its review belongs to. This holds even if a second run starts by a route AC1 missed.
+3. **AC3 — Finalization gets copies (#4):** the entities and the custom pseudonyms a finalization receives, in single-document validation and in batch, are copies made when the user confirms; nothing done in the review afterwards changes them.
+4. **AC4 — The review cannot change while a document is written (#4):** during single-document finalization the editor, the list and undo and redo are disabled, as "Finaliser" and "Retour" already are. They are enabled again if the finalization fails.
+5. **AC5 — Tests first, invented names only:** the tests are committed before the fix and run through the real paths: the real `BatchScreen`, `ValidationScreen` and two `BatchWorker` threads for #1, as in 10.10; the real `ValidationScreen` and `FinalizationWorker` for #4; only detection replaced. Each expected failure is an `assert` on the written file and the stored rows, made after the test's preconditions hold, and each failing test is marked `xfail(strict=True, raises=AssertionError)` on the old code (the 10.5 pattern). The fix removes the markers. Cases:
+   - #1 in both signal orders: B's output holds none of B's names in clear and none of A's text, and A's worker ends;
+   - #4: an edit and an undo made while the worker is held before it reads its input, with a generated and with a custom pseudonym: the written file holds the full pseudonym and no part of the real name, and the stored row matches;
+   - the batch hand-off: the list and the custom pseudonyms the worker gets share no object with the kept review.
+
+   Existing tests stay green.
+6. **AC6 — User copy:** any new visible text (the AC1 message, open question 2) is user copy that Lionel approves, word for word, before the story is done.
+7. **AC7 — CHANGELOG:** `[Unreleased]` gets a "Fixed" entry: opening another folder or document during a batch can no longer mix it with the running batch; a change made in the review while a document is written no longer changes what is written.
+8. **AC8 — Codex:** the code is written through Codex (Forge, `ForgeProgress.ts`), as Lionel requires for customer-facing repositories. The tests-first commit is code too: it is written through Forge, or the final review below covers it explicitly. The PR gets a `codex exec` review of its final diff before the merge command. If Codex cannot run, the work stops and Lionel is told; no Claude-written code is presented as Codex's.
+9. **AC9 — Gates:**
    - **G1, G3 and G5 are N/A:** there is no detection change. The PR states this explicitly. If any file the accuracy suite loads is touched, one regular `accuracy.yaml` run on the branch shows the 16 lines identical to `38212303870`, cited by ID.
-   - **G4:** never in the same PR as a detector change, or as the other release-blocker story.
-   - **G2:** QA re-runs the AC4 tests, checks out the tests-first commit to see them fail on the old code, and reads the diff. QA's gate comes before the merge.
+   - **G4:** never in the same PR as a detector change, or as another Epic 10 story.
+   - **G2:** QA re-runs the AC5 tests and its own #1 and #4 probes, checks out the tests-first commit to see the tests fail on the old code, and reads the diff. QA's gate comes before the merge.
    - **G6** applies in full (black, ruff, mypy, unit tests, full CI green).
-   - **G7:** no headline number changes. CHANGELOG and docs as above.
+   - **G7:** no headline number changes. CHANGELOG as above.
 
 ### Open Questions for Lionel (the orchestrator asks them; nothing is built for them before the answer)
 
-1. **The same warning elsewhere.** The same names stay in clear in two other places, with no warning. In single-document validation, the summary window before writing counts accepted, rejected, added and modified names, but says nothing about names still to review. In the command line, a name skipped with [N] is never pseudonymized, and the final "Ready to process" question does not count such names. Should the warning also come there? Recommendation: yes, in both, in this story: the same names stay in clear there too, and one rule everywhere is easier to remember. Options: both (Rec.); single-document validation only; batch review only, as decided.
-2. **The warning text (to approve word for word; " / " marks a new line).** Proposed, desktop, French: title "Noms encore à vérifier"; message "%1 nom(s) de ce document n'ont été ni acceptés ni rejetés. Ils resteront en clair dans le fichier écrit. / Écrire le document quand même ?"; buttons "Écrire quand même" and "Annuler". English: title "Names still to review"; message "%1 name(s) in this document were neither accepted nor rejected. They will stay in clear in the written file. / Write the document anyway?"; buttons "Write anyway" and "Cancel". Command line (only if question 1 brings it in), added above "Ready to process document with validated entities?": "%1 name(s) were neither accepted nor rejected and will stay in clear in the output." Recommendation: approve as written; the wording follows the existing summary window. Options: approve all; change some.
+1. **Opening something else while a batch runs.** Today, while a batch runs, you can open another folder or document from the File menu. The two runs then mix, and a name can be written in clear (Codex #1). What should happen instead? Recommendation: "Refuse while running": while a batch runs, opening another document or folder shows a short message that says a batch is running and how to stop it; nothing else happens. Nothing is lost by accident, and the batch can always be stopped with its existing "Annuler le lot" button. Other option: "Stop the batch first": a window asks to confirm; on yes, the running batch is cancelled (its documents not yet written are not written), then the new document or folder opens.
+2. **The message (only if question 1 is "Refuse while running"; to approve word for word; " / " marks a new line).** French: title « Lot en cours »; text « Un lot de documents est en cours de traitement. » / « Pour ouvrir un autre document ou dossier, attendez la fin du lot ou cliquez sur « Annuler le lot ». »; button « OK ». English: title "Batch in progress"; text "A batch of documents is being processed." / "To open another document or folder, wait for the batch to finish or click "Cancel batch"."; button "OK". Recommendation: approve as written. It names the existing button as each language shows it (« Annuler le lot », "Cancel batch", `gui/i18n/en.ts:103-104`); the SM checks that both batch screens show that label in English.
 
 ### Integration Points
 
-- `gdpr_pseudonymizer/gui/screens/validation.py` — `_on_finalize` (`:981-1028`), the button texts (`:235-240`)
-- `gdpr_pseudonymizer/gui/models/validation_state.py` — `get_summary` (`:705-724`), the rows still to review
-- `gdpr_pseudonymizer/gui/widgets/confirm_dialog.py` — the dialog (read only, unless a new helper is needed)
-- `gdpr_pseudonymizer/gui/i18n/fr.ts`, `en.ts` and their `.qm` files — the approved texts
-- `gdpr_pseudonymizer/validation/workflow.py` (`:141`) and `validation/ui.py` (`FinalConfirmationScreen`, `:343`) — only if open question 1 brings the CLI in
-- `tests/unit/gui/` or `tests/integration/gui/` — AC4; `CHANGELOG.md` — AC5
+- `gdpr_pseudonymizer/gui/screens/batch.py` — `_launch_worker` (`:624`), `_on_validation_required` (`:875`), the submission guard (`:951`) and submission (`:978`), `review_state` and `store_review_state` (`:987-993`)
+- `gdpr_pseudonymizer/gui/workers/batch_worker.py` — its signals (`:365`) carry the run identifier
+- `gdpr_pseudonymizer/gui/screens/validation.py` — the kept review (`:427`), the batch branch (`:986-1000`), `_start_finalization` (`:1032-1065`)
+- `gdpr_pseudonymizer/gui/workers/finalization_worker.py` (`:47`)
+- `gdpr_pseudonymizer/gui/main_window.py` — the open routes (`:135`, `:140`, `_on_open_folder` `:391`); `gui/screens/home.py`; `gui/widgets/drop_zone.py`
+- `gdpr_pseudonymizer/gui/i18n/fr.ts`, `en.ts` and their `.qm` files — AC6
+- `tests/unit/gui/`, `tests/integration/gui/` — AC5; `CHANGELOG.md` — AC7
 
-### Estimated Effort: 0.5 week
+### Estimated Effort: 1-1.5 weeks (the real-thread tests of both signal orders are the long pole)
+
+---
+
+## Story 10.15: CLI Corrections on Spreadsheets (Codex release review #2)
+
+**Added by Lionel, 2026-10-16 (Codex release review):** "Leaks + new 10.11 bugs (Rec.)" (the question is quoted in Story 10.14). In his preview, to fix before release: "2 CLI: corrected Excel/CSV names stay in clear".
+
+**As a** CLI user reviewing an Excel or CSV file,
+**I want** a name I correct ([E]) or retype ([T]) to be replaced in its cell,
+**so that** it is not left in clear while its pseudonym is stored.
+
+**Priority:** HIGH — release blocker for v2.3.0 (Lionel, 2026-10-16). A leak (Codex P0), in every version tested.
+**Change type:** the CLI validation path for spreadsheets and the spreadsheet writer's matching of names to cells. No detection change, so G1, G3 and G5 are N/A. No file under `gdpr_pseudonymizer/nlp/`, `gdpr_pseudonymizer/resources/`, `tests/accuracy/` or `tests/test_corpus/` changes.
+**Ordering:** outside the detector chain. It changes `validation/models.py` and `validation/workflow.py`; Story 10.16 may change `validation/workflow.py` too: never in the same PR, and the later one is rebased on the earlier. Before the v2.3.0 release.
+
+### Context
+
+At `main` `fb7917c`:
+
+- **How a spreadsheet goes through the CLI:** each cell is detected on its own; each name carries its cell in `context_label`, with positions inside the cell's text (`core/document_processor.py:1244-1294`, the label at `:1279`). The review shows the cells joined by line breaks (`:1197`). After the review, replacements are grouped by `context_label` and applied cell by cell (`_apply_tabular_replacements`, `:1345-1391`; `ref = entity.context_label or ""`, `:1372`). A replacement with no `context_label` matches no cell and is dropped without a word, while its mapping row is stored.
+- **[T] loses the cell:** `ValidationSession.change_entity_type` builds the retyped name without `context_label` (`validation/models.py:309-337`, the rebuild at `:327-337`).
+- **[E] loses the cell and puts the span in the wrong text:** the correction builds the corrected name without `context_label` (`validation/workflow.py:287-303`) and locates it in the joined review text (`_locate_modified_span`, `:541`, on `session.document_text`), so its positions are not positions inside the cell.
+- **Two more, found by reading the code, not probed:** `_sent_entity` builds a corrected name without `context_label` when it has no `modified_entity` (`validation/models.py:389-404`); [A] adds a name found in the joined text, with no cell (`_handle_add_entity`, `validation/workflow.py:569-606`).
+- **QA's reproduction** (the real CLI driven by keys, ".xlsx" and ".csv"; failed at `fb7917c` and at v2.2.0, so pre-existing):
+  - **[T]:** "Zorbal Quentrix", detected as ORG and retyped PERSON. Output cells `[['Nom', 'Note'], ['Brune Perrier', 'valide'], ['Zorbal Quentrix', 'signe']]`: the name in clear, while the database holds a row ('Zorbal Quentrix', PERSON) with the pseudonym 'Inaya Paul'.
+  - **[E]:** "Zorbal Quentrix signe" detected, corrected to "Zorbal Quentrix". The output cell "Zorbal Quentrix signe le contrat" is in clear; a row is stored for the name.
+  - The run reports success both times.
+- **The desktop app:** its review keeps `context_label` on corrections (`gui/models/validation_state.py:741`, `:791`). Not probed for this story.
+
+### Acceptance Criteria
+
+1. **AC1 — The cell is kept:** in the CLI, on a spreadsheet, a name corrected with [E], retyped with [T], corrected then retyped, or given a custom pseudonym after a correction keeps its cell. It is replaced in that cell, at every place of its group, and its stored row matches what is written.
+2. **AC2 — A correction is found inside its cell:** a correction is located in the text of the cell the name came from, not in the joined review text. Where it is not found there, that place keeps its span, as on the text path (`_locate_modified_span`).
+3. **AC3 — A name added with [A]:** on a spreadsheet, a name added by hand is replaced in the cell where it was found, as on the text path.
+4. **AC4 — No silent drop:** if a replacement still matches no cell, the run stops with an error before anything is written or stored: no output file, no new mapping row, and no success message. The error text is user copy (AC6).
+5. **AC5 — Tests first, invented names only:** the tests are committed before the fix and drive the real CLI review with keys on ".xlsx" and ".csv": [T]; [E]; [E] then [T]; [A]; [C] after [E]; plus a test of AC4 on a replacement with no cell. Each expected failure is an `assert` on the output cells and the stored rows, made after the test's preconditions hold, and each failing test is marked `xfail(strict=True, raises=AssertionError)` on the old code (the 10.5 pattern). The fix removes the markers. A case that passes on the old code (for example [A], which was not probed) stays as a guard, and the SM records it. Existing tests stay green.
+6. **AC6 — User copy:** the AC4 error text, and any other new visible text, is user copy that Lionel approves, word for word, before the story is done.
+7. **AC7 — CHANGELOG:** `[Unreleased]` gets a "Fixed" entry: in the CLI, on Excel and CSV files, a name corrected with [E] or retyped with [T] was left in clear in its cell while its pseudonym was stored (every earlier version); it is now replaced.
+8. **AC8 — Codex:** the code is written through Codex (Forge, `ForgeProgress.ts`), as Lionel requires for customer-facing repositories. The tests-first commit is code too: it is written through Forge, or the final review below covers it explicitly. The PR gets a `codex exec` review of its final diff before the merge command. If Codex cannot run, the work stops and Lionel is told; no Claude-written code is presented as Codex's.
+9. **AC9 — Gates:**
+   - **G1, G3 and G5 are N/A:** there is no detection change. The PR states this explicitly. If any file the accuracy suite loads is touched, one regular `accuracy.yaml` run on the branch shows the 16 lines identical to `38212303870`, cited by ID.
+   - **G4:** never in the same PR as a detector change, or as another Epic 10 story.
+   - **G2:** QA re-runs the AC5 tests and its own #2 probe, checks out the tests-first commit to see the tests fail on the old code, and reads the diff. QA's gate comes before the merge.
+   - **G6** applies in full (black, ruff, mypy, unit tests, full CI green).
+   - **G7:** no headline number changes. CHANGELOG as above.
+
+### Integration Points
+
+- `gdpr_pseudonymizer/validation/models.py` — `change_entity_type` (`:309-337`), `_sent_entity` (`:389-404`)
+- `gdpr_pseudonymizer/validation/workflow.py` — [E] (`:287-303`), `_locate_modified_span` (`:541`), [A] (`_handle_add_entity`, `:569-606`)
+- `gdpr_pseudonymizer/core/document_processor.py` — `_process_document_tabular` (`:1182-1242`), `_apply_tabular_replacements` (`:1345-1391`)
+- `tests/unit/`, `tests/integration/` — AC5; `CHANGELOG.md` — AC7
+
+### Estimated Effort: 0.5-1 week
+
+---
+
+## Story 10.16: Custom Pseudonym Fixes (Codex release review #8, #6 and #7)
+
+**Added by Lionel, 2026-10-16 (Codex release review):** "Leaks + new 10.11 bugs (Rec.)" (the question is quoted in Story 10.14). In his preview, to fix before release: "8 lowercase real name accepted as own pseudonym", "6 own first name reused as someone's surname" and "7 false error after a correction". All three are gaps in Story 10.11, whose feature is new in 2.3.0: #8 can leave a real name in clear, #6 lets two people share part of a pseudonym, and #7 refuses a valid document.
+
+**As a** user who sets my own pseudonym for a name,
+**I want** it refused when it repeats the real name, whatever its capitals; never shared with another person's generated pseudonym; and applied to the name I set it for,
+**so that** my own pseudonym never brings back the real name or merges two people, and a valid document is written.
+
+**Priority:** HIGH — before the v2.3.0 release (Lionel, 2026-10-16). Codex P1.
+**Change type:** the shared checks and the generation guard (`core/custom_pseudonym.py`), the desktop review's reach of a custom pseudonym, and the callers of the check in the desktop app, the CLI and finalization. No detection change, so G1, G3 and G5 are N/A. No file under `gdpr_pseudonymizer/nlp/`, `gdpr_pseudonymizer/resources/`, `tests/accuracy/` or `tests/test_corpus/` changes.
+**Ordering:** outside the detector chain, after 10.11 (merged, `b2042c7`). It changes `gui/models/validation_state.py` (as 10.14 may) and may change `validation/workflow.py` (as 10.15 does): never in the same PR as either, and the later one is rebased on the earlier. Before the v2.3.0 release.
+
+### Context
+
+At `main` `fb7917c`:
+
+- **#8, the real-name check ignores a lowercase name the user reviewed (Codex P1).**
+  - **Code:** the document part of the check counts only words with a capital (`core/custom_pseudonym.py:538-540`, Lionel's Q-C); the database part counts only full names already stored (`:541-544`, Q-C2). Nothing compares the custom pseudonym with the name it replaces, or with the other names of the review, when they are written in small letters.
+  - **QA's reproduction** (fresh database, « zorbal quentrix signe le contrat. », the name reviewed as PERSON; the CLI and the desktop app): "Xantor Quentrix" is accepted and the output is "Xantor Quentrix signe le contrat.", the real surname kept; "zorbal quentrix" is accepted and the output is "zorbal quentrix signe le contrat.", the real name in clear and stored as its own pseudonym. The desktop app shows no refusal either. Control: with « Zorbal Quentrix » capitalised, "Xantor Quentrix" is refused.
+  - **The PM's reading (no new question):** Lionel's Q-C ("Capitalised words", 2026-10-15) is about the document's other words, which the detector may not have found: a common word in small letters must not block a pseudonym ("Grace Vellion" accepted beside « grâce »). A name the user reviewed is known to be a name, whatever its capitals. Lionel put #8 among the fixes before release (2026-10-16). So: the names of the review count whatever their capitals; the document's other words in small letters still do not.
+- **#6, the generation guard lets a generated pseudonym take a custom part in the other role, or with another spelling (Codex P1; new in 10.11, its AC19).**
+  - **Code:** `untracked_custom_values` (`core/custom_pseudonym.py:608-647`) leaves out a custom part that the library already tracks for its real word (`:646`), assuming the library protects it. The library keeps first names and last names apart, and compares exact spellings (`pseudonym/library_manager.py:788-797`, `:637-643`).
+  - **QA's reproduction** (the library's draw forced, so rare in practice but reachable): custom "Martin Vellion" stored for "Zorbal Quentrix"; a later "Brimel Testar" gets "Dylan Martin", with "Martin" as a last name. Custom "Clement Vellion"; "Brimel Testar" gets "Clément Pereira". Control: "Martin" drawn as a first name is drawn again; and "Alice Martin" or "Clément Xorvan" typed as a custom pseudonym is refused (Q2).
+- **#7, a custom pseudonym spreads by detected names, while the check and finalization use current names (Codex P1; new in 10.11, its Q3).**
+  - **Code:** `_pseudonym_rows` (`gui/models/validation_state.py:478-497`) compares each row's fixed detected name (`_mapping_name`, `:470-476`; the comparison at `:492`), while `get_custom_pseudonyms` keys by the current name, after corrections and type changes (`_sent_name`, `:499-505`; `:507-517`).
+  - **QA's reproduction** (batch review, rows « Zorbal Quentrix » and « M. Zorbal Quentrix »): the first row corrected to « Zorbal » (or retyped ORG), then "Xantor Vellion" set on the second: both rows carry it, so two names share it, ('Zorbal', PERSON) and ('Zorbal Quentrix', PERSON). Finalization refuses the document with "A pseudonym you chose can no longer be used: it, or a part of it, is now used for another name. Nothing was written."; no output file, no row. Not a leak: the document is not written.
+
+### Acceptance Criteria
+
+1. **AC1 — The review's names count whatever their capitals (#8):** a person's custom pseudonym is refused, with the real-name message Lionel approved for 10.11 (Q-A), when one of its runs of whole words (read as Q-C reads them, with Q-I's linking-word rule) equals, capitals and accents ignored, a word or a run of words of the name it replaces, or of another name of the review. When the pseudonym is set, the other names are those not rejected; at finalization, the names sent to the file. An organisation's or a place's pseudonym is compared whole, the same way. The Q-C rule for the document's other words is unchanged: words in small letters still do not count. This holds in the desktop app, the CLI and the finalization check.
+2. **AC2 — The generation guard keeps roles and spellings (#6):** a generated pseudonym never takes, for another real name, a beginning or an ending of a person's stored custom pseudonym, whatever role (first or last name) the library gives it, and capitals and accents ignored. The only reuse allowed is the one 10.11 already requires: a part bound to the same real first or last name, in the same role (10.11 AC2, Q-D).
+3. **AC3 — A custom pseudonym follows the current name (#7):** in review, a custom pseudonym reaches the rows whose current name (text after corrections, and current type, as `_sent_name` reads them) is the row's own, not the rows with the same detected name. The whole reach is checked before it is applied, so a pseudonym that is accepted is never refused at finalization for a clash inside the same review. 10.11's Q3 and Q-B (every place, like a correction) and Q-E (a later correction removes it) are unchanged.
+4. **AC4 — Tests first, invented names only:** the tests are committed before the fix. Each expected failure is an `assert` on the refusal shown, or on the written file and the stored rows, made after the test's preconditions hold, and each failing test is marked `xfail(strict=True, raises=AssertionError)` on the old code (the 10.5 pattern). The fix removes the markers. Cases:
+   - #8, in the CLI, the desktop app and finalization: a custom pseudonym equal to the lowercase name; one that repeats its lowercase surname; one that repeats another reviewed lowercase name; control: a lowercase common word of the document still does not block (Q-C's "Grace Vellion" case);
+   - #6, with the library's draw forced: the other role, an accent variant, and the same-role control;
+   - #7, through the real batch path: after a correction and after a type change, the written file and the stored rows.
+
+   Existing tests stay green; a 10.11 test changes only if it encodes the old reach, each for a stated reason.
+5. **AC5 — No new text:** the refusals use the messages Lionel approved for 10.11 (Q-A). If a new text seems needed, it is user copy for his approval, word for word, before the story is done.
+6. **AC6 — CHANGELOG:** the 10.11 entry in `[Unreleased]` (the feature is unreleased) says what changes for the user: a custom pseudonym that repeats a name of the review, whatever its capitals, is refused.
+7. **AC7 — Codex:** the code is written through Codex (Forge, `ForgeProgress.ts`), as Lionel requires for customer-facing repositories. The tests-first commit is code too: it is written through Forge, or the final review below covers it explicitly. The PR gets a `codex exec` review of its final diff before the merge command. If Codex cannot run, the work stops and Lionel is told; no Claude-written code is presented as Codex's.
+8. **AC8 — Gates:**
+   - **G1, G3 and G5 are N/A:** there is no detection change. The PR states this explicitly. If any file the accuracy suite loads is touched, one regular `accuracy.yaml` run on the branch shows the 16 lines identical to `38212303870`, cited by ID.
+   - **G4:** never in the same PR as a detector change, or as another Epic 10 story.
+   - **G2:** QA re-runs the AC4 tests and its own #6, #7 and #8 probes, checks out the tests-first commit to see the tests fail on the old code, and reads the diff. QA's gate comes before the merge.
+   - **G6** applies in full (black, ruff, mypy, unit tests, full CI green).
+   - **G7:** no headline number changes. CHANGELOG as above.
+
+### Integration Points
+
+- `gdpr_pseudonymizer/core/custom_pseudonym.py` — `check_custom_pseudonym` (`:486-546`, the real-name part `:538-544`), `untracked_custom_values` (`:608-647`)
+- `gdpr_pseudonymizer/core/document_processor.py` — the CLI check (`:393-413`), the finalization check (`_register_custom_pseudonyms`, `:416`; the check at `:443-459`), the guard's inputs (`:480`, `:874`)
+- `gdpr_pseudonymizer/gui/models/validation_state.py` — `_pseudonym_rows` (`:478-497`), `_sent_name` (`:499-505`), the desktop check (`:561`)
+- `gdpr_pseudonymizer/validation/workflow.py` — only if the CLI check needs the review's other names
+- `tests/unit/`, `tests/integration/` — AC4; `CHANGELOG.md` — AC6
+
+### Estimated Effort: 0.5-1 week
 
 ---
 
@@ -1156,8 +1404,11 @@ Story 10.8 (Desktop app type-aware keys)  --- 0.5 week, before 10.7 --- no accur
 Story 10.9 (Edit at every occurrence)     --- 0.5 week, after 10.8 --- no accuracy baseline (desktop app)
 Story 10.10 (Batch review fixes)          --- 0.5-1 week, dev after 10.9 merges --- no accuracy baseline (desktop app)
 Story 10.11 (Custom pseudonym used)       --- 1.5 weeks, after 10.7 and 10.10 --- no accuracy baseline (desktop app + data layer)
-Story 10.12 (Erasure log, no name)        --- 0.5-1 week, release blocker --- no accuracy baseline (CLI + docs)
-Story 10.13 (Batch pending warning)       --- 0.5 week, release blocker --- no accuracy baseline (desktop app)
+Story 10.12 (Erasure log, no name)        --- 1 week, release blocker --- no accuracy baseline (CLI + data layer + docs)
+Story 10.13 (Warning, names to review)    --- 0.5-1 week, release blocker --- no accuracy baseline (desktop app + CLI)
+Story 10.14 (Batch, finalization hand-offs) --- 1-1.5 weeks, release blocker --- no accuracy baseline (desktop app)
+Story 10.15 (CLI spreadsheet corrections) --- 0.5-1 week, release blocker --- no accuracy baseline (CLI)
+Story 10.16 (Custom pseudonym fixes)      --- 0.5-1 week, release blocker --- no accuracy baseline (desktop app + CLI + core)
 ```
 
 **Strictly sequential:** 10.1 → 10.2 → 10.3a → 10.3b → 10.3c → 10.4. Each story's baseline is the previous story's merged close-out G1 run. No parallel detector stories: overlapping changes would make G3/G4 attribution impossible.
@@ -1176,7 +1427,7 @@ Story 10.13 (Batch pending warning)       --- 0.5 week, release blocker --- no a
 
 **Story 10.11** is outside the chain too: it changes no detection (desktop review, the CLI validation path and the mapping data layer), so it has no accuracy baseline. It comes after 10.7 and 10.10 (both merged); Lionel's decisions are recorded (2026-10-15).
 
-**Stories 10.12 and 10.13** are release blockers outside the chain: neither changes detection, so neither has an accuracy baseline. They are independent of each other and never in the same PR; both land before the v2.3.0 release.
+**Stories 10.12 to 10.16** are release blockers outside the chain: none changes detection, so none has an accuracy baseline. Each is its own PR, never shared with another story, and all five land before the v2.3.0 release. Where two change the same file they merge one after the other, the later one rebased on the earlier: 10.13 and 10.14 both change `gui/screens/validation.py`; 10.14 and 10.16 may both change `gui/models/validation_state.py`; 10.15 and 10.16 may both change `validation/workflow.py`. 10.12 shares no file with the others. Suggested order: 10.12 and 10.15 at any time; on the desktop side 10.13 (its questions are answered), then 10.14 (once Lionel answers its two questions), then 10.16.
 
 **Epic close-out baseline:** the 10.4 merged G1 run (main + held-out) is the baseline Epic 9 starts from, together with the one final-exam run (10.6) and its ranges.
 
@@ -1193,7 +1444,8 @@ Story 10.13 (Batch pending warning)       --- 0.5 week, release blocker --- no a
   - **Several processes:** concurrent opens are serialised by the write lock (with a busy timeout); a process that waited sees the converted file and changes nothing.
   - **Failure:** if the conversion fails, the open stops with the new error class and the file is untouched.
   - **Going back:** opening a converted file with 2.2 or older is unsafe. The CHANGELOG tells users to copy their database file before upgrading if they may need to go back. No automatic copy is kept (a kept copy would still hold names erased later).
-- [ ] UI changes: none; validation stays mandatory. Exception, Story 10.11: the refusal messages Lionel approved word for word (desktop French and English, the CLI, the rare finalization error; Q-A, 2026-10-15); the theme value "custom" shown in `list-mappings` (and its exports), `validate-mappings`, `delete-mapping` and `stats`; internally, `validation_complete` gains an argument and `finalize_document` an optional one. The schema is unchanged and its version is not bumped
+- [ ] Database after 10.12 (Lionel, 2026-10-16, Q1 and Q2): no schema change and no version bump. On the first open by 2.3.0, after the 10.7 conversion, the names are removed from the ERASURE entries written by earlier versions and the file is compacted once (`VACUUM`, then a TRUNCATE checkpoint); a metadata row records a compaction still due, retried at the next open. Every connection deletes with `secure_delete`. New ERASURE entries hold no name
+- [ ] UI changes: none; validation stays mandatory. Exception, Story 10.11: the refusal messages Lionel approved word for word (desktop French and English, the CLI, the rare finalization error; Q-A, 2026-10-15); the theme value "custom" shown in `list-mappings` (and its exports), `validate-mappings`, `delete-mapping` and `stats`; internally, `validation_complete` gains an argument and `finalize_document` an optional one. The schema is unchanged and its version is not bumped. Exceptions, release blockers (2026-10-16): Story 10.13's warning window (batch and single document) and CLI line, approved by Lionel word for word; Story 10.14's handling of an open during a batch and its message, as Lionel decides (its open questions); Story 10.15's error text; the `--reason` help of Story 10.12. Each new text is approved by Lionel word for word
 - [ ] Performance impact is minimal (post-filters are linear in the number of detections; single-document NFR1 still met)
 
 ---
@@ -1215,8 +1467,12 @@ Story 10.13 (Batch pending warning)       --- 0.5 week, release blocker --- no a
 | Desktop app edit leaves other occurrences in clear: editing a name in the review list changes one occurrence, and the others are not pseudonymized (since v2.0.0; not a 10.3c regression) | MEDIUM | HIGH | Story 10.9 (HIGH, before the next release): an edit applies to every occurrence of that name and type, as in the CLI (`validation/workflow.py:242-259`); tests first with invented names; QA before merge |
 | Desktop batch review leaks (pre-existing, found by QA on 10.8): "Précédent" then "Valider et continuer" writes the waiting document with an earlier document's positions (names in clear, text damaged); "Précédent" then "Suivant" drops decisions already made; a reject on a hand-added row rejects the detected rows | MEDIUM | HIGH | Story 10.10 (HIGH, before any release): each document's result and decisions stay its own; a hand-added row acts on itself only; tests first through the real batch worker, with invented names; QA before merge |
 | Custom pseudonym advertised but never used (every version since v1.0.0; QA PRE-004 on 10.8): the user believes the chosen pseudonym is in the file, but a generated one is written. A careless fix could give two names one pseudonym | HIGH (every use) | MEDIUM (no leak; wrong output, lost trust) | Story 10.11 (HIGH, before release): the pseudonym is used in the file and stored for that (text, type); tests assert the written output; a clash or an already-stored pseudonym is refused (Lionel's Q1, Q2, Q-C and Q-D, 2026-10-15); the two older CLI review leaks with [P] are fixed in the same story (Q-F, AC11) |
-| An erased person's name stays in the database file (every version since v1.1.0; QA B1): `delete-mapping` writes it, unencrypted, into the operations log, and `export` copies it out | HIGH (every erasure) | HIGH (privacy; defeats the erasure) | Story 10.12 (release blocker): the log keeps date, row id, type and reason, not the name; older entries as Lionel decides (10.12 open question 1); docs corrected |
-| Batch review writes names still to review in clear with no warning (QA B2; 10.10 follow-up (d)) | MEDIUM | HIGH (privacy) | Story 10.13 (release blocker): a warning with the count before writing; text approved by Lionel; scope beyond batch as he decides (10.13 open question 1) |
+| An erased person's name stays in the database file (every version since v1.1.0; QA B1; Codex #3): `delete-mapping` writes it, unencrypted, into the operations log, `export` copies it out, and every deletion leaves 7 encrypted copies in freed space | HIGH (every erasure) | HIGH (privacy; defeats the erasure) | Story 10.12 (release blocker): the log keeps date, row id, type and reason, not the name; names already in the log removed and the file compacted once on the first 2.3.0 open (Q1); every deletion overwrites the deleted data (Q2); docs corrected and `--reason` asks for a request reference (Q3). Out of reach, said in the docs: earlier exports, mapping exports, copies never opened by 2.3.0 |
+| Names still to review written in clear with no warning, in batch review, single-document validation and the CLI (QA B2; 10.10 follow-up (d)) | MEDIUM | HIGH (privacy) | Story 10.13 (release blocker): a warning with the count of names that would stay in clear, before writing; the texts approved by Lionel word for word (2026-10-16) |
+| Two runs mix in the desktop app (Codex #1, in every version tested) or a late change in the review alters what is written (Codex #4, pre-existing): names in clear | MEDIUM | HIGH (privacy) | Story 10.14 (release blocker): one batch at a time, as Lionel decides; every hand-off tied to its run; finalization gets copies and the review cannot change while a document is written; tests first through real worker threads |
+| CLI [E] and [T] on Excel and CSV files leave the name in clear while its pseudonym is stored (Codex #2, every version tested) | MEDIUM (spreadsheets, corrections) | HIGH (privacy) | Story 10.15 (release blocker): the cell is kept and the correction found inside it; a replacement that matches no cell stops the run before anything is written or stored |
+| A custom pseudonym repeats a lowercase real name, shares a part with a generated pseudonym, or makes finalization refuse a valid document (Codex #8, #6, #7; new in 10.11) | LOW (custom pseudonyms only) | HIGH for #8 (a name in clear), MEDIUM for #6 and #7 | Story 10.16 (release blocker): the review's names count whatever their capitals; the guard keeps roles and spellings; the reach follows the current name |
+| Rare races left for later (Codex #5, #9, #10; Lionel: later): two programs on one mapping database, two programs opening a pre-10.7 file at once, a lost wake-up in the batch worker | LOW | MEDIUM (a mapping out of step, a false open error, a hung batch) | Backlog (Close-Out Record); the release notes can tell users to use one program at a time on a mapping database (user copy) |
 | Final-exam set seen or used before close-out (leak) | LOW | HIGH | Kept in a workspace outside the repo until 10.4 merges, so no rule writer (agent, or Lionel at STOP R) can draw on it during detector work; Lionel sees no content before 10.4 merges; sha256 fingerprints recorded at freeze and checked at commit and before the scored run; adjudication view from a deterministic script that agents never read; plain files committed only after adjudication, outside every regular accuracy path; plain-text leakage guard on every CI run from that commit (its first run checks every file 10.3c and 10.4 added); no exam text in public CI logs; isolation rule restated in every later story (10.6 AC5-AC8). No encryption: it guarded nothing beyond this (Q5 reversed, Lionel, 2026-10-09) |
 | Final-exam score well below main or held-out | MEDIUM | MEDIUM | It is information, not a failure: no tuning in response inside Epic 10. Lionel picks the public number (10.6 AC9). The gap goes to Epic 9 as evidence |
 | Double annotation and adjudication delay close-out | MEDIUM | MEDIUM | 10.6 starts now, in parallel; both annotations are model runs, done before 10.4 merges; Lionel adjudicates only the disagreements plus a spot-check of about 3 agreed documents (10.6 AC5); close-out waits for that adjudication, the commit and one scored run, not for any further detector story |
@@ -1231,7 +1487,7 @@ Story 10.13 (Batch pending warning)       --- 0.5 week, release blocker --- no a
 
 ## Definition of Done
 
-- [ ] All 15 stories (10.1, 10.2, 10.3a, 10.3b, 10.3c, 10.4, 10.5, 10.6, 10.7, 10.8, 10.9, 10.10, 10.11, 10.12, 10.13) completed with acceptance criteria met (10.5, 10.7, 10.8, 10.9, 10.10, 10.11, 10.12 and 10.13: G1/G3/G5 N/A, no detection change; 10.6: G1/G3/G5 N/A for building the set, its scored-once run is a G1 run)
+- [ ] All 18 stories (10.1, 10.2, 10.3a, 10.3b, 10.3c, 10.4, 10.5, 10.6, 10.7, 10.8, 10.9, 10.10, 10.11, 10.12, 10.13, 10.14, 10.15, 10.16) completed with acceptance criteria met (10.5 and 10.7 to 10.16: G1/G3/G5 N/A, no detection change; 10.6: G1/G3/G5 N/A for building the set, its scored-once run is a G1 run)
 - [x] Every story closed with a cited G1 run and an independent G2 check
 - [x] No unapproved recall drop (G3) at any story
 - [x] Held-out set exists and is reported for 10.2, 10.3a, 10.3b, 10.3c and 10.4 (G5)
@@ -1256,6 +1512,7 @@ Story 10.13 (Batch pending warning)       --- 0.5 week, release blocker --- no a
 | "Keyword + connector(s)" ORG widening, R-KWC ("Chambre d'Agriculture d'Eure-et-Loir", "Cour d'Appel de Paris"). Dry-runs (local, not CI results): 10.3a +1 ORG TP; 10.3b 0 change | Deferred out of 10.3a at STOP R (Lionel, 2026-10-06): it adds new recall rather than fixing a boundary. Routed to 10.4 at 10.3b STOP R (Lionel, 2026-10-07), together with QA REQ-001 (same prefix pattern) | 10.4 candidate item (not an AC) |
 | Encoder NER models (CamemBERT-NER, …) | Lionel decision | Epic 9 |
 | Auto-accept / no-validation modes | Product constraint 3 | Parked in Epic 9 |
+| Codex release review #5, #9 and #10 (two programs on one mapping database, a conversion race between two programs, a lost wake-up in the batch worker) | Lionel, 2026-10-16: later; rare races, #9 new with 10.7, the others pre-existing | Backlog (Close-Out Record) |
 | v2.3.0 release | Only on Lionel's explicit go | Separate release story |
 
 ---
@@ -1281,6 +1538,6 @@ The epic should maintain system integrity while delivering higher detection prec
 
 ---
 
-**Document Status:** Re-opened for two release blockers (Lionel 2026-10-16): Stories 10.12 and 10.13. Stories 10.1 to 10.11 were done on 2026-10-15
+**Document Status:** Re-opened for release blockers (Lionel 2026-10-16): Stories 10.12 and 10.13 (QA B1, B2; Lionel's answers recorded) and 10.14 to 10.16 (Codex release review; 10.14 has two open questions). Stories 10.1 to 10.11 were done on 2026-10-15
 **Created:** 2026-10-02
 **Author:** John (PM)
