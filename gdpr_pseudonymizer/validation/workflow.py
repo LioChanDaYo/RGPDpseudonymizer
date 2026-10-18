@@ -55,6 +55,7 @@ class ValidationWorkflow:
         pseudonym_assigner: Callable[[DetectedEntity], str] | None = None,
         pseudonym_checker: PseudonymChecker | None = None,
         custom_pseudonyms: dict[NameKey, str] | None = None,
+        sent_without_review: list[DetectedEntity] | None = None,
     ) -> list[DetectedEntity]:
         """Execute the validation workflow.
 
@@ -68,6 +69,8 @@ class ValidationWorkflow:
             custom_pseudonyms: When given, filled at the end with the custom
                 pseudonyms of the names sent, keyed by (mapping key, type)
                 (Story 10.11; optional)
+            sent_without_review: Known entities written without review, included
+                in Story 10.13 coverage per Lionel's decision of 2026-10-16.
 
         Returns:
             List of validated entities after user review
@@ -130,13 +133,18 @@ class ValidationWorkflow:
                 pseudonym_assigner,
                 pseudonym_checker,
                 custom_pseudonyms,
+                sent_without_review=sent_without_review,
             )
 
         # Step 3: Ambiguous entities are handled during review
 
         # Step 4: Display final confirmation
         summary_stats = session.get_summary_stats()
-        self.final_screen.display(summary_stats)
+        # Story 10.13: count pending names that finalization leaves in clear.
+        still_to_review = session.names_left_in_clear(
+            sent_without_review=sent_without_review or []
+        )
+        self.final_screen.display(summary_stats, still_to_review=still_to_review)
 
         if not get_confirmation("Ready to process document with validated entities?"):
             display_info_message("Validation cancelled. Returning to review.")
@@ -148,6 +156,7 @@ class ValidationWorkflow:
                 pseudonym_assigner,
                 pseudonym_checker,
                 custom_pseudonyms,
+                sent_without_review=sent_without_review,
             )
 
         # Step 5: Return validated entities (and, Story 10.11, the custom
@@ -668,6 +677,7 @@ def run_validation_workflow(
     pseudonym_assigner: Callable[[DetectedEntity], str] | None = None,
     pseudonym_checker: PseudonymChecker | None = None,
     custom_pseudonyms: dict[NameKey, str] | None = None,
+    sent_without_review: list[DetectedEntity] | None = None,
 ) -> list[DetectedEntity]:
     """Execute interactive validation workflow.
 
@@ -682,6 +692,8 @@ def run_validation_workflow(
             (Story 10.11; optional)
         custom_pseudonyms: When given, filled with the custom pseudonyms of
             the names sent, keyed by (mapping key, type) (Story 10.11)
+        sent_without_review: Known entities written without review, included
+            in Story 10.13 coverage per Lionel's decision of 2026-10-16.
 
     Returns:
         List of validated entities after user review
@@ -697,4 +709,5 @@ def run_validation_workflow(
         pseudonym_assigner,
         pseudonym_checker,
         custom_pseudonyms,
+        sent_without_review=sent_without_review,
     )

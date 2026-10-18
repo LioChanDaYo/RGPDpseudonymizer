@@ -42,6 +42,7 @@ if TYPE_CHECKING:
     from gdpr_pseudonymizer.gui.main_window import MainWindow
     from gdpr_pseudonymizer.gui.screens.batch import BatchScreen
     from gdpr_pseudonymizer.gui.workers.detection_worker import DetectionResult
+    from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 
 logger = get_logger(__name__)
 
@@ -991,6 +992,8 @@ class ValidationScreen(QWidget):
             if not self._is_awaiting_document():
                 return
             validated = self._validation_state.get_validated_entities()
+            if not self._confirm_names_left_in_clear(validated):
+                return
             # Story 10.11: the custom pseudonyms of the names sent go with
             # the list (passed on to finalization only when there is one)
             self.validation_complete.emit(
@@ -998,6 +1001,11 @@ class ValidationScreen(QWidget):
                 validated,
                 self._validation_state.get_custom_pseudonyms(),
             )
+            return
+
+        if not self._confirm_names_left_in_clear(
+            self._validation_state.expand_validated_entities()
+        ):
             return
 
         from gdpr_pseudonymizer.gui.widgets.confirm_dialog import ConfirmDialog
@@ -1028,6 +1036,36 @@ class ValidationScreen(QWidget):
 
         # Start finalization
         self._start_finalization()
+
+    def _confirm_names_left_in_clear(self, sent: list[DetectedEntity]) -> bool:
+        """Confirm pending names for Story 10.13 AC2, AC3 and AC5.
+
+        Texts approved by Lionel on 2026-10-16.
+        """
+        if self._validation_state is None:
+            return False
+        count = self._validation_state.names_left_in_clear(sent)
+        if count == 0:
+            return True
+
+        from gdpr_pseudonymizer.gui.widgets.confirm_dialog import ConfirmDialog
+
+        dlg = ConfirmDialog(
+            title=self.tr("Noms encore à vérifier"),
+            message=qarg(
+                self.tr(
+                    "Noms encore à vérifier dans ce document : %1.\n"
+                    "Un nom ni accepté ni rejeté n'est pas pseudonymisé : "
+                    "il reste en clair dans le fichier de sortie.\n"
+                    "Continuer quand même ?"
+                ),
+                str(count),
+            ),
+            confirm_label=self.tr("Continuer quand même"),
+            cancel_label=self.tr("Annuler"),
+            parent=self._main_window,
+        )
+        return bool(dlg.exec())
 
     def _start_finalization(self) -> None:
         """Launch FinalizationWorker with validated entities."""

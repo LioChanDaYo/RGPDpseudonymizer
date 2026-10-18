@@ -340,6 +340,10 @@ class ReviewScreen:
         self.console.print()
 
 
+# Story 10.13: wording approved by Lionel on 2026-10-16.
+STILL_TO_REVIEW_LINE = "⚠ Still to review: %1 (left in plain text)"
+
+
 class FinalConfirmationScreen:
     """Final confirmation screen showing validation summary."""
 
@@ -351,11 +355,14 @@ class FinalConfirmationScreen:
         """
         self.console = console or Console()
 
-    def display(self, summary_stats: dict[str, int]) -> None:
-        """Display validation summary and prompt for final confirmation.
+    def display(self, summary_stats: dict[str, int], still_to_review: int = 0) -> None:
+        """Display validation summary, including the Story 10.13 warning.
+
+        Warning wording follows Lionel's approval of 2026-10-16.
 
         Args:
             summary_stats: Dictionary with counts (confirmed, rejected, modified, added, unique, total)
+            still_to_review: Number of pending names left in plain text.
         """
         self.console.clear()
         self.console.print()
@@ -401,6 +408,10 @@ class FinalConfirmationScreen:
         summary_lines.extend(
             ["", f"[bold]Total entities to process:[/bold] {total_decisions}"]
         )
+
+        if still_to_review > 0:
+            warning = STILL_TO_REVIEW_LINE.replace("%1", str(still_to_review))
+            summary_lines.extend(["", f"[yellow]{warning}[/yellow]"])
 
         panel = Panel(
             "\n".join(summary_lines),
