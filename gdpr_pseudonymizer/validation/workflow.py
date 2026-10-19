@@ -26,6 +26,7 @@ from gdpr_pseudonymizer.validation.context_precomputer import ContextPrecomputer
 from gdpr_pseudonymizer.validation.models import (
     CORRECTED_BY_HAND_SOURCE,
     EntityGroup,
+    EntityReviewState,
     ValidationSession,
 )
 from gdpr_pseudonymizer.validation.ui import (
@@ -380,8 +381,13 @@ class ValidationWorkflow:
                                     )
                                     if key != name
                                 }
+                                # Story 10.16: with the review's names
                                 refusal = pseudonym_checker(
-                                    name[0], name[1], pseudonym, others
+                                    name[0],
+                                    name[1],
+                                    pseudonym,
+                                    others,
+                                    self._review_names(session),
                                 )
                                 if refusal is not None:
                                     display_warning_message(
@@ -519,6 +525,19 @@ class ValidationWorkflow:
             else entity
         )
         return (mapping_key(sent.text, sent.entity_type), sent.entity_type)
+
+    @staticmethod
+    def _review_names(session: ValidationSession) -> list[str]:
+        """The mapping keys of the names of the review that are not
+        rejected: the entity each review still to review, confirmed,
+        modified or added sends (Story 10.16, Codex #8)."""
+        names: dict[str, None] = {}
+        for review in session._entity_reviews:
+            if review.state == EntityReviewState.REJECTED:
+                continue
+            sent = ValidationSession._sent_entity(review)
+            names[mapping_key(sent.text, sent.entity_type)] = None
+        return list(names)
 
     @staticmethod
     def _group_custom_pseudonym(session: ValidationSession, group: EntityGroup) -> str:

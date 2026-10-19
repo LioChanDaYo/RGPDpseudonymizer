@@ -268,11 +268,6 @@ class _Single:
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.16: reproduces Codex #8 on the unfixed code; fixed in Task 2",
-)
 @pytest.mark.parametrize(
     "case",
     [
@@ -320,11 +315,6 @@ def test_desktop_lowercase_review_name_refused(  # type: ignore[no-untyped-def]
     assert stored is not None and stored[3] == place
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.16: reproduces Codex #8 on the unfixed code; fixed in Task 2",
-)
 def test_desktop_variant_occurrence_counts(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, monkeypatch
 ) -> None:
@@ -396,11 +386,6 @@ def test_desktop_words_that_do_not_count(  # type: ignore[no-untyped-def]
     assert stored is not None and stored[3] == typed
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.16: reproduces Codex #8 on the unfixed code; fixed in Task 2",
-)
 def test_desktop_pending_word_blocks_until_rejected(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, monkeypatch
 ) -> None:
@@ -429,11 +414,6 @@ def test_desktop_pending_word_blocks_until_rejected(  # type: ignore[no-untyped-
     assert _replacements(written, QCDOC, _spans([name])) == ["Grace Vellion"], written
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.16: reproduces Codex #8 on the unfixed code; fixed in Task 2",
-)
 def test_desktop_org_pseudonym_compared_whole(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, monkeypatch
 ) -> None:
@@ -462,14 +442,6 @@ def test_desktop_org_pseudonym_compared_whole(  # type: ignore[no-untyped-def]
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=(
-        "Story 10.16: reproduces Lionel's 10.16 Q1 path on the unfixed code; "
-        "fixed in Task 2"
-    ),
-)
 @pytest.mark.parametrize("case", ["added_by_hand", "corrected_into", "accepted_again"])
 def test_desktop_name_marked_after_the_pseudonym(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, monkeypatch, case

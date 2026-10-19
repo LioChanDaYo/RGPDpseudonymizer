@@ -19,7 +19,8 @@ finalization:
   has a stored pseudonym keeps it (Q1); a real first or last name that
   already has a part keeps it (Q-D); it may not be, in whole or in part,
   another name's pseudonym (Q2); it may not be a real name: a capitalised
-  word or words of the document, or a full name stored in the mapping
+  word or words of the document, a name of the review whatever its
+  capitals (Story 10.16, Codex #8), or a full name stored in the mapping
   database (Q2, Q-C, Q-C2). Capitals, accents and repeated spaces are
   ignored when comparing (Q-C). For a person, every beginning and every
   ending of the pseudonym (Q2) and every run of its words (Q-C; a linking
@@ -78,6 +79,10 @@ class Refusal:
         required: PART_BOUND: the part the real name already has
         example: PART_BOUND: a pseudonym that the rule accepts
         kind: PART_BOUND: "first" or "last"
+        in_document: REAL_NAME: the words are a name of this document (a
+            capitalised word of the document, or a name of the review or
+            sent), not only a full name stored in the mapping database
+            (Story 10.16, Lionel's 10.16 Q1)
     """
 
     reason: CustomPseudonymRefusal
@@ -86,12 +91,16 @@ class Refusal:
     required: str = ""
     example: str = ""
     kind: str = ""
+    in_document: bool = False
 
 
 # The command line's set-time check: (name's mapping key, type, normalized
-# custom pseudonym, this review's custom pseudonyms of other names) -> the
+# custom pseudonym, this review's custom pseudonyms of other names, the
+# mapping keys of this review's names not rejected (Story 10.16)) -> the
 # refusal, or None.
-PseudonymChecker = Callable[[str, str, str, Mapping[NameKey, str]], Refusal | None]
+PseudonymChecker = Callable[
+    [str, str, str, Mapping[NameKey, str], Iterable[str]], Refusal | None
+]
 
 
 def normalize_custom_pseudonym(text: str, entity_type: str) -> str:
@@ -316,6 +325,18 @@ def _capitalised_occurrence(candidate: str, words: DocumentWords) -> bool:
     a capital letter there (found by the detector or not; a sentence-initial
     word counts). Capitals and accents are ignored when comparing.
     """
+    return _occurrence(candidate, words, capitalised=True)
+
+
+def _occurrence(candidate: str, words: DocumentWords, capitalised: bool) -> bool:
+    """Whether ``candidate``'s words occur as consecutive whole words of
+    ``words``, with the candidate's own separators between them (a space for
+    any whitespace, a hyphen, an apostrophe; PO F1), compared folded.
+
+    ``capitalised``: the first of them must start with a capital letter
+    there (the document, Q-C). Without it, capitals do not matter (a name of
+    the review, Story 10.16).
+    """
     wanted_tokens = list(_WORD.finditer(candidate))
     if not wanted_tokens:
         return False
@@ -329,7 +350,7 @@ def _capitalised_occurrence(candidate: str, words: DocumentWords) -> bool:
     for start in words.where.get(wanted[0], ()):
         if list(folded[start : start + size]) != wanted:
             continue
-        if not text[spans[start][0]].isupper():
+        if capitalised and not text[spans[start][0]].isupper():
             continue
         gaps = [
             _separator_kind(text[spans[j][1] : spans[j + 1][0]])
@@ -491,8 +512,17 @@ def check_custom_pseudonym(
     document_text: str,
     other_customs: Mapping[NameKey, str],
     words: DocumentWords | None = None,
+    review_names: Iterable[str] = (),
 ) -> Refusal | None:
     """The first rule a custom pseudonym breaks, or None if it is accepted.
+
+    Story 10.16 (Codex #8; the PM's reading of Lionel's #8 decision, which
+    the PO found faithful): the name itself and the names of the review count
+    as real names whatever their capitals. A run of the pseudonym (read as
+    Q-C reads it, with Q-I's linking-word rule) that occurs in one of them as
+    consecutive whole words, with its own separators, is refused, as a
+    capitalised word of the document is. The document's other words in small
+    letters still do not count (Q-C).
 
     Args:
         stored_rows: The decrypted mapping rows, or None when the database
@@ -505,6 +535,9 @@ def check_custom_pseudonym(
             keyed by (mapping key, type); the name's own entry is ignored
         words: The document's words, when the caller checks several custom
             pseudonyms of one document (finalization); else read here
+        review_names: The mapping keys of the review's other names: when the
+            pseudonym is set, every name not rejected; at finalization, the
+            names sent (Story 10.16). The name itself is always added
 
     Returns:
         The refusal (Q1, Q-D, Q2, then Q-C), or None
@@ -536,9 +569,19 @@ def check_custom_pseudonym(
             )
     if words is None:
         words = document_words(document_text)
+    # Story 10.16: the name and the review's names, each read as a short text
+    names = [
+        document_words(text)
+        for text in dict.fromkeys([name, *review_names])
+        if text.strip()
+    ]
     for run in _document_runs(pseudonym, entity_type):  # Q2, Q-C, Q-I
-        if _capitalised_occurrence(run, words):
-            return Refusal(CustomPseudonymRefusal.REAL_NAME, pseudonym, run)
+        if _capitalised_occurrence(run, words) or any(
+            _occurrence(run, name_words, capitalised=False) for name_words in names
+        ):
+            return Refusal(
+                CustomPseudonymRefusal.REAL_NAME, pseudonym, run, in_document=True
+            )
     stored_names = {fold(row.full_name) for row in rows}
     for run in _word_runs(pseudonym, entity_type):  # Q-C2: a stored full name
         if fold(run) in stored_names:
@@ -605,47 +648,104 @@ def custom_entity_fields(
     return fields
 
 
-def untracked_custom_values(rows: Iterable[Entity]) -> set[str]:
-    """Folded values a later generated pseudonym must not take (AC19).
+# A real first or last name in a role: (folded real word, "first" or "last").
+Owner = tuple[str, str]
+# The values a generated pseudonym must not take, each with the real words
+# that may take it, in their role (``untracked_custom_values``).
+CustomReservations = Mapping[str, frozenset[Owner]]
+
+
+def untracked_custom_values(rows: Iterable[Entity]) -> dict[str, frozenset[Owner]]:
+    """The values of custom pseudonyms a later generated pseudonym must not
+    take (10.11 AC19), each with its owners (Story 10.16, Codex #6).
 
     For each custom row of a person: every beginning and every ending of its
-    pseudonym (one or more whole words, the whole one included), except a
-    value that one of the row's own real words (its real first or last
-    name, as ``person_parts`` reads its ``full_name``) already has as a part
-    in ``rows``: its own stored parts, or the part the same real word has in
-    another row (QA GUARD-001). The library keeps those for their real word
-    and gives them to no other; the rest it does not track, so finalization
-    keeps them here and draws again a generated pseudonym that has one (QA
-    GUARD-001, PO A1). Pass every stored row, with this run's custom rows.
+    pseudonym (one or more whole words, the whole one included), folded.
+    Each value's owners are the row's real words, in a role, that already
+    have that value as their part in that role in ``rows``: its own stored
+    parts, or the part the same real word has in another row (QA GUARD-001).
+    A row's real words are ``person_parts`` of its ``full_name``: the first
+    name in the role "first" and the last name in the role "last"; a
+    one-word name in both roles, since the engine matches a lone word as a
+    first or a last name (``_handle_standalone_component``). Roles are kept
+    apart and real words are compared folded, so a value stays reserved for
+    another role and another spelling, which the library does not track
+    (it compares exact spellings, per role). Pass every stored row, with
+    this run's custom rows.
     """
     rows = list(rows)
-    # folded real first or last name -> the folded parts it has
-    parts_of: dict[str, set[str]] = {}
+    # (folded real first or last name, role) -> the folded parts it has
+    parts_of: dict[Owner, set[str]] = {}
     for row in rows:
         if row.entity_type != "PERSON":
             continue
         if row.first_name and row.pseudonym_first:
-            parts_of.setdefault(fold(row.first_name), set()).add(
+            parts_of.setdefault((fold(row.first_name), "first"), set()).add(
                 fold(row.pseudonym_first)
             )
         if row.last_name and row.pseudonym_last:
-            parts_of.setdefault(fold(row.last_name), set()).add(
+            parts_of.setdefault((fold(row.last_name), "last"), set()).add(
                 fold(row.pseudonym_last)
             )
-    taken: set[str] = set()
+    reserved: dict[str, set[Owner]] = {}
     for row in rows:
         if row.theme != CUSTOM_THEME or row.entity_type != "PERSON":
             continue
-        own: set[str] = set()
-        for real in person_parts(row.full_name):
-            if real:
-                own |= parts_of.get(fold(real), set())
+        real_first, real_last = person_parts(row.full_name)
+        own: list[Owner] = []
+        if real_first and real_last:
+            own = [(fold(real_first), "first"), (fold(real_last), "last")]
+        elif real_first:
+            own = [(fold(real_first), "first"), (fold(real_first), "last")]
         words = row.pseudonym_full.split()
         for size in range(1, len(words) + 1):
             for value in (" ".join(words[:size]), " ".join(words[-size:])):
-                if fold(value) not in own:
-                    taken.add(fold(value))
-    return taken
+                folded = fold(value)
+                owners = reserved.setdefault(folded, set())
+                owners.update(
+                    owner for owner in own if folded in parts_of.get(owner, ())
+                )
+    return {value: frozenset(owners) for value, owners in reserved.items()}
+
+
+def _reserved_for(
+    value: str, real: str | None, role: str, reserved: CustomReservations
+) -> bool:
+    """Whether a generated part may not take ``value``: it is reserved, and
+    the part's real word (None when it has none) does not own it in
+    ``role``."""
+    owners = reserved.get(fold(value))
+    if owners is None:
+        return False
+    return real is None or (fold(real), role) not in owners
+
+
+def takes_custom_value(entity: Entity, reserved: CustomReservations) -> bool:
+    """Whether a generated row takes a value of a custom pseudonym that it
+    may not (Story 10.16, AC2; Codex #6).
+
+    Its first part, unless its real first name owns it as a first name; its
+    last part, unless its real last name owns it as a last name (a lone name
+    whose last part the engine matched has no first part, and its one word
+    is its real last name; a lone name's freshly drawn last part has no real
+    word); its full pseudonym, when it differs from its parts (several
+    parts, an organisation or a place), at all. The reuse 10.11 requires (a
+    part bound to the same real word, in the same role) is the only one
+    allowed.
+    """
+    if not reserved:
+        return False
+    first, last = entity.pseudonym_first, entity.pseudonym_last
+    if first and _reserved_for(first, entity.first_name, "first", reserved):
+        return True
+    if last:
+        real_last = entity.last_name or (entity.first_name if not first else None)
+        if _reserved_for(last, real_last, "last", reserved):
+            return True
+    full = entity.pseudonym_full
+    if full and fold(full) not in {fold(part) for part in (first, last) if part}:
+        return fold(full) in reserved
+    return False
 
 
 # The command line's refusal lines (Lionel's Q-A, 2026-10-15: the approved
@@ -709,10 +809,21 @@ _FINALIZATION_REASONS = {
 }
 
 
+# The fifth reason (Lionel's 10.16 Q1, "Add the new reason (Rec.)",
+# 2026-10-16), for a REAL_NAME refusal whose words are a name of this
+# document; a full name stored in the database keeps 10.11's reason.
+_IN_DOCUMENT_REASON = "it now matches a name in this document"
+
+
 def finalization_message(refusal: Refusal) -> str:
-    """The finalization error's message (Lionel's Q-A): no name, no
-    pseudonym. The user reads it after the prefix "CustomPseudonymError: "."""
+    """The finalization error's message (Lionel's Q-A and 10.16 Q1): no
+    name, no pseudonym. The user reads it after the prefix
+    "CustomPseudonymError: "."""
+    if refusal.reason is CustomPseudonymRefusal.REAL_NAME and refusal.in_document:
+        reason = _IN_DOCUMENT_REASON
+    else:
+        reason = _FINALIZATION_REASONS[refusal.reason]
     return (
         "A pseudonym you chose can no longer be used: "
-        f"{_FINALIZATION_REASONS[refusal.reason]}. Nothing was written."
+        f"{reason}. Nothing was written."
     )

@@ -295,11 +295,6 @@ def _store_first_doc(tmp_path: Path, db: str) -> None:
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.16: reproduces Codex #8 on the unfixed code; fixed in Task 2",
-)
 @pytest.mark.parametrize(
     "case",
     [
@@ -394,11 +389,6 @@ def test_cli_qc_lowercase_word_still_does_not_block(tmp_path: Path) -> None:
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.16: reproduces Codex #8 on the unfixed code; fixed in Task 2",
-)
 @pytest.mark.parametrize("case", ["own_surname", "other_name_sent"])
 def test_finalization_counts_names_sent(tmp_path: Path, case: str) -> None:
     """T3 (AC1, #8; Lionel's 10.16 Q1): finalization refuses a custom
@@ -473,11 +463,6 @@ def _later_with_forced_draw(tmp_path: Path, case: str) -> None:
     assert not {"xantor", "vellion"} & parts, stored
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.16: reproduces Codex #6 on the unfixed code; fixed in Task 2",
-)
 @pytest.mark.parametrize(
     "case",
     [
@@ -526,11 +511,6 @@ def test_generation_reuses_own_parts(tmp_path: Path) -> None:
     assert lone_first == "Xantor"
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.16: reproduces Codex #6 on the unfixed code; fixed in Task 2",
-)
 def test_cli_generation_other_role(tmp_path: Path) -> None:
     """T8 (AC2, #6; QA's reproduction in the command line): after [C]
     "Xantor Vellion", a later name whose last name the library offers
@@ -575,14 +555,6 @@ def test_cli_generation_other_role(tmp_path: Path) -> None:
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=(
-        "Story 10.16: reproduces Lionel's 10.16 Q1 path on the unfixed code; "
-        "fixed in Task 2"
-    ),
-)
 def test_cli_name_added_after_the_pseudonym(tmp_path: Path) -> None:
     """T16 (AC1, AC5; Lionel's 10.16 Q1): [C] "Xantor Quovix" on the name,
     then « quovix » added with [A]: the run fails with Lionel's new reason;

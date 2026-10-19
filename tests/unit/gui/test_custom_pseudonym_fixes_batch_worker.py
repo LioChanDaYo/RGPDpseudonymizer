@@ -235,11 +235,6 @@ class _Batch:
         self.vs.finalize_button.click()
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.16: reproduces Codex #7 on the unfixed code; fixed in Task 2",
-)
 @pytest.mark.parametrize("case", ["corrected", "retyped"])
 def test_batch_custom_follows_the_current_name(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, monkeypatch, case
