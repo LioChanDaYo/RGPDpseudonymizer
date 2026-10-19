@@ -1,0 +1,126 @@
+schema: 1
+story: '10.15'
+story_title: 'CLI Corrections and Hand-Added Names'
+scope: 'PR #106, pre-merge review (Task 7, G2) at head 37ead88 on main e35ccc5 (10.12 and 10.13 merged). Commits reviewed: 40daade, 6a611a8, 89f3cc2, a341a86 (story), tests first 38938dc, fix 0633c24, 92536d8 and 37ead88 (CHANGELOG, story).'
+gate: PASS
+status_reason: 'Every AC holds on real output: corrected and retyped names keep their cell, a name added with [A] is written at every whole-word place (a hyphen joins words) with the found places keeping their decision, the overlap takes the added name''s pseudonym over found and stored names, and a name with no cell stops the run with Lionel''s exact Q1 text, no output and no row. G2 holds (27 AssertionErrors on their expected-failure lines at 38938dc, 6 guards pass, markers only removed); CI green on every leg of the three runs; 6 of QA''s 9 mutants are caught by the committed tests, QA''s probes catch the other 3 (two low test gaps). No codex session, Forge, Anvil or Cato touched this branch. Low items only.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-10-19T07:31:15Z'
+
+waiver: { active: false }
+
+merge_blockers: []
+
+merge_notes:
+  - 'The merge waits for Lionel (Task 7.5). QA never merges.'
+  - 'Task 6.3 is still open: the orchestrator''s one read-only codex exec review of the final head, with its session id, model, sandbox and VERDICT line added to the Debug Log and the PR body (Tasks 6.4, 6.5). QA did not run codex and did not wait for it.'
+  - 'This gate commit (docs only) starts its own CI run on the PR; the orchestrator checks it green before the merge.'
+  - 'If 10.16 merges first and this branch is rebased (Task 6.6), the conflict points are the two restart calls of ValidationWorkflow.run. No committed test pins cells=cells there (TEST-001): check both lines by eye and re-run QA''s probes test_qa_ctrl_c_restart_then_e_in_cell and test_qa_ready_no_restart_then_a_in_cell on the rebased head.'
+
+top_issues:
+  - id: 'TEST-001'
+    severity: low
+    finding: 'No committed test drives a spreadsheet through either restart of the CLI review (G5 covers both restarts, but on a .txt and for sent_without_review only). QA mutant M4a (the Ctrl+C restart drops cells=cells) and M4b (the "Ready" restart drops it) each pass the 33 new tests and 197 existing tests of the changed area. Real effect of M4a: [E] after the restart is located in the joined review text, and the cell "chez Zorbal Quentrix signé le contrat" is written "<pseudonym>ntrix signé le contrat" ("chez" erased, "ntrix" in clear), exit 0 with "Processing Successful". M4b: [A] after "No" stops the run with SpreadsheetCellError (no output; [E] there would leak as M4a). The product at 37ead88 is right (QA probes restartE and restartA pass); the gap is regression protection only, on the exact lines a rebase on 10.16 would touch.'
+    suggested_action: 'Before or at the 10.16 rebase, by the BMAD dev agent: a CLI test on .xlsx or .csv through both restarts, [E] after Ctrl+C and [A] after "No" (QA probes test_qa_ctrl_c_restart_then_e_in_cell and test_qa_ready_no_restart_then_a_in_cell, r1015/qa/probes/test_qa_1015.py). Until then, the merge note above.'
+    refs: ['gdpr_pseudonymizer/validation/workflow.py:151', 'gdpr_pseudonymizer/validation/workflow.py:175', 'tests/unit/test_cli_corrections_hand_added.py']
+    suggested_owner: dev
+  - id: 'TEST-002'
+    severity: low
+    finding: 'No committed test has the same added text at the same in-cell span in two cells. QA mutant M5 (is_listed_place ignores context_label) passes the 230 tests of the changed area. Real effect: "Zorbal Quentrix" in A2 (found, accepted) and in A3 (not found); [A] of it treats A3''s place as already listed, so A3 is written in clear with "Processing Successful" while the name''s row is stored (.xlsx and .csv). The product at 37ead88 is right (QA probe test_qa_a_same_span_other_cell passes).'
+    suggested_action: 'Backlog, by the BMAD dev agent: a test like QA probe test_qa_a_same_span_other_cell.'
+    refs: ['gdpr_pseudonymizer/validation/models.py:306-319']
+    suggested_owner: dev
+  - id: 'MNT-001'
+    severity: low
+    finding: 'The place pattern holds U+2010 and U+2011 as literal characters (validation/models.py:24-25, bytes E2 80 90 and E2 80 91), which most editors show as an ordinary hyphen or nothing. The Fix Design wrote them as \u2010 and \u2011. Behaviour is right (QA probe: "Zorbal‐Quentrix" and "Quentrix‑Zorbal" hold no place of "Zorbal").'
+    suggested_action: 'Optional: write r"(?<![\w\-\u2010\u2011])" and r"(?![\w\-\u2010\u2011])"; re reads \uXXXX inside a raw string, so the pattern is the same and visible.'
+    refs: ['gdpr_pseudonymizer/validation/models.py:24-25']
+    suggested_owner: dev
+
+quality_score: 100
+expires: '2026-11-02T07:31:15Z'
+
+evidence:
+  tests_reviewed: 33
+  risks_identified: 3
+  environment: 'Windows, the main Poetry environment (Python 3.11.9), through .bat runners with cmd.exe; PYTHONPATH = the tree under test (each run prints the imported package path); USERPROFILE and HOME = r1015/qa/home, TEMP = r1015/qa/tmp; a runner-only plugin (r1015/qa/plugins/qa_isolation.py) points gui.config._config_path at each test''s tmp_path, and the probes'' autouse fixture points HOME and USERPROFILE at tmp_path and changes to it. C:\Users\devea\.gdpr-pseudo.yaml was never opened (mtime 2026-10-14 13:27, 270 bytes, before and after). QA''s worktree of 38938dc holds no tests/test_corpus/; held_out/ and final_exam/ were never opened, listed or grepped.'
+  g2:
+    worktree: 'r1015/qa/wt_38938dc (git worktree add --no-checkout of 38938dc, then git checkout 38938dc -- . '':(exclude)tests/test_corpus''; test -e tests/test_corpus is false). git diff e35ccc5 38938dc -- gdpr_pseudonymizer scripts .github pyproject.toml poetry.lock is empty: the unfixed code is main''s.'
+    runxfail: '27 failed, 6 passed. Each failure is an AssertionError on its "# expected failure" line, after its preconditions ("PRE:" appears nowhere): T1 :326 x2, T2 :359 x2, T3 :394 x2, T4 :427 x2, T9 :455 x2, T12 :484, T5 :510 x2, T6 :541 (.txt) and :546 (.xlsx), T7 :582 (.txt) and :586 (.xlsx), T13 :606, T10 :634 (.txt) and :639 (.xlsx), T11 :663, T14 :715 (.txt) and :720 (.xlsx), T15 :750, T8 :805 x3. G1 x2, G2, G3, G4 and G5 pass. The lines are those of the Dev Agent Record.'
+    what_the_unfixed_code_writes: 'T1 A3 "Zorbal Quentrix" (row stored); T2/T3/T4 B2 or B3 "Zorbal Quentrix signé le contrat"; T9 "chez Zorbal Quentrix signé le contrat"; T12 context_label None; T5 "contrat avec Zorbal Quentrix"; T11 "Carl Dumont a signé avec Saint-Geneviève Carlos, Zorbalix, l''Zorbal et Zorbal."; T13 a row stored against the reject; T8 exit 0.'
+    with_markers: '6 passed, 27 xfailed, in one process and under -n 4 --dist loadscope.'
+    markers_only: 'git diff 38938dc 0633c24 -- tests: 75 lines removed, 0 added: 15 blocks of 5 lines (@pytest.mark.xfail( / strict=True, / raises=AssertionError, / reason=... / )). No assertion, precondition or helper changed. 0633c24..37ead88 touches CHANGELOG.md and the story only.'
+    linux: 'Not run on Linux locally (the Windows toolchain is the rule); CI''s Ubuntu and macOS legs ran them.'
+  ci:
+    38938dc: '39207849781, attempt 1: ubuntu 3.10 "2686 passed, 27 xfailed in 303.59s"; ubuntu 3.11 "2686 passed, 27 xfailed in 308.66s"; macos "2686 passed, 27 xfailed in 491.26s"; windows "2537 passed, 3 skipped, 27 xfailed in 330.63s". Each leg lists exactly 27 XFAIL lines, all in test_cli_corrections_hand_added.py, and its 6 guards PASSED; no other XFAIL in the run. lint success.'
+    0633c24: '39210819216, attempt 1: ubuntu 3.10 "2713 passed in 417.90s"; ubuntu 3.11 "2713 passed in 516.79s"; macos "2713 passed in 865.29s"; windows "2564 passed, 3 skipped in 414.38s". 0 XFAIL; the 33 new tests PASSED on each leg. lint success.'
+    37ead88: '39213354560, attempt 1 (the PR head): ubuntu 3.10 "2713 passed in 314.94s"; ubuntu 3.11 "2713 passed in 318.94s"; macos "2713 passed in 802.23s"; windows "2564 passed, 3 skipped in 392.54s". 0 XFAIL; the 33 new tests PASSED on each leg; the 15 leakage-guard tests PASSED on each leg. lint: black "315 files would be left unchanged", mypy "Success: no issues found in 105 source files". Code Quality 39213354518 success.'
+    notes: 'Read from the job logs (r1015/qa/logs/ci/job_*.txt). The Windows skips are the 3 existing ones. No reruns.'
+  mutants:
+    harness: 'r1015/qa/mut/: git archive 37ead88 of the package, one change each (tools/make_mutants.ts). Each runs the 33 new tests plus 197 existing tests of the changed area (test_validation_models, test_validation_workflow, integration/test_validation_workflow_integration, test_validation_edit_every_occurrence, test_custom_pseudonym_cli, test_pending_names_cli, test_document_processor, test_document_processor_internals, test_type_aware_document_processor, test_validation_ui), then QA''s 43 probes. Unmutated copy: 230 passed, 43 passed.'
+    M1_hyphen_dropped: 'the lookarounds without the hyphens: caught by T11; probes Ahyphen and Ahyphencells x2.'
+    M2_stored_not_widened: '_run_validation widens the reviewed names only: caught by T14 x2; probes Ovstored x3 and Ovchain.'
+    M3_text_of_joined: 'text_of always returns the joined review text: caught by T2 x2, T3 x2, T4 x2, T9 x2; 9 probes.'
+    M4a_ctrlc_restart_drops_cells: 'NOT caught by the committed tests (TEST-001); probe restartE: "<pseudonym>ntrix signé le contrat", exit 0.'
+    M4b_ready_restart_drops_cells: 'NOT caught by the committed tests (TEST-001); probe restartA: SpreadsheetCellError, no output.'
+    M5_listed_ignores_cell: 'NOT caught by the committed tests (TEST-002); probe sameSpanOtherCell x2: A3 in clear with success.'
+    M6_check_after_resolve: '_check_cells after _resolve_pseudonyms: caught by T8 x3 (rows stored); probes Q1process and batchQ1.'
+    M7_widen_across_cells: 'the widening compares spans of other cells: caught by T5 x2 and T6[.xlsx]; 9 probes.'
+    M10_no_span_check: '_check_cells checks the cell only: caught by T8[span_outside].'
+  end_to_end:
+    harness: 'QA''s own probes, r1015/qa/probes/ (qa_harness.py, test_qa_1015.py; never committed): the real Typer app (process, and batch --workers 1 --output) through CliRunner on a database made by the real init command; only detection, readchar.readkey, Prompt.ask and Confirm.ask replaced; COLUMNS=320 so that the printed lines are not wrapped. Assertions on the written .txt, .xlsx and .csv files and on the mapping and audit rows. Invented names and main-corpus words only (blind check of the extra word "d": in the main corpus; "anti" is not, so it is not used). At 37ead88: 43 passed. At 38938dc: the 39 first probes all fail, each with an AssertionError on the leak (no precondition failed).'
+    corrections: '[T] of a group in A2 and B3 (.xlsx, .csv): both cells hold the (ZQ, PERSON) pseudonym, no ORG row. [E] of a group in B2 and A3, with "Zorbal Quentrix" also in A1 as ORG: B2 "chez <p> signé le contrat", A3 "<p> signé", A1 the ORG pseudonym. [E] whose text is not in the cell ("Brimel Testar" for "Zorbal Quentrix signé"): the span is kept, B2 "<BT> le contrat". [E] then [T], and [C] after [E], each on a group in two cells: every cell holds the stored pseudonym ("Xantor Vellion", theme custom).'
+    add_every_place: '.txt at 3 places: exactly the source with both pseudonyms, "Added: 3". Cells: "p et p" in one cell, A3 and B4. Hyphens: "Saint-Zorbal", "Zorbal-Quentrix", "Quentrix-Zorbal", U+2010 and U+2011 compounds, "Zorbalix", "Zorbal2", "_Zorbal" and "ZORBAL" untouched; "(Zorbal)", "« Zorbal »", "l''Zorbal", "d''Zorbal", "Zorbal–Quentrix" (en dash) and "Zorbal." replaced, "Added: 6"; the same rule per cell (.xlsx, .csv). Found and rejected at A2, added at B3 (.csv): A2 kept by choice, B3 replaced. A found at A2 accepted and the same text at A3 at the same span: both replaced.'
+    q2: 'Every place found: the printed line is exactly "ℹ️  ''Zorbal Quentrix'' is already in the review as PERSON at every place: nothing added" (Lionel''s text after display_info_message''s "ℹ️  "), "Added: 0"; with the group rejected (.xlsx, .csv) no row and the cells unchanged. A typed "Zorbal%2" is shown as typed.'
+    overlap: 'Found "Vorlan Zorbal" (.csv): B2 "<ZQ> a signé". Chain, "Vorlan Zorbal Quentrix Brimel" with "Vorlan Zorbal" stored and "Quentrix Brimel" found: "<ZQ> a signé. <VZ> valide.". The brief''s case, "Vorlan Zorbal" stored then "Zorbal Quentrix" added (.txt, .xlsx, .csv): "Auto-accepted" shown, the stored row unchanged, "<VZ> valide." where it stands alone and "<ZQ> a signé avec <BT>" at the overlap; no "Vorlan" or "Quentrix" left.'
+    stored_and_types: '[A] of a stored name not detected (.txt, .xlsx): the stored pseudonym at every place, still one row. [A] "Zorbaville" LOCATION where it is found as ORG at the first place (.txt, .xlsx): accepted, the first place keeps the ORG pseudonym and the second gets the LOCATION one, two rows; rejected, the LOCATION pseudonym at both places, no ORG row (Consumer Trace #29).'
+    formats: '.docx with [A] written to .txt: both places replaced, nothing in clear. .xlsx with -o out.txt, [A] and [E]: "<VM>\t<p> signé le contrat" and "ok\tavec <p>".'
+    q1: 'A validated name losing its cell (.csv): exit 1; the printed "Error:" line is exactly "Error: SpreadsheetCellError: " + Lionel''s Q1 text, after "✗ Processing Failed"; no "Processing Successful"; no output file; no mapping row; one failed audit operation whose error is "SpreadsheetCellError: " + the Q1 text, with no name. The log events: tabular_entity_without_cell (no field), processing_error and processing_failed with the Q1 text.'
+    batch: 'batch --workers 1 on a.txt ([A] at 2 places), b.xlsx ([E] then [T]) and c.csv ([A] LOCATION at 3 places, 2 in one cell): exit 0, every place replaced, no (QZ, ORG) row, every typed text used. With b.xlsx losing a cell: exit 1, "b_sheet.xlsx: SpreadsheetCellError: <Q1>" in the summary, no b output, a and c written, rows for a''s and c''s names only.'
+    restarts: 'Ctrl+C answered No, then [E] on .xlsx: B2 "chez <p> signé le contrat". "No" at "Ready to process document with validated entities?", then [A] on .csv: B3 replaced, exit 0.'
+    dev_point_2: '[A] "Quentrix" ORG while PERSON "Vorlan Zorbal" is shown, then [E] of that added place to "Zorbal Quentrix" in the ORG review: the corrected place keeps source manual, is widened over "Vorlan Zorbal", and the output is "<(ZQ, ORG)> a signé."; nothing in clear. The rows ("Vorlan Zorbal", PERSON) and ("Quentrix", ORG) are stored but not written there, as Q4 says for the name already there.'
+    earlier_probes: 'Re-run read-only from their folders at 37ead88: QA''s #2 probe (r23codex/qa/probes/test_f2_cli_tabular.py) 4 passed; the 10.12 PO''s [A] probe (r1012/po/probe/test_po_add_tabular.py) 5 passed, "in clear: False" on .xlsx, .csv and .txt, "times in clear: 0" twice; the 10.15 PO''s probe (r1015/po/probe/test_po_1015.py) 8 passed: P1 "''Quentrix'' in clear: False" (.txt and .xlsx), P5a Q2''s line and "Added: 0", P6 Q1''s text, exit 1, no output, no row, one failed audit operation, batch lists the file; P3 and P4 (no review when nothing is left to review) unchanged, Story 10.18.'
+  texts: 'tools/texts_1015.ts cuts the approved texts from the decision log (stopA-answers.md, "Story 10.15 Q1–Q4"): Q1 (210 bytes) equals SPREADSHEET_CELL_ERROR (document_processor.py:75), one literal in the file; Q2 (82 bytes) equals ALREADY_IN_REVIEW_LINE (workflow.py:41) with %2 = PERSON and %1 = Zorbal Quentrix, one literal. The story''s Decisions Recorded hold both. Printed on screen: both exact (see end_to_end). The story byte check (r1015/sm/bytecheck_1015.ts . HEAD ...): blocks=19 matched=19.'
+  changelog: 'tools/changelog_1015.ts: the two bullets of the story''s CHANGELOG Entry are in CHANGELOG.md once each, byte for byte, under [Unreleased] ### Fixed, right after Story 10.13''s bullet; 10.12''s and 10.13''s entries kept; git diff --numstat: 4 added, 0 removed. Every claim matches QA''s measures. No number.'
+  consumer_trace: 'Re-checked at 37ead88: #16 (probes Astored x2 and Ovstored x3: the stored pseudonym reused, one row; a partial overlap with a stored name widened), #17 ("Added: 3" and "Added: 6" count places, "Added: 0" on Q2), #23 and #24 (Q1process, batchQ1: "✗ Processing Failed", exit 1, no output, no row; batch lists the file and exits 1), #29 (Atype x4). All as "After the fix".'
+  dev_points:
+    single_literals: 'Agreed. Q1 and Q2 are each one unsplit literal (one occurrence each, so a plain search finds them), and Q2 replaces %2 before %1: the type is one of three fixed words, so the typed text is inserted last and shown as typed (probe: "Zorbal%2").'
+    manual_kept_on_edit: 'Agreed. It follows the Fix Design (AC1 item 4: [E] keeps the entity''s source). The widening only joins spans of names that are sent, so it can only cover more text; QA''s probe (dev_point_2) leaves nothing in clear. Not covered by a committed test, as the dev says (follow-up (c)''s area).'
+  codex_rule:
+    sessions: '~/.codex/sessions/2026/10/19/ does not exist. Every rollout under ~/.codex/sessions modified since 2026-10-18 00:00: 01a150d0-4849 (2026-10-18 22:59, cwd /mnt/c/Users/devea/NPlusOne-JP, sandbox read-only) and 01a150d4-176c (23:03, same cwd, read-only). No rollout of any date has its cwd under rgpd-wt-s1015 (one 2026-10-16 rollout, 01a1459e-eea4, names the path in its text; its cwd is rgpd-wt-s1012). C:\Users\devea\.codex\sessions: nothing newer than 2026-09-18. So no codex session ran on this branch; the final read-only review (Task 6.3) has not run yet.'
+    agents: 'MEMORY/OBSERVABILITY/subagent-events.jsonl: the last Forge, Anvil or Cato start is 2026-10-16 23:10 (before this branch''s code). On 2026-10-18 and 2026-10-19 the only subagents started are general-purpose (the BMAD dev agent for 10.15, this QA, and an unrelated retro). forge-codex-gate.jsonl: last entry 2026-10-16.'
+    commits: 'git log origin/main..37ead88: 8 commits, author Lionel Deveaux, each with the trailer Co-Authored-By: Claude Opus 5.5; the 38938dc and 0633c24 bodies say the BMAD dev agent (Claude) wrote them. No skip-CI marker in any commit message, the PR title or the PR body.'
+    pr: 'The PR body holds Task 6.4''s sentence word for word ("code and tests written by the BMAD dev agent (Claude); design and measurement sketches by the SM (Claude); final diff reviewed read-only by `codex exec`") and says the review''s session id and VERDICT line will be added when it has run.'
+  g6_local: 'Head: ruff exit 0; black "315 files would be left unchanged"; mypy "Success: no issues found in 105 source files". pytest -m "not slow" -n 4 --dist loadscope from the worktree root: 2702 passed, 10 skipped, 1 failed: tests/unit/cli/commands/test_config_show.py::TestConfigShowCommand::test_displays_config_files_status, Rich wrapping "(not \nfound)" over the long scratch path (the known environment failure; 23 passed when its file runs alone). The new file: 33 passed, in one process and under -n 4. The site/ folder the docs test builds was removed; the worktree is clean after every run.'
+  scope_check: 'git diff --name-status origin/main...37ead88: CHANGELOG.md, the epic (one line, Story 10.15''s AC8, Lionel''s 2026-10-18 decision), the story, document_processor.py, exceptions.py, validation/models.py, validation/workflow.py, and the new test file: File Locations exactly. Task 6.1''s path list, both leakage allowlists, .github/, pyproject.toml and poetry.lock: empty. No existing test changed. None of the 13 files the accuracy suite loads is touched, so G1, G3 and G5 are N/A; G4 holds (Story 10.15''s commits only).'
+  code_read: 'Every CLI rebuild of a name is a dataclasses.replace: [T] (models.py:453), [E] (workflow.py:323), the _sent_entity fallback (models.py:514); the only DetectedEntity(...) left in validation/ is places_of''s new place (models.py:291), which sets the cell, and actions.py (unused by the CLI, unchanged). [E] is located with session.text_of(entity). places_of: re.escape between the two lookarounds, per cell, source manual; is_listed_place compares text, type, span and cell. _widen_added_places: over known_entities + validated_unknown, same cell, repeated until no partial overlap, text and type kept. _check_cells: in _process_document_tabular after _run_validation and before _reset_pseudonym_state and _resolve_pseudonyms, and in finalize_document_tabular before _reset_pseudonym_state; the log event carries no field; the message names no name. cells=cells by keyword in run, both restarts, the manual flow and run_validation_workflow, next to 10.13''s sent_without_review.'
+  not_checked: 'Linux and macOS locally (CI only); .pdf and .md input (the same text path as .txt and .docx, by reading); a real terminal (CliRunner; COLUMNS=320 in QA''s runs, so line wrapping on an 80-column terminal was not judged); the desktop app (not changed; its added names are Story 10.17); the read-only Codex review (not run yet); the post-merge performance run.'
+  notes_for_lionel: 'Facts, no QA judgement. (1) A place is the exact text typed (AC14 (a)): adding "Zorbal" leaves "ZORBAL" and "zorbal" in clear. (2) Only -, U+2010 and U+2011 join words: "Zorbal–Quentrix" with an en dash holds a place of "Zorbal" (as the PO''s P2 shows). (3) "''X'' not found in document" also shows when X stands only inside longer words (follow-up (e)). All three as the story states them; 10.17 uses the same rules.'
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+    ac_gaps: []
+    notes: 'AC1 T1-T4, T12 + probes T2cells, E2cells, ET, CE, batch. AC2 T9 + E2cells, Enotincell, restartE (restarts only through QA''s probes: TEST-001). AC3/AC14 T5-T7, T10, T11, T13-T15 + probes A3txt, Acells, Ahyphen x3, Arejected, Q2 x4, overlap x4, Astored x2, Atype x4, docx, xlsx2txt, sameSpanOtherCell (TEST-002), widenOwnCell. AC4 T8 x3 + Q1process, batchQ1. AC5/AC10 g2 + ci. AC6 texts. AC7 changelog. AC8 codex_rule. AC9 scope_check, ci, g6_local, g2. AC11 G1-G4, existing suites unchanged. AC12 consumer_trace. AC13 the 15 leakage-guard tests on every leg, allowlists unchanged. AC14 as AC3.'
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'Removes three paths that wrote accepted, corrected or added names in clear while their pseudonym was stored. The new check stops the run before any row is saved or any file written; its log event has no field and its message names no name (audit row checked). No new log line carries entity text.'
+  performance:
+    status: PASS
+    notes: 'places_of is one regular-expression pass per [A]; is_listed_place and the widening are linear in the number of names per added place; _check_cells is one pass. Nothing changes for a text document without [A]. The new file runs in about 9 s for 33 real CLI runs.'
+  reliability:
+    status: PASS
+    notes: 'A failed check gives "✗ Processing Failed" and exit 1 with no partial output; batch --workers 1 lists the file and goes on. The review''s keys, prompts and existing messages are unchanged; both restarts keep the cells (by reading and QA''s probes).'
+  maintainability:
+    status: PASS
+    notes: 'dataclasses.replace instead of field-by-field rebuilds; keyword arguments with defaults; the approved texts as single literals; docstrings name the story and Lionel''s decisions. Two regression gaps (TEST-001, TEST-002) and one readability nit (MNT-001).'
+
+recommendations:
+  immediate: []
+  future:
+    - action: 'Commit a spreadsheet test through both restarts ([E] after Ctrl+C, [A] after "No"), before or at the 10.16 rebase (TEST-001).'
+      refs: ['tests/unit/test_cli_corrections_hand_added.py', 'gdpr_pseudonymizer/validation/workflow.py:151', 'gdpr_pseudonymizer/validation/workflow.py:175']
+    - action: 'Commit a test with the same added text at the same in-cell span in two cells, one of them found (TEST-002).'
+      refs: ['tests/unit/test_cli_corrections_hand_added.py', 'gdpr_pseudonymizer/validation/models.py:306-319']
+    - action: 'Optional: write the two word-joining hyphens as \u2010 and \u2011 in the place pattern (MNT-001).'
+      refs: ['gdpr_pseudonymizer/validation/models.py:24-25']
