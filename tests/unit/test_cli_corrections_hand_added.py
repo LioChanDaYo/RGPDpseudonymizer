@@ -940,3 +940,207 @@ def test_add_same_span_in_another_cell(tmp_path: Path, db: Path) -> None:
     assert ZQ not in _flat(cells)
     assert _cell(cells, "A2") == pseudonym
     assert _cell(cells, "A3") == pseudonym
+
+
+# --- v1.4: a correction that partly overlaps another written name (the read-only
+# Codex review's P0; Lionel's Q4 applied to corrections) ------------------------
+
+OVERLAP = "Vorlan Zorbal Quentrix a signé."
+MIRROR = "Zorbal Quentrix Vorlan a signé."
+QV = "Quentrix Vorlan"
+NAME_PARTS = ("Vorlan", "Zorbal", "Quentrix")
+
+
+def _batch(
+    folder: Path,
+    out_folder: Path,
+    db: Path,
+    names: Names,
+    keys: Sequence[str],
+    typed: Sequence[str] = (),
+) -> Run:
+    """One real ``gdpr-pseudo batch --workers 1`` run, with ``_process``'s
+    detection, keys, typed texts and yes/no answers."""
+    detector = FakeDetector(names)
+    confirm = Answers()
+    with ExitStack() as stack:
+        stack.enter_context(
+            patch.object(DocumentProcessor, "_get_detector", new=lambda self: detector)
+        )
+        stack.enter_context(
+            patch.object(
+                DocumentProcessor,
+                "_detect_and_filter_entities",
+                new=lambda self, text, entity_type_filter=None: (
+                    detector.detect_entities(text)
+                ),
+            )
+        )
+        stack.enter_context(patch.object(readchar, "readkey", new=Keys(keys)))
+        stack.enter_context(patch.object(Prompt, "ask", new=Typed(typed)))
+        stack.enter_context(patch.object(Confirm, "ask", new=confirm))
+        result = CliRunner().invoke(
+            app,
+            [
+                "batch",
+                str(folder),
+                "--db",
+                str(db),
+                "--output",
+                str(out_folder),
+                "--workers",
+                "1",
+            ],
+            env=ENV,
+            catch_exceptions=False,
+        )
+    return Run(result.exit_code, _ANSI.sub("", result.output), confirm.asked)
+
+
+def _write_overlap(path: Path, text: str) -> None:
+    """The text as a text file, or in cell B2 of a sheet."""
+    if path.suffix == ".txt":
+        path.write_text(text, encoding="utf-8")
+    else:
+        _write_sheet(path, [["Nom", "Note"], ["ok", text]])
+
+
+def _overlap_written(path: Path) -> str:
+    """The text written, or cell B2 of a sheet whose other cells are unchanged."""
+    if path.suffix == ".txt":
+        return _text(path)
+    cells = _cells(path)
+    _pre(
+        len(cells) == 2
+        and [_cell(cells, "A1"), _cell(cells, "B1"), _cell(cells, "A2")]
+        == ["Nom", "Note", "ok"],
+        "the sheet's other cells unchanged",
+    )
+    return _cell(cells, "B2")
+
+
+def _names(db: Path) -> list[tuple[str, str]]:
+    return sorted((row[0], row[1]) for row in _rows(db))
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 10.15 v1.4: reproduces a correction that partly overlaps another name, left partly in clear; fixed in Task 2.6",
+)
+@pytest.mark.parametrize("ext", [".txt", ".xlsx", ".csv"])
+def test_correction_overlapping_accepted_name(
+    tmp_path: Path, db: Path, ext: str
+) -> None:
+    """T16 (AC1, AC14 (d) for [E]; the Codex P0): a correction that reaches
+    into an accepted name is widened over both and takes its own pseudonym."""
+    source, output = _files(tmp_path, ext)
+    _write_overlap(source, OVERLAP)
+    run = _process(
+        source,
+        output,
+        db,
+        [(VZ, "PERSON"), ("Quentrix", "PERSON")],
+        [ENTER, SPACE, "e"],
+        [ZQ],
+    )
+    _pre(run.exit_code == 0, "exit code 0")
+    _pseudonym(db, VZ, "PERSON")
+    pseudonym = _pseudonym(db, ZQ, "PERSON")
+    written = _overlap_written(output)
+    assert [part for part in NAME_PARTS if part in written] == []  # expected failure
+    assert written == f"{pseudonym} a signé."
+    assert _names(db) == sorted([(VZ, "PERSON"), (ZQ, "PERSON")])
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 10.15 v1.4: reproduces a correction that partly overlaps another name, left partly in clear; fixed in Task 2.6",
+)
+@pytest.mark.parametrize("ext", [".txt", ".xlsx", ".csv"])
+def test_correction_then_accepted_overlap(tmp_path: Path, db: Path, ext: str) -> None:
+    """T17 (the mirror order): a correction that reaches into a name accepted
+    after it is widened over both and takes its own pseudonym."""
+    source, output = _files(tmp_path, ext)
+    _write_overlap(source, MIRROR)
+    run = _process(
+        source,
+        output,
+        db,
+        [("Zorbal", "PERSON"), (QV, "PERSON")],
+        [ENTER, "e", SPACE],
+        [ZQ],
+    )
+    _pre(run.exit_code == 0, "exit code 0")
+    _pseudonym(db, QV, "PERSON")
+    pseudonym = _pseudonym(db, ZQ, "PERSON")
+    written = _overlap_written(output)
+    assert [part for part in NAME_PARTS if part in written] == []  # expected failure
+    assert written == f"{pseudonym} a signé."
+    assert _names(db) == sorted([(QV, "PERSON"), (ZQ, "PERSON")])
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 10.15 v1.4: reproduces a correction that partly overlaps another name, left partly in clear; fixed in Task 2.6",
+)
+@pytest.mark.parametrize("ext", [".txt", ".xlsx"])
+def test_correction_overlapping_stored_name(tmp_path: Path, db: Path, ext: str) -> None:
+    """T18 (AC14 (d)'s stored names, for [E]): a correction that reaches into
+    a name stored in the mapping database, accepted without review, is widened
+    over both; the stored row is unchanged."""
+    first, first_out = _files(tmp_path, ext, "1")
+    _write_overlap(first, "Vorlan Zorbal valide.")
+    run = _process(first, first_out, db, [(VZ, "PERSON")], [ENTER, SPACE])
+    _pre(run.exit_code == 0, "first run: exit code 0")
+    stored = _pseudonym(db, VZ, "PERSON")
+
+    source, output = _files(tmp_path, ext, "2")
+    _write_overlap(source, OVERLAP)
+    run = _process(
+        source,
+        output,
+        db,
+        [(VZ, "PERSON"), ("Quentrix", "PERSON")],
+        [ENTER, "e"],
+        [ZQ],
+    )
+    _pre(run.exit_code == 0, "second run: exit code 0")
+    _pre(AUTO_ACCEPTED in run.shown, "the stored name is accepted without review")
+    _pre(_pseudonym(db, VZ, "PERSON") == stored, "the stored row is unchanged")
+    pseudonym = _pseudonym(db, ZQ, "PERSON")
+    written = _overlap_written(output)
+    assert [part for part in NAME_PARTS if part in written] == []  # expected failure
+    assert written == f"{pseudonym} a signé."
+    assert _names(db) == sorted([(VZ, "PERSON"), (ZQ, "PERSON")])
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 10.15 v1.4: reproduces a correction that partly overlaps another name, left partly in clear; fixed in Task 2.6",
+)
+@pytest.mark.parametrize("ext", [".txt", ".xlsx", ".csv"])
+def test_batch_correction_overlap(tmp_path: Path, db: Path, ext: str) -> None:
+    """T19: the same correction through ``batch --workers 1``."""
+    folder, out_folder = tmp_path / "docs", tmp_path / "out"
+    folder.mkdir()
+    _write_overlap(folder / f"in{ext}", OVERLAP)
+    run = _batch(
+        folder,
+        out_folder,
+        db,
+        [(VZ, "PERSON"), ("Quentrix", "PERSON")],
+        [ENTER, SPACE, "e"],
+        [ZQ],
+    )
+    _pre(run.exit_code == 0, "exit code 0")
+    output = out_folder / f"in_pseudonymized{ext}"
+    _pseudonym(db, VZ, "PERSON")
+    pseudonym = _pseudonym(db, ZQ, "PERSON")
+    written = _overlap_written(output)
+    assert [part for part in NAME_PARTS if part in written] == []  # expected failure
+    assert written == f"{pseudonym} a signé."
+    assert _names(db) == sorted([(VZ, "PERSON"), (ZQ, "PERSON")])
