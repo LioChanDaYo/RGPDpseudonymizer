@@ -1196,3 +1196,71 @@ def test_correction_overlap_in_another_cell(tmp_path: Path, db: Path, ext: str) 
     assert [part for part in NAME_PARTS if part in both] == []  # expected failure
     assert (b2, b3) == (f"{pseudonym} valide.", f"{pseudonym} a signé.")
     assert _names(db) == sorted([(VZ, "PERSON"), (ZQ, "PERSON")])
+
+
+# --- Guards from QA's re-check: the widening's fixed point and the tie rule
+# (TEST-003, TEST-004) ----------------------------------------------------------
+
+QB = "Quentrix Brimel"
+
+
+@pytest.mark.parametrize("ext", [".txt", ".xlsx"])
+def test_widening_reaches_fixed_point(tmp_path: Path, db: Path, ext: str) -> None:
+    """G9 (QA TEST-003; mutant MC, one pass): a correction widened over an
+    accepted name that itself partly overlaps a stored name is widened again,
+    until it covers both."""
+    first, first_out = _files(tmp_path, ext, "1")
+    _write_overlap(first, "Vorlan Mestrix valide.")
+    run = _process(first, first_out, db, [(VM, "PERSON")], [ENTER, SPACE])
+    _pre(run.exit_code == 0, "first run: exit code 0")
+    stored = _pseudonym(db, VM, "PERSON")
+
+    source, output = _files(tmp_path, ext, "2")
+    _write_overlap(source, "ok Zorbal Quentrix Vorlan Mestrix a signé.")
+    run = _process(
+        source,
+        output,
+        db,
+        [("Zorbal", "PERSON"), (QV, "PERSON"), (VM, "PERSON")],
+        [ENTER, "e", SPACE],
+        [ZQ],
+    )
+    _pre(AUTO_ACCEPTED in run.shown, "the stored name is accepted without review")
+    assert run.exit_code == 0
+    written = _overlap_written(output)
+    pseudonym = _pseudonym(db, ZQ, "PERSON")
+    parts = (*NAME_PARTS, "Mestrix")
+    assert [part for part in parts if part in written] == []
+    assert written == f"ok {pseudonym} a signé."
+    assert _pseudonym(db, VM, "PERSON") == stored
+
+
+def test_overlapping_typed_places_first_in_list_wins(tmp_path: Path, db: Path) -> None:
+    """G10 (QA TEST-004; mutants MD, the later place wins, and MD2, the typed
+    places taken last to first): two corrections that partly overlap each
+    other and a stored name both end with the same span; the first in the
+    list sent (the first group reviewed) gives the pseudonym."""
+    first, first_out = _files(tmp_path, ".txt", "1")
+    first.write_text("Quentrix Brimel valide.", encoding="utf-8")
+    run = _process(first, first_out, db, [(QB, "PERSON")], [ENTER, SPACE])
+    _pre(run.exit_code == 0, "first run: exit code 0")
+    stored = _pseudonym(db, QB, "PERSON")
+
+    source, output = _files(tmp_path, ".txt", "2")
+    source.write_text("Vorlan Zorbal Quentrix Brimel a signé.", encoding="utf-8")
+    run = _process(
+        source,
+        output,
+        db,
+        [("Vorlan", "PERSON"), ("Zorbal", "PERSON"), (QB, "PERSON")],
+        [ENTER, "e", "e"],
+        [VZ, ZQ],
+    )
+    _pre(AUTO_ACCEPTED in run.shown, "the stored name is accepted without review")
+    assert run.exit_code == 0
+    written = _text(output)
+    parts = (*NAME_PARTS, "Brimel")
+    assert [part for part in parts if part in written] == []
+    assert written == f"{_pseudonym(db, VZ, 'PERSON')} a signé."
+    _pseudonym(db, ZQ, "PERSON")
+    assert _pseudonym(db, QB, "PERSON") == stored

@@ -423,10 +423,13 @@ class DocumentProcessor:
         it partly overlaps no other span of the list, the other typed places'
         widened spans included. Its text and type are kept, so the whole span
         is written with the typed name's pseudonym and nothing of either name
-        stays in plain text there. Two typed places that partly overlap each
-        other end with the same span; the writer keeps the first of the two
-        in the list (its sort is stable). Every other entity, and the order,
-        are unchanged.
+        stays in plain text there. Typed places are taken in the order of the
+        list: when two of them partly overlap each other, the first widens
+        over the second, which then lies inside it and is covered by it. They
+        end with the same span only when a third name widens both to the
+        same union; the writer then keeps the first of the two in the list,
+        its sort being stable. Either way the first in the list gives the
+        pseudonym. Every other entity, and the order, are unchanged.
         """
         spans = [(entity.start_pos, entity.end_pos) for entity in entities]
         typed = [
