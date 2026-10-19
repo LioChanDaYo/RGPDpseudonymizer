@@ -1441,6 +1441,8 @@ At `main` `fb7917c`:
 
 **Added by Lionel, 2026-10-16 (release blocker):** "Fix before release (Rec.)". The question he answered is quoted in Story 10.15; the option he chose: "A name you add by hand is replaced at every place of that name and type. Command line and desktop app." Found by the PO while reviewing Stories 10.14 to 10.16 (2026-10-16), measured, and the same in v2.2.0. This story takes the desktop part; Story 10.15 takes the CLI part.
 
+**Changed by Lionel, 2026-10-19 (capitals), before development starts:** "A: Fix, capitals only (Rec.)". His option: « Zorbal » also reaches « ZORBAL », never a word in small letters. AC1 now reaches the forms of the name written with capitals (Decisions Recorded). The command line and the corrections are Story 10.19.
+
 **As a** desktop-app user who adds a name the detector missed, by selecting it in the document,
 **I want** it replaced at every place of that name and type,
 **so that** its other places are not left in clear while the name is stored.
@@ -1460,16 +1462,17 @@ At `main` `fb7917c`:
 
 ### Acceptance Criteria
 
-1. **AC1 — Every place (Lionel, 2026-10-16):** a name added by hand is replaced at every place of that name and type, that is every whole-word occurrence of its exact text in the document. An occurrence inside a longer word is not a place. A place where the detector found the same name with the same type keeps its own row and decision (10.10: a decision on a row added by hand acts on that row only). The written file and the stored row match.
+1. **AC1 — Every place (Lionel, 2026-10-16), in its forms with capitals (Lionel, 2026-10-19):** a name added by hand is replaced at every place of that name and type, that is every whole-word occurrence, in the document, of one of these forms of the text selected: the text as selected; the same text with the first letter of each word in capitals and the other letters in small letters; the same text in all capitals. Lionel's rule: « Zorbal » also reaches « ZORBAL », never a word in small letters. So a word written in small letters is never reached unless it is exactly the text selected. An occurrence inside a longer word is not a place. A place where the detector found the same name with the same type, whatever the capitals of the text it found, keeps its own row and decision (10.10: a decision on a row added by hand acts on that row only). Every form takes the pseudonym of the name as added; the written file and the stored row match.
 2. **AC2 — Shown as it is written:** in single-document validation, the added name's highlights show every place it will be written. In batch review, where each place is its own row, each place gets its own row added by hand. One undo removes the add at every place, and redo restores it. This follows the 10.9 and 10.11 conventions; the SM states the detail, and any real product choice in it goes back to Lionel.
 3. **AC3 — Tests first, invented names only:** the tests are committed before the fix and run through the real single-document path and the real batch path (as in 10.10), only detection replaced. Each expected failure is an `assert` on the written file and the stored rows, made after the test's preconditions hold, and each failing test is marked `xfail(strict=True, raises=AssertionError)` on the old code (the 10.5 pattern). The fix removes the markers. Cases:
    - a name added at one of its 2 places (measured failing), single document and batch;
    - a place where the detector found the same name with the same type and the user left it to review: the add does not decide it, and Story 10.13's warning still counts it;
    - the same text inside a longer word: not written;
+   - the name in capitals at another place (« ZORBAL » for « Zorbal » added): written with the added name's pseudonym; a word in small letters (« petit » for « Petit » added): not written;
    - one undo of the add: nothing of it is written.
 
    Existing tests stay green; a 10.9 or 10.10 test changes only if it encodes the old reach, each for a stated reason.
-4. **AC4 — CHANGELOG:** `[Unreleased]` gets a "Fixed" entry: in the desktop app, a name added by hand was replaced only at the place selected (every earlier version), and is now replaced at every place of that name and type.
+4. **AC4 — CHANGELOG:** `[Unreleased]` gets a "Fixed" entry: in the desktop app, a name added by hand was replaced only at the place selected (every earlier version), and is now replaced at every place of that name and type, including where it is written in capitals.
 5. **AC5 — User copy:** no new text is expected. If one appears, it is user copy that Lionel approves, word for word, before the story is done.
 6. **AC6 — Codex:** Lionel, 2026-10-18: "codex is NOT writing code, ever. Codex is a reviewer."; "codex is the reviewer for bmad projects, period, and don't substitute with forge without telling me first"; "forge cato and co are part of this. which is good, pai should keep and using it BUT NOT WITH BMAD". The BMAD dev agent (Claude) writes the code and the tests, tests first; no Forge, Anvil or Cato on this story. Before the merge command, the PR's final head gets one read-only Codex review (`codex exec --sandbox read-only`, run by the orchestrator, one session); if the code changes after that review, the new head is reviewed again. If Codex cannot run, the work stops and Lionel is told; no review is reported that did not run.
 7. **AC7 — Gates:**
@@ -1478,6 +1481,10 @@ At `main` `fb7917c`:
    - **G2:** QA re-runs the AC3 tests and the PO's desktop probe, checks out the tests-first commit to see the tests fail on the old code, and reads the diff. QA's gate comes before the merge.
    - **G6** applies in full (black, ruff, mypy, unit tests, full CI green).
    - **G7:** no headline number changes. CHANGELOG as above.
+
+### Decisions Recorded (Lionel, 2026-10-19)
+
+1. **Capitals in "every place": "A: Fix, capitals only (Rec.)".** The question, word for word, after the PO's measurements (2026-10-19): "Capitals in 'every place' (10.15 command line, 10.17 desktop): a name you add by hand is replaced only where it is written with exactly the capitals you typed. Measured with the real detector: in « Monsieur Zorbal a présenté le budget. Brimel Testar a validé la proposition de ZORBAL. », adding « Zorbal » leaves « ZORBAL » in clear, in a text file and in Excel. In four invented test texts the detector found « Zorbal » at all 5 of its places but « ZORBAL » at only 2 of 8. When every « Zorbal » was already found, the command line even says « 'Zorbal' is already in the review as PERSON at every place: nothing added » while two « ZORBAL » stay in clear. Corrections have an older gap of the same kind: if the review groups « Zorbal » and « ZORBAL » as one name and you correct it to « Zorbal Quentrix », the place « ZORBAL QUENTRIX » is written « [pseudonym] QUENTRIX » (command line, already in v2.2.0; desktop single-document review). (A) Fix before 2.3.0, forms with capitals only (Rec.): « Zorbal » also reaches « ZORBAL », never a word in small letters; none of the app's 728 known names appears in capitals in your ebook (20,000 words) or in the 25 test documents, so this adds no wrong replacement there. (B) Fix before 2.3.0, capitals ignored entirely: it also reaches small-letter words, so adding the surname « Petit » would also replace « petit », 8 times in your ebook. (C) Later (backlog). For A or B: 10.17's rule changes before its development starts, and the command line and the corrections get one small new story after 10.15 merges. Which one?" The options: "A: Fix, capitals only (Rec.)" / "B: Fix, ignore capitals" / "C: Later (backlog)". → AC1, AC3, AC4. The command line ([A]) and the corrections across capitals are Story 10.19.
 
 ### Integration Points
 
