@@ -7,6 +7,7 @@ find bar, finalization flow, and first-use contextual hints.
 
 from __future__ import annotations
 
+import copy
 from typing import TYPE_CHECKING
 
 from PySide6.QtCore import QEvent, Qt, QThreadPool, Signal
@@ -51,8 +52,9 @@ class ValidationScreen(QWidget):
     """Screen for interactive entity validation before pseudonymization."""
 
     # Signals for batch mode orchestration: (document index, validated list,
-    # custom pseudonyms of the names sent; Story 10.11)
-    validation_complete = Signal(int, object, object)
+    # custom pseudonyms of the names sent; Story 10.11; the batch run, Story
+    # 10.14, an object so that a context without one still emits)
+    validation_complete = Signal(int, object, object, object)
     batch_cancel_requested = Signal()
 
     def __init__(self, main_window: MainWindow) -> None:
@@ -65,6 +67,10 @@ class ValidationScreen(QWidget):
         self._batch_mode = False
         self._doc_index = 0
         self._total_docs = 0
+        # Story 10.14: the batch run of the document shown (None outside one),
+        # and whether a single document is being written.
+        self._run_id: int | None = None
+        self._finalizing = False
 
         self._build_ui()
         self._connect_shortcuts()
@@ -318,6 +324,7 @@ class ValidationScreen(QWidget):
             detection_result: Result from DetectionWorker
         """
         self._batch_mode = False
+        self._run_id = None
         self._batch_header.setVisible(False)
         self._batch_cancel_btn.setVisible(False)
         self._batch_notice.setVisible(False)
@@ -359,6 +366,7 @@ class ValidationScreen(QWidget):
         self._finalize_label.setVisible(False)
         self._finalize_btn.setEnabled(True)
         self._back_btn.setEnabled(True)
+        self._set_review_enabled(True)
 
         # First-use hints
         self._maybe_show_hints()
@@ -384,6 +392,9 @@ class ValidationScreen(QWidget):
         self._batch_mode = bool(kw.get("batch_mode", False))
         self._doc_index = int(kw.get("doc_index", 0))
         self._total_docs = int(kw.get("total_docs", 0))
+        # Story 10.14: the batch run the document belongs to
+        run_id = kw.get("run_id")
+        self._run_id = run_id if self._batch_mode and isinstance(run_id, int) else None
 
         # Update batch mode widget visibility
         self._batch_header.setVisible(self._batch_mode)
@@ -425,13 +436,19 @@ class ValidationScreen(QWidget):
         # no known-entity pass; a document shown for the first time is built
         # and kept.
         batch = self._batch_screen() if self._batch_mode else None
-        kept = batch.review_state(self._doc_index) if batch is not None else None
+        kept = (
+            batch.review_state(self._doc_index, self._run_id)
+            if batch is not None
+            else None
+        )
         if kept is not None:
             self._attach_review(kept, detection_result)
         else:
             self._begin_review(detection_result)
             if batch is not None and self._validation_state is not None:
-                batch.store_review_state(self._doc_index, self._validation_state)
+                batch.store_review_state(
+                    self._doc_index, self._validation_state, self._run_id
+                )
         self._apply_batch_document_rule()
 
         # Reconfigure focus order with batch widgets
@@ -452,6 +469,7 @@ class ValidationScreen(QWidget):
         self._finalize_progress.setVisible(False)
         self._finalize_label.setVisible(False)
         self._back_btn.setEnabled(True)
+        self._set_review_enabled(True)
 
     def _batch_screen(self) -> BatchScreen | None:
         """The main window's batch screen, if there is one."""
@@ -469,14 +487,17 @@ class ValidationScreen(QWidget):
         The shown document must be the waiting one, and the review shown
         must be the one the batch screen keeps for it (the identity guard),
         so a single document shown with stale batch fields is refused too
-        (Story 10.10 AC1).
+        (Story 10.10 AC1). Story 10.14: the document's run must be the current
+        run.
         """
         batch = self._batch_screen()
         return (
             batch is not None
             and self._validation_state is not None
+            and (self._run_id is None or self._run_id == batch.run_id)
             and batch.awaiting_doc_index == self._doc_index
-            and batch.review_state(self._doc_index) is self._validation_state
+            and batch.review_state(self._doc_index, self._run_id)
+            is self._validation_state
         )
 
     def _apply_batch_document_rule(self) -> None:
@@ -559,7 +580,8 @@ class ValidationScreen(QWidget):
 
     def _handle_entity_action(self, entity_id: str, action: str) -> None:
         """Route entity actions from editor/navigation to validation state."""
-        if self._validation_state is None:
+        # Story 10.14 AC5: nothing reaches the review while it is written.
+        if self._validation_state is None or self._finalizing:
             return
 
         if action == "accept":
@@ -578,7 +600,7 @@ class ValidationScreen(QWidget):
         self, entity_type: str, start_pos: int, end_pos: int
     ) -> None:
         """Handle 'Add as entity' from editor text selection."""
-        if self._validation_state is None:
+        if self._validation_state is None or self._finalizing:
             return
         doc_text = self._validation_state.session.document_text
         text = doc_text[start_pos:end_pos]
@@ -595,7 +617,7 @@ class ValidationScreen(QWidget):
         2026-10-14, "Stay rejected"); Ctrl+Shift+A passes False, so its
         accepts follow the group.
         """
-        if self._validation_state is None:
+        if self._validation_state is None or self._finalizing:
             return
 
         from gdpr_pseudonymizer.gui.widgets.toast import Toast
@@ -814,14 +836,14 @@ class ValidationScreen(QWidget):
     # ------------------------------------------------------------------
 
     def _on_undo(self) -> None:
-        if self._validation_state:
+        if self._validation_state and not self._finalizing:
             self._validation_state.undo_stack.undo()
             from gdpr_pseudonymizer.gui.widgets.toast import Toast
 
             Toast.show_message(self.tr("Annulé"), self._main_window, duration_ms=1500)
 
     def _on_redo(self) -> None:
-        if self._validation_state:
+        if self._validation_state and not self._finalizing:
             self._validation_state.undo_stack.redo()
             from gdpr_pseudonymizer.gui.widgets.toast import Toast
 
@@ -995,11 +1017,15 @@ class ValidationScreen(QWidget):
             if not self._confirm_names_left_in_clear(validated):
                 return
             # Story 10.11: the custom pseudonyms of the names sent go with
-            # the list (passed on to finalization only when there is one)
+            # the list (passed on to finalization only when there is one).
+            # Story 10.14 AC4: copies made when the user confirms, of the list
+            # the warning's count read, so nothing done in the kept review
+            # afterwards changes them; the run goes with them (AC3).
             self.validation_complete.emit(
                 self._doc_index,
-                validated,
-                self._validation_state.get_custom_pseudonyms(),
+                copy.deepcopy(validated),
+                copy.deepcopy(self._validation_state.get_custom_pseudonyms()),
+                self._run_id,
             )
             return
 
@@ -1078,10 +1104,16 @@ class ValidationScreen(QWidget):
 
         # Expand canonical entities back to ALL variant occurrences so
         # every position in the document gets pseudonymized (not just canonical).
-        validated = self._validation_state.expand_validated_entities()
+        # Story 10.14 AC4: copies made when the user confirms, so an edit, an
+        # undo or a type change made while the document is written cannot
+        # change what is written.
+        validated = copy.deepcopy(self._validation_state.expand_validated_entities())
+        customs = copy.deepcopy(self._validation_state.get_custom_pseudonyms())
 
         self._finalize_btn.setEnabled(False)
         self._back_btn.setEnabled(False)
+        # Story 10.14 AC5: the review cannot change while it is written.
+        self._set_review_enabled(False)
         self._finalize_progress.setVisible(True)
         self._finalize_progress.setValue(0)
         self._finalize_label.setVisible(True)
@@ -1094,13 +1126,33 @@ class ValidationScreen(QWidget):
             passphrase=self._detection_result.passphrase,
             theme=self._detection_result.theme,
             input_path=self._detection_result.input_file,
-            custom_pseudonyms=self._validation_state.get_custom_pseudonyms(),
+            custom_pseudonyms=customs,
         )
         worker.signals.progress.connect(self._on_finalize_progress)
         worker.signals.finished.connect(self._on_finalize_finished)
         worker.signals.error.connect(self._on_finalize_error)
 
         QThreadPool.globalInstance().start(worker)
+
+    def _set_review_enabled(self, enabled: bool) -> None:
+        """Enable or disable the review while a single document is written.
+
+        Story 10.14 AC5: the editor, the list and the screen's six shortcuts
+        are disabled with "Finaliser" and "Retour", and enabled again if the
+        finalization fails or when a review is shown.
+        """
+        self._finalizing = not enabled
+        self._editor.setEnabled(enabled)
+        self._panel.setEnabled(enabled)
+        for shortcut in (
+            self._undo_shortcut,
+            self._redo_shortcut,
+            self._redo_shortcut2,
+            self._find_shortcut,
+            self._accept_all_shortcut,
+            self._reject_all_shortcut,
+        ):
+            shortcut.setEnabled(enabled)
 
     def _on_finalize_progress(self, percent: int, phase: str) -> None:
         if percent >= 0:
@@ -1145,6 +1197,7 @@ class ValidationScreen(QWidget):
         self._finalize_label.setVisible(False)
         self._finalize_btn.setEnabled(True)
         self._back_btn.setEnabled(True)
+        self._set_review_enabled(True)
 
         from gdpr_pseudonymizer.gui.widgets.confirm_dialog import ConfirmDialog
 

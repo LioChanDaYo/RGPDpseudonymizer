@@ -105,9 +105,13 @@ class BatchWorker(QRunnable):
         continue_on_error: bool = True,
         validation_mode: str = "per_document",
         validate_per_document: bool = False,
+        run_id: int = 0,
     ) -> None:
         super().__init__()
         self._validate_per_document = validate_per_document
+        # Story 10.14: the batch run this worker belongs to, set by the batch
+        # screen and bound to each of its signal connections there.
+        self._run_id = run_id
         self.signals: WorkerSignals = (
             BatchValidationSignals() if validate_per_document else WorkerSignals()
         )
@@ -135,6 +139,11 @@ class BatchWorker(QRunnable):
         self._written_files: list[Path] = []
 
         self.setAutoDelete(True)
+
+    @property
+    def run_id(self) -> int:
+        """The batch run this worker belongs to (Story 10.14)."""
+        return self._run_id
 
     def pause(self) -> None:
         """Pause processing after current document finishes."""

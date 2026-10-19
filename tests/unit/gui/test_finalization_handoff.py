@@ -276,13 +276,6 @@ class _Single:
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.14: finalization writes the review's live entities, so a "
-    "change made after « Confirmer » changes the file, on the unfixed code; "
-    "fixed in Task 2",
-)
 @pytest.mark.parametrize(
     "case", ["edit_generated", "edit_custom", "undo_generated", "undo_custom"]
 )
@@ -363,12 +356,6 @@ def test_finalization_writes_what_was_confirmed(  # type: ignore[no-untyped-def]
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.14: the editor, the list and the shortcuts stay enabled while "
-    "a document is written, on the unfixed code; fixed in Task 2",
-)
 @pytest.mark.parametrize("case", ["failure", "success_then_next"])
 def test_review_disabled_while_writing_and_enabled_again(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path: Path, env: _Env, case: str

@@ -19,6 +19,7 @@ from PySide6.QtWidgets import (
 )
 
 if TYPE_CHECKING:
+    from gdpr_pseudonymizer.gui.screens.batch import BatchScreen
     from gdpr_pseudonymizer.gui.widgets.step_indicator import StepIndicator
 
 
@@ -87,6 +88,31 @@ class MainWindow(QMainWindow):
             if kwargs and hasattr(widget, "set_context"):
                 widget.set_context(**kwargs)
             self._stack.setCurrentIndex(idx)
+
+    def _running_batch_screen(self) -> BatchScreen | None:
+        """The batch screen while a batch runs, else None (Story 10.14)."""
+        idx = self._screens.get("batch")
+        if idx is None:
+            return None
+        from gdpr_pseudonymizer.gui.screens.batch import BatchScreen
+
+        widget = self._stack.widget(idx)
+        if isinstance(widget, BatchScreen) and widget.is_running:
+            return widget
+        return None
+
+    def batch_is_running(self) -> bool:
+        """Whether a batch runs, from "Démarrer" until its summary."""
+        return self._running_batch_screen() is not None
+
+    def refuse_open_during_batch(self) -> bool:
+        """Every route that opens a document or a folder asks this first.
+
+        Story 10.14 AC1: while a batch runs, the batch screen shows its
+        message and True is returned; the route then does nothing else.
+        """
+        batch = self._running_batch_screen()
+        return batch is not None and batch.refuse_open_while_running()
 
     def current_screen_name(self) -> str:
         """Return the name of the currently displayed screen."""
@@ -368,6 +394,8 @@ class MainWindow(QMainWindow):
 
     def _open_recent(self, filepath: str) -> None:
         """Handle opening a recent file."""
+        if self.refuse_open_during_batch():
+            return
         p = Path(filepath)
         if not p.exists():
             # Will be handled by home screen
@@ -379,6 +407,9 @@ class MainWindow(QMainWindow):
     # ------------------------------------------------------------------
 
     def _on_open_file(self) -> None:
+        # Story 10.14 AC1: refused before the file chooser while a batch runs
+        if self.refuse_open_during_batch():
+            return
         filepath, _ = QFileDialog.getOpenFileName(
             self,
             self.tr("Ouvrir un document"),
@@ -389,6 +420,9 @@ class MainWindow(QMainWindow):
             self._notify_file_selected(filepath)
 
     def _on_open_folder(self) -> None:
+        # Story 10.14 AC1: refused before the folder chooser while a batch runs
+        if self.refuse_open_during_batch():
+            return
         folder = QFileDialog.getExistingDirectory(
             self,
             self.tr("Ouvrir un dossier"),

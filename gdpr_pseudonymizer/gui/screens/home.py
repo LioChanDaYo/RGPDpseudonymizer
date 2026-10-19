@@ -6,7 +6,8 @@ import time
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from PySide6.QtCore import QCoreApplication, QEvent, Qt
+from PySide6.QtCore import QCoreApplication, QEvent, QObject, Qt
+from PySide6.QtGui import QMouseEvent
 from PySide6.QtWidgets import (
     QFrame,
     QHBoxLayout,
@@ -59,6 +60,9 @@ class HomeScreen(QWidget):
         self._drop_zone.folder_selected.connect(self._on_folder_selected)
         self._drop_zone.multi_file_dropped.connect(self._on_multi_file_dropped)
         self._drop_zone.invalid_drop.connect(self._on_invalid_drop)
+        # Story 10.14 AC1: the drop zone's click is refused while a batch runs,
+        # before its file chooser opens (eventFilter).
+        self._drop_zone.installEventFilter(self)
         layout.addWidget(self._drop_zone)
 
         # Batch processing card
@@ -76,9 +80,7 @@ class HomeScreen(QWidget):
         batch_layout.addStretch()
         self._batch_btn = QPushButton()
         self._batch_btn.setObjectName("secondaryButton")
-        self._batch_btn.clicked.connect(
-            lambda: self._main_window.navigate_to("batch", reset=True)
-        )
+        self._batch_btn.clicked.connect(self._on_batch_button)
         # Accessibility support (AC2 - Task 4.2)
         self._batch_btn.setAccessibleName(self.tr("Ouvrir le traitement par lot"))
         self._batch_btn.setAccessibleDescription(
@@ -228,8 +230,34 @@ class HomeScreen(QWidget):
     # Event handlers
     # ------------------------------------------------------------------
 
+    def eventFilter(self, watched: QObject, event: QEvent) -> bool:
+        """Refuse the drop zone's click while a batch runs (Story 10.14 AC1).
+
+        On a left mouse press (the only one that opens the drop zone's file
+        chooser) the message is shown and the press is swallowed.
+        """
+        if (
+            watched is self._drop_zone
+            and event.type() == QEvent.Type.MouseButtonPress
+            and isinstance(event, QMouseEvent)
+            and event.button() == Qt.MouseButton.LeftButton
+            and self._main_window.refuse_open_during_batch()
+        ):
+            return True
+        return super().eventFilter(watched, event)
+
+    def _on_batch_button(self) -> None:
+        """The batch card's button: a fresh batch screen, unless a batch runs
+        (Story 10.14 AC1, AC2)."""
+        if self._main_window.refuse_open_during_batch():
+            return
+        self._main_window.navigate_to("batch", reset=True)
+
     def _on_file_selected(self, filepath: str) -> None:
         """Handle file selection from drop zone or recent list."""
+        # Story 10.14 AC1: refused while a batch runs, before anything else
+        if self._main_window.refuse_open_during_batch():
+            return
         add_recent_file(filepath, self._config)
         save_gui_config(self._config)
         self._rebuild_recent_list()
@@ -279,6 +307,9 @@ class HomeScreen(QWidget):
 
     def _on_folder_selected(self, folder_path: str) -> None:
         """Handle folder drop — redirect to batch flow."""
+        # Story 10.14 AC1: refused while a batch runs, before the toast
+        if self._main_window.refuse_open_during_batch():
+            return
         Toast.show_message(
             self.tr("Ouverture du traitement par lot..."),
             self._main_window,
@@ -287,6 +318,10 @@ class HomeScreen(QWidget):
 
     def _on_multi_file_dropped(self) -> None:
         """Handle multi-file drop — only first file is processed."""
+        # Story 10.14 AC1: while a batch runs the first file was refused with
+        # the message (a modal window), so no toast is shown.
+        if self._main_window.batch_is_running():
+            return
         Toast.show_message(
             self.tr("Un seul fichier à la fois — seul le premier sera traité."),
             self._main_window,

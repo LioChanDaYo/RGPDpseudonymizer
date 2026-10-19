@@ -558,12 +558,6 @@ class _Harness:
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.14: no message on an open route while a batch runs, on the "
-    "unfixed code; fixed in Task 2",
-)
 @pytest.mark.parametrize("language", ["fr", "en"])
 @pytest.mark.parametrize("route", ROUTES)
 def test_open_route_during_batch_is_refused(  # type: ignore[no-untyped-def]
@@ -613,12 +607,6 @@ def test_open_route_during_batch_is_refused(  # type: ignore[no-untyped-def]
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.14: no message and no way back to the running batch, on the "
-    "unfixed code; fixed in Task 2",
-)
 @pytest.mark.parametrize(
     "where",
     [
@@ -701,12 +689,6 @@ def test_back_to_the_batch(  # type: ignore[no-untyped-def]
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.14: the home screen's batch button drops the running worker, "
-    "so « Annuler le lot » cannot stop it, on the unfixed code; fixed in Task 2",
-)
 def test_cancel_still_stops_the_batch_after_home_route(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path: Path, env: _Env
 ) -> None:
@@ -746,12 +728,6 @@ def test_cancel_still_stops_the_batch_after_home_route(  # type: ignore[no-untyp
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.14: a second run mixes with the first (A's review written on "
-    "B's text, or A's worker left waiting), on the unfixed code; fixed in Task 2",
-)
 @pytest.mark.parametrize("order", ["A_first", "B_first"])
 def test_second_run_never_mixes_with_the_first(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path: Path, env: _Env, order: str
@@ -815,12 +791,6 @@ def test_second_run_never_mixes_with_the_first(  # type: ignore[no-untyped-def]
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.14: an old run's signals are taken as the current run's, on "
-    "the unfixed code; fixed in Task 2",
-)
 def test_signals_of_an_old_run_are_ignored(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path: Path, env: _Env
 ) -> None:
@@ -864,12 +834,6 @@ def test_signals_of_an_old_run_are_ignored(  # type: ignore[no-untyped-def]
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.14: the batch hand-off sends the kept review's own entity "
-    "objects, on the unfixed code; fixed in Task 2",
-)
 def test_batch_handoff_shares_nothing_with_the_kept_review(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path: Path, env: _Env, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -922,12 +886,6 @@ def test_batch_handoff_shares_nothing_with_the_kept_review(  # type: ignore[no-u
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.14: the review screen's « Annuler le lot » has no English "
-    "translation, on the unfixed code; fixed in Task 2",
-)
 def test_english_review_cancel_button(  # type: ignore[no-untyped-def]
     qtbot, qapp, main_window, tmp_path: Path, env: _Env
 ) -> None:
@@ -996,12 +954,6 @@ def test_routes_unchanged_when_no_batch_runs(  # type: ignore[no-untyped-def]
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.14: « Démarrer » starts a second worker while a batch runs, "
-    "on the unfixed code; fixed in Task 2",
-)
 def test_start_while_a_batch_runs_is_refused(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path: Path, env: _Env
 ) -> None:
