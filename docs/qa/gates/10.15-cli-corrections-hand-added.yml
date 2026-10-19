@@ -1,11 +1,11 @@
 schema: 1
 story: '10.15'
 story_title: 'CLI Corrections and Hand-Added Names'
-scope: 'PR #106, pre-merge review (Task 7, G2) at head 37ead88 on main e35ccc5 (10.12 and 10.13 merged), the follow-up at 2143813 (guards G6-G8, test-only), and the re-check (Task 7.6) at head 210cf1d after the read-only Codex review''s P0 on c4a419e. Commits reviewed: 40daade, 6a611a8, 89f3cc2, a341a86 (story), tests first 38938dc, fix 0633c24, 92536d8 and 37ead88 (CHANGELOG, story), 2143813 (guards); ed8419d, 54237f6, b4055ce (story v1.4, v1.5, the epic AC1 sentence), tests first 650ad30 and 0f60a3a, fix 38e5b76, 210cf1d (CHANGELOG sentence, Dev Agent Record).'
+scope: 'PR #106, pre-merge review (Task 7, G2) at head 37ead88 on main e35ccc5 (10.12 and 10.13 merged), the follow-up at 2143813 (guards G6-G8, test-only), and the re-check (Task 7.6) at head 210cf1d after the read-only Codex review''s P0 on c4a419e. Commits reviewed: 40daade, 6a611a8, 89f3cc2, a341a86 (story), tests first 38938dc, fix 0633c24, 92536d8 and 37ead88 (CHANGELOG, story), 2143813 (guards); ed8419d, 54237f6, b4055ce (story v1.4, v1.5, the epic AC1 sentence), tests first 650ad30 and 0f60a3a, fix 38e5b76, 210cf1d (CHANGELOG sentence, Dev Agent Record); then the follow-up at e30a083: 26a08c4 (guards G9, G10 and the docstring for TEST-003, TEST-004, MNT-002) and e30a083 (story v1.6).'
 gate: PASS
-status_reason: 'Every AC holds on real output at 210cf1d. The Codex P0 is fixed: a correction that partly overlaps an accepted, stored or typed name, at its first or any later place of its group, is widened over both and nothing is left in clear (.txt, .xlsx, .csv; process and batch --workers 1; the PO''s probes and QA''s). G2 holds for v1.5 (16 AssertionErrors at the committed lines on c4a419e''s code; markers only removed). The committed tests catch 8 of QA''s 12 mutants; QA''s probes catch the other 4 (the fixed point and the tie rule are not pinned: TEST-003, TEST-004). CI green on every leg. Codex ran once, read-only. Low items only.'
+status_reason: 'Every AC holds on real output at 210cf1d. The Codex P0 is fixed: a correction that partly overlaps an accepted, stored or typed name, at its first or any later place of its group, is widened over both and nothing is left in clear (.txt, .xlsx, .csv; process and batch --workers 1; the PO''s probes and QA''s). G2 holds for v1.5 (16 AssertionErrors at the committed lines on c4a419e''s code; markers only removed). Since 26a08c4 the committed tests catch all 12 of QA''s mutants (G9 the fixed point, G10 the tie rule). CI green on every leg. Codex ran once, read-only. One optional low item left (MNT-001).'
 reviewer: 'Quinn (Test Architect)'
-updated: '2026-10-19T10:36:01Z'
+updated: '2026-10-19T11:12:27Z'
 
 waiver: { active: false }
 
@@ -24,24 +24,6 @@ top_issues:
     suggested_action: 'Optional: write r"(?<![\w\-\u2010\u2011])" and r"(?![\w\-\u2010\u2011])"; re reads \uXXXX inside a raw string, so the pattern is the same and visible.'
     refs: ['gdpr_pseudonymizer/validation/models.py:24-25']
     suggested_owner: dev
-  - id: 'TEST-003'
-    severity: low
-    finding: 'No committed test needs the widening''s fixed point. QA mutant MC (one outer pass only) passes the 52 new tests and 197 existing tests of the changed area. The case it breaks: a correction widened over an accepted name that itself partly overlaps a stored name ("ok Zorbal Quentrix Vorlan Mestrix a signé.", "Zorbal" corrected to "Zorbal Quentrix", "Quentrix Vorlan" accepted, "Vorlan Mestrix" stored). Under MC the output is "ok <ZQ''s pseudonym> Mestrix a signé.", exit 0 with "Processing Successful", while "Vorlan Mestrix" has a stored row. At 210cf1d it is "ok <ZQ''s pseudonym> a signé." (QA probe test_qa_fixed_point_through_two_overlapping_names, .txt and .xlsx). It needs two written names that partly overlap each other, which detection rarely gives; the product is right, the gap is regression protection only.'
-    suggested_action: 'Backlog, by the BMAD dev agent: a test like QA probe test_qa_fixed_point_through_two_overlapping_names (r1015/qa/probes/test_qa_1015_v15.py).'
-    refs: ['gdpr_pseudonymizer/core/document_processor.py:437-455']
-    suggested_owner: dev
-  - id: 'TEST-004'
-    severity: low
-    finding: 'No committed test pins the tie rule of the ruling ("first in the list sent") for two typed places that partly overlap each other. QA mutants MD (equal widened spans go to the later place) and MD2 (typed places processed last to first) pass the 249 tests of the changed area. Under MD2, two overlapping corrections ("Vorlan" corrected to "Vorlan Zorbal", "Quentrix" to "Zorbal Quentrix") are written with the second correction''s pseudonym instead of the first''s. Nothing is left in clear either way; only which typed name''s pseudonym covers the span changes. QA probes test_qa_two_corrections_overlap (.txt, .xlsx, .csv) and test_qa_tie_first_in_list (.txt, .xlsx) catch both.'
-    suggested_action: 'Backlog, by the BMAD dev agent: a test like QA probe test_qa_two_corrections_overlap.'
-    refs: ['gdpr_pseudonymizer/core/document_processor.py:437-463']
-    suggested_owner: dev
-  - id: 'MNT-002'
-    severity: low
-    finding: 'The _widen_added_places docstring (and the story''s Fix Design item 3) say that two typed places that partly overlap each other "end with the same span" and the writer keeps the first. In the common case they do not: the first typed place in the list widens over the second, which it then holds, so the second keeps its span; the first wins because its span is the longer one. Equal spans only arise in chains through a third name (QA probe test_qa_tie_first_in_list). The outcome matches the ruling (the first in the list gives the pseudonym) in both cases.'
-    suggested_action: 'Optional: reword the docstring to "the first typed place in the list widens over the second and covers it; where both end with the same span, the writer keeps the first".'
-    refs: ['gdpr_pseudonymizer/core/document_processor.py:416-430']
-    suggested_owner: dev
 
 resolved_issues:
   - id: 'TEST-001'
@@ -54,6 +36,21 @@ resolved_issues:
     finding: 'At 37ead88 no committed test had the same added text at the same in-cell span in two cells. QA mutant M5 (is_listed_place ignores context_label) passed the 230 tests of the changed area, and wrote A3 in clear with "Processing Successful".'
     resolution: 'Guard G8 test_add_same_span_in_another_cell (2143813). Under M5: 1 failed, 232 passed, G8 only, AssertionError at :940 (''Zorbal Quentrix'' found in the cells). It passes at the head.'
     resolved_at: '2143813'
+  - id: 'TEST-003'
+    severity: low
+    finding: 'No committed test needs the widening''s fixed point. QA mutant MC (one outer pass only) passes the 52 new tests and 197 existing tests of the changed area. The case it breaks: a correction widened over an accepted name that itself partly overlaps a stored name ("ok Zorbal Quentrix Vorlan Mestrix a signé.", "Zorbal" corrected to "Zorbal Quentrix", "Quentrix Vorlan" accepted, "Vorlan Mestrix" stored). Under MC the output is "ok <ZQ''s pseudonym> Mestrix a signé.", exit 0 with "Processing Successful", while "Vorlan Mestrix" has a stored row. At 210cf1d it is "ok <ZQ''s pseudonym> a signé." (QA probe test_qa_fixed_point_through_two_overlapping_names, .txt and .xlsx). It needs two written names that partly overlap each other, which detection rarely gives; the product is right, the gap is regression protection only.'
+    resolution: 'Guard G9 test_widening_reaches_fixed_point[.txt, .xlsx] (26a08c4, no marker). Under MC: 3 failed, 249 passed; G9 x2 at test_cli_corrections_hand_added.py:1233 (assert [''Mestrix''] == []) and G10 at :1264. Both pass at the head.'
+    resolved_at: '26a08c4'
+  - id: 'TEST-004'
+    severity: low
+    finding: 'No committed test pins the tie rule of the ruling ("first in the list sent") for two typed places that partly overlap each other. QA mutants MD (equal widened spans go to the later place) and MD2 (typed places processed last to first) pass the 249 tests of the changed area. Under MD2, two overlapping corrections ("Vorlan" corrected to "Vorlan Zorbal", "Quentrix" to "Zorbal Quentrix") are written with the second correction''s pseudonym instead of the first''s. Nothing is left in clear either way; only which typed name''s pseudonym covers the span changes. QA probes test_qa_two_corrections_overlap (.txt, .xlsx, .csv) and test_qa_tie_first_in_list (.txt, .xlsx) catch both.'
+    resolution: 'Guard G10 test_overlapping_typed_places_first_in_list_wins (26a08c4, .txt: two corrections that partly overlap each other and a stored name). Under MD: 1 failed, 251 passed, G10 only, AssertionError at :1264 (the later correction''s pseudonym written). Under MD2: 1 failed, 251 passed, G10 only, at :1264. It passes at the head.'
+    resolved_at: '26a08c4'
+  - id: 'MNT-002'
+    severity: low
+    finding: 'The _widen_added_places docstring (and the story''s Fix Design item 3) say that two typed places that partly overlap each other "end with the same span" and the writer keeps the first. In the common case they do not: the first typed place in the list widens over the second, which it then holds, so the second keeps its span; the first wins because its span is the longer one. Equal spans only arise in chains through a third name (QA probe test_qa_tie_first_in_list). The outcome matches the ruling (the first in the list gives the pseudonym) in both cases.'
+    resolution: 'The docstring now says that typed places are taken in the order of the list, the first widens over the second and covers it, equal spans arise only when a third name widens both, and either way the first in the list gives the pseudonym (26a08c4; the story''s AC precisions and Fix Design item 3 match it since e30a083, v1.6). It is the only product-file change in 26a08c4: QA compared the AST of document_processor.py at 5a39078 and 26a08c4 with docstrings blanked, and it is identical.'
+    resolved_at: '26a08c4'
 
 history:
   - at: '2026-10-19T07:31:15Z'
@@ -65,13 +62,21 @@ history:
   - at: '2026-10-19T10:36:01Z'
     gate: PASS
     note: 'Re-check (Task 7.6) at 210cf1d after the read-only Codex review''s P0 on c4a419e (CHANGES REQUESTED): the P0 and the PO''s N4 are fixed on real output; G2 holds for T16-T21; three new low items (TEST-003, TEST-004, MNT-002), MNT-001 still open.'
+  - at: '2026-10-19T11:12:27Z'
+    gate: PASS
+    note: 'Follow-up at e30a083: G9 and G10 (26a08c4) close TEST-003 and TEST-004, measured on QA''s mutants MC, MD and MD2; the docstring and story v1.6 close MNT-002; all 12 of QA''s mutants are now caught by the committed tests; MNT-001 stays open (optional).'
 
 quality_score: 100
-expires: '2026-11-02T10:36:01Z'
+expires: '2026-11-02T11:12:27Z'
 
 evidence:
-  tests_reviewed: 52
+  tests_reviewed: 55
   risks_identified: 5
+  follow_up_e30a083:
+    scope: 'git diff 5a39078 26a08c4: tests/unit/test_cli_corrections_hand_added.py (68 lines appended after T21: G9 test_widening_reaches_fixed_point[.txt, .xlsx] and G10 test_overlapping_typed_places_first_in_list_wins[.txt], no marker), core/document_processor.py (docstring lines of _widen_added_places only: the AST with docstrings blanked is identical at 5a39078 and 26a08c4), and the story''s Change Log row and Dev Agent Record. e30a083 changes the story only (Status, AC precisions, Fix Design item 3, Test Plan, Notes, Change Log). git diff 5a39078 e30a083 -- scripts .github pyproject.toml poetry.lock CHANGELOG.md docs/prd is empty. No existing test changed; QA''s QA Results section is byte-identical. The guards use invented names (Vorlan Mestrix, Quentrix Vorlan, Quentrix Brimel, Vorlan Zorbal, Zorbal Quentrix) and pre-checked words. Byte check blocks=19 matched=19.'
+    local: 'At e30a083: the new file 55 passed, one process and -n 4 (G9 x2 and G10 PASSED). ruff exit 0, black "315 files would be left unchanged", mypy "Success: no issues found in 105 source files". pytest -m "not slow" -n 4 --dist loadscope from the worktree root: 2724 passed, 10 skipped, 1 failed (test_config_show, "(not \nfound)", the known wrap). site/ removed; worktree clean.'
+    mutants: 'r1015/qa/mut15 (the package of 210cf1d; its code equals e30a083''s, docstring aside) against e30a083''s committed tests (55 new + 197 existing = 252; unmutated 252 passed) and QA''s 57 probes (57 passed). MC one pass: 3 failed (G9 x2 at :1233 assert [''Mestrix''] == [], G10 at :1264). MD equal spans to the later place: 1 failed (G10 at :1264). MD2 typed last to first: 1 failed (G10 at :1264). MA: T20 x3, T21 x2. MB: 19 (T16-T21, G9 x2, G10). M2: 7 (T14 x2, T18 x2, G9 x2, G10). M7: 11. M4a: G6. M4b: G7. M5: G8. All 12 of QA''s mutants are caught by the committed tests; each failure is an AssertionError.'
+    ci: 'e30a083, 39240220373 (attempt 1, the head): ubuntu 3.10 "2735 passed in 404.78s", ubuntu 3.11 "2735 passed in 528.68s", macos "2735 passed in 1071.70s", windows "2586 passed, 3 skipped in 350.27s": 3 more than 210cf1d on every leg, 0 XFAIL; the 55 new tests (G9 x2 and G10 included) and the 15 leakage-guard tests PASSED on each leg; lint black "315 files would be left unchanged", mypy "Success: no issues found in 105 source files"; Code Quality 39240220349 success. 26a08c4, 39239816916 (attempt 1): ubuntu 3.10, ubuntu 3.11 and macos "2735 passed", windows "2586 passed, 3 skipped", 0 XFAIL; Code Quality 39239817280 success. QA''s 5a39078, 39238684234 (attempt 1): 2732 passed, windows 2583 passed and 3 skipped, 0 XFAIL. Read from the job logs; no reruns.'
   recheck_210cf1d:
     scope: 'git diff c4a419e 210cf1d: product code in validation/models.py (CORRECTED_BY_HAND_SOURCE = "corrected", TYPED_SOURCES), validation/workflow.py ([E] gives every place it reaches source=CORRECTED_BY_HAND_SOURCE, :336) and core/document_processor.py (_widen_added_places widens every place whose source is in TYPED_SOURCES, against the current spans of the list, the other typed places'' widened spans included, until nothing changes); the test file (T16-T21 appended after G8: 204 lines in 650ad30, 82 in 0f60a3a; 38e5b76 removes 30 lines, the six xfail blocks); CHANGELOG.md (one sentence added to the first 10.15 bullet); the epic (AC1''s last sentence, 54237f6, the orchestrator''s approved mechanical edit); the story. No existing test changed; _locate_modified_span, _apply_replacements, _apply_tabular_replacements, _resolve_pseudonyms and _check_cells unchanged; no new user text. The story byte check: blocks=19 matched=19; Q1 and Q2 literals still equal Lionel''s texts; the CHANGELOG bullets equal the story''s entry byte for byte.'
     g2: 'QA worktree r1015/qa/wt_0f60a3a (git worktree of 0f60a3a without tests/test_corpus; git diff c4a419e 0f60a3a -- gdpr_pseudonymizer is empty, so it is c4a419e''s code with v1.5''s tests). --runxfail: 16 failed, 36 passed; each an AssertionError at its "# expected failure" line, no "PRE:": T16 :1051 x3 [''Quentrix''], T17 :1079 x3 [''Vorlan''], T18 :1115 x2 [''Quentrix''], T19 :1144 x3 [''Quentrix''], T20 :1183 x3 [''Quentrix''], T21 :1226 x2 [''Quentrix'']. With the markers: 36 passed, 16 xfailed, one process and -n 4. git diff 0f60a3a 38e5b76 -- tests: 30 lines removed, 0 added (six @pytest.mark.xfail(strict=True, raises=AssertionError, reason=...) blocks); 650ad30 to 0f60a3a only appends T20 and T21.'
@@ -139,12 +144,12 @@ evidence:
   g6_local: 'Head: ruff exit 0; black "315 files would be left unchanged"; mypy "Success: no issues found in 105 source files". pytest -m "not slow" -n 4 --dist loadscope from the worktree root: 2702 passed, 10 skipped, 1 failed: tests/unit/cli/commands/test_config_show.py::TestConfigShowCommand::test_displays_config_files_status, Rich wrapping "(not \nfound)" over the long scratch path (the known environment failure; 23 passed when its file runs alone). The new file: 33 passed, in one process and under -n 4. The site/ folder the docs test builds was removed; the worktree is clean after every run.'
   scope_check: 'git diff --name-status origin/main...37ead88: CHANGELOG.md, the epic (one line, Story 10.15''s AC8, Lionel''s 2026-10-18 decision), the story, document_processor.py, exceptions.py, validation/models.py, validation/workflow.py, and the new test file: File Locations exactly. Task 6.1''s path list, both leakage allowlists, .github/, pyproject.toml and poetry.lock: empty. No existing test changed. None of the 13 files the accuracy suite loads is touched, so G1, G3 and G5 are N/A; G4 holds (Story 10.15''s commits only).'
   code_read: 'Every CLI rebuild of a name is a dataclasses.replace: [T] (models.py:453), [E] (workflow.py:323), the _sent_entity fallback (models.py:514); the only DetectedEntity(...) left in validation/ is places_of''s new place (models.py:291), which sets the cell, and actions.py (unused by the CLI, unchanged). [E] is located with session.text_of(entity). places_of: re.escape between the two lookarounds, per cell, source manual; is_listed_place compares text, type, span and cell. _widen_added_places: over known_entities + validated_unknown, same cell, repeated until no partial overlap, text and type kept. _check_cells: in _process_document_tabular after _run_validation and before _reset_pseudonym_state and _resolve_pseudonyms, and in finalize_document_tabular before _reset_pseudonym_state; the log event carries no field; the message names no name. cells=cells by keyword in run, both restarts, the manual flow and run_validation_workflow, next to 10.13''s sent_without_review.'
-  not_checked: 'Linux and macOS locally (CI only); .pdf and .md input (the same text path as .txt and .docx, by reading); a real terminal (CliRunner; COLUMNS=320 in QA''s runs, so line wrapping on an 80-column terminal was not judged); the desktop app (not changed; its added names are Story 10.17); the read-only Codex review (not run yet); the post-merge performance run.'
+  not_checked: 'Linux and macOS locally (CI only); .pdf and .md input (the same text path as .txt and .docx, by reading); a real terminal (CliRunner; COLUMNS=320 in QA''s runs, so line wrapping on an 80-column terminal was not judged); the desktop app (not changed; its added names are Story 10.17); the second read-only Codex review (Task 6.3, run by the orchestrator after this gate); the post-merge performance run.'
   notes_for_lionel: 'Facts, no QA judgement. (1) A place is the exact text typed (AC14 (a)): adding "Zorbal" leaves "ZORBAL" and "zorbal" in clear. (2) Only -, U+2010 and U+2011 join words: "Zorbal–Quentrix" with an en dash holds a place of "Zorbal" (as the PO''s P2 shows). (3) "''X'' not found in document" also shows when X stands only inside longer words (follow-up (e)). All three as the story states them; 10.17 uses the same rules.'
   trace:
     ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
     ac_gaps: []
-    notes: 'AC1 T1-T4, T12, and for a correction partly overlapping another written name T16-T21 (v1.4/v1.5) + probes T2cells, E2cells, ET, CE, batch, EotherType, twoCorrections, ETOverlap, CEOverlap, fixedPoint, tieChain and the PO''s overlap and second-place probes. AC2 T9, G6 (after the Ctrl+C restart) + E2cells, Enotincell, restartE. AC3/AC14 T5-T7, T10, T11, T13-T15, G7 (after the "Ready" restart), G8 (same span in two cells) + probes A3txt, Acells, Ahyphen x3, Arejected, Q2 x4, overlap x4, Astored x2, Atype x4, docx, xlsx2txt, sameSpanOtherCell, widenOwnCell. AC4 T8 x3 + Q1process, batchQ1. AC5/AC10 g2 + ci. AC6 texts. AC7 changelog. AC8 codex_rule. AC9 scope_check, ci, g6_local, g2. AC11 G1-G4, existing suites unchanged. AC12 consumer_trace. AC13 the 15 leakage-guard tests on every leg, allowlists unchanged. AC14 as AC3.'
+    notes: 'AC1 T1-T4, T12, and for a correction partly overlapping another written name T16-T21 (v1.4/v1.5) + probes T2cells, E2cells, ET, CE, batch, EotherType, twoCorrections, ETOverlap, CEOverlap, fixedPoint, tieChain and the PO''s overlap and second-place probes; the fixed point G9 and the tie rule G10. AC2 T9, G6 (after the Ctrl+C restart) + E2cells, Enotincell, restartE. AC3/AC14 T5-T7, T10, T11, T13-T15, G7 (after the "Ready" restart), G8 (same span in two cells) + probes A3txt, Acells, Ahyphen x3, Arejected, Q2 x4, overlap x4, Astored x2, Atype x4, docx, xlsx2txt, sameSpanOtherCell, widenOwnCell. AC4 T8 x3 + Q1process, batchQ1. AC5/AC10 g2 + ci. AC6 texts. AC7 changelog. AC8 codex_rule. AC9 scope_check, ci, g6_local, g2. AC11 G1-G4, existing suites unchanged. AC12 consumer_trace. AC13 the 15 leakage-guard tests on every leg, allowlists unchanged. AC14 as AC3.'
 
 nfr_validation:
   security:
@@ -158,16 +163,10 @@ nfr_validation:
     notes: 'A failed check gives "✗ Processing Failed" and exit 1 with no partial output; batch --workers 1 lists the file and goes on. The review''s keys, prompts and existing messages are unchanged; both restarts keep the cells (by reading, QA''s probes, and G6 and G7 since 2143813).'
   maintainability:
     status: PASS
-    notes: 'dataclasses.replace instead of field-by-field rebuilds; keyword arguments with defaults; the approved texts as single literals; docstrings name the story and Lionel''s decisions. The two regression gaps QA found at 37ead88 (TEST-001, TEST-002) are guarded since 2143813 (G6-G8). At 210cf1d: two regression gaps (TEST-003 the fixed point, TEST-004 the tie rule) and two readability nits (MNT-001, MNT-002).'
+    notes: 'dataclasses.replace instead of field-by-field rebuilds; keyword arguments with defaults; the approved texts as single literals; docstrings name the story and Lionel''s decisions. The two regression gaps QA found at 37ead88 (TEST-001, TEST-002) are guarded since 2143813 (G6-G8). The re-check''s two gaps (TEST-003 the fixed point, TEST-004 the tie rule) are guarded since 26a08c4 (G9, G10) and the tie docstring is fixed (MNT-002). One readability nit left (MNT-001, optional).'
 
 recommendations:
   immediate: []
   future:
-    - action: 'Backlog: commit a test for the widening''s fixed point, a correction widened over an accepted name that partly overlaps a stored name (TEST-003).'
-      refs: ['tests/unit/test_cli_corrections_hand_added.py', 'gdpr_pseudonymizer/core/document_processor.py:437-455']
-    - action: 'Backlog: commit a test for the tie rule, two corrections that partly overlap each other (TEST-004).'
-      refs: ['tests/unit/test_cli_corrections_hand_added.py']
-    - action: 'Optional: reword the _widen_added_places docstring on ties (MNT-002).'
-      refs: ['gdpr_pseudonymizer/core/document_processor.py:416-430']
     - action: 'Optional, backlog: write the two word-joining hyphens as \u2010 and \u2011 in the place pattern (MNT-001).'
       refs: ['gdpr_pseudonymizer/validation/models.py:24-25']
