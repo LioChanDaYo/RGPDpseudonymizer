@@ -1144,3 +1144,85 @@ def test_batch_correction_overlap(tmp_path: Path, db: Path, ext: str) -> None:
     assert [part for part in NAME_PARTS if part in written] == []  # expected failure
     assert written == f"{pseudonym} a signé."
     assert _names(db) == sorted([(VZ, "PERSON"), (ZQ, "PERSON")])
+
+
+# --- v1.5: every place [E] reaches is typed (the PO's N4) ----------------------
+
+SECOND_PLACE = "Zorbal Quentrix valide. Vorlan Zorbal Quentrix a signé."
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 10.15 v1.5: reproduces a correction that partly overlaps another name at a second place of its group, left partly in clear; fixed in Task 2.6",
+)
+@pytest.mark.parametrize("ext", [".txt", ".xlsx", ".csv"])
+def test_correction_overlap_at_second_place(tmp_path: Path, db: Path, ext: str) -> None:
+    """T20 (AC1, AC14 (d) for [E] at every place of its group; the PO's N4):
+    [E] corrects both places of its group; at the second, the correction
+    reaches into an accepted name and is widened over both there too."""
+    source, output = _files(tmp_path, ext)
+    _write_overlap(source, SECOND_PLACE)
+    _pre(
+        [SECOND_PLACE.find("Quentrix"), SECOND_PLACE.rfind("Quentrix")] == [7, 38]
+        and SECOND_PLACE.find(VZ) == 24,
+        "the places of the Test Plan",
+    )
+    run = _process(
+        source,
+        output,
+        db,
+        [("Quentrix", "PERSON"), (VZ, "PERSON")],
+        [ENTER, "e", SPACE],
+        [ZQ],
+    )
+    _pre(run.exit_code == 0, "exit code 0")
+    _pseudonym(db, VZ, "PERSON")
+    pseudonym = _pseudonym(db, ZQ, "PERSON")
+    written = _overlap_written(output)
+    assert [part for part in NAME_PARTS if part in written] == []  # expected failure
+    assert written == f"{pseudonym} valide. {pseudonym} a signé."
+    assert _names(db) == sorted([(VZ, "PERSON"), (ZQ, "PERSON")])
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 10.15 v1.5: reproduces a correction that partly overlaps another name at a second place of its group, left partly in clear; fixed in Task 2.6",
+)
+@pytest.mark.parametrize("ext", [".xlsx", ".csv"])
+def test_correction_overlap_in_another_cell(tmp_path: Path, db: Path, ext: str) -> None:
+    """T21 (T20 across two cells): the correction's second place, in another
+    cell, reaches into an accepted name and is widened over both there."""
+    source, output = _files(tmp_path, ext)
+    _write_sheet(
+        source,
+        [
+            ["Nom", "Note"],
+            ["ok", "Zorbal Quentrix valide."],
+            ["ok", "Vorlan Zorbal Quentrix a signé."],
+        ],
+    )
+    run = _process(
+        source,
+        output,
+        db,
+        [("Quentrix", "PERSON"), (VZ, "PERSON")],
+        [ENTER, SPACE, "e"],
+        [ZQ],
+    )
+    _pre(run.exit_code == 0, "exit code 0")
+    _pseudonym(db, VZ, "PERSON")
+    pseudonym = _pseudonym(db, ZQ, "PERSON")
+    cells = _cells(output)
+    _pre(
+        len(cells) == 3
+        and [_cell(cells, ref) for ref in ("A1", "B1", "A2", "A3")]
+        == ["Nom", "Note", "ok", "ok"],
+        "the sheet's other cells unchanged",
+    )
+    b2, b3 = _cell(cells, "B2"), _cell(cells, "B3")
+    both = f"{b2}\n{b3}"
+    assert [part for part in NAME_PARTS if part in both] == []  # expected failure
+    assert (b2, b3) == (f"{pseudonym} valide.", f"{pseudonym} a signé.")
+    assert _names(db) == sorted([(VZ, "PERSON"), (ZQ, "PERSON")])
