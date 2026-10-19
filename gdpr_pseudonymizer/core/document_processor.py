@@ -15,7 +15,7 @@ from __future__ import annotations
 import re
 import time
 from collections.abc import Callable, Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 
 from gdpr_pseudonymizer.core.custom_pseudonym import (
@@ -38,7 +38,7 @@ from gdpr_pseudonymizer.data.repositories.mapping_repository import (
     MappingRepository,
     SQLiteMappingRepository,
 )
-from gdpr_pseudonymizer.exceptions import CustomPseudonymError
+from gdpr_pseudonymizer.exceptions import CustomPseudonymError, SpreadsheetCellError
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 from gdpr_pseudonymizer.nlp.hybrid_detector import HybridDetector
 from gdpr_pseudonymizer.nlp.model_names import resolve_spacy_model
@@ -58,11 +58,21 @@ from gdpr_pseudonymizer.utils.tabular_reader import (
     read_csv_structured,
     read_excel_structured,
 )
-from gdpr_pseudonymizer.validation.models import CandidateKey, candidate_key
+from gdpr_pseudonymizer.validation.models import (
+    TYPED_SOURCES,
+    CandidateKey,
+    candidate_key,
+)
 from gdpr_pseudonymizer.validation.workflow import run_validation_workflow
 
 # Configure logging (NO sensitive data)
 logger = get_logger(__name__)
+
+# Story 10.15 (AC4, Lionel's approved Q1 text): a validated name of a
+# spreadsheet matches no cell. ``_sanitize_error_message`` puts the class
+# name in front; the text names no name and no cell. Kept on one line so that
+# it can be checked byte for byte.
+SPREADSHEET_CELL_ERROR = "A name you validated could not be placed in its cell in the Excel or CSV file, so it would have stayed in plain text. No output was written for this file and no pseudonym was stored. Please report this problem."
 
 
 @dataclass
@@ -313,12 +323,17 @@ class DocumentProcessor:
         skip_validation: bool,
         pseudonym_assigner: Callable[[DetectedEntity], str],
         custom_pseudonyms: dict[NameKey, str] | None = None,
+        cells: dict[str, str] | None = None,
     ) -> list[DetectedEntity]:
         """Run entity validation workflow (interactive or auto-accept).
 
         ``custom_pseudonyms``, when given, is filled with the custom
         pseudonyms the user set in the review (Story 10.11), keyed by
-        (mapping key, type) of the name sent.
+        (mapping key, type) of the name sent. ``cells`` (cell reference ->
+        cell text) is given for a spreadsheet, whose entities' positions
+        point into their cells (Story 10.15); None for a text document.
+        The places the user typed (added with [A] or corrected with [E]) are
+        widened over the other names sent (``_widen_added_places``).
         """
         if skip_validation:
             logger.info(
@@ -371,6 +386,7 @@ class DocumentProcessor:
                     custom_pseudonyms=custom_pseudonyms,
                     # Names known in the mapping database are written without review.
                     sent_without_review=known_entities,
+                    cells=cells,
                 )
             else:
                 validated_unknown = []
@@ -378,7 +394,11 @@ class DocumentProcessor:
                     "All entities have existing mappings. Skipping validation."
                 )
 
-            validated_entities = known_entities + validated_unknown
+            # Story 10.15 (AC14 (d)): over every name sent, stored names
+            # accepted without review included
+            validated_entities = self._widen_added_places(
+                known_entities + validated_unknown
+            )
             logger.info(
                 "validation_complete",
                 validated_count=len(validated_entities),
@@ -390,6 +410,84 @@ class DocumentProcessor:
         except KeyboardInterrupt:
             logger.info("validation_cancelled", reason="user_interrupt")
             raise
+
+    @staticmethod
+    def _widen_added_places(entities: list[DetectedEntity]) -> list[DetectedEntity]:
+        """Widen each place the user typed over the names it partly overlaps
+        (Story 10.15, AC14 (d), Lionel's Q4; v1.4/v1.5: corrections too).
+
+        A typed place (its source is in ``TYPED_SOURCES``: added with [A], or
+        any place a correction made with [E] reaches) that partly overlaps
+        another name of the list in the same text or cell (they overlap and
+        neither span holds the other) is widened to cover both, again until
+        it partly overlaps no other span of the list, the other typed places'
+        widened spans included. Its text and type are kept, so the whole span
+        is written with the typed name's pseudonym and nothing of either name
+        stays in plain text there. Typed places are taken in the order of the
+        list: when two of them partly overlap each other, the first widens
+        over the second, which then lies inside it and is covered by it. They
+        end with the same span only when a third name widens both to the
+        same union; the writer then keeps the first of the two in the list,
+        its sort being stable. Either way the first in the list gives the
+        pseudonym. Every other entity, and the order, are unchanged.
+        """
+        spans = [(entity.start_pos, entity.end_pos) for entity in entities]
+        typed = [
+            index
+            for index, entity in enumerate(entities)
+            if entity.source in TYPED_SOURCES
+        ]
+        changed = True
+        while changed:
+            changed = False
+            for index in typed:
+                start, end = spans[index]
+                label = entities[index].context_label
+                for other_index, (other_start, other_end) in enumerate(spans):
+                    if (
+                        other_index == index
+                        or entities[other_index].context_label != label
+                    ):
+                        continue
+                    overlaps = other_start < end and start < other_end
+                    holds = start <= other_start and other_end <= end
+                    held = other_start <= start and end <= other_end
+                    if overlaps and not holds and not held:
+                        start, end = min(start, other_start), max(end, other_end)
+                        changed = True
+                spans[index] = (start, end)
+        return [
+            (
+                entity
+                if (start, end) == (entity.start_pos, entity.end_pos)
+                else replace(entity, start_pos=start, end_pos=end)
+            )
+            for entity, (start, end) in zip(entities, spans)
+        ]
+
+    @staticmethod
+    def _check_cells(
+        tabular_doc: TabularDocument, validated_entities: list[DetectedEntity]
+    ) -> None:
+        """Check that every validated name of a spreadsheet matches a cell
+        (Story 10.15, AC4), before any pseudonym is stored.
+
+        A name matches a cell when its ``context_label`` is the reference of
+        a cell of the document and its span lies inside that cell's text.
+
+        Raises:
+            SpreadsheetCellError: If one does not. Neither the log event nor
+                the message names a name, a cell or a position.
+        """
+        cell_texts = {cell.cell_ref: cell.value for cell in tabular_doc.cells}
+        for entity in validated_entities:
+            label = entity.context_label
+            cell_text = cell_texts.get(label) if label is not None else None
+            if cell_text is None or not (
+                0 <= entity.start_pos < entity.end_pos <= len(cell_text)
+            ):
+                logger.error("tabular_entity_without_cell")
+                raise SpreadsheetCellError(SPREADSHEET_CELL_ERROR)
 
     @staticmethod
     def _build_custom_pseudonym_checker(
@@ -1210,7 +1308,11 @@ class DocumentProcessor:
                     skip_validation=skip_validation,
                     pseudonym_assigner=pseudonym_assigner,
                     custom_pseudonyms=custom_pseudonyms,
+                    cells={cell.cell_ref: cell.value for cell in tabular_doc.cells},
                 )
+                # Story 10.15 (AC4): every name has its cell, before any
+                # pseudonym is stored
+                self._check_cells(tabular_doc, validated_entities)
                 self._reset_pseudonym_state(ctx)
                 resolve_result = self._resolve_pseudonyms(
                     ctx,
@@ -1320,6 +1422,9 @@ class DocumentProcessor:
         try:
             with open_database(self.db_path, self.passphrase) as db_session:
                 ctx = self._init_processing_context(db_session)
+                # Story 10.15 (AC4): every name has its cell, before any
+                # pseudonym is stored
+                self._check_cells(tabular_doc, validated_entities)
                 self._reset_pseudonym_state(ctx)
                 resolve_result = self._resolve_pseudonyms(ctx, validated_entities)
 

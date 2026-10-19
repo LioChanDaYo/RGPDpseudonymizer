@@ -10,6 +10,7 @@ from __future__ import annotations
 import re
 from collections import defaultdict
 from collections.abc import Callable
+from dataclasses import replace
 
 from gdpr_pseudonymizer.core.custom_pseudonym import (
     NameKey,
@@ -21,7 +22,11 @@ from gdpr_pseudonymizer.core.mapping_key import mapping_key
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 from gdpr_pseudonymizer.utils.french_patterns import FRENCH_TITLE_PATTERN
 from gdpr_pseudonymizer.validation.context_precomputer import ContextPrecomputer
-from gdpr_pseudonymizer.validation.models import EntityGroup, ValidationSession
+from gdpr_pseudonymizer.validation.models import (
+    CORRECTED_BY_HAND_SOURCE,
+    EntityGroup,
+    ValidationSession,
+)
 from gdpr_pseudonymizer.validation.ui import (
     FinalConfirmationScreen,
     HelpOverlay,
@@ -33,6 +38,12 @@ from gdpr_pseudonymizer.validation.ui import (
     get_confirmation,
     get_text_input,
     get_user_action,
+)
+
+# Story 10.15 (AC14 (e), Lionel's approved Q2 text): [A] of a name whose every
+# place is already in the review. %1 is the text typed, %2 the type typed.
+ALREADY_IN_REVIEW_LINE = (
+    "'%1' is already in the review as %2 at every place: nothing added"
 )
 
 
@@ -56,6 +67,7 @@ class ValidationWorkflow:
         pseudonym_checker: PseudonymChecker | None = None,
         custom_pseudonyms: dict[NameKey, str] | None = None,
         sent_without_review: list[DetectedEntity] | None = None,
+        cells: dict[str, str] | None = None,
     ) -> list[DetectedEntity]:
         """Execute the validation workflow.
 
@@ -71,6 +83,9 @@ class ValidationWorkflow:
                 (Story 10.11; optional)
             sent_without_review: Known entities written without review, included
                 in Story 10.13 coverage per Lionel's decision of 2026-10-16.
+            cells: Cell reference -> cell text of a spreadsheet, whose
+                entities' positions point into their cells (Story 10.15);
+                None for a text document.
 
         Returns:
             List of validated entities after user review
@@ -83,7 +98,9 @@ class ValidationWorkflow:
             display_info_message("No entities detected in document.")
             if get_confirmation("Would you like to manually add entities?"):
                 # Allow manual entity addition
-                return self._manual_entity_addition_flow(document_text, document_path)
+                return self._manual_entity_addition_flow(
+                    document_text, document_path, cells=cells
+                )
             return []
 
         # Handle large entity count warning
@@ -99,6 +116,7 @@ class ValidationWorkflow:
         session = ValidationSession(
             document_path=document_path,
             document_text=document_text,
+            cell_texts=dict(cells or {}),
         )
 
         # Add entities to session
@@ -134,6 +152,7 @@ class ValidationWorkflow:
                 pseudonym_checker,
                 custom_pseudonyms,
                 sent_without_review=sent_without_review,
+                cells=cells,
             )
 
         # Step 3: Ambiguous entities are handled during review
@@ -157,6 +176,7 @@ class ValidationWorkflow:
                 pseudonym_checker,
                 custom_pseudonyms,
                 sent_without_review=sent_without_review,
+                cells=cells,
             )
 
         # Step 5: Return validated entities (and, Story 10.11, the custom
@@ -296,19 +316,24 @@ class ValidationWorkflow:
                     elif action == "modify":
                         new_text = get_text_input("Enter corrected entity text")
                         if new_text and new_text != current_entity.text:
-                            # Apply modification to all occurrences in group
+                            # Apply modification to all occurrences in group.
+                            # Story 10.15: each is located in the text its
+                            # positions point into (its own cell on a
+                            # spreadsheet) and keeps its cell. Every place
+                            # the correction reaches is a place the user
+                            # typed (v1.4/v1.5), widened over a name it
+                            # partly overlaps before the document is written.
                             for entity in group.occurrences:
                                 start_pos, end_pos = self._locate_modified_span(
-                                    session.document_text, entity, new_text
+                                    session.text_of(entity), entity, new_text
                                 )
-                                modified_entity = DetectedEntity(
+                                modified_entity = replace(
+                                    entity,
                                     text=new_text,
-                                    entity_type=entity.entity_type,
                                     start_pos=start_pos,
                                     end_pos=end_pos,
-                                    confidence=entity.confidence,
-                                    gender=entity.gender,
                                     is_ambiguous=False,
+                                    source=CORRECTED_BY_HAND_SOURCE,
                                 )
                                 session.mark_modified(entity, modified_entity)
                         else:
@@ -593,36 +618,41 @@ class ValidationWorkflow:
             display_warning_message("Invalid entity type")
             return
 
-        # Find position in document
-        start_pos = session.document_text.find(entity_text)
-        if start_pos == -1:
+        # Story 10.15 (AC14): every whole-word place of the text, in the text
+        # or in every cell. A place already in the review (found by the
+        # detector with this type, or added before) keeps its own review.
+        places = session.places_of(entity_text, entity_type)
+        if not places:
             display_warning_message(f"'{entity_text}' not found in document")
             return
 
-        end_pos = start_pos + len(entity_text)
+        new_places = [place for place in places if not session.is_listed_place(place)]
+        for place in new_places:
+            session.add_manual_entity(place)
 
-        # Create new entity
-        new_entity = DetectedEntity(
-            text=entity_text,
-            entity_type=entity_type,
-            start_pos=start_pos,
-            end_pos=end_pos,
-            confidence=None,
-            gender=None,
-            is_ambiguous=False,
-        )
-
-        session.add_manual_entity(new_entity)
-        display_info_message(f"Added {entity_type} entity: {entity_text}")
+        if new_places:
+            display_info_message(f"Added {entity_type} entity: {entity_text}")
+        else:
+            # %2 first: the type is a fixed word, the typed text may hold "%2"
+            display_info_message(
+                ALREADY_IN_REVIEW_LINE.replace("%2", entity_type).replace(
+                    "%1", entity_text
+                )
+            )
 
     def _manual_entity_addition_flow(
-        self, document_text: str, document_path: str
+        self,
+        document_text: str,
+        document_path: str,
+        cells: dict[str, str] | None = None,
     ) -> list[DetectedEntity]:
         """Handle manual entity addition when no entities detected.
 
         Args:
             document_text: Full document text
             document_path: Path to document
+            cells: Cell reference -> cell text of a spreadsheet (Story 10.15);
+                None for a text document
 
         Returns:
             List of manually added entities
@@ -630,6 +660,7 @@ class ValidationWorkflow:
         session = ValidationSession(
             document_path=document_path,
             document_text=document_text,
+            cell_texts=dict(cells or {}),
         )
 
         display_info_message("Manual entity addition mode")
@@ -678,6 +709,7 @@ def run_validation_workflow(
     pseudonym_checker: PseudonymChecker | None = None,
     custom_pseudonyms: dict[NameKey, str] | None = None,
     sent_without_review: list[DetectedEntity] | None = None,
+    cells: dict[str, str] | None = None,
 ) -> list[DetectedEntity]:
     """Execute interactive validation workflow.
 
@@ -694,6 +726,8 @@ def run_validation_workflow(
             the names sent, keyed by (mapping key, type) (Story 10.11)
         sent_without_review: Known entities written without review, included
             in Story 10.13 coverage per Lionel's decision of 2026-10-16.
+        cells: Cell reference -> cell text of a spreadsheet (Story 10.15);
+            None for a text document.
 
     Returns:
         List of validated entities after user review
@@ -710,4 +744,5 @@ def run_validation_workflow(
         pseudonym_checker,
         custom_pseudonyms,
         sent_without_review=sent_without_review,
+        cells=cells,
     )

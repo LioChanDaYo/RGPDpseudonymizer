@@ -2,15 +2,35 @@
 
 from __future__ import annotations
 
+import re
 import uuid
 from collections.abc import Iterable
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import datetime
 from enum import Enum
 from typing import TypeAlias
 
 from gdpr_pseudonymizer.core.mapping_key import mapping_key
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
+
+# Story 10.15: the source of a place added by hand with [A], the marker the
+# desktop app already gives a row added by hand.
+ADDED_BY_HAND_SOURCE = "manual"
+
+# Story 10.15 v1.4/v1.5 (AC1 and AC14 (d), Lionel's Q4 applied to
+# corrections): the source of every place a correction made with [E] reaches.
+CORRECTED_BY_HAND_SOURCE = "corrected"
+
+# The places the user typed, added with [A] or corrected with [E]: each is
+# widened over a name it partly overlaps before the document is written.
+TYPED_SOURCES = frozenset({ADDED_BY_HAND_SOURCE, CORRECTED_BY_HAND_SOURCE})
+
+# Story 10.15 (AC14 (a), Lionel's Q3): a place of a name added by hand is a
+# whole word. The character just before and just after it (when there is one)
+# is neither a word character nor a hyphen (-, U+2010, U+2011): a hyphen joins
+# words.
+_NOT_AFTER_WORD = r"(?<![\w\-‐‑])"
+_NOT_BEFORE_WORD = r"(?![\w\-‐‑])"
 
 
 @dataclass
@@ -234,6 +254,8 @@ class ValidationSession:
         user_decisions: List of all user decisions
         current_index: Index of entity currently being reviewed
         current_entity_type: Current entity type being reviewed
+        cell_texts: Cell reference -> cell text of a spreadsheet; empty for
+            a text document (Story 10.15)
     """
 
     document_path: str
@@ -244,6 +266,66 @@ class ValidationSession:
     current_index: int = 0
     current_entity_type: str = "PERSON"
     _entity_reviews: list[EntityReview] = field(default_factory=list)
+    cell_texts: dict[str, str] = field(default_factory=dict)
+
+    def text_of(self, entity: DetectedEntity) -> str:
+        """The text an entity's positions point into (Story 10.15, AC2).
+
+        On a spreadsheet, the text of the entity's own cell; otherwise the
+        document text.
+        """
+        label = entity.context_label
+        if label is not None and label in self.cell_texts:
+            return self.cell_texts[label]
+        return self.document_text
+
+    def places_of(self, text: str, entity_type: str) -> list[DetectedEntity]:
+        """Every place of a name added by hand (Story 10.15, AC14 (a)).
+
+        A place is a whole-word occurrence of the exact text: neither the
+        character before it nor the one after it is a word character or a
+        hyphen. Each cell of a spreadsheet is searched on its own, so a place
+        carries its cell and its position in the cell; a text document is
+        searched as one text. Places are read left to right and never
+        overlap each other. Each place is marked ``ADDED_BY_HAND_SOURCE``.
+        """
+        pattern = re.compile(_NOT_AFTER_WORD + re.escape(text) + _NOT_BEFORE_WORD)
+        units: list[tuple[str | None, str]] = (
+            [(label, cell_text) for label, cell_text in self.cell_texts.items()]
+            if self.cell_texts
+            else [(None, self.document_text)]
+        )
+        return [
+            DetectedEntity(
+                text=text,
+                entity_type=entity_type,
+                start_pos=match.start(),
+                end_pos=match.end(),
+                confidence=None,
+                gender=None,
+                is_ambiguous=False,
+                source=ADDED_BY_HAND_SOURCE,
+                context_label=label,
+            )
+            for label, unit in units
+            for match in pattern.finditer(unit)
+        ]
+
+    def is_listed_place(self, place: DetectedEntity) -> bool:
+        """Whether a place is already in the review (Story 10.15, AC14 (b)).
+
+        True when a review holds an entity with the same text, type, span and
+        cell: a place the detector found, which keeps its own decision, or a
+        place added by an earlier [A].
+        """
+        return any(
+            review.entity.text == place.text
+            and review.entity.entity_type == place.entity_type
+            and review.entity.start_pos == place.start_pos
+            and review.entity.end_pos == place.end_pos
+            and review.entity.context_label == place.context_label
+            for review in self._entity_reviews
+        )
 
     def add_entity(self, entity: DetectedEntity) -> None:
         """Add detected entity to validation session.
@@ -361,9 +443,9 @@ class ValidationSession:
     def change_entity_type(self, entity: DetectedEntity, new_type: str) -> None:
         """Change the type of an entity (e.g., a person detected as LOCATION).
 
-        Recorded as a modification: text and span are kept, only the type
-        changes. The entity retyped is the one the review sends: an earlier
-        correction is kept (Story 10.11, AC11, PO F2).
+        Recorded as a modification: text, span and cell are kept, only the
+        type changes (Story 10.15, AC1). The entity retyped is the one the
+        review sends: an earlier correction is kept (Story 10.11, AC11, PO F2).
 
         Args:
             entity: Entity to retype
@@ -376,17 +458,7 @@ class ValidationSession:
             else entity
         )
         self.mark_modified(
-            entity,
-            DetectedEntity(
-                text=sent.text,
-                entity_type=new_type,
-                start_pos=sent.start_pos,
-                end_pos=sent.end_pos,
-                confidence=sent.confidence,
-                gender=sent.gender,
-                is_ambiguous=False,
-                source=sent.source,
-            ),
+            entity, replace(sent, entity_type=new_type, is_ambiguous=False)
         )
 
     def change_pseudonym(self, entity: DetectedEntity, new_pseudonym: str) -> None:
@@ -441,19 +513,13 @@ class ValidationSession:
     @staticmethod
     def _sent_entity(review: EntityReview) -> DetectedEntity:
         """The entity a kept review sends: its correction whenever it has one
-        (Story 10.11, AC11), else the detected entity."""
+        (Story 10.11, AC11), else the detected entity. A corrected text
+        without a corrected entity keeps the detected entity's span and cell
+        (Story 10.15, AC1)."""
         if review.modified_entity is not None:
             return review.modified_entity
         if review.state == EntityReviewState.MODIFIED and review.user_modification:
-            return DetectedEntity(
-                text=review.user_modification,
-                entity_type=review.entity.entity_type,
-                start_pos=review.entity.start_pos,
-                end_pos=review.entity.end_pos,
-                confidence=review.entity.confidence,
-                gender=review.entity.gender,
-                is_ambiguous=review.entity.is_ambiguous,
-            )
+            return replace(review.entity, text=review.user_modification)
         return review.entity
 
     def get_custom_pseudonyms(self) -> dict[tuple[str, str], str]:
