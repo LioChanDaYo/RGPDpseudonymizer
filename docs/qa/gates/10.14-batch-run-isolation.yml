@@ -1,0 +1,140 @@
+schema: 1
+story: '10.14'
+story_title: 'Desktop Batch and Finalization Hand-Offs'
+scope: 'PR #108, pre-merge review (Task 7, G2) at head 59b0fa1 on main 90a1646 (10.12, 10.13 and 10.15 merged). Commits reviewed: story 5d150c5, 4c7bbf7, 590a445, e7e7897; tests first 3084c9b; fix 68d75e9; CHANGELOG da0379d; Dev Agent Record 59b0fa1 (docs only).'
+gate: PASS
+status_reason: 'Every AC holds on real output: each of the ten open routes (Démarrer included) shows the approved message in French and English and changes nothing; « Revenir au lot » brings back the waiting review or the progress screen with no reset; a second run never mixes with the first in either order, and A''s worker ends; a late edit, retype, undo or bulk action never reaches the written file (generated and custom pseudonyms, single and batch); the review is disabled while written and enabled again on failure and on the next review; the review screen shows "Cancel batch" in English. G2 holds exactly (34 AssertionErrors at the dev''s recorded lines, 7 guards pass; the only test change is the ten removed markers). en.qm is byte-identical to QA''s own build; fr.qm unchanged. No Codex write session, no Forge, Anvil or Cato. CI green on every leg of the three runs. Low items only (three regression-protection gaps, one note on the unreachable fallback).'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-10-19T18:05:00Z'
+
+waiver: { active: false }
+
+merge_blockers: []
+
+merge_notes:
+  - 'The merge waits for the orchestrator''s one read-only Codex review of the final head (Task 6.5, AC9) and for Lionel. QA never merges and did not run codex.'
+  - 'This gate commit (docs only: this file and the story''s QA Results) starts its own CI run on the PR; the orchestrator checks it green and runs the Codex review on the head that will be merged.'
+
+top_issues:
+  - id: 'TEST-001'
+    severity: low
+    finding: 'No committed test pins the handler guards behind the disabled controls (Fix Design AC5: _handle_entity_action, _handle_add_entity, _handle_bulk_action, _on_undo, _on_redo return while a document is written). QA mutants Q14 (no _finalizing check in _handle_entity_action) and Q15 (none in _on_undo) pass all 41 new tests. The file stays right either way (the AC4 copies), but the review then no longer matches what was written: under Q14 a queued context-menu edit or reject changes the row during writing; under Q15 the undo shortcut''s own signal undoes it. QA probes test_qa5[screen_edit_emit, screen_reject_all] (Q14) and test_qa5[screen_undo_shortcut] (Q15) catch them.'
+    suggested_action: 'Backlog (BMAD dev agent): one T8 case that emits editor.entity_action_requested and _undo_shortcut.activated while the worker is held and asserts the review''s undo index is unchanged.'
+    refs: ['gdpr_pseudonymizer/gui/screens/validation.py:581-584', 'gdpr_pseudonymizer/gui/screens/validation.py:838-850', 'tests/unit/gui/test_finalization_handoff.py']
+    suggested_owner: dev
+  - id: 'TEST-002'
+    severity: low
+    finding: 'AC precision AC1 says File › "Fichiers récents" is refused before the recent-files list is touched. The code does it (main_window.py:397-398), but T1[recent_menu] uses a one-entry list, so re-saving it changes nothing visible. QA mutant Q9 (the refusal removed from _open_recent; the home screen''s own refusal still shows the message) passes all 41 tests, yet moves the opened file to the top of the list and re-saves the settings before refusing. QA probe test_qa1b (two entries, the second opened) catches it.'
+    suggested_action: 'Backlog: T1[recent_menu] with two recent entries, opening the second, asserting the list order is unchanged.'
+    refs: ['gdpr_pseudonymizer/gui/main_window.py:395-403', 'tests/unit/gui/test_batch_run_isolation.py:493-497']
+    suggested_owner: dev
+  - id: 'TEST-003'
+    severity: low
+    finding: 'The run filter on the worker''s progress signal is not pinned. QA mutant Q2 (no _is_stale check in _on_progress) passes all 41 tests: T5 emits an old run''s progress but records neither the progress bar nor the document table. Under Q2, run A''s late "DOC_DONE" marks both of run B''s documents "Traité" and sets the bar to 100 while B''s first document is still being detected (display only, no file or row affected). QA probe test_qa4c catches it.'
+    suggested_action: 'Backlog: add the progress bar value and the document table''s status column to T5''s record.'
+    refs: ['gdpr_pseudonymizer/gui/screens/batch.py:827-834', 'tests/unit/gui/test_batch_run_isolation.py:794-827']
+    suggested_owner: dev
+  - id: 'FALLBACK-001'
+    severity: low
+    finding: 'The _launch_worker fallback (a run started while one is live, by a route the AC1 checks missed) behaves as documented and no user route reaches it (T1, T11, QA-1 x20, QA-4 user_way). Measured on it: run A''s already-written output is deleted and its stored row stays (as « Annuler le lot »); the PO''s N2 race is real: with both runs writing "same_pseudonymized.txt" to one output folder and A busy detecting when B starts, A''s late cleanup deletes B''s file after B wrote it (a lost file, not a name in clear); and A''s review still on screen keeps "Valider" enabled, its click doing nothing (the run guard).'
+    suggested_action: 'No action for 10.14. If a future route can reach _launch_worker while a run is live, refuse there too (or cancel without cleanup) rather than relying on the fallback.'
+    refs: ['gdpr_pseudonymizer/gui/screens/batch.py:692-706', 'gdpr_pseudonymizer/gui/workers/batch_worker.py:331-333']
+    suggested_owner: dev
+
+quality_score: 100
+expires: '2026-11-02T18:05:00Z'
+
+evidence:
+  tests_reviewed: 41
+  risks_identified: 4
+  environment: 'Windows, the main Poetry environment (Python 3.11.9, PySide6 6.7.3), through .bat runners with cmd.exe; PYTHONPATH = the tree under test (every run printed its package path); QT_QPA_PLATFORM=offscreen; USERPROFILE and HOME = r1014/qa/home; gui.config._config_path patched by the autouse fixture of tests/unit/gui/conftest.py and of QA''s probes. C:\Users\devea\.gdpr-pseudo.yaml not touched (mtime still 2026-10-14 13:27, 270 bytes). QA''s worktree of 3084c9b is a sparse checkout without tests/test_corpus/; held_out/ and final_exam/ were never opened, listed or grepped. No product or test file of the repository was changed by QA; the worktree is clean after every run.'
+  g2:
+    worktree: 'r1014/qa/wt-3084c9b (git worktree --no-checkout, sparse-checkout "/*" "!/tests/test_corpus/").'
+    runxfail: '34 failed, 7 passed. Each failure is an AssertionError on its "# expected failure" line, after its preconditions (no PRE: failure, no timeout): T1 x18 test_batch_run_isolation.py:604 assert [] == [MSG_FR] / [MSG_EN]; T2 x3 :690 assert [] == [MSG_FR]; T3 :738 [« Annuler le lot » window] == [MSG_FR, that window]; T4[A_first] :805 (via written_as :142) B''s file "<pseudonym>signé avec Quentrel Zorbalia."; T4[B_first] :808 assert False is True (A''s worker never ended); T5 :857 the validation screen with run A''s document and an error window; T6 :914 the list holds the row''s own DetectedEntity; T9 :948 (''Annuler le lot'', ''Cancel batch''); T11 :1035 assert [] == [MSG_FR]; T7 x4 test_finalization_handoff.py:354 (generated "<P> Quentrix", custom "Xantor Vellion Quentrix", the undo cases stored or written as ORG); T8 x2 :411 the 8 controls all True. Passing: T10 x6, T12. Exactly the dev''s list and lines (Task 1.3).'
+    with_markers: '7 passed, 34 xfailed (strict, raises=AssertionError), in 28 s.'
+    markers_only: 'git diff 3084c9b 68d75e9 -- tests/: 61 lines deleted, all inside the ten @pytest.mark.xfail(strict=True, raises=AssertionError, reason=...) decorators; no line added, no assertion, precondition or helper changed. git diff 68d75e9 59b0fa1 touches CHANGELOG.md and the story only.'
+    head: 'The two files at 59b0fa1: 41 passed in 31 s.'
+  mutants:
+    harness: 'r1014/qa/mut/: git archive 59b0fa1 of the package and the GUI tests, one change each (tools/make_mutants.py, each change asserted to apply exactly once). The unmutated copy: 41 passed. Each mutant runs the 41 new tests; the survivors also run QA''s 58 probes.'
+    Q1_no_filter_finished: 'caught (3): T4[A_first], T4[B_first], T5'
+    Q2_no_filter_progress: 'NOT caught by the 41 (TEST-003); caught by QA probe test_qa4c'
+    Q3_no_filter_error: 'caught (1): T5'
+    Q4_no_filter_validation_required: 'caught (1): T5'
+    Q5_no_deepcopy_customs_single: 'not caught by the 41 or the 58: equivalent. get_custom_pseudonyms() builds a new dict of strings at each call (validation_state.py:511-521), so the copy shares nothing either way.'
+    Q6_no_deepcopy_customs_batch: 'not caught: equivalent, as Q5.'
+    Q7_no_deepcopy_entities_single: 'caught (4): T7 x4'
+    Q8_no_deepcopy_entities_batch: 'caught (1): T6'
+    Q9_recent_menu_not_refused_first: 'NOT caught by the 41 (TEST-002); caught by QA probe test_qa1b'
+    Q10_drop_folder_not_refused: 'caught (3): T1[home_drop_folder] x2, T2[progress_from_home_drop_folder]'
+    Q11_drop_click_filter_on_release: 'caught (2): T1[home_drop_click] x2 (the chooser opens on the press)'
+    Q12_controls_enabled_after_start: 'caught (2): T8 x2'
+    Q13_controls_enabled_on_progress: 'caught (2): T8 x2 (the worker''s first progress comes before finalize_document)'
+    Q14_no_guard_entity_action: 'NOT caught by the 41 (TEST-001); caught by QA probes test_qa5[screen_edit_emit x2, screen_reject_all x2]'
+    Q15_no_guard_undo: 'NOT caught by the 41 (TEST-001); caught by QA probes test_qa5[screen_undo_shortcut x2]'
+    Q16_awaiting_without_run_check: 'not caught: equivalent in practice. The kept reviews are keyed by run and emptied at each launch, so an old run''s review is never "the review kept for the waiting document" anyway (defence in depth).'
+    Q17_set_context_not_guarded: 'not caught: unreachable. Every caller that passes a context to the batch screen (Ctrl+Shift+O, the home batch button, the home folder drop) is refused first.'
+    Q18_way_back_always_batch_screen: 'caught (2): T2[review_from_home], T2[review_from_database_ctrl_o]'
+    Q19_escape_also_leads_back: 'caught (12): T1 home routes x12 (the screen changes on Escape)'
+    Q20_submit_without_worker_run_check: 'not caught: equivalent. The run check before it already refuses another run''s list, and the worker held is always the current run''s.'
+    Q21_review_state_not_keyed_by_run: 'not caught: equivalent, as Q16.'
+    summary: '21 mutants: the 41 tests catch 11; QA''s probes catch 4 more (Q2, Q9, Q14, Q15, the three gaps above); 6 are equivalent or unreachable (Q5, Q6, Q16, Q17, Q20, Q21). The SM''s m1 to m8 and the PO''s m2, m5, m7 were measured before on the prototype; QA did not repeat them.'
+  end_to_end:
+    harness: 'QA''s own probes, r1014/qa/probes/ (test_qa_1014.py, qa1014_harness.py; never committed). The real BatchScreen, ValidationScreen, BatchWorker, ProcessingScreen, DetectionWorker and FinalizationWorker threads; only DocumentProcessor._detect_and_filter_entities replaced (threading gates hold a detection or finalize_document). Windows are answered through the real ConfirmDialog.exec: a timer clicks its button or sends a real Escape key. Routes are taken the user''s way where Qt allows it: QAction.trigger, qtbot.mouseClick on the home batch button, the drop zone and the recent row, QDropEvent on the drop zone. Assertions on the windows, the written files and the decrypted mapping rows. Invented names (Zorbal Quentrix, Quentrel Zorbalia, Zorbaville, Xantorel Quenbal, Xantor Vellion) and main-corpus words only (a, signé, le, contrat, Le, est, avec, à). At 59b0fa1: 58 passed (44 s). At 3084c9b: 57 failed, 1 passed (the after-summary guard).'
+    qa1_routes: 'Ten routes x French and English (Ctrl+O, Ctrl+Shift+O, recent menu, home batch button, drop file, drop folder, drop two files, drop-zone click, home recent row, "Démarrer"), a two-document batch waiting on doc 0, Escape: exactly one window, the approved texts with one button and no cancel, parented to the main window; same screen, no chooser, no start_processing, one worker, the same worker still waiting on doc 0, phase 1, same files, recent list unchanged, no toast, the same review object; then both files written with every name replaced and the rows exactly the batch''s three names.'
+    qa2_back: '« Revenir au lot » (the real button) from: the waiting review itself (same review object, its accept and undo index kept), the home batch button, the database screen (Ctrl+Shift+O), the doc-0 review reached by "◀ Précédent" while doc 1 waits (back to doc 1''s kept review with its reject and undo index), the progress screen through a folder drop (batch screen, phase 1, same worker), "Démarrer". "◀ Retour" is hidden on every batch review. Files and rows as validated.'
+    qa3_moments: 'A batch without per-document validation: the message, « Revenir au lot » shows the progress screen as it is. A paused batch: the message from the database screen; the batch screen comes back still paused ("Reprendre"). Escape from the database screen: the database screen stays, the review and the worker untouched. Ctrl+O after « Annuler le lot » is confirmed but before the worker ends: still refused; after the summary, Ctrl+O opens the chooser and the document. The home batch button after the summary: a fresh batch screen (phase 0, no files, no worker).'
+    qa4_codex1: 'Run A held in detection; the user''s ways to start B (Ctrl+Shift+O, then "Démarrer") are both refused, one worker. Run B started with _launch_worker; both orders: the review shown is B''s text, only B''s worker gets a list, B''s file is TEXT_B with B''s two names replaced and nothing of A, A''s worker ends, A writes nothing, the rows are B''s two names. Stale review: A''s review on screen after B started, its validate clicked: nothing submitted. The new log lines name no entity (the batch logger recorded; batch_previous_run_cancelled and batch_stale_signal_ignored carry ids only). The fallback and N2: FALLBACK-001.'
+    qa5_codex4: 'Single document, generated and custom pseudonym, eight late changes made while the worker is held before it reads its input: a state edit to "Zorbal" (0-6), a retype to ORG, undo of everything back to the detected ORG, the context-menu edit signal, the undo shortcut''s signal, Ctrl+Shift+R plus a reject action, a bulk reject, an added entity. Each time: the 8 controls and "Finaliser" and "◀ Retour" are disabled; the screen routes change nothing in the review; the file is "<P> a signé le contrat." with P the stored pseudonym ("Xantor Vellion" when custom); the one row is ("Zorbal Quentrix", "PERSON", P). Batch: the kept review edited, retyped and given another custom pseudonym while doc 0 is held: no submitted entity is a review object, the file and the row hold the confirmed name and pseudonym.'
+    qa6_failure: 'Detection finds "Zorbal" only; finalization fails once: the controls come back (8 controls and "◀ Retour"); the user corrects the name to "Zorbal Quentrix" and finalizes again: the file is "Le contrat est signé avec <P>." and the row is the full name. The next document''s review is enabled.'
+    qa7_english: 'The review''s and the batch screen''s cancel buttons read "Cancel batch"; the review''s cancel window reads title "Cancel batch", button "Cancel batch" (its text stays French: follow-up (b)); Ctrl+Shift+O and a home file drop show the English message.'
+    prior_probes: 'Re-run as Task 7.3 says, adapted copies in r1014/qa/prior/ (texts reworded to main-corpus words; windows answered; French restored with switch_language). At 59b0fa1, 13 passed: QA f1 in both orders (Open Folder and the hidden "Démarrer" both refused, B started with _launch_worker, B''s output "Le contrat est signé avec <P>.", A''s worker ends, rows = Vorlan Mestrix only); QA f4 x5 (control, edit and undo, generated and custom: full pseudonym, no "Quentrix", rows PERSON, editor/panel/undo shortcut disabled, the direct emit ignored); the PO''s R1 to R4 (one message, same worker still waiting, one worker, phase 1, nothing processed, « Revenir au lot » to doc 0''s kept review; after R4 « Annuler le lot » stops the worker), C1 unchanged (doc 0''s output deleted, its row kept), the English labels ("Cancel batch" on both screens, "Batch in progress", "Back to the batch"). At 3084c9b, 12 failed, 1 passed (C1): R1 batch screen reset to phase 0, R2/R3 the processing screen, R4 the worker dropped; f4 writes "<pseudonym> Quentrix a signé le contrat.", "Xantor Vellion Quentrix a signé le contrat." and ORG rows.'
+  texts: 'The three tr() sources in BatchScreen.refuse_open_while_running join to the approved French byte for byte; en.ts holds the approved English for the three BatchScreen messages and "Cancel batch" for ValidationScreen''s "Annuler le lot"; fr.ts the four sources unfinished; both texts found verbatim in Lionel''s Q2a/Q2b block. No \u escape in any added product line. The story byte check (bytecheck_1014.ts): blocks 16 of 16 identical, approved strings 7 of 7.'
+  i18n: 'QA filtered the head en.ts with its own XML script (removed 3: the "Documents (*.txt *.md *.pdf *.docx *.xlsx *.csv);;Tous (*)" entries of BatchScreen, DropZone and MainWindow; 317 messages left) and ran pyside6-lrelease: "Generated 317 translation(s) (317 finished and 0 unfinished)", byte-identical to the committed en.qm (sha256 a0347e4d...). qm_compare over the 320 messages of the head en.ts, main''s en.qm against the committed one: messages=320 differing=4 (BatchScreen "Lot en cours", the message, "Revenir au lot"; ValidationScreen "Annuler le lot"). fr.qm rebuilt: "Generated 0 translation(s)", "Ignored 280 untranslated source text(s)", byte-identical to main''s and to the head''s (16 bytes, not in the diff).'
+  changelog: 'The story''s CHANGELOG Entry block is in CHANGELOG.md once, byte for byte, under [Unreleased] ### Fixed, right after Story 10.13''s bullet and before 10.15''s two bullets; 10.12''s, 10.13''s and 10.15''s entries are kept (the diff only adds 6 lines). Every claim matches QA''s measures (QA-1, QA-2, QA-3 cancel, QA-4, QA-5, QA-6, QA-7). No number.'
+  consumer_trace: 'Re-read at 59b0fa1, three rows of QA''s choice, all as "After the fix": R8 (home.py:233-247: a left MouseButtonPress on the drop zone shows the message and is swallowed; drop_zone.py unchanged; QA-1[home_drop_click], Q11); H5 (validation.py:1009-1030: 10.10''s guard, 10.13''s warning on the same list, then deep copies and the run id; batch.py:1074-1081 refuses another run, :1108 submits only to the current run''s worker; QA-5 batch, T6); H7 (validation.py:1114-1116 and 1137-1155: the 8 controls disabled with the two buttons, enabled again in _on_finalize_error, _begin_review and _attach_review; the five handler guards; QA-5, QA-6). Also: both callers of _launch_worker (batch.py:667, :690) are after the refusal at :660; the only open, chooser and drop paths of gui/ are the ones refused (grep of QFileDialog, start_processing, navigate_to and dropEvent).'
+  dev_notes:
+    batch_is_running: 'Sound. A read-only query sharing _running_batch_screen() with refuse_open_during_batch(); used only by _on_multi_file_dropped so a two-file drop shows the message once and no toast (QA-1[home_drop_files]). Edge, cosmetic only: a no-validation batch that ends while the message is open would let the toast show after it.'
+    launch_worker_fallback: 'Acceptable for 10.14 and as documented: it is reached only by a route the checks missed, which QA could not find (both _launch_worker callers sit behind the refusal); it never waits for the old thread; the old run''s signals are ignored (log ids only). Its costs are measured in FALLBACK-001.'
+    processing_continuer: 'Holds. ProcessingScreen._on_finished only shows "Continuer" and never navigates; the processing screen is reached only from HomeScreen._start_processing (behind the refused _on_file_selected) and ValidationScreen._on_back, whose button is hidden on every batch review (QA-2); the batch never shows the single-mode review. Not a leak. A detection that fails during a batch still sends the user home (follow-up (e), pre-existing).'
+  codex_rule:
+    sessions: '~/.codex/sessions/2026/10/18/ and /19/ hold four rollouts, each read through session_meta and every turn_context: two on 10-18 (cwd /mnt/c/Users/devea/NPlusOne-JP, sandbox read-only) and two on 10-19 at 10:04 and 13:13 (cwd rgpd-wt-s1015, sandbox read-only: the orchestrator''s 10.15 reviews). None has a cwd under rgpd-wt-s1014 and none a workspace-write sandbox; none started after 13:13 on 10-19, while the dev worked 16:50 to 18:42; no October rollout contains the string "rgpd-wt-s1014".'
+    agents: 'PAI''s subagent log (MEMORY/OBSERVABILITY/subagent-events.jsonl): since 2026-10-18 every subagent start is general-purpose (the retro personas, 10.15''s dev and QA, 10.14''s dev and this QA); the last Forge start is 10-16, no Anvil or Cato since 10-14; forge-codex-gate.jsonl has no entry on 10-18 or 10-19. The tool-activity log''s only codex commands on 10-19 are "codex exec --help" and the two 10.15 reviews in rgpd-wt-s1015.'
+    pr: 'The PR body holds the sentence "code and tests written by the BMAD dev agent (Claude); design and measurement sketches by the SM (Claude); final diff reviewed read-only by `codex exec`" word for word. No skip-CI marker in the PR title, body or the commits origin/main..59b0fa1. The final read-only Codex review is the orchestrator''s next step (Task 6.5): not run yet, so not reported.'
+  ci:
+    3084c9b: '39274992986 (attempt 1): ubuntu 3.10 "2742 passed, 34 xfailed in 282.68s"; ubuntu 3.11 "2742 passed, 34 xfailed in 491.97s"; macos "2742 passed, 34 xfailed in 972.78s"; windows "2593 passed, 3 skipped, 34 xfailed in 373.54s". Each leg lists exactly the 34 XFAIL ids of the two new files and no other; the 7 guards PASSED on each leg. lint success.'
+    68d75e9: '39280080428 (attempt 1): ubuntu 3.10 "2776 passed in 263.79s"; ubuntu 3.11 "2776 passed in 476.68s"; macos "2776 passed in 797.38s"; windows "2627 passed, 3 skipped in 440.86s"; 0 xfailed. lint success.'
+    59b0fa1: '39287748121 (attempt 1, the PR head): ubuntu 3.10 "2776 passed in 419.00s"; ubuntu 3.11 "2776 passed in 293.05s"; macos "2776 passed in 829.23s"; windows "2627 passed, 3 skipped in 414.36s"; 0 xfailed; the 41 new tests PASSED on each leg. lint success; Code Quality 39287748118 success; CodeQL success.'
+    notes: 'Read from the job logs (r1014/qa/logs/ci/job_*.txt). No reruns. 2776 = 2742 + 34; 2627 = 2593 + 34.'
+  g6_local: 'Head: ruff exit 0; black "317 files would be left unchanged"; mypy "Success: no issues found in 105 source files". pytest -m "not slow" -n 4 --dist loadscope from the worktree root, spaCy model installed: third run 2766 passed, 10 skipped (the dev''s number; the 10 Windows-only skips: 7 spaCy pdf/docx tests and 3 permission or descriptor tests). Two earlier runs each had one failure outside 10.14''s files, both environmental and passing on rerun: tests/unit/cli/commands/test_config_show.py::test_displays_config_files_status (Rich wraps "(not found)" when QA''s long TEMP path is added under an xdist worker; fails the same on the 3084c9b tree, 23 of 23 pass with the system TEMP) and tests/unit/test_final_exam_tooling.py::test_serve_refuses_foreign_host_and_origin (ConnectionAbortedError, WinError 10053, from its local HTTP server under load; 3 of 3 alone).'
+  scope_check: 'git diff --stat origin/main...59b0fa1: CHANGELOG.md, the story, gui/main_window.py, screens/batch.py, screens/home.py, screens/validation.py, workers/batch_worker.py (the run id and its property only: the wait, wake-up, cancel and cleanup untouched, Codex #10 not made worse), i18n en.ts, fr.ts, en.qm, and the two new test files: the File List. One more file: docs/prd/epic-10-v2.3-detection-precision-quick-wins.md, one line (AC9 amended), in the SM''s story commit e7e7897, recorded in the story''s Change Log v1.3 (the byte check confirms the story''s AC9 equals it). drop_zone.py, confirm_dialog.py, finalization_worker.py, signals.py, validation_state.py, processing.py, the leakage allowlists, .github/, pyproject.toml and poetry.lock: unchanged. None of the 13 files the accuracy suite loads is touched: G1, G3, G5 N/A; G4 holds. No existing test changed.'
+  not_checked: 'A real Linux or macOS machine (CI only); a real drag from the file manager and real key presses (offscreen: drops are built QDropEvents, shortcuts are checked by isEnabled() and by emitting their activated signal); the Codex review (not run yet, the orchestrator''s step).'
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    ac_gaps: []
+    notes: 'AC1 T1 x18, T10 x6, T11 + QA-1 x20, QA-1b, QA-3, PO R1-R4. AC2 T2 x3, T3 + QA-2 x6, QA-3, PO R1-R4. AC3 T4 x2, T5 + QA-4 x4, QA-4c, QA f1 x2. AC4 T6, T7 x4 + QA-5 x18, QA f4. AC5 T8 x2 + QA-5, QA-6, QA f4. AC6 T1[en], T9 + QA-7, PO EN labels, texts, i18n. AC7 g2. AC8 changelog. AC9 codex_rule (QA''s part). AC10 scope_check, ci, g6_local.'
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'No name is left in clear on any measured path: a second run never writes with another run''s review, and a late change never reaches the written file (rows and files checked). The new log lines carry run ids and document indexes only. Nothing is deleted on a refused route; only the unreachable fallback deletes the old run''s outputs (FALLBACK-001).'
+  performance:
+    status: PASS
+    notes: 'Two deep copies per confirm, of a list of small dataclasses and a dict of strings. One modal window per refused route. No new wait in the GUI thread; the fallback never waits for the old thread.'
+  reliability:
+    status: PASS
+    notes: 'The batch is never dropped or reset by a route; « Annuler le lot » always reaches the worker; stale signals of four kinds are ignored; Codex #10''s wait is untouched. Tests wait only on conditions and threading events; no sleep or wall-clock assert. A batch hung by #10 now blocks every open route until « Annuler le lot » (PO N3, expected, not seen in QA''s runs).'
+  maintainability:
+    status: PASS
+    notes: 'One refusal owned by the batch screen and asked by every route; the run id bound at connection, so the shared signal classes and existing tests keep their signatures; docstrings name the story and Lionel''s decisions. Three regression gaps (TEST-001 to TEST-003).'
+
+recommendations:
+  immediate: []
+  future:
+    - action: 'Pin the AC5 handler guards with one T8 case (TEST-001).'
+      refs: ['tests/unit/gui/test_finalization_handoff.py']
+    - action: 'Pin "refused before the recent-files list is touched" with a two-entry recent list (TEST-002).'
+      refs: ['tests/unit/gui/test_batch_run_isolation.py']
+    - action: 'Record the progress bar and the document table in T5 (TEST-003).'
+      refs: ['tests/unit/gui/test_batch_run_isolation.py']
+    - action: 'If a later route can reach _launch_worker while a run is live, refuse there instead of relying on the cancel-and-clean fallback (FALLBACK-001).'
+      refs: ['gdpr_pseudonymizer/gui/screens/batch.py']
