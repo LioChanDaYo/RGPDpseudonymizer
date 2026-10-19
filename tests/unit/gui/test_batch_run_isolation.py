@@ -21,15 +21,23 @@ from pathlib import Path
 from typing import Any, cast
 
 import pytest
-from PySide6.QtCore import QEvent, QMimeData, QPointF, Qt, QThreadPool, QUrl
+from PySide6.QtCore import QEvent, QMimeData, QPointF, Qt, QThreadPool, QTimer, QUrl
 from PySide6.QtGui import QDropEvent, QMouseEvent
-from PySide6.QtWidgets import QApplication, QFileDialog, QInputDialog, QLabel
+from PySide6.QtTest import QTest
+from PySide6.QtWidgets import (
+    QApplication,
+    QDialog,
+    QFileDialog,
+    QInputDialog,
+    QLabel,
+)
 
 from gdpr_pseudonymizer.core.document_processor import DocumentProcessor
 from gdpr_pseudonymizer.data.database import init_database, open_database
 from gdpr_pseudonymizer.data.repositories.mapping_repository import (
     SQLiteMappingRepository,
 )
+from gdpr_pseudonymizer.gui.screens import batch as batch_module
 from gdpr_pseudonymizer.gui.screens.processing import ProcessingScreen
 from gdpr_pseudonymizer.gui.widgets.confirm_dialog import ConfirmDialog
 from gdpr_pseudonymizer.gui.widgets.toast import Toast
@@ -54,6 +62,8 @@ TEXT_B = "Le contrat est signé avec Quentrel Zorbalia."
 SINGLE = "Zorbaville a signé avec Quentrel."
 CUSTOM = "Xantor Vellion"
 BATCH_ERROR = "Une erreur inattendue s'est produite lors du traitement par lot."
+# The home screen's several-files toast (a product string, home.py).
+MULTI_TOAST = "Un seul fichier à la fois — seul le premier sera traité."
 
 PENDING = EntityReviewState.PENDING
 CONFIRMED = EntityReviewState.CONFIRMED
@@ -151,13 +161,24 @@ def stored_rows(db: str) -> list[tuple[str, str, str]]:
 
 
 class _Gate:
-    """Holds a call in a worker's thread until the test releases it."""
+    """Holds a call in a worker's thread until the test releases it.
 
-    def __init__(self) -> None:
+    With ``first_only``, only its first caller is held; it counts its calls.
+    """
+
+    def __init__(self, first_only: bool = False) -> None:
         self.entered = threading.Event()
         self._open = threading.Event()
+        self._first_only = first_only
+        self._lock = threading.Lock()
+        self.calls = 0
 
     def hold(self) -> None:
+        with self._lock:
+            self.calls += 1
+            first = self.calls == 1
+        if self._first_only and not first:
+            return
         self.entered.set()
         if not self._open.wait(WAIT_MS / 1000):
             raise RuntimeError()
@@ -174,6 +195,9 @@ class _Env:
         self.answers: list[int] = []
         self.workers: list[Any] = []
         self.ended: list[threading.Event] = []
+        # Each worker's BatchResult(s), and the batch screen's log lines.
+        self.results: list[list[Any]] = []
+        self.logs: list[tuple[str, str, dict[str, Any]]] = []
         self.choosers: list[str] = []
         self.processing: list[str] = []
         self.toasts: list[str] = []
@@ -195,6 +219,30 @@ class _Env:
             if built is worker:
                 return ended
         pytest.fail("PRE: a worker built by the test")
+
+    def results_of(self, worker: Any) -> list[tuple[bool, int]]:
+        """(cancelled, successful files) of each result the worker emitted."""
+        for built, results in zip(self.workers, self.results):
+            if built is worker:
+                return [(r.cancelled, r.successful_files) for r in results]
+        pytest.fail("PRE: a worker built by the test")
+
+
+class _LogRecorder:
+    """Records the batch screen's log lines, then logs them as before."""
+
+    def __init__(self, real: Any, lines: list[tuple[str, str, dict[str, Any]]]):
+        self._real = real
+        self._lines = lines
+
+    def __getattr__(self, level: str) -> Callable[..., Any]:
+        method = getattr(self._real, level)
+
+        def record(event: str, *args: Any, **fields: Any) -> Any:
+            self._lines.append((level, event, dict(fields)))
+            return method(event, *args, **fields)
+
+        return record
 
 
 @pytest.fixture()
@@ -224,15 +272,20 @@ def env(monkeypatch: pytest.MonkeyPatch) -> _Env:
     def record_worker(self: BatchWorker, *args: Any, **kwargs: Any) -> None:
         original_worker_init(self, *args, **kwargs)
         ended = threading.Event()
+        results: list[Any] = []
+
+        def on_finished(result: Any) -> None:
+            results.append(result)
+            ended.set()
+
         # Set in the worker's own thread when its run emits its last signal.
-        self.signals.finished.connect(
-            lambda *_: ended.set(), Qt.ConnectionType.DirectConnection
-        )
+        self.signals.finished.connect(on_finished, Qt.ConnectionType.DirectConnection)
         self.signals.error.connect(
             lambda *_: ended.set(), Qt.ConnectionType.DirectConnection
         )
         recorder.workers.append(self)
         recorder.ended.append(ended)
+        recorder.results.append(results)
 
     original_submit = BatchWorker.submit_validation_result
 
@@ -292,6 +345,9 @@ def env(monkeypatch: pytest.MonkeyPatch) -> _Env:
     )
     monkeypatch.setattr(ProcessingScreen, "start_processing", start_processing)
     monkeypatch.setattr(Toast, "show_message", classmethod(show_toast))
+    monkeypatch.setattr(
+        batch_module, "logger", _LogRecorder(batch_module.logger, recorder.logs)
+    )
     return recorder
 
 
@@ -387,11 +443,12 @@ class _Harness:
             paths.append(path)
         return paths
 
-    def launch(self, files: list[Path]) -> Any:
-        """Start a run with validation per document; returns its worker."""
+    def launch(self, files: list[Path], validate: bool = True) -> Any:
+        """Start a run, by default with validation per document; returns its
+        worker."""
         self.bs._files = files
         self.bs._output_input.setText(str(self.out))
-        self.bs._validate_checkbox.setChecked(True)
+        self.bs._validate_checkbox.setChecked(validate)
         built = len(self.env.workers)
         self.bs._launch_worker(self.db, PASSPHRASE)
         pre(len(self.env.workers) == built + 1, "one worker built by the launch")
@@ -725,9 +782,16 @@ def test_cancel_still_stops_the_batch_after_home_route(  # type: ignore[no-untyp
 
 # ---------------------------------------------------------------------------
 # T4 (#1, AC3): a second run never mixes with the first, in both orders
+# (v1.5: the launch a route AC1 missed is refused while the first run is live)
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 10.14 v1.5: a launch while a run is live cancels it and builds a "
+    "second worker, with no message, on 30ab70b; fixed in Task 2.8",
+)
 @pytest.mark.parametrize("order", ["A_first", "B_first"])
 def test_second_run_never_mixes_with_the_first(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path: Path, env: _Env, order: str
@@ -735,55 +799,50 @@ def test_second_run_never_mixes_with_the_first(  # type: ignore[no-untyped-def]
     h = _Harness(qtbot, main_window, tmp_path, env)
     files_a = h.folder("lotA", [("lotA.txt", TEXT_A)])
     files_b = h.folder("lotB", [("lotB.txt", TEXT_B)])
-    gate_a, gate_b = _Gate(), _Gate()
-    env.detection_gates = {TEXT_A: gate_a, TEXT_B: gate_b}
-
-    def cached(text: str) -> bool:
-        context = h.bs._validation_contexts.get(0)
-        return context is not None and context.get("document_text") == text
-
+    gate_a = _Gate()
+    env.detection_gates[TEXT_A] = gate_a
     try:
         worker_a = h.launch(files_a)
         h.wait(gate_a.entered.is_set, "run A's detection held")
-        # Run B started the way a route AC1 missed would start it.
-        worker_b = h.launch(files_b)
-        h.wait(gate_b.entered.is_set, "run B's detection held")
-        ended_a, ended_b = h.ended(worker_a), h.ended(worker_b)
-
-        def a_settled() -> bool:
-            return ended_a.is_set() or cached(TEXT_A)
-
-        def b_waits() -> bool:
-            return (
-                cached(TEXT_B)
-                and bool(worker_b._waiting_for_validation)
-                and h.mw.stack.currentWidget() is h.vs
-                and h.vs.validation_state is not None
-            )
-
         if order == "A_first":
+            # A's signal comes before the launch: its document waits.
             gate_a.release()
-            h.wait(a_settled, "run A ended or its document is cached")
-            gate_b.release()
-            h.wait(b_waits, "run B's document waits")
-        else:
-            gate_b.release()
-            h.wait(b_waits, "run B's document waits")
-            gate_a.release()
-            h.wait(a_settled, "run A ended or its document is cached")
-        review_text = h.accept_and_validate()
-        h.wait(ended_b.is_set, "run B ended")
-        a_ended_by_itself = ended_a.is_set()
+            h.wait_doc(worker_a, 0)
+        env.clear()
+        env.answers = [0]
+        # The launch a route the AC1 checks missed would make, on the screen
+        # as it is.
+        h.bs._launch_worker(h.db, PASSPHRASE)
+        windows = list(env.windows)
+        record = (len(env.workers), h.bs._worker is worker_a, h.bs.run_id)
+        gate_a.release()
+        texts_a = h.complete(worker_a, 1)
+        result_a = env.results_of(worker_a)
+        texts_b: list[str] = []
+        if len(env.workers) == 1 and h.bs._worker is None:
+            # Run B, alone, after A's summary.
+            worker_b = h.launch(files_b)
+            texts_b = h.complete(worker_b, 1)
+        outputs = sorted(p.name for p in h.out.iterdir()) if h.out.exists() else []
     finally:
         h.finish()
 
-    output = h.output("lotB_pseudonymized.txt")
-    replaced = written_as(output, TEXT_B, [(26, 43)])  # expected failure, A_first
+    assert windows == [MSG_FR]  # expected failure
+    assert record == (1, True, 1)
+    assert result_a == [(False, 1)]
+    assert (texts_a, texts_b) == ([TEXT_A], [TEXT_B])
+    assert outputs == ["lotA_pseudonymized.txt", "lotB_pseudonymized.txt"]
+    replaced_a = written_as(h.output("lotA_pseudonymized.txt"), TEXT_A, [(0, 15)])
+    output_b = h.output("lotB_pseudonymized.txt")
+    replaced_b = written_as(output_b, TEXT_B, [(26, 43)])
     for part in ("Zorbal", "Quentr", "a signé le"):
-        assert part not in output
-    assert a_ended_by_itself is True  # expected failure, B_first
-    assert review_text == TEXT_B
-    assert stored_rows(h.db) == [("Quentrel Zorbalia", "PERSON", replaced[0])]
+        assert part not in output_b
+    assert stored_rows(h.db) == sorted(
+        [
+            ("Quentrel Zorbalia", "PERSON", replaced_b[0]),
+            ("Zorbal Quentrix", "PERSON", replaced_a[0]),
+        ]
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -987,3 +1046,239 @@ def test_start_while_a_batch_runs_is_refused(  # type: ignore[no-untyped-def]
     assert windows == [MSG_FR]  # expected failure
     assert record == (1, True, True)
     written_as(h.output("doc0_pseudonymized.txt"), TEXT_A, [(0, 15)])
+
+
+# ---------------------------------------------------------------------------
+# T13 (AC3, v1.5): a launch while a run is live is refused, and the run keeps
+# its written files
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 10.14 v1.5: a launch while a run is live cancels it, and its "
+    "late cleanup deletes the outputs written into the same folder, on 30ab70b; "
+    "fixed in Task 2.8",
+)
+def test_launch_while_a_run_is_live_is_refused(  # type: ignore[no-untyped-def]
+    qtbot, main_window, tmp_path: Path, env: _Env
+) -> None:
+    h = _Harness(qtbot, main_window, tmp_path, env)
+    files = h.folder("in", [("doc0.txt", TEXT_A), ("doc1.txt", TEXT_B)])
+    gate = _Gate(first_only=True)
+    env.detection_gates[TEXT_B] = gate
+    try:
+        worker_a = h.launch(files, validate=False)
+        h.wait(
+            lambda: gate.entered.is_set()
+            and (h.out / "doc0_pseudonymized.txt").exists(),
+            "run A wrote document 0 and is held on document 1",
+        )
+        env.clear()
+        env.answers = [0]
+        # The launch a route the checks missed would make: the same files and
+        # the same output folder.
+        h.bs._launch_worker(h.db, PASSPHRASE)
+        windows = list(env.windows)
+        built = len(env.workers)
+        if built > 1:
+            h.wait(h.ended(env.workers[-1]).is_set, "the second run ended")
+        gate.release()
+        h.wait(
+            lambda: all(ended.is_set() for ended in env.ended) and h.bs._worker is None,
+            "every run ended and the batch screen holds no worker",
+        )
+        outputs = sorted(p.name for p in h.out.iterdir())
+        result_a = env.results_of(worker_a)
+        logs = list(env.logs)
+    finally:
+        h.finish()
+
+    assert outputs == [  # expected failure
+        "doc0_pseudonymized.txt",
+        "doc1_pseudonymized.txt",
+    ]
+    replaced0 = written_as(h.output("doc0_pseudonymized.txt"), TEXT_A, [(0, 15)])
+    replaced1 = written_as(h.output("doc1_pseudonymized.txt"), TEXT_B, [(26, 43)])
+    assert (built, result_a) == (1, [(False, 2)])
+    assert windows == [MSG_FR]
+    refused = [
+        (level, fields)
+        for level, event, fields in logs
+        if event == "batch_launch_refused_while_running"
+    ]
+    assert refused == [("warning", {"run_id": 1})]
+    for part in ("Zorbal", "Quentr", "contrat"):
+        assert part not in repr(logs)
+    assert stored_rows(h.db) == sorted(
+        [
+            ("Quentrel Zorbalia", "PERSON", replaced1[0]),
+            ("Zorbal Quentrix", "PERSON", replaced0[0]),
+        ]
+    )
+
+
+# ---------------------------------------------------------------------------
+# T14 (AC3, v1.5, guard): a launch after the summary starts a new run
+# ---------------------------------------------------------------------------
+
+
+def test_launch_after_the_summary_starts_a_new_run(  # type: ignore[no-untyped-def]
+    qtbot, main_window, tmp_path: Path, env: _Env
+) -> None:
+    h = _Harness(qtbot, main_window, tmp_path, env)
+    files_a = h.folder("lotA", [("lotA.txt", TEXT_A)])
+    files_b = h.folder("lotB", [("lotB.txt", TEXT_B)])
+    try:
+        worker_a = h.launch(files_a, validate=False)
+        ended_a = h.ended(worker_a)
+        h.wait(
+            lambda: ended_a.is_set()
+            and h.bs._worker is None
+            and h.bs._phases.currentIndex() == 2,
+            "run A's summary shown",
+        )
+        env.clear()
+        h.bs._files = files_b
+        h.bs._launch_worker(h.db, PASSPHRASE)
+        if len(env.workers) == 2:
+            h.wait_end(env.workers[1])
+        windows = list(env.windows)
+        record = (
+            len(env.workers),
+            h.bs.run_id,
+            h.bs._phases.currentIndex(),
+            h.bs._worker is None,
+            [event for _, event, _ in env.logs if "refused" in event],
+        )
+    finally:
+        h.finish()
+
+    assert windows == []
+    assert record == (2, 2, 2, True, [])
+    written_as(h.output("lotA_pseudonymized.txt"), TEXT_A, [(0, 15)])
+    written_as(h.output("lotB_pseudonymized.txt"), TEXT_B, [(26, 43)])
+
+
+# ---------------------------------------------------------------------------
+# T15 (AC1, v1.5): a refused several-files drop stays refused, even if the
+# batch ends while the message is open
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 10.14 v1.5: a refused several-files drop shows its toast when "
+    "the batch ended while the message was open, on 30ab70b; fixed in Task 2.9",
+)
+def test_refused_drop_stays_refused_when_the_batch_ends_meanwhile(  # type: ignore[no-untyped-def]
+    qtbot, main_window, tmp_path: Path, env: _Env, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    h = _Harness(qtbot, main_window, tmp_path, env)
+    files = h.folder("in", [("doc0.txt", TEXT_A)])
+    gate = _Gate()
+    env.detection_gates[TEXT_A] = gate
+    closed_after_summary: list[bool] = []
+
+    def modal_exec(dlg: ConfirmDialog) -> int:
+        """The real modal window; it lets the batch end, then gets Escape.
+
+        Each tick releases the detection; once the summary is in, a real
+        Escape closes the window. After 6000 ticks without the summary it
+        sends Escape anyway, and the precondition below fails (a hang guard,
+        not a time assertion)."""
+        timer = QTimer(dlg)
+        ticks = [0]
+
+        def tick() -> None:
+            ticks[0] += 1
+            gate.release()
+            summary = h.bs._worker is None and h.bs._phases.currentIndex() == 2
+            if summary or ticks[0] >= 6000:
+                timer.stop()
+                closed_after_summary.append(summary)
+                QTest.keyClick(dlg, Qt.Key.Key_Escape)
+
+        timer.timeout.connect(tick)
+        timer.start(10)
+        return QDialog.exec(dlg)
+
+    try:
+        worker = h.launch(files, validate=False)
+        h.wait(gate.entered.is_set, "the batch's detection held")
+        h.go_home()
+        recent = list(h.mw.config.get("recent_files", []))
+        env.clear()
+        monkeypatch.setattr(ConfirmDialog, "exec", modal_exec)
+        _drop(h.home.drop_zone, [h.single, h.in2 / "other.txt"])
+        toasts = list(env.toasts)
+        windows = list(env.windows)
+        record = (
+            list(env.processing),
+            list(env.choosers),
+            h.mw.config.get("recent_files", []) == recent,
+            h.mw.current_screen_name(),
+            len(env.workers),
+        )
+        pre(
+            closed_after_summary == [True] and h.ended(worker).is_set(),
+            "the window closed after the batch's summary",
+        )
+    finally:
+        h.finish()
+
+    assert toasts == []  # expected failure
+    assert windows == [MSG_FR]
+    assert record == ([], [], True, "home", 1)
+
+
+# ---------------------------------------------------------------------------
+# T16 (AC1, v1.5, guard): with no batch running, the several-files drop opens
+# its first file and shows its toast, also after a refused drop
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("before", ["before_any_batch", "after_a_refused_drop"])
+def test_several_files_toast_when_no_batch_runs(  # type: ignore[no-untyped-def]
+    qtbot, main_window, tmp_path: Path, env: _Env, before: str
+) -> None:
+    h = _Harness(qtbot, main_window, tmp_path, env)
+    files = h.folder("in", [("doc0.txt", TEXT_A)])
+    try:
+        if before == "after_a_refused_drop":
+            gate = _Gate()
+            env.detection_gates[TEXT_A] = gate
+            worker = h.launch(files, validate=False)
+            h.wait(gate.entered.is_set, "the batch's detection held")
+            h.go_home()
+            env.clear()
+            env.answers = [0]
+            _drop(h.home.drop_zone, [h.single, h.in2 / "other.txt"])
+            pre(
+                (env.windows, env.toasts, env.processing) == ([MSG_FR], [], []),
+                "the drop during the batch refused",
+            )
+            gate.release()
+            ended = h.ended(worker)
+            h.wait(
+                lambda: ended.is_set()
+                and h.bs._worker is None
+                and h.bs._phases.currentIndex() == 2,
+                "the batch's summary",
+            )
+        else:
+            h.go_home()
+        env.clear()
+        _drop(h.home.drop_zone, [h.single, h.in2 / "other.txt"])
+        record = (
+            list(env.windows),
+            list(env.toasts),
+            list(env.processing),
+            list(h.mw.config.get("recent_files", [])),
+        )
+    finally:
+        h.finish()
+
+    assert record == ([], [MULTI_TOAST], [str(h.single)], [str(h.single)])
