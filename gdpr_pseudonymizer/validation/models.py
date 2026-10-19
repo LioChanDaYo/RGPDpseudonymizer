@@ -17,6 +17,14 @@ from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 # desktop app already gives a row added by hand.
 ADDED_BY_HAND_SOURCE = "manual"
 
+# Story 10.15 v1.4/v1.5 (AC1 and AC14 (d), Lionel's Q4 applied to
+# corrections): the source of every place a correction made with [E] reaches.
+CORRECTED_BY_HAND_SOURCE = "corrected"
+
+# The places the user typed, added with [A] or corrected with [E]: each is
+# widened over a name it partly overlaps before the document is written.
+TYPED_SOURCES = frozenset({ADDED_BY_HAND_SOURCE, CORRECTED_BY_HAND_SOURCE})
+
 # Story 10.15 (AC14 (a), Lionel's Q3): a place of a name added by hand is a
 # whole word. The character just before and just after it (when there is one)
 # is neither a word character nor a hyphen (-, U+2010, U+2011): a hyphen joins

@@ -59,7 +59,7 @@ from gdpr_pseudonymizer.utils.tabular_reader import (
     read_excel_structured,
 )
 from gdpr_pseudonymizer.validation.models import (
-    ADDED_BY_HAND_SOURCE,
+    TYPED_SOURCES,
     CandidateKey,
     candidate_key,
 )
@@ -332,8 +332,8 @@ class DocumentProcessor:
         (mapping key, type) of the name sent. ``cells`` (cell reference ->
         cell text) is given for a spreadsheet, whose entities' positions
         point into their cells (Story 10.15); None for a text document.
-        The places added by hand are widened over the other names sent
-        (``_widen_added_places``).
+        The places the user typed (added with [A] or corrected with [E]) are
+        widened over the other names sent (``_widen_added_places``).
         """
         if skip_validation:
             logger.info(
@@ -413,43 +413,54 @@ class DocumentProcessor:
 
     @staticmethod
     def _widen_added_places(entities: list[DetectedEntity]) -> list[DetectedEntity]:
-        """Widen each place added by hand over the names it partly overlaps
-        (Story 10.15, AC14 (d), Lionel's Q4).
+        """Widen each place the user typed over the names it partly overlaps
+        (Story 10.15, AC14 (d), Lionel's Q4; v1.4/v1.5: corrections too).
 
-        A place marked ``ADDED_BY_HAND_SOURCE`` that partly overlaps another
-        name of the list in the same text or cell (they overlap and neither
-        span holds the other) is widened to cover both, again until it
-        partly overlaps no other name. Its text and type are kept, so the
-        whole span is written with the added name's pseudonym and nothing of
-        either name stays in plain text there. Every other entity, and the
-        order, are unchanged.
+        A typed place (its source is in ``TYPED_SOURCES``: added with [A], or
+        any place a correction made with [E] reaches) that partly overlaps
+        another name of the list in the same text or cell (they overlap and
+        neither span holds the other) is widened to cover both, again until
+        it partly overlaps no other span of the list, the other typed places'
+        widened spans included. Its text and type are kept, so the whole span
+        is written with the typed name's pseudonym and nothing of either name
+        stays in plain text there. Two typed places that partly overlap each
+        other end with the same span; the writer keeps the first of the two
+        in the list (its sort is stable). Every other entity, and the order,
+        are unchanged.
         """
-        widened: list[DetectedEntity] = []
-        for index, entity in enumerate(entities):
-            if entity.source != ADDED_BY_HAND_SOURCE:
-                widened.append(entity)
-                continue
-            others = [
-                (other.start_pos, other.end_pos)
-                for other_index, other in enumerate(entities)
-                if other_index != index and other.context_label == entity.context_label
-            ]
-            start, end = entity.start_pos, entity.end_pos
-            changed = True
-            while changed:
-                changed = False
-                for other_start, other_end in others:
+        spans = [(entity.start_pos, entity.end_pos) for entity in entities]
+        typed = [
+            index
+            for index, entity in enumerate(entities)
+            if entity.source in TYPED_SOURCES
+        ]
+        changed = True
+        while changed:
+            changed = False
+            for index in typed:
+                start, end = spans[index]
+                label = entities[index].context_label
+                for other_index, (other_start, other_end) in enumerate(spans):
+                    if (
+                        other_index == index
+                        or entities[other_index].context_label != label
+                    ):
+                        continue
                     overlaps = other_start < end and start < other_end
                     holds = start <= other_start and other_end <= end
                     held = other_start <= start and end <= other_end
                     if overlaps and not holds and not held:
                         start, end = min(start, other_start), max(end, other_end)
                         changed = True
-            if (start, end) == (entity.start_pos, entity.end_pos):
-                widened.append(entity)
-            else:
-                widened.append(replace(entity, start_pos=start, end_pos=end))
-        return widened
+                spans[index] = (start, end)
+        return [
+            (
+                entity
+                if (start, end) == (entity.start_pos, entity.end_pos)
+                else replace(entity, start_pos=start, end_pos=end)
+            )
+            for entity, (start, end) in zip(entities, spans)
+        ]
 
     @staticmethod
     def _check_cells(

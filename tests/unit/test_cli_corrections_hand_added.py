@@ -1023,11 +1023,6 @@ def _names(db: Path) -> list[tuple[str, str]]:
     return sorted((row[0], row[1]) for row in _rows(db))
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.15 v1.4: reproduces a correction that partly overlaps another name, left partly in clear; fixed in Task 2.6",
-)
 @pytest.mark.parametrize("ext", [".txt", ".xlsx", ".csv"])
 def test_correction_overlapping_accepted_name(
     tmp_path: Path, db: Path, ext: str
@@ -1053,11 +1048,6 @@ def test_correction_overlapping_accepted_name(
     assert _names(db) == sorted([(VZ, "PERSON"), (ZQ, "PERSON")])
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.15 v1.4: reproduces a correction that partly overlaps another name, left partly in clear; fixed in Task 2.6",
-)
 @pytest.mark.parametrize("ext", [".txt", ".xlsx", ".csv"])
 def test_correction_then_accepted_overlap(tmp_path: Path, db: Path, ext: str) -> None:
     """T17 (the mirror order): a correction that reaches into a name accepted
@@ -1081,11 +1071,6 @@ def test_correction_then_accepted_overlap(tmp_path: Path, db: Path, ext: str) ->
     assert _names(db) == sorted([(QV, "PERSON"), (ZQ, "PERSON")])
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.15 v1.4: reproduces a correction that partly overlaps another name, left partly in clear; fixed in Task 2.6",
-)
 @pytest.mark.parametrize("ext", [".txt", ".xlsx"])
 def test_correction_overlapping_stored_name(tmp_path: Path, db: Path, ext: str) -> None:
     """T18 (AC14 (d)'s stored names, for [E]): a correction that reaches into
@@ -1117,11 +1102,6 @@ def test_correction_overlapping_stored_name(tmp_path: Path, db: Path, ext: str) 
     assert _names(db) == sorted([(VZ, "PERSON"), (ZQ, "PERSON")])
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.15 v1.4: reproduces a correction that partly overlaps another name, left partly in clear; fixed in Task 2.6",
-)
 @pytest.mark.parametrize("ext", [".txt", ".xlsx", ".csv"])
 def test_batch_correction_overlap(tmp_path: Path, db: Path, ext: str) -> None:
     """T19: the same correction through ``batch --workers 1``."""
@@ -1151,11 +1131,6 @@ def test_batch_correction_overlap(tmp_path: Path, db: Path, ext: str) -> None:
 SECOND_PLACE = "Zorbal Quentrix valide. Vorlan Zorbal Quentrix a signé."
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.15 v1.5: reproduces a correction that partly overlaps another name at a second place of its group, left partly in clear; fixed in Task 2.6",
-)
 @pytest.mark.parametrize("ext", [".txt", ".xlsx", ".csv"])
 def test_correction_overlap_at_second_place(tmp_path: Path, db: Path, ext: str) -> None:
     """T20 (AC1, AC14 (d) for [E] at every place of its group; the PO's N4):
@@ -1185,11 +1160,6 @@ def test_correction_overlap_at_second_place(tmp_path: Path, db: Path, ext: str) 
     assert _names(db) == sorted([(VZ, "PERSON"), (ZQ, "PERSON")])
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.15 v1.5: reproduces a correction that partly overlaps another name at a second place of its group, left partly in clear; fixed in Task 2.6",
-)
 @pytest.mark.parametrize("ext", [".xlsx", ".csv"])
 def test_correction_overlap_in_another_cell(tmp_path: Path, db: Path, ext: str) -> None:
     """T21 (T20 across two cells): the correction's second place, in another

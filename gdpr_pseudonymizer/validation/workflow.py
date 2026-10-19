@@ -22,7 +22,11 @@ from gdpr_pseudonymizer.core.mapping_key import mapping_key
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 from gdpr_pseudonymizer.utils.french_patterns import FRENCH_TITLE_PATTERN
 from gdpr_pseudonymizer.validation.context_precomputer import ContextPrecomputer
-from gdpr_pseudonymizer.validation.models import EntityGroup, ValidationSession
+from gdpr_pseudonymizer.validation.models import (
+    CORRECTED_BY_HAND_SOURCE,
+    EntityGroup,
+    ValidationSession,
+)
 from gdpr_pseudonymizer.validation.ui import (
     FinalConfirmationScreen,
     HelpOverlay,
@@ -315,7 +319,10 @@ class ValidationWorkflow:
                             # Apply modification to all occurrences in group.
                             # Story 10.15: each is located in the text its
                             # positions point into (its own cell on a
-                            # spreadsheet) and keeps its cell.
+                            # spreadsheet) and keeps its cell. Every place
+                            # the correction reaches is a place the user
+                            # typed (v1.4/v1.5), widened over a name it
+                            # partly overlaps before the document is written.
                             for entity in group.occurrences:
                                 start_pos, end_pos = self._locate_modified_span(
                                     session.text_of(entity), entity, new_text
@@ -326,6 +333,7 @@ class ValidationWorkflow:
                                     start_pos=start_pos,
                                     end_pos=end_pos,
                                     is_ambiguous=False,
+                                    source=CORRECTED_BY_HAND_SOURCE,
                                 )
                                 session.mark_modified(entity, modified_entity)
                         else:
