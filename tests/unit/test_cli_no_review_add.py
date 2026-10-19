@@ -288,11 +288,6 @@ def _with(content: str | Rows, name: str, pseudonym: str) -> str | Rows:
 # --- AC1, AC2: the question, and "y" adds the names missed ------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.18: reproduces a document with nothing detected written with no question, a missed name in clear on the unfixed code; fixed in Task 2",
-)
 @pytest.mark.parametrize("ext", [".txt", ".xlsx"])
 def test_nothing_found_yes_every_place(tmp_path: Path, db: Path, ext: str) -> None:
     """T1 (AC1, AC2): nothing detected; "y" and a name at two places: both
@@ -311,11 +306,6 @@ def test_nothing_found_yes_every_place(tmp_path: Path, db: Path, ext: str) -> No
     assert FALSE_LINE not in run.shown
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.18: reproduces a document whose names are all stored written with no question, a missed name in clear on the unfixed code; fixed in Task 2",
-)
 @pytest.mark.parametrize("ext", [".txt", ".xlsx"])
 def test_all_stored_yes_adds_missed(tmp_path: Path, db: Path, ext: str) -> None:
     """T2 (AC1, AC2): every name found is stored; "y" adds the missed one."""
@@ -339,11 +329,6 @@ def test_all_stored_yes_adds_missed(tmp_path: Path, db: Path, ext: str) -> None:
     assert FALSE_LINE not in run.shown
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.18: reproduces no question, so a missed name next to a stored name left in clear on the unfixed code; fixed in Task 2",
-)
 @pytest.mark.parametrize("ext", [".txt", ".xlsx"])
 def test_stored_name_overlap(tmp_path: Path, db: Path, ext: str) -> None:
     """T3 (AC1, AC9; 10.15's F1 and Q4): the name added partly overlaps a
@@ -366,11 +351,6 @@ def test_stored_name_overlap(tmp_path: Path, db: Path, ext: str) -> None:
         assert written == f"Nom\tNote\nok\t{pseudonym} a signé"
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.18: reproduces the false line in place of the approved one, and no question on the unfixed code; fixed in Task 2",
-)
 def test_answer_n_writes_as_today(tmp_path: Path, db: Path) -> None:
     """T4 (AC1, AC2): "n" writes the file as today; the new line and the
     question are shown, the false line is not."""
@@ -386,11 +366,6 @@ def test_answer_n_writes_as_today(tmp_path: Path, db: Path) -> None:
     assert _rows(db) == []
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.18: reproduces no question, so a missed name left in clear on the unfixed code; fixed in Task 2",
-)
 def test_hyphen_compound_not_a_place(tmp_path: Path, db: Path) -> None:
     """T5 (AC1; 10.15 Q3): a name inside a hyphenated word is not a place."""
     source, output = tmp_path / "in.txt", tmp_path / "out_in.txt"
@@ -404,11 +379,6 @@ def test_hyphen_compound_not_a_place(tmp_path: Path, db: Path) -> None:
     assert written == f"Le contrat avec Saint-Zorbal et {pseudonym} est signé."
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.18: reproduces the false line in place of the selected-types line on the unfixed code; fixed in Task 2",
-)
 @pytest.mark.parametrize("case", ["nothing_of_the_types", "stored_and_left_out"])
 def test_entity_types_lines(tmp_path: Path, db: Path, case: str) -> None:
     """T6 (Q5): with --entity-types, the lines speak of the selected types."""
@@ -452,11 +422,6 @@ def test_entity_types_lines(tmp_path: Path, db: Path, case: str) -> None:
 # --- AC3: batch one file at a time -------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.18: reproduces no question in a batch, a missed name in clear on the unfixed code; fixed in Task 2",
-)
 def test_batch_asks_each_file(tmp_path: Path, db: Path) -> None:
     """T7 (AC3, Q3): the question is asked for each file."""
     folder, out_folder = tmp_path / "docs", tmp_path / "out"
@@ -478,11 +443,6 @@ def test_batch_asks_each_file(tmp_path: Path, db: Path) -> None:
 # --- AC4: no answer can be read ----------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.18: reproduces a document written with no answer read on the unfixed code; fixed in Task 2",
-)
 @pytest.mark.parametrize("ext", [".txt", ".xlsx"])
 def test_no_answer_closed_stdin(tmp_path: Path, db: Path, ext: str) -> None:
     """T8 (AC4, Q4): a closed input stops the run with the approved line."""
@@ -496,11 +456,6 @@ def test_no_answer_closed_stdin(tmp_path: Path, db: Path, ext: str) -> None:
     assert SUCCESS not in run.shown
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.18: reproduces a document written with no answer read on the unfixed code; fixed in Task 2",
-)
 def test_no_answer_input_runs_out(tmp_path: Path, db: Path) -> None:
     """T9 (AC4): an input that runs out inside the manual flow stops the run."""
     source, output = tmp_path / "in.txt", tmp_path / "out_in.txt"
@@ -512,11 +467,6 @@ def test_no_answer_input_runs_out(tmp_path: Path, db: Path) -> None:
     assert NO_ANSWER in run.shown
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.18: reproduces a batch writing every file with no answer read on the unfixed code; fixed in Task 2",
-)
 def test_no_answer_batch_each_file_fails(tmp_path: Path, db: Path) -> None:
     """T10 (AC4): in a batch, each file without an answer fails and the batch
     goes on to the next one."""
@@ -536,11 +486,6 @@ def test_no_answer_batch_each_file_fails(tmp_path: Path, db: Path) -> None:
 # --- AC5: Ctrl+C ----------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.18: reproduces no question to cancel, the document written on the unfixed code; fixed in Task 2",
-)
 def test_ctrl_c_at_question(tmp_path: Path, db: Path) -> None:
     """T12 (AC5): Ctrl+C at the question cancels at once; nothing written."""
     source, output = tmp_path / "in.txt", tmp_path / "out_in.txt"
@@ -552,11 +497,6 @@ def test_ctrl_c_at_question(tmp_path: Path, db: Path) -> None:
     assert _rows(db) == []
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.18: reproduces no question to cancel, the document written on the unfixed code; fixed in Task 2",
-)
 def test_ctrl_c_while_adding(tmp_path: Path, db: Path) -> None:
     """T13 (AC5): Ctrl+C at 'Entity text' cancels; nothing written or stored."""
     source, output = tmp_path / "in.txt", tmp_path / "out_in.txt"
@@ -568,11 +508,6 @@ def test_ctrl_c_while_adding(tmp_path: Path, db: Path) -> None:
     assert _rows(db) == []
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.18: reproduces no question to cancel, the second file written on the unfixed code; fixed in Task 2",
-)
 def test_ctrl_c_in_batch_keeps_written(tmp_path: Path, db: Path) -> None:
     """T14 (AC5): Ctrl+C at the second file's question cancels the batch; the
     first file's output stays."""
@@ -590,11 +525,6 @@ def test_ctrl_c_in_batch_keeps_written(tmp_path: Path, db: Path) -> None:
 # --- AC8: the CLI reference -------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.18: reproduces the CLI reference documenting --stop-on-error and a --workers default of 1 on the unfixed code; fixed in Task 2",
-)
 def test_cli_reference_options() -> None:
     """T15 (AC8, Q6 and the --stop-on-error fix): both CLI references name
     the real batch options and the real --workers default."""

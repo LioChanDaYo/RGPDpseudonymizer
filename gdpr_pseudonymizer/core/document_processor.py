@@ -63,7 +63,10 @@ from gdpr_pseudonymizer.validation.models import (
     CandidateKey,
     candidate_key,
 )
-from gdpr_pseudonymizer.validation.workflow import run_validation_workflow
+from gdpr_pseudonymizer.validation.workflow import (
+    ask_for_missed_names,
+    run_validation_workflow,
+)
 
 # Configure logging (NO sensitive data)
 logger = get_logger(__name__)
@@ -324,6 +327,7 @@ class DocumentProcessor:
         pseudonym_assigner: Callable[[DetectedEntity], str],
         custom_pseudonyms: dict[NameKey, str] | None = None,
         cells: dict[str, str] | None = None,
+        types_selected: bool = False,
     ) -> list[DetectedEntity]:
         """Run entity validation workflow (interactive or auto-accept).
 
@@ -334,6 +338,11 @@ class DocumentProcessor:
         point into their cells (Story 10.15); None for a text document.
         The places the user typed (added with [A] or corrected with [E]) are
         widened over the other names sent (``_widen_added_places``).
+
+        When nothing is left to review (no name found, or only names already
+        stored under the same type), the command line asks whether to add a
+        name the detector missed (``ask_for_missed_names``, Story 10.18);
+        ``types_selected`` (``--entity-types`` given) chooses its lines.
         """
         if skip_validation:
             logger.info(
@@ -389,9 +398,15 @@ class DocumentProcessor:
                     cells=cells,
                 )
             else:
-                validated_unknown = []
-                self._notifier(
-                    "All entities have existing mappings. Skipping validation."
+                # Story 10.18: nothing is left to review; the command line
+                # asks whether to add a name the detector missed. The names
+                # added are widened below with the stored names (10.15's F1).
+                validated_unknown = ask_for_missed_names(
+                    document_text,
+                    input_path,
+                    nothing_found=not detected_entities,
+                    cells=cells,
+                    types_selected=types_selected,
                 )
 
             # Story 10.15 (AC14 (d)): over every name sent, stored names
@@ -1250,6 +1265,7 @@ class DocumentProcessor:
                     skip_validation=skip_validation,
                     pseudonym_assigner=pseudonym_assigner,
                     custom_pseudonyms=custom_pseudonyms,
+                    types_selected=entity_type_filter is not None,
                 )
                 self._reset_pseudonym_state(ctx)
                 resolve_result = self._resolve_pseudonyms(
@@ -1309,6 +1325,7 @@ class DocumentProcessor:
                     pseudonym_assigner=pseudonym_assigner,
                     custom_pseudonyms=custom_pseudonyms,
                     cells={cell.cell_ref: cell.value for cell in tabular_doc.cells},
+                    types_selected=entity_type_filter is not None,
                 )
                 # Story 10.15 (AC4): every name has its cell, before any
                 # pseudonym is stored

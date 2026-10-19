@@ -75,6 +75,16 @@ class SpreadsheetCellError(ValidationError):
     """
 
 
+class NoAnswerError(ValidationError):
+    """Raised when no answer can be read on the command line (Story 10.18).
+
+    The question asked on a document with nothing left to review, or a
+    prompt of the manual flow after it, read the end of input (closed
+    stdin, ``< NUL`` or a pipe that ran out). Nothing is written or stored
+    for that document. Its message names no name.
+    """
+
+
 class FileProcessingError(PseudonymizerError):
     """Raised when file I/O operations fail.
 

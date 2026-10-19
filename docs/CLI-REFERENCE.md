@@ -173,8 +173,8 @@ gdpr-pseudo batch INPUT_PATH [OPTIONS]
 | `--passphrase TEXT` | `-p` | (prompt) | Database passphrase |
 | `--recursive` | `-r` | | Process subdirectories recursively |
 | `--continue-on-error` | | Yes | Continue processing on individual file errors |
-| `--stop-on-error` | | | Stop on first error |
-| `--workers` | `-w` | 1 | Number of parallel workers (1-8). Use 1 for interactive validation, 2-8 for parallel processing without validation |
+| `--no-continue-on-error` | | | Stop on first error |
+| `--workers` | `-w` | 4 | Number of parallel workers (1-8). Only `--workers 1` shows the interactive validation; 2-8 process the files in parallel without validation |
 | `--entity-types TEXT` | | (all) | Filter entity types to process (comma-separated: PERSON,LOCATION,ORG). Only specified types will be detected and pseudonymized. |
 
 **Examples:**
@@ -189,7 +189,7 @@ gdpr-pseudo batch ./documents/ -o ./output/ --recursive
 gdpr-pseudo batch ./documents/ --theme star_wars
 
 # Stop on first error
-gdpr-pseudo batch ./documents/ --stop-on-error
+gdpr-pseudo batch ./documents/ --no-continue-on-error
 
 # Parallel processing (no validation, faster for pre-validated entities)
 gdpr-pseudo batch ./documents/ --workers 4
