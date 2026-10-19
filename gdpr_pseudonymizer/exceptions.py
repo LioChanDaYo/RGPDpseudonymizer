@@ -66,6 +66,15 @@ class CustomPseudonymError(ValidationError):
     """
 
 
+class SpreadsheetCellError(ValidationError):
+    """Raised when a validated name of a spreadsheet matches no cell (Story 10.15).
+
+    Checked before any pseudonym is stored or any output written, so that a
+    name the writer could not place is never left in plain text while its
+    pseudonym is stored. Its message names no name and no cell.
+    """
+
+
 class FileProcessingError(PseudonymizerError):
     """Raised when file I/O operations fail.
 

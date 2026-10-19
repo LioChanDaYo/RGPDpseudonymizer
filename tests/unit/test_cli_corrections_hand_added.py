@@ -301,11 +301,6 @@ def _files(tmp_path: Path, ext: str, tag: str = "") -> tuple[Path, Path]:
 # --- AC1 and AC2: a corrected or retyped name keeps its cell ----------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.15: reproduces a retyped name left in clear in its cell on the unfixed code; fixed in Task 2",
-)
 @pytest.mark.parametrize("ext", SHEETS)
 def test_type_change_keeps_cell(tmp_path: Path, db: Path, ext: str) -> None:
     """T1 (AC1, [T]; QA's #2): a name retyped with [T] is written in its cell."""
@@ -327,11 +322,6 @@ def test_type_change_keeps_cell(tmp_path: Path, db: Path, ext: str) -> None:
     assert ZQ not in _flat(cells)
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.15: reproduces a corrected name left in clear in its cell on the unfixed code; fixed in Task 2",
-)
 @pytest.mark.parametrize("ext", SHEETS)
 def test_correction_keeps_cell(tmp_path: Path, db: Path, ext: str) -> None:
     """T2 (AC1, [E]; QA's #2): a name corrected with [E] is written in its cell."""
@@ -359,11 +349,6 @@ def test_correction_keeps_cell(tmp_path: Path, db: Path, ext: str) -> None:
     assert _cell(cells, "B2") == f"{pseudonym} signé le contrat"  # expected failure
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.15: reproduces a corrected then retyped name left in clear in its cell on the unfixed code; fixed in Task 2",
-)
 @pytest.mark.parametrize("ext", SHEETS)
 def test_correction_then_type_change_keeps_cell(
     tmp_path: Path, db: Path, ext: str
@@ -394,11 +379,6 @@ def test_correction_then_type_change_keeps_cell(
     assert _cell(cells, "B3") == f"{pseudonym} signé le contrat"  # expected failure
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.15: reproduces a corrected name with its own pseudonym left in clear in its cell on the unfixed code; fixed in Task 2",
-)
 @pytest.mark.parametrize("ext", SHEETS)
 def test_custom_after_correction_keeps_cell(tmp_path: Path, db: Path, ext: str) -> None:
     """T4 (AC1, [C] after [E]): the corrected name with its own pseudonym keeps
@@ -427,11 +407,6 @@ def test_custom_after_correction_keeps_cell(tmp_path: Path, db: Path, ext: str) 
     assert _cell(cells, "B2") == f"{CUSTOM} signé le contrat"  # expected failure
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.15: reproduces a correction located in the joined review text, not in its cell on the unfixed code; fixed in Task 2",
-)
 @pytest.mark.parametrize("ext", SHEETS)
 def test_correction_located_in_its_cell(tmp_path: Path, db: Path, ext: str) -> None:
     """T9 (AC2): a correction is located in its own cell, not in the joined
@@ -457,11 +432,6 @@ def test_correction_located_in_its_cell(tmp_path: Path, db: Path, ext: str) -> N
     )  # expected failure
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.15: reproduces the corrected-name fallback losing its cell on the unfixed code; fixed in Task 2",
-)
 def test_sent_entity_fallback_keeps_cell() -> None:
     """T12 (AC1): the corrected-name fallback of ``_sent_entity`` keeps the cell."""
     label = f"{SHEET}!B2"
@@ -487,11 +457,6 @@ def test_sent_entity_fallback_keeps_cell() -> None:
 # --- AC3 and AC14: a name added with [A] is replaced at every place ---------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.15: reproduces an added name left in clear in its cell on the unfixed code; fixed in Task 2",
-)
 @pytest.mark.parametrize("ext", SHEETS)
 def test_add_on_spreadsheet(tmp_path: Path, db: Path, ext: str) -> None:
     """T5 (AC3; the PO's probe): a name added with [A] is written in its cell."""
@@ -510,11 +475,6 @@ def test_add_on_spreadsheet(tmp_path: Path, db: Path, ext: str) -> None:
     assert _cell(cells, "B3") == f"contrat avec {pseudonym}"  # expected failure
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.15: reproduces an added name replaced at its first place only on the unfixed code; fixed in Task 2",
-)
 @pytest.mark.parametrize("ext", [".txt", ".xlsx"])
 def test_add_name_at_two_places(tmp_path: Path, db: Path, ext: str) -> None:
     """T6 (AC3; the PO's two-place cases): both places of an added name."""
@@ -548,11 +508,6 @@ def test_add_name_at_two_places(tmp_path: Path, db: Path, ext: str) -> None:
         assert _cell(cells, "A3") == pseudonym
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.15: reproduces an added name taking a found place and leaving the other in clear on the unfixed code; fixed in Task 2",
-)
 @pytest.mark.parametrize("ext", [".txt", ".xlsx"])
 def test_add_keeps_found_place_decision(tmp_path: Path, db: Path, ext: str) -> None:
     """T7 (AC3, AC14 (b), 10.10): a place the detector found keeps its own
@@ -587,11 +542,6 @@ def test_add_keeps_found_place_decision(tmp_path: Path, db: Path, ext: str) -> N
         assert _cell(cells, "A2") == ZQ
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.15: reproduces an added name overriding the reject of its found places on the unfixed code; fixed in Task 2",
-)
 def test_add_on_found_places_adds_nothing(tmp_path: Path, db: Path) -> None:
     """T13 (AC14 (b), Q2's case): [A] of a name found at every place adds
     nothing; the user's reject of the found places holds."""
@@ -607,11 +557,6 @@ def test_add_on_found_places_adds_nothing(tmp_path: Path, db: Path) -> None:
     assert written == text
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.15: reproduces an added name left partly in clear next to a found name on the unfixed code; fixed in Task 2",
-)
 @pytest.mark.parametrize("ext", [".txt", ".xlsx"])
 def test_add_overlapping_a_written_name(tmp_path: Path, db: Path, ext: str) -> None:
     """T10 (AC14 (d), Q4): an added place that partly overlaps a found name is
@@ -640,11 +585,6 @@ def test_add_overlapping_a_written_name(tmp_path: Path, db: Path, ext: str) -> N
         assert _cell(cells, "B2") == f"{pseudonym} a signé"
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.15: reproduces an added name written inside a longer word on the unfixed code; fixed in Task 2",
-)
 def test_add_whole_words_only(tmp_path: Path, db: Path) -> None:
     """T11 (AC14 (a), Q3): only whole words are places; a hyphen joins words,
     an elided article does not."""
@@ -666,11 +606,6 @@ def test_add_whole_words_only(tmp_path: Path, db: Path) -> None:
     )
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.15: reproduces an added name left partly in clear next to a stored name on the unfixed code; fixed in Task 2",
-)
 @pytest.mark.parametrize("ext", [".txt", ".xlsx"])
 def test_add_overlapping_a_stored_name(tmp_path: Path, db: Path, ext: str) -> None:
     """T14 (AC14 (d), Q4; the PO's F1): the widening also covers a name stored
@@ -721,11 +656,6 @@ def test_add_overlapping_a_stored_name(tmp_path: Path, db: Path, ext: str) -> No
         assert _cell(cells, "B2") == f"{pseudonym} a signé avec {bt}"
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.15: reproduces a second add of the same name taking the same place on the unfixed code; fixed in Task 2",
-)
 def test_add_twice_writes_once(tmp_path: Path, db: Path) -> None:
     """T15 (AC14 (b)): the same [A] twice adds each place once; both places
     are written."""
@@ -781,11 +711,6 @@ def _lose_cell(how: str, changed: list[str]) -> AbstractContextManager[Any]:
     return patch.object(document_processor_module, "run_validation_workflow", review)
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.15: reproduces a name that matches no cell written in clear with a success on the unfixed code; fixed in Task 2",
-)
 @pytest.mark.parametrize("how", ["no_cell", "unknown_cell", "span_outside"])
 def test_unmatched_cell_stops_run(tmp_path: Path, db: Path, how: str) -> None:
     """T8 (AC4): a validated name that matches no cell stops the run: exit
