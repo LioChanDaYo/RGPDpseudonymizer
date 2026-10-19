@@ -1,6 +1,8 @@
 """Story 10.15: a name corrected ([E]), retyped ([T]) or added ([A]) in the
 command-line review is replaced at every place it belongs, in a text file and
-in Excel and CSV cells (T1-T15), and what must not change (G1-G5).
+in Excel and CSV cells (T1-T15), and what must not change (G1-G5). G6-G8
+guard the gaps QA found (TEST-001: the cells through both restarts of the
+review; TEST-002: the same span in two cells).
 
 Written by the BMAD dev agent (Claude). Each test drives the real
 ``gdpr-pseudo process`` command through ``CliRunner``, on a database made by
@@ -857,3 +859,84 @@ def test_known_name_kept_through_both_restarts(tmp_path: Path, db: Path) -> None
     zv = _pseudonym(db, ZV, "ORG")
     zorbalix = _pseudonym(db, "Zorbalix", "LOCATION")
     assert _text(output) == f"{zv} a signé avec Quentrix et {zorbalix}."
+
+
+# --- Guards from QA's review: the cells through both restarts, one span in two
+# cells (TEST-001, TEST-002) ----------------------------------------------------
+
+
+def test_spreadsheet_correction_after_ctrl_c_restart(tmp_path: Path, db: Path) -> None:
+    """G6 (QA TEST-001; mutant M4a): after the Ctrl+C restart of the review
+    (« Quit validation? » answered No), a correction is still located in its
+    own cell."""
+    source, output = _files(tmp_path, ".xlsx")
+    _write_sheet(
+        source, [[ZQ, "Note"], ["ok", "chez Zorbal Quentrix signé le contrat"]]
+    )
+    run = _process(
+        source,
+        output,
+        db,
+        [(ZQ, "ORG"), (ZQS, "PERSON")],
+        [ENTER, CTRL_C, ENTER, "e", SPACE],
+        [ZQ],
+        answers=[False],
+    )
+    _pre(run.asked[:1] == [QUIT_QUESTION], "the review restarted after Ctrl+C")
+    assert run.exit_code == 0
+    cells = _cells(output)
+    pseudonym = _pseudonym(db, ZQ, "PERSON")
+    assert _cell(cells, "B2") == f"chez {pseudonym} signé le contrat"
+    assert _cell(cells, "A1") == _pseudonym(db, ZQ, "ORG")
+
+
+def test_spreadsheet_add_after_ready_restart(tmp_path: Path, db: Path) -> None:
+    """G7 (QA TEST-001; mutant M4b): after the restart of the review (« Ready
+    to process … » answered No), a name added with [A] is replaced in every
+    cell where it stands, and the run does not stop."""
+    source, output = _files(tmp_path, ".xlsx")
+    _write_sheet(source, [["Nom", "Note"], [VM, "avec Zorbal Quentrix"], [ZQ, "signé"]])
+    run = _process(
+        source,
+        output,
+        db,
+        [(VM, "PERSON")],
+        [ENTER, SPACE, ENTER, "a", SPACE],
+        [ZQ, "PERSON"],
+        answers=[False],
+    )
+    _pre(
+        run.asked[:2] == [READY_QUESTION, READY_QUESTION],
+        "the review restarted after No",
+    )
+    assert run.exit_code == 0
+    assert SUCCESS in run.shown
+    cells = _cells(output)
+    pseudonym = _pseudonym(db, ZQ, "PERSON")
+    assert ZQ not in _flat(cells)
+    assert _cell(cells, "B2") == f"avec {pseudonym}"
+    assert _cell(cells, "A3") == pseudonym
+    assert _cell(cells, "A2") == _pseudonym(db, VM, "PERSON")
+
+
+def test_add_same_span_in_another_cell(tmp_path: Path, db: Path) -> None:
+    """G8 (QA TEST-002; mutant M5): a place in another cell at the same
+    position as a found place is a place of its own: [A] adds it, and both
+    cells are replaced."""
+    source, output = _files(tmp_path, ".xlsx")
+    _write_sheet(source, [["Nom", "Note"], [ZQ, "valide"], [ZQ, "signé"]])
+    run = _process(
+        source,
+        output,
+        db,
+        [(ZQ, "PERSON")],
+        [ENTER, "a", SPACE],
+        [ZQ, "PERSON"],
+        first_only=True,
+    )
+    assert run.exit_code == 0
+    cells = _cells(output)
+    pseudonym = _pseudonym(db, ZQ, "PERSON")
+    assert ZQ not in _flat(cells)
+    assert _cell(cells, "A2") == pseudonym
+    assert _cell(cells, "A3") == pseudonym
