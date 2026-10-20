@@ -123,9 +123,16 @@ def _validate(
     with open_database(str(db_path), PASSPHRASE) as session:
         ctx = processor._init_processing_context(session)
         assigner = processor._build_pseudonym_assigner(ctx)
-        with patch(
-            "gdpr_pseudonymizer.core.document_processor.run_validation_workflow",
-            side_effect=recorder,
+        with (
+            patch(
+                "gdpr_pseudonymizer.core.document_processor.run_validation_workflow",
+                side_effect=recorder,
+            ),
+            # Story 10.18: nothing left to review asks; the stand-in answers n.
+            patch(
+                "gdpr_pseudonymizer.core.document_processor.ask_for_missed_names",
+                return_value=[],
+            ),
         ):
             validated = processor._run_validation(
                 ctx=ctx,

@@ -386,8 +386,10 @@ def test_process_end_to_end_no_entities(tmp_path: Path) -> None:
 
     output_file = tmp_path / "output.txt"
 
+    # Story 10.18: nothing found, so the command line asks whether to add a
+    # missed name; answered n, the file is written as before.
     result = runner.invoke(
-        app, ["process", str(input_file), "--output", str(output_file)]
+        app, ["process", str(input_file), "--output", str(output_file)], input="n\n"
     )
 
     # Command should succeed

@@ -335,9 +335,16 @@ class TestRunValidation:
         assert unknown_entity in result
         mock_workflow.assert_called_once()
 
+    @patch(
+        "gdpr_pseudonymizer.core.document_processor.ask_for_missed_names",
+        return_value=[],
+    )
     @patch("gdpr_pseudonymizer.core.document_processor.run_validation_workflow")
-    def test_all_known_skips_workflow(self, mock_workflow: MagicMock) -> None:
-        """When all entities are known, workflow is not invoked."""
+    def test_all_known_skips_workflow(
+        self, mock_workflow: MagicMock, mock_ask: MagicMock
+    ) -> None:
+        """When all entities are known, the review is not invoked; Story 10.18
+        asks instead whether to add a missed name (the stand-in answers n)."""
         ctx = Mock()
         ctx.compositional_engine.strip_titles.side_effect = lambda t: t
 
@@ -360,7 +367,9 @@ class TestRunValidation:
 
         assert result == [entity]
         mock_workflow.assert_not_called()
-        assert any("Skipping validation" in m for m in messages)
+        mock_ask.assert_called_once()
+        assert mock_ask.call_args.kwargs["nothing_found"] is False
+        assert not any("Skipping validation" in m for m in messages)
 
 
 # ===========================================================================

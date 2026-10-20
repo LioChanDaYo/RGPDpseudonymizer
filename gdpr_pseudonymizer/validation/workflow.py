@@ -19,6 +19,7 @@ from gdpr_pseudonymizer.core.custom_pseudonym import (
     normalize_custom_pseudonym,
 )
 from gdpr_pseudonymizer.core.mapping_key import mapping_key
+from gdpr_pseudonymizer.exceptions import NoAnswerError
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 from gdpr_pseudonymizer.utils.french_patterns import FRENCH_TITLE_PATTERN
 from gdpr_pseudonymizer.validation.context_precomputer import ContextPrecomputer
@@ -45,6 +46,22 @@ from gdpr_pseudonymizer.validation.ui import (
 ALREADY_IN_REVIEW_LINE = (
     "'%1' is already in the review as %2 at every place: nothing added"
 )
+
+# Story 10.18 (Lionel's approved texts, Q1, Q4 and Q5, 2026-10-16), each on
+# one line so that it can be checked byte for byte. ``display_info_message``
+# gives the lines their « ℹ️  », ``Confirm.ask`` gives the question its
+# « [y/n]: », and ``_sanitize_error_message`` gives the error its
+# "NoAnswerError: ".
+NO_NAMES_FOUND_LINE = "No names were found in this document."
+NO_NEW_NAMES_LINE = (
+    "No new names to review: every name found is already in your mapping database."
+)
+SELECTED_NO_NAMES_FOUND_LINE = (
+    "No names of the selected types were found in this document."
+)
+SELECTED_NO_NEW_NAMES_LINE = "No new names of the selected types to review: every one found is already in your mapping database."
+ADD_MISSED_NAME_QUESTION = "Add a name the detector missed before the file is written?"
+NO_ANSWER_TEXT = "No answer could be read, so this document was not processed: the command line must ask whether to add a name the detector missed. Run it in a terminal to answer. No output was written for this file."
 
 
 class ValidationWorkflow:
@@ -672,6 +689,61 @@ class ValidationWorkflow:
                 break
 
         return session.get_validated_entities()
+
+
+def ask_for_missed_names(
+    document_text: str,
+    document_path: str = "",
+    *,
+    nothing_found: bool,
+    cells: dict[str, str] | None = None,
+    types_selected: bool = False,
+) -> list[DetectedEntity]:
+    """Ask whether to add a name the detector missed (Story 10.18).
+
+    Called in place of the review when nothing is left to review: the
+    detector found no name, or only names already stored under the same
+    type. Shows which case it is (with ``types_selected``, the lines speak
+    of the types selected with ``--entity-types``), then asks the question;
+    with yes, the manual flow adds names with [A]'s rules (every place, in
+    each cell of a spreadsheet), until the answer to « Add another
+    entity? » is no.
+
+    Args:
+        document_text: Full document text (on a spreadsheet, its cells joined)
+        document_path: Path to the document
+        nothing_found: True when the detector found no name at all
+        cells: Cell reference -> cell text of a spreadsheet; None for a text
+            document
+        types_selected: True when ``--entity-types`` was given
+
+    Returns:
+        The places added by hand (empty when the answer is no)
+
+    Raises:
+        NoAnswerError: If no answer can be read (end of input), at the
+            question or at a prompt of the manual flow. ``isatty()`` is never
+            read: it is True on Windows when stdin is NUL.
+        KeyboardInterrupt: On Ctrl+C, not caught here: the command cancels
+            at once, as the review's empty-list path does.
+    """
+    if types_selected:
+        line = (
+            SELECTED_NO_NAMES_FOUND_LINE
+            if nothing_found
+            else SELECTED_NO_NEW_NAMES_LINE
+        )
+    else:
+        line = NO_NAMES_FOUND_LINE if nothing_found else NO_NEW_NAMES_LINE
+    display_info_message(line)
+    try:
+        if not get_confirmation(ADD_MISSED_NAME_QUESTION):
+            return []
+        return ValidationWorkflow()._manual_entity_addition_flow(
+            document_text, document_path, cells=cells
+        )
+    except EOFError as error:
+        raise NoAnswerError(NO_ANSWER_TEXT) from error
 
 
 def create_validation_session(

@@ -173,8 +173,8 @@ gdpr-pseudo batch CHEMIN_ENTREE [OPTIONS]
 | `--passphrase TEXTE` | `-p` | (saisie interactive) | Mot de passe de la base de données |
 | `--recursive` | `-r` | | Traite aussi les sous-répertoires |
 | `--continue-on-error` | | Oui | Continue le traitement si un fichier produit une erreur |
-| `--stop-on-error` | | | Arrête le traitement dès la première erreur |
-| `--workers` | `-w` | 1 | Nombre de processus parallèles (1-8). Utiliser 1 pour la validation interactive, 2-8 pour le traitement parallèle sans validation |
+| `--no-continue-on-error` | | | Arrête le traitement dès la première erreur |
+| `--workers` | `-w` | 4 | Nombre de processus parallèles (1-8). Seul `--workers 1` propose la validation interactive ; de 2 à 8, les fichiers sont traités en parallèle sans validation |
 | `--entity-types TEXTE` | | (tous) | Types d'entités à traiter, séparés par des virgules (PERSON,LOCATION,ORG). Seuls les types indiqués seront détectés et pseudonymisés. |
 
 **Exemples :**
@@ -189,7 +189,7 @@ gdpr-pseudo batch ./documents/ -o ./output/ --recursive
 gdpr-pseudo batch ./documents/ --theme star_wars
 
 # S'arrêter à la première erreur
-gdpr-pseudo batch ./documents/ --stop-on-error
+gdpr-pseudo batch ./documents/ --no-continue-on-error
 
 # Traitement parallèle (sans validation, plus rapide pour les entités déjà validées)
 gdpr-pseudo batch ./documents/ --workers 4

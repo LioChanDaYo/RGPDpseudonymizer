@@ -29,9 +29,16 @@ class TestSingleDocumentWorkflow:
     @pytest.fixture(autouse=True)
     def mock_validation_workflow(self):
         """Mock validation workflow to auto-accept all detected entities."""
-        with patch(
-            "gdpr_pseudonymizer.core.document_processor.run_validation_workflow"
-        ) as mock:
+        with (
+            patch(
+                "gdpr_pseudonymizer.core.document_processor.run_validation_workflow"
+            ) as mock,
+            # Story 10.18: nothing left to review asks; the stand-in answers n.
+            patch(
+                "gdpr_pseudonymizer.core.document_processor.ask_for_missed_names",
+                return_value=[],
+            ),
+        ):
             # Pass through all entities (simulate user accepting everything)
             mock.side_effect = lambda entities, **kwargs: entities
             yield mock
