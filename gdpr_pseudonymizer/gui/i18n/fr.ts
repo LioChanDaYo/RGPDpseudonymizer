@@ -320,6 +320,21 @@
         <source>Erreur lors de l&apos;export.</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <location filename="../screens/batch.py" line="129"/>
+        <source>Lot en cours</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../screens/batch.py" line="130"/>
+        <source>Un lot de documents est en cours de traitement. Pour ouvrir un autre document ou dossier, terminez d&apos;abord ce lot ou arrêtez-le avec « Annuler le lot ».</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../screens/batch.py" line="135"/>
+        <source>Revenir au lot</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>ConfirmDialog</name>
@@ -1468,6 +1483,11 @@ Continuer quand même ?</source>
     <message>
         <location filename="../screens/validation.py" line="584"/>
         <source>Compris</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../screens/validation.py" line="230"/>
+        <source>Annuler le lot</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

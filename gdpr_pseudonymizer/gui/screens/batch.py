@@ -8,6 +8,7 @@ Three-phase screen using QStackedWidget:
 
 from __future__ import annotations
 
+import functools
 import time
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -65,7 +66,13 @@ class BatchScreen(QWidget):
         # validation_required), and the review state of each document shown
         # in this batch run, kept for "Précédent" and "Suivant".
         self._awaiting_doc_index: int | None = None
-        self._review_states: dict[int, GUIValidationState] = {}
+        # Story 10.14: each batch run has its own identifier (the first run is
+        # 1), carried by every signal of its worker, every kept review and
+        # every submission. The kept reviews are keyed by (run, document).
+        self._run_id = 0
+        self._review_states: dict[tuple[int, int], GUIValidationState] = {}
+        self._validation_contexts: dict[int, dict[str, Any]] = {}
+        self._validation_results: dict[int, list[DetectedEntity]] = {}
 
         self._build_ui()
 
@@ -79,7 +86,13 @@ class BatchScreen(QWidget):
         Kwargs:
             folder_path: Pre-populate the folder input and discover files.
             reset: If True, clear all selection state for a fresh start.
+
+        While a batch runs nothing changes (Story 10.14 AC2): no route resets
+        the screen, changes its folder or phase, or drops its worker.
         """
+        if self.is_running:
+            logger.warning("batch_context_ignored_while_running", run_id=self._run_id)
+            return
         if kwargs.get("reset"):
             self._reset_selection()
 
@@ -89,6 +102,57 @@ class BatchScreen(QWidget):
             self._discover_files()
 
         self._phases.setCurrentIndex(0)
+
+    @property
+    def is_running(self) -> bool:
+        """Whether a batch runs: from "Démarrer" until its summary (10.14)."""
+        return self._worker is not None
+
+    @property
+    def run_id(self) -> int:
+        """Identifier of the current (or last) batch run; 0 before any run."""
+        return self._run_id
+
+    def refuse_open_while_running(self) -> bool:
+        """Refuse to open a document or a folder while a batch runs.
+
+        Returns False when no batch runs. Otherwise shows the message (texts
+        approved by Lionel on 2026-10-16, Story 10.14 Q2a and Q2b) and returns
+        True: the caller does nothing else. The window's button leads back to
+        the running batch; Escape or closing the window only closes it.
+        """
+        if not self.is_running:
+            return False
+        from gdpr_pseudonymizer.gui.widgets.confirm_dialog import ConfirmDialog
+
+        dlg = ConfirmDialog.informational(
+            self.tr("Lot en cours"),
+            self.tr(
+                "Un lot de documents est en cours de traitement. Pour ouvrir "
+                "un autre document ou dossier, terminez d'abord ce lot ou "
+                "arrêtez-le avec « Annuler le lot »."
+            ),
+            dismiss_label=self.tr("Revenir au lot"),
+            parent=self._main_window,
+        )
+        if dlg.exec():
+            self.show_running_batch()
+        return True
+
+    def show_running_batch(self) -> None:
+        """Show the running batch where it waits (Story 10.14 AC2).
+
+        The review of the document the worker waits on, re-attached as it was
+        left (Story 10.10), or else the batch screen as it is.
+        """
+        awaiting = self._awaiting_doc_index
+        context = (
+            self._validation_contexts.get(awaiting) if awaiting is not None else None
+        )
+        if context is not None:
+            self._main_window.navigate_to("validation", **context)
+        else:
+            self._main_window.navigate_to("batch")
 
     def _reset_selection(self) -> None:
         """Clear all selection state for a fresh batch run."""
@@ -591,6 +655,10 @@ class BatchScreen(QWidget):
     def _start_batch(self) -> None:
         if not self._files:
             return
+        # Story 10.14 AC1: "Démarrer" never starts a second batch beside one
+        # that runs (the button is hidden in phase 1 but still enabled).
+        if self.refuse_open_while_running():
+            return
 
         # Prompt for passphrase
         cached = self._main_window.cached_passphrase
@@ -624,6 +692,20 @@ class BatchScreen(QWidget):
     def _launch_worker(self, db_path: str, passphrase: str) -> None:
         from gdpr_pseudonymizer.gui.workers.batch_worker import BatchWorker
 
+        # Story 10.14 AC3: a second worker never runs beside the first. Every
+        # route is refused while a batch runs, so only a route those checks
+        # missed gets here with a live run. It is refused like every route
+        # (v1.5: the read-only Codex review of 30ab70b and the orchestrator's
+        # ruling): the message is shown, nothing starts and nothing is
+        # cancelled, so the running batch goes on and keeps every file it
+        # wrote.
+        if self._worker is not None:
+            logger.warning("batch_launch_refused_while_running", run_id=self._run_id)
+            self.refuse_open_while_running()
+            return
+        self._run_id += 1
+        run_id = self._run_id
+
         # Store for validation flow (Task 5.2)
         self._db_path = db_path
         self._passphrase = passphrase
@@ -651,8 +733,8 @@ class BatchScreen(QWidget):
         self._batch_start_time = time.time()
         self._cumulative_validation_time = 0.0
         self._validation_pause_start: float | None = None
-        self._validation_results: dict[int, list[DetectedEntity]] = {}
-        self._validation_contexts: dict[int, dict[str, Any]] = {}
+        self._validation_results = {}
+        self._validation_contexts = {}
         self._review_states = {}
         self._awaiting_doc_index = None
         self._doc_table.setRowCount(len(self._files))
@@ -682,10 +764,19 @@ class BatchScreen(QWidget):
             continue_on_error=continue_on_error,
             validation_mode=validation_mode,
             validate_per_document=validate_per_document,
+            run_id=run_id,
         )
-        self._worker.signals.progress.connect(self._on_progress)
-        self._worker.signals.finished.connect(self._on_finished)
-        self._worker.signals.error.connect(self._on_error)
+        # Story 10.14 AC3: every signal of the worker carries its run, bound
+        # at connection (the shared signal classes keep their signatures).
+        self._worker.signals.progress.connect(
+            functools.partial(self._on_progress, run_id=run_id)
+        )
+        self._worker.signals.finished.connect(
+            functools.partial(self._on_finished, run_id=run_id)
+        )
+        self._worker.signals.error.connect(
+            functools.partial(self._on_error, run_id=run_id)
+        )
 
         # Connect validation signals if enabled
         if validate_per_document:
@@ -693,7 +784,7 @@ class BatchScreen(QWidget):
 
             assert isinstance(self._worker.signals, BatchValidationSignals)
             self._worker.signals.validation_required.connect(
-                self._on_validation_required
+                functools.partial(self._on_validation_required, run_id=run_id)
             )
 
             # Connect ValidationScreen signals (disconnect first to prevent
@@ -719,8 +810,28 @@ class BatchScreen(QWidget):
 
         QThreadPool.globalInstance().start(self._worker)
 
-    def _on_progress(self, percent: int, message: str) -> None:
+    def _is_stale(self, run_id: int | None, signal: str) -> bool:
+        """Whether a signal comes from a run that is not the current one.
+
+        ``None`` is a direct call and counts as the current run. A stale
+        signal is logged with the ids only (Story 10.14 AC3).
+        """
+        if run_id is None or run_id == self._run_id:
+            return False
+        logger.warning(
+            "batch_stale_signal_ignored",
+            signal=signal,
+            run_id=run_id,
+            current_run_id=self._run_id,
+        )
+        return True
+
+    def _on_progress(
+        self, percent: int, message: str, run_id: int | None = None
+    ) -> None:
         """Handle progress signal from worker."""
+        if self._is_stale(run_id, "progress"):
+            return
         self._progress_bar.setValue(percent)
 
         if message.startswith("DOC_DONE:"):
@@ -770,8 +881,10 @@ class BatchScreen(QWidget):
                 status_item.setForeground(Qt.GlobalColor.blue)
                 self._doc_table.setItem(0, 3, status_item)
 
-    def _on_finished(self, result: object) -> None:
+    def _on_finished(self, result: object, run_id: int | None = None) -> None:
         """Handle batch completion."""
+        if self._is_stale(run_id, "finished"):
+            return
         if not isinstance(result, BatchResult):
             return
 
@@ -814,8 +927,10 @@ class BatchScreen(QWidget):
         # Show summary
         self._show_summary(result)
 
-    def _on_error(self, error_msg: str) -> None:
+    def _on_error(self, error_msg: str, run_id: int | None = None) -> None:
         """Handle fatal worker error."""
+        if self._is_stale(run_id, "error"):
+            return
         self._worker = None
         self._awaiting_doc_index = None
 
@@ -878,12 +993,16 @@ class BatchScreen(QWidget):
         document_text: str,
         doc_index: int,
         total_docs: int,
+        run_id: int | None = None,
     ) -> None:
         """Handle validation_required signal from BatchWorker.
 
         Generates pseudonym previews, then navigates to ValidationScreen
-        in batch mode.
+        in batch mode. A signal of another run is ignored before any change
+        (Story 10.14); the context carries the run.
         """
+        if self._is_stale(run_id, "validation_required"):
+            return
         from gdpr_pseudonymizer.core.document_processor import DocumentProcessor
 
         entity_list: list[DetectedEntity] = entities  # type: ignore[assignment]
@@ -920,6 +1039,7 @@ class BatchScreen(QWidget):
             "batch_mode": True,
             "doc_index": doc_index,
             "total_docs": total_docs,
+            "run_id": self._run_id,
         }
         self._validation_contexts[doc_index] = context
         self._awaiting_doc_index = doc_index
@@ -932,8 +1052,13 @@ class BatchScreen(QWidget):
         doc_index: int,
         validated_entities: object,
         custom_pseudonyms: object = None,
+        run_id: object = None,
     ) -> None:
         """Handle validation_complete signal from ValidationScreen.
+
+        Story 10.14: a list of another run is refused before anything is
+        stored, submitted or navigated, and a list goes only to the worker of
+        the current run. ``run_id`` None is a direct call (the current run).
 
         Only the list of the document the worker waits on is accepted (Story
         10.10): a list built on another document is refused before anything
@@ -948,6 +1073,14 @@ class BatchScreen(QWidget):
             custom_pseudonyms if isinstance(custom_pseudonyms, dict) else None
         )
 
+        if run_id is not None and run_id != self._run_id:
+            logger.warning(
+                "batch_validation_result_refused",
+                doc_index=doc_index,
+                run_id=run_id,
+                current_run_id=self._run_id,
+            )
+            return
         if doc_index != self._awaiting_doc_index:
             logger.warning(
                 "batch_validation_result_refused",
@@ -974,7 +1107,7 @@ class BatchScreen(QWidget):
             self._doc_table.setItem(current_doc_idx, 3, status_item)
 
         # Submit to worker and navigate back
-        if self._worker is not None:
+        if self._worker is not None and self._worker.run_id == self._run_id:
             self._worker.submit_validation_result(entity_list, customs)
 
         self._main_window.navigate_to("batch")
@@ -984,13 +1117,23 @@ class BatchScreen(QWidget):
         """Index of the document the worker waits on, or None (Story 10.10)."""
         return self._awaiting_doc_index
 
-    def review_state(self, doc_index: int) -> GUIValidationState | None:
-        """Review state kept for a document of this batch run (Story 10.10)."""
-        return self._review_states.get(doc_index)
+    def review_state(
+        self, doc_index: int, run_id: int | None = None
+    ) -> GUIValidationState | None:
+        """Review state kept for a document of a batch run (Story 10.10).
 
-    def store_review_state(self, doc_index: int, state: GUIValidationState) -> None:
+        Story 10.14: kept by (run, document); ``run_id`` None is the current
+        run, so a review is attached only within its own run.
+        """
+        run = self._run_id if run_id is None else run_id
+        return self._review_states.get((run, doc_index))
+
+    def store_review_state(
+        self, doc_index: int, state: GUIValidationState, run_id: int | None = None
+    ) -> None:
         """Keep a document's review state for "Précédent" and "Suivant"."""
-        self._review_states[doc_index] = state
+        run = self._run_id if run_id is None else run_id
+        self._review_states[(run, doc_index)] = state
 
     # ------------------------------------------------------------------
     # Summary Phase Logic
