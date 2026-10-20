@@ -303,14 +303,23 @@ class DocumentWords:
 
 
 def document_words(document_text: str) -> DocumentWords:
-    """Read a document's words once (``DocumentWords``)."""
-    spans = tuple(token.span() for token in _WORD.finditer(document_text))
-    folded = tuple(fold(document_text[start:end]) for start, end in spans)
+    """Read a document's words once (``DocumentWords``).
+
+    Story 10.16 (Codex's review of 463481a): the text is read in one composed
+    form (Unicode NFC) before it is cut into words, so a letter written with a
+    separate accent mark (a letter, then U+0301) stays inside its word; a
+    mark alone is not a word character. ``DocumentWords.text`` is that
+    composed text, read only by ``_occurrence``: nothing written or stored
+    changes.
+    """
+    text = unicodedata.normalize("NFC", document_text)
+    spans = tuple(token.span() for token in _WORD.finditer(text))
+    folded = tuple(fold(text[start:end]) for start, end in spans)
     where: dict[str, list[int]] = {}
     for position, word in enumerate(folded):
         where.setdefault(word, []).append(position)
     return DocumentWords(
-        document_text,
+        text,
         spans,
         folded,
         {word: tuple(positions) for word, positions in where.items()},
@@ -575,7 +584,12 @@ def check_custom_pseudonym(
         for text in dict.fromkeys([name, *review_names])
         if text.strip()
     ]
-    for run in _document_runs(pseudonym, entity_type):  # Q2, Q-C, Q-I
+    # Story 10.16 (Codex's review of 463481a): the runs are cut from the
+    # pseudonym's composed form (NFC), as document_words reads the document
+    # and the names, so a separate accent mark stays inside its word. The
+    # refusal keeps the pseudonym as received; nothing typed is changed.
+    composed = unicodedata.normalize("NFC", pseudonym)
+    for run in _document_runs(composed, entity_type):  # Q2, Q-C, Q-I
         if _capitalised_occurrence(run, words) or any(
             _occurrence(run, name_words, capitalised=False) for name_words in names
         ):

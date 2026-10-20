@@ -69,15 +69,6 @@ ADD_DOC_GUI = "quentrel quovan a signé avec zórbalia."
 ADD_NAME = "quentrel quovan"
 ADDED = "zórbalia"
 
-XFAIL = pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=(
-        "Story 10.16 round 2: reproduces Codex's P0 (a separate accent mark) "
-        "on 463481a; fixed in Task 2.7"
-    ),
-)
-
 Form = Callable[[str], str]
 
 
@@ -97,12 +88,9 @@ def _forms(form: str) -> tuple[Form, Form]:
 
 
 def _cases() -> list[Any]:
-    """Each form; every case but ``[both_decomposed]`` is an expected failure
-    on 463481a (both sides are cut alike there)."""
-    return [
-        pytest.param(form, marks=() if form == BOTH_DECOMPOSED else XFAIL, id=form)
-        for form in FORMS
-    ]
+    """Each form (on 463481a every case but ``[both_decomposed]`` failed;
+    both sides are cut alike there)."""
+    return [pytest.param(form, id=form) for form in FORMS]
 
 
 def _one_row(state: Any) -> Any:

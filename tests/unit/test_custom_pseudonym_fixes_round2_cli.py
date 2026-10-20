@@ -91,15 +91,6 @@ OFFERED_WHOLE = "Xántor Véllion"
 REJECTED_OWN = "quentrel zorbalia a signé avec quovan."
 REJECTED_OTHER = "quentrix a signé avec zorbix velmar."
 
-XFAIL = pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=(
-        "Story 10.16 round 2: reproduces Codex's P0 (a separate accent mark) "
-        "on 463481a; fixed in Task 2.7"
-    ),
-)
-
 Form = Callable[[str], str]
 
 
@@ -119,13 +110,12 @@ def _forms(form: str) -> tuple[Form, Form]:
 
 
 def _cases(modes: Sequence[str]) -> list[Any]:
-    """Each mode with each form; every case but ``[both_decomposed]`` is an
-    expected failure on 463481a (both sides are cut alike there)."""
+    """Each mode with each form (on 463481a every case but
+    ``[both_decomposed]`` failed; both sides are cut alike there)."""
     return [
         pytest.param(
             mode,
             form,
-            marks=() if form == BOTH_DECOMPOSED else XFAIL,
             id=f"{mode}-{form}",
         )
         for mode in modes
