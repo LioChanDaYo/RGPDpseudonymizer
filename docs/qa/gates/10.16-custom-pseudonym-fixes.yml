@@ -1,40 +1,28 @@
 schema: 1
 story: '10.16'
 story_title: 'Custom Pseudonym Fixes'
-scope: 'PR #109, pre-merge review (Task 7, G2) at head ae7efc4 on main 43041e9 (10.12 to 10.15 and 10.18 merged). Commits reviewed: 23e845b, 2e12fe3, 74de96c (story, PO, the epic''s AC7 line), tests first b348135, fix 838d50d, CHANGELOG 8519eed, Dev Agent Record ae7efc4.'
+scope: 'PR #109. Round 2 re-check (Task 7.6) at head 4002fcd on main 43041e9, after the read-only Codex review of 463481a (CHANGES REQUESTED: P0 a separate accent mark, P2 the whole-value guard untested) and the orchestrator''s ruling (r1016/codex/ruling.md). Round 2 commits: story v1.4 93c3c9d, tests first a1c3fdf, fix 3ab62bd, Dev Agent Record 4002fcd. Round 1 (Task 7) at ae7efc4: commits 23e845b, 2e12fe3, 74de96c, b348135, 838d50d, 8519eed, ae7efc4; QA gate 463481a.'
 gate: PASS
-status_reason: 'Every AC holds on real output in the command line (process, batch --workers 1), the desktop single-document review and desktop batches of three documents: a custom pseudonym that repeats a name of the review, whatever its capitals, is refused when set (rejected names do not count, the document''s other lowercase words still do not); a name marked after it fails the document with Lionel''s new reason byte for byte and nothing written; generated pseudonyms never take a custom part in another role or spelling; a custom pseudonym follows each row''s current name. G2 holds (27 AssertionErrors at their committed lines on main''s code; markers only removed). CI green on every leg of the head at attempt 1. 15 of QA''s 20 mutants caught by the committed tests (one equivalent). Five low items: four rules that hold but no committed test pins (TEST-001 to TEST-003; QA''s probes catch them), a finalization cost growing with custom pseudonyms x names (PERF-002), the PR body and Task 6.5 lag the head (DOC-001). One pre-existing observation (OBS-001).'
+status_reason: 'Round 2 holds. Codex''s P0 is fixed on real output: a name or a custom pseudonym written with a separate accent mark (decomposed, U+0301) is refused when set and at finalization (Lionel''s new reason, nothing written, no row) in the command line (process, batch --workers 1), the desktop single document and a desktop batch, in every form (name decomposed, pseudonym decomposed, both), and for QA''s variants (mixed accents, marks in the other order, a capitalised word, an organisation); written files and stored rows keep the document''s and the user''s own characters. G2 holds for round 2 (18 AssertionErrors at the dev''s lines on 463481a''s code, no PRE; markers only removed). CI green at attempt 1 on a1c3fdf (18 xfailed per leg, same ids), 3ab62bd and 4002fcd (2885; Windows 2736 + 3 skipped). QA''s round-1 survivors Q02, Q05, Q13, Q18 are now caught by T22-T24, T28, T29 (TEST-001 to TEST-003 resolved). Of 10 NFC mutants, 8 caught by committed tests; N8 (NFKC) equivalent in practice; N7 (the words'' text not the composed one) survives (TEST-004, low; QA probe o1). The recorded limit (a mark with no composed letter) is unchanged from 463481a. Round 1''s findings PERF-002, DOC-001 (low) and OBS-001 stand; OBS-002 (info) added.'
 reviewer: 'Quinn (Test Architect)'
-updated: '2026-10-20T16:15:57Z'
+updated: '2026-10-20T19:38:00Z'
 
 waiver: { active: false }
 
 merge_blockers: []
 
 merge_notes:
-  - 'The merge waits for the orchestrator''s one read-only codex exec review of the final head (Task 8.1) and QA''s check of it (Task 8.3), then Lionel. QA never merges and did not run codex.'
+  - 'The merge waits for the orchestrator''s second read-only codex exec review, on this gate commit''s head (Task 8.4), QA''s check of it (Task 8.3), then Lionel. QA never merges and did not run codex.'
   - 'Task 6.5 is open: the PR is still a draft. Mark it Ready for Review (DOC-001).'
   - 'This gate commit (docs only) starts its own CI run on the PR; the orchestrator checks it green before the merge.'
   - 'After the merge, performance.yaml runs on main (10.16 touches core/); the dev''s local run of its three steps passed.'
 
 top_issues:
-  - id: 'TEST-001'
+  - id: 'TEST-004'
     severity: low
-    finding: 'Two AC1 rules hold but no committed test pins them: "the name it replaces is always among the names" and the desktop names read each row''s correction. QA mutants Q02 (the name not added to the names) and Q18 (_review_names reads the detected entity, not _edited_entity) pass all 341 committed tests and QA''s 27 probes: on every committed path the name is also a review name (T1/T9[whole_name, surname], T3[own_surname]), and no test corrects a row into a lowercase name before setting a pseudonym (T15[corrected_into] corrects after). If either regressed, the refusal would move from set time to finalization (the document fails with the new reason; in the command line the review is lost); no name in clear. QA probes n1 (command line [R], [P], [C] with the name''s own surname), n2 (desktop, the row rejected, then its own surname) and n6 (desktop, « zorba » corrected into « zorbal », then "Xantor Zorbal") catch them and pass at the head.'
-    suggested_action: 'Dev (backlog, or before merge at the orchestrator''s call): add the three cases to T1/T9 with invented names.'
-    refs: ['gdpr_pseudonymizer/core/custom_pseudonym.py:573', 'gdpr_pseudonymizer/gui/models/validation_state.py:909', 'tests/unit/test_custom_pseudonym_fixes_cli.py', 'tests/unit/gui/test_custom_pseudonym_fixes_review.py']
-    suggested_owner: dev
-  - id: 'TEST-002'
-    severity: low
-    finding: 'In the command line, "a rejected name does not count" is not pinned: QA mutant Q05 (validation/workflow.py _review_names keeps rejected reviews) passes everything committed; the desktop''s T11[rejected_name] has no command-line twin. If it regressed, the command line would wrongly refuse a pseudonym next to a rejected lowercase name (no leak). QA probe n3 ([R] « quentrix », then [C] "Xantor Quentrix": no warning, "quentrix a signé avec Xantor Quentrix.") catches it.'
-    suggested_action: 'Dev (backlog): a command-line twin of T11[rejected_name].'
-    refs: ['gdpr_pseudonymizer/validation/workflow.py:530', 'tests/unit/test_custom_pseudonym_fixes_cli.py']
-    suggested_owner: dev
-  - id: 'TEST-003'
-    severity: low
-    finding: 'takes_custom_value''s whole-value clause is not pinned: QA mutant Q13 (the clause dropped) passes everything committed. The library refuses the same spelling (the custom pseudonym is marked used), so only another spelling reaches the clause. Under Q13, a place offered "Xántor Véllion" at finalization is written "Le contrat est signé à Xántor Véllion." next to the person''s "Xantor Vellion" (two names read alike; no name in clear). QA probe n5 catches it; at the head the draw is redone.'
-    suggested_action: 'Dev (backlog): a T5 case for a place or an organisation.'
-    refs: ['gdpr_pseudonymizer/core/custom_pseudonym.py:723-748', 'tests/unit/test_custom_pseudonym_fixes_cli.py']
+    finding: 'Round 2: nothing pins that DocumentWords.text is the composed text its spans come from. QA mutant N7 (document_words returns DocumentWords(document_text, ...) with the NFC spans) passes all 386 committed tests and QA''s 62 probes: on a composed document the two texts are the same. On a decomposed one, every offset after a composed pair is off by one per pair, so _occurrence reads the capital and the separators at the wrong place. QA probe o1 (« Hélène » written decomposed, then the capitalised words « Zorbal Quentrix », no name): at the head and at 463481a "Xantor Zorbal" and "Xantor Zorbal Quentrix" are refused (one line 5 each); under N7 both are accepted and written ("… avec Xantor Zorbal Quentrix et Zorbal Quentrix."). T21''s capitalised word carries the only accent, so no offset moves before it.'
+    suggested_action: 'Dev (backlog, or 10.20 which reads documents in composed form): a T21 case with a decomposed accent before the capitalised word, single and two-word runs.'
+    refs: ['gdpr_pseudonymizer/core/custom_pseudonym.py:305-326', 'gdpr_pseudonymizer/core/custom_pseudonym.py:340-370', 'tests/unit/test_custom_pseudonym_fixes_round2_cli.py']
     suggested_owner: dev
   - id: 'PERF-002'
     severity: low
@@ -45,6 +33,7 @@ top_issues:
   - id: 'DOC-001'
     severity: low
     finding: 'The PR body''s "The rebased head: not yet read" is now known: run 39446561086 on ae7efc4, attempt 1, ubuntu 3.11 and 3.10 and macOS "2840 passed", windows "2691 passed, 3 skipped", 0 XFAIL, lint green, exactly the counts the body expects. The PR is still a draft (isDraft true) while the story says Ready for Review; Tasks 6.2 (CI green on the head, now true) and 6.5 are unchecked.'
+    round2_note: 'Still open at 4002fcd: the PR is still a draft (isDraft true) and its round-1 section still says "The rebased head: not yet read"; its round-2 section gives the real runs (2885; 2736 + 3 skipped).'
     suggested_action: 'Orchestrator or dev: put the head run in the PR body, check Task 6.2, mark the PR Ready for Review (Task 6.5).'
     refs: ['https://github.com/LioChanDaYo/RGPDpseudonymizer/pull/109']
     suggested_owner: dev
@@ -54,13 +43,42 @@ top_issues:
     suggested_action: 'Backlog note only, if Lionel wants titles kept after a correction in single-document review.'
     refs: ['gdpr_pseudonymizer/gui/models/validation_state.py']
     suggested_owner: po
+  - id: 'OBS-002'
+    severity: info
+    finding: 'Round 2, measured on real output (QA probe test_qa_1016_limit.py, 463481a vs 4002fcd): NFC changes one class of decisions from refused to accepted, fragments the old cut made into words. Next to « quentrel zórbalia » written decomposed, "Rbalia Xantor" was refused at 463481a (« zo » + mark + « rbalia » gave the word « rbalia ») and is accepted at the head, as it is next to the composed spelling at both commits (L6 = L7). This is AC1''s rule (whole words): no whole word of a name is accepted that was refused before. The no-composed-letter limit (follow-up f, Story 10.20) is unchanged: L1 « zox » + U+0301 + « rbalia » vs "Xantor Zoxrbalia" accepted, L2 the reverse accepted, L3 both with the mark refused, L5 accepted, on both commits; L4 (« zó » decomposed + « x » + U+0301 + « rbalia » vs "Xantor Zó" composed + « x » + U+0301 + « rbalia ») accepted at 463481a and refused at the head.'
+    suggested_action: 'None for 10.16; context for Story 10.20.'
+    refs: ['gdpr_pseudonymizer/core/custom_pseudonym.py:305-326']
+    suggested_owner: po
+
+resolved_issues:
+  - id: 'TEST-001'
+    severity: low
+    resolved_in: 'a1c3fdf (tests) / 3ab62bd, round 2; QA mutants rebuilt on 4002fcd are caught by the committed tests (see evidence.round2.mutants)'
+    finding: 'Two AC1 rules hold but no committed test pins them: "the name it replaces is always among the names" and the desktop names read each row''s correction. QA mutants Q02 (the name not added to the names) and Q18 (_review_names reads the detected entity, not _edited_entity) pass all 341 committed tests and QA''s 27 probes: on every committed path the name is also a review name (T1/T9[whole_name, surname], T3[own_surname]), and no test corrects a row into a lowercase name before setting a pseudonym (T15[corrected_into] corrects after). If either regressed, the refusal would move from set time to finalization (the document fails with the new reason; in the command line the review is lost); no name in clear. QA probes n1 (command line [R], [P], [C] with the name''s own surname), n2 (desktop, the row rejected, then its own surname) and n6 (desktop, « zorba » corrected into « zorbal », then "Xantor Zorbal") catch them and pass at the head.'
+    suggested_action: 'Dev (backlog, or before merge at the orchestrator''s call): add the three cases to T1/T9 with invented names.'
+    refs: ['gdpr_pseudonymizer/core/custom_pseudonym.py:573', 'gdpr_pseudonymizer/gui/models/validation_state.py:909', 'tests/unit/test_custom_pseudonym_fixes_cli.py', 'tests/unit/gui/test_custom_pseudonym_fixes_review.py']
+    suggested_owner: dev
+  - id: 'TEST-002'
+    severity: low
+    resolved_in: 'a1c3fdf (tests) / 3ab62bd, round 2; QA mutants rebuilt on 4002fcd are caught by the committed tests (see evidence.round2.mutants)'
+    finding: 'In the command line, "a rejected name does not count" is not pinned: QA mutant Q05 (validation/workflow.py _review_names keeps rejected reviews) passes everything committed; the desktop''s T11[rejected_name] has no command-line twin. If it regressed, the command line would wrongly refuse a pseudonym next to a rejected lowercase name (no leak). QA probe n3 ([R] « quentrix », then [C] "Xantor Quentrix": no warning, "quentrix a signé avec Xantor Quentrix.") catches it.'
+    suggested_action: 'Dev (backlog): a command-line twin of T11[rejected_name].'
+    refs: ['gdpr_pseudonymizer/validation/workflow.py:530', 'tests/unit/test_custom_pseudonym_fixes_cli.py']
+    suggested_owner: dev
+  - id: 'TEST-003'
+    severity: low
+    resolved_in: 'a1c3fdf (tests) / 3ab62bd, round 2; QA mutants rebuilt on 4002fcd are caught by the committed tests (see evidence.round2.mutants)'
+    finding: 'takes_custom_value''s whole-value clause is not pinned: QA mutant Q13 (the clause dropped) passes everything committed. The library refuses the same spelling (the custom pseudonym is marked used), so only another spelling reaches the clause. Under Q13, a place offered "Xántor Véllion" at finalization is written "Le contrat est signé à Xántor Véllion." next to the person''s "Xantor Vellion" (two names read alike; no name in clear). QA probe n5 catches it; at the head the draw is redone.'
+    suggested_action: 'Dev (backlog): a T5 case for a place or an organisation.'
+    refs: ['gdpr_pseudonymizer/core/custom_pseudonym.py:723-748', 'tests/unit/test_custom_pseudonym_fixes_cli.py']
+    suggested_owner: dev
 
 quality_score: 100
-expires: '2026-11-03T16:15:57Z'
+expires: '2026-11-03T19:38:00Z'
 
 evidence:
-  tests_reviewed: 36
-  risks_identified: 5
+  tests_reviewed: 81
+  risks_identified: 4
   environment: 'Windows, the main Poetry environment (Python 3.11.9), through .bat runners with cmd.exe; PYTHONPATH = the tree under test (each run prints the imported package path); USERPROFILE and HOME = r1016/qa/home, TEMP = r1016/qa/tmp; a runner-only plugin (r1016/qa/plugins/qa_isolation.py) points gui.config._config_path at each test''s tmp_path. C:\Users\devea\.gdpr-pseudo.yaml was never opened (mtime 2026-10-14 13:27, 270 bytes, before and after). QA''s worktree of b348135 holds no tests/test_corpus/; held_out/ and final_exam/ were never opened, listed or grepped.'
   g2:
     worktree: 'r1016/qa/wt_b348135 (git checkout b348135 -- . '':(exclude)tests/test_corpus''). b348135 adds only the three new test files; git diff 43041e9 b348135 -- gdpr_pseudonymizer is empty: the unfixed code is main''s.'
@@ -92,33 +110,44 @@ evidence:
     ae7efc4: '39446561086, attempt 1 (the head): ubuntu 3.11 "2840 passed in 506.72s", ubuntu 3.10 "2840 passed in 253.82s", macos "2840 passed in 754.90s", windows "2691 passed, 3 skipped in 367.77s"; 0 XFAIL; lint green; Code Quality 39446560943 success.'
     notes: 'Read from the job logs (r1016/qa/logs/ci/). The Windows skips are the 3 existing ones.'
   codex_rule: '~/.codex/sessions/2026/10/19 and /20: no rollout has its cwd under rgpd-wt-s1016 or the branch story/10.16-custom-pseudonym-fixes (they are 10.14''s, 10.15''s and 10.18''s reviews and other projects); none on 10/17 or 10/18 in this repository. Subagent log: the 10.16 dev was a general-purpose agent (2026-10-19 19:03); no Forge, Anvil or Cato start for 10.16 (the only Cato starts since 2026-10-19 belong to another session''s ISA audit). Every branch commit carries Co-Authored-By: Claude Opus 5.5 and the Claude-Session line; no skip-CI marker in any commit, the PR title or the PR body. The PR body holds Task 6.3''s sentence word for word.'
-  codex_review_task_8_3: 'Pending: the orchestrator''s one read-only codex exec review runs on the final head after this gate. Session id, model, sandbox and VERDICT line to be recorded then.'
+  codex_review_task_8_3: 'First review (Task 8.0, of 463481a): session 01a15a1b-24b6-7b71-9a20-734ecf2c8108, gpt-6.1-sol, sandbox read-only, "VERDICT: CHANGES REQUESTED" (P0 a separate accent mark, P2 the whole-value guard untested), fixed in round 2. Second review (Task 8.4): pending, on this gate commit''s head; its session id, model, sandbox and VERDICT line to be recorded then.'
   g6_local: 'Head: ruff exit 0; black "322 files would be left unchanged"; mypy "Success: no issues found in 105 source files". pytest -m "not slow" -n 4 --dist loadscope from the worktree root: 2829 passed, 10 skipped, 1 failed: test_config_show.py::TestConfigShowCommand::test_displays_config_files_status, Rich wrapping "(not \nfound)" over the long scratch path (the known environment failure). site/ removed; worktree clean.'
   scope_check: 'git diff --name-status 43041e9..ae7efc4: the four product files of File Locations, the three new test files, CHANGELOG.md, the story and the epic''s AC7 line. Task 6.1''s path list: empty. None of the 13 files the accuracy suite loads is touched: G1, G3 and G5 N/A; G4 holds; G7 the CHANGELOG line only.'
+  round2:
+    diff: 'git diff 463481a 4002fcd -- gdpr_pseudonymizer: core/custom_pseudonym.py only, +19/-5: document_words reads unicodedata.normalize("NFC", text) before cutting and keeps that text in DocumentWords.text; check_custom_pseudonym cuts the runs from the NFC pseudonym (local composed), the Refusal keeps the pseudonym as received. Nothing else: fold, _WORD, _word_runs (Q-C2 folds runs split at spaces, NFKD then marks dropped), the guard, the reach (exact mapping keys), Q1, Q-D, Q2, normalize_custom_pseudonym and mapping_key unchanged. Round-1 test files, CHANGELOG.md and this gate unchanged since 463481a; story byte check 16 of 16 blocks, 6 of 6 strings.'
+    g2: 'r1016/qa/wt_a1c3fdf (git checkout a1c3fdf -- . '':(exclude)tests/test_corpus''); git diff 463481a a1c3fdf -- gdpr_pseudonymizer is empty. --runxfail on the three round-2 files: 18 failed, 27 passed; each an AssertionError at its "# expected failure" line, no PRE: T18 x4 round2_cli:388, T19 x4 :420, T21 x2 :465, T25 x2 round2_review:115, T26 x2 :156, T30 x2 round2_batch_worker:138, T31 x2 :180 (the dev''s lines). With the markers: 27 passed, 18 xfailed under -n 4. a1c3fdf..3ab62bd in tests: the XFAIL definitions and marks= removed, two helper docstrings reworded, no assertion changed. Head: 45 passed.'
+    ci: 'a1c3fdf 39470188637 attempt 1: ubuntu 3.10 "2867 passed, 18 xfailed in 342.87s", ubuntu 3.11 "2867 passed, 18 xfailed in 373.81s", macos "2867 passed, 18 xfailed in 673.49s", windows "2718 passed, 3 skipped, 18 xfailed in 378.17s"; the same 18 XFAIL ids on every leg. 3ab62bd 39477205366 attempt 1: 2885 / 2885 / 2885 / 2736 + 3 skipped, 0 xfail. 4002fcd (head) 39480305144 attempt 1: ubuntu 3.10 "2885 passed in 388.84s", ubuntu 3.11 "2885 passed in 351.84s", macos "2885 passed in 797.34s", windows "2736 passed, 3 skipped in 408.39s"; lint and Code Quality 39480305345 green. QA''s gate commit 463481a 39456029665: 2840 / 2691 + 3 skipped, green.'
+    mutants: 'r1016/qa/mut2/: git archive 4002fcd of the package, one change each (tools/make_mutants2.ts); each runs 386 committed tests (round 1''s 36 and round 2''s 45, 10.11''s three files and the existing tests of the path; unmutated 386 passed), then QA''s 62 probes (unmutated 62 passed). Round-1 survivors rebuilt: Q02 caught by T23 test_cli_rejected_name_own_surname_refused and T28 test_desktop_rejected_row_own_surname_refused; Q05 by T24 test_cli_rejected_name_does_not_count; Q13 by T22 test_generation_whole_value_never_another_spelling[location, org]; Q18 by T29 test_desktop_corrected_row_counts_when_set. NFC mutants: N1 no NFC in document_words: 18 (T18, T19, T21, T25, T26, T30, T31 [name_decomposed, both_decomposed]); N2 no NFC on the pseudonym: 18 (the same, [pseudonym_decomposed, both_decomposed]); N3a pseudonym NFD (one side NFC, the other NFD): 27; N3b names not NFC (document and pseudonym NFC): 16; N3c document text not NFC (names and pseudonym NFC): 2 (T21 [name_decomposed, both_decomposed]); N4 NFD on both sides: 1 (round 1''s T12, "grâce" splits) and QA probe c1; N5 the typed pseudonym composed: 12 (T20, T26, T27, T31, T32 [pseudonym_decomposed, both_decomposed]); N6 mapping keys composed: 24; N7 DocumentWords keeps the document''s own text with the NFC spans: none (TEST-004; QA probe o1 catches it); N8 NFKC on both sides: none, equivalent in practice (fold already applies NFKD to each word after the cut).'
+    end_to_end: 'QA probes test_qa_1016_accents.py (29), never committed, texts composed in the source and the forms built at run time. At 4002fcd 29 passed; at 463481a 17 failed (every name-decomposed and pseudonym-decomposed case, and the mixed-accents variant) and 12 passed (the both-decomposed cases, the guards, the marks-in-other-order variant). Command line, process and batch --workers 1, name « quentrel zórbalia » with ó decomposed / pseudonym "Xantor Zórbalia" composed, the reverse, and both decomposed: one line 5 warning when set, then a generated name written and stored, the rest of the text (a decomposed « Zórbaville » further on) byte for byte, the stored name in the document''s own form; [C] then [A] « zórbalia »: exit 1, the ProcessingResult message Lionel''s new reason byte for byte, no file, no row. A pseudonym with no shared word ("Xantor Véllion") written and stored as typed, decomposed or not. Variants: « quéntrel » composed + « zórbalia » decomposed vs "Quéntrel Vellion" with é decomposed: refused; o + U+0323 + U+0302 vs o + U+0302 + U+0323: refused; a capitalised word « Zórbaville » and an organisation « zórbaville »: both refused. Desktop single document: text 5 once when set, the file written with a generated name; the pseudonym set, then « zórbalia » added by hand: Lionel''s new reason byte for byte, the review stays open, no row. Desktop batch of three documents (the real worker): doc 0 refused when set then written; doc 1 set, then the name added by hand: « Erreur », tooltip and result message Lionel''s new reason, no output, no row; doc 2 a pseudonym with no shared word written as typed, the stored name in the document''s form.'
+    limit: 'QA probe test_qa_1016_limit.py on 463481a''s package and on 4002fcd (real output, process): a mark with no composed letter (x + U+0301) decides the same on both (L1, L2 accepted; L3 refused; L5 accepted); L4 refused only at the head; see OBS-002. 10.16 is no worse than 463481a there.'
+    unchanged: 'Round-1 behaviour at 4002fcd: QA''s round-1 probes (18 command line, 9 desktop, 6 gap) pass; the Codex-era probes behave as at 463481a (f6 x2 and control pass, f7 x2 pass, f8''s old-behaviour probes fail at test_f8_lowercase.py:41 and test_f8_gui.py:42, the pass, the PO''s f8_after passes); the redraw probe gives the same bounded 4 draws; 10.11''s six batch tests x60 under -n 12: 360 passed; finalize_document times equal 463481a''s (400 names: 0.48/0.53 s vs 0.48/0.45 s; 1500 names with 150 custom pseudonyms: 6.21/6.26 s vs 6.23/6.13 s; one check against 1500 names 0.031 s vs 0.030-0.033 s).'
+    local: 'ruff exit 0; black "325 files would be left unchanged"; mypy "Success: no issues found in 105 source files". pytest -m "not slow" -n 4 --dist loadscope from the worktree root: 2874 passed, 10 skipped, 1 failed (test_config_show wrapping over the long scratch path, the known environment failure). site/ removed.'
+    codex_rule: '~/.codex/sessions/2026/10/20: one rollout in rgpd-wt-s1016 on story/10.16-custom-pseudonym-fixes, 01a15a1b-24b6-7b71-9a20-734ecf2c8108 (18:18), originator codex_exec, gpt-6.1-sol, sandbox_policy read-only, approval never, no apply_patch: the orchestrator''s review of 463481a; none after it. Subagent log: no Forge, Anvil or Cato start for 10.16 (the only Cato on 2026-10-20 is another session''s ISA audit). The four round-2 commits carry the Co-Authored-By and Claude-Session lines; no skip-CI marker.'
+    pytest_note: 'The dev''s note holds: with pytest 9.1.1 (this environment), command-line paths that go tests/unit, tests/unit/gui, tests/unit, tests/unit/gui lose the GUI conftest''s fixtures for the later GUI files ("fixture ''main_window'' not found"); QA hit the same in its round-1 mutant runner and lists files grouped by directory. Pytest''s own collection order (directories, the full suite, CI) is not affected.'
   trace:
     ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
     ac_gaps: []
-    notes: 'AC1 T1-T4, T9-T13, T15-T17 + c1-c6, g1-g4, gb1, n1-n4, n6 (TEST-001, TEST-002: rules pinned only by QA''s probes). AC2 T5-T8 + c7-c9, n5, redraw, f6 (TEST-003). AC3 T14 + g5, gb2, f7. AC4 g2. AC5 texts. AC6 changelog. AC7 codex_rule (Task 8.3 pending). AC8 scope_check. AC9 g2, ci. AC10 10.11''s 89 tests, c9, the full suite. AC11 environment, leakage guards on every leg. AC12 scope_check, range-diff.'
+    notes: 'AC1 T1-T4, T9-T13, T15-T17, T18, T19, T21, T23-T26, T28-T31 + c1-c6, g1-g4, gb1, n1-n4, n6, accents a1-a9 (decomposed accents, round 2). AC2 T5-T8, T22 + c7-c9, n5, redraw, f6. AC3 T14 + g5, gb2, f7. AC4 g2, round2.g2. AC5 texts (the new reason byte for byte in the accent cases too). AC6 changelog (round 2 unchanged). AC7 codex_rule, round2.codex_rule (Task 8.4 pending). AC8 scope_check. AC9 g2, round2.g2, ci, round2.ci. AC10 10.11''s 89 tests, c9, the full suite; written and stored characters unchanged (T20, T27, T32; N5, N6). AC11 environment, leakage guards on every leg. AC12 scope_check (main still 43041e9).'
 
 nfr_validation:
   security:
     status: PASS
-    notes: 'The ways a real name could stay in clear (#8, #6) are closed on every path; a name marked after the pseudonym fails the document with nothing written or stored; the new reason names no name.'
+    notes: 'The ways a real name could stay in clear (#8, #6) are closed on every path, now also for names and pseudonyms written with separate accent marks (Codex P0); a name marked after the pseudonym fails the document with nothing written or stored; the new reason names no name. A mark with no composed letter remains (follow-up f, Story 10.20), unchanged from 463481a.'
   performance:
     status: PASS
-    notes: 'Nothing changes without a custom pseudonym (AC10, measured). With many custom pseudonyms and names, finalization grows with their product (+2.8 s at 150 x 1500; PERF-002, backlog).'
+    notes: 'Nothing changes without a custom pseudonym (AC10, measured). With many custom pseudonyms and names, finalization grows with their product (PERF-002, backlog). Round 2''s NFC adds no measurable time (equal to 463481a''s).'
   reliability:
     status: PASS
     notes: 'The redraw is bounded and fails safe. CI green at attempt 1 on the head. T24 is not 10.16''s on present evidence.'
   maintainability:
     status: PASS
-    notes: 'One check function for three paths; the desktop names reuse expand_validated_entities'' expansion; the owners'' type is named. TEST-001 to TEST-003: four rules lack a committed test.'
+    notes: 'One check function for three paths; the composed reading is in the two places that cut text into words; TEST-001 to TEST-003 resolved by round 2''s tests; TEST-004: the composed text and its offsets lack a pin.'
 
 recommendations:
   immediate: []
   future:
-    - action: 'Pin the four rules QA''s mutants Q02, Q05, Q13 and Q18 show unpinned (TEST-001 to TEST-003); QA''s probes n1-n3, n5, n6 are models.'
-      refs: ['tests/unit/test_custom_pseudonym_fixes_cli.py', 'tests/unit/gui/test_custom_pseudonym_fixes_review.py']
+    - action: 'Pin that the words'' text is the composed text (TEST-004): a T21 case with a decomposed accent before the capitalised word; QA''s probe o1 is a model.'
+      refs: ['tests/unit/test_custom_pseudonym_fixes_round2_cli.py']
     - action: 'Tokenize the names sent once per finalization (PERF-002).'
       refs: ['gdpr_pseudonymizer/core/document_processor.py:547']
     - action: 'Put the head CI run in the PR body and mark the PR Ready for Review (DOC-001).'
