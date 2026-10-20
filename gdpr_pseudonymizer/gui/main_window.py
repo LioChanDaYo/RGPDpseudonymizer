@@ -101,10 +101,6 @@ class MainWindow(QMainWindow):
             return widget
         return None
 
-    def batch_is_running(self) -> bool:
-        """Whether a batch runs, from "Démarrer" until its summary."""
-        return self._running_batch_screen() is not None
-
     def refuse_open_during_batch(self) -> bool:
         """Every route that opens a document or a folder asks this first.
 

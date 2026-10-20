@@ -694,13 +694,15 @@ class BatchScreen(QWidget):
 
         # Story 10.14 AC3: a second worker never runs beside the first. Every
         # route is refused while a batch runs, so only a route those checks
-        # missed gets here with a live run: it is stopped as « Annuler le lot »
-        # stops it, never waited for, and its id is retired so that its later
-        # signals are ignored.
+        # missed gets here with a live run. It is refused like every route
+        # (v1.5: the read-only Codex review of 30ab70b and the orchestrator's
+        # ruling): the message is shown, nothing starts and nothing is
+        # cancelled, so the running batch goes on and keeps every file it
+        # wrote.
         if self._worker is not None:
-            logger.warning("batch_previous_run_cancelled", run_id=self._run_id)
-            self._worker.cancel()
-            self._worker = None
+            logger.warning("batch_launch_refused_while_running", run_id=self._run_id)
+            self.refuse_open_while_running()
+            return
         self._run_id += 1
         run_id = self._run_id
 

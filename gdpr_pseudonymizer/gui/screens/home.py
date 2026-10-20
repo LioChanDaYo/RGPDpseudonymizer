@@ -35,6 +35,10 @@ class HomeScreen(QWidget):
         super().__init__(main_window)
         self._main_window = main_window
         self._config = main_window.config
+        # Story 10.14 AC1 (v1.5): whether the last file selected was refused
+        # because a batch runs; the several-files toast of the same drop
+        # follows it.
+        self._open_refused = False
 
         self._build_ui()
 
@@ -255,8 +259,10 @@ class HomeScreen(QWidget):
 
     def _on_file_selected(self, filepath: str) -> None:
         """Handle file selection from drop zone or recent list."""
-        # Story 10.14 AC1: refused while a batch runs, before anything else
-        if self._main_window.refuse_open_during_batch():
+        # Story 10.14 AC1: refused while a batch runs, before anything else.
+        # The decision is kept for the rest of the same drop (v1.5).
+        self._open_refused = self._main_window.refuse_open_during_batch()
+        if self._open_refused:
             return
         add_recent_file(filepath, self._config)
         save_gui_config(self._config)
@@ -318,9 +324,11 @@ class HomeScreen(QWidget):
 
     def _on_multi_file_dropped(self) -> None:
         """Handle multi-file drop — only first file is processed."""
-        # Story 10.14 AC1: while a batch runs the first file was refused with
-        # the message (a modal window), so no toast is shown.
-        if self._main_window.batch_is_running():
+        # Story 10.14 AC1 (v1.5): the toast follows the decision taken for the
+        # same drop's first file (the drop zone emits file_selected, then
+        # multi_file_dropped, in one call), so a refused drop never shows it,
+        # even if the batch ended while the message was open.
+        if self._open_refused:
             return
         Toast.show_message(
             self.tr("Un seul fichier à la fois — seul le premier sera traité."),

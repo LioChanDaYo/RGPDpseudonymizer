@@ -786,12 +786,6 @@ def test_cancel_still_stops_the_batch_after_home_route(  # type: ignore[no-untyp
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.14 v1.5: a launch while a run is live cancels it and builds a "
-    "second worker, with no message, on 30ab70b; fixed in Task 2.8",
-)
 @pytest.mark.parametrize("order", ["A_first", "B_first"])
 def test_second_run_never_mixes_with_the_first(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path: Path, env: _Env, order: str
@@ -1054,13 +1048,6 @@ def test_start_while_a_batch_runs_is_refused(  # type: ignore[no-untyped-def]
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.14 v1.5: a launch while a run is live cancels it, and its "
-    "late cleanup deletes the outputs written into the same folder, on 30ab70b; "
-    "fixed in Task 2.8",
-)
 def test_launch_while_a_run_is_live_is_refused(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path: Path, env: _Env
 ) -> None:
@@ -1167,12 +1154,6 @@ def test_launch_after_the_summary_starts_a_new_run(  # type: ignore[no-untyped-d
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.14 v1.5: a refused several-files drop shows its toast when "
-    "the batch ended while the message was open, on 30ab70b; fixed in Task 2.9",
-)
 def test_refused_drop_stays_refused_when_the_batch_ends_meanwhile(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path: Path, env: _Env, monkeypatch: pytest.MonkeyPatch
 ) -> None:
