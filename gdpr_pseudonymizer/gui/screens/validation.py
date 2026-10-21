@@ -339,7 +339,9 @@ class ValidationScreen(QWidget):
 
         # Create validation state
         self._validation_state = GUIValidationState(self)
-        self._validation_state.init_from_detection_result(detection_result)
+        self._validation_state.init_from_detection_result(
+            detection_result, rows_per_place=self._batch_mode
+        )
 
         # Classify known entities
         self._validation_state.classify_known_entities(
