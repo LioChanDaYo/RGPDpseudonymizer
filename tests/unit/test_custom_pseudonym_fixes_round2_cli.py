@@ -158,19 +158,22 @@ class FakeDetector:
     def detect_entities(self, text: str) -> list[DetectedEntity]:
         found: list[DetectedEntity] = []
         for name, entity_type in self.names:
-            start = text.find(name)
-            while start != -1:
-                found.append(
-                    DetectedEntity(
-                        text=name,
-                        entity_type=entity_type,
-                        start_pos=start,
-                        end_pos=start + len(name),
-                        confidence=0.9,
-                        source="spacy",
+            # Story 10.20 (AC1): the reader returns the document composed, so
+            # each name is looked for in its composed and decomposed spellings
+            for form in dict.fromkeys((_nfc(name), _nfd(name))):
+                start = text.find(form)
+                while start != -1:
+                    found.append(
+                        DetectedEntity(
+                            text=form,
+                            entity_type=entity_type,
+                            start_pos=start,
+                            end_pos=start + len(form),
+                            confidence=0.9,
+                            source="spacy",
+                        )
                     )
-                )
-                start = text.find(name, start + 1)
+                    start = text.find(form, start + 1)
         return [
             entity
             for entity in found
@@ -378,7 +381,7 @@ def test_cli_accents_refused_when_set(
     assert _one_warning(run.warnings), run.warnings  # expected failure
     pre(run.output.exists(), "written")
     written = run.output.read_text(encoding="utf-8")
-    (place,) = _replacements(written, text, [(0, len(name))])
+    (place,) = _replacements(written, _nfc(text), [(0, len(_nfc(name)))])
     assert not {"quentrel", "zorbalia"} & set(_words(place)), written
     stored = _stored(str(db), name, "PERSON")
     assert stored is not None and stored[3] == place, stored
@@ -426,9 +429,9 @@ def test_cli_accents_without_shared_word_accepted(
     pre(len(run.results) == 1, f"one document processed: {run.shown!r}")
     pre(run.typed_left == 0, "every text typed")
     assert run.warnings == [], run.warnings
-    assert run.output.read_text(encoding="utf-8") == typed + text[len(name) :]
+    assert run.output.read_text(encoding="utf-8") == _nfc(typed + text[len(name) :])
     stored = _stored(str(db), name, "PERSON")
-    assert stored is not None and stored[3] == typed, stored
+    assert stored is not None and stored[3] == _nfc(typed), stored
 
 
 @pytest.mark.parametrize("mode, form", _cases(["process"]))
@@ -440,7 +443,7 @@ def test_cli_accents_capitalised_document_word(
     whichever side is written with a separate accent mark."""
     document, typed_form = _forms(form)
     text, name = document(QC_DOC), document(QC_NAME)
-    start = text.find(name)
+    start = _nfc(text).find(_nfc(name))
     run = _cli(
         tmp_path,
         db,
@@ -455,7 +458,7 @@ def test_cli_accents_capitalised_document_word(
     assert _one_warning(run.warnings), run.warnings  # expected failure
     pre(run.output.exists(), "written")
     written = run.output.read_text(encoding="utf-8")
-    (place,) = _replacements(written, text, [(start, start + len(name))])
+    (place,) = _replacements(written, _nfc(text), [(start, start + len(_nfc(name)))])
     assert "zorbaville" not in _words(place), written
 
 

@@ -96,8 +96,6 @@ SEVERAL_LINE = (
     "(all of this name, whatever its type):"
 )
 
-XFAIL = "Story 10.20: reproduces {} on the unfixed code; fixed in Task 2"
-
 _ANSI = re.compile(r"\x1b\[[0-9;?]*[A-Za-z]")
 
 
@@ -500,11 +498,6 @@ def _read_back(tmp_path: Path, kind: str, text: str) -> str:
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("the reader returning the stored marks"),
-)
 @pytest.mark.parametrize(
     "kind", ["txt", "md", "docx", "pdf", "xlsx", "csv", "xlsx_cells", "csv_cells"]
 )
@@ -517,11 +510,6 @@ def test_reader_returns_composed(tmp_path: Path, kind: str) -> None:
     assert SENT in text
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("a written file keeping the stored marks"),
-)
 @pytest.mark.parametrize("ext", [".txt", ".xlsx", ".csv"])
 def test_written_file_composed(tmp_path: Path, db: Path, ext: str) -> None:
     """T2 (AC5): a document stored decomposed, nothing detected, is written
@@ -540,13 +528,6 @@ def test_written_file_composed(tmp_path: Path, db: Path, ext: str) -> None:
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format(
-        "« Mme Zo » (the regex layer cuts the title's name at the mark)"
-    ),
-)
 def test_mme_zo_regex_layer(tmp_path: Path, db: Path) -> None:
     """T3 (path 1): with the real regex layer, a decomposed « Mme Zórbalia »
     is replaced whole: the end of the name is not left in the written file."""
@@ -561,11 +542,6 @@ def test_mme_zo_regex_layer(tmp_path: Path, db: Path) -> None:
 
 
 @pytest.mark.spacy
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("« Mme Zo » with the real detector"),
-)
 def test_mme_zo_real_detector(tmp_path: Path, db: Path) -> None:
     """T4 (path 1): the same with the real detector."""
     source, output = tmp_path / "in.txt", tmp_path / "out.txt"
@@ -583,11 +559,6 @@ def test_mme_zo_real_detector(tmp_path: Path, db: Path) -> None:
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("[A] « not found » for a name typed composed"),
-)
 @pytest.mark.parametrize("ext", [".txt", ".xlsx"])
 def test_add_composed_in_decomposed_document(
     tmp_path: Path, db: Path, ext: str
@@ -609,11 +580,6 @@ def test_add_composed_in_decomposed_document(
     assert _names(db) == sorted([(VM, PERSON), (ZO, PERSON)])
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("[A] « not found » for a name typed decomposed"),
-)
 def test_add_decomposed_in_composed_document(tmp_path: Path, db: Path) -> None:
     """T6 (path 2): « Zórbalia » typed decomposed at [A] in a composed
     document: no « not found », one row, composed."""
@@ -627,11 +593,6 @@ def test_add_decomposed_in_composed_document(tmp_path: Path, db: Path) -> None:
     assert _names(db) == sorted([(VM, PERSON), (ZO, PERSON)])
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("[A] replacing the places of one form only"),
-)
 @pytest.mark.parametrize("typed_form", ["nfc", "nfd"])
 def test_add_in_document_with_both_forms(
     tmp_path: Path, db: Path, typed_form: str
@@ -656,11 +617,6 @@ def test_add_in_document_with_both_forms(
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("a correction typed in the other form leaving « Quentrel »"),
-)
 @pytest.mark.parametrize(
     "doc_form, typed_form", [("nfd", "nfc"), ("nfc", "nfd")], ids=["nfd-nfc", "nfc-nfd"]
 )
@@ -693,11 +649,6 @@ def _mixed() -> str:
     return f"{nfc('Zórbalia Quentrel a signé.')} {nfd('Signé : Zórbalia Quentrel.')}"
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("two names in the review for one name in two forms"),
-)
 def test_both_forms_are_one_name(tmp_path: Path, db: Path) -> None:
     """T9 (path 4): the name composed at one place and decomposed at another
     is one name in the review, one pseudonym in the file, one row."""
@@ -712,11 +663,6 @@ def test_both_forms_are_one_name(tmp_path: Path, db: Path) -> None:
     assert _written(output) == f"{pseudonym} a signé. Signé : {pseudonym}."
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("« Still to review: 2 » for one name in two forms"),
-)
 def test_still_to_review_counts_it_once(tmp_path: Path, db: Path) -> None:
     """T10 (path 4, 10.13's count): the name in two forms, left to review,
     is counted once."""
@@ -739,11 +685,6 @@ _ORDERS = pytest.mark.parametrize(
 )
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("a second pseudonym for the name in the other form"),
-)
 @_ORDERS
 def test_reuse_process_twice(tmp_path: Path, db: Path, first: str, second: str) -> None:
     """T12 (path 7): the name saved from one form and met in the other in
@@ -762,11 +703,6 @@ def test_reuse_process_twice(tmp_path: Path, db: Path, first: str, second: str) 
     assert _names(db) == [(ZQ, PERSON)]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("a second pseudonym in batch for the name in the other form"),
-)
 @_ORDERS
 def test_reuse_batch_one_at_a_time(
     tmp_path: Path, db: Path, first: str, second: str
@@ -787,11 +723,6 @@ def test_reuse_batch_one_at_a_time(
     assert _names(db) == [(ZQ, PERSON)]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("a row saved decomposed not reused"),
-)
 def test_old_decomposed_row_reused(tmp_path: Path, db: Path) -> None:
     """T14 (path 7, AC3): a row saved decomposed, as the unfixed code saves
     it, gives its pseudonym to the composed name."""
@@ -811,11 +742,6 @@ def test_old_decomposed_row_reused(tmp_path: Path, db: Path) -> None:
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("« Entity Not Found » for a row saved decomposed"),
-)
 def test_delete_decomposed_row_by_composed_name(tmp_path: Path, db: Path) -> None:
     """T15 (path 8): ``delete-mapping`` with the composed name erases the row
     saved decomposed, with its erasure entry."""
@@ -827,11 +753,6 @@ def test_delete_decomposed_row_by_composed_name(tmp_path: Path, db: Path) -> Non
     assert _erasures(db) == 1
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("only the composed row listed and erased"),
-)
 def test_delete_both_forms(tmp_path: Path, db: Path) -> None:
     """T16 (path 8, Open Point (b)): a name saved both ways: both rows listed
     before the confirmation, both erased, each with its entry."""
@@ -846,11 +767,6 @@ def test_delete_both_forms(tmp_path: Path, db: Path) -> None:
     assert _erasures(db) == 2
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("« No entities found » for the name in the other form"),
-)
 @pytest.mark.parametrize(
     "saved, searched", [("nfd", "nfc"), ("nfc", "nfd")], ids=["nfd-nfc", "nfc-nfd"]
 )
@@ -865,11 +781,6 @@ def test_list_entities_search(
     assert XV in run.flat, run.shown  # expected failure
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("« No mappings found » for a row saved decomposed"),
-)
 def test_list_mappings_search(tmp_path: Path, db: Path) -> None:
     """T18 (AC2): ``list-mappings --search`` composed lists the row saved
     decomposed."""
@@ -884,11 +795,6 @@ def test_list_mappings_search(tmp_path: Path, db: Path) -> None:
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("the custom pseudonym check cutting a word at its mark"),
-)
 def test_custom_check_keeps_the_mark_inside_the_word() -> None:
     """T20 (AC4): « Zox » + U+0301 + « rbalia » is one word for the custom
     pseudonym check, so « Xantor Zoxrbalia » is refused."""
@@ -899,11 +805,6 @@ def test_custom_check_keeps_the_mark_inside_the_word() -> None:
     assert refusal is not None  # expected failure
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("[A] placing « Zox » inside a word with a mark"),
-)
 def test_add_does_not_place_inside_a_word_with_a_mark(tmp_path: Path, db: Path) -> None:
     """T21 (AC4): [A] « Zox » is not placed inside « Zox » + U+0301 +
     « rbalia »."""
@@ -918,11 +819,6 @@ def test_add_does_not_place_inside_a_word_with_a_mark(tmp_path: Path, db: Path) 
     assert ZOX in written, repr(written)  # expected failure
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("a name with a mark not redacted from the error text"),
-)
 def test_log_redaction_keeps_the_mark_inside_the_name() -> None:
     """T22 (AC4): the error text's name-shaped run takes the mark, so the
     whole name is redacted."""
@@ -939,11 +835,6 @@ def test_log_redaction_keeps_the_mark_inside_the_name() -> None:
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("a custom pseudonym typed decomposed stored decomposed"),
-)
 def test_cli_custom_pseudonym_typed_decomposed(tmp_path: Path, db: Path) -> None:
     """T23 (AC2): [C] « Xantor Véllion » typed decomposed is stored and
     written composed."""
@@ -964,11 +855,6 @@ def test_cli_custom_pseudonym_typed_decomposed(tmp_path: Path, db: Path) -> None
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("« Me<pseudonym> » for a decomposed « Mélora »"),
-)
 def test_fresh_decomposed_title_like_name(tmp_path: Path, db: Path) -> None:
     """T26 (the PO's S2): a decomposed « Mélora Quentrel » on a fresh
     database is replaced whole and saved composed."""
@@ -1074,11 +960,6 @@ def _erase(db: Path, old: OldRow) -> Run:
     return _delete(db, old.bare)
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("a new pseudonym beside a row saved with « Maître » or « à »"),
-)
 @pytest.mark.parametrize("case", TITLED)
 def test_old_titled_row_reused(tmp_path: Path, db: Path, case: str) -> None:
     """T27 (the PO's M1, AC3): a row saved with a decomposed « Maître » or
@@ -1089,13 +970,6 @@ def test_old_titled_row_reused(tmp_path: Path, db: Path, case: str) -> None:
     assert len(_rows(db)) == 1
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format(
-        "« Entity Not Found » for a row saved with « Maître » or « à »"
-    ),
-)
 @pytest.mark.parametrize("case", TITLED)
 def test_old_titled_row_erased_by_name(tmp_path: Path, db: Path, case: str) -> None:
     """T27 (the PO's M1, AC3): ``delete-mapping`` with the bare composed name
@@ -1106,11 +980,6 @@ def test_old_titled_row_erased_by_name(tmp_path: Path, db: Path, case: str) -> N
     assert _erasures(db) == 1
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("a new pseudonym beside a row that lost letters"),
-)
 @pytest.mark.parametrize("case", CUT)
 def test_row_that_lost_letters_reused(tmp_path: Path, db: Path, case: str) -> None:
     """T28 (Lionel's Qa, AC3): a row whose key lost letters to the title
@@ -1121,11 +990,6 @@ def test_row_that_lost_letters_reused(tmp_path: Path, db: Path, case: str) -> No
     assert len(_rows(db)) == 1
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("« Entity Not Found » for a row that lost letters"),
-)
 @pytest.mark.parametrize("case", CUT)
 def test_row_that_lost_letters_erased_by_name(
     tmp_path: Path, db: Path, case: str
@@ -1138,11 +1002,6 @@ def test_row_that_lost_letters_erased_by_name(
     assert _erasures(db) == 1
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("the decomposed row's pseudonym for a decomposed document"),
-)
 def test_rule_a_the_usual_way_pseudonym(tmp_path: Path, db: Path) -> None:
     """T29 (Lionel's Qb, rule A): a name saved both ways (decomposed first):
     documents in either form get the composed row's pseudonym; both rows
@@ -1162,11 +1021,6 @@ def test_rule_a_the_usual_way_pseudonym(tmp_path: Path, db: Path) -> None:
     assert len(_rows(db)) == 2
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("the one-row screen or « one per type of this name »"),
-)
 @pytest.mark.parametrize("other", ["decomposed_same_type", "composed_other_type"])
 def test_delete_mapping_several_rows_line(tmp_path: Path, db: Path, other: str) -> None:
     """T30 (Lionel's Qc, AC9): the line for several saved pseudonyms of one

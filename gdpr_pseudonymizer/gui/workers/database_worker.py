@@ -17,6 +17,7 @@ from PySide6.QtCore import QRunnable
 
 from gdpr_pseudonymizer.gui.workers.signals import WorkerSignals
 from gdpr_pseudonymizer.utils.logger import get_logger
+from gdpr_pseudonymizer.utils.text_form import composed
 
 logger = get_logger(__name__)
 
@@ -227,12 +228,13 @@ class DatabaseWorker(QRunnable):
             return
 
         if search_text:
-            search_lower = search_text.lower()
+            # Story 10.20: both sides composed (NFC)
+            search_lower = composed(search_text).lower()
             filtered = [
                 e
                 for e in filtered
-                if search_lower in e.full_name.lower()
-                or search_lower in e.pseudonym_full.lower()
+                if search_lower in composed(e.full_name).lower()
+                or search_lower in composed(e.pseudonym_full).lower()
             ]
 
         if self._cancelled.is_set():

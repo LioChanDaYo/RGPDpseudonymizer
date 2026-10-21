@@ -75,8 +75,6 @@ A_TEXT = "Vorlan Mestrix valide. Le contrat avec Zórbalia. Signé : Zórbalia."
 E_TEXT = "Zórbalia Quentrel a signé. Signé : Zórbalia Quentrel."
 R_TEXT = "Le contrat avec Zórbalia Quentrel a signé."
 
-XFAIL = "Story 10.20: reproduces {} on the unfixed code; fixed in Task 2"
-
 
 def nfc(text: str) -> str:
     return unicodedata.normalize("NFC", text)
@@ -356,11 +354,6 @@ class _Batch:
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("a desktop correction leaving « Quentrel » in clear"),
-)
 @pytest.mark.parametrize(
     "case", ["nfd-single", "nfd-batch", "mixed-single", "mixed-batch"]
 )
@@ -411,11 +404,6 @@ def test_desktop_correction(  # type: ignore[no-untyped-def]
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("the database search finding nothing in the other form"),
-)
 @pytest.mark.parametrize(
     "saved, searched", [("nfd", "nfc"), ("nfc", "nfd")], ids=["nfd-nfc", "nfc-nfd"]
 )
@@ -442,11 +430,6 @@ def test_desktop_database_search(  # type: ignore[no-untyped-def]
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("a custom pseudonym typed decomposed stored decomposed"),
-)
 def test_desktop_custom_pseudonym_typed_decomposed(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, monkeypatch
 ) -> None:
@@ -469,11 +452,6 @@ def test_desktop_custom_pseudonym_typed_decomposed(  # type: ignore[no-untyped-d
     assert written == nfc(written)
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("the review's filter typed decomposed finding nothing"),
-)
 def test_desktop_review_filter_typed_decomposed(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path
 ) -> None:

@@ -35,6 +35,7 @@ from gdpr_pseudonymizer.gui.config import (
 from gdpr_pseudonymizer.gui.i18n import qarg
 from gdpr_pseudonymizer.gui.widgets.toast import Toast
 from gdpr_pseudonymizer.utils.logger import get_logger
+from gdpr_pseudonymizer.utils.text_form import composed
 
 if TYPE_CHECKING:
     from gdpr_pseudonymizer.data.models import Entity
@@ -552,7 +553,8 @@ class DatabaseScreen(QWidget):
         self._apply_filters()
 
     def _apply_filters(self) -> None:
-        search = self._search_field.text().strip()
+        # Story 10.20: the search typed is read in composed form (NFC)
+        search = composed(self._search_field.text().strip())
         type_filter = self._type_filter.currentData()
 
         if not search and not type_filter:
@@ -571,12 +573,14 @@ class DatabaseScreen(QWidget):
         if type_filter:
             filtered = [e for e in filtered if e.entity_type == type_filter]
         if search:
-            search_lower = search.lower()
+            # Story 10.20: both sides composed, so a name saved with separate
+            # accent marks is found too
+            search_lower = composed(search).lower()
             filtered = [
                 e
                 for e in filtered
-                if search_lower in e.full_name.lower()
-                or search_lower in e.pseudonym_full.lower()
+                if search_lower in composed(e.full_name).lower()
+                or search_lower in composed(e.pseudonym_full).lower()
             ]
         self._populate_entity_table(filtered)
 

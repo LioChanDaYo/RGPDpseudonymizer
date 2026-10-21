@@ -128,7 +128,7 @@ def test_batch_accents_refused_when_set(  # type: ignore[no-untyped-def]
     output = batch.out / "doc0_pseudonymized.txt"
     assert output.exists()
     (place,) = _replacements(
-        output.read_text(encoding="utf-8"), text, [(0, len(name_text))]
+        output.read_text(encoding="utf-8"), _nfc(text), [(0, len(_nfc(name_text)))]
     )
     assert not {"quentrel", "zorbalia"} & set(_words(place)), place
     stored = _stored(batch.db, name_text, "PERSON")
@@ -156,7 +156,7 @@ def test_batch_accents_name_added_after_the_pseudonym(  # type: ignore[no-untype
         row = _one_row(state)
         batch.action(monkeypatch, row.entity_id, "change_pseudonym", typed)
         pre(
-            dialogs.calls == [] and row.custom_pseudonym == typed,
+            dialogs.calls == [] and row.custom_pseudonym == _nfc(typed),
             f"set as typed, without a message: {dialogs.calls!r}",
         )
         start = text.find(added)
@@ -199,8 +199,8 @@ def test_batch_accents_without_shared_word_accepted(  # type: ignore[no-untyped-
 
     record = batch.run(body)
     assert record["messages"] == [], record["messages"]
-    assert record["custom"] == typed
+    assert record["custom"] == _nfc(typed)
     output = batch.out / "doc0_pseudonymized.txt"
-    assert output.read_text(encoding="utf-8") == typed + text[len(name_text) :]
+    assert output.read_text(encoding="utf-8") == _nfc(typed + text[len(name_text) :])
     stored = _stored(batch.db, name_text, "PERSON")
-    assert stored is not None and stored[3] == typed, stored
+    assert stored is not None and stored[3] == _nfc(typed), stored

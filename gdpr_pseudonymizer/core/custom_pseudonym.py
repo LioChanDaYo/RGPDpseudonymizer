@@ -35,7 +35,6 @@ from __future__ import annotations
 
 import functools
 import json
-import re
 import unicodedata
 from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass
@@ -43,6 +42,7 @@ from enum import Enum
 from typing import TYPE_CHECKING, Any
 
 from gdpr_pseudonymizer.core.mapping_key import mapping_key
+from gdpr_pseudonymizer.utils.text_form import word_pattern
 
 if TYPE_CHECKING:
     from gdpr_pseudonymizer.data.models import Entity
@@ -273,7 +273,9 @@ def _clash(mine: list[_Value], theirs: list[_Value]) -> bool:
     return False
 
 
-_WORD = re.compile(r"\w+")
+# Story 10.20 (AC4): a word is a run of word characters and combining marks, so
+# a mark with no composed letter (« x » + U+0301) stays inside its word.
+_WORD = word_pattern()
 _APOSTROPHES = frozenset({"'", "’"})
 
 

@@ -37,6 +37,7 @@ from gdpr_pseudonymizer.gui.widgets.entity_editor import EntityEditor
 from gdpr_pseudonymizer.gui.widgets.entity_panel import EntityPanel
 from gdpr_pseudonymizer.gui.widgets.step_indicator import StepMode
 from gdpr_pseudonymizer.utils.logger import get_logger
+from gdpr_pseudonymizer.utils.text_form import composed
 from gdpr_pseudonymizer.validation.workflow import ValidationWorkflow
 
 if TYPE_CHECKING:
@@ -717,6 +718,9 @@ class ValidationScreen(QWidget):
             self.tr("Nouveau texte :"),
             text=current,
         )
+        # Story 10.20: the text typed is read in composed form (Unicode NFC),
+        # as the document is, before it is compared and located
+        text = composed(text)
         if ok and text and text != current:
             # The CLI's rule (Story 10.9): the edited text where it overlaps
             # the row's span, else the row's own span.

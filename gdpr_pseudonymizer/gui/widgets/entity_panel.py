@@ -25,6 +25,7 @@ from PySide6.QtWidgets import (
 )
 
 from gdpr_pseudonymizer.gui.i18n import qarg
+from gdpr_pseudonymizer.utils.text_form import composed
 
 if TYPE_CHECKING:
     from gdpr_pseudonymizer.gui.models.validation_state import GUIValidationState
@@ -215,12 +216,12 @@ class EntityPanel(QWidget):
             if not reviews:
                 continue
 
-            # Filter by text
+            # Filter by text, both sides composed (Story 10.20)
             if self._filter_text:
                 reviews = [
                     r
                     for r in reviews
-                    if self._filter_text.lower() in r.entity.text.lower()
+                    if self._filter_text.lower() in composed(r.entity.text).lower()
                 ]
 
             # Filter by status (match EntityEditor logic)
@@ -440,7 +441,8 @@ class EntityPanel(QWidget):
 
     def _on_filter_changed(self, text: str) -> None:
         """Re-populate when filter text changes."""
-        self._filter_text = text
+        # Story 10.20: the filter typed is kept in composed form (NFC)
+        self._filter_text = composed(text)
         self.populate()
 
     def _update_pending_counter(self) -> None:

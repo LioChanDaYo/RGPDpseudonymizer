@@ -4,8 +4,27 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
+from gdpr_pseudonymizer.core.mapping_key import former_keys
 from gdpr_pseudonymizer.data.models import Entity
 from gdpr_pseudonymizer.exceptions import DatabaseError, DuplicateEntityError
+from gdpr_pseudonymizer.utils.text_form import composed
+
+# The types a name is looked up under, for its forms (Story 10.20): only a
+# LOCATION has forms of its own (its prepositions); every other type has a
+# PERSON's.
+_FORM_TYPES = ("PERSON", "LOCATION")
+
+
+def _name_forms(full_name: str, entity_type: str) -> list[str]:
+    """Every text a row of this name and type may hold (Story 10.20, Lionel's
+    Qa and Qb), in the order a lookup prefers them: the composed name, the
+    keys an earlier version could have saved for it read with separate
+    accent marks (``former_keys``), then the name as given."""
+    return list(
+        dict.fromkeys(
+            [composed(full_name), *former_keys(full_name, entity_type), full_name]
+        )
+    )
 
 
 class MappingRepository(ABC):
@@ -151,6 +170,13 @@ class SQLiteMappingRepository(MappingRepository):
     Transparently handles encryption/decryption of sensitive fields using
     DatabaseSession's EncryptionService. Leverages AES-256-SIV deterministic
     encryption for queryable encrypted fields.
+
+    Story 10.20 (Lionel, 2026-10-21, Qa "A: Find as they are (Rec.)"): a
+    lookup by name or by name component reaches every form a row of the name
+    may hold (``_name_forms``) in one indexed query, each form one encryption;
+    no saved row is rewritten. When a name and type are saved in several
+    forms, the row saved the usual (composed) way comes first (Qb, "A: Usual
+    way's one (Rec.)").
     """
 
     def __init__(self, db_session: DatabaseSession) -> None:  # type: ignore  # noqa: F821
@@ -176,6 +202,10 @@ class SQLiteMappingRepository(MappingRepository):
             full_name: Plaintext full name to search for
             entity_type: Entity type (PERSON, LOCATION, ORG)
 
+        Story 10.20: every form of the name (``_name_forms``) is looked up in
+        one indexed query; of several rows found, the one whose form comes
+        first is returned, so the row saved the usual way wins (Lionel's Qb).
+
         Returns:
             Entity with decrypted fields, or None if not found
 
@@ -183,24 +213,35 @@ class SQLiteMappingRepository(MappingRepository):
             >>> entity = repo.find_by_full_name_and_type("Marie Dubois", "PERSON")
             >>> print(entity.full_name)  # "Marie Dubois" (decrypted)
         """
-        # Encrypt search term for deterministic lookup
-        encrypted_full_name = self._encryption.encrypt(full_name)
+        # Encrypt each form for deterministic lookup; its rank is its order
+        rank = self._encrypted_ranks(_name_forms(full_name, entity_type))
 
         # Query by encrypted field and type: one indexed query, (text, type) unique
-        db_entity = (
+        db_entities = (
             self._session.query(Entity)
             .filter(
-                Entity.full_name == encrypted_full_name,
+                Entity.full_name.in_(list(rank)),
                 Entity.entity_type == entity_type,
             )
-            .first()
+            .all()
         )
 
-        if not db_entity:
+        if not db_entities:
             return None
 
-        # Decrypt and return
-        return self._decrypt_entity(db_entity)
+        # Decrypt and return the row of the preferred form
+        return self._decrypt_entity(
+            min(db_entities, key=lambda db_entity: rank[db_entity.full_name])
+        )
+
+    def _encrypted_ranks(self, forms: list[str]) -> dict[str, int]:
+        """Each form's encryption (deterministic), with the form's rank."""
+        rank: dict[str, int] = {}
+        for index, form in enumerate(forms):
+            encrypted = self._encryption.encrypt(form)
+            if encrypted is not None:
+                rank.setdefault(encrypted, index)
+        return rank
 
     def find_all_by_full_name(self, full_name: str) -> list[Entity]:
         """Find every entity stored for an encrypted full name, whatever its type.
@@ -214,14 +255,29 @@ class SQLiteMappingRepository(MappingRepository):
         return [self._decrypt_entity(e) for e in self._query_by_full_name(full_name)]
 
     def _query_by_full_name(self, full_name: str) -> list[Entity]:
-        """Stored (encrypted) rows of a plaintext full name, ordered by type."""
-        encrypted_full_name = self._encryption.encrypt(full_name)
-        rows: list[Entity] = (
+        """Stored (encrypted) rows of a plaintext full name, ordered by type.
+
+        Story 10.20: every form of the name, for every type, in one indexed
+        query; a row is kept when its text is a form of the name for its own
+        type. Each type's rows are in the order of their forms (the row
+        saved the usual way first).
+        """
+        ranks = {
+            form_type: self._encrypted_ranks(_name_forms(full_name, form_type))
+            for form_type in _FORM_TYPES
+        }
+        every_form = {value for rank in ranks.values() for value in rank}
+        found: list[Entity] = (
             self._session.query(Entity)
-            .filter(Entity.full_name == encrypted_full_name)
-            .order_by(Entity.entity_type)
+            .filter(Entity.full_name.in_(list(every_form)))
             .all()
         )
+
+        def rank_of(row: Entity) -> dict[str, int]:
+            return ranks["LOCATION" if row.entity_type == "LOCATION" else "PERSON"]
+
+        rows = [row for row in found if row.full_name in rank_of(row)]
+        rows.sort(key=lambda row: (row.entity_type, rank_of(row)[row.full_name]))
         return rows
 
     def find_by_component(self, component: str, component_type: str) -> list[Entity]:
@@ -247,25 +303,24 @@ class SQLiteMappingRepository(MappingRepository):
                 f"Invalid component_type: {component_type}. Must be 'first_name' or 'last_name'."
             )
 
-        # Encrypt search term
-        encrypted_component = self._encryption.encrypt(component)
+        # Story 10.20: every form of the component, as a PERSON's name, each
+        # encrypted (deterministic), in one indexed query
+        rank = self._encrypted_ranks(_name_forms(component, "PERSON"))
+        column = (
+            Entity.first_name if component_type == "first_name" else Entity.last_name
+        )
+        db_entities = self._session.query(Entity).filter(column.in_(list(rank))).all()
 
-        # Query by encrypted component field
-        if component_type == "first_name":
-            db_entities = (
-                self._session.query(Entity)
-                .filter(Entity.first_name == encrypted_component)
-                .all()
+        def rank_of(db_entity: Entity) -> int:
+            value = (
+                db_entity.first_name
+                if component_type == "first_name"
+                else db_entity.last_name
             )
-        else:  # last_name
-            db_entities = (
-                self._session.query(Entity)
-                .filter(Entity.last_name == encrypted_component)
-                .all()
-            )
+            return rank[value] if value is not None else len(rank)
 
-        # Decrypt and return
-        return [self._decrypt_entity(e) for e in db_entities]
+        # Decrypt and return, the usual form's rows first
+        return [self._decrypt_entity(e) for e in sorted(db_entities, key=rank_of)]
 
     def save(self, entity: Entity) -> Entity:
         """Persist entity with encrypted sensitive fields.
@@ -522,14 +577,15 @@ class SQLiteMappingRepository(MappingRepository):
         # Use find_all for base query with type filter
         entities = self.find_all(entity_type=entity_type)
 
-        # Apply search filter on decrypted names
+        # Apply search filter on decrypted names, both sides composed (Story
+        # 10.20): a row saved with separate accent marks is found too
         if search_term:
-            search_lower = search_term.lower()
+            search_lower = composed(search_term).lower()
             entities = [
                 e
                 for e in entities
-                if search_lower in e.full_name.lower()
-                or search_lower in e.pseudonym_full.lower()
+                if search_lower in composed(e.full_name).lower()
+                or search_lower in composed(e.pseudonym_full).lower()
             ]
 
         return entities
