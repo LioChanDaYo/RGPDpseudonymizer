@@ -17,6 +17,7 @@ from gdpr_pseudonymizer.core.custom_pseudonym import (
     NameKey,
     Refusal,
     check_custom_pseudonym,
+    document_words,
 )
 from gdpr_pseudonymizer.core.mapping_key import mapping_key
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
@@ -450,11 +451,12 @@ class GUIValidationState(QObject):
         """Set a custom pseudonym at every place of the name (Story 10.11).
 
         The rows of ``_pseudonym_rows`` (Lionel's Q3): the row itself, then
-        every other row of the same name as the written file reads it, found
-        or added by hand, except another row rejected on its own; one undo
-        reverts them all. Like a correction (Lionel's Q-B), it is the row's
-        own decision when it reaches that row only; when it reaches several
-        rows they follow the group.
+        every other row of the same name as the written file reads it now
+        (its current text and type, Story 10.16), found or added by hand,
+        except another row rejected on its own; one undo reverts them all.
+        Like a correction (Lionel's Q-B), it is the row's own decision when
+        it reaches that row only; when it reaches several rows they follow
+        the group.
 
         The checks of Lionel's Q1, Q2, Q-C and Q-D are made before, by
         ``custom_pseudonym_refusal``; undo and redo never open the database.
@@ -471,29 +473,22 @@ class GUIValidationState(QObject):
             cmd = _ChangePseudonymCommand(self, entity_id, new_pseudonym, alone=True)
             self._undo_stack.push(cmd)
 
-    def _mapping_name(self, review: EntityReview) -> NameKey | None:
-        """A row's fixed name (``_name_key``) read as the written file reads
-        it: (mapping key of its text, its type) (Story 10.11)."""
-        name = self._name_key(review)
-        if name is None:
-            return None
-        return (mapping_key(name[0], name[1]), name[1])
-
     def _pseudonym_rows(self, review: EntityReview) -> list[EntityReview]:
         """Rows one custom pseudonym acts on (Story 10.11, Lionel's Q3).
 
-        ``_action_rows``' rule, with the name compared by mapping key, so a
-        titled form of the name ("M. Zorbal" next to "Zorbal") is the same
-        name, as it is in the written file: the row itself first, always;
-        then every other row of the name, found or added by hand, except a
-        row rejected on its own.
+        ``_action_rows``' rule, with the name read as the written file reads
+        it now: the mapping key of the row's current text and its current
+        type (``_sent_name``; Story 10.16, Codex #7), so a titled form of the
+        name ("M. Zorbal" next to "Zorbal") is the same name, a place
+        corrected or retyped into another name is not, and a place corrected
+        into the name is. The row itself first, always; then every other row
+        of the name, found or added by hand, except a row rejected on its
+        own.
         """
         rows = [review]
-        name = self._mapping_name(review)
-        if name is None:
-            return rows
+        name = self._sent_name(review)
         for other in self._session._entity_reviews:
-            if other is review or self._mapping_name(other) != name:
+            if other is review or self._sent_name(other) != name:
                 continue
             if self._decided_alone(other, _DROPPED):
                 continue
@@ -526,10 +521,15 @@ class GUIValidationState(QObject):
         """The rule a custom pseudonym breaks for a row's name, or None.
 
         Checks Lionel's Q1, Q-D, Q2 and Q-C (Story 10.11) against the mapping
-        database, this document and the review's other custom pseudonyms.
-        The database is opened here, as the known-entity pass does; when it
-        cannot be opened, only this document and this review are checked,
-        and finalization checks the rest.
+        database, this document, the review's names whatever their capitals
+        (every row not rejected, ``_review_names``; Story 10.16, Codex #8)
+        and the review's other custom pseudonyms. The whole reach is checked
+        before it is applied (Story 10.16, Codex #7): every name of the rows
+        ``change_pseudonym`` would set (``_pseudonym_rows``), the others'
+        custom pseudonyms read from the rows outside it. The database is
+        opened here, as the known-entity pass does; when it cannot be opened,
+        only this document and this review are checked, and finalization
+        checks the rest.
 
         Args:
             entity_id: The row the pseudonym is set on
@@ -540,15 +540,16 @@ class GUIValidationState(QObject):
         review = self._reviews_by_id.get(entity_id)
         if review is None:
             return None
-        name = self._sent_name(review)
+        reach = self._pseudonym_rows(review)
+        names = list(dict.fromkeys(self._sent_name(row) for row in reach))
         others: dict[NameKey, str] = {}
         for other in self._session._entity_reviews:
-            if not other.custom_pseudonym:
+            if any(other is row for row in reach) or not other.custom_pseudonym:
                 continue
             if other.state == EntityReviewState.REJECTED:
                 continue
             key = self._sent_name(other)
-            if key != name:
+            if key not in names:
                 others.setdefault(key, other.custom_pseudonym)
         stored = None
         if db_path:
@@ -562,14 +563,26 @@ class GUIValidationState(QObject):
                     stored = SQLiteMappingRepository(db_session).find_all()
             except Exception:
                 stored = None  # finalization checks the database again
-        return check_custom_pseudonym(
-            stored,
-            name[0],
-            name[1],
-            pseudonym,
-            self._session.document_text,
-            others,
-        )
+        document_text = self._session.document_text
+        words = document_words(document_text)
+        review_names = self._review_names()
+        for name in names:
+            # The reach's other names (none, by ``_pseudonym_rows``' rule)
+            # would get the same pseudonym
+            reach_others = {key: pseudonym for key in names if key != name}
+            refusal = check_custom_pseudonym(
+                stored,
+                name[0],
+                name[1],
+                pseudonym,
+                document_text,
+                {**others, **reach_others},
+                words,
+                review_names=review_names,
+            )
+            if refusal is not None:
+                return refusal
+        return None
 
     def change_entity_type(self, entity_id: str, new_type: str) -> None:
         """Change entity type (e.g. PERSON -> ORG) at every occurrence.
@@ -856,12 +869,18 @@ class GUIValidationState(QObject):
         a key computed from the entity sent to finalization, so they normally
         stay single.
         """
-        validated = self._validated_rows()
+        return self._expand(self._validated_rows())
+
+    def _expand(
+        self, rows: list[tuple[EntityReview, DetectedEntity]]
+    ) -> list[DetectedEntity]:
+        """``expand_validated_entities``' expansion of the given (row, entity
+        sent) pairs (Story 10.16: shared with ``_review_names``)."""
         if not self._variant_occurrences:
-            return [entity for _, entity in validated]
+            return [entity for _, entity in rows]
 
         expanded: list[DetectedEntity] = []
-        for review, entity in validated:
+        for review, entity in rows:
             if review.user_modification:
                 occurrences = self._edited_occurrences(review, entity)
                 expanded.extend(occurrences if occurrences is not None else [entity])
@@ -886,6 +905,27 @@ class GUIValidationState(QObject):
             else:
                 expanded.extend(self._variant_occurrences[key])
         return expanded
+
+    def _review_names(self) -> list[str]:
+        """The mapping keys of the review's names that are not rejected
+        (Story 10.16, Codex #8): the entities every row still to review,
+        accepted, corrected, retyped or added by hand would send, expanded
+        to their variant occurrences exactly as ``expand_validated_entities``
+        expands the rows it sends."""
+        rows = [
+            (
+                review,
+                (
+                    self._edited_entity(review)
+                    if review.user_modification
+                    else review.entity
+                ),
+            )
+            for review in self._session._entity_reviews
+            if review.state != EntityReviewState.REJECTED
+        ]
+        names = (mapping_key(e.text, e.entity_type) for e in self._expand(rows))
+        return list(dict.fromkeys(names))
 
     def get_all_entity_ranges(self) -> list[tuple[int, int, str]]:
         """Return (start, end, entity_id) for all entities including variant occurrences.

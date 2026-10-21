@@ -14,12 +14,13 @@ from __future__ import annotations
 
 import re
 import time
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 
 from gdpr_pseudonymizer.core.custom_pseudonym import (
     CUSTOM_THEME,
+    CustomReservations,
     NameKey,
     PseudonymChecker,
     Refusal,
@@ -28,6 +29,7 @@ from gdpr_pseudonymizer.core.custom_pseudonym import (
     document_words,
     finalization_message,
     fold,
+    takes_custom_value,
     untracked_custom_values,
 )
 from gdpr_pseudonymizer.core.mapping_key import mapping_key
@@ -184,11 +186,11 @@ class DocumentProcessor:
 
         # Story 10.11 (AC3, AC19): folded values a generated pseudonym must
         # not take: every beginning and ending of a person's custom
-        # pseudonym, except a part one of its own real words already has
-        # (``untracked_custom_values``). Set per document by
-        # _reset_pseudonym_state, and again when this run's custom
-        # pseudonyms are registered.
-        self._custom_taken: set[str] = set()
+        # pseudonym, each with the real words that own it in their role
+        # (Story 10.16, Codex #6; ``untracked_custom_values``). Set per
+        # document by _reset_pseudonym_state, and again when this run's
+        # custom pseudonyms are registered.
+        self._custom_taken: CustomReservations = {}
 
     def _get_detector(self) -> HybridDetector:
         """Get or initialize hybrid entity detector.
@@ -390,7 +392,7 @@ class DocumentProcessor:
                     document_path=input_path,
                     pseudonym_assigner=pseudonym_assigner,
                     pseudonym_checker=self._build_custom_pseudonym_checker(
-                        ctx, document_text
+                        ctx, document_text, known_entities=known_entities
                     ),
                     custom_pseudonyms=custom_pseudonyms,
                     # Names known in the mapping database are written without review.
@@ -506,16 +508,29 @@ class DocumentProcessor:
 
     @staticmethod
     def _build_custom_pseudonym_checker(
-        ctx: _ProcessingContext, document_text: str
+        ctx: _ProcessingContext,
+        document_text: str,
+        known_entities: list[DetectedEntity] | None = None,
     ) -> PseudonymChecker:
         """The command line's check of a custom pseudonym when it is set
-        (Story 10.11): the stored rows are read at each check."""
+        (Story 10.11): the stored rows are read at each check.
+
+        Story 10.16 (Codex #8): the review's names (every name not rejected,
+        from the [C] branch) and the names known in the mapping database
+        (``known_entities``, sent to the file without review) count whatever
+        their capitals, so a pseudonym accepted here is not refused at
+        finalization."""
+        known_names = [
+            DocumentProcessor._normalize_entity_text(ctx, entity)
+            for entity in known_entities or []
+        ]
 
         def checker(
             name: str,
             entity_type: str,
             pseudonym: str,
             other_customs: Mapping[NameKey, str],
+            review_names: Iterable[str],
         ) -> Refusal | None:
             return check_custom_pseudonym(
                 ctx.mapping_repo.find_all(),
@@ -524,6 +539,7 @@ class DocumentProcessor:
                 pseudonym,
                 document_text,
                 other_customs,
+                review_names=[*review_names, *known_names],
             )
 
         return checker
@@ -535,11 +551,14 @@ class DocumentProcessor:
         document_text: str,
         entity_cache: dict[tuple[str, str], str],
         new_entities: list[Entity],
+        sent_names: Iterable[str] = (),
     ) -> set[NameKey]:
         """Check every custom pseudonym again, then register it first (10.11).
 
         The last check: the database may have changed since the pseudonym
-        was set. A refusal raises before anything is saved or written. Then
+        was set, and ``sent_names`` (the mapping keys of the names sent)
+        count whatever their capitals (Story 10.16, Codex #8). A refusal
+        raises before anything is saved or written. Then
         each name gets its new row (saved with the run's other new rows),
         the library marks its pseudonym and its bound parts as used, the
         values a generated pseudonym must not take are kept (AC19), and the
@@ -558,6 +577,7 @@ class DocumentProcessor:
         stored = ctx.mapping_repo.find_all()
         names = sorted(custom_pseudonyms)
         words = document_words(document_text)  # read once (QA PERF-001, PO A5)
+        sent = list(sent_names)
         for name in names:
             others = {k: v for k, v in custom_pseudonyms.items() if k != name}
             refusal = check_custom_pseudonym(
@@ -568,6 +588,7 @@ class DocumentProcessor:
                 document_text,
                 others,
                 words,
+                review_names=sent,
             )
             if refusal is not None:
                 logger.warning("custom_pseudonym_refused", reason=refusal.reason.value)
@@ -749,22 +770,17 @@ class DocumentProcessor:
 
     def _uses_custom_part(self, new_entity: Entity) -> bool:
         """Whether a generated pseudonym, or one of its parts, is a value of a
-        custom pseudonym that it must not take (Story 10.11, AC3, AC19)."""
-        if not self._custom_taken:
-            return False
-        values = (
-            new_entity.pseudonym_full,
-            new_entity.pseudonym_first,
-            new_entity.pseudonym_last,
-        )
-        return any(value and fold(value) in self._custom_taken for value in values)
+        custom pseudonym that it must not take (Story 10.11, AC3, AC19): in
+        another role or for another real word, whatever the spelling (Story
+        10.16, Codex #6; ``takes_custom_value``)."""
+        return takes_custom_value(new_entity, self._custom_taken)
 
     @staticmethod
     def _assign_untaken_pseudonym(
         ctx: _ProcessingContext,
         new_entity: Entity,
         taken: set[str],
-        custom_taken: set[str] | None = None,
+        custom_taken: CustomReservations | None = None,
     ) -> tuple[str, Entity]:
         """Give a new row a pseudonym that its key has under no other type.
 
@@ -778,13 +794,14 @@ class DocumentProcessor:
         stored component mapping of the name is not changed).
 
         Story 10.11 (AC3): a draw whose pseudonym or part is in
-        ``custom_taken`` (the values of custom pseudonyms it must not take,
-        folded; AC19) is drawn again too.
+        ``custom_taken`` (the values of custom pseudonyms, folded; AC19) is
+        drawn again too: the draw keeps no component link, so it owns none of
+        them (Story 10.16).
 
         Raises:
             RuntimeError: If the library gives no untaken pseudonym
         """
-        custom_taken = custom_taken or set()
+        custom_taken = custom_taken or {}
         for _attempt in range(len(taken) + len(custom_taken) + 1):
             assignment = ctx.pseudonym_manager.assign_pseudonym(
                 entity_type=new_entity.entity_type, gender=None
@@ -848,9 +865,21 @@ class DocumentProcessor:
         entities_new = 0
         entities_reused = 0
         type_counts: dict[str, int] = {}
+        # Story 10.16 (Codex #8): the names sent count in the custom
+        # pseudonyms' real-name check, read only when there is one (AC10)
+        sent_names = (
+            [self._normalize_entity_text(ctx, entity) for entity in validated_entities]
+            if custom_pseudonyms
+            else []
+        )
         # Story 10.11: custom names whose first occurrence is still to come
         custom_unseen = self._register_custom_pseudonyms(
-            ctx, custom_pseudonyms or {}, document_text, entity_cache, new_entities
+            ctx,
+            custom_pseudonyms or {},
+            document_text,
+            entity_cache,
+            new_entities,
+            sent_names=sent_names,
         )
 
         for entity in validated_entities:
