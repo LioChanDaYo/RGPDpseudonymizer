@@ -7,6 +7,8 @@ core validation models with Qt undo/redo and signal infrastructure.
 from __future__ import annotations
 
 import dataclasses
+import re
+import unicodedata
 import uuid
 from typing import TYPE_CHECKING
 
@@ -22,6 +24,9 @@ from gdpr_pseudonymizer.core.custom_pseudonym import (
 from gdpr_pseudonymizer.core.mapping_key import mapping_key
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 from gdpr_pseudonymizer.validation.models import (
+    ADDED_BY_HAND_SOURCE,
+    CORRECTED_BY_HAND_SOURCE,
+    TYPED_SOURCES,
     CandidateKey,
     EntityReview,
     EntityReviewState,
@@ -50,6 +55,109 @@ def _same_kind(old: EntityReviewState | None, new: EntityReviewState) -> bool:
     if old is None:
         return False
     return (old in _KEPT and new in _KEPT) or (old in _DROPPED and new in _DROPPED)
+
+
+# Story 10.17 (AC13 (a); Lionel's 10.15 Q3, "A: Hyphen joins"): a place of a
+# name added by hand is a whole word. The character just before and just after
+# it (when there is one) is neither a word character nor a hyphen (-, U+2010,
+# U+2011); an apostrophe is not a word character.
+_NOT_AFTER_WORD = r"(?<![\w\-‐‑])"
+_NOT_BEFORE_WORD = r"(?![\w\-‐‑])"
+
+# The label of an add, also the undo macro of an add that makes several rows.
+_ADD_LABEL = "Ajouter une entité"
+
+
+def fold(text: str) -> str:
+    """``text`` with each character's accents set aside, one character for one.
+
+    A character whose decomposition without its combining marks is not one
+    character is kept as it is, so a position in the folded text is the same
+    position in ``text``.
+    """
+    folded: list[str] = []
+    for char in text:
+        bare = "".join(
+            part
+            for part in unicodedata.normalize("NFD", char)
+            if not unicodedata.combining(part)
+        )
+        folded.append(bare if len(bare) == 1 else char)
+    return "".join(folded)
+
+
+def is_form(place: str, text: str) -> bool:
+    """Whether ``place`` is written as a form of the name ``text`` (Story
+    10.17, AC13 (a); Lionel, 2026-10-19, "A: Fix, capitals only", in the PO's
+    wording, and his 10.19 Q3, "A: Reach it too").
+
+    The same letters as ``text``, whatever their capitals, except a place
+    written entirely in small letters (no capital letter in it), unless it is
+    exactly ``text``. In a place written entirely in capitals (no small letter
+    in it), accents are set aside too: « HELENE » and « HELÈNE » are forms of
+    « Hélène », « Helene » and « hélène » are not.
+    """
+    if place == text:
+        return True
+    if not any(char.isupper() for char in place):
+        return False
+    if place.lower() == text.lower():
+        return True
+    if any(char.islower() for char in place):
+        return False
+    return fold(place).lower() == fold(text).lower()
+
+
+def whole_word_places(text: str, document_text: str) -> list[tuple[int, int]]:
+    """The places of the name ``text`` in ``document_text`` (Story 10.17,
+    AC13 (a)): every whole-word form of it (``is_form``), read left to right,
+    not overlapping each other. An empty text has no place.
+
+    The search runs on the folded document, case-insensitively; each place it
+    finds is kept only if the text written there is a form of ``text``.
+    """
+    if not text:
+        return []
+    folded = fold(document_text)
+    pattern = re.compile(
+        _NOT_AFTER_WORD + re.escape(fold(text)) + _NOT_BEFORE_WORD, re.IGNORECASE
+    )
+    places: list[tuple[int, int]] = []
+    position = 0
+    while True:
+        match = pattern.search(folded, position)
+        if match is None:
+            return places
+        start, end = match.span()
+        if is_form(document_text[start:end], text):
+            places.append((start, end))
+            position = end
+        else:
+            position = start + 1
+
+
+def _corrected_source(source: str) -> str:
+    """The source of a place a correction reaches (Story 10.17, AC8): a place
+    the user typed. A place added by hand keeps its own mark."""
+    return source if source in TYPED_SOURCES else CORRECTED_BY_HAND_SOURCE
+
+
+def _widen_typed_places(entities: list[DetectedEntity]) -> list[DetectedEntity]:
+    """The list sent, each place the user typed widened over the names it
+    partly overlaps (Story 10.17, AC8; Lionel's 10.15 Q4, "A: Name you
+    added", applied to the desktop; the 10.15 Codex P0 ruling for
+    corrections).
+
+    The typed places are those added by hand (``ADDED_BY_HAND_SOURCE``) and
+    every place a correction reaches (``CORRECTED_BY_HAND_SOURCE``). The rule
+    is the command line's own (Story 10.15), so both apps keep one rule.
+    """
+    # Imported here, not at module level: core.document_processor loads the
+    # hybrid detector and the pseudonym library modules, which the review
+    # model's own imports do not load.
+    from gdpr_pseudonymizer.core.document_processor import DocumentProcessor
+
+    return DocumentProcessor._widen_added_places(entities)
 
 
 class GUIValidationState(QObject):
@@ -100,6 +208,25 @@ class GUIValidationState(QObject):
         # that changes a row saves and restores the row's flag, so undo and
         # redo keep it exact.
         self._own_ids: set[str] = set()
+        # Story 10.17 (AC2, AC13 (d)): True in batch validation, where each
+        # place of a name is its own row; False in single-document
+        # validation, where a row stands for every place of its name.
+        self._rows_per_place = False
+        # The places the detector found, taken once from the detection
+        # (detected entities and every variant occurrence) before any
+        # decision or edit: (start, end, type) -> the texts found there
+        # (Story 10.17, AC13 (b)). An add leaves out a found place of the
+        # same name and type, whatever the capitals of the text found.
+        self._found_places: dict[tuple[int, int, str], list[str]] = {}
+        # The spans each row added by hand was added with, set by its add
+        # command and removed by its undo (Story 10.17, AC13 (b)): a place
+        # held by a row of the same name and type is not added twice.
+        self._hand_spans_by_id: dict[str, list[tuple[int, int]]] = {}
+        # Single-document validation: every place of a row added by hand, one
+        # entity per place in document order, the row's own entity among them
+        # (as a variant group holds its canonical), all with the name as
+        # added (Story 10.17, AC13 (d)).
+        self._hand_places_by_id: dict[str, list[DetectedEntity]] = {}
 
     @property
     def undo_stack(self) -> QUndoStack:
@@ -113,11 +240,17 @@ class GUIValidationState(QObject):
     # Initialization
     # ------------------------------------------------------------------
 
-    def init_from_detection_result(self, detection_result: DetectionResult) -> None:
+    def init_from_detection_result(
+        self, detection_result: DetectionResult, rows_per_place: bool = False
+    ) -> None:
         """Initialize state from a DetectionResult.
 
         Args:
             detection_result: Result from DetectionWorker
+            rows_per_place: True in batch validation, where each place of a
+                name is its own row; False (the default) in single-document
+                validation, where a row stands for every place of its name
+                (Story 10.17)
         """
         self._session = ValidationSession(
             document_path=detection_result.input_file,
@@ -125,6 +258,7 @@ class GUIValidationState(QObject):
         )
         self._pseudonym_previews = dict(detection_result.pseudonym_previews)
         self._variant_occurrences = dict(detection_result.variant_occurrences or {})
+        self._rows_per_place = rows_per_place
         self._reviews_by_id.clear()
         self._candidate_key_by_id.clear()
         self._edited_spans_by_id.clear()
@@ -132,6 +266,17 @@ class GUIValidationState(QObject):
         self._own_ids.clear()
         self._known_entity_ids.clear()
         self._undo_stack.clear()
+        self._hand_spans_by_id.clear()
+        self._hand_places_by_id.clear()
+
+        # Story 10.17: the places the detector found, before any decision.
+        self._found_places = {}
+        found = list(detection_result.detected_entities)
+        for occurrences in self._variant_occurrences.values():
+            found.extend(occurrences)
+        for entity in found:
+            place = (entity.start_pos, entity.end_pos, entity.entity_type)
+            self._found_places.setdefault(place, []).append(entity.text)
 
         for entity in detection_result.detected_entities:
             self._session.add_entity(entity)
@@ -407,17 +552,19 @@ class GUIValidationState(QObject):
     ) -> list[tuple[int, int]] | None:
         """Span of each occurrence of a row's variant group after an edit.
 
-        Returns ``None`` when the row has no stored key or the key has no
-        variant entry (batch rows, rows added by hand). Otherwise, in the
-        group's order: ``own_span`` for the row's own occurrence, and for
-        every other occurrence the span the CLI's rule gives from its current
-        span: the span the row's previous edit gave it when the row has a
-        text edit, else its detected span (Story 10.9).
+        The occurrences are those of ``_occurrences``: a detected row's
+        variant group, or every place of a row added by hand in
+        single-document validation (Story 10.17). Returns ``None`` when the
+        row has none (batch rows, a detected row with no variant entry).
+        Otherwise, in the group's order: ``own_span`` for the row's own
+        occurrence, and for every other occurrence the span the CLI's rule
+        gives from its current span: the span the row's previous edit gave it
+        when the row has a text edit, else its detected (or added) span
+        (Story 10.9).
         """
-        key = self._candidate_key_by_id.get(review.entity_id)
-        if key is None or key not in self._variant_occurrences:
+        occurrences = self._occurrences(review)
+        if occurrences is None:
             return None
-        occurrences = self._variant_occurrences[key]
         current = (
             self._edited_spans_by_id.get(review.entity_id)
             if review.user_modification
@@ -614,11 +761,90 @@ class GUIValidationState(QObject):
         start_pos: int,
         end_pos: int,
     ) -> str:
-        """Add a manually selected entity. Returns entity_id."""
-        entity_id = str(uuid.uuid4())
-        cmd = _AddEntityCommand(self, entity_id, text, entity_type, start_pos, end_pos)
-        self._undo_stack.push(cmd)
-        return entity_id
+        """Add a name the user selected, at every place of that name and type.
+
+        The places (Story 10.17, ``_new_places``): every whole-word form of
+        the text in the document and the place selected, except a place the
+        detector found with that name and type and a place a row added by
+        hand already holds for it. Single-document validation: one row that
+        stands for every place, as a found row stands for its variant group,
+        added by one command. Batch validation: one row per place, each its
+        own row for accept and reject (Lionel's 10.17 Q2), added by one undo
+        macro. Every place carries the name as added, so one undo removes the
+        add at every place and one redo restores it.
+
+        Returns the id of the row at the selected place (or at the first new
+        place when the selected place is not new), or "" when no place is new.
+        """
+        spans = self._new_places(text, entity_type, start_pos, end_pos)
+        if not spans:
+            return ""
+        own = (start_pos, end_pos) if (start_pos, end_pos) in spans else spans[0]
+        if not self._rows_per_place:
+            entity_id = str(uuid.uuid4())
+            cmd = _AddEntityCommand(
+                self, entity_id, text, entity_type, own[0], own[1], places=spans
+            )
+            self._undo_stack.push(cmd)
+            return entity_id
+        ids = [str(uuid.uuid4()) for _ in spans]
+        if len(spans) > 1:
+            self._undo_stack.beginMacro(_ADD_LABEL)
+        for entity_id, (start, end) in zip(ids, spans):
+            cmd = _AddEntityCommand(self, entity_id, text, entity_type, start, end)
+            self._undo_stack.push(cmd)
+        if len(spans) > 1:
+            self._undo_stack.endMacro()
+        return ids[spans.index(own)]
+
+    def _new_places(
+        self, text: str, entity_type: str, start_pos: int, end_pos: int
+    ) -> list[tuple[int, int]]:
+        """The places an add of (``text``, ``entity_type``) makes, in document
+        order (Story 10.17, AC13 (a)-(c)).
+
+        Every whole-word form of the text (``whole_word_places``) and the
+        place selected, which is always a place, whole word or not. Left out:
+        a place where the detector found the same name with the same type,
+        whatever the capitals of the text it found (``_found_places``; the
+        found place keeps its own row and decision), and a place a row added
+        by hand with the same name and type already holds.
+        """
+        places = whole_word_places(text, self._session.document_text)
+        if (start_pos, end_pos) not in places:
+            places.append((start_pos, end_pos))
+            places.sort()
+        held = {
+            span
+            for entity_id, spans in self._hand_spans_by_id.items()
+            if self._hand_key_by_id.get(entity_id) == (text, entity_type)
+            for span in spans
+        }
+        return [
+            (start, end)
+            for start, end in places
+            if (start, end) not in held
+            and not any(
+                is_form(found, text)
+                for found in self._found_places.get((start, end, entity_type), [])
+            )
+        ]
+
+    def _occurrences(self, review: EntityReview) -> list[DetectedEntity] | None:
+        """The occurrences a row stands for in single-document validation.
+
+        A row added by hand: its places (Story 10.17). A detected row: its
+        variant group, looked up with the key stored at init. ``None`` when
+        the row has neither (batch rows, a detected row with no variant
+        entry).
+        """
+        places = self._hand_places_by_id.get(review.entity_id)
+        if places is not None:
+            return places
+        key = self._candidate_key_by_id.get(review.entity_id)
+        if key is None:
+            return None
+        return self._variant_occurrences.get(key)
 
     def bulk_accept(self, entity_ids: list[str], alone: bool = True) -> None:
         """Accept multiple entities as a single undoable action.
@@ -762,7 +988,8 @@ class GUIValidationState(QObject):
         """The entity sent for a row whose text the user edited.
 
         The edited text, the row's current type and its (moved) span; the
-        other fields come from the row's entity.
+        other fields come from the row's entity. Its source marks it as a
+        place the user typed (Story 10.17, AC8), for the widening.
         """
         return DetectedEntity(
             text=review.user_modification or review.entity.text,
@@ -772,7 +999,7 @@ class GUIValidationState(QObject):
             confidence=review.entity.confidence,
             gender=review.entity.gender,
             is_ambiguous=review.entity.is_ambiguous,
-            source=review.entity.source,
+            source=_corrected_source(review.entity.source),
             context_label=review.entity.context_label,
         )
 
@@ -781,24 +1008,26 @@ class GUIValidationState(QObject):
     ) -> list[DetectedEntity] | None:
         """Every occurrence of a text-edited row, each with the edit (Story 10.9).
 
-        Looks up the row's variant group with the key stored at init. Returns
-        ``None`` when the row has no stored key or the key has no variant
-        entry (batch rows, rows added by hand). Otherwise, in the group's
-        order: ``edited`` for the row's own occurrence, and for every other
-        occurrence a new entity with the edited text and the row's current
-        type. Its span is the one the edit's command stored
-        (``_occurrence_spans_for_edit``); without a stored list, the span the
-        CLI's rule gives on the occurrence's detected span (the edited text
-        where it overlaps it, else the detected span). The text, type and
-        other fields are taken on each call, and the stored spans are set and
-        restored by the edit's one command, so undo and redo revert and
-        re-apply every occurrence.
+        The occurrences are those of ``_occurrences``: a detected row's
+        variant group, looked up with the key stored at init, or every place
+        of a row added by hand in single-document validation (Story 10.17).
+        Returns ``None`` when the row has none (batch rows, a detected row
+        with no variant entry). Otherwise, in the group's order: ``edited``
+        for the row's own occurrence, and for every other occurrence a new
+        entity with the edited text and the row's current type. Its span is
+        the one the edit's command stored (``_occurrence_spans_for_edit``);
+        without a stored list, the span the CLI's rule gives on the
+        occurrence's detected span (the edited text where it overlaps it,
+        else the detected span). The text, type and other fields are taken
+        on each call, and the stored spans are set and restored by the edit's
+        one command, so undo and redo revert and re-apply every occurrence.
+        Every occurrence is marked as a place the user typed (Story 10.17,
+        AC8: every place a correction reaches is widened).
         """
-        key = self._candidate_key_by_id.get(review.entity_id)
-        if key is None or key not in self._variant_occurrences:
+        group = self._occurrences(review)
+        if group is None:
             return None
         document_text = self._session.document_text
-        group = self._variant_occurrences[key]
         stored = self._edited_spans_by_id.get(review.entity_id)
         if stored is not None and len(stored) != len(group):
             stored = None
@@ -822,7 +1051,7 @@ class GUIValidationState(QObject):
                     confidence=occurrence.confidence,
                     gender=occurrence.gender,
                     is_ambiguous=occurrence.is_ambiguous,
-                    source=occurrence.source,
+                    source=_corrected_source(occurrence.source),
                     context_label=occurrence.context_label,
                 )
             )
@@ -849,8 +1078,12 @@ class GUIValidationState(QObject):
         return rows
 
     def get_validated_entities(self) -> list[DetectedEntity]:
-        """Final entity list for finalization (excludes rejected)."""
-        return [entity for _, entity in self._validated_rows()]
+        """Final entity list for finalization (excludes rejected).
+
+        Each place the user typed (a row added by hand, a corrected row) is
+        widened over the names it partly overlaps (Story 10.17, AC8).
+        """
+        return _widen_typed_places([entity for _, entity in self._validated_rows()])
 
     def expand_validated_entities(self) -> list[DetectedEntity]:
         """Expand validated canonical entities to include all variant occurrences.
@@ -865,25 +1098,44 @@ class GUIValidationState(QObject):
         A row whose text the user edited expands to every occurrence of its
         group, each on its edited span or, where the edited text is absent,
         the span it had before that edit: the previous edit's, else the
-        detected one (Story 10.9). Rows added by hand are looked up with
-        a key computed from the entity sent to finalization, so they normally
-        stay single.
+        detected one (Story 10.9). A row added by hand expands to every place
+        of its name, each with the row's current type (Story 10.17), also
+        when the detector found nothing.
+
+        Each place the user typed (added by hand, or reached by a correction)
+        is widened over the names it partly overlaps (Story 10.17, AC8).
         """
-        return self._expand(self._validated_rows())
+        return _widen_typed_places(self._expand(self._validated_rows()))
 
     def _expand(
         self, rows: list[tuple[EntityReview, DetectedEntity]]
     ) -> list[DetectedEntity]:
         """``expand_validated_entities``' expansion of the given (row, entity
-        sent) pairs (Story 10.16: shared with ``_review_names``)."""
-        if not self._variant_occurrences:
-            return [entity for _, entity in rows]
+        sent) pairs (Story 10.16: shared with ``_review_names``).
 
+        There is no early return when the variant map is empty (Story 10.17,
+        the PO's M2): a document where the detector found nothing still sends
+        every place of a name added by hand; every other row is then sent as
+        itself, as before."""
         expanded: list[DetectedEntity] = []
         for review, entity in rows:
             if review.user_modification:
                 occurrences = self._edited_occurrences(review, entity)
                 expanded.extend(occurrences if occurrences is not None else [entity])
+                continue
+            places = self._hand_places_by_id.get(review.entity_id)
+            if places is not None:
+                # Every place of a row added by hand, with the row's current
+                # type (Story 10.17, as 10.9 does for a retyped found row).
+                row_type = review.entity.entity_type
+                expanded.extend(
+                    (
+                        place
+                        if place is review.entity or place.entity_type == row_type
+                        else dataclasses.replace(place, entity_type=row_type)
+                    )
+                    for place in places
+                )
                 continue
             key = self._variant_key(review, entity)
             if key not in self._variant_occurrences:
@@ -935,7 +1187,8 @@ class GUIValidationState(QObject):
         The variant map is keyed by text, start and type, so each type of a
         same-span pair maps its own occurrences to its own row. A row whose
         text the user edited gives exactly the spans finalization sends for
-        it (Story 10.9).
+        it (Story 10.9). A row added by hand gives every place of its name in
+        single-document validation (Story 10.17).
         """
         ranges: list[tuple[int, int, str]] = []
         for review in self._session._entity_reviews:
@@ -955,6 +1208,13 @@ class GUIValidationState(QObject):
                     ranges.extend(
                         (o.start_pos, o.end_pos, review.entity_id) for o in occurrences
                     )
+                continue
+            places = self._hand_places_by_id.get(review.entity_id)
+            if places is not None:
+                ranges.extend(
+                    (place.start_pos, place.end_pos, review.entity_id)
+                    for place in places
+                )
                 continue
             canonical = review.entity
             key = self._variant_key(review, canonical)
@@ -1234,7 +1494,14 @@ class _ChangeTypeCommand(QUndoCommand):
 
 
 class _AddEntityCommand(QUndoCommand):
-    """Add a manually selected entity."""
+    """Add a manually selected entity.
+
+    ``places`` (single-document validation, Story 10.17): every place the
+    row stands for, in document order, its own span among them; the row is
+    then one row for all of them, and one undo or redo removes or restores
+    every place. Without it the row stands for its own span only (batch
+    validation, one command per place).
+    """
 
     def __init__(
         self,
@@ -1244,14 +1511,16 @@ class _AddEntityCommand(QUndoCommand):
         entity_type: str,
         start_pos: int,
         end_pos: int,
+        places: list[tuple[int, int]] | None = None,
     ) -> None:
-        super().__init__("Ajouter une entité")
+        super().__init__(_ADD_LABEL)
         self._state = state
         self._entity_id = entity_id
         self._text = text
         self._entity_type = entity_type
         self._start_pos = start_pos
         self._end_pos = end_pos
+        self._places = list(places) if places is not None else None
 
     def redo(self) -> None:
         entity = DetectedEntity(
@@ -1262,7 +1531,7 @@ class _AddEntityCommand(QUndoCommand):
             confidence=1.0,
             gender=None,
             is_ambiguous=False,
-            source="manual",
+            source=ADDED_BY_HAND_SOURCE,
         )
         review = EntityReview(
             entity=entity,
@@ -1276,11 +1545,29 @@ class _AddEntityCommand(QUndoCommand):
         # added row is the user's own decision.
         self._state._hand_key_by_id[self._entity_id] = (self._text, self._entity_type)
         self._state._own_ids.add(self._entity_id)
+        # Story 10.17: the spans the row was added with, and in
+        # single-document validation one entity per place, every place
+        # carrying the name as added.
+        own = (self._start_pos, self._end_pos)
+        self._state._hand_spans_by_id[self._entity_id] = (
+            list(self._places) if self._places is not None else [own]
+        )
+        if self._places is not None:
+            self._state._hand_places_by_id[self._entity_id] = [
+                (
+                    entity
+                    if span == own
+                    else dataclasses.replace(entity, start_pos=span[0], end_pos=span[1])
+                )
+                for span in self._places
+            ]
         self._state.entity_added.emit(self._entity_id)
 
     def undo(self) -> None:
         review = self._state._reviews_by_id.pop(self._entity_id, None)
         self._state._hand_key_by_id.pop(self._entity_id, None)
+        self._state._hand_spans_by_id.pop(self._entity_id, None)
+        self._state._hand_places_by_id.pop(self._entity_id, None)
         self._state._own_ids.discard(self._entity_id)
         if review:
             self._state._session._entity_reviews.remove(review)

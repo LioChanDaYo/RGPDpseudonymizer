@@ -421,21 +421,11 @@ def _review(
     return _Review(mode, qtbot, main_window, tmp_path, [(text, entities)], known)
 
 
-def _xfail(failure: str) -> pytest.MarkDecorator:
-    return pytest.mark.xfail(
-        strict=True,
-        raises=AssertionError,
-        reason=f"Story 10.17: reproduces {failure} on the unfixed code; "
-        "fixed in Task 2",
-    )
-
-
 # ---------------------------------------------------------------------------
 # T1-T14: every place of a name added by hand
 # ---------------------------------------------------------------------------
 
 
-@_xfail("the second place of an added name left in clear")
 @pytest.mark.parametrize("mode", MODES)
 def test_added_name_every_place(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, dialogs, mode
@@ -454,7 +444,6 @@ def test_added_name_every_place(  # type: ignore[no-untyped-def]
     assert output == f"{vm} valide. Le contrat avec {zq}. Signé : {zq}."
 
 
-@_xfail("the third place left in clear beside a found place")
 @pytest.mark.parametrize("found", ["pending", "rejected"])
 @pytest.mark.parametrize("mode", MODES)
 def test_found_place_keeps_its_decision(  # type: ignore[no-untyped-def]
@@ -485,7 +474,6 @@ def test_found_place_keeps_its_decision(  # type: ignore[no-untyped-def]
     assert pending_counts(dialogs) == ([1] if found == "pending" else [])
 
 
-@_xfail("a whole-word place after an elided article left in clear")
 @pytest.mark.parametrize("mode", MODES)
 def test_whole_words_only(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, dialogs, mode
@@ -530,7 +518,6 @@ def test_one_undo_removes_the_add_everywhere(  # type: ignore[no-untyped-def]
     assert not review.has_row(ZQ, "PERSON")
 
 
-@_xfail("the second place left in clear after undo and redo")
 @pytest.mark.parametrize("mode", MODES)
 def test_undo_then_redo_restores_every_place(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, dialogs, mode
@@ -552,7 +539,6 @@ def test_undo_then_redo_restores_every_place(  # type: ignore[no-untyped-def]
     assert output == f"{vm} valide. Le contrat avec {zq}. Signé : {zq}."
 
 
-@_xfail("part of a name left in clear where the added name overlaps it")
 @pytest.mark.parametrize("case", ["single", "batch", "single_known", "batch_known"])
 def test_overlap_takes_the_added_name(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, dialogs, case
@@ -592,7 +578,6 @@ def test_overlap_takes_the_added_name(  # type: ignore[no-untyped-def]
     assert output == f"{zq} a signé. Le contrat avec {zq}."
 
 
-@_xfail("the added rows' second place left in clear after Précédent, Suivant")
 def test_batch_previous_next_keeps_every_place(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, dialogs
 ) -> None:
@@ -633,7 +618,6 @@ def test_batch_previous_next_keeps_every_place(  # type: ignore[no-untyped-def]
     assert output == f"{vm} valide. Le contrat avec {zq}. Signé : {zq}."
 
 
-@_xfail("the place found with another type and left to review in clear")
 @pytest.mark.parametrize("mode", MODES)
 def test_text_found_with_another_type(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, dialogs, mode
@@ -654,7 +638,6 @@ def test_text_found_with_another_type(  # type: ignore[no-untyped-def]
     assert output == f"{zq} valide. Le contrat avec {zq}."
 
 
-@_xfail("one place shown for a name at two places")
 @pytest.mark.parametrize("mode", MODES)
 def test_every_place_shown(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, dialogs, mode
@@ -678,7 +661,6 @@ def test_every_place_shown(  # type: ignore[no-untyped-def]
     assert record["rows"] == (1 if mode == "single" else 2)
 
 
-@_xfail("a second add of the same place left the other place in clear")
 @pytest.mark.parametrize("mode", MODES)
 def test_add_twice_adds_once(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, dialogs, mode
@@ -702,7 +684,6 @@ def test_add_twice_adds_once(  # type: ignore[no-untyped-def]
     assert output == f"{vm} valide. Le contrat avec {zq}. Signé : {zq}."
 
 
-@_xfail("a custom pseudonym of an added name written at one place only")
 @pytest.mark.parametrize("mode", MODES)
 def test_custom_pseudonym_on_added_name(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, dialogs, mode
@@ -729,7 +710,6 @@ def test_custom_pseudonym_on_added_name(  # type: ignore[no-untyped-def]
     assert output == f"{vm} valide. Le contrat avec {CUSTOM}. Signé : {CUSTOM}."
 
 
-@_xfail("a correction of an added name written at one place only")
 @pytest.mark.parametrize("mode", MODES)
 def test_correction_on_added_name(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, dialogs, mode
@@ -752,7 +732,6 @@ def test_correction_on_added_name(  # type: ignore[no-untyped-def]
     assert output == f"{vm} valide. Le contrat avec {zq}. Signé : {zq}."
 
 
-@_xfail("a type change of an added name written at one place only")
 @pytest.mark.parametrize("mode", MODES)
 def test_type_change_on_added_name(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, dialogs, mode
@@ -775,7 +754,6 @@ def test_type_change_on_added_name(  # type: ignore[no-untyped-def]
     assert not review.has_row(ZQ, "PERSON")
 
 
-@_xfail("the second place left in clear when nothing is detected")
 @pytest.mark.parametrize("mode", MODES)
 def test_nothing_detected_add_every_place(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, dialogs, mode
@@ -800,7 +778,6 @@ def test_nothing_detected_add_every_place(  # type: ignore[no-untyped-def]
 # ---------------------------------------------------------------------------
 
 
-@_xfail("a form in capitals of an added name left in clear")
 @pytest.mark.parametrize("mode", MODES)
 def test_capital_form_written(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, dialogs, mode
@@ -822,7 +799,6 @@ def test_capital_form_written(  # type: ignore[no-untyped-def]
     assert record["rows"] == (1 if mode == "single" else 3)
 
 
-@_xfail("a form in capitals left in clear beside a small-letter word")
 @pytest.mark.parametrize("mode", MODES)
 def test_small_letter_word_never_written(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, dialogs, mode
@@ -841,7 +817,6 @@ def test_small_letter_word_never_written(  # type: ignore[no-untyped-def]
     assert output == f"{petit} valide. Le contrat avec petit et {petit}."
 
 
-@_xfail("a mixed form of an added name left in clear")
 @pytest.mark.parametrize("mode", MODES)
 def test_mixed_form_written(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, dialogs, mode
@@ -861,7 +836,6 @@ def test_mixed_form_written(  # type: ignore[no-untyped-def]
     assert len(review.stored()) == 1
 
 
-@_xfail("a form with a small particle left in clear")
 @pytest.mark.parametrize("mode", MODES)
 def test_small_particle_written(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, dialogs, mode
@@ -882,7 +856,6 @@ def test_small_particle_written(  # type: ignore[no-untyped-def]
     assert len(review.stored()) == 1
 
 
-@_xfail("a form in capitals left in clear beside a found capital place")
 @pytest.mark.parametrize("mode", MODES)
 def test_found_capital_place_keeps_its_decision(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, dialogs, mode
@@ -909,7 +882,6 @@ def test_found_capital_place_keeps_its_decision(  # type: ignore[no-untyped-def]
     assert record["found_state"] == REJECTED
 
 
-@_xfail("a form in capitals without its accents left in clear")
 @pytest.mark.parametrize("mode", MODES)
 def test_accents_in_capitals(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, dialogs, mode
@@ -936,7 +908,6 @@ def test_accents_in_capitals(  # type: ignore[no-untyped-def]
 # ---------------------------------------------------------------------------
 
 
-@_xfail("part of a name left in clear where a correction overlaps it")
 @pytest.mark.parametrize("mode", MODES)
 def test_correction_overlapping_accepted_name(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, dialogs, mode
@@ -969,7 +940,6 @@ def test_correction_overlapping_accepted_name(  # type: ignore[no-untyped-def]
     assert len(review.stored()) == 2
 
 
-@_xfail("part of a name left in clear where a correction overlaps it")
 @pytest.mark.parametrize("mode", MODES)
 def test_correction_then_accepted_overlap(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, dialogs, mode
@@ -1001,7 +971,6 @@ def test_correction_then_accepted_overlap(  # type: ignore[no-untyped-def]
     assert len(review.stored()) == 2
 
 
-@_xfail("part of a name left in clear at the second place a correction reaches")
 @pytest.mark.parametrize("mode", MODES)
 def test_correction_overlap_at_second_place(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, dialogs, mode
