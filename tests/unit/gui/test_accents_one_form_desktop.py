@@ -216,12 +216,13 @@ class _Single:
         tmp_path: Path,
         text: str,
         names: Sequence[tuple[str, str]],
+        db: str | None = None,
     ) -> None:
         from gdpr_pseudonymizer.gui.screens.validation import ValidationScreen
 
         self.qtbot = qtbot
         self.mw = main_window
-        self.db = _new_db(tmp_path)
+        self.db = db if db is not None else _new_db(tmp_path)
         path = tmp_path / "doc.txt"
         path.write_text(text, encoding="utf-8")
         finished: list[object] = []
@@ -578,3 +579,98 @@ def test_guard_desktop_correction_typed_decomposed(  # type: ignore[no-untyped-d
         pytest.fail(f"PRE: written: {dialogs.calls!r}")
     assert "Quentrel" not in written, repr(written)
     assert _names(sd.db) == [(ZQ, PERSON)]
+
+
+# ---------------------------------------------------------------------------
+# v1.7: the Codex review of 186972b in the desktop app: a custom pseudonym
+# equal to an old saved name (T35), or set on a name saved decomposed (T37);
+# a database with no old rows as today (G14)
+# ---------------------------------------------------------------------------
+
+XFAIL = "Story 10.20 v1.7: reproduces {} on the unfixed code; fixed in Task 2.9"
+PLACE_TEXT = "Le contrat a été signé à Zórbaville."
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason=XFAIL.format("a custom pseudonym equal to an old saved name accepted"),
+)
+def test_desktop_custom_pseudonym_equal_to_an_old_saved_name_refused(  # type: ignore[no-untyped-def]
+    qtbot, main_window, tmp_path, monkeypatch
+) -> None:
+    """T35 (v1.7, Codex P0-2): « Éloria Quentrel » typed in the custom
+    pseudonym dialog is refused beside the row an earlier version saved for
+    « Maître Éloria Quentrel »."""
+    dialogs = _Dialogs(monkeypatch)
+    db = _new_db(tmp_path)
+    _save(db, [(nfd("Maître Éloria Quentrel"), PERSON, XV)])
+    sd = _Single(
+        qtbot, main_window, tmp_path, "Vorlan Mestrix valide.", [(VM, PERSON)], db
+    )
+    row = sd.rows()[0]
+    _type_in(monkeypatch, "Éloria Quentrel")
+    sd.vs._show_change_pseudonym_dialog(row.entity_id)
+    refusals = list(dialogs.calls)
+    sd.accept_pending()
+    written = sd.finalize(dialogs)
+    if written is None:
+        pytest.fail(f"PRE: written: {dialogs.calls!r}")
+    assert "Éloria Quentrel" not in nfc(written), repr(written)  # expected failure
+    assert refusals, refusals
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason=XFAIL.format("a custom pseudonym set on a name saved decomposed"),
+)
+def test_desktop_custom_pseudonym_for_a_name_saved_decomposed_refused(  # type: ignore[no-untyped-def]
+    qtbot, main_window, tmp_path, monkeypatch
+) -> None:
+    """T37 (v1.7, Codex P1-2): a place saved decomposed keeps its pseudonym:
+    « Quovixville » typed in the custom pseudonym dialog is refused."""
+    dialogs = _Dialogs(monkeypatch)
+    db = _new_db(tmp_path)
+    _save(db, [(nfd("Zórbaville"), "LOCATION", "Xantorville")])
+    sd = _Single(
+        qtbot, main_window, tmp_path, PLACE_TEXT, [("Zórbaville", "LOCATION")], db
+    )
+    row = sd.rows()[0]
+    _type_in(monkeypatch, "Quovixville")
+    sd.vs._show_change_pseudonym_dialog(row.entity_id)
+    refusals = list(dialogs.calls)
+    sd.accept_pending()
+    written = sd.finalize(dialogs)
+    if written is None:
+        pytest.fail(f"PRE: written: {dialogs.calls!r}")
+    rows = _rows(db)
+    assert len(rows) == 1, rows  # expected failure
+    assert "Xantorville" in written, repr(written)
+    assert refusals, refusals
+
+
+@pytest.mark.parametrize("case", ["custom_place_already_stored"])
+def test_guard_clean_database_as_today(  # type: ignore[no-untyped-def]
+    qtbot, main_window, tmp_path, monkeypatch, case
+) -> None:
+    """G14 (v1.7; AC13), the desktop case: a place saved composed, as today's
+    code saves it, keeps its pseudonym: « Quovixville » typed in the custom
+    pseudonym dialog is refused, one row, « Xantorville » written."""
+    dialogs = _Dialogs(monkeypatch)
+    db = _new_db(tmp_path)
+    _save(db, [("Zórbaville", "LOCATION", "Xantorville")])
+    sd = _Single(
+        qtbot, main_window, tmp_path, PLACE_TEXT, [("Zórbaville", "LOCATION")], db
+    )
+    row = sd.rows()[0]
+    _type_in(monkeypatch, "Quovixville")
+    sd.vs._show_change_pseudonym_dialog(row.entity_id)
+    refusals = list(dialogs.calls)
+    sd.accept_pending()
+    written = sd.finalize(dialogs)
+    if written is None:
+        pytest.fail(f"PRE: written: {dialogs.calls!r}")
+    assert refusals, refusals
+    assert len(_rows(db)) == 1, _rows(db)
+    assert "Xantorville" in written, repr(written)
