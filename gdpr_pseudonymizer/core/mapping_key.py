@@ -122,6 +122,12 @@ def _former(entity_text: str, entity_type: str) -> list[tuple[str, str]]:
     key = mapping_key(entity_text, entity_type)
     found: dict[str, str] = {}
     for text, inserted in _key_texts(key, entity_type):
+        if text == key:
+            # v1.19 (row c6): every word composed, what an earlier version
+            # saved is today's key itself; the steps again on a place's key
+            # that still starts with a preposition (« de Zórbaville ») would
+            # give a key no version saved
+            continue
         old = _key_steps(text, entity_type)
         if not old or old == key or old in found:
             continue
@@ -164,14 +170,17 @@ def saved_name_forms(entity_text: str, entity_type: str) -> list[str]:
     """Every text a saved row of this name and type may hold (Story 10.20,
     v1.7; Lionel's Qa and Qb), in the order a lookup prefers them: the
     composed text; the keys an earlier version saved (``former_keys``); the
-    composed form of each "titled" and "sign" key, as ``import-mappings``
-    saves a row it copies (the Codex review's P1-3); the text as given.
-    Without duplicates; the composed text first (rule A)."""
+    text as given. Without duplicates; the composed text first (rule A).
+
+    Every form but the composed text and the text as given holds an accent
+    mark: each text the replay tries, but the all-composed one, holds a
+    decomposed letter, « Maître » or « à », and no old step takes a mark
+    off. So no form is a name today's code saves. v1.18 (the third Codex
+    review, P0-b): an old key is no longer tried in its composed form. It
+    could be the correct name of another person saved today (« Vorlan
+    ZorbôQuentrel » for « Vorlan Zorbôme Quentrel »), which Lionel's P0-1
+    answer forbids, and no path stores a composed old key (``import-mappings``
+    copies rows as saved since v1.14)."""
     former = _former(entity_text, entity_type)
-    forms = [
-        composed(entity_text),
-        *(old for old, _ in former),
-        *(composed(old) for old, kind in former if kind in (_TITLED, _SIGN)),
-        entity_text,
-    ]
+    forms = [composed(entity_text), *(old for old, _ in former), entity_text]
     return list(dict.fromkeys(forms))

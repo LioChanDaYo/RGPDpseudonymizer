@@ -2005,7 +2005,6 @@ def test_guard_maitre_with_circumflex_still_a_kept_title(
 # to T57)
 # ---------------------------------------------------------------------------
 
-XFAIL = "Story 10.20 v1.18: reproduces {} on the unfixed code; fixed in Task 2.12"
 FRESH = "Vorlan ZorbôQuentrel"
 VZQ = "Vorlan Zorbôme Quentrel"
 VZQ_TEXT = f"Le contrat avec {VZQ} a signé."
@@ -2068,11 +2067,6 @@ def _class_names(kind: str) -> list[str]:
     return names
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("a fresh composed name reached through an old key composed"),
-)
 @pytest.mark.parametrize("path", ["reuse", "delete"])
 def test_fresh_composed_name_not_reached_from_another(
     tmp_path: Path, db: Path, path: str
@@ -2095,11 +2089,6 @@ def test_fresh_composed_name_not_reached_from_another(
         assert FRESH not in nfc(run.flat) and XQ not in run.flat, run.shown
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("an old key tried in its composed form"),
-)
 def test_every_other_lookup_form_holds_a_mark() -> None:
     """T53 (v1.18; P0-b, the ruling's property): every form a lookup tries,
     other than the name composed and the name as given, holds an accent
@@ -2113,11 +2102,6 @@ def test_every_other_lookup_form_holds_a_mark() -> None:
     assert without == [], without  # expected failure
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("a name that lost two title words between two marks accepted"),
-)
 @pytest.mark.parametrize("path", ["cli_set", "cli_final"])
 def test_two_titles_between_marks_refused(
     tmp_path: Path, db: Path, monkeypatch: pytest.MonkeyPatch, path: str
@@ -2151,11 +2135,6 @@ def test_two_titles_between_marks_refused(
         assert len(_rows(db)) == 1, _rows(db)
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("a name that lost two title words, typed without accents"),
-)
 @pytest.mark.parametrize(
     "typed", ["Zorbome Melora Quentrel", "ZORBOME MELORA QUENTREL"]
 )
@@ -2169,11 +2148,6 @@ def test_two_titles_between_marks_refused_whatever_the_accents(
     assert typed.lower() not in written.lower(), repr(written)  # expected failure
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("a name cut between two marks or before « - » accepted"),
-)
 @pytest.mark.parametrize("kind", ["two_titles_between_marks", "space_before_hyphen"])
 def test_class_round_trip_refused(kind: str) -> None:
     """T56 (v1.18; the ruling's class): for invented names the old steps cut
@@ -2201,11 +2175,6 @@ def test_class_round_trip_refused(kind: str) -> None:
     assert accepted == [], shown  # expected failure
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("no forward comparison in the saved-real-name check"),
-)
 def test_forward_forms_refuse_without_the_reverse_repair(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -2329,11 +2298,6 @@ def _refused_for_vm(row: Entity, typed: str) -> bool:
     return refusal is not None and refusal.reason is CustomPseudonymRefusal.REAL_NAME
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("a « Maître » joined by a hyphen beside a cut name accepted"),
-)
 @pytest.mark.parametrize("case", list(JOINED))
 def test_maitre_joined_old_row_refused(tmp_path: Path, db: Path, case: str) -> None:
     """T58 (v1.19; the PO's NO-GO, its three shapes with invented names; rows
@@ -2348,11 +2312,6 @@ def test_maitre_joined_old_row_refused(tmp_path: Path, db: Path, case: str) -> N
     assert key not in nfc(written), repr(written)  # expected failure
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("a difference between the old key and today's accepted"),
-)
 @pytest.mark.parametrize("case", list(DIFFERENCES))
 def test_old_and_new_key_differences_refused(case: str) -> None:
     """T59 (v1.19, v1.21; rows b2, b3, b6, b7): for each name, the row the
@@ -2377,11 +2336,6 @@ def test_old_and_new_key_differences_refused(case: str) -> None:
     assert accepted == [], shown  # expected failure
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("a place key form without a mark"),
-)
 def test_place_key_with_a_preposition_forms_hold_a_mark() -> None:
     """T61 (v1.19; row c6; P0-b's property): « à de Zórbaville », whose key
     today still starts with a preposition, gets no lookup form without an

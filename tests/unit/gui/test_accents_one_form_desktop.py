@@ -757,17 +757,11 @@ def test_end_cut_hyphenated_first_name_refused(  # type: ignore[no-untyped-def]
 # (T54)
 # ---------------------------------------------------------------------------
 
-XFAIL = "Story 10.20 v1.18: reproduces {} on the unfixed code; fixed in Task 2.12"
 FRESH = "Vorlan ZorbôQuentrel"
 VZQ = "Vorlan Zorbôme Quentrel"
 MELORA_CUT = "Zorbôme Mélora Quentrel"
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("a fresh composed name reused through an old key composed"),
-)
 def test_desktop_fresh_composed_name_not_reused(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, monkeypatch
 ) -> None:
@@ -793,11 +787,6 @@ def test_desktop_fresh_composed_name_not_reused(  # type: ignore[no-untyped-def]
     assert len(_rows(db)) == 2, _rows(db)
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("a name that lost two title words between two marks accepted"),
-)
 @pytest.mark.parametrize("path", ["desktop_set", "desktop_final"])
 def test_two_titles_between_marks_refused(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, monkeypatch, path
@@ -845,11 +834,6 @@ def test_two_titles_between_marks_refused(  # type: ignore[no-untyped-def]
 PLACE_ELISION = "Maître d'Maître Zorbôme Quentrel"
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("a place with « Maître » glued to an elision accepted"),
-)
 @pytest.mark.parametrize("path", ["desktop_set", "desktop_final"])
 def test_place_maitre_after_an_elision_refused_desktop(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, monkeypatch, path
