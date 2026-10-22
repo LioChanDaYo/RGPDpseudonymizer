@@ -51,7 +51,7 @@ from gdpr_pseudonymizer.core.custom_pseudonym import (
     normalize_custom_pseudonym,
 )
 from gdpr_pseudonymizer.core.document_processor import DocumentProcessor
-from gdpr_pseudonymizer.core.mapping_key import saved_name_forms
+from gdpr_pseudonymizer.core.mapping_key import mapping_key, saved_name_forms
 from gdpr_pseudonymizer.data.database import open_database
 from gdpr_pseudonymizer.data.models import Entity
 from gdpr_pseudonymizer.data.repositories.mapping_repository import (
@@ -62,6 +62,7 @@ from gdpr_pseudonymizer.nlp.regex_matcher import RegexMatcher
 from gdpr_pseudonymizer.utils.file_handler import read_file
 from gdpr_pseudonymizer.utils.french_patterns import (
     FRENCH_TITLE_PATTERN,
+    strip_french_prepositions,
     strip_french_titles,
 )
 from gdpr_pseudonymizer.utils.tabular_reader import (
@@ -2253,3 +2254,184 @@ def test_guard_old_row_with_a_sign_still_reached(
         run = _delete(db, VZQ)
         assert _rows(db) == [], (_rows(db), run.shown)
         assert _erasures(db) == 1
+
+
+# ---------------------------------------------------------------------------
+# v1.19 and v1.21: the PO's NO-GO of v1.18 and of v1.19. Every place where
+# the old key and today's key can differ: « Maître » joined by a hyphen, an
+# apostrophe or a dot (T58, T59), a place's preposition after a leading
+# « Maître » (T59), a place key that still starts with a preposition (T61);
+# « Maître » glued to letters or after a mark kept (G23, G24)
+# ---------------------------------------------------------------------------
+
+JOINED = {
+    "zorbome": (
+        "Zorbôme Maître-Zorbal",
+        nfd("Zorbô") + nfd("Maître") + "-Zorbal",
+        "Zorbôme -Zorbal",
+    ),
+    "quovome": (
+        "Quovôme Maître-Zorbal",
+        nfd("Quovô") + nfd("Maître") + "-Zorbal",
+        "Quovôme -Zorbal",
+    ),
+    "zorbal_quovome": (
+        "Zorbal Maître-Quovôme",
+        "Zorbal " + nfd("Maître") + "-" + nfd("Quovô"),
+        "Zorbal -Quovôme",
+    ),
+}
+DIFFERENCES = {
+    "hyphen": (
+        PERSON,
+        [
+            "Zorbôme Maître-Zorbal",
+            "Quovôme-Maître Zorbal",
+            "Maître-Zorbôme Quentrel",
+            "ZorbôMe-Maître",
+            "Quovôme-Maître-Zorbal",
+        ],
+    ),
+    "apostrophe": (PERSON, ["Quovôme d'Maître", "Maître'Quovôme"]),
+    "dot": (PERSON, ["Quovôme Maître.Zorbal"]),
+    "two_titles": (PERSON, ["Quovôme Maître Maître-Zorbal"]),
+    "place_preposition": (
+        LOCATION,
+        [
+            "Maître de Zorbôme",
+            "Maître d'Zorbôme",
+            "Maître à Zorbôme",
+            "à Quovôme-Maître",
+            "Maître d'Maître Zorbôme Quentrel",
+            "Maître l'Maître Quovôme",
+            "Maître d'Dr Maître Mérizac",
+        ],
+    ),
+    "lone_preposition": (LOCATION, ["de Maître", "en MAÎTRE Maître"]),
+}
+
+
+def _saved_by_old_steps_as(text: str, entity_type: str) -> str:
+    """The name an earlier version saved for ``text``: titles taken off
+    anywhere, for a place its leading preposition, spaces collapsed."""
+    stripped = strip_french_titles(text)
+    if entity_type == LOCATION:
+        stripped = strip_french_prepositions(stripped)
+    return " ".join(stripped.split())
+
+
+def _refused_for_vm(row: Entity, typed: str) -> bool:
+    """Whether ``typed``, normalized as a custom pseudonym, is refused as a
+    real name for « Vorlan Mestrix » beside ``row``, as set time and
+    finalization check it."""
+    pseudonym = normalize_custom_pseudonym(typed, PERSON)
+    refusal = check_custom_pseudonym([row], VM, PERSON, pseudonym, VM_TEXT, {})
+    return refusal is not None and refusal.reason is CustomPseudonymRefusal.REAL_NAME
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason=XFAIL.format("a « Maître » joined by a hyphen beside a cut name accepted"),
+)
+@pytest.mark.parametrize("case", list(JOINED))
+def test_maitre_joined_old_row_refused(tmp_path: Path, db: Path, case: str) -> None:
+    """T58 (v1.19; the PO's NO-GO, its three shapes with invented names; rows
+    b2, b3): the row an earlier version saved from a name holding
+    « Maître- » beside a cut name refuses that name as a custom pseudonym;
+    today's key is not written."""
+    typed, stored, key = JOINED[case]
+    _pre(_saved_by_old_steps(nfd(typed)) == stored, "the old steps give the row")
+    _pre(mapping_key(typed, PERSON) == key, f"today's key: {key!r}")
+    _save(db, [(stored, PERSON, XV)])
+    _, written = _custom_for_vm(tmp_path, db, typed)
+    assert key not in nfc(written), repr(written)  # expected failure
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason=XFAIL.format("a difference between the old key and today's accepted"),
+)
+@pytest.mark.parametrize("case", list(DIFFERENCES))
+def test_old_and_new_key_differences_refused(case: str) -> None:
+    """T59 (v1.19, v1.21; rows b2, b3, b6, b7): for each name, the row the
+    old steps save from its decomposed form refuses today's key and that
+    key without accents, each normalized as a custom pseudonym."""
+    entity_type, names = DIFFERENCES[case]
+    accepted: list[str] = []
+    for name in names:
+        saved = _saved_by_old_steps_as(nfd(name), entity_type)
+        key = mapping_key(name, entity_type)
+        _pre(saved != nfd(key), f"the old row differs from today's key: {name!r}")
+        row = Entity(
+            entity_type=entity_type,
+            full_name=saved,
+            pseudonym_full=XV,
+            theme="neutral",
+        )
+        for spelling in (key, _without_accents(key)):
+            if not _refused_for_vm(row, spelling):
+                accepted.append(spelling)
+    shown = (len(accepted), accepted)
+    assert accepted == [], shown  # expected failure
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason=XFAIL.format("a place key form without a mark"),
+)
+def test_place_key_with_a_preposition_forms_hold_a_mark() -> None:
+    """T61 (v1.19; row c6; P0-b's property): « à de Zórbaville », whose key
+    today still starts with a preposition, gets no lookup form without an
+    accent mark but the name composed and as given."""
+    name = "à de Zórbaville"
+    _pre(mapping_key(name, LOCATION) == "de Zórbaville", "today's key")
+    without = [
+        form
+        for form in saved_name_forms(name, LOCATION)
+        if form not in (nfc(name), name) and not _has_mark(form)
+    ]
+    assert without == [], without  # expected failure
+
+
+def test_guard_maitre_glued_to_letters_kept() -> None:
+    """G23 (v1.19): « Maître » glued to the letters after it is no title:
+    the row the old steps save from nfd(« Quovôme Maîtrequix ») does not
+    refuse « Quovôme quix »."""
+    stored = nfd("Quovô") + nfd("Maîtrequix")
+    _pre(
+        _saved_by_old_steps(nfd("Quovôme Maîtrequix")) == stored,
+        "the old steps give the row",
+    )
+    fresh = Entity(
+        entity_type=PERSON,
+        full_name=mapping_key("Quovôme Maîtrequix", PERSON),
+        pseudonym_full=XV,
+        theme="neutral",
+    )
+    _pre(not _refused_for_vm(fresh, "Quovôme quix"), "a fresh row does not refuse it")
+    old = Entity(
+        entity_type=PERSON, full_name=stored, pseudonym_full=XV, theme="neutral"
+    )
+    assert not _refused_for_vm(old, "Quovôme quix")
+
+
+def test_guard_maitre_glued_after_a_mark_kept() -> None:
+    """G24 (v1.19): « Maître » glued to « ô » is no title unless title words
+    were taken off between: the row nfd(« ZorbôMaître Quentrel ») does not
+    refuse « Zorbô Quentrel »."""
+    stored = nfd("ZorbôMaître Quentrel")
+    _pre(_saved_by_old_steps(stored) == stored, "the old steps leave the row whole")
+    fresh = Entity(
+        entity_type=PERSON,
+        full_name=mapping_key("ZorbôMaître Quentrel", PERSON),
+        pseudonym_full=XV,
+        theme="neutral",
+    )
+    _pre(not _refused_for_vm(fresh, "Zorbô Quentrel"), "a fresh row does not refuse it")
+    old = Entity(
+        entity_type=PERSON, full_name=stored, pseudonym_full=XV, theme="neutral"
+    )
+    assert not _refused_for_vm(old, "Zorbô Quentrel")

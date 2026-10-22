@@ -37,6 +37,7 @@ import pytest
 from PySide6.QtWidgets import QInputDialog
 
 from gdpr_pseudonymizer.core.document_processor import DocumentProcessor
+from gdpr_pseudonymizer.core.mapping_key import mapping_key
 from gdpr_pseudonymizer.data.database import init_database, open_database
 from gdpr_pseudonymizer.data.models import Entity
 from gdpr_pseudonymizer.data.repositories.mapping_repository import (
@@ -48,7 +49,10 @@ from gdpr_pseudonymizer.gui.workers.detection_worker import (
     DetectionWorker,
 )
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
-from gdpr_pseudonymizer.utils.french_patterns import strip_french_titles
+from gdpr_pseudonymizer.utils.french_patterns import (
+    strip_french_prepositions,
+    strip_french_titles,
+)
 from gdpr_pseudonymizer.validation.models import EntityReviewState
 
 # _launch_worker disconnects two slots that are not connected yet
@@ -827,6 +831,63 @@ def test_two_titles_between_marks_refused(  # type: ignore[no-untyped-def]
         assert dialogs.calls, dialogs.calls
     else:
         name_written = written is not None and MELORA_CUT in nfc(written)
+        assert not name_written, repr(written)  # expected failure
+        assert dialogs.calls, dialogs.calls
+        assert written is None and len(_rows(db)) == 1, (written, _rows(db))
+
+
+# ---------------------------------------------------------------------------
+# v1.21: the PO's NO-GO of v1.19 in the desktop app: a place an earlier
+# version saved with « Maître » glued to an elision after a leading
+# « Maître » (T62)
+# ---------------------------------------------------------------------------
+
+PLACE_ELISION = "Maître d'Maître Zorbôme Quentrel"
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason=XFAIL.format("a place with « Maître » glued to an elision accepted"),
+)
+@pytest.mark.parametrize("path", ["desktop_set", "desktop_final"])
+def test_place_maitre_after_an_elision_refused_desktop(  # type: ignore[no-untyped-def]
+    qtbot, main_window, tmp_path, monkeypatch, path
+) -> None:
+    """T62 (v1.21; the PO's NO-GO of v1.19; row b6): the place row an
+    earlier version saved from nfd(« Maître d'Maître Zorbôme Quentrel »)
+    refuses today's key « Zorbôme Quentrel » in the custom pseudonym dialog
+    (the row saved first) and at finalization (the row saved after the
+    dialog accepted it)."""
+    stored = nfd("Maître d'Maître Zorbô") + "Quentrel"
+    old = " ".join(
+        strip_french_prepositions(strip_french_titles(nfd(PLACE_ELISION))).split()
+    )
+    _pre(old == stored, "the old steps on the decomposed place give the row")
+    key = mapping_key(PLACE_ELISION, "LOCATION")
+    _pre(key == "Zorbôme Quentrel", f"today's key: {key!r}")
+    dialogs = _Dialogs(monkeypatch)
+    db = _new_db(tmp_path)
+    if path == "desktop_set":
+        _save(db, [(stored, "LOCATION", XV)])
+    sd = _Single(
+        qtbot, main_window, tmp_path, "Vorlan Mestrix valide.", [(VM, PERSON)], db
+    )
+    row = sd.rows()[0]
+    _type_in(monkeypatch, key)
+    sd.vs._show_change_pseudonym_dialog(row.entity_id)
+    if path == "desktop_final":
+        _pre(dialogs.calls == [], f"set without a message: {dialogs.calls!r}")
+        _save(db, [(stored, "LOCATION", XV)])
+    sd.accept_pending()
+    written = sd.finalize(dialogs)
+    if path == "desktop_set":
+        if written is None:
+            pytest.fail(f"PRE: written: {dialogs.calls!r}")
+        assert key not in nfc(written), repr(written)  # expected failure
+        assert dialogs.calls, dialogs.calls
+    else:
+        name_written = written is not None and key in nfc(written)
         assert not name_written, repr(written)  # expected failure
         assert dialogs.calls, dialogs.calls
         assert written is None and len(_rows(db)) == 1, (written, _rows(db))
