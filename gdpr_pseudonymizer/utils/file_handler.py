@@ -351,6 +351,10 @@ def read_csv(file_path: str) -> str:
 def write_file(file_path: str, content: str) -> None:
     """Write text content to file.
 
+    Story 10.20 (v1.7, the Codex review's P2; AC5): the text is written in
+    composed form (Unicode NFC), so a pseudonym an earlier version saved with
+    separate accent marks is written as the usual letters too.
+
     Args:
         file_path: Path to file (absolute or relative)
         content: Text content to write
@@ -365,7 +369,7 @@ def write_file(file_path: str, content: str) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
 
         with open(path, "w", encoding="utf-8") as f:
-            f.write(content)
+            f.write(composed(content))
     except PermissionError as e:
         raise FileProcessingError(f"Permission denied: {file_path}") from e
     except OSError as e:

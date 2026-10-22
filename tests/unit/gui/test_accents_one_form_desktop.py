@@ -587,15 +587,9 @@ def test_guard_desktop_correction_typed_decomposed(  # type: ignore[no-untyped-d
 # a database with no old rows as today (G14)
 # ---------------------------------------------------------------------------
 
-XFAIL = "Story 10.20 v1.7: reproduces {} on the unfixed code; fixed in Task 2.9"
 PLACE_TEXT = "Le contrat a été signé à Zórbaville."
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("a custom pseudonym equal to an old saved name accepted"),
-)
 def test_desktop_custom_pseudonym_equal_to_an_old_saved_name_refused(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, monkeypatch
 ) -> None:
@@ -620,11 +614,6 @@ def test_desktop_custom_pseudonym_equal_to_an_old_saved_name_refused(  # type: i
     assert refusals, refusals
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("a custom pseudonym set on a name saved decomposed"),
-)
 def test_desktop_custom_pseudonym_for_a_name_saved_decomposed_refused(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, monkeypatch
 ) -> None:

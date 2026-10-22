@@ -14,13 +14,14 @@ saved row is rewritten (Lionel, 2026-10-21, Qa).
 
 from __future__ import annotations
 
+import itertools
 import unicodedata
 
 from gdpr_pseudonymizer.utils.french_patterns import (
     strip_french_prepositions,
     strip_french_titles,
 )
-from gdpr_pseudonymizer.utils.text_form import composed
+from gdpr_pseudonymizer.utils.text_form import composed, is_mark
 
 # The only accented words of FRENCH_TITLE_PATTERN (every type) and of
 # FRENCH_PREPOSITION_PATTERN (LOCATION), in the case forms the patterns match
@@ -60,16 +61,94 @@ def mapping_key(entity_text: str, entity_type: str) -> str:
     return _key_steps(composed(entity_text), entity_type)
 
 
+# Story 10.20, v1.7 (the Codex review's P1-1): the per-word mixes of composed
+# and decomposed words are tried for a name of at most this many accented
+# words (16 mixes); a longer name, its two whole forms only.
+MAX_MIXED_WORDS = 4
+
+# The kinds of an old key (Story 10.20, v1.7): the text an earlier version
+# was given, kept whole ("whole") or with a decomposed title or preposition
+# kept in it ("titled"); cut by the old title pattern at a mark in a way that
+# leaves a sign no correct name has, a word starting with a combining mark or
+# two words glued together ("sign"); or cut without such a sign ("cut").
+_WHOLE = "whole"
+_TITLED = "titled"
+_SIGN = "sign"
+_CUT = "cut"
+
+
+def _nfd(text: str) -> str:
+    return unicodedata.normalize("NFD", text)
+
+
+def _key_texts(key: str, entity_type: str) -> list[tuple[str, bool]]:
+    """The texts an earlier version could have been given for a name whose
+    key is ``key``, each with whether a word was inserted (a title, or a
+    LOCATION's preposition): every per-word mix of the words' composed and
+    decomposed forms (every word decomposed first) when at most
+    ``MAX_MIXED_WORDS`` words carry an accent, else the two whole forms; then
+    each of the two whole forms with a decomposed « Maître » (each case form)
+    at each word position, and for a LOCATION with a decomposed « à » or
+    « À » in front."""
+    words = key.split()
+    if not words:
+        return []
+    choices = [(_nfd(word), word) if _nfd(word) != word else (word,) for word in words]
+    accented = sum(1 for choice in choices if len(choice) == 2)
+    decomposed = [_nfd(word) for word in words]
+    if accented <= MAX_MIXED_WORDS:
+        mixes = [" ".join(mix) for mix in itertools.product(*choices)]
+    else:
+        mixes = [" ".join(decomposed), " ".join(words)]
+    texts = [(mix, False) for mix in mixes]
+    wholes = (decomposed, words)
+    for whole in wholes:
+        for title in FORMER_TITLE_WORDS:
+            for position in range(len(whole) + 1):
+                inserted = [*whole[:position], _nfd(title), *whole[position:]]
+                texts.append((" ".join(inserted), True))
+    if entity_type == "LOCATION":
+        for whole in wholes:
+            for preposition in FORMER_PREPOSITION_WORDS:
+                texts.append((" ".join([_nfd(preposition), *whole]), True))
+    return texts
+
+
+def _former(entity_text: str, entity_type: str) -> list[tuple[str, str]]:
+    """The keys an earlier version saved for this text, replayed, each with
+    its kind, today's key left out. P0-1 (Lionel, 2026-10-22, "A: Only with a
+    sign (Rec.)"): a "cut" key could be another person's name, so it is
+    dropped."""
+    key = mapping_key(entity_text, entity_type)
+    found: dict[str, str] = {}
+    for text, inserted in _key_texts(key, entity_type):
+        old = _key_steps(text, entity_type)
+        if not old or old == key or old in found:
+            continue
+        if old == text:
+            found[old] = _TITLED if inserted else _WHOLE
+        elif any(is_mark(word[0]) for word in old.split()) or len(old.split()) < len(
+            text.split()
+        ):
+            found[old] = _SIGN
+        else:
+            found[old] = _CUT
+    return [(old, kind) for old, kind in found.items() if kind != _CUT]
+
+
 def former_keys(entity_text: str, entity_type: str) -> list[str]:
     """The keys an earlier version could have saved for this text, read with
-    separate accent marks (Unicode NFD) (Story 10.20, Lionel's Qa).
+    separate accent marks (Unicode NFD) (Story 10.20, Lionel's Qa; v1.7, the
+    Codex review of 186972b).
 
-    In order: the key's steps on the decomposed text (a title pattern cut at
-    a mark: « Mélora Quentrel » saved as « lora Quentrel » after a lone
-    U+0301); the decomposed key; the key's steps on the decomposed key with
-    « Maître » in front, in each case form, for every type, and with « à » or
-    « À » in front for a LOCATION (a decomposed title or preposition kept in
-    the key). Without duplicates and without the composed key itself.
+    The old steps (titles taken off anywhere, a LOCATION's leading
+    preposition, spaces collapsed) replayed on each per-word mix of today's
+    key and on its two whole forms with a decomposed « Maître » or (for a
+    LOCATION) « à » kept in it (``_key_texts``). A key the old steps leave as
+    it was ("whole" or "titled"), or cut leaving a sign ("sign": « Mélora
+    Quentrel » saved as « lora Quentrel » after a lone U+0301; « Zorbôme
+    Quentrel » glued as « ZorbôQuentrel »); a key cut without a sign is never
+    returned (Lionel's P0-1). Without duplicates and without today's key.
 
     Args:
         entity_text: The text looked up (a key, or a name as typed)
@@ -78,23 +157,24 @@ def former_keys(entity_text: str, entity_type: str) -> list[str]:
     Returns:
         The former keys, possibly empty
     """
-    key = mapping_key(entity_text, entity_type)
-    words = FORMER_TITLE_WORDS + (
-        FORMER_PREPOSITION_WORDS if entity_type == "LOCATION" else ()
-    )
-    candidates = [
-        _key_steps(unicodedata.normalize("NFD", entity_text), entity_type),
-        unicodedata.normalize("NFD", key),
-        *(
-            _key_steps(unicodedata.normalize("NFD", f"{word} {key}"), entity_type)
-            for word in words
-        ),
+    return [old for old, _ in _former(entity_text, entity_type)]
+
+
+def saved_name_forms(entity_text: str, entity_type: str) -> list[str]:
+    """Every text a saved row of this name and type may hold (Story 10.20,
+    v1.7; Lionel's Qa and Qb), in the order a lookup prefers them: the
+    composed text; the keys an earlier version saved (``former_keys``); the
+    composed form of each "titled" and "sign" key, as ``import-mappings``
+    saves a row it copies (the Codex review's P1-3); the text as given.
+    Without duplicates; the composed text first (rule A)."""
+    former = _former(entity_text, entity_type)
+    forms = [
+        composed(entity_text),
+        *(old for old, _ in former),
+        *(composed(old) for old, kind in former if kind in (_TITLED, _SIGN)),
+        entity_text,
     ]
-    return [
-        candidate
-        for candidate in dict.fromkeys(candidates)
-        if candidate and candidate != key
-    ]
+    return list(dict.fromkeys(forms))
 
 
 def search_forms(search_text: str, entity_type: str) -> list[str]:

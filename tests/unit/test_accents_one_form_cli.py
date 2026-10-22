@@ -1300,7 +1300,6 @@ def test_guard_search_with_a_title_as_today(
 # today (G14)
 # ---------------------------------------------------------------------------
 
-XFAIL = "Story 10.20 v1.7: reproduces {} on the unfixed code; fixed in Task 2.9"
 VZ = "Vorlan Zorbô"
 VZM = "Vorlan Zorbôme"
 EZ = "Éloria Zórbalia"
@@ -1383,11 +1382,6 @@ def _process_text(
     return _process(source, output, db, names, [ENTER, SPACE]), output
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("another name's row reached through a name cut at its end"),
-)
 @pytest.mark.parametrize("path", ["reuse", "delete"])
 def test_end_cut_row_is_not_reached_from_another_name(
     tmp_path: Path, db: Path, path: str
@@ -1411,11 +1405,6 @@ def test_end_cut_row_is_not_reached_from_another_name(
         assert _erasures(db) == 0
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("a custom pseudonym equal to an old saved name accepted"),
-)
 @pytest.mark.parametrize(
     "case", ["maitre_eloria", "a_zorbaville", "melora", "zorbome", "cabinet_maitre"]
 )
@@ -1436,11 +1425,6 @@ def test_cli_custom_pseudonym_equal_to_an_old_saved_name_refused(
     assert REAL_NAME_LINE in run.flat, run.shown
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("a row mixing composed and decomposed words missed"),
-)
 @pytest.mark.parametrize(
     "path", ["reuse", "delete_with_composed_row", "import_duplicate"]
 )
@@ -1474,11 +1458,6 @@ def test_mixed_old_row_reached(tmp_path: Path, db: Path, path: str) -> None:
         assert pseudonyms == [XV], pseudonyms  # expected failure
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("an imported old row (composed by the import) missed"),
-)
 @pytest.mark.parametrize("case", ["maitre_eloria", "a_zorbaville", "zorbome"])
 def test_imported_old_row_reached(tmp_path: Path, db: Path, case: str) -> None:
     """T38 (v1.7, Codex P1-3): a row an earlier version saved, imported
@@ -1502,11 +1481,6 @@ def test_imported_old_row_reached(tmp_path: Path, db: Path, case: str) -> None:
     assert _rows(db) == []
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("a title kept inside an old organisation's name missed"),
-)
 @pytest.mark.parametrize("path", ["reuse", "delete", "search"])
 def test_title_inside_an_old_name_reached(tmp_path: Path, db: Path, path: str) -> None:
     """T39 (v1.7, Codex P1-4): the ORG row nfd(« Cabinet Maître Éloria
@@ -1536,11 +1510,6 @@ def test_title_inside_an_old_name_reached(tmp_path: Path, db: Path, path: str) -
         assert XV in run.flat, run.shown  # expected failure
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("a reused pseudonym saved decomposed written decomposed"),
-)
 @pytest.mark.parametrize("ext", [".txt", ".xlsx", ".csv"])
 def test_reused_pseudonym_saved_decomposed_written_composed(
     tmp_path: Path, db: Path, ext: str
@@ -1558,11 +1527,6 @@ def test_reused_pseudonym_saved_decomposed_written_composed(
     assert XVE in written
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("a search listing a name cut from the search"),
-)
 @pytest.mark.parametrize("saved", ["old_row_decomposed", "clean_database_composed"])
 def test_search_never_lists_a_name_cut_from_the_search(
     tmp_path: Path, db: Path, saved: str

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
-from gdpr_pseudonymizer.core.mapping_key import former_keys, search_forms
+from gdpr_pseudonymizer.core.mapping_key import saved_name_forms, search_forms
 from gdpr_pseudonymizer.data.models import Entity
 from gdpr_pseudonymizer.exceptions import DatabaseError, DuplicateEntityError
 from gdpr_pseudonymizer.utils.text_form import composed
@@ -22,14 +22,9 @@ def _form_type(entity_type: str) -> str:
 
 def _name_forms(full_name: str, entity_type: str) -> list[str]:
     """Every text a row of this name and type may hold (Story 10.20, Lionel's
-    Qa and Qb), in the order a lookup prefers them: the composed name, the
-    keys an earlier version could have saved for it read with separate
-    accent marks (``former_keys``), then the name as given."""
-    return list(
-        dict.fromkeys(
-            [composed(full_name), *former_keys(full_name, entity_type), full_name]
-        )
-    )
+    Qa and Qb; v1.7, ``saved_name_forms``), in the order a lookup prefers
+    them: the composed name first."""
+    return saved_name_forms(full_name, entity_type)
 
 
 class MappingRepository(ABC):

@@ -41,7 +41,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import TYPE_CHECKING, Any
 
-from gdpr_pseudonymizer.core.mapping_key import mapping_key
+from gdpr_pseudonymizer.core.mapping_key import mapping_key, saved_name_forms
 from gdpr_pseudonymizer.utils.text_form import word_pattern
 
 if TYPE_CHECKING:
@@ -554,11 +554,18 @@ def check_custom_pseudonym(
         The refusal (Q1, Q-D, Q2, then Q-C), or None
     """
     rows = list(stored_rows) if stored_rows is not None else []
-    for row in rows:  # Q1: the name already has a stored pseudonym
-        if row.full_name == name and row.entity_type == entity_type:
-            return Refusal(
-                CustomPseudonymRefusal.ALREADY_STORED, pseudonym, row.pseudonym_full
-            )
+    # Q1: the name already has a stored pseudonym, saved in any form a lookup
+    # reaches (Story 10.20, v1.7, the Codex review's P1-2); the row whose
+    # form ranks first names the pseudonym kept (rule A)
+    forms = saved_name_forms(name, entity_type)
+    saved = [
+        row for row in rows if row.entity_type == entity_type and row.full_name in forms
+    ]
+    if saved:
+        first = min(saved, key=lambda row: forms.index(row.full_name))
+        return Refusal(
+            CustomPseudonymRefusal.ALREADY_STORED, pseudonym, first.pseudonym_full
+        )
     others = {
         key: value for key, value in other_customs.items() if key != (name, entity_type)
     }
@@ -598,11 +605,29 @@ def check_custom_pseudonym(
             return Refusal(
                 CustomPseudonymRefusal.REAL_NAME, pseudonym, run, in_document=True
             )
-    stored_names = {fold(row.full_name) for row in rows}
-    for run in _word_runs(pseudonym, entity_type):  # Q-C2: a stored full name
-        if fold(run) in stored_names:
+    # Q-C2: a stored full name. Story 10.20 (v1.7, the Codex review's P0-2):
+    # the saved names an earlier version kept a title or preposition in, or
+    # cut leaving a sign, count too: each row's key read today (folded), and
+    # each row's name with its accent marks kept, against every form a
+    # lookup of the run reaches
+    stored_names = {fold(row.full_name) for row in rows} | {
+        fold(mapping_key(row.full_name, row.entity_type)) for row in rows
+    }
+    saved_texts = {_saved_text(row.full_name) for row in rows}
+    for run in _word_runs(pseudonym, entity_type):
+        if fold(run) in stored_names or any(
+            _saved_text(form) in saved_texts
+            for kind in ("PERSON", "LOCATION")
+            for form in saved_name_forms(run, kind)
+        ):
             return Refusal(CustomPseudonymRefusal.REAL_NAME, pseudonym, run)
     return None
+
+
+def _saved_text(text: str) -> str:
+    """A saved name compared as stored: casefolded, spaces collapsed, accent
+    marks kept (Story 10.20, v1.7)."""
+    return " ".join(text.casefold().split())
 
 
 def _engine_ambiguity(name: str, entity_type: str) -> tuple[bool, str | None]:

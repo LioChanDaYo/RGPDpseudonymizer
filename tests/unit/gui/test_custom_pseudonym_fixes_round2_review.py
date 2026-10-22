@@ -105,7 +105,7 @@ def test_desktop_accents_refused_when_set(  # type: ignore[no-untyped-def]
     sd.accept_pending()
     written = sd.finalize(dialogs)
     assert written is not None, dialogs.calls
-    (place,) = _replacements(written, text, [(0, len(name_text))])
+    (place,) = _replacements(written, _nfc(text), [(0, len(_nfc(name_text)))])
     assert not {"quentrel", "zorbalia"} & set(_words(place)), written
     stored = _stored(db, name_text, "PERSON")
     assert stored is not None and stored[3] == place, stored
@@ -171,7 +171,7 @@ def test_desktop_accents_without_shared_word_accepted(  # type: ignore[no-untype
     assert row.custom_pseudonym == _nfc(typed)
     sd.accept_pending()
     written = sd.finalize(dialogs)
-    assert written == _nfc(typed) + text[len(name_text) :], written
+    assert written == _nfc(typed + text[len(name_text) :]), written
     stored = _stored(db, name_text, "PERSON")
     assert stored is not None and stored[3] == _nfc(typed), stored
 
