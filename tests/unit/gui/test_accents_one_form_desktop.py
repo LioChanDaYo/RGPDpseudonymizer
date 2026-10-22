@@ -663,3 +663,94 @@ def test_guard_clean_database_as_today(  # type: ignore[no-untyped-def]
     assert refusals, refusals
     assert len(_rows(db)) == 1, _rows(db)
     assert "Xantorville" in written, repr(written)
+
+
+# ---------------------------------------------------------------------------
+# v1.10 and v1.11: the second Codex review of 56feb3d in the desktop app: a
+# search with a title (T44), and a hyphenated first name an old row was cut
+# from, as a custom pseudonym (T47)
+# ---------------------------------------------------------------------------
+
+XFAIL = "Story 10.20 v1.10: reproduces {} on the unfixed code; fixed in Task 2.10"
+MAITREQUIX = "Éloria Maîtrequix"
+HYPHEN_CUT = "Zorbôme-Quovan Quentrel"
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason=XFAIL.format("a search with a title listing another name"),
+)
+@pytest.mark.parametrize("path", ["inline", "worker"])
+def test_search_with_a_title_lists_no_other_name(  # type: ignore[no-untyped-def]
+    qtbot, main_window, tmp_path, path
+) -> None:
+    """T44 (v1.10; Codex review 2, P1; AC13): the database screen's search
+    « Mme Éloria », inline and in ``DatabaseWorker``, lists no « Éloria
+    Maîtrequix »."""
+    from gdpr_pseudonymizer.gui.workers.database_worker import DatabaseWorker
+
+    db = _new_db(tmp_path)
+    _save(db, [(MAITREQUIX, PERSON, XV), (VM, PERSON, XQ)])
+    with open_database(db, PASSPHRASE) as session:
+        entities = SQLiteMappingRepository(session).find_all()
+    if path == "inline":
+        screen = main_window.stack.widget(main_window._screens["database"])
+        screen._entities = entities
+        screen._populate_entity_table()
+        screen.search_field.setText("Mme Éloria")
+        screen._apply_filters()
+        shown = screen.entity_table.rowCount()
+        _pre(shown <= 2, f"at most two rows shown: {shown}")
+        assert shown == 0, shown  # expected failure
+    else:
+        worker = DatabaseWorker(
+            "search", entities=entities, search_text="Mme Éloria", type_filter=""
+        )
+        results: list[Any] = []
+        worker.signals.finished.connect(results.append)
+        worker.run()
+        _pre(len(results) == 1, f"one result: {results!r}")
+        found = [entity.pseudonym_full for entity in results[0]]
+        assert found == [], found  # expected failure
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason=XFAIL.format("a hyphenated first name cut before its hyphen accepted"),
+)
+@pytest.mark.parametrize("path", ["desktop_set", "desktop_final"])
+def test_end_cut_hyphenated_first_name_refused(  # type: ignore[no-untyped-def]
+    qtbot, main_window, tmp_path, monkeypatch, path
+) -> None:
+    """T47 (v1.11; Lionel's end-cut answer A; the PO's case): the row an
+    earlier version saved from nfd(« Zorbôme-Quovan Quentrel ») refuses that
+    name in the custom pseudonym dialog (the row saved first) and at
+    finalization (the row saved after the dialog accepted it)."""
+    dialogs = _Dialogs(monkeypatch)
+    db = _new_db(tmp_path)
+    stored = nfd("Zorbô") + "-Quovan Quentrel"
+    if path == "desktop_set":
+        _save(db, [(stored, PERSON, XV)])
+    sd = _Single(
+        qtbot, main_window, tmp_path, "Vorlan Mestrix valide.", [(VM, PERSON)], db
+    )
+    row = sd.rows()[0]
+    _type_in(monkeypatch, HYPHEN_CUT)
+    sd.vs._show_change_pseudonym_dialog(row.entity_id)
+    if path == "desktop_final":
+        _pre(dialogs.calls == [], f"set without a message: {dialogs.calls!r}")
+        _save(db, [(stored, PERSON, XV)])
+    sd.accept_pending()
+    written = sd.finalize(dialogs)
+    if path == "desktop_set":
+        if written is None:
+            pytest.fail(f"PRE: written: {dialogs.calls!r}")
+        assert HYPHEN_CUT not in nfc(written), repr(written)  # expected failure
+        assert dialogs.calls, dialogs.calls
+    else:
+        name_written = written is not None and HYPHEN_CUT in nfc(written)
+        assert not name_written, repr(written)  # expected failure
+        assert dialogs.calls, dialogs.calls
+        assert written is None and len(_rows(db)) == 1, (written, _rows(db))

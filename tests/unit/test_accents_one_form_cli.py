@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import csv
 import dataclasses
+import itertools
 import re
 import sqlite3
 import unicodedata
@@ -43,7 +44,10 @@ from rich.prompt import Confirm, Prompt
 from typer.testing import CliRunner
 
 from gdpr_pseudonymizer.cli.main import app
-from gdpr_pseudonymizer.core.custom_pseudonym import check_custom_pseudonym
+from gdpr_pseudonymizer.core.custom_pseudonym import (
+    CustomPseudonymRefusal,
+    check_custom_pseudonym,
+)
 from gdpr_pseudonymizer.core.document_processor import DocumentProcessor
 from gdpr_pseudonymizer.data.database import open_database
 from gdpr_pseudonymizer.data.models import Entity
@@ -53,6 +57,10 @@ from gdpr_pseudonymizer.data.repositories.mapping_repository import (
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 from gdpr_pseudonymizer.nlp.regex_matcher import RegexMatcher
 from gdpr_pseudonymizer.utils.file_handler import read_file
+from gdpr_pseudonymizer.utils.french_patterns import (
+    FRENCH_TITLE_PATTERN,
+    strip_french_titles,
+)
 from gdpr_pseudonymizer.utils.tabular_reader import (
     read_csv_structured,
     read_excel_structured,
@@ -1602,3 +1610,324 @@ def test_guard_old_cut_row_reached_by_the_shorter_name(
         assert run.exit_code == 0, run.shown
         assert _rows(db) == []
         assert _erasures(db) == 1
+
+
+# ---------------------------------------------------------------------------
+# v1.10 and v1.11: the second Codex review of 56feb3d. The saved-real-name
+# check (Q-C2) against names an earlier version cut or kept a title in
+# (T42, T43, T45, T46, T47, G16-G19), and searches with a title (T44)
+# ---------------------------------------------------------------------------
+
+XFAIL = "Story 10.20 v1.10: reproduces {} on the unfixed code; fixed in Task 2.10"
+MELORA_ZO = "Mélora Zórbalia"
+MAITREQUIX = "Éloria Maîtrequix"
+HYPHEN_CUT = "Zorbôme-Quovan Quentrel"
+PLACE_HYPHEN = "Zorbal-à-Quentrix"
+VM_TEXT = "Vorlan Mestrix valide."
+READY_QUESTION = "Ready to process document with validated entities?"
+
+
+def _custom_for_vm(tmp_path: Path, db: Path, typed: str) -> tuple[Run, str]:
+    """[C] ``typed`` for « Vorlan Mestrix »; the group shown again after a
+    refusal, Space. The run and the written text (after the preconditions)."""
+    source, output = tmp_path / "in.txt", tmp_path / "out.txt"
+    source.write_text(VM_TEXT, encoding="utf-8")
+    run = _process(source, output, db, [(VM, PERSON)], [ENTER, "c", SPACE], [typed])
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    return run, _written(output)
+
+
+def _old_title_words() -> list[str]:
+    """The title words of the old title pattern, read from the pattern itself
+    (each alternative; one ending in ``\\.?`` with and without its « . »)."""
+    head, tail = r"\b(?:", r")(?!\w)\s*"
+    _pre(
+        FRENCH_TITLE_PATTERN.startswith(head) and FRENCH_TITLE_PATTERN.endswith(tail),
+        "the title pattern has its known shape",
+    )
+    words: list[str] = []
+    for alternative in FRENCH_TITLE_PATTERN[len(head) : -len(tail)].split("|"):
+        if alternative.endswith(r"\.?"):
+            words += [alternative[:-3], alternative[:-3] + "."]
+        else:
+            words.append(alternative)
+    return words
+
+
+def _saved_by_old_steps(text: str) -> str:
+    """The name an earlier version saved for ``text`` (a PERSON): titles
+    taken off anywhere, spaces collapsed."""
+    return " ".join(strip_french_titles(text).split())
+
+
+def _mixes(name: str) -> list[str]:
+    """Every per-word mix of the name's composed and decomposed words."""
+    choices = [dict.fromkeys((nfc(word), nfd(word))) for word in name.split()]
+    return [" ".join(mix) for mix in itertools.product(*choices)]
+
+
+def _round_trip_names(kind: str) -> list[str]:
+    """Invented names the old pattern cuts: a title word at a word start
+    whose last letter carries the accent (« Mélora »), alone or after a
+    hyphen (``word_start``); « Zorbô » joined to a title word before a word
+    or before « de la » (``joined``); both in one name (``two_sites``). As
+    written, all caps and lowercase; « Maître » nowhere, first or last."""
+    names: list[str] = []
+    for title in _old_title_words():
+        started = nfc(title + ACUTE + "lora")
+        joined = "Zorbô" + title
+        if kind == "word_start":
+            shapes = [f"{started} Quentrel", f"Vorlan-{started} Quentrel"]
+        elif kind == "joined":
+            shapes = [f"{joined} Quentrel", f"{joined} de la Quentrel"]
+        else:
+            shapes = [f"{started} {joined} Quentrel"]
+        for shape in shapes:
+            for cased in (shape, shape.upper(), shape.lower()):
+                for maitre in ("", "first", "last"):
+                    if maitre == "first":
+                        cased_name = f"{_case_like(cased, 'Maître')} {cased}"
+                    elif maitre == "last":
+                        cased_name = f"{cased} {_case_like(cased, 'Maître')}"
+                    else:
+                        cased_name = cased
+                    names.append(cased_name)
+    return names
+
+
+def _case_like(model: str, word: str) -> str:
+    """``word`` in the case of ``model`` (all caps, lowercase, or as given)."""
+    if model == model.upper():
+        return word.upper()
+    if model == model.lower():
+        return word.lower()
+    return word
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason=XFAIL.format("a mixed old row with a title and a lone mark accepted"),
+)
+@pytest.mark.parametrize("path", ["cli", "check"])
+def test_mixed_old_row_with_a_title_and_a_lone_mark_refused(
+    tmp_path: Path, db: Path, path: str
+) -> None:
+    """T42 (v1.10; Codex review 2, P0): the row an earlier version saved from
+    nfd(« Maître Mélora ») + « Zórbalia » refuses « Mélora Zórbalia » as a
+    custom pseudonym, at set time and at finalization (the same check)."""
+    stored = nfd("Maître") + " " + ACUTE + "lora Zórbalia"
+    if path == "cli":
+        _save(db, [(stored, PERSON, XV)])
+        _, written = _custom_for_vm(tmp_path, db, MELORA_ZO)
+        assert MELORA_ZO not in nfc(written), repr(written)  # expected failure
+    else:
+        row = Entity(
+            entity_type=PERSON, full_name=stored, pseudonym_full=XV, theme="neutral"
+        )
+        refusal = check_custom_pseudonym([row], VM, PERSON, MELORA_ZO, VM_TEXT, {})
+        assert refusal is not None, refusal  # expected failure
+        assert refusal.reason is CustomPseudonymRefusal.REAL_NAME, refusal
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason=XFAIL.format("an old row's name typed without its accent accepted"),
+)
+@pytest.mark.parametrize("typed", ["Melora Quentrel", "MELORA QUENTREL"])
+def test_old_row_refused_whatever_the_accents_typed(
+    tmp_path: Path, db: Path, typed: str
+) -> None:
+    """T43 (v1.10; Codex review 2, P0): the row « lora Quentrel » after a
+    lone U+0301 refuses « Melora Quentrel », whatever its accents and
+    capitals."""
+    _save(db, [(ACUTE + "lora Quentrel", PERSON, XV)])
+    _, written = _custom_for_vm(tmp_path, db, typed)
+    assert typed.lower() not in written.lower(), repr(written)  # expected failure
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason=XFAIL.format("a search with a title listing another name"),
+)
+@pytest.mark.parametrize("command", SEARCHES)
+def test_search_with_a_title_lists_no_other_name(
+    tmp_path: Path, db: Path, command: str
+) -> None:
+    """T44 (v1.10; Codex review 2, P1; AC13): ``--search "Mme Éloria"`` lists
+    no « Éloria Maîtrequix »."""
+    _save(db, [(MAITREQUIX, PERSON, XV)])
+    run = _invoke([command, "--db", str(db), "--search", "Mme Éloria"])
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    assert XV not in run.flat, run.shown  # expected failure
+
+
+@pytest.mark.parametrize(
+    "kind",
+    [
+        pytest.param(
+            "word_start",
+            marks=pytest.mark.xfail(
+                strict=True,
+                raises=AssertionError,
+                reason=XFAIL.format("a name whose title word started a word missed"),
+            ),
+        ),
+        "joined",
+        pytest.param(
+            "two_sites",
+            marks=pytest.mark.xfail(
+                strict=True,
+                raises=AssertionError,
+                reason=XFAIL.format("a name cut at two sites missed"),
+            ),
+        ),
+    ],
+)
+def test_round_trip_check_refuses_the_original(kind: str) -> None:
+    """T45 (v1.10; the ruling's proof (1)): for invented names the old title
+    pattern cuts, every name an earlier version could have saved (each
+    per-word mix of composed and decomposed words, through the old steps)
+    refuses the original as a custom pseudonym."""
+    cases = [
+        (original, _saved_by_old_steps(mix))
+        for original in _round_trip_names(kind)
+        for mix in _mixes(original)
+    ]
+    _pre(len(cases) > 100, f"more than 100 names: {len(cases)}")
+    missed = [
+        (original, saved)
+        for original, saved in cases
+        if check_custom_pseudonym(
+            [
+                Entity(
+                    entity_type=PERSON,
+                    full_name=saved,
+                    pseudonym_full=XV,
+                    theme="neutral",
+                )
+            ],
+            VM,
+            PERSON,
+            original,
+            VM_TEXT,
+            {},
+        )
+        is None
+    ]
+    assert missed == [], (len(missed), missed[:5])  # expected failure
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason=XFAIL.format("a name an old row could have been cut from accepted"),
+)
+@pytest.mark.parametrize("saved", ["Quovan Zorbô", "Zorbô"])
+def test_end_cut_old_row_refused_as_a_pseudonym(
+    tmp_path: Path, db: Path, saved: str
+) -> None:
+    """T46 (v1.10; Lionel's end-cut answer A): the row nfd(« Quovan Zorbô »)
+    or nfd(« Zorbô ») refuses « Quovan Zorbôme » or « Zorbôme »: the name it
+    could have been cut from."""
+    _save(db, [(nfd(saved), PERSON, XV)])
+    typed = saved + "me"
+    _, written = _custom_for_vm(tmp_path, db, typed)
+    assert typed not in nfc(written), repr(written)  # expected failure
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason=XFAIL.format("a hyphenated first name cut before its hyphen accepted"),
+)
+@pytest.mark.parametrize("path", ["cli_set", "cli_final"])
+def test_end_cut_hyphenated_first_name_refused(
+    tmp_path: Path, db: Path, monkeypatch: pytest.MonkeyPatch, path: str
+) -> None:
+    """T47 (v1.11; Lionel's end-cut answer A; the PO's case): the row an
+    earlier version saved from nfd(« Zorbôme-Quovan Quentrel ») refuses that
+    name as a custom pseudonym, when it is set (the row saved first) and at
+    finalization (the row saved before the review ends)."""
+    stored = nfd("Zorbô") + "-Quovan Quentrel"
+    if path == "cli_set":
+        _save(db, [(stored, PERSON, XV)])
+        _, written = _custom_for_vm(tmp_path, db, HYPHEN_CUT)
+        assert HYPHEN_CUT not in nfc(written), repr(written)  # expected failure
+    else:
+        answer = Answers.__call__
+
+        def ready_after_saving(
+            self: Any, prompt: Any, *args: Any, **kwargs: Any
+        ) -> bool:
+            if str(prompt) == READY_QUESTION and not _rows(db):
+                _save(db, [(stored, PERSON, XV)])
+            return answer(self, prompt, *args, **kwargs)
+
+        monkeypatch.setattr(Answers, "__call__", ready_after_saving)
+        source, output = tmp_path / "in.txt", tmp_path / "out.txt"
+        source.write_text(VM_TEXT, encoding="utf-8")
+        _process(source, output, db, [(VM, PERSON)], [ENTER, "c"], [HYPHEN_CUT])
+        _pre(len(_rows(db)) >= 1, "the row saved before the review ends")
+        written = output.read_text(encoding="utf-8") if output.is_file() else ""
+        assert HYPHEN_CUT not in nfc(written), repr(written)  # expected failure
+        assert len(_rows(db)) == 1, _rows(db)
+
+
+@pytest.mark.parametrize("path", ["check", "search"])
+def test_guard_pont_a_mousson_as_today(tmp_path: Path, db: Path, path: str) -> None:
+    """G16 (v1.10; AC13): « à » inside « Zorbal-à-Quentrix » is never dropped:
+    « Zorbal-Quentrix » is not refused as a custom pseudonym, nor listed by a
+    search."""
+    if path == "check":
+        row = Entity(
+            entity_type=LOCATION,
+            full_name=PLACE_HYPHEN,
+            pseudonym_full="Xantorville",
+            theme="neutral",
+        )
+        refusal = check_custom_pseudonym(
+            [row], VM, PERSON, "Zorbal-Quentrix", VM_TEXT, {}
+        )
+        assert refusal is None, refusal
+    else:
+        _save(db, [(PLACE_HYPHEN, LOCATION, "Xantorville")])
+        run = _invoke(["list-entities", "--db", str(db), "--search", "Zorbal-Quentrix"])
+        _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+        assert "Xantorville" not in run.flat, run.shown
+
+
+def test_guard_maitre_inside_a_word_as_today() -> None:
+    """G17 (v1.10; AC13): « Maître » inside a word is never dropped:
+    « Éloria Quix » is not refused beside the name « Éloria Maîtrequix »."""
+    row = Entity(
+        entity_type=PERSON, full_name=MAITREQUIX, pseudonym_full=XV, theme="neutral"
+    )
+    refusal = check_custom_pseudonym([row], VM, PERSON, "Éloria Quix", VM_TEXT, {})
+    assert refusal is None, refusal
+
+
+def test_guard_lowercase_old_row_joined(tmp_path: Path, db: Path) -> None:
+    """G18 (v1.10): the lowercase old row nfd(« zorbô ») + « quentrel »
+    refuses « Zorbôme Quentrel » (no capital needed after the mark)."""
+    _save(db, [(nfd("zorbô") + "quentrel", PERSON, XV)])
+    run, written = _custom_for_vm(tmp_path, db, "Zorbôme Quentrel")
+    assert "Zorbôme" not in nfc(written), repr(written)
+    assert REAL_NAME_LINE in run.flat, run.shown
+
+
+@pytest.mark.parametrize("case", ["whole_decomposed", "all_caps_maitre_surname"])
+def test_guard_saved_name_itself_compared(tmp_path: Path, db: Path, case: str) -> None:
+    """G19 (v1.10): the saved name itself is always compared: a whole name
+    saved decomposed refuses itself, and a surname « MAÎTRE » saved
+    decomposed refuses « Zorvan Maître »."""
+    if case == "whole_decomposed":
+        stored, typed, first_word = nfd(ZQ), ZQ, ZO
+    else:
+        stored, typed, first_word = nfd("Zorvan MAÎTRE"), "Zorvan Maître", "Zorvan"
+    _save(db, [(stored, PERSON, XV)])
+    run, written = _custom_for_vm(tmp_path, db, typed)
+    assert first_word not in nfc(written), repr(written)
+    assert REAL_NAME_LINE in run.flat, run.shown
