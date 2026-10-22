@@ -1121,3 +1121,177 @@ def test_capitalised_words_after_an_accent_stored_apart(
     composed = nfc(written)
     assert composed.startswith("Éloria a signé avec"), repr(written)
     assert composed.endswith("et Zorbal Quentrix."), repr(written)
+
+
+# ---------------------------------------------------------------------------
+# v1.5: the full-name searches reach the rows an earlier version saved with
+# letters lost (QA's SEARCH-001; T31), and five behaviours pinned (QA's
+# TEST-001; G8, G9, G10, G12) with the search's own key left out (G13)
+# ---------------------------------------------------------------------------
+
+XFAIL = "Story 10.20 v1.5: reproduces {} on the unfixed code; fixed in Task 2.8"
+SEARCHES = ["list-entities", "list-mappings"]
+OLD_CUT_SEARCHED = ["melora", "zorbome", "maitre_melora"]
+
+
+def _cut_row(case: str) -> tuple[str, str]:
+    """(the name an earlier version saved, the name searched): letters lost
+    to the title pattern, with a decomposed « Maître » in front for
+    ``maitre_melora``."""
+    if case == "zorbome":
+        return nfd("Zorbô") + "Quentrel", "Zorbôme Quentrel"
+    lost = ACUTE + "lora Quentrel"
+    if case == "maitre_melora":
+        return nfd("Maître") + " " + lost, "Mélora Quentrel"
+    return lost, "Mélora Quentrel"
+
+
+def _save_entity(db: Path, **fields: Any) -> None:
+    """One row saved with the exact fields given (theme neutral)."""
+    with open_database(str(db), PASSPHRASE) as session:
+        SQLiteMappingRepository(session).save(Entity(theme="neutral", **fields))
+
+
+def _parts(db: Path) -> list[tuple[str, str | None, str | None]]:
+    """Every stored row: (full_name, first_name, last_name)."""
+    with open_database(str(db), PASSPHRASE) as session:
+        return [
+            (row.full_name, row.first_name, row.last_name)
+            for row in SQLiteMappingRepository(session).find_all()
+        ]
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason=XFAIL.format("« No entities/mappings found » for a row that lost letters"),
+)
+@pytest.mark.parametrize("case", OLD_CUT_SEARCHED)
+@pytest.mark.parametrize("command", SEARCHES)
+def test_search_lists_a_row_that_lost_letters(
+    tmp_path: Path, db: Path, command: str, case: str
+) -> None:
+    """T31 (v1.5, SEARCH-001; Lionel's Qa, AC3): ``--search`` with the full
+    name composed lists the row an earlier version saved with letters lost,
+    and not another name's row."""
+    stored, name = _cut_row(case)
+    _save(db, [(stored, PERSON, XV), (VM, PERSON, XQ)])
+    _pre(len(_rows(db)) == 2, "two rows stored")
+    run = _invoke([command, "--db", str(db), "--search", name])
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    assert XV in run.flat, run.shown  # expected failure
+    assert XQ not in run.flat, run.shown
+
+
+def test_guard_passphrase_not_composed(tmp_path: Path) -> None:
+    """G8 (v1.5, QA's M08; AC13): a passphrase is never composed: a database
+    made with a decomposed passphrase opens with it and refuses its composed
+    spelling."""
+    path = tmp_path / "decomposed_pass.db"
+    passphrase = nfd("Zórbalia_pass_A_123!")
+    runner = CliRunner()
+    made = runner.invoke(
+        app,
+        ["init", "--db", str(path)],
+        env={"GDPR_PSEUDO_PASSPHRASE": passphrase},
+        catch_exceptions=False,
+    )
+    opened = runner.invoke(
+        app,
+        ["list-entities", "--db", str(path)],
+        env={"GDPR_PSEUDO_PASSPHRASE": passphrase},
+        catch_exceptions=False,
+    )
+    _pre(made.exit_code == 0 and opened.exit_code == 0, "made and opened")
+    refused = runner.invoke(
+        app,
+        ["list-entities", "--db", str(path)],
+        env={"GDPR_PSEUDO_PASSPHRASE": nfc(passphrase)},
+        catch_exceptions=False,
+    )
+    assert refused.exit_code != 0, _ANSI.sub("", refused.output)
+
+
+def test_guard_list_mappings_search_typed_decomposed(tmp_path: Path, db: Path) -> None:
+    """G9 (v1.5, QA's M23; AC2): ``list-mappings --search`` typed decomposed
+    is read composed."""
+    _save(db, [(ZQ, PERSON, XV)])
+    run = _invoke(["list-mappings", "--db", str(db), "--search", nfd(ZO)])
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    assert XV in run.flat, run.shown
+
+
+def test_guard_import_mappings_saves_composed(tmp_path: Path, db: Path) -> None:
+    """G10 (v1.5, QA's M25; AC3): ``import-mappings`` saves a new row's
+    full, first and last names composed."""
+    source = tmp_path / "source.db"
+    made = CliRunner().invoke(
+        app, ["init", "--db", str(source)], env=ENV, catch_exceptions=False
+    )
+    _pre(made.exit_code == 0, "the source database is made")
+    _save_entity(
+        source,
+        entity_type=PERSON,
+        full_name=nfd(ZQ),
+        first_name=nfd(ZO),
+        last_name="Quentrel",
+        pseudonym_full=XV,
+        pseudonym_first="Xantor",
+        pseudonym_last="Vellion",
+    )
+    run = _invoke(
+        [
+            "import-mappings",
+            str(source),
+            "--db",
+            str(db),
+            "--source-passphrase",
+            PASSPHRASE,
+        ]
+    )
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    imported = _parts(db)
+    _pre(len(imported) == 1, f"one row imported: {imported!r}")
+    assert imported == [(ZQ, ZO, "Quentrel")], imported
+
+
+@pytest.mark.parametrize("component", ["first_name", "last_name"])
+def test_guard_component_saved_decomposed_reused(
+    tmp_path: Path, db: Path, component: str
+) -> None:
+    """G12 (v1.5, QA's M33; AC3): a first or last name saved decomposed is
+    reused for a composed name that shares it."""
+    if component == "first_name":
+        full_name, first, last = nfd(ZQ), nfd(ZO), "Quentrel"
+        detected, part = "Zórbalia Mestrix", "Xantor"
+    else:
+        full_name, first, last = nfd("Quentrel Zórbalia"), "Quentrel", nfd(ZO)
+        detected, part = "Vorlan Zórbalia", "Vellion"
+    _save_entity(
+        db,
+        entity_type=PERSON,
+        full_name=full_name,
+        first_name=first,
+        last_name=last,
+        pseudonym_full=XV,
+        pseudonym_first="Xantor",
+        pseudonym_last="Vellion",
+    )
+    source, output = tmp_path / "in.txt", tmp_path / "out.txt"
+    source.write_text(f"Le contrat avec {detected} a été signé.", encoding="utf-8")
+    run = _process(source, output, db, [(detected, PERSON)], [ENTER])
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    written = _written(output)
+    assert part in written, repr(written)
+
+
+@pytest.mark.parametrize("command", SEARCHES)
+def test_guard_search_with_a_title_as_today(
+    tmp_path: Path, db: Path, command: str
+) -> None:
+    """G13 (v1.5; AC13): a search keeps its titles: « Mme Éloria » lists no
+    « Éloria Quentrel », as today."""
+    _save(db, [("Éloria Quentrel", PERSON, XV)])
+    run = _invoke([command, "--db", str(db), "--search", "Mme Éloria"])
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    assert XV not in run.flat, run.shown

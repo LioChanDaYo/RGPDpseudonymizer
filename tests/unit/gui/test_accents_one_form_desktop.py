@@ -499,3 +499,90 @@ def test_guard_hand_added_same_in_both_forms(  # type: ignore[no-untyped-def]
     assert sorted((nfc(name), kind) for name, kind in _names(sd.db)) == sorted(
         [(VM, PERSON), (ZO, PERSON)]
     )
+
+
+# ---------------------------------------------------------------------------
+# v1.5: the database search reaches the rows an earlier version saved with
+# letters lost (QA's SEARCH-001; T32); the correction dialog typed decomposed
+# (QA's TEST-001, M27; G11)
+# ---------------------------------------------------------------------------
+
+XFAIL = "Story 10.20 v1.5: reproduces {} on the unfixed code; fixed in Task 2.8"
+ACUTE = unicodedata.lookup("COMBINING ACUTE ACCENT")
+
+
+def _cut_row(case: str) -> tuple[str, str]:
+    """(the name an earlier version saved, the name searched): letters lost
+    to the title pattern, with a decomposed « Maître » in front for
+    ``maitre_melora``."""
+    if case == "zorbome":
+        return nfd("Zorbô") + "Quentrel", "Zorbôme Quentrel"
+    lost = ACUTE + "lora Quentrel"
+    if case == "maitre_melora":
+        return nfd("Maître") + " " + lost, "Mélora Quentrel"
+    return lost, "Mélora Quentrel"
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason=XFAIL.format(
+        "the database search finding nothing for a row that lost letters"
+    ),
+)
+@pytest.mark.parametrize("case", ["melora", "zorbome", "maitre_melora"])
+@pytest.mark.parametrize("path", ["inline", "worker"])
+def test_desktop_search_lists_a_row_that_lost_letters(  # type: ignore[no-untyped-def]
+    qtbot, main_window, tmp_path, path, case
+) -> None:
+    """T32 (v1.5, SEARCH-001; AC3): the database screen's search with the full
+    name composed, inline and in ``DatabaseWorker``, lists the row an earlier
+    version saved with letters lost, and not another name's row."""
+    from gdpr_pseudonymizer.gui.workers.database_worker import DatabaseWorker
+
+    db = _new_db(tmp_path)
+    stored, name = _cut_row(case)
+    _save(db, [(stored, PERSON, XV), (VM, PERSON, XQ)])
+    with open_database(db, PASSPHRASE) as session:
+        entities = SQLiteMappingRepository(session).find_all()
+    if path == "inline":
+        screen = main_window.stack.widget(main_window._screens["database"])
+        screen._entities = entities
+        screen._populate_entity_table()
+        screen.search_field.setText(name)
+        screen._apply_filters()
+        shown = screen.entity_table.rowCount()
+        _pre(shown <= 2, f"at most two rows shown: {shown}")
+        pseudonyms = [screen.entity_table.item(row, 3).text() for row in range(shown)]
+        assert shown == 1, pseudonyms  # expected failure
+        assert XQ not in pseudonyms
+    else:
+        worker = DatabaseWorker(
+            "search", entities=entities, search_text=name, type_filter=""
+        )
+        results: list[Any] = []
+        worker.signals.finished.connect(results.append)
+        worker.run()
+        _pre(len(results) == 1, f"one result: {results!r}")
+        found = [entity.pseudonym_full for entity in results[0]]
+        assert found == [XV], found  # expected failure
+
+
+@pytest.mark.parametrize("form", ["nfd", "nfc"])
+def test_guard_desktop_correction_typed_decomposed(  # type: ignore[no-untyped-def]
+    qtbot, main_window, tmp_path, monkeypatch, form
+) -> None:
+    """G11 (v1.5, QA's M27; AC2): « Zórbalia » corrected into « Zórbalia
+    Quentrel » typed decomposed, in a decomposed or composed document: no
+    « Quentrel » in clear, one row, composed."""
+    dialogs = _Dialogs(monkeypatch)
+    sd = _Single(qtbot, main_window, tmp_path, FORMS[form](E_TEXT), [(ZO, PERSON)])
+    first = sd.rows()[0]
+    _type_in(monkeypatch, nfd(ZQ))
+    sd.vs._show_modify_text_dialog(first.entity_id)
+    sd.accept_pending()
+    written = sd.finalize(dialogs)
+    if written is None:
+        pytest.fail(f"PRE: written: {dialogs.calls!r}")
+    assert "Quentrel" not in written, repr(written)
+    assert _names(sd.db) == [(ZQ, PERSON)]
