@@ -1884,3 +1884,136 @@ def test_guard_saved_name_itself_compared(tmp_path: Path, db: Path, case: str) -
     run, written = _custom_for_vm(tmp_path, db, typed)
     assert first_word not in nfc(written), repr(written)
     assert REAL_NAME_LINE in run.flat, run.shown
+
+
+# ---------------------------------------------------------------------------
+# v1.14: QA's round 4. Old rows that kept a sign, imported (T48, T49), and
+# « Maître » without its circumflex (T50, G20)
+# ---------------------------------------------------------------------------
+
+XFAIL = "Story 10.20 v1.14: reproduces {} on the unfixed code; fixed in Task 2.11"
+QM = "Quovan Mestrix"
+QM_TEXT = "Quovan Mestrix valide."
+QUOVIX = "Vorlan Quovix"
+
+
+def _custom_for_qm(tmp_path: Path, db: Path, typed: str) -> tuple[Run, str]:
+    """[C] ``typed`` for « Quovan Mestrix », a name that shares no word with
+    the saved ones; the group shown again after a refusal, Space. The run and
+    the written text (after the preconditions)."""
+    source, output = tmp_path / "in.txt", tmp_path / "out.txt"
+    source.write_text(QM_TEXT, encoding="utf-8")
+    run = _process(source, output, db, [(QM, PERSON)], [ENTER, "c", SPACE], [typed])
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    return run, _written(output)
+
+
+def _old_sign_row(row: str) -> tuple[str, str]:
+    """(the row an earlier version saved, the name it was saved from): the
+    word « Zorbôme » joined to the next word once its « me » and the space
+    were taken off (``glued``, ``glued_de_la``), or « Mélora » left as a lone
+    mark and « lora » (``lone_mark``)."""
+    if row == "glued":
+        return nfd("Zorbô") + "Quentrel", "Zorbôme Quentrel"
+    if row == "glued_de_la":
+        return nfd("Zorbô") + "de la Quentrel", "Zorbôme de la Quentrel"
+    return ACUTE + "lora Quentrel", "Mélora Quentrel"
+
+
+def _import_one(tmp_path: Path, db: Path, stored: str) -> None:
+    """The row ``stored`` « Xantor Vellion » saved in a new source database,
+    then imported into ``db`` with the real ``import-mappings``."""
+    source = _new_source(tmp_path)
+    _save(source, [(stored, PERSON, XV)])
+    imported = _import(source, db)
+    _pre(
+        imported.exit_code == 0 and len(_rows(db)) == 1,
+        f"one row imported: {imported.shown!r}",
+    )
+
+
+_GLUED_XFAIL = pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason=XFAIL.format("an imported old joined row composed, its sign lost"),
+)
+
+
+@pytest.mark.parametrize(
+    "row",
+    [
+        pytest.param("glued", marks=_GLUED_XFAIL),
+        pytest.param("glued_de_la", marks=_GLUED_XFAIL),
+        "lone_mark",
+    ],
+)
+@pytest.mark.parametrize("path", ["check", "search"])
+def test_imported_old_row_with_a_sign(
+    tmp_path: Path, db: Path, path: str, row: str
+) -> None:
+    """T48 (v1.14; QA's IMPORT-002): a row an earlier version saved with a
+    sign, imported, still refuses the name it was saved from as a custom
+    pseudonym, and a search of that name lists it."""
+    stored, original = _old_sign_row(row)
+    _import_one(tmp_path, db, stored)
+    if path == "check":
+        _, written = _custom_for_qm(tmp_path, db, original)
+        assert original not in nfc(written), repr(written)  # expected failure
+    else:
+        listed = []
+        for command in SEARCHES:
+            run = _invoke([command, "--db", str(db), "--search", original])
+            _pre(run.exit_code == 0, f"{command} exit code 0: {run.shown!r}")
+            listed.append(XV in run.flat)
+        assert listed == [True, True], listed  # expected failure
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason=XFAIL.format("an imported old row composed"),
+)
+def test_imported_row_kept_as_saved(tmp_path: Path, db: Path) -> None:
+    """T49 (v1.14; the ruling's rule): an imported row keeps the source's
+    bytes."""
+    stored, _ = _old_sign_row("glued")
+    _import_one(tmp_path, db, stored)
+    assert _rows(db) == [(stored, PERSON, XV)], _rows(db)  # expected failure
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason=XFAIL.format("« Maitre » without its circumflex taken for a title"),
+)
+@pytest.mark.parametrize("word", ["MAITRE", "Maitre"])
+@pytest.mark.parametrize("path", ["check", "search"])
+def test_maitre_without_circumflex(
+    tmp_path: Path, db: Path, path: str, word: str
+) -> None:
+    """T50 (v1.14; QA's REPAIR-001; a database with no old rows, AC13): a
+    saved word « MAITRE » or « Maitre », without the circumflex the old
+    title pattern needed, is part of the name: « Vorlan Quovix » is accepted
+    beside « Vorlan MAITRE », and « Éloria Quentrel » lists no « Éloria
+    MAITRE Quentrel »."""
+    if path == "check":
+        _save(db, [(f"Vorlan {word}", PERSON, XV)])
+        _, written = _custom_for_qm(tmp_path, db, QUOVIX)
+        assert written == f"{QUOVIX} valide.", repr(written)  # expected failure
+    else:
+        _save(db, [(f"Éloria {word} Quentrel", PERSON, XQ)])
+        run = _invoke(["list-entities", "--db", str(db), "--search", "Éloria Quentrel"])
+        _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+        assert XQ not in run.flat, run.shown  # expected failure
+
+
+def test_guard_maitre_with_circumflex_still_a_kept_title(
+    tmp_path: Path, db: Path
+) -> None:
+    """G20 (v1.14): the row nfd(« Maître Éloria Quentrel ») still refuses
+    « Éloria Quentrel »: « Maître » with its circumflex is a title an earlier
+    version kept."""
+    _save(db, [(nfd("Maître Éloria Quentrel"), PERSON, XV)])
+    run, written = _custom_for_qm(tmp_path, db, "Éloria Quentrel")
+    assert "Éloria Quentrel" not in nfc(written), repr(written)
+    assert REAL_NAME_LINE in run.flat, run.shown
