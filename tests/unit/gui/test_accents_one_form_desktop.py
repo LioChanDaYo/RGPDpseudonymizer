@@ -507,7 +507,6 @@ def test_guard_hand_added_same_in_both_forms(  # type: ignore[no-untyped-def]
 # (QA's TEST-001, M27; G11)
 # ---------------------------------------------------------------------------
 
-XFAIL = "Story 10.20 v1.5: reproduces {} on the unfixed code; fixed in Task 2.8"
 ACUTE = unicodedata.lookup("COMBINING ACUTE ACCENT")
 
 
@@ -523,13 +522,6 @@ def _cut_row(case: str) -> tuple[str, str]:
     return lost, "Mélora Quentrel"
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format(
-        "the database search finding nothing for a row that lost letters"
-    ),
-)
 @pytest.mark.parametrize("case", ["melora", "zorbome", "maitre_melora"])
 @pytest.mark.parametrize("path", ["inline", "worker"])
 def test_desktop_search_lists_a_row_that_lost_letters(  # type: ignore[no-untyped-def]

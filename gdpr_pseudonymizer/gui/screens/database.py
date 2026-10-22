@@ -25,6 +25,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from gdpr_pseudonymizer.core.mapping_key import search_forms
 from gdpr_pseudonymizer.gui.accessibility.focus_manager import (
     setup_focus_order_database,
 )
@@ -574,12 +575,22 @@ class DatabaseScreen(QWidget):
             filtered = [e for e in filtered if e.entity_type == type_filter]
         if search:
             # Story 10.20: both sides composed, so a name saved with separate
-            # accent marks is found too
+            # accent marks is found too, and (v1.5) a name an earlier version
+            # saved with letters lost, through the search's former forms for
+            # the row's type
             search_lower = composed(search).lower()
+            forms = {
+                kind: search_forms(search, kind) for kind in ("PERSON", "LOCATION")
+            }
             filtered = [
                 e
                 for e in filtered
-                if search_lower in composed(e.full_name).lower()
+                if any(
+                    form in composed(e.full_name).lower()
+                    for form in forms[
+                        "LOCATION" if e.entity_type == "LOCATION" else "PERSON"
+                    ]
+                )
                 or search_lower in composed(e.pseudonym_full).lower()
             ]
         self._populate_entity_table(filtered)

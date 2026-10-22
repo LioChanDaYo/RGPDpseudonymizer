@@ -1129,7 +1129,6 @@ def test_capitalised_words_after_an_accent_stored_apart(
 # TEST-001; G8, G9, G10, G12) with the search's own key left out (G13)
 # ---------------------------------------------------------------------------
 
-XFAIL = "Story 10.20 v1.5: reproduces {} on the unfixed code; fixed in Task 2.8"
 SEARCHES = ["list-entities", "list-mappings"]
 OLD_CUT_SEARCHED = ["melora", "zorbome", "maitre_melora"]
 
@@ -1161,11 +1160,6 @@ def _parts(db: Path) -> list[tuple[str, str | None, str | None]]:
         ]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("« No entities/mappings found » for a row that lost letters"),
-)
 @pytest.mark.parametrize("case", OLD_CUT_SEARCHED)
 @pytest.mark.parametrize("command", SEARCHES)
 def test_search_lists_a_row_that_lost_letters(

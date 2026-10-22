@@ -16,6 +16,7 @@ from rich.table import Table
 
 from gdpr_pseudonymizer.cli.formatters import format_error_message
 from gdpr_pseudonymizer.cli.passphrase import resolve_passphrase
+from gdpr_pseudonymizer.core.mapping_key import search_forms
 from gdpr_pseudonymizer.data.database import open_database
 from gdpr_pseudonymizer.data.models import Entity
 from gdpr_pseudonymizer.data.repositories.mapping_repository import (
@@ -131,13 +132,23 @@ def list_mappings_command(
             entities = repo.find_all(entity_type=entity_type)
 
             # Apply search filter if provided, both sides composed (Story
-            # 10.20): a name saved with separate accent marks is found too
+            # 10.20): a name saved with separate accent marks is found too,
+            # and (v1.5) a name an earlier version saved with letters lost,
+            # through the search's former forms for the row's type
             if search:
                 search_lower = composed(search).lower()
+                forms = {
+                    kind: search_forms(search, kind) for kind in ("PERSON", "LOCATION")
+                }
                 entities = [
                     e
                     for e in entities
-                    if search_lower in composed(e.full_name).lower()
+                    if any(
+                        form in composed(e.full_name).lower()
+                        for form in forms[
+                            "LOCATION" if e.entity_type == "LOCATION" else "PERSON"
+                        ]
+                    )
                     or search_lower in composed(e.pseudonym_full).lower()
                 ]
 
