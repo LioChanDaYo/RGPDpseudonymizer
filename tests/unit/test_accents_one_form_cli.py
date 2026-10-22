@@ -1470,8 +1470,8 @@ def test_mixed_old_row_reached(tmp_path: Path, db: Path, path: str) -> None:
 @pytest.mark.parametrize("case", ["maitre_eloria", "a_zorbaville", "zorbome"])
 def test_imported_old_row_reached(tmp_path: Path, db: Path, case: str) -> None:
     """T38 (v1.7, Codex P1-3): a row an earlier version saved, imported
-    (``import-mappings`` composes it), is reached from the bare name: reused
-    and erased."""
+    (v1.14: ``import-mappings`` copies it as saved), is reached from the bare
+    name: reused and erased."""
     stored, entity_type, pseudonym, text, detected = _old_imported_row(case)
     source = _new_source(tmp_path)
     _save(source, [(stored, entity_type, pseudonym)])
