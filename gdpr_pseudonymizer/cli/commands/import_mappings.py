@@ -22,7 +22,6 @@ from gdpr_pseudonymizer.data.repositories.mapping_repository import (
 )
 from gdpr_pseudonymizer.exceptions import DuplicateEntityError
 from gdpr_pseudonymizer.utils.logger import configure_logging, get_logger
-from gdpr_pseudonymizer.utils.text_form import composed
 
 # Configure logging
 configure_logging()
@@ -188,20 +187,20 @@ def import_mappings_command(
                     # Create new entity without ID (let DB generate new one)
                     from gdpr_pseudonymizer.data.models import Entity as EntityModel
 
-                    # Story 10.20: a new row's names are saved composed (NFC)
+                    # Story 10.20 (QA's IMPORT-002): the names are copied as
+                    # the source saved them, byte for byte. A name an earlier
+                    # version saved with separate accent marks may hold the
+                    # sign of letters its title pattern took off (a lone mark,
+                    # two words joined); the saved-real-name check and the
+                    # searches read those marks (core/legacy_names.py), and
+                    # composing would remove them. Such a row and a whole
+                    # name saved decomposed can be the same bytes, so no row
+                    # is composed.
                     new_entity = EntityModel(
                         entity_type=entity.entity_type,
-                        full_name=composed(entity.full_name),
-                        first_name=(
-                            composed(entity.first_name)
-                            if entity.first_name is not None
-                            else None
-                        ),
-                        last_name=(
-                            composed(entity.last_name)
-                            if entity.last_name is not None
-                            else None
-                        ),
+                        full_name=entity.full_name,
+                        first_name=entity.first_name,
+                        last_name=entity.last_name,
                         pseudonym_full=entity.pseudonym_full,
                         pseudonym_first=entity.pseudonym_first,
                         pseudonym_last=entity.pseudonym_last,

@@ -26,8 +26,10 @@ Where the old pattern left a sign in a saved name:
   a word character (another mark included): a title word was taken off right
   after it, leaving no sign. In the saved-real-name check only
   (``END_CUTS``; Lionel, 2026-10-22, end cut "A: Refuse them too (Rec.)").
-- S4, a word « Maître »: the pattern's « Maître » is composed, so a
-  decomposed one was kept; the name may stand for itself without it.
+- S4, a word « Maître » with its circumflex: the pattern's « Maître » is
+  composed, so a decomposed one was kept; the name may stand for itself
+  without it. « Maitre » and « MAITRE » never matched the pattern: they
+  are names.
 - S5, a place whose first word is « à »: the preposition pattern's « à »
   is composed and anchored at the start; the place may stand for itself
   without it (never inside a word, as in a hyphenated place).
@@ -59,7 +61,8 @@ _TAIL = r")(?!\w)\s*"
 _OPTIONAL_DOT = r"\.?"
 _TITLE_WORD = re.compile(r"[^\W\d_]+\.?")
 
-_MAITRE = "maitre"  # fold("Maître")
+_MAITRE = "maitre"  # fold("Maître"), in the patterns over folded text
+_MAITRE_WORD = "maître"  # the pattern's « Maître », casefolded
 _A = "à"
 _WORD_CHAR = re.compile(r"\w")
 
@@ -131,10 +134,18 @@ def _is_word_char(char: str) -> bool:
     return _WORD_CHAR.match(char) is not None
 
 
+def _is_maitre(word: str) -> bool:
+    """Whether a word is « Maître » with its circumflex, in any case,
+    composed or decomposed (S4): the only form of the word the old pattern
+    could leave in a name. « Maitre » and « MAITRE » never matched it; they
+    are names (QA's REPAIR-001)."""
+    return composed(word).casefold() == _MAITRE_WORD
+
+
 def _droppable(words: list[str], entity_type: str) -> list[int]:
     """The positions of the words a saved name may stand for itself
     without: each « Maître » (S4), and a place's first word « à » (S5)."""
-    positions = [index for index, word in enumerate(words) if fold(word) == _MAITRE]
+    positions = [index for index, word in enumerate(words) if _is_maitre(word)]
     if (
         entity_type == "LOCATION"
         and words
@@ -148,8 +159,8 @@ def _droppable(words: list[str], entity_type: str) -> list[int]:
 @functools.lru_cache(maxsize=_CACHE_SIZE)
 def is_legacy(full_name: str, entity_type: str) -> bool:
     """Whether a saved name may stand for another text: it holds a mark, a
-    word « Maître » (any case, composed or decomposed), or, for a place, a
-    first word « à »."""
+    word « Maître » with its circumflex (any case, composed or decomposed),
+    or, for a place, a first word « à »."""
     if _mark_search().search(full_name):
         return True
     return bool(_droppable(full_name.split(), entity_type))
@@ -203,7 +214,7 @@ def _word_regex(word: str, last_word: bool) -> tuple[str, list[str]]:
         if _S1 in site:
             regex.append(f"(?:{titles})?")
         if _S2 in site:
-            if fold(word[start:]) == _MAITRE:
+            if _is_maitre(word[start:]):
                 # S4 after an S2 site: the « Maître » joined to the word
                 # before it may be left out, a title word in its place
                 regex.append(f"(?:(?:{titles})(?: {_MAITRE})?|{_MAITRE})")

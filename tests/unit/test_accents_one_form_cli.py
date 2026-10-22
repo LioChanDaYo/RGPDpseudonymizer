@@ -1224,8 +1224,9 @@ def test_guard_list_mappings_search_typed_decomposed(tmp_path: Path, db: Path) -
 
 
 def test_guard_import_mappings_saves_composed(tmp_path: Path, db: Path) -> None:
-    """G10 (v1.5, QA's M25; AC3): ``import-mappings`` saves a new row's
-    full, first and last names composed."""
+    """G10 (v1.5, QA's M25; AC3; v1.14, QA's IMPORT-002): ``import-mappings``
+    copies a new row's full, first and last names as the source saved them,
+    their accent marks kept."""
     source = tmp_path / "source.db"
     made = CliRunner().invoke(
         app, ["init", "--db", str(source)], env=ENV, catch_exceptions=False
@@ -1254,7 +1255,7 @@ def test_guard_import_mappings_saves_composed(tmp_path: Path, db: Path) -> None:
     _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
     imported = _parts(db)
     _pre(len(imported) == 1, f"one row imported: {imported!r}")
-    assert imported == [(ZQ, ZO, "Quentrel")], imported
+    assert imported == [(nfd(ZQ), nfd(ZO), "Quentrel")], imported
 
 
 @pytest.mark.parametrize("component", ["first_name", "last_name"])
@@ -1891,7 +1892,6 @@ def test_guard_saved_name_itself_compared(tmp_path: Path, db: Path, case: str) -
 # « Maître » without its circumflex (T50, G20)
 # ---------------------------------------------------------------------------
 
-XFAIL = "Story 10.20 v1.14: reproduces {} on the unfixed code; fixed in Task 2.11"
 QM = "Quovan Mestrix"
 QM_TEXT = "Quovan Mestrix valide."
 QUOVIX = "Vorlan Quovix"
@@ -1932,21 +1932,7 @@ def _import_one(tmp_path: Path, db: Path, stored: str) -> None:
     )
 
 
-_GLUED_XFAIL = pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("an imported old joined row composed, its sign lost"),
-)
-
-
-@pytest.mark.parametrize(
-    "row",
-    [
-        pytest.param("glued", marks=_GLUED_XFAIL),
-        pytest.param("glued_de_la", marks=_GLUED_XFAIL),
-        "lone_mark",
-    ],
-)
+@pytest.mark.parametrize("row", ["glued", "glued_de_la", "lone_mark"])
 @pytest.mark.parametrize("path", ["check", "search"])
 def test_imported_old_row_with_a_sign(
     tmp_path: Path, db: Path, path: str, row: str
@@ -1968,11 +1954,6 @@ def test_imported_old_row_with_a_sign(
         assert listed == [True, True], listed  # expected failure
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("an imported old row composed"),
-)
 def test_imported_row_kept_as_saved(tmp_path: Path, db: Path) -> None:
     """T49 (v1.14; the ruling's rule): an imported row keeps the source's
     bytes."""
@@ -1981,11 +1962,6 @@ def test_imported_row_kept_as_saved(tmp_path: Path, db: Path) -> None:
     assert _rows(db) == [(stored, PERSON, XV)], _rows(db)  # expected failure
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("« Maitre » without its circumflex taken for a title"),
-)
 @pytest.mark.parametrize("word", ["MAITRE", "Maitre"])
 @pytest.mark.parametrize("path", ["check", "search"])
 def test_maitre_without_circumflex(
