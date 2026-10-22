@@ -1,78 +1,79 @@
 schema: 1
 story: '10.20'
 story_title: 'Accents Stored Two Ways: One Form Everywhere'
-scope: 'Round 3 re-check (Task 7.8): PR #111 at head a312fa7 on main 3114e9e. Commits reviewed: story v1.7 eb6485f and v1.8 9df8668 (epic 315eb24, 106366e), tests first fa36fe9, fix e82de14, Dev Agent Record a312fa7. Round 2 was QA''s CONCERNS 90 at 186972b (SEARCH-002 and TEST-002 backlogged by the orchestrator). The one read-only Codex review of 186972b (session 01a162a8-65ad-7af0-bf08-4330486f8519) returned CHANGES REQUESTED; ruling r1020/codex/ruling.md; Lionel''s P0-1 answer « A: Only with a sign (Rec.) ». Round 2''s evidence is kept under evidence_round2 and round 1''s under evidence_round1.'
-gate: PASS
-status_reason: 'Every Codex finding is fixed on real output, on fresh databases written by the real v2.2.0 tree and by 43041e9 (copies only): P0-1 as Lionel answered (« Vorlan Zorbôme » no longer reaches or erases the old cut row; « Vorlan Zorbô » still does, as G15 says; « Jérôme » alone gets a second pseudonym), P0-2 at set time and at finalization in the command line and the desktop, mixed rows (reuse, rule A, erase both, import duplicate), the existing-mapping guard (desktop and [C]), imported « Maître »/« à »/glued/lone-mark rows, the « Cabinet Maître » ORG, and reused decomposed pseudonyms written composed (.txt, .md, .docx, .xlsx, .csv, desktop). QA''s 24 old databases all reached (none is an end-of-name cut). Clean databases: G14 passes; QA''s 48-line search probe moves 2 lines, both narrower (back to 87cd011''s). G2 holds (23 AssertionErrors on the expected-failure lines, no PRE, markers and the Task 3.6 edits only). G1 holds on a312fa7. CI green at attempt 1 on all three commits. Lookup cost as the SM measured. Every mutant the orchestrator named is caught by committed tests. Low only: CUSTOM-001 (Q-C2 leaves the cut keys out, so a cut name is accepted as a custom pseudonym), IMPORT-001 (older than this story), TEST-003 (four mutants caught by QA''s probes only), DOC-001 (PR body); SEARCH-002 and TEST-002 stay in the backlog.'
+scope: 'Round 4 re-check (Task 7.9): PR #111 at head e6e28a7 on main 3114e9e. Commits reviewed: story v1.10 42aaaab, v1.11 ff80c45, v1.12 12b7d3d (epic 0a531a0, 9f0ccd5), tests first 0e944e5, fix 2086cb3, Dev Agent Record e6e28a7. Round 3 was QA''s PASS 100 at 56feb3d; the second read-only Codex review of 56feb3d (session 01a16343-c727-7152-a752-1e6d2202a977) returned CHANGES REQUESTED; ruling r1020/codex/ruling2.md (reverse add-only repair, core/legacy_names.py, for Q-C2 and the four searches); Lionel''s end-cut answer « A: Refuse them too (Rec.) ». Earlier evidence is kept under evidence_round3, evidence_round2 and evidence_round1.'
+gate: FAIL
+status_reason: 'Codex review 2''s three findings are fixed on real output (fresh old databases written by v2.2.0 and 43041e9, copies only), at set time and finalization, on the command line and the desktop, with QA''s variants (Mme, Dr, Pr, M, all caps, « de la », hyphens, two sites, mixed rows); the end cut is refused at set time and finalization and finding, reuse, erasure and G15 are unchanged; QA''s clean search probe is now 87cd011''s, line for line (SEARCH-002 gone); the app''s name lists give no false refusal on the old databases; G2 holds; G1 holds on e6e28a7; CI green at attempt 1; cost as the dev measured. FAIL because of a regression of round 3 (IMPORT-002, high): an old glued row copied by import-mappings is composed (« JérôQuentrel ») and holds no mark, so the reverse repair never sees it: [C] « Jérôme Quentrel » for another person is accepted and the real name written, and the full-name searches miss the row; 56feb3d refused and listed it. Also REPAIR-001 (medium): S4 takes « Maitre »/« MAITRE » without the circumflex as a kept title, so on a clean database a custom pseudonym holding the rest of such a saved name is refused (accepted at 56feb3d) and searches over-list. Low: SEARCH-003, TEST-004, DOC-001; IMPORT-001, TEST-002, TEST-003 unchanged.'
 reviewer: 'Quinn (Test Architect)'
-updated: '2026-10-22T10:56:00Z'
+updated: '2026-10-22T14:30:00Z'
 
 waiver: { active: false }
 
-merge_blockers: []
+merge_blockers:
+  - 'IMPORT-002: Q-C2 and the four searches must reach old glued rows that import-mappings composed, as 56feb3d did, with a committed test.'
+  - 'REPAIR-001: S4 must not take a word « Maitre »/« MAITRE » without its circumflex as a kept title (AC13, Lionel''s Q-C2 « Whole names only »), with a committed test.'
 
 merge_notes:
-  - 'What QA accepts: SEARCH-002, TEST-002, TEST-003, CUSTOM-001 and IMPORT-001 as backlog items, with no change to this story.'
-  - 'Before the merge: DOC-001 (Tasks 6.5 and 6.7: the PR body and the Ready for Review flag) and the second read-only codex exec review of the final head (AC10, the orchestrator''s step). QA did not run codex. If that review changes code, QA re-checks.'
-  - 'This gate commit (docs only) starts its own CI run; the orchestrator checks it green before the merge.'
+  - 'What QA accepts: the two blockers fixed with tests; SEARCH-003, TEST-004, IMPORT-001, TEST-002 and TEST-003 as backlog items. Before the merge: DOC-001 and the third read-only Codex review of the final head. QA re-checks after the fix.'
+  - 'QA did not run codex. This gate commit (docs only) starts its own CI run.'
 
 top_issues:
-  - id: 'CUSTOM-001'
+  - id: 'IMPORT-002'
+    severity: high
+    finding: 'A regression of round 3. import-mappings composes an old row the old version glued (nfd « Jérôme Quentrel » saved as « Je » + U+0301 + « ro » + U+0302 + « Quentrel » becomes « JérôQuentrel »; also « ZorbôQuentrel », « Zorbôde la Quentrel »). The row then holds no mark, no « Maître » and no leading « à », so legacy_names.is_legacy is false and Q-C2 and the searches never repair it. At e6e28a7: [C] « Jérôme Quentrel » for another person is accepted and written (« Jérôme Quentrel valide. »), 6 of 6 cases on both old trees; list-entities and list-mappings --search with the full name list nothing. At 56feb3d the same probe passes 10 of 10 (its forward forms held the composed glued key, Codex P1-3). The exact lookups still reach the row. « Jérôme » before a surname is the glued case of the app''s own name list. The CHANGELOG''s « A custom pseudonym equal to a name an earlier version saved wrongly … is refused. » does not hold for such rows.'
+    reproduction: 'r1020/qa/probes/test_q20_r4.py::test_r4_imported_old_row_check_and_search[v220-jerome_full] (and zorbome_quentrel, de_la, both trees); test_q20_codex.py::test_p13_imported_old_row[*-zorbome_quentrel].'
+    suggested_action: 'Dev: Q-C2 and the searches also compare rows with no mark through the composed forward keys (as at 56feb3d), or another way; a committed test: import a glued row, then [C] refused and the full-name search listing it.'
+    refs: ['gdpr_pseudonymizer/core/legacy_names.py:148-155', 'gdpr_pseudonymizer/core/custom_pseudonym.py:609-624', 'gdpr_pseudonymizer/cli/commands/import_mappings.py:194']
+    suggested_owner: dev
+  - id: 'REPAIR-001'
+    severity: medium
+    finding: 'S4 (legacy_names._droppable) takes any word whose fold is « maitre », so « Maitre » and « MAITRE » without the circumflex count as a kept title, though the old pattern only ever matched « Maître » with it and today''s code saves those words as written. On a clean database made by today''s code (« Le contrat avec Vorlan MAITRE a signé. » processed), [C] « Vorlan Quovix » for another person is refused (« could be taken for a real name »); 56feb3d accepts it, as Lionel''s 10.11 Q-C2 « Whole names only » does. With rows « Vorlan Maitre », « Éloria MAITRE Quentrel » and the ORG « Maitre Quovix SARL » saved, « Zorbix Vorlan » and « Éloria Quentrel » are refused too, and a search « Éloria Quentrel » lists « Éloria MAITRE Quentrel ». An AC13 change (G14: checks and searches as today on databases with no old rows). G17 and G19 do not cover it.'
+    reproduction: 'r1020/qa/probes/test_q20_r4.py::test_r4_clean_maitre_surname_real_output[MAITRE, Maitre] and test_r4_clean_maitre_word (printed; compare with 56feb3d).'
+    suggested_action: 'Dev: S4 only for a word « Maître » with its circumflex, any case (composed(word).casefold() == "maître"); a G-test with « MAITRE ».'
+    refs: ['gdpr_pseudonymizer/core/legacy_names.py:134-145']
+    suggested_owner: dev
+  - id: 'SEARCH-003'
     severity: low
-    finding: 'A custom pseudonym equal to the full name of a person whose old row was cut at its end is accepted and written: [C] « Vorlan Zorbôme » beside the row v2.2.0 or 43041e9 saved for « Vorlan Zorbôme » (nfd « Vorlan Zorbô ») gives « Vorlan Zorbôme valide. ». Q-C2 compares with the lookup forms, and Lionel''s answer A leaves the "cut" keys out of the lookups. A refusal cannot reach a wrong row, so Q-C2 alone could also try the "cut" keys; the cost is that it may also refuse « Vorlan Zorbôme » beside a row that really was « Vorlan Zorbô ». Rare: of the app''s 106 accented names, only « Jérôme » is cut at its end, alone or as a surname (the SM''s measurement).'
-    reproduction: 'r1020/qa/probes/test_q20_codex.py::test_p02_cli_cut_name_accepted_under_a[v220, base].'
-    suggested_action: 'PO: backlog, or one line in Q-C2 (try the "cut" keys for the refusal only).'
-    refs: ['gdpr_pseudonymizer/core/custom_pseudonym.py:608-623', 'gdpr_pseudonymizer/core/mapping_key.py:117-136']
+    finding: 'On old databases, a search of a few letters can list a lone-mark row through the letters of a put-back title: « Léo » lists the old row a lone U+0301 + « orvan Quentrel » (« Mllé » + « orvan » holds « léo »). Found by scanning the app''s first and last names against QA''s old rows (2 words list a row only through a repair: « Jérôme », a true original, and « Léo »). Nothing written or erased.'
+    suggested_action: 'Backlog.'
+    refs: ['gdpr_pseudonymizer/core/legacy_names.py:329-355']
     suggested_owner: po
+  - id: 'TEST-004'
+    severity: low
+    finding: 'Mutants of the repair that survive the 688 committed tests: L11 (a search part inside the put-back title counts; QA''s S2 catches it), L16 (is_legacy on marks only; QA''s imported « Cabinet Maître » probe catches it), L05 (« à » inside a place''s first word) and L15 (no « Maître » joined after an S2 site), with no case anywhere, and L14 (the quick piece), the same on every row QA has.'
+    suggested_action: 'Backlog: tests for L11 and L16 at least.'
+    refs: ['tests/unit/test_accents_one_form_cli.py']
+    suggested_owner: dev
   - id: 'IMPORT-001'
     severity: low
-    finding: 'import-mappings --skip-duplicates does not see an old row with a kept title or preposition (nfd « Maître Éloria Quentrel ») as a duplicate of the clean « Éloria Quentrel » already in the target: a second row is added. The bare name keeps the clean row''s pseudonym (rule A), delete-mapping erases both (two ERASURE entries) and the custom-pseudonym checks see both, so nothing is left in clear. The same on 186972b (older than this round).'
-    reproduction: 'r1020/qa/probes/test_q20_codex.py::test_p13b_import_old_titled_row_beside_clean_row[v220, base].'
-    suggested_action: 'Backlog: import''s duplicate check also tries mapping_key of the source text.'
-    refs: ['gdpr_pseudonymizer/cli/commands/import_mappings.py:167-169']
+    finding: 'Unchanged from round 3 (an old titled row imported beside its clean row is a second row; rule A and erasure of both hold).'
+    suggested_action: 'Backlog.'
+    refs: ['gdpr_pseudonymizer/cli/commands/import_mappings.py']
+    suggested_owner: dev
+  - id: 'TEST-002'
+    severity: low
+    finding: 'Backlogged (round 2).'
+    suggested_action: 'Backlog.'
+    refs: ['tests/unit/test_accents_one_form_cli.py']
     suggested_owner: dev
   - id: 'TEST-003'
     severity: low
-    finding: 'Four non-equivalent QA mutants of the round-3 code survive the 665 committed tests of the path; QA''s probes catch each and the behaviour holds at the head. K08 (titles inserted into the decomposed whole only): an old row with « Maître » decomposed and the name composed, written by v2.2.0 and 43041e9, is reached and erased by the bare name. K15 (Q1 names the last row): the refusal names the row saved the usual way (« Anya Branco », « Nassim Fonseca »), in either row order. K16 (Q-C2 without each row''s key read today): « Eloria Quentrel » without accents is refused beside the old « Maître Éloria Quentrel ». W4 (write_tabular_as_text raw): an .xlsx written as text is composed.'
-    suggested_action: 'Backlog: one test each; QA''s test_q20_r3extra.py X1, X2, X3 and test_q20_codex.py P2[xlsx_to_txt] are models.'
-    refs: ['tests/unit/test_accents_one_form_cli.py', 'tests/unit/gui/test_accents_one_form_desktop.py']
-    suggested_owner: dev
-  - id: 'SEARCH-002'
-    severity: low
-    finding: 'Backlogged by the orchestrator after round 2; unchanged at a312fa7: « Mé » still lists a saved name holding a mark with no composed letter.'
-    suggested_action: 'Backlog.'
-    refs: ['gdpr_pseudonymizer/core/mapping_key.py']
-    suggested_owner: po
-  - id: 'TEST-002'
-    severity: low
-    finding: 'Backlogged by the orchestrator after round 2 (the type-dependent search forms; the pseudonym half typed decomposed).'
+    finding: 'Round 3''s survivors (K08, K15, K16, W4); unchanged.'
     suggested_action: 'Backlog.'
     refs: ['tests/unit/test_accents_one_form_cli.py']
     suggested_owner: dev
   - id: 'DOC-001'
     severity: low
-    finding: 'Still open: PR #111 is a draft and its body says « This draft holds the tests-first commit only »; it lacks the later runs, the Codex reviews and Lionel''s P0-1 answer. Noted, not edited.'
+    finding: 'PR #111 is still a draft and its body still says « This draft holds the tests-first commit only ».'
     suggested_action: 'Orchestrator: Tasks 6.5 and 6.7.'
     refs: ['https://github.com/LioChanDaYo/RGPDpseudonymizer/pull/111']
     suggested_owner: dev
-  - id: 'OBS-001'
+  - id: 'OBS-004'
     severity: info
-    finding: 'As in rounds 1 and 2 (10.16''s batch test span, harmless).'
-    suggested_action: 'Backlog.'
-    refs: ['tests/unit/gui/test_custom_pseudonym_fixes_round2_batch_worker.py:162-163']
-    suggested_owner: dev
-  - id: 'OBS-002'
-    severity: info
-    finding: 'As in rounds 1 and 2 (real-detector misses, the same in both forms).'
-    suggested_action: 'None.'
-    refs: ['docs/stories/10.20.accents-one-form.story.md']
-    suggested_owner: po
-  - id: 'OBS-003'
-    severity: info
-    finding: 'As in round 2 (search_forms'' redundant clause; the PO''s desktop batch probe artefact). Also: a title searched alone (« Me », « Mme ») no longer lists old « Maître » rows (back to 87cd011''s result); mapping_key is not idempotent on « D''Acy » after a preposition (6 of 81,000 inputs built from the app''s lists), so Q-C2 also refuses « Acy » beside it.'
+    finding: 'The mixed row with a decomposed « Maître » (Codex''s P0 row) is not reached by a lookup (the stated limit since v1.7): a document naming « Mélora Zórbalia » gets a second pseudonym; the check refuses the name. With the search read as typed, « de Mézorville » no longer lists a place saved as a lone U+0301 + « zorville » (« Mézorville » does), by design.'
     suggested_action: 'None.'
     refs: ['gdpr_pseudonymizer/core/mapping_key.py']
-    suggested_owner: dev
+    suggested_owner: po
 
 resolved_issues:
   - id: 'SEARCH-001'
@@ -80,19 +81,54 @@ resolved_issues:
     note: 'Round 2.'
   - id: 'TEST-001'
     resolved_in: 'f7f7d70'
-    note: 'Round 2 (M19 to the backlog by the ruling).'
+    note: 'Round 2.'
   - id: 'CODEX-186972b'
     resolved_in: 'e82de14'
-    note: 'The Codex review of 186972b: P0-1 (Lionel''s answer A), P0-2, P1-1 to P1-4 and P2, each on real output (round 3 evidence).'
+    note: 'Round 3.'
+  - id: 'CODEX2-56feb3d'
+    resolved_in: '2086cb3'
+    note: 'Codex review 2''s two P0s and its P1, on real output (round 4 evidence).'
+  - id: 'SEARCH-002'
+    resolved_in: '2086cb3'
+    note: '« Mé » lists only the « mé » names (QA''s clean probe equals 87cd011''s).'
+  - id: 'CUSTOM-001'
+    resolved_in: '2086cb3'
+    note: 'Lionel''s end-cut answer A: refused at set time and finalization.'
 
-quality_score: 100
-expires: '2026-11-05T10:56:00Z'
+quality_score: 70
+expires: '2026-11-05T14:30:00Z'
 
 qa_process_notes:
   - 'QA error, 2026-10-22 09:46 (Paris): a one-off read script (r1020/qa/tools/lone_marks.py) opened the 13 v2.2.0 databases in r1020/po/dbs, r1020/po/v11/dbs and r1020/sm/dbs in place instead of copies. The app''s 10.7 conversion turned them from schema 1.0.0 to 1.1.0 (the entities rows kept; "database_converted" in its log). QA restored all 13 at about 10:00 from the files the makers had copied them from (the PO''s and SM''s own m.db in r1020/po/tmp, r1020/po/v11/tmp and r1020/sm/tmp, still schema 1.0.0, with the same encrypted rows): byte-identical, timestamps kept. The converted files are kept in r1020/qa/logs/converted_by_qa_0946/. The old-database and search probes, rerun on copies, give 121 passed, as before. Nothing in the repository was touched.'
   - 'Round 3: every old database (QA''s 24 and the 29 fresh ones of r1020/qa/r3/olddbs) was opened as a copy only; no original file was opened by today''s code.'
+  - 'Round 4: every old database (QA''s 55 fresh ones and the PO''s and SM''s) opened as a copy only; the originals'' timestamps unchanged.'
 
 evidence:
+  tests_reviewed: 140
+  risks_identified: 4
+  environment: 'As before (Windows, the main Poetry environment, .bat runners through cmd.exe, USERPROFILE and HOME = r1020/qa/home). C:\Users\devea\.gdpr-pseudo.yaml never opened (2026-10-14 13:27, 270 bytes). Nothing under held_out/, final_exam/ or tests/accuracy/ opened; wt_0e944e5 excludes tests/test_corpus and tests/accuracy. Every old database opened as a copy (the originals'' timestamps unchanged). No Codex, Forge, Anvil or Cato from QA.'
+  old_databases_round4: 'r1020/qa/r3/olddbs/ (55 files, v2.2.0 and 43041e9 through the real CLI): this round adds nfd « Maître » + lone U+0301 + « lora Zórbalia »; lone U+0301 + « LORA QUENTREL »; « Mmélora », « Dŕorvan », « Ḿorvan », « Pŕovan » cut after Mme, Dr, M, Pr (« Dŕorvan » and « Ḿorvan » give the same row); « Zorbôde la Quentrel »; lone U+0301 + « lora-Quovan Quentrel »; « Zorbô-Quovan Quentrel » (end cut before a hyphen); lone U+0301 + « lora ZorbôQuentrel » (two sites); lone U+0301 + « lora Zórbalia » (mixed); nfd « Zorvan MAÎTRE »; « Quovan Zorbô » (end cut).'
+  codex2_findings: 'test_q20_r4.py at e6e28a7: 125 of 131 (the 6 failing are IMPORT-002); on 56feb3d''s code 50 of the first 109 fail. Check (set time and finalization call it): every original of each old row refused, typed as written, without accents, in capitals and in lowercase, both trees. [C] 18 of 18. Finalization: finalize_document refuses 5 of 5 (« Nothing was written. »); the CLI with the mixed « Maître » row saved after the review exits 1, nothing written. Desktop: the dialog refuses « Mélora Zórbalia » and « Melora Quentrel » (3 rows x 2 trees); desktop finalization refuses (3 of 3). Searches: « Mme Éloria » and « Monsieur Éloria » list neither « Éloria Maîtrequix » nor « Éloria Maître-Quix » on the four paths; one-site rows listed by their full name on the four paths; the two-site row by a part; end-cut rows never by the longer name.'
+  imported_glued_rows: 'IMPORT-002: v220 and 43041e9 rows « JérôQuentrel », « ZorbôQuentrel », « Zorbôde la Quentrel » after import-mappings: check None, [C] written, both searches empty at e6e28a7; refused and listed at 56feb3d (10 of 10). Imported lone-mark and « Maître » rows still refused and listed.'
+  clean_databases: 'QA''s 48-line clean search probe vs 56feb3d: 44 identical, 4 narrower (« Monsieur Vorlan », « Me Vorlan », « Mé » x2); all 48 equal to 87cd011''s. G16 to G19 pass. REPAIR-001: « Vorlan MAITRE » / « Vorlan Maitre » saved by today''s code from a document; [C] « Vorlan Quovix » refused at e6e28a7, accepted at 56feb3d.'
+  false_refusals: 'tools/false_refusals_r4.py: 500,910 names (french_names.json and pseudonyms/neutral.json first and last names, alone and first x last) against the 29 distinct legacy rows of 88 rows in 84 old databases (copies): 1 refused through a repair, « Jérôme » (the original of the end-cut row; Lionel''s answer); 2 list words list a row only through a repair: « Jérôme » (true) and « Léo » (SEARCH-003).'
+  end_cut: 'Refused at set time ([C], the check four ways) and at finalization (finalize_document) for « Vorlan Zorbôme », « Quovan Zorbôme », « Zorbôme-Quovan Quentrel », « Jérôme » (both trees); T46, T47 pass. QA''s round-3 CUSTOM-001 probe now fails, as Lionel answered. P0-1 forward and G15 probes unchanged (pass).'
+  g2_round4: 'wt_0e944e5 (git diff 56feb3d 0e944e5 -- gdpr_pseudonymizer empty). --runxfail: 16 failed, 124 passed, each an AssertionError on its « expected failure » line: cli :1723 :1729 (T42), :1747 x2 (T43), :1764 x2 (T44), :1820 x2 (T45), :1838 x2 (T46), :1858 :1875 (T47); desktop :705 :715 (T44), :750 :754 (T47); no PRE. Marked: 124 passed, 16 xfailed, one process and -n 4. 0e944e5..2086cb3 test diff: markers removed only (T45''s parametrize collapsed).'
+  mutants_round4: 'r1020/qa/mut4/ (tools/make_mutants4.ts), git archive e6e28a7, 18 mutants; 688 committed tests (10 skipped) and 374 QA probes (2 skipped; the head''s 11 own failures discounted). Caught by committed tests: L01 no S1 15; L02 S2 capital only 3 (G18, T45 x2); L03q replace in Q-C2 12 (G19 ...); L03s replace in searches 4; L04 Maître inside words 1 (G17); L06 no fold on the saved side 3; L07 S3 in searches 1 (T41); L08 S3 in lookups 2 (T33); L09 END_CUTS off 6 (T46, T47); L12 searches without repair 12 (T31, T32); L13 Q-C2 without repair 16; L18 no dotted titles 3 (T45); L19 S2 without its space 4. Not caught by committed tests (TEST-004): L11 (QA S2), L16 (QA import probe), L05, L14, L15.'
+  cost_round4: 'test_q20_r4cost.py, 10,000 names, one check and one DatabaseWorker search, first/cached: all decomposed, head 0.29-0.31/0.16-0.17 s (check) and 0.28-0.29/0.04 s (search) vs 56feb3d 0.16/0.16 and 0.03/0.03 s; composed, head 0.21-0.24/0.16 and 0.012/0.011 s vs 0.16-0.18/0.16 and 0.02/0.02 s. As the dev measured.'
+  ci_round4:
+    0e944e5: '39777908883, attempt 1: Ubuntu 3.10 "3009 passed, 16 xfailed in 442.05s", Ubuntu 3.11 "3009 passed, 16 xfailed in 374.25s", macOS "3009 passed, 16 xfailed in 840.39s", Windows "2859 passed, 3 skipped, 16 xfailed in 304.25s"; the same 16 XFAIL ids on every leg; 0 XPASS; Code Quality 39777908884 green.'
+    2086cb3: '39783800869, attempt 1: "3025 passed" in 380.85s / 534.99s / macOS 590.34s; Windows "2875 passed, 3 skipped in 445.63s"; Code Quality 39783800806 green.'
+    e6e28a7: '39786491619, attempt 1: Ubuntu 3.10 "3025 passed in 423.92s", Ubuntu 3.11 "3025 passed in 514.57s", macOS "3025 passed in 669.65s", Windows "2875 passed, 3 skipped in 472.79s"; Code Quality 39786491584 green.'
+  g1_accuracy_round4: 'QA''s own download of accuracy-results from 39786571603 (e6e28a7, workflow_dispatch, success): the 58 score lines identical to rounds 1 to 3 and to main; JSON differs only in commit and run_id; output only in the summary line''s time.'
+  g6_local: 'ruff 0; black "329 files would be left unchanged"; mypy "no issues found in 107 source files". Suite -m "not slow" -n 4 (six corpus files ignored): 2883 passed, 10 skipped, 1 failed (test_config_show) = 2860 + 23. site/ removed. QA''s earlier probes: 249 passed, 2 skipped, 5 failed (2 by Lionel''s answer, 1 by the search as typed, 2 IMPORT-002).'
+  codex_rule: 'Codex sessions on the 22nd: two in rgpd-wt-s1020, the orchestrator''s read-only reviews of 186972b and 56feb3d; four in ~/.claude (workspace-write) whose only RGPD mention is a GitHub page fixture URL. The two Forge entries of the subagent log belong to another Claude session (« Fix Railway Urgent Email »), not 10.20. The eight round-4 commits carry Co-Authored-By and Claude-Session, no skip-CI marker. The third read-only review is still to come.'
+  trace:
+    ac_covered: [1, 2, 4, 5, 6, 7, 8, 9, 11, 12, 14, 15]
+    ac_gaps: [3, 13]
+    notes: 'AC3: imported glued rows not refused by Q-C2 nor listed by the full-name searches (IMPORT-002). AC13: REPAIR-001 on clean databases. AC10: the third Codex review is still to come.'
+
+evidence_round3:
   tests_reviewed: 117
   risks_identified: 3
   environment: 'As in rounds 1 and 2 (Windows, the main Poetry environment, .bat runners through cmd.exe, USERPROFILE and HOME = r1020/qa/home, test paths grouped by directory). C:\Users\devea\.gdpr-pseudo.yaml never opened (2026-10-14 13:27, 270 bytes). Nothing under held_out/, final_exam/ or tests/accuracy/ opened; wt_fa36fe9 excludes tests/test_corpus and tests/accuracy. Every old database opened as a copy. No Codex, Forge, Anvil or Cato.'
@@ -176,30 +212,26 @@ evidence_round1:
 
 nfr_validation:
   security:
-    status: PASS
-    notes: 'No name left in clear on any path QA ran, in either form; a custom pseudonym equal to an old saved real name is refused at set time and at finalization (CLI and desktop); the end-cut row is no longer reused or erased from another name (P0-1 A). CUSTOM-001 (low): a cut name can still be chosen as a custom pseudonym.'
+    status: FAIL
+    notes: 'IMPORT-002: after import-mappings, an old glued row''s real name (« Jérôme Quentrel ») is accepted as another person''s custom pseudonym and written; 56feb3d refused it. Codex review 2''s two leaks are fixed.'
   performance:
     status: PASS
-    notes: 'About 0.15 ms more per lookup on 10,000 rows; a 50-name document within the noise.'
+    notes: 'Check and search on 10,000 decomposed rows: about 0.3 s the first time, cached after (0.16 s, 0.04 s), as the dev measured.'
   reliability:
-    status: PASS
-    notes: 'No stored row rewritten (raw entities table unchanged on the old databases). CI green at attempt 1 on all three round-3 commits.'
+    status: CONCERNS
+    notes: 'REPAIR-001: on clean databases the check refuses and the searches list differently from 56feb3d when a saved name holds « Maitre »/« MAITRE » without the circumflex. No stored row rewritten; CI green at attempt 1.'
   maintainability:
     status: PASS
-    notes: 'One saved-name rule (saved_name_forms) for lookups, searches and the custom-pseudonym checks; the writers compose. TEST-003: four behaviours pinned by QA''s probes only.'
+    notes: 'The repair read from FRENCH_TITLE_PATTERN itself (a check fails loudly if the pattern''s shape changes); TEST-004: five survivors.'
 
 recommendations:
   immediate:
-    - action: 'Before the merge: the PR body and Ready for Review (DOC-001), and the second read-only Codex review of the final head (AC10).'
+    - action: 'IMPORT-002: reach imported glued rows in Q-C2 and the searches (e.g. the composed forward keys, as at 56feb3d), with a committed test.'
+      refs: ['gdpr_pseudonymizer/core/legacy_names.py', 'gdpr_pseudonymizer/core/custom_pseudonym.py']
+    - action: 'REPAIR-001: S4 only for « Maître » with its circumflex (any case), with a test using « MAITRE ».'
+      refs: ['gdpr_pseudonymizer/core/legacy_names.py']
+    - action: 'Before the merge: DOC-001 and the third read-only Codex review of the final head.'
       refs: ['https://github.com/LioChanDaYo/RGPDpseudonymizer/pull/111']
   future:
-    - action: 'CUSTOM-001: decide whether Q-C2 also tries the "cut" keys (refusal only).'
-      refs: ['gdpr_pseudonymizer/core/custom_pseudonym.py']
-    - action: 'IMPORT-001: import''s duplicate check also tries mapping_key of the source text.'
-      refs: ['gdpr_pseudonymizer/cli/commands/import_mappings.py']
-    - action: 'TEST-003, TEST-002 and M19: the tests QA''s probes model.'
-      refs: ['tests/unit/test_accents_one_form_cli.py', 'tests/unit/gui/test_accents_one_form_desktop.py']
-    - action: 'SEARCH-002 (backlogged): a former form that begins with a mark counts only where the mark does not follow a letter.'
-      refs: ['gdpr_pseudonymizer/core/mapping_key.py']
-    - action: 'Backlog: OBS-001 (10.16''s batch test span).'
-      refs: ['tests/unit/gui/test_custom_pseudonym_fixes_round2_batch_worker.py']
+    - action: 'SEARCH-003, TEST-004 (L11, L16 first), IMPORT-001, TEST-002, TEST-003: backlog.'
+      refs: ['tests/unit/test_accents_one_form_cli.py']
