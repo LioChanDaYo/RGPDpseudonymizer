@@ -1,0 +1,116 @@
+schema: 1
+story: '10.20'
+story_title: 'Accents Stored Two Ways: One Form Everywhere'
+scope: 'PR #111, pre-merge review (Task 7, G2) at head 87cd011 on main 3114e9e (10.12 to 10.16 and 10.18 merged; 10.17, 10.19 not). Commits reviewed: tests first c7e0818, fix 1559488, CHANGELOG and Dev Agent Record 87cd011, on the story and epic docs commits a3d4a7e..4f691ff.'
+gate: CONCERNS
+status_reason: 'Everything the story fixes holds on real output, both storage forms: every reader (.txt, .md, .docx, a PDF that draws accents apart, .xlsx, .csv, the cell readers) returns composed text and every written file is composed; every typed entry composes ([A], [E], [C], delete-mapping, the searches, the desktop dialogs, the database search, the review filter) while passphrases, paths and --reason do not; the PO''s nine paths behave like the composed copy; « Mme Zo » and the « Me » leak are gone with the real detector; Lionel''s Qa (24 old databases: old rows reused and erased, no stored row rewritten), Qb (rule A) and Qc (the line byte for byte) hold. G2 holds (58 AssertionErrors at the dev''s lines on main''s code, markers only removed, the AC6-allowed edits only); G1 holds from QA''s own download (every score line identical); CI green at attempt 1 on every leg. One medium concern: the three searches with a person''s full name do not list rows an earlier version saved with lost letters, which AC3 and Lionel''s Qa promise (SEARCH-001). Low: six behaviours pinned by no committed test (TEST-001); the PR body (DOC-001).'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-10-21T23:59:17Z'
+
+waiver: { active: false }
+
+merge_blockers: []
+
+merge_notes:
+  - 'SEARCH-001 needs a decision before the merge: a dev fix (the searches also try the search text''s former forms) or the PO''s and Lionel''s acceptance of the limit with the CHANGELOG reworded. QA re-checks either way.'
+  - 'The orchestrator''s read-only codex exec review (Task 6.3) runs on the final head after this gate; QA records it then. QA never merges and did not run codex.'
+  - 'Task 6.5/6.7: the PR body and the Ready for Review flag (DOC-001).'
+  - 'This gate commit (docs only) starts its own CI run; the orchestrator checks it green before the merge. After the merge, performance.yaml runs on main (10.20 touches core/).'
+
+top_issues:
+  - id: 'SEARCH-001'
+    severity: medium
+    finding: 'The three searches with a person''s full name do not list rows an earlier version saved with lost letters: « lora Quentrel » after a lone U+0301 (for « Mélora Quentrel »), « JérôQuentrel » (for « Jérôme Quentrel ») and « Maître » + lone U+0301 + « lora Quentrel » (decomposed). list-entities --search "Mélora Quentrel" and list-mappings --search give « No entities found » / no row; the desktop database search shows 0 rows. 7 of the PO''s and SM''s 24 old databases (v220_melora, base_melora, v220_jerome, base_jerome, v220_maitre_melora, base_maitre_melora, v220_mangled). Reuse and delete-mapping by the full name reach the same rows (24 of 24), and a part of the name (« Quentrel ») lists them. AC3 lists the searches among the comparisons and says « So a database written by v2.2.0 or by today''s code still matches, with both kinds of old row »; Lionel''s Qa says « each time the app looks for a saved name, it also looks for the ways an earlier version could have saved it »; the CHANGELOG says such names « are still found, reused and erased ». The Fix Design (search_entities compares composed forms) and Consumer Trace row 22 (substring of composed forms) did not carry the former forms into the searches.'
+    reproduction: 'r1020/qa/probes/test_q20_olddbs.py::test_old_row_found_by_search_with_the_bare_name[po/dbs/v220_melora.db] (and the six others); test_q20_desktop.py::test_d5_database_screen_search (mangled_row_typed_full_C: 0).'
+    suggested_action: 'Decision for the orchestrator, the PO and Lionel: (a) the dev makes search_entities, list-mappings, the database screen and its worker also try the search text''s former forms (former_keys) as substrings, with tests; or (b) the limit is accepted and the CHANGELOG says the searches find such names by a part of the name.'
+    refs: ['gdpr_pseudonymizer/data/repositories/mapping_repository.py:577-590', 'gdpr_pseudonymizer/cli/commands/list_mappings.py:133-142', 'gdpr_pseudonymizer/gui/screens/database.py:570-585', 'gdpr_pseudonymizer/gui/workers/database_worker.py:230-238', 'CHANGELOG.md']
+    suggested_owner: po
+  - id: 'TEST-001'
+    severity: low
+    finding: 'Six behaviours that hold on real output are pinned by no committed test; QA mutants survive the 615 committed tests of the path: M08 (a passphrase composed in init_database and open_database; AC13), M23 (list-mappings --search typed decomposed not composed), M25 (import-mappings saving the names as read), M27 (the desktop correction dialog not composing), M33 (find_by_component exact), M19 (_locate_modified_span''s mark check dropped; reachable only with a mark that has no composed letter). QA probes catch the first five: test_q20_cli.py e8 and e7[C-D], test_q20_gaps.py g1, test_q20_desktop.py d2[decomposed-*], test_q20_component.py.'
+    suggested_action: 'Dev (backlog, or with SEARCH-001''s fix): one test each, QA''s probes as models.'
+    refs: ['tests/unit/test_accents_one_form_cli.py', 'tests/unit/gui/test_accents_one_form_desktop.py']
+    suggested_owner: dev
+  - id: 'DOC-001'
+    severity: low
+    finding: 'The PR body still says « This draft holds the tests-first commit only » and gives that commit''s expected CI; it lacks the fix and head runs (39682995567, 39686908296), the AC7 run (39688923947) with its lines, and the Codex review; the PR is still a draft. Noted, not edited.'
+    suggested_action: 'Orchestrator: Tasks 6.5 and 6.7.'
+    refs: ['https://github.com/LioChanDaYo/RGPDpseudonymizer/pull/111']
+    suggested_owner: dev
+  - id: 'OBS-001'
+    severity: info
+    finding: 'The dev''s test smell (10.16''s test_batch_accents_name_added_after_the_pseudonym[name_decomposed, both_decomposed] adds « zórbalia » at decomposed offsets in the composed review text, one character off) is harmless: the cases still pin the finalization check (QA mutant M35, names sent dropped, fails them).'
+    suggested_action: 'Backlog: locate the name in the review''s own text.'
+    refs: ['tests/unit/gui/test_custom_pseudonym_fixes_round2_batch_worker.py:162-163']
+    suggested_owner: dev
+  - id: 'OBS-002'
+    severity: info
+    finding: 'With the real detector, the decomposed copy of the PO''s texts is detected exactly as the composed one, misses included (« Éloria Vórlan » after « Madame »; « Zórbalia Quentrel » in the PO''s path-1 text), as AC8 and the story record; no promise of this story.'
+    suggested_action: 'None.'
+    refs: ['docs/stories/10.20.accents-one-form.story.md']
+    suggested_owner: po
+
+quality_score: 90
+expires: '2026-11-04T23:59:17Z'
+
+evidence:
+  tests_reviewed: 67
+  risks_identified: 3
+  environment: 'Windows, the main Poetry environment (Python 3.11.9, pytest 9.1.1), .bat runners through cmd.exe, test paths grouped by directory; PYTHONPATH = the tree under test (each run prints the imported package path); USERPROFILE and HOME = r1020/qa/home, TEMP = r1020/qa/tmp; r1020/qa/plugins/qa_isolation.py points gui.config._config_path at each test''s tmp_path. C:\Users\devea\.gdpr-pseudo.yaml never opened (mtime 2026-10-14 13:27, 270 bytes). QA''s worktree of c7e0818 excludes tests/test_corpus and tests/accuracy; the suite run ignores the six corpus-reading files (as the SM and the dev); the accuracy artifacts were compared by their score lines and by the leaf field names of the JSON only. Nothing under held_out/, final_exam/ or tests/accuracy/ was opened.'
+  code_read: 'utils/text_form.py (composed, is_mark, mark_class cached, word_pattern, not_after_word, not_before_word with 10.15''s hyphens); the readers composed (read_file text branch, read_pdf''s extracted text, read_docx, read_excel, read_csv, each cell of the structured readers); get_text_input, the delete-mapping name, list-mappings and search_entities, the desktop correction dialog, database screen, worker and review filter composed; passphrases, paths, --reason, the confirmation word untouched; mapping_key composed; former_keys (title-cut steps on the decomposed text, the decomposed key, « Maître » x3 for every type, « à »/« À » for a LOCATION; two constants with the comment); _name_forms in one IN query in find_by_full_name_and_type, _query_by_full_name, find_by_component; rule A by rank; import-mappings composed; the four word cuts; Qc''s line. Untouched: nlp/, resources/, utils/french_patterns.py, utils/__init__.py, utils/logger.py, gdpr_pseudonymizer/__init__.py, data/database.py, .github/, pyproject.toml, poetry.lock. Story byte check: blocks=30 matched=30, Qc line (count 2) MATCH.'
+  g2:
+    worktree: 'r1020/qa/wt_c7e0818 (git checkout c7e0818 -- . '':(exclude)tests/test_corpus'' '':(exclude)tests/accuracy''); git diff 3114e9e c7e0818 -- gdpr_pseudonymizer is empty.'
+    runxfail: '58 failed, 9 passed; each failure at the dev''s line, no PRE: T1 x8 :516, T2 x3 :534, T3 :559, T4 :577, T5 x2 :607, T6 :626, T7 x2 :650, T8 x2 :681, T9 :708, T10 :730, T12 x2 :761, T13 x2 :786, T14 :805, T15 :825, T16 :844, T17 x2 :865, T18 :879, T20 :899, T21 :918, T22 :933, T23 :958, T26 :983, T27 :1088 x3 / :1104 x3, T28 :1120 x2 / :1136 x2, T29 :1160, T30 :1183 x2; desktop T11 x4 :405, T19 x2 :437, T24 :468, T25 :490.'
+    with_markers: '9 passed, 58 xfailed, one process and -n 4 (strict raises=AssertionError).'
+    fix_commit_tests: 'New files: only the 32 xfail blocks and their reason constant removed, nothing added. Existing edits only those AC6 allows, each with its reason in the commit body: 10.16 round-2 CLI (both-spellings stand-in AC1; written text vs the composed source AC5; stored pseudonym NFC AC2/AC5), round-2 review and batch (review pseudonym, written text, stored pseudonym NFC; AC2, AC5), round-1 _Batch._detect (entities placed in the composed text; AC1). No other assertion changes.'
+    head: '67 new + 10.16''s 81 + 10.11''s 89 = 237 passed.'
+  ci:
+    c7e0818: '39674894560, attempt 1: Ubuntu 3.11 "2894 passed, 58 xfailed in 457.95s", Ubuntu 3.10 "2894 passed, 58 xfailed in 274.56s", macOS "2894 passed, 58 xfailed in 1305.68s" (the same 58 XFAIL ids), Windows "2745 passed, 3 skipped, 57 xfailed in 322.28s" (T4 deselected); 0 XPASS; lint green.'
+    1559488: '39682995567, attempt 1: 2952 / 2952 / 2952; Windows "2802 passed, 3 skipped"; 0 xfail.'
+    87cd011: '39686908296, attempt 1 (the head): Ubuntu 3.11 "2952 passed in 277.45s", Ubuntu 3.10 "2952 passed in 426.37s", macOS "2952 passed in 749.36s", Windows "2802 passed, 3 skipped in 390.71s"; lint and Code Quality 39686908178 green.'
+  g1_accuracy: 'QA''s own download of accuracy-results from 39688923947 (87cd011, workflow_dispatch) and 38212303870: the 58 lines holding recall, precision or F1 identical (same SHA-256); accuracy-per-document.json differs only in its commit and run_id leaves; accuracy-output.txt otherwise differs in the plugin order, « collected 26 items » vs 27 (TestFinalExamMetrics::test_final_exam_metrics SKIPPED, a test that exists now) and the summary line. No score changed: G3 and G5 hold.'
+  end_to_end:
+    harness: 'r1020/qa/probes/ (never committed): the real Typer app (CliRunner; process, batch --workers 1, delete-mapping, list-entities, list-mappings, import-mappings, init), the real readers, the real DetectionWorker, ValidationScreen, finalization and BatchWorker; detection replaced below the reader by a stand-in that finds each name in both spellings in the text it receives (except the real-detector probes); decomposed forms built at run time; a PDF drawn with the accents apart (copy of the SM''s maker).'
+    cli: 'test_q20_cli.py at 87cd011: 27 passed, 1 skipped (on main''s code 19 fail). process on .txt, .md, .docx, the drawn-apart PDF, .xlsx, .csv, decomposed and composed: written file without a combining mark, the name replaced, « été », « témoin », « présent » composed, one composed row; read_file on the PDF alone composed. batch --workers 1 across forms (.txt, .docx, .csv): one pseudonym, one row. Both forms in one document: « 1 unique », one pseudonym. [A] in the other form and both decomposed: no « not found », both places replaced. [E] in the other form: nothing in clear. [C] typed decomposed: written and stored composed. list-entities and list-mappings --search and delete-mapping typed in the other form: listed and erased. Not composed: a database made with a decomposed passphrase opens with it and refuses its composed spelling; folders and files with decomposed names read and written under those names; --reason stored decomposed. A text without accents: the same bytes as main''s code (SHA-256 equal).'
+    desktop: 'test_q20_desktop.py at 87cd011: 20 passed, 1 skipped. Item 3: .txt, .md, .docx and the drawn-apart PDF through the real DetectionWorker and read_file: the review''s own text without a mark, the row the composed name, the written file composed with the name replaced, one composed row. Correction dialog typed composed or decomposed on decomposed .txt and .docx: no « Quentrel » in clear. « Changer le pseudonyme » typed decomposed: written and stored composed; the review filter typed decomposed lists the name. v2.2.0 databases (decomposed, both ways) with decomposed .txt and .docx: the old pseudonym by rule A, rows unchanged. The database screen finds the decomposed row typed either way. A batch of three with review (decomposed .txt and .docx, a mixed .txt): one row, one pseudonym in three composed outputs.'
+    po_paths: 'The PO''s probes from QA''s copy r1020/qa/po_probes/ (stand-in in both spellings): 32 passed (print-only); every decomposed case written like its composed copy: [A], [E], grouping (« 1 unique » for the mixed text), reuse by process and batch, deletion, every input format composed. The PO''s ten sentences through the real detector: the decomposed copy gives the same 10 rows and the same names left in clear as the composed copy; « Mme Mahaut », no « Mme Zo ». Path 9 is 10.17''s and 10.19''s.'
+    real_detector: 'test_q20_real.py, NFC vs NFD: « Signé : Mme Zórbalia » -> « Mme <pseudonym> »; « Le contrat avec Mélora Quentrel a signé. » on a fresh database -> « Le contrat avec <pseudonym> a signé. », row « Mélora Quentrel » composed; the same rows as the composed copy. On main''s code: « Delaunaýrbalia », « Mélora Quentrel a Victoria Teixeira ».'
+  old_databases: 'test_q20_olddbs.py, 24 databases written by v2.2.0 and 43041e9 (r1020/po/dbs, r1020/po/v11/dbs, r1020/sm/dbs), copied; the entities table read raw before and after. Qa: composed and decomposed documents reuse the old pseudonym, 48 of 48, entities table unchanged byte for byte (separate marks; « lora Quentrel » after a lone U+0301, « JérôQuentrel », « Maître » + lone U+0301 + « lora Quentrel »; « Maître » in three case forms; « à »/« À » places); delete-mapping with the bare composed name erases every row, 24 of 24, one ERASURE entry per row. Qb: v220_both.db « Anya Branco » for both forms, v220_both_rev.db « Nassim Fonseca » (the composed row''s, not the older « Noé Fonseca »); both rows kept, both listed and erased. Qc: the two both-ways deletions show « You are about to delete the following 2 saved pseudonyms (all of this name, whatever its type): » byte for byte, never « one per type of this name ». Searches: 17 of 24 (SEARCH-001). test_q20_component.py: a first or last name saved decomposed is reused as a part in another full name and alone, 12 of 12 (main''s code: the first name gets a new part).'
+  mutants: 'r1020/qa/mut/ (tools/make_mutants.ts), git archive 87cd011 of the package, 35 mutants; each runs 615 committed tests of the path (10 skipped) and QA''s 148 probes (2 skipped; the 7 SEARCH-001 failures discounted). Caught by committed tests (24): M01 .txt reader raw 40, M02 PDF 1, M03 DOCX 1, M04/M05 flattened XLSX/CSV 1 each, M06/M07 cells 3/2, M09 no « Maître » key 4, M10 no « à » 2, M11 no title-cut key 4, M13 rule B 1 (T29), M14 last form first 1, M15 word pattern without marks 1 (T20), M16 boundaries 1 (T21), M18 composed name only 14, M20 redaction 1 (T22), M21 typed text raw 7, M24 search_entities raw 1 (T17), M26 mapping_key raw 9, M28 database screen search 1 (T19), M30 review filter 1 (T25), M31 old line 2 (T30), M32 LOCATION forms 8, M35 10.16''s names sent dropped 17. Equivalent on every product path QA found (5): M12 (no decomposed key: the title-cut form equals it unless a title-like name was saved decomposed and uncut), M17 (the IN query without the name as given), M22 (the delete-mapping name raw: the repository composes again), M29 (the worker''s search raw: the screen composes first), M34 (DocumentWords keeps the original text: every caller passes composed text now; 10.16''s TEST-004 holds as behaviour, G7 passes, the invariant is unreachable). Not pinned (6, TEST-001): M08 passphrase composed (probe e8), M23 list-mappings search raw (probe e7), M25 import raw (probe g1), M27 desktop correction raw (probe d2), M33 find_by_component exact (component probe), M19 _locate_modified_span mark check (no probe; marks without a composed letter only).'
+  smell_item6: 'The off-by-one hand-added span in 10.16''s test_batch_accents_name_added_after_the_pseudonym[name_decomposed, both_decomposed] is harmless: M35 (names sent dropped) fails those cases, so they still pin the finalization check.'
+  performance: 'test_q20_perf.py, 2,000 saved names, head vs main''s code, two runs of three: 500 lookups 0.156-0.178 s vs 0.113-0.120 s (about 0.1 ms more per lookup); finalize_document of 50 names, all new 0.281-0.321 s vs 0.271-0.306 s, all known 0.220-0.266 s vs 0.226-0.255 s: about a hundredth of a second or less per 50-name document, as Lionel''s Qa said. The dev''s local performance suite: 7, 3 and 4 (+3 skipped) passed; benchmarks 0.348, 0.613, 0.941, 0.555 s.'
+  g6_local: 'ruff 0; black "328 files would be left unchanged"; mypy "Success: no issues found in 106 source files". pytest -m "not slow" -n 4 --dist loadscope over tests/unit and tests/integration (six corpus-reading files ignored): 2810 passed, 10 skipped, 1 failed (test_config_show, the known long-path wrapping). The dev''s numbers. site/ removed.'
+  changelog: 'One bullet, byte for byte the story''s CHANGELOG Entry, after 10.14''s bullet in [Unreleased]; it says « the same look, different bytes, also where no name was replaced »; no promise that missed names are found. « Names an earlier version saved … wrongly … are still found » overstates the searches (SEARCH-001).'
+  codex_rule: 'No codex session in rgpd-wt-s1020 or on story/10.20-accents-one-form (~/.codex/sessions up to 2026/10/20; none on the 21st or 22nd). Subagent log: the 10.20 dev a general-purpose agent (2026-10-21 22:30); no Forge, Anvil or Cato for 10.20. The 11 branch commits carry Co-Authored-By and Claude-Session; no skip-CI marker in commits, title or body. The read-only review (Task 6.3) is still to come.'
+  codex_review: 'Pending: the orchestrator''s read-only codex exec review of the final head; QA records its session id, model, sandbox and VERDICT line then.'
+  consumer_trace: 'Re-checked at 87cd011: row 2 (the PDF reader composed, on a PDF pdfplumber returns apart, CLI and desktop), row 11 (get_text_input: [A], [E], [C] typed in the other form composed), row 23 (rule A and both erased, on the SM''s v2.2.0 databases). Row 22 (searches, substring of composed forms) holds as written and leaves SEARCH-001.'
+  trace:
+    ac_covered: [1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+    ac_gaps: [3]
+    notes: 'AC3 holds for reuse, erasure, the other types and components (24 of 24 old databases), not for the searches with a full name on rows saved with lost letters (SEARCH-001). AC7 from QA''s download. AC10: the review is still to come.'
+
+nfr_validation:
+  security:
+    status: CONCERNS
+    notes: 'No name or part of a name left in clear on any path QA ran, in either form. SEARCH-001: a stored person is invisible to the full-name search a data-protection officer would use to answer an access request (still erased by name).'
+  performance:
+    status: PASS
+    notes: 'About 0.1 ms more per lookup; about a hundredth of a second per 50-name document.'
+  reliability:
+    status: PASS
+    notes: 'No stored row rewritten (raw entities table unchanged on 24 databases). CI green at attempt 1 on every run.'
+  maintainability:
+    status: PASS
+    notes: 'One module for the form and the marks; repository signatures unchanged. TEST-001: six unpinned behaviours.'
+
+recommendations:
+  immediate:
+    - action: 'Decide SEARCH-001: make the searches also try the search text''s former forms (with tests), or accept the limit and reword the CHANGELOG.'
+      refs: ['gdpr_pseudonymizer/data/repositories/mapping_repository.py', 'CHANGELOG.md']
+  future:
+    - action: 'Pin the six behaviours of TEST-001; QA''s probes are models.'
+      refs: ['tests/unit/test_accents_one_form_cli.py', 'tests/unit/gui/test_accents_one_form_desktop.py']
+    - action: 'Update the PR body and mark the PR Ready for Review (DOC-001).'
+      refs: ['https://github.com/LioChanDaYo/RGPDpseudonymizer/pull/111']
+    - action: 'Backlog: locate the hand-added name in the review''s own text in 10.16''s batch test (OBS-001).'
+      refs: ['tests/unit/gui/test_custom_pseudonym_fixes_round2_batch_worker.py']
