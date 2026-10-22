@@ -15,7 +15,7 @@ from typing import Any
 
 from PySide6.QtCore import QRunnable
 
-from gdpr_pseudonymizer.core.mapping_key import search_forms
+from gdpr_pseudonymizer.core.legacy_names import matches_search
 from gdpr_pseudonymizer.gui.workers.signals import WorkerSignals
 from gdpr_pseudonymizer.utils.logger import get_logger
 from gdpr_pseudonymizer.utils.text_form import composed
@@ -229,22 +229,14 @@ class DatabaseWorker(QRunnable):
             return
 
         if search_text:
-            # Story 10.20: both sides composed (NFC); v1.5: a name an earlier
-            # version saved with letters lost is found through the search's
-            # former forms for the row's type
+            # Story 10.20: both sides composed (NFC); v1.10: a name an earlier
+            # version cut or kept a title in is found through the texts it may
+            # stand for
             search_lower = composed(search_text).lower()
-            forms = {
-                kind: search_forms(search_text, kind) for kind in ("PERSON", "LOCATION")
-            }
             filtered = [
                 e
                 for e in filtered
-                if any(
-                    form in composed(e.full_name).lower()
-                    for form in forms[
-                        "LOCATION" if e.entity_type == "LOCATION" else "PERSON"
-                    ]
-                )
+                if matches_search(search_lower, e.full_name, e.entity_type)
                 or search_lower in composed(e.pseudonym_full).lower()
             ]
 

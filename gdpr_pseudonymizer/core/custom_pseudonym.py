@@ -41,6 +41,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import TYPE_CHECKING, Any
 
+from gdpr_pseudonymizer.core.legacy_names import is_legacy, is_saved_real_name
 from gdpr_pseudonymizer.core.mapping_key import mapping_key, saved_name_forms
 from gdpr_pseudonymizer.utils.text_form import word_pattern
 
@@ -605,29 +606,23 @@ def check_custom_pseudonym(
             return Refusal(
                 CustomPseudonymRefusal.REAL_NAME, pseudonym, run, in_document=True
             )
-    # Q-C2: a stored full name. Story 10.20 (v1.7, the Codex review's P0-2):
-    # the saved names an earlier version kept a title or preposition in, or
-    # cut leaving a sign, count too: each row's key read today (folded), and
-    # each row's name with its accent marks kept, against every form a
-    # lookup of the run reaches
+    # Q-C2: a stored full name. Story 10.20: each saved name folded, and its
+    # key read today (v1.7: a title or preposition an earlier version kept,
+    # taken off); v1.10 (the second Codex review): each whole text a saved
+    # name an earlier version cut or kept a title in may stand for, rebuilt
+    # backwards from the old title pattern (core/legacy_names.py)
     stored_names = {fold(row.full_name) for row in rows} | {
         fold(mapping_key(row.full_name, row.entity_type)) for row in rows
     }
-    saved_texts = {_saved_text(row.full_name) for row in rows}
+    legacy = [
+        (row.full_name, row.entity_type)
+        for row in rows
+        if is_legacy(row.full_name, row.entity_type)
+    ]
     for run in _word_runs(pseudonym, entity_type):
-        if fold(run) in stored_names or any(
-            _saved_text(form) in saved_texts
-            for kind in ("PERSON", "LOCATION")
-            for form in saved_name_forms(run, kind)
-        ):
+        if fold(run) in stored_names or is_saved_real_name(run, legacy):
             return Refusal(CustomPseudonymRefusal.REAL_NAME, pseudonym, run)
     return None
-
-
-def _saved_text(text: str) -> str:
-    """A saved name compared as stored: casefolded, spaces collapsed, accent
-    marks kept (Story 10.20, v1.7)."""
-    return " ".join(text.casefold().split())
 
 
 def _engine_ambiguity(name: str, entity_type: str) -> tuple[bool, str | None]:

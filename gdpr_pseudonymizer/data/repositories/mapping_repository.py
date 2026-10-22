@@ -4,7 +4,8 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
-from gdpr_pseudonymizer.core.mapping_key import saved_name_forms, search_forms
+from gdpr_pseudonymizer.core.legacy_names import matches_search
+from gdpr_pseudonymizer.core.mapping_key import saved_name_forms
 from gdpr_pseudonymizer.data.models import Entity
 from gdpr_pseudonymizer.exceptions import DatabaseError, DuplicateEntityError
 from gdpr_pseudonymizer.utils.text_form import composed
@@ -13,11 +14,6 @@ from gdpr_pseudonymizer.utils.text_form import composed
 # LOCATION has forms of its own (its prepositions); every other type has a
 # PERSON's.
 _FORM_TYPES = ("PERSON", "LOCATION")
-
-
-def _form_type(entity_type: str) -> str:
-    """The type whose forms a row of ``entity_type`` is compared with."""
-    return "LOCATION" if entity_type == "LOCATION" else "PERSON"
 
 
 def _name_forms(full_name: str, entity_type: str) -> list[str]:
@@ -579,18 +575,14 @@ class SQLiteMappingRepository(MappingRepository):
 
         # Apply search filter on decrypted names, both sides composed (Story
         # 10.20): a row saved with separate accent marks is found too, and
-        # (v1.5) a row an earlier version saved with letters lost, through
-        # the search's former forms for the row's type (``search_forms``)
+        # (v1.10) a row an earlier version cut or kept a title in, through
+        # the texts it may stand for (``matches_search``)
         if search_term:
             search_lower = composed(search_term).lower()
-            forms = {kind: search_forms(search_term, kind) for kind in _FORM_TYPES}
             entities = [
                 e
                 for e in entities
-                if any(
-                    form in composed(e.full_name).lower()
-                    for form in forms[_form_type(e.entity_type)]
-                )
+                if matches_search(search_lower, e.full_name, e.entity_type)
                 or search_lower in composed(e.pseudonym_full).lower()
             ]
 

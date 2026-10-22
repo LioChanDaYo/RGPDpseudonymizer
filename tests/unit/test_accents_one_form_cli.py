@@ -1618,7 +1618,6 @@ def test_guard_old_cut_row_reached_by_the_shorter_name(
 # (T42, T43, T45, T46, T47, G16-G19), and searches with a title (T44)
 # ---------------------------------------------------------------------------
 
-XFAIL = "Story 10.20 v1.10: reproduces {} on the unfixed code; fixed in Task 2.10"
 MELORA_ZO = "Mélora Zórbalia"
 MAITREQUIX = "Éloria Maîtrequix"
 HYPHEN_CUT = "Zorbôme-Quovan Quentrel"
@@ -1704,11 +1703,6 @@ def _case_like(model: str, word: str) -> str:
     return word
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("a mixed old row with a title and a lone mark accepted"),
-)
 @pytest.mark.parametrize("path", ["cli", "check"])
 def test_mixed_old_row_with_a_title_and_a_lone_mark_refused(
     tmp_path: Path, db: Path, path: str
@@ -1730,11 +1724,6 @@ def test_mixed_old_row_with_a_title_and_a_lone_mark_refused(
         assert refusal.reason is CustomPseudonymRefusal.REAL_NAME, refusal
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("an old row's name typed without its accent accepted"),
-)
 @pytest.mark.parametrize("typed", ["Melora Quentrel", "MELORA QUENTREL"])
 def test_old_row_refused_whatever_the_accents_typed(
     tmp_path: Path, db: Path, typed: str
@@ -1747,11 +1736,6 @@ def test_old_row_refused_whatever_the_accents_typed(
     assert typed.lower() not in written.lower(), repr(written)  # expected failure
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("a search with a title listing another name"),
-)
 @pytest.mark.parametrize("command", SEARCHES)
 def test_search_with_a_title_lists_no_other_name(
     tmp_path: Path, db: Path, command: str
@@ -1764,28 +1748,7 @@ def test_search_with_a_title_lists_no_other_name(
     assert XV not in run.flat, run.shown  # expected failure
 
 
-@pytest.mark.parametrize(
-    "kind",
-    [
-        pytest.param(
-            "word_start",
-            marks=pytest.mark.xfail(
-                strict=True,
-                raises=AssertionError,
-                reason=XFAIL.format("a name whose title word started a word missed"),
-            ),
-        ),
-        "joined",
-        pytest.param(
-            "two_sites",
-            marks=pytest.mark.xfail(
-                strict=True,
-                raises=AssertionError,
-                reason=XFAIL.format("a name cut at two sites missed"),
-            ),
-        ),
-    ],
-)
+@pytest.mark.parametrize("kind", ["word_start", "joined", "two_sites"])
 def test_round_trip_check_refuses_the_original(kind: str) -> None:
     """T45 (v1.10; the ruling's proof (1)): for invented names the old title
     pattern cuts, every name an earlier version could have saved (each
@@ -1820,11 +1783,6 @@ def test_round_trip_check_refuses_the_original(kind: str) -> None:
     assert missed == [], (len(missed), missed[:5])  # expected failure
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("a name an old row could have been cut from accepted"),
-)
 @pytest.mark.parametrize("saved", ["Quovan Zorbô", "Zorbô"])
 def test_end_cut_old_row_refused_as_a_pseudonym(
     tmp_path: Path, db: Path, saved: str
@@ -1838,11 +1796,6 @@ def test_end_cut_old_row_refused_as_a_pseudonym(
     assert typed not in nfc(written), repr(written)  # expected failure
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("a hyphenated first name cut before its hyphen accepted"),
-)
 @pytest.mark.parametrize("path", ["cli_set", "cli_final"])
 def test_end_cut_hyphenated_first_name_refused(
     tmp_path: Path, db: Path, monkeypatch: pytest.MonkeyPatch, path: str

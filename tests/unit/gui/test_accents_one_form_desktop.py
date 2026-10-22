@@ -671,16 +671,10 @@ def test_guard_clean_database_as_today(  # type: ignore[no-untyped-def]
 # from, as a custom pseudonym (T47)
 # ---------------------------------------------------------------------------
 
-XFAIL = "Story 10.20 v1.10: reproduces {} on the unfixed code; fixed in Task 2.10"
 MAITREQUIX = "Éloria Maîtrequix"
 HYPHEN_CUT = "Zorbôme-Quovan Quentrel"
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("a search with a title listing another name"),
-)
 @pytest.mark.parametrize("path", ["inline", "worker"])
 def test_search_with_a_title_lists_no_other_name(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, path
@@ -715,11 +709,6 @@ def test_search_with_a_title_lists_no_other_name(  # type: ignore[no-untyped-def
         assert found == [], found  # expected failure
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("a hyphenated first name cut before its hyphen accepted"),
-)
 @pytest.mark.parametrize("path", ["desktop_set", "desktop_final"])
 def test_end_cut_hyphenated_first_name_refused(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, monkeypatch, path

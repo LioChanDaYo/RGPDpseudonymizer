@@ -175,31 +175,3 @@ def saved_name_forms(entity_text: str, entity_type: str) -> list[str]:
         entity_text,
     ]
     return list(dict.fromkeys(forms))
-
-
-def search_forms(search_text: str, entity_type: str) -> list[str]:
-    """The texts a search by name looks for in a saved name of this type
-    (Story 10.20, v1.5; Lionel's Qa), each lowercased, without duplicates:
-    the composed search, then each of its former keys (``former_keys``)
-    composed. A former key equal to the search's own key (``mapping_key``:
-    its title, or a LOCATION's preposition, taken off) is left out unless it
-    is the composed search itself, so a search keeps its titles and
-    prepositions as before: « Mme Éloria » looks for « mme éloria » and
-    « maître éloria », never « éloria ».
-
-    Args:
-        search_text: The text searched, as typed
-        entity_type: The type of the saved names it is compared with (a
-            LOCATION has forms of its own; every other type has a PERSON's)
-
-    Returns:
-        The lowercased forms, the composed search first
-    """
-    search = composed(search_text)
-    key = mapping_key(search_text, entity_type)
-    forms = [search] + [
-        former
-        for former in (composed(text) for text in former_keys(search_text, entity_type))
-        if former != key or former == search
-    ]
-    return list(dict.fromkeys(form.lower() for form in forms))
