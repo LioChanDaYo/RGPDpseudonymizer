@@ -44,11 +44,14 @@ from rich.prompt import Confirm, Prompt
 from typer.testing import CliRunner
 
 from gdpr_pseudonymizer.cli.main import app
+from gdpr_pseudonymizer.core import custom_pseudonym as custom_pseudonym_module
 from gdpr_pseudonymizer.core.custom_pseudonym import (
     CustomPseudonymRefusal,
     check_custom_pseudonym,
+    normalize_custom_pseudonym,
 )
 from gdpr_pseudonymizer.core.document_processor import DocumentProcessor
+from gdpr_pseudonymizer.core.mapping_key import saved_name_forms
 from gdpr_pseudonymizer.data.database import open_database
 from gdpr_pseudonymizer.data.models import Entity
 from gdpr_pseudonymizer.data.repositories.mapping_repository import (
@@ -1993,3 +1996,260 @@ def test_guard_maitre_with_circumflex_still_a_kept_title(
     run, written = _custom_for_qm(tmp_path, db, "Éloria Quentrel")
     assert "Éloria Quentrel" not in nfc(written), repr(written)
     assert REAL_NAME_LINE in run.flat, run.shown
+
+
+# ---------------------------------------------------------------------------
+# v1.18: the third Codex review of 9784ddf. Old keys never tried composed
+# (T51, T53, G21, G22), and title words lost between two accent marks (T54
+# to T57)
+# ---------------------------------------------------------------------------
+
+XFAIL = "Story 10.20 v1.18: reproduces {} on the unfixed code; fixed in Task 2.12"
+FRESH = "Vorlan ZorbôQuentrel"
+VZQ = "Vorlan Zorbôme Quentrel"
+VZQ_TEXT = f"Le contrat avec {VZQ} a signé."
+MELORA_CUT = "Zorbôme Mélora Quentrel"
+LOOKUP_NAMES = [
+    (VZQ, PERSON),
+    ("Mélora Quentrel", PERSON),
+    ("Zorbôme de la Quentrel", PERSON),
+    ("Maître Éloria Quentrel", PERSON),
+    ("Éloria Zórbalia", PERSON),
+    ("Cabinet Maître Éloria Quentrel", "ORG"),
+    ("à Zórbaville", LOCATION),
+    ("Zórbaville", LOCATION),
+]
+
+
+def _two_titles_row() -> str:
+    """The row an earlier version saved from nfd(« Zorbôme Mélora
+    Quentrel »): « me » and « Me » taken off between the two marks."""
+    stored = nfd("Zorbô") + ACUTE + "lora Quentrel"
+    _pre(
+        _saved_by_old_steps(nfd(MELORA_CUT)) == stored,
+        "the old steps on the decomposed name give the row",
+    )
+    return stored
+
+
+def _letters(text: str) -> int:
+    """The characters of ``text`` that are neither marks nor spaces."""
+    return sum(
+        1 for char in text if not unicodedata.combining(char) and not char.isspace()
+    )
+
+
+def _without_accents(text: str) -> str:
+    """``text`` with every accent mark taken off."""
+    return "".join(char for char in nfd(text) if not unicodedata.combining(char))
+
+
+def _carries_acute(word: str) -> bool:
+    """Whether the word's last letter makes one composed letter with
+    U+0301."""
+    return len(nfc(word + ACUTE)) == len(word)
+
+
+def _class_names(kind: str) -> list[str]:
+    """Invented names the old steps cut at a place between two marks: « Zorbô »
+    + a title word + a space + a title word whose last letter carries
+    U+0301 + « lora », in two shapes (``two_titles_between_marks``); or
+    before « - » with a space eaten (``space_before_hyphen``). « Maître »
+    is left out (the old pattern never matched it decomposed)."""
+    words = [word for word in _old_title_words() if word != "Maître"]
+    if kind == "space_before_hyphen":
+        return [nfc(f"Zorbô{word} -Quovan Quentrel") for word in words]
+    names: list[str] = []
+    for first in words:
+        for second in (word for word in words if _carries_acute(word)):
+            names.append(nfc(f"Zorbô{first} {second}{ACUTE}lora Quentrel"))
+            names.append(nfc(f"Quovan Zorbô{first} {second}{ACUTE}lora"))
+    return names
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason=XFAIL.format("a fresh composed name reached through an old key composed"),
+)
+@pytest.mark.parametrize("path", ["reuse", "delete"])
+def test_fresh_composed_name_not_reached_from_another(
+    tmp_path: Path, db: Path, path: str
+) -> None:
+    """T51 (v1.18; the third Codex review, P0-b; a database with no old
+    rows, AC13): the row « Vorlan ZorbôQuentrel », saved composed as today's
+    code saves it, is another person: « Vorlan Zorbôme Quentrel » neither
+    reuses its pseudonym nor lists or erases it."""
+    _save(db, [(FRESH, PERSON, XQ)])
+    if path == "reuse":
+        run, output = _process_text(tmp_path, db, VZQ_TEXT, [(VZQ, PERSON)])
+        _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+        written = _written(output)
+        assert XQ not in written, repr(written)  # expected failure
+        assert len(_rows(db)) == 2, _rows(db)
+    else:
+        run = _delete(db, VZQ)
+        assert (FRESH, PERSON, XQ) in _rows(db), run.shown  # expected failure
+        assert _erasures(db) == 0
+        assert FRESH not in nfc(run.flat) and XQ not in run.flat, run.shown
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason=XFAIL.format("an old key tried in its composed form"),
+)
+def test_every_other_lookup_form_holds_a_mark() -> None:
+    """T53 (v1.18; P0-b, the ruling's property): every form a lookup tries,
+    other than the name composed and the name as given, holds an accent
+    mark, so it can never be a name today's code saves."""
+    without = [
+        (name, form)
+        for name, entity_type in LOOKUP_NAMES
+        for form in saved_name_forms(name, entity_type)
+        if form not in (nfc(name), name) and not _has_mark(form)
+    ]
+    assert without == [], without  # expected failure
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason=XFAIL.format("a name that lost two title words between two marks accepted"),
+)
+@pytest.mark.parametrize("path", ["cli_set", "cli_final"])
+def test_two_titles_between_marks_refused(
+    tmp_path: Path, db: Path, monkeypatch: pytest.MonkeyPatch, path: str
+) -> None:
+    """T54 (v1.18; P0-a, Codex's case; Lionel's end-cut answer A): the row
+    an earlier version saved from nfd(« Zorbôme Mélora Quentrel ») refuses
+    that name as a custom pseudonym, when it is set (the row saved first)
+    and at finalization (the row saved before the review ends)."""
+    stored = _two_titles_row()
+    if path == "cli_set":
+        _save(db, [(stored, PERSON, XV)])
+        _, written = _custom_for_vm(tmp_path, db, MELORA_CUT)
+        assert MELORA_CUT not in nfc(written), repr(written)  # expected failure
+    else:
+        answer = Answers.__call__
+
+        def ready_after_saving(
+            self: Any, prompt: Any, *args: Any, **kwargs: Any
+        ) -> bool:
+            if str(prompt) == READY_QUESTION and not _rows(db):
+                _save(db, [(stored, PERSON, XV)])
+            return answer(self, prompt, *args, **kwargs)
+
+        monkeypatch.setattr(Answers, "__call__", ready_after_saving)
+        source, output = tmp_path / "in.txt", tmp_path / "out.txt"
+        source.write_text(VM_TEXT, encoding="utf-8")
+        _process(source, output, db, [(VM, PERSON)], [ENTER, "c"], [MELORA_CUT])
+        _pre(len(_rows(db)) >= 1, "the row saved before the review ends")
+        written = output.read_text(encoding="utf-8") if output.is_file() else ""
+        assert MELORA_CUT not in nfc(written), repr(written)  # expected failure
+        assert len(_rows(db)) == 1, _rows(db)
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason=XFAIL.format("a name that lost two title words, typed without accents"),
+)
+@pytest.mark.parametrize(
+    "typed", ["Zorbome Melora Quentrel", "ZORBOME MELORA QUENTREL"]
+)
+def test_two_titles_between_marks_refused_whatever_the_accents(
+    tmp_path: Path, db: Path, typed: str
+) -> None:
+    """T55 (v1.18; the ruling's item 3): T54's row refuses the name typed
+    without its accents, whatever its capitals."""
+    _save(db, [(_two_titles_row(), PERSON, XV)])
+    _, written = _custom_for_vm(tmp_path, db, typed)
+    assert typed.lower() not in written.lower(), repr(written)  # expected failure
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason=XFAIL.format("a name cut between two marks or before « - » accepted"),
+)
+@pytest.mark.parametrize("kind", ["two_titles_between_marks", "space_before_hyphen"])
+def test_class_round_trip_refused(kind: str) -> None:
+    """T56 (v1.18; the ruling's class): for invented names the old steps cut
+    at a place between two marks, or before « - » with the space eaten, the
+    row they saved refuses the name and its spelling without accents, each
+    normalized as a custom pseudonym, as set time and finalization check
+    it."""
+    names = _class_names(kind)
+    accepted: list[str] = []
+    for name in names:
+        saved = _saved_by_old_steps(nfd(name))
+        _pre(_letters(saved) < _letters(name), f"letters lost: {name!r}")
+        row = Entity(
+            entity_type=PERSON, full_name=saved, pseudonym_full=XV, theme="neutral"
+        )
+        for spelling in (name, _without_accents(name)):
+            typed = normalize_custom_pseudonym(spelling, PERSON)
+            refusal = check_custom_pseudonym([row], VM, PERSON, typed, VM_TEXT, {})
+            if (
+                refusal is None
+                or refusal.reason is not CustomPseudonymRefusal.REAL_NAME
+            ):
+                accepted.append(spelling)
+    shown = (len(accepted), 2 * len(names), accepted[:5])
+    assert accepted == [], shown  # expected failure
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason=XFAIL.format("no forward comparison in the saved-real-name check"),
+)
+def test_forward_forms_refuse_without_the_reverse_repair(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """T57 (v1.18; the ruling's item 2): with the reverse repair switched
+    off, T54's row still refuses « Zorbôme Mélora Quentrel »: the old steps
+    on the name's decomposed form give the saved name."""
+    stored = _two_titles_row()
+    monkeypatch.setattr(
+        custom_pseudonym_module, "is_saved_real_name", lambda run, rows: False
+    )
+    row = Entity(
+        entity_type=PERSON, full_name=stored, pseudonym_full=XV, theme="neutral"
+    )
+    refusal = check_custom_pseudonym([row], VM, PERSON, MELORA_CUT, VM_TEXT, {})
+    assert refusal is not None, refusal  # expected failure
+    assert refusal.reason is CustomPseudonymRefusal.REAL_NAME, refusal
+
+
+def test_guard_clean_database_custom_accepted(tmp_path: Path, db: Path) -> None:
+    """G21 (v1.18; AC13): beside the row « Vorlan ZorbôQuentrel » saved
+    composed, « Vorlan Zorbôme Quentrel » is accepted as a custom pseudonym:
+    the forward comparison keeps the marks and reads only saved names that
+    hold a sign."""
+    _save(db, [(FRESH, PERSON, XQ)])
+    _, written = _custom_for_qm(tmp_path, db, VZQ)
+    assert written == f"{VZQ} valide.", repr(written)
+
+
+@pytest.mark.parametrize("path", ["reuse", "delete"])
+def test_guard_old_row_with_a_sign_still_reached(
+    tmp_path: Path, db: Path, path: str
+) -> None:
+    """G22 (v1.18; Lionel's P0-1: rows with a sign stay reached): the row an
+    earlier version saved for « Vorlan Zorbôme Quentrel », nfd(« Vorlan
+    Zorbô ») + « Quentrel », is still reused and erased by that name."""
+    stored = nfd("Vorlan Zorbô") + "Quentrel"
+    _pre(_saved_by_old_steps(nfd(VZQ)) == stored, "the old steps give the row")
+    _save(db, [(stored, PERSON, XQ)])
+    if path == "reuse":
+        run, output = _process_text(tmp_path, db, VZQ_TEXT, [(VZQ, PERSON)])
+        _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+        written = _written(output)
+        assert XQ in written, repr(written)
+        assert len(_rows(db)) == 1, _rows(db)
+    else:
+        run = _delete(db, VZQ)
+        assert _rows(db) == [], (_rows(db), run.shown)
+        assert _erasures(db) == 1

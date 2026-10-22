@@ -48,6 +48,7 @@ from gdpr_pseudonymizer.gui.workers.detection_worker import (
     DetectionWorker,
 )
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
+from gdpr_pseudonymizer.utils.french_patterns import strip_french_titles
 from gdpr_pseudonymizer.validation.models import EntityReviewState
 
 # _launch_worker disconnects two slots that are not connected yet
@@ -740,6 +741,92 @@ def test_end_cut_hyphenated_first_name_refused(  # type: ignore[no-untyped-def]
         assert dialogs.calls, dialogs.calls
     else:
         name_written = written is not None and HYPHEN_CUT in nfc(written)
+        assert not name_written, repr(written)  # expected failure
+        assert dialogs.calls, dialogs.calls
+        assert written is None and len(_rows(db)) == 1, (written, _rows(db))
+
+
+# ---------------------------------------------------------------------------
+# v1.18: the third Codex review of 9784ddf in the desktop app: a fresh
+# composed name not reused through an old key composed (T52), and a name
+# that lost two title words between two accent marks, as a custom pseudonym
+# (T54)
+# ---------------------------------------------------------------------------
+
+XFAIL = "Story 10.20 v1.18: reproduces {} on the unfixed code; fixed in Task 2.12"
+FRESH = "Vorlan ZorbôQuentrel"
+VZQ = "Vorlan Zorbôme Quentrel"
+MELORA_CUT = "Zorbôme Mélora Quentrel"
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason=XFAIL.format("a fresh composed name reused through an old key composed"),
+)
+def test_desktop_fresh_composed_name_not_reused(  # type: ignore[no-untyped-def]
+    qtbot, main_window, tmp_path, monkeypatch
+) -> None:
+    """T52 (v1.18; P0-b): the row « Vorlan ZorbôQuentrel », saved composed
+    as today's code saves it, is another person: the desktop single document
+    naming « Vorlan Zorbôme Quentrel » does not reuse its pseudonym."""
+    dialogs = _Dialogs(monkeypatch)
+    db = _new_db(tmp_path)
+    _save(db, [(FRESH, PERSON, XQ)])
+    sd = _Single(
+        qtbot,
+        main_window,
+        tmp_path,
+        f"Le contrat avec {VZQ} a signé.",
+        [(VZQ, PERSON)],
+        db,
+    )
+    sd.accept_pending()
+    written = sd.finalize(dialogs)
+    if written is None:
+        pytest.fail(f"PRE: written: {dialogs.calls!r}")
+    assert XQ not in written, repr(written)  # expected failure
+    assert len(_rows(db)) == 2, _rows(db)
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason=XFAIL.format("a name that lost two title words between two marks accepted"),
+)
+@pytest.mark.parametrize("path", ["desktop_set", "desktop_final"])
+def test_two_titles_between_marks_refused(  # type: ignore[no-untyped-def]
+    qtbot, main_window, tmp_path, monkeypatch, path
+) -> None:
+    """T54 (v1.18; P0-a, Codex's case; Lionel's end-cut answer A): the row
+    an earlier version saved from nfd(« Zorbôme Mélora Quentrel ») refuses
+    that name in the custom pseudonym dialog (the row saved first) and at
+    finalization (the row saved after the dialog accepted it)."""
+    stored = nfd("Zorbô") + ACUTE + "lora Quentrel"
+    old = " ".join(strip_french_titles(nfd(MELORA_CUT)).split())
+    _pre(old == stored, "the old steps on the decomposed name give the row")
+    dialogs = _Dialogs(monkeypatch)
+    db = _new_db(tmp_path)
+    if path == "desktop_set":
+        _save(db, [(stored, PERSON, XV)])
+    sd = _Single(
+        qtbot, main_window, tmp_path, "Vorlan Mestrix valide.", [(VM, PERSON)], db
+    )
+    row = sd.rows()[0]
+    _type_in(monkeypatch, MELORA_CUT)
+    sd.vs._show_change_pseudonym_dialog(row.entity_id)
+    if path == "desktop_final":
+        _pre(dialogs.calls == [], f"set without a message: {dialogs.calls!r}")
+        _save(db, [(stored, PERSON, XV)])
+    sd.accept_pending()
+    written = sd.finalize(dialogs)
+    if path == "desktop_set":
+        if written is None:
+            pytest.fail(f"PRE: written: {dialogs.calls!r}")
+        assert MELORA_CUT not in nfc(written), repr(written)  # expected failure
+        assert dialogs.calls, dialogs.calls
+    else:
+        name_written = written is not None and MELORA_CUT in nfc(written)
         assert not name_written, repr(written)  # expected failure
         assert dialogs.calls, dialogs.calls
         assert written is None and len(_rows(db)) == 1, (written, _rows(db))
