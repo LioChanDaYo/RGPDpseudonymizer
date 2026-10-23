@@ -1,19 +1,20 @@
 schema: 1
 story: '10.20'
 story_title: 'Accents Stored Two Ways: One Form Everywhere'
-scope: 'Round 7 re-check (Task 7.12): PR #111 at head 832c190 on main 3114e9e. Commits reviewed: story v1.23 d3268e6, tests first dcd9623, fix 2ceade4, Dev Agent Record 832c190. Round 6 was QA''s PASS 100 at be2d48b; the fourth read-only Codex review (session 01a165e9-369e-7960-86ed-5127d68b74d2) found one P0 and two P1s (ruling r1020/codex/ruling4.md). Lionel''s scope unchanged: French-looking text, artificial or not, in; other scripts, the « İ », foreign marks, letters with no composed form and unusual spaces out. Earlier evidence is kept under evidence_round6 to evidence_round1.'
-gate: PASS
-status_reason: 'On old rows written by the real v2.2.0 tree and 43041e9 (copies only): « à de Zórbaville » never reuses, lists or erases the old nfd(« Zórbaville ») row (CLI, desktop, delete-mapping "de Zórbaville"), which « de Zórbaville » and « Zórbaville » text still reuse; the old « de » + nfd(« Zórbaville ») row is found from its key; on a clean database [C] « Zórbaville » is accepted beside a fresh « de Zórbaville », as on main; 24 « Maître » searched in 0.17 s and checked in under 0.01 s, still listed and refused (9 of 9; on be2d48b 7 fail and the search hangs). Clean databases: 46 shapes x 3 types identical to origin/main by digest. Samplers unchanged, 454,854 texts: 0 misses. No regression of rounds 4 to 6. G2 holds (10 on the dev''s lines, no PRE; T66 stops itself at 60 s). Mutants of lookup_key, the replay, the S5 narrowing and the cap''s bound are caught by committed tests; C1 equivalent; M3 survives (TEST-005, low). CI green, attempt 1; G1 #7 holds; performance figures match; nothing serves a5 or b4; no added cost.'
+scope: 'Round 8 re-check (Task 7.13): PR #111 at head 52fb118 on main 3114e9e. Commits reviewed: story v1.25 6bf666d, tests first c21e43f, fix f95e58f, test-only 45e5daa (T67 joined: 27 pairs, 30 s), Dev Agent Record 52fb118. Round 7 was QA''s PASS 100 at dcb9664; the fifth read-only Codex review (session 01a167b0-c917-7c00-b7c5-4438e146add9) found one P1, exponential backtracking in the check (ruling r1020/codex/ruling5.md). Lionel''s scope unchanged: French-looking text, artificial or not, in; other scripts, the « İ » and foreign marks out. Earlier evidence is kept under evidence_round7 to evidence_round1.'
+gate: CONCERNS
+status_reason: 'The P1 is fixed: on old rows written by v2.2.0 and 43041e9 (copies only), Codex''s case (28 lone marks side by side + « Quentrel », typed « Mé » x 14 + « Quentrel Quovix ») is refused in 0.06 s as on origin/main (dcb9664: killed at 20 s), on [C], finalization and the desktop dialog; the sweep (432 cases, each in its own process) kills nothing, and every check and search on short input stays under a second; over 1 s only typed pseudonyms of over 100 words (polynomial, 2 to 3 times main). Samplers identical line for line, 0 misses; AC13 identical to main by digest; false refusals unchanged; no regression; G2 holds; T67 catches no merge, no lookahead and no bound; G29 resolves TEST-005; CI green (one macOS timing rerun); G1 #8 holds. CONCERNS: the merge is not exact (MERGE-001, medium): the _no_split lookahead reads the text after a run, so beside the old row from « ḾḾelora Quentrel », « MMelora Quentrel » and « MMELORA QUENTREL » are now accepted (refused at round 7; accepted on main); QA''s comparison: 33 refusals lost in 1.27 million, none gained; a restriction on the run''s first title word, checked by QA, is exact and bounded.'
 reviewer: 'Quinn (Test Architect)'
-updated: '2026-10-23T07:40:00Z'
+updated: '2026-10-23T12:40:00Z'
 
 waiver: { active: false }
 
 merge_blockers: []
 
 merge_notes:
-  - 'Before the merge: DOC-001 (Tasks 6.5 and 6.7) and the fifth read-only codex exec review of the final head (AC10, the orchestrator''s step). QA did not run codex. If that review changes code, QA re-checks.'
-  - 'TEST-005 (low): an optional test-only guard, before the fifth Codex review or in the backlog, the orchestrator''s call.'
+  - 'Before the sixth read-only Codex review (AC10): MERGE-001 fixed with a guard, or explicitly waived by the orchestrator; if fixed, QA re-checks the merge (patcmp.py and the sweep). QA did not run codex.'
+  - 'TEST-006 (low): an optional test-only guard.'
+  - 'Before the merge: DOC-001 (Tasks 6.5 and 6.7).'
   - 'Backlog, as ruled: SEARCH-003, TEST-004, IMPORT-001, TEST-002, TEST-003.'
   - 'This gate commit (docs only) starts its own CI run; the orchestrator checks it green before the merge.'
 
@@ -24,10 +25,16 @@ top_issues:
     suggested_action: 'Orchestrator: Tasks 6.5 and 6.7, before the merge.'
     refs: ['https://github.com/LioChanDaYo/RGPDpseudonymizer/pull/111']
     suggested_owner: dev
-  - id: 'TEST-005'
+  - id: 'MERGE-001'
+    severity: medium
+    finding: 'The merged repair group''s _no_split lookahead (?!(?<=m)me|(?<=m)me\.) reads the raw text after a run, so it also blocks a second run « m » whose following literal starts with « e »: round 7''s refusals are lost there. Real output (v2.2.0 and 43041e9 old rows, copies): beside the row saved from « ḾḾelora Quentrel » (lone U+0301 x2 + « elora Quentrel »), [C] and the desktop dialog accept « MMelora Quentrel » and « MMELORA QUENTREL »; dcb9664 refused both; origin/main accepts them (a 10.20 refusal lost, not a main one). QA''s direct comparison (r8/patcmp.py, 1,273,953 comparisons): 55 pattern matches and 33 real-check refusals lost, none gained. Mutants without the merge or without the lookahead make QA''s probe pass again.'
+    suggested_action: 'Restrict the second run''s first title word (after a run ending in « m », any title word but « me » and « me. ») instead of the text: QA''s diagnostic tree r1020/qa/diag8/X1_lookahead_on_run equals round 7 on all 1,273,953 comparisons and keeps the worst cases bounded (72 sweep cases, slowest 0.06 s). Add a guard (« MMelora Quentrel » refused beside that row). Then a short QA re-check (patcmp and the sweep), before the sixth Codex review.'
+    refs: ['gdpr_pseudonymizer/core/legacy_names.py', 'rgpd-analysis/r1020/qa/probes/test_q20_r8.py', 'rgpd-analysis/r1020/qa/r8/patcmp.py']
+    suggested_owner: dev
+  - id: 'TEST-006'
     severity: low
-    finding: 'No test covers the cap''s « all left out » choice: QA''s mutant M3 (above MAX_DROPPED_WORDS, all kept only) passes every committed test and QA probe, yet a search for today''s key « Zorbal Quentrel » then no longer lists the old row nfd(« Zorbal » + 5 x « Maître » + « Quentrel ») (the head lists it). T66 checks the bound only. M2 (cap 0) also survives; it drops only mixed choices (texts neither as written nor today''s key).'
-    suggested_action: 'A guard: above the cap, a search for today''s key lists the old row. Test only; before the fifth Codex review or backlog, the orchestrator''s call.'
+    finding: 'No committed test pins MAX_REPAIR_WORDS from below: QA''s mutant with the bound at 9 passes every committed test and QA probe; QA''s combination sampler (seed 6060) catches it (4 misses, keys of 10 words). The SM measured 10 words as the longest key a repair must refuse.'
+    suggested_action: 'A guard: a 10-word key refused through a repair. Test only; optional before the sixth Codex review.'
     refs: ['gdpr_pseudonymizer/core/legacy_names.py', 'tests/unit/test_accents_one_form_cli.py']
     suggested_owner: dev
   - id: 'SEARCH-003'
@@ -59,6 +66,12 @@ top_issues:
     finding: 'Backlog (unchanged).'
     suggested_action: 'Backlog.'
     refs: ['tests/unit/test_accents_one_form_cli.py']
+    suggested_owner: dev
+  - id: 'OBS-008'
+    severity: info
+    finding: 'Round 8: MAX_REPAIR_WORDS = 12 accepts typed runs over 12 words that round 7 refused through a repair, as origin/main does (an old row from « Mélora » + 12 more words typed without accents: refused at 10 and 12 words, accepted at 13 and 14), the ruling''s measured bound. Checks with typed pseudonyms of over 100 words take 1.3 to 7.2 s (origin/main 0.5 to 3.8 s; round 7 never finished). The samplers cannot exercise the merge: their saved names never hold two plain groups side by side.'
+    suggested_action: 'None.'
+    refs: ['gdpr_pseudonymizer/core/custom_pseudonym.py']
     suggested_owner: dev
   - id: 'OBS-007'
     severity: info
@@ -133,9 +146,15 @@ resolved_issues:
   - id: 'CODEX4-be2d48b'
     resolved_in: '2ceade4'
     note: 'P0 (a place key replayed through a second preposition), P1-a (fresh rows keyed again in Q-C2) and P1-b (title-word choices 2^n) (round 7 evidence).'
+  - id: 'TEST-005'
+    resolved_in: 'c21e43f'
+    note: 'G29; QA''s mutant M3 caught (round 8 evidence).'
+  - id: 'CODEX5-dcb9664'
+    resolved_in: 'f95e58f'
+    note: 'The check''s exponential backtracking on repair sites side by side; every check and search on short input under a second (round 8 evidence).'
 
-quality_score: 100
-expires: '2026-11-06T07:40:00Z'
+quality_score: 90
+expires: '2026-11-06T12:40:00Z'
 
 qa_process_notes:
   - 'QA error, 2026-10-22 09:46 (Paris): a one-off read script (r1020/qa/tools/lone_marks.py) opened the 13 v2.2.0 databases in r1020/po/dbs, r1020/po/v11/dbs and r1020/sm/dbs in place instead of copies. The app''s 10.7 conversion turned them from schema 1.0.0 to 1.1.0 (the entities rows kept; "database_converted" in its log). QA restored all 13 at about 10:00 from the files the makers had copied them from (the PO''s and SM''s own m.db in r1020/po/tmp, r1020/po/v11/tmp and r1020/sm/tmp, still schema 1.0.0, with the same encrypted rows): byte-identical, timestamps kept. The converted files are kept in r1020/qa/logs/converted_by_qa_0946/. The old-database and search probes, rerun on copies, give 121 passed, as before. Nothing in the repository was touched.'
@@ -144,8 +163,34 @@ qa_process_notes:
   - 'Round 5: every old database opened as a copy only; QA was alone in its worktree.'
   - 'Round 6: every old database (QA''s 77 fresh ones and the PO''s and SM''s) opened as a copy only; the PO''s samplers run unchanged.'
   - 'Round 7: every old database (QA''s 110 and the PO''s and SM''s) opened as a copy only; the samplers run unchanged; the clean databases of the AC13 digest made fresh by each tree.'
+  - 'Round 8: every old database (QA''s 124 and the PO''s and SM''s) opened as a copy only; the samplers run unchanged; every check of the sweep and of test_q20_r8.py in its own process with a kill limit; no QA process left running.'
 
 evidence:
+  tests_reviewed: 202
+  risks_identified: 1
+  environment: 'As before (Windows, the main Poetry environment, .bat runners through cmd.exe, USERPROFILE and HOME = r1020/qa/home). C:\Users\devea\.gdpr-pseudo.yaml not touched (2026-10-14 13:27, 270 bytes). Nothing under held_out/, final_exam/ or tests/accuracy/ opened; wt_c21e43f excludes tests/test_corpus and tests/accuracy. Every old database opened as a copy. Invented names only; no other scripts, no « İ », no foreign marks. No Codex, Forge, Anvil or Cato from QA.'
+  real_output: 'Old rows by v2.2.0 and 43041e9 (r3/oldmake/test_make_old_r8.py): « Mé » x 28 (Codex''s case), x 56, x 100, « Mmé » x 28 (saved as lone marks side by side + « Quentrel »), « Zorbôme Maître » x 30 + « Quentrel », « Mé » x 20 as words. test_q20_r8.py, each check first in a child killed at 20 s against the head and origin/main: 45 of 45 at 52fb118 (28 of 45 fail on dcb9664, killed). Codex''s case typed « Mé » x 14 + « Quentrel Quovix »: refused in 0.06 s, as on main; [C] at set time 0.08-0.15 s (the 62-word text 1.8-1.9 s); finalize_document writes nothing when refused; the desktop dialog 0.04 s (0.87 s for 62 words); every outcome equals origin/main''s; searches under 0.08 s.'
+  same_matches: 'Samplers unchanged on f95e58f''s code, identical line for line to the control (round 7''s run on 2ceade4''s code; the new seed run on both): po6_sample 1022, 2026 (38,907 texts); po7_sample_place 11, 22, 33, 44, 5577 (150,000); po7_sample_fr 7171, 8282, 9393, 6464 (118,219); qa_combo_sampler 6060, 7070, 8080, new 9090 (196,998); 0 misses. QA''s direct comparison r8/patcmp.py (originals of title words glued to marks, up to 6 or 10 per word; the original, capitals, no accents, key, perturbations, unrelated): 1,273,953 comparisons; round 8''s pattern loses 55 matches, gains none; the real check accepts 33 texts round 7 refused, refuses none round 7 accepted (MERGE-001). QA''s diagnostic tree diag8/X1_lookahead_on_run: 0 differences from round 7.'
+  sweep: 'r8/sweep_driver.py, each check, lookup and search in its own process killed at 30 s, on 52fb118''s code: 432 cases on 35 saved shapes (marks side by side 28/56/100, glued « Mmé », « Ḿ » runs, mixed titles, lone-mark words, a place with « à », « Maître » runs and inside 5/24/50/100, « Zorbôme Maître » 10/30/60, many title words, « Zorbô » + « Mmé »): 0 killed; searches under 0.07 s, lookups under 0.06 s, checks with up to 65 typed words under 0.8 s. Over 1 s only with over 100 typed words: 101 words 1.26 s; 121-122 words 1.64-2.38 s (main 0.91 s); 102 words 1.51-1.54 s (main 0.49-0.54 s); 202 words 6.23-7.16 s (main 3.59-3.78 s); dcb9664 killed at 60 s from 102 words (58 words 8.5-8.7 s).'
+  ac13_and_false_refusals: 'AC13 by digest: 52fb118 = origin/main (a630e965c52cd9cb, 107 rows, 14,767 lines, 674 refusals), line for line. False refusals over 500,910 list names on 124 old databases (47 legacy rows): « Côme » and « Jérôme »; « Jérôme » and « Léo » list a row only through a repair (SEARCH-003).'
+  no_regression: 'mut8/base (= head): committed tests of the path 750 passed, 10 skipped; QA''s earlier probes 250 passed, 2 skipped, 4 failed by design; test_q20_r4.py 131 of 131; test_q20_r5.py 108 of 110 (14 new cases on the round-8 old databases; the 2 duplicate skips); test_q20_r6.py 43 of 43; test_q20_r7.py 9 of 9; IMPORT-002, REPAIR-001 and the 48-line clean search hold.'
+  g2_round8: 'wt_c21e43f (product code = dcb9664''s). --runxfail: 3 failed, 199 passed, T67 adjacent, glued and joined each an AssertionError at test_accents_one_form_cli.py:2703 (« killed at 10 s »); no PRE. Marked: 199 passed, 3 xfailed, one process (85 s) and -n 4 (35 s). 52fb118''s test file on the same product code: 3 failed at :2704 (« killed at its limit »; joined at 30 s). c21e43f..f95e58f test diff: deletions only (markers).'
+  mutants_round8: 'r1020/qa/mut8/ (tools/make_mutants8.ts), git archive 52fb118: 750 committed tests (10 skipped), 589 QA probes (2 skipped; the head''s 12 failures discounted: 6 by design, 6 MERGE-001). N1 no merge: 2 (T67 adjacent, glued), probes 22, MERGE-001''s probe passes again; N2 no lookahead: 1 (T67 glued), probes 6, MERGE-001''s probe passes again; N3 no bound: 1 (T67 joined, killed at its 30 s limit), probes 6; N4 bound 9: 0 and 0 (TEST-006; QA''s combination sampler seed 6060: 4 misses, 10-word keys); N5 bound 2: 12, probes 16; M3 above MAX_DROPPED_WORDS all kept only: 1 (G29).'
+  bloat_and_cost: 'No code, test or comment names the Tamil, Myanmar or Balinese marks or the « İ » (grep); no escaped code point added. Cost, 10,000 decomposed names, two runs each, head vs dcb9664: a few marks each, check 0.18/0.14-0.15 s vs 0.18-0.21/0.14-0.15 s, search 0.24-0.25/0.037-0.040 s vs 0.24-0.25/0.038-0.041 s; every syllable accented, check 0.29/0.16-0.19 s vs 0.30/0.16-0.19 s, search 0.63-0.64/0.10-0.11 s vs 0.63-0.65/0.10-0.11 s. The dev''s A/B table matches r1020/dev/scratch/r8ab/out (A1, A2 on t2ce = 2ceade4; B1, B2 on tf95 = f95e58f; 2,000 words 0.400/0.438 vs 0.472/0.348 s; 5,000 words 1.276/1.170 vs 1.278/0.990 s; detection 0.676/0.658 vs 0.792/0.646 s; peak 949.2 MB x4; 12 commands passed).'
+  ci_round8:
+    c21e43f: '39933174478, attempt 1: Ubuntu 3.10 "3084 passed, 3 xfailed in 440.35s", Ubuntu 3.11 "... in 385.78s", macOS "... in 599.68s", Windows "2934 passed, 3 skipped, 3 xfailed in 412.83s"; Code Quality 39933174481 green.'
+    f95e58f: '39934910463, attempt 1: "3087 passed" in 472.98s / 528.86s / macOS 721.67s; Windows "2937 passed, 3 skipped in 501.60s"; Code Quality 39934910398 green.'
+    45e5daa: '39938301457, attempt 1: "3087 passed" in 313.75s / 510.25s / macOS 873.30s; Windows "2937 passed, 3 skipped in 464.26s"; Code Quality 39938301452 green.'
+    52fb118: '39942105391 needed one macOS rerun: attempt 2 is green, after the known 10.3b timing test test_trailing_particle_search_scales_linearly failed (0.00128 s vs 0.01326 s, ratio about 10.4), with product code identical to f95e58f. The dev did not record this cause in the Debug Log, to avoid another push. Ubuntu 3.10 "3087 passed in 321.25s", Ubuntu 3.11 "3087 passed in 526.29s", macOS attempt 2 "3087 passed in 539.57s", Windows "2937 passed, 3 skipped in 671.10s"; Code Quality 39942105395 green.'
+  g1_accuracy_round8: 'QA''s own download of accuracy-results from 39945202625 (52fb118, workflow_dispatch, success), byte-identical to the orchestrator''s copy: every score line identical to main''s 38212303870; JSON differs only in commit and run_id; output differs from round 7 only in the summary line''s time; the final-exam test skipped, no FINAL-EXAM line.'
+  g6_local: 'ruff 0; black "329 files would be left unchanged"; mypy "no issues found in 107 source files". Suite -m "not slow" -n 4 (six corpus files ignored): 2945 passed, 10 skipped, 1 failed (test_config_show) = 2941 + 4; the worktree clean afterwards.'
+  codex_rule: 'Codex sessions in rgpd-wt-s1020: five, all read-only (the reviews of 186972b, 56feb3d, 9784ddf, be2d48b, dcb9664); the 23rd has the fourth (01:19) and the fifth (09:36). No Forge entry for this story. The 5 round-8 commits carry Co-Authored-By and Claude-Session, no skip-CI marker. The sixth read-only review is still to come.'
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15]
+    ac_gaps: []
+    notes: 'AC10: the sixth Codex review of the final head is still to come. MERGE-001 touches the refusals 10.20 adds (AC precisions, Q-C2), not AC13.'
+
+evidence_round7:
   tests_reviewed: 198
   risks_identified: 0
   environment: 'As before (Windows, the main Poetry environment, .bat runners through cmd.exe, USERPROFILE and HOME = r1020/qa/home). C:\Users\devea\.gdpr-pseudo.yaml not touched (2026-10-14 13:27, 270 bytes). Nothing under held_out/, final_exam/ or tests/accuracy/ opened; wt_dcd9623 excludes tests/test_corpus and tests/accuracy. Every old database opened as a copy. Invented names only; no other scripts, no « İ », no foreign marks. No Codex, Forge, Anvil or Cato from QA.'
