@@ -28,8 +28,10 @@ from __future__ import annotations
 import csv
 import dataclasses
 import itertools
+import os
 import re
 import sqlite3
+import subprocess
 import sys
 import time
 import tracemalloc
@@ -46,6 +48,7 @@ import readchar
 from rich.prompt import Confirm, Prompt
 from typer.testing import CliRunner
 
+import gdpr_pseudonymizer
 from gdpr_pseudonymizer.cli.main import app
 from gdpr_pseudonymizer.core import custom_pseudonym as custom_pseudonym_module
 from gdpr_pseudonymizer.core.custom_pseudonym import (
@@ -2621,3 +2624,95 @@ def test_guard_preposition_kept_by_the_key_not_left_out(
     _save(db, [(nfd(TWO_PREPOSITIONS), LOCATION, XANTORVILLE)])
     _, written = _custom_for_vm(tmp_path, db, ZORBAVILLE)
     assert written == f"{ZORBAVILLE} valide.", repr(written)
+
+
+# ---------------------------------------------------------------------------
+# v1.25: the fifth Codex review of dcb9664. A saved name with repair sites
+# side by side is checked within limits (T67); QA's TEST-005 (G29)
+# ---------------------------------------------------------------------------
+
+XFAIL = "Story 10.20 v1.25: reproduces {} on the unfixed code; fixed in Task 2.14"
+# (the text an earlier version saved from, decomposed; the typed text; the
+# outcome measured on origin/main)
+MANY_SITES = {
+    "adjacent": ("Mé" * 28 + " Quentrel", "Mé" * 14 + " Quentrel Quovix", "REAL_NAME"),
+    "glued": ("Mé" * 56 + " Quentrel", "Mmé" * 28 + " Quentrel Quovix", "REAL_NAME"),
+    "joined": (
+        " ".join(["Zorbôme Maître"] * 30 + ["Quentrel"]),
+        " ".join(["Zorbôme Maitre"] * 30 + ["Quentrel Quovix"]),
+        "ACCEPTED",
+    ),
+}
+_CHILD_CHECK = """
+from gdpr_pseudonymizer.core.custom_pseudonym import (
+    check_custom_pseudonym,
+    normalize_custom_pseudonym,
+)
+from gdpr_pseudonymizer.data.models import Entity
+
+row = Entity(
+    entity_type="PERSON", full_name={stored}, pseudonym_full="Xantor Vellion",
+    theme="neutral",
+)
+pseudonym = normalize_custom_pseudonym({typed}, "PERSON")
+refusal = check_custom_pseudonym(
+    [row], "Vorlan Mestrix", "PERSON", pseudonym, "Vorlan Mestrix valide.", {{}}
+)
+print("ACCEPTED" if refusal is None else refusal.reason.name)
+"""
+
+
+def _check_in_child(
+    stored: str, typed: str, seconds: float = 10.0
+) -> subprocess.CompletedProcess[str] | None:
+    """``check_custom_pseudonym`` for « Vorlan Mestrix », the typed text
+    normalized, beside one PERSON row ``stored``, in a child process killed
+    at ``seconds`` (a regex call no hook can stop). The finished child, or
+    None when it was killed. The child imports this tree's package."""
+    root = Path(gdpr_pseudonymizer.__file__).resolve().parents[1]
+    paths = [str(root), os.environ.get("PYTHONPATH", "")]
+    env = {**os.environ, "PYTHONPATH": os.pathsep.join(p for p in paths if p)}
+    code = _CHILD_CHECK.format(stored=ascii(stored), typed=ascii(typed))
+    try:
+        return subprocess.run(
+            [sys.executable, "-c", code],
+            cwd=root,
+            env=env,
+            capture_output=True,
+            text=True,
+            timeout=seconds,
+        )
+    except subprocess.TimeoutExpired:
+        return None
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason=XFAIL.format("a check backtracking over repair sites side by side"),
+)
+@pytest.mark.parametrize("case", list(MANY_SITES))
+def test_saved_name_with_many_sites_checked_within_limits(case: str) -> None:
+    """T67 (v1.25; the fifth Codex review's P1): a saved name whose repair
+    sites sit side by side (accent marks side by side, or « Maître » glued
+    after one) is checked within 10 s, with the outcome origin/main gives:
+    refused through « Quentrel » (the row as saved), or accepted."""
+    text, typed, expected = MANY_SITES[case]
+    stored = _saved_by_old_steps(nfd(text))
+    done = _check_in_child(stored, typed)
+    assert done is not None, "killed at 10 s"  # expected failure
+    _pre(done.returncode == 0, f"the check ran: {done.stderr[-2000:]!r}")
+    assert done.stdout.strip() == expected, (done.stdout, done.stderr[-2000:])
+
+
+def test_guard_many_titles_listed_by_todays_key(tmp_path: Path, db: Path) -> None:
+    """G29 (v1.25; QA's TEST-005): above MAX_DROPPED_WORDS, the choice with
+    every « Maître » left out stays: the old row nfd(« Zorbal » + five
+    « Maître » + « Quentrel ») is listed by today's key « Zorbal
+    Quentrel »."""
+    text = " ".join(["Zorbal", *["Maître"] * 5, "Quentrel"])
+    _pre(mapping_key(text, PERSON) == "Zorbal Quentrel", "today's key")
+    _save(db, [(nfd(text), PERSON, XV)])
+    run = _invoke(["list-entities", "--db", str(db), "--search", "Zorbal Quentrel"])
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    assert XV in run.flat, run.shown
