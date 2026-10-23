@@ -90,6 +90,13 @@ _CACHE_SIZE = 1 << 16
 
 _S1, _S2, _S3 = "S1", "S2", "S3"
 
+# v1.29 (the sixth Codex review), measured: a saved name with more accent
+# marks than this gets no reverse repair (``is_saved_real_name``); it is
+# compared as saved, keyed again and through the lookup forms, as the rest
+# of the saved-real-name check. The most marks a realistic or sampled
+# French-looking saved name holds is 16 (the story's data); a margin of 8.
+MAX_REPAIR_SITES = 24
+
 # v1.25 (the fifth Codex review), measured: the two repairs of the
 # saved-real-name check compare a run of at most this many words; a longer
 # run is compared with the saved names folded, as before Story 10.20 (the
@@ -303,6 +310,13 @@ def is_legacy(full_name: str, entity_type: str) -> bool:
     return bool(_droppable(full_name.split(), entity_type))
 
 
+@functools.lru_cache(maxsize=_CACHE_SIZE)
+def _repair_sites(full_name: str) -> int:
+    """The accent marks of a saved name: each a place where the old pattern
+    may have taken title words off (v1.29, ``MAX_REPAIR_SITES``)."""
+    return len(_mark_search().findall(full_name))
+
+
 def _sites(word: str, last_word: bool) -> list[tuple[int, str]]:
     """The sites of a saved word where the old pattern took title words
     off, each as (the position of its mark, S1, S2 or S3)."""
@@ -386,8 +400,9 @@ def _span_regex(
     two (``_glued_run``; v1.27: the rule on the glued run's first title
     word, QA's MERGE-001). It reads the same texts, with no optional groups
     side by side for a text that does not match to be split among in every
-    way. A group S2 (``(?:RUN )?``) or S3 before « - » or « . »
-    (``(?:RUN ?)?``) ends such a stretch."""
+    way. A group S2 (``(?:RUN )?``) ends such a stretch; v1.29: an S3 site
+    before « - », « . » or « ' » closes it into one group with its own run
+    (``(?:RUN(?:GLUED){0,k} ?)?``)."""
     run = _run_regex()
     regex: list[str] = []
     pieces: list[str] = []
@@ -420,8 +435,14 @@ def _span_regex(
             # spaces after the last title word were taken off too
             after = word[start] if start < len(word) else ""
             if after and not is_mark(after):
-                close_plain()
-                regex.append(f"(?:{run} ?)?")
+                # v1.29 (the sixth Codex review): the plain groups waiting
+                # (k of them, S1's among them) and S3's run are one group,
+                # one optional run per site: up to k + 1 runs glued, then a
+                # space or not. The same texts as the groups side by side,
+                # read one way
+                glued = f"(?:{_glued_run()}){{0,{plain}}}" if plain else ""
+                regex.append(f"(?:{run}{glued} ?)?")
+                plain = 0
             else:
                 plain += 1
     close_plain()
@@ -572,14 +593,16 @@ def is_saved_real_name(run: str, legacy_rows: Iterable[tuple[str, str]]) -> bool
     Args:
         run: A run of whole words of the pseudonym
         legacy_rows: The (full name, type) of the saved names ``is_legacy``
-            keeps
+            keeps; those with more than ``MAX_REPAIR_SITES`` accent marks
+            are not repaired (v1.29)
 
     Returns:
         True when the run is refused
     """
     folded = fold(run)
     return any(
-        legacy_piece(full_name, entity_type) in folded
+        _repair_sites(full_name) <= MAX_REPAIR_SITES
+        and legacy_piece(full_name, entity_type) in folded
         and legacy_pattern(full_name, entity_type).fullmatch(folded) is not None
         for full_name, entity_type in legacy_rows
     )

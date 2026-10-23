@@ -2745,7 +2745,6 @@ def test_two_titles_glued_before_the_name_refused(tmp_path: Path, db: Path) -> N
 # within limits (T69); the reverse repair still runs at the bound (G30)
 # ---------------------------------------------------------------------------
 
-XFAIL = "Story 10.20 v1.29: reproduces {} on the unfixed code; fixed in Task 2.16"
 # (the text an earlier version saved from, decomposed; the typed text; the
 # outcome after the fix, Story 10.20 v1.29)
 PUNCTUATED = {
@@ -2767,11 +2766,6 @@ PUNCTUATED = {
 }
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("a check backtracking over punctuated repair sites"),
-)
 @pytest.mark.parametrize("case", list(PUNCTUATED))
 def test_punctuated_sites_checked_within_limits(case: str) -> None:
     """T69 (v1.29; the sixth Codex review's P1): a saved name whose repair
