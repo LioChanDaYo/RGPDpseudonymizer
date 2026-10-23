@@ -2724,14 +2724,7 @@ def test_guard_many_titles_listed_by_todays_key(tmp_path: Path, db: Path) -> Non
 # at marks side by side before the name's own letters (T68)
 # ---------------------------------------------------------------------------
 
-XFAIL = "Story 10.20 v1.27: reproduces {} on the unfixed code; fixed in Task 2.15"
 
-
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("the glued run's rule read on the letters after it"),
-)
 def test_two_titles_glued_before_the_name_refused(tmp_path: Path, db: Path) -> None:
     """T68 (v1.27; QA's MERGE-001): the row v2.2.0 saved from « ḾḾelora
     Quentrel » (two lone marks + « elora Quentrel ») refuses « MMelora

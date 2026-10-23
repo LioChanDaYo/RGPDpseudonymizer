@@ -226,44 +226,43 @@ def _run_regex() -> str:
 
 
 @functools.cache
-def _no_split() -> str:
-    """A lookahead that keeps a merged repair group from reading one title
-    word as two glued ones (Story 10.20, v1.25): at each place where two
-    runs of title words are glued, the word after may not start with ``b``
-    when the word before is ``a``, for every pair of title words with
-    ``a + b`` a title word too (today « m » + « me » and « m » + « me. »:
-    « mme », « mme. »). Such a reading always has one with one title word
-    fewer, so no text is lost, and each glued text is read one way only.
+def _glued_run() -> str:
+    """A run of title words glued to the run before it in a merged repair
+    group (Story 10.20, v1.25; v1.27, QA's MERGE-001). Its first title word
+    is never ``b`` when the run before ends with the title word ``a``, for
+    every pair of title words with ``a + b`` a title word too (today « m »
+    + « me » and « m » + « me. »: « mme », « mme. »): so one title word is
+    never read as two glued ones, and each glued text is read one way only.
+    Such a reading always has one with one title word fewer, so no text is
+    lost. The rule is on that first word, not on the letters after the run:
+    a run « m » followed by the name's own « e… » stays (« MMelora » beside
+    the row saved from nfd(« ḾḾelora »)).
 
     Raises:
-        ValueError: A title word ends with ``a`` without being it, starts
-            with ``b`` without ``a`` + it being a title word, or ``b``
-            splits into a title word and the start of another: the lookahead
-            would refuse a reading it must keep.
+        ValueError: ``a`` is more than one letter, or another title word
+            ends with it: the look back could then see ``a`` after another
+            title word, and refuse a reading it must keep.
     """
     words = {fold(word) for word in title_words()}
     pairs = sorted((a, b) for a in words for b in words if a + b in words)
-    for a, b in pairs:
-        ends_with_a = [word for word in words if word != a and word.endswith(a)]
-        starts_with_b = [
-            word for word in words if word.startswith(b) and a + word not in words
-        ]
-        b_splits = [
-            word
-            for size in range(1, len(b))
-            if b[:size] in words
-            for word in words
-            if word.startswith(b[size:])
-        ]
-        if ends_with_a or starts_with_b or b_splits:
+    ends = sorted({a for a, _ in pairs})
+    for a in ends:
+        if len(a) != 1 or any(word != a and word.endswith(a) for word in words):
             raise ValueError(
-                f"the title words {a!r} and {b!r} no longer split one way: the "
+                f"the title word {a!r} no longer ends a glued run one way: the "
                 "saved-name repair (core/legacy_names.py) must be read again"
             )
-    if not pairs:
-        return ""
-    alternatives = "|".join(f"(?<={re.escape(a)}){re.escape(b)}" for a, b in pairs)
-    return f"(?!{alternatives})"
+    titles = _titles_regex()
+    not_after = "".join(f"(?<!{re.escape(a)})" for a in ends)
+    firsts = [f"{not_after}(?:{titles})"]
+    for a in ends:
+        kept = sorted(
+            words - {b for end, b in pairs if end == a},
+            key=lambda word: (-len(word), word),
+        )
+        alternatives = "|".join(re.escape(word) for word in kept)
+        firsts.append(f"(?<={re.escape(a)})(?:{alternatives})")
+    return f"(?:{'|'.join(firsts)})(?: (?:{titles}))*"
 
 
 def _is_word_char(char: str) -> bool:
@@ -384,7 +383,8 @@ def _span_regex(
     v1.25 (the fifth Codex review): the k plain groups ``(?:RUN)?`` with
     nothing literal between them (sites on marks side by side) are one
     group, up to k runs of title words glued, one title word never read as
-    two (``_no_split``). It reads the same texts, with no optional groups
+    two (``_glued_run``; v1.27: the rule on the glued run's first title
+    word, QA's MERGE-001). It reads the same texts, with no optional groups
     side by side for a text that does not match to be split among in every
     way. A group S2 (``(?:RUN )?``) or S3 before « - » or « . »
     (``(?:RUN ?)?``) ends such a stretch."""
@@ -398,7 +398,7 @@ def _span_regex(
         if plain == 1:
             regex.append(f"(?:{run})?")
         elif plain > 1:
-            regex.append(f"(?:{run}(?:{_no_split()}{run}){{0,{plain - 1}}})?")
+            regex.append(f"(?:{run}(?:{_glued_run()}){{0,{plain - 1}}})?")
         plain = 0
 
     start = low
