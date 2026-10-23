@@ -2738,3 +2738,64 @@ def test_two_titles_glued_before_the_name_refused(tmp_path: Path, db: Path) -> N
     _save(db, [(stored, PERSON, XV)])
     _, written = _custom_for_vm(tmp_path, db, "MMelora Quentrel")
     assert "MMelora Quentrel" not in nfc(written), repr(written)  # expected failure
+
+
+# ---------------------------------------------------------------------------
+# v1.29: the sixth Codex review of c64f6be. Punctuated repair sites checked
+# within limits (T69); the reverse repair still runs at the bound (G30)
+# ---------------------------------------------------------------------------
+
+XFAIL = "Story 10.20 v1.29: reproduces {} on the unfixed code; fixed in Task 2.16"
+# (the text an earlier version saved from, decomposed; the typed text; the
+# outcome after the fix, Story 10.20 v1.29)
+PUNCTUATED = {
+    "as_typed": (
+        "Mé." * 28 + " Quentrel",
+        "Mé." * 28 + " Quentrel Quovix",
+        "REAL_NAME",
+    ),
+    "over_bound": (
+        "Mé." * 28 + " Quentrel",
+        "Mè." * 28 + " Quentrel Quovix",
+        "ACCEPTED",
+    ),
+    "at_bound": (
+        "Mé." * 24 + " Quentrel",
+        "Mè." * 24 + " Quentrel Quovix",
+        "REAL_NAME",
+    ),
+}
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason=XFAIL.format("a check backtracking over punctuated repair sites"),
+)
+@pytest.mark.parametrize("case", list(PUNCTUATED))
+def test_punctuated_sites_checked_within_limits(case: str) -> None:
+    """T69 (v1.29; the sixth Codex review's P1): a saved name whose repair
+    sites sit before « . » is checked within 10 s. Over MAX_REPAIR_SITES (28
+    marks) it gets no reverse repair: refused as typed through the lookup
+    forms, accepted with other accents (as on origin/main). At the bound (24
+    marks) the reverse repair still refuses it."""
+    text, typed, expected = PUNCTUATED[case]
+    stored = _saved_by_old_steps(nfd(text))
+    done = _check_in_child(stored, typed)
+    assert done is not None, "killed at its limit"  # expected failure
+    _pre(done.returncode == 0, f"the check ran: {done.stderr[-2000:]!r}")
+    assert done.stdout.strip() == expected, (done.stdout, done.stderr[-2000:])
+
+
+def test_guard_reverse_repair_at_the_bound() -> None:
+    """G30 (v1.29): a saved name of exactly MAX_REPAIR_SITES marks (24 marks
+    side by side + « lora Quentrel ») is still repaired backwards: « Mme » ×
+    24 + « lora Quentrel Quovix » is refused."""
+    stored = ACUTE * 24 + "lora Quentrel"
+    _pre(
+        _saved_by_old_steps(nfd("Mé" * 24 + "lora Quentrel")) == stored,
+        "the old steps on the decomposed name give the row",
+    )
+    done = _check_in_child(stored, "Mme" * 24 + "lora Quentrel Quovix")
+    _pre(done is not None and done.returncode == 0, "the check ran")
+    assert done is not None and done.stdout.strip() == "REAL_NAME", done
