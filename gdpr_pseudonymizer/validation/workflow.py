@@ -22,6 +22,7 @@ from gdpr_pseudonymizer.core.mapping_key import mapping_key
 from gdpr_pseudonymizer.exceptions import NoAnswerError
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 from gdpr_pseudonymizer.utils.french_patterns import FRENCH_TITLE_PATTERN
+from gdpr_pseudonymizer.utils.text_form import is_mark
 from gdpr_pseudonymizer.validation.context_precomputer import ContextPrecomputer
 from gdpr_pseudonymizer.validation.models import (
     CORRECTED_BY_HAND_SOURCE,
@@ -617,6 +618,8 @@ class ValidationWorkflow:
         must move the span onto "Aino"; keeping the original offsets would
         replace (erase) "Thanks, " as well. Extending a truncated name
         ("Dr. Marja" -> "Dr. Marja-Liisa") widens the span the same way.
+        Story 10.20 (AC4): a place that starts on a combining mark, or ends
+        just before one, is skipped: it would part a letter from its accent.
 
         Args:
             document_text: Full document text
@@ -631,8 +634,12 @@ class ValidationWorkflow:
         window_end = min(len(document_text), entity.end_pos + len(new_text))
         pos = document_text.find(new_text, window_start, window_end)
         while pos != -1:
-            if pos < entity.end_pos and pos + len(new_text) > entity.start_pos:
-                return pos, pos + len(new_text)
+            end = pos + len(new_text)
+            splits_a_letter = is_mark(document_text[pos]) or (
+                end < len(document_text) and is_mark(document_text[end])
+            )
+            if pos < entity.end_pos and end > entity.start_pos and not splits_a_letter:
+                return pos, end
             pos = document_text.find(new_text, pos + 1, window_end)
         return entity.start_pos, entity.end_pos
 

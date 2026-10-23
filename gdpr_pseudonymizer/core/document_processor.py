@@ -60,6 +60,7 @@ from gdpr_pseudonymizer.utils.tabular_reader import (
     read_csv_structured,
     read_excel_structured,
 )
+from gdpr_pseudonymizer.utils.text_form import mark_class
 from gdpr_pseudonymizer.validation.models import (
     TYPED_SOURCES,
     CandidateKey,
@@ -1103,9 +1104,13 @@ class DocumentProcessor:
         # Strip double-quoted strings (e.g., "Jean Dupont")
         message = re.sub(r'"[^"]*"', '"[REDACTED]"', message)
         # Strip sequences of 2+ capitalized words that look like names
-        # (e.g., "Jean Pierre Dupont" but not "Cannot parse")
+        # (e.g., "Jean Pierre Dupont" but not "Cannot parse"). Story 10.20
+        # (AC4): a combining mark is part of its word, so a name holding a
+        # mark with no composed letter is redacted whole.
+        marks = mark_class()
         message = re.sub(
-            r"\b[A-ZÀ-Ÿ][a-zà-ÿ]+(?:\s+[A-ZÀ-Ÿ][a-zà-ÿ]+){1,}\b",
+            rf"\b[A-ZÀ-Ÿ][a-zà-ÿ{marks}]+(?:\s+[A-ZÀ-Ÿ][a-zà-ÿ{marks}]+){{1,}}"
+            rf"(?![\w{marks}])",
             "[REDACTED]",
             message,
         )

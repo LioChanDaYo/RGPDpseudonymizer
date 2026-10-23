@@ -12,6 +12,7 @@ from pathlib import Path
 
 from gdpr_pseudonymizer.exceptions import FileProcessingError
 from gdpr_pseudonymizer.utils.logger import get_logger
+from gdpr_pseudonymizer.utils.text_form import composed
 
 logger = get_logger(__name__)
 
@@ -46,11 +47,15 @@ def read_file(file_path: str) -> str:
 
     Supports .txt, .md (plaintext), .pdf (via pdfplumber), and .docx (via python-docx).
 
+    Story 10.20: every reader returns its text in composed form (Unicode
+    NFC), so an accent stored as a separate mark reads like the usual
+    accented letter.
+
     Args:
         file_path: Path to file (absolute or relative)
 
     Returns:
-        File contents as string
+        File contents as string, composed
 
     Raises:
         FileProcessingError: If file not found, cannot be read, or
@@ -81,7 +86,7 @@ def read_file(file_path: str) -> str:
     # Default: plaintext (.txt, .md, or any other text file)
     try:
         with open(path, encoding="utf-8") as f:
-            return f.read()
+            return composed(f.read())
     except PermissionError as e:
         raise FileProcessingError(f"Permission denied: {file_path}") from e
     except OSError as e:
@@ -137,7 +142,10 @@ def read_pdf(file_path: str) -> str:
                 ),
             )
 
-        return extracted
+        # Story 10.20: pdfplumber returns an accent drawn apart from its
+        # letter as a character of its own, and its unicode_norm normalizes
+        # each character alone, so the extracted text is composed here
+        return composed(extracted)
 
     except Exception as e:
         error_msg = str(e).lower()
@@ -205,7 +213,7 @@ def read_docx(file_path: str) -> str:
                     if paragraph.text.strip():
                         text_parts.append(paragraph.text)
 
-        return "\n".join(text_parts)
+        return composed("\n".join(text_parts))
 
     except Exception as e:
         raise FileProcessingError(f"Cannot read DOCX file {file_path}: {e}") from e
@@ -285,7 +293,7 @@ def read_excel(file_path: str) -> str:
                 ),
             )
 
-        return "\n\n".join(sheets_text)
+        return composed("\n\n".join(sheets_text))
     finally:
         wb.close()
 
@@ -337,11 +345,15 @@ def read_csv(file_path: str) -> str:
         if any(cell.strip() for cell in row):
             rows_text.append("\t".join(row))
 
-    return "\n".join(rows_text)
+    return composed("\n".join(rows_text))
 
 
 def write_file(file_path: str, content: str) -> None:
     """Write text content to file.
+
+    Story 10.20 (v1.7, the Codex review's P2; AC5): the text is written in
+    composed form (Unicode NFC), so a pseudonym an earlier version saved with
+    separate accent marks is written as the usual letters too.
 
     Args:
         file_path: Path to file (absolute or relative)
@@ -357,7 +369,7 @@ def write_file(file_path: str, content: str) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
 
         with open(path, "w", encoding="utf-8") as f:
-            f.write(content)
+            f.write(composed(content))
     except PermissionError as e:
         raise FileProcessingError(f"Permission denied: {file_path}") from e
     except OSError as e:

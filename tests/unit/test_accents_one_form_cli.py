@@ -1,0 +1,2795 @@
+"""Story 10.20: an accent stored as a separate mark, in the readers, the
+command line and the saved names (T1-T10, T12-T18, T20-T23, T26-T30, G2-G7).
+
+Written by the BMAD dev agent (Claude). The readers are called directly; the
+command-line paths drive the real ``gdpr-pseudo`` commands (``process``,
+``batch --workers 1``, ``delete-mapping``, ``list-entities``,
+``list-mappings``) through ``CliRunner``, on a database made by the real
+``init`` command, as Story 10.15's harness (``test_cli_corrections_hand_added.py``).
+Detection is replaced below the reader by a stand-in that finds each name
+given in its composed and its decomposed spelling, in the text it receives;
+T3 uses the real regex layer and T4 the real detector. The keys, the typed
+texts and the yes/no answers come from lists (no to « Add a name the
+detector missed », yes otherwise). The assertions read what a reader
+returns, the written file, the stored rows, the ERASURE entries and the
+lines shown.
+
+Every text is written composed in this file; a decomposed form is made at
+run time with ``unicodedata.normalize("NFD", ...)``, and the one mark with no
+composed letter with ``unicodedata.lookup``: no combining mark is written in
+this file. Preconditions call ``pytest.fail("PRE: ...")``, never ``assert``;
+the first ``assert`` after them is the expected failure on the unfixed code
+(``# expected failure``). Invented names and main-corpus words only. No Qt;
+no spaCy model except T4.
+"""
+
+from __future__ import annotations
+
+import csv
+import dataclasses
+import itertools
+import os
+import re
+import sqlite3
+import subprocess
+import sys
+import time
+import tracemalloc
+import unicodedata
+from collections.abc import Callable, Sequence
+from contextlib import ExitStack, closing
+from pathlib import Path
+from typing import Any
+from unittest.mock import patch
+
+import openpyxl
+import pytest
+import readchar
+from rich.prompt import Confirm, Prompt
+from typer.testing import CliRunner
+
+import gdpr_pseudonymizer
+from gdpr_pseudonymizer.cli.main import app
+from gdpr_pseudonymizer.core import custom_pseudonym as custom_pseudonym_module
+from gdpr_pseudonymizer.core.custom_pseudonym import (
+    CustomPseudonymRefusal,
+    check_custom_pseudonym,
+    normalize_custom_pseudonym,
+)
+from gdpr_pseudonymizer.core.document_processor import DocumentProcessor
+from gdpr_pseudonymizer.core.legacy_names import matches_search
+from gdpr_pseudonymizer.core.mapping_key import mapping_key, saved_name_forms
+from gdpr_pseudonymizer.data.database import open_database
+from gdpr_pseudonymizer.data.models import Entity
+from gdpr_pseudonymizer.data.repositories.mapping_repository import (
+    SQLiteMappingRepository,
+)
+from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
+from gdpr_pseudonymizer.nlp.regex_matcher import RegexMatcher
+from gdpr_pseudonymizer.utils.file_handler import read_file
+from gdpr_pseudonymizer.utils.french_patterns import (
+    FRENCH_TITLE_PATTERN,
+    strip_french_prepositions,
+    strip_french_titles,
+)
+from gdpr_pseudonymizer.utils.tabular_reader import (
+    read_csv_structured,
+    read_excel_structured,
+)
+from gdpr_pseudonymizer.validation.workflow import ADD_MISSED_NAME_QUESTION
+
+PASSPHRASE = "zorbalia_pass_A_123!"
+ENV = {"GDPR_PSEUDO_PASSPHRASE": PASSPHRASE}
+SHEET = "Zorbalia"
+PERSON = "PERSON"
+LOCATION = "LOCATION"
+
+ENTER = "\r"
+SPACE = " "
+MAX_KEYS = 60
+
+ZO = "Zórbalia"
+ZQ = "Zórbalia Quentrel"
+VM = "Vorlan Mestrix"
+XV = "Xantor Vellion"
+XQ = "Xantor Quovix"
+XVE = "Xantor Véllion"
+
+SENT = "Le contrat avec Zórbalia Quentrel a été signé."
+A_FIRST = "Vorlan Mestrix valide. Le contrat avec Zórbalia."
+A_SECOND = "Signé : Zórbalia."
+A_TEXT = f"{A_FIRST} {A_SECOND}"
+A_SENTENCES = ("Vorlan Mestrix valide.", "Le contrat avec Zórbalia.", A_SECOND)
+E_TEXT = "Zórbalia Quentrel a signé. Signé : Zórbalia Quentrel."
+R_TEXT = "Le contrat avec Zórbalia Quentrel a signé."
+R_REUSED = "Le contrat avec Xantor Vellion a signé."
+MME_TEXT = "Vorlan Mestrix valide. Signé : Mme Zórbalia."
+G7_REST = " a signé avec quentrel quovan et Zorbal Quentrix."
+
+NOT_FOUND = "not found in document"
+STILL_ONE = "Still to review: 1 (left in plain text)"
+CONFIRM_PROMPT = "Type 'yes'"
+# Lionel's Qc line (2026-10-21, "A: Use it (Rec.)"), N = 2, byte for byte.
+SEVERAL_LINE = (
+    "You are about to delete the following 2 saved pseudonyms "
+    "(all of this name, whatever its type):"
+)
+
+_ANSI = re.compile(r"\x1b\[[0-9;?]*[A-Za-z]")
+
+
+def nfc(text: str) -> str:
+    return unicodedata.normalize("NFC", text)
+
+
+def nfd(text: str) -> str:
+    return unicodedata.normalize("NFD", text)
+
+
+FORMS: dict[str, Callable[[str], str]] = {"nfc": nfc, "nfd": nfd}
+
+# « Zox » + U+0301 + « rbalia »: a mark with no composed letter (AC4)
+ACUTE = unicodedata.lookup("COMBINING ACUTE ACCENT")
+ZOX = "Zox" + ACUTE + "rbalia"
+
+
+def _pre(condition: bool, what: str) -> None:
+    """A precondition: a red failure on every leg, never an AssertionError."""
+    if not condition:
+        pytest.fail(f"PRE: {what}")
+
+
+def _has_mark(text: str) -> bool:
+    """Whether ``text`` holds a combining mark (AC4's rule)."""
+    return any(unicodedata.combining(char) for char in text)
+
+
+def _collapsed(text: str) -> str:
+    """``text`` with every whitespace run made one space (Rich wraps lines)."""
+    return " ".join(text.split())
+
+
+@pytest.fixture(autouse=True)
+def _settings(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """No user or project settings file is read or written."""
+    monkeypatch.setenv("HOME", str(tmp_path))
+    monkeypatch.setenv("USERPROFILE", str(tmp_path))
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(
+        "gdpr_pseudonymizer.gui.config._config_path",
+        lambda: tmp_path / ".gdpr-pseudo.yaml",
+    )
+
+
+@pytest.fixture
+def db(tmp_path: Path) -> Path:
+    """A new database, made by the real ``init`` command."""
+    path = tmp_path / "mappings.db"
+    result = CliRunner().invoke(
+        app, ["init", "--db", str(path)], env=ENV, catch_exceptions=False
+    )
+    _pre(result.exit_code == 0 and path.is_file(), "init made the database")
+    return path
+
+
+# ---------------------------------------------------------------------------
+# Harness
+# ---------------------------------------------------------------------------
+
+
+class EitherForm:
+    """Stand-in detector: every occurrence of each (name, type) given, in its
+    composed and its decomposed spelling, in the text it receives; an
+    occurrence inside a longer one found is dropped."""
+
+    def __init__(self, names: Sequence[tuple[str, str]]) -> None:
+        self.names = list(names)
+
+    def detect_entities(self, text: str) -> list[DetectedEntity]:
+        found: list[DetectedEntity] = []
+        for name, entity_type in self.names:
+            for form in dict.fromkeys((nfc(name), nfd(name))):
+                start = text.find(form)
+                while start != -1:
+                    found.append(
+                        DetectedEntity(
+                            text=form,
+                            entity_type=entity_type,
+                            start_pos=start,
+                            end_pos=start + len(form),
+                            confidence=0.9,
+                            source="spacy",
+                        )
+                    )
+                    start = text.find(form, start + 1)
+        return [
+            entity
+            for entity in found
+            if not any(
+                other.start_pos <= entity.start_pos
+                and entity.end_pos <= other.end_pos
+                and other.end_pos - other.start_pos > entity.end_pos - entity.start_pos
+                for other in found
+            )
+        ]
+
+
+class RegexLayer:
+    """The real regex layer of the detector (the one that cuts « Mme Zo »)."""
+
+    def __init__(self) -> None:
+        self.matcher = RegexMatcher()
+        self.matcher.load_patterns()
+
+    def detect_entities(self, text: str) -> list[DetectedEntity]:
+        return self.matcher.match_entities(text)
+
+
+class Keys:
+    """``readchar.readkey``: the keys in order, then Space."""
+
+    def __init__(self, keys: Sequence[str]) -> None:
+        self.keys = list(keys)
+        self.read = 0
+
+    def __call__(self) -> str:
+        self.read += 1
+        if self.read > MAX_KEYS:
+            raise RuntimeError("more than 60 keys read")
+        return self.keys.pop(0) if self.keys else SPACE
+
+
+class Typed:
+    """``Prompt.ask``: the typed texts in order. The prompt is printed, so the
+    output shows where it was asked."""
+
+    def __init__(self, texts: Sequence[str]) -> None:
+        self.texts = list(texts)
+
+    def __call__(self, prompt: Any, *args: Any, **kwargs: Any) -> str:
+        print(f"[asked] {prompt}")
+        if not self.texts:
+            raise RuntimeError("no typed text left")
+        return self.texts.pop(0)
+
+
+class Answers:
+    """``Confirm.ask``: no to Story 10.18's question, yes otherwise."""
+
+    def __call__(self, prompt: Any, *args: Any, **kwargs: Any) -> bool:
+        return str(prompt) != ADD_MISSED_NAME_QUESTION
+
+
+@dataclasses.dataclass
+class Run:
+    exit_code: int
+    shown: str
+
+    @property
+    def flat(self) -> str:
+        return _collapsed(self.shown)
+
+
+def _invoke(
+    args: Sequence[str],
+    names: Sequence[tuple[str, str]] = (),
+    keys: Sequence[str] = (),
+    typed: Sequence[str] = (),
+    detect: str = "stand-in",
+) -> Run:
+    """One real command run. ``detect``: "stand-in" (``EitherForm``),
+    "regex" (``RegexLayer``) or "real" (the detector itself)."""
+    with ExitStack() as stack:
+        if detect != "real":
+            detector: Any = RegexLayer() if detect == "regex" else EitherForm(names)
+            stack.enter_context(
+                patch.object(
+                    DocumentProcessor, "_get_detector", new=lambda self: detector
+                )
+            )
+            stack.enter_context(
+                patch.object(
+                    DocumentProcessor,
+                    "_detect_and_filter_entities",
+                    new=lambda self, text, entity_type_filter=None: (
+                        detector.detect_entities(text)
+                    ),
+                )
+            )
+        stack.enter_context(patch.object(readchar, "readkey", new=Keys(keys)))
+        stack.enter_context(patch.object(Prompt, "ask", new=Typed(typed)))
+        stack.enter_context(patch.object(Confirm, "ask", new=Answers()))
+        result = CliRunner().invoke(app, list(args), env=ENV, catch_exceptions=False)
+    return Run(result.exit_code, _ANSI.sub("", result.output))
+
+
+def _process(
+    source: Path,
+    output: Path,
+    db: Path,
+    names: Sequence[tuple[str, str]] = (),
+    keys: Sequence[str] = (ENTER,),
+    typed: Sequence[str] = (),
+    detect: str = "stand-in",
+) -> Run:
+    """One real ``gdpr-pseudo process`` run."""
+    return _invoke(
+        ["process", str(source), "--db", str(db), "-o", str(output)],
+        names,
+        keys,
+        typed,
+        detect,
+    )
+
+
+def _batch(folder: Path, out: Path, db: Path, names: Sequence[tuple[str, str]]) -> Run:
+    """One real ``gdpr-pseudo batch --workers 1`` run."""
+    return _invoke(
+        [
+            "batch",
+            str(folder),
+            "--db",
+            str(db),
+            "--output",
+            str(out),
+            "--workers",
+            "1",
+        ],
+        names,
+        (ENTER,),
+    )
+
+
+def _delete(db: Path, name: str) -> Run:
+    """One real ``gdpr-pseudo delete-mapping <name>``, « yes » typed."""
+    return _invoke(["delete-mapping", name, "--db", str(db)], typed=["yes"])
+
+
+def _write_sheet(path: Path, rows: list[list[str]]) -> None:
+    if path.suffix == ".xlsx":
+        workbook = openpyxl.Workbook()
+        sheet = workbook.active
+        sheet.title = SHEET
+        for row in rows:
+            sheet.append(row)
+        workbook.save(path)
+        workbook.close()
+    else:
+        with path.open("w", encoding="utf-8", newline="") as handle:
+            csv.writer(handle).writerows(rows)
+
+
+def _write_doc(path: Path, text: str) -> None:
+    """A document holding ``text``; a sheet holds it in A2, « ok » in B2,
+    under the header « Nom », « Note »."""
+    if path.suffix in (".xlsx", ".csv"):
+        _write_sheet(path, [["Nom", "Note"], [text, "ok"]])
+    else:
+        path.write_text(text, encoding="utf-8")
+
+
+def _written(path: Path) -> str:
+    """The written text; a sheet's cells, one per line."""
+    _pre(path.is_file(), f"{path.name} is written")
+    if path.suffix == ".xlsx":
+        workbook = openpyxl.load_workbook(path)
+        try:
+            return "\n".join(
+                str(value)
+                for sheet in workbook.worksheets
+                for row in sheet.iter_rows(values_only=True)
+                for value in row
+                if value is not None
+            )
+        finally:
+            workbook.close()
+    if path.suffix == ".csv":
+        with path.open(encoding="utf-8", newline="") as handle:
+            return "\n".join(cell for row in csv.reader(handle) for cell in row)
+    return path.read_text(encoding="utf-8")
+
+
+def _save(db: Path, rows: Sequence[tuple[str, str, str]]) -> None:
+    """Rows saved in order, each with the exact name given, as an earlier
+    version saved them: (full_name, type, pseudonym)."""
+    with open_database(str(db), PASSPHRASE) as session:
+        repo = SQLiteMappingRepository(session)
+        for full_name, entity_type, pseudonym in rows:
+            repo.save(
+                Entity(
+                    entity_type=entity_type,
+                    full_name=full_name,
+                    pseudonym_full=pseudonym,
+                    theme="neutral",
+                )
+            )
+
+
+def _rows(db: Path) -> list[tuple[str, str, str]]:
+    """Every stored row: (full_name, entity_type, pseudonym_full)."""
+    with open_database(str(db), PASSPHRASE) as session:
+        return [
+            (row.full_name, row.entity_type, row.pseudonym_full)
+            for row in SQLiteMappingRepository(session).find_all()
+        ]
+
+
+def _names(db: Path) -> list[tuple[str, str]]:
+    """Every stored (full_name, entity_type), sorted."""
+    return sorted((name, entity_type) for name, entity_type, _ in _rows(db))
+
+
+def _erasures(db: Path) -> int:
+    """The ERASURE entries of the operations table."""
+    with closing(sqlite3.connect(str(db))) as connection:
+        (count,) = connection.execute(
+            "SELECT COUNT(*) FROM operations WHERE operation_type = 'ERASURE'"
+        ).fetchone()
+    return int(count)
+
+
+# A PDF whose accents are drawn apart (no font file): the standard Helvetica
+# font, WinAnsi encoding, each accented letter drawn as its plain letter then
+# a spacing accent, which the font's /ToUnicode map gives as a combining mark.
+_SPACING_ACCENT = {
+    unicodedata.lookup("COMBINING ACUTE ACCENT"): 0xB4,
+    unicodedata.lookup("COMBINING GRAVE ACCENT"): 0x60,
+    unicodedata.lookup("COMBINING CIRCUMFLEX ACCENT"): 0x88,
+    unicodedata.lookup("COMBINING DIAERESIS"): 0xA8,
+    unicodedata.lookup("COMBINING CEDILLA"): 0xB8,
+}
+
+
+def _stream(data: bytes) -> bytes:
+    return f"<< /Length {len(data)} >>\nstream\n".encode() + data + b"\nendstream"
+
+
+def _write_pdf(path: Path, text: str) -> None:
+    codes = bytearray()
+    for char in nfd(text):
+        code = _SPACING_ACCENT.get(char, ord(char))
+        _pre(code < 0x100, f"{char!r} drawn with WinAnsi")
+        codes.append(code)
+    content = b"BT /F1 12 Tf 40 700 Td <" + codes.hex().upper().encode() + b"> Tj ET"
+    to_unicode = (
+        b"/CIDInit /ProcSet findresource begin\n12 dict begin\nbegincmap\n"
+        b"/CIDSystemInfo << /Registry (Adobe) /Ordering (UCS) /Supplement 0 >> def\n"
+        b"/CMapName /Adobe-Identity-UCS def\n/CMapType 2 def\n"
+        b"1 begincodespacerange\n<00> <FF>\nendcodespacerange\n"
+        + f"{len(_SPACING_ACCENT)} beginbfchar\n".encode()
+        + b"".join(
+            f"<{code:02X}> <{ord(mark):04X}>\n".encode()
+            for mark, code in _SPACING_ACCENT.items()
+        )
+        + b"endbfchar\nendcmap\nCMapName currentdict /CMap defineresource pop\n"
+        b"end\nend"
+    )
+    objects = [
+        b"<< /Type /Catalog /Pages 2 0 R >>",
+        b"<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+        b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] "
+        b"/Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>",
+        b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica "
+        b"/Encoding /WinAnsiEncoding /ToUnicode 6 0 R >>",
+        _stream(content),
+        _stream(to_unicode),
+    ]
+    out = bytearray(b"%PDF-1.4\n")
+    offsets: list[int] = []
+    for number, body in enumerate(objects, start=1):
+        offsets.append(len(out))
+        out += f"{number} 0 obj\n".encode() + body + b"\nendobj\n"
+    xref = len(out)
+    out += f"xref\n0 {len(objects) + 1}\n0000000000 65535 f \n".encode()
+    for offset in offsets:
+        out += f"{offset:010d} 00000 n \n".encode()
+    out += (
+        f"trailer\n<< /Size {len(objects) + 1} /Root 1 0 R >>\n"
+        f"startxref\n{xref}\n%%EOF\n"
+    ).encode()
+    path.write_bytes(bytes(out))
+
+
+def _read_back(tmp_path: Path, kind: str, text: str) -> str:
+    """``text`` written as a file of ``kind``, then read by the product's
+    reader (the structured readers' cells joined, one per line)."""
+    ext = "." + kind.split("_")[0]
+    path = tmp_path / f"doc{ext}"
+    if kind == "docx":
+        import docx
+
+        document = docx.Document()
+        document.add_paragraph(text)
+        document.save(str(path))
+    elif kind == "pdf":
+        _write_pdf(path, text)
+    else:
+        _write_doc(path, text)
+    if kind == "xlsx_cells":
+        return "\n".join(cell.value for cell in read_excel_structured(str(path)).cells)
+    if kind == "csv_cells":
+        return "\n".join(cell.value for cell in read_csv_structured(str(path)).cells)
+    return read_file(str(path))
+
+
+# ---------------------------------------------------------------------------
+# AC1, AC5: every reader returns composed text; written files are composed
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "kind", ["txt", "md", "docx", "pdf", "xlsx", "csv", "xlsx_cells", "csv_cells"]
+)
+def test_reader_returns_composed(tmp_path: Path, kind: str) -> None:
+    """T1 (AC1): each reader returns the sentence composed, from a file that
+    stores it decomposed (a PDF whose accents are drawn apart)."""
+    text = _read_back(tmp_path, kind, nfd(SENT))
+    _pre(SENT in nfc(text), f"the reader returned the sentence: {text!r}")
+    assert not _has_mark(text), repr(text)  # expected failure
+    assert SENT in text
+
+
+@pytest.mark.parametrize("ext", [".txt", ".xlsx", ".csv"])
+def test_written_file_composed(tmp_path: Path, db: Path, ext: str) -> None:
+    """T2 (AC5): a document stored decomposed, nothing detected, is written
+    composed."""
+    source, output = tmp_path / f"in{ext}", tmp_path / f"out{ext}"
+    _write_doc(source, nfd(SENT))
+    run = _process(source, output, db)
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    written = _written(output)
+    assert not _has_mark(written), repr(written)  # expected failure
+    assert SENT in written
+
+
+# ---------------------------------------------------------------------------
+# Path 1: « Mme Zo »
+# ---------------------------------------------------------------------------
+
+
+def test_mme_zo_regex_layer(tmp_path: Path, db: Path) -> None:
+    """T3 (path 1): with the real regex layer, a decomposed « Mme Zórbalia »
+    is replaced whole: the end of the name is not left in the written file."""
+    source, output = tmp_path / "in.txt", tmp_path / "out.txt"
+    source.write_text(nfd(MME_TEXT), encoding="utf-8")
+    run = _process(source, output, db, detect="regex")
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    written = _written(output)
+    _pre("Reviewing PERSON entities" in run.flat, "a PERSON reviewed")
+    assert "rbalia" not in nfc(written), repr(written)  # expected failure
+    assert not _has_mark(written)
+
+
+@pytest.mark.spacy
+def test_mme_zo_real_detector(tmp_path: Path, db: Path) -> None:
+    """T4 (path 1): the same with the real detector."""
+    source, output = tmp_path / "in.txt", tmp_path / "out.txt"
+    source.write_text(nfd(MME_TEXT), encoding="utf-8")
+    run = _process(source, output, db, detect="real")
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    written = _written(output)
+    _pre("Reviewing PERSON entities" in run.flat, "a PERSON reviewed")
+    assert "rbalia" not in nfc(written), repr(written)  # expected failure
+    assert not _has_mark(written)
+
+
+# ---------------------------------------------------------------------------
+# Path 2: [A]
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("ext", [".txt", ".xlsx"])
+def test_add_composed_in_decomposed_document(
+    tmp_path: Path, db: Path, ext: str
+) -> None:
+    """T5 (path 2): « Zórbalia » typed composed at [A] in a decomposed
+    document: no « not found », every place replaced, one row."""
+    source, output = tmp_path / f"in{ext}", tmp_path / f"out{ext}"
+    if ext == ".xlsx":
+        _write_sheet(source, [[nfd(sentence)] for sentence in A_SENTENCES])
+    else:
+        source.write_text(nfd(A_TEXT), encoding="utf-8")
+    run = _process(
+        source, output, db, [(VM, PERSON)], [ENTER, "a", SPACE], [ZO, PERSON]
+    )
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    written = _written(output)
+    assert NOT_FOUND not in run.flat, run.shown  # expected failure
+    assert "rbalia" not in nfc(written), repr(written)
+    assert _names(db) == sorted([(VM, PERSON), (ZO, PERSON)])
+
+
+def test_add_decomposed_in_composed_document(tmp_path: Path, db: Path) -> None:
+    """T6 (path 2): « Zórbalia » typed decomposed at [A] in a composed
+    document: no « not found », one row, composed."""
+    source, output = tmp_path / "in.txt", tmp_path / "out.txt"
+    source.write_text(A_TEXT, encoding="utf-8")
+    run = _process(
+        source, output, db, [(VM, PERSON)], [ENTER, "a", SPACE], [nfd(ZO), PERSON]
+    )
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    assert NOT_FOUND not in run.flat, run.shown  # expected failure
+    assert _names(db) == sorted([(VM, PERSON), (ZO, PERSON)])
+
+
+@pytest.mark.parametrize("typed_form", ["nfc", "nfd"])
+def test_add_in_document_with_both_forms(
+    tmp_path: Path, db: Path, typed_form: str
+) -> None:
+    """T7 (path 2): the first place composed, the second decomposed; [A]
+    typed in either form replaces both; one row, composed."""
+    source, output = tmp_path / "in.txt", tmp_path / "out.txt"
+    source.write_text(f"{nfc(A_FIRST)} {nfd(A_SECOND)}", encoding="utf-8")
+    typed = FORMS[typed_form](ZO)
+    run = _process(
+        source, output, db, [(VM, PERSON)], [ENTER, "a", SPACE], [typed, PERSON]
+    )
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    _pre("Added PERSON entity" in run.flat, f"added: {run.shown!r}")
+    written = _written(output)
+    assert "rbalia" not in nfc(written), repr(written)  # expected failure
+    assert [row for row in _names(db) if row[0] != VM] == [(ZO, PERSON)]
+
+
+# ---------------------------------------------------------------------------
+# Path 3: [E]
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "doc_form, typed_form", [("nfd", "nfc"), ("nfc", "nfd")], ids=["nfd-nfc", "nfc-nfd"]
+)
+def test_correction_across_forms(
+    tmp_path: Path, db: Path, doc_form: str, typed_form: str
+) -> None:
+    """T8 (path 3): « Zórbalia » found twice, corrected at [E] into
+    « Zórbalia Quentrel » typed in the other form: no part of it in clear,
+    one row, composed."""
+    source, output = tmp_path / "in.txt", tmp_path / "out.txt"
+    source.write_text(FORMS[doc_form](E_TEXT), encoding="utf-8")
+    run = _process(
+        source, output, db, [(ZO, PERSON)], [ENTER, "e"], [FORMS[typed_form](ZQ)]
+    )
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    _pre("2 occurrences, 1 unique" in run.flat, f"one group of 2: {run.shown!r}")
+    written = _written(output)
+    assert "Quentrel" not in written, repr(written)  # expected failure
+    assert _names(db) == [(ZQ, PERSON)]
+
+
+# ---------------------------------------------------------------------------
+# Path 4: the review's grouping and 10.13's count
+# ---------------------------------------------------------------------------
+
+
+def _mixed() -> str:
+    """« Zórbalia Quentrel a signé. » composed, then « Signé : Zórbalia
+    Quentrel. » decomposed."""
+    return f"{nfc('Zórbalia Quentrel a signé.')} {nfd('Signé : Zórbalia Quentrel.')}"
+
+
+def test_both_forms_are_one_name(tmp_path: Path, db: Path) -> None:
+    """T9 (path 4): the name composed at one place and decomposed at another
+    is one name in the review, one pseudonym in the file, one row."""
+    source, output = tmp_path / "in.txt", tmp_path / "out.txt"
+    source.write_text(_mixed(), encoding="utf-8")
+    run = _process(source, output, db, [(ZQ, PERSON)], [ENTER, SPACE])
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    assert "2 occurrences, 1 unique" in run.flat, run.shown  # expected failure
+    rows = _rows(db)
+    assert [row[:2] for row in rows] == [(ZQ, PERSON)]
+    pseudonym = rows[0][2]
+    assert _written(output) == f"{pseudonym} a signé. Signé : {pseudonym}."
+
+
+def test_still_to_review_counts_it_once(tmp_path: Path, db: Path) -> None:
+    """T10 (path 4, 10.13's count): the name in two forms, left to review,
+    is counted once."""
+    source, output = tmp_path / "in.txt", tmp_path / "out.txt"
+    source.write_text(f"{_mixed()} Vorlan Mestrix valide.", encoding="utf-8")
+    run = _process(
+        source, output, db, [(ZQ, PERSON), (VM, PERSON)], [ENTER, "n", "n", SPACE]
+    )
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    _pre("Still to review" in run.flat, f"names left to review: {run.shown!r}")
+    assert STILL_ONE in run.flat, run.shown  # expected failure
+
+
+# ---------------------------------------------------------------------------
+# Path 7: a saved name reused in a later document
+# ---------------------------------------------------------------------------
+
+_ORDERS = pytest.mark.parametrize(
+    "first, second", [("nfc", "nfd"), ("nfd", "nfc")], ids=["nfc-nfd", "nfd-nfc"]
+)
+
+
+@_ORDERS
+def test_reuse_process_twice(tmp_path: Path, db: Path, first: str, second: str) -> None:
+    """T12 (path 7): the name saved from one form and met in the other in
+    the next ``process``: the same pseudonym, the same written text, one
+    row."""
+    source_a, output_a = tmp_path / "a.txt", tmp_path / "a_out.txt"
+    source_b, output_b = tmp_path / "b.txt", tmp_path / "b_out.txt"
+    source_a.write_text(FORMS[first](R_TEXT), encoding="utf-8")
+    source_b.write_text(FORMS[second](R_TEXT), encoding="utf-8")
+    run_a = _process(source_a, output_a, db, [(ZQ, PERSON)], [ENTER, SPACE])
+    _pre(run_a.exit_code == 0 and len(_rows(db)) == 1, "the first run stored one row")
+    run_b = _process(source_b, output_b, db, [(ZQ, PERSON)], [ENTER, SPACE])
+    _pre(run_b.exit_code == 0, f"exit code 0: {run_b.shown!r}")
+    written_b = _written(output_b)
+    assert written_b == _written(output_a), repr(written_b)  # expected failure
+    assert _names(db) == [(ZQ, PERSON)]
+
+
+@_ORDERS
+def test_reuse_batch_one_at_a_time(
+    tmp_path: Path, db: Path, first: str, second: str
+) -> None:
+    """T13 (path 7): the same with ``batch --workers 1``."""
+    folder, out = tmp_path / "in", tmp_path / "out"
+    folder.mkdir()
+    (folder / "a.txt").write_text(FORMS[first](R_TEXT), encoding="utf-8")
+    (folder / "b.txt").write_text(FORMS[second](R_TEXT), encoding="utf-8")
+    run = _batch(folder, out, db, [(ZQ, PERSON)])
+    output_a, output_b = out / "a_pseudonymized.txt", out / "b_pseudonymized.txt"
+    _pre(
+        run.exit_code == 0 and output_a.is_file() and output_b.is_file(),
+        f"two files written: {run.shown!r}",
+    )
+    written_b = _written(output_b)
+    assert written_b == _written(output_a), repr(written_b)  # expected failure
+    assert _names(db) == [(ZQ, PERSON)]
+
+
+def test_old_decomposed_row_reused(tmp_path: Path, db: Path) -> None:
+    """T14 (path 7, AC3): a row saved decomposed, as the unfixed code saves
+    it, gives its pseudonym to the composed name."""
+    _save(db, [(nfd(ZQ), PERSON, XV)])
+    _pre(_rows(db) == [(nfd(ZQ), PERSON, XV)], "the decomposed row is stored")
+    source, output = tmp_path / "in.txt", tmp_path / "out.txt"
+    source.write_text(R_TEXT, encoding="utf-8")
+    run = _process(source, output, db, [(ZQ, PERSON)], [ENTER, SPACE])
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    written = _written(output)
+    assert written == R_REUSED, repr(written)  # expected failure
+    assert len(_rows(db)) == 1
+
+
+# ---------------------------------------------------------------------------
+# Path 8: delete-mapping, list-entities, list-mappings
+# ---------------------------------------------------------------------------
+
+
+def test_delete_decomposed_row_by_composed_name(tmp_path: Path, db: Path) -> None:
+    """T15 (path 8): ``delete-mapping`` with the composed name erases the row
+    saved decomposed, with its erasure entry."""
+    _save(db, [(nfd(ZQ), PERSON, XV)])
+    _pre(len(_rows(db)) == 1, "one row stored")
+    run = _delete(db, ZQ)
+    assert run.exit_code == 0, run.shown  # expected failure
+    assert _rows(db) == []
+    assert _erasures(db) == 1
+
+
+def test_delete_both_forms(tmp_path: Path, db: Path) -> None:
+    """T16 (path 8, Open Point (b)): a name saved both ways: both rows listed
+    before the confirmation, both erased, each with its entry."""
+    _save(db, [(ZQ, PERSON, XV), (nfd(ZQ), PERSON, XQ)])
+    _pre(len(_rows(db)) == 2, "two rows stored")
+    run = _delete(db, ZQ)
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    _pre(CONFIRM_PROMPT in run.shown, "the confirmation is asked")
+    before = _collapsed(run.shown.split(CONFIRM_PROMPT, 1)[0])
+    assert XQ in before, before  # expected failure
+    assert _rows(db) == []
+    assert _erasures(db) == 2
+
+
+@pytest.mark.parametrize(
+    "saved, searched", [("nfd", "nfc"), ("nfc", "nfd")], ids=["nfd-nfc", "nfc-nfd"]
+)
+def test_list_entities_search(
+    tmp_path: Path, db: Path, saved: str, searched: str
+) -> None:
+    """T17 (path 8, AC2): ``list-entities --search`` in the other form lists
+    the row."""
+    _save(db, [(FORMS[saved](ZQ), PERSON, XV)])
+    run = _invoke(["list-entities", "--db", str(db), "--search", FORMS[searched](ZO)])
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    assert XV in run.flat, run.shown  # expected failure
+
+
+def test_list_mappings_search(tmp_path: Path, db: Path) -> None:
+    """T18 (AC2): ``list-mappings --search`` composed lists the row saved
+    decomposed."""
+    _save(db, [(nfd(ZQ), PERSON, XV)])
+    run = _invoke(["list-mappings", "--db", str(db), "--search", ZO])
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    assert XV in run.flat, run.shown  # expected failure
+
+
+# ---------------------------------------------------------------------------
+# AC4: a word keeps its marks, also a mark with no composed letter
+# ---------------------------------------------------------------------------
+
+
+def test_custom_check_keeps_the_mark_inside_the_word() -> None:
+    """T20 (AC4): « Zox » + U+0301 + « rbalia » is one word for the custom
+    pseudonym check, so « Xantor Zoxrbalia » is refused."""
+    document = f"Quentrel {ZOX} a signé le contrat."
+    refusal = check_custom_pseudonym(
+        [], f"Quentrel {ZOX}", PERSON, "Xantor Zoxrbalia", document, {}
+    )
+    assert refusal is not None  # expected failure
+
+
+def test_add_does_not_place_inside_a_word_with_a_mark(tmp_path: Path, db: Path) -> None:
+    """T21 (AC4): [A] « Zox » is not placed inside « Zox » + U+0301 +
+    « rbalia »."""
+    source, output = tmp_path / "in.txt", tmp_path / "out.txt"
+    source.write_text(f"Vorlan Mestrix valide. {ZOX} a signé. Zox valide.", "utf-8")
+    run = _process(
+        source, output, db, [(VM, PERSON)], [ENTER, "a", SPACE], ["Zox", PERSON]
+    )
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    written = _written(output)
+    _pre("Zox valide" not in written, f"« Zox valide » replaced: {written!r}")
+    assert ZOX in written, repr(written)  # expected failure
+
+
+def test_log_redaction_keeps_the_mark_inside_the_name() -> None:
+    """T22 (AC4): the error text's name-shaped run takes the mark, so the
+    whole name is redacted."""
+    message = DocumentProcessor._sanitize_error_message(
+        ValueError(f"failed near {ZOX} Quentrel today")
+    )
+    _pre(message.startswith("ValueError: "), message)
+    assert "rbalia" not in message, message  # expected failure
+    assert "Quentrel" not in message, message
+
+
+# ---------------------------------------------------------------------------
+# AC2: a custom pseudonym typed decomposed
+# ---------------------------------------------------------------------------
+
+
+def test_cli_custom_pseudonym_typed_decomposed(tmp_path: Path, db: Path) -> None:
+    """T23 (AC2): [C] « Xantor Véllion » typed decomposed is stored and
+    written composed."""
+    source, output = tmp_path / "in.txt", tmp_path / "out.txt"
+    source.write_text("Vorlan Mestrix valide.", encoding="utf-8")
+    run = _process(source, output, db, [(VM, PERSON)], [ENTER, "c"], [nfd(XVE)])
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    written = _written(output)
+    _pre(nfc(written) == f"{XVE} valide.", f"the custom pseudonym written: {written!r}")
+    rows = _rows(db)
+    _pre(len(rows) == 1, f"one row: {rows!r}")
+    assert rows[0][2] == XVE, repr(rows[0][2])  # expected failure
+    assert written == nfc(written)
+
+
+# ---------------------------------------------------------------------------
+# The PO's S2 and M1, Lionel's Qa, Qb, Qc
+# ---------------------------------------------------------------------------
+
+
+def test_fresh_decomposed_title_like_name(tmp_path: Path, db: Path) -> None:
+    """T26 (the PO's S2): a decomposed « Mélora Quentrel » on a fresh
+    database is replaced whole and saved composed."""
+    source, output = tmp_path / "in.txt", tmp_path / "out.txt"
+    source.write_text(nfd("Le contrat avec Mélora Quentrel a signé."), "utf-8")
+    run = _process(source, output, db, [("Mélora Quentrel", PERSON)], [ENTER, SPACE])
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    written = _written(output)
+    rows = _rows(db)
+    _pre(len(rows) == 1, f"one row: {rows!r}")
+    expected = f"Le contrat avec {rows[0][2]} a signé."
+    assert nfc(written) == expected, repr(written)  # expected failure
+    assert rows[0][:2] == ("Mélora Quentrel", PERSON)
+
+
+@dataclasses.dataclass(frozen=True)
+class OldRow:
+    """A row an earlier version saved from a decomposed document, and the
+    composed document that later meets the name."""
+
+    stored: str
+    entity_type: str
+    pseudonym: str
+    document: str
+    detected: str
+    expected: str
+    bare: str
+
+
+def _old_titled(case: str) -> OldRow:
+    """The PO's M1: « Maître » or « à » kept in front, decomposed."""
+    if case == "maitre_vorlan":
+        return OldRow(
+            nfd("Maître Vorlan Mestrix"),
+            PERSON,
+            XV,
+            "Le contrat avec Maître Vorlan Mestrix a signé.",
+            "Maître Vorlan Mestrix",
+            "Le contrat avec Maître Xantor Vellion a signé.",
+            VM,
+        )
+    if case == "maitre_eloria":
+        return OldRow(
+            nfd("Maître Éloria Quentrel"),
+            PERSON,
+            XV,
+            "Le contrat avec Maître Éloria Quentrel a signé.",
+            "Maître Éloria Quentrel",
+            "Le contrat avec Maître Xantor Vellion a signé.",
+            "Éloria Quentrel",
+        )
+    return OldRow(
+        nfd("à Zórbaville"),
+        LOCATION,
+        "Xantorville",
+        "Le contrat a été signé à Zórbaville.",
+        "Zórbaville",
+        "Le contrat a été signé à Xantorville.",
+        "Zórbaville",
+    )
+
+
+def _old_cut(case: str) -> OldRow:
+    """Lionel's Qa: a row that lost letters to the title pattern."""
+    name = "Mélora Quentrel" if case == "melora" else "Zorbôme Quentrel"
+    stored = ACUTE + "lora Quentrel" if case == "melora" else nfd("Zorbô") + "Quentrel"
+    return OldRow(
+        stored,
+        PERSON,
+        XV,
+        f"Le contrat avec {name} a signé.",
+        name,
+        R_REUSED,
+        name,
+    )
+
+
+TITLED = ["maitre_vorlan", "maitre_eloria", "a_zorbaville"]
+CUT = ["melora", "zorbome"]
+
+
+def _reuse(tmp_path: Path, db: Path, old: OldRow) -> str:
+    """The old row saved, then the composed document processed: the written
+    text (after the preconditions)."""
+    _save(db, [(old.stored, old.entity_type, old.pseudonym)])
+    _pre(
+        _rows(db) == [(old.stored, old.entity_type, old.pseudonym)],
+        "the old row is stored",
+    )
+    source, output = tmp_path / "in.txt", tmp_path / "out.txt"
+    source.write_text(old.document, encoding="utf-8")
+    run = _process(
+        source, output, db, [(old.detected, old.entity_type)], [ENTER, SPACE]
+    )
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    return _written(output)
+
+
+def _erase(db: Path, old: OldRow) -> Run:
+    """The old row saved, then ``delete-mapping`` with the bare name."""
+    _save(db, [(old.stored, old.entity_type, old.pseudonym)])
+    _pre(len(_rows(db)) == 1, "the old row is stored")
+    return _delete(db, old.bare)
+
+
+@pytest.mark.parametrize("case", TITLED)
+def test_old_titled_row_reused(tmp_path: Path, db: Path, case: str) -> None:
+    """T27 (the PO's M1, AC3): a row saved with a decomposed « Maître » or
+    « à » in its key gives its pseudonym to the composed name."""
+    old = _old_titled(case)
+    written = _reuse(tmp_path, db, old)
+    assert written == old.expected, repr(written)  # expected failure
+    assert len(_rows(db)) == 1
+
+
+@pytest.mark.parametrize("case", TITLED)
+def test_old_titled_row_erased_by_name(tmp_path: Path, db: Path, case: str) -> None:
+    """T27 (the PO's M1, AC3): ``delete-mapping`` with the bare composed name
+    erases that row, with its entry."""
+    run = _erase(db, _old_titled(case))
+    assert run.exit_code == 0, run.shown  # expected failure
+    assert _rows(db) == []
+    assert _erasures(db) == 1
+
+
+@pytest.mark.parametrize("case", CUT)
+def test_row_that_lost_letters_reused(tmp_path: Path, db: Path, case: str) -> None:
+    """T28 (Lionel's Qa, AC3): a row whose key lost letters to the title
+    pattern gives its pseudonym to the composed name."""
+    old = _old_cut(case)
+    written = _reuse(tmp_path, db, old)
+    assert written == old.expected, repr(written)  # expected failure
+    assert len(_rows(db)) == 1
+
+
+@pytest.mark.parametrize("case", CUT)
+def test_row_that_lost_letters_erased_by_name(
+    tmp_path: Path, db: Path, case: str
+) -> None:
+    """T28 (Lionel's Qa, AC3): ``delete-mapping`` with the composed name
+    erases that row, with its entry."""
+    run = _erase(db, _old_cut(case))
+    assert run.exit_code == 0, run.shown  # expected failure
+    assert _rows(db) == []
+    assert _erasures(db) == 1
+
+
+def test_rule_a_the_usual_way_pseudonym(tmp_path: Path, db: Path) -> None:
+    """T29 (Lionel's Qb, rule A): a name saved both ways (decomposed first):
+    documents in either form get the composed row's pseudonym; both rows
+    stay."""
+    _save(db, [(nfd(ZQ), PERSON, XQ), (ZQ, PERSON, XV)])
+    _pre(len(_rows(db)) == 2, "two rows stored")
+    source_a, output_a = tmp_path / "a.txt", tmp_path / "a_out.txt"
+    source_b, output_b = tmp_path / "b.txt", tmp_path / "b_out.txt"
+    source_a.write_text(nfd(R_TEXT), encoding="utf-8")
+    source_b.write_text(R_TEXT, encoding="utf-8")
+    run_a = _process(source_a, output_a, db, [(ZQ, PERSON)], [ENTER, SPACE])
+    run_b = _process(source_b, output_b, db, [(ZQ, PERSON)], [ENTER, SPACE])
+    _pre(run_a.exit_code == 0 and run_b.exit_code == 0, "both written")
+    written_a, written_b = _written(output_a), _written(output_b)
+    assert nfc(written_a) == R_REUSED, repr(written_a)  # expected failure
+    assert nfc(written_b) == R_REUSED, repr(written_b)
+    assert len(_rows(db)) == 2
+
+
+@pytest.mark.parametrize("other", ["decomposed_same_type", "composed_other_type"])
+def test_delete_mapping_several_rows_line(tmp_path: Path, db: Path, other: str) -> None:
+    """T30 (Lionel's Qc, AC9): the line for several saved pseudonyms of one
+    name, two forms of one type or two types."""
+    second = (
+        (nfd(ZQ), PERSON, XQ)
+        if other == "decomposed_same_type"
+        else (ZQ, LOCATION, "Xantorville")
+    )
+    _save(db, [(ZQ, PERSON, XV), second])
+    _pre(len(_rows(db)) == 2, "two rows stored")
+    run = _delete(db, ZQ)
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    assert SEVERAL_LINE in run.flat, run.shown  # expected failure
+    assert "one per type of this name" not in run.flat
+
+
+# ---------------------------------------------------------------------------
+# Guards (pass on the unfixed and the fixed code)
+# ---------------------------------------------------------------------------
+
+
+def test_guard_add_reaches_the_whole_word_with_a_mark(tmp_path: Path, db: Path) -> None:
+    """G2 (AC4): [A] « Zox » + U+0301 + « rbalia » typed whole replaces the
+    word; no mark is left."""
+    source, output = tmp_path / "in.txt", tmp_path / "out.txt"
+    source.write_text(f"Vorlan Mestrix valide. {ZOX} a signé. Zox valide.", "utf-8")
+    run = _process(
+        source, output, db, [(VM, PERSON)], [ENTER, "a", SPACE], [ZOX, PERSON]
+    )
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    written = _written(output)
+    assert "rbalia" not in written, repr(written)
+    assert not _has_mark(written)
+
+
+def test_text_without_accents_unchanged(tmp_path: Path, db: Path) -> None:
+    """G3 (AC13): a document without accents, nothing detected, is written
+    byte for byte."""
+    source, output = tmp_path / "in.txt", tmp_path / "out.txt"
+    source.write_text(
+        "Vorlan Mestrix valide.\nLe contrat avec Zorbal Quentrix.", encoding="utf-8"
+    )
+    run = _process(source, output, db)
+    _pre(run.exit_code == 0 and output.is_file(), f"written: {run.shown!r}")
+    assert output.read_bytes() == source.read_bytes()
+
+
+def test_compatibility_forms_unchanged(tmp_path: Path) -> None:
+    """G4 (AC1, AC13): the reader keeps a compatibility form (the ligature
+    U+FB01)."""
+    text = "Le contrat avec Zorbaﬁx a signé."
+    path = tmp_path / "doc.txt"
+    path.write_text(text, encoding="utf-8")
+    assert read_file(str(path)) == text
+
+
+def test_composed_everywhere_unchanged(tmp_path: Path, db: Path) -> None:
+    """G5 (AC13): T5 composed and typed composed, as today."""
+    source, output = tmp_path / "in.txt", tmp_path / "out.txt"
+    source.write_text(A_TEXT, encoding="utf-8")
+    run = _process(
+        source, output, db, [(VM, PERSON)], [ENTER, "a", SPACE], [ZO, PERSON]
+    )
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    written = _written(output)
+    assert NOT_FOUND not in run.flat, run.shown
+    assert "rbalia" not in written, repr(written)
+    assert _names(db) == sorted([(VM, PERSON), (ZO, PERSON)])
+
+
+def test_no_saved_row_rewritten(tmp_path: Path, db: Path) -> None:
+    """G6 (Lionel's Qa, AC13): a row saved decomposed keeps its stored name
+    after a composed document met the name."""
+    _save(db, [(nfd(ZQ), PERSON, XV)])
+    source, output = tmp_path / "in.txt", tmp_path / "out.txt"
+    source.write_text(R_TEXT, encoding="utf-8")
+    run = _process(source, output, db, [(ZQ, PERSON)], [ENTER, SPACE])
+    _pre(run.exit_code == 0 and output.is_file(), f"written: {run.shown!r}")
+    assert (nfd(ZQ), PERSON, XV) in _rows(db)
+
+
+@pytest.mark.parametrize("typed", ["Xantor Zorbal", "Xantor Zorbal Quentrix"])
+def test_capitalised_words_after_an_accent_stored_apart(
+    tmp_path: Path, db: Path, typed: str
+) -> None:
+    """G7 (QA's TEST-004 on 10.16, AC4): after « Éloria » written decomposed,
+    « Zorbal » and « Zorbal Quentrix » are capitalised words of the
+    document, so [C] refuses a pseudonym holding them."""
+    source, output = tmp_path / "in.txt", tmp_path / "out.txt"
+    source.write_text(nfd("Éloria") + G7_REST, encoding="utf-8")
+    run = _process(
+        source, output, db, [("quentrel quovan", PERSON)], [ENTER, "c", SPACE], [typed]
+    )
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    written = _written(output)
+    assert "Xantor" not in written, repr(written)
+    composed = nfc(written)
+    assert composed.startswith("Éloria a signé avec"), repr(written)
+    assert composed.endswith("et Zorbal Quentrix."), repr(written)
+
+
+# ---------------------------------------------------------------------------
+# v1.5: the full-name searches reach the rows an earlier version saved with
+# letters lost (QA's SEARCH-001; T31), and five behaviours pinned (QA's
+# TEST-001; G8, G9, G10, G12) with the search's own key left out (G13)
+# ---------------------------------------------------------------------------
+
+SEARCHES = ["list-entities", "list-mappings"]
+OLD_CUT_SEARCHED = ["melora", "zorbome", "maitre_melora"]
+
+
+def _cut_row(case: str) -> tuple[str, str]:
+    """(the name an earlier version saved, the name searched): letters lost
+    to the title pattern, with a decomposed « Maître » in front for
+    ``maitre_melora``."""
+    if case == "zorbome":
+        return nfd("Zorbô") + "Quentrel", "Zorbôme Quentrel"
+    lost = ACUTE + "lora Quentrel"
+    if case == "maitre_melora":
+        return nfd("Maître") + " " + lost, "Mélora Quentrel"
+    return lost, "Mélora Quentrel"
+
+
+def _save_entity(db: Path, **fields: Any) -> None:
+    """One row saved with the exact fields given (theme neutral)."""
+    with open_database(str(db), PASSPHRASE) as session:
+        SQLiteMappingRepository(session).save(Entity(theme="neutral", **fields))
+
+
+def _parts(db: Path) -> list[tuple[str, str | None, str | None]]:
+    """Every stored row: (full_name, first_name, last_name)."""
+    with open_database(str(db), PASSPHRASE) as session:
+        return [
+            (row.full_name, row.first_name, row.last_name)
+            for row in SQLiteMappingRepository(session).find_all()
+        ]
+
+
+@pytest.mark.parametrize("case", OLD_CUT_SEARCHED)
+@pytest.mark.parametrize("command", SEARCHES)
+def test_search_lists_a_row_that_lost_letters(
+    tmp_path: Path, db: Path, command: str, case: str
+) -> None:
+    """T31 (v1.5, SEARCH-001; Lionel's Qa, AC3): ``--search`` with the full
+    name composed lists the row an earlier version saved with letters lost,
+    and not another name's row."""
+    stored, name = _cut_row(case)
+    _save(db, [(stored, PERSON, XV), (VM, PERSON, XQ)])
+    _pre(len(_rows(db)) == 2, "two rows stored")
+    run = _invoke([command, "--db", str(db), "--search", name])
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    assert XV in run.flat, run.shown  # expected failure
+    assert XQ not in run.flat, run.shown
+
+
+def test_guard_passphrase_not_composed(tmp_path: Path) -> None:
+    """G8 (v1.5, QA's M08; AC13): a passphrase is never composed: a database
+    made with a decomposed passphrase opens with it and refuses its composed
+    spelling."""
+    path = tmp_path / "decomposed_pass.db"
+    passphrase = nfd("Zórbalia_pass_A_123!")
+    runner = CliRunner()
+    made = runner.invoke(
+        app,
+        ["init", "--db", str(path)],
+        env={"GDPR_PSEUDO_PASSPHRASE": passphrase},
+        catch_exceptions=False,
+    )
+    opened = runner.invoke(
+        app,
+        ["list-entities", "--db", str(path)],
+        env={"GDPR_PSEUDO_PASSPHRASE": passphrase},
+        catch_exceptions=False,
+    )
+    _pre(made.exit_code == 0 and opened.exit_code == 0, "made and opened")
+    refused = runner.invoke(
+        app,
+        ["list-entities", "--db", str(path)],
+        env={"GDPR_PSEUDO_PASSPHRASE": nfc(passphrase)},
+        catch_exceptions=False,
+    )
+    assert refused.exit_code != 0, _ANSI.sub("", refused.output)
+
+
+def test_guard_list_mappings_search_typed_decomposed(tmp_path: Path, db: Path) -> None:
+    """G9 (v1.5, QA's M23; AC2): ``list-mappings --search`` typed decomposed
+    is read composed."""
+    _save(db, [(ZQ, PERSON, XV)])
+    run = _invoke(["list-mappings", "--db", str(db), "--search", nfd(ZO)])
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    assert XV in run.flat, run.shown
+
+
+def test_guard_import_mappings_saves_composed(tmp_path: Path, db: Path) -> None:
+    """G10 (v1.5, QA's M25; AC3; v1.14, QA's IMPORT-002): ``import-mappings``
+    copies a new row's full, first and last names as the source saved them,
+    their accent marks kept."""
+    source = tmp_path / "source.db"
+    made = CliRunner().invoke(
+        app, ["init", "--db", str(source)], env=ENV, catch_exceptions=False
+    )
+    _pre(made.exit_code == 0, "the source database is made")
+    _save_entity(
+        source,
+        entity_type=PERSON,
+        full_name=nfd(ZQ),
+        first_name=nfd(ZO),
+        last_name="Quentrel",
+        pseudonym_full=XV,
+        pseudonym_first="Xantor",
+        pseudonym_last="Vellion",
+    )
+    run = _invoke(
+        [
+            "import-mappings",
+            str(source),
+            "--db",
+            str(db),
+            "--source-passphrase",
+            PASSPHRASE,
+        ]
+    )
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    imported = _parts(db)
+    _pre(len(imported) == 1, f"one row imported: {imported!r}")
+    assert imported == [(nfd(ZQ), nfd(ZO), "Quentrel")], imported
+
+
+@pytest.mark.parametrize("component", ["first_name", "last_name"])
+def test_guard_component_saved_decomposed_reused(
+    tmp_path: Path, db: Path, component: str
+) -> None:
+    """G12 (v1.5, QA's M33; AC3): a first or last name saved decomposed is
+    reused for a composed name that shares it."""
+    if component == "first_name":
+        full_name, first, last = nfd(ZQ), nfd(ZO), "Quentrel"
+        detected, part = "Zórbalia Mestrix", "Xantor"
+    else:
+        full_name, first, last = nfd("Quentrel Zórbalia"), "Quentrel", nfd(ZO)
+        detected, part = "Vorlan Zórbalia", "Vellion"
+    _save_entity(
+        db,
+        entity_type=PERSON,
+        full_name=full_name,
+        first_name=first,
+        last_name=last,
+        pseudonym_full=XV,
+        pseudonym_first="Xantor",
+        pseudonym_last="Vellion",
+    )
+    source, output = tmp_path / "in.txt", tmp_path / "out.txt"
+    source.write_text(f"Le contrat avec {detected} a été signé.", encoding="utf-8")
+    run = _process(source, output, db, [(detected, PERSON)], [ENTER])
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    written = _written(output)
+    assert part in written, repr(written)
+
+
+@pytest.mark.parametrize("command", SEARCHES)
+def test_guard_search_with_a_title_as_today(
+    tmp_path: Path, db: Path, command: str
+) -> None:
+    """G13 (v1.5; AC13): a search keeps its titles: « Mme Éloria » lists no
+    « Éloria Quentrel », as today."""
+    _save(db, [("Éloria Quentrel", PERSON, XV)])
+    run = _invoke([command, "--db", str(db), "--search", "Mme Éloria"])
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    assert XV not in run.flat, run.shown
+
+
+# ---------------------------------------------------------------------------
+# v1.7 and v1.8: the Codex review of 186972b. Old saved names a lookup must
+# not mistake (T33, Lionel's P0-1 answer A) or must still reach (T36, T38,
+# T39, G15); the custom-pseudonym checks against old saved names (T34); a
+# reused pseudonym saved decomposed written composed (T40); a search never
+# lists a name cut from the search (T41); databases with no old rows as
+# today (G14)
+# ---------------------------------------------------------------------------
+
+VZ = "Vorlan Zorbô"
+VZM = "Vorlan Zorbôme"
+EZ = "Éloria Zórbalia"
+REAL_NAME_LINE = "could be taken for a real name"
+
+
+def _old_custom_row(case: str) -> tuple[str, str, str]:
+    """(the name an earlier version saved, its type, the real name typed)."""
+    if case == "maitre_eloria":
+        return nfd("Maître Éloria Quentrel"), PERSON, "Éloria Quentrel"
+    if case == "a_zorbaville":
+        return nfd("à Zórbaville"), LOCATION, "Zórbaville"
+    if case == "melora":
+        return ACUTE + "lora Quentrel", PERSON, "Mélora Quentrel"
+    if case == "zorbome":
+        return nfd("Zorbô") + "Quentrel", PERSON, "Zorbôme Quentrel"
+    return nfd("Cabinet Maître Éloria Quentrel"), "ORG", "Cabinet Éloria Quentrel"
+
+
+def _old_imported_row(case: str) -> tuple[str, str, str, str, str]:
+    """(the name an earlier version saved, its type, its pseudonym, the
+    document, the name detected in it)."""
+    if case == "maitre_eloria":
+        return (
+            nfd("Maître Éloria Quentrel"),
+            PERSON,
+            XV,
+            "Le contrat avec Éloria Quentrel a signé.",
+            "Éloria Quentrel",
+        )
+    if case == "a_zorbaville":
+        return (
+            nfd("à Zórbaville"),
+            LOCATION,
+            "Xantorville",
+            "Le contrat a été signé à Zórbaville.",
+            "Zórbaville",
+        )
+    return (
+        nfd("Zorbô") + "Quentrel",
+        PERSON,
+        XV,
+        "Le contrat avec Zorbôme Quentrel a signé.",
+        "Zorbôme Quentrel",
+    )
+
+
+def _new_source(tmp_path: Path) -> Path:
+    """A second database (an import's source), made by the real ``init``."""
+    path = tmp_path / "source.db"
+    made = CliRunner().invoke(
+        app, ["init", "--db", str(path)], env=ENV, catch_exceptions=False
+    )
+    _pre(made.exit_code == 0, "the source database is made")
+    return path
+
+
+def _import(source: Path, db: Path) -> Run:
+    """One real ``gdpr-pseudo import-mappings`` run, duplicates skipped."""
+    return _invoke(
+        [
+            "import-mappings",
+            str(source),
+            "--db",
+            str(db),
+            "--source-passphrase",
+            PASSPHRASE,
+            "--skip-duplicates",
+        ]
+    )
+
+
+def _process_text(
+    tmp_path: Path, db: Path, text: str, names: Sequence[tuple[str, str]]
+) -> tuple[Run, Path]:
+    """``process`` on ``text`` (``in.txt`` to ``out.txt``), the names given
+    detected; Enter, then Space."""
+    source, output = tmp_path / "in.txt", tmp_path / "out.txt"
+    source.write_text(text, encoding="utf-8")
+    return _process(source, output, db, names, [ENTER, SPACE]), output
+
+
+@pytest.mark.parametrize("path", ["reuse", "delete"])
+def test_end_cut_row_is_not_reached_from_another_name(
+    tmp_path: Path, db: Path, path: str
+) -> None:
+    """T33 (v1.7, Codex P0-1; Lionel's answer A, "Only with a sign"): the row
+    nfd(« Vorlan Zorbô ») is never reached from « Vorlan Zorbôme »: no reuse
+    of its pseudonym, no erasure."""
+    _save(db, [(nfd(VZ), PERSON, XQ)])
+    _pre(len(_rows(db)) == 1, "the old row is stored")
+    if path == "reuse":
+        run, output = _process_text(
+            tmp_path, db, f"Le contrat avec {VZM} a signé.", [(VZM, PERSON)]
+        )
+        _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+        written = _written(output)
+        assert XQ not in written, repr(written)  # expected failure
+        assert len(_rows(db)) == 2
+    else:
+        _delete(db, VZM)
+        assert _rows(db) == [(nfd(VZ), PERSON, XQ)]  # expected failure
+        assert _erasures(db) == 0
+
+
+@pytest.mark.parametrize(
+    "case", ["maitre_eloria", "a_zorbaville", "melora", "zorbome", "cabinet_maitre"]
+)
+def test_cli_custom_pseudonym_equal_to_an_old_saved_name_refused(
+    tmp_path: Path, db: Path, case: str
+) -> None:
+    """T34 (v1.7, Codex P0-2): [C] typed with a real name an earlier version
+    saved (title or preposition kept, letters lost, a title inside an
+    organisation's name) is refused."""
+    stored, entity_type, real = _old_custom_row(case)
+    _save(db, [(stored, entity_type, XV)])
+    source, output = tmp_path / "in.txt", tmp_path / "out.txt"
+    source.write_text("Vorlan Mestrix valide.", encoding="utf-8")
+    run = _process(source, output, db, [(VM, PERSON)], [ENTER, "c", SPACE], [real])
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    written = _written(output)
+    assert real not in nfc(written), repr(written)  # expected failure
+    assert REAL_NAME_LINE in run.flat, run.shown
+
+
+@pytest.mark.parametrize(
+    "path", ["reuse", "delete_with_composed_row", "import_duplicate"]
+)
+def test_mixed_old_row_reached(tmp_path: Path, db: Path, path: str) -> None:
+    """T36 (v1.7, Codex P1-1): a row « Éloria » composed and « Zórbalia »
+    decomposed is reached from the name composed: reused, erased with the
+    composed row, and a duplicate for ``import-mappings``."""
+    mixed = "Éloria " + nfd("Zórbalia")
+    _save(db, [(mixed, PERSON, XV)])
+    if path == "reuse":
+        run, output = _process_text(
+            tmp_path, db, f"Le contrat avec {EZ} a signé.", [(EZ, PERSON)]
+        )
+        _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+        written = _written(output)
+        assert written == R_REUSED, repr(written)  # expected failure
+        assert len(_rows(db)) == 1
+    elif path == "delete_with_composed_row":
+        _save(db, [(EZ, PERSON, XQ)])
+        _pre(len(_rows(db)) == 2, "two rows stored")
+        run = _delete(db, EZ)
+        _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+        assert _rows(db) == [], _rows(db)  # expected failure
+        assert _erasures(db) == 2
+    else:
+        source = _new_source(tmp_path)
+        _save(source, [(EZ, PERSON, XQ)])
+        run = _import(source, db)
+        _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+        pseudonyms = [row[2] for row in _rows(db)]
+        assert pseudonyms == [XV], pseudonyms  # expected failure
+
+
+@pytest.mark.parametrize("case", ["maitre_eloria", "a_zorbaville", "zorbome"])
+def test_imported_old_row_reached(tmp_path: Path, db: Path, case: str) -> None:
+    """T38 (v1.7, Codex P1-3): a row an earlier version saved, imported
+    (v1.14: ``import-mappings`` copies it as saved), is reached from the bare
+    name: reused and erased."""
+    stored, entity_type, pseudonym, text, detected = _old_imported_row(case)
+    source = _new_source(tmp_path)
+    _save(source, [(stored, entity_type, pseudonym)])
+    imported = _import(source, db)
+    _pre(
+        imported.exit_code == 0 and len(_rows(db)) == 1,
+        f"one row imported: {imported.shown!r}",
+    )
+    run, output = _process_text(tmp_path, db, text, [(detected, entity_type)])
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    written = _written(output)
+    assert pseudonym in written, repr(written)  # expected failure
+    assert len(_rows(db)) == 1
+    erased = _delete(db, detected)
+    assert erased.exit_code == 0, erased.shown
+    assert _rows(db) == []
+
+
+@pytest.mark.parametrize("path", ["reuse", "delete", "search"])
+def test_title_inside_an_old_name_reached(tmp_path: Path, db: Path, path: str) -> None:
+    """T39 (v1.7, Codex P1-4): the ORG row nfd(« Cabinet Maître Éloria
+    Quentrel ») is reached from today's key « Cabinet Éloria Quentrel »:
+    reused, erased and listed."""
+    _save(db, [(nfd("Cabinet Maître Éloria Quentrel"), "ORG", XV)])
+    if path == "reuse":
+        run, output = _process_text(
+            tmp_path,
+            db,
+            "Le contrat avec Cabinet Maître Éloria Quentrel a signé.",
+            [("Cabinet Maître Éloria Quentrel", "ORG")],
+        )
+        _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+        written = _written(output)
+        assert XV in written, repr(written)  # expected failure
+        assert len(_rows(db)) == 1
+    elif path == "delete":
+        run = _delete(db, "Cabinet Éloria Quentrel")
+        assert run.exit_code == 0, run.shown  # expected failure
+        assert _rows(db) == []
+    else:
+        run = _invoke(
+            ["list-entities", "--db", str(db), "--search", "Cabinet Éloria Quentrel"]
+        )
+        _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+        assert XV in run.flat, run.shown  # expected failure
+
+
+@pytest.mark.parametrize("ext", [".txt", ".xlsx", ".csv"])
+def test_reused_pseudonym_saved_decomposed_written_composed(
+    tmp_path: Path, db: Path, ext: str
+) -> None:
+    """T40 (v1.7, Codex P2; AC5): a pseudonym an earlier version saved
+    decomposed is written composed."""
+    _save(db, [(ZQ, PERSON, nfd(XVE))])
+    source, output = tmp_path / f"in{ext}", tmp_path / f"out{ext}"
+    _write_doc(source, R_TEXT)
+    run = _process(source, output, db, [(ZQ, PERSON)], [ENTER, SPACE])
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    written = _written(output)
+    _pre(XVE in nfc(written), f"the reused pseudonym written: {written!r}")
+    assert not _has_mark(written), repr(written)  # expected failure
+    assert XVE in written
+
+
+@pytest.mark.parametrize("saved", ["old_row_decomposed", "clean_database_composed"])
+def test_search_never_lists_a_name_cut_from_the_search(
+    tmp_path: Path, db: Path, saved: str
+) -> None:
+    """T41 (v1.7, P0-1's search side; AC13): ``--search "Vorlan Zorbôme"``
+    never lists the row « Vorlan Zorbô », saved decomposed or composed."""
+    name = nfd(VZ) if saved == "old_row_decomposed" else VZ
+    _save(db, [(name, PERSON, XQ)])
+    runs = {
+        command: _invoke([command, "--db", str(db), "--search", VZM])
+        for command in SEARCHES
+    }
+    _pre(
+        all(run.exit_code == 0 for run in runs.values()),
+        f"exit code 0: {[run.shown for run in runs.values()]!r}",
+    )
+    listing = [command for command, run in runs.items() if XQ in run.flat]
+    assert listing == [], listing  # expected failure
+
+
+@pytest.mark.parametrize(
+    "case", ["end_cut_name_saved_composed", "title_typed_at_delete", "custom_mezorvan"]
+)
+def test_guard_clean_database_as_today(tmp_path: Path, db: Path, case: str) -> None:
+    """G14 (v1.7; AC13): databases with no old rows (rows saved composed, as
+    today's code saves them) behave as today: « Vorlan Zorbôme » does not
+    reuse « Vorlan Zorbô »'s pseudonym; « Maître Éloria Quentrel » typed at
+    ``delete-mapping`` erases nothing; [C] « Mézorvan Quovan » is accepted
+    beside the saved « Zorvan Quovan »."""
+    if case == "end_cut_name_saved_composed":
+        _save(db, [(VZ, PERSON, XQ)])
+        run, output = _process_text(
+            tmp_path, db, f"Le contrat avec {VZM} a signé.", [(VZM, PERSON)]
+        )
+        _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+        written = _written(output)
+        assert XQ not in written, repr(written)
+        assert len(_rows(db)) == 2
+    elif case == "title_typed_at_delete":
+        _save(db, [("Éloria Quentrel", PERSON, XV)])
+        run = _delete(db, "Maître Éloria Quentrel")
+        assert run.exit_code != 0, run.shown
+        assert _rows(db) == [("Éloria Quentrel", PERSON, XV)]
+    else:
+        _save(db, [("Zorvan Quovan", PERSON, XQ)])
+        source, output = tmp_path / "in.txt", tmp_path / "out.txt"
+        source.write_text("Vorlan Mestrix valide.", encoding="utf-8")
+        run = _process(
+            source, output, db, [(VM, PERSON)], [ENTER, "c"], ["Mézorvan Quovan"]
+        )
+        _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+        assert _written(output) == "Mézorvan Quovan valide."
+
+
+@pytest.mark.parametrize("path", ["reuse", "delete"])
+def test_guard_old_cut_row_reached_by_the_shorter_name(
+    tmp_path: Path, db: Path, path: str
+) -> None:
+    """G15 (v1.8; Lionel's P0-1, the case that stays): the row nfd(« Vorlan
+    Zorbô ») is reached from « Vorlan Zorbô », as any whole name saved
+    decomposed (T14): reused and erased."""
+    _save(db, [(nfd(VZ), PERSON, XQ)])
+    if path == "reuse":
+        run, output = _process_text(
+            tmp_path, db, f"Le contrat avec {VZ} a signé.", [(VZ, PERSON)]
+        )
+        _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+        written = _written(output)
+        assert written == f"Le contrat avec {XQ} a signé.", repr(written)
+        assert len(_rows(db)) == 1
+    else:
+        run = _delete(db, VZ)
+        assert run.exit_code == 0, run.shown
+        assert _rows(db) == []
+        assert _erasures(db) == 1
+
+
+# ---------------------------------------------------------------------------
+# v1.10 and v1.11: the second Codex review of 56feb3d. The saved-real-name
+# check (Q-C2) against names an earlier version cut or kept a title in
+# (T42, T43, T45, T46, T47, G16-G19), and searches with a title (T44)
+# ---------------------------------------------------------------------------
+
+MELORA_ZO = "Mélora Zórbalia"
+MAITREQUIX = "Éloria Maîtrequix"
+HYPHEN_CUT = "Zorbôme-Quovan Quentrel"
+PLACE_HYPHEN = "Zorbal-à-Quentrix"
+VM_TEXT = "Vorlan Mestrix valide."
+READY_QUESTION = "Ready to process document with validated entities?"
+
+
+def _custom_for_vm(tmp_path: Path, db: Path, typed: str) -> tuple[Run, str]:
+    """[C] ``typed`` for « Vorlan Mestrix »; the group shown again after a
+    refusal, Space. The run and the written text (after the preconditions)."""
+    source, output = tmp_path / "in.txt", tmp_path / "out.txt"
+    source.write_text(VM_TEXT, encoding="utf-8")
+    run = _process(source, output, db, [(VM, PERSON)], [ENTER, "c", SPACE], [typed])
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    return run, _written(output)
+
+
+def _old_title_words() -> list[str]:
+    """The title words of the old title pattern, read from the pattern itself
+    (each alternative; one ending in ``\\.?`` with and without its « . »)."""
+    head, tail = r"\b(?:", r")(?!\w)\s*"
+    _pre(
+        FRENCH_TITLE_PATTERN.startswith(head) and FRENCH_TITLE_PATTERN.endswith(tail),
+        "the title pattern has its known shape",
+    )
+    words: list[str] = []
+    for alternative in FRENCH_TITLE_PATTERN[len(head) : -len(tail)].split("|"):
+        if alternative.endswith(r"\.?"):
+            words += [alternative[:-3], alternative[:-3] + "."]
+        else:
+            words.append(alternative)
+    return words
+
+
+def _saved_by_old_steps(text: str) -> str:
+    """The name an earlier version saved for ``text`` (a PERSON): titles
+    taken off anywhere, spaces collapsed."""
+    return " ".join(strip_french_titles(text).split())
+
+
+def _mixes(name: str) -> list[str]:
+    """Every per-word mix of the name's composed and decomposed words."""
+    choices = [dict.fromkeys((nfc(word), nfd(word))) for word in name.split()]
+    return [" ".join(mix) for mix in itertools.product(*choices)]
+
+
+def _round_trip_names(kind: str) -> list[str]:
+    """Invented names the old pattern cuts: a title word at a word start
+    whose last letter carries the accent (« Mélora »), alone or after a
+    hyphen (``word_start``); « Zorbô » joined to a title word before a word
+    or before « de la » (``joined``); both in one name (``two_sites``). As
+    written, all caps and lowercase; « Maître » nowhere, first or last."""
+    names: list[str] = []
+    for title in _old_title_words():
+        started = nfc(title + ACUTE + "lora")
+        joined = "Zorbô" + title
+        if kind == "word_start":
+            shapes = [f"{started} Quentrel", f"Vorlan-{started} Quentrel"]
+        elif kind == "joined":
+            shapes = [f"{joined} Quentrel", f"{joined} de la Quentrel"]
+        else:
+            shapes = [f"{started} {joined} Quentrel"]
+        for shape in shapes:
+            for cased in (shape, shape.upper(), shape.lower()):
+                for maitre in ("", "first", "last"):
+                    if maitre == "first":
+                        cased_name = f"{_case_like(cased, 'Maître')} {cased}"
+                    elif maitre == "last":
+                        cased_name = f"{cased} {_case_like(cased, 'Maître')}"
+                    else:
+                        cased_name = cased
+                    names.append(cased_name)
+    return names
+
+
+def _case_like(model: str, word: str) -> str:
+    """``word`` in the case of ``model`` (all caps, lowercase, or as given)."""
+    if model == model.upper():
+        return word.upper()
+    if model == model.lower():
+        return word.lower()
+    return word
+
+
+@pytest.mark.parametrize("path", ["cli", "check"])
+def test_mixed_old_row_with_a_title_and_a_lone_mark_refused(
+    tmp_path: Path, db: Path, path: str
+) -> None:
+    """T42 (v1.10; Codex review 2, P0): the row an earlier version saved from
+    nfd(« Maître Mélora ») + « Zórbalia » refuses « Mélora Zórbalia » as a
+    custom pseudonym, at set time and at finalization (the same check)."""
+    stored = nfd("Maître") + " " + ACUTE + "lora Zórbalia"
+    if path == "cli":
+        _save(db, [(stored, PERSON, XV)])
+        _, written = _custom_for_vm(tmp_path, db, MELORA_ZO)
+        assert MELORA_ZO not in nfc(written), repr(written)  # expected failure
+    else:
+        row = Entity(
+            entity_type=PERSON, full_name=stored, pseudonym_full=XV, theme="neutral"
+        )
+        refusal = check_custom_pseudonym([row], VM, PERSON, MELORA_ZO, VM_TEXT, {})
+        assert refusal is not None, refusal  # expected failure
+        assert refusal.reason is CustomPseudonymRefusal.REAL_NAME, refusal
+
+
+@pytest.mark.parametrize("typed", ["Melora Quentrel", "MELORA QUENTREL"])
+def test_old_row_refused_whatever_the_accents_typed(
+    tmp_path: Path, db: Path, typed: str
+) -> None:
+    """T43 (v1.10; Codex review 2, P0): the row « lora Quentrel » after a
+    lone U+0301 refuses « Melora Quentrel », whatever its accents and
+    capitals."""
+    _save(db, [(ACUTE + "lora Quentrel", PERSON, XV)])
+    _, written = _custom_for_vm(tmp_path, db, typed)
+    assert typed.lower() not in written.lower(), repr(written)  # expected failure
+
+
+@pytest.mark.parametrize("command", SEARCHES)
+def test_search_with_a_title_lists_no_other_name(
+    tmp_path: Path, db: Path, command: str
+) -> None:
+    """T44 (v1.10; Codex review 2, P1; AC13): ``--search "Mme Éloria"`` lists
+    no « Éloria Maîtrequix »."""
+    _save(db, [(MAITREQUIX, PERSON, XV)])
+    run = _invoke([command, "--db", str(db), "--search", "Mme Éloria"])
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    assert XV not in run.flat, run.shown  # expected failure
+
+
+@pytest.mark.parametrize("kind", ["word_start", "joined", "two_sites"])
+def test_round_trip_check_refuses_the_original(kind: str) -> None:
+    """T45 (v1.10; the ruling's proof (1)): for invented names the old title
+    pattern cuts, every name an earlier version could have saved (each
+    per-word mix of composed and decomposed words, through the old steps)
+    refuses the original as a custom pseudonym."""
+    cases = [
+        (original, _saved_by_old_steps(mix))
+        for original in _round_trip_names(kind)
+        for mix in _mixes(original)
+    ]
+    _pre(len(cases) > 100, f"more than 100 names: {len(cases)}")
+    missed = [
+        (original, saved)
+        for original, saved in cases
+        if check_custom_pseudonym(
+            [
+                Entity(
+                    entity_type=PERSON,
+                    full_name=saved,
+                    pseudonym_full=XV,
+                    theme="neutral",
+                )
+            ],
+            VM,
+            PERSON,
+            original,
+            VM_TEXT,
+            {},
+        )
+        is None
+    ]
+    assert missed == [], (len(missed), missed[:5])  # expected failure
+
+
+@pytest.mark.parametrize("saved", ["Quovan Zorbô", "Zorbô"])
+def test_end_cut_old_row_refused_as_a_pseudonym(
+    tmp_path: Path, db: Path, saved: str
+) -> None:
+    """T46 (v1.10; Lionel's end-cut answer A): the row nfd(« Quovan Zorbô »)
+    or nfd(« Zorbô ») refuses « Quovan Zorbôme » or « Zorbôme »: the name it
+    could have been cut from."""
+    _save(db, [(nfd(saved), PERSON, XV)])
+    typed = saved + "me"
+    _, written = _custom_for_vm(tmp_path, db, typed)
+    assert typed not in nfc(written), repr(written)  # expected failure
+
+
+@pytest.mark.parametrize("path", ["cli_set", "cli_final"])
+def test_end_cut_hyphenated_first_name_refused(
+    tmp_path: Path, db: Path, monkeypatch: pytest.MonkeyPatch, path: str
+) -> None:
+    """T47 (v1.11; Lionel's end-cut answer A; the PO's case): the row an
+    earlier version saved from nfd(« Zorbôme-Quovan Quentrel ») refuses that
+    name as a custom pseudonym, when it is set (the row saved first) and at
+    finalization (the row saved before the review ends)."""
+    stored = nfd("Zorbô") + "-Quovan Quentrel"
+    if path == "cli_set":
+        _save(db, [(stored, PERSON, XV)])
+        _, written = _custom_for_vm(tmp_path, db, HYPHEN_CUT)
+        assert HYPHEN_CUT not in nfc(written), repr(written)  # expected failure
+    else:
+        answer = Answers.__call__
+
+        def ready_after_saving(
+            self: Any, prompt: Any, *args: Any, **kwargs: Any
+        ) -> bool:
+            if str(prompt) == READY_QUESTION and not _rows(db):
+                _save(db, [(stored, PERSON, XV)])
+            return answer(self, prompt, *args, **kwargs)
+
+        monkeypatch.setattr(Answers, "__call__", ready_after_saving)
+        source, output = tmp_path / "in.txt", tmp_path / "out.txt"
+        source.write_text(VM_TEXT, encoding="utf-8")
+        _process(source, output, db, [(VM, PERSON)], [ENTER, "c"], [HYPHEN_CUT])
+        _pre(len(_rows(db)) >= 1, "the row saved before the review ends")
+        written = output.read_text(encoding="utf-8") if output.is_file() else ""
+        assert HYPHEN_CUT not in nfc(written), repr(written)  # expected failure
+        assert len(_rows(db)) == 1, _rows(db)
+
+
+@pytest.mark.parametrize("path", ["check", "search"])
+def test_guard_pont_a_mousson_as_today(tmp_path: Path, db: Path, path: str) -> None:
+    """G16 (v1.10; AC13): « à » inside « Zorbal-à-Quentrix » is never dropped:
+    « Zorbal-Quentrix » is not refused as a custom pseudonym, nor listed by a
+    search."""
+    if path == "check":
+        row = Entity(
+            entity_type=LOCATION,
+            full_name=PLACE_HYPHEN,
+            pseudonym_full="Xantorville",
+            theme="neutral",
+        )
+        refusal = check_custom_pseudonym(
+            [row], VM, PERSON, "Zorbal-Quentrix", VM_TEXT, {}
+        )
+        assert refusal is None, refusal
+    else:
+        _save(db, [(PLACE_HYPHEN, LOCATION, "Xantorville")])
+        run = _invoke(["list-entities", "--db", str(db), "--search", "Zorbal-Quentrix"])
+        _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+        assert "Xantorville" not in run.flat, run.shown
+
+
+def test_guard_maitre_inside_a_word_as_today() -> None:
+    """G17 (v1.10; AC13): « Maître » inside a word is never dropped:
+    « Éloria Quix » is not refused beside the name « Éloria Maîtrequix »."""
+    row = Entity(
+        entity_type=PERSON, full_name=MAITREQUIX, pseudonym_full=XV, theme="neutral"
+    )
+    refusal = check_custom_pseudonym([row], VM, PERSON, "Éloria Quix", VM_TEXT, {})
+    assert refusal is None, refusal
+
+
+def test_guard_lowercase_old_row_joined(tmp_path: Path, db: Path) -> None:
+    """G18 (v1.10): the lowercase old row nfd(« zorbô ») + « quentrel »
+    refuses « Zorbôme Quentrel » (no capital needed after the mark)."""
+    _save(db, [(nfd("zorbô") + "quentrel", PERSON, XV)])
+    run, written = _custom_for_vm(tmp_path, db, "Zorbôme Quentrel")
+    assert "Zorbôme" not in nfc(written), repr(written)
+    assert REAL_NAME_LINE in run.flat, run.shown
+
+
+@pytest.mark.parametrize("case", ["whole_decomposed", "all_caps_maitre_surname"])
+def test_guard_saved_name_itself_compared(tmp_path: Path, db: Path, case: str) -> None:
+    """G19 (v1.10): the saved name itself is always compared: a whole name
+    saved decomposed refuses itself, and a surname « MAÎTRE » saved
+    decomposed refuses « Zorvan Maître »."""
+    if case == "whole_decomposed":
+        stored, typed, first_word = nfd(ZQ), ZQ, ZO
+    else:
+        stored, typed, first_word = nfd("Zorvan MAÎTRE"), "Zorvan Maître", "Zorvan"
+    _save(db, [(stored, PERSON, XV)])
+    run, written = _custom_for_vm(tmp_path, db, typed)
+    assert first_word not in nfc(written), repr(written)
+    assert REAL_NAME_LINE in run.flat, run.shown
+
+
+# ---------------------------------------------------------------------------
+# v1.14: QA's round 4. Old rows that kept a sign, imported (T48, T49), and
+# « Maître » without its circumflex (T50, G20)
+# ---------------------------------------------------------------------------
+
+QM = "Quovan Mestrix"
+QM_TEXT = "Quovan Mestrix valide."
+QUOVIX = "Vorlan Quovix"
+
+
+def _custom_for_qm(tmp_path: Path, db: Path, typed: str) -> tuple[Run, str]:
+    """[C] ``typed`` for « Quovan Mestrix », a name that shares no word with
+    the saved ones; the group shown again after a refusal, Space. The run and
+    the written text (after the preconditions)."""
+    source, output = tmp_path / "in.txt", tmp_path / "out.txt"
+    source.write_text(QM_TEXT, encoding="utf-8")
+    run = _process(source, output, db, [(QM, PERSON)], [ENTER, "c", SPACE], [typed])
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    return run, _written(output)
+
+
+def _old_sign_row(row: str) -> tuple[str, str]:
+    """(the row an earlier version saved, the name it was saved from): the
+    word « Zorbôme » joined to the next word once its « me » and the space
+    were taken off (``glued``, ``glued_de_la``), or « Mélora » left as a lone
+    mark and « lora » (``lone_mark``)."""
+    if row == "glued":
+        return nfd("Zorbô") + "Quentrel", "Zorbôme Quentrel"
+    if row == "glued_de_la":
+        return nfd("Zorbô") + "de la Quentrel", "Zorbôme de la Quentrel"
+    return ACUTE + "lora Quentrel", "Mélora Quentrel"
+
+
+def _import_one(tmp_path: Path, db: Path, stored: str) -> None:
+    """The row ``stored`` « Xantor Vellion » saved in a new source database,
+    then imported into ``db`` with the real ``import-mappings``."""
+    source = _new_source(tmp_path)
+    _save(source, [(stored, PERSON, XV)])
+    imported = _import(source, db)
+    _pre(
+        imported.exit_code == 0 and len(_rows(db)) == 1,
+        f"one row imported: {imported.shown!r}",
+    )
+
+
+@pytest.mark.parametrize("row", ["glued", "glued_de_la", "lone_mark"])
+@pytest.mark.parametrize("path", ["check", "search"])
+def test_imported_old_row_with_a_sign(
+    tmp_path: Path, db: Path, path: str, row: str
+) -> None:
+    """T48 (v1.14; QA's IMPORT-002): a row an earlier version saved with a
+    sign, imported, still refuses the name it was saved from as a custom
+    pseudonym, and a search of that name lists it."""
+    stored, original = _old_sign_row(row)
+    _import_one(tmp_path, db, stored)
+    if path == "check":
+        _, written = _custom_for_qm(tmp_path, db, original)
+        assert original not in nfc(written), repr(written)  # expected failure
+    else:
+        listed = []
+        for command in SEARCHES:
+            run = _invoke([command, "--db", str(db), "--search", original])
+            _pre(run.exit_code == 0, f"{command} exit code 0: {run.shown!r}")
+            listed.append(XV in run.flat)
+        assert listed == [True, True], listed  # expected failure
+
+
+def test_imported_row_kept_as_saved(tmp_path: Path, db: Path) -> None:
+    """T49 (v1.14; the ruling's rule): an imported row keeps the source's
+    bytes."""
+    stored, _ = _old_sign_row("glued")
+    _import_one(tmp_path, db, stored)
+    assert _rows(db) == [(stored, PERSON, XV)], _rows(db)  # expected failure
+
+
+@pytest.mark.parametrize("word", ["MAITRE", "Maitre"])
+@pytest.mark.parametrize("path", ["check", "search"])
+def test_maitre_without_circumflex(
+    tmp_path: Path, db: Path, path: str, word: str
+) -> None:
+    """T50 (v1.14; QA's REPAIR-001; a database with no old rows, AC13): a
+    saved word « MAITRE » or « Maitre », without the circumflex the old
+    title pattern needed, is part of the name: « Vorlan Quovix » is accepted
+    beside « Vorlan MAITRE », and « Éloria Quentrel » lists no « Éloria
+    MAITRE Quentrel »."""
+    if path == "check":
+        _save(db, [(f"Vorlan {word}", PERSON, XV)])
+        _, written = _custom_for_qm(tmp_path, db, QUOVIX)
+        assert written == f"{QUOVIX} valide.", repr(written)  # expected failure
+    else:
+        _save(db, [(f"Éloria {word} Quentrel", PERSON, XQ)])
+        run = _invoke(["list-entities", "--db", str(db), "--search", "Éloria Quentrel"])
+        _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+        assert XQ not in run.flat, run.shown  # expected failure
+
+
+def test_guard_maitre_with_circumflex_still_a_kept_title(
+    tmp_path: Path, db: Path
+) -> None:
+    """G20 (v1.14): the row nfd(« Maître Éloria Quentrel ») still refuses
+    « Éloria Quentrel »: « Maître » with its circumflex is a title an earlier
+    version kept."""
+    _save(db, [(nfd("Maître Éloria Quentrel"), PERSON, XV)])
+    run, written = _custom_for_qm(tmp_path, db, "Éloria Quentrel")
+    assert "Éloria Quentrel" not in nfc(written), repr(written)
+    assert REAL_NAME_LINE in run.flat, run.shown
+
+
+# ---------------------------------------------------------------------------
+# v1.18: the third Codex review of 9784ddf. Old keys never tried composed
+# (T51, T53, G21, G22), and title words lost between two accent marks (T54
+# to T57)
+# ---------------------------------------------------------------------------
+
+FRESH = "Vorlan ZorbôQuentrel"
+VZQ = "Vorlan Zorbôme Quentrel"
+VZQ_TEXT = f"Le contrat avec {VZQ} a signé."
+MELORA_CUT = "Zorbôme Mélora Quentrel"
+LOOKUP_NAMES = [
+    (VZQ, PERSON),
+    ("Mélora Quentrel", PERSON),
+    ("Zorbôme de la Quentrel", PERSON),
+    ("Maître Éloria Quentrel", PERSON),
+    ("Éloria Zórbalia", PERSON),
+    ("Cabinet Maître Éloria Quentrel", "ORG"),
+    ("à Zórbaville", LOCATION),
+    ("Zórbaville", LOCATION),
+]
+
+
+def _two_titles_row() -> str:
+    """The row an earlier version saved from nfd(« Zorbôme Mélora
+    Quentrel »): « me » and « Me » taken off between the two marks."""
+    stored = nfd("Zorbô") + ACUTE + "lora Quentrel"
+    _pre(
+        _saved_by_old_steps(nfd(MELORA_CUT)) == stored,
+        "the old steps on the decomposed name give the row",
+    )
+    return stored
+
+
+def _letters(text: str) -> int:
+    """The characters of ``text`` that are neither marks nor spaces."""
+    return sum(
+        1 for char in text if not unicodedata.combining(char) and not char.isspace()
+    )
+
+
+def _without_accents(text: str) -> str:
+    """``text`` with every accent mark taken off."""
+    return "".join(char for char in nfd(text) if not unicodedata.combining(char))
+
+
+def _carries_acute(word: str) -> bool:
+    """Whether the word's last letter makes one composed letter with
+    U+0301."""
+    return len(nfc(word + ACUTE)) == len(word)
+
+
+def _class_names(kind: str) -> list[str]:
+    """Invented names the old steps cut at a place between two marks: « Zorbô »
+    + a title word + a space + a title word whose last letter carries
+    U+0301 + « lora », in two shapes (``two_titles_between_marks``); or
+    before « - » with a space eaten (``space_before_hyphen``). « Maître »
+    is left out (the old pattern never matched it decomposed)."""
+    words = [word for word in _old_title_words() if word != "Maître"]
+    if kind == "space_before_hyphen":
+        return [nfc(f"Zorbô{word} -Quovan Quentrel") for word in words]
+    names: list[str] = []
+    for first in words:
+        for second in (word for word in words if _carries_acute(word)):
+            names.append(nfc(f"Zorbô{first} {second}{ACUTE}lora Quentrel"))
+            names.append(nfc(f"Quovan Zorbô{first} {second}{ACUTE}lora"))
+    return names
+
+
+@pytest.mark.parametrize("path", ["reuse", "delete"])
+def test_fresh_composed_name_not_reached_from_another(
+    tmp_path: Path, db: Path, path: str
+) -> None:
+    """T51 (v1.18; the third Codex review, P0-b; a database with no old
+    rows, AC13): the row « Vorlan ZorbôQuentrel », saved composed as today's
+    code saves it, is another person: « Vorlan Zorbôme Quentrel » neither
+    reuses its pseudonym nor lists or erases it."""
+    _save(db, [(FRESH, PERSON, XQ)])
+    if path == "reuse":
+        run, output = _process_text(tmp_path, db, VZQ_TEXT, [(VZQ, PERSON)])
+        _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+        written = _written(output)
+        assert XQ not in written, repr(written)  # expected failure
+        assert len(_rows(db)) == 2, _rows(db)
+    else:
+        run = _delete(db, VZQ)
+        assert (FRESH, PERSON, XQ) in _rows(db), run.shown  # expected failure
+        assert _erasures(db) == 0
+        assert FRESH not in nfc(run.flat) and XQ not in run.flat, run.shown
+
+
+def test_every_other_lookup_form_holds_a_mark() -> None:
+    """T53 (v1.18; P0-b, the ruling's property): every form a lookup tries,
+    other than the name composed and the name as given, holds an accent
+    mark, so it can never be a name today's code saves."""
+    without = [
+        (name, form)
+        for name, entity_type in LOOKUP_NAMES
+        for form in saved_name_forms(name, entity_type)
+        if form not in (nfc(name), name) and not _has_mark(form)
+    ]
+    assert without == [], without  # expected failure
+
+
+@pytest.mark.parametrize("path", ["cli_set", "cli_final"])
+def test_two_titles_between_marks_refused(
+    tmp_path: Path, db: Path, monkeypatch: pytest.MonkeyPatch, path: str
+) -> None:
+    """T54 (v1.18; P0-a, Codex's case; Lionel's end-cut answer A): the row
+    an earlier version saved from nfd(« Zorbôme Mélora Quentrel ») refuses
+    that name as a custom pseudonym, when it is set (the row saved first)
+    and at finalization (the row saved before the review ends)."""
+    stored = _two_titles_row()
+    if path == "cli_set":
+        _save(db, [(stored, PERSON, XV)])
+        _, written = _custom_for_vm(tmp_path, db, MELORA_CUT)
+        assert MELORA_CUT not in nfc(written), repr(written)  # expected failure
+    else:
+        answer = Answers.__call__
+
+        def ready_after_saving(
+            self: Any, prompt: Any, *args: Any, **kwargs: Any
+        ) -> bool:
+            if str(prompt) == READY_QUESTION and not _rows(db):
+                _save(db, [(stored, PERSON, XV)])
+            return answer(self, prompt, *args, **kwargs)
+
+        monkeypatch.setattr(Answers, "__call__", ready_after_saving)
+        source, output = tmp_path / "in.txt", tmp_path / "out.txt"
+        source.write_text(VM_TEXT, encoding="utf-8")
+        _process(source, output, db, [(VM, PERSON)], [ENTER, "c"], [MELORA_CUT])
+        _pre(len(_rows(db)) >= 1, "the row saved before the review ends")
+        written = output.read_text(encoding="utf-8") if output.is_file() else ""
+        assert MELORA_CUT not in nfc(written), repr(written)  # expected failure
+        assert len(_rows(db)) == 1, _rows(db)
+
+
+@pytest.mark.parametrize(
+    "typed", ["Zorbome Melora Quentrel", "ZORBOME MELORA QUENTREL"]
+)
+def test_two_titles_between_marks_refused_whatever_the_accents(
+    tmp_path: Path, db: Path, typed: str
+) -> None:
+    """T55 (v1.18; the ruling's item 3): T54's row refuses the name typed
+    without its accents, whatever its capitals."""
+    _save(db, [(_two_titles_row(), PERSON, XV)])
+    _, written = _custom_for_vm(tmp_path, db, typed)
+    assert typed.lower() not in written.lower(), repr(written)  # expected failure
+
+
+@pytest.mark.parametrize("kind", ["two_titles_between_marks", "space_before_hyphen"])
+def test_class_round_trip_refused(kind: str) -> None:
+    """T56 (v1.18; the ruling's class): for invented names the old steps cut
+    at a place between two marks, or before « - » with the space eaten, the
+    row they saved refuses the name and its spelling without accents, each
+    normalized as a custom pseudonym, as set time and finalization check
+    it."""
+    names = _class_names(kind)
+    accepted: list[str] = []
+    for name in names:
+        saved = _saved_by_old_steps(nfd(name))
+        _pre(_letters(saved) < _letters(name), f"letters lost: {name!r}")
+        row = Entity(
+            entity_type=PERSON, full_name=saved, pseudonym_full=XV, theme="neutral"
+        )
+        for spelling in (name, _without_accents(name)):
+            typed = normalize_custom_pseudonym(spelling, PERSON)
+            refusal = check_custom_pseudonym([row], VM, PERSON, typed, VM_TEXT, {})
+            if (
+                refusal is None
+                or refusal.reason is not CustomPseudonymRefusal.REAL_NAME
+            ):
+                accepted.append(spelling)
+    shown = (len(accepted), 2 * len(names), accepted[:5])
+    assert accepted == [], shown  # expected failure
+
+
+def test_forward_forms_refuse_without_the_reverse_repair(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """T57 (v1.18; the ruling's item 2): with the reverse repair switched
+    off, T54's row still refuses « Zorbôme Mélora Quentrel »: the old steps
+    on the name's decomposed form give the saved name."""
+    stored = _two_titles_row()
+    monkeypatch.setattr(
+        custom_pseudonym_module, "is_saved_real_name", lambda run, rows: False
+    )
+    row = Entity(
+        entity_type=PERSON, full_name=stored, pseudonym_full=XV, theme="neutral"
+    )
+    refusal = check_custom_pseudonym([row], VM, PERSON, MELORA_CUT, VM_TEXT, {})
+    assert refusal is not None, refusal  # expected failure
+    assert refusal.reason is CustomPseudonymRefusal.REAL_NAME, refusal
+
+
+def test_guard_clean_database_custom_accepted(tmp_path: Path, db: Path) -> None:
+    """G21 (v1.18; AC13): beside the row « Vorlan ZorbôQuentrel » saved
+    composed, « Vorlan Zorbôme Quentrel » is accepted as a custom pseudonym:
+    the forward comparison keeps the marks and reads only saved names that
+    hold a sign."""
+    _save(db, [(FRESH, PERSON, XQ)])
+    _, written = _custom_for_qm(tmp_path, db, VZQ)
+    assert written == f"{VZQ} valide.", repr(written)
+
+
+@pytest.mark.parametrize("path", ["reuse", "delete"])
+def test_guard_old_row_with_a_sign_still_reached(
+    tmp_path: Path, db: Path, path: str
+) -> None:
+    """G22 (v1.18; Lionel's P0-1: rows with a sign stay reached): the row an
+    earlier version saved for « Vorlan Zorbôme Quentrel », nfd(« Vorlan
+    Zorbô ») + « Quentrel », is still reused and erased by that name."""
+    stored = nfd("Vorlan Zorbô") + "Quentrel"
+    _pre(_saved_by_old_steps(nfd(VZQ)) == stored, "the old steps give the row")
+    _save(db, [(stored, PERSON, XQ)])
+    if path == "reuse":
+        run, output = _process_text(tmp_path, db, VZQ_TEXT, [(VZQ, PERSON)])
+        _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+        written = _written(output)
+        assert XQ in written, repr(written)
+        assert len(_rows(db)) == 1, _rows(db)
+    else:
+        run = _delete(db, VZQ)
+        assert _rows(db) == [], (_rows(db), run.shown)
+        assert _erasures(db) == 1
+
+
+# ---------------------------------------------------------------------------
+# v1.19 and v1.21: the PO's NO-GO of v1.18 and of v1.19. Every place where
+# the old key and today's key can differ: « Maître » joined by a hyphen, an
+# apostrophe or a dot (T58, T59), a place's preposition after a leading
+# « Maître » (T59), a place key that still starts with a preposition (T61);
+# « Maître » glued to letters or after a mark kept (G23, G24)
+# ---------------------------------------------------------------------------
+
+JOINED = {
+    "zorbome": (
+        "Zorbôme Maître-Zorbal",
+        nfd("Zorbô") + nfd("Maître") + "-Zorbal",
+        "Zorbôme -Zorbal",
+    ),
+    "quovome": (
+        "Quovôme Maître-Zorbal",
+        nfd("Quovô") + nfd("Maître") + "-Zorbal",
+        "Quovôme -Zorbal",
+    ),
+    "zorbal_quovome": (
+        "Zorbal Maître-Quovôme",
+        "Zorbal " + nfd("Maître") + "-" + nfd("Quovô"),
+        "Zorbal -Quovôme",
+    ),
+}
+DIFFERENCES = {
+    "hyphen": (
+        PERSON,
+        [
+            "Zorbôme Maître-Zorbal",
+            "Quovôme-Maître Zorbal",
+            "Maître-Zorbôme Quentrel",
+            "ZorbôMe-Maître",
+            "Quovôme-Maître-Zorbal",
+        ],
+    ),
+    "apostrophe": (PERSON, ["Quovôme d'Maître", "Maître'Quovôme"]),
+    "dot": (PERSON, ["Quovôme Maître.Zorbal"]),
+    "two_titles": (PERSON, ["Quovôme Maître Maître-Zorbal"]),
+    "place_preposition": (
+        LOCATION,
+        [
+            "Maître de Zorbôme",
+            "Maître d'Zorbôme",
+            "Maître à Zorbôme",
+            "à Quovôme-Maître",
+            "Maître d'Maître Zorbôme Quentrel",
+            "Maître l'Maître Quovôme",
+            "Maître d'Dr Maître Mérizac",
+        ],
+    ),
+    "lone_preposition": (LOCATION, ["de Maître", "en MAÎTRE Maître"]),
+}
+
+
+def _saved_by_old_steps_as(text: str, entity_type: str) -> str:
+    """The name an earlier version saved for ``text``: titles taken off
+    anywhere, for a place its leading preposition, spaces collapsed."""
+    stripped = strip_french_titles(text)
+    if entity_type == LOCATION:
+        stripped = strip_french_prepositions(stripped)
+    return " ".join(stripped.split())
+
+
+def _refused_for_vm(row: Entity, typed: str) -> bool:
+    """Whether ``typed``, normalized as a custom pseudonym, is refused as a
+    real name for « Vorlan Mestrix » beside ``row``, as set time and
+    finalization check it."""
+    pseudonym = normalize_custom_pseudonym(typed, PERSON)
+    refusal = check_custom_pseudonym([row], VM, PERSON, pseudonym, VM_TEXT, {})
+    return refusal is not None and refusal.reason is CustomPseudonymRefusal.REAL_NAME
+
+
+@pytest.mark.parametrize("case", list(JOINED))
+def test_maitre_joined_old_row_refused(tmp_path: Path, db: Path, case: str) -> None:
+    """T58 (v1.19; the PO's NO-GO, its three shapes with invented names; rows
+    b2, b3): the row an earlier version saved from a name holding
+    « Maître- » beside a cut name refuses that name as a custom pseudonym;
+    today's key is not written."""
+    typed, stored, key = JOINED[case]
+    _pre(_saved_by_old_steps(nfd(typed)) == stored, "the old steps give the row")
+    _pre(mapping_key(typed, PERSON) == key, f"today's key: {key!r}")
+    _save(db, [(stored, PERSON, XV)])
+    _, written = _custom_for_vm(tmp_path, db, typed)
+    assert key not in nfc(written), repr(written)  # expected failure
+
+
+@pytest.mark.parametrize("case", list(DIFFERENCES))
+def test_old_and_new_key_differences_refused(case: str) -> None:
+    """T59 (v1.19, v1.21; rows b2, b3, b6, b7): for each name, the row the
+    old steps save from its decomposed form refuses today's key and that
+    key without accents, each normalized as a custom pseudonym."""
+    entity_type, names = DIFFERENCES[case]
+    accepted: list[str] = []
+    for name in names:
+        saved = _saved_by_old_steps_as(nfd(name), entity_type)
+        key = mapping_key(name, entity_type)
+        _pre(saved != nfd(key), f"the old row differs from today's key: {name!r}")
+        row = Entity(
+            entity_type=entity_type,
+            full_name=saved,
+            pseudonym_full=XV,
+            theme="neutral",
+        )
+        for spelling in (key, _without_accents(key)):
+            if not _refused_for_vm(row, spelling):
+                accepted.append(spelling)
+    shown = (len(accepted), accepted)
+    assert accepted == [], shown  # expected failure
+
+
+def test_place_key_with_a_preposition_forms_hold_a_mark() -> None:
+    """T61 (v1.19; row c6; P0-b's property): « à de Zórbaville », whose key
+    today still starts with a preposition, gets no lookup form without an
+    accent mark but the name composed and as given."""
+    name = "à de Zórbaville"
+    _pre(mapping_key(name, LOCATION) == "de Zórbaville", "today's key")
+    without = [
+        form
+        for form in saved_name_forms(name, LOCATION)
+        if form not in (nfc(name), name) and not _has_mark(form)
+    ]
+    assert without == [], without  # expected failure
+
+
+def test_guard_maitre_glued_to_letters_kept() -> None:
+    """G23 (v1.19): « Maître » glued to the letters after it is no title:
+    the row the old steps save from nfd(« Quovôme Maîtrequix ») does not
+    refuse « Quovôme quix »."""
+    stored = nfd("Quovô") + nfd("Maîtrequix")
+    _pre(
+        _saved_by_old_steps(nfd("Quovôme Maîtrequix")) == stored,
+        "the old steps give the row",
+    )
+    fresh = Entity(
+        entity_type=PERSON,
+        full_name=mapping_key("Quovôme Maîtrequix", PERSON),
+        pseudonym_full=XV,
+        theme="neutral",
+    )
+    _pre(not _refused_for_vm(fresh, "Quovôme quix"), "a fresh row does not refuse it")
+    old = Entity(
+        entity_type=PERSON, full_name=stored, pseudonym_full=XV, theme="neutral"
+    )
+    assert not _refused_for_vm(old, "Quovôme quix")
+
+
+def test_guard_maitre_glued_after_a_mark_kept() -> None:
+    """G24 (v1.19): « Maître » glued to « ô » is no title unless title words
+    were taken off between: the row nfd(« ZorbôMaître Quentrel ») does not
+    refuse « Zorbô Quentrel »."""
+    stored = nfd("ZorbôMaître Quentrel")
+    _pre(_saved_by_old_steps(stored) == stored, "the old steps leave the row whole")
+    fresh = Entity(
+        entity_type=PERSON,
+        full_name=mapping_key("ZorbôMaître Quentrel", PERSON),
+        pseudonym_full=XV,
+        theme="neutral",
+    )
+    _pre(not _refused_for_vm(fresh, "Zorbô Quentrel"), "a fresh row does not refuse it")
+    old = Entity(
+        entity_type=PERSON, full_name=stored, pseudonym_full=XV, theme="neutral"
+    )
+    assert not _refused_for_vm(old, "Zorbô Quentrel")
+
+
+# ---------------------------------------------------------------------------
+# v1.23: the fourth Codex review of be2d48b. A key is never keyed again: a
+# place's key that keeps its preposition never reaches another place (T63)
+# and finds its own old row (T64); fresh place rows compared as saved (T65);
+# title-word choices bounded (T66); guards G25 to G28
+# ---------------------------------------------------------------------------
+
+ZORBAVILLE = "Zórbaville"
+XANTORVILLE = "Xantorville"
+TWO_PREPOSITIONS = "à de Zórbaville"
+KEPT_PREPOSITION = "de Zórbaville"
+TWO_PREPOSITIONS_TEXT = f"Le contrat a été signé {TWO_PREPOSITIONS}."
+MANY_TITLES = nfd(" ".join(["Maître"] * 24 + ["Éloria Quentrel"]))
+
+
+class _OverLimit(BaseException):
+    """A run passed its wall-clock or memory limit (raised by the profile
+    hook of ``_within_limits``, so no ``except Exception`` stops it)."""
+
+
+def _within_limits(
+    call: Callable[[], Any], seconds: float = 60.0, mebibytes: int = 128
+) -> tuple[bool, Any]:
+    """``call()`` under a wall-clock limit and a limit on the memory it
+    allocates (``tracemalloc``), stopped by a profile hook as soon as it
+    passes one, so a run that does not stop never holds the runner. (whether
+    it finished, its result)."""
+    limit = mebibytes * 1024 * 1024
+    was_tracing = tracemalloc.is_tracing()
+    if not was_tracing:
+        tracemalloc.start()
+    baseline = tracemalloc.get_traced_memory()[0]
+    deadline = time.monotonic() + seconds
+
+    def hook(frame: Any, event: str, arg: Any) -> None:
+        over_time = time.monotonic() > deadline
+        if over_time or tracemalloc.get_traced_memory()[0] - baseline > limit:
+            raise _OverLimit
+
+    previous = sys.getprofile()
+    sys.setprofile(hook)
+    try:
+        return True, call()
+    except _OverLimit:
+        return False, None
+    finally:
+        sys.setprofile(previous)
+        if not was_tracing:
+            tracemalloc.stop()
+
+
+@pytest.mark.parametrize("path", ["reuse", "delete"])
+def test_place_key_never_reaches_another_place(
+    tmp_path: Path, db: Path, path: str
+) -> None:
+    """T63 (v1.23; Codex's P0): the old row nfd(« Zórbaville ») is another
+    place: « à de Zórbaville », whose key keeps « de », neither reuses its
+    pseudonym, and ``delete-mapping "de Zórbaville"`` does not erase it."""
+    _pre(
+        mapping_key(TWO_PREPOSITIONS, LOCATION) == KEPT_PREPOSITION,
+        "today's key of « à de Zórbaville »",
+    )
+    stored = nfd(ZORBAVILLE)
+    _save(db, [(stored, LOCATION, XANTORVILLE)])
+    if path == "reuse":
+        run, output = _process_text(
+            tmp_path, db, TWO_PREPOSITIONS_TEXT, [(TWO_PREPOSITIONS, LOCATION)]
+        )
+        _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+        written = _written(output)
+        assert XANTORVILLE not in written, repr(written)  # expected failure
+        assert len(_rows(db)) == 2, _rows(db)
+    else:
+        run = _delete(db, KEPT_PREPOSITION)
+        rows = _rows(db)
+        assert (stored, LOCATION, XANTORVILLE) in rows, run.shown  # expected failure
+        assert _erasures(db) == 0
+
+
+@pytest.mark.parametrize("path", ["reuse", "delete"])
+def test_place_key_with_a_preposition_finds_its_old_row(
+    tmp_path: Path, db: Path, path: str
+) -> None:
+    """T64 (v1.23; Lionel's Qa, the plain shape « de Zórbaville »): the old
+    row nfd(« de Zórbaville »), what an earlier version saved for « à de
+    Zórbaville » with « à » composed, is found as it is: reused and
+    erased."""
+    stored = nfd(KEPT_PREPOSITION)
+    old = _saved_by_old_steps_as("à " + stored, LOCATION)
+    _pre(old == stored, "the old steps on « à » + nfd(« de Zórbaville ») give it")
+    _save(db, [(stored, LOCATION, XANTORVILLE)])
+    if path == "reuse":
+        run, output = _process_text(
+            tmp_path, db, TWO_PREPOSITIONS_TEXT, [(TWO_PREPOSITIONS, LOCATION)]
+        )
+        _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+        written = _written(output)
+        assert XANTORVILLE in written, repr(written)  # expected failure
+        assert len(_rows(db)) == 1, _rows(db)
+    else:
+        run = _delete(db, KEPT_PREPOSITION)
+        assert run.exit_code == 0, run.shown  # expected failure
+        assert _rows(db) == [], _rows(db)
+
+
+@pytest.mark.parametrize("row", ["fresh_de", "fresh_a", "old_de"])
+def test_place_key_part_accepted_as_custom_pseudonym(
+    tmp_path: Path, db: Path, row: str
+) -> None:
+    """T65 (v1.23; Codex's P1-a, AC13): a place row « de Zórbaville » or
+    « à Zórbaville » saved as today's code saves it, or nfd(« de
+    Zórbaville »), does not refuse « Zórbaville », a part of its name, as a
+    custom pseudonym: as on ``origin/main``."""
+    if row == "fresh_de":
+        stored = KEPT_PREPOSITION
+        _pre(mapping_key(TWO_PREPOSITIONS, LOCATION) == stored, "today's key")
+    elif row == "fresh_a":
+        stored = "à Zórbaville"
+        _pre(mapping_key("à à Zórbaville", LOCATION) == stored, "today's key")
+    else:
+        stored = nfd(KEPT_PREPOSITION)
+    _save(db, [(stored, LOCATION, XANTORVILLE)])
+    _, written = _custom_for_vm(tmp_path, db, ZORBAVILLE)
+    assert written == f"{ZORBAVILLE} valide.", repr(written)  # expected failure
+
+
+@pytest.mark.parametrize("path", ["search", "check"])
+def test_many_titles_within_bounds(path: str) -> None:
+    """T66 (v1.23; Codex's P1-b): the old row nfd(24 × « Maître » + « Éloria
+    Quentrel ») is searched (as the four searches call ``matches_search``)
+    and checked (as set time and finalization call the check) within 60 s
+    and 128 MiB allocated; no timing ratio."""
+    if path == "search":
+        finished, listed = _within_limits(
+            lambda: matches_search("quovix", MANY_TITLES, PERSON)
+        )
+        assert finished, "stopped at a limit"  # expected failure
+        assert listed is False, listed
+    else:
+        row = Entity(
+            entity_type=PERSON,
+            full_name=MANY_TITLES,
+            pseudonym_full=XV,
+            theme="neutral",
+        )
+        finished, refusal = _within_limits(
+            lambda: check_custom_pseudonym(
+                [row], VM, PERSON, "Quovix Quentrel", VM_TEXT, {}
+            )
+        )
+        assert finished, "stopped at a limit"  # expected failure
+        assert refusal is None, refusal
+
+
+@pytest.mark.parametrize("path", ["reuse", "search"])
+def test_guard_plain_place_shapes(tmp_path: Path, db: Path, path: str) -> None:
+    """G25 (v1.23; Lionel's Qa, the plain shapes): the old row nfd(« Zórbaville »)
+    is found by the key « Zórbaville » (the text « de Zórbaville »), and a
+    search for « de Zórbaville » does not list it."""
+    _save(db, [(nfd(ZORBAVILLE), LOCATION, XANTORVILLE)])
+    if path == "reuse":
+        _pre(mapping_key(KEPT_PREPOSITION, LOCATION) == ZORBAVILLE, "today's key")
+        run, output = _process_text(
+            tmp_path,
+            db,
+            f"Le contrat a été signé {KEPT_PREPOSITION}.",
+            [(KEPT_PREPOSITION, LOCATION)],
+        )
+        _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+        written = _written(output)
+        assert XANTORVILLE in written, repr(written)
+        assert len(_rows(db)) == 1, _rows(db)
+    else:
+        run = _invoke(["list-entities", "--db", str(db), "--search", KEPT_PREPOSITION])
+        _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+        assert XANTORVILLE not in run.flat, run.shown
+
+
+@pytest.mark.parametrize("row", ["old_a", "saved_itself"])
+def test_guard_place_rows_still_refuse(tmp_path: Path, db: Path, row: str) -> None:
+    """G26 (v1.23): the old row nfd(« à Zórbaville ») (an « à » with a
+    separate mark) still refuses « Zórbaville », and the row « de
+    Zórbaville » refuses itself."""
+    if row == "old_a":
+        stored, typed = nfd("à Zórbaville"), ZORBAVILLE
+    else:
+        stored, typed = KEPT_PREPOSITION, KEPT_PREPOSITION
+    _save(db, [(stored, LOCATION, XANTORVILLE)])
+    _, written = _custom_for_vm(tmp_path, db, typed)
+    assert typed not in nfc(written), repr(written)
+
+
+def test_guard_title_typed_at_delete_keyed_as_today(tmp_path: Path, db: Path) -> None:
+    """G27 (v1.23; Fix Design item 1, "any other text"): a place typed at
+    ``delete-mapping`` with a title is keyed as today: « de Maître
+    Zórbaville » erases nfd(« Zórbaville ») and keeps nfd(« de
+    Zórbaville »)."""
+    _pre(
+        mapping_key("de Maître Zórbaville", LOCATION) == ZORBAVILLE,
+        "today's key of « de Maître Zórbaville »",
+    )
+    _save(
+        db,
+        [
+            (nfd(ZORBAVILLE), LOCATION, XANTORVILLE),
+            (nfd(KEPT_PREPOSITION), LOCATION, "Quovixville"),
+        ],
+    )
+    run = _delete(db, "de Maître Zórbaville")
+    assert run.exit_code == 0, run.shown
+    assert _names(db) == [(nfd(KEPT_PREPOSITION), LOCATION)], _rows(db)
+
+
+def test_guard_preposition_kept_by_the_key_not_left_out(
+    tmp_path: Path, db: Path
+) -> None:
+    """G28 (v1.23; the rule on the reverse side): the old row nfd(« à de
+    Zórbaville ») does not refuse « Zórbaville »: a preposition is left out
+    only behind « Maître » words left out."""
+    _pre(
+        mapping_key(TWO_PREPOSITIONS, LOCATION) == KEPT_PREPOSITION,
+        "today's key of « à de Zórbaville »",
+    )
+    _save(db, [(nfd(TWO_PREPOSITIONS), LOCATION, XANTORVILLE)])
+    _, written = _custom_for_vm(tmp_path, db, ZORBAVILLE)
+    assert written == f"{ZORBAVILLE} valide.", repr(written)
+
+
+# ---------------------------------------------------------------------------
+# v1.25: the fifth Codex review of dcb9664. A saved name with repair sites
+# side by side is checked within limits (T67); QA's TEST-005 (G29)
+# ---------------------------------------------------------------------------
+
+# (the text an earlier version saved from, decomposed; the typed text; the
+# outcome measured on origin/main)
+MANY_SITES = {
+    "adjacent": ("Mé" * 28 + " Quentrel", "Mé" * 14 + " Quentrel Quovix", "REAL_NAME"),
+    "glued": ("Mé" * 56 + " Quentrel", "Mmé" * 28 + " Quentrel Quovix", "REAL_NAME"),
+    "joined": (
+        " ".join(["Zorbôme Maître"] * 27 + ["Quentrel"]),
+        " ".join(["Zorbôme Maitre"] * 27 + ["Quentrel Quovix"]),
+        "ACCEPTED",
+    ),
+}
+# The wall-clock limit of each case's child. ``joined`` (27 pairs) gets 30 s:
+# on the fix it takes about 1 s locally, start-up included, and several times
+# that on a loaded CI runner. Without MAX_REPAIR_WORDS it takes 73 s locally.
+# At 10 s no length kept both the fix under a tenth of the limit with room
+# for CI and the unbounded check clearly past it (Story 10.20, round 8)
+MANY_SITES_LIMITS = {"adjacent": 10.0, "glued": 10.0, "joined": 30.0}
+_CHILD_CHECK = """
+from gdpr_pseudonymizer.core.custom_pseudonym import (
+    check_custom_pseudonym,
+    normalize_custom_pseudonym,
+)
+from gdpr_pseudonymizer.data.models import Entity
+
+row = Entity(
+    entity_type="PERSON", full_name={stored}, pseudonym_full="Xantor Vellion",
+    theme="neutral",
+)
+pseudonym = normalize_custom_pseudonym({typed}, "PERSON")
+refusal = check_custom_pseudonym(
+    [row], "Vorlan Mestrix", "PERSON", pseudonym, "Vorlan Mestrix valide.", {{}}
+)
+print("ACCEPTED" if refusal is None else refusal.reason.name)
+"""
+
+
+def _check_in_child(
+    stored: str, typed: str, seconds: float = 10.0
+) -> subprocess.CompletedProcess[str] | None:
+    """``check_custom_pseudonym`` for « Vorlan Mestrix », the typed text
+    normalized, beside one PERSON row ``stored``, in a child process killed
+    at ``seconds`` (a regex call no hook can stop). The finished child, or
+    None when it was killed. The child imports this tree's package."""
+    root = Path(gdpr_pseudonymizer.__file__).resolve().parents[1]
+    paths = [str(root), os.environ.get("PYTHONPATH", "")]
+    env = {**os.environ, "PYTHONPATH": os.pathsep.join(p for p in paths if p)}
+    code = _CHILD_CHECK.format(stored=ascii(stored), typed=ascii(typed))
+    try:
+        return subprocess.run(
+            [sys.executable, "-c", code],
+            cwd=root,
+            env=env,
+            capture_output=True,
+            text=True,
+            timeout=seconds,
+        )
+    except subprocess.TimeoutExpired:
+        return None
+
+
+@pytest.mark.parametrize("case", list(MANY_SITES))
+def test_saved_name_with_many_sites_checked_within_limits(case: str) -> None:
+    """T67 (v1.25; the fifth Codex review's P1): a saved name whose repair
+    sites sit side by side (accent marks side by side, or « Maître » glued
+    after one) is checked within its limit (10 s; 30 s for ``joined``), with
+    the outcome origin/main gives: refused through « Quentrel » (the row as
+    saved), or accepted."""
+    text, typed, expected = MANY_SITES[case]
+    stored = _saved_by_old_steps(nfd(text))
+    done = _check_in_child(stored, typed, MANY_SITES_LIMITS[case])
+    assert done is not None, "killed at its limit"  # expected failure
+    _pre(done.returncode == 0, f"the check ran: {done.stderr[-2000:]!r}")
+    assert done.stdout.strip() == expected, (done.stdout, done.stderr[-2000:])
+
+
+def test_guard_many_titles_listed_by_todays_key(tmp_path: Path, db: Path) -> None:
+    """G29 (v1.25; QA's TEST-005): above MAX_DROPPED_WORDS, the choice with
+    every « Maître » left out stays: the old row nfd(« Zorbal » + five
+    « Maître » + « Quentrel ») is listed by today's key « Zorbal
+    Quentrel »."""
+    text = " ".join(["Zorbal", *["Maître"] * 5, "Quentrel"])
+    _pre(mapping_key(text, PERSON) == "Zorbal Quentrel", "today's key")
+    _save(db, [(nfd(text), PERSON, XV)])
+    run = _invoke(["list-entities", "--db", str(db), "--search", "Zorbal Quentrel"])
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    assert XV in run.flat, run.shown
+
+
+# ---------------------------------------------------------------------------
+# v1.27: QA's MERGE-001 (Lionel: "Fix it first"). Two title words put back
+# at marks side by side before the name's own letters (T68)
+# ---------------------------------------------------------------------------
+
+
+def test_two_titles_glued_before_the_name_refused(tmp_path: Path, db: Path) -> None:
+    """T68 (v1.27; QA's MERGE-001): the row v2.2.0 saved from « ḾḾelora
+    Quentrel » (two lone marks + « elora Quentrel ») refuses « MMelora
+    Quentrel »: an « M » put back at each mark, the « e » after them the
+    name's own."""
+    stored = ACUTE * 2 + "elora Quentrel"
+    _pre(
+        _saved_by_old_steps(nfd("ḾḾelora Quentrel")) == stored,
+        "the old steps on the decomposed name give the row",
+    )
+    _save(db, [(stored, PERSON, XV)])
+    _, written = _custom_for_vm(tmp_path, db, "MMelora Quentrel")
+    assert "MMelora Quentrel" not in nfc(written), repr(written)  # expected failure
+
+
+# ---------------------------------------------------------------------------
+# v1.29: the sixth Codex review of c64f6be. Punctuated repair sites checked
+# within limits (T69); the reverse repair still runs at the bound (G30)
+# ---------------------------------------------------------------------------
+
+# (the text an earlier version saved from, decomposed; the typed text; the
+# outcome after the fix, Story 10.20 v1.29)
+PUNCTUATED = {
+    "as_typed": (
+        "Mé." * 28 + " Quentrel",
+        "Mé." * 28 + " Quentrel Quovix",
+        "REAL_NAME",
+    ),
+    "over_bound": (
+        "Mé." * 28 + " Quentrel",
+        "Mè." * 28 + " Quentrel Quovix",
+        "ACCEPTED",
+    ),
+    "at_bound": (
+        "Mé." * 24 + " Quentrel",
+        "Mè." * 24 + " Quentrel Quovix",
+        "REAL_NAME",
+    ),
+}
+
+
+@pytest.mark.parametrize("case", list(PUNCTUATED))
+def test_punctuated_sites_checked_within_limits(case: str) -> None:
+    """T69 (v1.29; the sixth Codex review's P1): a saved name whose repair
+    sites sit before « . » is checked within 10 s. Over MAX_REPAIR_SITES (28
+    marks) it gets no reverse repair: refused as typed through the lookup
+    forms, accepted with other accents (as on origin/main). At the bound (24
+    marks) the reverse repair still refuses it."""
+    text, typed, expected = PUNCTUATED[case]
+    stored = _saved_by_old_steps(nfd(text))
+    done = _check_in_child(stored, typed)
+    assert done is not None, "killed at its limit"  # expected failure
+    _pre(done.returncode == 0, f"the check ran: {done.stderr[-2000:]!r}")
+    assert done.stdout.strip() == expected, (done.stdout, done.stderr[-2000:])
+
+
+def test_guard_reverse_repair_at_the_bound() -> None:
+    """G30 (v1.29): a saved name of exactly MAX_REPAIR_SITES marks (24 marks
+    side by side + « lora Quentrel ») is still repaired backwards: « Mme » ×
+    24 + « lora Quentrel Quovix » is refused."""
+    stored = ACUTE * 24 + "lora Quentrel"
+    _pre(
+        _saved_by_old_steps(nfd("Mé" * 24 + "lora Quentrel")) == stored,
+        "the old steps on the decomposed name give the row",
+    )
+    done = _check_in_child(stored, "Mme" * 24 + "lora Quentrel Quovix")
+    _pre(done is not None and done.returncode == 0, "the check ran")
+    assert done is not None and done.stdout.strip() == "REAL_NAME", done

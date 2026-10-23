@@ -13,6 +13,7 @@ from rich.prompt import Confirm, Prompt
 from rich.table import Table
 
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
+from gdpr_pseudonymizer.utils.text_form import composed
 
 # Create Rich console for output
 console = Console()
@@ -102,13 +103,17 @@ def get_user_action() -> str:
 def get_text_input(prompt_text: str) -> str:
     """Get text input from user using Rich prompt.
 
+    Story 10.20: the text is read in composed form (Unicode NFC), so a name
+    typed or pasted with a separate accent mark is the usual name. Every
+    text typed in the review goes through here ([A], [E], [C], [T]).
+
     Args:
         prompt_text: Prompt message to display
 
     Returns:
-        User input string
+        User input string, composed
     """
-    return Prompt.ask(prompt_text)
+    return composed(Prompt.ask(prompt_text))
 
 
 def get_confirmation(prompt_text: str) -> bool:

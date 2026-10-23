@@ -12,6 +12,7 @@ from typing import TypeAlias
 
 from gdpr_pseudonymizer.core.mapping_key import mapping_key
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
+from gdpr_pseudonymizer.utils.text_form import not_after_word, not_before_word
 
 # Story 10.15: the source of a place added by hand with [A], the marker the
 # desktop app already gives a row added by hand.
@@ -28,9 +29,9 @@ TYPED_SOURCES = frozenset({ADDED_BY_HAND_SOURCE, CORRECTED_BY_HAND_SOURCE})
 # Story 10.15 (AC14 (a), Lionel's Q3): a place of a name added by hand is a
 # whole word. The character just before and just after it (when there is one)
 # is neither a word character nor a hyphen (-, U+2010, U+2011): a hyphen joins
-# words.
-_NOT_AFTER_WORD = r"(?<![\w\-‐‑])"
-_NOT_BEFORE_WORD = r"(?![\w\-‐‑])"
+# words. Story 10.20 (AC4): nor a combining mark, which belongs to its word.
+_NOT_AFTER_WORD = not_after_word()
+_NOT_BEFORE_WORD = not_before_word()
 
 
 @dataclass
@@ -283,8 +284,8 @@ class ValidationSession:
         """Every place of a name added by hand (Story 10.15, AC14 (a)).
 
         A place is a whole-word occurrence of the exact text: neither the
-        character before it nor the one after it is a word character or a
-        hyphen. Each cell of a spreadsheet is searched on its own, so a place
+        character before it nor the one after it is a word character, a
+        combining mark (Story 10.20) or a hyphen. Each cell of a spreadsheet is searched on its own, so a place
         carries its cell and its position in the cell; a text document is
         searched as one text. Places are read left to right and never
         overlap each other. Each place is marked ``ADDED_BY_HAND_SOURCE``.

@@ -90,6 +90,21 @@ def _at(text: str, name: str, entity_type: str, start: int) -> DetectedEntity:
     )
 
 
+def _placed(written: str, entity: DetectedEntity) -> DetectedEntity:
+    """A copy of ``entity``, found in ``written``, placed in ``written``
+    composed (Unicode NFC), as the reader returns it (Story 10.20)."""
+    start = len(unicodedata.normalize("NFC", written[: entity.start_pos]))
+    text = unicodedata.normalize("NFC", entity.text)
+    return DetectedEntity(
+        **{
+            **vars(entity),
+            "text": text,
+            "start_pos": start,
+            "end_pos": start + len(text),
+        }
+    )
+
+
 def _replacements(output: str, source: str, spans: list[tuple[int, int]]) -> list[str]:
     """The string written in place of each span (in span order); every other
     character of the source unchanged."""
@@ -184,7 +199,15 @@ class _Batch:
         self.bs._validate_checkbox.setChecked(True)
 
     def _detect(self, text: str) -> list[DetectedEntity]:
-        return [DetectedEntity(**vars(e)) for e in self._by_text[text]]
+        # Story 10.20 (AC1): the reader returns the document composed (Unicode
+        # NFC); each entity given for the document as written is placed in the
+        # text the reader returns
+        written = next(
+            source
+            for source in self._by_text
+            if unicodedata.normalize("NFC", source) == text
+        )
+        return [_placed(written, e) for e in self._by_text[written]]
 
     def run(self, body: Callable[[dict[str, Any]], None]) -> dict[str, Any]:
         """Run the batch; ``body`` drives it. Returns what ``body`` recorded."""
