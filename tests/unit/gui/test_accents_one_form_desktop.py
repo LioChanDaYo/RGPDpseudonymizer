@@ -875,3 +875,46 @@ def test_place_maitre_after_an_elision_refused_desktop(  # type: ignore[no-untyp
         assert not name_written, repr(written)  # expected failure
         assert dialogs.calls, dialogs.calls
         assert written is None and len(_rows(db)) == 1, (written, _rows(db))
+
+
+# ---------------------------------------------------------------------------
+# v1.23: the fourth Codex review of be2d48b in the desktop app: a place's
+# key that keeps its preposition never reaches another place (T63)
+# ---------------------------------------------------------------------------
+
+XFAIL = "Story 10.20 v1.23: reproduces {} on the unfixed code; fixed in Task 2.13"
+TWO_PREPOSITIONS = "à de Zórbaville"
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason=XFAIL.format("a place key keyed again reaching another place"),
+)
+def test_place_key_never_reaches_another_place_desktop(  # type: ignore[no-untyped-def]
+    qtbot, main_window, tmp_path, monkeypatch
+) -> None:
+    """T63 (v1.23; Codex's P0), the desktop case: the old row nfd(« Zórbaville »)
+    is another place; the desktop single document naming « à de
+    Zórbaville », whose key keeps « de », does not reuse its pseudonym."""
+    _pre(
+        mapping_key(TWO_PREPOSITIONS, "LOCATION") == "de Zórbaville",
+        "today's key of « à de Zórbaville »",
+    )
+    dialogs = _Dialogs(monkeypatch)
+    db = _new_db(tmp_path)
+    _save(db, [(nfd("Zórbaville"), "LOCATION", "Xantorville")])
+    sd = _Single(
+        qtbot,
+        main_window,
+        tmp_path,
+        f"Le contrat a été signé {TWO_PREPOSITIONS}.",
+        [(TWO_PREPOSITIONS, "LOCATION")],
+        db,
+    )
+    sd.accept_pending()
+    written = sd.finalize(dialogs)
+    if written is None:
+        pytest.fail(f"PRE: written: {dialogs.calls!r}")
+    assert "Xantorville" not in written, repr(written)  # expected failure
+    assert len(_rows(db)) == 2, _rows(db)

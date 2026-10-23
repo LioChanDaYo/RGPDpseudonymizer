@@ -30,6 +30,9 @@ import dataclasses
 import itertools
 import re
 import sqlite3
+import sys
+import time
+import tracemalloc
 import unicodedata
 from collections.abc import Callable, Sequence
 from contextlib import ExitStack, closing
@@ -51,6 +54,7 @@ from gdpr_pseudonymizer.core.custom_pseudonym import (
     normalize_custom_pseudonym,
 )
 from gdpr_pseudonymizer.core.document_processor import DocumentProcessor
+from gdpr_pseudonymizer.core.legacy_names import matches_search
 from gdpr_pseudonymizer.core.mapping_key import mapping_key, saved_name_forms
 from gdpr_pseudonymizer.data.database import open_database
 from gdpr_pseudonymizer.data.models import Entity
@@ -2389,3 +2393,252 @@ def test_guard_maitre_glued_after_a_mark_kept() -> None:
         entity_type=PERSON, full_name=stored, pseudonym_full=XV, theme="neutral"
     )
     assert not _refused_for_vm(old, "Zorbô Quentrel")
+
+
+# ---------------------------------------------------------------------------
+# v1.23: the fourth Codex review of be2d48b. A key is never keyed again: a
+# place's key that keeps its preposition never reaches another place (T63)
+# and finds its own old row (T64); fresh place rows compared as saved (T65);
+# title-word choices bounded (T66); guards G25 to G28
+# ---------------------------------------------------------------------------
+
+XFAIL = "Story 10.20 v1.23: reproduces {} on the unfixed code; fixed in Task 2.13"
+ZORBAVILLE = "Zórbaville"
+XANTORVILLE = "Xantorville"
+TWO_PREPOSITIONS = "à de Zórbaville"
+KEPT_PREPOSITION = "de Zórbaville"
+TWO_PREPOSITIONS_TEXT = f"Le contrat a été signé {TWO_PREPOSITIONS}."
+MANY_TITLES = nfd(" ".join(["Maître"] * 24 + ["Éloria Quentrel"]))
+
+
+class _OverLimit(BaseException):
+    """A run passed its wall-clock or memory limit (raised by the profile
+    hook of ``_within_limits``, so no ``except Exception`` stops it)."""
+
+
+def _within_limits(
+    call: Callable[[], Any], seconds: float = 60.0, mebibytes: int = 128
+) -> tuple[bool, Any]:
+    """``call()`` under a wall-clock limit and a limit on the memory it
+    allocates (``tracemalloc``), stopped by a profile hook as soon as it
+    passes one, so a run that does not stop never holds the runner. (whether
+    it finished, its result)."""
+    limit = mebibytes * 1024 * 1024
+    was_tracing = tracemalloc.is_tracing()
+    if not was_tracing:
+        tracemalloc.start()
+    baseline = tracemalloc.get_traced_memory()[0]
+    deadline = time.monotonic() + seconds
+
+    def hook(frame: Any, event: str, arg: Any) -> None:
+        over_time = time.monotonic() > deadline
+        if over_time or tracemalloc.get_traced_memory()[0] - baseline > limit:
+            raise _OverLimit
+
+    previous = sys.getprofile()
+    sys.setprofile(hook)
+    try:
+        return True, call()
+    except _OverLimit:
+        return False, None
+    finally:
+        sys.setprofile(previous)
+        if not was_tracing:
+            tracemalloc.stop()
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason=XFAIL.format("a place key keyed again reaching another place"),
+)
+@pytest.mark.parametrize("path", ["reuse", "delete"])
+def test_place_key_never_reaches_another_place(
+    tmp_path: Path, db: Path, path: str
+) -> None:
+    """T63 (v1.23; Codex's P0): the old row nfd(« Zórbaville ») is another
+    place: « à de Zórbaville », whose key keeps « de », neither reuses its
+    pseudonym, and ``delete-mapping "de Zórbaville"`` does not erase it."""
+    _pre(
+        mapping_key(TWO_PREPOSITIONS, LOCATION) == KEPT_PREPOSITION,
+        "today's key of « à de Zórbaville »",
+    )
+    stored = nfd(ZORBAVILLE)
+    _save(db, [(stored, LOCATION, XANTORVILLE)])
+    if path == "reuse":
+        run, output = _process_text(
+            tmp_path, db, TWO_PREPOSITIONS_TEXT, [(TWO_PREPOSITIONS, LOCATION)]
+        )
+        _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+        written = _written(output)
+        assert XANTORVILLE not in written, repr(written)  # expected failure
+        assert len(_rows(db)) == 2, _rows(db)
+    else:
+        run = _delete(db, KEPT_PREPOSITION)
+        rows = _rows(db)
+        assert (stored, LOCATION, XANTORVILLE) in rows, run.shown  # expected failure
+        assert _erasures(db) == 0
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason=XFAIL.format("a place key keyed again missing its own old row"),
+)
+@pytest.mark.parametrize("path", ["reuse", "delete"])
+def test_place_key_with_a_preposition_finds_its_old_row(
+    tmp_path: Path, db: Path, path: str
+) -> None:
+    """T64 (v1.23; Lionel's Qa, the plain shape « de Zórbaville »): the old
+    row nfd(« de Zórbaville »), what an earlier version saved for « à de
+    Zórbaville » with « à » composed, is found as it is: reused and
+    erased."""
+    stored = nfd(KEPT_PREPOSITION)
+    old = _saved_by_old_steps_as("à " + stored, LOCATION)
+    _pre(old == stored, "the old steps on « à » + nfd(« de Zórbaville ») give it")
+    _save(db, [(stored, LOCATION, XANTORVILLE)])
+    if path == "reuse":
+        run, output = _process_text(
+            tmp_path, db, TWO_PREPOSITIONS_TEXT, [(TWO_PREPOSITIONS, LOCATION)]
+        )
+        _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+        written = _written(output)
+        assert XANTORVILLE in written, repr(written)  # expected failure
+        assert len(_rows(db)) == 1, _rows(db)
+    else:
+        run = _delete(db, KEPT_PREPOSITION)
+        assert run.exit_code == 0, run.shown  # expected failure
+        assert _rows(db) == [], _rows(db)
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason=XFAIL.format("a fresh place row keyed again refusing part of it"),
+)
+@pytest.mark.parametrize("row", ["fresh_de", "fresh_a", "old_de"])
+def test_place_key_part_accepted_as_custom_pseudonym(
+    tmp_path: Path, db: Path, row: str
+) -> None:
+    """T65 (v1.23; Codex's P1-a, AC13): a place row « de Zórbaville » or
+    « à Zórbaville » saved as today's code saves it, or nfd(« de
+    Zórbaville »), does not refuse « Zórbaville », a part of its name, as a
+    custom pseudonym: as on ``origin/main``."""
+    if row == "fresh_de":
+        stored = KEPT_PREPOSITION
+        _pre(mapping_key(TWO_PREPOSITIONS, LOCATION) == stored, "today's key")
+    elif row == "fresh_a":
+        stored = "à Zórbaville"
+        _pre(mapping_key("à à Zórbaville", LOCATION) == stored, "today's key")
+    else:
+        stored = nfd(KEPT_PREPOSITION)
+    _save(db, [(stored, LOCATION, XANTORVILLE)])
+    _, written = _custom_for_vm(tmp_path, db, ZORBAVILLE)
+    assert written == f"{ZORBAVILLE} valide.", repr(written)  # expected failure
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason=XFAIL.format("every subset of 24 title words enumerated"),
+)
+@pytest.mark.parametrize("path", ["search", "check"])
+def test_many_titles_within_bounds(path: str) -> None:
+    """T66 (v1.23; Codex's P1-b): the old row nfd(24 × « Maître » + « Éloria
+    Quentrel ») is searched (as the four searches call ``matches_search``)
+    and checked (as set time and finalization call the check) within 60 s
+    and 128 MiB allocated; no timing ratio."""
+    if path == "search":
+        finished, listed = _within_limits(
+            lambda: matches_search("quovix", MANY_TITLES, PERSON)
+        )
+        assert finished, "stopped at a limit"  # expected failure
+        assert listed is False, listed
+    else:
+        row = Entity(
+            entity_type=PERSON,
+            full_name=MANY_TITLES,
+            pseudonym_full=XV,
+            theme="neutral",
+        )
+        finished, refusal = _within_limits(
+            lambda: check_custom_pseudonym(
+                [row], VM, PERSON, "Quovix Quentrel", VM_TEXT, {}
+            )
+        )
+        assert finished, "stopped at a limit"  # expected failure
+        assert refusal is None, refusal
+
+
+@pytest.mark.parametrize("path", ["reuse", "search"])
+def test_guard_plain_place_shapes(tmp_path: Path, db: Path, path: str) -> None:
+    """G25 (v1.23; Lionel's Qa, the plain shapes): the old row nfd(« Zórbaville »)
+    is found by the key « Zórbaville » (the text « de Zórbaville »), and a
+    search for « de Zórbaville » does not list it."""
+    _save(db, [(nfd(ZORBAVILLE), LOCATION, XANTORVILLE)])
+    if path == "reuse":
+        _pre(mapping_key(KEPT_PREPOSITION, LOCATION) == ZORBAVILLE, "today's key")
+        run, output = _process_text(
+            tmp_path,
+            db,
+            f"Le contrat a été signé {KEPT_PREPOSITION}.",
+            [(KEPT_PREPOSITION, LOCATION)],
+        )
+        _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+        written = _written(output)
+        assert XANTORVILLE in written, repr(written)
+        assert len(_rows(db)) == 1, _rows(db)
+    else:
+        run = _invoke(["list-entities", "--db", str(db), "--search", KEPT_PREPOSITION])
+        _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+        assert XANTORVILLE not in run.flat, run.shown
+
+
+@pytest.mark.parametrize("row", ["old_a", "saved_itself"])
+def test_guard_place_rows_still_refuse(tmp_path: Path, db: Path, row: str) -> None:
+    """G26 (v1.23): the old row nfd(« à Zórbaville ») (an « à » with a
+    separate mark) still refuses « Zórbaville », and the row « de
+    Zórbaville » refuses itself."""
+    if row == "old_a":
+        stored, typed = nfd("à Zórbaville"), ZORBAVILLE
+    else:
+        stored, typed = KEPT_PREPOSITION, KEPT_PREPOSITION
+    _save(db, [(stored, LOCATION, XANTORVILLE)])
+    _, written = _custom_for_vm(tmp_path, db, typed)
+    assert typed not in nfc(written), repr(written)
+
+
+def test_guard_title_typed_at_delete_keyed_as_today(tmp_path: Path, db: Path) -> None:
+    """G27 (v1.23; Fix Design item 1, "any other text"): a place typed at
+    ``delete-mapping`` with a title is keyed as today: « de Maître
+    Zórbaville » erases nfd(« Zórbaville ») and keeps nfd(« de
+    Zórbaville »)."""
+    _pre(
+        mapping_key("de Maître Zórbaville", LOCATION) == ZORBAVILLE,
+        "today's key of « de Maître Zórbaville »",
+    )
+    _save(
+        db,
+        [
+            (nfd(ZORBAVILLE), LOCATION, XANTORVILLE),
+            (nfd(KEPT_PREPOSITION), LOCATION, "Quovixville"),
+        ],
+    )
+    run = _delete(db, "de Maître Zórbaville")
+    assert run.exit_code == 0, run.shown
+    assert _names(db) == [(nfd(KEPT_PREPOSITION), LOCATION)], _rows(db)
+
+
+def test_guard_preposition_kept_by_the_key_not_left_out(
+    tmp_path: Path, db: Path
+) -> None:
+    """G28 (v1.23; the rule on the reverse side): the old row nfd(« à de
+    Zórbaville ») does not refuse « Zórbaville »: a preposition is left out
+    only behind « Maître » words left out."""
+    _pre(
+        mapping_key(TWO_PREPOSITIONS, LOCATION) == KEPT_PREPOSITION,
+        "today's key of « à de Zórbaville »",
+    )
+    _save(db, [(nfd(TWO_PREPOSITIONS), LOCATION, XANTORVILLE)])
+    _, written = _custom_for_vm(tmp_path, db, ZORBAVILLE)
+    assert written == f"{ZORBAVILLE} valide.", repr(written)
