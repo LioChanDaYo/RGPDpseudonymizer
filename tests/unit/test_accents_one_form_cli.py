@@ -2637,11 +2637,17 @@ MANY_SITES = {
     "adjacent": ("Mé" * 28 + " Quentrel", "Mé" * 14 + " Quentrel Quovix", "REAL_NAME"),
     "glued": ("Mé" * 56 + " Quentrel", "Mmé" * 28 + " Quentrel Quovix", "REAL_NAME"),
     "joined": (
-        " ".join(["Zorbôme Maître"] * 30 + ["Quentrel"]),
-        " ".join(["Zorbôme Maitre"] * 30 + ["Quentrel Quovix"]),
+        " ".join(["Zorbôme Maître"] * 27 + ["Quentrel"]),
+        " ".join(["Zorbôme Maitre"] * 27 + ["Quentrel Quovix"]),
         "ACCEPTED",
     ),
 }
+# The wall-clock limit of each case's child. ``joined`` (27 pairs) gets 30 s:
+# on the fix it takes about 1 s locally, start-up included, and several times
+# that on a loaded CI runner. Without MAX_REPAIR_WORDS it takes 73 s locally.
+# At 10 s no length kept both the fix under a tenth of the limit with room
+# for CI and the unbounded check clearly past it (Story 10.20, round 8)
+MANY_SITES_LIMITS = {"adjacent": 10.0, "glued": 10.0, "joined": 30.0}
 _CHILD_CHECK = """
 from gdpr_pseudonymizer.core.custom_pseudonym import (
     check_custom_pseudonym,
@@ -2689,12 +2695,13 @@ def _check_in_child(
 def test_saved_name_with_many_sites_checked_within_limits(case: str) -> None:
     """T67 (v1.25; the fifth Codex review's P1): a saved name whose repair
     sites sit side by side (accent marks side by side, or « Maître » glued
-    after one) is checked within 10 s, with the outcome origin/main gives:
-    refused through « Quentrel » (the row as saved), or accepted."""
+    after one) is checked within its limit (10 s; 30 s for ``joined``), with
+    the outcome origin/main gives: refused through « Quentrel » (the row as
+    saved), or accepted."""
     text, typed, expected = MANY_SITES[case]
     stored = _saved_by_old_steps(nfd(text))
-    done = _check_in_child(stored, typed)
-    assert done is not None, "killed at 10 s"  # expected failure
+    done = _check_in_child(stored, typed, MANY_SITES_LIMITS[case])
+    assert done is not None, "killed at its limit"  # expected failure
     _pre(done.returncode == 0, f"the check ran: {done.stderr[-2000:]!r}")
     assert done.stdout.strip() == expected, (done.stdout, done.stderr[-2000:])
 
