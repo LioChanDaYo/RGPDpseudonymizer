@@ -2631,7 +2631,6 @@ def test_guard_preposition_kept_by_the_key_not_left_out(
 # side by side is checked within limits (T67); QA's TEST-005 (G29)
 # ---------------------------------------------------------------------------
 
-XFAIL = "Story 10.20 v1.25: reproduces {} on the unfixed code; fixed in Task 2.14"
 # (the text an earlier version saved from, decomposed; the typed text; the
 # outcome measured on origin/main)
 MANY_SITES = {
@@ -2686,11 +2685,6 @@ def _check_in_child(
         return None
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("a check backtracking over repair sites side by side"),
-)
 @pytest.mark.parametrize("case", list(MANY_SITES))
 def test_saved_name_with_many_sites_checked_within_limits(case: str) -> None:
     """T67 (v1.25; the fifth Codex review's P1): a saved name whose repair

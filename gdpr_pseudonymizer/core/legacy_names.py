@@ -90,6 +90,13 @@ _CACHE_SIZE = 1 << 16
 
 _S1, _S2, _S3 = "S1", "S2", "S3"
 
+# v1.25 (the fifth Codex review), measured: the two repairs of the
+# saved-real-name check compare a run of at most this many words; a longer
+# run is compared with the saved names folded, as before Story 10.20 (the
+# legacy ones keyed again). The longest key the samplers need refused
+# through a repair holds 10 words.
+MAX_REPAIR_WORDS = 12
+
 # v1.23 (the fourth Codex review's P1-b), as the lookups' MAX_MIXED_WORDS:
 # every way of leaving the droppable words out is tried for a saved name of
 # at most this many (16 ways); a longer one, all kept and all left out only.
@@ -218,6 +225,47 @@ def _run_regex() -> str:
     return f"(?:{titles})(?: (?:{titles}))*"
 
 
+@functools.cache
+def _no_split() -> str:
+    """A lookahead that keeps a merged repair group from reading one title
+    word as two glued ones (Story 10.20, v1.25): at each place where two
+    runs of title words are glued, the word after may not start with ``b``
+    when the word before is ``a``, for every pair of title words with
+    ``a + b`` a title word too (today « m » + « me » and « m » + « me. »:
+    « mme », « mme. »). Such a reading always has one with one title word
+    fewer, so no text is lost, and each glued text is read one way only.
+
+    Raises:
+        ValueError: A title word ends with ``a`` without being it, starts
+            with ``b`` without ``a`` + it being a title word, or ``b``
+            splits into a title word and the start of another: the lookahead
+            would refuse a reading it must keep.
+    """
+    words = {fold(word) for word in title_words()}
+    pairs = sorted((a, b) for a in words for b in words if a + b in words)
+    for a, b in pairs:
+        ends_with_a = [word for word in words if word != a and word.endswith(a)]
+        starts_with_b = [
+            word for word in words if word.startswith(b) and a + word not in words
+        ]
+        b_splits = [
+            word
+            for size in range(1, len(b))
+            if b[:size] in words
+            for word in words
+            if word.startswith(b[size:])
+        ]
+        if ends_with_a or starts_with_b or b_splits:
+            raise ValueError(
+                f"the title words {a!r} and {b!r} no longer split one way: the "
+                "saved-name repair (core/legacy_names.py) must be read again"
+            )
+    if not pairs:
+        return ""
+    alternatives = "|".join(f"(?<={re.escape(a)}){re.escape(b)}" for a, b in pairs)
+    return f"(?!{alternatives})"
+
+
 def _is_word_char(char: str) -> bool:
     return _WORD_CHAR.match(char) is not None
 
@@ -331,27 +379,52 @@ def _span_regex(
 ) -> tuple[str, list[str]]:
     """``word[low:high]`` as a regex over folded text, one or more title
     words optional at each of its sites (``_run_regex``), and its literal
-    pieces between sites."""
+    pieces between sites.
+
+    v1.25 (the fifth Codex review): the k plain groups ``(?:RUN)?`` with
+    nothing literal between them (sites on marks side by side) are one
+    group, up to k runs of title words glued, one title word never read as
+    two (``_no_split``). It reads the same texts, with no optional groups
+    side by side for a text that does not match to be split among in every
+    way. A group S2 (``(?:RUN )?``) or S3 before « - » or « . »
+    (``(?:RUN ?)?``) ends such a stretch."""
     run = _run_regex()
     regex: list[str] = []
     pieces: list[str] = []
+    plain = 0
+
+    def close_plain() -> None:
+        nonlocal plain
+        if plain == 1:
+            regex.append(f"(?:{run})?")
+        elif plain > 1:
+            regex.append(f"(?:{run}(?:{_no_split()}{run}){{0,{plain - 1}}})?")
+        plain = 0
+
     start = low
     for index in sorted(position for position in kinds if low <= position < high):
         site = kinds[index]
         piece = fold(word[start:index])
         pieces.append(piece)
-        regex.append(re.escape(piece))
+        if piece:
+            close_plain()
+            regex.append(re.escape(piece))
         start = index + 1
         if _S1 in site:
-            regex.append(f"(?:{run})?")
+            plain += 1
         if _S2 in site:
+            close_plain()
             regex.append(f"(?:{run} )?")
         if _S3 in site:
             # before a character other than a mark (« - », « . »), the
             # spaces after the last title word were taken off too
             after = word[start] if start < len(word) else ""
-            space = " ?" if after and not is_mark(after) else ""
-            regex.append(f"(?:{run}{space})?")
+            if after and not is_mark(after):
+                close_plain()
+                regex.append(f"(?:{run} ?)?")
+            else:
+                plain += 1
+    close_plain()
     piece = fold(word[start:high])
     pieces.append(piece)
     regex.append(re.escape(piece))

@@ -41,7 +41,11 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import TYPE_CHECKING, Any
 
-from gdpr_pseudonymizer.core.legacy_names import is_legacy, is_saved_real_name
+from gdpr_pseudonymizer.core.legacy_names import (
+    MAX_REPAIR_WORDS,
+    is_legacy,
+    is_saved_real_name,
+)
 from gdpr_pseudonymizer.core.mapping_key import (
     lookup_key,
     mapping_key,
@@ -631,10 +635,13 @@ def check_custom_pseudonym(
     }
     legacy_texts = {_saved_text(full_name) for full_name, _ in legacy}
     for run in _word_runs(pseudonym, entity_type):
+        # v1.25 (the fifth Codex review): the two repairs compare a run of at
+        # most MAX_REPAIR_WORDS words; a longer one, the saved names folded
+        repaired = len(run.split()) <= MAX_REPAIR_WORDS
         if (
             fold(run) in stored_names
-            or is_saved_real_name(run, legacy)
-            or _is_saved_form(run, legacy_texts)
+            or (repaired and is_saved_real_name(run, legacy))
+            or (repaired and _is_saved_form(run, legacy_texts))
         ):
             return Refusal(CustomPseudonymRefusal.REAL_NAME, pseudonym, run)
     return None
