@@ -37,10 +37,12 @@ v1.19 and v1.21, the table of the AC precisions):
   (« Maître-Zorbal »), with the space after it, or glued after a mark when
   title words are put back there. « Maitre » and « MAITRE » never matched
   the pattern: they are names (QA's REPAIR-001).
-- S5, a place whose first word is « à » (the preposition pattern's « à »
-  is composed and anchored at the start; never inside a word, as in a
-  hyphenated place); and, after « Maître » words left out at the start of
-  a place, the preposition today's step then takes off there.
+- S5, a place whose first word is « à » written with a separate mark (the
+  preposition pattern's « à » is composed and anchored at the start; never
+  inside a word, as in a hyphenated place; a composed « à » the old step
+  left there was a second preposition, which today's step keeps too); and,
+  after « Maître » words left out at the start of a place, the preposition
+  today's step then takes off there.
 
 This module imports only ``utils/french_patterns.py`` and
 ``utils/text_form.py``.
@@ -87,6 +89,11 @@ _WORD_CHAR = re.compile(r"\w")
 _CACHE_SIZE = 1 << 16
 
 _S1, _S2, _S3 = "S1", "S2", "S3"
+
+# v1.23 (the fourth Codex review's P1-b), as the lookups' MAX_MIXED_WORDS:
+# every way of leaving the droppable words out is tried for a saved name of
+# at most this many (16 ways); a longer one, all kept and all left out only.
+MAX_DROPPED_WORDS = 4
 
 
 @functools.cache
@@ -225,12 +232,14 @@ def _is_maitre(word: str) -> bool:
 
 def _droppable(words: list[str], entity_type: str) -> list[int]:
     """The positions of the words a saved name may stand for itself
-    without: each « Maître » (S4), and a place's first word « à » (S5)."""
+    without: each « Maître » (S4), and a place's first word « à » written
+    with a separate mark (S5)."""
     positions = [index for index, word in enumerate(words) if _is_maitre(word)]
     if (
         entity_type == "LOCATION"
         and words
         and composed(words[0]).lower() == _A
+        and words[0] != composed(words[0])
         and 0 not in positions
     ):
         positions.insert(0, 0)
@@ -241,7 +250,7 @@ def _droppable(words: list[str], entity_type: str) -> list[int]:
 def is_legacy(full_name: str, entity_type: str) -> bool:
     """Whether a saved name may stand for another text: it holds a mark, a
     word « Maître » with its circumflex (any case, composed or decomposed),
-    or, for a place, a first word « à »."""
+    or, for a place, a first word « à » written with a separate mark."""
     if _mark_search().search(full_name):
         return True
     return bool(_droppable(full_name.split(), entity_type))
@@ -266,10 +275,18 @@ def _sites(word: str, last_word: bool) -> list[tuple[int, str]]:
 
 def _word_choices(words: list[str], entity_type: str) -> list[tuple[int, ...]]:
     """The positions of the words kept, for every way of leaving out the
-    droppable words (S4, S5) or not; never every word."""
+    droppable words (S4, S5) or not; never every word. v1.23 (the fourth
+    Codex review's P1-b): above ``MAX_DROPPED_WORDS`` droppable words, all
+    kept and all left out only (a run of a custom pseudonym is a key, so it
+    holds no whole « Maître », and today's key leaves them all out)."""
     droppable = _droppable(words, entity_type)
     choices: list[tuple[int, ...]] = []
-    for dropped in itertools.product((False, True), repeat=len(droppable)):
+    ways: Iterable[tuple[bool, ...]] = itertools.product(
+        (False, True), repeat=len(droppable)
+    )
+    if len(droppable) > MAX_DROPPED_WORDS:
+        ways = [(False,) * len(droppable), (True,) * len(droppable)]
+    for dropped in ways:
         left_out = {position for position, drop in zip(droppable, dropped) if drop}
         kept = tuple(index for index in range(len(words)) if index not in left_out)
         if kept:

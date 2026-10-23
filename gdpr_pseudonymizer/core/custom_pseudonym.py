@@ -42,7 +42,11 @@ from enum import Enum
 from typing import TYPE_CHECKING, Any
 
 from gdpr_pseudonymizer.core.legacy_names import is_legacy, is_saved_real_name
-from gdpr_pseudonymizer.core.mapping_key import mapping_key, saved_name_forms
+from gdpr_pseudonymizer.core.mapping_key import (
+    lookup_key,
+    mapping_key,
+    saved_name_forms,
+)
 from gdpr_pseudonymizer.utils.text_form import word_pattern
 
 if TYPE_CHECKING:
@@ -613,15 +617,18 @@ def check_custom_pseudonym(
     # backwards from the old title pattern (core/legacy_names.py); v1.18
     # (the third Codex review): and each form a lookup of the run tries
     # (``saved_name_forms``), compared with those saved names as saved,
-    # accent marks kept. Both comparisons only add refusals
-    stored_names = {fold(row.full_name) for row in rows} | {
-        fold(mapping_key(row.full_name, row.entity_type)) for row in rows
-    }
+    # accent marks kept. Both comparisons only add refusals. v1.23 (the
+    # fourth Codex review's P1-a): only a saved name that may stand for
+    # another text is keyed again, as a key (``lookup_key``); the others
+    # are compared as saved, folded, as before Story 10.20 (AC13)
     legacy = [
         (row.full_name, row.entity_type)
         for row in rows
         if is_legacy(row.full_name, row.entity_type)
     ]
+    stored_names = {fold(row.full_name) for row in rows} | {
+        fold(lookup_key(full_name, entity_type)) for full_name, entity_type in legacy
+    }
     legacy_texts = {_saved_text(full_name) for full_name, _ in legacy}
     for run in _word_runs(pseudonym, entity_type):
         if (

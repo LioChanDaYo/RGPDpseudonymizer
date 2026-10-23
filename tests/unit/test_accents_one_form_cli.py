@@ -2402,7 +2402,6 @@ def test_guard_maitre_glued_after_a_mark_kept() -> None:
 # title-word choices bounded (T66); guards G25 to G28
 # ---------------------------------------------------------------------------
 
-XFAIL = "Story 10.20 v1.23: reproduces {} on the unfixed code; fixed in Task 2.13"
 ZORBAVILLE = "Zórbaville"
 XANTORVILLE = "Xantorville"
 TWO_PREPOSITIONS = "à de Zórbaville"
@@ -2447,11 +2446,6 @@ def _within_limits(
             tracemalloc.stop()
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("a place key keyed again reaching another place"),
-)
 @pytest.mark.parametrize("path", ["reuse", "delete"])
 def test_place_key_never_reaches_another_place(
     tmp_path: Path, db: Path, path: str
@@ -2480,11 +2474,6 @@ def test_place_key_never_reaches_another_place(
         assert _erasures(db) == 0
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("a place key keyed again missing its own old row"),
-)
 @pytest.mark.parametrize("path", ["reuse", "delete"])
 def test_place_key_with_a_preposition_finds_its_old_row(
     tmp_path: Path, db: Path, path: str
@@ -2511,11 +2500,6 @@ def test_place_key_with_a_preposition_finds_its_old_row(
         assert _rows(db) == [], _rows(db)
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("a fresh place row keyed again refusing part of it"),
-)
 @pytest.mark.parametrize("row", ["fresh_de", "fresh_a", "old_de"])
 def test_place_key_part_accepted_as_custom_pseudonym(
     tmp_path: Path, db: Path, row: str
@@ -2537,11 +2521,6 @@ def test_place_key_part_accepted_as_custom_pseudonym(
     assert written == f"{ZORBAVILLE} valide.", repr(written)  # expected failure
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("every subset of 24 title words enumerated"),
-)
 @pytest.mark.parametrize("path", ["search", "check"])
 def test_many_titles_within_bounds(path: str) -> None:
     """T66 (v1.23; Codex's P1-b): the old row nfd(24 × « Maître » + « Éloria

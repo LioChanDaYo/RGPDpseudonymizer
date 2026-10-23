@@ -61,6 +61,37 @@ def mapping_key(entity_text: str, entity_type: str) -> str:
     return _key_steps(composed(entity_text), entity_type)
 
 
+def lookup_key(entity_text: str, entity_type: str) -> str:
+    """Today's key of a text a lookup or a check compares, which may be a key
+    already (Story 10.20, v1.23; the fourth Codex review's P0 and P1-a).
+
+    A place's key may still start with a preposition: the preposition step
+    runs once, so « à de Zórbaville » is keyed « de Zórbaville ». A text the
+    title step leaves as it is, as given (spaces collapsed), and whose start
+    the preposition step would take off, is such a key, today's or an
+    earlier version's: its titles are taken off from its composed form and
+    its spaces collapsed, and no preposition is taken off it again. Any
+    other text is keyed as today (``mapping_key``): a name typed with a
+    title (« de Maître Zórbaville » at ``delete-mapping``), or an old key
+    starting with a decomposed « à », which the old step could not see.
+
+    Args:
+        entity_text: The text looked up or compared (a key, or a name)
+        entity_type: Entity type (PERSON, LOCATION, ORG)
+
+    Returns:
+        The key text
+    """
+    given = " ".join(entity_text.split())
+    if (
+        entity_type == "LOCATION"
+        and " ".join(strip_french_titles(given).split()) == given
+        and strip_french_prepositions(given) != given
+    ):
+        return " ".join(strip_french_titles(composed(given)).split())
+    return mapping_key(entity_text, entity_type)
+
+
 # Story 10.20, v1.7 (the Codex review's P1-1): the per-word mixes of composed
 # and decomposed words are tried for a name of at most this many accented
 # words (16 mixes); a longer name, its two whole forms only.
@@ -118,8 +149,9 @@ def _former(entity_text: str, entity_type: str) -> list[tuple[str, str]]:
     """The keys an earlier version saved for this text, replayed, each with
     its kind, today's key left out. P0-1 (Lionel, 2026-10-22, "A: Only with a
     sign (Rec.)"): a "cut" key could be another person's name, so it is
-    dropped."""
-    key = mapping_key(entity_text, entity_type)
+    dropped. v1.23 (the fourth Codex review's P0): a key is not keyed again
+    (``lookup_key``), and the replay is the old title and space steps only."""
+    key = lookup_key(entity_text, entity_type)
     found: dict[str, str] = {}
     for text, inserted in _key_texts(key, entity_type):
         if text == key:
@@ -128,7 +160,12 @@ def _former(entity_text: str, entity_type: str) -> list[tuple[str, str]]:
             # that still starts with a preposition (« de Zórbaville ») would
             # give a key no version saved
             continue
-        old = _key_steps(text, entity_type)
+        # v1.23: the old title and space steps only. Today's key went
+        # through the preposition step already; the one preposition the old
+        # step could not see is the decomposed « à » ``_key_texts`` puts in
+        # front, which it never takes off. So no preposition today's key
+        # kept is taken off, and no word is lost to a preposition step
+        old = " ".join(strip_french_titles(text).split())
         if not old or old == key or old in found:
             continue
         if old == text:
@@ -147,9 +184,10 @@ def former_keys(entity_text: str, entity_type: str) -> list[str]:
     separate accent marks (Unicode NFD) (Story 10.20, Lionel's Qa; v1.7, the
     Codex review of 186972b).
 
-    The old steps (titles taken off anywhere, a LOCATION's leading
-    preposition, spaces collapsed) replayed on each per-word mix of today's
-    key and on its two whole forms with a decomposed « Maître » or (for a
+    The old title and space steps (titles taken off anywhere, spaces
+    collapsed; v1.23: never the preposition step again) replayed on each
+    per-word mix of today's key (``lookup_key``: a key is not keyed again)
+    and on its two whole forms with a decomposed « Maître » or (for a
     LOCATION) « à » kept in it (``_key_texts``). A key the old steps leave as
     it was ("whole" or "titled"), or cut leaving a sign ("sign": « Mélora
     Quentrel » saved as « lora Quentrel » after a lone U+0301; « Zorbôme
@@ -180,7 +218,10 @@ def saved_name_forms(entity_text: str, entity_type: str) -> list[str]:
     could be the correct name of another person saved today (« Vorlan
     ZorbôQuentrel » for « Vorlan Zorbôme Quentrel »), which Lionel's P0-1
     answer forbids, and no path stores a composed old key (``import-mappings``
-    copies rows as saved since v1.14)."""
+    copies rows as saved since v1.14). v1.23 (the fourth Codex review's P0):
+    the text is keyed by ``lookup_key``, so a place's key that keeps its
+    preposition (« de Zórbaville ») never reaches the row of another place
+    (nfd(« Zórbaville »)), and finds its own old row as it is."""
     former = _former(entity_text, entity_type)
     forms = [composed(entity_text), *(old for old, _ in former), entity_text]
     return list(dict.fromkeys(forms))

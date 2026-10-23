@@ -882,15 +882,9 @@ def test_place_maitre_after_an_elision_refused_desktop(  # type: ignore[no-untyp
 # key that keeps its preposition never reaches another place (T63)
 # ---------------------------------------------------------------------------
 
-XFAIL = "Story 10.20 v1.23: reproduces {} on the unfixed code; fixed in Task 2.13"
 TWO_PREPOSITIONS = "à de Zórbaville"
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=XFAIL.format("a place key keyed again reaching another place"),
-)
 def test_place_key_never_reaches_another_place_desktop(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, monkeypatch
 ) -> None:
