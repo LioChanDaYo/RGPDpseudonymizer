@@ -2717,3 +2717,31 @@ def test_guard_many_titles_listed_by_todays_key(tmp_path: Path, db: Path) -> Non
     run = _invoke(["list-entities", "--db", str(db), "--search", "Zorbal Quentrel"])
     _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
     assert XV in run.flat, run.shown
+
+
+# ---------------------------------------------------------------------------
+# v1.27: QA's MERGE-001 (Lionel: "Fix it first"). Two title words put back
+# at marks side by side before the name's own letters (T68)
+# ---------------------------------------------------------------------------
+
+XFAIL = "Story 10.20 v1.27: reproduces {} on the unfixed code; fixed in Task 2.15"
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason=XFAIL.format("the glued run's rule read on the letters after it"),
+)
+def test_two_titles_glued_before_the_name_refused(tmp_path: Path, db: Path) -> None:
+    """T68 (v1.27; QA's MERGE-001): the row v2.2.0 saved from « ḾḾelora
+    Quentrel » (two lone marks + « elora Quentrel ») refuses « MMelora
+    Quentrel »: an « M » put back at each mark, the « e » after them the
+    name's own."""
+    stored = ACUTE * 2 + "elora Quentrel"
+    _pre(
+        _saved_by_old_steps(nfd("ḾḾelora Quentrel")) == stored,
+        "the old steps on the decomposed name give the row",
+    )
+    _save(db, [(stored, PERSON, XV)])
+    _, written = _custom_for_vm(tmp_path, db, "MMelora Quentrel")
+    assert "MMelora Quentrel" not in nfc(written), repr(written)  # expected failure
