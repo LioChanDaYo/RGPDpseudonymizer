@@ -350,12 +350,6 @@ class _Review:
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19: reproduces « <pseudonym> QUENTRIX » after a correction in "
-    "single-document review on the unfixed code; fixed in Task 2",
-)
 def test_desktop_correction_reaches_capital_place(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, dialogs
 ) -> None:
@@ -384,12 +378,6 @@ def test_desktop_correction_reaches_capital_place(  # type: ignore[no-untyped-de
     assert review.names() == [(ZQ, PERSON)]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19: reproduces the « ZORBAL » row not reached by a batch "
-    "correction on the unfixed code; fixed in Task 2",
-)
 def test_batch_correction_reaches_other_capitals(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, dialogs
 ) -> None:
@@ -417,12 +405,6 @@ def test_batch_correction_reaches_other_capitals(  # type: ignore[no-untyped-def
     assert review.names() == [(ZQ, PERSON)]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19: reproduces the « VORLENE » row not reached by a correction "
-    "in single-document review on the unfixed code; fixed in Task 2",
-)
 def test_correction_reaches_accentless_capitals(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, dialogs
 ) -> None:
@@ -450,12 +432,6 @@ def test_correction_reaches_accentless_capitals(  # type: ignore[no-untyped-def]
     assert review.names() == [(VQ, PERSON)]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19: reproduces the « VORLENE » row not reached by a batch "
-    "correction on the unfixed code; fixed in Task 2",
-)
 def test_batch_correction_reaches_accentless_capitals(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, dialogs
 ) -> None:
@@ -482,12 +458,6 @@ def test_batch_correction_reaches_accentless_capitals(  # type: ignore[no-untype
     assert review.names() == [(VQ, PERSON)]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19: reproduces « QUENTRIX » left in clear in a document whose "
-    "accents are stored as separate marks on the unfixed code; fixed in Task 2",
-)
 def test_desktop_decomposed_document(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, dialogs
 ) -> None:

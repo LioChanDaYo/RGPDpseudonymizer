@@ -29,6 +29,7 @@ from gdpr_pseudonymizer.validation.models import (
     EntityGroup,
     EntityReviewState,
     ValidationSession,
+    whole_word_places,
 )
 from gdpr_pseudonymizer.validation.ui import (
     FinalConfirmationScreen,
@@ -620,6 +621,11 @@ class ValidationWorkflow:
         ("Dr. Marja" -> "Dr. Marja-Liisa") widens the span the same way.
         Story 10.20 (AC4): a place that starts on a combining mark, or ends
         just before one, is skipped: it would part a letter from its accent.
+        Story 10.19 (AC3): when the exact text is not there, the first form of
+        it (``whole_word_places``: other capitals, or capitals without its
+        accents, never a word in small letters) inside the same window that
+        overlaps the original span is taken, so « ZORBAL » corrected as
+        « Zorbal Quentrix » covers « ZORBAL QUENTRIX » whole.
 
         Args:
             document_text: Full document text
@@ -627,8 +633,9 @@ class ValidationWorkflow:
             new_text: Text entered by the user
 
         Returns:
-            (start_pos, end_pos) of the edited text overlapping the original
-            span, or the original span if the text is not found there
+            (start_pos, end_pos) of the edited text (or of a form of it)
+            overlapping the original span, or the original span if neither
+            is found there
         """
         window_start = max(0, entity.start_pos - len(new_text))
         window_end = min(len(document_text), entity.end_pos + len(new_text))
@@ -641,6 +648,14 @@ class ValidationWorkflow:
             if pos < entity.end_pos and end > entity.start_pos and not splits_a_letter:
                 return pos, end
             pos = document_text.find(new_text, pos + 1, window_end)
+        for start, end in whole_word_places(new_text, document_text):
+            if (
+                window_start <= start
+                and end <= window_end
+                and start < entity.end_pos
+                and end > entity.start_pos
+            ):
+                return start, end
         return entity.start_pos, entity.end_pos
 
     def _handle_add_entity(self, session: ValidationSession) -> None:

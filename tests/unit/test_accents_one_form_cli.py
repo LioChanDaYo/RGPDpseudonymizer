@@ -109,10 +109,10 @@ G7_REST = " a signé avec quentrel quovan et Zorbal Quentrix."
 NOT_FOUND = "not found in document"
 STILL_ONE = "Still to review: 1 (left in plain text)"
 CONFIRM_PROMPT = "Type 'yes'"
-# Lionel's Qc line (2026-10-21, "A: Use it (Rec.)"), N = 2, byte for byte.
+# Lionel's 10.19 Q2 line (2026-10-19, "Approve (Rec.)"), N = 2, byte for byte.
 SEVERAL_LINE = (
     "You are about to delete the following 2 saved pseudonyms "
-    "(all of this name, whatever its type):"
+    "(all of this name, whatever its type or its capitals):"
 )
 
 _ANSI = re.compile(r"\x1b\[[0-9;?]*[A-Za-z]")

@@ -458,12 +458,6 @@ def _erased_ids(db: Path) -> list[str]:
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19: reproduces « ZORBAL » left in clear after [A] « Zorbal » "
-    "on the unfixed code; fixed in Task 2",
-)
 @pytest.mark.parametrize("ext", [".txt", ".xlsx"])
 def test_add_reaches_capital_forms(tmp_path: Path, db: Path, ext: str) -> None:
     """T1 (AC1, AC2): [A] « Zorbal » also writes « ZORBAL » with its pseudonym,
@@ -492,12 +486,6 @@ def test_add_reaches_capital_forms(tmp_path: Path, db: Path, ext: str) -> None:
     assert _names(db) == sorted([(VM, PERSON), ("Zorbal", PERSON)])
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19: reproduces the approved « nothing added » line shown while "
-    "« ZORBAL » stays in clear on the unfixed code; fixed in Task 2",
-)
 def test_capitals_left_when_every_title_form_found(tmp_path: Path, db: Path) -> None:
     """T2 (AC2): every « Zorbal » found, « ZORBAL » not: the approved line is
     not shown and the capital places are added."""
@@ -518,12 +506,6 @@ def test_capitals_left_when_every_title_form_found(tmp_path: Path, db: Path) -> 
     assert _names(db) == [("Zorbal", PERSON)]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19: reproduces a second « ZORBAL » left in clear beside a found "
-    "one on the unfixed code; fixed in Task 2",
-)
 def test_found_capital_place_keeps_its_decision(tmp_path: Path, db: Path) -> None:
     """T3 (AC2): « ZORBAL » found at its first place and rejected keeps its
     decision; [A] « Zorbal » writes the other « ZORBAL »."""
@@ -546,12 +528,6 @@ def test_found_capital_place_keeps_its_decision(tmp_path: Path, db: Path) -> Non
     assert _names(db) == [("Zorbal", PERSON)]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19: reproduces « PETIT » left in clear after [A] « Petit » on "
-    "the unfixed code; fixed in Task 2",
-)
 def test_small_letter_word_never_reached(tmp_path: Path, db: Path) -> None:
     """T4 (AC1): [A] « Petit » writes « PETIT », never « petit »."""
     source, output = _files(tmp_path, ".txt")
@@ -567,12 +543,6 @@ def test_small_letter_word_never_reached(tmp_path: Path, db: Path) -> None:
     assert written == f"{vm} valide. Le petit contrat avec {p}. {p} a signé."
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19: reproduces « Vorlan ZORBAL » left in clear after [A] "
-    "« Vorlan Zorbal » on the unfixed code; fixed in Task 2",
-)
 def test_mixed_form_reached(tmp_path: Path, db: Path) -> None:
     """T5 (AC1): [A] « Vorlan Zorbal » also writes « Vorlan ZORBAL »."""
     source, output = _files(tmp_path, ".txt")
@@ -587,12 +557,6 @@ def test_mixed_form_reached(tmp_path: Path, db: Path) -> None:
     assert written == f"{vm} valide. Le contrat avec {vz} et {vz}."
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19: reproduces [A] « VORLAN DE ZORBAL » finding nothing in "
-    "« Vorlan de Zorbal » on the unfixed code; fixed in Task 2",
-)
 def test_small_particle_form_reached(tmp_path: Path, db: Path) -> None:
     """T6 (AC1): [A] « VORLAN DE ZORBAL » writes « Vorlan de Zorbal »."""
     source, output = _files(tmp_path, ".txt")
@@ -617,12 +581,6 @@ def test_small_particle_form_reached(tmp_path: Path, db: Path) -> None:
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19: reproduces « <pseudonym> QUENTRIX » after a correction "
-    "at a capital place on the unfixed code; fixed in Task 2",
-)
 @pytest.mark.parametrize("ext", [".txt", ".xlsx"])
 def test_correction_reaches_capital_place(tmp_path: Path, db: Path, ext: str) -> None:
     """T7 (AC3, CLI [E]): « Zorbal » and « ZORBAL » are one name; corrected as
@@ -648,12 +606,6 @@ def test_correction_reaches_capital_place(tmp_path: Path, db: Path, ext: str) ->
     assert _names(db) == [(ZQ, PERSON)]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19: reproduces « Vorlène » and « VORLENE » shown as two names "
-    "and « QUENTRIX » left in clear on the unfixed code; fixed in Task 2",
-)
 def test_cli_review_groups_accentless_capitals(tmp_path: Path, db: Path) -> None:
     """T17 (AC3, the CLI review's groups): « Vorlène » and « VORLENE » are one
     name; corrected as « Vorlène Quentrix », « VORLENE QUENTRIX » is covered."""
@@ -676,12 +628,6 @@ def test_cli_review_groups_accentless_capitals(tmp_path: Path, db: Path) -> None
     assert _names(db) == [(VQ, PERSON)]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19: reproduces « QUENTRIX » left in clear in a document whose "
-    "accents are stored as separate marks on the unfixed code; fixed in Task 2",
-)
 def test_cli_decomposed_document(tmp_path: Path, db: Path) -> None:
     """T19 CLI (AC1-AC3 with Story 10.20's readers): T17's document written
     with every accent as a separate mark, the correction typed the same way."""
@@ -712,12 +658,6 @@ def test_cli_decomposed_document(tmp_path: Path, db: Path) -> None:
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19: reproduces « VORLÈNE » and « VORLENE » left in clear after "
-    "[A] « Vorlène » on the unfixed code; fixed in Task 2",
-)
 def test_accent_dropped_in_capitals(tmp_path: Path, db: Path) -> None:
     """T10 (AC1, AC5, Q3): [A] « Vorlène » writes « VORLÈNE » and « VORLENE »,
     never « Vorlene »."""
@@ -743,12 +683,6 @@ def test_accent_dropped_in_capitals(tmp_path: Path, db: Path) -> None:
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19: reproduces delete-mapping listing and erasing « Zorbal » "
-    "only on the unfixed code; fixed in Task 2",
-)
 def test_delete_mapping_removes_capital_variants(tmp_path: Path, db: Path) -> None:
     """T9 (AC4): « Zorbal », « ZORBAL » and « zorbal » are listed on the screen
     and erased, each with its entry; « Zorbalix » stays."""
@@ -771,12 +705,6 @@ def test_delete_mapping_removes_capital_variants(tmp_path: Path, db: Path) -> No
     assert all("zorbal" not in raw.lower() for raw in _erasures(db))
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19: reproduces the one-row screen for a name saved in two "
-    "capitals on the unfixed code; fixed in Task 2",
-)
 def test_screen_line_for_several(tmp_path: Path, db: Path) -> None:
     """T11 (AC8, Q2): two saved pseudonyms of the name in two capitals: Lionel's
     approved line, with the count."""
@@ -787,12 +715,6 @@ def test_screen_line_for_several(tmp_path: Path, db: Path) -> None:
     assert SEVERAL_LINE in run.flat, run.shown  # expected failure
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19: reproduces --force leaving « ZORBAL » saved and unnamed on "
-    "the unfixed code; fixed in Task 2",
-)
 def test_force_names_every_deleted(tmp_path: Path, db: Path) -> None:
     """T12 (AC4, the PO's S1): with ``--force``, no screen, and the success lines
     name every saved pseudonym deleted."""
@@ -807,12 +729,6 @@ def test_force_names_every_deleted(tmp_path: Path, db: Path) -> None:
     assert len(_erasures(db)) == 2
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19: reproduces delete-mapping « Vorlène » leaving « VORLENE » "
-    "on the unfixed code; fixed in Task 2",
-)
 def test_delete_mapping_accent_dropped_in_capitals(tmp_path: Path, db: Path) -> None:
     """T13 (AC4, Q3): « VORLENE » is listed and erased with « Vorlène »;
     « Vorlene » and « Zorbalix » stay."""
@@ -834,12 +750,6 @@ def test_delete_mapping_accent_dropped_in_capitals(tmp_path: Path, db: Path) -> 
     assert len(_erasures(db)) == 2
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19: reproduces the --id line saying « row » on the unfixed "
-    "code; fixed in Task 2",
-)
 @pytest.mark.parametrize("left", ["one", "two"])
 def test_id_line_says_mapping(tmp_path: Path, db: Path, left: str) -> None:
     """T18 (AC15, Lionel's Q5b): after ``delete-mapping --id``, the line about
@@ -858,12 +768,6 @@ def test_id_line_says_mapping(tmp_path: Path, db: Path, left: str) -> None:
     assert expected in run.after, run.shown  # expected failure
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19: reproduces the row v2.2.0 saved damaged in capitals left "
-    "by delete-mapping on the unfixed code; fixed in Task 2",
-)
 def test_delete_mapping_reaches_old_damaged_row(tmp_path: Path, db: Path) -> None:
     """T20 (AC4, Q1 with Lionel's 10.20 Qa): the row v2.2.0 saved from
     « QUOVÔME ZORBAL » read with separate marks is listed and erased with

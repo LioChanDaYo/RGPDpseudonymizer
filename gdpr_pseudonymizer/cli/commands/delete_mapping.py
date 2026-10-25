@@ -1,10 +1,12 @@
 """Delete-mapping command for GDPR Article 17 erasure.
 
 This command deletes entity mappings from the database, converting
-pseudonymization into anonymization for GDPR compliance. A name can be stored
-under several types, one row each (Story 10.7): deleting by name deletes every
-row of the name; deleting by --id deletes one row and says which rows of the
-same name remain.
+pseudonymization into anonymization for GDPR compliance. A name can have
+several saved pseudonyms: one for each type it was saved under (Story 10.7),
+and one for each way it was written with capitals (Story 10.19). Deleting by
+name deletes every saved pseudonym of the name, whatever its type or its
+capitals (capitals without accents included); deleting by --id deletes one
+and says which others remain for the same name written exactly the same way.
 """
 
 from __future__ import annotations
@@ -65,9 +67,11 @@ def delete_mapping_command(
     without the mapping, the pseudonym cannot be linked to an identifiable
     individual, placing the data outside GDPR scope.
 
-    By name, every row of the name is deleted (one per type it is stored
-    under), each listed first. By --id, one row is deleted, and the rows of
-    the same name under other types are reported.
+    The same name can have several saved pseudonyms: one for each type it
+    was saved under, and one for each way it was written with capitals.
+    Deleting by name lists all of them, then deletes them all; --id deletes
+    only one and tells you which others remain for the same name written
+    exactly the same way.
 
     Examples:
         # Delete by entity name
@@ -130,9 +134,10 @@ def delete_mapping_command(
             audit_repo = AuditRepository(db_session.session)
 
             # Find entities first (for confirmation display). By name: every
-            # row of the name, one per type (Story 10.7, AC4).
+            # saved pseudonym of the name, one per type (Story 10.7, AC4) and
+            # one per way it was written with capitals (Story 10.19, AC4).
             if entity_name:
-                entities = repo.find_all_by_full_name(entity_name)
+                entities = repo.find_all_by_full_name_any_capitals(entity_name)
             else:
                 found = _find_entity_by_id(repo, entity_id)  # type: ignore[arg-type]
                 entities = [found] if found is not None else []
@@ -162,7 +167,9 @@ def delete_mapping_command(
             # Perform deletion: by name, every row in one transaction; by id,
             # that row (entity.id handles partial UUIDs)
             if entity_name:
-                deleted_rows = repo.delete_entities_by_full_name(entity_name)
+                deleted_rows = repo.delete_entities_by_full_name_any_capitals(
+                    entity_name
+                )
             else:
                 one = repo.delete_entity_by_id(entities[0].id)
                 deleted_rows = [one] if one is not None else []
@@ -301,17 +308,20 @@ def _display_confirmation(entities: list[Entity]) -> None:
 
     Args:
         entities: Entities to display (every row of the name: one per type,
-            and one per form it was saved in, Story 10.20)
+            one per form it was saved in, Story 10.20, and one per way it was
+            written with capitals, Story 10.19)
     """
     console.print("\n[bold red]WARNING: PERMANENT DELETION[/bold red]\n")
     if len(entities) == 1:
         console.print("You are about to delete the following entity mapping:\n")
     else:
-        # Lionel's 10.20 Qc, "A: Use it (Rec.)" (2026-10-21), byte for byte:
-        # several saved pseudonyms of one name, of one type or several
+        # Lionel's 10.19 Q2, "Approve (Rec.)" (2026-10-19), byte for byte:
+        # several saved pseudonyms of one name, of one type or several, in
+        # one capitals or several (his 10.20 Qc line, « or its capitals »
+        # added back as its option said)
         console.print(
             f"You are about to delete the following {len(entities)} saved "
-            "pseudonyms (all of this name, whatever its type):\n"
+            "pseudonyms (all of this name, whatever its type or its capitals):\n"
         )
     for index, entity in enumerate(entities):
         if index:
@@ -342,12 +352,17 @@ def _display_confirmation(entities: list[Entity]) -> None:
 def _display_remaining(remaining: list[Entity]) -> None:
     """After a deletion by --id, report the rows of the same name that remain.
 
+    Lionel's 10.19 Q5b, "Say mapping (Rec.)" (2026-10-19): the lines say
+    "mapping"/"mappings" where they said "row"/"rows", nothing else changed.
+
     Args:
         remaining: Rows still stored for the deleted row's name (other types)
     """
     count = len(remaining)
     noun, verb, label = (
-        ("row", "remains", "type") if count == 1 else ("rows", "remain", "types")
+        ("mapping", "remains", "type")
+        if count == 1
+        else ("mappings", "remain", "types")
     )
     types = ", ".join(entity.entity_type for entity in remaining)
     console.print(
@@ -356,5 +371,5 @@ def _display_remaining(remaining: list[Entity]) -> None:
     )
     console.print(
         "[yellow]Delete one with 'gdpr-pseudo delete-mapping --id <uuid>', or every "
-        "row of the name with 'gdpr-pseudo delete-mapping \"<name>\"'.[/yellow]"
+        "mapping of the name with 'gdpr-pseudo delete-mapping \"<name>\"'.[/yellow]"
     )

@@ -61,6 +61,25 @@ class MappingRepository(ABC):
         pass
 
     @abstractmethod
+    def find_all_by_full_name_any_capitals(self, full_name: str) -> list[Entity]:
+        """Find every entity stored for a text, whatever its type or its
+        capitals (Story 10.19, AC4).
+
+        The rows ``find_all_by_full_name`` finds, then every row whose name
+        differs from the text only in capitals, or is written entirely in
+        capitals with the text's letters once accents are set aside, or (as
+        an earlier version saved it) is one of the text's saved forms in
+        other capitals.
+
+        Args:
+            full_name: Complete entity name to search for
+
+        Returns:
+            Every matching entity (empty list if none)
+        """
+        pass
+
+    @abstractmethod
     def find_by_component(self, component: str, component_type: str) -> list[Entity]:
         """Find entities with matching name component for compositional logic.
 
@@ -127,6 +146,19 @@ class MappingRepository(ABC):
         Returns:
             Decrypted entities that were deleted, ordered by type (empty list
             if none)
+        """
+        pass
+
+    @abstractmethod
+    def delete_entities_by_full_name_any_capitals(self, full_name: str) -> list[Entity]:
+        """Delete every entity ``find_all_by_full_name_any_capitals`` finds for
+        a text, in one transaction (Story 10.19, AC4).
+
+        Args:
+            full_name: Plaintext full name of the entities to delete
+
+        Returns:
+            Decrypted entities that were deleted (empty list if none)
         """
         pass
 
@@ -274,6 +306,65 @@ class SQLiteMappingRepository(MappingRepository):
 
         rows = [row for row in found if row.full_name in rank_of(row)]
         rows.sort(key=lambda row: (row.entity_type, rank_of(row)[row.full_name]))
+        return rows
+
+    def find_all_by_full_name_any_capitals(self, full_name: str) -> list[Entity]:
+        """Find every entity stored for a plaintext full name, whatever its
+        type or its capitals (Story 10.19, AC4; Lionel's Q1 and Q3).
+
+        Args:
+            full_name: Plaintext full name to search for
+
+        Returns:
+            Entities with decrypted fields: those ``find_all_by_full_name``
+            finds first, ordered by type, then the others (empty list if none)
+        """
+        return [
+            self._decrypt_entity(e)
+            for e in self._query_by_full_name_any_capitals(full_name)
+        ]
+
+    def _query_by_full_name_any_capitals(self, full_name: str) -> list[Entity]:
+        """Stored (encrypted) rows of a plaintext full name, whatever its type
+        or its capitals (Story 10.19, AC4).
+
+        First the rows ``_query_by_full_name`` finds (Story 10.20: every form
+        an earlier version saved the name in), in its order. Then every other
+        row, its name decrypted and composed, whose name is the same letters
+        whatever their capitals (a saved « zorbal » for « Zorbal » too), or a
+        form of the name (``is_form``: written entirely in capitals with the
+        name's letters once accents are set aside, « HELENE » for « Hélène »),
+        or whose name as saved, in small letters, is one of the name's saved
+        forms (``_name_forms``, for its type as ``_query_by_full_name`` reads
+        them) in small letters: a row an earlier version saved damaged, in
+        other capitals (the PO's v1.5 M1; Lionel's 10.20 Qa). Every other
+        saved row is decrypted once, as ``search_entities`` does.
+        """
+        # Imported here: the data layer reads the forms rule of the
+        # validation models, which import the core (no gui/ import).
+        from gdpr_pseudonymizer.validation.models import is_form
+
+        rows = self._query_by_full_name(full_name)
+        found = {row.id for row in rows}
+        name = composed(full_name)
+        old_forms = {
+            form_type: {form.lower() for form in _name_forms(full_name, form_type)}
+            for form_type in _FORM_TYPES
+        }
+        for row in self._session.query(Entity).all():
+            if row.id in found:
+                continue
+            stored = self._encryption.decrypt(row.full_name)
+            if stored is None:
+                continue
+            text = composed(stored)
+            form_type = "LOCATION" if row.entity_type == "LOCATION" else "PERSON"
+            if (
+                text.lower() == name.lower()
+                or is_form(text, name)
+                or stored.lower() in old_forms[form_type]
+            ):
+                rows.append(row)
         return rows
 
     def find_by_component(self, component: str, component_type: str) -> list[Entity]:
@@ -507,6 +598,40 @@ class SQLiteMappingRepository(MappingRepository):
         from sqlalchemy.exc import OperationalError
 
         db_entities = self._query_by_full_name(full_name)
+        if not db_entities:
+            return []
+
+        # Decrypt before deletion (needed for audit log / confirmation)
+        decrypted = [self._decrypt_entity(e) for e in db_entities]
+
+        try:
+            for db_entity in db_entities:
+                self._session.delete(db_entity)
+            self._session.commit()
+        except OperationalError as e:
+            self._session.rollback()
+            raise DatabaseError(f"Failed to delete entity: {e}") from e
+
+        return decrypted
+
+    def delete_entities_by_full_name_any_capitals(self, full_name: str) -> list[Entity]:
+        """Delete every entity stored for a plaintext full name, whatever its
+        type or its capitals, in one transaction (Story 10.19, AC4).
+
+        The rows are those of ``find_all_by_full_name_any_capitals``.
+
+        Args:
+            full_name: Plaintext full name of the entities to delete
+
+        Returns:
+            Decrypted entities that were deleted (empty list if none)
+
+        Raises:
+            DatabaseError: If database operation fails (nothing is deleted)
+        """
+        from sqlalchemy.exc import OperationalError
+
+        db_entities = self._query_by_full_name_any_capitals(full_name)
         if not db_entities:
             return []
 

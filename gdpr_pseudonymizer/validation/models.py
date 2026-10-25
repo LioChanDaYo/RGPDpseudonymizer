@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+import unicodedata
 import uuid
 from collections.abc import Iterable
 from dataclasses import dataclass, field, replace
@@ -26,12 +27,93 @@ CORRECTED_BY_HAND_SOURCE = "corrected"
 # widened over a name it partly overlaps before the document is written.
 TYPED_SOURCES = frozenset({ADDED_BY_HAND_SOURCE, CORRECTED_BY_HAND_SOURCE})
 
-# Story 10.15 (AC14 (a), Lionel's Q3): a place of a name added by hand is a
-# whole word. The character just before and just after it (when there is one)
-# is neither a word character nor a hyphen (-, U+2010, U+2011): a hyphen joins
-# words. Story 10.20 (AC4): nor a combining mark, which belongs to its word.
-_NOT_AFTER_WORD = not_after_word()
-_NOT_BEFORE_WORD = not_before_word()
+# Stories 10.17 and 10.19: the forms of a name, one rule for the command line
+# and the desktop app (moved here unchanged from gui/models/validation_state.py,
+# where Story 10.17 wrote them). A place of a name is a whole word (Story 10.15,
+# AC14 (a), Lionel's Q3): the character just before and just after it (when
+# there is one) is neither a word character nor a hyphen (-, U+2010, U+2011),
+# a hyphen joins words; Story 10.20 (AC4): nor a combining mark, which belongs
+# to its word.
+
+
+def fold(text: str) -> str:
+    """``text`` with each character's accents set aside, one character for one.
+
+    A character whose decomposition without its combining marks is not one
+    character is kept as it is, so a position in the folded text is the same
+    position in ``text``.
+    """
+    folded: list[str] = []
+    for char in text:
+        bare = "".join(
+            part
+            for part in unicodedata.normalize("NFD", char)
+            if not unicodedata.combining(part)
+        )
+        folded.append(bare if len(bare) == 1 else char)
+    return "".join(folded)
+
+
+def is_form(place: str, text: str) -> bool:
+    """Whether ``place`` is written as a form of the name ``text`` (Story
+    10.17, AC13 (a); Lionel, 2026-10-19, "A: Fix, capitals only", in the PO's
+    wording, and his 10.19 Q3, "A: Reach it too").
+
+    The same letters as ``text``, whatever their capitals, except a place
+    written entirely in small letters (no capital letter in it), unless it is
+    exactly ``text``. In a place written entirely in capitals (no small letter
+    in it), accents are set aside too: « HELENE » and « HELÈNE » are forms of
+    « Hélène », « Helene » and « hélène » are not.
+    """
+    if place == text:
+        return True
+    if not any(char.isupper() for char in place):
+        return False
+    if place.lower() == text.lower():
+        return True
+    if any(char.islower() for char in place):
+        return False
+    return fold(place).lower() == fold(text).lower()
+
+
+def whole_word_places(text: str, document_text: str) -> list[tuple[int, int]]:
+    """The places of the name ``text`` in ``document_text`` (Story 10.17,
+    AC13 (a)): every whole-word form of it (``is_form``), read left to right,
+    not overlapping each other. An empty text has no place.
+
+    A whole word (Lionel's 10.15 Q3, "A: Hyphen joins"; Story 10.20, AC4):
+    the character just before and just after it (when there is one) is
+    neither a word character, a combining mark nor a hyphen (-, U+2010,
+    U+2011); an apostrophe is not a word character. The rule is the
+    product's one (``not_after_word``, ``not_before_word``).
+
+    The search runs on the folded document, case-insensitively; each place it
+    finds is kept only if the text written there is a form of ``text``.
+    """
+    if not text:
+        return []
+    folded = fold(document_text)
+    pattern = re.compile(
+        not_after_word() + re.escape(fold(text)) + not_before_word(), re.IGNORECASE
+    )
+    places: list[tuple[int, int]] = []
+    position = 0
+    while True:
+        match = pattern.search(folded, position)
+        if match is None:
+            return places
+        start, end = match.span()
+        if is_form(document_text[start:end], text):
+            places.append((start, end))
+            position = end
+        else:
+            position = start + 1
+
+
+def _all_forms(texts: Iterable[str], names: Iterable[str]) -> bool:
+    """Whether every text of ``texts`` is a form of one of ``names``."""
+    candidates = list(names)
+    return all(any(is_form(text, name) for name in candidates) for text in texts)
 
 
 @dataclass
@@ -281,16 +363,22 @@ class ValidationSession:
         return self.document_text
 
     def places_of(self, text: str, entity_type: str) -> list[DetectedEntity]:
-        """Every place of a name added by hand (Story 10.15, AC14 (a)).
+        """Every place of a name added by hand (Story 10.15, AC14 (a); Story
+        10.19, AC1 and AC2).
 
-        A place is a whole-word occurrence of the exact text: neither the
-        character before it nor the one after it is a word character, a
-        combining mark (Story 10.20) or a hyphen. Each cell of a spreadsheet is searched on its own, so a place
-        carries its cell and its position in the cell; a text document is
-        searched as one text. Places are read left to right and never
-        overlap each other. Each place is marked ``ADDED_BY_HAND_SOURCE``.
+        A place is a whole-word form of the text (``whole_word_places``): the
+        text typed, or the same letters whatever their capitals, never a word
+        written entirely in small letters unless it is exactly the text
+        typed, and in a word written entirely in capitals the same letters
+        once accents are set aside (Lionel, 2026-10-19, and his 10.19 Q3).
+        Neither the character before a place nor the one after it is a word
+        character, a combining mark (Story 10.20) or a hyphen. Each cell of a
+        spreadsheet is searched on its own, so a place carries its cell and
+        its position in the cell; a text document is searched as one text.
+        Places are read left to right and never overlap each other. Each
+        place carries the text as typed and is marked
+        ``ADDED_BY_HAND_SOURCE``.
         """
-        pattern = re.compile(_NOT_AFTER_WORD + re.escape(text) + _NOT_BEFORE_WORD)
         units: list[tuple[str | None, str]] = (
             [(label, cell_text) for label, cell_text in self.cell_texts.items()]
             if self.cell_texts
@@ -300,8 +388,8 @@ class ValidationSession:
             DetectedEntity(
                 text=text,
                 entity_type=entity_type,
-                start_pos=match.start(),
-                end_pos=match.end(),
+                start_pos=start,
+                end_pos=end,
                 confidence=None,
                 gender=None,
                 is_ambiguous=False,
@@ -309,18 +397,19 @@ class ValidationSession:
                 context_label=label,
             )
             for label, unit in units
-            for match in pattern.finditer(unit)
+            for start, end in whole_word_places(text, unit)
         ]
 
     def is_listed_place(self, place: DetectedEntity) -> bool:
         """Whether a place is already in the review (Story 10.15, AC14 (b)).
 
-        True when a review holds an entity with the same text, type, span and
-        cell: a place the detector found, which keeps its own decision, or a
-        place added by an earlier [A].
+        True when a review holds an entity with the same type, span and cell
+        whose text is a form of the place's text (Story 10.19, AC2: a found
+        « ZORBAL » for an added « Zorbal »): a place the detector found, which
+        keeps its own decision, or a place added by an earlier [A].
         """
         return any(
-            review.entity.text == place.text
+            is_form(review.entity.text, place.text)
             and review.entity.entity_type == place.entity_type
             and review.entity.start_pos == place.start_pos
             and review.entity.end_pos == place.end_pos
@@ -580,7 +669,43 @@ class ValidationSession:
         ]
 
         # Sort groups by position of first occurrence
-        return sorted(groups, key=lambda g: g.occurrences[0].start_pos)
+        groups = sorted(groups, key=lambda g: g.occurrences[0].start_pos)
+        return sorted(
+            self._join_forms(groups), key=lambda g: g.occurrences[0].start_pos
+        )
+
+    def _join_forms(self, groups: list[EntityGroup]) -> list[EntityGroup]:
+        """The groups, those that are forms of one name joined (Story 10.19,
+        AC3; the PO's M2 on v1.1).
+
+        Taken left to right, a group joins the first kept group of the same
+        type when every text of one (its key and its variant texts) is a form
+        of a text of the other (``is_form``), either way round: « Vorlène »
+        and « VORLENE » are one name. Each group is compared with its own
+        texts only, never with texts an earlier join gave it, so a join never
+        chains (the orchestrator's ruling on the PO's v1.2 M1): with
+        « Vorlène », and « VORLENE » grouped with « Vorlene », the two stay
+        apart. The joined group keeps the first group's key and canonical
+        entity, takes both groups' places in the order of the session's
+        entities, and the union of their variant texts.
+        """
+        order = {id(entity): index for index, entity in enumerate(self.entities)}
+        kept: list[tuple[EntityGroup, set[str]]] = []
+        for group in groups:
+            texts = {group.unique_key[0], *group.variant_texts}
+            for first, first_texts in kept:
+                if first.unique_key[1] != group.unique_key[1]:
+                    continue
+                if _all_forms(texts, first_texts) or _all_forms(first_texts, texts):
+                    first.occurrences = sorted(
+                        [*first.occurrences, *group.occurrences],
+                        key=lambda entity: order.get(id(entity), len(order)),
+                    )
+                    first.variant_texts = first.variant_texts | group.variant_texts
+                    break
+            else:
+                kept.append((group, texts))
+        return [group for group, _ in kept]
 
     def names_left_in_clear(
         self, sent_without_review: Iterable[DetectedEntity] = ()

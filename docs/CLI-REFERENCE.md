@@ -467,7 +467,7 @@ Delete an entity mapping from the database (GDPR Article 17 erasure).
 
 Deleting a mapping converts pseudonymization into **anonymization**: without the mapping, the pseudonym cannot be linked to an identifiable individual, placing the data outside GDPR scope.
 
-A name can be stored under several types, one row each: deleting by name lists every row of the name, then removes them all (one ERASURE audit entry per row); `--id` removes one row and reports the rows of the same name that remain.
+The same name can have several saved pseudonyms: one for each type it was saved under, and one for each way it was written with capitals ("Marie Dupont", "MARIE DUPONT"). Deleting by name lists all of them, then deletes them all (each deletion is logged as an ERASURE entry); `--id` deletes only one and tells you which others remain for the same name written exactly the same way.
 
 **Usage:**
 ```bash
