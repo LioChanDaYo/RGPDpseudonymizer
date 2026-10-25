@@ -1,41 +1,71 @@
 schema: 1
 story: '10.17'
 story_title: 'Desktop Hand-Added Names at Every Place'
-scope: 'PR #110 (draft), pre-merge review (Task 7, G2) at head ca36e35 on main 3114e9e (10.12 to 10.16 and 10.18 merged). Commits reviewed: the twelve story and epic commits (1a85ada ... 0514c35), tests first 90e1369, fix 667f122, CHANGELOG and Dev Agent Record f5666f5, the SM''s Execution Sequence re-copy ca36e35. Story 10.20 is to merge first; 10.17 then rebases on it and adds one decomposed-accent guard case, and QA re-checks that head.'
+scope: 'PR #110 (draft). Re-check after the rebase on Story 10.20 (merged as e93c55e, PR #111), at head d128879: the rebased commits (tests 194e52a, fix 449f218, CHANGELOG fc52f1d, QA 23ff2ea unchanged), the SM''s re-copy d76e2d4, the whole-word switch ce31060, the guards G3 and G4 and the flip of 10.20''s G1 fce3544, the Dev Agent Record d128879. The first review (2026-10-22) was at ca36e35 on main 3114e9e; its evidence is kept below recheck_1020, which supersedes it where the rebase changed something.'
 gate: PASS
-status_reason: 'Every AC holds on real output through the real single-document route (home, processing, review, finalization) and the real batch route (Open Folder, Démarrer, per-document review): a name added by hand reaches every whole-word place with any capitals, never a word in small letters, accents set aside only in a place written entirely in capitals; a hyphen joins words, an apostrophe or a bracket does not; a found place of the same name and type and a place already held keep their row and decision; single document one row for all places (highlights, type, correction, custom pseudonym, undo and redo), batch one row per place in one undo step, each accepted or rejected on its own; typed places that partly overlap another written name (added or corrected, against accepted, known or other corrected names, both orders) are widened through 10.15''s rule; written files and stored rows match. G2 holds exactly (47 AssertionErrors at the dev''s lines, 6 guards pass; the fix only removes the markers). 21 of QA''s 24 mutants are caught by the 53 tests, 2 are equivalent, 1 is caught by QA''s probe only (TEST-001). No new text; i18n unchanged. No Codex session on this branch, no Forge, Anvil or Cato on this story. CI green on every leg of the four runs. One low item.'
+status_reason: 'The rebased head holds every AC on real output: QA''s 85 earlier probes and the PO''s probes pass unchanged through the real single-document and batch routes. Documents whose accents are stored as separate marks (NFD), .txt and .docx, single and batch: the reader gives the review the composed text, a name added at one place reaches every place (its capital form included), nothing of it stays in clear, the rows are composed. The whole-word switch to 10.20''s rule gives the same places as the old rule on 50,000 random composed documents (differences only next to a stray mark with no composed letter, out of scope). TEST-001 is closed: G4 fails under QA''s mutant M09 (single). 10.20''s desktop tests pass (31) and the flipped G1 now also catches an add that reaches the selected place only. The rebase is clean (16 of 17 commits identical, the CHANGELOG commit with the same 2 lines after 10.20''s bullet). CI green on every leg of both runs; local full suite 3139 passed, 10 skipped. No finding.'
 reviewer: 'Quinn (Test Architect)'
-updated: '2026-10-21T22:45:00Z'
+updated: '2026-10-25T09:30:00Z'
 
 waiver: { active: false }
 
 merge_blockers: []
 
 merge_notes:
-  - 'Next, as the coordinator set it: Story 10.20 merges, 10.17 rebases on it and adds one decomposed-accent guard case, QA re-checks that head, then the one read-only Codex review runs on the final head (Task 6.6, AC6). The merge waits for those and for Lionel. QA never merges and did not run codex.'
+  - 'Next: the one read-only Codex review of the final head (Task 6.6, AC6), then Lionel. QA never merges and did not run codex.'
   - 'The PR body is still the tests-first stage''s (INFO-001); QA did not edit it.'
   - 'This gate commit (docs only: this file and the story''s QA Results) starts its own CI run on the PR.'
 
-top_issues:
-  - id: 'TEST-001'
-    severity: low
-    finding: 'No committed test pins that the found places include the detector''s variant occurrences (AC13 (b); Fix Design step 4). Every found name in the 53 tests is detected at one place. QA mutant M09 (the found places built from detection_result.detected_entities only, without _variant_occurrences) passes all 53. Its effect, single-document review: « Zorbal Quentrix valide. Le contrat avec Zorbal Quentrix. Signé : Zorbal Quentrix. », the name found at the first two places (one row, the second place a variant occurrence), the row rejected by the user, the name added by hand at the third place: under M09 the second found place is written with the added name''s pseudonym, against the user''s reject (an over-replacement, not a name left in clear). The product code is right: QA probe test_b1_found_variants_keep_their_decision passes at ca36e35 in both modes and fails under M09 (single).'
-    suggested_action: 'Backlog, or in the 10.20 rebase round: a T2 case with the found name detected at two places, rejected, then added at a third.'
-    refs: ['gdpr_pseudonymizer/gui/models/validation_state.py:272-279', 'tests/unit/gui/test_hand_added_every_place.py']
-    suggested_owner: dev
+top_issues: []
 
+resolved_issues:
+  - id: 'TEST-001'
+    resolved_in: 'fce3544 (G4, test_found_variants_keep_their_decision[single, batch], from QA''s probe test_b1)'
+    measured: 'QA''s mutant M09, rebuilt on d128879 (the found places without the variant occurrences), fails G4[single] and only it among the 88 tests of the two desktop files; QA''s probe b1[single] fails too. Unmutated, G4 passes in both modes.'
+    first_finding: 'No committed test pins that the found places include the detector''s variant occurrences (AC13 (b); Fix Design step 4). Every found name in the 53 tests is detected at one place. QA mutant M09 (the found places built from detection_result.detected_entities only, without _variant_occurrences) passes all 53. Its effect, single-document review: « Zorbal Quentrix valide. Le contrat avec Zorbal Quentrix. Signé : Zorbal Quentrix. », the name found at the first two places (one row, the second place a variant occurrence), the row rejected by the user, the name added by hand at the third place: under M09 the second found place is written with the added name''s pseudonym, against the user''s reject (an over-replacement, not a name left in clear). The product code is right: QA probe test_b1_found_variants_keep_their_decision passes at ca36e35 in both modes and fails under M09 (single).'
 info:
   - id: 'INFO-001'
-    note: 'PR #110''s body is the tests-first stage''s: it says "Expected CI on this commit: every test leg green, with 47 xfailed", "G6: CI below" with nothing below, "(in a later commit)" for the CHANGELOG, and does not describe the fix commit or its runs (39673559208, 39679298622, 39681543668, 39682180310). Task 6.3 is the orchestrator''s; QA did not edit it. The authorship sentence is there word for word, and no skip-CI marker.'
+    note: 'Still true at d128879 (2026-10-25). PR #110''s body is the tests-first stage''s: it says "Expected CI on this commit: every test leg green, with 47 xfailed", "G6: CI below" with nothing below, "(in a later commit)" for the CHANGELOG, and does not describe the fix commit or its runs (39673559208, 39679298622, 39681543668, 39682180310, and after the rebase 40178557693, 40179648229). Task 6.3 is the orchestrator''s; QA did not edit it. The authorship sentence is there word for word, and no skip-CI marker.'
   - id: 'INFO-002'
     note: 'Out of 10.17''s scope, measured with the PO''s caps probe: a correction across capitals (« Zorbal » corrected to « Zorbal Quentrix » leaves « ZORBAL QUENTRIX » written « … QUENTRIX ») is Story 10.19''s (Lionel''s 10.19 Q4, and the CLI and single-document corrections across capitals). Not a 10.17 defect.'
   - id: 'INFO-003'
-    note: 'Task 0.3 is still unticked in the Dev Agent Record although the SM''s re-copy (ca36e35) makes the byte check pass: QA ran it, "blocks=36 matched=36".'
+    note: 'Resolved in d128879: Task 0.3 ticked.'
+  - id: 'INFO-004'
+    note: 'Outside the repository: the SM''s r1017/sm/bytecheck_1017.ts, which Task 0.3 names, still anchors the Execution Sequence block on "**Stories 10.12 to 10.18**" and stops at d128879 ("line not found"). The dev''s copy with that one anchor updated (r1017/dev/bytecheck_1017_known1020.ts, a one-line diff) gives "blocks=36 matched=36", as the coordinator reported. Process only.'
 
 quality_score: 100
-expires: '2026-11-04T22:45:00Z'
+expires: '2026-11-08T09:30:00Z'
 
 evidence:
+  recheck_1020:
+    date: '2026-10-25'
+    head: 'd128879 on main e93c55e (10.12 to 10.16, 10.18 and 10.20 merged)'
+    tests_reviewed: 57
+    environment: 'As the first review (Windows, the main Poetry environment, pytest 9.1.1, .bat runners, PYTHONPATH = the tree under test, offscreen, USERPROFILE and HOME = r1017/qa/home, a fresh mapping database per test). C:\Users\devea\.gdpr-pseudo.yaml not touched. Searches scoped to gdpr_pseudonymizer/, tests/unit/ and named files; held_out/, final_exam/ and tests/accuracy/ never opened. The worktree was clean on arrival at d128879 (= origin) and after every run (site/ removed). No QA process left running.'
+    diff_read: 'ce31060: whole_word_places builds its pattern with 10.20''s utils/text_form.not_after_word() and not_before_word() (word characters, combining marks, -, U+2010, U+2011), the module''s own _NOT_AFTER_WORD and _NOT_BEFORE_WORD removed; the search still runs on fold(document) with is_form on the text written. fce3544: G3 test_decomposed_document_every_place [single, batch] (an NFD file through the app''s reader; the review text composed; both places shown and written; 2 rows), G4 test_found_variants_keep_their_decision [single, batch] (QA''s TEST-001), and test_accents_one_form_desktop.py:504 from "nfc(written).count(ZO) == 1" to "ZO not in nfc(written)" (line 505, the rows, unchanged). No other product or test change since 1ac451a besides the rebase.'
+    rebase: 'git range-diff 3114e9e..1ac451a e93c55e..23ff2ea: 16 of 17 commits identical (=), the CHANGELOG commit f5666f5 -> fc52f1d replayed (!) with the same added bullet; QA''s gate file byte-identical in 23ff2ea. git diff e93c55e d128879 -- CHANGELOG.md: 2 lines added, the 10.17 entry (byte for byte the story''s) right after 10.20''s bullet; nothing of main changed. The epic differs from main only in its 10.17 section (two hunks). Byte check: 36 of 36 with the anchor-updated copy (INFO-004).'
+    tests: 'test_hand_added_every_place.py and test_accents_one_form_desktop.py at d128879: 88 passed (57 + 31).'
+    earlier_probes: 'QA''s 85 probes of the first review (test_qa_1017.py 73, test_qa_1017b.py 8, test_qa_1017c.py 4) at d128879: 85 passed, through the real routes (timing unchanged: 200 places, 0.01 s single, 0.61 s batch). The PO''s probes: "times in clear: 0" both modes; the overlap probes write none of Vorlan, Zorbal, Quentrix; the caps probe no ZORBAL; Q2 as before (16 + 2 passed).'
+    nfd_probes: 'test_qa_1017d.py (10 probes, all pass at d128879): d1 [single, batch] x [txt, docx]: « … Vorlène Quentrix … VORLÈNE QUENTRIX … Vorlène Quentrix » written with its accents as separate marks; the review text composed; "Vorlène Quentrix" added at its first place reaches all three (single: one row, three highlights; batch: three rows); neither form (composed or decomposed) of any of its words in the written text; the pseudonym written three times; rows (Vorlan Mestrix), (Vorlène Quentrix), both composed. d2: accents in capitals on a decomposed file (« VORLENE », « VORLÈNE » written, « Vorlene » not). d3: a name saved from a composed file is known in a decomposed one (CONFIRMED), an add leaves that found place out, every place the same pseudonym, one row. d4: a custom pseudonym typed decomposed on the added name is stored and written composed at every place.'
+    whole_word_switch: 'tools/ww_diff.py, the head''s whole_word_places against the same function with 1ac451a''s boundaries (r"(?<![\w\-‐‑])", r"(?![\w\-‐‑])"), names and pieces of QA''s cases (capitals, accents, hyphens -, U+2010, U+2011, en dash, apostrophes '' and ’, brackets, « », punctuation, digits, underscore, Œ, ß, İ, ǅ): composed documents, 50,000 cases, 0 differing. With stray combining marks inserted (no composed letter, out of scope by Lionel): 1,212 of 50,000 differ, each a place touching a stray mark that the new rule refuses. QA''s q3 (« SAINT-ZORBAL, Zorbal-Quentrix, (Zorbal), l''ZORBAL et Zorbal. ») and q10 (« SAINT-ZORBAL ») give the same output as at 1ac451a.'
+    mutants:
+      harness: 'r1017/qa/mut2/: git archive d128879, one change each (make_mutants2.py). Each runs the 88 tests of the two desktop files and QA''s 91 probes (q, b, d). Unmutated: 88 and 91 pass.'
+      W1_old_boundaries_back: 'not caught (88 tests, 91 probes): equivalent on composed text, as the fuzz shows; differs only next to a stray mark (out of scope)'
+      W2_hyphen_no_longer_joins: 'T3 x2 (QA: q3 x2, q10 hyphen_caps x2)'
+      W3_no_lookahead: 'T3 x2 (q3 x2)'
+      W4_no_lookbehind: 'T3 x2 (q3 x2, q10 hyphen_caps x2)'
+      W5_search_not_folded: 'T23 x2, G3 x2, and 10.20''s G1 x2 (14 probes)'
+      M09_found_places_without_variants: 'G4[single] only (QA: b1[single]): TEST-001 closed'
+      F1_added_name_selected_place_only: '45 tests, among them 10.20''s G1 [nfc, nfd] since its flip (before the flip it asserted one place only, so it passed under this mutant and failed under the fix)'
+      R1_txt_reader_not_composed: 'G3 x2 and 10.20''s test_desktop_correction [nfd, mixed] x [single, batch], test_guard_desktop_correction_typed_decomposed[nfd] (QA: d1 txt x2, d2 x2, d3 x2, d4 x2)'
+    g1_flip: 'Judged right: the guard''s purpose is "the same result in both forms"; it still compares both forms, and its old count asserted 10.17''s leak (one place in clear). Measured: F1 fails it in both forms.'
+    ci:
+      fce3544: '40178557693 (attempt 1): ubuntu 3.10 "3149 passed in 283.18s"; ubuntu 3.11 "3149 passed in 424.08s"; macos "3149 passed in 578.68s"; windows "2999 passed, 3 skipped in 520.86s"; 57 PASSED of the 10.17 file and 31 of 10.20''s desktop file on each leg; no XFAIL or XPASS. lint success.'
+      d128879: '40179648229 (attempt 1, the head): ubuntu 3.10 "3149 passed in 447.13s"; ubuntu 3.11 "3149 passed in 611.22s"; macos "3149 passed in 590.78s"; windows "2999 passed, 3 skipped in 520.89s"; 57 and 31 PASSED on each leg; no XFAIL or XPASS. lint success; Code Quality 40179648295 success.'
+      notes: 'Read from the job logs (r1017/qa/logs/ci/). 3149 = main''s 3092 + 57.'
+    g6_local: 'd128879: ruff exit 0; black "330 files would be left unchanged"; mypy "Success: no issues found in 107 source files". pytest -m "not slow" -n 4 --dist loadscope from the worktree root: 3139 passed, 10 skipped (3149 minus the 10 Windows-only skips), 0 failed.'
+    codex_rule: '~/.codex/sessions/2026/10/: no rollout on 10-24 or 10-25; no rollout of any date contains "rgpd-wt-s1017"; the 10-22 and 10-23 rollouts are read-only reviews in rgpd-wt-s1020, and PAI work in /home/lionel/.claude (some workspace-write: PAI, not BMAD, as Lionel''s scope allows). The Forge and Cato starts of 10-22 and 10-23 built and audited PAI hooks and a scanner, not this story. No Agent launch and no codex command on 10-24 or 10-25 in the tool-activity log; the subagent log stops at 10-23 18:05 (no reading after). ce31060, fce3544 and d128879 say "Written by the BMAD dev agent (Claude)". The read-only Codex review of the final head has not run yet.'
+  first_review_v16: 'The keys below are the first review (2026-10-22, head ca36e35, now db1f7e9 after the rebase).'
   tests_reviewed: 53
   risks_identified: 1
   environment: 'Windows, the main Poetry environment (Python 3.11.9, PySide6 6.7.3, pytest 9.1.1), .bat runners through cmd.exe, PYTHONPATH = the tree under test (every run printed its package path), QT_QPA_PLATFORM=offscreen, USERPROFILE and HOME = r1017/qa/home, gui.config._config_path patched by the autouse fixtures. C:\Users\devea\.gdpr-pseudo.yaml not touched. QA''s worktree of 90e1369 is a sparse checkout without tests/test_corpus/; held_out/, final_exam/ and tests/accuracy/ were never opened, listed or searched; every search was scoped to gdpr_pseudonymizer/, tests/unit/ or named files. No product or test file of the repository changed; the worktree is clean after every run (the docs build site/ the full suite writes was removed). No QA process is still running.'
@@ -129,7 +159,5 @@ nfr_validation:
 recommendations:
   immediate: []
   future:
-    - action: 'Pin the variant occurrences in the found places with a T2 case (the name found at two places, rejected, added at a third) (TEST-001).'
-      refs: ['tests/unit/gui/test_hand_added_every_place.py']
     - action: 'Update the PR body with the fix commit and its runs before the merge (INFO-001; Task 6.3, the orchestrator).'
       refs: ['PR #110']
