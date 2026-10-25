@@ -17,6 +17,7 @@ of each test is its expected failure on the unfixed code. Invented names only.
 from __future__ import annotations
 
 import re
+import unicodedata
 from collections.abc import Callable, Iterator
 from pathlib import Path
 from typing import Any
@@ -85,6 +86,12 @@ O21 = "Zorbal Quentrix Vorlan a signé."
 O22 = "Zorbal Quentrix a validé. Vorlan Zorbal Quentrix a signé."
 A23 = "Vorlène valide. Le contrat avec VORLÈNE et VORLENE. Signé : Vorlene."
 KNOWN = "Vorlan Zorbal."
+# G3 (Story 10.20): written to the file with its accents as separate marks.
+VQ = "Vorlène Quentrix"
+DEC = (
+    "Vorlan Mestrix valide. Le contrat avec Vorlène Quentrix. "
+    "Signé : Vorlène Quentrix."
+)
 
 Drive = Callable[["_Review", dict[str, Any]], None]
 
@@ -171,7 +178,12 @@ class _Review:
         tmp_path: Path,
         docs: list[tuple[str, list[DetectedEntity]]],
         known: list[DetectedEntity] | None = None,
+        through_reader: bool = False,
     ) -> None:
+        """``through_reader`` (the Story 10.20 guard): the file is read by the
+        app's reader (``read_file``), only ``_detect_and_filter_entities`` is
+        replaced in both modes, and a document's entities are looked up by its
+        composed text (positions in the text the reader returns)."""
         from gdpr_pseudonymizer.gui.screens.batch import BatchScreen
         from gdpr_pseudonymizer.gui.screens.validation import ValidationScreen
 
@@ -180,6 +192,7 @@ class _Review:
         self.mw = main_window
         self.tmp_path = tmp_path
         self.docs = docs
+        self.through_reader = through_reader
         self.db = str(tmp_path / "mappings.db")
         init_database(self.db, PASSPHRASE)
         if known is not None:
@@ -207,7 +220,8 @@ class _Review:
                 path = source_dir / f"doc{index}.txt"
                 path.write_text(text, encoding="utf-8")
                 files.append(path)
-                self._by_text[text] = entities
+                key = unicodedata.normalize("NFC", text) if through_reader else text
+                self._by_text[key] = entities
             main_window.navigate_to("batch")
             self.bs = main_window.stack.currentWidget()
             pre(isinstance(self.bs, BatchScreen), "batch screen")
@@ -331,12 +345,28 @@ class _Review:
         errors: list[str] = []
         worker.signals.finished.connect(results.append)
         worker.signals.error.connect(errors.append)
-        with patch.object(
-            DocumentProcessor,
-            "detect_entities",
-            return_value=(text, [DetectedEntity(**vars(e)) for e in entities]),
-        ):
-            worker.run()
+        if self.through_reader:
+            read: list[str] = []
+
+            def detect(document_text: str, *args: Any, **kwargs: Any) -> Any:
+                read.append(document_text)
+                return [DetectedEntity(**vars(e)) for e in entities]
+
+            with patch.object(
+                DocumentProcessor, "_detect_and_filter_entities", side_effect=detect
+            ):
+                worker.run()
+            pre(
+                read == [unicodedata.normalize("NFC", text)],
+                "the reader gave the composed text",
+            )
+        else:
+            with patch.object(
+                DocumentProcessor,
+                "detect_entities",
+                return_value=(text, [DetectedEntity(**vars(e)) for e in entities]),
+            ):
+                worker.run()
         pre(not errors, "detection error")
         pre(len(results) == 1, "one detection result")
         pre(isinstance(results[0], DetectionResult), "detection result")
@@ -1048,3 +1078,79 @@ def test_selected_place_always_replaced(  # type: ignore[no-untyped-def]
     output = review.output()
     vm, zorbal = review.pseudonym(VM), review.pseudonym("Zorbal")
     assert output == f"{vm} a signé avec {zorbal}ix."
+
+
+# ---------------------------------------------------------------------------
+# Guards added in the rebase on Story 10.20 (no marker: they pass on the code)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("mode", MODES)
+def test_decomposed_document_every_place(  # type: ignore[no-untyped-def]
+    qtbot, main_window, tmp_path, dialogs, mode
+) -> None:
+    """G3 (Story 10.20, its path 9): a document whose accents are stored as
+    separate marks (NFD). The app's reader gives the review the composed
+    text; a name added by hand there reaches every place, and the written
+    file holds no part of it in clear."""
+    stored = unicodedata.normalize("NFD", DEC)
+    pre(stored != DEC, "the file stores its accents as separate marks")
+    review = _Review(
+        mode,
+        qtbot,
+        main_window,
+        tmp_path,
+        [(stored, [_nth(DEC, VM, "PERSON")])],
+        through_reader=True,
+    )
+
+    def drive(r: _Review, record: dict[str, Any]) -> None:
+        pre(r.text == DEC, "the review's text is composed")
+        r.add(VQ, "PERSON", 0)
+        record["shown"] = r.places_shown(VQ)
+        r.accept_pending()
+
+    record = review.run(drive)
+    output = review.output()
+    vm, vq = review.pseudonym(VM), review.pseudonym(VQ)
+    written = unicodedata.normalize("NFC", output)
+    assert "Vorlène" not in written and "Quentrix" not in written
+    assert output == f"{vm} valide. Le contrat avec {vq}. Signé : {vq}."
+    first, second = occurrence(DEC, VQ, 0), occurrence(DEC, VQ, 1)
+    assert record["shown"] == [(first, first + len(VQ)), (second, second + len(VQ))]
+    assert len(review.stored()) == 2
+
+
+@pytest.mark.parametrize("mode", MODES)
+def test_found_variants_keep_their_decision(  # type: ignore[no-untyped-def]
+    qtbot, main_window, tmp_path, dialogs, mode
+) -> None:
+    """G4 (AC13 (b); QA's TEST-001): a name the detector found at two places
+    (in single-document review one row that stands for both), rejected, then
+    added by hand at its third place. The two found places keep the user's
+    reject; only the third is written."""
+    review = _review(
+        mode,
+        qtbot,
+        main_window,
+        tmp_path,
+        T2T,
+        [_nth(T2T, ZQ, "PERSON", 0), _nth(T2T, ZQ, "PERSON", 1)],
+    )
+
+    def drive(r: _Review, record: dict[str, Any]) -> None:
+        rows = r.found(ZQ)
+        pre(len(rows) == (1 if r.mode == "single" else 2), "the found rows")
+        for row in rows:
+            r.state.reject_entity(row.entity_id)
+        pre(all(row.state == REJECTED for row in rows), "the found rows rejected")
+        r.add(ZQ, "PERSON", 2)
+        record["found_states"] = [row.state for row in rows]
+
+    record = review.run(drive)
+    output = review.output()
+    zq = review.pseudonym(ZQ)
+    assert output == (
+        f"Zorbal Quentrix valide. Le contrat avec Zorbal Quentrix. Signé : {zq}."
+    )
+    assert record["found_states"] == [REJECTED] * (1 if mode == "single" else 2)

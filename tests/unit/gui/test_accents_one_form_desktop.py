@@ -501,7 +501,7 @@ def test_guard_hand_added_same_in_both_forms(  # type: ignore[no-untyped-def]
     written = sd.finalize(dialogs)
     if written is None:
         pytest.fail(f"PRE: written: {dialogs.calls!r}")
-    assert nfc(written).count(ZO) == 1, repr(written)
+    assert ZO not in nfc(written), repr(written)
     assert sorted((nfc(name), kind) for name, kind in _names(sd.db)) == sorted(
         [(VM, PERSON), (ZO, PERSON)]
     )
