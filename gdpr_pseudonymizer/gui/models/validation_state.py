@@ -23,6 +23,7 @@ from gdpr_pseudonymizer.core.custom_pseudonym import (
 )
 from gdpr_pseudonymizer.core.mapping_key import mapping_key
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
+from gdpr_pseudonymizer.utils.text_form import not_after_word, not_before_word
 from gdpr_pseudonymizer.validation.models import (
     ADDED_BY_HAND_SOURCE,
     CORRECTED_BY_HAND_SOURCE,
@@ -56,13 +57,6 @@ def _same_kind(old: EntityReviewState | None, new: EntityReviewState) -> bool:
         return False
     return (old in _KEPT and new in _KEPT) or (old in _DROPPED and new in _DROPPED)
 
-
-# Story 10.17 (AC13 (a); Lionel's 10.15 Q3, "A: Hyphen joins"): a place of a
-# name added by hand is a whole word. The character just before and just after
-# it (when there is one) is neither a word character nor a hyphen (-, U+2010,
-# U+2011); an apostrophe is not a word character.
-_NOT_AFTER_WORD = r"(?<![\w\-‐‑])"
-_NOT_BEFORE_WORD = r"(?![\w\-‐‑])"
 
 # The label of an add, also the undo macro of an add that makes several rows.
 _ADD_LABEL = "Ajouter une entité"
@@ -113,6 +107,12 @@ def whole_word_places(text: str, document_text: str) -> list[tuple[int, int]]:
     AC13 (a)): every whole-word form of it (``is_form``), read left to right,
     not overlapping each other. An empty text has no place.
 
+    A whole word (Lionel's 10.15 Q3, "A: Hyphen joins"; Story 10.20, AC4):
+    the character just before and just after it (when there is one) is
+    neither a word character, a combining mark nor a hyphen (-, U+2010,
+    U+2011); an apostrophe is not a word character. The rule is the
+    product's one (``not_after_word``, ``not_before_word``).
+
     The search runs on the folded document, case-insensitively; each place it
     finds is kept only if the text written there is a form of ``text``.
     """
@@ -120,7 +120,7 @@ def whole_word_places(text: str, document_text: str) -> list[tuple[int, int]]:
         return []
     folded = fold(document_text)
     pattern = re.compile(
-        _NOT_AFTER_WORD + re.escape(fold(text)) + _NOT_BEFORE_WORD, re.IGNORECASE
+        not_after_word() + re.escape(fold(text)) + not_before_word(), re.IGNORECASE
     )
     places: list[tuple[int, int]] = []
     position = 0
