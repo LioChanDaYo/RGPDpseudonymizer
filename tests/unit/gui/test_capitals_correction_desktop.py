@@ -1,6 +1,6 @@
 """Story 10.19: a correction in the desktop app reaches the name's forms in
-capitals (T8, T14, T15, T16, T19 desktop), and what must not change (G3, G4,
-G5, G8 desktop, G9).
+capitals (T8, T14, T15, T16, T19 desktop, T21 desktop), and what must not
+change (G3, G4, G5, G8 desktop, G9).
 
 Written by the BMAD dev agent (Claude), before the fix. Each test drives the
 real single-document path (``DetectionWorker``, the validation screen, the
@@ -487,6 +487,58 @@ def test_desktop_decomposed_document(  # type: ignore[no-untyped-def]
     vq = review.pseudonym(VQ)
     assert output == f"{vq} a signé. Signé : {vq}."
     assert review.names() == [(VQ, PERSON)]
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 10.19 v1.8: reproduces a row added by hand as « VORLENE » that "
+    "also stands for « Vorlene » reached by the correction of « Vorlène » on "
+    "93d7ae0; fixed in Task 8.2",
+)
+def test_hand_row_reached_by_its_written_texts(  # type: ignore[no-untyped-def]
+    qtbot, main_window, tmp_path, dialogs
+) -> None:
+    """T21 desktop (AC3, G8's rule for rows added by hand; the orchestrator's
+    ruling, 2026-10-25): « VORLENE » added by hand stands for « VORLENE » and
+    « Vorlene » (Story 10.17); the every-place check reads the text written
+    at each place, so the correction of « Vorlène » does not reach that row,
+    which keeps its own decision."""
+    review = _Review(
+        "single",
+        qtbot,
+        main_window,
+        tmp_path,
+        G8_TEXT,
+        [found_at(G8_TEXT, "Vorlène")],
+    )
+    caps = occurrence(G8_TEXT, "VORLENE")
+    other = occurrence(G8_TEXT, "Vorlene")
+
+    def drive(r: _Review, record: dict[str, Any]) -> None:
+        pre(len(r.reviews()) == 1, "one detected row before the add")
+        r.add("VORLENE", 0)
+        hand = [x for x in r.reviews() if x.state == ADDED]
+        pre(len(hand) == 1, "one row added by hand")
+        places = r.state._occurrences(hand[0]) or []
+        pre(
+            [(p.start_pos, p.end_pos) for p in places]
+            == [(caps, caps + 7), (other, other + 7)],
+            "the hand row's places",
+        )
+        r.correct(r.row("Vorlène"), VQ, 0)
+        r.accept_pending()
+
+    review.run(drive)
+    output = review.output()
+    pre((VQ, PERSON) in review.names(), "(VQ, PERSON) saved")
+    vq = review.pseudonym(VQ)
+    assert f"avec {vq}" not in output, output  # expected failure
+    hand = review.pseudonym("VORLENE")
+    assert output == (
+        f"{vq} a signé. Signé : {hand} QUENTRIX. Le contrat avec {hand} Quentrix."
+    )
+    assert review.names() == sorted([(VQ, PERSON), ("VORLENE", PERSON)])
 
 
 # ---------------------------------------------------------------------------

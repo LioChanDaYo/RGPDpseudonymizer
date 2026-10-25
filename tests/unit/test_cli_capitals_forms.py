@@ -1,7 +1,8 @@
 """Story 10.19: a name added ([A]) or corrected ([E]) in the command-line
 review also reaches its forms in capitals, and ``delete-mapping`` by name also
 erases the saved pseudonyms of the name in other capitals (T1-T7, T9-T13,
-T17, T18, T19 CLI, T20), and what must not change (G1, G2, G7, G8 CLI).
+T17, T18, T19 CLI, T20, T21 CLI), and what must not change (G1, G2, G7, G8
+CLI).
 
 Written by the BMAD dev agent (Claude), before the fix. Each test drives the
 real ``gdpr-pseudo process`` or ``delete-mapping`` command through
@@ -99,6 +100,7 @@ G8_TEXT = (
     "Vorlène Quentrix a signé. Signé : VORLENE QUENTRIX. "
     "Le contrat avec Vorlene Quentrix."
 )
+T21_TEXT = f"Vorlan Mestrix valide. {G8_TEXT}"
 
 # Story 10.15's approved line (Lionel's Q2 there), for « Zorbal » as PERSON.
 ALREADY_LINE = (
@@ -651,6 +653,41 @@ def test_cli_decomposed_document(tmp_path: Path, db: Path) -> None:
     assert written == f"{vq} a signé. Signé : {vq}."
     assert "(2 occurrences, 1 unique)" in run.flat
     assert _names(db) == [(VQ, PERSON)]
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 10.19 v1.8: reproduces « Vorlene », a place [A] « VORLENE » "
+    "reached, joined with « Vorlène » and written with the corrected name's "
+    "pseudonym on 93d7ae0; fixed in Task 8.2",
+)
+def test_hand_group_joined_by_its_written_texts(tmp_path: Path, db: Path) -> None:
+    """T21 CLI (AC3, G8's rule for places added with [A]; the orchestrator's
+    ruling, 2026-10-25): [A] « VORLENE » also reaches « Vorlene », which is
+    not a form of « Vorlène ». The review's join reads the text written at
+    each place, so that name stays apart, and the correction of « Vorlène »
+    never writes « Vorlene » with the corrected name's pseudonym."""
+    source, output = _files(tmp_path, ".txt")
+    source.write_text(T21_TEXT, encoding="utf-8")
+    run = _process(
+        source,
+        output,
+        db,
+        [(VM, PERSON), ("Vorlène", LOCATION)],
+        [ENTER, "a", SPACE, "e", SPACE],
+        ["VORLENE", LOCATION, VQ],
+    )
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    written = _written(output)
+    vq = _pseudonym(db, VQ, LOCATION)
+    assert f"avec {vq}" not in written, written  # expected failure
+    assert "(3 occurrences, 2 unique)" in run.flat
+    vm, caps = _pseudonym(db, VM), _pseudonym(db, "VORLENE", LOCATION)
+    assert written == (
+        f"{vm} valide. {vq} a signé. Signé : {caps} QUENTRIX. "
+        f"Le contrat avec {caps} Quentrix."
+    )
 
 
 # ---------------------------------------------------------------------------
