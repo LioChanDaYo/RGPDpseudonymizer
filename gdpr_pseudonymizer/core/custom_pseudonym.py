@@ -35,14 +35,23 @@ from __future__ import annotations
 
 import functools
 import json
-import re
 import unicodedata
 from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass
 from enum import Enum
 from typing import TYPE_CHECKING, Any
 
-from gdpr_pseudonymizer.core.mapping_key import mapping_key
+from gdpr_pseudonymizer.core.legacy_names import (
+    MAX_REPAIR_WORDS,
+    is_legacy,
+    is_saved_real_name,
+)
+from gdpr_pseudonymizer.core.mapping_key import (
+    lookup_key,
+    mapping_key,
+    saved_name_forms,
+)
+from gdpr_pseudonymizer.utils.text_form import word_pattern
 
 if TYPE_CHECKING:
     from gdpr_pseudonymizer.data.models import Entity
@@ -273,7 +282,9 @@ def _clash(mine: list[_Value], theirs: list[_Value]) -> bool:
     return False
 
 
-_WORD = re.compile(r"\w+")
+# Story 10.20 (AC4): a word is a run of word characters and combining marks, so
+# a mark with no composed letter (« x » + U+0301) stays inside its word.
+_WORD = word_pattern()
 _APOSTROPHES = frozenset({"'", "’"})
 
 
@@ -552,11 +563,18 @@ def check_custom_pseudonym(
         The refusal (Q1, Q-D, Q2, then Q-C), or None
     """
     rows = list(stored_rows) if stored_rows is not None else []
-    for row in rows:  # Q1: the name already has a stored pseudonym
-        if row.full_name == name and row.entity_type == entity_type:
-            return Refusal(
-                CustomPseudonymRefusal.ALREADY_STORED, pseudonym, row.pseudonym_full
-            )
+    # Q1: the name already has a stored pseudonym, saved in any form a lookup
+    # reaches (Story 10.20, v1.7, the Codex review's P1-2); the row whose
+    # form ranks first names the pseudonym kept (rule A)
+    forms = saved_name_forms(name, entity_type)
+    saved = [
+        row for row in rows if row.entity_type == entity_type and row.full_name in forms
+    ]
+    if saved:
+        first = min(saved, key=lambda row: forms.index(row.full_name))
+        return Refusal(
+            CustomPseudonymRefusal.ALREADY_STORED, pseudonym, first.pseudonym_full
+        )
     others = {
         key: value for key, value in other_customs.items() if key != (name, entity_type)
     }
@@ -596,11 +614,56 @@ def check_custom_pseudonym(
             return Refusal(
                 CustomPseudonymRefusal.REAL_NAME, pseudonym, run, in_document=True
             )
-    stored_names = {fold(row.full_name) for row in rows}
-    for run in _word_runs(pseudonym, entity_type):  # Q-C2: a stored full name
-        if fold(run) in stored_names:
+    # Q-C2: a stored full name. Story 10.20: each saved name folded, and its
+    # key read today (v1.7: a title or preposition an earlier version kept,
+    # taken off); v1.10 (the second Codex review): each whole text a saved
+    # name an earlier version cut or kept a title in may stand for, rebuilt
+    # backwards from the old title pattern (core/legacy_names.py); v1.18
+    # (the third Codex review): and each form a lookup of the run tries
+    # (``saved_name_forms``), compared with those saved names as saved,
+    # accent marks kept. Both comparisons only add refusals. v1.23 (the
+    # fourth Codex review's P1-a): only a saved name that may stand for
+    # another text is keyed again, as a key (``lookup_key``); the others
+    # are compared as saved, folded, as before Story 10.20 (AC13)
+    legacy = [
+        (row.full_name, row.entity_type)
+        for row in rows
+        if is_legacy(row.full_name, row.entity_type)
+    ]
+    stored_names = {fold(row.full_name) for row in rows} | {
+        fold(lookup_key(full_name, entity_type)) for full_name, entity_type in legacy
+    }
+    legacy_texts = {_saved_text(full_name) for full_name, _ in legacy}
+    for run in _word_runs(pseudonym, entity_type):
+        # v1.25 (the fifth Codex review): the two repairs compare a run of at
+        # most MAX_REPAIR_WORDS words; a longer one, the saved names folded
+        repaired = len(run.split()) <= MAX_REPAIR_WORDS
+        if (
+            fold(run) in stored_names
+            or (repaired and is_saved_real_name(run, legacy))
+            or (repaired and _is_saved_form(run, legacy_texts))
+        ):
             return Refusal(CustomPseudonymRefusal.REAL_NAME, pseudonym, run)
     return None
+
+
+def _saved_text(text: str) -> str:
+    """A saved name compared as stored: casefolded, spaces collapsed, accent
+    marks kept (Story 10.20, v1.7 and v1.18)."""
+    return " ".join(text.casefold().split())
+
+
+def _is_saved_form(run: str, legacy_texts: set[str]) -> bool:
+    """Whether a form a lookup of the run tries, as a person's or a place's
+    name (``saved_name_forms``), is one of the saved names that may stand
+    for another text, compared as stored (Story 10.20, v1.18). Every form
+    but the run itself holds an accent mark, so it can only equal a saved
+    name that holds one; the run itself is compared folded."""
+    return bool(legacy_texts) and any(
+        _saved_text(form) in legacy_texts
+        for kind in ("PERSON", "LOCATION")
+        for form in saved_name_forms(run, kind)
+    )
 
 
 def _engine_ambiguity(name: str, entity_type: str) -> tuple[bool, str | None]:

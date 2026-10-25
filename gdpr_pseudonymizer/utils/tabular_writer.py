@@ -12,6 +12,7 @@ from pathlib import Path
 from gdpr_pseudonymizer.exceptions import FileProcessingError
 from gdpr_pseudonymizer.utils.file_handler import HAS_OPENPYXL
 from gdpr_pseudonymizer.utils.tabular_reader import TabularDocument
+from gdpr_pseudonymizer.utils.text_form import composed
 
 
 def write_excel(tabular_doc: TabularDocument, output_path: str) -> None:
@@ -62,7 +63,8 @@ def write_excel(tabular_doc: TabularDocument, output_path: str) -> None:
                 if ws is None:
                     ws = wb.create_sheet(title=cell.sheet_name)
                     sheets_created[cell.sheet_name] = ws
-                ws.cell(row=cell.row, column=cell.column, value=cell.value)
+                # Story 10.20 (v1.7, Codex P2; AC5): each cell written composed
+                ws.cell(row=cell.row, column=cell.column, value=composed(cell.value))
 
             wb.save(str(path))
         finally:
@@ -98,7 +100,7 @@ def write_csv(tabular_doc: TabularDocument, output_path: str) -> None:
             sheet_rows = rows_by_sheet[cell.sheet_name]
             if cell.row not in sheet_rows:
                 sheet_rows[cell.row] = {}
-            sheet_rows[cell.row][cell.column] = cell.value
+            sheet_rows[cell.row][cell.column] = composed(cell.value)
 
         with open(path, "w", encoding="utf-8", newline="") as f:
             writer = csv.writer(f)
@@ -147,7 +149,7 @@ def write_tabular_as_text(tabular_doc: TabularDocument, output_path: str) -> Non
         sheet_rows = rows_by_sheet[cell.sheet_name]
         if cell.row not in sheet_rows:
             sheet_rows[cell.row] = {}
-        sheet_rows[cell.row][cell.column] = cell.value
+        sheet_rows[cell.row][cell.column] = composed(cell.value)
 
     sheets_text: list[str] = []
     for sheet_name in tabular_doc.sheet_names:

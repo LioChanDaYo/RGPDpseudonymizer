@@ -29,6 +29,7 @@ from gdpr_pseudonymizer.data.repositories.mapping_repository import (
     SQLiteMappingRepository,
 )
 from gdpr_pseudonymizer.utils.logger import configure_logging, get_logger
+from gdpr_pseudonymizer.utils.text_form import composed
 
 # Configure logging
 configure_logging()
@@ -83,6 +84,11 @@ def delete_mapping_command(
     """
     try:
         start_time = time.monotonic()
+
+        # Story 10.20: the name is read in composed form (Unicode NFC); the
+        # repository also reaches the forms an earlier version saved it in
+        if entity_name:
+            entity_name = composed(entity_name)
 
         # Validate: must provide exactly one of entity_name or entity_id
         if entity_name and entity_id:
@@ -294,15 +300,18 @@ def _display_confirmation(entities: list[Entity]) -> None:
     """Display the details of every row to delete and the deletion warning.
 
     Args:
-        entities: Entities to display (one row per type of the name)
+        entities: Entities to display (every row of the name: one per type,
+            and one per form it was saved in, Story 10.20)
     """
     console.print("\n[bold red]WARNING: PERMANENT DELETION[/bold red]\n")
     if len(entities) == 1:
         console.print("You are about to delete the following entity mapping:\n")
     else:
+        # Lionel's 10.20 Qc, "A: Use it (Rec.)" (2026-10-21), byte for byte:
+        # several saved pseudonyms of one name, of one type or several
         console.print(
-            f"You are about to delete the following {len(entities)} entity "
-            "mappings (one per type of this name):\n"
+            f"You are about to delete the following {len(entities)} saved "
+            "pseudonyms (all of this name, whatever its type):\n"
         )
     for index, entity in enumerate(entities):
         if index:

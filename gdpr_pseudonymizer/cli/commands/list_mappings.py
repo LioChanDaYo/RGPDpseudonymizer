@@ -16,12 +16,14 @@ from rich.table import Table
 
 from gdpr_pseudonymizer.cli.formatters import format_error_message
 from gdpr_pseudonymizer.cli.passphrase import resolve_passphrase
+from gdpr_pseudonymizer.core.legacy_names import matches_search
 from gdpr_pseudonymizer.data.database import open_database
 from gdpr_pseudonymizer.data.models import Entity
 from gdpr_pseudonymizer.data.repositories.mapping_repository import (
     SQLiteMappingRepository,
 )
 from gdpr_pseudonymizer.utils.logger import configure_logging, get_logger
+from gdpr_pseudonymizer.utils.text_form import composed
 
 # Configure logging
 configure_logging()
@@ -129,14 +131,17 @@ def list_mappings_command(
             # Query entities with filter
             entities = repo.find_all(entity_type=entity_type)
 
-            # Apply search filter if provided
+            # Apply search filter if provided, both sides composed (Story
+            # 10.20): a name saved with separate accent marks is found too,
+            # and (v1.10) a name an earlier version cut or kept a title in,
+            # through the texts it may stand for
             if search:
-                search_lower = search.lower()
+                search_lower = composed(search).lower()
                 entities = [
                     e
                     for e in entities
-                    if search_lower in e.full_name.lower()
-                    or search_lower in e.pseudonym_full.lower()
+                    if matches_search(search_lower, e.full_name, e.entity_type)
+                    or search_lower in composed(e.pseudonym_full).lower()
                 ]
 
             # Apply limit if provided

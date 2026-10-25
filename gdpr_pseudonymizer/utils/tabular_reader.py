@@ -13,6 +13,7 @@ from pathlib import Path
 from gdpr_pseudonymizer.exceptions import FileProcessingError
 from gdpr_pseudonymizer.utils.file_handler import HAS_OPENPYXL
 from gdpr_pseudonymizer.utils.logger import get_logger
+from gdpr_pseudonymizer.utils.text_form import composed
 
 logger = get_logger(__name__)
 
@@ -123,7 +124,8 @@ def read_excel_structured(file_path: str) -> TabularDocument:
                                 row=cell.row,
                                 column=cell.column,
                                 column_letter=col_letter,
-                                value=str(cell.value),
+                                # Story 10.20: each cell composed (NFC)
+                                value=composed(str(cell.value)),
                                 cell_ref=cell_ref,
                             )
                         )
@@ -216,7 +218,8 @@ def read_csv_structured(file_path: str) -> TabularDocument:
                         row=row_idx,
                         column=col_idx,
                         column_letter=col_letter,
-                        value=value,
+                        # Story 10.20: each cell composed (NFC)
+                        value=composed(value),
                         cell_ref=cell_ref,
                     )
                 )

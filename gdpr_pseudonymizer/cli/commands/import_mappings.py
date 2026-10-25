@@ -187,6 +187,15 @@ def import_mappings_command(
                     # Create new entity without ID (let DB generate new one)
                     from gdpr_pseudonymizer.data.models import Entity as EntityModel
 
+                    # Story 10.20 (QA's IMPORT-002): the names are copied as
+                    # the source saved them, byte for byte. A name an earlier
+                    # version saved with separate accent marks may hold the
+                    # sign of letters its title pattern took off (a lone mark,
+                    # two words joined); the saved-real-name check and the
+                    # searches read those marks (core/legacy_names.py), and
+                    # composing would remove them. Such a row and a whole
+                    # name saved decomposed can be the same bytes, so no row
+                    # is composed.
                     new_entity = EntityModel(
                         entity_type=entity.entity_type,
                         full_name=entity.full_name,
