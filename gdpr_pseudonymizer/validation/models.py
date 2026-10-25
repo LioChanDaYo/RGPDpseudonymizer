@@ -679,20 +679,26 @@ class ValidationSession:
         AC3; the PO's M2 on v1.1).
 
         Taken left to right, a group joins the first kept group of the same
-        type when every text of one (its key and its variant texts) is a form
-        of a text of the other (``is_form``), either way round: « Vorlène »
-        and « VORLENE » are one name. Each group is compared with its own
-        texts only, never with texts an earlier join gave it, so a join never
-        chains (the orchestrator's ruling on the PO's v1.2 M1): with
-        « Vorlène », and « VORLENE » grouped with « Vorlene », the two stay
-        apart. The joined group keeps the first group's key and canonical
-        entity, takes both groups' places in the order of the session's
-        entities, and the union of their variant texts.
+        type when every text written at a place of one is a form of a text
+        written at a place of the other (``is_form``), either way round:
+        « Vorlène » and « VORLENE » are one name. The texts are read from the
+        document (``text_of``), since a place added with [A] carries the name
+        as typed (v1.8; the orchestrator's ruling, 2026-10-25). Each group is
+        compared with its own texts only, never with texts an earlier join
+        gave it, so a join never chains (the orchestrator's ruling on the
+        PO's v1.2 M1): with « Vorlène », and « VORLENE » grouped with
+        « Vorlene », the two stay apart. The joined group keeps the first
+        group's key and canonical entity, takes both groups' places in the
+        order of the session's entities, and the union of their variant
+        texts.
         """
         order = {id(entity): index for index, entity in enumerate(self.entities)}
         kept: list[tuple[EntityGroup, set[str]]] = []
         for group in groups:
-            texts = {group.unique_key[0], *group.variant_texts}
+            texts = {
+                self.text_of(entity)[entity.start_pos : entity.end_pos]
+                for entity in group.occurrences
+            }
             for first, first_texts in kept:
                 if first.unique_key[1] != group.unique_key[1]:
                     continue

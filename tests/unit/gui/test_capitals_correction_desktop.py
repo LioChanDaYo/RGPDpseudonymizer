@@ -489,13 +489,6 @@ def test_desktop_decomposed_document(  # type: ignore[no-untyped-def]
     assert review.names() == [(VQ, PERSON)]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19 v1.8: reproduces a row added by hand as « VORLENE » that "
-    "also stands for « Vorlene » reached by the correction of « Vorlène » on "
-    "93d7ae0; fixed in Task 8.2",
-)
 def test_hand_row_reached_by_its_written_texts(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, dialogs
 ) -> None:

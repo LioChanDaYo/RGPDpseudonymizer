@@ -655,13 +655,6 @@ def test_cli_decomposed_document(tmp_path: Path, db: Path) -> None:
     assert _names(db) == [(VQ, PERSON)]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19 v1.8: reproduces « Vorlene », a place [A] « VORLENE » "
-    "reached, joined with « Vorlène » and written with the corrected name's "
-    "pseudonym on 93d7ae0; fixed in Task 8.2",
-)
 def test_hand_group_joined_by_its_written_texts(tmp_path: Path, db: Path) -> None:
     """T21 CLI (AC3, G8's rule for places added with [A]; the orchestrator's
     ruling, 2026-10-25): [A] « VORLENE » also reaches « Vorlene », which is

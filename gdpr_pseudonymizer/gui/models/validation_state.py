@@ -403,11 +403,14 @@ class GUIValidationState(QObject):
         name is a form of the row's name (``is_form``: other capitals, or
         capitals without its accents; never a name written entirely in small
         letters) is reached too. Such a row, reached through the forms rule
-        only, is reached when the text of every place it stands for
+        only, is reached when the text written at every place it stands for
         (``_occurrences``, else the row itself) is a form of the row's name,
         so a correction never chains to another name (the orchestrator's
-        rulings on the PO's v1.2 and v1.3 M1); a row of exactly the same name
-        and type is reached as before (10.10), whatever places it stands for.
+        rulings on the PO's v1.2 and v1.3 M1). The text written there is read
+        from the document, since a place added by hand carries the name as
+        typed (v1.8; the orchestrator's ruling, 2026-10-25). A row of exactly
+        the same name and type is reached as before (10.10), whatever places
+        it stands for.
 
         Accept and reject do not use this: they use ``_group_ids``, where a
         row added by hand is alone.
@@ -433,7 +436,13 @@ class GUIValidationState(QObject):
                 places = self._occurrences(other)
                 if places is None:
                     places = [other.entity]
-                if not all(is_form(place.text, text) for place in places):
+                if not all(
+                    is_form(
+                        self._session.text_of(place)[place.start_pos : place.end_pos],
+                        text,
+                    )
+                    for place in places
+                ):
                     continue
             rows.append(other)
         return rows
