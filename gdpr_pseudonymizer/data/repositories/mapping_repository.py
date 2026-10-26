@@ -8,7 +8,7 @@ from gdpr_pseudonymizer.core.legacy_names import matches_search
 from gdpr_pseudonymizer.core.mapping_key import saved_name_forms
 from gdpr_pseudonymizer.data.models import Entity
 from gdpr_pseudonymizer.exceptions import DatabaseError, DuplicateEntityError
-from gdpr_pseudonymizer.utils.text_form import composed
+from gdpr_pseudonymizer.utils.text_form import composed, is_mark
 
 # The types a name is looked up under, for its forms (Story 10.20): only a
 # LOCATION has forms of its own (its prepositions); every other type has a
@@ -21,6 +21,26 @@ def _name_forms(full_name: str, entity_type: str) -> list[str]:
     Qa and Qb; v1.7, ``saved_name_forms``), in the order a lookup prefers
     them: the composed name first."""
     return saved_name_forms(full_name, entity_type)
+
+
+def _same_or_form(text: str, name: str) -> bool:
+    """Whether a saved name is erased with ``name`` (Story 10.19, AC4): the
+    same letters whatever their capitals, or a form of it (``is_form``:
+    written entirely in capitals, accents set aside)."""
+    # Imported here: the data layer reads the forms rule of the validation
+    # models, which import the core (no gui/ import).
+    from gdpr_pseudonymizer.validation.models import is_form
+
+    return text.lower() == name.lower() or is_form(text, name)
+
+
+def _keeps_words(words: list[str], form_words: list[str]) -> bool:
+    """Whether every word of ``words`` is among ``form_words``, in order: a
+    saved form that keeps every word of the name as typed (a title or a
+    preposition may be added), as opposed to one that lost letters or a
+    word."""
+    remaining = iter(form_words)
+    return all(word in remaining for word in words)
 
 
 class MappingRepository(ABC):
@@ -334,23 +354,43 @@ class SQLiteMappingRepository(MappingRepository):
         whatever their capitals (a saved « zorbal » for « Zorbal » too), or a
         form of the name (``is_form``: written entirely in capitals with the
         name's letters once accents are set aside, « HELENE » for « Hélène »),
-        or whose name as saved, in small letters, is one of the name's saved
-        forms (``_name_forms``, for its type as ``_query_by_full_name`` reads
-        them) in small letters: a row an earlier version saved damaged, in
-        other capitals (the PO's v1.5 M1; Lionel's 10.20 Qa). Every other
-        saved row is decrypted once, as ``search_entities`` does.
+        or whose name, composed, is the same letters as, or a form of, one of
+        the name's saved forms composed (``_name_forms``, for its type as
+        ``_query_by_full_name`` reads them): a row an earlier version saved
+        damaged, in other capitals or in capitals without an accent (the
+        PO's v1.5 M1; Lionel's 10.20 Qa; the Codex review's P0-2). A lone
+        mark does not compose, so it stays in the comparison.
+
+        The sign is kept (Lionel's 10.20 P0-1, "Only with a sign"): a saved
+        form that lost letters (not every word of the name as typed, accents
+        set aside, is among its words in order) matches only a row whose
+        saved text carries an accent mark, so a name saved today that is such
+        a form once composed (« QUOVÔZORBAL »), another person's, is never
+        reached; nor is the name without a title typed with it (10.20's
+        clean-database rule). A row is compared only when its composed text, accents set
+        aside, in small letters, is that of the name or of one of the forms
+        (one ``fold`` per row). Every other saved row is decrypted once, as
+        ``search_entities`` does.
         """
         # Imported here: the data layer reads the forms rule of the
         # validation models, which import the core (no gui/ import).
-        from gdpr_pseudonymizer.validation.models import is_form
+        from gdpr_pseudonymizer.validation.models import fold
 
         rows = self._query_by_full_name(full_name)
         found = {row.id for row in rows}
         name = composed(full_name)
-        old_forms = {
-            form_type: {form.lower() for form in _name_forms(full_name, form_type)}
-            for form_type in _FORM_TYPES
-        }
+        name_words = fold(name).lower().split()
+        letters = {fold(name).lower()}
+        old_forms: dict[str, list[tuple[str, bool]]] = {}
+        for form_type in _FORM_TYPES:
+            forms: list[tuple[str, bool]] = []
+            for form in dict.fromkeys(
+                composed(saved) for saved in _name_forms(full_name, form_type)
+            ):
+                folded = fold(form).lower()
+                letters.add(folded)
+                forms.append((form, _keeps_words(name_words, folded.split())))
+            old_forms[form_type] = forms
         for row in self._session.query(Entity).all():
             if row.id in found:
                 continue
@@ -358,11 +398,13 @@ class SQLiteMappingRepository(MappingRepository):
             if stored is None:
                 continue
             text = composed(stored)
+            if fold(text).lower() not in letters:
+                continue
             form_type = "LOCATION" if row.entity_type == "LOCATION" else "PERSON"
-            if (
-                text.lower() == name.lower()
-                or is_form(text, name)
-                or stored.lower() in old_forms[form_type]
+            marked = any(is_mark(char) for char in stored)
+            if _same_or_form(text, name) or any(
+                (keeps or marked) and _same_or_form(text, form)
+                for form, keeps in old_forms[form_type]
             ):
                 rows.append(row)
         return rows

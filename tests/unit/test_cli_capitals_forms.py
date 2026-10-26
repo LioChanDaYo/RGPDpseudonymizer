@@ -705,12 +705,6 @@ def test_hand_group_joined_by_its_written_texts(tmp_path: Path, db: Path) -> Non
     )
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19 v1.10: reproduces the join chaining « Vorlan Mézor » and "
-    "« Zorbal Mèzor » through « MEZOR » on fa9f2ac; fixed in Task 9.2",
-)
 def test_join_never_chains(tmp_path: Path, db: Path) -> None:
     """T22 (AC3, Codex P0-1): « MEZOR » is a form of « Mézor » and of
     « Mèzor », but the « Vorlan Mézor » and « Zorbal Mèzor » groups never
@@ -727,12 +721,6 @@ def test_join_never_chains(tmp_path: Path, db: Path) -> None:
     assert _pseudonym(db, "Zorbal Mèzor") != vm
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19 v1.10: reproduces « MEZOR » corrected with the « Vorlan "
-    "Mézor » group it joined on fa9f2ac; fixed in Task 9.2",
-)
 def test_join_never_chains_swapped(tmp_path: Path, db: Path) -> None:
     """T22, swapped (AC3, Codex P0-1; the orchestrator's addition): the full
     name first. « MEZOR » does not join the « Vorlan Mézor » group, so its
@@ -751,12 +739,6 @@ def test_join_never_chains_swapped(tmp_path: Path, db: Path) -> None:
     assert written.startswith(f"{vmq} valide. Signé : {vmq}. {mezor} a signé. ")
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19 v1.10: reproduces « Mèzor » joined through « MEZOR » with "
-    "« Mézor », which it is not a form of, on fa9f2ac; fixed in Task 9.2",
-)
 def test_join_never_chains_through_the_set(tmp_path: Path, db: Path) -> None:
     """T22, case 3 (AC3; the orchestrator's addition): « Mézor » joins
     « MEZOR »; « Mèzor », a form of « MEZOR » but not of « Mézor », does not.
@@ -782,12 +764,6 @@ def test_join_never_chains_through_the_set(tmp_path: Path, db: Path) -> None:
     assert written == f"{vm} a signé. {vm} valide. Le contrat avec {other}."
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19 v1.10: reproduces « Zelvine » joined through the written "
-    "« ZELVINE » of a place [A] « ZÉLVINE » made on fa9f2ac; fixed in Task 9.2",
-)
 def test_hand_place_never_joins_another_name(tmp_path: Path, db: Path) -> None:
     """T24 (AC2, AC3, QA's JOIN-001): [A] « ZÉLVINE » (LOCATION) puts its
     « ZELVINE » place in the « Zélvine » group; « Zelvine », another name
@@ -811,13 +787,6 @@ def test_hand_place_never_joins_another_name(tmp_path: Path, db: Path) -> None:
     assert ("Zelvine", LOCATION) in _names(db)
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19 v1.10: reproduces « <p> Testar » written silently where a "
-    "correction in capitals cannot reach « Zélvine Testar » on fa9f2ac; fixed "
-    "in Task 9.2",
-)
 def test_unreached_place_goes_back_to_review(tmp_path: Path, db: Path) -> None:
     """T25 (AC3, QA's CAPS-001; the orchestrator's ruling): a correction typed
     in capitals without accents does not reach « Zélvine Testar »; that place
@@ -974,13 +943,6 @@ def test_delete_mapping_reaches_old_damaged_row(tmp_path: Path, db: Path) -> Non
     assert _erased_ids(db) == sorted([ids[(QZ, PERSON)], ids[(old, PERSON)]])
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19 v1.10: reproduces the row v2.2.0 saved from « BELORA "
-    "MÉLORA » left by delete-mapping « Bélora Mélora » on fa9f2ac; fixed in "
-    "Task 9.2",
-)
 def test_delete_mapping_reaches_old_row_in_capitals_without_accent(
     tmp_path: Path, db: Path
 ) -> None:

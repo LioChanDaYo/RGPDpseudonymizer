@@ -110,12 +110,6 @@ def whole_word_places(text: str, document_text: str) -> list[tuple[int, int]]:
             position = start + 1
 
 
-def _all_forms(texts: Iterable[str], names: Iterable[str]) -> bool:
-    """Whether every text of ``texts`` is a form of one of ``names``."""
-    candidates = list(names)
-    return all(any(is_form(text, name) for name in candidates) for text in texts)
-
-
 @dataclass
 class EntityGroup:
     """Group of entities with same text and type (including variant forms).
@@ -132,6 +126,9 @@ class EntityGroup:
         variant_texts: Set of unique text forms in this group
         canonical_entity: The representative entity (longest/most complete form)
         current_context_index: Index for context cycling (0-based)
+        joined_parts: The places of each group the forms join brought into
+            this one (Story 10.19), one list per group joined, in join order;
+            empty when nothing joined
     """
 
     unique_key: tuple[str, str]
@@ -139,6 +136,7 @@ class EntityGroup:
     variant_texts: set[str] = field(default_factory=set)
     canonical_entity: DetectedEntity | None = None
     current_context_index: int = 0
+    joined_parts: list[list[DetectedEntity]] = field(default_factory=list)
 
     @property
     def text(self) -> str:
@@ -679,18 +677,20 @@ class ValidationSession:
         AC3; the PO's M2 on v1.1).
 
         Taken left to right, a group joins the first kept group of the same
-        type when every text written at a place of one is a form of a text
-        written at a place of the other (``is_form``), either way round:
+        type when every text written at a place of it is a form, either way
+        round (``is_form``), of every text already in that joined group:
         « Vorlène » and « VORLENE » are one name. The texts are read from the
         document (``text_of``), since a place added with [A] carries the name
-        as typed (v1.8; the orchestrator's ruling, 2026-10-25). Each group is
-        compared with its own texts only, never with texts an earlier join
-        gave it, so a join never chains (the orchestrator's ruling on the
-        PO's v1.2 M1): with « Vorlène », and « VORLENE » grouped with
+        as typed (v1.8; the orchestrator's ruling, 2026-10-25). The joined
+        texts grow with each join, and every one of them is compared, so a
+        join never chains (the orchestrator's rulings on the PO's v1.2 M1 and
+        on the Codex review's P0-1): « MEZOR » is a form of « Mézor » and of
+        « Mèzor », but « Vorlan Mézor » and « Zorbal Mèzor » never meet
+        through it, and with « Vorlène », and « VORLENE » grouped with
         « Vorlene », the two stay apart. The joined group keeps the first
         group's key and canonical entity, takes both groups' places in the
-        order of the session's entities, and the union of their variant
-        texts.
+        order of the session's entities, the union of their variant texts,
+        and each joined group's places in ``joined_parts``.
         """
         order = {id(entity): index for index, entity in enumerate(self.entities)}
         kept: list[tuple[EntityGroup, set[str]]] = []
@@ -699,15 +699,21 @@ class ValidationSession:
                 self.text_of(entity)[entity.start_pos : entity.end_pos]
                 for entity in group.occurrences
             }
-            for first, first_texts in kept:
+            for first, joined_texts in kept:
                 if first.unique_key[1] != group.unique_key[1]:
                     continue
-                if _all_forms(texts, first_texts) or _all_forms(first_texts, texts):
+                if all(
+                    is_form(text, other) or is_form(other, text)
+                    for text in texts
+                    for other in joined_texts
+                ):
                     first.occurrences = sorted(
                         [*first.occurrences, *group.occurrences],
                         key=lambda entity: order.get(id(entity), len(order)),
                     )
                     first.variant_texts = first.variant_texts | group.variant_texts
+                    first.joined_parts.append(list(group.occurrences))
+                    joined_texts |= texts
                     break
             else:
                 kept.append((group, texts))

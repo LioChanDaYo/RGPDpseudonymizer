@@ -343,19 +343,12 @@ class ValidationWorkflow:
                             # the correction reaches is a place the user
                             # typed (v1.4/v1.5), widened over a name it
                             # partly overlaps before the document is written.
-                            for entity in group.occurrences:
-                                start_pos, end_pos = self._locate_modified_span(
-                                    session.text_of(entity), entity, new_text
-                                )
-                                modified_entity = replace(
-                                    entity,
-                                    text=new_text,
-                                    start_pos=start_pos,
-                                    end_pos=end_pos,
-                                    is_ambiguous=False,
-                                    source=CORRECTED_BY_HAND_SOURCE,
-                                )
-                                session.mark_modified(entity, modified_entity)
+                            # Story 10.19 (QA's CAPS-001; the orchestrator's
+                            # ruling): in a joined group, the places the
+                            # correction does not reach come back to the
+                            # review right after this group.
+                            sent_back = self._apply_correction(session, group, new_text)
+                            entity_groups[group_index + 1 : group_index + 1] = sent_back
                         else:
                             for entity in group.occurrences:
                                 session.mark_confirmed(entity)
@@ -609,10 +602,76 @@ class ValidationWorkflow:
         else:
             return "Entity flagged as ambiguous by detection algorithm"
 
+    def _apply_correction(
+        self, session: ValidationSession, group: EntityGroup, new_text: str
+    ) -> list[EntityGroup]:
+        """[E] on a group: every place it reaches takes ``new_text``.
+
+        A group the forms join did not touch (no ``joined_parts``): every
+        place takes the correction at the span ``_locate_modified_span``
+        gives, the old span when the text is not found there, as before.
+
+        A joined group (Story 10.19, QA's CAPS-001; the orchestrator's
+        ruling, 2026-10-26): a place where neither the correction nor a
+        capitals form of it is found (``_reached_span``), one of the group's
+        own or one a join brought in, is never written with a partial span.
+        It is left unmodified and goes back to the review as its own name:
+        the group's own such places as one group, then each joined part's,
+        in that order (key and canonical entity: the group's first place).
+
+        Returns:
+            The groups sent back to the review, possibly none
+        """
+        part_of = {
+            id(entity): index + 1
+            for index, part in enumerate(group.joined_parts)
+            for entity in part
+        }
+        unreached: dict[int, list[DetectedEntity]] = {}
+        for entity in group.occurrences:
+            text = session.text_of(entity)
+            if group.joined_parts:
+                reached = self._reached_span(text, entity, new_text)
+                if reached is None:
+                    unreached.setdefault(part_of.get(id(entity), 0), []).append(entity)
+                    continue
+                start_pos, end_pos = reached
+            else:
+                start_pos, end_pos = self._locate_modified_span(text, entity, new_text)
+            modified_entity = replace(
+                entity,
+                text=new_text,
+                start_pos=start_pos,
+                end_pos=end_pos,
+                is_ambiguous=False,
+                source=CORRECTED_BY_HAND_SOURCE,
+            )
+            session.mark_modified(entity, modified_entity)
+        return [
+            EntityGroup(
+                unique_key=(places[0].text, places[0].entity_type),
+                occurrences=places,
+                variant_texts={place.text for place in places},
+                canonical_entity=places[0],
+            )
+            for _, places in sorted(unreached.items())
+        ]
+
     @staticmethod
     def _locate_modified_span(
         document_text: str, entity: DetectedEntity, new_text: str
     ) -> tuple[int, int]:
+        """The span ``_reached_span`` finds for the edited text, or the
+        original span when it finds none."""
+        reached = ValidationWorkflow._reached_span(document_text, entity, new_text)
+        if reached is None:
+            return entity.start_pos, entity.end_pos
+        return reached
+
+    @staticmethod
+    def _reached_span(
+        document_text: str, entity: DetectedEntity, new_text: str
+    ) -> tuple[int, int] | None:
         """Find where the edited text sits relative to the original span.
 
         Replacement is offset-based, so editing "Thanks, Aino" down to "Aino"
@@ -625,7 +684,9 @@ class ValidationWorkflow:
         it (``whole_word_places``: other capitals, or capitals without its
         accents, never a word in small letters) inside the same window that
         overlaps the original span is taken, so « ZORBAL » corrected as
-        « Zorbal Quentrix » covers « ZORBAL QUENTRIX » whole.
+        « Zorbal Quentrix » covers « ZORBAL QUENTRIX » whole. The forms are
+        searched in the window only, with one character more on each side
+        for the word bounds (QA's PERF-001).
 
         Args:
             document_text: Full document text
@@ -634,8 +695,7 @@ class ValidationWorkflow:
 
         Returns:
             (start_pos, end_pos) of the edited text (or of a form of it)
-            overlapping the original span, or the original span if neither
-            is found there
+            overlapping the original span, or None if neither is found there
         """
         window_start = max(0, entity.start_pos - len(new_text))
         window_end = min(len(document_text), entity.end_pos + len(new_text))
@@ -648,7 +708,10 @@ class ValidationWorkflow:
             if pos < entity.end_pos and end > entity.start_pos and not splits_a_letter:
                 return pos, end
             pos = document_text.find(new_text, pos + 1, window_end)
-        for start, end in whole_word_places(new_text, document_text):
+        low = max(0, window_start - 1)
+        high = min(len(document_text), window_end + 1)
+        for start, end in whole_word_places(new_text, document_text[low:high]):
+            start, end = start + low, end + low
             if (
                 window_start <= start
                 and end <= window_end
@@ -656,7 +719,7 @@ class ValidationWorkflow:
                 and end > entity.start_pos
             ):
                 return start, end
-        return entity.start_pos, entity.end_pos
+        return None
 
     def _handle_add_entity(self, session: ValidationSession) -> None:
         """Handle manual entity addition flow.
