@@ -29,6 +29,7 @@ from gdpr_pseudonymizer.validation.models import (
     EntityGroup,
     EntityReviewState,
     ValidationSession,
+    fold,
     whole_word_places,
 )
 from gdpr_pseudonymizer.validation.ui import (
@@ -43,6 +44,10 @@ from gdpr_pseudonymizer.validation.ui import (
     get_text_input,
     get_user_action,
 )
+
+# Story 10.19 (v1.13, Lionel's answer on the leak): the word written right
+# after a place, past spaces: letters up to a space or a punctuation mark.
+_NEXT_WORD = re.compile(r"[ \t]+([^\s.,;:!?«»()\[\]\"]+)")
 
 # Story 10.15 (AC14 (e), Lionel's approved Q2 text): [A] of a name whose every
 # place is already in the review. %1 is the text typed, %2 the type typed.
@@ -661,12 +666,55 @@ class ValidationWorkflow:
     def _locate_modified_span(
         document_text: str, entity: DetectedEntity, new_text: str
     ) -> tuple[int, int]:
-        """The span ``_reached_span`` finds for the edited text, or the
-        original span when it finds none."""
+        """The span ``_reached_span`` finds for the edited text; else the
+        original span widened over the words the correction adds, when they
+        are written right after it (``_widened_over_added_words``); else the
+        original span."""
         reached = ValidationWorkflow._reached_span(document_text, entity, new_text)
-        if reached is None:
-            return entity.start_pos, entity.end_pos
-        return reached
+        if reached is not None:
+            return reached
+        widened = ValidationWorkflow._widened_over_added_words(
+            document_text, entity, new_text
+        )
+        if widened is not None:
+            return widened
+        return entity.start_pos, entity.end_pos
+
+    @staticmethod
+    def _widened_over_added_words(
+        document_text: str, entity: DetectedEntity, new_text: str
+    ) -> tuple[int, int] | None:
+        """The original span widened over the words a correction adds
+        (Story 10.19, v1.13; Lionel, 2026-10-26, "fix it in 10.19").
+
+        When the correction starts with the words the original span holds,
+        accents set aside, in any capitals, and the words written right after
+        the span are the words it adds, accents set aside, each with a capital
+        letter (never a word written in small letters only), the span covers
+        them: « Zélvine » corrected as « ZELVINE TESTAR » covers « Zélvine
+        Testar », so « Testar » is not left in clear beside the pseudonym.
+
+        Returns:
+            (start_pos, end_pos) of the widened span, or None
+        """
+        held = document_text[entity.start_pos : entity.end_pos].split()
+        typed = new_text.split()
+        if not held or len(typed) <= len(held):
+            return None
+        if any(fold(a).lower() != fold(b).lower() for a, b in zip(held, typed)):
+            return None
+        end = entity.end_pos
+        for word in typed[len(held) :]:
+            found = _NEXT_WORD.match(document_text, end)
+            if found is None:
+                return None
+            written = found.group(1)
+            if fold(written).lower() != fold(word).lower() or not any(
+                char.isupper() for char in written
+            ):
+                return None
+            end = found.end(1)
+        return entity.start_pos, end
 
     @staticmethod
     def _reached_span(

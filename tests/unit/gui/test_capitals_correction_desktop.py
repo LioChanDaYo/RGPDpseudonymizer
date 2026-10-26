@@ -540,12 +540,6 @@ def test_hand_row_reached_by_its_written_texts(  # type: ignore[no-untyped-def]
     assert review.names() == sorted([(VQ, PERSON), ("VORLENE", PERSON)])
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19 v1.13: reproduces a second correction missing the "
-    "« VORLENE » row the first one reached on f8c28a6; fixed in Task 10.2",
-)
 @pytest.mark.parametrize("mode", ["single", "batch"])
 def test_second_correction_reaches_rows_the_first_reached(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, dialogs, mode
@@ -582,12 +576,6 @@ def test_second_correction_reaches_rows_the_first_reached(  # type: ignore[no-un
     assert review.names() == [(f"{VQ} Zorbal", PERSON)]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19 v1.13: reproduces the « Zélvine » batch row written with "
-    "a correction its text cannot reach on f8c28a6; fixed in Task 10.2",
-)
 def test_batch_unreached_row_stays_pending(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, dialogs
 ) -> None:
@@ -616,12 +604,6 @@ def test_batch_unreached_row_stays_pending(  # type: ignore[no-untyped-def]
     assert review.output() == f"Signé : {zt}. {z} Testar a signé."
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19 v1.13: reproduces a « ZELVINE » row written with a "
-    "correction found at one of its two places on f8c28a6; fixed in Task 10.2",
-)
 def test_single_row_unreached_at_one_place_stays_pending(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, dialogs
 ) -> None:
@@ -657,13 +639,6 @@ def test_single_row_unreached_at_one_place_stays_pending(  # type: ignore[no-unt
     )
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19 v1.13: reproduces « <p> Testar » left where a correction "
-    "typed in other accents is written at the row's own place on f8c28a6; "
-    "fixed in Task 10.2",
-)
 def test_desktop_single_added_words_never_left_in_clear(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, dialogs
 ) -> None:

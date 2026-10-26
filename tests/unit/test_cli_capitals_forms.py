@@ -812,13 +812,6 @@ def test_unreached_place_goes_back_to_review(tmp_path: Path, db: Path) -> None:
     assert written == f"Signé : {caps}. {title} a signé."
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19 v1.13: reproduces « <p> Testar » left where a correction "
-    "typed in other accents is written at the group's own place on f8c28a6; "
-    "fixed in Task 10.2",
-)
 def test_cli_added_words_never_left_in_clear_at_own_places(
     tmp_path: Path, db: Path
 ) -> None:
@@ -1006,13 +999,6 @@ def test_delete_mapping_reaches_old_row_in_capitals_without_accent(
     )
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19 v1.13: reproduces the row v2.2.0 saved from « VORLAN "
-    "MÈLORA » left by delete-mapping « Vorlan Mélora » on f8c28a6; fixed in "
-    "Task 10.2",
-)
 def test_delete_mapping_reaches_old_row_with_another_accent(
     tmp_path: Path, db: Path
 ) -> None:
@@ -1043,13 +1029,6 @@ def test_delete_mapping_reaches_old_row_with_another_accent(
     )
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19 v1.13: reproduces delete-mapping « Vorlan Melora » erasing "
-    "today's « VORLAN MÉLORA » but not the old row v2.2.0 saved of it on "
-    "f8c28a6; fixed in Task 10.2",
-)
 def test_delete_mapping_typed_without_accents_reaches_old_capitals_row(
     tmp_path: Path, db: Path
 ) -> None:

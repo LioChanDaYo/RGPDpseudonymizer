@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+import itertools
 from abc import ABC, abstractmethod
 
-from gdpr_pseudonymizer.core.legacy_names import matches_search
+from gdpr_pseudonymizer.core.legacy_names import matches_search, title_words
 from gdpr_pseudonymizer.core.mapping_key import saved_name_forms
 from gdpr_pseudonymizer.data.models import Entity
 from gdpr_pseudonymizer.exceptions import DatabaseError, DuplicateEntityError
@@ -32,6 +33,56 @@ def _same_or_form(text: str, name: str) -> bool:
     from gdpr_pseudonymizer.validation.models import is_form
 
     return text.lower() == name.lower() or is_form(text, name)
+
+
+def _one_mark(text: str) -> str:
+    """``text`` with every accent mark written as one mark (U+0301), so that
+    comparing Q3 forms of saved forms, every accent mark counts as a mark,
+    whatever its kind (Story 10.19, v1.13; the orchestrator's ruling on the
+    second Codex review's third P0): v2.2.0's « VORLAN » + U+0300 + « LORA »
+    (from « VORLAN MÈLORA ») meets « VORLAN » + U+0301 + « LORA »."""
+    return "".join("\u0301" if is_mark(char) else char for char in text)
+
+
+# The vowels an accent can sit on where v2.2.0's title step cut a word
+# (Story 10.19, v1.13, ``_damage_seeds``), in capitals.
+_VOWELS = frozenset("AEIOUY")
+
+# The most cut points ``_damage_seeds`` combines (2**6 - 1 seeds at most).
+_MAX_DAMAGE_SPOTS = 6
+
+
+def _damage_seeds(name: str) -> list[str]:
+    """The capitals texts of ``name`` an earlier version could have saved
+    damaged (Story 10.19, v1.13; QA's DEL-1019-01, second shape).
+
+    The name in capitals, accents set aside, with an accent put back on each
+    letter where v2.2.0's title step could cut a word read with separate
+    marks: a vowel that ends a title word at the start of a word (« ME » in
+    « MÉLORA »), or that a title word follows to the end of the word (« ME »
+    in « QUOVÔME »); every choice of them, from at most six such letters.
+    Each is a form of the name once accents are set aside (Lionel's Q3).
+    """
+    # Imported here: the data layer reads the forms rule of the validation
+    # models, which import the core (no gui/ import).
+    from gdpr_pseudonymizer.validation.models import fold
+
+    titles = {fold(word).upper() for word in title_words() if not word.endswith(".")}
+    words = fold(name).upper().split()
+    spots = [
+        (index, at)
+        for index, word in enumerate(words)
+        for at, char in enumerate(word)
+        if char in _VOWELS and (word[: at + 1] in titles or word[at + 1 :] in titles)
+    ][:_MAX_DAMAGE_SPOTS]
+    seeds: list[str] = []
+    for size in range(1, len(spots) + 1):
+        for chosen in itertools.combinations(spots, size):
+            letters = [list(word) for word in words]
+            for index, at in chosen:
+                letters[index][at] = composed(letters[index][at] + "\u0301")
+            seeds.append(" ".join("".join(word) for word in letters))
+    return seeds
 
 
 def _keeps_words(words: list[str], form_words: list[str]) -> bool:
@@ -367,9 +418,20 @@ class SQLiteMappingRepository(MappingRepository):
         saved text carries an accent mark, so a name saved today that is such
         a form once composed (« QUOVÔZORBAL »), another person's, is never
         reached; nor is the name without a title typed with it (10.20's
-        clean-database rule). A row is compared only when its composed text, accents set
-        aside, in small letters, is that of the name or of one of the forms
-        (one ``fold`` per row). Every other saved row is decrypted once, as
+        clean-database rule).
+
+        v1.13 (the second Codex review's third P0; QA's DEL-1019-01): in
+        those comparisons every accent mark counts as one mark, whatever its
+        kind (``_one_mark``), so « VORLAN » + U+0300 + « LORA », saved from
+        « VORLAN MÈLORA », is erased with « Vorlan Mélora »; and the forms
+        that lost letters of the name's damaged capitals texts
+        (``_damage_seeds``: « VORLAN MÉLORA » for « Vorlan Melora ») reach a
+        row written entirely in capitals that carries a mark. The sign rule
+        reads the saved text as it is.
+
+        A row is compared only when its composed text, accents set aside, in
+        small letters, is that of the name or of one of the forms (one
+        ``fold`` per row). Every other saved row is decrypted once, as
         ``search_entities`` does.
         """
         # Imported here: the data layer reads the forms rule of the
@@ -380,17 +442,30 @@ class SQLiteMappingRepository(MappingRepository):
         found = {row.id for row in rows}
         name = composed(full_name)
         name_words = fold(name).lower().split()
-        letters = {fold(name).lower()}
+        letters = {fold(name).lower(), fold(_one_mark(name)).lower()}
         old_forms: dict[str, list[tuple[str, bool]]] = {}
+        seed_forms: dict[str, list[str]] = {}
+        seeds = _damage_seeds(name)
         for form_type in _FORM_TYPES:
             forms: list[tuple[str, bool]] = []
             for form in dict.fromkeys(
-                composed(saved) for saved in _name_forms(full_name, form_type)
+                _one_mark(composed(saved))
+                for saved in _name_forms(full_name, form_type)
             ):
                 folded = fold(form).lower()
                 letters.add(folded)
                 forms.append((form, _keeps_words(name_words, folded.split())))
             old_forms[form_type] = forms
+            lost: list[str] = []
+            for seed in seeds:
+                for saved in _name_forms(seed, form_type):
+                    form = _one_mark(composed(saved))
+                    folded = fold(form).lower()
+                    if _keeps_words(name_words, folded.split()):
+                        continue
+                    letters.add(folded)
+                    lost.append(form)
+            seed_forms[form_type] = list(dict.fromkeys(lost))
         for row in self._session.query(Entity).all():
             if row.id in found:
                 continue
@@ -398,13 +473,24 @@ class SQLiteMappingRepository(MappingRepository):
             if stored is None:
                 continue
             text = composed(stored)
-            if fold(text).lower() not in letters:
+            marks_one = _one_mark(text)
+            if fold(marks_one).lower() not in letters:
                 continue
             form_type = "LOCATION" if row.entity_type == "LOCATION" else "PERSON"
             marked = any(is_mark(char) for char in stored)
-            if _same_or_form(text, name) or any(
-                (keeps or marked) and _same_or_form(text, form)
-                for form, keeps in old_forms[form_type]
+            if (
+                _same_or_form(text, name)
+                or any(
+                    (keeps or marked) and _same_or_form(marks_one, form)
+                    for form, keeps in old_forms[form_type]
+                )
+                or (
+                    marked
+                    and not any(char.islower() for char in text)
+                    and any(
+                        _same_or_form(marks_one, form) for form in seed_forms[form_type]
+                    )
+                )
             ):
                 rows.append(row)
         return rows

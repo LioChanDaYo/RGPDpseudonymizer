@@ -412,6 +412,13 @@ class GUIValidationState(QObject):
         the same name and type is reached as before (10.10), whatever places
         it stands for.
 
+        A row the row's earlier correction reached (it holds the same
+        corrected text) is reached again when the text now written at every
+        place it stands for (``_current_places``: the span that correction
+        gave it) is a form of that corrected text, so a second correction
+        reaches every row the first one reached (v1.13; the orchestrator's
+        ruling on the second Codex review's first P0).
+
         Accept and reject do not use this: they use ``_group_ids``, where a
         row added by hand is alone.
         """
@@ -420,6 +427,7 @@ class GUIValidationState(QObject):
         if name is None:
             return rows
         text, entity_type = name
+        earlier = review.user_modification
         for other in self._session._entity_reviews:
             if other is review:
                 continue
@@ -442,10 +450,49 @@ class GUIValidationState(QObject):
                         text,
                     )
                     for place in places
+                ) and not (
+                    earlier is not None
+                    and other.user_modification == earlier
+                    and all(
+                        is_form(self._session.text_of(place)[start:end], earlier)
+                        for place, start, end in self._current_places(other)
+                    )
                 ):
                     continue
             rows.append(other)
         return rows
+
+    def _current_places(
+        self, review: EntityReview
+    ) -> list[tuple[DetectedEntity, int, int]]:
+        """Every place a row stands for (``_occurrences``, else the row
+        itself), each with the span now written there: the span the row's
+        last text edit gave it (``_edited_spans_by_id``), else its own."""
+        places = self._occurrences(review) or [review.entity]
+        spans = (
+            self._edited_spans_by_id.get(review.entity_id)
+            if review.user_modification
+            else None
+        )
+        if spans is None or len(spans) != len(places):
+            return [(place, place.start_pos, place.end_pos) for place in places]
+        return [(place, start, end) for place, (start, end) in zip(places, spans)]
+
+    def _reaches(self, review: EntityReview, new_text: str) -> bool:
+        """Whether a corrected text reaches every place a row stands for, read
+        from the span now written there (``_current_places``), in Q3's
+        direction: the text itself, or a form of it in capitals
+        (``ValidationWorkflow._reached_span``; never the widening over added
+        words)."""
+        return all(
+            ValidationWorkflow._reached_span(
+                self._session.text_of(place),
+                dataclasses.replace(place, start_pos=start, end_pos=end),
+                new_text,
+            )
+            is not None
+            for place, start, end in self._current_places(review)
+        )
 
     def modify_entity_text(
         self,
@@ -469,9 +516,26 @@ class GUIValidationState(QObject):
         ``_action_rows``: every place of the name and type, found or added
         by hand, except another place rejected on its own (Story 10.10). The
         edit is the row's own when it reaches that row only.
+
+        Story 10.19 (v1.13; the orchestrator's ruling on the second Codex
+        review's second P0): a row of another name, reached through the forms
+        rule, takes the edit only when the corrected text, or a capitals form
+        of it, is found at every place it stands for (``_reaches``); otherwise
+        it is left as it is (pending, as before Story 10.19), never written
+        with a partial span. The row itself and the rows of exactly its name
+        take the edit as before.
         """
         review = self._reviews_by_id.get(entity_id)
         rows = self._action_rows(review) if review is not None else []
+        if review is not None:
+            name = self._name_key(review)
+            rows = [
+                row
+                for row in rows
+                if row is review
+                or self._name_key(row) == name
+                or self._reaches(row, new_text)
+            ]
         if len(rows) > 1:
             document_text = self._session.document_text
             self._undo_stack.beginMacro("Modifier le texte du groupe")
