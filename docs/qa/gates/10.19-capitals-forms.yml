@@ -1,0 +1,97 @@
+schema: 1
+story: '10.19'
+story_title: 'Capitals in Hand-Added Names and Corrections'
+scope: 'PR #112, pre-merge review (Task 7, G2) at head fa9f2ac on main 097a12c (10.12-10.18 and 10.20 merged). Commits reviewed: tests first 6d7a424, fix 0045902, record 93d7ae0, v1.8 2461443, T21 af3c110, the written-texts fix d6c71e4, record fa9f2ac. QA folder: rgpd-analysis/r1019/qa (probes test_q19_real.py, test_q19_old.py, test_q19_cost.py; old databases written by v2.2.0 and 43041e9; 17 mutants).'
+gate: FAIL
+status_reason: 'Every AC holds on real output (QA''s 51 checks pass at the head, 32 of them fail on main, each a 10.19 change), and the PO''s NO-GO shapes and QA''s own v2.2.0 and 43041e9 rows are erased across capitals. But a variant of Task 8''s gap fails in the command line (JOIN-001, high): a name added with [A] puts its form written in capitals without accents into the accented name''s group, the join then pulls in another name (« Zelvine », Q3), and the correction writes it with the corrected name''s pseudonym. A correction typed in capitals without accents also misses the accented places of the same name, silently in the CLI where the review shows one name (CAPS-001, medium).'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-10-26T02:30:00Z'
+
+waiver: { active: false }
+
+merge_blockers:
+  - 'JOIN-001'
+
+merge_notes:
+  - 'The merge waits for a fix of JOIN-001 with a guard, then QA''s re-check, and for Lionel. QA never merges.'
+  - 'CAPS-001 needs a ruling (the orchestrator''s, or a question for Lionel): does a correction typed in capitals without accents, or of a capitals-without-accents row, reach the accented places of the same name?'
+  - 'Task 6.3 is running: the orchestrator''s read-only codex exec review (session 01a17588, read-only). If the code changes after it, the new head is reviewed again (AC9).'
+  - 'This gate commit (docs only) starts its own CI run on the PR.'
+
+top_issues:
+  - id: 'JOIN-001'
+    severity: high
+    finding: 'CLI forms join (validation/models.py _join_forms): with « Zélvine » and « Zelvine » found (LOCATION) in « Brimel Testar valide. Zélvine Testar a signé. Signé : ZELVINE TESTAR. Le contrat avec Zelvine Testar. », [A] « ZÉLVINE » (or [A] « Zélvine », the found name itself) then [E] « Zélvine Testar » on « Zélvine »: the review shows « (3 occurrences, 1 unique) » and writes « … Caen a signé. Signé : Caen. Le contrat avec Caen Testar. »; « Zelvine », another name (Lionel''s Q3), takes the corrected name''s pseudonym and its row is not saved (main keeps it apart). Cause: the grouping puts the [A] place with « Zélvine » by its typed text, so the group''s written texts hold « ZELVINE », of which « Zelvine » is a form; G8''s chain, built by [A]. Fails Task 8''s criterion (a text not written as a form at every place never takes the corrected name''s pseudonym). The desktop is not affected.'
+    suggested_action: 'Dev (with the SM): keep [A] places whose written text is of another small-letter class out of the join, or compare each group''s own key texts; a guard of QA''s shape (r1019/qa/probes/test_q19_real.py::test_j_cli_join_through_a_hand_place). Then QA re-checks.'
+    refs: ['gdpr_pseudonymizer/validation/models.py', 'rgpd-analysis/r1019/qa/probes/test_q19_real.py']
+    suggested_owner: dev
+  - id: 'CAPS-001'
+    severity: medium
+    finding: 'is_form reaches one way only: an accented place is not a form of the name typed in capitals without accents. CLI: « Signé : ZELVINE TESTAR. Zélvine Testar a signé. » is one name in the review (2 occurrences, 1 unique), and [E] typed « ZELVINE TESTAR » writes « <p>. <p> Testar a signé. » (silent; on main they were two names). Desktop single document and batch: a correction of the « ZELVINE » row does not reach the « Zélvine » row (visible; accepted as it is, « Testar » stays in clear: Lionel''s Q4 case, the other way round).'
+    suggested_action: 'Orchestrator: rule whether Q3/Q4 cover the reverse direction (or ask Lionel); then the dev applies it to the correction locating and _action_rows, with a test.'
+    refs: ['gdpr_pseudonymizer/validation/models.py', 'gdpr_pseudonymizer/validation/workflow.py', 'gdpr_pseudonymizer/gui/models/validation_state.py']
+    suggested_owner: po
+  - id: 'PERF-001'
+    severity: low
+    finding: '_locate_modified_span''s forms fallback folds and searches the whole document at every place whose corrected text is not found exactly: 73-79 ms per place on 203 KB; [E] on one name with 100 capital places in 200 KB takes 7.36 s at the head (0.27 s on main, which leaves « QUENTRIX » in clear 100 times). With the text found exactly at every place: 0.22 s against 0.23 s.'
+    suggested_action: 'Search only the window around the place (a form has the corrected text''s length, so the same places are found).'
+    refs: ['gdpr_pseudonymizer/validation/workflow.py']
+    suggested_owner: dev
+  - id: 'TEST-1019-01'
+    severity: low
+    finding: 'No committed test has the capitals group first in the document: QA''s mutant with the join one way only (_all_forms(texts, first_texts) only) passes every committed test; in « Signé : ZELVINE TESTAR. Zélvine Testar a signé. » it shows two names where the head shows one.'
+    suggested_action: 'A guard with the capitals place first (T17''s shape reversed).'
+    refs: ['tests/unit/test_cli_capitals_forms.py']
+    suggested_owner: dev
+  - id: 'CI-FLAKY-01'
+    severity: low
+    finding: 'tests/unit/test_hybrid_overlap_role_filter.py::TestSameTypeDedup::test_large_input_uses_an_active_window failed on macOS in two separate runs (40238133978: 0.0265/0.3326 s; 40244260284: 0.0203/0.2752 s, ratio above its bound of 10), each green on its rerun; nlp/ and the test are unchanged in this story. The test is now flaky on macOS.'
+    suggested_action: 'Backlog: widen or rework the timing bound (not this story).'
+    refs: ['tests/unit/test_hybrid_overlap_role_filter.py']
+    suggested_owner: dev
+  - id: 'DOC-1019-01'
+    severity: low
+    finding: 'PR #112 is still a draft; its body still holds the tests-first text, without Task 6.4''s sentence and the Codex VERDICT line.'
+    suggested_action: 'Orchestrator: Tasks 6.3 to 6.6.'
+    refs: ['https://github.com/LioChanDaYo/RGPDpseudonymizer/pull/112']
+    suggested_owner: dev
+  - id: 'OBS-1019-01'
+    severity: info
+    finding: 'delete-mapping of an accentless name (« Zelvine », « Quovome Zorbal ») also deletes a saved name written entirely in capitals with accents (« ZÉLVINE », « QUOVÔME ZORBAL »): a name in capitals is a form of both spellings, as AC4 reads; listed on the screen, named only in the success lines with --force. Three QA mutants are equivalent: the join that chains (every type''s grouping already joins texts of the same small letters), delete without the small-letter branch (the saved-forms branch holds the name in small letters), the fallback without the window (a form has the corrected text''s length).'
+    suggested_action: 'None.'
+    refs: ['gdpr_pseudonymizer/data/repositories/mapping_repository.py']
+    suggested_owner: po
+
+quality_score: 70
+expires: '2026-11-09T02:30:00Z'
+
+qa_process_notes:
+  - 'Every old database opened as a copy only: the PO''s six (po11/dbs, checksums unchanged after the run; its maker step left out) and QA''s twelve (r1019/qa/olddbs).'
+  - 'QA''s probes import the dev''s desktop driver (_Review) from the worktree''s committed test file; QA''s harness answers no to Story 10.18''s question, as the dev''s tests do.'
+
+evidence:
+  tests_reviewed: 35
+  risks_identified: 2
+  environment: 'Windows, the main Poetry environment, .bat runners through cmd.exe, USERPROFILE and HOME = r1019/qa/home; packages from git archive (head fa9f2ac, main 097a12c). C:\Users\devea\.gdpr-pseudo.yaml not touched (2026-10-14 13:27, 270 bytes). Nothing under held_out/, final_exam/ or tests/accuracy/ opened. Invented names only. No Codex, Forge, Anvil or Cato from QA.'
+  real_output: 'test_q19_real.py: its 51 AC checks pass at the head and 32 of them fail on main (each a 10.19 change); QA''s later probes of JOIN-001 (2, LOCATION) and CAPS-001 (1) fail at the head. [A] on .txt, .xlsx, .csv and batch: « QUOVANE » written with « Quovane »''s pseudonym, one row; « quovane » and « QUOVANE-JEAN » kept; « ZÉLVINE », « ZELVINE », « ZÈLVINE » written for « Zélvine », « Zelvine » and « zélvine » kept; mixed and particle forms; apostrophes; a form widened over a partly overlapping name; the approved line only when every form is found; a found capital place keeps its rejection. [E]: « QUOVANE TESTAR » covered whole (typed « Quovane Testar » or « QUOVANE TESTAR »), the small-letter place keeping its span as today; « Zélvine », « ZELVINE », « ZÉLVINE » one name. Desktop single and batch: corrections reach capital and accentless-capital rows; an own-rejected row stays; the small row is not reached; 10.17''s hand add reaches capitals. delete-mapping: every row of the name across capitals and accentless capitals listed, deleted, one ERASURE entry each with no name; --force names them; --id lines byte for byte.'
+  po_and_old_rows: 'PO''s test_po11_capsold.py on copies: head erases all six shapes (typed and as saved) and both mixed cases; main answers not found. QA''s v2.2.0 and 43041e9 rows (ZÉLVINE TESTAR decomposed; MÉLINA TESTAR and Mélina Testar saved with a lone U+0301; À QUOVANEVILLE; Maître ZÉLVINE; QUOVANE TESTAR): 41 of 41 at the head (28 fail on main), by title-case, capitals, accentless capitals and small-letter names; with today''s row too, both erased.'
+  task8_variants: 'Desktop: « ZELVINE » or « Zelvine » added by hand, then « Zélvine » corrected: not reached; the hand row corrected itself. CLI: [A] « ZELVINE », « zelvine », « Zelvine », « ZÉLVINE » (LOCATION) then [E]: « Zelvine » never takes the corrected pseudonym when it is not found. With « Zelvine » found too: JOIN-001.'
+  no_regression: 'QA''s 10.17 (95) and 10.18 (35) probe sets identical on head and main; 10.15 (57): one by-design difference (« ZORBAL » now a form); 10.20 (639): the same 6 by-design failures, plus two expecting 10.20''s Qc line, which Lionel''s Q2 completes (rows still erased). 10.20''s clean digest a630e965c52cd9cb identical. No file of nlp/, resources/, utils/, core/, tests/accuracy/ or tests/test_corpus/ changed.'
+  clean_databases: 'clean_delete.py, 24 shapes x 3 types fresh: head deletes exactly QA''s reading of AC4 (0 differences; 156 beyond the exact name); main the exact name only.'
+  cost: 'delete-mapping by name, 10,002 rows: head 0.29-0.30 s (lookup 0.11-0.13 s), main 0.05-0.06 s. _locate_modified_span fallback, 203 KB: 73-79 ms per call; [E] across 100 capital places in 200 KB: 7.36 s (PERF-001).'
+  g2: 'wt_6d7a424 (product = 097a12c): --runxfail 24 failed, 9 passed at the dev''s lines (CLI :479 x2 :515 :543 :564 :585 :610 :638 x2 :672 :703 :731 :766 :787 :804 :832 :858 x2 :879; desktop :381 :414 :447 :479 :516), no PRE; marked 9 passed, 24 xfailed, one process and -n 4. wt_af3c110 (product = 93d7ae0): 2 failed at :684 (CLI) and :536 (desktop), no PRE; marked 33 passed, 2 xfailed. Both fix commits remove marker lines only from the new files; the three changed assertions are Task 3.2''s.'
+  mutants: '17 in r1019/qa/mut (make_mutants19.ts): caught by committed tests: no join (T17, T19 CLI), join over typed texts (T21 CLI), _action_rows exact key (T14, T15, T16, T19 desktop), no every-place check (G8 desktop, T21 desktop), every-place on place.text (T21 desktop), every-place for the same name (G9 + 2), delete without saved forms (T20), without accents (T13), accents turned round (T13), list exact delete all (T9, T11, T13, T20), places_of exact (11), is_listed_place exact (T3), no forms fallback (9). Survive: join one way (TEST-1019-01); equivalent: join that chains, delete without the small-letter branch, fallback without the window.'
+  strings: 'accuracy_heldout_blind_check.py on the data words of the new tests (valide, Le, contrat, avec, Signé, a, signé, et, de, petit, Petit, PETIT, ok, Nom, Note, SAINT, Saint, Copie): all in the main corpus.'
+  texts: 'Byte for byte: the Q2 screen line, both CLI-REFERENCE paragraphs (AC8), the 10.19 CHANGELOG bullet and 10.7''s block (CHANGELOG Entry), Task 5.4''s « or its capitals » in 10.20''s quote; the --id lines (AC15) on real output.'
+  ci:
+    6d7a424: '40235836792, attempt 1: "3158 passed, 24 xfailed" x3; Windows "3008 passed, 3 skipped, 24 xfailed".'
+    0045902: '40238133978: macOS attempt 1 "1 failed, 3181 passed" (the timing test), attempt 2 "3182 passed"; others "3182 passed", Windows "3032 passed, 3 skipped".'
+    93d7ae0: '40240341750, attempt 1: "3182 passed" x3; Windows "3032 passed, 3 skipped".'
+    af3c110: '40242890365, attempt 1: "3182 passed, 2 xfailed" x3; Windows "3032 passed, 3 skipped, 2 xfailed".'
+    d6c71e4: '40244260284: macOS attempt 1 "1 failed, 3183 passed" (the timing test), attempt 2 "3184 passed"; others "3184 passed", Windows "3034 passed, 3 skipped".'
+    fa9f2ac: '40246280093, attempt 1: "3184 passed" x3; Windows "3034 passed, 3 skipped". Code Quality and the PR checks green on every commit. Lint at the head clean (ruff 0, black 332 files, mypy 107 source files).'
+  codex_rule: 'One Codex session on rgpd-wt-s1019, read-only (01a17588, 2026-10-26 01:07, the parallel review); no workspace-write session; no Forge entry for this story; every 10.19 commit carries both attribution lines, no skip-CI marker.'
+  trace:
+    ac_covered: [1, 2, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15]
+    ac_gaps: [3]
+    notes: 'AC3: JOIN-001 (the CLI join merges another name) and CAPS-001 (the reverse accent direction). AC9: the read-only Codex review of the final head is running.'
