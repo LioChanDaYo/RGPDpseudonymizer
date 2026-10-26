@@ -1,6 +1,6 @@
 """Story 10.19: a correction in the desktop app reaches the name's forms in
 capitals (T8, T14, T15, T16, T19 desktop, T21 desktop), and what must not
-change (G3, G4, G5, G8 desktop, G9).
+change (G3, G4, G5, G8 desktop, G9, G10).
 
 Written by the BMAD dev agent (Claude), before the fix. Each test drives the
 real single-document path (``DetectionWorker``, the validation screen, the
@@ -68,6 +68,7 @@ G8_TEXT = (
     "Le contrat avec Vorlene Quentrix."
 )
 G9_TEXT = "Zorbal Quentrix a signé. Signé : zorbal. Le contrat avec Zorbal Quentrix."
+G10_TEXT = "Signé : ZELVINE TESTAR. Zélvine Testar a signé."
 
 Drive = Callable[["_Review", dict[str, Any]], None]
 
@@ -693,3 +694,32 @@ def test_hand_row_reaches_detected_row_of_same_name(  # type: ignore[no-untyped-
     zq = review.pseudonym(ZQ)
     assert output == f"{zq} a signé. Signé : {zq}. Le contrat avec {zq}."
     assert review.names() == [(ZQ, PERSON)]
+
+
+def test_capitals_correction_leaves_accented_row(  # type: ignore[no-untyped-def]
+    qtbot, main_window, tmp_path, dialogs
+) -> None:
+    """G10 (AC3, QA's CAPS-001; the orchestrator's ruling): a correction typed
+    in capitals without accents reaches from the name to its capitals forms,
+    not back. Correcting the « ZELVINE » row leaves the « Zélvine » row to
+    review, pending; the user then accepts it as it is."""
+    review = _Review(
+        "single",
+        qtbot,
+        main_window,
+        tmp_path,
+        G10_TEXT,
+        [found_at(G10_TEXT, "ZELVINE"), found_at(G10_TEXT, "Zélvine")],
+    )
+    caps = occurrence(G10_TEXT, "ZELVINE")
+
+    def drive(r: _Review, record: dict[str, Any]) -> None:
+        pre(len(r.reviews()) == 2, "two rows in the review")
+        r.correct(r.row("ZELVINE"), "ZELVINE TESTAR", caps)
+        record["accented"] = r.row("Zélvine").state
+        r.accept_pending()
+
+    record = review.run(drive)
+    assert record["accented"] == PENDING
+    zt, z = review.pseudonym("ZELVINE TESTAR"), review.pseudonym("Zélvine")
+    assert review.output() == f"Signé : {zt}. {z} Testar a signé."

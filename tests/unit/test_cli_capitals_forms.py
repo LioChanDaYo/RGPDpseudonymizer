@@ -1,8 +1,8 @@
 """Story 10.19: a name added ([A]) or corrected ([E]) in the command-line
 review also reaches its forms in capitals, and ``delete-mapping`` by name also
 erases the saved pseudonyms of the name in other capitals (T1-T7, T9-T13,
-T17, T18, T19 CLI, T20, T21 CLI), and what must not change (G1, G2, G7, G8
-CLI).
+T17, T18, T19 CLI, T20, T21 CLI, T22-T25), and what must not change (G1, G2,
+G7, G8 CLI, G11, T23's case 2).
 
 Written by the BMAD dev agent (Claude), before the fix. Each test drives the
 real ``gdpr-pseudo process`` or ``delete-mapping`` command through
@@ -101,6 +101,28 @@ G8_TEXT = (
     "Le contrat avec Vorlene Quentrix."
 )
 T21_TEXT = f"Vorlan Mestrix valide. {G8_TEXT}"
+T22_TEXT = (
+    "MEZOR a signé. Vorlan Mézor valide. Signé : Mézor. "
+    "Le contrat avec Zorbal Mèzor. Signé : Mèzor."
+)
+T22_SWAPPED = (
+    "Vorlan Mézor valide. Signé : Mézor. MEZOR a signé. "
+    "Le contrat avec Zorbal Mèzor. Signé : Mèzor."
+)
+T22_SET = "MEZOR a signé. Mézor valide. Le contrat avec Mèzor."
+T22_NAMES = [
+    ("MEZOR", PERSON),
+    ("Vorlan Mézor", PERSON),
+    ("Mézor", PERSON),
+    ("Zorbal Mèzor", PERSON),
+    ("Mèzor", PERSON),
+]
+T24_TEXT = (
+    "Brimel Testar valide. Zélvine Testar a signé. Signé : ZELVINE TESTAR. "
+    "Le contrat avec Zelvine Testar."
+)
+T25_TEXT = "Signé : ZELVINE TESTAR. Zélvine Testar a signé."
+G11_TEXT = "Signé : VORLENE QUENTRIX. Vorlène Quentrix a signé."
 
 # Story 10.15's approved line (Lionel's Q2 there), for « Zorbal » as PERSON.
 ALREADY_LINE = (
@@ -683,6 +705,142 @@ def test_hand_group_joined_by_its_written_texts(tmp_path: Path, db: Path) -> Non
     )
 
 
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 10.19 v1.10: reproduces the join chaining « Vorlan Mézor » and "
+    "« Zorbal Mèzor » through « MEZOR » on fa9f2ac; fixed in Task 9.2",
+)
+def test_join_never_chains(tmp_path: Path, db: Path) -> None:
+    """T22 (AC3, Codex P0-1): « MEZOR » is a form of « Mézor » and of
+    « Mèzor », but the « Vorlan Mézor » and « Zorbal Mèzor » groups never
+    meet through it: three names, and « Zorbal Mèzor » keeps its own
+    pseudonym."""
+    source, output = _files(tmp_path, ".txt")
+    source.write_text(T22_TEXT, encoding="utf-8")
+    run = _process(source, output, db, T22_NAMES, [ENTER, "e"], ["Vorlan Mézor"])
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    written = _written(output)
+    vm = _pseudonym(db, "Vorlan Mézor")
+    assert f"avec {vm}" not in written, written  # expected failure
+    assert "(5 occurrences, 3 unique)" in run.flat
+    assert _pseudonym(db, "Zorbal Mèzor") != vm
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 10.19 v1.10: reproduces « MEZOR » corrected with the « Vorlan "
+    "Mézor » group it joined on fa9f2ac; fixed in Task 9.2",
+)
+def test_join_never_chains_swapped(tmp_path: Path, db: Path) -> None:
+    """T22, swapped (AC3, Codex P0-1; the orchestrator's addition): the full
+    name first. « MEZOR » does not join the « Vorlan Mézor » group, so its
+    place keeps its own decision."""
+    source, output = _files(tmp_path, ".txt")
+    source.write_text(T22_SWAPPED, encoding="utf-8")
+    run = _process(
+        source, output, db, T22_NAMES, [ENTER, "e"], ["Vorlan Mézor Quentrix"]
+    )
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    written = _written(output)
+    vmq = _pseudonym(db, "Vorlan Mézor Quentrix")
+    assert f"{vmq} a signé" not in written, written  # expected failure
+    assert "(5 occurrences, 3 unique)" in run.flat
+    mezor = _pseudonym(db, "MEZOR")
+    assert written.startswith(f"{vmq} valide. Signé : {vmq}. {mezor} a signé. ")
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 10.19 v1.10: reproduces « Mèzor » joined through « MEZOR » with "
+    "« Mézor », which it is not a form of, on fa9f2ac; fixed in Task 9.2",
+)
+def test_join_never_chains_through_the_set(tmp_path: Path, db: Path) -> None:
+    """T22, case 3 (AC3; the orchestrator's addition): « Mézor » joins
+    « MEZOR »; « Mèzor », a form of « MEZOR » but not of « Mézor », does not.
+    The correction reaches no place of the joined group, so « MEZOR » and
+    « Mézor » come back to the review as their own names (T25's rule), each
+    corrected; « Mèzor » is accepted."""
+    source, output = _files(tmp_path, ".txt")
+    source.write_text(T22_SET, encoding="utf-8")
+    run = _process(
+        source,
+        output,
+        db,
+        [("MEZOR", PERSON), ("Mézor", PERSON), ("Mèzor", PERSON)],
+        [ENTER, "e", "e", "e", SPACE],
+        ["Vorlan Mézor"] * 3,
+    )
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    written = _written(output)
+    vm = _pseudonym(db, "Vorlan Mézor")
+    assert f"avec {vm}" not in written, written  # expected failure
+    assert "(3 occurrences, 2 unique)" in run.flat
+    other = _pseudonym(db, "Mèzor")
+    assert written == f"{vm} a signé. {vm} valide. Le contrat avec {other}."
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 10.19 v1.10: reproduces « Zelvine » joined through the written "
+    "« ZELVINE » of a place [A] « ZÉLVINE » made on fa9f2ac; fixed in Task 9.2",
+)
+def test_hand_place_never_joins_another_name(tmp_path: Path, db: Path) -> None:
+    """T24 (AC2, AC3, QA's JOIN-001): [A] « ZÉLVINE » (LOCATION) puts its
+    « ZELVINE » place in the « Zélvine » group; « Zelvine », another name
+    under Q3, never joins it, so the correction of « Zélvine » never writes
+    « Zelvine » with its pseudonym."""
+    source, output = _files(tmp_path, ".txt")
+    source.write_text(T24_TEXT, encoding="utf-8")
+    run = _process(
+        source,
+        output,
+        db,
+        [("Brimel Testar", PERSON), ("Zélvine", LOCATION), ("Zelvine", LOCATION)],
+        [ENTER, "a", SPACE, "e", SPACE],
+        ["ZÉLVINE", LOCATION, "Zélvine Testar"],
+    )
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    written = _written(output)
+    zt = _pseudonym(db, "Zélvine Testar", LOCATION)
+    assert f"avec {zt}" not in written, written  # expected failure
+    assert "(3 occurrences, 2 unique)" in run.flat
+    assert ("Zelvine", LOCATION) in _names(db)
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 10.19 v1.10: reproduces « <p> Testar » written silently where a "
+    "correction in capitals cannot reach « Zélvine Testar » on fa9f2ac; fixed "
+    "in Task 9.2",
+)
+def test_unreached_place_goes_back_to_review(tmp_path: Path, db: Path) -> None:
+    """T25 (AC3, QA's CAPS-001; the orchestrator's ruling): a correction typed
+    in capitals without accents does not reach « Zélvine Testar »; that place
+    goes back to the review as its own name, never written with a partial
+    span, and is corrected there."""
+    source, output = _files(tmp_path, ".txt")
+    source.write_text(T25_TEXT, encoding="utf-8")
+    run = _process(
+        source,
+        output,
+        db,
+        [("ZELVINE", PERSON), ("Zélvine", PERSON)],
+        [ENTER, "e", "e"],
+        ["ZELVINE TESTAR", "Zélvine Testar"],
+    )
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    written = _written(output)
+    assert "TESTAR" not in written.upper(), written  # expected failure
+    assert "(2 occurrences, 1 unique)" in run.flat
+    caps, title = _pseudonym(db, "ZELVINE TESTAR"), _pseudonym(db, "Zélvine Testar")
+    assert written == f"Signé : {caps}. {title} a signé."
+
+
 # ---------------------------------------------------------------------------
 # AC1, AC5: accents in capitals
 # ---------------------------------------------------------------------------
@@ -816,6 +974,43 @@ def test_delete_mapping_reaches_old_damaged_row(tmp_path: Path, db: Path) -> Non
     assert _erased_ids(db) == sorted([ids[(QZ, PERSON)], ids[(old, PERSON)]])
 
 
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 10.19 v1.10: reproduces the row v2.2.0 saved from « BELORA "
+    "MÉLORA » left by delete-mapping « Bélora Mélora » on fa9f2ac; fixed in "
+    "Task 9.2",
+)
+def test_delete_mapping_reaches_old_row_in_capitals_without_accent(
+    tmp_path: Path, db: Path
+) -> None:
+    """T23 (AC4, Codex P0-2): « BELORA MÉLORA », a Q3 form of « Bélora
+    Mélora », read with separate marks by v2.2.0, was saved « BELORA » + a
+    lone mark + « LORA »; deleting « Bélora Mélora » erases it with today's
+    row, and leaves « Vorlan Mélora »."""
+    acute = unicodedata.lookup("COMBINING ACUTE ACCENT")
+    old = _key_steps(nfd("BELORA MÉLORA"), PERSON)
+    _pre(old == "BELORA " + acute + "LORA", "the old saved text")
+    _save(
+        db,
+        [
+            ("Bélora Mélora", PERSON, VM),
+            (old, PERSON, "Zorbalix"),
+            ("Vorlan Mélora", PERSON, "Quovane Testar"),
+        ],
+    )
+    _pre(len(_names(db)) == 3, "three rows saved")
+    ids = _ids(db)
+    run = _delete(db, "Bélora Mélora")
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    assert f"{NAME_LINE}{old}" in run.screen, run.shown  # expected failure
+    assert f"{NAME_LINE}Bélora Mélora" in run.screen
+    assert _names(db) == [("Vorlan Mélora", PERSON)]
+    assert _erased_ids(db) == sorted(
+        [ids[("Bélora Mélora", PERSON)], ids[(old, PERSON)]]
+    )
+
+
 # ---------------------------------------------------------------------------
 # Guards (pass on the unfixed and the fixed code)
 # ---------------------------------------------------------------------------
@@ -892,3 +1087,59 @@ def test_cli_three_spellings_keep_other_letters_apart(tmp_path: Path, db: Path) 
     assert _names(db) == sorted(
         [(VQ, PERSON), ("VORLENE", PERSON), ("Vorlene", PERSON)]
     )
+
+
+def test_delete_mapping_keeps_name_saved_today_equal_to_lost_letter_form(
+    tmp_path: Path, db: Path
+) -> None:
+    """T23, case 2 (AC4, the sign rule; the orchestrator's addition): the old
+    row « QUOVO » + a mark + « ZORBAL » is « QUOVÔZORBAL » once composed, but
+    « QUOVÔZORBAL » saved today, with no mark, is another person: deleting
+    « Quovôme Zorbal » erases the old row and today's row of the name, never
+    that one."""
+    circumflex = unicodedata.lookup("COMBINING CIRCUMFLEX ACCENT")
+    old = _key_steps(nfd("QUOVÔME ZORBAL"), PERSON)
+    _pre(
+        old == "QUOVO" + circumflex + "ZORBAL"
+        and unicodedata.normalize("NFC", old) == "QUOVÔZORBAL",
+        "the old saved text and its composed form",
+    )
+    _save(
+        db,
+        [
+            (QZ, PERSON, VM),
+            (old, PERSON, "Zorbalix"),
+            ("QUOVÔZORBAL", PERSON, "Quovane Testar"),
+        ],
+    )
+    _pre(len(_names(db)) == 3, "three rows saved")
+    ids = _ids(db)
+    run = _delete(db, QZ)
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    left = [(e.full_name, e.entity_type, e.pseudonym_full) for e in _entities(db)]
+    assert left == [("QUOVÔZORBAL", PERSON, "Quovane Testar")], run.shown
+    assert f"{NAME_LINE}QUOVÔZORBAL" not in run.screen
+    assert f"{NAME_LINE}{old}" in run.screen and f"{NAME_LINE}{QZ}" in run.screen
+    assert _erased_ids(db) == sorted([ids[(QZ, PERSON)], ids[(old, PERSON)]])
+
+
+def test_capitals_first_joined(tmp_path: Path, db: Path) -> None:
+    """G11 (AC3, QA's TEST-1019-01): the capitals form first in the document;
+    « VORLENE » and « Vorlène » are one name, and the correction covers both
+    places whole."""
+    source, output = _files(tmp_path, ".txt")
+    source.write_text(G11_TEXT, encoding="utf-8")
+    run = _process(
+        source,
+        output,
+        db,
+        [("VORLENE", PERSON), ("Vorlène", PERSON)],
+        [ENTER, "e"],
+        [VQ],
+    )
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    written = _written(output)
+    assert "Quentrix" not in written and "QUENTRIX" not in written, written
+    assert "(2 occurrences, 1 unique)" in run.flat
+    vq = _pseudonym(db, VQ)
+    assert written == f"Signé : {vq}. {vq} a signé."
