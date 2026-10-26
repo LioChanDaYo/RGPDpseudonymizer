@@ -1,8 +1,8 @@
 """Story 10.19: a name added ([A]) or corrected ([E]) in the command-line
 review also reaches its forms in capitals, and ``delete-mapping`` by name also
 erases the saved pseudonyms of the name in other capitals (T1-T7, T9-T13,
-T17, T18, T19 CLI, T20, T21 CLI, T22-T25), and what must not change (G1, G2,
-G7, G8 CLI, G11, T23's case 2).
+T17, T18, T19 CLI, T20, T21 CLI, T22-T25, T28, T30 CLI), and what must not
+change (G1, G2, G7, G8 CLI, G11-G13, T23's case 2).
 
 Written by the BMAD dev agent (Claude), before the fix. Each test drives the
 real ``gdpr-pseudo process`` or ``delete-mapping`` command through
@@ -123,6 +123,8 @@ T24_TEXT = (
 )
 T25_TEXT = "Signé : ZELVINE TESTAR. Zélvine Testar a signé."
 G11_TEXT = "Signé : VORLENE QUENTRIX. Vorlène Quentrix a signé."
+G13_TEXT = "Le contrat est validé. Signé : ZORBAL QUENTRIX."
+T30_TEXT = "Signé : ZÉLVINE TESTAR. Zélvine Testar a signé."
 
 # Story 10.15's approved line (Lionel's Q2 there), for « Zorbal » as PERSON.
 ALREADY_LINE = (
@@ -810,6 +812,37 @@ def test_unreached_place_goes_back_to_review(tmp_path: Path, db: Path) -> None:
     assert written == f"Signé : {caps}. {title} a signé."
 
 
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 10.19 v1.13: reproduces « <p> Testar » left where a correction "
+    "typed in other accents is written at the group's own place on f8c28a6; "
+    "fixed in Task 10.2",
+)
+def test_cli_added_words_never_left_in_clear_at_own_places(
+    tmp_path: Path, db: Path
+) -> None:
+    """T30 CLI (AC3, Lionel's answer on the leak, "fix it in 10.19"):
+    « ZÉLVINE » and « Zélvine » are one name (no join); corrected as
+    « ZELVINE TESTAR », the place « Zélvine » is widened over « Testar »,
+    the word the correction adds, so nothing of the name stays in clear."""
+    source, output = _files(tmp_path, ".txt")
+    source.write_text(T30_TEXT, encoding="utf-8")
+    run = _process(
+        source,
+        output,
+        db,
+        [("ZÉLVINE", PERSON), ("Zélvine", PERSON)],
+        [ENTER, "e"],
+        ["ZELVINE TESTAR"],
+    )
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    written = _written(output)
+    assert "TESTAR" not in written.upper(), written  # expected failure
+    p = _pseudonym(db, "ZELVINE TESTAR")
+    assert written == f"Signé : {p}. {p} a signé."
+
+
 # ---------------------------------------------------------------------------
 # AC1, AC5: accents in capitals
 # ---------------------------------------------------------------------------
@@ -973,6 +1006,91 @@ def test_delete_mapping_reaches_old_row_in_capitals_without_accent(
     )
 
 
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 10.19 v1.13: reproduces the row v2.2.0 saved from « VORLAN "
+    "MÈLORA » left by delete-mapping « Vorlan Mélora » on f8c28a6; fixed in "
+    "Task 10.2",
+)
+def test_delete_mapping_reaches_old_row_with_another_accent(
+    tmp_path: Path, db: Path
+) -> None:
+    """T28 (AC4, the second Codex review's third P0): « VORLAN MÈLORA », a Q3
+    form of « Vorlan Mélora », read with separate marks by v2.2.0, was saved
+    « VORLAN » + a lone grave accent + « LORA »; deleting « Vorlan Mélora »
+    erases it with today's row, and leaves « Bélora Quentrel »."""
+    grave = unicodedata.lookup("COMBINING GRAVE ACCENT")
+    old = _key_steps(nfd("VORLAN MÈLORA"), PERSON)
+    _pre(old == "VORLAN " + grave + "LORA", "the old saved text")
+    _save(
+        db,
+        [
+            ("Vorlan Mélora", PERSON, VM),
+            (old, PERSON, "Zorbalix"),
+            ("Bélora Quentrel", PERSON, "Quovane Testar"),
+        ],
+    )
+    _pre(len(_names(db)) == 3, "three rows saved")
+    ids = _ids(db)
+    run = _delete(db, "Vorlan Mélora")
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    assert f"{NAME_LINE}{old}" in run.screen, run.shown  # expected failure
+    assert f"{NAME_LINE}Vorlan Mélora" in run.screen
+    assert _names(db) == [("Bélora Quentrel", PERSON)]
+    assert _erased_ids(db) == sorted(
+        [ids[("Vorlan Mélora", PERSON)], ids[(old, PERSON)]]
+    )
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 10.19 v1.13: reproduces delete-mapping « Vorlan Melora » erasing "
+    "today's « VORLAN MÉLORA » but not the old row v2.2.0 saved of it on "
+    "f8c28a6; fixed in Task 10.2",
+)
+def test_delete_mapping_typed_without_accents_reaches_old_capitals_row(
+    tmp_path: Path, db: Path
+) -> None:
+    """T28, case 2 (AC4, QA's DEL-1019-01 second shape): typed without its
+    accents, « Vorlan Melora » erases « VORLAN MÉLORA » (a form once accents
+    are set aside) and the old row v2.2.0 saved of it, « VORLAN » + a lone
+    mark + « LORA »; « Vorlan Mélora » in title case is another name, and its
+    rows stay, today's and the old one."""
+    acute = unicodedata.lookup("COMBINING ACUTE ACCENT")
+    old_caps = _key_steps(nfd("VORLAN MÉLORA"), PERSON)
+    old_title = _key_steps(nfd("Vorlan Mélora"), PERSON)
+    _pre(
+        old_caps == "VORLAN " + acute + "LORA"
+        and old_title == "Vorlan " + acute + "lora",
+        "the two old saved texts",
+    )
+    _save(
+        db,
+        [
+            ("Vorlan Melora", PERSON, VM),
+            ("VORLAN MÉLORA", PERSON, "Zorbalix"),
+            (old_caps, PERSON, "Quovane Testar"),
+            ("Vorlan Mélora", PERSON, "Brimel Testar"),
+            (old_title, PERSON, "Zorbal Quentrix"),
+        ],
+    )
+    _pre(len(_names(db)) == 5, "five rows saved")
+    ids = _ids(db)
+    run = _delete(db, "Vorlan Melora")
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    assert f"{NAME_LINE}{old_caps}" in run.screen, run.shown  # expected failure
+    assert _names(db) == sorted([("Vorlan Mélora", PERSON), (old_title, PERSON)])
+    assert _erased_ids(db) == sorted(
+        [
+            ids[("Vorlan Melora", PERSON)],
+            ids[("VORLAN MÉLORA", PERSON)],
+            ids[(old_caps, PERSON)],
+        ]
+    )
+
+
 # ---------------------------------------------------------------------------
 # Guards (pass on the unfixed and the fixed code)
 # ---------------------------------------------------------------------------
@@ -1105,3 +1223,49 @@ def test_capitals_first_joined(tmp_path: Path, db: Path) -> None:
     assert "(2 occurrences, 1 unique)" in run.flat
     vq = _pseudonym(db, VQ)
     assert written == f"Signé : {vq}. {vq} a signé."
+
+
+def test_delete_mapping_reaches_row_with_no_mark_that_keeps_every_word(
+    tmp_path: Path, db: Path
+) -> None:
+    """G12 (AC4, QA's TEST-1019-02): the row v2.2.0 saved from « A
+    ZORBAVILLE », the capitals form of « à Zorbaville » without its accent,
+    carries no mark; it keeps every word of « Zorbaville », so deleting
+    « Zorbaville » erases it with today's row, and leaves « Zorbavillette »."""
+    old = _key_steps(nfd("A ZORBAVILLE"), LOCATION)
+    _pre(
+        old == "A ZORBAVILLE" and not any(unicodedata.combining(char) for char in old),
+        "the old saved text, with no mark",
+    )
+    _save(
+        db,
+        [
+            ("Zorbaville", LOCATION, "Xantorville"),
+            (old, LOCATION, "Quentrelville"),
+            ("Zorbavillette", LOCATION, "Vorlanville"),
+        ],
+    )
+    _pre(len(_names(db)) == 3, "three rows saved")
+    ids = _ids(db)
+    run = _delete(db, "Zorbaville")
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    assert _names(db) == [("Zorbavillette", LOCATION)], run.shown
+    assert _erased_ids(db) == sorted(
+        [ids[("Zorbaville", LOCATION)], ids[(old, LOCATION)]]
+    )
+
+
+def test_cli_correction_reaches_capitals_form_before_found_place(
+    tmp_path: Path, db: Path
+) -> None:
+    """G13 (AC3, QA's TEST-1019-03): « QUENTRIX » found; the correction
+    « Zorbal Quentrix » reaches its capitals form « ZORBAL QUENTRIX », which
+    starts before the found place."""
+    source, output = _files(tmp_path, ".txt")
+    source.write_text(G13_TEXT, encoding="utf-8")
+    run = _process(source, output, db, [("QUENTRIX", PERSON)], [ENTER, "e"], [ZQ])
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    written = _written(output)
+    assert "ZORBAL" not in written, written
+    p = _pseudonym(db, ZQ)
+    assert written == f"Le contrat est validé. Signé : {p}."

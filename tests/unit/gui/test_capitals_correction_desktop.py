@@ -1,6 +1,6 @@
 """Story 10.19: a correction in the desktop app reaches the name's forms in
-capitals (T8, T14, T15, T16, T19 desktop, T21 desktop), and what must not
-change (G3, G4, G5, G8 desktop, G9, G10).
+capitals (T8, T14, T15, T16, T19 desktop, T21 desktop, T26, T27, T29, T30
+desktop), and what must not change (G3, G4, G5, G8 desktop, G9, G10).
 
 Written by the BMAD dev agent (Claude), before the fix. Each test drives the
 real single-document path (``DetectionWorker``, the validation screen, the
@@ -69,6 +69,11 @@ G8_TEXT = (
 )
 G9_TEXT = "Zorbal Quentrix a signé. Signé : zorbal. Le contrat avec Zorbal Quentrix."
 G10_TEXT = "Signé : ZELVINE TESTAR. Zélvine Testar a signé."
+T26_TEXT = "Vorlène Quentrix Zorbal a signé. Signé : VORLENE QUENTRIX ZORBAL."
+T27_TEXT = "Signé : ZÉLVINE TESTAR. Zélvine Testar a signé."
+T29_TEXT = (
+    "Signé : ZELVINE MÉZOR. Le contrat avec ZELVINE TESTAR. Zélvine Mézor a signé."
+)
 
 Drive = Callable[["_Review", dict[str, Any]], None]
 
@@ -533,6 +538,159 @@ def test_hand_row_reached_by_its_written_texts(  # type: ignore[no-untyped-def]
         f"{vq} a signé. Signé : {hand} QUENTRIX. Le contrat avec {hand} Quentrix."
     )
     assert review.names() == sorted([(VQ, PERSON), ("VORLENE", PERSON)])
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 10.19 v1.13: reproduces a second correction missing the "
+    "« VORLENE » row the first one reached on f8c28a6; fixed in Task 10.2",
+)
+@pytest.mark.parametrize("mode", ["single", "batch"])
+def test_second_correction_reaches_rows_the_first_reached(  # type: ignore[no-untyped-def]
+    qtbot, main_window, tmp_path, dialogs, mode
+) -> None:
+    """T26 (AC3, the second Codex review's first P0): « Vorlène » corrected to
+    « Vorlène Quentrix » also corrects « VORLENE »; corrected again to
+    « Vorlène Quentrix Zorbal », it reaches « VORLENE » again, through the
+    span the first correction gave it."""
+    review = _Review(
+        mode,
+        qtbot,
+        main_window,
+        tmp_path,
+        T26_TEXT,
+        [found_at(T26_TEXT, "Vorlène"), found_at(T26_TEXT, "VORLENE")],
+    )
+
+    def drive(r: _Review, record: dict[str, Any]) -> None:
+        pre(len(r.reviews()) == 2, "two rows in the review")
+        r.correct(r.row("Vorlène"), VQ, 0)
+        pre(
+            r.row("Vorlène").user_modification == VQ
+            and r.row("VORLENE").user_modification == VQ,
+            "both rows hold the first correction",
+        )
+        r.correct(r.row("Vorlène"), f"{VQ} Zorbal", 0)
+        r.accept_pending()
+
+    review.run(drive)
+    output = review.output()
+    assert "ZORBAL" not in output, output  # expected failure
+    p = review.pseudonym(f"{VQ} Zorbal")
+    assert output == f"{p} a signé. Signé : {p}."
+    assert review.names() == [(f"{VQ} Zorbal", PERSON)]
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 10.19 v1.13: reproduces the « Zélvine » batch row written with "
+    "a correction its text cannot reach on f8c28a6; fixed in Task 10.2",
+)
+def test_batch_unreached_row_stays_pending(  # type: ignore[no-untyped-def]
+    qtbot, main_window, tmp_path, dialogs
+) -> None:
+    """T27 (AC3, the second Codex review's second P0, CAPS-001 in the desktop):
+    in batch review, « ZÉLVINE » corrected to « ZELVINE TESTAR » does not
+    reach the « Zélvine » row, which stays pending, as on main."""
+    review = _Review(
+        "batch",
+        qtbot,
+        main_window,
+        tmp_path,
+        T27_TEXT,
+        [found_at(T27_TEXT, "ZÉLVINE"), found_at(T27_TEXT, "Zélvine")],
+    )
+    caps = occurrence(T27_TEXT, "ZÉLVINE")
+
+    def drive(r: _Review, record: dict[str, Any]) -> None:
+        pre(len(r.reviews()) == 2, "two rows in the review")
+        r.correct(r.row("ZÉLVINE"), "ZELVINE TESTAR", caps)
+        record["accented"] = r.row("Zélvine").state
+        r.accept_pending()
+
+    record = review.run(drive)
+    assert record["accented"] == PENDING, record  # expected failure
+    zt, z = review.pseudonym("ZELVINE TESTAR"), review.pseudonym("Zélvine")
+    assert review.output() == f"Signé : {zt}. {z} Testar a signé."
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 10.19 v1.13: reproduces a « ZELVINE » row written with a "
+    "correction found at one of its two places on f8c28a6; fixed in Task 10.2",
+)
+def test_single_row_unreached_at_one_place_stays_pending(  # type: ignore[no-untyped-def]
+    qtbot, main_window, tmp_path, dialogs
+) -> None:
+    """T29 (AC3, the second P0's rule in single-document review): the
+    « ZELVINE » row stands for « ZELVINE MÉZOR » and « ZELVINE TESTAR »;
+    « Zélvine » corrected to « Zélvine Mézor » reaches only the first, so
+    that row stays pending, never written with a partial span."""
+    review = _Review(
+        "single",
+        qtbot,
+        main_window,
+        tmp_path,
+        T29_TEXT,
+        [
+            found_at(T29_TEXT, "ZELVINE", 0),
+            found_at(T29_TEXT, "ZELVINE", 1),
+            found_at(T29_TEXT, "Zélvine"),
+        ],
+    )
+    title = occurrence(T29_TEXT, "Zélvine")
+
+    def drive(r: _Review, record: dict[str, Any]) -> None:
+        pre(len(r.reviews()) == 2, "two rows in the review")
+        r.correct(r.row("Zélvine"), "Zélvine Mézor", title)
+        record["caps"] = r.row("ZELVINE").state
+        r.accept_pending()
+
+    record = review.run(drive)
+    assert record["caps"] == PENDING, record  # expected failure
+    z, zm = review.pseudonym("ZELVINE"), review.pseudonym("Zélvine Mézor")
+    assert review.output() == (
+        f"Signé : {z} MÉZOR. Le contrat avec {z} TESTAR. {zm} a signé."
+    )
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 10.19 v1.13: reproduces « <p> Testar » left where a correction "
+    "typed in other accents is written at the row's own place on f8c28a6; "
+    "fixed in Task 10.2",
+)
+def test_desktop_single_added_words_never_left_in_clear(  # type: ignore[no-untyped-def]
+    qtbot, main_window, tmp_path, dialogs
+) -> None:
+    """T30 desktop (AC3, Lionel's answer on the leak, "fix it in 10.19"):
+    « ZÉLVINE » and « Zélvine » are one row; corrected as « ZELVINE TESTAR »,
+    the place « Zélvine » is widened over « Testar », the word the correction
+    adds, so nothing of the name stays in clear."""
+    review = _Review(
+        "single",
+        qtbot,
+        main_window,
+        tmp_path,
+        T27_TEXT,
+        [found_at(T27_TEXT, "ZÉLVINE"), found_at(T27_TEXT, "Zélvine")],
+    )
+    caps = occurrence(T27_TEXT, "ZÉLVINE")
+
+    def drive(r: _Review, record: dict[str, Any]) -> None:
+        pre(len(r.reviews()) == 1, "one row in the review")
+        r.correct(r.row("ZÉLVINE"), "ZELVINE TESTAR", caps)
+        r.accept_pending()
+
+    review.run(drive)
+    output = review.output()
+    assert "TESTAR" not in output.upper(), output  # expected failure
+    p = review.pseudonym("ZELVINE TESTAR")
+    assert output == f"Signé : {p}. {p} a signé."
 
 
 # ---------------------------------------------------------------------------
