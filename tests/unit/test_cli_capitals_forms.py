@@ -1,8 +1,8 @@
 """Story 10.19: a name added ([A]) or corrected ([E]) in the command-line
 review also reaches its forms in capitals, and ``delete-mapping`` by name also
 erases the saved pseudonyms of the name in other capitals (T1-T7, T9-T13,
-T17, T18, T19 CLI, T20, T21 CLI, T22-T25, T28, T30 CLI, T31, T33-T36 CLI),
-and what must not change (G1, G2, G7, G8 CLI, G11-G18, T23's case 2).
+T17, T18, T19 CLI, T20, T21 CLI, T22-T25, T28, T30 CLI, T31, T33-T39 CLI),
+and what must not change (G1, G2, G7, G8 CLI, G11-G21, T23's case 2).
 
 Written by the BMAD dev agent (Claude), before the fix. Each test drives the
 real ``gdpr-pseudo process`` or ``delete-mapping`` command through
@@ -49,6 +49,7 @@ from gdpr_pseudonymizer.data.repositories.mapping_repository import (
     SQLiteMappingRepository,
 )
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
+from gdpr_pseudonymizer.validation.models import fold
 from gdpr_pseudonymizer.validation.workflow import ADD_MISSED_NAME_QUESTION
 
 PASSPHRASE = "zorbalia_pass_A_123!"
@@ -129,6 +130,12 @@ T31_TEXT = "Zélvine Mézor a signé. Zélvine Mèzor a signé."
 T35_TEXT = "Signé : ZÉLVINE TESTAR. Zélvine\nTestar a signé."
 T36_TEXT = "Vorlan Mestrix valide. Vorlène a signé. VORLENE a signé."
 T36B_TEXT = "Vorlan Mestrix valide. Signé : Bélora. Signé : BÊLORA."
+# T37: the second name between quotation marks (opening, closing)
+QUOTES = {
+    "straight": ("'", "'"),
+    "curly": ("\u2018", "\u2019"),
+    "curly_double": ("\u201c", "\u201d"),
+}
 
 # Story 10.15's approved line (Lionel's Q2 there), for « Zorbal » as PERSON.
 ALREADY_LINE = (
@@ -927,6 +934,72 @@ def test_cli_repeated_add_reads_the_text_written_at_a_held_place(
     assert _names(db) == sorted([(VM, PERSON), ("Belora", PERSON), ("Bélora", PERSON)])
 
 
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 10.19 v1.17: reproduces « Testar » left inside quotation marks "
+    "on 0c03692; fixed in Task 12.2",
+)
+@pytest.mark.parametrize("quotes", list(QUOTES))
+def test_cli_widening_inside_quotation_marks(
+    tmp_path: Path, db: Path, quotes: str
+) -> None:
+    """T37 CLI (AC3; the fourth Codex review's P0-1): « Zélvine Testar »
+    between quotation marks (straight, curly, curly double), « Zélvine »
+    corrected as « ZELVINE TESTAR »: the widening covers « Testar », the
+    closing mark is not part of the word, and the marks stay."""
+    opening, closing = QUOTES[quotes]
+    source, output = _files(tmp_path, ".txt")
+    source.write_text(
+        f"Signé : ZÉLVINE TESTAR. {opening}Zélvine Testar{closing} a signé.",
+        encoding="utf-8",
+    )
+    run = _process(
+        source,
+        output,
+        db,
+        [("ZÉLVINE", PERSON), ("Zélvine", PERSON)],
+        [ENTER, "e"],
+        ["ZELVINE TESTAR"],
+    )
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    written = _written(output)
+    assert "TESTAR" not in written.upper(), written  # expected failure
+    p = _pseudonym(db, "ZELVINE TESTAR")
+    assert written == f"Signé : {p}. {opening}{p}{closing} a signé."
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 10.19 v1.17: reproduces « D'Émerine » left inside quotation "
+    "marks on 0c03692; fixed in Task 12.2",
+)
+def test_cli_widening_keeps_the_elision_inside_quotation_marks(
+    tmp_path: Path, db: Path
+) -> None:
+    """T37 CLI, the elision (AC3; the fourth Codex review's P0-1): the
+    apostrophe inside « D'Émerine » stays part of the word; only the closing
+    quotation mark is taken off."""
+    source, output = _files(tmp_path, ".txt")
+    source.write_text(
+        "Signé : ZÉLVINE D'ÉMERINE. 'Zélvine D'Émerine' a signé.", encoding="utf-8"
+    )
+    run = _process(
+        source,
+        output,
+        db,
+        [("ZÉLVINE", PERSON), ("Zélvine", PERSON)],
+        [ENTER, "e"],
+        ["ZELVINE D'EMERINE"],
+    )
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    written = _written(output)
+    assert "EMERINE" not in fold(written).upper(), written  # expected failure
+    p = _pseudonym(db, "ZELVINE D'EMERINE")
+    assert written == f"Signé : {p}. '{p}' a signé."
+
+
 # ---------------------------------------------------------------------------
 # AC1, AC5: accents in capitals
 # ---------------------------------------------------------------------------
@@ -1211,6 +1284,50 @@ def test_delete_mapping_reaches_old_hyphen_row_typed_without_accents(
     assert _erased_ids(db) == sorted([ids[(caps, PERSON)], ids[(old, PERSON)]])
 
 
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 10.19 v1.17: reproduces the old row of « QUOVÔME MÉLORA », two "
+    "marks side by side, left by delete-mapping on 0c03692; fixed in Task 12.2",
+)
+def test_delete_mapping_reaches_old_row_with_two_marks_side_by_side(
+    tmp_path: Path, db: Path
+) -> None:
+    """T38 (AC4; the fourth Codex review's P0-2): v2.2.0 cut « ME » at the end
+    of « QUOVÔME » and at the start of « MÉLORA », leaving two marks side by
+    side; deleting « Quovome Melora » erases that row with today's."""
+    circumflex = unicodedata.lookup("COMBINING CIRCUMFLEX ACCENT")
+    acute = unicodedata.lookup("COMBINING ACUTE ACCENT")
+    document = "QUOVÔME MÉLORA"
+    old = _key_steps(nfd(document), PERSON)
+    _pre(old == "QUOVO" + circumflex + acute + "LORA", "the old saved text")
+    left, erased, ids, _ = _old_rows_erased(db, document, "Quovome Melora")
+    assert left == [("Vorlan Mestrix", PERSON)], left  # expected failure
+    assert erased == sorted([ids[(document, PERSON)], ids[(old, PERSON)]])
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 10.19 v1.17: reproduces the old row of a four-word name cut at "
+    "its last word, past six possible cut places, left on 0c03692; fixed in "
+    "Task 12.2",
+)
+def test_delete_mapping_reaches_old_row_past_six_spots(
+    tmp_path: Path, db: Path
+) -> None:
+    """T39 (AC4; the fourth Codex review's P0-3): the first three words hold
+    six possible cut places; the row v2.2.0 saved, cut at the last word, is
+    erased with « Melome Melame Melime Melume »."""
+    acute = unicodedata.lookup("COMBINING ACUTE ACCENT")
+    document = "MELOME MELAME MELIME MÉLUME"
+    old = _key_steps(nfd(document), PERSON)
+    _pre(old == "MELOME MELAME MELIME " + acute + "LUME", "the old saved text")
+    left, erased, ids, _ = _old_rows_erased(db, document, "Melome Melame Melime Melume")
+    assert left == [("Vorlan Mestrix", PERSON)], left  # expected failure
+    assert erased == sorted([ids[(document, PERSON)], ids[(old, PERSON)]])
+
+
 # ---------------------------------------------------------------------------
 # Guards (pass on the unfixed and the fixed code)
 # ---------------------------------------------------------------------------
@@ -1485,3 +1602,44 @@ def test_widening_over_every_added_word(tmp_path: Path, db: Path) -> None:
         "ZELVINE BRIMEL TESTAR",
     )
     assert written == f"Signé : {p}. {p} a signé."
+
+
+def test_widening_needs_the_held_words_first(tmp_path: Path, db: Path) -> None:
+    """G19 (AC3; QA's TEST-1019-05): « Zélvine » corrected as « Quovane
+    Testar » does not start with the word the place holds, so nothing is
+    widened: « TESTAR » and « Testar » stay as on main."""
+    written, p = _widened(
+        tmp_path,
+        db,
+        "Signé : ZÉLVINE TESTAR. Zélvine Testar a signé.",
+        "Quovane Testar",
+    )
+    assert written == f"Signé : {p} TESTAR. {p} Testar a signé."
+
+
+def test_widening_over_capitals_form_of_typed_word(tmp_path: Path, db: Path) -> None:
+    """G20 (AC3; QA's TEST-1019-05): typed « Zélvine Testar » covers
+    « Zélvine TÉSTAR », the written word a Q3 form of the typed one."""
+    source, output = _files(tmp_path, ".txt")
+    source.write_text("Signé : Zélvine TÉSTAR.", encoding="utf-8")
+    run = _process(
+        source, output, db, [("Zélvine", PERSON)], [ENTER, "e"], ["Zélvine Testar"]
+    )
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    p = _pseudonym(db, "Zélvine Testar")
+    assert _written(output) == f"Signé : {p}."
+
+
+def test_delete_mapping_reaches_old_row_cut_after_an_apostrophe(
+    tmp_path: Path, db: Path
+) -> None:
+    """G21 (AC4; QA's TEST-1019-05): v2.2.0 cut « ME » after the apostrophe of
+    « O'MÉLORA »; deleting « Quovome O'Melora » erases that row with today's."""
+    document = "QUOVÔME O'MÉLORA"
+    left, erased, ids, old = _old_rows_erased(db, document, "Quovome O'Melora")
+    _pre(
+        any(unicodedata.combining(char) for char in old) and "O'" in old,
+        "the old saved text, cut after the apostrophe",
+    )
+    assert left == [("Vorlan Mestrix", PERSON)]
+    assert erased == sorted([ids[(document, PERSON)], ids[(old, PERSON)]])
