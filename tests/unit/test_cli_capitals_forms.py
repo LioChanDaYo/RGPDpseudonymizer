@@ -934,12 +934,6 @@ def test_cli_repeated_add_reads_the_text_written_at_a_held_place(
     assert _names(db) == sorted([(VM, PERSON), ("Belora", PERSON), ("Bélora", PERSON)])
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19 v1.17: reproduces « Testar » left inside quotation marks "
-    "on 0c03692; fixed in Task 12.2",
-)
 @pytest.mark.parametrize("quotes", list(QUOTES))
 def test_cli_widening_inside_quotation_marks(
     tmp_path: Path, db: Path, quotes: str
@@ -969,12 +963,6 @@ def test_cli_widening_inside_quotation_marks(
     assert written == f"Signé : {p}. {opening}{p}{closing} a signé."
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19 v1.17: reproduces « D'Émerine » left inside quotation "
-    "marks on 0c03692; fixed in Task 12.2",
-)
 def test_cli_widening_keeps_the_elision_inside_quotation_marks(
     tmp_path: Path, db: Path
 ) -> None:
@@ -1284,12 +1272,6 @@ def test_delete_mapping_reaches_old_hyphen_row_typed_without_accents(
     assert _erased_ids(db) == sorted([ids[(caps, PERSON)], ids[(old, PERSON)]])
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19 v1.17: reproduces the old row of « QUOVÔME MÉLORA », two "
-    "marks side by side, left by delete-mapping on 0c03692; fixed in Task 12.2",
-)
 def test_delete_mapping_reaches_old_row_with_two_marks_side_by_side(
     tmp_path: Path, db: Path
 ) -> None:
@@ -1306,13 +1288,6 @@ def test_delete_mapping_reaches_old_row_with_two_marks_side_by_side(
     assert erased == sorted([ids[(document, PERSON)], ids[(old, PERSON)]])
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19 v1.17: reproduces the old row of a four-word name cut at "
-    "its last word, past six possible cut places, left on 0c03692; fixed in "
-    "Task 12.2",
-)
 def test_delete_mapping_reaches_old_row_past_six_spots(
     tmp_path: Path, db: Path
 ) -> None:

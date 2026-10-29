@@ -48,8 +48,13 @@ from gdpr_pseudonymizer.validation.ui import (
 
 # Story 10.19 (v1.13, Lionel's answer on the leak): the word written right
 # after a place, past any whitespace, a line break included (v1.15): letters
-# up to a space or a punctuation mark.
-_NEXT_WORD = re.compile(r"\s+([^\s.,;:!?«»()\[\]\"]+)")
+# up to a space or a punctuation mark, curly double quotation marks included
+# (v1.17).
+_NEXT_WORD = re.compile(r"\s+([^\s.,;:!?«»()\[\]\"\u201c\u201d\u201e]+)")
+
+# A closing single quotation mark at the end of a word is not part of it; an
+# apostrophe inside a word is an elision and stays (Story 10.19, v1.17).
+_CLOSING_QUOTES = "'\u2019"
 
 # Story 10.15 (AC14 (e), Lionel's approved Q2 text): [A] of a name whose every
 # place is already in the review. %1 is the text typed, %2 the type typed.
@@ -698,7 +703,8 @@ class ValidationWorkflow:
         « Mèzor » for « Mézor »; v1.15, the orchestrator's rulings 1 and 2),
         the span covers them: « Zélvine » corrected as « ZELVINE TESTAR »
         covers « Zélvine Testar », so « Testar » is not left in clear beside
-        the pseudonym.
+        the pseudonym. A closing quotation mark (« ' », « ’ », « ” ») is not
+        part of the word read; an elision inside it stays (v1.17).
 
         Returns:
             (start_pos, end_pos) of the widened span, or None
@@ -714,12 +720,12 @@ class ValidationWorkflow:
             found = _NEXT_WORD.match(document_text, end)
             if found is None:
                 return None
-            written = found.group(1)
+            written = found.group(1).rstrip(_CLOSING_QUOTES)
             if not any(char.isupper() for char in written) or not (
                 is_form(written, word) or is_form(word, written)
             ):
                 return None
-            end = found.end(1)
+            end = found.start(1) + len(written)
         return entity.start_pos, end
 
     @staticmethod

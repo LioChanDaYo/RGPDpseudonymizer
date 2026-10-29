@@ -823,12 +823,6 @@ def test_desktop_single_repeated_add_reads_the_text_written_at_a_held_place(  # 
     assert record["spans"] == [(title, title + 6)], record  # expected failure
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19 v1.17: reproduces « Testar » left inside quotation marks "
-    "on 0c03692; fixed in Task 12.2",
-)
 def test_desktop_single_widening_inside_quotation_marks(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, dialogs
 ) -> None:

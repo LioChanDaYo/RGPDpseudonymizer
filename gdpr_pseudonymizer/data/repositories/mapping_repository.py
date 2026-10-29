@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import itertools
+import unicodedata
 from abc import ABC, abstractmethod
 
 from gdpr_pseudonymizer.core.legacy_names import matches_search, title_words
@@ -48,8 +49,11 @@ def _one_mark(text: str) -> str:
 # (Story 10.19, v1.13, ``_damage_seeds``), in capitals.
 _VOWELS = frozenset("AEIOUY")
 
-# The most cut points ``_damage_seeds`` combines (2**6 - 1 seeds at most).
-_MAX_DAMAGE_SPOTS = 6
+# The most cut points ``_damage_seeds`` combines (2**8 - 1 seeds at most).
+# v1.17 (the fourth Codex review's P0-3), from the data: the app's name lists
+# hold at most one such point per word, so four for a four-word name; twice
+# that keeps a margin.
+_MAX_DAMAGE_SPOTS = 8
 
 
 def _damage_seeds(name: str) -> list[str]:
@@ -60,7 +64,7 @@ def _damage_seeds(name: str) -> list[str]:
     letter where v2.2.0's title step could cut a word read with separate
     marks: a vowel that ends a title word at the start of a word (« ME » in
     « MÉLORA »), or that a title word follows to the end of the word (« ME »
-    in « QUOVÔME »); every choice of them, from at most six such letters.
+    in « QUOVÔME »); every choice of them, from at most eight such letters.
     A word starts after a hyphen or an apostrophe too (v1.15, the
     orchestrator's ruling 5: « ME » after the hyphen of « BELORA-MÉLORA »),
     so each part of a word is read on its own (``_word_parts``). Each seed
@@ -105,6 +109,29 @@ def _word_parts(word: str) -> list[tuple[int, int]]:
             start = at + 1
     parts.append((start, len(word)))
     return [(begin, end) for begin, end in parts if end > begin]
+
+
+def _seed_key(text: str) -> str:
+    """A capitals text as the damaged forms are compared, whatever way its
+    marks compose (Story 10.19, v1.17; the fourth Codex review's P0-2).
+
+    Read decomposed, in small letters: a letter's own accent (the first mark
+    right after it) is set aside, as Q3 does in capitals, and every other
+    mark is written as one mark (U+0301), whatever its kind. So « QUOVO » +
+    U+0302 + U+0301 + « LORA » (v2.2.0's row of « QUOVÔME MÉLORA ») meets
+    « QUOVO » + U+0301 + U+0301 + « LORA », and « VORLAN » + U+0300 +
+    « LORA » meets « VORLAN » + U+0301 + « LORA »."""
+    out: list[str] = []
+    after_letter = False
+    for char in unicodedata.normalize("NFD", text):
+        if is_mark(char):
+            if not after_letter:
+                out.append("\u0301")
+            after_letter = False
+            continue
+        after_letter = char.isalpha()
+        out.append(char)
+    return "".join(out).lower()
 
 
 def _keeps_words(words: list[str], form_words: list[str]) -> bool:
@@ -447,8 +474,9 @@ class SQLiteMappingRepository(MappingRepository):
         (``_damage_seeds``: « VORLAN MÉLORA » for « Vorlan Mélora » or
         « Vorlan Melora ») reach a row written entirely in capitals that
         carries a mark, every accent mark counting there as one mark,
-        whatever its kind (``_one_mark``), so « VORLAN » + U+0300 + « LORA »,
-        saved from « VORLAN MÈLORA », is erased with « Vorlan Mélora ». v1.15
+        whatever its kind, so « VORLAN » + U+0300 + « LORA », saved from
+        « VORLAN MÈLORA », is erased with « Vorlan Mélora »; v1.17: compared
+        by ``_seed_key``, whatever way marks side by side compose. v1.15
         (the third Codex review's P0-3; the orchestrator's ruling 4): the
         name's own saved forms are compared with their marks as they are, so
         « Vorlan » + U+0300 + « lora », saved from « Vorlan Mèlora », another
@@ -470,7 +498,7 @@ class SQLiteMappingRepository(MappingRepository):
         name_words = fold(name).lower().split()
         letters = {fold(name).lower(), fold(_one_mark(name)).lower()}
         old_forms: dict[str, list[tuple[str, bool]]] = {}
-        seed_forms: dict[str, list[str]] = {}
+        seed_keys: dict[str, set[str]] = {}
         seeds = _damage_seeds(name)
         for form_type in _FORM_TYPES:
             forms: list[tuple[str, bool]] = []
@@ -482,16 +510,13 @@ class SQLiteMappingRepository(MappingRepository):
                 letters.add(fold(_one_mark(form)).lower())
                 forms.append((form, _keeps_words(name_words, folded.split())))
             old_forms[form_type] = forms
-            lost: list[str] = []
+            lost: set[str] = set()
             for seed in seeds:
                 for saved in _name_forms(seed, form_type):
-                    form = _one_mark(composed(saved))
-                    folded = fold(form).lower()
-                    if _keeps_words(name_words, folded.split()):
-                        continue
-                    letters.add(folded)
-                    lost.append(form)
-            seed_forms[form_type] = list(dict.fromkeys(lost))
+                    folded = fold(composed(saved)).lower()
+                    if not _keeps_words(name_words, folded.split()):
+                        lost.add(_seed_key(saved))
+            seed_keys[form_type] = lost
         for row in self._session.query(Entity).all():
             if row.id in found:
                 continue
@@ -499,24 +524,20 @@ class SQLiteMappingRepository(MappingRepository):
             if stored is None:
                 continue
             text = composed(stored)
-            marks_one = _one_mark(text)
-            if fold(marks_one).lower() not in letters:
-                continue
             form_type = "LOCATION" if row.entity_type == "LOCATION" else "PERSON"
             marked = any(is_mark(char) for char in stored)
             if (
-                _same_or_form(text, name)
-                or any(
-                    (keeps or marked) and _same_or_form(text, form)
-                    for form, keeps in old_forms[form_type]
-                )
-                or (
-                    marked
-                    and not any(char.islower() for char in text)
-                    and any(
-                        _same_or_form(marks_one, form) for form in seed_forms[form_type]
-                    )
-                )
+                marked
+                and not any(char.islower() for char in text)
+                and _seed_key(stored) in seed_keys[form_type]
+            ):
+                rows.append(row)
+                continue
+            if fold(_one_mark(text)).lower() not in letters:
+                continue
+            if _same_or_form(text, name) or any(
+                (keeps or marked) and _same_or_form(text, form)
+                for form, keeps in old_forms[form_type]
             ):
                 rows.append(row)
         return rows
