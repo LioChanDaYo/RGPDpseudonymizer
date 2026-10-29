@@ -61,6 +61,20 @@ def _same_kind(old: EntityReviewState | None, new: EntityReviewState) -> bool:
 _ADD_LABEL = "Ajouter une entité"
 
 
+def _holds(
+    key: tuple[str, str] | None, text: str, entity_type: str, written: str
+) -> bool:
+    """Whether a place a row added by hand holds, under its ``key`` (name,
+    type), is already that of an add of ``text`` (Story 10.19, v1.15; the
+    orchestrator's ruling 6): the same type, and its name and ``text`` Q3
+    forms of each other either way round, or the text ``written`` at the
+    place a form of its name."""
+    if key is None or key[1] != entity_type:
+        return False
+    name = key[0]
+    return is_form(name, text) or is_form(text, name) or is_form(written, name)
+
+
 def _corrected_source(source: str) -> str:
     """The source of a place a correction reaches (Story 10.17, AC8): a place
     the user typed. A place added by hand keeps its own mark."""
@@ -412,12 +426,13 @@ class GUIValidationState(QObject):
         the same name and type is reached as before (10.10), whatever places
         it stands for.
 
-        A row the row's earlier correction reached (it holds the same
-        corrected text) is reached again when the text now written at every
-        place it stands for (``_current_places``: the span that correction
-        gave it) is a form of that corrected text, so a second correction
-        reaches every row the first one reached (v1.13; the orchestrator's
-        ruling on the second Codex review's first P0).
+        A row of the same type holding the row's earlier correction (the same
+        corrected text) is taken before the original names are compared, so
+        a second correction from either row reaches every row the first one
+        reached (v1.13 and v1.15; the orchestrator's rulings on the second
+        Codex review's first P0 and the third's P0-2); ``modify_entity_text``
+        then keeps such a row only where the new text reaches it, from the
+        span now written there (``_reaches``).
 
         Accept and reject do not use this: they use ``_group_ids``, where a
         row added by hand is alone.
@@ -432,13 +447,18 @@ class GUIValidationState(QObject):
             if other is review:
                 continue
             other_name = self._name_key(other)
-            if (
-                other_name is None
-                or other_name[1] != entity_type
-                or not is_form(other_name[0], text)
-            ):
+            if other_name is None or other_name[1] != entity_type:
                 continue
             if self._decided_alone(other, _DROPPED):
+                continue
+            if (
+                other_name != name
+                and earlier is not None
+                and other.user_modification == earlier
+            ):
+                rows.append(other)
+                continue
+            if not is_form(other_name[0], text):
                 continue
             if other_name != name:
                 places = self._occurrences(other)
@@ -450,13 +470,6 @@ class GUIValidationState(QObject):
                         text,
                     )
                     for place in places
-                ) and not (
-                    earlier is not None
-                    and other.user_modification == earlier
-                    and all(
-                        is_form(self._session.text_of(place)[start:end], earlier)
-                        for place, start, end in self._current_places(other)
-                    )
                 ):
                     continue
             rows.append(other)
@@ -836,11 +849,17 @@ class GUIValidationState(QObject):
         if (start_pos, end_pos) not in places:
             places.append((start_pos, end_pos))
             places.sort()
+        document_text = self._session.document_text
         held = {
             span
             for entity_id, spans in self._hand_spans_by_id.items()
-            if self._hand_key_by_id.get(entity_id) == (text, entity_type)
             for span in spans
+            if _holds(
+                self._hand_key_by_id.get(entity_id),
+                text,
+                entity_type,
+                document_text[span[0] : span[1]],
+            )
         }
         return [
             (start, end)

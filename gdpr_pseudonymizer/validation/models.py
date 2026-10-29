@@ -404,10 +404,18 @@ class ValidationSession:
         True when a review holds an entity with the same type, span and cell
         whose text is a form of the place's text (Story 10.19, AC2: a found
         « ZORBAL » for an added « Zorbal »): a place the detector found, which
-        keeps its own decision, or a place added by an earlier [A].
+        keeps its own decision, or a place added by an earlier [A]. v1.15
+        (the orchestrator's ruling 6): either way round (« Vorlène » added,
+        then « VORLENE »), or through the text written at the place
+        (« BÊLORA », held by [A] « Belora », for a later [A] « Bélora »).
         """
+        written = self.text_of(place)[place.start_pos : place.end_pos]
         return any(
-            is_form(review.entity.text, place.text)
+            (
+                is_form(review.entity.text, place.text)
+                or is_form(place.text, review.entity.text)
+                or is_form(written, review.entity.text)
+            )
             and review.entity.entity_type == place.entity_type
             and review.entity.start_pos == place.start_pos
             and review.entity.end_pos == place.end_pos

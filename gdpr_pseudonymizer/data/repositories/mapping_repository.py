@@ -61,7 +61,10 @@ def _damage_seeds(name: str) -> list[str]:
     marks: a vowel that ends a title word at the start of a word (« ME » in
     « MÉLORA »), or that a title word follows to the end of the word (« ME »
     in « QUOVÔME »); every choice of them, from at most six such letters.
-    Each is a form of the name once accents are set aside (Lionel's Q3).
+    A word starts after a hyphen or an apostrophe too (v1.15, the
+    orchestrator's ruling 5: « ME » after the hyphen of « BELORA-MÉLORA »),
+    so each part of a word is read on its own (``_word_parts``). Each seed
+    is a form of the name once accents are set aside (Lionel's Q3).
     """
     # Imported here: the data layer reads the forms rule of the validation
     # models, which import the core (no gui/ import).
@@ -72,8 +75,10 @@ def _damage_seeds(name: str) -> list[str]:
     spots = [
         (index, at)
         for index, word in enumerate(words)
-        for at, char in enumerate(word)
-        if char in _VOWELS and (word[: at + 1] in titles or word[at + 1 :] in titles)
+        for start, end in _word_parts(word)
+        for at in range(start, end)
+        if word[at] in _VOWELS
+        and (word[start : at + 1] in titles or word[at + 1 : end] in titles)
     ][:_MAX_DAMAGE_SPOTS]
     seeds: list[str] = []
     for size in range(1, len(spots) + 1):
@@ -83,6 +88,23 @@ def _damage_seeds(name: str) -> list[str]:
                 letters[index][at] = composed(letters[index][at] + "\u0301")
             seeds.append(" ".join("".join(word) for word in letters))
     return seeds
+
+
+# The characters that join parts of one word, for ``_word_parts``.
+_WORD_JOINERS = frozenset("-\u2010\u2011'\u2019")
+
+
+def _word_parts(word: str) -> list[tuple[int, int]]:
+    """The (start, end) offsets of the parts of ``word`` between hyphens and
+    apostrophes, empty parts left out."""
+    parts: list[tuple[int, int]] = []
+    start = 0
+    for at, char in enumerate(word):
+        if char in _WORD_JOINERS:
+            parts.append((start, at))
+            start = at + 1
+    parts.append((start, len(word)))
+    return [(begin, end) for begin, end in parts if end > begin]
 
 
 def _keeps_words(words: list[str], form_words: list[str]) -> bool:
@@ -420,14 +442,18 @@ class SQLiteMappingRepository(MappingRepository):
         reached; nor is the name without a title typed with it (10.20's
         clean-database rule).
 
-        v1.13 (the second Codex review's third P0; QA's DEL-1019-01): in
-        those comparisons every accent mark counts as one mark, whatever its
-        kind (``_one_mark``), so « VORLAN » + U+0300 + « LORA », saved from
-        « VORLAN MÈLORA », is erased with « Vorlan Mélora »; and the forms
-        that lost letters of the name's damaged capitals texts
-        (``_damage_seeds``: « VORLAN MÉLORA » for « Vorlan Melora ») reach a
-        row written entirely in capitals that carries a mark. The sign rule
-        reads the saved text as it is.
+        v1.13 (the second Codex review's third P0; QA's DEL-1019-01): the
+        forms that lost letters of the name's damaged capitals texts
+        (``_damage_seeds``: « VORLAN MÉLORA » for « Vorlan Mélora » or
+        « Vorlan Melora ») reach a row written entirely in capitals that
+        carries a mark, every accent mark counting there as one mark,
+        whatever its kind (``_one_mark``), so « VORLAN » + U+0300 + « LORA »,
+        saved from « VORLAN MÈLORA », is erased with « Vorlan Mélora ». v1.15
+        (the third Codex review's P0-3; the orchestrator's ruling 4): the
+        name's own saved forms are compared with their marks as they are, so
+        « Vorlan » + U+0300 + « lora », saved from « Vorlan Mèlora », another
+        name in title case, stays. The sign rule reads the saved text as it
+        is.
 
         A row is compared only when its composed text, accents set aside, in
         small letters, is that of the name or of one of the forms (one
@@ -449,11 +475,11 @@ class SQLiteMappingRepository(MappingRepository):
         for form_type in _FORM_TYPES:
             forms: list[tuple[str, bool]] = []
             for form in dict.fromkeys(
-                _one_mark(composed(saved))
-                for saved in _name_forms(full_name, form_type)
+                composed(saved) for saved in _name_forms(full_name, form_type)
             ):
                 folded = fold(form).lower()
                 letters.add(folded)
+                letters.add(fold(_one_mark(form)).lower())
                 forms.append((form, _keeps_words(name_words, folded.split())))
             old_forms[form_type] = forms
             lost: list[str] = []
@@ -481,7 +507,7 @@ class SQLiteMappingRepository(MappingRepository):
             if (
                 _same_or_form(text, name)
                 or any(
-                    (keeps or marked) and _same_or_form(marks_one, form)
+                    (keeps or marked) and _same_or_form(text, form)
                     for form, keeps in old_forms[form_type]
                 )
                 or (

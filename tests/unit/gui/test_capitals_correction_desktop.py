@@ -674,12 +674,6 @@ def test_desktop_single_added_words_never_left_in_clear(  # type: ignore[no-unty
     assert output == f"Signé : {p}. {p} a signé."
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19 v1.15: reproduces the widening over « Mèzor », another "
-    "name's word, on 919a227; fixed in Task 11.2",
-)
 def test_desktop_single_widening_never_takes_another_name(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, dialogs
 ) -> None:
@@ -707,12 +701,6 @@ def test_desktop_single_widening_never_takes_another_name(  # type: ignore[no-un
     assert output == f"{p} a signé. {p} Mèzor a signé."
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19 v1.15: reproduces a second correction from the capitals "
-    "row missing the « Vorlène » row on 919a227; fixed in Task 11.2",
-)
 @pytest.mark.parametrize("mode", ["single", "batch"])
 def test_desktop_second_correction_from_the_capitals_row(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, dialogs, mode
@@ -750,12 +738,6 @@ def test_desktop_second_correction_from_the_capitals_row(  # type: ignore[no-unt
     assert output == f"{p} a signé. Signé : {p}."
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19 v1.15: reproduces « Testar » left past a line break on "
-    "919a227; fixed in Task 11.2",
-)
 def test_desktop_single_widening_across_a_line_break(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, dialogs
 ) -> None:
@@ -783,12 +765,6 @@ def test_desktop_single_widening_across_a_line_break(  # type: ignore[no-untyped
     assert output == f"Signé : {p}. {p} a signé."
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19 v1.15: reproduces a second add of « VORLENE » making a "
-    "row for a place the « Vorlène » row holds on 919a227; fixed in Task 11.2",
-)
 def test_desktop_single_repeated_add_recognises_held_capitals_place(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, dialogs
 ) -> None:
@@ -818,12 +794,6 @@ def test_desktop_single_repeated_add_recognises_held_capitals_place(  # type: ig
     assert review.names() == sorted([(VM, PERSON), ("Vorlène", PERSON)])
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19 v1.15: reproduces a second add of « Bélora » holding "
-    "« BÊLORA », held by the « Belora » row, on 919a227; fixed in Task 11.2",
-)
 def test_desktop_single_repeated_add_reads_the_text_written_at_a_held_place(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, dialogs
 ) -> None:

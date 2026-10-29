@@ -30,6 +30,7 @@ from gdpr_pseudonymizer.validation.models import (
     EntityReviewState,
     ValidationSession,
     fold,
+    is_form,
     whole_word_places,
 )
 from gdpr_pseudonymizer.validation.ui import (
@@ -46,8 +47,9 @@ from gdpr_pseudonymizer.validation.ui import (
 )
 
 # Story 10.19 (v1.13, Lionel's answer on the leak): the word written right
-# after a place, past spaces: letters up to a space or a punctuation mark.
-_NEXT_WORD = re.compile(r"[ \t]+([^\s.,;:!?«»()\[\]\"]+)")
+# after a place, past any whitespace, a line break included (v1.15): letters
+# up to a space or a punctuation mark.
+_NEXT_WORD = re.compile(r"\s+([^\s.,;:!?«»()\[\]\"]+)")
 
 # Story 10.15 (AC14 (e), Lionel's approved Q2 text): [A] of a name whose every
 # place is already in the review. %1 is the text typed, %2 the type typed.
@@ -689,10 +691,14 @@ class ValidationWorkflow:
 
         When the correction starts with the words the original span holds,
         accents set aside, in any capitals, and the words written right after
-        the span are the words it adds, accents set aside, each with a capital
-        letter (never a word written in small letters only), the span covers
-        them: « Zélvine » corrected as « ZELVINE TESTAR » covers « Zélvine
-        Testar », so « Testar » is not left in clear beside the pseudonym.
+        the span, past any whitespace (a line break too), are the words it
+        adds, each with a capital letter (never a word written in small
+        letters only) and each a Q3 form of the typed word, or the typed word
+        of it (``is_form`` either way round: « Tèstar » for « TESTAR », never
+        « Mèzor » for « Mézor »; v1.15, the orchestrator's rulings 1 and 2),
+        the span covers them: « Zélvine » corrected as « ZELVINE TESTAR »
+        covers « Zélvine Testar », so « Testar » is not left in clear beside
+        the pseudonym.
 
         Returns:
             (start_pos, end_pos) of the widened span, or None
@@ -709,8 +715,8 @@ class ValidationWorkflow:
             if found is None:
                 return None
             written = found.group(1)
-            if fold(written).lower() != fold(word).lower() or not any(
-                char.isupper() for char in written
+            if not any(char.isupper() for char in written) or not (
+                is_form(written, word) or is_form(word, written)
             ):
                 return None
             end = found.end(1)

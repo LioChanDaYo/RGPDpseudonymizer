@@ -840,12 +840,6 @@ def test_cli_added_words_never_left_in_clear_at_own_places(
     assert written == f"Signé : {p}. {p} a signé."
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19 v1.15: reproduces the widening over « Mèzor », another "
-    "name's word, on 919a227; fixed in Task 11.2",
-)
 def test_cli_widening_never_takes_another_name(tmp_path: Path, db: Path) -> None:
     """T31 CLI (AC3; the third Codex review's P0-1, the orchestrator's ruling
     1): « Zélvine » corrected as « Zélvine Mézor » is never widened over
@@ -863,12 +857,6 @@ def test_cli_widening_never_takes_another_name(tmp_path: Path, db: Path) -> None
     assert written == f"{p} a signé. {p} Mèzor a signé."
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19 v1.15: reproduces « Testar » left past a line break on "
-    "919a227; fixed in Task 11.2",
-)
 def test_cli_widening_across_a_line_break(tmp_path: Path, db: Path) -> None:
     """T35 CLI (AC3; the third Codex review's P0-5, the orchestrator's ruling
     2): the added word written after a line break is covered too."""
@@ -889,12 +877,6 @@ def test_cli_widening_across_a_line_break(tmp_path: Path, db: Path) -> None:
     assert written == f"Signé : {p}. {p} a signé."
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19 v1.15: reproduces [A] « VORLENE » adding a place [A] "
-    "« Vorlène » already holds on 919a227; fixed in Task 11.2",
-)
 def test_cli_repeated_add_recognises_held_capitals_place(
     tmp_path: Path, db: Path
 ) -> None:
@@ -917,12 +899,6 @@ def test_cli_repeated_add_recognises_held_capitals_place(
     assert _names(db) == sorted([(VM, PERSON), ("Vorlène", PERSON)])
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19 v1.15: reproduces [A] « Bélora » adding « BÊLORA » a "
-    "second time, held by [A] « Belora », on 919a227; fixed in Task 11.2",
-)
 def test_cli_repeated_add_reads_the_text_written_at_a_held_place(
     tmp_path: Path, db: Path
 ) -> None:
@@ -1185,13 +1161,6 @@ def test_delete_mapping_typed_without_accents_reaches_old_capitals_row(
     )
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19 v1.15: reproduces delete-mapping « Vorlan Mélora » erasing "
-    "the old row of « Vorlan Mèlora », another name, on 919a227; fixed in "
-    "Task 11.2",
-)
 def test_delete_mapping_keeps_title_case_old_row_of_another_accent(
     tmp_path: Path, db: Path
 ) -> None:
@@ -1211,13 +1180,6 @@ def test_delete_mapping_keeps_title_case_old_row_of_another_accent(
     assert _erased_ids(db) == [ids[("Vorlan Mélora", PERSON)]]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19 v1.15: reproduces the old row of « BELORA-MÉLORA QUOVÔME "
-    "ZORBAL », cut after a hyphen, left by delete-mapping on 919a227; fixed in "
-    "Task 11.2",
-)
 def test_delete_mapping_reaches_old_hyphen_row_typed_without_accents(
     tmp_path: Path, db: Path
 ) -> None:
