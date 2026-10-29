@@ -1,48 +1,41 @@
 schema: 1
 story: '10.19'
 story_title: 'Capitals in Hand-Added Names and Corrections'
-scope: 'Re-check after Task 11 (the stop-rule round; Lionel''s option A): PR #112 at head 0c03692 on main 097a12c. Commits reviewed: SM v1.15 769653b (rulings 1 to 8), tests first 60686ca (T31 to T36 strict xfail; G14 to G18), fix 67d2ed7, record 0c03692. Round 3 was QA''s FAIL 30 at 919a227 (a3a47cc). The fourth read-only Codex review (01a1890d) ran in parallel; QA read it after its own probes had run. Earlier evidence is kept under evidence_round3 to evidence_round1. QA folder: rgpd-analysis/r1019/qa (headpkg4, probes test_q19_r4*.py, olddbs *_r4_*, mut4/, logs4/).'
-gate: FAIL
-status_reason: 'Every round-3 finding is fixed on real output (DEL-1019-02, DEL-1019-03 for Codex''s shape, WIDEN-1019-01, CAPS-004, LEAK-1019-01, ADD-1019-01, TEST-1019-04); the SM''s 13 class checks and every QA probe set agree; QA''s end-to-end class check matches main and 919a227 place for place; no regression; G2 holds; CI green on attempt 1. The fourth Codex review''s three P0, which QA''s probes had not found, are reproduced on real output: an old row with two adjacent marks (« QUOVÔME MÉLORA ») is missed by the name typed without its accents while today''s row goes and the command reports it anonymous (DEL-1019-04, high); single quotation marks keep Lionel''s leak (LEAK-1019-02, medium); a four-word name beyond the six-cut cap (DEL-1019-05, low, scope).'
+scope: 'Re-check after Task 12: PR #112 at head 6d87d22 on main 097a12c. Commits reviewed: SM v1.17 6802af8, tests first 9479617 (T37 x5, T38, T39 strict xfail; G19 to G21), fix 7331357, record 6d87d22. Round 4 was QA''s FAIL 70 at 0c03692 (49a0f85). Lionel''s rule: realistic findings are fixed now, findings that need exotic input go to a follow-up. The fifth read-only Codex review (01a189f1) ran in parallel; QA read it after its own probes had run. Earlier evidence is kept under evidence_round4 to evidence_round1. QA folder: rgpd-analysis/r1019/qa (headpkg5, probes test_q19_r5.py and test_q19_r4c.py, olddbs *_r5_*, mut5/, logs5/).'
+gate: CONCERNS
+status_reason: 'Round 4''s three findings are fixed on real output (DEL-1019-04 two marks side by side, LEAK-1019-02 quotation marks, DEL-1019-05 eight cut places); the SM''s 14 class checks and every QA probe set agree; QA''s end-to-end class check is identical to 0c03692; no regression; G2 holds; CI green on attempt 1. The fifth Codex review''s two P0, reproduced by QA: punctuation glued to an added word (« Testar… », « Testar— », and QA''s « – », « / », « * ») keeps Lionel''s leak (LEAK-1019-03, medium, realistic); a nine-cut name typed without its accents misses its old row (DEL-1019-06, low, exotic: follow-up).'
 reviewer: 'Quinn (Test Architect)'
-updated: '2026-10-29T19:51:19Z'
+updated: '2026-10-29T23:49:46Z'
 
 waiver: { active: false }
 
 merge_blockers:
-  - 'DEL-1019-04'
-  - 'LEAK-1019-02'
+  - 'LEAK-1019-03'
 
 merge_notes:
-  - 'Lionel''s option A: this round finds P0-class issues again, so the orchestrator decides which part moves to a follow-up after 2.3.0: the erasure of old damaged rows by a name typed without its accents (_damage_seeds: DEL-1019-04, DEL-1019-05) and the widening (LEAK-1019-02). QA never merges.'
-  - 'DEL-1019-04, LEAK-1019-02 and DEL-1019-05 were found by the fourth read-only Codex review (01a1890d) and reproduced by QA on real output with main compared.'
+  - 'Under Lionel''s rule, LEAK-1019-03 is realistic and is fixed in this story (with a guard); DEL-1019-06 needs exotic input and goes to the follow-up. QA never merges.'
+  - 'Both were found by the fifth read-only Codex review (01a189f1) and reproduced by QA on real output with main compared.'
   - 'This gate commit (docs only) starts its own CI run on the PR.'
 
 top_issues:
-  - id: 'DEL-1019-04'
-    severity: high
-    finding: 'QA''s v2.2.0 and 43041e9 rows from « QUOVÔME MÉLORA », saved as « QUOVO » + U+0302 + U+0301 + « LORA » (two adjacent marks): delete-mapping « Quovome Melora » erases today''s « QUOVÔME MÉLORA », says the pseudonym is now permanently anonymous, and keeps the old row; « Quovôme Mélora » erases both; main erases neither. The composed old text and the acute-only seed compose the two marks differently. DEL-1019-01''s second shape again. The fourth Codex review''s P0-2.'
-    suggested_action: 'Dev (or the follow-up under option A): compare marked capitals rows with the seeds'' forms after _one_mark on the decomposed text, so adjacent marks count the same; a guard of QA''s shape (test_q19_r4c.py::test_d).'
-    refs: ['gdpr_pseudonymizer/data/repositories/mapping_repository.py', 'rgpd-analysis/r1019/qa/probes/test_q19_r4c.py']
-    suggested_owner: dev
-  - id: 'LEAK-1019-02'
+  - id: 'LEAK-1019-03'
     severity: medium
-    finding: '« Signé : ZÉLVINE TESTAR. ''Zélvine Testar'' a signé. » (and with ‘ ’), corrected as « ZELVINE TESTAR »: « Testar'' » is read as one word, so « Testar » stays in clear, CLI and desktop single. Double quotation marks and « » (with or without spaces) are covered. Not a regression (main leaks too); Lionel''s leak with single quotation marks. The fourth Codex review''s P0-1.'
-    suggested_action: 'Dev: end the next word before a closing single quotation mark (straight or curly) as before other punctuation; a guard.'
-    refs: ['gdpr_pseudonymizer/validation/workflow.py']
+    finding: '« Signé : ZÉLVINE TESTAR. Zélvine Testar… a signé. » corrected as « ZELVINE TESTAR »: « Testar » stays in clear, CLI and desktop single (real screen''s dialog); also with « — », « – », « / » or « * » glued to the word (the word runs to the next space); « ... », « ? » and a closing « » » are covered. Realistic: « Testar… », « Testar— », a footnote « Testar* », « Testar/Quovane ». Not a regression (main leaks too). The fifth Codex review''s P0-1 plus QA''s variants.'
+    suggested_action: 'Dev: read the added word as letters, apostrophes and hyphens only, so any other character ends it; a guard (r1019/qa/probes/test_q19_r5.py).'
+    refs: ['gdpr_pseudonymizer/validation/workflow.py', 'rgpd-analysis/r1019/qa/probes/test_q19_r5.py']
     suggested_owner: dev
-  - id: 'DEL-1019-05'
+  - id: 'DEL-1019-06'
     severity: low
-    finding: '« MELOME MELAME MELIME MÉLUME »''s v2.2.0 row is missed by « Melome Melame Melime Melume »: the six-cut cap is spent on the first three words; today''s row goes and the command reports it anonymous. Four words each holding a title cut is beyond what QA calls plausible under Lionel''s scope. The fourth Codex review''s P0-3.'
-    suggested_action: 'Orchestrator: rule on scope; if in, count only cuts the name can carry (or raise the cap) with a guard.'
+    finding: '« MELOME MELAME MELIME-MELUME MÉLORA »''s v2.2.0 row (« … » + lone U+0301 + « LORA ») is missed by the name typed without its accents (the eight-cut cap is spent before the surname''s cut); the accented name erases it. Exotic: four given names each holding a « ME » cut is not a real name. The fifth Codex review''s P0-2.'
+    suggested_action: 'Follow-up after 2.3.0 under Lionel''s rule (count only the cuts a name actually carries).'
     refs: ['gdpr_pseudonymizer/data/repositories/mapping_repository.py']
     suggested_owner: po
-  - id: 'TEST-1019-05'
+  - id: 'TEST-1019-06'
     severity: low
-    finding: 'The story''s third equivalence claim does not hold: the widening without its prefix check covers « Testar » after a correction that renames (« Zélvine » corrected as « Quovane Testar » or « Brimel Testar »), where the head leaves it in clear as main does. Committed-test gaps: the typed word a form of the written word only (typed « Zélvine Testar », written « TÉSTAR »: the head covers it, the mutant does not); apostrophe cuts in _damage_seeds.'
-    suggested_action: 'Orchestrator: a ruling on renames (or a test); guards for the two gaps when convenient.'
-    refs: ['gdpr_pseudonymizer/validation/workflow.py', 'rgpd-analysis/r1019/qa/probes/test_q19_r4.py']
-    suggested_owner: po
+    finding: 'QA''s mutant « _seed_key keeps a letter''s own accent as a mark » passes every committed test; QA''s probe catches it (old capitals rows saved decomposed with an accented letter next to a cut: « ZÈLVINE MÈZOR », « À VORLAN MÈLORA »).'
+    suggested_action: 'A guard of that shape when convenient.'
+    refs: ['tests/unit/test_cli_capitals_forms.py']
+    suggested_owner: dev
   - id: 'CI-FLAKY-01'
     severity: low
     finding: 'The macOS timing test, flaky in Task 7; no failure since.'
@@ -55,12 +48,6 @@ top_issues:
     suggested_action: 'Orchestrator.'
     refs: ['https://github.com/LioChanDaYo/RGPDpseudonymizer/pull/112']
     suggested_owner: dev
-  - id: 'OBS-1019-04'
-    severity: info
-    finding: 'Recorded: the two-word hyphen gap (ruling 8, backlog) also makes the head erase today''s « BELORA-MÉLORA ZORBAL » and report the name anonymous while v2.2.0''s row stays (the backlog entry should say so); « Testar''s » is left as on main; class_leak (v1.13) now counts ruling 1''s other names as leaks, class_leak2 as « another name »; delete-mapping on 10,002 rows 0.41 s.'
-    suggested_action: 'None.'
-    refs: ['gdpr_pseudonymizer/data/repositories/mapping_repository.py']
-    suggested_owner: po
 
 resolved_issues:
   - id: 'JOIN-001'
@@ -92,34 +79,46 @@ resolved_issues:
     note: 'Round 3.'
   - id: 'TEST-1019-02'
     resolved_in: '6f119d5'
-    note: 'Round 3 (G12).'
+    note: 'Round 3.'
   - id: 'TEST-1019-03'
     resolved_in: '6f119d5'
-    note: 'Round 3 (G13).'
+    note: 'Round 3.'
   - id: 'DEL-1019-02'
     resolved_in: '67d2ed7'
-    note: 'Round 4: 20 title-case cases keep their rows (T33).'
+    note: 'Round 4.'
   - id: 'DEL-1019-03'
     resolved_in: '67d2ed7'
-    note: 'Round 4, Codex''s shape (T34); the two-word hyphen gap is 10.20''s, backlog (ruling 8).'
+    note: 'Round 4; the two-word hyphen gap is 10.20''s, backlog.'
   - id: 'WIDEN-1019-01'
     resolved_in: '67d2ed7'
-    note: 'Round 4 (T31 x2).'
+    note: 'Round 4.'
   - id: 'CAPS-004'
     resolved_in: '67d2ed7'
-    note: 'Round 4 (T32 x2).'
+    note: 'Round 4.'
   - id: 'LEAK-1019-01'
     resolved_in: '67d2ed7'
-    note: 'Round 4 (T35 x2); QA''s probe expectation updated.'
+    note: 'Round 4.'
   - id: 'ADD-1019-01'
     resolved_in: '67d2ed7'
-    note: 'Round 4 (T36 x2, x2).'
+    note: 'Round 4.'
   - id: 'TEST-1019-04'
     resolved_in: '60686ca'
-    note: 'Round 4 (G14 to G18).'
+    note: 'Round 4.'
+  - id: 'DEL-1019-04'
+    resolved_in: '7331357'
+    note: 'Round 5: 4 of 4 (T38).'
+  - id: 'LEAK-1019-02'
+    resolved_in: '7331357'
+    note: 'Round 5: straight, curly, curly double, low-high quotes, the elision (T37 x5).'
+  - id: 'DEL-1019-05'
+    resolved_in: '7331357'
+    note: 'Round 5: 4 of 4 (T39).'
+  - id: 'TEST-1019-05'
+    resolved_in: '9479617'
+    note: 'Round 5: G19 to G21; the equivalence sentence corrected.'
 
-quality_score: 70
-expires: '2026-11-12T19:51:19Z'
+quality_score: 90
+expires: '2026-11-12T23:49:46Z'
 
 qa_process_notes:
   - 'Every old database opened as a copy only: the PO''s six (po11/dbs, checksums unchanged after the run; its maker step left out) and QA''s twelve (r1019/qa/olddbs).'
@@ -127,8 +126,31 @@ qa_process_notes:
   - 'Re-check: every old database opened as a copy only (the PO''s six, QA''s twelve and QA''s new twenty: olddbs/*_r2_*, *_r2b_*, written by v2.2.0 and 43041e9); the SM''s four class checks run unchanged; QA read the second Codex review''s final message (session 01a17614) after its own probes had run and checked its three cases on real output; no QA process left running.'
   - 'Re-check after Task 10: every old database opened as a copy only (QA''s new rows olddbs/*_r3*, written by v2.2.0 and 43041e9); the SM''s eight class checks run unchanged; QA read the third Codex review''s final message (session 01a17719) after its own probes had run and checked its cases on real output; no QA process left running.'
   - 'Re-check after Task 11: every old database opened as a copy only (QA''s new rows olddbs/*_r4_*, written by v2.2.0 and 43041e9); the SM''s 13 class checks run unchanged; QA read the fourth Codex review''s final message (session 01a1890d) after its own probes had run and checked its cases on real output; no QA process left running.'
+  - 'Re-check after Task 12: every old database opened as a copy only (QA''s new rows olddbs/*_r5_*, written by v2.2.0 and 43041e9); the SM''s 14 class checks run unchanged; QA read the fifth Codex review''s final message (session 01a189f1) after its own probes had run and checked its cases on real output; no QA process left running.'
 
 evidence:
+  tests_reviewed: 81
+  risks_identified: 2
+  environment: 'Windows, the main Poetry environment, .bat runners through cmd.exe, USERPROFILE and HOME = r1019/qa/home; packages from git archive (head 6d87d22 as headpkg5, 0c03692, main 097a12c). C:\Users\devea\.gdpr-pseudo.yaml not touched. Nothing under held_out/, final_exam/ or tests/accuracy/ opened. Invented names only. No Codex, Forge, Anvil or Cato from QA.'
+  round4_findings: 'DEL-1019-04: QUOVÔME MÉLORA old rows (v2.2.0, 43041e9) erased by « Quovome Melora » and « Quovôme Mélora », 4 of 4. DEL-1019-05: MELOME MELAME MELIME MÉLUME 4 of 4. LEAK-1019-02: straight, curly single, curly double, low-high quotes and a quote then a comma covered, CLI and desktop single (real screen); « ''Zélvine D''Émerine'' » covered; « Testar''s » left as main.'
+  probe_sets: 'test_q19_real 61/62 (K); r2 181/181; r2b 58/58; old 41/41; r3 106/107 (QA''s « Testar''s » expectation); r3b 20/20; r3c 9/13 (the two-word hyphen gap, backlog); r3s 10/10; r4 3/3; r4c 21/21 (9/21 at 0c03692); po11 20 passed. Against 0c03692 with pseudonyms and operation ids masked: no change.'
+  class_checks: 'The SM''s 14 unchanged: class_join and class_join_all 0; class_delete, class_delete_sub, class_delete_typed 0 missed, 0 touched; class_delete_typed2 and class_delete_typed3 (5,591 rows) 0 missed, 0 touched (199 counted as 10.20''s gap); class_caps 0; class_desk and class_desk2 A/B/C 0; class_add 0; class_leak2 0 leaks, 0 absorbed, 0 wrongly widened. QA''s class_e2e19 identical to 0c03692, nothing worse than main.'
+  fifth_codex_review: 'Session 01a189f1 (read-only), two P0, reproduced by QA (test_q19_r5.py; the nine-cut row by v2.2.0) after QA''s own runs: glued punctuation = LEAK-1019-03 (QA adds « – », « / », « * »); the nine-cut name = DEL-1019-06 (exotic).'
+  no_regression: '10.15 (57), 10.17 (95), 10.18 (35), 10.20 (639): every outcome identical to 0c03692. 10.20''s clean digest a630e965c52cd9cb identical to main. clean_delete.py 0 differences, 156 beyond, digest f8a1cd0cfeb87de4.'
+  g2: 'wt_9479617 (product = 0c03692''s, byte for byte): --runxfail 7 failed at the dev''s lines (CLI :967 x3, :998, :1305, :1327; desktop :855), AssertionError, no PRE; marked 74 passed, 7 xfailed, one process and -n 4; 7331357 deletes only the seven markers (31 lines).'
+  mutants: '11 in r1019/qa/mut5 (base 591 committed pass). Caught: _seed_key keeps mark kinds (T28), seeds without a mark (T23 case 2), seeds for title case (T33, T28 case 2), no seeds branch (8), six cuts (T39), no closing quotes (T37 x4), straight quote only (T37 curly), no curly double (T37 curly double), cut at the first apostrophe (T37 elision). Survive: _seed_key keeps a letter''s own accent (QA''s C3 probe catches it: TEST-1019-06); seven cuts (needs an eight-cut name, exotic).'
+  cost: 'Measured while QA''s mutants ran (relative, same run): delete-mapping on 10,002 rows, four words with four cuts (15 seeds) 0.31 s against 0.33 s at 0c03692; eight cuts (255 seeds) 0.76 s against 0.41 s; the usual name 0.52 s against 0.56 s. [E] on 100 capital places in 200 KB 0.28-0.32 s.'
+  ci:
+    9479617: '40964876687, attempt 1: "3223 passed, 7 xfailed" x3; Windows "3073 passed, 3 skipped, 7 xfailed".'
+    7331357: '40967104585, attempt 1: "3230 passed" x3; Windows "3080 passed, 3 skipped".'
+    6d87d22: '40969067011, attempt 1: "3230 passed" x3; Windows "3080 passed, 3 skipped". Lint at the head clean (ruff 0, black 332 files, mypy 107 source files).'
+  codex_rule: 'Five Codex sessions on rgpd-wt-s1019, all read-only (the latest 01a189f1, 2026-10-30 00:14); no workspace-write session; no Forge entry; the four new commits carry both attribution lines and no skip-CI marker.'
+  trace:
+    ac_covered: [1, 2, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15]
+    ac_gaps: [3]
+    notes: 'AC3: LEAK-1019-03 (glued punctuation). AC4: DEL-1019-06 is exotic (follow-up). AC9: the fifth Codex review asks for changes.'
+
+evidence_round4:
   tests_reviewed: 71
   risks_identified: 3
   environment: 'Windows, the main Poetry environment, .bat runners through cmd.exe, USERPROFILE and HOME = r1019/qa/home; packages from git archive (head 0c03692 as headpkg4, 919a227, main 097a12c). C:\Users\devea\.gdpr-pseudo.yaml not touched. Nothing under held_out/, final_exam/ or tests/accuracy/ opened. Invented names only. No Codex, Forge, Anvil or Cato from QA.'
