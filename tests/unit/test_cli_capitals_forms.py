@@ -1,8 +1,8 @@
 """Story 10.19: a name added ([A]) or corrected ([E]) in the command-line
 review also reaches its forms in capitals, and ``delete-mapping`` by name also
 erases the saved pseudonyms of the name in other capitals (T1-T7, T9-T13,
-T17, T18, T19 CLI, T20, T21 CLI, T22-T25, T28, T30 CLI), and what must not
-change (G1, G2, G7, G8 CLI, G11-G13, T23's case 2).
+T17, T18, T19 CLI, T20, T21 CLI, T22-T25, T28, T30 CLI, T31, T33-T36 CLI),
+and what must not change (G1, G2, G7, G8 CLI, G11-G18, T23's case 2).
 
 Written by the BMAD dev agent (Claude), before the fix. Each test drives the
 real ``gdpr-pseudo process`` or ``delete-mapping`` command through
@@ -125,6 +125,10 @@ T25_TEXT = "Signé : ZELVINE TESTAR. Zélvine Testar a signé."
 G11_TEXT = "Signé : VORLENE QUENTRIX. Vorlène Quentrix a signé."
 G13_TEXT = "Le contrat est validé. Signé : ZORBAL QUENTRIX."
 T30_TEXT = "Signé : ZÉLVINE TESTAR. Zélvine Testar a signé."
+T31_TEXT = "Zélvine Mézor a signé. Zélvine Mèzor a signé."
+T35_TEXT = "Signé : ZÉLVINE TESTAR. Zélvine\nTestar a signé."
+T36_TEXT = "Vorlan Mestrix valide. Vorlène a signé. VORLENE a signé."
+T36B_TEXT = "Vorlan Mestrix valide. Signé : Bélora. Signé : BÊLORA."
 
 # Story 10.15's approved line (Lionel's Q2 there), for « Zorbal » as PERSON.
 ALREADY_LINE = (
@@ -836,6 +840,117 @@ def test_cli_added_words_never_left_in_clear_at_own_places(
     assert written == f"Signé : {p}. {p} a signé."
 
 
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 10.19 v1.15: reproduces the widening over « Mèzor », another "
+    "name's word, on 919a227; fixed in Task 11.2",
+)
+def test_cli_widening_never_takes_another_name(tmp_path: Path, db: Path) -> None:
+    """T31 CLI (AC3; the third Codex review's P0-1, the orchestrator's ruling
+    1): « Zélvine » corrected as « Zélvine Mézor » is never widened over
+    « Mèzor », which is neither a Q3 form of « Mézor » nor « Mézor » of it;
+    that place keeps its old span, as on main."""
+    source, output = _files(tmp_path, ".txt")
+    source.write_text(T31_TEXT, encoding="utf-8")
+    run = _process(
+        source, output, db, [("Zélvine", PERSON)], [ENTER, "e"], ["Zélvine Mézor"]
+    )
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    written = _written(output)
+    assert "Mèzor a signé" in written, written  # expected failure
+    p = _pseudonym(db, "Zélvine Mézor")
+    assert written == f"{p} a signé. {p} Mèzor a signé."
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 10.19 v1.15: reproduces « Testar » left past a line break on "
+    "919a227; fixed in Task 11.2",
+)
+def test_cli_widening_across_a_line_break(tmp_path: Path, db: Path) -> None:
+    """T35 CLI (AC3; the third Codex review's P0-5, the orchestrator's ruling
+    2): the added word written after a line break is covered too."""
+    source, output = _files(tmp_path, ".txt")
+    source.write_text(T35_TEXT, encoding="utf-8")
+    run = _process(
+        source,
+        output,
+        db,
+        [("ZÉLVINE", PERSON), ("Zélvine", PERSON)],
+        [ENTER, "e"],
+        ["ZELVINE TESTAR"],
+    )
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    written = _written(output)
+    assert "TESTAR" not in written.upper(), written  # expected failure
+    p = _pseudonym(db, "ZELVINE TESTAR")
+    assert written == f"Signé : {p}. {p} a signé."
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 10.19 v1.15: reproduces [A] « VORLENE » adding a place [A] "
+    "« Vorlène » already holds on 919a227; fixed in Task 11.2",
+)
+def test_cli_repeated_add_recognises_held_capitals_place(
+    tmp_path: Path, db: Path
+) -> None:
+    """T36 CLI (AC2; the third Codex review's P1, the orchestrator's ruling
+    6): [A] « Vorlène » holds « VORLENE » too; [A] « VORLENE » then adds
+    nothing and shows the approved line, and one row is saved."""
+    source, output = _files(tmp_path, ".txt")
+    source.write_text(T36_TEXT, encoding="utf-8")
+    run = _process(
+        source,
+        output,
+        db,
+        [(VM, PERSON)],
+        [ENTER, "a", "a", SPACE],
+        ["Vorlène", PERSON, "VORLENE", PERSON],
+    )
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    line = "'VORLENE' is already in the review as PERSON at every place: nothing added"
+    assert line in run.flat, run.shown  # expected failure
+    assert _names(db) == sorted([(VM, PERSON), ("Vorlène", PERSON)])
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 10.19 v1.15: reproduces [A] « Bélora » adding « BÊLORA » a "
+    "second time, held by [A] « Belora », on 919a227; fixed in Task 11.2",
+)
+def test_cli_repeated_add_reads_the_text_written_at_a_held_place(
+    tmp_path: Path, db: Path
+) -> None:
+    """T36 CLI, case 2 (AC2; ADD-1019-01 through the text written): [A]
+    « Belora » holds « BÊLORA », a capitals form of it; [A] « Bélora »,
+    another name, adds « Bélora » only, since « BÊLORA » written there is
+    already in the review."""
+    source, output = _files(tmp_path, ".txt")
+    source.write_text(T36B_TEXT, encoding="utf-8")
+    run = _process(
+        source,
+        output,
+        db,
+        [(VM, PERSON)],
+        [ENTER, "a", "a", SPACE],
+        ["Belora", PERSON, "Bélora", PERSON],
+    )
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    assert "Processing 3 entities." in run.flat, run.shown  # expected failure
+    vm, pb, pe = (
+        _pseudonym(db, VM),
+        _pseudonym(db, "Belora"),
+        _pseudonym(db, "Bélora"),
+    )
+    assert _written(output) == f"{vm} valide. Signé : {pe}. Signé : {pb}."
+    assert _names(db) == sorted([(VM, PERSON), ("Belora", PERSON), ("Bélora", PERSON)])
+
+
 # ---------------------------------------------------------------------------
 # AC1, AC5: accents in capitals
 # ---------------------------------------------------------------------------
@@ -1070,6 +1185,70 @@ def test_delete_mapping_typed_without_accents_reaches_old_capitals_row(
     )
 
 
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 10.19 v1.15: reproduces delete-mapping « Vorlan Mélora » erasing "
+    "the old row of « Vorlan Mèlora », another name, on 919a227; fixed in "
+    "Task 11.2",
+)
+def test_delete_mapping_keeps_title_case_old_row_of_another_accent(
+    tmp_path: Path, db: Path
+) -> None:
+    """T33 (AC4; the third Codex review's P0-3, the orchestrator's ruling 4):
+    « Vorlan Mèlora » in title case is another name than « Vorlan Mélora »
+    (Q3 sets accents aside in capitals only), so the row v2.2.0 saved of it,
+    « Vorlan » + a lone grave accent + « lora », stays."""
+    grave = unicodedata.lookup("COMBINING GRAVE ACCENT")
+    old = _key_steps(nfd("Vorlan Mèlora"), PERSON)
+    _pre(old == "Vorlan " + grave + "lora", "the old saved text")
+    _save(db, [("Vorlan Mélora", PERSON, VM), (old, PERSON, "Zorbalix")])
+    _pre(len(_names(db)) == 2, "two rows saved")
+    ids = _ids(db)
+    run = _delete(db, "Vorlan Mélora")
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    assert _names(db) == [(old, PERSON)], run.shown  # expected failure
+    assert _erased_ids(db) == [ids[("Vorlan Mélora", PERSON)]]
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 10.19 v1.15: reproduces the old row of « BELORA-MÉLORA QUOVÔME "
+    "ZORBAL », cut after a hyphen, left by delete-mapping on 919a227; fixed in "
+    "Task 11.2",
+)
+def test_delete_mapping_reaches_old_hyphen_row_typed_without_accents(
+    tmp_path: Path, db: Path
+) -> None:
+    """T34 (AC4; the third Codex review's P0-4, the orchestrator's ruling 5):
+    v2.2.0 cut « ME » after the hyphen of « BELORA-MÉLORA » and at the end of
+    « QUOVÔME »; deleting « Belora-Melora Quovome Zorbal » erases that row
+    with today's row in capitals, and leaves « Vorlan Mestrix »."""
+    acute = unicodedata.lookup("COMBINING ACUTE ACCENT")
+    circumflex = unicodedata.lookup("COMBINING CIRCUMFLEX ACCENT")
+    caps = "BELORA-MÉLORA QUOVÔME ZORBAL"
+    old = _key_steps(nfd(caps), PERSON)
+    _pre(
+        old == "BELORA-" + acute + "LORA QUOVO" + circumflex + "ZORBAL",
+        "the old saved text",
+    )
+    _save(
+        db,
+        [
+            (caps, PERSON, VM),
+            (old, PERSON, "Zorbalix"),
+            ("Vorlan Mestrix", PERSON, "Quovane Testar"),
+        ],
+    )
+    _pre(len(_names(db)) == 3, "three rows saved")
+    ids = _ids(db)
+    run = _delete(db, "Belora-Melora Quovome Zorbal")
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    assert _names(db) == [("Vorlan Mestrix", PERSON)], run.shown  # expected failure
+    assert _erased_ids(db) == sorted([ids[(caps, PERSON)], ids[(old, PERSON)]])
+
+
 # ---------------------------------------------------------------------------
 # Guards (pass on the unfixed and the fixed code)
 # ---------------------------------------------------------------------------
@@ -1248,3 +1427,99 @@ def test_cli_correction_reaches_capitals_form_before_found_place(
     assert "ZORBAL" not in written, written
     p = _pseudonym(db, ZQ)
     assert written == f"Le contrat est validé. Signé : {p}."
+
+
+def _old_rows_erased(
+    db: Path, document: str, typed: str
+) -> tuple[list[tuple[str, str]], list[str], dict[tuple[str, str], str], str]:
+    """Saves today's row of ``document``, the row v2.2.0 saved from it read
+    with separate marks, and ('Vorlan Mestrix', PERSON); deletes ``typed``.
+    Returns the names left, the erased ids, the ids and the old text."""
+    old = _key_steps(nfd(document), PERSON)
+    _save(
+        db,
+        [
+            (document, PERSON, VM),
+            (old, PERSON, "Zorbalix"),
+            ("Vorlan Mestrix", PERSON, "Quovane Testar"),
+        ],
+    )
+    _pre(len(_names(db)) == 3, "three rows saved")
+    ids = _ids(db)
+    run = _delete(db, typed)
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    return _names(db), _erased_ids(db), ids, old
+
+
+def test_delete_mapping_reaches_old_row_with_two_cuts(tmp_path: Path, db: Path) -> None:
+    """G14 (AC4; QA's TEST-1019-04): v2.2.0 saved « MÉLORA MÉZOR » cut twice;
+    deleting « Melora Mezor » erases it with today's row."""
+    acute = unicodedata.lookup("COMBINING ACUTE ACCENT")
+    left, erased, ids, old = _old_rows_erased(db, "MÉLORA MÉZOR", "Melora Mezor")
+    _pre(old == acute + "LORA " + acute + "ZOR", "the old saved text")
+    assert left == [("Vorlan Mestrix", PERSON)]
+    assert erased == sorted([ids[("MÉLORA MÉZOR", PERSON)], ids[(old, PERSON)]])
+
+
+def test_delete_mapping_reaches_old_row_cut_at_word_end(
+    tmp_path: Path, db: Path
+) -> None:
+    """G15 (AC4; QA's TEST-1019-04): v2.2.0 cut « ME » at the end of
+    « QUOVÔME »; deleting « Quovome Zorbal » erases that row with today's."""
+    circumflex = unicodedata.lookup("COMBINING CIRCUMFLEX ACCENT")
+    left, erased, ids, old = _old_rows_erased(db, "QUOVÔME ZORBAL", "Quovome Zorbal")
+    _pre(old == "QUOVO" + circumflex + "ZORBAL", "the old saved text")
+    assert left == [("Vorlan Mestrix", PERSON)]
+    assert erased == sorted([ids[("QUOVÔME ZORBAL", PERSON)], ids[(old, PERSON)]])
+
+
+def _widened(tmp_path: Path, db: Path, text: str, typed: str) -> tuple[str, str]:
+    """« ZÉLVINE » and « Zélvine » found as one name, corrected as ``typed``:
+    the written text and the corrected name's pseudonym."""
+    source, output = _files(tmp_path, ".txt")
+    source.write_text(text, encoding="utf-8")
+    run = _process(
+        source,
+        output,
+        db,
+        [("ZÉLVINE", PERSON), ("Zélvine", PERSON)],
+        [ENTER, "e"],
+        [typed],
+    )
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    return _written(output), _pseudonym(db, typed)
+
+
+def test_widening_never_over_a_word_in_small_letters(tmp_path: Path, db: Path) -> None:
+    """G16 (AC1, AC3; QA's TEST-1019-04): « testar » in small letters is never
+    covered, as on main."""
+    written, p = _widened(
+        tmp_path,
+        db,
+        "Signé : ZÉLVINE TESTAR. Zélvine testar a signé.",
+        "ZELVINE TESTAR",
+    )
+    assert written == f"Signé : {p}. {p} testar a signé."
+
+
+def test_widening_over_capitals_form_of_accented_word(tmp_path: Path, db: Path) -> None:
+    """G17 (AC3; QA's TEST-1019-04, the orchestrator's ruling 1): the typed
+    « TESTAR » is a Q3 form of the written « Tèstar », so it is covered."""
+    written, p = _widened(
+        tmp_path,
+        db,
+        "Signé : ZÉLVINE TÈSTAR. Zélvine Tèstar a signé.",
+        "ZELVINE TESTAR",
+    )
+    assert written == f"Signé : {p}. {p} a signé."
+
+
+def test_widening_over_every_added_word(tmp_path: Path, db: Path) -> None:
+    """G18 (AC3; QA's TEST-1019-04): two added words are both covered."""
+    written, p = _widened(
+        tmp_path,
+        db,
+        "Signé : ZÉLVINE BRIMEL TESTAR. Zélvine Brimel Testar a signé.",
+        "ZELVINE BRIMEL TESTAR",
+    )
+    assert written == f"Signé : {p}. {p} a signé."

@@ -1,6 +1,7 @@
 """Story 10.19: a correction in the desktop app reaches the name's forms in
 capitals (T8, T14, T15, T16, T19 desktop, T21 desktop, T26, T27, T29, T30
-desktop), and what must not change (G3, G4, G5, G8 desktop, G9, G10).
+desktop, T31, T32, T35, T36 desktop), and what must not change (G3, G4, G5,
+G8 desktop, G9, G10).
 
 Written by the BMAD dev agent (Claude), before the fix. Each test drives the
 real single-document path (``DetectionWorker``, the validation screen, the
@@ -57,6 +58,7 @@ REJECTED = EntityReviewState.REJECTED
 ADDED = EntityReviewState.ADDED
 
 ZQ = "Zorbal Quentrix"
+VM = "Vorlan Mestrix"
 VQ = "Vorlène Quentrix"
 
 T8_TEXT = "Zorbal Quentrix a signé. Signé : ZORBAL QUENTRIX."
@@ -71,6 +73,10 @@ G9_TEXT = "Zorbal Quentrix a signé. Signé : zorbal. Le contrat avec Zorbal Que
 G10_TEXT = "Signé : ZELVINE TESTAR. Zélvine Testar a signé."
 T26_TEXT = "Vorlène Quentrix Zorbal a signé. Signé : VORLENE QUENTRIX ZORBAL."
 T27_TEXT = "Signé : ZÉLVINE TESTAR. Zélvine Testar a signé."
+T31_TEXT = "Zélvine Mézor a signé. Zélvine Mèzor a signé."
+T35_TEXT = "Signé : ZÉLVINE TESTAR. Zélvine\nTestar a signé."
+T36_TEXT = "Vorlan Mestrix valide. Vorlène a signé. VORLENE a signé."
+T36B_TEXT = "Vorlan Mestrix valide. Signé : Bélora. Signé : BÊLORA."
 T29_TEXT = (
     "Signé : ZELVINE MÉZOR. Le contrat avec ZELVINE TESTAR. Zélvine Mézor a signé."
 )
@@ -666,6 +672,184 @@ def test_desktop_single_added_words_never_left_in_clear(  # type: ignore[no-unty
     assert "TESTAR" not in output.upper(), output  # expected failure
     p = review.pseudonym("ZELVINE TESTAR")
     assert output == f"Signé : {p}. {p} a signé."
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 10.19 v1.15: reproduces the widening over « Mèzor », another "
+    "name's word, on 919a227; fixed in Task 11.2",
+)
+def test_desktop_single_widening_never_takes_another_name(  # type: ignore[no-untyped-def]
+    qtbot, main_window, tmp_path, dialogs
+) -> None:
+    """T31 desktop (AC3; the third Codex review's P0-1, the orchestrator's
+    ruling 1): the « Zélvine » row corrected as « Zélvine Mézor » is never
+    widened over « Mèzor » at its other place."""
+    review = _Review(
+        "single",
+        qtbot,
+        main_window,
+        tmp_path,
+        T31_TEXT,
+        [found_at(T31_TEXT, "Zélvine", 0), found_at(T31_TEXT, "Zélvine", 1)],
+    )
+
+    def drive(r: _Review, record: dict[str, Any]) -> None:
+        pre(len(r.reviews()) == 1, "one row in the review")
+        r.correct(r.row("Zélvine"), "Zélvine Mézor", 0)
+        r.accept_pending()
+
+    review.run(drive)
+    output = review.output()
+    assert "Mèzor a signé" in output, output  # expected failure
+    p = review.pseudonym("Zélvine Mézor")
+    assert output == f"{p} a signé. {p} Mèzor a signé."
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 10.19 v1.15: reproduces a second correction from the capitals "
+    "row missing the « Vorlène » row on 919a227; fixed in Task 11.2",
+)
+@pytest.mark.parametrize("mode", ["single", "batch"])
+def test_desktop_second_correction_from_the_capitals_row(  # type: ignore[no-untyped-def]
+    qtbot, main_window, tmp_path, dialogs, mode
+) -> None:
+    """T32 (AC3; the third Codex review's P0-2, the orchestrator's ruling 3):
+    « Vorlène » corrected to « Vorlène Quentrix » also corrects « VORLENE »;
+    the « VORLENE » row then corrected to « Vorlène Quentrix Zorbal » reaches
+    the « Vorlène » row again through their shared earlier correction."""
+    review = _Review(
+        mode,
+        qtbot,
+        main_window,
+        tmp_path,
+        T26_TEXT,
+        [found_at(T26_TEXT, "Vorlène"), found_at(T26_TEXT, "VORLENE")],
+    )
+    caps = occurrence(T26_TEXT, "VORLENE")
+    whole = f"{VQ} Zorbal"
+
+    def drive(r: _Review, record: dict[str, Any]) -> None:
+        pre(len(r.reviews()) == 2, "two rows in the review")
+        r.correct(r.row("Vorlène"), VQ, 0)
+        pre(
+            r.row("Vorlène").user_modification == VQ
+            and r.row("VORLENE").user_modification == VQ,
+            "both rows hold the first correction",
+        )
+        r.correct(r.row("VORLENE"), whole, caps)
+        r.accept_pending()
+
+    review.run(drive)
+    output = review.output()
+    assert "ZORBAL" not in output.upper(), output  # expected failure
+    p = review.pseudonym(whole)
+    assert output == f"{p} a signé. Signé : {p}."
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 10.19 v1.15: reproduces « Testar » left past a line break on "
+    "919a227; fixed in Task 11.2",
+)
+def test_desktop_single_widening_across_a_line_break(  # type: ignore[no-untyped-def]
+    qtbot, main_window, tmp_path, dialogs
+) -> None:
+    """T35 desktop (AC3; the third Codex review's P0-5, the orchestrator's
+    ruling 2): the added word written after a line break is covered too."""
+    review = _Review(
+        "single",
+        qtbot,
+        main_window,
+        tmp_path,
+        T35_TEXT,
+        [found_at(T35_TEXT, "ZÉLVINE"), found_at(T35_TEXT, "Zélvine")],
+    )
+    caps = occurrence(T35_TEXT, "ZÉLVINE")
+
+    def drive(r: _Review, record: dict[str, Any]) -> None:
+        pre(len(r.reviews()) == 1, "one row in the review")
+        r.correct(r.row("ZÉLVINE"), "ZELVINE TESTAR", caps)
+        r.accept_pending()
+
+    review.run(drive)
+    output = review.output()
+    assert "TESTAR" not in output.upper(), output  # expected failure
+    p = review.pseudonym("ZELVINE TESTAR")
+    assert output == f"Signé : {p}. {p} a signé."
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 10.19 v1.15: reproduces a second add of « VORLENE » making a "
+    "row for a place the « Vorlène » row holds on 919a227; fixed in Task 11.2",
+)
+def test_desktop_single_repeated_add_recognises_held_capitals_place(  # type: ignore[no-untyped-def]
+    qtbot, main_window, tmp_path, dialogs
+) -> None:
+    """T36 desktop (AC2; the third Codex review's P1, the orchestrator's
+    ruling 6): « Vorlène » added by hand holds « VORLENE » too; adding
+    « VORLENE » then makes no row."""
+    review = _Review(
+        "single",
+        qtbot,
+        main_window,
+        tmp_path,
+        T36_TEXT,
+        [found_at(T36_TEXT, VM)],
+    )
+
+    def drive(r: _Review, record: dict[str, Any]) -> None:
+        title = occurrence(T36_TEXT, "Vorlène")
+        first = r.state.add_entity("Vorlène", PERSON, title, title + 7)
+        pre(first != "" and len(r.reviews()) == 2, "the first add made a row")
+        caps = occurrence(T36_TEXT, "VORLENE")
+        record["second"] = r.state.add_entity("VORLENE", PERSON, caps, caps + 7)
+        record["rows"] = len(r.reviews())
+        r.accept_pending()
+
+    record = review.run(drive)
+    assert record["second"] == "" and record["rows"] == 2, record  # expected failure
+    assert review.names() == sorted([(VM, PERSON), ("Vorlène", PERSON)])
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 10.19 v1.15: reproduces a second add of « Bélora » holding "
+    "« BÊLORA », held by the « Belora » row, on 919a227; fixed in Task 11.2",
+)
+def test_desktop_single_repeated_add_reads_the_text_written_at_a_held_place(  # type: ignore[no-untyped-def]
+    qtbot, main_window, tmp_path, dialogs
+) -> None:
+    """T36 desktop, case 2 (AC2; ADD-1019-01 through the text written): the
+    « Belora » row holds « BÊLORA »; the « Bélora » row added next stands
+    for « Bélora » only."""
+    review = _Review(
+        "single",
+        qtbot,
+        main_window,
+        tmp_path,
+        T36B_TEXT,
+        [found_at(T36B_TEXT, VM)],
+    )
+    title = occurrence(T36B_TEXT, "Bélora")
+
+    def drive(r: _Review, record: dict[str, Any]) -> None:
+        caps = occurrence(T36B_TEXT, "BÊLORA")
+        first = r.state.add_entity("Belora", PERSON, caps, caps + 6)
+        pre(first != "", "the first add made a row")
+        second = r.state.add_entity("Bélora", PERSON, title, title + 6)
+        record["spans"] = sorted(r.state._hand_spans_by_id.get(second, []))
+        r.accept_pending()
+
+    record = review.run(drive)
+    assert record["spans"] == [(title, title + 6)], record  # expected failure
 
 
 # ---------------------------------------------------------------------------
