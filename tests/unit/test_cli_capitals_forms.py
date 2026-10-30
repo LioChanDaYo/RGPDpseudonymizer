@@ -1469,16 +1469,7 @@ def test_delete_mapping_reaches_old_row_cut_after_an_own_accent(
 @pytest.mark.parametrize(
     "typed",
     [
-        pytest.param(
-            "Meme Testar",
-            marks=pytest.mark.xfail(
-                strict=True,
-                raises=AssertionError,
-                reason="Story 10.19 v1.23: reproduces the old row cut on both sides "
-                "of one mark, left on 46202a3; fixed in Task 15.2",
-            ),
-            id="typed_without_accents",
-        ),
+        pytest.param("Meme Testar", id="typed_without_accents"),
         pytest.param("Mème Testar", id="typed_with_accents"),
     ],
 )
@@ -1499,12 +1490,6 @@ def test_delete_mapping_reaches_old_row_cut_on_both_sides_of_one_mark(
     assert erased == sorted([ids[(document, PERSON)], ids[(old, PERSON)]])
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19 v1.23: reproduces another name's old row erased through "
-    "an accent on a consonant on 46202a3; fixed in Task 15.2",
-)
 def test_delete_mapping_never_reaches_another_names_old_row_through_a_consonant(
     tmp_path: Path, db: Path
 ) -> None:

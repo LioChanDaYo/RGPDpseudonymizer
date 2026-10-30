@@ -71,51 +71,50 @@ _SEPARATORS = frozenset(" -\u2010\u2011'\u2019")
 _INSERTED_ROOM = len(_INSERTED_TITLE) + len(_INSERTED_PREPOSITION) + 2
 
 
+# The letters French writes with an accent mark (« É », « Ÿ », « Ç »), in
+# capitals with accents set aside, for ``_cut_places`` (Story 10.19, v1.23):
+# only such a letter of a name can have carried a mark the old step left.
+_MARKED_LETTERS = frozenset("AEIOUYC")
+
+
 def _cut_places(
     words: list[str], row: str, location: bool, titles: frozenset[str]
 ) -> set[frozenset[int]]:
-    """Every set of letters of the name that, accented, let v2.2.0's title
-    step turn the name into ``row`` (Story 10.19, v1.21; the sixth Codex
-    review's P0-2, the orchestrator's "a cut wherever the row carries a
-    mark").
+    """The sets of the name's letters which, accented, may have let v2.2.0's
+    title step turn the name into ``row`` (Story 10.19, v1.21; v1.23, the
+    seventh Codex review's P0 and the orchestrator's "any sequence of cuts
+    the old title step could make").
 
     ``words`` is the name in capitals, accents set aside; the letters are
     offsets in ``" ".join(words)``. ``row`` is a saved row decomposed, in
-    capitals, its spaces collapsed, its marks kept. The old step cut a title
-    word where an accent mark bounded it, and the mark stayed, so the row's
-    marks show where cuts can have happened:
+    capitals, its spaces collapsed, its marks kept. The old step took title
+    words off between word bounds, again until nothing changed, and never
+    took a mark off: each mark of the row is the accent of the name's letter
+    read just before it, whether that letter stayed or went with a title
+    word, and a mark bounds the next word whatever cut left it there
+    (« MÈME TESTAR » saved as a mark + « TESTAR »). Reading the name and the
+    row side by side, each step may:
 
-    - a letter's own mark (right after a letter) is passed over;
-    - at a mark at a word's start, after a separator or after another mark,
-      a title word of the name starting there may have been taken off, its
-      last letter accented, any number in one word (« MÉMÉLIE » saved as two
-      marks + « LIE »); when the mark before is a letter's own accent, that
-      letter was accented too (« CLÉMÉLIE » saved as « CLE » + two marks +
-      « LIE »);
-    - after a letter's own mark, a title word ending a part may have been
-      taken off with the spaces after it, the letter before it accented
-      (« QUOVÔME ZORBAL » saved as « QUOVO » + a mark + « ZORBAL »);
-    - letters match one by one;
-    - a « MAITRE » word, or a place's leading « A », which 10.20's replay
-      inserts, may be passed over in the row.
+    - match a letter;
+    - read a mark of the row as the accent of the letter just read, when
+      French writes that letter with an accent (``_MARKED_LETTERS``: never
+      the « R » of « DR », so « Drlime » never meets « MÉLIME »'s old row);
+    - take off a title word of the name starting there, with or without the
+      spaces after it, where a word bound can stand before it (the name's
+      start or the row's, a separator, a space or a mark before it);
+    - pass over a « MAITRE » word, or a place's leading « A », which 10.20's
+      replay inserts.
 
-    Walked once, memoised on the two positions. A row with more characters
-    other than marks than the name and the inserted words have is not
-    walked: no step adds one.
+    The walk only offers sets: the caller replays the old step on the name
+    accented at each set (``_name_forms``) and keeps a row only when that
+    replay gives it. Memoised on the two positions. A row with more
+    characters other than marks than the name and the inserted words have is
+    not walked: no step adds one.
     """
     name = " ".join(words)
     if sum(not is_mark(char) for char in row) > len(name) + _INSERTED_ROOM:
         return set()
     memo: dict[tuple[int, int], set[frozenset[int]]] = {}
-
-    def own_mark(j: int) -> bool:
-        """Whether ``row[j]`` is a mark right after a letter."""
-        return (
-            0 < j < len(row)
-            and is_mark(row[j])
-            and not is_mark(row[j - 1])
-            and row[j - 1] not in _SEPARATORS
-        )
 
     def past_spaces(i: int) -> int:
         while i < len(name) and name[i] == " ":
@@ -135,40 +134,38 @@ def _cut_places(
             return j
         return j + 1 if row[j] == " " else None
 
+    def bound_before(i: int, j: int) -> bool:
+        """Whether a word bound can stand before the name's ``i`` read at
+        the row's ``j``."""
+        return (
+            i == 0
+            or j == 0
+            or name[i - 1] in _SEPARATORS
+            or row[j - 1] == " "
+            or is_mark(row[j - 1])
+        )
+
     def walk(i: int, j: int) -> set[frozenset[int]]:
         if (i, j) in memo:
             return memo[(i, j)]
         found: set[frozenset[int]] = set()
         if i == len(name) and j == len(row):
             found.add(frozenset())
-        if own_mark(j):
-            found |= walk(i, j + 1)
+        if i < len(name) and j < len(row) and name[i] == row[j]:
+            found |= walk(i + 1, j + 1)
         if (
             j < len(row)
             and is_mark(row[j])
-            and (j == 0 or row[j - 1] in _SEPARATORS or is_mark(row[j - 1]))
+            and i > 0
+            and name[i - 1] in _MARKED_LETTERS
         ):
-            before = (
-                {i - 1}
-                if i > 0 and name[i - 1] not in _SEPARATORS and own_mark(j - 1)
-                else set()
-            )
+            found |= {places | {i - 1} for places in walk(i, j + 1)}
+        if i < len(name) and bound_before(i, j):
             for title in titles:
                 if name.startswith(title, i):
-                    last = i + len(title) - 1
-                    found |= {
-                        places | before | {last}
-                        for places in walk(i + len(title), j + 1)
-                    }
-        if own_mark(j - 1) and i > 0 and name[i - 1] not in _SEPARATORS:
-            for title in titles:
-                end = i + len(title)
-                if name.startswith(title, i) and (
-                    end == len(name) or name[end] in _SEPARATORS
-                ):
-                    found |= {places | {i - 1} for places in walk(past_spaces(end), j)}
-        if i < len(name) and j < len(row) and name[i] == row[j]:
-            found |= walk(i + 1, j + 1)
+                    end = i + len(title)
+                    found |= walk(end, j)
+                    found |= walk(past_spaces(end), j)
         if j == 0 or row[j - 1] == " ":
             inserted = [_INSERTED_TITLE]
             if location and j == 0:
@@ -596,9 +593,10 @@ class SQLiteMappingRepository(MappingRepository):
         def reaches_old_row(stored: str, form_type: str) -> bool:
             """Whether a row in capitals is one an earlier version saved
             damaged from the name (Story 10.19, v1.19; v1.21 read at the
-            row's marks, ``_cut_places``): some set of cut letters turns the
-            name into the row, and the row's ``_seed_key`` is among that
-            set's forms that lost letters."""
+            row's marks, ``_cut_places``; v1.23 the old step deciding): for
+            some set of accented letters the walk offers, the old step's
+            replay on the name accented there gives a form that lost letters
+            whose ``_seed_key`` is the row's."""
             row = " ".join(unicodedata.normalize("NFD", stored).upper().split())
             key = _seed_key(stored)
             return any(
