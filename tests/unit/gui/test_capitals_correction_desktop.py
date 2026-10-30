@@ -852,12 +852,6 @@ def test_desktop_single_widening_inside_quotation_marks(  # type: ignore[no-unty
     assert output == f"Signé : {p}. '{p}' a signé."
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19 v1.19: reproduces « Testar » left before an ellipsis on "
-    "6d87d22; fixed in Task 13.2",
-)
 def test_desktop_single_widening_before_an_ellipsis(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, dialogs
 ) -> None:

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import itertools
 import unicodedata
 from abc import ABC, abstractmethod
 
@@ -46,52 +45,108 @@ def _one_mark(text: str) -> str:
 
 
 # The vowels an accent can sit on where v2.2.0's title step cut a word
-# (Story 10.19, v1.13, ``_damage_seeds``), in capitals.
+# (Story 10.19, ``_damage_spots``), in capitals.
 _VOWELS = frozenset("AEIOUY")
 
-# The most cut points ``_damage_seeds`` combines (2**8 - 1 seeds at most).
-# v1.17 (the fourth Codex review's P0-3), from the data: the app's name lists
-# hold at most one such point per word, so four for a four-word name; twice
-# that keeps a margin.
-_MAX_DAMAGE_SPOTS = 8
+# The words 10.20's replay may insert in an old key (a decomposed « Maître »,
+# and a place's leading « à »), in capitals with accents set aside.
+_INSERTED_TITLE = "MAITRE"
+_INSERTED_PREPOSITION = "A"
 
 
-def _damage_seeds(name: str) -> list[str]:
-    """The capitals texts of ``name`` an earlier version could have saved
-    damaged (Story 10.19, v1.13; QA's DEL-1019-01, second shape).
-
-    The name in capitals, accents set aside, with an accent put back on each
-    letter where v2.2.0's title step could cut a word read with separate
-    marks: a vowel that ends a title word at the start of a word (« ME » in
-    « MÉLORA »), or that a title word follows to the end of the word (« ME »
-    in « QUOVÔME »); every choice of them, from at most eight such letters.
-    A word starts after a hyphen or an apostrophe too (v1.15, the
-    orchestrator's ruling 5: « ME » after the hyphen of « BELORA-MÉLORA »),
-    so each part of a word is read on its own (``_word_parts``). Each seed
-    is a form of the name once accents are set aside (Lionel's Q3).
-    """
+def _title_words_in_capitals() -> frozenset[str]:
+    """The title words of ``FRENCH_TITLE_PATTERN`` (10.20's ``title_words``),
+    in capitals with accents set aside, without their « . »."""
     # Imported here: the data layer reads the forms rule of the validation
     # models, which import the core (no gui/ import).
     from gdpr_pseudonymizer.validation.models import fold
 
-    titles = {fold(word).upper() for word in title_words() if not word.endswith(".")}
-    words = fold(name).upper().split()
-    spots = [
-        (index, at)
+    return frozenset(
+        fold(word).upper() for word in title_words() if not word.endswith(".")
+    )
+
+
+def _damage_spots(
+    words: list[str], titles: frozenset[str]
+) -> list[tuple[int, int, int, int]]:
+    """The places where v2.2.0's title step could cut a word of ``words`` (in
+    capitals, accents set aside) read with separate marks (Story 10.19,
+    v1.13; v1.19 with no bound): a vowel that ends a title word at the start
+    of a part of a word (« ME » in « MÉLORA »), or that a title word follows
+    to the end of the part (« ME » in « QUOVÔME »); the parts are those
+    between hyphens and apostrophes (v1.15, ruling 5). Each as (the word,
+    the vowel, the part's start, the part's end)."""
+    return [
+        (index, at, start, end)
         for index, word in enumerate(words)
         for start, end in _word_parts(word)
         for at in range(start, end)
         if word[at] in _VOWELS
         and (word[start : at + 1] in titles or word[at + 1 : end] in titles)
-    ][:_MAX_DAMAGE_SPOTS]
-    seeds: list[str] = []
-    for size in range(1, len(spots) + 1):
-        for chosen in itertools.combinations(spots, size):
-            letters = [list(word) for word in words]
-            for index, at in chosen:
-                letters[index][at] = composed(letters[index][at] + "\u0301")
-            seeds.append(" ".join("".join(word) for word in letters))
-    return seeds
+    ]
+
+
+def _cut_sets(
+    words: list[str], plain: str, location: bool, titles: frozenset[str]
+) -> set[frozenset[int]]:
+    """Every set of cut places of the name (``_damage_spots``) whose removed
+    title words turn the name's letters into ``plain``, a saved row's letters
+    (Story 10.19, v1.19; the fifth Codex review's P0-2, "fix the class, not
+    the case").
+
+    ``words`` is the name in capitals, accents set aside; ``plain`` the row
+    decomposed, in capitals, its marks taken off, its spaces collapsed. A cut
+    at a part's start takes off the title word that ends at the vowel; a cut
+    at a part's end takes off the title word after the vowel, and the spaces
+    after it (the old step's « \\s* »). The row may also hold a word 10.20's
+    replay inserts (a « MAITRE » word; for a place, a leading « A »). The
+    search walks the name and the row once, memoised on the two positions,
+    so it grows with their length, not with the number of places.
+    """
+    name = " ".join(words)
+    # 10.20's replay inserts one title word, or a place's « à », at most
+    if len(plain) > len(name) + len(_INSERTED_TITLE) + len(_INSERTED_PREPOSITION) + 2:
+        return set()
+    starts: list[int] = []
+    offset = 0
+    for word in words:
+        starts.append(offset)
+        offset += len(word) + 1
+    cuts: dict[int, list[tuple[int, int]]] = {}
+    for spot, (index, vowel, start, end) in enumerate(_damage_spots(words, titles)):
+        word, base = words[index], starts[index]
+        if word[start : vowel + 1] in titles:
+            cuts.setdefault(base + start, []).append((spot, base + vowel + 1))
+        if word[vowel + 1 : end] in titles:
+            after = base + end
+            while after < len(name) and name[after] == " ":
+                after += 1
+            cuts.setdefault(base + vowel + 1, []).append((spot, after))
+    memo: dict[tuple[int, int], set[frozenset[int]]] = {}
+
+    def walk(i: int, j: int) -> set[frozenset[int]]:
+        if (i, j) in memo:
+            return memo[(i, j)]
+        found: set[frozenset[int]] = set()
+        if i == len(name) and j == len(plain):
+            found.add(frozenset())
+        for spot, after in cuts.get(i, []):
+            found |= {cut | {spot} for cut in walk(after, j)}
+        if i < len(name) and j < len(plain) and name[i] == plain[j]:
+            found |= walk(i + 1, j + 1)
+        if j == 0 or plain[j - 1] == " ":
+            inserted = [_INSERTED_TITLE]
+            if location and j == 0:
+                inserted.append(_INSERTED_PREPOSITION)
+            for word in inserted:
+                if plain.startswith(word + " ", j):
+                    found |= walk(i, j + len(word) + 1)
+                elif plain.startswith(word, j) and j + len(word) == len(plain):
+                    found |= walk(i, len(plain))
+        memo[(i, j)] = found
+        return found
+
+    return walk(0, 0)
 
 
 # The characters that join parts of one word, for ``_word_parts``.
@@ -471,8 +526,9 @@ class SQLiteMappingRepository(MappingRepository):
 
         v1.13 (the second Codex review's third P0; QA's DEL-1019-01): the
         forms that lost letters of the name's damaged capitals texts
-        (``_damage_seeds``: « VORLAN MÉLORA » for « Vorlan Mélora » or
-        « Vorlan Melora ») reach a row written entirely in capitals that
+        (« VORLAN MÉLORA » for « Vorlan Mélora » or « Vorlan Melora »;
+        v1.19: found row by row, ``_cut_sets``) reach a row written entirely
+        in capitals that
         carries a mark, every accent mark counting there as one mark,
         whatever its kind, so « VORLAN » + U+0300 + « LORA », saved from
         « VORLAN MÈLORA », is erased with « Vorlan Mélora »; v1.17: compared
@@ -498,8 +554,50 @@ class SQLiteMappingRepository(MappingRepository):
         name_words = fold(name).lower().split()
         letters = {fold(name).lower(), fold(_one_mark(name)).lower()}
         old_forms: dict[str, list[tuple[str, bool]]] = {}
-        seed_keys: dict[str, set[str]] = {}
-        seeds = _damage_seeds(name)
+        titles = _title_words_in_capitals()
+        caps_words = fold(name).upper().split()
+        spots = _damage_spots(caps_words, titles)
+        lost_keys: dict[tuple[frozenset[int], str], set[str]] = {}
+
+        def lost_forms(cut: frozenset[int], form_type: str) -> set[str]:
+            """The ``_seed_key`` of every form that lost letters of the name
+            in capitals with an accent put back at the places of ``cut``."""
+            if (cut, form_type) not in lost_keys:
+                letters_of = [list(word) for word in caps_words]
+                for spot in cut:
+                    index, vowel, _start, _end = spots[spot]
+                    letters_of[index][vowel] = composed(
+                        letters_of[index][vowel] + "\u0301"
+                    )
+                seed = " ".join("".join(word) for word in letters_of)
+                lost_keys[(cut, form_type)] = {
+                    _seed_key(saved)
+                    for saved in _name_forms(seed, form_type)
+                    if not _keeps_words(
+                        name_words, fold(composed(saved)).lower().split()
+                    )
+                }
+            return lost_keys[(cut, form_type)]
+
+        def reaches_old_row(stored: str, form_type: str) -> bool:
+            """Whether a row in capitals is one an earlier version saved
+            damaged from the name (Story 10.19, v1.19): some set of cut
+            places turns the name into the row's letters, and the row's
+            ``_seed_key`` is among that set's forms that lost letters."""
+            plain = " ".join(
+                "".join(
+                    char
+                    for char in unicodedata.normalize("NFD", stored).upper()
+                    if not is_mark(char)
+                ).split()
+            )
+            key = _seed_key(stored)
+            return any(
+                key in lost_forms(cut, form_type)
+                for cut in _cut_sets(caps_words, plain, form_type == "LOCATION", titles)
+                if cut
+            )
+
         for form_type in _FORM_TYPES:
             forms: list[tuple[str, bool]] = []
             for form in dict.fromkeys(
@@ -510,13 +608,6 @@ class SQLiteMappingRepository(MappingRepository):
                 letters.add(fold(_one_mark(form)).lower())
                 forms.append((form, _keeps_words(name_words, folded.split())))
             old_forms[form_type] = forms
-            lost: set[str] = set()
-            for seed in seeds:
-                for saved in _name_forms(seed, form_type):
-                    folded = fold(composed(saved)).lower()
-                    if not _keeps_words(name_words, folded.split()):
-                        lost.add(_seed_key(saved))
-            seed_keys[form_type] = lost
         for row in self._session.query(Entity).all():
             if row.id in found:
                 continue
@@ -529,7 +620,7 @@ class SQLiteMappingRepository(MappingRepository):
             if (
                 marked
                 and not any(char.islower() for char in text)
-                and _seed_key(stored) in seed_keys[form_type]
+                and reaches_old_row(stored, form_type)
             ):
                 rows.append(row)
                 continue

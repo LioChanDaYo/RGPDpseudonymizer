@@ -997,12 +997,6 @@ def test_cli_widening_keeps_the_elision_inside_quotation_marks(
     assert written == f"Signé : {p}. '{p}' a signé."
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19 v1.19: reproduces « Testar » left before punctuation the "
-    "word reader took in on 6d87d22; fixed in Task 13.2",
-)
 @pytest.mark.parametrize("mark", list(PUNCTUATION))
 def test_cli_widening_before_any_punctuation(
     tmp_path: Path, db: Path, mark: str
@@ -1347,12 +1341,6 @@ def test_delete_mapping_reaches_old_row_past_six_spots(
     assert erased == sorted([ids[(document, PERSON)], ids[(old, PERSON)]])
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19 v1.19: reproduces the old row of a name whose cut place "
-    "comes after eight possible ones, left on 6d87d22; fixed in Task 13.2",
-)
 def test_delete_mapping_reaches_old_row_past_eight_places(
     tmp_path: Path, db: Path
 ) -> None:
