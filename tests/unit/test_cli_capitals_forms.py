@@ -1543,16 +1543,7 @@ def _inserted_rows_erased(
 @pytest.mark.parametrize(
     "typed",
     [
-        pytest.param(
-            "Quovome Testar",
-            marks=pytest.mark.xfail(
-                strict=True,
-                raises=AssertionError,
-                reason="Story 10.19 v1.25: reproduces the old row with « MAÎTRE » glued after a cut, left on c2379c4; "
-                "fixed in Task 16.2",
-            ),
-            id="typed_without_accents",
-        ),
+        pytest.param("Quovome Testar", id="typed_without_accents"),
         pytest.param("Quovôme Testar", id="typed_with_accents"),
     ],
 )
@@ -1581,16 +1572,7 @@ def test_delete_mapping_reaches_old_row_with_maitre_glued_after_a_cut(
 @pytest.mark.parametrize(
     "typed",
     [
-        pytest.param(
-            "Melora Vorlan",
-            marks=pytest.mark.xfail(
-                strict=True,
-                raises=AssertionError,
-                reason="Story 10.19 v1.25: reproduces the old row ending with « MAÎTRE », left on c2379c4; "
-                "fixed in Task 16.2",
-            ),
-            id="typed_without_accents",
-        ),
+        pytest.param("Melora Vorlan", id="typed_without_accents"),
         pytest.param("Mélora Vorlan", id="typed_with_accents"),
     ],
 )
@@ -1619,16 +1601,7 @@ def test_delete_mapping_reaches_old_row_ending_with_maitre(
 @pytest.mark.parametrize(
     "typed",
     [
-        pytest.param(
-            "Éloria-Mèlora Mmé Vorlan",
-            marks=pytest.mark.xfail(
-                strict=True,
-                raises=AssertionError,
-                reason="Story 10.19 v1.25: reproduces the old row that lost a whole title word, left on c2379c4; "
-                "fixed in Task 16.2",
-            ),
-            id="typed_with_accents",
-        ),
+        pytest.param("Éloria-Mèlora Mmé Vorlan", id="typed_with_accents"),
         pytest.param("Eloria-Melora Mme Vorlan", id="typed_without_accents"),
     ],
 )

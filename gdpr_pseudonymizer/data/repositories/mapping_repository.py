@@ -102,8 +102,14 @@ def _cut_places(
     - take off a title word of the name starting there, with or without the
       spaces after it, where a word bound can stand before it (the name's
       start or the row's, a separator, a space or a mark before it);
-    - pass over a « MAITRE » word, or a place's leading « A », which 10.20's
-      replay inserts.
+    - pass over a « MAITRE » word, or a place's « A », which 10.20's replay
+      inserts, where a word bound can stand before it, the same bound as a
+      title cut's (``bound_before``; v1.25, the eighth Codex review's P0): a
+      cut may have glued it to the mark before it (« QUOVÔME MAÎTRE
+      TESTAR » saved as « QUOVO » + a mark + « MAI » + a mark + « TRE
+      TESTAR »), and after the name's last word, the space before it is its
+      bound (« MÉLORA VORLAN MAÎTRE » saved as a mark + « LORA VORLAN MAI »
+      + a mark + « TRE »).
 
     The walk only offers sets: the caller replays the old step on the name
     accented at each set (``_name_forms``) and keeps a row only when that
@@ -115,6 +121,7 @@ def _cut_places(
     if sum(not is_mark(char) for char in row) > len(name) + _INSERTED_ROOM:
         return set()
     memo: dict[tuple[int, int], set[frozenset[int]]] = {}
+    inserted = [_INSERTED_TITLE] + ([_INSERTED_PREPOSITION] if location else [])
 
     def past_spaces(i: int) -> int:
         while i < len(name) and name[i] == " ":
@@ -166,14 +173,15 @@ def _cut_places(
                     end = i + len(title)
                     found |= walk(end, j)
                     found |= walk(past_spaces(end), j)
-        if j == 0 or row[j - 1] == " ":
-            inserted = [_INSERTED_TITLE]
-            if location and j == 0:
-                inserted.append(_INSERTED_PREPOSITION)
+        if bound_before(i, j):
             for word in inserted:
                 after = past_inserted(j, word)
                 if after is not None:
                     found |= walk(i, after)
+        if i == len(name) and j < len(row) and row[j] == " ":
+            for word in inserted:
+                if past_inserted(j + 1, word) == len(row):
+                    found |= walk(i, len(row))
         memo[(i, j)] = found
         return found
 
@@ -596,13 +604,14 @@ class SQLiteMappingRepository(MappingRepository):
             row's marks, ``_cut_places``; v1.23 the old step deciding): for
             some set of accented letters the walk offers, the old step's
             replay on the name accented there gives a form that lost letters
-            whose ``_seed_key`` is the row's."""
+            whose ``_seed_key`` is the row's. v1.25: the empty set too, the
+            name in capitals with no letter accented (« ELORIA-MELORA
+            MAÎTRE MME VORLAN » saved without its « MME »)."""
             row = " ".join(unicodedata.normalize("NFD", stored).upper().split())
             key = _seed_key(stored)
             return any(
                 key in lost_forms(cut, form_type)
                 for cut in _cut_places(caps_words, row, form_type == "LOCATION", titles)
-                if cut
             )
 
         for form_type in _FORM_TYPES:
