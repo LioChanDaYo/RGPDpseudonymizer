@@ -7,8 +7,6 @@ core validation models with Qt undo/redo and signal infrastructure.
 from __future__ import annotations
 
 import dataclasses
-import re
-import unicodedata
 import uuid
 from typing import TYPE_CHECKING
 
@@ -23,7 +21,6 @@ from gdpr_pseudonymizer.core.custom_pseudonym import (
 )
 from gdpr_pseudonymizer.core.mapping_key import mapping_key
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
-from gdpr_pseudonymizer.utils.text_form import not_after_word, not_before_word
 from gdpr_pseudonymizer.validation.models import (
     ADDED_BY_HAND_SOURCE,
     CORRECTED_BY_HAND_SOURCE,
@@ -36,7 +33,9 @@ from gdpr_pseudonymizer.validation.models import (
     ValidationSession,
     candidate_key,
     count_names_left_in_clear,
+    is_form,
     place_of,
+    whole_word_places,
 )
 from gdpr_pseudonymizer.validation.workflow import ValidationWorkflow
 
@@ -62,78 +61,18 @@ def _same_kind(old: EntityReviewState | None, new: EntityReviewState) -> bool:
 _ADD_LABEL = "Ajouter une entité"
 
 
-def fold(text: str) -> str:
-    """``text`` with each character's accents set aside, one character for one.
-
-    A character whose decomposition without its combining marks is not one
-    character is kept as it is, so a position in the folded text is the same
-    position in ``text``.
-    """
-    folded: list[str] = []
-    for char in text:
-        bare = "".join(
-            part
-            for part in unicodedata.normalize("NFD", char)
-            if not unicodedata.combining(part)
-        )
-        folded.append(bare if len(bare) == 1 else char)
-    return "".join(folded)
-
-
-def is_form(place: str, text: str) -> bool:
-    """Whether ``place`` is written as a form of the name ``text`` (Story
-    10.17, AC13 (a); Lionel, 2026-10-19, "A: Fix, capitals only", in the PO's
-    wording, and his 10.19 Q3, "A: Reach it too").
-
-    The same letters as ``text``, whatever their capitals, except a place
-    written entirely in small letters (no capital letter in it), unless it is
-    exactly ``text``. In a place written entirely in capitals (no small letter
-    in it), accents are set aside too: « HELENE » and « HELÈNE » are forms of
-    « Hélène », « Helene » and « hélène » are not.
-    """
-    if place == text:
-        return True
-    if not any(char.isupper() for char in place):
+def _holds(
+    key: tuple[str, str] | None, text: str, entity_type: str, written: str
+) -> bool:
+    """Whether a place a row added by hand holds, under its ``key`` (name,
+    type), is already that of an add of ``text`` (Story 10.19, v1.15; the
+    orchestrator's ruling 6): the same type, and its name and ``text`` Q3
+    forms of each other either way round, or the text ``written`` at the
+    place a form of its name."""
+    if key is None or key[1] != entity_type:
         return False
-    if place.lower() == text.lower():
-        return True
-    if any(char.islower() for char in place):
-        return False
-    return fold(place).lower() == fold(text).lower()
-
-
-def whole_word_places(text: str, document_text: str) -> list[tuple[int, int]]:
-    """The places of the name ``text`` in ``document_text`` (Story 10.17,
-    AC13 (a)): every whole-word form of it (``is_form``), read left to right,
-    not overlapping each other. An empty text has no place.
-
-    A whole word (Lionel's 10.15 Q3, "A: Hyphen joins"; Story 10.20, AC4):
-    the character just before and just after it (when there is one) is
-    neither a word character, a combining mark nor a hyphen (-, U+2010,
-    U+2011); an apostrophe is not a word character. The rule is the
-    product's one (``not_after_word``, ``not_before_word``).
-
-    The search runs on the folded document, case-insensitively; each place it
-    finds is kept only if the text written there is a form of ``text``.
-    """
-    if not text:
-        return []
-    folded = fold(document_text)
-    pattern = re.compile(
-        not_after_word() + re.escape(fold(text)) + not_before_word(), re.IGNORECASE
-    )
-    places: list[tuple[int, int]] = []
-    position = 0
-    while True:
-        match = pattern.search(folded, position)
-        if match is None:
-            return places
-        start, end = match.span()
-        if is_form(document_text[start:end], text):
-            places.append((start, end))
-            position = end
-        else:
-            position = start + 1
+    name = key[0]
+    return is_form(name, text) or is_form(text, name) or is_form(written, name)
 
 
 def _corrected_source(source: str) -> str:
@@ -474,6 +413,27 @@ class GUIValidationState(QObject):
         AC14 (d); Lionel, 2026-10-14, Q7, which refines Story 10.9's rule of
         skipping every rejected row).
 
+        Story 10.19 (AC3, Lionel's Q4): another row of the same type whose
+        name is a form of the row's name (``is_form``: other capitals, or
+        capitals without its accents; never a name written entirely in small
+        letters) is reached too. Such a row, reached through the forms rule
+        only, is reached when the text written at every place it stands for
+        (``_occurrences``, else the row itself) is a form of the row's name,
+        so a correction never chains to another name (the orchestrator's
+        rulings on the PO's v1.2 and v1.3 M1). The text written there is read
+        from the document, since a place added by hand carries the name as
+        typed (v1.8; the orchestrator's ruling, 2026-10-25). A row of exactly
+        the same name and type is reached as before (10.10), whatever places
+        it stands for.
+
+        A row of the same type holding the row's earlier correction (the same
+        corrected text) is taken before the original names are compared, so
+        a second correction from either row reaches every row the first one
+        reached (v1.13 and v1.15; the orchestrator's rulings on the second
+        Codex review's first P0 and the third's P0-2); ``modify_entity_text``
+        then keeps such a row only where the new text reaches it, from the
+        span now written there (``_reaches``).
+
         Accept and reject do not use this: they use ``_group_ids``, where a
         row added by hand is alone.
         """
@@ -481,13 +441,71 @@ class GUIValidationState(QObject):
         name = self._name_key(review)
         if name is None:
             return rows
+        text, entity_type = name
+        earlier = review.user_modification
         for other in self._session._entity_reviews:
-            if other is review or self._name_key(other) != name:
+            if other is review:
+                continue
+            other_name = self._name_key(other)
+            if other_name is None or other_name[1] != entity_type:
                 continue
             if self._decided_alone(other, _DROPPED):
                 continue
+            if (
+                other_name != name
+                and earlier is not None
+                and other.user_modification == earlier
+            ):
+                rows.append(other)
+                continue
+            if not is_form(other_name[0], text):
+                continue
+            if other_name != name:
+                places = self._occurrences(other)
+                if places is None:
+                    places = [other.entity]
+                if not all(
+                    is_form(
+                        self._session.text_of(place)[place.start_pos : place.end_pos],
+                        text,
+                    )
+                    for place in places
+                ):
+                    continue
             rows.append(other)
         return rows
+
+    def _current_places(
+        self, review: EntityReview
+    ) -> list[tuple[DetectedEntity, int, int]]:
+        """Every place a row stands for (``_occurrences``, else the row
+        itself), each with the span now written there: the span the row's
+        last text edit gave it (``_edited_spans_by_id``), else its own."""
+        places = self._occurrences(review) or [review.entity]
+        spans = (
+            self._edited_spans_by_id.get(review.entity_id)
+            if review.user_modification
+            else None
+        )
+        if spans is None or len(spans) != len(places):
+            return [(place, place.start_pos, place.end_pos) for place in places]
+        return [(place, start, end) for place, (start, end) in zip(places, spans)]
+
+    def _reaches(self, review: EntityReview, new_text: str) -> bool:
+        """Whether a corrected text reaches every place a row stands for, read
+        from the span now written there (``_current_places``), in Q3's
+        direction: the text itself, or a form of it in capitals
+        (``ValidationWorkflow._reached_span``; never the widening over added
+        words)."""
+        return all(
+            ValidationWorkflow._reached_span(
+                self._session.text_of(place),
+                dataclasses.replace(place, start_pos=start, end_pos=end),
+                new_text,
+            )
+            is not None
+            for place, start, end in self._current_places(review)
+        )
 
     def modify_entity_text(
         self,
@@ -511,9 +529,26 @@ class GUIValidationState(QObject):
         ``_action_rows``: every place of the name and type, found or added
         by hand, except another place rejected on its own (Story 10.10). The
         edit is the row's own when it reaches that row only.
+
+        Story 10.19 (v1.13; the orchestrator's ruling on the second Codex
+        review's second P0): a row of another name, reached through the forms
+        rule, takes the edit only when the corrected text, or a capitals form
+        of it, is found at every place it stands for (``_reaches``); otherwise
+        it is left as it is (pending, as before Story 10.19), never written
+        with a partial span. The row itself and the rows of exactly its name
+        take the edit as before.
         """
         review = self._reviews_by_id.get(entity_id)
         rows = self._action_rows(review) if review is not None else []
+        if review is not None:
+            name = self._name_key(review)
+            rows = [
+                row
+                for row in rows
+                if row is review
+                or self._name_key(row) == name
+                or self._reaches(row, new_text)
+            ]
         if len(rows) > 1:
             document_text = self._session.document_text
             self._undo_stack.beginMacro("Modifier le texte du groupe")
@@ -814,11 +849,17 @@ class GUIValidationState(QObject):
         if (start_pos, end_pos) not in places:
             places.append((start_pos, end_pos))
             places.sort()
+        document_text = self._session.document_text
         held = {
             span
             for entity_id, spans in self._hand_spans_by_id.items()
-            if self._hand_key_by_id.get(entity_id) == (text, entity_type)
             for span in spans
+            if _holds(
+                self._hand_key_by_id.get(entity_id),
+                text,
+                entity_type,
+                document_text[span[0] : span[1]],
+            )
         }
         return [
             (start, end)

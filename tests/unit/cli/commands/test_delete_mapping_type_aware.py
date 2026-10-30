@@ -206,7 +206,7 @@ class TestDeleteById:
         assert ("Zorbaville", "LOCATION") not in _stored_rows(db_path)
         assert ("Zorbaville", "ORG") in _stored_rows(db_path)
         remaining = output.split("deleted successfully")[1]
-        assert "1 other row" in remaining
+        assert "1 other mapping" in remaining
         assert "ORG" in remaining
         assert "delete-mapping" in remaining
         assert len(_erasures(db_path)) == 1
@@ -219,5 +219,5 @@ class TestDeleteById:
         code, output = _invoke("--id", stored[0].id, "--db", db_path, "--force")
 
         assert code == 0, output
-        assert "other row" not in output
+        assert "other mapping" not in output
         assert _stored_rows(db_path) == []

@@ -29,6 +29,9 @@ from gdpr_pseudonymizer.validation.models import (
     EntityGroup,
     EntityReviewState,
     ValidationSession,
+    fold,
+    is_form,
+    whole_word_places,
 )
 from gdpr_pseudonymizer.validation.ui import (
     FinalConfirmationScreen,
@@ -42,6 +45,96 @@ from gdpr_pseudonymizer.validation.ui import (
     get_text_input,
     get_user_action,
 )
+
+# Story 10.19 (v1.19; the fifth Codex review's P0-1, "fix the class, not the
+# case"): a word is read by what it is, not by the characters that end it:
+# letters and accent marks, with a hyphen or an apostrophe only when a letter
+# follows it (« Testar-Brimel », the elision « D'Émerine »). Anything else
+# ends it: an ellipsis, a dash, a slash, a quotation mark of any kind, a
+# bracket, a comma, a full stop, a guillemet, a digit. v1.21 (the sixth Codex
+# review's P0-1, "one rule applied to both sides"): the typed correction is
+# read by the same rule, and a hyphen right after a single letter ends the
+# word, so « J.-M. » and « J-M » are two initials either way.
+_WORD_JOINERS = frozenset("-\u2010\u2011'\u2019")
+_ELISION_MARKS = frozenset("'\u2019")
+
+
+def _word_end(text: str, start: int) -> int:
+    """The end of the word that starts with the letter at ``start``: letters
+    and accent marks, and a hyphen or an apostrophe with a letter right
+    after it, except a hyphen after a word of one letter (an initial)."""
+    letters = 1
+    at = start + 1
+    while at < len(text):
+        char = text[at]
+        if char.isalpha():
+            letters += 1
+        elif is_mark(char):
+            pass
+        elif (
+            char in _WORD_JOINERS
+            and at + 1 < len(text)
+            and text[at + 1].isalpha()
+            and (letters > 1 or char in _ELISION_MARKS)
+        ):
+            pass
+        else:
+            break
+        at += 1
+    return at
+
+
+def _words(text: str, start: int, end: int) -> list[tuple[int, int]]:
+    """The (start, end) of every word of ``text[start:end]``, read by
+    ``_word_end`` (a word cut at ``end``)."""
+    words: list[tuple[int, int]] = []
+    at = start
+    while at < end:
+        if text[at].isalpha():
+            stop = min(_word_end(text, at), end)
+            words.append((at, stop))
+            at = stop
+        else:
+            at += 1
+    return words
+
+
+def _word_after(text: str, position: int) -> tuple[int, int] | None:
+    """The (start, end) of the first word at or after ``position``, past
+    whatever is written before it, or None when no word follows."""
+    at = position
+    while at < len(text) and not text[at].isalpha():
+        at += 1
+    if at == len(text):
+        return None
+    return at, _word_end(text, at)
+
+
+def _between(text: str, word: tuple[int, int], end: int) -> str:
+    """What lies between ``word`` and ``end`` in ``text``, as it is compared
+    on both sides: each run of whitespace (a line break too) read as one
+    space, and the full stop right after a word of one letter (an initial)
+    read as part of it, so « J. TESTAR » meets « J TESTAR »."""
+    start, stop = word
+    if (
+        sum(char.isalpha() for char in text[start:stop]) == 1
+        and stop < end
+        and text[stop] == "."
+    ):
+        stop += 1
+    return _one_space(text[stop:end])
+
+
+def _one_space(text: str) -> str:
+    """``text`` with each run of whitespace written as one space."""
+    out: list[str] = []
+    for char in text:
+        if not char.isspace():
+            out.append(char)
+        elif not out or out[-1] != " ":
+            out.append(" ")
+    return "".join(out)
+
 
 # Story 10.15 (AC14 (e), Lionel's approved Q2 text): [A] of a name whose every
 # place is already in the review. %1 is the text typed, %2 the type typed.
@@ -342,19 +435,12 @@ class ValidationWorkflow:
                             # the correction reaches is a place the user
                             # typed (v1.4/v1.5), widened over a name it
                             # partly overlaps before the document is written.
-                            for entity in group.occurrences:
-                                start_pos, end_pos = self._locate_modified_span(
-                                    session.text_of(entity), entity, new_text
-                                )
-                                modified_entity = replace(
-                                    entity,
-                                    text=new_text,
-                                    start_pos=start_pos,
-                                    end_pos=end_pos,
-                                    is_ambiguous=False,
-                                    source=CORRECTED_BY_HAND_SOURCE,
-                                )
-                                session.mark_modified(entity, modified_entity)
+                            # Story 10.19 (QA's CAPS-001; the orchestrator's
+                            # ruling): in a joined group, the places the
+                            # correction does not reach come back to the
+                            # review right after this group.
+                            sent_back = self._apply_correction(session, group, new_text)
+                            entity_groups[group_index + 1 : group_index + 1] = sent_back
                         else:
                             for entity in group.occurrences:
                                 session.mark_confirmed(entity)
@@ -608,10 +694,140 @@ class ValidationWorkflow:
         else:
             return "Entity flagged as ambiguous by detection algorithm"
 
+    def _apply_correction(
+        self, session: ValidationSession, group: EntityGroup, new_text: str
+    ) -> list[EntityGroup]:
+        """[E] on a group: every place it reaches takes ``new_text``.
+
+        A group the forms join did not touch (no ``joined_parts``): every
+        place takes the correction at the span ``_locate_modified_span``
+        gives, the old span when the text is not found there, as before.
+
+        A joined group (Story 10.19, QA's CAPS-001; the orchestrator's
+        ruling, 2026-10-26): a place where neither the correction nor a
+        capitals form of it is found (``_reached_span``), one of the group's
+        own or one a join brought in, is never written with a partial span.
+        It is left unmodified and goes back to the review as its own name:
+        the group's own such places as one group, then each joined part's,
+        in that order (key and canonical entity: the group's first place).
+
+        Returns:
+            The groups sent back to the review, possibly none
+        """
+        part_of = {
+            id(entity): index + 1
+            for index, part in enumerate(group.joined_parts)
+            for entity in part
+        }
+        unreached: dict[int, list[DetectedEntity]] = {}
+        for entity in group.occurrences:
+            text = session.text_of(entity)
+            if group.joined_parts:
+                reached = self._reached_span(text, entity, new_text)
+                if reached is None:
+                    unreached.setdefault(part_of.get(id(entity), 0), []).append(entity)
+                    continue
+                start_pos, end_pos = reached
+            else:
+                start_pos, end_pos = self._locate_modified_span(text, entity, new_text)
+            modified_entity = replace(
+                entity,
+                text=new_text,
+                start_pos=start_pos,
+                end_pos=end_pos,
+                is_ambiguous=False,
+                source=CORRECTED_BY_HAND_SOURCE,
+            )
+            session.mark_modified(entity, modified_entity)
+        return [
+            EntityGroup(
+                unique_key=(places[0].text, places[0].entity_type),
+                occurrences=places,
+                variant_texts={place.text for place in places},
+                canonical_entity=places[0],
+            )
+            for _, places in sorted(unreached.items())
+        ]
+
     @staticmethod
     def _locate_modified_span(
         document_text: str, entity: DetectedEntity, new_text: str
     ) -> tuple[int, int]:
+        """The span ``_reached_span`` finds for the edited text; else the
+        original span widened over the words the correction adds, when they
+        are written right after it (``_widened_over_added_words``); else the
+        original span."""
+        reached = ValidationWorkflow._reached_span(document_text, entity, new_text)
+        if reached is not None:
+            return reached
+        widened = ValidationWorkflow._widened_over_added_words(
+            document_text, entity, new_text
+        )
+        if widened is not None:
+            return widened
+        return entity.start_pos, entity.end_pos
+
+    @staticmethod
+    def _widened_over_added_words(
+        document_text: str, entity: DetectedEntity, new_text: str
+    ) -> tuple[int, int] | None:
+        """The original span widened over the words a correction adds
+        (Story 10.19, v1.13; Lionel, 2026-10-26, "fix it in 10.19").
+
+        When the correction starts with the words the original span holds,
+        accents set aside, in any capitals, and the words written right after
+        the span, past any whitespace (a line break too), are the words it
+        adds, each with a capital letter (never a word written in small
+        letters only) and each a Q3 form of the typed word, or the typed word
+        of it (``is_form`` either way round: « Tèstar » for « TESTAR », never
+        « Mèzor » for « Mézor »; v1.15, the orchestrator's rulings 1 and 2),
+        the span covers them: « Zélvine » corrected as « ZELVINE TESTAR »
+        covers « Zélvine Testar », so « Testar » is not left in clear beside
+        the pseudonym. A word is read by what it is (``_word_end``, v1.19):
+        quotation marks, an ellipsis, a dash or a digit after it are not part
+        of it; an elision inside it stays. v1.21 (the sixth Codex review's
+        P0-1): the typed correction is read by the same rule (``_words``),
+        and what lies between two words is the same in the document and in
+        the correction (``_between``: whitespace as one space, an initial's
+        full stop part of the initial), so « Zélvine J. Testar » is covered
+        by « ZELVINE J. TESTAR » or « ZELVINE J TESTAR », never
+        « Zélvine, Testar » by « ZELVINE TESTAR ».
+
+        Returns:
+            (start_pos, end_pos) of the widened span, or None
+        """
+        held = _words(document_text, entity.start_pos, entity.end_pos)
+        typed = _words(new_text, 0, len(new_text))
+        if not held or len(typed) <= len(held):
+            return None
+        if any(
+            fold(document_text[a_start:a_end]).lower()
+            != fold(new_text[b_start:b_end]).lower()
+            for (a_start, a_end), (b_start, b_end) in zip(held, typed)
+        ):
+            return None
+        before = held[-1]
+        for index in range(len(held), len(typed)):
+            found = _word_after(document_text, before[1])
+            if found is None:
+                return None
+            if _between(document_text, before, found[0]) != _between(
+                new_text, typed[index - 1], typed[index][0]
+            ):
+                return None
+            written = document_text[found[0] : found[1]]
+            word = new_text[typed[index][0] : typed[index][1]]
+            if not any(char.isupper() for char in written) or not (
+                is_form(written, word) or is_form(word, written)
+            ):
+                return None
+            before = found
+        return entity.start_pos, before[1]
+
+    @staticmethod
+    def _reached_span(
+        document_text: str, entity: DetectedEntity, new_text: str
+    ) -> tuple[int, int] | None:
         """Find where the edited text sits relative to the original span.
 
         Replacement is offset-based, so editing "Thanks, Aino" down to "Aino"
@@ -620,6 +836,13 @@ class ValidationWorkflow:
         ("Dr. Marja" -> "Dr. Marja-Liisa") widens the span the same way.
         Story 10.20 (AC4): a place that starts on a combining mark, or ends
         just before one, is skipped: it would part a letter from its accent.
+        Story 10.19 (AC3): when the exact text is not there, the first form of
+        it (``whole_word_places``: other capitals, or capitals without its
+        accents, never a word in small letters) inside the same window that
+        overlaps the original span is taken, so « ZORBAL » corrected as
+        « Zorbal Quentrix » covers « ZORBAL QUENTRIX » whole. The forms are
+        searched in the window only, with one character more on each side
+        for the word bounds (QA's PERF-001).
 
         Args:
             document_text: Full document text
@@ -627,8 +850,8 @@ class ValidationWorkflow:
             new_text: Text entered by the user
 
         Returns:
-            (start_pos, end_pos) of the edited text overlapping the original
-            span, or the original span if the text is not found there
+            (start_pos, end_pos) of the edited text (or of a form of it)
+            overlapping the original span, or None if neither is found there
         """
         window_start = max(0, entity.start_pos - len(new_text))
         window_end = min(len(document_text), entity.end_pos + len(new_text))
@@ -641,7 +864,18 @@ class ValidationWorkflow:
             if pos < entity.end_pos and end > entity.start_pos and not splits_a_letter:
                 return pos, end
             pos = document_text.find(new_text, pos + 1, window_end)
-        return entity.start_pos, entity.end_pos
+        low = max(0, window_start - 1)
+        high = min(len(document_text), window_end + 1)
+        for start, end in whole_word_places(new_text, document_text[low:high]):
+            start, end = start + low, end + low
+            if (
+                window_start <= start
+                and end <= window_end
+                and start < entity.end_pos
+                and end > entity.start_pos
+            ):
+                return start, end
+        return None
 
     def _handle_add_entity(self, session: ValidationSession) -> None:
         """Handle manual entity addition flow.
