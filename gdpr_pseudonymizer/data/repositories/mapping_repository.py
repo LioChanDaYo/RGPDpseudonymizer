@@ -2,13 +2,22 @@
 
 from __future__ import annotations
 
+import re
 import unicodedata
 from abc import ABC, abstractmethod
 
 from gdpr_pseudonymizer.core.legacy_names import matches_search, title_words
-from gdpr_pseudonymizer.core.mapping_key import saved_name_forms
+from gdpr_pseudonymizer.core.mapping_key import (
+    _key_texts,
+    lookup_key,
+    saved_name_forms,
+)
 from gdpr_pseudonymizer.data.models import Entity
 from gdpr_pseudonymizer.exceptions import DatabaseError, DuplicateEntityError
+from gdpr_pseudonymizer.utils.french_patterns import (
+    FRENCH_TITLE_PATTERN,
+    strip_french_titles,
+)
 from gdpr_pseudonymizer.utils.text_form import composed, is_mark
 
 # The types a name is looked up under, for its forms (Story 10.20): only a
@@ -62,9 +71,34 @@ def _title_words_in_capitals() -> frozenset[str]:
     )
 
 
-# The characters that part the words of a name in a saved row, for
-# ``_cut_places``: a space, a hyphen, an apostrophe.
-_SEPARATORS = frozenset(" -\u2010\u2011'\u2019")
+# The bound v2.2.0's title pattern asks for before a title word, read from
+# ``FRENCH_TITLE_PATTERN`` itself: the part before its title words (« \b »)
+# (Story 10.19, v1.27; the ninth Codex review's P0). The walk offers a cut
+# or an inserted word wherever the old step allowed one: after a space, a
+# hyphen, a mark, « ( », « [ », « / », a quotation mark...
+_TITLE_BOUND = re.compile(
+    FRENCH_TITLE_PATTERN[: FRENCH_TITLE_PATTERN.index("(?:")], re.IGNORECASE
+)
+
+
+def _bound_after(char: str) -> bool:
+    """Whether the old title pattern's bound holds between ``char`` and the
+    first letter of a title word."""
+    return _TITLE_BOUND.match(char + "M", 1) is not None
+
+
+def _lone_mark(text: str) -> bool:
+    """Whether ``text`` holds an accent mark at its start, or right after a
+    character that is not a mark and after which the old title pattern's
+    bound holds: a mark a cut left alone (10.20's sign, a word starting with
+    a mark, read with the same bound; v1.27: after « ( », « [ » or « / »
+    too, QA's DEL-1019-10)."""
+    return any(
+        is_mark(char)
+        and (at == 0 or (not is_mark(text[at - 1]) and _bound_after(text[at - 1])))
+        for at, char in enumerate(text)
+    )
+
 
 # Room for the words 10.20's replay inserts (« MAITRE » and « A », each with
 # a space), for ``_cut_places``'s bound on a row's letters.
@@ -100,11 +134,13 @@ def _cut_places(
       French writes that letter with an accent (``_MARKED_LETTERS``: never
       the « R » of « DR », so « Drlime » never meets « MÉLIME »'s old row);
     - take off a title word of the name starting there, with or without the
-      spaces after it, where a word bound can stand before it (the name's
-      start or the row's, a separator, a space or a mark before it);
+      spaces after it, where the old title pattern's own bound can stand
+      before it (``bound_before``; v1.27: the name's start or the row's, or
+      after any character the pattern lets a title word follow, a space, a
+      hyphen, a mark, « ( », « [ », « / »...);
     - pass over a « MAITRE » word, or a place's « A », which 10.20's replay
-      inserts, where a word bound can stand before it, the same bound as a
-      title cut's (``bound_before``; v1.25, the eighth Codex review's P0): a
+      inserts, where the same bound can stand before it as before a title
+      cut (``bound_before``; v1.25, the eighth Codex review's P0): a
       cut may have glued it to the mark before it (« QUOVÔME MAÎTRE
       TESTAR » saved as « QUOVO » + a mark + « MAI » + a mark + « TRE
       TESTAR »), and after the name's last word, the space before it is its
@@ -142,15 +178,11 @@ def _cut_places(
         return j + 1 if row[j] == " " else None
 
     def bound_before(i: int, j: int) -> bool:
-        """Whether a word bound can stand before the name's ``i`` read at
-        the row's ``j``."""
-        return (
-            i == 0
-            or j == 0
-            or name[i - 1] in _SEPARATORS
-            or row[j - 1] == " "
-            or is_mark(row[j - 1])
-        )
+        """Whether the old title pattern's bound can stand before the name's
+        ``i`` read at the row's ``j``: the text's start, or a character
+        before it, in the name or in the row, after which the bound holds
+        (``_bound_after``, v1.27)."""
+        return i == 0 or j == 0 or _bound_after(name[i - 1]) or _bound_after(row[j - 1])
 
     def walk(i: int, j: int) -> set[frozenset[int]]:
         if (i, j) in memo:
@@ -179,7 +211,9 @@ def _cut_places(
                 if after is not None:
                     found |= walk(i, after)
         if i == len(name) and j < len(row) and row[j] == " ":
-            for word in inserted:
+            # only « MAITRE » follows the name's last word: 10.20's replay
+            # puts a place's « à » in front of it only (v1.27)
+            for word in [_INSERTED_TITLE]:
                 if past_inserted(j + 1, word) == len(row):
                     found |= walk(i, len(row))
         memo[(i, j)] = found
@@ -589,9 +623,24 @@ class SQLiteMappingRepository(MappingRepository):
                 for at in cut:
                     letters_of[at] = composed(letters_of[at] + "\u0301")
                 seed = "".join(letters_of)
+                # v1.27 (QA's DEL-1019-10): 10.20's replay keeps a key that
+                # lost letters only with its sign, a word starting with a
+                # mark; a mark a cut left after « ( », « [ » or « / » is the
+                # same sign, so the old step's own keys of the seed that hold
+                # such a mark are kept too
+                old_keys = (
+                    " ".join(strip_french_titles(text).split())
+                    for text, _inserted in _key_texts(
+                        lookup_key(seed, form_type), form_type
+                    )
+                )
+                seed_forms = [
+                    *_name_forms(seed, form_type),
+                    *(key for key in old_keys if _lone_mark(key)),
+                ]
                 lost_keys[(cut, form_type)] = {
                     _seed_key(saved)
-                    for saved in _name_forms(seed, form_type)
+                    for saved in seed_forms
                     if not _keeps_words(
                         name_words, fold(composed(saved)).lower().split()
                     )

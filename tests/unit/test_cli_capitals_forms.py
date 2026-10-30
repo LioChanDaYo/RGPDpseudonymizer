@@ -2137,16 +2137,7 @@ def test_delete_mapping_reaches_old_row_with_a_cedilla(
 @pytest.mark.parametrize(
     "typed",
     [
-        pytest.param(
-            "Melorine (Melavie) Testar",
-            marks=pytest.mark.xfail(
-                strict=True,
-                raises=AssertionError,
-                reason="Story 10.19 v1.27: reproduces the old row cut after a "
-                "bracket, left on 5d110a4; fixed in Task 17.2",
-            ),
-            id="typed_without_accents",
-        ),
+        pytest.param("Melorine (Melavie) Testar", id="typed_without_accents"),
         pytest.param("Mélorine (Mélavie) Testar", id="typed_with_accents"),
     ],
 )
@@ -2166,12 +2157,6 @@ def test_delete_mapping_reaches_old_row_cut_after_a_bracket(
     assert erased == sorted([ids[(document, PERSON)], ids[(old, PERSON)]])
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19 v1.27: reproduces the old row cut after a bracket, a "
-    "square bracket or a slash, left on 5d110a4; fixed in Task 17.2",
-)
 @pytest.mark.parametrize("case", list(T51_CASES))
 def test_delete_mapping_reaches_old_row_cut_after_any_bound(
     tmp_path: Path, db: Path, case: str
