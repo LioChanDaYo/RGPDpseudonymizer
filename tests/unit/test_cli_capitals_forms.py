@@ -1,9 +1,9 @@
 """Story 10.19: a name added ([A]) or corrected ([E]) in the command-line
 review also reaches its forms in capitals, and ``delete-mapping`` by name also
 erases the saved pseudonyms of the name in other capitals (T1-T7, T9-T13,
-T17, T18, T19 CLI, T20, T21 CLI, T22-T25, T28, T30 CLI, T31, T33-T44 CLI),
-and what must not change (G1, G2, G7, G8 CLI, G11-G27, T23's case 2, T44's
-accented case).
+T17, T18, T19 CLI, T20, T21 CLI, T22-T25, T28, T30 CLI, T31, T33-T46 CLI),
+and what must not change (G1, G2, G7, G8 CLI, G11-G29, T23's case 2, T44's
+and T45's accented cases).
 
 Written by the BMAD dev agent (Claude), before the fix. Each test drives the
 real ``gdpr-pseudo process`` or ``delete-mapping`` command through
@@ -1466,6 +1466,72 @@ def test_delete_mapping_reaches_old_row_cut_after_an_own_accent(
     assert erased == sorted([ids[(document, PERSON)], ids[(old, PERSON)]])
 
 
+@pytest.mark.parametrize(
+    "typed",
+    [
+        pytest.param(
+            "Meme Testar",
+            marks=pytest.mark.xfail(
+                strict=True,
+                raises=AssertionError,
+                reason="Story 10.19 v1.23: reproduces the old row cut on both sides "
+                "of one mark, left on 46202a3; fixed in Task 15.2",
+            ),
+            id="typed_without_accents",
+        ),
+        pytest.param("Mème Testar", id="typed_with_accents"),
+    ],
+)
+def test_delete_mapping_reaches_old_row_cut_on_both_sides_of_one_mark(
+    tmp_path: Path, db: Path, typed: str
+) -> None:
+    """T45 (AC4; the seventh Codex review's P0, DEL-1019-08): v2.2.0 cut « ME »
+    from « MÈME TESTAR » before the « È »'s mark, then the second « ME »
+    after it, with the space, leaving the mark + « TESTAR ». The row is
+    erased typed without the accents (expected failure on 46202a3, a
+    regression from 63da306) and with them (a guard: 10.20 reaches it)."""
+    grave = unicodedata.lookup("COMBINING GRAVE ACCENT")
+    document = "MÈME TESTAR"
+    old = _key_steps(nfd(document), PERSON)
+    _pre(old == grave + "TESTAR", "the old saved text")
+    left, erased, ids, _ = _old_rows_erased(db, document, typed)
+    assert left == [("Vorlan Mestrix", PERSON)], left  # expected failure
+    assert erased == sorted([ids[(document, PERSON)], ids[(old, PERSON)]])
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 10.19 v1.23: reproduces another name's old row erased through "
+    "an accent on a consonant on 46202a3; fixed in Task 15.2",
+)
+def test_delete_mapping_never_reaches_another_names_old_row_through_a_consonant(
+    tmp_path: Path, db: Path
+) -> None:
+    """T46 (AC4; found measuring v1.23): « Drlime » is not « MÉLIME », whose
+    v2.2.0 row is a mark + « LIME »; deleting « Drlime » erases its own row
+    only, since no French letter « R » carries an accent the old step could
+    have bounded « DR » with."""
+    acute = unicodedata.lookup("COMBINING ACUTE ACCENT")
+    old = _key_steps(nfd("MÉLIME"), PERSON)
+    _pre(old == acute + "LIME", "the old saved text")
+    _save(
+        db,
+        [
+            ("Drlime", PERSON, "Quovane Testar"),
+            ("MÉLIME", PERSON, VM),
+            (old, PERSON, "Zorbalix"),
+        ],
+    )
+    _pre(len(_names(db)) == 3, "three rows saved")
+    ids = _ids(db)
+    run = _delete(db, "Drlime")
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    left = _names(db)
+    assert left == sorted([("MÉLIME", PERSON), (old, PERSON)]), left  # expected failure
+    assert _erased_ids(db) == [ids[("Drlime", PERSON)]]
+
+
 # ---------------------------------------------------------------------------
 # Guards (pass on the unfixed and the fixed code)
 # ---------------------------------------------------------------------------
@@ -1908,3 +1974,42 @@ def test_widening_never_over_a_comma_or_a_full_stop_the_correction_lacks(
     it and the next word."""
     written, p = _widened(tmp_path, db, text, "ZELVINE TESTAR")
     assert written == f"Signé : {p}. " + tail.format(p=p)
+
+
+@pytest.mark.parametrize(
+    "typed",
+    ["Melora Quovome Testar", "Mélora Quovômé Testar"],
+    ids=["typed_without_accents", "typed_with_accents"],
+)
+def test_delete_mapping_reaches_old_row_cut_between_two_marks(
+    tmp_path: Path, db: Path, typed: str
+) -> None:
+    """G28 (AC4; v1.23): v2.2.0 cut « MÉ » from « MÉLORA » and the « MÉ » of
+    « QUOVÔMÉ » between the « Ô »'s mark and its own, both marks left before
+    the space; the row is erased typed with or without the accents."""
+    acute = unicodedata.lookup("COMBINING ACUTE ACCENT")
+    circumflex = unicodedata.lookup("COMBINING CIRCUMFLEX ACCENT")
+    document = "MÉLORA QUOVÔMÉ TESTAR"
+    old = _key_steps(nfd(document), PERSON)
+    _pre(
+        old == acute + "LORA QUOVO" + circumflex + acute + " TESTAR",
+        "the old saved text",
+    )
+    left, erased, ids, _ = _old_rows_erased(db, document, typed)
+    assert left == [("Vorlan Mestrix", PERSON)], left
+    assert erased == sorted([ids[(document, PERSON)], ids[(old, PERSON)]])
+
+
+def test_delete_mapping_reaches_old_row_of_a_title_run(
+    tmp_path: Path, db: Path
+) -> None:
+    """G29 (AC4; QA's note on 46202a3): v2.2.0 cut both « MÉ » of « MÉMÉ
+    TESTAR », leaving two marks + « TESTAR »; deleting « Meme Testar »
+    erases it with today's row of that text."""
+    acute = unicodedata.lookup("COMBINING ACUTE ACCENT")
+    document = "MÉMÉ TESTAR"
+    old = _key_steps(nfd(document), PERSON)
+    _pre(old == acute + acute + " TESTAR", "the old saved text")
+    left, erased, ids, _ = _old_rows_erased(db, document, "Meme Testar")
+    assert left == [("Vorlan Mestrix", PERSON)], left
+    assert erased == sorted([ids[(document, PERSON)], ids[(old, PERSON)]])
