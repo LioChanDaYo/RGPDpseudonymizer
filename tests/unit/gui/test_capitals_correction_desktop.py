@@ -881,12 +881,6 @@ def test_desktop_single_widening_before_an_ellipsis(  # type: ignore[no-untyped-
     assert output == f"Signé : {p}. {p}\u2026 a signé."
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19 v1.21: reproduces « J. Testar » left after a middle "
-    "initial on 63da306; fixed in Task 14.2",
-)
 def test_desktop_single_widening_over_a_middle_initial(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, dialogs
 ) -> None:

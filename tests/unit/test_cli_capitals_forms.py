@@ -1061,12 +1061,6 @@ def test_cli_widening_before_any_punctuation(
     assert written == f"Signé : {p}. {p}{punctuation} a signé."
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19 v1.21: reproduces « Testar » or « Zélvine » left after an "
-    "initial or a comma on 63da306; fixed in Task 14.2",
-)
 @pytest.mark.parametrize("case", list(T42_CASES))
 def test_cli_widening_reads_the_correction_by_the_same_word_rule(
     tmp_path: Path, db: Path, case: str
@@ -1092,7 +1086,11 @@ def test_cli_widening_reads_the_correction_by_the_same_word_rule(
     written = _written(output)
     left = [word for word in ("Testar", "TESTAR", "Zélvine") if word in written]
     assert not left, written  # expected failure
-    p = _pseudonym(db, typed)
+    # « M. » in « J.-M. » is read as a title when the row is saved, as on
+    # main, so the one row is read by its type, not by the text typed
+    people = [row.pseudonym_full for row in _entities(db) if row.entity_type == PERSON]
+    _pre(len(people) == 1, f"one row stored for {typed!r}: {_names(db)}")
+    p = str(people[0])
     assert written == f"Signé : {p}. {p} a signé."
 
 
@@ -1429,12 +1427,6 @@ def test_delete_mapping_reaches_old_row_past_eight_places(
     assert erased == sorted([ids[(document, PERSON)], ids[(old, PERSON)]])
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.19 v1.21: reproduces the old row of a name cut twice in one "
-    "word, left on 63da306; fixed in Task 14.2",
-)
 def test_delete_mapping_reaches_old_row_with_a_repeated_cut(
     tmp_path: Path, db: Path
 ) -> None:
@@ -1453,16 +1445,7 @@ def test_delete_mapping_reaches_old_row_with_a_repeated_cut(
 @pytest.mark.parametrize(
     "typed",
     [
-        pytest.param(
-            "Clemelie Mezor",
-            marks=pytest.mark.xfail(
-                strict=True,
-                raises=AssertionError,
-                reason="Story 10.19 v1.21: reproduces the old row cut right after "
-                "a letter's own accent, left on 63da306; fixed in Task 14.2",
-            ),
-            id="typed_without_accents",
-        ),
+        pytest.param("Clemelie Mezor", id="typed_without_accents"),
         pytest.param("Clémélie Mézor", id="typed_with_accents"),
     ],
 )

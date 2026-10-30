@@ -51,32 +51,89 @@ from gdpr_pseudonymizer.validation.ui import (
 # letters and accent marks, with a hyphen or an apostrophe only when a letter
 # follows it (« Testar-Brimel », the elision « D'Émerine »). Anything else
 # ends it: an ellipsis, a dash, a slash, a quotation mark of any kind, a
-# bracket, a comma, a full stop, a guillemet, a digit.
+# bracket, a comma, a full stop, a guillemet, a digit. v1.21 (the sixth Codex
+# review's P0-1, "one rule applied to both sides"): the typed correction is
+# read by the same rule, and a hyphen right after a single letter ends the
+# word, so « J.-M. » and « J-M » are two initials either way.
 _WORD_JOINERS = frozenset("-\u2010\u2011'\u2019")
+_ELISION_MARKS = frozenset("'\u2019")
 
 
-def _next_word(text: str, position: int) -> tuple[int, int] | None:
-    """The (start, end) of the word written after the whitespace at
-    ``position`` (at least one whitespace character, a line break included),
-    or None when no word starts there."""
-    at = position
-    if at >= len(text) or not text[at].isspace():
-        return None
-    while at < len(text) and text[at].isspace():
-        at += 1
-    start = at
-    if at >= len(text) or not text[at].isalpha():
-        return None
-    at += 1
+def _word_end(text: str, start: int) -> int:
+    """The end of the word that starts with the letter at ``start``: letters
+    and accent marks, and a hyphen or an apostrophe with a letter right
+    after it, except a hyphen after a word of one letter (an initial)."""
+    letters = 1
+    at = start + 1
     while at < len(text):
         char = text[at]
-        if char.isalpha() or is_mark(char):
-            at += 1
-        elif char in _WORD_JOINERS and at + 1 < len(text) and text[at + 1].isalpha():
-            at += 1
+        if char.isalpha():
+            letters += 1
+        elif is_mark(char):
+            pass
+        elif (
+            char in _WORD_JOINERS
+            and at + 1 < len(text)
+            and text[at + 1].isalpha()
+            and (letters > 1 or char in _ELISION_MARKS)
+        ):
+            pass
         else:
             break
-    return start, at
+        at += 1
+    return at
+
+
+def _words(text: str, start: int, end: int) -> list[tuple[int, int]]:
+    """The (start, end) of every word of ``text[start:end]``, read by
+    ``_word_end`` (a word cut at ``end``)."""
+    words: list[tuple[int, int]] = []
+    at = start
+    while at < end:
+        if text[at].isalpha():
+            stop = min(_word_end(text, at), end)
+            words.append((at, stop))
+            at = stop
+        else:
+            at += 1
+    return words
+
+
+def _word_after(text: str, position: int) -> tuple[int, int] | None:
+    """The (start, end) of the first word at or after ``position``, past
+    whatever is written before it, or None when no word follows."""
+    at = position
+    while at < len(text) and not text[at].isalpha():
+        at += 1
+    if at == len(text):
+        return None
+    return at, _word_end(text, at)
+
+
+def _between(text: str, word: tuple[int, int], end: int) -> str:
+    """What lies between ``word`` and ``end`` in ``text``, as it is compared
+    on both sides: each run of whitespace (a line break too) read as one
+    space, and the full stop right after a word of one letter (an initial)
+    read as part of it, so « J. TESTAR » meets « J TESTAR »."""
+    start, stop = word
+    if (
+        sum(char.isalpha() for char in text[start:stop]) == 1
+        and stop < end
+        and text[stop] == "."
+    ):
+        stop += 1
+    return _one_space(text[stop:end])
+
+
+def _one_space(text: str) -> str:
+    """``text`` with each run of whitespace written as one space."""
+    out: list[str] = []
+    for char in text:
+        if not char.isspace():
+            out.append(char)
+        elif not out or out[-1] != " ":
+            out.append(" ")
+    return "".join(out)
 
 
 # Story 10.15 (AC14 (e), Lionel's approved Q2 text): [A] of a name whose every
@@ -726,32 +783,46 @@ class ValidationWorkflow:
         « Mèzor » for « Mézor »; v1.15, the orchestrator's rulings 1 and 2),
         the span covers them: « Zélvine » corrected as « ZELVINE TESTAR »
         covers « Zélvine Testar », so « Testar » is not left in clear beside
-        the pseudonym. A word is read by what it is (``_next_word``, v1.19):
+        the pseudonym. A word is read by what it is (``_word_end``, v1.19):
         quotation marks, an ellipsis, a dash or a digit after it are not part
-        of it; an elision inside it stays.
+        of it; an elision inside it stays. v1.21 (the sixth Codex review's
+        P0-1): the typed correction is read by the same rule (``_words``),
+        and what lies between two words is the same in the document and in
+        the correction (``_between``: whitespace as one space, an initial's
+        full stop part of the initial), so « Zélvine J. Testar » is covered
+        by « ZELVINE J. TESTAR » or « ZELVINE J TESTAR », never
+        « Zélvine, Testar » by « ZELVINE TESTAR ».
 
         Returns:
             (start_pos, end_pos) of the widened span, or None
         """
-        held = document_text[entity.start_pos : entity.end_pos].split()
-        typed = new_text.split()
+        held = _words(document_text, entity.start_pos, entity.end_pos)
+        typed = _words(new_text, 0, len(new_text))
         if not held or len(typed) <= len(held):
             return None
-        if any(fold(a).lower() != fold(b).lower() for a, b in zip(held, typed)):
+        if any(
+            fold(document_text[a_start:a_end]).lower()
+            != fold(new_text[b_start:b_end]).lower()
+            for (a_start, a_end), (b_start, b_end) in zip(held, typed)
+        ):
             return None
-        end = entity.end_pos
-        for word in typed[len(held) :]:
-            found = _next_word(document_text, end)
+        before = held[-1]
+        for index in range(len(held), len(typed)):
+            found = _word_after(document_text, before[1])
             if found is None:
                 return None
-            word_start, word_end = found
-            written = document_text[word_start:word_end]
+            if _between(document_text, before, found[0]) != _between(
+                new_text, typed[index - 1], typed[index][0]
+            ):
+                return None
+            written = document_text[found[0] : found[1]]
+            word = new_text[typed[index][0] : typed[index][1]]
             if not any(char.isupper() for char in written) or not (
                 is_form(written, word) or is_form(word, written)
             ):
                 return None
-            end = word_end
-        return entity.start_pos, end
+            before = found
+        return entity.start_pos, before[1]
 
     @staticmethod
     def _reached_span(

@@ -44,10 +44,6 @@ def _one_mark(text: str) -> str:
     return "".join("\u0301" if is_mark(char) else char for char in text)
 
 
-# The vowels an accent can sit on where v2.2.0's title step cut a word
-# (Story 10.19, ``_damage_spots``), in capitals.
-_VOWELS = frozenset("AEIOUY")
-
 # The words 10.20's replay may insert in an old key (a decomposed « Maître »,
 # and a place's leading « à »), in capitals with accents set aside.
 _INSERTED_TITLE = "MAITRE"
@@ -66,104 +62,125 @@ def _title_words_in_capitals() -> frozenset[str]:
     )
 
 
-def _damage_spots(
-    words: list[str], titles: frozenset[str]
-) -> list[tuple[int, int, int, int]]:
-    """The places where v2.2.0's title step could cut a word of ``words`` (in
-    capitals, accents set aside) read with separate marks (Story 10.19,
-    v1.13; v1.19 with no bound): a vowel that ends a title word at the start
-    of a part of a word (« ME » in « MÉLORA »), or that a title word follows
-    to the end of the part (« ME » in « QUOVÔME »); the parts are those
-    between hyphens and apostrophes (v1.15, ruling 5). Each as (the word,
-    the vowel, the part's start, the part's end)."""
-    return [
-        (index, at, start, end)
-        for index, word in enumerate(words)
-        for start, end in _word_parts(word)
-        for at in range(start, end)
-        if word[at] in _VOWELS
-        and (word[start : at + 1] in titles or word[at + 1 : end] in titles)
-    ]
+# The characters that part the words of a name in a saved row, for
+# ``_cut_places``: a space, a hyphen, an apostrophe.
+_SEPARATORS = frozenset(" -\u2010\u2011'\u2019")
+
+# Room for the words 10.20's replay inserts (« MAITRE » and « A », each with
+# a space), for ``_cut_places``'s bound on a row's letters.
+_INSERTED_ROOM = len(_INSERTED_TITLE) + len(_INSERTED_PREPOSITION) + 2
 
 
-def _cut_sets(
-    words: list[str], plain: str, location: bool, titles: frozenset[str]
+def _cut_places(
+    words: list[str], row: str, location: bool, titles: frozenset[str]
 ) -> set[frozenset[int]]:
-    """Every set of cut places of the name (``_damage_spots``) whose removed
-    title words turn the name's letters into ``plain``, a saved row's letters
-    (Story 10.19, v1.19; the fifth Codex review's P0-2, "fix the class, not
-    the case").
+    """Every set of letters of the name that, accented, let v2.2.0's title
+    step turn the name into ``row`` (Story 10.19, v1.21; the sixth Codex
+    review's P0-2, the orchestrator's "a cut wherever the row carries a
+    mark").
 
-    ``words`` is the name in capitals, accents set aside; ``plain`` the row
-    decomposed, in capitals, its marks taken off, its spaces collapsed. A cut
-    at a part's start takes off the title word that ends at the vowel; a cut
-    at a part's end takes off the title word after the vowel, and the spaces
-    after it (the old step's « \\s* »). The row may also hold a word 10.20's
-    replay inserts (a « MAITRE » word; for a place, a leading « A »). The
-    search walks the name and the row once, memoised on the two positions,
-    so it grows with their length, not with the number of places.
+    ``words`` is the name in capitals, accents set aside; the letters are
+    offsets in ``" ".join(words)``. ``row`` is a saved row decomposed, in
+    capitals, its spaces collapsed, its marks kept. The old step cut a title
+    word where an accent mark bounded it, and the mark stayed, so the row's
+    marks show where cuts can have happened:
+
+    - a letter's own mark (right after a letter) is passed over;
+    - at a mark at a word's start, after a separator or after another mark,
+      a title word of the name starting there may have been taken off, its
+      last letter accented, any number in one word (« MÉMÉLIE » saved as two
+      marks + « LIE »); when the mark before is a letter's own accent, that
+      letter was accented too (« CLÉMÉLIE » saved as « CLE » + two marks +
+      « LIE »);
+    - after a letter's own mark, a title word ending a part may have been
+      taken off with the spaces after it, the letter before it accented
+      (« QUOVÔME ZORBAL » saved as « QUOVO » + a mark + « ZORBAL »);
+    - letters match one by one;
+    - a « MAITRE » word, or a place's leading « A », which 10.20's replay
+      inserts, may be passed over in the row.
+
+    Walked once, memoised on the two positions. A row with more characters
+    other than marks than the name and the inserted words have is not
+    walked: no step adds one.
     """
     name = " ".join(words)
-    # 10.20's replay inserts one title word, or a place's « à », at most
-    if len(plain) > len(name) + len(_INSERTED_TITLE) + len(_INSERTED_PREPOSITION) + 2:
+    if sum(not is_mark(char) for char in row) > len(name) + _INSERTED_ROOM:
         return set()
-    starts: list[int] = []
-    offset = 0
-    for word in words:
-        starts.append(offset)
-        offset += len(word) + 1
-    cuts: dict[int, list[tuple[int, int]]] = {}
-    for spot, (index, vowel, start, end) in enumerate(_damage_spots(words, titles)):
-        word, base = words[index], starts[index]
-        if word[start : vowel + 1] in titles:
-            cuts.setdefault(base + start, []).append((spot, base + vowel + 1))
-        if word[vowel + 1 : end] in titles:
-            after = base + end
-            while after < len(name) and name[after] == " ":
-                after += 1
-            cuts.setdefault(base + vowel + 1, []).append((spot, after))
     memo: dict[tuple[int, int], set[frozenset[int]]] = {}
+
+    def own_mark(j: int) -> bool:
+        """Whether ``row[j]`` is a mark right after a letter."""
+        return (
+            0 < j < len(row)
+            and is_mark(row[j])
+            and not is_mark(row[j - 1])
+            and row[j - 1] not in _SEPARATORS
+        )
+
+    def past_spaces(i: int) -> int:
+        while i < len(name) and name[i] == " ":
+            i += 1
+        return i
+
+    def past_inserted(j: int, word: str) -> int | None:
+        """The row's position after ``word`` (each letter with its marks,
+        then a space or the end) written at ``j``, or None."""
+        for letter in word:
+            if j >= len(row) or row[j] != letter:
+                return None
+            j += 1
+            while j < len(row) and is_mark(row[j]):
+                j += 1
+        if j == len(row):
+            return j
+        return j + 1 if row[j] == " " else None
 
     def walk(i: int, j: int) -> set[frozenset[int]]:
         if (i, j) in memo:
             return memo[(i, j)]
         found: set[frozenset[int]] = set()
-        if i == len(name) and j == len(plain):
+        if i == len(name) and j == len(row):
             found.add(frozenset())
-        for spot, after in cuts.get(i, []):
-            found |= {cut | {spot} for cut in walk(after, j)}
-        if i < len(name) and j < len(plain) and name[i] == plain[j]:
+        if own_mark(j):
+            found |= walk(i, j + 1)
+        if (
+            j < len(row)
+            and is_mark(row[j])
+            and (j == 0 or row[j - 1] in _SEPARATORS or is_mark(row[j - 1]))
+        ):
+            before = (
+                {i - 1}
+                if i > 0 and name[i - 1] not in _SEPARATORS and own_mark(j - 1)
+                else set()
+            )
+            for title in titles:
+                if name.startswith(title, i):
+                    last = i + len(title) - 1
+                    found |= {
+                        places | before | {last}
+                        for places in walk(i + len(title), j + 1)
+                    }
+        if own_mark(j - 1) and i > 0 and name[i - 1] not in _SEPARATORS:
+            for title in titles:
+                end = i + len(title)
+                if name.startswith(title, i) and (
+                    end == len(name) or name[end] in _SEPARATORS
+                ):
+                    found |= {places | {i - 1} for places in walk(past_spaces(end), j)}
+        if i < len(name) and j < len(row) and name[i] == row[j]:
             found |= walk(i + 1, j + 1)
-        if j == 0 or plain[j - 1] == " ":
+        if j == 0 or row[j - 1] == " ":
             inserted = [_INSERTED_TITLE]
             if location and j == 0:
                 inserted.append(_INSERTED_PREPOSITION)
             for word in inserted:
-                if plain.startswith(word + " ", j):
-                    found |= walk(i, j + len(word) + 1)
-                elif plain.startswith(word, j) and j + len(word) == len(plain):
-                    found |= walk(i, len(plain))
+                after = past_inserted(j, word)
+                if after is not None:
+                    found |= walk(i, after)
         memo[(i, j)] = found
         return found
 
     return walk(0, 0)
-
-
-# The characters that join parts of one word, for ``_word_parts``.
-_WORD_JOINERS = frozenset("-\u2010\u2011'\u2019")
-
-
-def _word_parts(word: str) -> list[tuple[int, int]]:
-    """The (start, end) offsets of the parts of ``word`` between hyphens and
-    apostrophes, empty parts left out."""
-    parts: list[tuple[int, int]] = []
-    start = 0
-    for at, char in enumerate(word):
-        if char in _WORD_JOINERS:
-            parts.append((start, at))
-            start = at + 1
-    parts.append((start, len(word)))
-    return [(begin, end) for begin, end in parts if end > begin]
 
 
 def _seed_key(text: str) -> str:
@@ -527,9 +544,9 @@ class SQLiteMappingRepository(MappingRepository):
         v1.13 (the second Codex review's third P0; QA's DEL-1019-01): the
         forms that lost letters of the name's damaged capitals texts
         (« VORLAN MÉLORA » for « Vorlan Mélora » or « Vorlan Melora »;
-        v1.19: found row by row, ``_cut_sets``) reach a row written entirely
-        in capitals that
-        carries a mark, every accent mark counting there as one mark,
+        v1.19: found row by row; v1.21: ``_cut_places``) reach a row
+        written entirely in capitals that carries a mark, every accent mark
+        counting there as one mark,
         whatever its kind, so « VORLAN » + U+0300 + « LORA », saved from
         « VORLAN MÈLORA », is erased with « Vorlan Mélora »; v1.17: compared
         by ``_seed_key``, whatever way marks side by side compose. v1.15
@@ -556,20 +573,17 @@ class SQLiteMappingRepository(MappingRepository):
         old_forms: dict[str, list[tuple[str, bool]]] = {}
         titles = _title_words_in_capitals()
         caps_words = fold(name).upper().split()
-        spots = _damage_spots(caps_words, titles)
         lost_keys: dict[tuple[frozenset[int], str], set[str]] = {}
 
         def lost_forms(cut: frozenset[int], form_type: str) -> set[str]:
             """The ``_seed_key`` of every form that lost letters of the name
-            in capitals with an accent put back at the places of ``cut``."""
+            in capitals with an accent put back on the letters of ``cut``
+            (offsets in the name's words joined by one space)."""
             if (cut, form_type) not in lost_keys:
-                letters_of = [list(word) for word in caps_words]
-                for spot in cut:
-                    index, vowel, _start, _end = spots[spot]
-                    letters_of[index][vowel] = composed(
-                        letters_of[index][vowel] + "\u0301"
-                    )
-                seed = " ".join("".join(word) for word in letters_of)
+                letters_of = list(" ".join(caps_words))
+                for at in cut:
+                    letters_of[at] = composed(letters_of[at] + "\u0301")
+                seed = "".join(letters_of)
                 lost_keys[(cut, form_type)] = {
                     _seed_key(saved)
                     for saved in _name_forms(seed, form_type)
@@ -581,20 +595,15 @@ class SQLiteMappingRepository(MappingRepository):
 
         def reaches_old_row(stored: str, form_type: str) -> bool:
             """Whether a row in capitals is one an earlier version saved
-            damaged from the name (Story 10.19, v1.19): some set of cut
-            places turns the name into the row's letters, and the row's
-            ``_seed_key`` is among that set's forms that lost letters."""
-            plain = " ".join(
-                "".join(
-                    char
-                    for char in unicodedata.normalize("NFD", stored).upper()
-                    if not is_mark(char)
-                ).split()
-            )
+            damaged from the name (Story 10.19, v1.19; v1.21 read at the
+            row's marks, ``_cut_places``): some set of cut letters turns the
+            name into the row, and the row's ``_seed_key`` is among that
+            set's forms that lost letters."""
+            row = " ".join(unicodedata.normalize("NFD", stored).upper().split())
             key = _seed_key(stored)
             return any(
                 key in lost_forms(cut, form_type)
-                for cut in _cut_sets(caps_words, plain, form_type == "LOCATION", titles)
+                for cut in _cut_places(caps_words, row, form_type == "LOCATION", titles)
                 if cut
             )
 
