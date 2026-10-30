@@ -1,8 +1,8 @@
 """Story 10.19: a name added ([A]) or corrected ([E]) in the command-line
 review also reaches its forms in capitals, and ``delete-mapping`` by name also
 erases the saved pseudonyms of the name in other capitals (T1-T7, T9-T13,
-T17, T18, T19 CLI, T20, T21 CLI, T22-T25, T28, T30 CLI, T31, T33-T39 CLI),
-and what must not change (G1, G2, G7, G8 CLI, G11-G21, T23's case 2).
+T17, T18, T19 CLI, T20, T21 CLI, T22-T25, T28, T30 CLI, T31, T33-T41 CLI),
+and what must not change (G1, G2, G7, G8 CLI, G11-G23, T23's case 2).
 
 Written by the BMAD dev agent (Claude), before the fix. Each test drives the
 real ``gdpr-pseudo process`` or ``delete-mapping`` command through
@@ -130,6 +130,15 @@ T31_TEXT = "Zélvine Mézor a signé. Zélvine Mèzor a signé."
 T35_TEXT = "Signé : ZÉLVINE TESTAR. Zélvine\nTestar a signé."
 T36_TEXT = "Vorlan Mestrix valide. Vorlène a signé. VORLENE a signé."
 T36B_TEXT = "Vorlan Mestrix valide. Signé : Bélora. Signé : BÊLORA."
+# T40: the punctuation written right after « Testar »
+PUNCTUATION = {
+    "ellipsis": "\u2026",
+    "em_dash": "\u2014",
+    "en_dash": "\u2013",
+    "slash": "/",
+    "asterisk": "*",
+    "footnote_digit": "1",
+}
 # T37: the second name between quotation marks (opening, closing)
 QUOTES = {
     "straight": ("'", "'"),
@@ -988,6 +997,41 @@ def test_cli_widening_keeps_the_elision_inside_quotation_marks(
     assert written == f"Signé : {p}. '{p}' a signé."
 
 
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 10.19 v1.19: reproduces « Testar » left before punctuation the "
+    "word reader took in on 6d87d22; fixed in Task 13.2",
+)
+@pytest.mark.parametrize("mark", list(PUNCTUATION))
+def test_cli_widening_before_any_punctuation(
+    tmp_path: Path, db: Path, mark: str
+) -> None:
+    """T40 CLI (AC3; the fifth Codex review's P0-1, QA's LEAK-1019-03): a word
+    is read by what it is, so an ellipsis, a dash, a slash, an asterisk or a
+    footnote digit right after « Testar » ends it; « Zélvine » corrected as
+    « ZELVINE TESTAR » covers « Testar », and the punctuation stays."""
+    punctuation = PUNCTUATION[mark]
+    source, output = _files(tmp_path, ".txt")
+    source.write_text(
+        f"Signé : ZÉLVINE TESTAR. Zélvine Testar{punctuation} a signé.",
+        encoding="utf-8",
+    )
+    run = _process(
+        source,
+        output,
+        db,
+        [("ZÉLVINE", PERSON), ("Zélvine", PERSON)],
+        [ENTER, "e"],
+        ["ZELVINE TESTAR"],
+    )
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    written = _written(output)
+    assert "TESTAR" not in written.upper(), written  # expected failure
+    p = _pseudonym(db, "ZELVINE TESTAR")
+    assert written == f"Signé : {p}. {p}{punctuation} a signé."
+
+
 # ---------------------------------------------------------------------------
 # AC1, AC5: accents in capitals
 # ---------------------------------------------------------------------------
@@ -1299,6 +1343,30 @@ def test_delete_mapping_reaches_old_row_past_six_spots(
     old = _key_steps(nfd(document), PERSON)
     _pre(old == "MELOME MELAME MELIME " + acute + "LUME", "the old saved text")
     left, erased, ids, _ = _old_rows_erased(db, document, "Melome Melame Melime Melume")
+    assert left == [("Vorlan Mestrix", PERSON)], left  # expected failure
+    assert erased == sorted([ids[(document, PERSON)], ids[(old, PERSON)]])
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 10.19 v1.19: reproduces the old row of a name whose cut place "
+    "comes after eight possible ones, left on 6d87d22; fixed in Task 13.2",
+)
+def test_delete_mapping_reaches_old_row_past_eight_places(
+    tmp_path: Path, db: Path
+) -> None:
+    """T41 (AC4; the fifth Codex review's P0-2): the first words, one of them
+    hyphenated, hold eight possible cut places before the surname's real
+    cut; the row v2.2.0 saved is erased with « Melome Melame Melime-Melume
+    Melora », whatever the number of places."""
+    acute = unicodedata.lookup("COMBINING ACUTE ACCENT")
+    document = "MELOME MELAME MELIME-MELUME MÉLORA"
+    old = _key_steps(nfd(document), PERSON)
+    _pre(old == "MELOME MELAME MELIME-MELUME " + acute + "LORA", "the old saved text")
+    left, erased, ids, _ = _old_rows_erased(
+        db, document, "Melome Melame Melime-Melume Melora"
+    )
     assert left == [("Vorlan Mestrix", PERSON)], left  # expected failure
     assert erased == sorted([ids[(document, PERSON)], ids[(old, PERSON)]])
 
@@ -1616,5 +1684,35 @@ def test_delete_mapping_reaches_old_row_cut_after_an_apostrophe(
         any(unicodedata.combining(char) for char in old) and "O'" in old,
         "the old saved text, cut after the apostrophe",
     )
+    assert left == [("Vorlan Mestrix", PERSON)]
+    assert erased == sorted([ids[(document, PERSON)], ids[(old, PERSON)]])
+
+
+def test_delete_mapping_reaches_old_titled_row(tmp_path: Path, db: Path) -> None:
+    """G22 (AC4; QA's TEST-1019-06): v2.2.0 saved « MAÎTRE VORLAN MÉLORA »
+    with the title kept (read with a separate mark) and the surname cut;
+    deleting « Vorlan Melora » erases it with today's row of that text."""
+    circumflex = unicodedata.lookup("COMBINING CIRCUMFLEX ACCENT")
+    acute = unicodedata.lookup("COMBINING ACUTE ACCENT")
+    document = "MAÎTRE VORLAN MÉLORA"
+    left, erased, ids, old = _old_rows_erased(db, document, "Vorlan Melora")
+    _pre(
+        old == "MAI" + circumflex + "TRE VORLAN " + acute + "LORA",
+        "the old saved text",
+    )
+    assert left == [("Vorlan Mestrix", PERSON)]
+    assert erased == sorted([ids[(document, PERSON)], ids[(old, PERSON)]])
+
+
+def test_delete_mapping_sets_aside_the_accent_beside_a_cut(
+    tmp_path: Path, db: Path
+) -> None:
+    """G23 (AC4; QA's TEST-1019-06): v2.2.0 saved « ZÈLVINE MÈZOR » with
+    « È » keeping its own accent beside the cut; deleting « Zelvine Mezor »
+    erases it with today's row of that text."""
+    grave = unicodedata.lookup("COMBINING GRAVE ACCENT")
+    document = "ZÈLVINE MÈZOR"
+    left, erased, ids, old = _old_rows_erased(db, document, "Zelvine Mezor")
+    _pre(old == "ZE" + grave + "LVINE " + grave + "ZOR", "the old saved text")
     assert left == [("Vorlan Mestrix", PERSON)]
     assert erased == sorted([ids[(document, PERSON)], ids[(old, PERSON)]])

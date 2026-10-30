@@ -1,7 +1,7 @@
 """Story 10.19: a correction in the desktop app reaches the name's forms in
 capitals (T8, T14, T15, T16, T19 desktop, T21 desktop, T26, T27, T29, T30
-desktop, T31, T32, T35, T36, T37 desktop), and what must not change (G3, G4,
-G5, G8 desktop, G9, G10).
+desktop, T31, T32, T35, T36, T37, T40 desktop), and what must not change (G3,
+G4, G5, G8 desktop, G9, G10).
 
 Written by the BMAD dev agent (Claude), before the fix. Each test drives the
 real single-document path (``DetectionWorker``, the validation screen, the
@@ -78,6 +78,7 @@ T35_TEXT = "Signé : ZÉLVINE TESTAR. Zélvine\nTestar a signé."
 T36_TEXT = "Vorlan Mestrix valide. Vorlène a signé. VORLENE a signé."
 T36B_TEXT = "Vorlan Mestrix valide. Signé : Bélora. Signé : BÊLORA."
 T37_TEXT = "Signé : ZÉLVINE TESTAR. 'Zélvine Testar' a signé."
+T40_TEXT = "Signé : ZÉLVINE TESTAR. Zélvine Testar\u2026 a signé."
 T29_TEXT = (
     "Signé : ZELVINE MÉZOR. Le contrat avec ZELVINE TESTAR. Zélvine Mézor a signé."
 )
@@ -849,6 +850,40 @@ def test_desktop_single_widening_inside_quotation_marks(  # type: ignore[no-unty
     assert "TESTAR" not in output.upper(), output  # expected failure
     p = review.pseudonym("ZELVINE TESTAR")
     assert output == f"Signé : {p}. '{p}' a signé."
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 10.19 v1.19: reproduces « Testar » left before an ellipsis on "
+    "6d87d22; fixed in Task 13.2",
+)
+def test_desktop_single_widening_before_an_ellipsis(  # type: ignore[no-untyped-def]
+    qtbot, main_window, tmp_path, dialogs
+) -> None:
+    """T40 desktop (AC3; the fifth Codex review's P0-1): « Zélvine Testar… »,
+    the row corrected as « ZELVINE TESTAR »: the widening covers « Testar »,
+    and the ellipsis stays."""
+    review = _Review(
+        "single",
+        qtbot,
+        main_window,
+        tmp_path,
+        T40_TEXT,
+        [found_at(T40_TEXT, "ZÉLVINE"), found_at(T40_TEXT, "Zélvine")],
+    )
+    caps = occurrence(T40_TEXT, "ZÉLVINE")
+
+    def drive(r: _Review, record: dict[str, Any]) -> None:
+        pre(len(r.reviews()) == 1, "one row in the review")
+        r.correct(r.row("ZÉLVINE"), "ZELVINE TESTAR", caps)
+        r.accept_pending()
+
+    review.run(drive)
+    output = review.output()
+    assert "TESTAR" not in output.upper(), output  # expected failure
+    p = review.pseudonym("ZELVINE TESTAR")
+    assert output == f"Signé : {p}. {p}\u2026 a signé."
 
 
 # ---------------------------------------------------------------------------
