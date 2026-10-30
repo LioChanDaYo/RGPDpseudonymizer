@@ -1,9 +1,9 @@
 """Story 10.19: a name added ([A]) or corrected ([E]) in the command-line
 review also reaches its forms in capitals, and ``delete-mapping`` by name also
 erases the saved pseudonyms of the name in other capitals (T1-T7, T9-T13,
-T17, T18, T19 CLI, T20, T21 CLI, T22-T25, T28, T30 CLI, T31, T33-T49 CLI),
+T17, T18, T19 CLI, T20, T21 CLI, T22-T25, T28, T30 CLI, T31, T33-T51 CLI),
 and what must not change (G1, G2, G7, G8 CLI, G11-G30, T23's case 2, T44's,
-T45's, T47's and T48's accented cases, T49's case without accents).
+T45's, T47's, T48's and T50's accented cases, T49's case without accents).
 
 Written by the BMAD dev agent (Claude), before the fix. Each test drives the
 real ``gdpr-pseudo process`` or ``delete-mapping`` command through
@@ -173,6 +173,14 @@ T42_CASES = {
         ("ZÉLVINE", "Zélvine"),
         "ZELVINE J-M TESTAR",
     ),
+}
+# T51: (the name in capitals, the name typed) with a bracket, a square
+# bracket or a slash before a word the old step cut
+T51_CASES = {
+    "brackets_in_the_middle": ("MÉLORA (MÉLIME) TESTAR", "Melora (Melime) Testar"),
+    "brackets_at_the_end": ("QUOVANE (MÉLORA)", "Quovane (Mélora)"),
+    "square_brackets": ("QUOVANE [MÉLORA]", "Quovane [Melora]"),
+    "slash": ("QUOVANE/MÉLORA", "Quovane/Melora"),
 }
 # T37: the second name between quotation marks (opening, closing)
 QUOTES = {
@@ -2123,4 +2131,61 @@ def test_delete_mapping_reaches_old_row_with_a_cedilla(
     _pre(old == acute + "LORA VORC" + cedilla + "ANE", "the old saved text")
     left, erased, ids, _ = _old_rows_erased(db, document, "Melora Vorcane")
     assert left == [("Vorlan Mestrix", PERSON)], left
+    assert erased == sorted([ids[(document, PERSON)], ids[(old, PERSON)]])
+
+
+@pytest.mark.parametrize(
+    "typed",
+    [
+        pytest.param(
+            "Melorine (Melavie) Testar",
+            marks=pytest.mark.xfail(
+                strict=True,
+                raises=AssertionError,
+                reason="Story 10.19 v1.27: reproduces the old row cut after a "
+                "bracket, left on 5d110a4; fixed in Task 17.2",
+            ),
+            id="typed_without_accents",
+        ),
+        pytest.param("Mélorine (Mélavie) Testar", id="typed_with_accents"),
+    ],
+)
+def test_delete_mapping_reaches_old_row_cut_after_a_bracket(
+    tmp_path: Path, db: Path, typed: str
+) -> None:
+    """T50 (AC4; the ninth Codex review's P0, QA's DEL-1019-10): v2.2.0 cut
+    « MÉ » from « MÉLORINE » and from « MÉLAVIE » after the « ( », the old
+    title pattern's own bound; the row is erased typed without the accents
+    (expected failure on 5d110a4) and with them (a guard)."""
+    acute = unicodedata.lookup("COMBINING ACUTE ACCENT")
+    document = "MÉLORINE (MÉLAVIE) TESTAR"
+    old = _key_steps(nfd(document), PERSON)
+    _pre(old == acute + "LORINE (" + acute + "LAVIE) TESTAR", "the old saved text")
+    left, erased, ids, _ = _old_rows_erased(db, document, typed)
+    assert left == [("Vorlan Mestrix", PERSON)], left  # expected failure
+    assert erased == sorted([ids[(document, PERSON)], ids[(old, PERSON)]])
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 10.19 v1.27: reproduces the old row cut after a bracket, a "
+    "square bracket or a slash, left on 5d110a4; fixed in Task 17.2",
+)
+@pytest.mark.parametrize("case", list(T51_CASES))
+def test_delete_mapping_reaches_old_row_cut_after_any_bound(
+    tmp_path: Path, db: Path, case: str
+) -> None:
+    """T51 (AC4; QA's DEL-1019-10): v2.2.0 cut « MÉ » after whatever the old
+    title pattern's bound allows before a title word, « ( », « [ » or « / »,
+    leaving the mark there (10.20's sign, read with the same bound); the row
+    is erased with today's row of the name."""
+    document, typed = T51_CASES[case]
+    old = _key_steps(nfd(document), PERSON)
+    _pre(
+        any(unicodedata.combining(char) for char in old) and old != nfd(document),
+        "the old saved text, cut",
+    )
+    left, erased, ids, _ = _old_rows_erased(db, document, typed)
+    assert left == [("Vorlan Mestrix", PERSON)], left  # expected failure
     assert erased == sorted([ids[(document, PERSON)], ids[(old, PERSON)]])
