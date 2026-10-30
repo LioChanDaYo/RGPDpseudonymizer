@@ -1,8 +1,9 @@
 """Story 10.19: a name added ([A]) or corrected ([E]) in the command-line
 review also reaches its forms in capitals, and ``delete-mapping`` by name also
 erases the saved pseudonyms of the name in other capitals (T1-T7, T9-T13,
-T17, T18, T19 CLI, T20, T21 CLI, T22-T25, T28, T30 CLI, T31, T33-T41 CLI),
-and what must not change (G1, G2, G7, G8 CLI, G11-G23, T23's case 2).
+T17, T18, T19 CLI, T20, T21 CLI, T22-T25, T28, T30 CLI, T31, T33-T44 CLI),
+and what must not change (G1, G2, G7, G8 CLI, G11-G27, T23's case 2, T44's
+accented case).
 
 Written by the BMAD dev agent (Claude), before the fix. Each test drives the
 real ``gdpr-pseudo process`` or ``delete-mapping`` command through
@@ -138,6 +139,40 @@ PUNCTUATION = {
     "slash": "/",
     "asterisk": "*",
     "footnote_digit": "1",
+}
+# T42: (the text, the two places found, the correction typed): an initial,
+# a comma, an initial typed without its full stops
+T42_CASES = {
+    "initial": (
+        "Signé : ZÉLVINE J. TESTAR. Zélvine J. Testar a signé.",
+        ("ZÉLVINE", "Zélvine"),
+        "ZELVINE J. TESTAR",
+    ),
+    "double_initial": (
+        "Signé : ZÉLVINE J.-P. TESTAR. Zélvine J.-P. Testar a signé.",
+        ("ZÉLVINE", "Zélvine"),
+        "ZELVINE J.-P. TESTAR",
+    ),
+    "compound_initial": (
+        "Signé : ZÉLVINE J.-M. TESTAR. Zélvine J.-M. Testar a signé.",
+        ("ZÉLVINE", "Zélvine"),
+        "ZELVINE J.-M. TESTAR",
+    ),
+    "comma": (
+        "Signé : TESTAR, ZÉLVINE. Testar, Zélvine a signé.",
+        ("TESTAR", "Testar"),
+        "TESTAR, ZELVINE",
+    ),
+    "typed_without_the_full_stop": (
+        "Signé : ZÉLVINE J. TESTAR. Zélvine J. Testar a signé.",
+        ("ZÉLVINE", "Zélvine"),
+        "ZELVINE J TESTAR",
+    ),
+    "typed_without_the_full_stops": (
+        "Signé : ZÉLVINE J.-M. TESTAR. Zélvine J.-M. Testar a signé.",
+        ("ZÉLVINE", "Zélvine"),
+        "ZELVINE J-M TESTAR",
+    ),
 }
 # T37: the second name between quotation marks (opening, closing)
 QUOTES = {
@@ -1026,6 +1061,41 @@ def test_cli_widening_before_any_punctuation(
     assert written == f"Signé : {p}. {p}{punctuation} a signé."
 
 
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 10.19 v1.21: reproduces « Testar » or « Zélvine » left after an "
+    "initial or a comma on 63da306; fixed in Task 14.2",
+)
+@pytest.mark.parametrize("case", list(T42_CASES))
+def test_cli_widening_reads_the_correction_by_the_same_word_rule(
+    tmp_path: Path, db: Path, case: str
+) -> None:
+    """T42 CLI (AC3; the sixth Codex review's P0-1, QA's LEAK-1019-04): the
+    typed correction is read with the document's word rule, and what lies
+    between two words is the same on both sides (an initial's full stop
+    belongs to the initial): a middle initial (« J. », « J.-P. »,
+    « J.-M. »), a comma, an initial typed without its full stops; nothing of
+    the name is left, and the pseudonym is written twice."""
+    text, found, typed = T42_CASES[case]
+    source, output = _files(tmp_path, ".txt")
+    source.write_text(text, encoding="utf-8")
+    run = _process(
+        source,
+        output,
+        db,
+        [(found[0], PERSON), (found[1], PERSON)],
+        [ENTER, "e"],
+        [typed],
+    )
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    written = _written(output)
+    left = [word for word in ("Testar", "TESTAR", "Zélvine") if word in written]
+    assert not left, written  # expected failure
+    p = _pseudonym(db, typed)
+    assert written == f"Signé : {p}. {p} a signé."
+
+
 # ---------------------------------------------------------------------------
 # AC1, AC5: accents in capitals
 # ---------------------------------------------------------------------------
@@ -1355,6 +1425,60 @@ def test_delete_mapping_reaches_old_row_past_eight_places(
     left, erased, ids, _ = _old_rows_erased(
         db, document, "Melome Melame Melime-Melume Melora"
     )
+    assert left == [("Vorlan Mestrix", PERSON)], left  # expected failure
+    assert erased == sorted([ids[(document, PERSON)], ids[(old, PERSON)]])
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 10.19 v1.21: reproduces the old row of a name cut twice in one "
+    "word, left on 63da306; fixed in Task 14.2",
+)
+def test_delete_mapping_reaches_old_row_with_a_repeated_cut(
+    tmp_path: Path, db: Path
+) -> None:
+    """T43 (AC4; the sixth Codex review's P0-2): v2.2.0 cut « MÉ » twice from
+    « MÉMÉLIE TESTAR », leaving two marks + « LIE TESTAR »; the row is
+    erased with « Memelie Testar », with today's row of that text."""
+    acute = unicodedata.lookup("COMBINING ACUTE ACCENT")
+    document = "MÉMÉLIE TESTAR"
+    old = _key_steps(nfd(document), PERSON)
+    _pre(old == acute + acute + "LIE TESTAR", "the old saved text")
+    left, erased, ids, _ = _old_rows_erased(db, document, "Memelie Testar")
+    assert left == [("Vorlan Mestrix", PERSON)], left  # expected failure
+    assert erased == sorted([ids[(document, PERSON)], ids[(old, PERSON)]])
+
+
+@pytest.mark.parametrize(
+    "typed",
+    [
+        pytest.param(
+            "Clemelie Mezor",
+            marks=pytest.mark.xfail(
+                strict=True,
+                raises=AssertionError,
+                reason="Story 10.19 v1.21: reproduces the old row cut right after "
+                "a letter's own accent, left on 63da306; fixed in Task 14.2",
+            ),
+            id="typed_without_accents",
+        ),
+        pytest.param("Clémélie Mézor", id="typed_with_accents"),
+    ],
+)
+def test_delete_mapping_reaches_old_row_cut_after_an_own_accent(
+    tmp_path: Path, db: Path, typed: str
+) -> None:
+    """T44 (AC4; DEL-1019-07): v2.2.0 cut « MÉ » from « CLÉMÉLIE » right after
+    the « É » of « CLÉ » (its own accent made the word's bound) and from
+    « MÉZOR »: « CLE » + two marks + « LIE », a mark + « ZOR ». The row is
+    erased typed without the accents (expected failure on 63da306) and with
+    them (a guard: 10.20 already reaches it)."""
+    acute = unicodedata.lookup("COMBINING ACUTE ACCENT")
+    document = "CLÉMÉLIE MÉZOR"
+    old = _key_steps(nfd(document), PERSON)
+    _pre(old == "CLE" + acute + acute + "LIE " + acute + "ZOR", "the old saved text")
+    left, erased, ids, _ = _old_rows_erased(db, document, typed)
     assert left == [("Vorlan Mestrix", PERSON)], left  # expected failure
     assert erased == sorted([ids[(document, PERSON)], ids[(old, PERSON)]])
 
@@ -1704,3 +1828,100 @@ def test_delete_mapping_sets_aside_the_accent_beside_a_cut(
     _pre(old == "ZE" + grave + "LVINE " + grave + "ZOR", "the old saved text")
     assert left == [("Vorlan Mestrix", PERSON)]
     assert erased == sorted([ids[(document, PERSON)], ids[(old, PERSON)]])
+
+
+@pytest.mark.parametrize(
+    "text,typed",
+    [
+        (
+            "Signé : ZÉLVINE D'ÉMERINE. Zélvine d'Émerine a signé.",
+            "ZELVINE D'EMERINE",
+        ),
+        (
+            "Signé : ZÉLVINE L'ÉMERINE. Zélvine l'Émerine a signé.",
+            "ZELVINE L'EMERINE",
+        ),
+    ],
+    ids=["d_elision", "l_elision"],
+)
+def test_widening_over_an_elided_word(
+    tmp_path: Path, db: Path, text: str, typed: str
+) -> None:
+    """G24 (AC3; v1.21): « d'Émerine » and « l'Émerine » are one word each (an
+    apostrophe between letters), on both sides: a hyphen after one letter
+    ends a word, an apostrophe does not. Covered whole."""
+    written, p = _widened(tmp_path, db, text, typed)
+    assert written == f"Signé : {p}. {p} a signé."
+
+
+def test_delete_mapping_reaches_old_place_row_with_its_a(
+    tmp_path: Path, db: Path
+) -> None:
+    """G25 (AC4; QA's TEST-1019-07): v2.2.0 saved the place « À VORLAN
+    MÈLORA » with its « À » read with a separate mark and the surname cut;
+    deleting « Vorlan Melora » erases it with today's « VORLAN MÈLORA », as
+    10.20's replay puts the « à » in front of a place."""
+    grave = unicodedata.lookup("COMBINING GRAVE ACCENT")
+    old = _key_steps(nfd("À VORLAN MÈLORA"), LOCATION)
+    _pre(old == "A" + grave + " VORLAN " + grave + "LORA", "the old saved text")
+    _save(
+        db,
+        [
+            ("VORLAN MÈLORA", LOCATION, "Zorbaville"),
+            (old, LOCATION, "Quentreville"),
+            ("Vorlan Mestrix", PERSON, "Quovane Testar"),
+        ],
+    )
+    _pre(len(_names(db)) == 3, "three rows saved")
+    ids = _ids(db)
+    run = _delete(db, "Vorlan Melora")
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    assert _names(db) == [("Vorlan Mestrix", PERSON)]
+    assert _erased_ids(db) == sorted(
+        [ids[("VORLAN MÈLORA", LOCATION)], ids[(old, LOCATION)]]
+    )
+
+
+def test_widening_stops_at_a_number(tmp_path: Path, db: Path) -> None:
+    """G26 (AC3; v1.21): what lies between two words is compared with the
+    correction, so a number and a comma there are never covered:
+    « Zélvine 14, Testar 12 » corrected as « ZELVINE TESTAR » keeps
+    « 14, Testar 12 »."""
+    source, output = _files(tmp_path, ".txt")
+    source.write_text("Note : Zélvine 14, Testar 12.", encoding="utf-8")
+    run = _process(
+        source,
+        output,
+        db,
+        [("Zélvine", PERSON)],
+        [ENTER, "e"],
+        ["ZELVINE TESTAR"],
+    )
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    p = _pseudonym(db, "ZELVINE TESTAR")
+    assert _written(output) == f"Note : {p} 14, Testar 12."
+
+
+@pytest.mark.parametrize(
+    "text,tail",
+    [
+        (
+            "Signé : ZÉLVINE TESTAR. Zélvine, Testar a signé.",
+            "{p}, Testar a signé.",
+        ),
+        (
+            "Signé : ZÉLVINE TESTAR. Merci Zélvine. Testar a signé.",
+            "Merci {p}. Testar a signé.",
+        ),
+    ],
+    ids=["comma", "sentence_full_stop"],
+)
+def test_widening_never_over_a_comma_or_a_full_stop_the_correction_lacks(
+    tmp_path: Path, db: Path, text: str, tail: str
+) -> None:
+    """G27 (AC3; v1.21, QA's r3 probe « added_comma »): what lies between two
+    words is what the correction has there; a comma or a sentence's full
+    stop the correction does not hold is never covered, so the text keeps
+    it and the next word."""
+    written, p = _widened(tmp_path, db, text, "ZELVINE TESTAR")
+    assert written == f"Signé : {p}. " + tail.format(p=p)
