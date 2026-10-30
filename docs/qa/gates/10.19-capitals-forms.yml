@@ -1,33 +1,33 @@
 schema: 1
 story: '10.19'
 story_title: 'Capitals in Hand-Added Names and Corrections'
-scope: 'Re-check after Task 15: PR #112 at head c2379c4 on main 097a12c. Rulings: DEL-1019-08 and the SM''s « Drlime » regression at 46202a3 (« MÉLIME »''s old row erased) are regressions to fix. Commits reviewed: SM v1.23 04a0529 (_cut_places offers candidate cuts; v2.2.0''s title step, replayed, decides), tests first 0a3a54e (T45, T46 strict xfail; guards T45 accented, G28 x2, G29), fix 98b4651 (mapping_repository.py only), record c2379c4. Round 7 was QA''s PASS 100 at 46202a3 (b4afa48). Lionel''s rule: realistic findings are fixed now, findings that need exotic input go to a follow-up. The eighth read-only Codex review (01a18c32) ran in parallel; QA read it after its own probes had run. Earlier evidence is kept under evidence_round7 to evidence_round1. QA folder: rgpd-analysis/r1019/qa (headpkg8, probes test_q19_r8*.py, olddbs *_r8_* and v220_r8b_*, mut8/, logs8/).'
+scope: 'Re-check after Task 16: PR #112 at head 5d110a4 on main 097a12c. Commits reviewed: SM v1.25 6a2cba9, tests first 8e0e632 (T47, T48, T49 strict xfail; guards T47 and T48 accented, T49 without accents, G30), fix 40588e4 (mapping_repository.py only), record 5d110a4. Round 8 was QA''s CONCERNS 90 at c2379c4 (eafe8c6). Lionel''s rule: realistic findings are fixed now, findings that need exotic input go to a follow-up. The ninth read-only Codex review (01a18cbb) ran in parallel; QA read it after its own probes had run. Earlier evidence is kept under evidence_round8 to evidence_round1. QA folder: rgpd-analysis/r1019/qa (headpkg9, headpkg9p, probes test_q19_r9*.py, olddbs v220_r9_* and v220_r9p_*, mut9/, logs9/).'
 gate: CONCERNS
-status_reason: 'Both ruled regressions are fixed on real output (QA''s v2.2.0 and 43041e9 rows, 34/34), and everything else holds: the SM''s class checks at 0, the v1.21 exactness set (0 lost against 63da306 and 6d87d22, 0 touched), QA''s probe sets and end-to-end check, the regression sets, clean databases, G2, CI green on attempt 1. One check does not hold: on the wide seed set (v1.25 script) the head loses 64 rows against 63da306 and 4,506 against 6d87d22, every one an old row with « MAITRE » inserted after a cut or after the name. QA reproduced it on real v2.2.0 rows as DEL-1019-09 (the eighth Codex review''s P0): a regression against 6d87d22 since 63da306; « MAÎTRE » before the name is fixed, inside or after a capitals name with no comma is rare but not impossible. Graded medium because the orchestrator ruled the last regression of this kind one to fix; if ruled exotic and accepted, low and PASS 100.'
+status_reason: 'DEL-1019-09 and TEST-1019-08 are fixed on real output (44/44 « MAÎTRE » rows in every spelling; G30 kills the no-C mutant). The wide seed set loses no row against c2379c4, 63da306 or 6d87d22 (2 touched rows, the same on every tree, from an exotic name of title fragments only); T49 erases nothing of another name (the SM''s class checks 0 touched, QA''s 42 other names); the place''s A at the row''s end is safe (identical output to the SM''s prototype choice); probe sets, e2e, earlier stories, AC13, clean databases, G2 and CI agree. The ninth Codex review''s P0 is reproduced as DEL-1019-10: a part glued after « ( », « [ » or « / » starting with a title fragment (« MÉLORA (MÉLIME) TESTAR »); not a regression (every head since 6d87d22 misses it; main erases none); rare but realistic in QA''s reading, so medium under Lionel''s rule; if ruled exotic, low and PASS 100.'
 reviewer: 'Quinn (Test Architect)'
-updated: '2026-10-30T10:49:38Z'
+updated: '2026-10-30T13:19:36Z'
 
 waiver: { active: false }
 
 merge_blockers: []
 
 merge_notes:
-  - 'The orchestrator rules on DEL-1019-09 (a regression against 6d87d22; QA grades it medium) and the eighth Codex review asks for changes (AC9). QA never merges.'
+  - 'The orchestrator rules on DEL-1019-10 (not a regression; QA grades it medium as rare but realistic) and the ninth Codex review asks for changes (AC9). QA never merges.'
   - 'This gate commit (docs only) starts its own CI run on the PR.'
 
 top_issues:
-  - id: 'DEL-1019-09'
+  - id: 'DEL-1019-10'
     severity: medium
-    finding: 'An old capitals row holding « MAÎTRE » glued after a cut or trailing the name is missed by the name typed without its accents: v2.2.0''s « QUOVÔME MAÎTRE TESTAR » (QUOVO + U+0302 + MAI + U+0302 + TRE TESTAR) by « Quovome Testar », « BÉLORA MÉLORA MAÎTRE » by « Belora Melora »; « ÉLORIA MÈLORA MAÎTRE » by every spelling. Today''s row goes and the command reports the name anonymous. 6d87d22 erased them; 63da306 and the head miss them; main erases none. Wide seed set: 64 rows lost against 63da306, 4,506 against 6d87d22, all with an inserted MAITRE (414 on plain names). « MAÎTRE » before the name is fixed. The eighth Codex review''s P0.'
-    suggested_action: 'Orchestrator: rule. If to fix, _cut_places tries an inserted MAITRE after a cut and at the row''s end too, with a guard on each shape and the wide set rerun (0 lost against 6d87d22).'
-    refs: ['gdpr_pseudonymizer/data/repositories/mapping_repository.py', 'rgpd-analysis/r1019/qa/probes/test_q19_r8b.py', 'rgpd-analysis/r1019/qa/logs8/cmpwide_headpkg8.txt']
+    finding: 'An old row whose name has a part glued after « ( », « [ » or « / » starting with a title fragment is missed: v2.2.0 saves « MÉLORA (MÉLIME) TESTAR » as a lone U+0301 + « LORA ( » + a lone U+0301 + « LIME) TESTAR »; the name typed without accents (and, for « QUOVANE (MÉLORA) », with them) erases today''s row, reports the name anonymous and keeps the old row. 10 of QA''s 20 spellings miss on the head, c2379c4, 63da306 and 6d87d22; main misses 16. « QUOVANE TESTAR (NÉE MÉLORA) » works (the cut follows a space). The ninth Codex review''s P0. Real documents: « NOM (PRÉNOM) » lists and « Mé- » given names are common; the old row needs the bracketed text added by hand as one name in v2.2.0.'
+    suggested_action: 'Orchestrator: rule. If to fix, bound_before also accepts a cut after « ( », « [ » and « / » in the row, with a guard per bracket and the other-name checks rerun.'
+    refs: ['gdpr_pseudonymizer/data/repositories/mapping_repository.py', 'rgpd-analysis/r1019/qa/probes/test_q19_r9p.py']
     suggested_owner: po
-  - id: 'TEST-1019-08'
-    severity: low
-    finding: 'No committed test cuts at a « Ç » (the C in _MARKED_LETTERS): QA''s mutant without it survives. A real name can hold one (« FRANÇOIS »).'
-    suggested_action: 'A guard with a « Ç » cut.'
-    refs: ['tests/unit/test_cli_capitals_forms.py', 'rgpd-analysis/r1019/qa/mut8']
-    suggested_owner: dev
+  - id: 'OBS-1019-06'
+    severity: info
+    finding: 'A capitals title lost whole leaves an old row with no mark (v2.2.0 saves « MME VORLAN » as « VORLAN », « DR LIME » as « LIME »); « Mme Vorlan » and « Dr Lime » keep it on every head and on main, « Vorlan » and « Lime » erase it. The wide set''s 502 rows typed with a title word. Common in real documents; but a bare surname row may be another person''s (« M. Vorlan »).'
+    suggested_action: 'PO decision, outside this story.'
+    refs: ['rgpd-analysis/r1019/qa/probes/test_q19_r9.py']
+    suggested_owner: po
   - id: 'CI-FLAKY-01'
     severity: low
     finding: 'The macOS timing test, flaky in Task 7; no failure since.'
@@ -138,10 +138,16 @@ resolved_issues:
   - id: 'SM-1019-DRLIME'
     resolved_in: '98b4651'
     note: 'Round 8: the SM''s regression at 46202a3, « Drlime » erasing « MÉLIME »''s old row; QA''s « DRLIME », « Mlime », « Drlime Testar » too (T46, G28, G29).'
+  - id: 'DEL-1019-09'
+    resolved_in: '40588e4'
+    note: 'Round 9: « MAÎTRE » glued after a cut or after the name, every spelling; T49''s whole title word (T47, T48, T49).'
+  - id: 'TEST-1019-08'
+    resolved_in: '8e0e632'
+    note: 'Round 9: G30 kills the no-C mutant.'
 
 
 quality_score: 90
-expires: '2026-11-13T10:49:38Z'
+expires: '2026-11-13T13:19:36Z'
 
 qa_process_notes:
   - 'Every old database opened as a copy only: the PO''s six (po11/dbs, checksums unchanged after the run; its maker step left out) and QA''s twelve (r1019/qa/olddbs).'
@@ -153,8 +159,34 @@ qa_process_notes:
   - 'Re-check after Task 13: every old database opened as a copy only (QA''s new row olddbs/v220_r6_memelie.db, written by v2.2.0, and cost/marked10k.db, built by QA); the SM''s class checks run unchanged; QA read the sixth Codex review''s final message (session 01a18a58) after its own probes had run and checked its cases on real output; no QA process left running.'
   - 'Re-check after Task 14: every old database opened as a copy only (QA''s new rows olddbs/v220_r7_*, written by v2.2.0); the SM''s class checks run unchanged; QA read the seventh Codex review''s final message (session 01a18bbc) after its own probes had run and checked its cases on real output; no QA process left running.'
   - 'Re-check after Task 15: every old database opened as a copy only (QA''s new rows olddbs/*_r8_*, by v2.2.0 and 43041e9, and v220_r8b_*); the SM''s class checks run unchanged; compare_seeds.py and exact_v123.py changed during QA''s run (v1.25), so QA reran the head''s wide set with the current script; QA read the eighth Codex review''s final message (session 01a18c32) after its own probes had run and checked its case on real output; no QA process left running.'
+  - 'Re-check after Task 16: every old database opened as a copy only (QA''s new rows olddbs/v220_r9_* and v220_r9p_*, by v2.2.0); the SM''s class checks run unchanged; compare_seeds.py and exact_v123.py changed during QA''s run (13:43, 13:58), so QA reran the head and c2379c4 and read every tree with the current exact_v123.py; QA started no Codex process and read the ninth review''s final message (session 01a18cbb) after its own probes had run; no QA process left running.'
 
 evidence:
+  tests_reviewed: 120
+  risks_identified: 2
+  environment: 'Windows, the main Poetry environment, .bat runners through cmd.exe, USERPROFILE and HOME = r1019/qa/home; packages from git archive (head 5d110a4 as headpkg9, headpkg9p = the head with only MAITRE at the row''s end, c2379c4, 63da306, 6d87d22, main 097a12c). The .gdpr-pseudo.yaml in the user profile not touched. Nothing under held_out/, final_exam/ or tests/accuracy/ opened. Invented names only. No Codex, Forge, Anvil or Cato from QA.'
+  del_1019_09: 'test_q19_r9.py, v2.2.0 rows, each name typed five ways: 44/44 at the head (10 fail at c2379c4, the names typed without accents). QUOVÔME MAÎTRE TESTAR, QUÉRÔME MAÎTRE TESTAR (glued after a cut), BÉLORA MÉLORA MAÎTRE, ÉLORIA MÈLORA MAÎTRE, MÉLORA VORLAN MAÎTRE (after the name), MAÎTRE BÉLORA MÉLORA, ELORIA-MELORA MAÎTRE MME VORLAN (T49''s shape), MÉLORA VORÇANE (G30''s shape). test_q19_r8 34/34, r8b 15/15.'
+  exactness: 'Wide set (300 47 wide, 1,152 cases; compare_seeds.py of 13:43 and exact_v123.py of 13:58, the head and c2379c4 rerun on the first, the head byte-identical): head 159,912 found, 2 touched; unfound expected 51,026 gap, 36,556 small letters, 3,024 à and Maître together, 502 typed with a title word, 0 other. Against c2379c4 0 lost, 6,912 extra all Q3; 63da306 0 lost, 17,166 extra; 6d87d22 0 lost, 11,934 extra. The 2 touched rows are the same on every tree: the old row of « Médr » (title fragments only) erased by « Medr » (exotic, newly in the sample). v1.21 set identical to c2379c4; 0 lost against 63da306 and 6d87d22. class_delete_long V123WIDE=1 23,532 rows, 0 missed (902 gap), 0 touched.'
+  t49_other_names: 'The SM''s class checks all 0 touched (delete 28, sub 66, typed 616, typed2 and typed3 0/0 with 84 and 115 gap, delete_long 23,846 rows 0/0 with 777 gap; join, join_all, caps, desk, desk2, add, leak2 0; unjoined identical to c2379c4). QA''s 42 other-name cases erase nothing at the head (the one exception on every head, « Quovomaitre Testar », has the old row''s own letters); QA''s today''s rows: titles typed (« Mme Vorlan », « Dr Lime », « Me Lora », « Maître Testar ») erase nothing, as at c2379c4.'
+  test_1019_08: 'G30 kills QA''s mutant K2 (no C in _MARKED_LETTERS); QA''s MÉLORA VORÇANE probes catch it too.'
+  place_a_at_row_end: 'Safe: read only after a space as a place row''s last word, the letters before it still the typed name''s. headpkg9p (MAITRE only, the SM''s prototype) byte-identical on the wide and v1.21 sets; QA''s other places erase nothing. Untested: mutant N4 survives. v2.2.0''s own place rows ending « À » keep U+0300 and are reached by neither (every head; a hand-added place ending « À », exotic).'
+  ninth_codex_review: 'Session 01a18cbb (read-only), one P0, reproduced by QA (test_q19_r9p.py; v2.2.0 rows) on the head, c2379c4, 63da306, 6d87d22 and main: DEL-1019-10.'
+  probe_sets: 'Counts and failing cases identical to c2379c4: test_q19_real 61/62 (K); r2 181; r2b 58; r2c 1/2; old 41; r3 106/107; r3b 20; r3c 9/13 (backlog gap); r3s 10; r4 3; r4c 21; r5 10; r6 27; r6c 7; r7 25; r7c 5; r8 34; r8b 15; po11 20 passed. class_e2e19 97 clear, 16 wrong, every place identical to c2379c4, nothing worse than main.'
+  no_regression: '10.15 (57), 10.17 (95), 10.18 (35), 10.20 (639): every outcome identical to c2379c4. 10.20''s clean digest a630e965c52cd9cb identical to main. clean_delete.py 0 differences, 156 beyond, digest f8a1cd0cfeb87de4.'
+  g2: 'wt_8e0e632 (product = c2379c4''s): --runxfail 3 failed at the dev''s lines (:1577 T47, :1615 T48, :1653 T49), AssertionError, no PRE; marked 117 passed, 3 xfailed, one process and -n 4; 40588e4 removes only the three markers.'
+  mutants: '11 in r1019/qa/mut9 (base 630 committed pass). Caught: any letter marked, no C (G30), a bound without a mark (10), a title cut with spaces only (2), without spaces only (7), inserted words after a space only (T47), no inserted word at the row''s end (T48), no empty set (T49), no place A (the place-row test). Survive: a bound always allowed (equivalent); only MAITRE at the row''s end (no difference on any sample).'
+  cost: 'Same run: QA''s 9,935 old marked rows, delete-mapping by name 0.39-0.45 s against 0.38-0.45 s at c2379c4; ordinary 10,002 rows 0.25-0.45 s, the same; QA''s [E] cost probe 0.26-0.28 s.'
+  ci:
+    8e0e632: '41049543462, attempt 1: "3266 passed, 3 xfailed" x3; Windows "3116 passed, 3 skipped, 3 xfailed".'
+    40588e4: '41051693209, attempt 1: "3269 passed" x3; Windows "3119 passed, 3 skipped".'
+    5d110a4: '41053756945, attempt 1: "3269 passed" x3; Windows "3119 passed, 3 skipped". Lint green on all three; Code Quality green at the head.'
+  codex_rule: 'Nine Codex sessions on rgpd-wt-s1019, all read-only (the latest 01a18cbb, 2026-10-30 13:14); no workspace-write session; no Forge entry; QA started none; the four new commits carry both attribution lines and no skip-CI marker.'
+  trace:
+    ac_covered: [1, 2, 3, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15]
+    ac_gaps: [4]
+    notes: 'AC4: DEL-1019-10 (a part glued after a bracket or a slash). AC9: the ninth Codex review asks for changes.'
+
+evidence_round8:
   tests_reviewed: 113
   risks_identified: 2
   environment: 'Windows, the main Poetry environment, .bat runners through cmd.exe, USERPROFILE and HOME = r1019/qa/home; packages from git archive (head c2379c4 as headpkg8, 46202a3, 63da306, 6d87d22, main 097a12c). The .gdpr-pseudo.yaml in the user profile not touched. Nothing under held_out/, final_exam/ or tests/accuracy/ opened. Invented names only. No Codex, Forge, Anvil or Cato from QA.'
