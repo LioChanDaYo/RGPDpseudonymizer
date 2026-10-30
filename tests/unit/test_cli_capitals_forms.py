@@ -1,9 +1,9 @@
 """Story 10.19: a name added ([A]) or corrected ([E]) in the command-line
 review also reaches its forms in capitals, and ``delete-mapping`` by name also
 erases the saved pseudonyms of the name in other capitals (T1-T7, T9-T13,
-T17, T18, T19 CLI, T20, T21 CLI, T22-T25, T28, T30 CLI, T31, T33-T46 CLI),
-and what must not change (G1, G2, G7, G8 CLI, G11-G29, T23's case 2, T44's
-and T45's accented cases).
+T17, T18, T19 CLI, T20, T21 CLI, T22-T25, T28, T30 CLI, T31, T33-T49 CLI),
+and what must not change (G1, G2, G7, G8 CLI, G11-G30, T23's case 2, T44's,
+T45's, T47's and T48's accented cases, T49's case without accents).
 
 Written by the BMAD dev agent (Claude), before the fix. Each test drives the
 real ``gdpr-pseudo process`` or ``delete-mapping`` command through
@@ -1517,6 +1517,143 @@ def test_delete_mapping_never_reaches_another_names_old_row_through_a_consonant(
     assert _erased_ids(db) == [ids[("Drlime", PERSON)]]
 
 
+def _inserted_rows_erased(
+    db: Path, today: str, source: str, typed: str
+) -> tuple[list[tuple[str, str]], list[str], dict[tuple[str, str], str], str]:
+    """Saves today's row of ``today``, the row the old steps saved from
+    ``source`` (the name with a word 10.20's replay inserts) read with
+    separate marks, and ('Vorlan Mestrix', PERSON); deletes ``typed``.
+    Returns the names left, the erased ids, the ids and the old text."""
+    old = _key_steps(nfd(source), PERSON)
+    _save(
+        db,
+        [
+            (today, PERSON, VM),
+            (old, PERSON, "Zorbalix"),
+            ("Vorlan Mestrix", PERSON, "Quovane Testar"),
+        ],
+    )
+    _pre(len(_names(db)) == 3, "three rows saved")
+    ids = _ids(db)
+    run = _delete(db, typed)
+    _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
+    return _names(db), _erased_ids(db), ids, old
+
+
+@pytest.mark.parametrize(
+    "typed",
+    [
+        pytest.param(
+            "Quovome Testar",
+            marks=pytest.mark.xfail(
+                strict=True,
+                raises=AssertionError,
+                reason="Story 10.19 v1.25: reproduces the old row with « MAÎTRE » glued after a cut, left on c2379c4; "
+                "fixed in Task 16.2",
+            ),
+            id="typed_without_accents",
+        ),
+        pytest.param("Quovôme Testar", id="typed_with_accents"),
+    ],
+)
+def test_delete_mapping_reaches_old_row_with_maitre_glued_after_a_cut(
+    tmp_path: Path, db: Path, typed: str
+) -> None:
+    """T47 (AC4; the eighth Codex review's P0, DEL-1019-09): the old steps'
+    row of « QUOVÔME MAÎTRE TESTAR » read with separate marks, « QUOVO » + a
+    mark + « MAI » + a mark + « TRE TESTAR » (« ME » cut, the inserted
+    « MAÎTRE » glued to the mark), is erased with today's « QUOVÔME
+    TESTAR », typed without the accents (expected failure on c2379c4, a
+    regression from 6d87d22) and with them (a guard)."""
+    circumflex = unicodedata.lookup("COMBINING CIRCUMFLEX ACCENT")
+    today = "QUOVÔME TESTAR"
+    left, erased, ids, old = _inserted_rows_erased(
+        db, today, "QUOVÔME MAÎTRE TESTAR", typed
+    )
+    _pre(
+        old == "QUOVO" + circumflex + "MAI" + circumflex + "TRE TESTAR",
+        "the old saved text",
+    )
+    assert left == [("Vorlan Mestrix", PERSON)], left  # expected failure
+    assert erased == sorted([ids[(today, PERSON)], ids[(old, PERSON)]])
+
+
+@pytest.mark.parametrize(
+    "typed",
+    [
+        pytest.param(
+            "Melora Vorlan",
+            marks=pytest.mark.xfail(
+                strict=True,
+                raises=AssertionError,
+                reason="Story 10.19 v1.25: reproduces the old row ending with « MAÎTRE », left on c2379c4; "
+                "fixed in Task 16.2",
+            ),
+            id="typed_without_accents",
+        ),
+        pytest.param("Mélora Vorlan", id="typed_with_accents"),
+    ],
+)
+def test_delete_mapping_reaches_old_row_ending_with_maitre(
+    tmp_path: Path, db: Path, typed: str
+) -> None:
+    """T48 (AC4; found measuring v1.25, a regression from 6d87d22): the old
+    steps' row of « MÉLORA VORLAN MAÎTRE », a mark + « LORA VORLAN MAI » + a
+    mark + « TRE » (the inserted word kept after the name's last word), is
+    erased with today's « MÉLORA VORLAN », typed without the accents
+    (expected failure on c2379c4) and with them (a guard)."""
+    acute = unicodedata.lookup("COMBINING ACUTE ACCENT")
+    circumflex = unicodedata.lookup("COMBINING CIRCUMFLEX ACCENT")
+    today = "MÉLORA VORLAN"
+    left, erased, ids, old = _inserted_rows_erased(
+        db, today, "MÉLORA VORLAN MAÎTRE", typed
+    )
+    _pre(
+        old == acute + "LORA VORLAN MAI" + circumflex + "TRE",
+        "the old saved text",
+    )
+    assert left == [("Vorlan Mestrix", PERSON)], left  # expected failure
+    assert erased == sorted([ids[(today, PERSON)], ids[(old, PERSON)]])
+
+
+@pytest.mark.parametrize(
+    "typed",
+    [
+        pytest.param(
+            "Éloria-Mèlora Mmé Vorlan",
+            marks=pytest.mark.xfail(
+                strict=True,
+                raises=AssertionError,
+                reason="Story 10.19 v1.25: reproduces the old row that lost a whole title word, left on c2379c4; "
+                "fixed in Task 16.2",
+            ),
+            id="typed_with_accents",
+        ),
+        pytest.param("Eloria-Melora Mme Vorlan", id="typed_without_accents"),
+    ],
+)
+def test_delete_mapping_reaches_old_row_that_lost_a_whole_title_word(
+    tmp_path: Path, db: Path, typed: str
+) -> None:
+    """T49 (AC4; found measuring v1.25, a regression from 6d87d22): the old
+    steps' row of « ELORIA-MELORA MAÎTRE MME VORLAN », « ELORIA-MELORA MAI »
+    + a mark + « TRE VORLAN » (« MME » lost whole, no letter of the name
+    accented), is erased with today's « ÉLORIA-MÈLORA MMÉ VORLAN », typed
+    with the accents (expected failure on c2379c4) and without them (a
+    guard)."""
+    circumflex = unicodedata.lookup("COMBINING CIRCUMFLEX ACCENT")
+    today = "ÉLORIA-MÈLORA MMÉ VORLAN"
+    left, erased, ids, old = _inserted_rows_erased(
+        db, today, "ELORIA-MELORA MAÎTRE MME VORLAN", typed
+    )
+    _pre(
+        old == "ELORIA-MELORA MAI" + circumflex + "TRE VORLAN",
+        "the old saved text",
+    )
+    assert left == [("Vorlan Mestrix", PERSON)], left  # expected failure
+    assert erased == sorted([ids[(today, PERSON)], ids[(old, PERSON)]])
+
+
 # ---------------------------------------------------------------------------
 # Guards (pass on the unfixed and the fixed code)
 # ---------------------------------------------------------------------------
@@ -1996,5 +2133,21 @@ def test_delete_mapping_reaches_old_row_of_a_title_run(
     old = _key_steps(nfd(document), PERSON)
     _pre(old == acute + acute + " TESTAR", "the old saved text")
     left, erased, ids, _ = _old_rows_erased(db, document, "Meme Testar")
+    assert left == [("Vorlan Mestrix", PERSON)], left
+    assert erased == sorted([ids[(document, PERSON)], ids[(old, PERSON)]])
+
+
+def test_delete_mapping_reaches_old_row_with_a_cedilla(
+    tmp_path: Path, db: Path
+) -> None:
+    """G30 (AC4; QA's TEST-1019-08): v2.2.0 saved « MÉLORA VORÇANE » cut at
+    « MÉ », the « Ç » keeping its cedilla as a separate mark; deleting
+    « Melora Vorcane » erases it with today's row of that text."""
+    acute = unicodedata.lookup("COMBINING ACUTE ACCENT")
+    cedilla = unicodedata.lookup("COMBINING CEDILLA")
+    document = "MÉLORA VORÇANE"
+    old = _key_steps(nfd(document), PERSON)
+    _pre(old == acute + "LORA VORC" + cedilla + "ANE", "the old saved text")
+    left, erased, ids, _ = _old_rows_erased(db, document, "Melora Vorcane")
     assert left == [("Vorlan Mestrix", PERSON)], left
     assert erased == sorted([ids[(document, PERSON)], ids[(old, PERSON)]])
