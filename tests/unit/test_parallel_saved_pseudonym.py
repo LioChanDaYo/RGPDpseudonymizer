@@ -94,13 +94,6 @@ NOW_ANOTHER_NAMES = (
 )
 
 
-XFAIL_REVIEW_1 = pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.22, Codex review 1: not fixed yet",
-)
-
-
 @pytest.fixture(autouse=True)
 def _settings(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     """No user or project settings file is read or written."""
@@ -687,7 +680,6 @@ def _import(source: str, target: str) -> Any:
     )
 
 
-@XFAIL_REVIEW_1
 def test_import_error_logs_no_name(tmp_path: Path) -> None:
     """T10 (P0, AC4): a row that `import-mappings` fails to save is logged
     by its type, never by its name."""
@@ -713,7 +705,6 @@ def test_import_error_logs_no_name(tmp_path: Path) -> None:
     assert errors[0][2].get("entity_type") == PERSON
 
 
-@XFAIL_REVIEW_1
 def test_deletion_behind_a_held_lock_keeps_its_record(tmp_path: Path) -> None:
     """T11 (P1, AC3): after `delete-mapping` has deleted the row, another
     connection takes the write lock and holds it 6 s from the moment the
@@ -784,7 +775,6 @@ def test_deletion_behind_a_held_lock_keeps_its_record(tmp_path: Path) -> None:
     assert result.exit_code == 0
 
 
-@XFAIL_REVIEW_1
 def test_import_behind_a_held_lock_completes(tmp_path: Path) -> None:
     """T12 (P1, QA's LOCK-1022-01; AC3): before `import-mappings` saves its
     first row, another connection takes the target's write lock and holds it

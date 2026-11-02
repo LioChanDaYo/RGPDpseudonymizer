@@ -229,7 +229,12 @@ def _secure_delete_on_connect(
 
 def _create_engine(db_path: str) -> Engine:
     """Create an engine that overwrites deleted data on every connection."""
-    engine = create_engine(f"sqlite:///{db_path}")
+    # Story 10.22: every connection waits for another program's write as
+    # long as a document waits for another document's (the busy timeout)
+    engine = create_engine(
+        f"sqlite:///{db_path}",
+        connect_args={"timeout": PSEUDONYM_LOCK_BUSY_TIMEOUT_SECONDS},
+    )
     event.listen(engine, "connect", _secure_delete_on_connect)
     return engine
 
