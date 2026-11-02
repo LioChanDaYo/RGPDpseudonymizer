@@ -1,17 +1,18 @@
 schema: 1
 story: '10.21'
 story_title: 'One Forms Rule for Names of Two Words or More'
-scope: 'Re-check 4 after Task 9: PR #114 at head 8292133 on main 0be4073. Commits reviewed: story v3.3 1c70d42, tests first 2b25ea5 (K6, strict xfail), fix f4a235b (a row P9''s replay adds is kept only if it is a _variant_of the typed name or an old row, an accent mark kept apart), record 8292133. Round 3 was QA''s PASS at 81ba62b (e9f4e3a); Codex review 3 then found one P0 (« Paul André » erasing « MAITRE Paul André »). The orchestrator''s stopping rule: findings in the class of legacy title rows, « Maitre » as a name word and v2.2.0 decomposed rows go to the Backlog unless a name is left in clear. Codex review 4 runs in parallel; QA did not read it. QA folder: rgpd-analysis/r1021/qa (tree-2b25ea5, tree-8292133, probes/, logs/, mut4/).'
+scope: 'Re-check 5 (last) after Task 10: PR #114 at head 74b956e on main 0be4073. Commits reviewed: story v3.4 c3a2f22, tests first e20974d (K7, strict xfail), fix 49ea628 (a row P9''s replay adds is read by _variant_of with its own type), record 74b956e. Round 4 was QA''s PASS at 8292133 (56eea8e); Codex review 4 then found one P0 (a PERSON replay erasing a LOCATION « Du Pré »). The orchestrator''s final stopping rule: a finding that leaves no name in clear goes to the Backlog with its realism and the story ships; only a name left in clear, or an erasure a real user would plausibly hit, reopens it. Codex review 5 runs in parallel; QA did not read it. QA folder: rgpd-analysis/r1021/qa (tree-e20974d, tree-74b956e, probes/, logs/, mut5/).'
 gate: PASS
-status_reason: 'Codex review 3''s case is fixed on the real delete-mapping: deleting « Quovane Mérand » keeps a modern « MAITRE Quovane Mérand », as on main; K1 to K5 and « de Vorlanne » behave as at 81ba62b. Real text, the 1,699-name delete, Lionel''s examples, finding 2 and the probe sets are identical to 81ba62b; CI green. One more row of the stopping rule''s class (Backlog, no name in clear) and one low test note; none a blocker.'
+status_reason: 'Codex review 4''s case is fixed on the real delete-mapping: deleting « Du Prelis » keeps the LOCATION « Du Prélis », as on main. Every other probe case (K1 to K6, BKL-1021-01''s R3e, « de Vorlanne », Lionel''s examples, the review paths), real text, the 1,699-name delete, finding 2 and the probe sets are identical to 8292133. No name is left in clear anywhere QA looked; every open note is low or Backlog.'
 reviewer: 'Quinn (Test Architect)'
-updated: '2026-11-02T19:21:03Z'
+updated: '2026-11-02T20:59:41Z'
 
 waiver: { active: false }
 
 merge_blockers: []
 
 merge_notes:
+  - 'Under the orchestrator''s final stopping rule, every open note below leaves no name in clear and is low or Backlog; none is an erasure a real user would plausibly hit.'
   - 'QA never merges. The merge waits for the read-only Codex review 2 (AC9) and for Lionel.'
   - 'This gate commit (docs only) starts its own CI run on the PR.'
 
@@ -54,6 +55,9 @@ top_issues:
     suggested_owner: po
 
 resolved_issues:
+  - id: 'CODEX-4-P0'
+    resolved_in: '49ea628'
+    note: 'Codex review 4: deleting « Du Prelis » no longer erases a LOCATION « Du Prélis » (one word once its preposition is set aside, another accent); K7; QA''s probes R4, R4b, R4d.'
   - id: 'CODEX-3-P0'
     resolved_in: 'f4a235b'
     note: 'Codex review 3: deleting « Quovane Mérand » no longer erases a modern « MAITRE Quovane Mérand » (K6; QA''s probes R3, R3b; R3c and R3d as main or by the rule).'
@@ -68,6 +72,13 @@ resolved_issues:
     note: 'A person''s « de Vorlanne », « Du Prelis » is a name of two words: their accent variants are erased (K4 x2; QA''s probes G7p, G7q, C4).'
 
 evidence:
+  round5:
+    g2_e20974d: '19 passed, 1 xfailed (marker on); --runxfail: K7 fails at its # expected failure line (:657), 0 PRE; 49ea628 removes only that marker in tests/'
+    codex_review_4: 'Real delete-mapping, 0be4073 / 8292133 / 74b956e. R4 (PERSON « Du Prelis », PERSON « Du Prélis », LOCATION « Du Prélis », delete « Du Prelis »): LOCATION kept / erased / kept. R4d (LOCATION « Du Prelis », LOCATION « Du Prélis », PERSON « Du Prélis »): the LOCATION « Du Prélis » kept / erased / kept; the PERSON « Du Prélis », a two-word variant for its type, erased (delete by name reads each row with its type; Ex5''s accepted reach). R4b: « à Du Prélis » and « Saint Prélis » kept on all three. R4c (« Quovane Zórbal », PERSON and LOCATION, two words for both types): erased on the head, by the rule.'
+    unchanged_since_8292133: 'All 116 other probe results identical (K1 to K6 shapes, R3e = BKL-1021-01, G7q « de Vorlanne », Lionel''s nine examples, review paths, finding-2 shapes). Real text: places identical (0 dropped, 708 added against main). 1,699-name delete: identical (181 added, 0 dropped). r230rel: nothing in clear. Probe sets 10.15 to 10.20: failure sets identical to round 3.'
+    mutants: 'S01 (the replay reads the added row with the originating row''s type): killed by K7.'
+    cost: 'delete-mapping, 3 variants at 10k rows: 0.06 s -> 0.34 s; no variant unchanged; search within noise.'
+    ci_head: '74b956e: Code Quality green; Test Matrix rerun in progress after the known Windows socket flake (test_serve_refuses_foreign_host_and_origin, WinError 10053), the coordinator''s reading; 49ea628 green at attempt 1 (3295 passed; Windows 3145 passed, 3 skipped).'
   round4:
     g2_2b25ea5: '18 passed, 1 xfailed (marker on); --runxfail: K6 fails at its # expected failure line (:631), 0 PRE; f4a235b removes only that marker in tests/'
     codex_review_3: 'Real delete-mapping, 0be4073 / 81ba62b / 8292133. R3 (« Quovane Mérand », decomposed « Maître Quovane Mérand », modern « MAITRE Quovane Mérand », delete « Quovane Mérand »): MAITRE kept / erased / kept. R3b (modern « Maitre Quovane Mérand », delete « Quovane Merand »): nothing found / erased / kept. R3c (the variants and the damaged row): erased on 81ba62b and the head. R3d (capitals rows « MAITRE QUOVANE MERAND », « MAÎTRE QUOVANE MÉRAND »): erased on all three, 10.20''s capitals rule. R3e: BKL-1021-01.'
@@ -115,7 +126,10 @@ history:
     note: 'Round 3 at 81ba62b: Codex review 2''s P0 fixed end to end; everything else as round 2; the backlog residue is not re-graded. Codex review 3 then found the replay reaching a modern « MAITRE » name.'
   - at: '2026-11-02T19:21:03Z'
     gate: PASS
-    note: 'Round 4 at 8292133: Codex review 3''s P0 fixed end to end; one more stopping-rule row (BKL-1021-01) and TEST-1021-03.'
+    note: 'Round 4 at 8292133: Codex review 3''s P0 fixed end to end; one more stopping-rule row (BKL-1021-01) and TEST-1021-03. Codex review 4 then found the replay reading a LOCATION with a PERSON''s type.'
+  - at: '2026-11-02T20:59:41Z'
+    gate: PASS
+    note: 'Round 5 (last) at 74b956e: Codex review 4''s P0 fixed end to end; nothing else changed; every open note is low or Backlog, none leaves a name in clear.'
 
 nfr_validation:
   security:
@@ -140,7 +154,7 @@ risk_summary:
       - 'REQ-1021-02: titles outside FRENCH_TITLE_PATTERN, only if met'
 
 quality_score: 100
-expires: '2026-11-16T19:21:03Z'
+expires: '2026-11-16T20:59:41Z'
 
 recommendations:
   immediate: []
