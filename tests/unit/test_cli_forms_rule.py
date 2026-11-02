@@ -1,7 +1,7 @@
 """Story 10.21: one forms rule for names of two words or more (Lionel,
 2026-11-01), in the command-line review and in ``delete-mapping`` (Ex1 CLI,
 Ex2, Ex5, Ex6, Ex8, T21, K3, K4), and what must not change (Ex3, Ex4, Ex7,
-Ex9, G7, K1, K2, K5).
+Ex9, G7, K1, K2, K5, K6).
 
 A name of two words or more is reached wherever its letters are written,
 accents and capitals set aside, any capitals, small letters included; a name
@@ -27,7 +27,9 @@ K1 to K4 (v3.1, the first Codex review's four P0; the orchestrator's ruling,
 one word count, ``name_words``): a title, or a place's preposition, is not a
 word of the name; a person's « Du », « de » is. K5 (v3.2, the second Codex
 review): a form 10.20's lookup generates from the typed name is compared
-under 10.20's own rule, and an extra word is never a variant.
+under 10.20's own rule, and an extra word is never a variant. K6 (v3.3, the
+third Codex review): a row P9's replay adds is a variant of the typed name
+or an old row, so a replay never reaches further than the name.
 """
 
 from __future__ import annotations
@@ -605,3 +607,25 @@ def test_delete_never_erases_a_longer_name_through_a_legacy_form(
     saved = [("Quovane Zorbal", PERSON), ("Quovane Maitre Zorbal", PERSON)]
     left = _left_after(db, saved, "Quovane Zorbal")
     assert left == ["Quovane Maitre Zorbal"], left  # expected failure
+
+
+# ---------------------------------------------------------------------------
+# v3.3, AC3: a replay never reaches further than the name (K6)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.xfail(strict=True, raises=AssertionError)
+def test_a_replay_never_reaches_further_than_the_name(tmp_path: Path, db: Path) -> None:
+    """K6 (AC3; Codex review 3, its P0, its « Paul André » shape): « Quovane
+    Mérand », « Maître Quovane Mérand » as v2.2.0 saved it (decomposed), and
+    « MAITRE Quovane Mérand » saved today (another person, a surname
+    « Maitre »); delete-mapping « Quovane Mérand » erases the first two only:
+    P9's replay of the legacy titled row never adds a row that is not a
+    variant of the typed name or an old row, as on 0be4073."""
+    saved = [
+        ("Quovane Mérand", PERSON),
+        (unicodedata.normalize("NFD", "Maître Quovane Mérand"), PERSON),
+        ("MAITRE Quovane Mérand", PERSON),
+    ]
+    left = _left_after(db, saved, "Quovane Mérand")
+    assert left == ["MAITRE Quovane Mérand"], left  # expected failure
