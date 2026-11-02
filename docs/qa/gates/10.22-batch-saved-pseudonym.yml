@@ -1,0 +1,104 @@
+schema: 1
+story: '10.22'
+story_title: 'In a Parallel Batch, Write Only the Pseudonym That Was Saved'
+scope: 'Pre-merge QA (Task 6, G2): PR #113 at head 8edd8ef on main 0be4073. Commits reviewed: tests first 4b02542 (12 strict xfail, 3 guards), fix 378a714 (data/database.py, core/document_processor.py), record 8edd8ef. QA folder: rgpd-analysis/r1022/qa (trees/, wt_4b02542, wt_base, wt_head, mut/, probes/, extra/, regress/, big/, logs/).'
+gate: PASS
+status_reason: 'The real batch command wrote no unsaved pseudonym and saved no shared one on the head in 91 runs. 0be4073 failed in 22 and 14 of the same 91, including the dev''s default-theme place case. Lionel''s Q1 and Q2 hold. G2 reproduces locally, the mutants are caught, and earlier stories'' probe sets are unchanged. Two low costs, both only on very large databases (other writers can fail behind a batch at 30,000 rows; a batch is about 22 % slower there), plus process and test notes.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-11-02T13:28:02Z'
+
+waiver: { active: false }
+
+quality_score: 100
+expires: '2026-11-16T13:28:02Z'
+
+merge_blockers: []
+
+merge_notes:
+  - 'AC9: the orchestrator''s read-only Codex review of the final head is still to be recorded. QA started no Codex process and never merges.'
+  - 'This gate commit (docs only) starts its own CI run on the PR.'
+
+top_issues:
+  - id: 'LOCK-1022-01'
+    severity: low
+    finding: 'Behind a running 40-document batch on a copy of a 30,000-row database: delete-mapping failed 8 of 22 times (exit 2, « database is locked … Please report this issue if it persists. »; database unchanged); import-mappings ended 9 of 20 times with exit 0 and a red « Errors: N » (those rows not imported; a rerun imports them). 0be4073: 0 of 80. At 10,000 rows: 0 of 43 failed, waits about twice as long (median delete 5.0 s against 2.6 s). Cause: a document now holds the lock for its reload too, while these commands keep SQLite''s 5 s wait. Realism: needs tens of thousands of saved names and an erasure or import on that database while a batch runs; plausible for a shared institutional database, uncommon; the failure is visible and safe.'
+    suggested_action: 'A release-note line, or the same 300 s wait for delete-mapping and import-mappings in a follow-up. Consumer Trace row 9''s « nothing is changed » holds for delete, not for import (partial).'
+    refs: ['gdpr_pseudonymizer/data/database.py', 'gdpr_pseudonymizer/cli/commands/delete_mapping.py', 'gdpr_pseudonymizer/cli/commands/import_mappings.py', 'rgpd-analysis/r1022/qa/probes/writers_probe.py', 'rgpd-analysis/r1022/qa/logs/writers30k_head.log']
+    suggested_owner: po
+  - id: 'PERF-1022-01'
+    severity: low
+    finding: '40-document batch, median of 4 runs: 86.2 s against 70.9 s at 30,000 saved rows (+22 %); 65.8 against 65.7 s at 10,000 rows; 38.9 against 42.3 s on a new database (no measurable cost). The reload decrypts every saved row inside the lock (about 1.5 s per document at 30,000 rows, QA''s estimate from the SM''s 0.52 s at 10,000). Every batch on such a database pays it; outputs are correct.'
+    suggested_action: 'Follow-up: reload only the rows saved since the context was loaded.'
+    refs: ['gdpr_pseudonymizer/core/document_processor.py', 'rgpd-analysis/r1022/qa/logs/stress_s2big30k_*.log']
+    suggested_owner: dev
+  - id: 'AC11-1022'
+    severity: low
+    finding: 'The tests-first commit 4b02542 never ran on CI (the PR was opened after the fix), so AC11''s "on every leg" is not met as written. QA''s local G2 (Windows) stands in: --runxfail 12 failed at the marked lines, 3 passed, no PRE; marked 3 passed, 12 xfailed, three times in one process and three with -n 4.'
+    suggested_action: 'Accept the local G2, or record the gap; nothing to change in the code.'
+    refs: ['https://github.com/LioChanDaYo/RGPDpseudonymizer/pull/113']
+    suggested_owner: po
+  - id: 'TEST-1022-01'
+    severity: low
+    finding: 'Survivors: m10 (no commit before BEGIN IMMEDIATE), m11 (no commit at the end of the block), m13 (no rollback on an error), equivalent or defensive today; m5 (no lock in finalize_document_tabular, no product caller), as the story says. .xlsx is in no committed test (QA''s test_e3 fails on 0be4073, passes on the head).'
+    suggested_action: 'Optional guards in a follow-up.'
+    refs: ['tests/unit/test_parallel_saved_pseudonym.py', 'rgpd-analysis/r1022/qa/mut']
+    suggested_owner: dev
+  - id: 'OBS-1022-01'
+    severity: info
+    finding: 'A timed-out wait shows the database library''s raw text (« OperationalError: (sqlite3.OperationalError) database is locked [SQL: BEGIN IMMEDIATE] … »); 0be4073 showed a longer raw text. Reachable only if another program holds the lock 300 s. A desktop batch cancel takes effect when the wait ends (seconds in practice). The audit entry waits 300 s (busy_timeout 300000 against 5000), as Fix Design 1 says.'
+    suggested_action: 'None.'
+    refs: ['rgpd-analysis/r1022/qa/probes/desktop_probe.py']
+    suggested_owner: po
+  - id: 'OBS-1022-02'
+    severity: info
+    finding: 'The CHANGELOG names two people under one pseudonym with neutral_id; on 0be4073 places and organisations also shared one with the default theme (« Tourcoing », the dev''s « Amiens », QA''s test_e1 « Lyon » and « Société Générale Technologies »). The fix covers them.'
+    suggested_action: 'The PM may say "two names".'
+    refs: ['CHANGELOG.md']
+    suggested_owner: po
+
+evidence:
+  tests_reviewed: 15
+  risks_identified: 2
+  environment: 'Windows, the main Poetry environment (Python 3.11), .bat runners through cmd.exe, USERPROFILE, HOME and TEMP in r1022/qa; packages from git archive (0be4073, 8edd8ef, 4b02542). Databases new or copies of QA''s own prefilled files (invented rows). The .gdpr-pseudo.yaml in the user profile not opened. Nothing under held_out/, final_exam/ or tests/accuracy/ opened. Invented names in QA''s new probes. No Codex, Forge, Anvil or Cato from QA.'
+  diff: 'As Fix Design 1 and 2: pseudonym_lock and the constant; the four call sites; nothing else in product code. git diff 0be4073 4b02542 -- gdpr_pseudonymizer empty. One commit inside the block (save_batch); the review before it; the file and the audit entry after it.'
+  g2: 'wt_4b02542: --runxfail 12 failed (AssertionError at 390 x2, 416 x2, 438, 459, 485 x2, 510, 529, 548, 572), 3 passed, no PRE; marked 3 passed, 12 xfailed x3 one process, x3 -n 4. wt_head: 15 passed x3 one process, x3 -n 4.'
+  real_batch: 'Unsaved / shared runs, 0be4073 against head: (a) QA''s f3_cli_batch.py 4/24 against 0/24; (b) neutral_id two people 0/15 and 13/15 against 0 and 0; (c) default 9/15 and 0 against 0 and 0; (d) --workers 8 1/10 against 0; (e) 40 documents 4/10 against 0; (f) 10,000-row copy 2/3 against 0; (g) 30,000-row copy 0/4 and 1/4 against 0 and 0; (h) two programs 2/10 against 0. All: 22/91 and 14/91 against 0/91 and 0/91. Every flagged line read: all 22 real races.'
+  dev_new_finding: 'Default theme, two names one place pseudonym: 1 of 76 runs on 0be4073 (« Tourcoing »), 0 on the head; test_e1 (places, organisations) fails on 0be4073, passes on the head; control test_e2 passes on both.'
+  two_programs: 'two_programs.py, 10 runs per tree (CLI batch of 24 documents + 24 desktop finalize_document calls, 8 custom): head 0 unsaved in either program, 0 custom unsaved, 0 custom for two names, 42 refusals all 10.11 texts; 0be4073 batch side 2/10, desktop side 0/10 (no reading; T6 to T9 and m8 cover it).'
+  timeout_and_desktop: 'desktop_probe.py: review never under the lock (desktop batch with review, both trees); single document waits and is written 0.1 s after the other program releases (head), fails at 11.2 s (0be4073); timeout texts as in OBS-1022-01; cancel during a wait takes effect at the wait''s end (12.3 s head, 11.2 s 0be4073).'
+  other_writers: 'writers_probe.py: 10,000 rows 0/63 (0be4073) and 0/43 (head) failed; 30,000 rows 0/80 and 17/42. writer_fail.py: a failed delete leaves the database unchanged.'
+  mutants: '14 in r1022/qa/mut. Caught: m1 (12), m2 (T5 x2), m3 and m14 (G2), m4 (G3), m6 (T3, T4, T5 x2, T7, T8, T9), m7 (T1 csv), m8 (T6, T7, T9), m9 (8), m12 (13). Survive: m5, m10, m11, m13 (TEST-1022-01).'
+  cost: '40 documents, medians: new database 42.3 s (0be4073, 10 runs) against 38.9 s (head, 10); 10,000 rows 65.7 against 65.8 s (3 each); 30,000 rows 70.9 against 86.2 s (4 each).'
+  regressions: 'Base and head identical: 10.11 probes 126 passed, 1 failed (same); 10.16 probes 56 passed, 23 failed (same, predating); 10.12 e2e 71 checks, same labels; 10.7 conversion race and batch on a real pre-10.7 file PASS (one forced run on the head recorded the wrong wait of two calls; three reruns PASS on both).'
+  ci:
+    378a714: '41430550533, attempt 1: "3290 passed" x3; Windows "3140 passed, 3 skipped"; lint and Code Quality green.'
+    8edd8ef: '41434787658, attempt 1: "3290 passed" x3; Windows "3140 passed, 3 skipped"; lint and Code Quality green.'
+    4b02542: 'No CI run (AC11-1022).'
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 10, 12]
+    ac_gaps: [9, 11]
+    notes: 'AC9: the orchestrator''s Codex review, not yet recorded. AC11: the tests-first commit had no CI run (AC11-1022).'
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'No name left in clear on either tree; no new logging; error texts carry no names.'
+  performance:
+    status: PASS
+    notes: 'No measurable cost on a new database or at 10,000 rows; +22 % at 30,000 rows (PERF-1022-01, low).'
+  reliability:
+    status: PASS
+    notes: 'The fix removes unsaved and shared pseudonyms (0 of 91 runs). Other writers can fail behind a batch on very large databases (LOCK-1022-01, low, safe failure).'
+  maintainability:
+    status: PASS
+    notes: 'One context manager, four two-line call-site changes, docstring and comments; tests readable, mutant-checked.'
+
+recommendations:
+  immediate: []
+  future:
+    - action: 'Give delete-mapping and import-mappings the same 300 s wait, or add a release-note line (LOCK-1022-01).'
+      refs: ['gdpr_pseudonymizer/cli/commands/delete_mapping.py', 'gdpr_pseudonymizer/cli/commands/import_mappings.py']
+    - action: 'Reload only the rows saved since the context was loaded, under the lock (PERF-1022-01).'
+      refs: ['gdpr_pseudonymizer/core/document_processor.py']
+    - action: 'Optional guards: .xlsx, lock released after an error (TEST-1022-01).'
+      refs: ['tests/unit/test_parallel_saved_pseudonym.py']
