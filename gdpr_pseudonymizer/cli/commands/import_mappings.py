@@ -218,10 +218,11 @@ def import_mappings_command(
                     skipped += 1
                 except Exception as e:
                     errors += 1
+                    # Story 10.22: the type and the error's kind, never the name
                     logger.error(
                         "import_entity_error",
-                        entity=entity.full_name,
-                        error=str(e),
+                        entity_type=entity.entity_type,
+                        error_type=type(e).__name__,
                     )
 
         # Display results

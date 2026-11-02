@@ -605,7 +605,7 @@ class LibraryBasedPseudonymManager(PseudonymManager):
 
         # Failed to find collision-free component after max attempts
         raise RuntimeError(
-            f"Unable to find unique first name component for '{real_first_name}' "
+            "Unable to find unique first name component "
             f"after {max_attempts} attempts. Library may be exhausted."
         )
 
@@ -653,7 +653,7 @@ class LibraryBasedPseudonymManager(PseudonymManager):
 
         # Failed to find collision-free component after max attempts
         raise RuntimeError(
-            f"Unable to find unique last name component for '{real_last_name}' "
+            "Unable to find unique last name component "
             f"after {max_attempts} attempts. Library may be exhausted."
         )
 

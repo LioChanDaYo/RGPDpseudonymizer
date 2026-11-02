@@ -264,7 +264,7 @@ class TestComponentExhaustion:
         # Third unique last name should fail (library exhausted)
         with pytest.raises(
             RuntimeError,
-            match="Unable to find unique last name component for 'RealName3'",
+            match="Unable to find unique last name component after",
         ):
             manager.assign_pseudonym(
                 entity_type="PERSON",
@@ -305,7 +305,7 @@ class TestComponentExhaustion:
         # Third unique first name should fail (library exhausted)
         with pytest.raises(
             RuntimeError,
-            match="Unable to find unique first name component for 'RealFirst3'",
+            match="Unable to find unique first name component after",
         ):
             manager.assign_pseudonym(
                 entity_type="PERSON",

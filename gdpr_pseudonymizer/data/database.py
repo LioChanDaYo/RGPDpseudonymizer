@@ -15,6 +15,8 @@ import base64
 import os
 import sqlite3
 import time
+from collections.abc import Iterator
+from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -43,6 +45,10 @@ PRE_10_7_SCHEMA_VERSION = "1.0.0"
 
 # How long a process waits for another one's conversion (its write lock)
 CONVERSION_BUSY_TIMEOUT_SECONDS = 30.0
+
+# Story 10.22: how long a document waits for another document's pseudonyms
+# to be saved (the write lock held by ``pseudonym_lock``)
+PSEUDONYM_LOCK_BUSY_TIMEOUT_SECONDS = 300.0
 
 # Story 10.12 (Decisions Recorded, SM): SQLite's user_version marks a cleaned
 # file, not a metadata row. The due row records compaction still to do.
@@ -104,6 +110,40 @@ class DatabaseSession:
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:  # type: ignore
         """Context manager exit with automatic cleanup."""
         self.close()
+
+
+@contextmanager
+def pseudonym_lock(db_session: DatabaseSession) -> Iterator[None]:
+    """Hold the database's write lock while a document's pseudonyms are
+    chosen and saved (Story 10.22).
+
+    Several programs or workers may process documents on one database at the
+    same time. Each document reloads the saved rows, checks its custom
+    pseudonyms, chooses its new pseudonyms and saves them; another document
+    doing the same in between could choose another pseudonym for the same
+    name, or the same pseudonym for another name. So this whole step runs
+    under ``BEGIN IMMEDIATE`` on the session's own connection: another
+    connection that wants the lock waits, up to
+    ``PSEUDONYM_LOCK_BUSY_TIMEOUT_SECONDS``, until this one's save commits,
+    then reads what it saved. Readers never wait (WAL mode).
+
+    The save's own commit releases the lock; the end of the block commits
+    when nothing was saved, and rolls back on an error. The longer wait stays
+    on the connection after the block (the document's audit entry waits as
+    long).
+    """
+    session = db_session.session
+    session.commit()
+    connection = session.connection()
+    timeout_ms = int(PSEUDONYM_LOCK_BUSY_TIMEOUT_SECONDS * 1000)
+    connection.exec_driver_sql(f"PRAGMA busy_timeout = {timeout_ms}")
+    connection.exec_driver_sql("BEGIN IMMEDIATE")
+    try:
+        yield
+    except BaseException:
+        session.rollback()
+        raise
+    session.commit()
 
 
 def _already_exists_message(db_path: str) -> str:
@@ -189,7 +229,12 @@ def _secure_delete_on_connect(
 
 def _create_engine(db_path: str) -> Engine:
     """Create an engine that overwrites deleted data on every connection."""
-    engine = create_engine(f"sqlite:///{db_path}")
+    # Story 10.22: every connection waits for another program's write as
+    # long as a document waits for another document's (the busy timeout)
+    engine = create_engine(
+        f"sqlite:///{db_path}",
+        connect_args={"timeout": PSEUDONYM_LOCK_BUSY_TIMEOUT_SECONDS},
+    )
     event.listen(engine, "connect", _secure_delete_on_connect)
     return engine
 

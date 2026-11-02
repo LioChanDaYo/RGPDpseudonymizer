@@ -877,7 +877,7 @@ class SQLiteMappingRepository(MappingRepository):
                     # Unexpected: integrity error but entity not found
                     # Re-raise as this shouldn't happen
                     raise DatabaseError(
-                        f"Race condition but entity not found: {entity.full_name}"
+                        f"Race condition but entity not found (type {entity.entity_type})"
                     )
 
         return saved_entities
