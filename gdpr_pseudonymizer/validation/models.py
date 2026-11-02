@@ -102,6 +102,18 @@ def is_form(place: str, text: str, entity_type: str = "PERSON") -> bool:
         and fold(place).lower() == fold(text).lower()
     ):
         return True
+    return capitals_form(place, text)
+
+
+def capitals_form(place: str, text: str) -> bool:
+    """10.19's capitals rule, for a name of any number of words (Q3): the
+    same letters whatever their capitals, never a place written entirely in
+    small letters unless it is exactly ``text``; in a place written entirely
+    in capitals, accents set aside too. ``is_form``'s rule for a name of one
+    word, and the rule a form 10.20's lookup generates is compared under
+    (Story 10.21, v3.2: the second Codex review)."""
+    if place == text:
+        return True
     if not any(char.isupper() for char in place):
         return False
     if place.lower() == text.lower():

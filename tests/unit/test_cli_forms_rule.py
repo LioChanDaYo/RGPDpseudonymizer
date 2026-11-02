@@ -593,7 +593,6 @@ def test_delete_a_person_whose_surname_starts_with_a_particle(
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError)
 def test_delete_never_erases_a_longer_name_through_a_legacy_form(
     tmp_path: Path, db: Path
 ) -> None:

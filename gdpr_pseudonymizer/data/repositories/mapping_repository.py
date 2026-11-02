@@ -49,6 +49,22 @@ def _same_or_form(text: str, name: str, entity_type: str) -> bool:
     return text.lower() == name.lower() or is_form(text, name, entity_type)
 
 
+def _variant_of(text: str, name: str, entity_type: str) -> bool:
+    """Whether a saved name is a variant of ``name`` (Story 10.21, P9; the
+    orchestrator's rulings on the two Codex reviews): ``name`` has two words
+    or more for the row's type (``name_words``), and the saved name has the
+    same words, accents and capitals aside, once both are reduced the same
+    way (a title, or a place's preposition, set aside). An extra word is
+    never a variant."""
+    # Imported here: the data layer reads the forms rule of the validation
+    # models, which import the core (no gui/ import).
+    from gdpr_pseudonymizer.validation.models import fold, name_words
+
+    words = name_words(name, entity_type)
+    reduced = " ".join(name_words(text, entity_type))
+    return len(words) > 1 and fold(reduced).lower() == fold(" ".join(words)).lower()
+
+
 def _one_mark(text: str) -> str:
     """``text`` with every accent mark written as one mark (U+0301), so that
     comparing Q3 forms of saved forms, every accent mark counts as a mark,
@@ -582,28 +598,17 @@ class SQLiteMappingRepository(MappingRepository):
         both are read by ``name_words``: « Maître Quovane Mérand » is a
         variant of « Quovane Merand ».
         """
-        # Imported here: the data layer reads the forms rule of the
-        # validation models, which import the core (no gui/ import).
-        from gdpr_pseudonymizer.validation.models import fold, name_words
-
         rows = self._query_name_any_capitals(full_name)
         name = composed(full_name)
         found = {row.id for row in rows}
         searched = {name}
         for row in list(rows):
             form_type = "LOCATION" if row.entity_type == "LOCATION" else "PERSON"
-            words = name_words(name, form_type)
-            if len(words) < 2:
-                continue
             stored = self._encryption.decrypt(row.full_name)
             if stored is None:
                 continue
             variant = composed(stored)
-            reduced = " ".join(name_words(variant, form_type))
-            if (
-                variant in searched
-                or fold(reduced).lower() != fold(" ".join(words)).lower()
-            ):
+            if variant in searched or not _variant_of(variant, name, form_type):
                 continue
             searched.add(variant)
             for extra in self._query_name_any_capitals(variant):
@@ -659,7 +664,7 @@ class SQLiteMappingRepository(MappingRepository):
         """
         # Imported here: the data layer reads the forms rule of the
         # validation models, which import the core (no gui/ import).
-        from gdpr_pseudonymizer.validation.models import fold
+        from gdpr_pseudonymizer.validation.models import capitals_form, fold
 
         rows = self._query_by_full_name(full_name)
         found = {row.id for row in rows}
@@ -748,9 +753,20 @@ class SQLiteMappingRepository(MappingRepository):
                 continue
             if fold(_one_mark(text)).lower() not in letters:
                 continue
-            if _same_or_form(text, name, form_type) or any(
-                (keeps or marked) and _same_or_form(text, form, form_type)
-                for form, keeps in old_forms[form_type]
+            # Story 10.21, v3.2 (the second Codex review): a form the lookup
+            # generates from the name (10.20's, a « Maître » or an « à » put
+            # in) is compared under 10.20's own rule, never Lionel's, so
+            # « Quovane Maitre Zorbal » is never a form of « Quovane Zorbal »'s
+            # « Quovane Maître Zorbal »; a row v2.2.0 saved decomposed is
+            # reached when it is a variant of the name (``_variant_of``)
+            if (
+                _same_or_form(text, name, form_type)
+                or (marked and _variant_of(text, name, form_type))
+                or any(
+                    (keeps or marked)
+                    and (text.lower() == form.lower() or capitals_form(text, form))
+                    for form, keeps in old_forms[form_type]
+                )
             ):
                 rows.append(row)
         return rows
