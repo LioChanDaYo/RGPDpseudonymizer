@@ -612,9 +612,22 @@ class SQLiteMappingRepository(MappingRepository):
                 continue
             searched.add(variant)
             for extra in self._query_name_any_capitals(variant):
-                if extra.id not in found:
-                    found.add(extra.id)
-                    rows.append(extra)
+                text = self._encryption.decrypt(extra.full_name)
+                # Story 10.21, v3.3 (the third Codex review): a replay never
+                # reaches further than the name: a row it adds is a variant of
+                # the name typed, or one an earlier version saved (an accent
+                # mark kept apart), as 10.20 reads its old rows
+                if (
+                    extra.id in found
+                    or text is None
+                    or not (
+                        _variant_of(composed(text), name, form_type)
+                        or any(is_mark(char) for char in text)
+                    )
+                ):
+                    continue
+                found.add(extra.id)
+                rows.append(extra)
         return rows
 
     def _query_name_any_capitals(self, full_name: str) -> list[Entity]:

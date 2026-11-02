@@ -614,7 +614,6 @@ def test_delete_never_erases_a_longer_name_through_a_legacy_form(
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError)
 def test_a_replay_never_reaches_further_than_the_name(tmp_path: Path, db: Path) -> None:
     """K6 (AC3; Codex review 3, its P0, its « Paul André » shape): « Quovane
     Mérand », « Maître Quovane Mérand » as v2.2.0 saved it (decomposed), and
