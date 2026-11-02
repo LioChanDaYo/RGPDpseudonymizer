@@ -34,19 +34,24 @@ from typing import Any
 from unittest.mock import patch
 
 import pytest
+from typer.testing import CliRunner
 
+import gdpr_pseudonymizer.cli.commands.import_mappings as import_module
+import gdpr_pseudonymizer.core.document_processor as processor_module
 import gdpr_pseudonymizer.pseudonym.library_manager as library_module
 import gdpr_pseudonymizer.validation.workflow as workflow_module
+from gdpr_pseudonymizer.cli.main import app
 from gdpr_pseudonymizer.core.document_processor import (
     DocumentProcessor,
     ProcessingResult,
 )
 from gdpr_pseudonymizer.core.mapping_key import mapping_key
-from gdpr_pseudonymizer.data.database import open_database
+from gdpr_pseudonymizer.data.database import init_database, open_database
 from gdpr_pseudonymizer.data.models import Entity
 from gdpr_pseudonymizer.data.repositories.mapping_repository import (
     SQLiteMappingRepository,
 )
+from gdpr_pseudonymizer.exceptions import DatabaseError
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 from tests.unit.test_custom_pseudonym_fixes_cli import (
     PASSPHRASE,
@@ -61,10 +66,13 @@ VM = "Vorlan Mestrix"
 CUSTOM = "Xantor Vellion"
 PERSON = "PERSON"
 
-# How long A waits for B to enter its reload (settle=True), and the bound
-# that only stops a hang
+# How long A waits for B to enter its reload (settle=True), the bound that
+# only stops a hang, and how long another connection holds the write lock:
+# past SQLite's default 5 s wait
 SETTLE = 3.0
 WAIT = 120.0
+HOLD = 6.0
+SOURCE_PASSPHRASE = "zorbalia_source_pass_123!"
 
 DOC_A = f"{ZQ} a signé le contrat."
 DOC_B = f"Le contrat avec {ZQ}."
@@ -77,6 +85,13 @@ NAME_NOW_STORED = (
 NOW_ANOTHER_NAMES = (
     "CustomPseudonymError: A pseudonym you chose can no longer be used: "
     "it, or a part of it, is now used for another name. Nothing was written."
+)
+
+
+XFAIL_REVIEW_1 = pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 10.22, Codex review 1: not fixed yet",
 )
 
 
@@ -562,6 +577,185 @@ def test_two_names_one_custom_pseudonym(tmp_path: Path) -> None:
     )
 
 
+# --- Codex review 1: the command line's other writers -----------------------
+
+
+def _db_with(path: Path, passphrase: str, *rows: tuple[str, str, str]) -> str:
+    """A new database holding the (type, name, pseudonym) rows given."""
+    init_database(str(path), passphrase)
+    with open_database(str(path), passphrase) as session:
+        repo = SQLiteMappingRepository(session)
+        for entity_type, name, pseudonym in rows:
+            repo.save(
+                Entity(
+                    entity_type=entity_type,
+                    full_name=name,
+                    pseudonym_full=pseudonym,
+                    theme="neutral",
+                )
+            )
+    return str(path)
+
+
+class _Recorder:
+    """A logger that records every call: (level, event, keywords)."""
+
+    def __init__(self) -> None:
+        self.calls: list[tuple[str, str, dict[str, Any]]] = []
+
+    def __getattr__(self, level: str) -> Callable[..., None]:
+        def record(event: str, *args: Any, **kwargs: Any) -> None:
+            self.calls.append((level, event, kwargs))
+
+        return record
+
+
+class _LockHolder:
+    """Another connection that takes the database's write lock and holds it
+    HOLD seconds (or until released)."""
+
+    def __init__(self, db: str) -> None:
+        self.db = db
+        self.acquired = threading.Event()
+        self.release = threading.Event()
+        self.thread = threading.Thread(target=self._hold, name="holder")
+
+    def _hold(self) -> None:
+        connection = sqlite3.connect(self.db, timeout=WAIT, isolation_level=None)
+        try:
+            connection.execute("BEGIN IMMEDIATE")
+            self.acquired.set()
+            self.release.wait(HOLD)
+            connection.execute("COMMIT")
+        finally:
+            connection.close()
+
+    def start(self, what: str) -> None:
+        self.thread.start()
+        pre(self.acquired.wait(WAIT), f"another connection took the lock {what}")
+
+    def stop(self) -> None:
+        self.release.set()
+        if self.thread.is_alive():
+            self.thread.join(WAIT)
+
+
+def _import(source: str, target: str) -> Any:
+    return CliRunner().invoke(
+        app,
+        [
+            "import-mappings",
+            source,
+            "--db",
+            target,
+            "--passphrase",
+            PASSPHRASE,
+            "--source-passphrase",
+            SOURCE_PASSPHRASE,
+        ],
+    )
+
+
+@XFAIL_REVIEW_1
+def test_import_error_logs_no_name(tmp_path: Path) -> None:
+    """T10 (P0, AC4): a row that `import-mappings` fails to save is logged
+    by its type, never by its name."""
+    source = _db_with(tmp_path / "source.db", SOURCE_PASSPHRASE, (PERSON, ZQ, CUSTOM))
+    target = _db_with(tmp_path / "target.db", PASSPHRASE)
+    recorder = _Recorder()
+
+    def failing_save(self: Any, entity: Any) -> Any:
+        raise DatabaseError("Database operation failed: database is locked")
+
+    with (
+        patch.object(import_module, "logger", recorder),
+        patch.object(SQLiteMappingRepository, "save", failing_save),
+    ):
+        result = _import(source, target)
+    errors = [call for call in recorder.calls if call[1] == "import_entity_error"]
+    pre(
+        len(errors) == 1,
+        f"one import_entity_error recorded: {recorder.calls} {result.output}",
+    )
+    recorded = repr(recorder.calls)
+    assert "Zorbal" not in recorded and "Quentrix" not in recorded  # expected failure
+    assert errors[0][2].get("entity_type") == PERSON
+
+
+@XFAIL_REVIEW_1
+def test_deletion_behind_a_held_lock_keeps_its_record(tmp_path: Path) -> None:
+    """T11 (P1, AC3): after `delete-mapping` has deleted the row, another
+    connection holds the write lock 6 s; the deletion's ERASURE record waits
+    for it and is written."""
+    db = _db_with(tmp_path / "mappings.db", PASSPHRASE, (PERSON, ZQ, CUSTOM))
+    real_delete = SQLiteMappingRepository.delete_entities_by_full_name_any_capitals
+    holder = _LockHolder(db)
+
+    def delete_then_lock(self: Any, name: str) -> Any:
+        deleted = real_delete(self, name)
+        holder.start("after the deletion")
+        return deleted
+
+    try:
+        with patch.object(
+            SQLiteMappingRepository,
+            "delete_entities_by_full_name_any_capitals",
+            delete_then_lock,
+        ):
+            result = CliRunner().invoke(
+                app,
+                [
+                    "delete-mapping",
+                    ZQ,
+                    "--db",
+                    db,
+                    "--passphrase",
+                    PASSPHRASE,
+                    "--force",
+                    "--reason",
+                    "REQ-1",
+                ],
+            )
+    finally:
+        holder.stop()
+    left = _saved(db)
+    pre(left == [], f"the row is deleted: {[row.full_name for row in left]}")
+    connection = sqlite3.connect(db)
+    try:
+        erasures = connection.execute(
+            "SELECT id FROM operations WHERE operation_type = 'ERASURE'"
+        ).fetchall()
+    finally:
+        connection.close()
+    assert len(erasures) == 1, (result.exit_code, result.output)  # expected failure
+    assert result.exit_code == 0
+
+
+@XFAIL_REVIEW_1
+def test_import_behind_a_held_lock_completes(tmp_path: Path) -> None:
+    """T12 (P1, QA's LOCK-1022-01; AC3): before `import-mappings` saves its
+    first row, another connection holds the target's write lock 6 s; the
+    import waits for it and saves the row."""
+    source = _db_with(tmp_path / "source.db", SOURCE_PASSPHRASE, (PERSON, ZQ, CUSTOM))
+    target = _db_with(tmp_path / "target.db", PASSPHRASE)
+    real_save = SQLiteMappingRepository.save
+    holder = _LockHolder(target)
+
+    def lock_then_save(self: Any, entity: Any) -> Any:
+        if not holder.acquired.is_set():
+            holder.start("before the first save")
+        return real_save(self, entity)
+
+    try:
+        with patch.object(SQLiteMappingRepository, "save", lock_then_save):
+            result = _import(source, target)
+    finally:
+        holder.stop()
+    names = [row.full_name for row in _saved(target)]
+    assert names == [ZQ], (result.exit_code, result.output)  # expected failure
+    assert result.exit_code == 0
+
+
 # --- The guards -------------------------------------------------------------
 
 
@@ -584,18 +778,26 @@ def test_one_after_the_other_unchanged(tmp_path: Path) -> None:
 
 
 def test_a_document_waits_longer_than_five_seconds(tmp_path: Path) -> None:
-    """G2 (AC3): A's save is held 6 s, past SQLite's default 5 s wait; B,
-    started then, is written too."""
+    """G2 (AC3): A's save waits until B asks for the lock, then is held 6 s,
+    past SQLite's default 5 s wait; B is written too."""
     db = _new_db(tmp_path)
     names = [(ZQ, PERSON)]
     real_save = SQLiteMappingRepository.save_batch
+    real_lock = processor_module.pseudonym_lock
     a_at_save = threading.Event()
+    b_asks = threading.Event()
     results: dict[str, Any] = {}
+
+    def lock(db_session: Any) -> Any:
+        if threading.current_thread().name == "B":
+            b_asks.set()
+        return real_lock(db_session)
 
     def slow_save(self: Any, entities: Any) -> Any:
         if threading.current_thread().name == "A" and not a_at_save.is_set():
             a_at_save.set()
-            threading.Event().wait(6.0)
+            pre(b_asks.wait(WAIT), "B asked for the lock")
+            threading.Event().wait(HOLD)
         return real_save(self, entities)
 
     def runner(key: str, run: Callable[[], ProcessingResult]) -> Callable[[], None]:
@@ -610,6 +812,7 @@ def test_a_document_waits_longer_than_five_seconds(tmp_path: Path) -> None:
     with (
         _detection(names),
         patch.object(SQLiteMappingRepository, "save_batch", slow_save),
+        patch.object(processor_module, "pseudonym_lock", lock),
     ):
         a = threading.Thread(
             target=runner("A", _process(db, tmp_path, "a", DOC_A)), name="A"
