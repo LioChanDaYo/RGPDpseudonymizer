@@ -636,7 +636,6 @@ def test_a_replay_never_reaches_further_than_the_name(tmp_path: Path, db: Path) 
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError)
 def test_a_replay_reads_each_row_with_its_own_type(tmp_path: Path, db: Path) -> None:
     """K7 (AC3; Codex review 4, its P0, its « Du Pré » mixed-type shape):
     « Du Prelis » and « Du Prélis » saved as PERSON, « Du Prélis » saved as a

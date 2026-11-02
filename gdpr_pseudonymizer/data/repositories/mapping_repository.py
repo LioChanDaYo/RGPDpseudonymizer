@@ -621,7 +621,17 @@ class SQLiteMappingRepository(MappingRepository):
                     extra.id in found
                     or text is None
                     or not (
-                        _variant_of(composed(text), name, form_type)
+                        _variant_of(
+                            composed(text),
+                            name,
+                            # Story 10.21, v3.4 (the fourth Codex review):
+                            # the added row read with its own type
+                            (
+                                "LOCATION"
+                                if extra.entity_type == "LOCATION"
+                                else "PERSON"
+                            ),
+                        )
                         or any(is_mark(char) for char in text)
                     )
                 ):
