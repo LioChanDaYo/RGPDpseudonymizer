@@ -1,6 +1,7 @@
 """Story 10.21: one forms rule for names of two words or more (Lionel,
 2026-11-01), in the command-line review and in ``delete-mapping`` (Ex1 CLI,
-Ex2, Ex5, Ex6, Ex8, T21), and what must not change (Ex3, Ex4, Ex7, Ex9, G7).
+Ex2, Ex5, Ex6, Ex8, T21, K3, K4), and what must not change (Ex3, Ex4, Ex7,
+Ex9, G7, K1, K2).
 
 A name of two words or more is reached wherever its letters are written,
 accents and capitals set aside, any capitals, small letters included; a name
@@ -17,9 +18,14 @@ The assertions read the written file, the stored rows and the lines shown.
 
 Preconditions call ``pytest.fail("PRE: ...")``, never ``assert``; the first
 ``assert`` after them is the expected failure on the unfixed code
-(``# expected failure``). Invented names and main-corpus words only; the one
-combining mark T21 needs is made at run time with ``unicodedata.lookup``: no
-combining mark is written in this file. No spaCy model, no Qt.
+(``# expected failure``). Invented names and main-corpus words only; the
+combining marks T21 and K1 to K3 need are made at run time with
+``unicodedata.lookup`` or ``unicodedata.normalize``: no combining mark is
+written in this file. No spaCy model, no Qt.
+
+K1 to K4 (v3.1, the first Codex review's four P0; the orchestrator's ruling,
+one word count, ``name_words``): a title, or a place's preposition, is not a
+word of the name; a person's « Du », « de » is.
 """
 
 from __future__ import annotations
@@ -473,3 +479,112 @@ def test_delete_mapping_a_place_name_saved_with_its_preposition_is_one_word(
     )
     _screen, left = _delete(db, "ZORBAVILLE")
     assert left == [("à Zòrbaville", LOCATION)]
+
+
+# ---------------------------------------------------------------------------
+# v3.1, AC1 and AC3: one word count (``name_words``), the first Codex
+# review's four P0 (K1 to K4)
+# ---------------------------------------------------------------------------
+
+
+def nfc(text: str) -> str:
+    return unicodedata.normalize("NFC", text)
+
+
+def _old(text: str, entity_type: str) -> str:
+    """The text v2.2.0 saved for ``text``: 10.20's old key steps on its
+    decomposed form."""
+    return _key_steps(unicodedata.normalize("NFD", text), entity_type)
+
+
+def _left_after(
+    db: Path, saved: Sequence[tuple[str, str]], typed: str, *, found: bool = True
+) -> list[str]:
+    """Each (full_name, type) saved, then delete-mapping ``typed``,
+    confirmed: the names left, composed, sorted."""
+    _save(
+        db,
+        [
+            (text, entity_type, f"Quentrix Brimel{index}")
+            for index, (text, entity_type) in enumerate(saved)
+        ],
+    )
+    _delete(db, typed, found=found)
+    return sorted(nfc(name) for name, _type in _names(db))
+
+
+@pytest.mark.xfail(strict=True, raises=AssertionError)
+def test_delete_one_word_never_erases_a_titled_name_with_another_accent(
+    tmp_path: Path, db: Path
+) -> None:
+    """K1 (AC1, AC3; Codex review 1, P0-1, its « Barre » shape): « Zorbe »
+    saved, and « Maître Zorbé » as v2.2.0 saved it; delete-mapping « Zorbe »
+    erases « Zorbe » only: a title is not a word, so « Maître Zorbé » is a
+    name of one word, another accent, as on 0be4073."""
+    old = _old("Maître Zorbé", PERSON)
+    circumflex = unicodedata.lookup("COMBINING CIRCUMFLEX ACCENT")
+    acute = unicodedata.lookup("COMBINING ACUTE ACCENT")
+    _pre(
+        old == "Mai" + circumflex + "tre Zorbe" + acute,
+        f"the row as v2.2.0 saved it: {old!r}",
+    )
+    left = _left_after(db, [("Zorbe", PERSON), (old, PERSON)], "Zorbe")
+    assert left == [nfc(old)], left  # expected failure
+
+
+@pytest.mark.xfail(strict=True, raises=AssertionError)
+def test_delete_a_place_with_its_preposition_never_replays_another_accent(
+    tmp_path: Path, db: Path
+) -> None:
+    """K2 (AC1, AC3; P0-2, its « à Macon » shape): « à Zorbacon », « À
+    ZORBÂCON » and « à Zorbâcon », each as v2.2.0 saved it; delete-mapping
+    « à Zorbacon » keeps « à Zorbâcon », as on 0be4073: with its
+    preposition set aside the name has one word, so no variant is
+    replayed."""
+    saved = [
+        (_old(text, LOCATION), LOCATION)
+        for text in ("à Zorbacon", "À ZORBÂCON", "à Zorbâcon")
+    ]
+    left = _left_after(db, saved, "à Zorbacon")
+    assert left == [nfc(_old("à Zorbâcon", LOCATION))], left  # expected failure
+
+
+@pytest.mark.xfail(strict=True, raises=AssertionError)
+def test_delete_replays_a_variant_saved_with_a_title(tmp_path: Path, db: Path) -> None:
+    """K3 (AC3; P0-3, its « Michel Mérand » shape): « Maître Quovane Mérand »
+    saved decomposed and as v2.2.0 damaged it (« Mai » + U+0302 + « tre
+    Quovane » + U+0301 + « rand »), and « Éloria Mèzor »; delete-mapping
+    « Quovane Merand » erases both rows of the name (its variant, compared
+    without its title, is replayed) and keeps the other name. On 0be4073
+    the name is found nowhere, so the exit code is not a precondition."""
+    old = _old("Maître Quovane Mérand", PERSON)
+    circumflex = unicodedata.lookup("COMBINING CIRCUMFLEX ACCENT")
+    acute = unicodedata.lookup("COMBINING ACUTE ACCENT")
+    _pre(
+        old == "Mai" + circumflex + "tre Quovane " + acute + "rand",
+        f"the row as v2.2.0 damaged it: {old!r}",
+    )
+    saved = [
+        (unicodedata.normalize("NFD", "Maître Quovane Mérand"), PERSON),
+        (old, PERSON),
+        ("Éloria Mèzor", PERSON),
+    ]
+    left = _left_after(db, saved, "Quovane Merand", found=False)
+    assert left == ["Éloria Mèzor"], left  # expected failure
+
+
+@pytest.mark.xfail(strict=True, raises=AssertionError)
+@pytest.mark.parametrize(
+    ("typed", "other"), [("Du Prelis", "Du Prélis"), ("de Vorlanne", "de Vorlânne")]
+)
+def test_delete_a_person_whose_surname_starts_with_a_particle(
+    tmp_path: Path, db: Path, typed: str, other: str
+) -> None:
+    """K4 ×2 (AC1, AC3; P0-4, its « Du Pré » shape; QA's REQ-1021-01, « de
+    Vorlanne »): a person's name that starts with a preposition is a name of
+    two words (a preposition is set aside only for a place): delete-mapping
+    « Du Prelis » erases « Du Prélis » too, and « de Vorlanne » « de
+    Vorlânne »; « Éloria Mèzor » stays."""
+    saved = [(typed, PERSON), (other, PERSON), ("Éloria Mèzor", PERSON)]
+    left = _left_after(db, saved, typed)
+    assert left == ["Éloria Mèzor"], left  # expected failure
