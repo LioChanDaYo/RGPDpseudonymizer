@@ -48,6 +48,7 @@ from gdpr_pseudonymizer.core.document_processor import (
 from gdpr_pseudonymizer.core.mapping_key import mapping_key
 from gdpr_pseudonymizer.data.database import init_database, open_database
 from gdpr_pseudonymizer.data.models import Entity
+from gdpr_pseudonymizer.data.repositories.audit_repository import AuditRepository
 from gdpr_pseudonymizer.data.repositories.mapping_repository import (
     SQLiteMappingRepository,
 )
@@ -611,12 +612,15 @@ class _Recorder:
 
 
 class _LockHolder:
-    """Another connection that takes the database's write lock and holds it
-    HOLD seconds (or until released)."""
+    """Another connection that takes the database's write lock, then holds it
+    HOLD seconds from the moment the command attempts its write (``attempt``,
+    set just before that write), or until released. Neither the hold nor
+    the write depends on the threads' start-up time."""
 
     def __init__(self, db: str) -> None:
         self.db = db
         self.acquired = threading.Event()
+        self.attempt = threading.Event()
         self.release = threading.Event()
         self.thread = threading.Thread(target=self._hold, name="holder")
 
@@ -625,14 +629,21 @@ class _LockHolder:
         try:
             connection.execute("BEGIN IMMEDIATE")
             self.acquired.set()
-            self.release.wait(HOLD)
+            if self.attempt.wait(WAIT):
+                self.release.wait(HOLD)
             connection.execute("COMMIT")
         finally:
             connection.close()
 
     def start(self, what: str) -> None:
+        """Start the holder; return once it holds the write lock."""
         self.thread.start()
         pre(self.acquired.wait(WAIT), f"another connection took the lock {what}")
+
+    def attempting(self) -> None:
+        """Called just before the command's write: the hold starts now."""
+        pre(self.acquired.is_set(), "the lock is held before the write")
+        self.attempt.set()
 
     def stop(self) -> None:
         self.release.set()
@@ -685,10 +696,11 @@ def test_import_error_logs_no_name(tmp_path: Path) -> None:
 @XFAIL_REVIEW_1
 def test_deletion_behind_a_held_lock_keeps_its_record(tmp_path: Path) -> None:
     """T11 (P1, AC3): after `delete-mapping` has deleted the row, another
-    connection holds the write lock 6 s; the deletion's ERASURE record waits
-    for it and is written."""
+    connection takes the write lock and holds it 6 s from the moment the
+    ERASURE record's write begins; the record waits for it and is written."""
     db = _db_with(tmp_path / "mappings.db", PASSPHRASE, (PERSON, ZQ, CUSTOM))
     real_delete = SQLiteMappingRepository.delete_entities_by_full_name_any_capitals
+    real_log = AuditRepository.log_operation
     holder = _LockHolder(db)
 
     def delete_then_lock(self: Any, name: str) -> Any:
@@ -696,11 +708,19 @@ def test_deletion_behind_a_held_lock_keeps_its_record(tmp_path: Path) -> None:
         holder.start("after the deletion")
         return deleted
 
+    def log_when_held(self: Any, operation: Any) -> Any:
+        if not holder.attempt.is_set():
+            holder.attempting()
+        return real_log(self, operation)
+
     try:
-        with patch.object(
-            SQLiteMappingRepository,
-            "delete_entities_by_full_name_any_capitals",
-            delete_then_lock,
+        with (
+            patch.object(
+                SQLiteMappingRepository,
+                "delete_entities_by_full_name_any_capitals",
+                delete_then_lock,
+            ),
+            patch.object(AuditRepository, "log_operation", log_when_held),
         ):
             result = CliRunner().invoke(
                 app,
@@ -718,6 +738,7 @@ def test_deletion_behind_a_held_lock_keeps_its_record(tmp_path: Path) -> None:
             )
     finally:
         holder.stop()
+    pre(holder.attempt.is_set(), f"the ERASURE record was attempted: {result.output}")
     left = _saved(db)
     pre(left == [], f"the row is deleted: {[row.full_name for row in left]}")
     connection = sqlite3.connect(db)
@@ -734,8 +755,9 @@ def test_deletion_behind_a_held_lock_keeps_its_record(tmp_path: Path) -> None:
 @XFAIL_REVIEW_1
 def test_import_behind_a_held_lock_completes(tmp_path: Path) -> None:
     """T12 (P1, QA's LOCK-1022-01; AC3): before `import-mappings` saves its
-    first row, another connection holds the target's write lock 6 s; the
-    import waits for it and saves the row."""
+    first row, another connection takes the target's write lock and holds it
+    6 s from the moment that save begins; the import waits and saves the
+    row."""
     source = _db_with(tmp_path / "source.db", SOURCE_PASSPHRASE, (PERSON, ZQ, CUSTOM))
     target = _db_with(tmp_path / "target.db", PASSPHRASE)
     real_save = SQLiteMappingRepository.save
@@ -744,6 +766,7 @@ def test_import_behind_a_held_lock_completes(tmp_path: Path) -> None:
     def lock_then_save(self: Any, entity: Any) -> Any:
         if not holder.acquired.is_set():
             holder.start("before the first save")
+            holder.attempting()
         return real_save(self, entity)
 
     try:
@@ -751,6 +774,7 @@ def test_import_behind_a_held_lock_completes(tmp_path: Path) -> None:
             result = _import(source, target)
     finally:
         holder.stop()
+    pre(holder.attempt.is_set(), f"the first save was attempted: {result.output}")
     names = [row.full_name for row in _saved(target)]
     assert names == [ZQ], (result.exit_code, result.output)  # expected failure
     assert result.exit_code == 0
