@@ -1,7 +1,7 @@
 """Story 10.21: one forms rule for names of two words or more (Lionel,
 2026-11-01), in the command-line review and in ``delete-mapping`` (Ex1 CLI,
 Ex2, Ex5, Ex6, Ex8, T21, K3, K4), and what must not change (Ex3, Ex4, Ex7,
-Ex9, G7, K1, K2).
+Ex9, G7, K1, K2, K5).
 
 A name of two words or more is reached wherever its letters are written,
 accents and capitals set aside, any capitals, small letters included; a name
@@ -25,7 +25,9 @@ written in this file. No spaCy model, no Qt.
 
 K1 to K4 (v3.1, the first Codex review's four P0; the orchestrator's ruling,
 one word count, ``name_words``): a title, or a place's preposition, is not a
-word of the name; a person's « Du », « de » is.
+word of the name; a person's « Du », « de » is. K5 (v3.2, the second Codex
+review): a form 10.20's lookup generates from the typed name is compared
+under 10.20's own rule, and an extra word is never a variant.
 """
 
 from __future__ import annotations
@@ -584,3 +586,23 @@ def test_delete_a_person_whose_surname_starts_with_a_particle(
     saved = [(typed, PERSON), (other, PERSON), ("Éloria Mèzor", PERSON)]
     left = _left_after(db, saved, typed)
     assert left == ["Éloria Mèzor"], left  # expected failure
+
+
+# ---------------------------------------------------------------------------
+# v3.2, AC1 and AC3: a legacy form never reaches a longer name (K5)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.xfail(strict=True, raises=AssertionError)
+def test_delete_never_erases_a_longer_name_through_a_legacy_form(
+    tmp_path: Path, db: Path
+) -> None:
+    """K5 (AC1, AC3; Codex review 2, its P0, its « Jean Dupont » shape):
+    « Quovane Zorbal » and « Quovane Maitre Zorbal » saved today (another
+    person, a name word « Maitre »); delete-mapping « Quovane Zorbal »
+    erases « Quovane Zorbal » only: a form 10.20's lookup generates from the
+    typed name (« Quovane Maître Zorbal ») is compared under 10.20's own
+    rule, and an extra word is never a variant, as on 0be4073."""
+    saved = [("Quovane Zorbal", PERSON), ("Quovane Maitre Zorbal", PERSON)]
+    left = _left_after(db, saved, "Quovane Zorbal")
+    assert left == ["Quovane Maitre Zorbal"], left  # expected failure
