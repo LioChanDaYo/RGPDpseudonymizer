@@ -1,0 +1,94 @@
+schema: 1
+story: '10.21'
+story_title: 'One Forms Rule for Names of Two Words or More'
+scope: 'PR #114 at head 836e640 on main 0be4073. Commits reviewed: tests first a65e8f4 (7 strict xfail, 5 guards), fix 494ddcc (validation/models.py is_form; data/repositories/mapping_repository.py P9 and G7; the six named 10.19 test cases), record 836e640. Scope set by Lionel ("please stop overfitting"): the Backlog is not reopened; a user typing a name other than the one written, partial detection machinery and exotic Unicode are out; the accepted over-reach (accent-only namesakes share a pseudonym, a two-word phrase equal to a name is replaced, Ex5''s delete) is not a finding. The read-only Codex review runs in parallel; QA did not read it. QA folder: rgpd-analysis/r1021/qa (trees tree-0be4073, tree-a65e8f4, tree-836e640; probes/, logs/, mut/).'
+gate: PASS
+status_reason: 'The rule is one condition in is_form and every path reads it: Lionel''s nine examples behave as he answered on the real CLI, desktop single and batch paths and delete-mapping; QA''s finding-2 probes leave nothing in clear (6/6 CLI, 2/2 desktop; main 3 and 1 leaks). Real text with the real detector: 0 places dropped, 0 rows erased that are not a variant; G2, the six changed tests, the 10.15-10.20 probe sets, mutants, cost and CI agree. Four low or info notes, none a blocker.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-11-02T13:12:33Z'
+
+waiver: { active: false }
+
+merge_blockers: []
+
+merge_notes:
+  - 'QA never merges. The merge waits for the read-only Codex review (AC9) and for Lionel.'
+  - 'This gate commit (docs only) starts its own CI run on the PR.'
+
+top_issues:
+  - id: 'DOC-1021-01'
+    severity: low
+    finding: 'The CHANGELOG says two people whose two-word names differ only by an accent "now share one pseudonym". That holds where an add or a correction reaches the other writing. When the detector finds both writings whole (« Zélvine Vorlanne » and « Zelvine Vorlanne ») and the user accepts them as found, the CLI now shows one entity "applied to 2 total occurrences" but writes two pseudonyms, as 10.19 already does for capitals forms (« Zélvine »/« ZELVINE »: two pseudonyms on main too). Realism: plausible (a document that writes a name once without its accents); the effect is one person under two pseudonyms, nothing in clear; the same on main.'
+    suggested_action: 'Word the entry for a name you add or correct, or leave it; pseudonym identity across joined forms is a PO question for later, not this story.'
+    refs: ['CHANGELOG.md', 'rgpd-analysis/r1021/qa/probes/test_qa1021_examples.py (IDa, IDb, IDc1, IDd, Ex2det)']
+    suggested_owner: po
+  - id: 'REQ-1021-01'
+    severity: low
+    finding: 'G7''s one-word reading in _same_or_form keys on a leading French preposition (FRENCH_PREPOSITION_PATTERN: de, du, des, à, en, au, aux, d'', l'') whatever the type, not only on a place name: delete-mapping « de Vorlanne » does not erase a saved PERSON « de Vorlânne » (probe G7q), where Lionel''s rule would. Realism: unlikely; it needs a surname saved alone with its particle, in two accent spellings. The confirmation lists what is erased; the same on main.'
+    suggested_action: 'Follow-up only if it shows up: read the one-word exception for LOCATION rows.'
+    refs: ['gdpr_pseudonymizer/data/repositories/mapping_repository.py:37-56']
+    suggested_owner: dev
+  - id: 'TEST-1021-01'
+    severity: low
+    finding: 'Two mutants survive the committed tests: M09 (a place name of two words saved with its preposition, « à Saint Zorbaville », read as one word, so « à Saint Zòrbaville » would stay) and M14 (the variant search through 10.20''s narrower _query_by_full_name; near-equivalent, every row it misses is reached by the name''s own search). The six changed 10.19 cases keep names that now say the opposite (test_unreached_place_goes_back_to_review, test_batch_unreached_row_stays_pending, the two ..._never_takes_another_name, test_widening_never_over_a_word_in_small_letters); their docstrings say why.'
+    suggested_action: 'Optional: a guard for a two-word place name with its preposition (QA''s probe G7c); rename the six when the files are next touched.'
+    refs: ['rgpd-analysis/r1021/qa/mut/M09_g7_two_words', 'rgpd-analysis/r1021/qa/mut/M14_p9_no_old_rows', 'tests/unit/test_cli_capitals_forms.py', 'tests/unit/gui/test_capitals_correction_desktop.py']
+    suggested_owner: dev
+  - id: 'OBS-1021-01'
+    severity: info
+    finding: 'P9 reaches the old rows of each variant that has a row saved today. A variant saved only by v2.2.0 (its damaged row alone) is not a variant the delete can see: with « Vorlan Mélora » saved and a v2.2.0-only row of « Vorlan Mèlora », delete-mapping « Vorlan Melora » erases the first and its old row and keeps the second (probe P9c); with only a v2.2.0 row, typed without the accent, the CLI says "No entity found" (P9d), as on main. Realism: contrived (two accent spellings of one name across versions); P9d is visible to the user.'
+    suggested_action: 'None in this story.'
+    refs: ['rgpd-analysis/r1021/qa/probes/test_qa1021_examples.py (P9c, P9d)']
+    suggested_owner: po
+
+evidence:
+  tests_reviewed: 18
+  risks_identified: 4
+  g2:
+    tests_first_a65e8f4: '5 passed, 7 xfailed (markers on); --runxfail: 7 failed at their # expected failure line (cli :318, :335, :379, :395, :421, :461; desktop :166), 5 passed, 0 PRE'
+    six_changed_cases: 'the a65e8f4 versions of the two 10.19 files against the head package: exactly the six named cases fail, each on its old-rule assertion; 96 + 24 others pass'
+    ci_head: '836e640: 3287 passed on Ubuntu 3.10, Ubuntu 3.11 and macOS; 3137 passed, 3 skipped on Windows; lint, quality, CodeQL green'
+  lionels_examples: 'Ex1 to Ex9 on CLI, desktop single and desktop batch (adds, the dialog''s corrections, delete-mapping), head against 0be4073: Ex1, Ex1b, Ex2, Ex5, Ex6, Ex8 reach as Lionel answered; Ex3, Ex4, Ex7, Ex9 identical to main; G7 identical to main'
+  finding_2: 'r230rel probes at head: 0 of 6 CLI and 0 of 2 desktop in clear (main: 3 and 1)'
+  real_text: 'HybridDetector on 38 main-corpus documents and 11 .md files of the ebook folder (one 2.3 MB file over spaCy''s limit skipped): 0 (name, place) pairs dropped; 714 added, of which 330 a name typed without its accents (275 corpus, 43 ebook text, 12 other) and 1 a name typed as detected (« Publishing rights » reaching « publishing rights » in KDP_KOBO_SUBMISSION.md, Ex8''s accepted over-reach); the rest typed in capitals; 0 new CLI joins; delete-mapping over a 1,699-row database copy of every detected name: 0 rows dropped, 187 added, 186 accent or capitals variants of a two-word name and 1 title form of one (« Maître François … » for « Francois … »)'
+  delete_p9: 'probes P9, P9b: every reached variant and its v2.2.0 row erased; P9c, P9d as OBS-1021-01; G7, G7b identical to main; G7c (a two-word place name) reaches its variants by the rule'
+  regression_sets: '10.15 (57), 10.16 (74), 10.17 (95), 10.18 (35), 10.20 (639): identical failure sets on head and main. 10.19 (922): 16 fail on main, 67 on head; the 51 head-only all encode the old rule (a small-letter or other-accent place left as it was, a place sent back, an other-accent row kept) or follow key scripts written for the send-back; none leaves a name in clear (k2 re-run with the natural keys: nothing in clear at head, « Testar » in clear on main)'
+  mutants: '18 on the fix and two paths the changed tests used to pin (CLI send-back, desktop pending): 13 killed; 5 survive, 3 equivalent (M07, M10, M15), 2 low (TEST-1021-01)'
+  cost: 'delete-mapping lookup on 10,005 rows: a name with 3 saved variants 0.08 s -> 0.42-0.48 s (one more scan per variant); a name without variants unchanged (0.08-0.09 s); whole_word_places over the ebook text +4 to 10 percent, within noise'
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12]
+    ac_gaps: []
+    ac_not_qa: [9]
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'No leak class opened: finding 2 closed; 0 places dropped on real text; delete-mapping erases only variants under the rule; no settings file touched (HOME, USERPROFILE at a scratch folder).'
+  performance:
+    status: PASS
+    notes: 'One extra table scan per saved variant in delete-mapping (0.4-0.5 s at 10k rows with 3 variants); search cost within noise.'
+  reliability:
+    status: PASS
+    notes: 'CI green on every leg; 10.15-10.20 probe sets unchanged but by-design 10.19 rows.'
+  maintainability:
+    status: PASS
+    notes: 'Two product files, as the Fix Design gives them; the docstrings cite Lionel. Six test names now contradict their bodies (TEST-1021-01).'
+
+risk_summary:
+  totals: { critical: 0, high: 0, medium: 0, low: 3 }
+  recommendations:
+    must_fix: []
+    monitor:
+      - 'DOC-1021-01: the CHANGELOG''s pseudonym sentence'
+      - 'REQ-1021-01, TEST-1021-01: follow-ups only on demand'
+
+quality_score: 100
+expires: '2026-11-16T13:12:33Z'
+
+recommendations:
+  immediate: []
+  future:
+    - action: 'Optionally narrow the CHANGELOG''s "share one pseudonym" to names added or corrected (DOC-1021-01).'
+      refs: ['CHANGELOG.md']
+    - action: 'Read G7''s one-word exception for place names only, and add a guard for a two-word place name with its preposition, if it ever matters (REQ-1021-01, TEST-1021-01).'
+      refs: ['gdpr_pseudonymizer/data/repositories/mapping_repository.py']
