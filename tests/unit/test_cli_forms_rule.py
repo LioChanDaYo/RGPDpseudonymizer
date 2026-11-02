@@ -1,7 +1,7 @@
 """Story 10.21: one forms rule for names of two words or more (Lionel,
 2026-11-01), in the command-line review and in ``delete-mapping`` (Ex1 CLI,
 Ex2, Ex5, Ex6, Ex8, T21, K3, K4), and what must not change (Ex3, Ex4, Ex7,
-Ex9, G7, K1, K2, K5, K6).
+Ex9, G7, K1, K2, K5, K6, K7).
 
 A name of two words or more is reached wherever its letters are written,
 accents and capitals set aside, any capitals, small letters included; a name
@@ -29,7 +29,8 @@ word of the name; a person's « Du », « de » is. K5 (v3.2, the second Codex
 review): a form 10.20's lookup generates from the typed name is compared
 under 10.20's own rule, and an extra word is never a variant. K6 (v3.3, the
 third Codex review): a row P9's replay adds is a variant of the typed name
-or an old row, so a replay never reaches further than the name.
+or an old row, so a replay never reaches further than the name. K7 (v3.4,
+the fourth Codex review): each row a replay adds is read with its own type.
 """
 
 from __future__ import annotations
@@ -628,3 +629,30 @@ def test_a_replay_never_reaches_further_than_the_name(tmp_path: Path, db: Path) 
     ]
     left = _left_after(db, saved, "Quovane Mérand")
     assert left == ["MAITRE Quovane Mérand"], left  # expected failure
+
+
+# ---------------------------------------------------------------------------
+# v3.4, AC3: a replay reads each row with its own type (K7)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.xfail(strict=True, raises=AssertionError)
+def test_a_replay_reads_each_row_with_its_own_type(tmp_path: Path, db: Path) -> None:
+    """K7 (AC3; Codex review 4, its P0, its « Du Pré » mixed-type shape):
+    « Du Prelis » and « Du Prélis » saved as PERSON, « Du Prélis » saved as a
+    LOCATION, all today; delete-mapping « Du Prelis » erases « Du Prelis »
+    and never the LOCATION row: read with its own type, that place is a name
+    of one word once its preposition is set aside, with another accent, so
+    not a variant of the typed name, as on 0be4073."""
+    _save(
+        db,
+        [
+            ("Du Prelis", PERSON, "Quentrix Brimel0"),
+            ("Du Prélis", PERSON, "Quentrix Brimel1"),
+            ("Du Prélis", LOCATION, "Brimelville"),
+        ],
+    )
+    _delete(db, "Du Prelis")
+    left = sorted((nfc(name), entity_type) for name, entity_type in _names(db))
+    assert ("Du Prélis", LOCATION) in left, left  # expected failure
+    assert ("Du Prelis", PERSON) not in left, left
