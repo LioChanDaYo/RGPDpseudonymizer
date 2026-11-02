@@ -27,6 +27,7 @@ import re
 import secrets
 import sqlite3
 import threading
+import time
 from collections.abc import Callable, Iterator
 from contextlib import AbstractContextManager, contextmanager, nullcontext
 from pathlib import Path
@@ -46,7 +47,11 @@ from gdpr_pseudonymizer.core.document_processor import (
     ProcessingResult,
 )
 from gdpr_pseudonymizer.core.mapping_key import mapping_key
-from gdpr_pseudonymizer.data.database import init_database, open_database
+from gdpr_pseudonymizer.data.database import (
+    PSEUDONYM_LOCK_BUSY_TIMEOUT_SECONDS,
+    init_database,
+    open_database,
+)
 from gdpr_pseudonymizer.data.models import Entity
 from gdpr_pseudonymizer.data.repositories.audit_repository import AuditRepository
 from gdpr_pseudonymizer.data.repositories.mapping_repository import (
@@ -651,6 +656,21 @@ class _LockHolder:
             self.thread.join(WAIT)
 
 
+def _timed_write(
+    session: Any, write: Callable[[], Any], measured: dict[str, float]
+) -> Any:
+    """Read ``PRAGMA busy_timeout`` on the connection that makes the write,
+    then make the write, recording how long it took (even when it fails)."""
+    measured["busy_timeout_ms"] = (
+        session.connection().exec_driver_sql("PRAGMA busy_timeout").scalar()
+    )
+    start = time.monotonic()
+    try:
+        return write()
+    finally:
+        measured["write_seconds"] = time.monotonic() - start
+
+
 def _import(source: str, target: str) -> Any:
     return CliRunner().invoke(
         app,
@@ -697,7 +717,9 @@ def test_import_error_logs_no_name(tmp_path: Path) -> None:
 def test_deletion_behind_a_held_lock_keeps_its_record(tmp_path: Path) -> None:
     """T11 (P1, AC3): after `delete-mapping` has deleted the row, another
     connection takes the write lock and holds it 6 s from the moment the
-    ERASURE record's write begins; the record waits for it and is written."""
+    ERASURE record's write begins. The connection that writes it waits as
+    long as a batch document (``PRAGMA busy_timeout`` read there, at least
+    PSEUDONYM_LOCK_BUSY_TIMEOUT_SECONDS), and the record is written."""
     db = _db_with(tmp_path / "mappings.db", PASSPHRASE, (PERSON, ZQ, CUSTOM))
     real_delete = SQLiteMappingRepository.delete_entities_by_full_name_any_capitals
     real_log = AuditRepository.log_operation
@@ -708,10 +730,13 @@ def test_deletion_behind_a_held_lock_keeps_its_record(tmp_path: Path) -> None:
         holder.start("after the deletion")
         return deleted
 
+    measured: dict[str, float] = {}
+
     def log_when_held(self: Any, operation: Any) -> Any:
-        if not holder.attempt.is_set():
-            holder.attempting()
-        return real_log(self, operation)
+        if holder.attempt.is_set():
+            return real_log(self, operation)
+        holder.attempting()
+        return _timed_write(self._session, lambda: real_log(self, operation), measured)
 
     try:
         with (
@@ -748,7 +773,14 @@ def test_deletion_behind_a_held_lock_keeps_its_record(tmp_path: Path) -> None:
         ).fetchall()
     finally:
         connection.close()
-    assert len(erasures) == 1, (result.exit_code, result.output)  # expected failure
+    pre("busy_timeout_ms" in measured, "the wait read at the ERASURE record's write")
+    print(
+        f"ERASURE write: busy_timeout {measured['busy_timeout_ms']} ms, "
+        f"took {measured['write_seconds']:.2f} s"
+    )
+    wait_ms = PSEUDONYM_LOCK_BUSY_TIMEOUT_SECONDS * 1000
+    assert measured["busy_timeout_ms"] >= wait_ms  # expected failure
+    assert len(erasures) == 1, (result.exit_code, result.output)
     assert result.exit_code == 0
 
 
@@ -756,18 +788,22 @@ def test_deletion_behind_a_held_lock_keeps_its_record(tmp_path: Path) -> None:
 def test_import_behind_a_held_lock_completes(tmp_path: Path) -> None:
     """T12 (P1, QA's LOCK-1022-01; AC3): before `import-mappings` saves its
     first row, another connection takes the target's write lock and holds it
-    6 s from the moment that save begins; the import waits and saves the
-    row."""
+    6 s from the moment that save begins. The connection that saves waits
+    as long as a batch document (``PRAGMA busy_timeout`` read there, at least
+    PSEUDONYM_LOCK_BUSY_TIMEOUT_SECONDS), and the row is imported."""
     source = _db_with(tmp_path / "source.db", SOURCE_PASSPHRASE, (PERSON, ZQ, CUSTOM))
     target = _db_with(tmp_path / "target.db", PASSPHRASE)
     real_save = SQLiteMappingRepository.save
     holder = _LockHolder(target)
 
+    measured: dict[str, float] = {}
+
     def lock_then_save(self: Any, entity: Any) -> Any:
-        if not holder.acquired.is_set():
-            holder.start("before the first save")
-            holder.attempting()
-        return real_save(self, entity)
+        if holder.acquired.is_set():
+            return real_save(self, entity)
+        holder.start("before the first save")
+        holder.attempting()
+        return _timed_write(self._session, lambda: real_save(self, entity), measured)
 
     try:
         with patch.object(SQLiteMappingRepository, "save", lock_then_save):
@@ -775,8 +811,15 @@ def test_import_behind_a_held_lock_completes(tmp_path: Path) -> None:
     finally:
         holder.stop()
     pre(holder.attempt.is_set(), f"the first save was attempted: {result.output}")
+    pre("busy_timeout_ms" in measured, "the wait read at the first save")
+    print(
+        f"first save: busy_timeout {measured['busy_timeout_ms']} ms, "
+        f"took {measured['write_seconds']:.2f} s"
+    )
     names = [row.full_name for row in _saved(target)]
-    assert names == [ZQ], (result.exit_code, result.output)  # expected failure
+    wait_ms = PSEUDONYM_LOCK_BUSY_TIMEOUT_SECONDS * 1000
+    assert measured["busy_timeout_ms"] >= wait_ms  # expected failure
+    assert names == [ZQ], (result.exit_code, result.output)
     assert result.exit_code == 0
 
 
