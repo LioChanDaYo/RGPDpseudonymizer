@@ -54,7 +54,7 @@ def fold(text: str) -> str:
     return "".join(folded)
 
 
-def is_form(place: str, text: str) -> bool:
+def is_form(place: str, text: str, *, one_word: bool = False) -> bool:
     """Whether ``place`` is written as a form of the name ``text`` (Story
     10.17, AC13 (a); Lionel, 2026-10-19, "A: Fix, capitals only", in the PO's
     wording, and his 10.19 Q3, "A: Reach it too").
@@ -64,8 +64,23 @@ def is_form(place: str, text: str) -> bool:
     exactly ``text``. In a place written entirely in capitals (no small letter
     in it), accents are set aside too: « HELENE » and « HELÈNE » are forms of
     « Hélène », « Helene » and « hélène » are not.
+
+    Story 10.21 (Lionel, 2026-11-01: "all the Élorine du Prélis, accented or
+    not, all caps or not, should match"; "yes, i prefer this split"): a name
+    of two words or more is reached wherever its letters are written,
+    accents and capitals set aside, any capitals, small letters included:
+    « ELORINE DU PRELIS », « Elorine du Prelis » and « élorine du prélis »
+    are forms of « Élorine du Prélis ». The rule above stays for a name of
+    one word, and for a name the caller reads as one word (``one_word``: a
+    place name saved with its preposition, « à Zorbaville »).
     """
     if place == text:
+        return True
+    if (
+        not one_word
+        and len(text.split()) > 1
+        and fold(place).lower() == fold(text).lower()
+    ):
         return True
     if not any(char.isupper() for char in place):
         return False

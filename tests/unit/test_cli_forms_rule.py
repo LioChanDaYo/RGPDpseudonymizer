@@ -300,7 +300,6 @@ def _save(db: Path, rows: Sequence[tuple[str, str, str]]) -> None:
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError)
 def test_Ex1_cli_correction_in_capitals_reaches_the_name_written_in_title_case(  # noqa: N802
     tmp_path: Path, db: Path
 ) -> None:
@@ -320,7 +319,6 @@ def test_Ex1_cli_correction_in_capitals_reaches_the_name_written_in_title_case( 
     ), written  # expected failure
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError)
 def test_Ex2_add_reaches_the_name_without_its_accents(  # noqa: N802
     tmp_path: Path, db: Path
 ) -> None:
@@ -360,7 +358,6 @@ def test_Ex4_one_word_name_never_reaches_an_accented_word_at_a_sentence_start(  
     assert written == f"Zélvine {p} a signé. Arvelé depuis dix ans, il valide."
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError)
 def test_Ex5_delete_mapping_also_deletes_the_name_saved_without_its_accents(  # noqa: N802
     tmp_path: Path, db: Path
 ) -> None:
@@ -380,7 +377,6 @@ def test_Ex5_delete_mapping_also_deletes_the_name_saved_without_its_accents(  # 
     assert left == [("Éloria Mèzor", PERSON)]
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError)
 def test_Ex6_add_reaches_the_name_written_in_small_letters(  # noqa: N802
     tmp_path: Path, db: Path
 ) -> None:
@@ -406,7 +402,6 @@ def test_Ex7_one_word_name_never_reaches_a_word_in_small_letters(  # noqa: N802
     assert written == f"M. {p} a signé le bail."
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError)
 def test_Ex8_two_word_name_reaches_an_ordinary_phrase_in_small_letters(  # noqa: N802
     tmp_path: Path, db: Path
 ) -> None:
@@ -437,7 +432,6 @@ def test_Ex9_one_word_name_never_reaches_itself_in_small_letters(  # noqa: N802
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError)
 def test_delete_mapping_erases_the_old_rows_of_every_variant_it_reaches(
     tmp_path: Path, db: Path
 ) -> None:

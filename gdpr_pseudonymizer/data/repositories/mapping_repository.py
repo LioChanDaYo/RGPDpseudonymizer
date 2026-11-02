@@ -15,6 +15,7 @@ from gdpr_pseudonymizer.core.mapping_key import (
 from gdpr_pseudonymizer.data.models import Entity
 from gdpr_pseudonymizer.exceptions import DatabaseError, DuplicateEntityError
 from gdpr_pseudonymizer.utils.french_patterns import (
+    FRENCH_PREPOSITION_PATTERN,
     FRENCH_TITLE_PATTERN,
     strip_french_titles,
 )
@@ -36,12 +37,23 @@ def _name_forms(full_name: str, entity_type: str) -> list[str]:
 def _same_or_form(text: str, name: str) -> bool:
     """Whether a saved name is erased with ``name`` (Story 10.19, AC4): the
     same letters whatever their capitals, or a form of it (``is_form``:
-    written entirely in capitals, accents set aside)."""
+    written entirely in capitals, accents set aside; Story 10.21: a name of
+    two words or more, accents and capitals set aside).
+
+    Story 10.21 (G7): a place name saved with its preposition (« à
+    Zorbaville ») whose name is one word is read as a name of one word, so
+    delete-mapping « ZORBAVILLE » never erases « à Zòrbaville », another
+    place under the one-word rule."""
     # Imported here: the data layer reads the forms rule of the validation
     # models, which import the core (no gui/ import).
     from gdpr_pseudonymizer.validation.models import is_form
 
-    return text.lower() == name.lower() or is_form(text, name)
+    if text.lower() == name.lower():
+        return True
+    bare = re.sub(FRENCH_PREPOSITION_PATTERN, "", name, flags=re.IGNORECASE)
+    if bare.strip() != name.strip() and len(bare.split()) < 2:
+        return is_form(text, name, one_word=True)
+    return is_form(text, name)
 
 
 def _one_mark(text: str) -> str:
@@ -556,6 +568,45 @@ class SQLiteMappingRepository(MappingRepository):
         ]
 
     def _query_by_full_name_any_capitals(self, full_name: str) -> list[Entity]:
+        """Stored (encrypted) rows of a plaintext full name and of each of its
+        variants found saved (Story 10.21, AC3, P9; the orchestrator's
+        ruling).
+
+        A name of two words or more reaches its variants: the same letters,
+        accents and capitals set aside (Lionel's rule of 2026-11-01,
+        ``is_form``). Each variant found among the rows of the name
+        (``_query_name_any_capitals``) is searched the same way, 10.20's old
+        rows of it included, so no row an earlier version saved for a variant
+        it erases is kept: delete-mapping « Vorlan Melora » erases « Vorlan
+        Mélora » and the row v2.2.0 saved damaged for it (« Vorlan » +
+        U+0301 + « lora »). A name of one word reaches no variant. Each row
+        is returned once, the name's own rows first.
+        """
+        # Imported here: the data layer reads the forms rule of the
+        # validation models, which import the core (no gui/ import).
+        from gdpr_pseudonymizer.validation.models import fold
+
+        rows = self._query_name_any_capitals(full_name)
+        name = composed(full_name)
+        if len(name.split()) < 2:
+            return rows
+        found = {row.id for row in rows}
+        searched = {name}
+        for row in list(rows):
+            stored = self._encryption.decrypt(row.full_name)
+            if stored is None:
+                continue
+            variant = composed(stored)
+            if variant in searched or fold(variant).lower() != fold(name).lower():
+                continue
+            searched.add(variant)
+            for extra in self._query_name_any_capitals(variant):
+                if extra.id not in found:
+                    found.add(extra.id)
+                    rows.append(extra)
+        return rows
+
+    def _query_name_any_capitals(self, full_name: str) -> list[Entity]:
         """Stored (encrypted) rows of a plaintext full name, whatever its type
         or its capitals (Story 10.19, AC4).
 

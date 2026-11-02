@@ -133,7 +133,6 @@ def _written(qtbot: Any, main_window: Any, vs: Any) -> str:
     return Path(results._temp_path).read_text(encoding="utf-8")
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError)
 def test_Ex1_desktop_correction_in_capitals_reaches_the_name_written_in_title_case(  # type: ignore[no-untyped-def]  # noqa: N802
     qtbot, main_window, tmp_path, monkeypatch, dialogs
 ) -> None:

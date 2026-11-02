@@ -853,10 +853,11 @@ def test_hand_place_never_joins_another_name(tmp_path: Path, db: Path) -> None:
 
 
 def test_unreached_place_goes_back_to_review(tmp_path: Path, db: Path) -> None:
-    """T25 (AC3, QA's CAPS-001; the orchestrator's ruling): a correction typed
-    in capitals without accents does not reach « Zélvine Testar »; that place
-    goes back to the review as its own name, never written with a partial
-    span, and is corrected there."""
+    """T25 (AC3, QA's CAPS-001; the orchestrator's ruling; changed by Story
+    10.21, Lionel's forms rule of 2026-11-01): « Zélvine Testar » is a form
+    of « ZELVINE TESTAR » (a name of two words, accents and capitals set
+    aside), so the correction typed in capitals without accents covers both
+    places with one pseudonym, and nothing goes back to the review."""
     source, output = _files(tmp_path, ".txt")
     source.write_text(T25_TEXT, encoding="utf-8")
     run = _process(
@@ -864,15 +865,15 @@ def test_unreached_place_goes_back_to_review(tmp_path: Path, db: Path) -> None:
         output,
         db,
         [("ZELVINE", PERSON), ("Zélvine", PERSON)],
-        [ENTER, "e", "e"],
-        ["ZELVINE TESTAR", "Zélvine Testar"],
+        [ENTER, "e"],
+        ["ZELVINE TESTAR"],
     )
     _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
     written = _written(output)
     assert "TESTAR" not in written.upper(), written  # expected failure
     assert "(2 occurrences, 1 unique)" in run.flat
-    caps, title = _pseudonym(db, "ZELVINE TESTAR"), _pseudonym(db, "Zélvine Testar")
-    assert written == f"Signé : {caps}. {title} a signé."
+    caps = _pseudonym(db, "ZELVINE TESTAR")
+    assert written == f"Signé : {caps}. {caps} a signé."
 
 
 def test_cli_added_words_never_left_in_clear_at_own_places(
@@ -901,9 +902,10 @@ def test_cli_added_words_never_left_in_clear_at_own_places(
 
 def test_cli_widening_never_takes_another_name(tmp_path: Path, db: Path) -> None:
     """T31 CLI (AC3; the third Codex review's P0-1, the orchestrator's ruling
-    1): « Zélvine » corrected as « Zélvine Mézor » is never widened over
-    « Mèzor », which is neither a Q3 form of « Mézor » nor « Mézor » of it;
-    that place keeps its old span, as on main."""
+    1; changed by Story 10.21, Lionel's forms rule of 2026-11-01, AC4):
+    « Zélvine » corrected as « Zélvine Mézor »: « Zélvine Mèzor » is a form of
+    it (a name of two words, accents set aside), so both places are covered
+    with one pseudonym."""
     source, output = _files(tmp_path, ".txt")
     source.write_text(T31_TEXT, encoding="utf-8")
     run = _process(
@@ -911,9 +913,9 @@ def test_cli_widening_never_takes_another_name(tmp_path: Path, db: Path) -> None
     )
     _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
     written = _written(output)
-    assert "Mèzor a signé" in written, written  # expected failure
+    assert "Mèzor" not in written, written
     p = _pseudonym(db, "Zélvine Mézor")
-    assert written == f"{p} a signé. {p} Mèzor a signé."
+    assert written == f"{p} a signé. {p} a signé."
 
 
 def test_cli_widening_across_a_line_break(tmp_path: Path, db: Path) -> None:
@@ -1301,8 +1303,10 @@ def test_delete_mapping_typed_without_accents_reaches_old_capitals_row(
     """T28, case 2 (AC4, QA's DEL-1019-01 second shape): typed without its
     accents, « Vorlan Melora » erases « VORLAN MÉLORA » (a form once accents
     are set aside) and the old row v2.2.0 saved of it, « VORLAN » + a lone
-    mark + « LORA »; « Vorlan Mélora » in title case is another name, and its
-    rows stay, today's and the old one."""
+    mark + « LORA »; changed by Story 10.21 (Lionel's forms rule of
+    2026-11-01 and the PO's P9): « Vorlan Mélora » in title case is a form of
+    it too (a name of two words, accents set aside), so it and its old row,
+    « Vorlan » + a lone mark + « lora », are erased as well: no row left."""
     acute = unicodedata.lookup("COMBINING ACUTE ACCENT")
     old_caps = _key_steps(nfd("VORLAN MÉLORA"), PERSON)
     old_title = _key_steps(nfd("Vorlan Mélora"), PERSON)
@@ -1326,12 +1330,14 @@ def test_delete_mapping_typed_without_accents_reaches_old_capitals_row(
     run = _delete(db, "Vorlan Melora")
     _pre(run.exit_code == 0, f"exit code 0: {run.shown!r}")
     assert f"{NAME_LINE}{old_caps}" in run.screen, run.shown  # expected failure
-    assert _names(db) == sorted([("Vorlan Mélora", PERSON), (old_title, PERSON)])
+    assert _names(db) == []
     assert _erased_ids(db) == sorted(
         [
             ids[("Vorlan Melora", PERSON)],
             ids[("VORLAN MÉLORA", PERSON)],
             ids[(old_caps, PERSON)],
+            ids[("Vorlan Mélora", PERSON)],
+            ids[(old_title, PERSON)],
         ]
     )
 
@@ -1877,15 +1883,17 @@ def _widened(tmp_path: Path, db: Path, text: str, typed: str) -> tuple[str, str]
 
 
 def test_widening_never_over_a_word_in_small_letters(tmp_path: Path, db: Path) -> None:
-    """G16 (AC1, AC3; QA's TEST-1019-04): « testar » in small letters is never
-    covered, as on main."""
+    """G16 (AC1, AC3; QA's TEST-1019-04; changed by Story 10.21, Lionel's
+    forms rule of 2026-11-01): « Zélvine testar » is a form of « ZELVINE
+    TESTAR » (a name of two words, small letters included), so it is
+    covered."""
     written, p = _widened(
         tmp_path,
         db,
         "Signé : ZÉLVINE TESTAR. Zélvine testar a signé.",
         "ZELVINE TESTAR",
     )
-    assert written == f"Signé : {p}. {p} testar a signé."
+    assert written == f"Signé : {p}. {p} a signé."
 
 
 def test_widening_over_capitals_form_of_accented_word(tmp_path: Path, db: Path) -> None:
