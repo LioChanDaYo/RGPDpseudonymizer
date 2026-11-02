@@ -33,7 +33,11 @@ from gdpr_pseudonymizer.core.custom_pseudonym import (
     untracked_custom_values,
 )
 from gdpr_pseudonymizer.core.mapping_key import mapping_key
-from gdpr_pseudonymizer.data.database import DatabaseSession, open_database
+from gdpr_pseudonymizer.data.database import (
+    DatabaseSession,
+    open_database,
+    pseudonym_lock,
+)
 from gdpr_pseudonymizer.data.models import Entity, Operation
 from gdpr_pseudonymizer.data.repositories.audit_repository import AuditRepository
 from gdpr_pseudonymizer.data.repositories.mapping_repository import (
@@ -1241,13 +1245,16 @@ class DocumentProcessor:
         try:
             with open_database(self.db_path, self.passphrase) as db_session:
                 ctx = self._init_processing_context(db_session)
-                self._reset_pseudonym_state(ctx)
-                resolve_result = self._resolve_pseudonyms(
-                    ctx,
-                    validated_entities,
-                    custom_pseudonyms=custom_pseudonyms,
-                    document_text=document_text,
-                )
+                # Story 10.22: the pseudonyms are chosen and saved under the
+                # database's write lock, one document at a time
+                with pseudonym_lock(db_session):
+                    self._reset_pseudonym_state(ctx)
+                    resolve_result = self._resolve_pseudonyms(
+                        ctx,
+                        validated_entities,
+                        custom_pseudonyms=custom_pseudonyms,
+                        document_text=document_text,
+                    )
                 pseudonymized_text = self._apply_replacements(
                     document_text, resolve_result.replacements
                 )
@@ -1301,13 +1308,16 @@ class DocumentProcessor:
                     custom_pseudonyms=custom_pseudonyms,
                     types_selected=entity_type_filter is not None,
                 )
-                self._reset_pseudonym_state(ctx)
-                resolve_result = self._resolve_pseudonyms(
-                    ctx,
-                    validated_entities,
-                    custom_pseudonyms=custom_pseudonyms,
-                    document_text=document_text,
-                )
+                # Story 10.22: the pseudonyms are chosen and saved under the
+                # database's write lock, one document at a time
+                with pseudonym_lock(db_session):
+                    self._reset_pseudonym_state(ctx)
+                    resolve_result = self._resolve_pseudonyms(
+                        ctx,
+                        validated_entities,
+                        custom_pseudonyms=custom_pseudonyms,
+                        document_text=document_text,
+                    )
                 pseudonymized_text = self._apply_replacements(
                     document_text, resolve_result.replacements
                 )
@@ -1364,13 +1374,16 @@ class DocumentProcessor:
                 # Story 10.15 (AC4): every name has its cell, before any
                 # pseudonym is stored
                 self._check_cells(tabular_doc, validated_entities)
-                self._reset_pseudonym_state(ctx)
-                resolve_result = self._resolve_pseudonyms(
-                    ctx,
-                    validated_entities,
-                    custom_pseudonyms=custom_pseudonyms,
-                    document_text=document_text,
-                )
+                # Story 10.22: the pseudonyms are chosen and saved under the
+                # database's write lock, one document at a time
+                with pseudonym_lock(db_session):
+                    self._reset_pseudonym_state(ctx)
+                    resolve_result = self._resolve_pseudonyms(
+                        ctx,
+                        validated_entities,
+                        custom_pseudonyms=custom_pseudonyms,
+                        document_text=document_text,
+                    )
 
                 self._apply_tabular_replacements(
                     tabular_doc,
@@ -1476,8 +1489,11 @@ class DocumentProcessor:
                 # Story 10.15 (AC4): every name has its cell, before any
                 # pseudonym is stored
                 self._check_cells(tabular_doc, validated_entities)
-                self._reset_pseudonym_state(ctx)
-                resolve_result = self._resolve_pseudonyms(ctx, validated_entities)
+                # Story 10.22: the pseudonyms are chosen and saved under the
+                # database's write lock, one document at a time
+                with pseudonym_lock(db_session):
+                    self._reset_pseudonym_state(ctx)
+                    resolve_result = self._resolve_pseudonyms(ctx, validated_entities)
 
                 self._apply_tabular_replacements(
                     tabular_doc,

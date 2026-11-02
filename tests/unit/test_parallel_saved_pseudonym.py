@@ -79,12 +79,6 @@ NOW_ANOTHER_NAMES = (
     "it, or a part of it, is now used for another name. Nothing was written."
 )
 
-XFAIL = pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 10.22: the pseudonyms are not chosen and saved under a lock",
-)
-
 
 @pytest.fixture(autouse=True)
 def _settings(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
@@ -367,7 +361,6 @@ def _rows_of(db: str, name: str) -> list[Entity]:
 # --- The expected failures --------------------------------------------------
 
 
-@XFAIL
 @pytest.mark.parametrize("suffix", [".txt", ".csv"], ids=["txt", "csv"])
 def test_two_workers_same_name_write_the_saved_pseudonym(
     tmp_path: Path, suffix: str
@@ -390,7 +383,6 @@ def test_two_workers_same_name_write_the_saved_pseudonym(
     assert (written_a, written_b) == (expected, expected)  # expected failure
 
 
-@XFAIL
 @pytest.mark.parametrize(
     ("name", "entity_type"),
     [("Zorbaville", "LOCATION"), ("Zorbtech", "ORG")],
@@ -416,7 +408,6 @@ def test_two_workers_place_and_organisation(
     assert (written_a, written_b) == (expected, expected)  # expected failure
 
 
-@XFAIL
 def test_last_name_alone_takes_the_saved_last_name(tmp_path: Path) -> None:
     """T3 (AC2): a last name written alone takes the saved row's last-name
     part."""
@@ -438,7 +429,6 @@ def test_last_name_alone_takes_the_saved_last_name(tmp_path: Path) -> None:
     assert written_a == expected  # expected failure
 
 
-@XFAIL
 def test_one_first_name_one_first_name_pseudonym(tmp_path: Path) -> None:
     """T4 (AC2): two full names with one real first name are saved with one
     first-name part."""
@@ -461,7 +451,6 @@ def test_one_first_name_one_first_name_pseudonym(tmp_path: Path) -> None:
     assert _written(tmp_path, "b", doc_b, names) == [saved[ZM].pseudonym_full]
 
 
-@XFAIL
 @pytest.mark.parametrize("theme", ["neutral_id", "neutral"])
 def test_two_people_never_share_a_pseudonym(tmp_path: Path, theme: str) -> None:
     """T5 (AC5, Lionel's Q2): two different people saved at once never share a
@@ -490,7 +479,6 @@ def test_two_people_never_share_a_pseudonym(tmp_path: Path, theme: str) -> None:
     assert _written(tmp_path, "b", doc_b, names) == [saved[VM].pseudonym_full]
 
 
-@XFAIL
 def test_desktop_document_then_worker(tmp_path: Path) -> None:
     """T6 (AC2, Lionel's Q1): a desktop finalization, then a batch worker, on
     one database."""
@@ -510,7 +498,6 @@ def test_desktop_document_then_worker(tmp_path: Path) -> None:
     assert (written_a, written_b) == (expected, expected)  # expected failure
 
 
-@XFAIL
 def test_custom_pseudonym_saved_first_is_written_by_the_worker(tmp_path: Path) -> None:
     """T7 (AC2, AC4, Lionel's Q1): the desktop saves a custom pseudonym; the
     worker that meets the name at the same moment writes it too."""
@@ -530,7 +517,6 @@ def test_custom_pseudonym_saved_first_is_written_by_the_worker(tmp_path: Path) -
     assert _written(tmp_path, "b", DOC_B, names) == [CUSTOM]
 
 
-@XFAIL
 def test_custom_pseudonym_after_a_worker_is_refused(tmp_path: Path) -> None:
     """T8 (AC4, Lionel's Q1): a worker saves the name first; the desktop's
     custom pseudonym for it is refused with 10.11's text, nothing written."""
@@ -553,7 +539,6 @@ def test_custom_pseudonym_after_a_worker_is_refused(tmp_path: Path) -> None:
     )
 
 
-@XFAIL
 def test_two_names_one_custom_pseudonym(tmp_path: Path) -> None:
     """T9 (AC4, Lionel's Q1): two desktop finalizations give one custom
     pseudonym to two names; the second is refused with 10.11's text."""
