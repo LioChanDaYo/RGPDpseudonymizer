@@ -513,7 +513,6 @@ def _left_after(
     return sorted(nfc(name) for name, _type in _names(db))
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError)
 def test_delete_one_word_never_erases_a_titled_name_with_another_accent(
     tmp_path: Path, db: Path
 ) -> None:
@@ -532,7 +531,6 @@ def test_delete_one_word_never_erases_a_titled_name_with_another_accent(
     assert left == [nfc(old)], left  # expected failure
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError)
 def test_delete_a_place_with_its_preposition_never_replays_another_accent(
     tmp_path: Path, db: Path
 ) -> None:
@@ -549,7 +547,6 @@ def test_delete_a_place_with_its_preposition_never_replays_another_accent(
     assert left == [nfc(_old("à Zorbâcon", LOCATION))], left  # expected failure
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError)
 def test_delete_replays_a_variant_saved_with_a_title(tmp_path: Path, db: Path) -> None:
     """K3 (AC3; P0-3, its « Michel Mérand » shape): « Maître Quovane Mérand »
     saved decomposed and as v2.2.0 damaged it (« Mai » + U+0302 + « tre
@@ -573,7 +570,6 @@ def test_delete_replays_a_variant_saved_with_a_title(tmp_path: Path, db: Path) -
     assert left == ["Éloria Mèzor"], left  # expected failure
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError)
 @pytest.mark.parametrize(
     ("typed", "other"), [("Du Prelis", "Du Prélis"), ("de Vorlanne", "de Vorlânne")]
 )

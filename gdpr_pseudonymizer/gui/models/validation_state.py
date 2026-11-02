@@ -72,7 +72,11 @@ def _holds(
     if key is None or key[1] != entity_type:
         return False
     name = key[0]
-    return is_form(name, text) or is_form(text, name) or is_form(written, name)
+    return (
+        is_form(name, text, entity_type)
+        or is_form(text, name, entity_type)
+        or is_form(written, name, entity_type)
+    )
 
 
 def _corrected_source(source: str) -> str:
@@ -458,7 +462,7 @@ class GUIValidationState(QObject):
             ):
                 rows.append(other)
                 continue
-            if not is_form(other_name[0], text):
+            if not is_form(other_name[0], text, entity_type):
                 continue
             if other_name != name:
                 places = self._occurrences(other)
@@ -468,6 +472,7 @@ class GUIValidationState(QObject):
                     is_form(
                         self._session.text_of(place)[place.start_pos : place.end_pos],
                         text,
+                        entity_type,
                     )
                     for place in places
                 ):
@@ -845,7 +850,7 @@ class GUIValidationState(QObject):
         found place keeps its own row and decision), and a place a row added
         by hand with the same name and type already holds.
         """
-        places = whole_word_places(text, self._session.document_text)
+        places = whole_word_places(text, self._session.document_text, entity_type)
         if (start_pos, end_pos) not in places:
             places.append((start_pos, end_pos))
             places.sort()
@@ -866,7 +871,7 @@ class GUIValidationState(QObject):
             for start, end in places
             if (start, end) not in held
             and not any(
-                is_form(found, text)
+                is_form(found, text, entity_type)
                 for found in self._found_places.get((start, end, entity_type), [])
             )
         ]

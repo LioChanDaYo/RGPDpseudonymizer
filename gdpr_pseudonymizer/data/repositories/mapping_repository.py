@@ -15,7 +15,6 @@ from gdpr_pseudonymizer.core.mapping_key import (
 from gdpr_pseudonymizer.data.models import Entity
 from gdpr_pseudonymizer.exceptions import DatabaseError, DuplicateEntityError
 from gdpr_pseudonymizer.utils.french_patterns import (
-    FRENCH_PREPOSITION_PATTERN,
     FRENCH_TITLE_PATTERN,
     strip_french_titles,
 )
@@ -34,26 +33,20 @@ def _name_forms(full_name: str, entity_type: str) -> list[str]:
     return saved_name_forms(full_name, entity_type)
 
 
-def _same_or_form(text: str, name: str) -> bool:
+def _same_or_form(text: str, name: str, entity_type: str) -> bool:
     """Whether a saved name is erased with ``name`` (Story 10.19, AC4): the
     same letters whatever their capitals, or a form of it (``is_form``:
     written entirely in capitals, accents set aside; Story 10.21: a name of
-    two words or more, accents and capitals set aside).
-
-    Story 10.21 (G7): a place name saved with its preposition (« à
-    Zorbaville ») whose name is one word is read as a name of one word, so
-    delete-mapping « ZORBAVILLE » never erases « à Zòrbaville », another
-    place under the one-word rule."""
+    two words or more, accents and capitals set aside), for the row's type:
+    how many words the name has is ``name_words`` (v3.1: a title or a
+    place's preposition is not a word of the name, so delete-mapping
+    « ZORBAVILLE » never erases « à Zòrbaville », another place under the
+    one-word rule)."""
     # Imported here: the data layer reads the forms rule of the validation
     # models, which import the core (no gui/ import).
     from gdpr_pseudonymizer.validation.models import is_form
 
-    if text.lower() == name.lower():
-        return True
-    bare = re.sub(FRENCH_PREPOSITION_PATTERN, "", name, flags=re.IGNORECASE)
-    if bare.strip() != name.strip() and len(bare.split()) < 2:
-        return is_form(text, name, one_word=True)
-    return is_form(text, name)
+    return text.lower() == name.lower() or is_form(text, name, entity_type)
 
 
 def _one_mark(text: str) -> str:
@@ -579,25 +572,38 @@ class SQLiteMappingRepository(MappingRepository):
         rows of it included, so no row an earlier version saved for a variant
         it erases is kept: delete-mapping « Vorlan Melora » erases « Vorlan
         Mélora » and the row v2.2.0 saved damaged for it (« Vorlan » +
-        U+0301 + « lora »). A name of one word reaches no variant. Each row
-        is returned once, the name's own rows first.
+        U+0301 + « lora »). Each row is returned once, the name's own rows
+        first.
+
+        v3.1 (the orchestrator's ruling on the first Codex review): each row
+        is read with its own type and ``name_words``. A name of one word for
+        that type (a title, or a place's preposition, set aside: « à
+        Zorbacon ») reaches no variant, and a variant is the same name once
+        both are read by ``name_words``: « Maître Quovane Mérand » is a
+        variant of « Quovane Merand ».
         """
         # Imported here: the data layer reads the forms rule of the
         # validation models, which import the core (no gui/ import).
-        from gdpr_pseudonymizer.validation.models import fold
+        from gdpr_pseudonymizer.validation.models import fold, name_words
 
         rows = self._query_name_any_capitals(full_name)
         name = composed(full_name)
-        if len(name.split()) < 2:
-            return rows
         found = {row.id for row in rows}
         searched = {name}
         for row in list(rows):
+            form_type = "LOCATION" if row.entity_type == "LOCATION" else "PERSON"
+            words = name_words(name, form_type)
+            if len(words) < 2:
+                continue
             stored = self._encryption.decrypt(row.full_name)
             if stored is None:
                 continue
             variant = composed(stored)
-            if variant in searched or fold(variant).lower() != fold(name).lower():
+            reduced = " ".join(name_words(variant, form_type))
+            if (
+                variant in searched
+                or fold(reduced).lower() != fold(" ".join(words)).lower()
+            ):
                 continue
             searched.add(variant)
             for extra in self._query_name_any_capitals(variant):
@@ -742,8 +748,8 @@ class SQLiteMappingRepository(MappingRepository):
                 continue
             if fold(_one_mark(text)).lower() not in letters:
                 continue
-            if _same_or_form(text, name) or any(
-                (keeps or marked) and _same_or_form(text, form)
+            if _same_or_form(text, name, form_type) or any(
+                (keeps or marked) and _same_or_form(text, form, form_type)
                 for form, keeps in old_forms[form_type]
             ):
                 rows.append(row)

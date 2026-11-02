@@ -13,6 +13,10 @@ from typing import TypeAlias
 
 from gdpr_pseudonymizer.core.mapping_key import mapping_key
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
+from gdpr_pseudonymizer.utils.french_patterns import (
+    strip_french_prepositions,
+    strip_french_titles,
+)
 from gdpr_pseudonymizer.utils.text_form import not_after_word, not_before_word
 
 # Story 10.15: the source of a place added by hand with [A], the marker the
@@ -54,7 +58,21 @@ def fold(text: str) -> str:
     return "".join(folded)
 
 
-def is_form(place: str, text: str, *, one_word: bool = False) -> bool:
+def name_words(text: str, entity_type: str = "PERSON") -> list[str]:
+    """The words of a name, for the forms rule (Story 10.21, v3.1; the
+    orchestrator's ruling on the first Codex review, "one definition of how
+    many words a name has"): its words once the old steps take a leading
+    preposition off a place's name (``strip_french_prepositions``), or a
+    leading title off any other name (``strip_french_titles``); every type
+    but LOCATION is read as a person's, as Story 10.20 reads its forms. So
+    « Maître Barré » and « à Zorbaville » are names of one word, and « Du
+    Pré », a person, a name of two."""
+    if entity_type == "LOCATION":
+        return strip_french_prepositions(text).split()
+    return strip_french_titles(text).split()
+
+
+def is_form(place: str, text: str, entity_type: str = "PERSON") -> bool:
     """Whether ``place`` is written as a form of the name ``text`` (Story
     10.17, AC13 (a); Lionel, 2026-10-19, "A: Fix, capitals only", in the PO's
     wording, and his 10.19 Q3, "A: Reach it too").
@@ -71,14 +89,16 @@ def is_form(place: str, text: str, *, one_word: bool = False) -> bool:
     accents and capitals set aside, any capitals, small letters included:
     « ELORINE DU PRELIS », « Elorine du Prelis » and « élorine du prélis »
     are forms of « Élorine du Prélis ». The rule above stays for a name of
-    one word, and for a name the caller reads as one word (``one_word``: a
-    place name saved with its preposition, « à Zorbaville »).
+    one word. How many words a name has is ``name_words``, for its type
+    (v3.1): « Maître Barré » and « à Zorbaville » are names of one word. The
+    place is read the same way: « à Zorbaville », a place of one word, is
+    never a form of « a Zorbaville », typed, a name of two.
     """
     if place == text:
         return True
     if (
-        not one_word
-        and len(text.split()) > 1
+        len(name_words(text, entity_type)) > 1
+        and len(name_words(place, entity_type)) > 1
         and fold(place).lower() == fold(text).lower()
     ):
         return True
@@ -91,7 +111,9 @@ def is_form(place: str, text: str, *, one_word: bool = False) -> bool:
     return fold(place).lower() == fold(text).lower()
 
 
-def whole_word_places(text: str, document_text: str) -> list[tuple[int, int]]:
+def whole_word_places(
+    text: str, document_text: str, entity_type: str = "PERSON"
+) -> list[tuple[int, int]]:
     """The places of the name ``text`` in ``document_text`` (Story 10.17,
     AC13 (a)): every whole-word form of it (``is_form``), read left to right,
     not overlapping each other. An empty text has no place.
@@ -118,7 +140,7 @@ def whole_word_places(text: str, document_text: str) -> list[tuple[int, int]]:
         if match is None:
             return places
         start, end = match.span()
-        if is_form(document_text[start:end], text):
+        if is_form(document_text[start:end], text, entity_type):
             places.append((start, end))
             position = end
         else:
@@ -410,7 +432,7 @@ class ValidationSession:
                 context_label=label,
             )
             for label, unit in units
-            for start, end in whole_word_places(text, unit)
+            for start, end in whole_word_places(text, unit, entity_type)
         ]
 
     def is_listed_place(self, place: DetectedEntity) -> bool:
@@ -427,9 +449,9 @@ class ValidationSession:
         written = self.text_of(place)[place.start_pos : place.end_pos]
         return any(
             (
-                is_form(review.entity.text, place.text)
-                or is_form(place.text, review.entity.text)
-                or is_form(written, review.entity.text)
+                is_form(review.entity.text, place.text, place.entity_type)
+                or is_form(place.text, review.entity.text, place.entity_type)
+                or is_form(written, review.entity.text, place.entity_type)
             )
             and review.entity.entity_type == place.entity_type
             and review.entity.start_pos == place.start_pos
@@ -726,7 +748,8 @@ class ValidationSession:
                 if first.unique_key[1] != group.unique_key[1]:
                     continue
                 if all(
-                    is_form(text, other) or is_form(other, text)
+                    is_form(text, other, group.unique_key[1])
+                    or is_form(other, text, group.unique_key[1])
                     for text in texts
                     for other in joined_texts
                 ):
