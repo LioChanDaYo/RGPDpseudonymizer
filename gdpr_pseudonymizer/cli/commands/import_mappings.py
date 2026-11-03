@@ -69,7 +69,7 @@ def import_mappings_command(
 
     Conflict handling:
     - By default, duplicate entities (same full_name + type) are skipped
-    - Use --prompt-duplicates to be prompted for each conflict
+    - Use --no-skip-duplicates to be prompted for each conflict
 
     Examples:
         # Import from another database
@@ -79,7 +79,7 @@ def import_mappings_command(
         gdpr-pseudo import-mappings old_project.db --db new_project.db
 
         # Prompt for duplicate handling
-        gdpr-pseudo import-mappings old.db --prompt-duplicates
+        gdpr-pseudo import-mappings old.db --no-skip-duplicates
     """
     try:
         # Validate target database exists

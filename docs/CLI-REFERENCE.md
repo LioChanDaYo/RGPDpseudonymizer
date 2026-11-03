@@ -397,7 +397,7 @@ gdpr-pseudo import-mappings SOURCE_DB [OPTIONS]
 | `--passphrase TEXT` | `-p` | (prompt) | Target database passphrase |
 | `--source-passphrase TEXT` | | (prompt) | Source database passphrase |
 | `--skip-duplicates` | | Yes | Skip duplicate entities |
-| `--prompt-duplicates` | | | Prompt for each duplicate |
+| `--no-skip-duplicates` | | | Prompt for each duplicate |
 
 **Examples:**
 ```bash
@@ -408,7 +408,7 @@ gdpr-pseudo import-mappings old_project.db
 gdpr-pseudo import-mappings old_project.db --db new_project.db
 
 # Prompt for duplicate handling
-gdpr-pseudo import-mappings old.db --prompt-duplicates
+gdpr-pseudo import-mappings old.db --no-skip-duplicates
 ```
 
 ---
