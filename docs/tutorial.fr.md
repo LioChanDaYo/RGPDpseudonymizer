@@ -478,7 +478,7 @@ Combinez les appariements de plusieurs bases de données :
 poetry run gdpr-pseudo import-mappings old_project.db --db new_project.db
 
 # Demander confirmation pour chaque doublon (au lieu de passer automatiquement)
-poetry run gdpr-pseudo import-mappings old_project.db --prompt-duplicates
+poetry run gdpr-pseudo import-mappings old_project.db --no-skip-duplicates
 ```
 
 ### Détruire une base de données de manière sécurisée

@@ -478,7 +478,7 @@ Combine mappings from multiple databases:
 poetry run gdpr-pseudo import-mappings old_project.db --db new_project.db
 
 # Prompt for each duplicate (instead of auto-skipping)
-poetry run gdpr-pseudo import-mappings old_project.db --prompt-duplicates
+poetry run gdpr-pseudo import-mappings old_project.db --no-skip-duplicates
 ```
 
 ### Securely Destroy a Database

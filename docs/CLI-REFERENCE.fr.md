@@ -397,7 +397,7 @@ gdpr-pseudo import-mappings BASE_SOURCE [OPTIONS]
 | `--passphrase TEXTE` | `-p` | (saisie interactive) | Mot de passe de la base cible |
 | `--source-passphrase TEXTE` | | (saisie interactive) | Mot de passe de la base source |
 | `--skip-duplicates` | | Oui | Ignore les doublons |
-| `--prompt-duplicates` | | | Demande confirmation pour chaque doublon |
+| `--no-skip-duplicates` | | | Demande confirmation pour chaque doublon |
 
 **Exemples :**
 ```bash
@@ -408,7 +408,7 @@ gdpr-pseudo import-mappings old_project.db
 gdpr-pseudo import-mappings old_project.db --db new_project.db
 
 # Gérer les doublons au cas par cas
-gdpr-pseudo import-mappings old.db --prompt-duplicates
+gdpr-pseudo import-mappings old.db --no-skip-duplicates
 ```
 
 ---
