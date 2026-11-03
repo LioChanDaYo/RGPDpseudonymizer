@@ -199,7 +199,9 @@ Non. Des exécutables autonomes sont disponibles pour Windows (installeur .exe),
 
 **v2.1 (T1 2026) :** Améliorations GUI, support Excel/CSV, thème Neutral ID, précision NER
 
-**v2.2 (T3 2026 — Actuelle) :** Choix du modèle spaCy, changement de type d'entité en validation CLI, corrections de délimitation des entités
+**v2.2 (T3 2026) :** Choix du modèle spaCy, changement de type d'entité en validation CLI, corrections de délimitation des entités
+
+**v2.3 (T4 2026 — Actuelle) :** Détection plus précise, noms ajoutés ou corrigés remplacés à chaque endroit, pseudonymes personnalisés utilisés, effacement complet sans nom dans le journal d'effacement, lots plus sûrs
 
 **v3.0 (2027+) :** Précision NLP et automatisation
 - Modèle NER français affiné (cible F1 de 70-85 %)

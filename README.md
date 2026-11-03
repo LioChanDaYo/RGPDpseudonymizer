@@ -14,13 +14,27 @@ Transform sensitive French documents for safe AI analysis with local processing,
 
 ---
 
-## What's New in v2.2
+## What's New in v2.3
+
+- **Names you add are replaced everywhere** — A name you add by hand (`[A]` in the command line, "Ajouter comme entité" in the desktop app) is now replaced at every place it appears, also where it is written in capitals or in capitals without accents ("ZORBAL", "HELENE"), never in a word written in small letters ("Petit" leaves "petit"). A name of two words or more is found whatever its accents and capitals.
+- **Corrections cover the whole name** — Correcting a name or changing its type now applies at every place, in the desktop app as in the command line, in Excel and CSV cells too, and with the full name you type: correcting "Élorine" to "Élorine du Prélis" no longer leaves "du Prélis" in clear.
+- **Your own pseudonym is used** — A pseudonym you choose ("Changer le pseudonyme", `[C]`) is now written in the file and kept for later documents. Before, a generated one was used instead.
+- **Complete erasure** — `delete-mapping "Name"` deletes every saved pseudonym of that name: each type, and each way it was written with capitals or accents. The erasure log no longer keeps the erased name, and the names earlier versions wrote there are removed the first time v2.3 opens the database.
+- **Safer batch runs** — In desktop batch review, each document keeps its own decisions and result when you move between documents, and a running batch can no longer mix with another run. When several documents of a `batch` meet the same new name at the same moment, it gets one pseudonym.
+- **No name left in clear without warning** — Names you neither accepted nor rejected are announced before the file is written. When the detector finds no new name, the command line asks whether to add one it missed.
+- **Same name, two types** — "Zorbaville" the town and "Zorbaville" the company now get separate pseudonyms. Your mapping database is converted once, the first time v2.3 opens it; after that, do not open it with v2.2 or older (copy it first if you may need to go back).
+- **More precise detection** — One candidate per name instead of fragments; job titles (CTO, DRH, "VP Europe") are no longer offered as organisations; names no longer run into the next line; fewer false places; names with particles ("van der", "Le") stay whole; people in greetings, organisations followed by their country, short forms and aliases defined in a contract are now offered; accents stored as a separate mark are handled. On a blind final exam of 30 unseen documents, detection scores F1 61.4% (see [Detection accuracy](#detection-accuracy-epic-10-october-2026)).
+
+<details>
+<summary>v2.2 highlights</summary>
 
 - **Choose the spaCy model** — `--model` / `pseudonymization.model` accept any spaCy package name (e.g. `en_core_web_trf` for English); `spacy` still selects the French `fr_core_news_lg`. The model only drives NLP detection: regex patterns, dictionaries and pseudonym libraries stay French. See the [CLI Reference](docs/CLI-REFERENCE.md).
 - **Retype entities during CLI validation (`[T]`)** — Switch a detected entity between PERSON, LOCATION and ORG for every occurrence, instead of rejecting and re-adding it
 - **Cleaner entity spans** — Editing with `[E]` no longer erases neighbouring text; "Last, First" matching now requires a known first name; timestamps and stray punctuation are trimmed from NER span edges; names with non-French letters ("María", "Yılmaz") and hyphenated names after titles are detected whole
 - **Fresh `pip install` fixed** — v2.1.3 crashed on import when pip resolved SQLAlchemy 2.1; SQLAlchemy is now capped below 2.1
 - **Audit log records the real model** — e.g. `fr_core_news_lg-3.8.0` instead of `spacy-unknown`
+
+</details>
 
 <details>
 <summary>v2.1 highlights</summary>
@@ -47,9 +61,9 @@ Pre-built standalone executables are available for Windows, macOS, and Linux. No
 
 | Platform | File | Notes |
 |----------|------|-------|
-| **Windows** | `gdpr-pseudonymizer-2.2.0-windows-setup.exe` | Run the installer. Adds Start Menu shortcut. |
-| **macOS (Apple Silicon)** | `gdpr-pseudonymizer-2.2.0-macos-arm64.dmg` | Open DMG, drag to Applications. |
-| **Linux** | `gdpr-pseudonymizer-2.2.0-linux.AppImage` | `chmod +x` then run. |
+| **Windows** | `gdpr-pseudonymizer-2.3.0-windows-setup.exe` | Run the installer. Adds Start Menu shortcut. |
+| **macOS (Apple Silicon)** | `gdpr-pseudonymizer-2.3.0-macos-arm64.dmg` | Open DMG, drag to Applications. |
+| **Linux** | `gdpr-pseudonymizer-2.3.0-linux.AppImage` | `chmod +x` then run. |
 
 > **Intel Macs:** no DMG is published. GitHub retired its Intel macOS runners, and an
 > Apple Silicon runner cannot cross-build a working x86_64 bundle. Install with
@@ -127,7 +141,7 @@ GDPR Pseudonymizer is a **privacy-first CLI and GUI tool** that combines AI effi
 
 ## 🚀 Quick Start
 
-**Status:** 🎉 **v2.2.0** (September 2026) — spaCy Model Choice, Entity Retyping & Span Fixes
+**Status:** 🎉 **v2.3.0** (November 2026) — Detection Precision, Corrections at Every Place & Complete Erasure
 
 ### Getting Started
 
@@ -149,7 +163,7 @@ pip install gdpr-pseudonymizer[excel]
 pip install gdpr-pseudonymizer[formats]
 ```
 
-### What v2.2 Delivers
+### What v2.3 Delivers
 
 - 🖥️ **Desktop GUI** — Visual entity validation with drag-and-drop, batch dashboard, and database management
 - 📦 **Standalone executables** — Windows .exe, macOS .dmg (Apple Silicon), Linux AppImage — no Python required
@@ -164,8 +178,10 @@ pip install gdpr-pseudonymizer[formats]
 - 🎯 **NER accuracy** — LOCATION false-negative rate reduced from 27% to 13% via regex expansion & POS disambiguation
 - 🧠 **Choice of spaCy model** — French by default; any spaCy model for detection (e.g. `--model en_core_web_trf`)
 - 🏷️ **Entity retyping** — Change an entity's type (PERSON/LOCATION/ORG) during CLI validation with `[T]`
+- ✍️ **Corrections at every place** — Names you add, correct or retype are replaced wherever they appear, also where written in capitals
+- 🗑️ **Complete erasure** — `delete-mapping` erases every saved pseudonym of a name, and the erasure log keeps no name
 
-**What v2.2 does NOT deliver:**
+**What v2.3 does NOT deliver:**
 - ❌ Fully automatic "set and forget" processing
 - ❌ 85%+ AI accuracy (current: F1 61.4% on unseen documents, 82.6% on our development corpus — we plan to raise it)
 - ❌ Optional validation mode (validation is mandatory)
@@ -180,7 +196,9 @@ pip install gdpr-pseudonymizer[formats]
 
 **v2.1 (Q1 2026):** GUI polish, Excel/CSV support, neutral ID theme, NER accuracy improvements, keyboard shortcuts help
 
-**v2.2 (Q3 2026) — CURRENT RELEASE:** Choice of spaCy model, entity retyping in CLI validation, entity-span accuracy fixes, fresh-install fix (SQLAlchemy < 2.1)
+**v2.2 (Q3 2026):** Choice of spaCy model, entity retyping in CLI validation, entity-span accuracy fixes, fresh-install fix (SQLAlchemy < 2.1)
+
+**v2.3 (Q4 2026) — CURRENT RELEASE:** Detection precision (Epic 10), benchmark repair and blind final exam, names added or corrected replaced at every place, custom pseudonyms used, complete erasure with no name in the erasure log, safer batch runs
 
 **v3.0 (2027+):** NLP accuracy & automation
 - Fine-tuned French NER model (70-85% F1 target, up from 61.4% on unseen documents today)
@@ -511,7 +529,7 @@ The validation UI provides an intuitive keyboard-driven interface for reviewing 
 
 ## 🛠️ Development Status
 
-**Epics 1-7 Complete** — current release v2.2.0 (September 2026): spaCy model choice, entity retyping, entity-span fixes. v2.1.0 (March 2026) closed Epic 7.
+**Epics 1-7 and 10 Complete** — current release v2.3.0 (November 2026) closed Epic 10: detection precision, corrections at every place, complete erasure. v2.1.0 (March 2026) closed Epic 7.
 
 - ✅ **Epic 1:** Foundation & NLP Validation (9 stories) — spaCy integration, validation UI, hybrid detection, entity deduplication
 - ✅ **Epic 2:** Core Pseudonymization Engine (9 stories) — pseudonym libraries, encryption, audit logging, batch processing, GDPR 1:1 mapping
@@ -539,6 +557,7 @@ The validation UI provides an intuitive keyboard-driven interface for reviewing 
   - ✅ Story 7.5: NER Accuracy Regex Expansion & POS Disambiguation
   - ✅ Story 7.6: Quality & Compatibility Integration Tests
   - ✅ Story 7.7: v2.1 Release Preparation
+- ✅ **Epic 10:** v2.3 Detection Precision Quick Wins — benchmark repair and held-out set, blind final exam with confidence ranges, overlap and boundary fixes, fewer false places, greetings and organisation-plus-country handling, type-aware mappings, names added or corrected replaced at every place, custom pseudonyms, erasure log without names, batch fixes, v2.3 release
 - **Total:** 60 stories, 1670+ tests, 86%+ coverage, all quality gates green
 
 ---
@@ -722,7 +741,7 @@ The integration test suite covers:
 
 | Metric | Value | Status |
 |--------|-------|--------|
-| **Development Progress** | v2.2.0 | ✅ Epics 1-7 complete |
+| **Development Progress** | v2.3.0 | ✅ Epics 1-7 and 10 complete |
 | **Stories Complete** | 60 (Epics 1-7) | ✅ All epics complete |
 | **LLM Utility (NFR10)** | 4.27/5.0 (85.4%) | ✅ PASSED (threshold: 80%) |
 | **Installation Success (NFR3)** | 87.5% (7/8 platforms) | ✅ PASSED (threshold: 85%) |
@@ -762,4 +781,4 @@ The integration test suite covers:
 
 ---
 
-**Last Updated:** 2026-10-01 (v2.2.0 — spaCy model choice, entity retyping, entity-span fixes)
+**Last Updated:** 2026-11-03 (v2.3.0 — detection precision, corrections at every place, complete erasure)

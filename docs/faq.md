@@ -199,7 +199,9 @@ No. Standalone executables are available for Windows (.exe installer), macOS (.d
 
 **v2.1 (Q1 2026):** GUI polish, Excel/CSV support, neutral ID theme, NER accuracy improvements
 
-**v2.2 (Q3 2026 — Current):** Choice of spaCy model, entity retyping in CLI validation, entity-span fixes
+**v2.2 (Q3 2026):** Choice of spaCy model, entity retyping in CLI validation, entity-span fixes
+
+**v2.3 (Q4 2026 — Current):** Detection precision, names added or corrected replaced at every place, custom pseudonyms used, complete erasure with no name in the erasure log, safer batch runs
 
 **v3.0 (2027+):** NLP accuracy and automation
 - Fine-tuned French NER model (70-85% F1 target)
