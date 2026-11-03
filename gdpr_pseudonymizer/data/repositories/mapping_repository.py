@@ -33,15 +33,36 @@ def _name_forms(full_name: str, entity_type: str) -> list[str]:
     return saved_name_forms(full_name, entity_type)
 
 
-def _same_or_form(text: str, name: str) -> bool:
+def _same_or_form(text: str, name: str, entity_type: str) -> bool:
     """Whether a saved name is erased with ``name`` (Story 10.19, AC4): the
     same letters whatever their capitals, or a form of it (``is_form``:
-    written entirely in capitals, accents set aside)."""
+    written entirely in capitals, accents set aside; Story 10.21: a name of
+    two words or more, accents and capitals set aside), for the row's type:
+    how many words the name has is ``name_words`` (v3.1: a title or a
+    place's preposition is not a word of the name, so delete-mapping
+    « ZORBAVILLE » never erases « à Zòrbaville », another place under the
+    one-word rule)."""
     # Imported here: the data layer reads the forms rule of the validation
     # models, which import the core (no gui/ import).
     from gdpr_pseudonymizer.validation.models import is_form
 
-    return text.lower() == name.lower() or is_form(text, name)
+    return text.lower() == name.lower() or is_form(text, name, entity_type)
+
+
+def _variant_of(text: str, name: str, entity_type: str) -> bool:
+    """Whether a saved name is a variant of ``name`` (Story 10.21, P9; the
+    orchestrator's rulings on the two Codex reviews): ``name`` has two words
+    or more for the row's type (``name_words``), and the saved name has the
+    same words, accents and capitals aside, once both are reduced the same
+    way (a title, or a place's preposition, set aside). An extra word is
+    never a variant."""
+    # Imported here: the data layer reads the forms rule of the validation
+    # models, which import the core (no gui/ import).
+    from gdpr_pseudonymizer.validation.models import fold, name_words
+
+    words = name_words(name, entity_type)
+    reduced = " ".join(name_words(text, entity_type))
+    return len(words) > 1 and fold(reduced).lower() == fold(" ".join(words)).lower()
 
 
 def _one_mark(text: str) -> str:
@@ -556,6 +577,70 @@ class SQLiteMappingRepository(MappingRepository):
         ]
 
     def _query_by_full_name_any_capitals(self, full_name: str) -> list[Entity]:
+        """Stored (encrypted) rows of a plaintext full name and of each of its
+        variants found saved (Story 10.21, AC3, P9; the orchestrator's
+        ruling).
+
+        A name of two words or more reaches its variants: the same letters,
+        accents and capitals set aside (Lionel's rule of 2026-11-01,
+        ``is_form``). Each variant found among the rows of the name
+        (``_query_name_any_capitals``) is searched the same way, 10.20's old
+        rows of it included, so no row an earlier version saved for a variant
+        it erases is kept: delete-mapping « Vorlan Melora » erases « Vorlan
+        Mélora » and the row v2.2.0 saved damaged for it (« Vorlan » +
+        U+0301 + « lora »). Each row is returned once, the name's own rows
+        first.
+
+        v3.1 (the orchestrator's ruling on the first Codex review): each row
+        is read with its own type and ``name_words``. A name of one word for
+        that type (a title, or a place's preposition, set aside: « à
+        Zorbacon ») reaches no variant, and a variant is the same name once
+        both are read by ``name_words``: « Maître Quovane Mérand » is a
+        variant of « Quovane Merand ».
+        """
+        rows = self._query_name_any_capitals(full_name)
+        name = composed(full_name)
+        found = {row.id for row in rows}
+        searched = {name}
+        for row in list(rows):
+            form_type = "LOCATION" if row.entity_type == "LOCATION" else "PERSON"
+            stored = self._encryption.decrypt(row.full_name)
+            if stored is None:
+                continue
+            variant = composed(stored)
+            if variant in searched or not _variant_of(variant, name, form_type):
+                continue
+            searched.add(variant)
+            for extra in self._query_name_any_capitals(variant):
+                text = self._encryption.decrypt(extra.full_name)
+                # Story 10.21, v3.3 (the third Codex review): a replay never
+                # reaches further than the name: a row it adds is a variant of
+                # the name typed, or one an earlier version saved (an accent
+                # mark kept apart), as 10.20 reads its old rows
+                if (
+                    extra.id in found
+                    or text is None
+                    or not (
+                        _variant_of(
+                            composed(text),
+                            name,
+                            # Story 10.21, v3.4 (the fourth Codex review):
+                            # the added row read with its own type
+                            (
+                                "LOCATION"
+                                if extra.entity_type == "LOCATION"
+                                else "PERSON"
+                            ),
+                        )
+                        or any(is_mark(char) for char in text)
+                    )
+                ):
+                    continue
+                found.add(extra.id)
+                rows.append(extra)
+        return rows
+
+    def _query_name_any_capitals(self, full_name: str) -> list[Entity]:
         """Stored (encrypted) rows of a plaintext full name, whatever its type
         or its capitals (Story 10.19, AC4).
 
@@ -602,7 +687,7 @@ class SQLiteMappingRepository(MappingRepository):
         """
         # Imported here: the data layer reads the forms rule of the
         # validation models, which import the core (no gui/ import).
-        from gdpr_pseudonymizer.validation.models import fold
+        from gdpr_pseudonymizer.validation.models import capitals_form, fold
 
         rows = self._query_by_full_name(full_name)
         found = {row.id for row in rows}
@@ -691,9 +776,20 @@ class SQLiteMappingRepository(MappingRepository):
                 continue
             if fold(_one_mark(text)).lower() not in letters:
                 continue
-            if _same_or_form(text, name) or any(
-                (keeps or marked) and _same_or_form(text, form)
-                for form, keeps in old_forms[form_type]
+            # Story 10.21, v3.2 (the second Codex review): a form the lookup
+            # generates from the name (10.20's, a « Maître » or an « à » put
+            # in) is compared under 10.20's own rule, never Lionel's, so
+            # « Quovane Maitre Zorbal » is never a form of « Quovane Zorbal »'s
+            # « Quovane Maître Zorbal »; a row v2.2.0 saved decomposed is
+            # reached when it is a variant of the name (``_variant_of``)
+            if (
+                _same_or_form(text, name, form_type)
+                or (marked and _variant_of(text, name, form_type))
+                or any(
+                    (keeps or marked)
+                    and (text.lower() == form.lower() or capitals_form(text, form))
+                    for form, keeps in old_forms[form_type]
+                )
             ):
                 rows.append(row)
         return rows

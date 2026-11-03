@@ -866,7 +866,9 @@ class ValidationWorkflow:
             pos = document_text.find(new_text, pos + 1, window_end)
         low = max(0, window_start - 1)
         high = min(len(document_text), window_end + 1)
-        for start, end in whole_word_places(new_text, document_text[low:high]):
+        for start, end in whole_word_places(
+            new_text, document_text[low:high], entity.entity_type
+        ):
             start, end = start + low, end + low
             if (
                 window_start <= start

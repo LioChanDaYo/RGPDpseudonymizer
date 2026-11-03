@@ -1,0 +1,165 @@
+schema: 1
+story: '10.21'
+story_title: 'One Forms Rule for Names of Two Words or More'
+scope: 'Re-check 5 (last) after Task 10: PR #114 at head 74b956e on main 0be4073. Commits reviewed: story v3.4 c3a2f22, tests first e20974d (K7, strict xfail), fix 49ea628 (a row P9''s replay adds is read by _variant_of with its own type), record 74b956e. Round 4 was QA''s PASS at 8292133 (56eea8e); Codex review 4 then found one P0 (a PERSON replay erasing a LOCATION « Du Pré »). The orchestrator''s final stopping rule: a finding that leaves no name in clear goes to the Backlog with its realism and the story ships; only a name left in clear, or an erasure a real user would plausibly hit, reopens it. Codex review 5 runs in parallel; QA did not read it. QA folder: rgpd-analysis/r1021/qa (tree-e20974d, tree-74b956e, probes/, logs/, mut5/).'
+gate: PASS
+status_reason: 'Codex review 4''s case is fixed on the real delete-mapping: deleting « Du Prelis » keeps the LOCATION « Du Prélis », as on main. Every other probe case (K1 to K6, BKL-1021-01''s R3e, « de Vorlanne », Lionel''s examples, the review paths), real text, the 1,699-name delete, finding 2 and the probe sets are identical to 8292133. No name is left in clear anywhere QA looked; every open note is low or Backlog.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-11-02T20:59:41Z'
+
+waiver: { active: false }
+
+merge_blockers: []
+
+merge_notes:
+  - 'Under the orchestrator''s final stopping rule, every open note below leaves no name in clear and is low or Backlog; none is an erasure a real user would plausibly hit.'
+  - 'QA never merges. The merge waits for the read-only Codex review 2 (AC9) and for Lionel.'
+  - 'This gate commit (docs only) starts its own CI run on the PR.'
+
+top_issues:
+  - id: 'BKL-1021-01'
+    severity: info
+    finding: 'Stopping-rule class (legacy title row, « Maitre » as a name word, v2.2.0 decomposed row): Backlog, no name left in clear. The replay filter keeps every old row the variant''s search reaches. So when the other person''s « MAITRE Quovane Mérand » was itself saved by v2.2.0 (decomposed), deleting « Quovane Mérand » with a v2.2.0 « Maître Quovane Mérand » saved erases it too (probe R3e; main keeps it). Realism: rarer than Codex review 3''s case, which Codex called uncommon: it also needs that person saved by v2.2.0. The row is listed before the confirmation.'
+    suggested_action: 'Backlog, by the orchestrator''s stopping rule.'
+    refs: ['gdpr_pseudonymizer/data/repositories/mapping_repository.py:614-630', 'rgpd-analysis/r1021/qa/probes/test_qa1021_examples.py (R3e)']
+    suggested_owner: po
+  - id: 'TEST-1021-03'
+    severity: low
+    finding: 'Mutant Q03 survives: the filter''s _variant_of half (a composed variant reached only through the replay, such as « Maître François Chambardon » through « François Chambardon » in QA''s database of detected names) is not pinned by a committed test; QA''s 1,699-name delete run still erases it at the head.'
+    suggested_action: 'Optional guard.'
+    refs: ['rgpd-analysis/r1021/qa/mut4/Q03_old_rows_only']
+    suggested_owner: dev
+  - id: 'TEST-1021-02'
+    severity: low
+    finding: 'Unchanged at 81ba62b (the review paths are untouched by Task 8). No committed test pins the type on the review paths. Eight mutants that drop it survive (whole_word_places, _reached_span, places_of, _join_forms, _holds, _action_rows, _new_places, is_listed_place); K1 to K4 cover delete-mapping only. Today the behaviour is right (QA''s probes: [A] « à Zorbacon » as a LOCATION keeps « à Zorbâcon », and « Maître Zorbé » keeps « Maître Zorbe », in the CLI, single and batch; at 836e640 both were reached). Realism of what a regression would bring back: unlikely, two one-word places or people one accent apart, added by hand with a preposition or a title.'
+    suggested_action: 'Optional: one CLI and one desktop guard ([A] « à Zorbacon », LOCATION; add « Maître Zorbé »).'
+    refs: ['rgpd-analysis/r1021/qa/mut2/N09_wwp_type_ignored', 'rgpd-analysis/r1021/qa/mut2/N15_new_places_no_type', 'rgpd-analysis/r1021/qa/probes/test_qa1021_examples.py (Loc, Tit)']
+    suggested_owner: dev
+  - id: 'REQ-1021-02'
+    severity: low
+    finding: 'Unchanged at 81ba62b; the SM''s 9-row delete residue (backlog, decided) comes from it and is not re-graded here. name_words knows only the titles of FRENCH_TITLE_PATTERN. « Maitre » (the 1990 spelling) and « Mr » count as words, so [A] « Maitre Zorbé » reaches « Maitre Zorbe », and « Mr Zorbé » « Mr Zorbe » (CLI, single, batch; main keeps them). Realism: unlikely; it needs two people whose one-word surnames differ by an accent, with the same unlisted title, in one document, one added by hand with its title.'
+    suggested_action: 'None now; if it is ever met, the title list is shared with detection, so it is its own story.'
+    refs: ['gdpr_pseudonymizer/utils/french_patterns.py', 'rgpd-analysis/r1021/qa/probes/test_qa1021_examples.py (TitR, TitMr)']
+    suggested_owner: po
+  - id: 'TEST-1021-01'
+    severity: low
+    finding: 'Carried from round 1, narrowed: M09 is moot (G7''s special case is gone; « à Saint Zorbaville » now reaches its variants by the rule). The six changed 10.19 cases keep names that say the opposite of what they test; their docstrings say why.'
+    suggested_action: 'Rename them when the files are next touched.'
+    refs: ['tests/unit/test_cli_capitals_forms.py', 'tests/unit/gui/test_capitals_correction_desktop.py']
+    suggested_owner: dev
+  - id: 'OBS-1021-01'
+    severity: info
+    finding: 'Unchanged in kind: delete-mapping reaches the old rows of each variant saved today; a variant saved only by v2.2.0 is not seen (P9c keeps it; P9d says "No entity found", as on main). Also as on main: a row saved today with a title other than the replay''s « Maître » (« Mme Quovane Mérand ») is not reached by the bare name, even typed exactly (C3d); since 81ba62b, a composed titled variant saved today (« Maître Quovane Mérand ») is reached by « Quovane Merand » only through an untitled variant (C3b: kept, as on main; d4e4ef8 erased it). Contrived: today''s saves strip a listed title, and v2.2.0''s titled rows are decomposed, which _variant_of reaches (C3: erased).'
+    suggested_action: 'None in this story.'
+    refs: ['rgpd-analysis/r1021/qa/probes/test_qa1021_examples.py (P9c, P9d, C3d)']
+    suggested_owner: po
+
+resolved_issues:
+  - id: 'CODEX-4-P0'
+    resolved_in: '49ea628'
+    note: 'Codex review 4: deleting « Du Prelis » no longer erases a LOCATION « Du Prélis » (one word once its preposition is set aside, another accent); K7; QA''s probes R4, R4b, R4d.'
+  - id: 'CODEX-3-P0'
+    resolved_in: 'f4a235b'
+    note: 'Codex review 3: deleting « Quovane Mérand » no longer erases a modern « MAITRE Quovane Mérand » (K6; QA''s probes R3, R3b; R3c and R3d as main or by the rule).'
+  - id: 'DOC-1021-01'
+    resolved_in: 'd4e4ef8'
+    note: 'The CHANGELOG now says the pseudonym is shared where an add or a correction reaches the other spelling, and that two writings found whole and accepted keep one each.'
+  - id: 'CODEX-2-P0'
+    resolved_in: '11cf7fe'
+    note: 'Codex review 2: deleting « Quovane Zorbal » no longer erases « Quovane Maitre Zorbal » (K5; QA''s probes R2, R2caps, R2nfd, R2loc, R2rev).'
+  - id: 'REQ-1021-01'
+    resolved_in: 'f5671fc'
+    note: 'A person''s « de Vorlanne », « Du Prelis » is a name of two words: their accent variants are erased (K4 x2; QA''s probes G7p, G7q, C4).'
+
+evidence:
+  round5:
+    g2_e20974d: '19 passed, 1 xfailed (marker on); --runxfail: K7 fails at its # expected failure line (:657), 0 PRE; 49ea628 removes only that marker in tests/'
+    codex_review_4: 'Real delete-mapping, 0be4073 / 8292133 / 74b956e. R4 (PERSON « Du Prelis », PERSON « Du Prélis », LOCATION « Du Prélis », delete « Du Prelis »): LOCATION kept / erased / kept. R4d (LOCATION « Du Prelis », LOCATION « Du Prélis », PERSON « Du Prélis »): the LOCATION « Du Prélis » kept / erased / kept; the PERSON « Du Prélis », a two-word variant for its type, erased (delete by name reads each row with its type; Ex5''s accepted reach). R4b: « à Du Prélis » and « Saint Prélis » kept on all three. R4c (« Quovane Zórbal », PERSON and LOCATION, two words for both types): erased on the head, by the rule.'
+    unchanged_since_8292133: 'All 116 other probe results identical (K1 to K6 shapes, R3e = BKL-1021-01, G7q « de Vorlanne », Lionel''s nine examples, review paths, finding-2 shapes). Real text: places identical (0 dropped, 708 added against main). 1,699-name delete: identical (181 added, 0 dropped). r230rel: nothing in clear. Probe sets 10.15 to 10.20: failure sets identical to round 3.'
+    mutants: 'S01 (the replay reads the added row with the originating row''s type): killed by K7.'
+    cost: 'delete-mapping, 3 variants at 10k rows: 0.06 s -> 0.34 s; no variant unchanged; search within noise.'
+    ci_head: '74b956e: Code Quality green; Test Matrix rerun in progress after the known Windows socket flake (test_serve_refuses_foreign_host_and_origin, WinError 10053), the coordinator''s reading; 49ea628 green at attempt 1 (3295 passed; Windows 3145 passed, 3 skipped).'
+  round4:
+    g2_2b25ea5: '18 passed, 1 xfailed (marker on); --runxfail: K6 fails at its # expected failure line (:631), 0 PRE; f4a235b removes only that marker in tests/'
+    codex_review_3: 'Real delete-mapping, 0be4073 / 81ba62b / 8292133. R3 (« Quovane Mérand », decomposed « Maître Quovane Mérand », modern « MAITRE Quovane Mérand », delete « Quovane Mérand »): MAITRE kept / erased / kept. R3b (modern « Maitre Quovane Mérand », delete « Quovane Merand »): nothing found / erased / kept. R3c (the variants and the damaged row): erased on 81ba62b and the head. R3d (capitals rows « MAITRE QUOVANE MERAND », « MAÎTRE QUOVANE MÉRAND »): erased on all three, 10.20''s capitals rule. R3e: BKL-1021-01.'
+    unchanged_since_81ba62b: 'Every other probe case (C1 to C4, K-shapes, G7p, G7q « de Vorlanne », R2*, Lionel''s nine examples, review paths, finding-2 shapes): identical. Real text: places identical (0 dropped, 708 added against main). 1,699-name delete: identical (181 added, 0 dropped). r230rel: nothing in clear. Probe sets: identical except one 10.16 redraw-count probe that failed once under -n 4 and passed 3 of 3 alone on the head and on 81ba62b (desktop timing, no file of it touched).'
+    mutants: '3 on the filter: Q01 (filter off) and Q02 (variants only) killed; Q03 (old rows only) survives (TEST-1021-03).'
+    cost: 'delete-mapping, 3 variants at 10k rows: 0.07 s -> 0.37 s; no variant unchanged; search within noise.'
+    ci_head: '8292133: both workflows green (3294 passed; Windows 3144 passed and 3 skipped, the coordinator''s reading).'
+  round3:
+    g2_3e3be3a: '17 passed, 1 xfailed (marker on); --runxfail: K5 fails at its # expected failure line (:608), 0 PRE; 11cf7fe removes only that marker in tests/'
+    codex_review_2: 'Real delete-mapping, 0be4073 / d4e4ef8 / 81ba62b. R2 (« Quovane Zorbal », « Quovane Maitre Zorbal », delete « Quovane Zorbal »): Maitre kept / erased / kept. R2caps (plus « QUOVANE MAITRE ZORBAL », « Quovane Maitre Zorbàl »): « Quovane Maitre Zorbàl » kept / erased / kept (the capitals row goes on all three, 10.20''s rule). R2nfd (decomposed « Quovane Zorbàl », « Quovane Maitre Zorbàl », « Quovane Zorbal Brimel »): the variant goes, the longer names stay, on the head (d4e4ef8 erased « Quovane Maitre Zorbàl »). R2loc (LOCATION, « à Quovane Maitre Zorbal » kept, decomposed « à Quovane Zórbal » erased). R2rev (delete « Quovane Maitre Zorbal »): « Quovane Zorbal » kept. R2tit (« Quovane Maître Zorbal », the title, today''s and decomposed): erased on all three trees, 10.20''s reading.'
+    codex_review_1_and_req: 'C1, C1b, C2, C2b, C2c, C3, C4, C4b, G7p, G7q (« de Vorlanne »): identical to d4e4ef8. Only C3b differs (OBS-1021-01).'
+    unchanged_since_d4e4ef8: 'Lionel''s nine examples, the review-path probes (Loc, Tit, TitR, TitMr), finding-2 shapes: identical. Real text: 0 dropped, places and joins identical to d4e4ef8 (708 added against main). Delete over the 1,699 detected names: identical to d4e4ef8 (181 added, 0 dropped, all variants). r230rel: 0 of 6 and 0 of 2 in clear. Probe sets 10.15 to 10.20: identical failure sets.'
+    mutants: '6 on the Task 8 fix (legacy forms back under the rule, the decomposed-row branch removed or widened to every row, _variant_of for one word, P9 by _same_or_form, _variant_of on raw text): 6 killed.'
+    cost: 'delete-mapping, 3 variants at 10k rows: 0.08 s -> 0.40 s; no variant unchanged; search within noise.'
+    ci_head: '81ba62b: 3293 passed on Ubuntu 3.10, Ubuntu 3.11 and macOS; 3143 passed, 3 skipped on Windows (the coordinator''s reading; QA saw both workflows green).'
+  tests_reviewed: 24
+  risks_identified: 4
+  g2:
+    tests_first_c596449: '12 passed, 5 xfailed (markers on); --runxfail: 5 failed at their # expected failure line (:532, :549, :573, :590 x2), 12 passed, 0 PRE'
+    fix_test_diff: 'f5671fc removes the 4 xfail markers (5 items) and nothing else in tests/'
+    ci_head: 'd4e4ef8: 3292 passed on Ubuntu 3.10, Ubuntu 3.11 and macOS; 3142 passed, 3 skipped on Windows; quality green'
+  codex_cases: 'Real delete-mapping, invented names of Codex''s shapes, 0be4073 / 836e640 / d4e4ef8. C1 (« Maître Zorbé », old and today''s rows, delete « Zorbe »): kept / erased / kept. C2 (« à Zorbâcon » with « À ZORBÂCON », old and today''s rows, delete « à Zorbacon »): kept / erased / kept. C3 (« Maître Quovane Mérand » decomposed and damaged, delete « Quovane Merand »): nothing found / damaged row left / both erased, « Éloria Mèzor » kept. C4 (« Du Prélis », delete « Du Prelis »): kept / kept / erased; « de Vorlânne » (REQ-1021-01) the same.'
+  review_paths: '[A] « à Zorbacon » (LOCATION) keeps « à Zorbâcon » in the CLI, single and batch (836e640 reached it); « Saint Zorbacon » reaches « Saint Zorbâcon » (two words); « Maître Zorbé » keeps « Maître Zorbe » (836e640 reached it); a person''s « Du Prélis » reaches « Du Prelis »; detected « à Zorbacon »/« à Zorbâcon » are not joined.'
+  lionels_examples: 'Ex1 to Ex9, CLI, desktop single and batch, delete-mapping: identical to 836e640 (Ex1, Ex2, Ex5, Ex6, Ex8 reached; Ex3, Ex4, Ex7, Ex9 as main); finding 2 shapes (F2, F2b) and k2 natural keys clean'
+  finding_2: 'r230rel probes at d4e4ef8: 0 of 6 CLI and 0 of 2 desktop in clear'
+  real_text: 'Same detections (HybridDetector, 38 corpus documents, ebook folder), names read with their detected type: 0 pairs dropped against 0be4073; 708 added (836e640: 718). The 10 no longer added are one-word names with a preposition or a title typed without its accent (« a Paris » for « à Paris », « Maitre Mercier » for « Maître Mercier »), which main does not reach either. 1 added for a name typed as detected (« Publishing rights », Ex8''s over-reach). 0 new joins.'
+  delete_real: 'Database copy of the 1,699 detected names: 0 rows dropped against main, 181 added (836e640: 187), every one an accent or capitals variant of the typed two-word name; the 6 no longer erased are one-word names behind « à » or « Maître ».'
+  regression_sets: '10.15, 10.16, 10.17, 10.18, 10.19, 10.20 probe sets at d4e4ef8: failure sets identical to 836e640 (10.19''s 51 by-design rows of round 1; the others identical to main)'
+  mutants: '19 on the Task 7 fix: 9 killed (word count, P9 gate and comparison, _same_or_form type, P9 type, no rule, P9 removed); 2 near-equivalent survive (either word-count check alone); 8 survive on the review paths'' type (TEST-1021-02)'
+  cost: 'delete-mapping on 10,005 rows, a name with 3 variants: 0.07 s -> 0.36-0.38 s; no variant: unchanged; whole_word_places over the ebook text within noise'
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12]
+    ac_gaps: []
+    ac_not_qa: [9]
+
+history:
+  - at: '2026-11-02T13:12:33Z'
+    gate: PASS
+    note: 'Round 1 at 836e640 (37191ef): PASS 100, DOC-1021-01, REQ-1021-01, TEST-1021-01 low, OBS-1021-01 info. Codex review 1 then found four P0 in delete-mapping that QA''s probes had not covered (titled and prepositioned one-word names); QA''s own location probe had not exercised the review path''s preposition either.'
+  - at: '2026-11-02T15:55:25Z'
+    gate: PASS
+    note: 'Round 2 at d4e4ef8: the four P0 fixed end to end; DOC-1021-01 and REQ-1021-01 resolved; TEST-1021-02 and REQ-1021-02 low. Codex review 2 then found a P0 QA had not probed: a generated legacy form folded onto a longer saved name.'
+  - at: '2026-11-02T17:57:02Z'
+    gate: PASS
+    note: 'Round 3 at 81ba62b: Codex review 2''s P0 fixed end to end; everything else as round 2; the backlog residue is not re-graded. Codex review 3 then found the replay reaching a modern « MAITRE » name.'
+  - at: '2026-11-02T19:21:03Z'
+    gate: PASS
+    note: 'Round 4 at 8292133: Codex review 3''s P0 fixed end to end; one more stopping-rule row (BKL-1021-01) and TEST-1021-03. Codex review 4 then found the replay reading a LOCATION with a PERSON''s type.'
+  - at: '2026-11-02T20:59:41Z'
+    gate: PASS
+    note: 'Round 5 (last) at 74b956e: Codex review 4''s P0 fixed end to end; nothing else changed; every open note is low or Backlog, none leaves a name in clear.'
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'No row of another name erased on real names or on Codex''s shapes; finding 2 closed; 0 places dropped; no settings file touched.'
+  performance:
+    status: PASS
+    notes: 'One more table scan per saved variant in delete-mapping (0.36-0.38 s at 10k rows with 3 variants).'
+  reliability:
+    status: PASS
+    notes: 'CI green on every leg at d4e4ef8; probe sets unchanged since round 1.'
+  maintainability:
+    status: PASS
+    notes: 'One word count (name_words) replaces three ways of counting; the type is passed explicitly. Review-path type not pinned by tests (TEST-1021-02).'
+
+risk_summary:
+  totals: { critical: 0, high: 0, medium: 0, low: 4 }
+  recommendations:
+    must_fix: []
+    monitor:
+      - 'TEST-1021-02: a guard on the review paths'' type, optional'
+      - 'REQ-1021-02: titles outside FRENCH_TITLE_PATTERN, only if met'
+
+quality_score: 100
+expires: '2026-11-16T20:59:41Z'
+
+recommendations:
+  immediate: []
+  future:
+    - action: 'Optionally add one CLI and one desktop guard for the review paths'' type (TEST-1021-02).'
+      refs: ['tests/unit/test_cli_forms_rule.py', 'tests/unit/gui/test_forms_rule_desktop.py']
+    - action: 'Rename the six changed 10.19 cases when the files are next touched (TEST-1021-01).'
+      refs: ['tests/unit/test_cli_capitals_forms.py', 'tests/unit/gui/test_capitals_correction_desktop.py']

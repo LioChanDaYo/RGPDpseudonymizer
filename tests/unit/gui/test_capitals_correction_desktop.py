@@ -588,9 +588,12 @@ def test_second_correction_reaches_rows_the_first_reached(  # type: ignore[no-un
 def test_batch_unreached_row_stays_pending(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, dialogs
 ) -> None:
-    """T27 (AC3, the second Codex review's second P0, CAPS-001 in the desktop):
-    in batch review, « ZÉLVINE » corrected to « ZELVINE TESTAR » does not
-    reach the « Zélvine » row, which stays pending, as on main."""
+    """T27 (AC3, the second Codex review's second P0, CAPS-001 in the desktop;
+    changed by Story 10.21, Lionel's forms rule of 2026-11-01): in batch
+    review, « ZÉLVINE » corrected to « ZELVINE TESTAR » reaches the
+    « Zélvine » row, whose place « Zélvine Testar » is a form of the
+    correction (a name of two words, accents and capitals set aside): that
+    row is corrected too, one pseudonym."""
     review = _Review(
         "batch",
         qtbot,
@@ -608,9 +611,9 @@ def test_batch_unreached_row_stays_pending(  # type: ignore[no-untyped-def]
         r.accept_pending()
 
     record = review.run(drive)
-    assert record["accented"] == PENDING, record  # expected failure
-    zt, z = review.pseudonym("ZELVINE TESTAR"), review.pseudonym("Zélvine")
-    assert review.output() == f"Signé : {zt}. {z} Testar a signé."
+    assert record["accented"] != PENDING, record
+    zt = review.pseudonym("ZELVINE TESTAR")
+    assert review.output() == f"Signé : {zt}. {zt} a signé."
 
 
 def test_single_row_unreached_at_one_place_stays_pending(  # type: ignore[no-untyped-def]
@@ -681,8 +684,10 @@ def test_desktop_single_widening_never_takes_another_name(  # type: ignore[no-un
     qtbot, main_window, tmp_path, dialogs
 ) -> None:
     """T31 desktop (AC3; the third Codex review's P0-1, the orchestrator's
-    ruling 1): the « Zélvine » row corrected as « Zélvine Mézor » is never
-    widened over « Mèzor » at its other place."""
+    ruling 1; changed by Story 10.21, Lionel's forms rule of 2026-11-01, AC4):
+    the « Zélvine » row corrected as « Zélvine Mézor » covers « Zélvine
+    Mèzor » at its other place too (a name of two words, accents set aside),
+    one pseudonym."""
     review = _Review(
         "single",
         qtbot,
@@ -699,9 +704,9 @@ def test_desktop_single_widening_never_takes_another_name(  # type: ignore[no-un
 
     review.run(drive)
     output = review.output()
-    assert "Mèzor a signé" in output, output  # expected failure
+    assert "Mèzor" not in output, output
     p = review.pseudonym("Zélvine Mézor")
-    assert output == f"{p} a signé. {p} Mèzor a signé."
+    assert output == f"{p} a signé. {p} a signé."
 
 
 @pytest.mark.parametrize("mode", ["single", "batch"])
