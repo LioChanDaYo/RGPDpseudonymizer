@@ -14,13 +14,27 @@ Préparez vos documents sensibles pour l'analyse par IA en toute sérénité : t
 
 ---
 
-## Nouveautés de la v2.2
+## Nouveautés de la v2.3
+
+- **Les noms ajoutés sont remplacés partout** — Un nom ajouté à la main (`[A]` en ligne de commande, « Ajouter comme entité » dans l'application) est désormais remplacé à chaque endroit où il apparaît, y compris écrit en majuscules ou en majuscules sans accents (« ZORBAL », « HELENE »), jamais dans un mot écrit en minuscules (« Petit » laisse « petit »). Un nom de deux mots ou plus est trouvé quels que soient ses accents et ses majuscules.
+- **Les corrections couvrent tout le nom** — Corriger un nom ou changer son type s'applique désormais à chaque endroit, dans l'application comme en ligne de commande, dans les cellules Excel et CSV aussi, et avec le nom complet que vous saisissez : corriger « Élorine » en « Élorine du Prélis » ne laisse plus « du Prélis » en clair.
+- **Votre propre pseudonyme est utilisé** — Le pseudonyme que vous choisissez (« Changer le pseudonyme », `[C]`) est désormais écrit dans le fichier et conservé pour les documents suivants. Avant, un pseudonyme généré était utilisé à sa place.
+- **Un effacement complet** — `delete-mapping "Nom"` supprime tous les pseudonymes enregistrés de ce nom : chaque type, et chaque façon dont il a été écrit en majuscules ou avec ses accents. Le journal d'effacement ne garde plus le nom effacé, et les noms que les versions précédentes y avaient écrits sont retirés la première fois que la v2.3 ouvre la base.
+- **Des lots plus sûrs** — Dans la validation par lot de l'application, chaque document garde ses propres décisions et son résultat quand vous passez d'un document à l'autre, et un lot en cours ne peut plus se mélanger à un autre traitement. Quand plusieurs documents d'un `batch` rencontrent le même nouveau nom au même moment, il reçoit un seul pseudonyme.
+- **Aucun nom laissé en clair sans prévenir** — Les noms que vous n'avez ni acceptés ni rejetés sont annoncés avant l'écriture du fichier. Quand le détecteur ne trouve aucun nouveau nom, la ligne de commande demande s'il faut en ajouter un qu'il a manqué.
+- **Même nom, deux types** — « Zorbaville » la ville et « Zorbaville » l'entreprise reçoivent désormais des pseudonymes distincts. Votre base de correspondances est convertie une fois, la première fois que la v2.3 l'ouvre ; ensuite, ne l'ouvrez plus avec la v2.2 ou une version antérieure (copiez-la d'abord si vous risquez de revenir en arrière).
+- **Une détection plus précise** — Un seul candidat par nom au lieu de fragments ; les intitulés de poste (CTO, DRH, « VP Europe ») ne sont plus proposés comme organisations ; les noms ne débordent plus sur la ligne suivante ; moins de faux lieux ; les noms à particule (« van der », « Le ») restent entiers ; les personnes saluées, les organisations suivies de leur pays, les sigles et les alias définis dans un contrat sont désormais proposés ; les accents stockés comme un signe séparé sont pris en charge. Sur un examen final à l'aveugle de 30 documents inédits, la détection obtient un F1 de 61,4 % (voir [Précision de la détection](#précision-de-la-détection-epic-10-octobre-2026)).
+
+<details>
+<summary>Points forts de la v2.2</summary>
 
 - **Choix du modèle spaCy** — `--model` / `pseudonymization.model` acceptent n'importe quel nom de paquet spaCy (p. ex. `en_core_web_trf` pour l'anglais) ; `spacy` sélectionne toujours le modèle français `fr_core_news_lg`. Le modèle ne concerne que la détection NLP : expressions régulières, dictionnaires et bibliothèques de pseudonymes restent français. Voir la [référence CLI](docs/CLI-REFERENCE.fr.md).
 - **Changer le type d'une entité pendant la validation CLI (`[T]`)** — Passer une entité détectée de PERSON à LOCATION ou ORG (et inversement) pour toutes ses occurrences, au lieu de la rejeter puis la rajouter
 - **Délimitation des entités plus propre** — Modifier avec `[E]` n'efface plus le texte voisin ; le motif « Nom, Prénom » exige désormais un prénom connu ; horodatages et ponctuation parasites sont retirés des bords des entités NER ; les noms à lettres non françaises (« María », « Yılmaz ») et les noms composés après un titre sont détectés en entier
 - **Installation `pip` corrigée** — la v2.1.3 plantait au démarrage quand pip installait SQLAlchemy 2.1 ; SQLAlchemy est désormais limité à < 2.1
 - **Le journal d'audit enregistre le modèle réel** — p. ex. `fr_core_news_lg-3.8.0` au lieu de `spacy-unknown`
+
+</details>
 
 <details>
 <summary>Points forts de la v2.1</summary>
@@ -47,9 +61,9 @@ Des exécutables autonomes pré-compilés sont disponibles pour Windows, macOS e
 
 | Plateforme | Fichier | Notes |
 |------------|---------|-------|
-| **Windows** | `gdpr-pseudonymizer-2.2.0-windows-setup.exe` | Lancer l'installeur. Ajoute un raccourci au menu Démarrer. |
-| **macOS (Apple Silicon)** | `gdpr-pseudonymizer-2.2.0-macos-arm64.dmg` | Ouvrir le DMG, glisser vers Applications. |
-| **Linux** | `gdpr-pseudonymizer-2.2.0-linux.AppImage` | `chmod +x` puis exécuter. |
+| **Windows** | `gdpr-pseudonymizer-2.3.0-windows-setup.exe` | Lancer l'installeur. Ajoute un raccourci au menu Démarrer. |
+| **macOS (Apple Silicon)** | `gdpr-pseudonymizer-2.3.0-macos-arm64.dmg` | Ouvrir le DMG, glisser vers Applications. |
+| **Linux** | `gdpr-pseudonymizer-2.3.0-linux.AppImage` | `chmod +x` puis exécuter. |
 
 > **Macs Intel :** aucun DMG n'est publié. GitHub a retiré ses runners macOS Intel, et un
 > runner Apple Silicon ne peut pas compiler un bundle x86_64 fonctionnel. Installez plutôt
@@ -126,7 +140,7 @@ GDPR Pseudonymizer est un **outil CLI et GUI conçu pour la confidentialité**. 
 
 ## 🚀 Prise en main rapide
 
-**Version actuelle :** 🎉 **v2.2.0** (septembre 2026) — Choix du modèle spaCy, changement de type d'entité et corrections de délimitation
+**Version actuelle :** 🎉 **v2.3.0** (novembre 2026) — Détection plus précise, corrections à chaque endroit et effacement complet
 
 ### Pour commencer
 
@@ -148,7 +162,7 @@ pip install gdpr-pseudonymizer[excel]
 pip install gdpr-pseudonymizer[formats]
 ```
 
-### Ce que la v2.2 offre
+### Ce que la v2.3 offre
 
 - 🖥️ **Interface graphique** — Validation visuelle des entités avec glisser-déposer, tableau de bord de lot et gestion de base de données
 - 📦 **Exécutables autonomes** — Installeur Windows .exe, DMG macOS (Apple Silicon), AppImage Linux — Python non requis
@@ -163,6 +177,8 @@ pip install gdpr-pseudonymizer[formats]
 - 🎯 **Précision NER** — Taux de faux négatifs LOCATION réduit de 27 % à 13 % via enrichissement regex et désambiguïsation POS
 - 🧠 **Choix du modèle spaCy** — Français par défaut ; n'importe quel modèle spaCy pour la détection (p. ex. `--model en_core_web_trf`)
 - 🏷️ **Changement de type d'entité** — Modifier le type d'une entité (PERSON/LOCATION/ORG) pendant la validation CLI avec `[T]`
+- ✍️ **Corrections à chaque endroit** — Les noms ajoutés, corrigés ou changés de type sont remplacés partout où ils apparaissent, y compris écrits en majuscules
+- 🗑️ **Effacement complet** — `delete-mapping` efface tous les pseudonymes enregistrés d'un nom, et le journal d'effacement ne garde aucun nom
 
 **Ce qu'elle ne propose pas :**
 - ❌ Un traitement entièrement automatique sans intervention
@@ -179,7 +195,9 @@ pip install gdpr-pseudonymizer[formats]
 
 **v2.1 (T1 2026) :** Améliorations GUI, support Excel/CSV, thème Neutral ID, précision NER, aide raccourcis clavier
 
-**v2.2 (T3 2026) — VERSION ACTUELLE :** Choix du modèle spaCy, changement de type d'entité en validation CLI, corrections de délimitation des entités, correctif d'installation (SQLAlchemy < 2.1)
+**v2.2 (T3 2026) :** Choix du modèle spaCy, changement de type d'entité en validation CLI, corrections de délimitation des entités, correctif d'installation (SQLAlchemy < 2.1)
+
+**v2.3 (T4 2026) — VERSION ACTUELLE :** Détection plus précise (Epic 10), benchmark réparé et examen final à l'aveugle, noms ajoutés ou corrigés remplacés à chaque endroit, pseudonymes personnalisés utilisés, effacement complet sans nom dans le journal d'effacement, lots plus sûrs
 
 **v3.0 (2027+) :** Précision NLP et automatisation
 - Modèle NER français affiné (objectif F1 70-85 %, contre 61,4 % sur des documents inédits actuellement)
@@ -510,7 +528,7 @@ L'interface de validation offre un parcours intuitif piloté au clavier pour pas
 
 ## 🛠️ État du développement
 
-**Epics 1-7 terminés** — version actuelle v2.2.0 (septembre 2026) : choix du modèle spaCy, changement de type d'entité, corrections de délimitation. La v2.1.0 (mars 2026) a clôturé l'Epic 7.
+**Epics 1-7 et 10 terminés** — la version actuelle v2.3.0 (novembre 2026) a clôturé l'Epic 10 : détection plus précise, corrections à chaque endroit, effacement complet. La v2.1.0 (mars 2026) a clôturé l'Epic 7.
 
 - ✅ **Epic 1 :** Fondations et validation NLP (9 stories) — Intégration spaCy, interface de validation, détection hybride, déduplication des entités
 - ✅ **Epic 2 :** Moteur de pseudonymisation (9 stories) — Bibliothèques de pseudonymes, chiffrement, journaux d'audit, traitement par lot, correspondance 1:1 RGPD
@@ -538,6 +556,7 @@ L'interface de validation offre un parcours intuitif piloté au clavier pour pas
   - ✅ Story 7.5 : Enrichissement regex NER et désambiguïsation POS
   - ✅ Story 7.6 : Tests d'intégration qualité et compatibilité
   - ✅ Story 7.7 : Préparation de la release v2.1
+- ✅ **Epic 10 :** v2.3 Gains rapides de précision de détection — benchmark réparé et jeu de validation séparé, examen final à l'aveugle avec intervalles de confiance, corrections de chevauchement et de délimitation, moins de faux lieux, prise en charge des salutations et des organisations suivies d'un lieu, correspondances tenant compte du type, noms ajoutés ou corrigés remplacés à chaque endroit, pseudonymes personnalisés, journal d'effacement sans noms, corrections des lots, release v2.3
 - **Total :** 60 stories, 1 670+ tests, 86 %+ de couverture, tous les contrôles qualité au vert
 
 ---
@@ -721,7 +740,7 @@ La suite de tests d'intégration couvre :
 
 | Métrique | Valeur | Statut |
 |----------|--------|--------|
-| **Avancement** | v2.2.0 | ✅ Epics 1-7 terminés |
+| **Avancement** | v2.3.0 | ✅ Epics 1-7 et 10 terminés |
 | **Stories terminées** | 60 (Epics 1-7) | ✅ Tous les epics terminés |
 | **Utilité LLM (NFR10)** | 4,27/5,0 (85,4 %) | ✅ VALIDÉ (seuil : 80 %) |
 | **Succès d'installation (NFR3)** | 87,5 % (7/8 plateformes) | ✅ VALIDÉ (seuil : 85 %) |
@@ -761,4 +780,4 @@ La suite de tests d'intégration couvre :
 
 ---
 
-**Dernière mise à jour :** 2026-10-01 (v2.2.0 — Choix du modèle spaCy, changement de type d'entité, corrections de délimitation)
+**Dernière mise à jour :** 2026-11-03 (v2.3.0 — Détection plus précise, corrections à chaque endroit, effacement complet)
