@@ -1,6 +1,6 @@
 # Product Backlog - GDPR Pseudonymizer
 
-**Last Updated:** 2026-03-17
+**Last Updated:** 2026-11-04
 **Epic 1 Status:** ✅ Complete (9/9 stories)
 **Epic 2 Status:** ✅ Complete (9/9 stories)
 **Epic 3 Status:** ✅ Complete (7/7 stories)
@@ -9,6 +9,7 @@
 **Epic 6 Status:** ✅ Complete (13/13 stories, v2.0.0 released 2026-03-04)
 **Epic 7 Status:** ✅ Complete (7/7 stories, v2.1.0 released 2026-03-17)
 **v2.1:** ✅ RELEASED (2026-03-17, PyPI published)
+**Epic 10 Status:** ✅ Complete (v2.3.0 released 2026-11-03, PyPI published)
 
 ---
 
@@ -729,6 +730,38 @@ Press Enter to continue...
 **Source:** Story 6.5 AC3 (DEFERRED-001)
 **Status:** ✅ **COMPLETED** — Implemented in Story 6.7.3 (v2.0 release, 2026-03-04)
 **Outcome:** Optional per-document validation in batch processing. Users can validate/reject entities for each document before pseudonymization proceeds. "Skip validation" remains the default.
+
+---
+
+## 🐛 Planned for v2.3.1
+
+Decided by Lionel on 2026-11-04, after the read-only Codex release review of v2.3.0 (`main` `90abef3`) and QA's check of each finding. Only these two go into 2.3.1. Neither leaves a name in clear.
+
+#### BUG-001: Two custom pseudonyms each accepted, then both refused at finalization 📅 v2.3.1
+**Source:** v2.3.0 release review (Codex), verified by QA
+**Description:** When two people share a first name and you choose custom pseudonyms where one has a two-word surname (« Aurore Bruneau » for « Élodie Martin », « Aurore Le Goff » for « Élodie Dupont »), both are accepted during review, then finalization refuses both and writes nothing. Its message wrongly blames the mapping database. The cause: a two-word surname in a custom pseudonym is split as first name « Aurore Le » plus surname « Goff ». The same split stores « Inès Le » as the first-name pseudonym of « Ségolène » when « Inès Le Goff » is chosen, so a later « Ségolène » gets « Inès Le Roque ».
+**Impact:** A refusal at the end of a review and odd later pseudonyms. No name in clear.
+**Where:** `core/custom_pseudonym.py` (finalization reparses the choice with the stored bindings only). New in v2.3.0 (Stories 10.11, 10.16).
+**Fix direction:** Keep the first-name/surname split accepted during review, and use the same split to check and to store.
+
+#### BUG-002: `import-mappings --no-skip-duplicates` replaces nothing when you answer yes 📅 v2.3.1
+**Source:** v2.3.0 release review (Codex), verified by QA; first noted in Story 10.7
+**Description:** With `--no-skip-duplicates`, answering yes to « Replace existing mapping? » inserts a new row instead of updating the existing one. The database refuses it (one name and type, one row), and the command counts the row as skipped.
+**Impact:** Your answer is ignored and the old pseudonym stays. The summary says "Skipped: 1".
+**Where:** `cli/commands/import_mappings.py` (the replace branch builds a new entity). Already in v2.2.0.
+**Fix direction:** Update the confirmed existing row in one transaction.
+
+## 🔎 Known limitations (not scheduled)
+
+Found by the same release review. Each needs conditions a real user is very unlikely to meet, so none is scheduled (Lionel, 2026-11-04). Reopen one only if a real user reports it. None leaves a name in clear.
+
+- **KL-001:** `delete-mapping` can miss a v2.2.0 row of a name with five or more accented words, when that name's accents were stored two ways and v2.2.0 cut a « Mé… » word as the title « Me ». The command then reports the erasure as complete.
+- **KL-002:** Two programs opening a pre-2.3 database for the first time within the same milliseconds: one can wrongly report "format not recognised". Opening it again works.
+- **KL-003:** Desktop batch review can hang if « Annuler le lot » is clicked in a window of a few microseconds. A second click ends it.
+- **KL-004:** In single-document mode, if you open the next document and reach its review before the previous one finishes writing (0.1 to 0.25 s), the previous result is offered under the next file's name.
+- **KL-005:** `delete-mapping "Meprof"` erases the v2.2.0 row of « Mèprof » (a name made only of title abbreviations, saved as a lone accent).
+
+Further non-leak items decided during Epic 10 are listed in the Backlog sections of Stories 10.19 to 10.22 (`docs/stories/`).
 
 ---
 
