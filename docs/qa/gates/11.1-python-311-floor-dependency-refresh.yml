@@ -1,0 +1,75 @@
+schema: 1
+story: '11.1'
+story_title: 'Python 3.11 Floor and Dependency Security Refresh'
+scope: 'Review of PR #118 at head b83ef14 (branch story/11.1-python-311-floor, base main 30de5f6): commits 6b04ec6 (epic and story), 16fb5fc (tests first, 9 strict xfail), ad194ba (floor and lock), 0ceac3e (ruff py311 and the datetime.UTC rewrites), b83ef14 (English docs, CHANGELOG, BACKLOG). The 14 French doc lines are read as unstaged text on disk, not committed. QA folder: rgpd-analysis/r111/qa/s111 (logs/qa_checks.log, logs/qa_tf16b.log, logs/qa_build.log).'
+gate: PASS
+status_reason: 'Every acceptance criterion QA can check holds on b83ef14: the lock moves exactly the 7 alerted packages and drops the 3 backports, every new hash list equals the files PyPI publishes, the 17 datetime.UTC rewrites are behaviour-identical, and the built wheel says Requires-Python >=3.11,<3.14 while 2.3.0 on PyPI still allows 3.10. Only two low notes remain, neither realistic for a user; AC8 (French text) and AC14 (build, ruleset rename, post-merge checks) are pending steps for Lionel and the orchestrator.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-11-05T14:30:00Z'
+
+waiver: { active: false }
+
+quality_score: 100
+expires: '2026-11-19T14:30:00Z'
+
+merge_blockers: []
+
+merge_notes:
+  - 'AC8: the French commit (14 lines in README.fr.md, docs/installation.fr.md, docs/index.fr.md, docs/troubleshooting.fr.md) waits for Lionel''s yes. QA read the text on disk and found it consistent with the English lines; QA did not stage or commit it.'
+  - 'AC14: build-executables.yaml run 42043507633 on b83ef14 (dispatched by the orchestrator) has no result in this gate; the rename of the required check in ruleset 12689559, the open-alert count of 0 after merge and performance.yaml on main are after-merge steps.'
+  - 'AC9 was checked at b83ef14. This gate file is the only docs/qa/ path added after it, a new file, not edited history; on the final head, git diff --name-only 30de5f6...HEAD lists it under docs/qa/ for that reason only.'
+  - 'Task 7.2: the read-only Codex review of the final head runs on the orchestrator''s side. QA started no Codex, Forge, Anvil or Cato process and never merges.'
+  - 'This gate commit (docs only) and the French commit each start their own CI run on the PR.'
+
+top_issues:
+  - id: 'LOCK-111-01'
+    severity: low
+    finding: 'The raw poetry.lock diff is 384 lines (136 insertions, 248 deletions) against the SM trial''s 425 (177, 248). The trial lock was not kept, so what its 41 extra inserted lines were has no reading. What QA can prove on the committed lock: 120 of the 136 insertions are file-hash lines, and they are exactly the files PyPI publishes today for the 7 moved packages (pillow 83, black 27, the other five 2 each; none missing, none extra); the other 16 are the 7 versions, 3 package python-versions (filelock, fpdf2, pillow), 4 extras lines (fpdf2, pillow, setuptools x2) and the 2 metadata lines (python-versions, content-hash). The 248 deletions are 175 hash lines, 65 other and 8 blank. Every same-version change (9 packages) is a removed python_version < "3.11" dependency line. Realism: none; the lock is complete and the dev''s names and versions match the story exactly.'
+    suggested_action: 'None.'
+    refs: ['poetry.lock', 'rgpd-analysis/r111/qa/s111/logs/qa_checks.log']
+    suggested_owner: po
+  - id: 'DOC-111-01'
+    severity: low
+    finding: 'docs/architecture/14-deployment-architecture.md l.53, 69 and 70 now describe a matrix of 3 OS x 2 Python versions (6 configurations); ci.yaml runs 4 test jobs. The text is the story''s exact text, the file is a design document no user reads to install, and it already disagreed with CI before (9 configurations). Realism: none for a user or the release.'
+    suggested_action: 'Backlog note only; align it with docs/ci-cd.md if the architecture docs are ever revised.'
+    refs: ['docs/architecture/14-deployment-architecture.md']
+    suggested_owner: po
+
+evidence:
+  tests_reviewed: 9
+  risks_identified: 0
+  environment: 'Windows, the main Poetry environment (Python 3.11.9, venv gdpr-pseudonymizer-_kRLwMSQ-py3.11), cmd.exe /c with no HOME or USERPROFILE override. Nothing installed. Nothing under held_out/, final_exam/ or tests/accuracy/ opened (ruff check . runs over the repo, as CI does). The .gdpr-pseudo.yaml in the user profile not touched. No worktree or repo copy: the tests-first check used the 7 files the test reads, from git show 16fb5fc, in a scratch folder.'
+  lock: 'lockdiff (the story''s script, run Windows-side from the repo root) prints exactly the 11 expected lines; poetry check --lock exit 0. Per package: anyio, cloudpathlib, confection, coverage, cryptography, mypy, pytest, rich, stanza lose only python_version < "3.11" dependency lines; defusedxml, exceptiongroup and tomli removed; nothing added. Hash lists of the 7 moved packages compared one to one with the PyPI JSON API.'
+  ruff_rewrites: '0ceac3e changes exactly the 11 files of AC6; 17 call sites (datetime.now(timezone.utc) and tzinfo=timezone.utc to UTC) and 9 import lines, nothing else in product code. In the venv: datetime.UTC is datetime.timezone.utc prints True, so the rewrites are behaviour-identical. git diff 30de5f6 --stat on core/custom_pseudonym.py and cli/commands/import_mappings.py prints nothing.'
+  local_checks: 'black --check . "335 files would be left unchanged."; ruff check . exit 0; mypy gdpr_pseudonymizer "Success: no issues found in 107 source files"; pytest tests/unit/test_project_config.py "21 passed", 0 xfailed, 0 failed.'
+  tests_first: '16fb5fc test file on its own config files: marked "12 passed, 9 xfailed"; --runxfail "9 failed, 12 passed", each at an AssertionError on its floor assertion (lines 114, 135, 154, 171, 189, 208, 240, 256, 325).'
+  wheel: 'poetry build --format wheel --output to the QA folder (git status unchanged): METADATA Requires-Python >=3.11,<3.14; classifiers 3, 3.11, 3.12, 3.13; PySide6 marker python_version >= "3.11" and < "3.13". PyPI 2.3.0: requires_python <3.14,>=3.10, so pip on 3.10 keeps installing 2.3.0, as the CHANGELOG says.'
+  docs: 'AC7 first grep prints exactly the 5 expected lines; the ci-cd.md grep prints nothing (18 lines at 30de5f6). A plain -F 3.10 sweep of the current user-facing docs (history, stories, qa and prd excluded) finds nothing else but the pending French lines. CHANGELOG and BACKLOG texts match the story word for word (grep -xF per line); CHANGELOG removes 0 lines; BACKLOG hunks at l.738, 754, 763, 770, nothing in l.96-128.'
+  french: '14 lines, 14 insertions and 14 deletions, line endings kept. Each line changes what its English mirror changes and nothing else; installation.fr.md l.17 carries the same three new facts as installation.md l.17 (3.10 no longer supported, end of life October 2026, pip installs 2.3.0 on 3.10). After the French commit, the only 3.10 line in those four files is installation.fr.md l.17.'
+  ci:
+    16fb5fc: 'run 42034046408 (orchestrator''s reading): 9 checks green; 9 XFAIL lines in test_project_config.py per test leg, 0 XPASS; ubuntu 3.11 cov, ubuntu 3.10 and macOS 3309 passed, Windows 3159 passed, 3 skipped (main 30de5f6: 3313 and 3163 + 3 skipped, so -4 passed, +9 xfailed).'
+    b83ef14: 'run 42040758054 (orchestrator''s reading): 9 checks green; both ubuntu 3.11 legs and macOS 3318 passed, Windows 3168 passed, 3 skipped (+5 against main), 0 xfail or xpass. The required check test (ubuntu-22.04, 3.10, false) shows "Expected, waiting" by design until the ruleset rename (Task 8.2).'
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13]
+    ac_gaps: [8, 14]
+    notes: 'AC8: the French commit waits for Lionel''s yes. AC14: build-executables result, ruleset rename, alert count 0 and performance.yaml on main are orchestrator steps, partly after merge.'
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'The 7 alerted packages move to the fixed versions; none is imported by the product, and the desktop spec still excludes PIL.'
+  performance:
+    status: PASS
+    notes: 'No product logic change; performance.yaml on main after merge is part of AC14.'
+  reliability:
+    status: PASS
+    notes: 'datetime.UTC is datetime.timezone.utc on 3.11+; CI green on all four legs with the new lock.'
+  maintainability:
+    status: PASS
+    notes: 'black, ruff and mypy all target the 3.11 floor; tests guard pyproject, mypy.ini and ci.yaml.'
+
+recommendations:
+  immediate: []
+  future:
+    - action: 'Align the architecture doc''s CI matrix with ci-cd.md if those docs are revised (DOC-111-01).'
+      refs: ['docs/architecture/14-deployment-architecture.md']
