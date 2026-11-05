@@ -146,11 +146,6 @@ def test_pyside6_python_marker():
     assert dependencies["PySide6-Essentials"]["python"] == ">=3.11,<3.13"
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 11.1, Codex review 1: defusedxml is not declared yet",
-)
 def test_defusedxml_with_openpyxl():
     """Test that every extra with openpyxl also installs defusedxml.
 

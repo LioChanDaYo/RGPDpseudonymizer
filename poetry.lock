@@ -843,6 +843,19 @@ files = [
 ]
 
 [[package]]
+name = "defusedxml"
+version = "0.7.1"
+description = "XML bomb protection for Python stdlib modules"
+optional = true
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
+groups = ["main"]
+markers = "extra == \"excel\" or extra == \"formats\" or extra == \"all\""
+files = [
+    {file = "defusedxml-0.7.1-py2.py3-none-any.whl", hash = "sha256:a352e7e428770286cc899e2542b6cdaedb2b4953ff269a210103ec58f6198a61"},
+    {file = "defusedxml-0.7.1.tar.gz", hash = "sha256:1bb3032db185915b62d7c6209c5a8792be6a32ab2fedacc84e01b52c51aa3e69"},
+]
+
+[[package]]
 name = "distro"
 version = "1.9.0"
 description = "Distro - an OS platform information API"
@@ -4605,14 +4618,14 @@ files = [
 dev = ["pytest", "setuptools"]
 
 [extras]
-all = ["PySide6-Essentials", "openpyxl", "pdfplumber", "python-docx"]
+all = ["PySide6-Essentials", "defusedxml", "openpyxl", "pdfplumber", "python-docx"]
 docx = ["python-docx"]
-excel = ["openpyxl"]
-formats = ["openpyxl", "pdfplumber", "python-docx"]
+excel = ["defusedxml", "openpyxl"]
+formats = ["defusedxml", "openpyxl", "pdfplumber", "python-docx"]
 gui = ["PySide6-Essentials"]
 pdf = ["pdfplumber"]
 
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11,<3.14"
-content-hash = "9a59aee424a9bda4af04691a04bb7c3d4af7320c5a735abfd7933542e9d7aed5"
+content-hash = "667fd56427377449fee206d9bdb89b3366138fe8c2564739992a959af785ad9d"
