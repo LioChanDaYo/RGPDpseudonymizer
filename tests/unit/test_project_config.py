@@ -4,10 +4,12 @@ Unit tests for CI/CD configuration validation.
 Tests verify project configuration files are valid and dependencies are correctly specified.
 """
 
+import configparser
 import sys
 from pathlib import Path
 
 import pytest
+import yaml
 
 # Python 3.11+ has tomllib built-in, earlier versions need tomli
 try:
@@ -95,8 +97,13 @@ def test_pyproject_has_dev_dependencies():
         assert dep in dev_dependencies, f"Missing required dev dependency: {dep}"
 
 
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 11.1 tests first: the 3.11 floor is not set yet",
+)
 def test_python_version_compatibility():
-    """Test that project supports Python 3.10+."""
+    """Test that the project's floor is Python 3.11 (Story 11.1)."""
     pyproject_path = Path(__file__).parent.parent.parent / "pyproject.toml"
 
     with open(pyproject_path, "rb") as f:
@@ -104,14 +111,71 @@ def test_python_version_compatibility():
 
     python_version = config["tool"]["poetry"]["dependencies"]["python"]
 
-    # Should be >=3.10 or similar
-    assert "3.10" in python_version, "Project must support Python 3.10+"
+    assert python_version == ">=3.11,<3.14", "Project floor must be Python 3.11"
 
     # Verify current Python version is supported
     current_version = sys.version_info
-    assert current_version >= (3, 10), f"Python 3.10+ required, got {current_version}"
+    assert current_version >= (3, 11), f"Python 3.11+ required, got {current_version}"
 
 
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 11.1 tests first: the 3.11 floor is not set yet",
+)
+def test_python_classifiers():
+    """Test that the classifiers list 3.11 and 3.12, and no longer 3.10."""
+    pyproject_path = Path(__file__).parent.parent.parent / "pyproject.toml"
+
+    with open(pyproject_path, "rb") as f:
+        config = tomllib.load(f)
+
+    classifiers = config["tool"]["poetry"]["classifiers"]
+
+    assert "Programming Language :: Python :: 3.10" not in classifiers
+    assert "Programming Language :: Python :: 3.11" in classifiers
+    assert "Programming Language :: Python :: 3.12" in classifiers
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 11.1 tests first: the 3.11 floor is not set yet",
+)
+def test_no_python_310_backport():
+    """Test that the Python 3.10 tomli backport is gone from the dev group."""
+    pyproject_path = Path(__file__).parent.parent.parent / "pyproject.toml"
+
+    with open(pyproject_path, "rb") as f:
+        config = tomllib.load(f)
+
+    dev_dependencies = config["tool"]["poetry"]["group"]["dev"]["dependencies"]
+
+    assert "tomli" not in dev_dependencies
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 11.1 tests first: the 3.11 floor is not set yet",
+)
+def test_pyside6_python_marker():
+    """Test that the PySide6 marker starts at the 3.11 floor."""
+    pyproject_path = Path(__file__).parent.parent.parent / "pyproject.toml"
+
+    with open(pyproject_path, "rb") as f:
+        config = tomllib.load(f)
+
+    dependencies = config["tool"]["poetry"]["dependencies"]
+
+    assert dependencies["PySide6-Essentials"]["python"] == ">=3.11,<3.13"
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 11.1 tests first: the 3.11 floor is not set yet",
+)
 def test_black_configuration():
     """Test that Black is configured correctly."""
     pyproject_path = Path(__file__).parent.parent.parent / "pyproject.toml"
@@ -122,9 +186,14 @@ def test_black_configuration():
     black_config = config["tool"]["black"]
 
     assert black_config["line-length"] == 88
-    assert "py310" in black_config["target-version"]
+    assert black_config["target-version"] == ["py311"]
 
 
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 11.1 tests first: the 3.11 floor is not set yet",
+)
 def test_ruff_configuration():
     """Test that Ruff is configured correctly."""
     pyproject_path = Path(__file__).parent.parent.parent / "pyproject.toml"
@@ -136,7 +205,7 @@ def test_ruff_configuration():
     ruff_lint_config = ruff_config["lint"]
 
     assert ruff_config["line-length"] == 88
-    assert ruff_config["target-version"] == "py310"
+    assert ruff_config["target-version"] == "py311"
     assert "F" in ruff_lint_config["select"]  # Pyflakes
     assert "E" in ruff_lint_config["select"]  # pycodestyle errors
 
@@ -154,6 +223,11 @@ def test_pytest_configuration():
     assert "test_*.py" in pytest_config["python_files"]
 
 
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 11.1 tests first: the 3.11 floor is not set yet",
+)
 def test_mypy_configuration():
     """Test that mypy is configured correctly."""
     pyproject_path = Path(__file__).parent.parent.parent / "pyproject.toml"
@@ -163,8 +237,23 @@ def test_mypy_configuration():
 
     mypy_config = config["tool"]["mypy"]
 
-    assert mypy_config["python_version"] == "3.10"
+    assert mypy_config["python_version"] == "3.11"
     assert mypy_config["strict"] is True
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 11.1 tests first: the 3.11 floor is not set yet",
+)
+def test_mypy_ini_python_version():
+    """Test that mypy.ini, which overrides [tool.mypy], targets the 3.11 floor."""
+    mypy_ini_path = Path(__file__).parent.parent.parent / "mypy.ini"
+
+    cfg = configparser.ConfigParser()
+    cfg.read(mypy_ini_path, encoding="utf-8")
+
+    assert cfg["mypy"]["python_version"] == "3.11"
 
 
 def test_coverage_configuration():
@@ -216,6 +305,29 @@ def test_github_workflows_exist():
 
     quality_workflow = workflows_dir / "code-quality.yaml"
     assert quality_workflow.exists(), "code-quality.yaml workflow not found"
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 11.1 tests first: the 3.11 floor is not set yet",
+)
+def test_ci_oldest_python_job():
+    """Test that the CI oldest-Python job runs 3.11 without coverage."""
+    ci_path = Path(__file__).parent.parent.parent / ".github" / "workflows" / "ci.yaml"
+
+    with open(ci_path, encoding="utf-8") as f:
+        ci_config = yaml.safe_load(f)
+
+    matrix = ci_config["jobs"]["test"]["strategy"]["matrix"]["include"]
+    versions = [entry["python-version"] for entry in matrix]
+
+    assert "3.10" not in versions
+    assert {
+        "os": "ubuntu-22.04",
+        "python-version": "3.11",
+        "coverage": False,
+    } in matrix
 
 
 def test_pytest_ini_exists():
