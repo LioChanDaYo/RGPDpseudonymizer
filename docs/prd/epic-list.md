@@ -68,6 +68,12 @@
 
 ---
 
+### Epic 11: v2.3.1 — Maintenance Fixes
+
+**Goal:** Raise the Python floor to 3.11 so a dependency refresh can close the open Dependabot alerts on `poetry.lock` (Lionel, 2026-11-05), and fix the two v2.3.0 release-review bugs: custom pseudonyms refused at finalization, and the import "replace" answer ignored (Lionel, 2026-11-04). Nothing else enters 2.3.1; no tag or PyPI release without Lionel's explicit go.
+
+---
+
 **Timeline: Epics 0-4: 14 weeks (v1.0 MVP). Epic 5: 6-7 weeks (v1.1). Epic 6: 10-14 weeks (v2.0). Epic 7: 4-6 weeks (v2.1). Epic 8: 5-7 weeks (v2.4). Epic 9: 8-12 weeks (v3.0). Epic 10: 13.5-20 weeks + 10.6 in parallel (v2.3 candidate, runs before Epic 9)**
 
 ---
