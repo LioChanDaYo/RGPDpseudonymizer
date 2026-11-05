@@ -146,6 +146,35 @@ def test_pyside6_python_marker():
     assert dependencies["PySide6-Essentials"]["python"] == ">=3.11,<3.13"
 
 
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 11.1, Codex review 1: defusedxml is not declared yet",
+)
+def test_defusedxml_with_openpyxl():
+    """Test that every extra with openpyxl also installs defusedxml.
+
+    openpyxl uses defusedxml, when it is installed, to block XML entity
+    expansion in Excel files.
+    """
+    pyproject_path = Path(__file__).parent.parent.parent / "pyproject.toml"
+
+    with open(pyproject_path, "rb") as f:
+        config = tomllib.load(f)
+
+    dependencies = config["tool"]["poetry"]["dependencies"]
+    extras = config["tool"]["poetry"]["extras"]
+
+    assert "defusedxml" in dependencies
+    assert dependencies["defusedxml"]["optional"] is True
+    openpyxl_extras = sorted(
+        name for name, packages in extras.items() if "openpyxl" in packages
+    )
+    assert openpyxl_extras == ["all", "excel", "formats"]
+    for name in openpyxl_extras:
+        assert "defusedxml" in extras[name], f"extra {name!r} lacks defusedxml"
+
+
 def test_black_configuration():
     """Test that Black is configured correctly."""
     pyproject_path = Path(__file__).parent.parent.parent / "pyproject.toml"
