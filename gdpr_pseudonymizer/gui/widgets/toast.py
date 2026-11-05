@@ -10,6 +10,7 @@ from __future__ import annotations
 from typing import ClassVar
 
 from PySide6.QtCore import (
+    QByteArray,
     QEasingCurve,
     QPropertyAnimation,
     Qt,
@@ -80,7 +81,7 @@ class Toast(QLabel):
         end_x = self.x()
         self.move(start_x, self.y())
 
-        self._anim = QPropertyAnimation(self, b"pos")
+        self._anim = QPropertyAnimation(self, QByteArray(b"pos"))
         self._anim.setDuration(300)
         self._anim.setStartValue(self.pos())
         from PySide6.QtCore import QPoint
