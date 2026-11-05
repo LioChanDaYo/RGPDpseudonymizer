@@ -212,7 +212,7 @@ pip install gdpr-pseudonymizer[formats]
 Consultez le [guide d'installation](https://liochandayo.github.io/RGPDpseudonymizer/installation/) pour des instructions détaillées selon votre plateforme.
 
 ### Prérequis
-- **Python 3.10, 3.11 ou 3.12** (validé en CI/CD — 3.13+ pas encore testé)
+- **Python 3.11 ou 3.12** (validé en CI/CD — 3.13+ pas encore testé)
 
 ### Depuis PyPI (recommandé)
 
@@ -421,7 +421,7 @@ L'interface de validation offre un parcours intuitif piloté au clavier pour pas
 
 | Composant | Technologie | Version | Rôle |
 |-----------|------------|---------|------|
-| **Environnement d'exécution** | Python | 3.10-3.12 | Validé en CI/CD (3.13+ pas encore testé) |
+| **Environnement d'exécution** | Python | 3.11-3.12 | Validé en CI/CD (3.13+ pas encore testé) |
 | **Bibliothèque NLP** | spaCy | 3.8.0 | Détection d'entités en français (fr_core_news_lg) |
 | **CLI** | Typer | 0.9+ | Interface en ligne de commande |
 | **Base de données** | SQLite | 3.35+ | Stockage local des tables de correspondance (mode WAL) |
@@ -707,7 +707,7 @@ poetry run pytest tests/integration/test_validation_workflow_integration.py -v
 - **Tests de performance :** 19 tests validant toutes les exigences non fonctionnelles — benchmarks par document (NFR1), benchmarks de détection d'entités, traitement par lot (NFR2), profilage mémoire (NFR4), temps de démarrage (NFR5), stabilité et taux d'erreur (NFR6), tests de charge (Story 4.5)
 - **Couverture actuelle :** 86 %+ sur l'ensemble des modules (100 % pour le module de progression, 91,41 % pour AuditRepository)
 - **Total :** 1 670+ tests
-- **CI/CD :** Tests exécutés sur Python 3.10-3.12, sous Windows, macOS et Linux
+- **CI/CD :** Tests exécutés sur Python 3.11-3.12, sous Windows, macOS et Linux
 - **Contrôles qualité :** Tous validés (Black, Ruff, mypy, pytest)
 
 ### Principaux scénarios des tests d'intégration
