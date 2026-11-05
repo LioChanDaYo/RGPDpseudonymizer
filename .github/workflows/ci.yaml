@@ -52,7 +52,7 @@ jobs:
   # Excludes @pytest.mark.slow tests (performance, accuracy, stress).
   # Those run in dedicated workflows: accuracy.yaml and performance.yaml.
   # - Ubuntu 3.11: primary (full coverage + Codecov)
-  # - Ubuntu 3.10: oldest supported Python
+  # - Ubuntu 3.11: oldest supported Python (no coverage)
   # - macOS 3.12:  cross-platform + newest Python
   # - Windows 3.12: cross-platform, non-spaCy tests only
   test:
@@ -67,7 +67,7 @@ jobs:
             python-version: '3.11'
             coverage: true
           - os: ubuntu-22.04
-            python-version: '3.10'
+            python-version: '3.11'
             coverage: false
           - os: macos-latest
             python-version: '3.12'

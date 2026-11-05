@@ -9,13 +9,8 @@ import sys
 from pathlib import Path
 
 import pytest
+import tomllib
 import yaml
-
-# Python 3.11+ has tomllib built-in, earlier versions need tomli
-try:
-    import tomllib
-except ModuleNotFoundError:
-    import tomli as tomllib
 
 
 def test_pyproject_toml_is_valid():
@@ -97,11 +92,6 @@ def test_pyproject_has_dev_dependencies():
         assert dep in dev_dependencies, f"Missing required dev dependency: {dep}"
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 11.1 tests first: the 3.11 floor is not set yet",
-)
 def test_python_version_compatibility():
     """Test that the project's floor is Python 3.11 (Story 11.1)."""
     pyproject_path = Path(__file__).parent.parent.parent / "pyproject.toml"
@@ -118,11 +108,6 @@ def test_python_version_compatibility():
     assert current_version >= (3, 11), f"Python 3.11+ required, got {current_version}"
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 11.1 tests first: the 3.11 floor is not set yet",
-)
 def test_python_classifiers():
     """Test that the classifiers list 3.11 and 3.12, and no longer 3.10."""
     pyproject_path = Path(__file__).parent.parent.parent / "pyproject.toml"
@@ -137,11 +122,6 @@ def test_python_classifiers():
     assert "Programming Language :: Python :: 3.12" in classifiers
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 11.1 tests first: the 3.11 floor is not set yet",
-)
 def test_no_python_310_backport():
     """Test that the Python 3.10 tomli backport is gone from the dev group."""
     pyproject_path = Path(__file__).parent.parent.parent / "pyproject.toml"
@@ -154,11 +134,6 @@ def test_no_python_310_backport():
     assert "tomli" not in dev_dependencies
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 11.1 tests first: the 3.11 floor is not set yet",
-)
 def test_pyside6_python_marker():
     """Test that the PySide6 marker starts at the 3.11 floor."""
     pyproject_path = Path(__file__).parent.parent.parent / "pyproject.toml"
@@ -171,11 +146,6 @@ def test_pyside6_python_marker():
     assert dependencies["PySide6-Essentials"]["python"] == ">=3.11,<3.13"
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 11.1 tests first: the 3.11 floor is not set yet",
-)
 def test_black_configuration():
     """Test that Black is configured correctly."""
     pyproject_path = Path(__file__).parent.parent.parent / "pyproject.toml"
@@ -223,11 +193,6 @@ def test_pytest_configuration():
     assert "test_*.py" in pytest_config["python_files"]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 11.1 tests first: the 3.11 floor is not set yet",
-)
 def test_mypy_configuration():
     """Test that mypy is configured correctly."""
     pyproject_path = Path(__file__).parent.parent.parent / "pyproject.toml"
@@ -241,11 +206,6 @@ def test_mypy_configuration():
     assert mypy_config["strict"] is True
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 11.1 tests first: the 3.11 floor is not set yet",
-)
 def test_mypy_ini_python_version():
     """Test that mypy.ini, which overrides [tool.mypy], targets the 3.11 floor."""
     mypy_ini_path = Path(__file__).parent.parent.parent / "mypy.ini"
@@ -307,11 +267,6 @@ def test_github_workflows_exist():
     assert quality_workflow.exists(), "code-quality.yaml workflow not found"
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 11.1 tests first: the 3.11 floor is not set yet",
-)
 def test_ci_oldest_python_job():
     """Test that the CI oldest-Python job runs 3.11 without coverage."""
     ci_path = Path(__file__).parent.parent.parent / ".github" / "workflows" / "ci.yaml"
