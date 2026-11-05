@@ -108,11 +108,6 @@ def test_python_version_compatibility():
     assert current_version >= (3, 11), f"Python 3.11+ required, got {current_version}"
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 11.3 tests first: Python 3.13 is not set up yet",
-)
 def test_python_classifiers():
     """Test that the classifiers list 3.11, 3.12 and 3.13, and no longer 3.10."""
     pyproject_path = Path(__file__).parent.parent.parent / "pyproject.toml"
@@ -140,11 +135,6 @@ def test_no_python_310_backport():
     assert "tomli" not in dev_dependencies
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 11.3 tests first: Python 3.13 is not set up yet",
-)
 def test_pyside6_python_marker():
     """Test that the GUI extra installs PySide6 6.8.3, which supports Python 3.13 (Story 11.3)."""
     pyproject_path = Path(__file__).parent.parent.parent / "pyproject.toml"
@@ -301,11 +291,6 @@ def test_github_workflows_exist():
     assert quality_workflow.exists(), "code-quality.yaml workflow not found"
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 11.3 tests first: Python 3.13 is not set up yet",
-)
 def test_ci_test_matrix():
     """Test the CI test matrix: 3.11 with coverage, 3.13, macOS and Windows 3.12 (Story 11.3)."""
     ci_path = Path(__file__).parent.parent.parent / ".github" / "workflows" / "ci.yaml"
