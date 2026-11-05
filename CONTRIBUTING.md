@@ -27,7 +27,7 @@ Thank you for your interest in contributing! This guide explains how to get invo
 
 ### Prerequisites
 
-- Python 3.10-3.12
+- Python 3.11-3.12
 - Git 2.30+
 - 8GB RAM minimum (spaCy model requires ~571MB)
 

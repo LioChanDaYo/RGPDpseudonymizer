@@ -12,7 +12,7 @@
 
 Before installing the GDPR Pseudonymizer, ensure you have:
 
-- **Python:** 3.10, 3.11, or 3.12 (validated in CI/CD; 3.9 no longer supported)
+- **Python:** 3.11 or 3.12 (validated in CI/CD; 3.10 no longer supported)
   - Check version: `python --version`
   - Download from: https://www.python.org/downloads/
 - **Poetry:** 1.7+ (dependency management)
@@ -138,7 +138,7 @@ Commands:
 ### macOS
 
 - Ensure Xcode Command Line Tools installed: `xcode-select --install`
-- Apple Silicon (M1/M2) users: Python 3.10+ has native ARM support
+- Apple Silicon (M1/M2) users: Python 3.11+ has native ARM support
 
 ### Linux
 
@@ -160,7 +160,7 @@ Commands:
 ### Problem: Python version not supported
 
 **Solution:**
-1. Install Python 3.10-3.12 from https://www.python.org/downloads/
+1. Install Python 3.11-3.12 from https://www.python.org/downloads/
 2. Use `py -3.11` (Windows) or `python3.11` (macOS/Linux) to specify version
 3. Configure Poetry to use specific Python: `poetry env use python3.11`
 
@@ -183,7 +183,7 @@ Commands:
 ### Problem: `poetry install` fails with dependency conflicts
 
 **Solution:**
-1. Ensure Python version is 3.10-3.12 (check with `python --version`)
+1. Ensure Python version is 3.11-3.12 (check with `python --version`)
 2. Delete existing virtual environment:
    ```bash
    poetry env remove python

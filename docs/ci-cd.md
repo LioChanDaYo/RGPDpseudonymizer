@@ -17,16 +17,16 @@ All GitHub Actions workflows are located in `.github/workflows/`:
 
 ### Test Matrix Strategy
 
-The CI pipeline runs tests across **9 configurations** to ensure cross-platform compatibility:
+The CI pipeline runs tests across **4 configurations** to ensure cross-platform compatibility:
 
 | Operating System | Python Versions | Total Configs |
 |-----------------|----------------|---------------|
-| Ubuntu 22.04 | 3.9, 3.10, 3.11 | 3 |
-| macOS (latest) | 3.9, 3.10, 3.11 | 3 |
-| Windows (latest) | 3.9, 3.10, 3.11 | 3 |
+| Ubuntu 22.04 | 3.11 (two jobs: with and without coverage) | 2 |
+| macOS (latest) | 3.12 | 1 |
+| Windows (latest) | 3.12 | 1 |
 
 **Rationale:**
-- Python 3.9+ required (EOL Oct 2025)
+- Python 3.11+ required (3.11 and 3.12 tested)
 - Ubuntu 22.04: Primary development platform
 - macOS/Windows: Ensure cross-platform compatibility
 - Matrix runs in parallel for fast feedback
@@ -43,7 +43,7 @@ The CI pipeline runs tests across **9 configurations** to ensure cross-platform 
 
 **Settings:**
 - Line length: 88 characters
-- Target: Python 3.9+
+- Target: Python 3.11+
 - Opinionated formatting (no configuration debates)
 
 **CI Behavior:** Fails if code is not formatted. Run `poetry run black .` to auto-format.
@@ -72,7 +72,7 @@ The CI pipeline runs tests across **9 configurations** to ensure cross-platform 
 
 **Settings:**
 - Strict mode enabled
-- Python 3.9 compatibility
+- Python 3.11 compatibility
 - Ignores missing type stubs for spaCy, Stanza, pytest
 
 **CI Behavior:** Fails on type errors. Add type hints or `# type: ignore` comments where necessary.
@@ -324,15 +324,17 @@ See [tests/performance/README.md](../tests/performance/README.md) for local usag
 
 To merge a PR, the following checks **must pass**:
 
-1. **CI Checks (3 required):**
-   - `ci (ubuntu-22.04, 3.11)` - Primary platform
-   - `ci (macos-latest, 3.11)` - macOS compatibility
-   - `ci (windows-latest, 3.11)` - Windows compatibility
+1. **CI Checks (5 required, `ci.yaml`):**
+   - `lint` - Ruff, Black, mypy (runs once, before the tests)
+   - `test (ubuntu-22.04, 3.11, true)` - Primary platform, with coverage
+   - `test (ubuntu-22.04, 3.11, false)` - Oldest supported Python
+   - `test (macos-latest, 3.12, false)` - macOS compatibility
+   - `test (windows-latest, 3.12, false)` - Windows compatibility
 
 2. **Code Quality:**
-   - `code-quality` - Black, Ruff, mypy checks
+   - `quality` - Black, Ruff, mypy checks (`code-quality.yaml`)
 
-**Note:** Not all 9 matrix configurations are required (to allow faster merges), but all must pass before merging.
+**Note:** All 4 test configurations are required.
 
 ### Configuring Branch Protection (Admin Guide)
 
@@ -347,10 +349,12 @@ To merge a PR, the following checks **must pass**:
    - ✅ **Require status checks to pass before merging**
    - ✅ **Require branches to be up to date before merging**
    - **Status checks that are required:**
-     - `ci (ubuntu-22.04, 3.11)`
-     - `ci (macos-latest, 3.11)`
-     - `ci (windows-latest, 3.11)`
-     - `code-quality`
+     - `lint`
+     - `test (ubuntu-22.04, 3.11, true)`
+     - `test (ubuntu-22.04, 3.11, false)`
+     - `test (macos-latest, 3.12, false)`
+     - `test (windows-latest, 3.12, false)`
+     - `quality`
    - ✅ **Require linear history** (optional, prevents merge commits)
    - ✅ **Do not allow bypassing the above settings** (enforce for admins)
 4. Click **Create** or **Save changes**
@@ -393,14 +397,14 @@ Add these badges to [README.md](README.md) to show CI status:
 |----------|-------------|--------------|
 | Unit Tests | <5 minutes | ~3-4 minutes |
 | Code Quality | <2 minutes | ~1-2 minutes |
-| Full CI (9 configs) | <15 minutes | ~8-12 minutes |
+| Full CI (4 configs) | <15 minutes | ~8-12 minutes |
 
 ### Optimization Strategies
 
 **Implemented:**
 - ✅ Poetry dependency caching (`actions/cache@v3`)
 - ✅ spaCy model caching (avoid 571MB re-download)
-- ✅ Parallel matrix execution (9 jobs run simultaneously)
+- ✅ Parallel matrix execution (4 jobs run simultaneously)
 - ✅ Separate quality checks (single OS, faster than full matrix)
 
 **Future Optimizations:**

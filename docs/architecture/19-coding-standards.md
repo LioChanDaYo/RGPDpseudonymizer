@@ -23,11 +23,11 @@ python -m pytest tests/   # ❌ NO (use 'poetry run pytest')
 ```
 
 **Why?** Poetry ensures:
-- Correct Python version (3.10-3.12)
+- Correct Python version (3.11-3.12)
 - Locked dependency versions
 - Isolated virtual environment
 
-**Supported Python:** 3.10 - 3.12 (3.9 EOL October 2025, 3.13+ not yet tested)
+**Supported Python:** 3.11 - 3.12 (3.10 EOL October 2026, 3.13+ not yet tested)
 
 ---
 

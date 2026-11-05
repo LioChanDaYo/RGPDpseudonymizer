@@ -3,7 +3,7 @@
 ### 13.1 Local Development Setup
 
 **Prerequisites:**
-- Python 3.10+
+- Python 3.11+
 - Git 2.30+
 - 8GB RAM minimum
 

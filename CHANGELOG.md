@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Python 3.11 is the new minimum (Story 11.1).** Python 3.10 is no longer supported: it reached end of life in October 2026. On Python 3.10, `pip install gdpr-pseudonymizer` keeps installing 2.3.0, the last version that supports it. Validated: Python 3.11 and 3.12.
+
+### Security
+
+- **Dependency refresh closes the open Dependabot alerts on the development lock file (Story 11.1).** In `poetry.lock`: Pillow 12.3.0 → 13.0.0, filelock 3.32.0 → 4.2.9, certifi 2026.7.22 → 2026.10.23, urllib3 2.7.0 → 2.8.0, setuptools 83.0.0 → 84.2.1, fpdf2 2.8.7 → 2.9.0, black 26.5.1 → 26.10.1. The Python 3.10 backports tomli and exceptiongroup, and defusedxml (only the old fpdf2 used it), leave the lock. None of these alerts reached users: the desktop builds leave Pillow out (`gdpr-pseudo-gui.spec`), make no network calls and bundle the spaCy model, and `pip` installs do not use the lock file.
+
 ---
 
 ## [2.3.0] - 2026-11-03

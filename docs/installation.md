@@ -10,11 +10,11 @@ This guide covers installation on Windows, macOS, and Linux.
 
 | Requirement | Version | How to Check |
 |-------------|---------|--------------|
-| **Python** | 3.10, 3.11, or 3.12 | `python --version` |
+| **Python** | 3.11 or 3.12 | `python --version` |
 | **Disk Space** | ~1GB free | For spaCy French model (auto-downloaded on first use) |
 | **Internet** | Required for installation | Model auto-download ~571MB |
 
-**Important:** Python 3.10-3.12 are validated in CI/CD. Python 3.9 is no longer supported (EOL October 2025). Python 3.13+ is not yet tested.
+**Important:** Python 3.11-3.12 are validated in CI/CD. Python 3.10 is no longer supported (EOL October 2026); on Python 3.10, pip installs version 2.3.0. Python 3.13+ is not yet tested.
 
 ---
 
@@ -456,17 +456,17 @@ poetry run gdpr-pseudo config
 **Error:** `The currently activated Python version X.Y.Z is not supported`
 
 **Solution:**
-1. Install Python 3.10, 3.11, or 3.12
+1. Install Python 3.11 or 3.12
 2. Configure Poetry to use correct version:
    ```bash
    poetry env use python3.11
    poetry install
    ```
 
-**Note:** If your system has Python 3.13+ but Poetry uses 3.10-3.12, the tool works correctly. Poetry manages its own virtual environment independently of system Python. Check with:
+**Note:** If your system has Python 3.13+ but Poetry uses 3.11-3.12, the tool works correctly. Poetry manages its own virtual environment independently of system Python. Check with:
 ```bash
 poetry env info
-# Look for "Virtualenv Python: 3.11.x" (should be 3.10-3.12)
+# Look for "Virtualenv Python: 3.11.x" (should be 3.11-3.12)
 ```
 
 ---
@@ -521,7 +521,7 @@ poetry env info
 ### `poetry install` fails with dependency conflicts
 
 **Solution:**
-1. Verify Python version (must be 3.10-3.12)
+1. Verify Python version (must be 3.11-3.12)
 2. Clear virtual environment and reinstall:
    ```bash
    poetry env remove python
