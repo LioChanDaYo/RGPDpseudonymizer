@@ -50,7 +50,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ['3.11', '3.12']
+        python-version: ['3.11', '3.12', '3.13']
 
     steps:
       - uses: actions/checkout@v4
@@ -66,8 +66,8 @@ jobs:
 
 **Test Matrix Coverage:**
 - **Operating Systems:** Ubuntu, macOS, Windows
-- **Python Versions:** 3.11, 3.12
-- **Total Configurations:** 6 (3 OS × 2 Python versions)
+- **Python Versions:** 3.11, 3.12, 3.13
+- **Total Configurations:** 9 (3 OS × 3 Python versions)
 
 ---
 

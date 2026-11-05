@@ -25,15 +25,15 @@
 **Error:** `The currently activated Python version X.Y.Z is not supported`
 
 **Solution:**
-1. Install Python 3.11 or 3.12
+1. Install Python 3.11, 3.12 or 3.13
 2. Configure Poetry to use correct version:
    ```bash
    poetry env use python3.11
    poetry install
    ```
-3. Verify with `poetry env info` (look for "Python: 3.11.x" or "3.12.x")
+3. Verify with `poetry env info` (look for "Python: 3.11.x", "3.12.x" or "3.13.x")
 
-**Note:** Python 3.9 is no longer supported (EOL October 2025). Python 3.13+ is not yet tested.
+**Note:** Python 3.9 is no longer supported (EOL October 2025). Python 3.14+ is not yet tested.
 
 ### spaCy model download fails
 
@@ -64,7 +64,7 @@
 ### `poetry install` fails with dependency conflicts
 
 **Solution:**
-1. Verify Python version (must be 3.11-3.12)
+1. Verify Python version (must be 3.11-3.13)
 2. Clear virtual environment and reinstall:
    ```bash
    poetry env remove python

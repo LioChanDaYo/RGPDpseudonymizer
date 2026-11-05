@@ -13,9 +13,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Python 3.11 is the new minimum (Story 11.1).** Python 3.10 is no longer supported: it reached end of life in October 2026. On Python 3.10, `pip install gdpr-pseudonymizer` keeps installing 2.3.0, the last version that supports it. Validated: Python 3.11 and 3.12.
 
+- **Python 3.13 is tested in CI (Story 11.3).** The second Ubuntu Python 3.11 test job now runs Python 3.13, desktop GUI tests included; Python 3.11 stays tested by the coverage job. Validated: Python 3.11, 3.12 and 3.13.
+
+- **The desktop app moves to Qt 6.8 (PySide6-Essentials 6.7.3 → 6.8.3, Story 11.3).** PySide6 6.7 does not install on Python 3.13; 6.8.3 does, so `pip install gdpr-pseudonymizer[gui]` now installs the desktop app on Python 3.13. This applies to every Python version and to the desktop builds. The desktop app now needs macOS 12 or later (it needed macOS 11).
+
 ### Security
 
 - **Dependency refresh closes the open Dependabot alerts on the development lock file (Story 11.1).** In `poetry.lock`: Pillow 12.3.0 → 13.0.0, filelock 3.32.0 → 4.2.9, certifi 2026.7.22 → 2026.10.23, urllib3 2.7.0 → 2.8.0, setuptools 83.0.0 → 84.2.1, fpdf2 2.8.7 → 2.9.0, black 26.5.1 → 26.10.1. The Python 3.10 backports tomli and exceptiongroup leave the lock. fpdf2 2.9.0 no longer pulls in defusedxml, so defusedxml 0.7.1 is now declared with openpyxl (extras `excel`, `formats` and `all`), which uses it to block XML entity expansion in Excel files. None of these alerts reached users: the desktop builds leave Pillow out (`gdpr-pseudo-gui.spec`), make no network calls and bundle the spaCy model, and `pip` installs do not use the lock file.
+
+- **stanza 1.15.0 closes Dependabot alert #109 (Story 11.3).** In `poetry.lock`, stanza 1.14.0 → 1.15.0 (remote code execution through pickle deserialization in the lemmatizer); stanza 1.15.0 adds orjson 3.13.0. stanza is a development dependency: the desktop builds leave it out (`gdpr-pseudo-gui.spec`) and `pip` installs do not include it.
 
 ---
 
