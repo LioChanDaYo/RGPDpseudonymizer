@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
 
 from gdpr_pseudonymizer.gui.workers.database_worker import (
@@ -36,7 +36,7 @@ def _make_entity(
     e.entity_type = entity_type
     e.full_name = full_name
     e.pseudonym_full = pseudonym_full
-    e.first_seen_timestamp = datetime(2026, 1, 15, tzinfo=timezone.utc)
+    e.first_seen_timestamp = datetime(2026, 1, 15, tzinfo=UTC)
     return e
 
 
@@ -76,7 +76,7 @@ class TestDatabaseWorkerList:
 
         mock_audit = MagicMock()
         mock_op = MagicMock()
-        mock_op.timestamp = datetime(2026, 2, 20, tzinfo=timezone.utc)
+        mock_op.timestamp = datetime(2026, 2, 20, tzinfo=UTC)
         mock_audit.find_operations.return_value = [mock_op]
         mock_audit_cls.return_value = mock_audit
 

@@ -6,10 +6,10 @@ Tests verify project configuration files are valid and dependencies are correctl
 
 import configparser
 import sys
+import tomllib
 from pathlib import Path
 
 import pytest
-import tomllib
 import yaml
 
 
@@ -159,11 +159,6 @@ def test_black_configuration():
     assert black_config["target-version"] == ["py311"]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 11.1 tests first: the 3.11 floor is not set yet",
-)
 def test_ruff_configuration():
     """Test that Ruff is configured correctly."""
     pyproject_path = Path(__file__).parent.parent.parent / "pyproject.toml"

@@ -9,7 +9,7 @@ from __future__ import annotations
 import csv
 import threading
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -141,8 +141,8 @@ class DatabaseWorker(QRunnable):
                 if last_ops:
                     last_op_time = last_ops[0].timestamp
                     if last_op_time.tzinfo is None:
-                        last_op_time = last_op_time.replace(tzinfo=timezone.utc)
-                    delta = datetime.now(timezone.utc) - last_op_time
+                        last_op_time = last_op_time.replace(tzinfo=UTC)
+                    delta = datetime.now(UTC) - last_op_time
                     if delta.days == 0:
                         last_op_str = "aujourd'hui"
                     elif delta.days == 1:

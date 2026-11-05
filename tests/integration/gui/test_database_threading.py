@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import time
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 from unittest.mock import MagicMock
 
@@ -37,7 +37,7 @@ def _make_mock_entity(
     entity.entity_type = entity_type
     entity.full_name = full_name
     entity.pseudonym_full = pseudonym_full
-    entity.first_seen_timestamp = datetime.now(timezone.utc)
+    entity.first_seen_timestamp = datetime.now(UTC)
     return entity
 
 

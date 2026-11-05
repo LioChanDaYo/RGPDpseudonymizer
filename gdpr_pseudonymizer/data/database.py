@@ -17,7 +17,7 @@ import sqlite3
 import time
 from collections.abc import Iterator
 from contextlib import contextmanager
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from sqlalchemy import create_engine, event, text
@@ -619,7 +619,7 @@ def _rebuild_entities_table(conn: sqlite3.Connection) -> int:
 
 def _write_schema_version(conn: sqlite3.Connection, version: str) -> None:
     """Write schema_version; the last step of the conversion before COMMIT."""
-    stamp = datetime.now(timezone.utc).replace(tzinfo=None)
+    stamp = datetime.now(UTC).replace(tzinfo=None)
     cursor = conn.execute(
         "UPDATE metadata SET value = ?, updated_at = ? "
         "WHERE \"key\" = 'schema_version'",
@@ -788,7 +788,7 @@ def _clean_erasure_log(db_path: str) -> bool:
                 f"json_remove(user_modifications, ?) WHERE {named_condition}",
                 (name_path, name_path),
             ).rowcount
-            stamp = datetime.now(timezone.utc).replace(tzinfo=None)
+            stamp = datetime.now(UTC).replace(tzinfo=None)
             conn.execute(
                 'INSERT OR REPLACE INTO metadata ("key", value, updated_at) '
                 "VALUES (?, ?, ?)",

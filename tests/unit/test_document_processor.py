@@ -6,7 +6,7 @@ to ensure correct orchestration of all Epic 2 components.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import MagicMock, Mock, patch
 
@@ -127,7 +127,7 @@ class TestDocumentProcessor:
                 pseudonym_full="Leia Organa",
                 pseudonym_first="Leia",
                 pseudonym_last="Organa",
-                first_seen_timestamp=datetime.now(timezone.utc),
+                first_seen_timestamp=datetime.now(UTC),
                 theme="neutral",
             ),
             Entity(
@@ -137,7 +137,7 @@ class TestDocumentProcessor:
                 pseudonym_full="Coruscant",
                 pseudonym_first=None,
                 pseudonym_last=None,
-                first_seen_timestamp=datetime.now(timezone.utc),
+                first_seen_timestamp=datetime.now(UTC),
                 theme="neutral",
             ),
         ]
@@ -286,7 +286,7 @@ class TestDocumentProcessor:
             pseudonym_full="Leia Organa",
             pseudonym_first="Leia",
             pseudonym_last="Organa",
-            first_seen_timestamp=datetime.now(timezone.utc),
+            first_seen_timestamp=datetime.now(UTC),
             theme="neutral",
         )
         existing_location = Entity(
@@ -296,7 +296,7 @@ class TestDocumentProcessor:
             pseudonym_full="Coruscant",
             pseudonym_first=None,
             pseudonym_last=None,
-            first_seen_timestamp=datetime.now(timezone.utc),
+            first_seen_timestamp=datetime.now(UTC),
             theme="neutral",
         )
 
@@ -663,7 +663,7 @@ class TestBuildPseudonymPreviews:
             pseudonym_full="Leia Organa",
             pseudonym_first="Leia",
             pseudonym_last="Organa",
-            first_seen_timestamp=datetime.now(timezone.utc),
+            first_seen_timestamp=datetime.now(UTC),
             theme="neutral",
         )
 

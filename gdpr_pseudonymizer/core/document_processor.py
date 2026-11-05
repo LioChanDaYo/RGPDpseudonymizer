@@ -16,7 +16,7 @@ import re
 import time
 from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass, replace
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from gdpr_pseudonymizer.core.custom_pseudonym import (
     CUSTOM_THEME,
@@ -606,7 +606,7 @@ class DocumentProcessor:
                 entity_type=entity_type,
                 full_name=text,
                 pseudonym_full=pseudonym,
-                first_seen_timestamp=datetime.now(timezone.utc),
+                first_seen_timestamp=datetime.now(UTC),
                 theme=CUSTOM_THEME,
                 **custom_entity_fields(
                     text, entity_type, pseudonym, stored, custom_pseudonyms
@@ -738,7 +738,7 @@ class DocumentProcessor:
             pseudonym_first=assignment.pseudonym_first,
             pseudonym_last=assignment.pseudonym_last,
             pseudonym_full=assignment.pseudonym_full,
-            first_seen_timestamp=datetime.now(timezone.utc),
+            first_seen_timestamp=datetime.now(UTC),
             gender=detected_gender,
             confidence_score=(
                 entity.confidence if hasattr(entity, "confidence") else None
