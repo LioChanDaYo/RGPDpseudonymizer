@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import csv
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -298,7 +298,7 @@ class AuditRepository:
             export_document = {
                 "export_metadata": {
                     "schema_version": "1.0.0",
-                    "export_timestamp": datetime.now(timezone.utc).isoformat(),
+                    "export_timestamp": datetime.now(UTC).isoformat(),
                     "filters_applied": filters_applied if filters_applied else None,
                     "total_results": len(operations),
                 },

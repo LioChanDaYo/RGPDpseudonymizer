@@ -25,13 +25,13 @@
 **Erreur :** `The currently activated Python version X.Y.Z is not supported`
 
 **Solution :**
-1. Installez Python 3.10, 3.11 ou 3.12
+1. Installez Python 3.11 ou 3.12
 2. Configurez Poetry pour utiliser la bonne version :
    ```bash
    poetry env use python3.11
    poetry install
    ```
-3. Vérifiez avec `poetry env info` (recherchez « Python: 3.10.x », « 3.11.x » ou « 3.12.x »)
+3. Vérifiez avec `poetry env info` (recherchez « Python: 3.11.x » ou « 3.12.x »)
 
 **Remarque :** Python 3.9 n'est plus pris en charge (fin de vie en octobre 2025). Python 3.13 et supérieur n'ont pas encore été testés.
 
@@ -64,7 +64,7 @@
 ### `poetry install` échoue avec des conflits de dépendances
 
 **Solution :**
-1. Vérifiez la version Python (doit être 3.10-3.12)
+1. Vérifiez la version Python (doit être 3.11-3.12)
 2. Supprimez l'environnement virtuel et réinstallez :
    ```bash
    poetry env remove python
@@ -266,7 +266,7 @@ xcode-select --install
 
 ### macOS : Apple Silicon (M1/M2/M3)
 
-Python 3.10+ dispose du support natif ARM. Si vous utilisez Homebrew :
+Python 3.11+ dispose du support natif ARM. Si vous utilisez Homebrew :
 ```bash
 brew install python@3.11
 ```

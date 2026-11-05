@@ -735,7 +735,7 @@ Press Enter to continue...
 
 ## 🐛 Planned for v2.3.1
 
-Decided by Lionel on 2026-11-04, after the read-only Codex release review of v2.3.0 (`main` `90abef3`) and QA's check of each finding. Only these two go into 2.3.1. Neither leaves a name in clear.
+Decided by Lionel on 2026-11-04, after the read-only Codex release review of v2.3.0 (`main` `90abef3`) and QA's check of each finding. Only these two bugs go into 2.3.1, with TD-005, which Lionel added on 2026-11-05: "drop 3.10 in 2.3.1 (beware; 2.3.1 already has stuff planned in it)". None of the three leaves a name in clear.
 
 #### BUG-001: Two custom pseudonyms each accepted, then both refused at finalization 📅 v2.3.1
 **Source:** v2.3.0 release review (Codex), verified by QA
@@ -751,15 +751,23 @@ Decided by Lionel on 2026-11-04, after the read-only Codex release review of v2.
 **Where:** `cli/commands/import_mappings.py` (the replace branch builds a new entity). Already in v2.2.0.
 **Fix direction:** Update the confirmed existing row in one transaction.
 
+#### TD-005: Python 3.11 floor and dependency security refresh 📅 v2.3.1
+**Source:** 61 open Dependabot alerts on `poetry.lock` (2026-11-05), 6 critical (5 Pillow, 1 certifi)
+**Description:** The fixed Pillow 13.0.0 and filelock 4.2.1 need Python 3.11 or later, so with the 3.10 floor a lock refresh closes only 8 of the 61 alerts. Python 3.10 is end of life. PyPI downloads over 90 days: 3.10 = 4, 3.11 = 17, 3.12 = 20.
+**Impact:** None for users: the desktop builds leave Pillow out, make no network calls and bundle the spaCy model, and `pip` installs do not use the lock file. On Python 3.10, pip keeps installing 2.3.0.
+**Where:** `pyproject.toml`, `poetry.lock`, `mypy.ini`, `.github/workflows/ci.yaml`, `tests/unit/test_project_config.py`, the user docs (Story 11.1).
+**Fix direction:** Raise the floor to 3.11 and refresh pillow, certifi, urllib3, setuptools, filelock, fpdf2 and black in the lock.
+
 ## 🔎 Known limitations (not scheduled)
 
-Found by the same release review. Each needs conditions a real user is very unlikely to meet, so none is scheduled (Lionel, 2026-11-04). Reopen one only if a real user reports it. None leaves a name in clear.
+KL-001 to KL-005 were found by the same release review. Each of those needs conditions a real user is very unlikely to meet, so none is scheduled (Lionel, 2026-11-04). KL-006 has its own source and decision, in its entry. Reopen one only if a real user reports it. None leaves a name in clear.
 
 - **KL-001:** `delete-mapping` can miss a v2.2.0 row of a name with five or more accented words, when that name's accents were stored two ways and v2.2.0 cut a « Mé… » word as the title « Me ». The command then reports the erasure as complete.
 - **KL-002:** Two programs opening a pre-2.3 database for the first time within the same milliseconds: one can wrongly report "format not recognised". Opening it again works.
 - **KL-003:** Desktop batch review can hang if « Annuler le lot » is clicked in a window of a few microseconds. A second click ends it.
 - **KL-004:** In single-document mode, if you open the next document and reach its review before the previous one finishes writing (0.1 to 0.25 s), the previous result is offered under the next file's name.
 - **KL-005:** `delete-mapping "Meprof"` erases the v2.2.0 row of « Mèprof » (a name made only of title abbreviations, saved as a lone accent).
+- **KL-006:** With the PER-001 style only (`--theme neutral_id`): after « Marie Dubois » and « Marie Dupont », a bare « Marie » gets PER-001-P in one run and PER-002-P in later runs. The default style gives the same pseudonym in every run (measured over three runs). Three places pick the pseudonym of a bare first name, each by its own rule: the first matching name in the document (`core/document_processor.py:625`), the reload of saved mappings, where the last saved wins (`pseudonym/library_manager.py:790-792`), and the database lookup, where the first saved wins but which is never reached, because the reloaded value is checked first (`pseudonym/assignment_engine.py:359-374`). Which Marie a bare « Marie » means can never be known from the text. Found on 2026-11-05, not by the release review; Lionel, 2026-11-05: "backlog it". Reopen if a `neutral_id` user reports it.
 
 Further non-leak items decided during Epic 10 are listed in the Backlog sections of Stories 10.19 to 10.22 (`docs/stories/`).
 

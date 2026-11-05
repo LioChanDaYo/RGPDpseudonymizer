@@ -16,7 +16,7 @@ from __future__ import annotations
 import random
 import sys
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 # Add project root to sys.path so we can import project modules
@@ -232,7 +232,7 @@ def seed_database(db_path: str, passphrase: str, count: int = 1200) -> None:
                 pseudonym_first=db_session.encryption.encrypt(pfirst),
                 pseudonym_last=db_session.encryption.encrypt(plast),
                 pseudonym_full=db_session.encryption.encrypt(pseudo_full),
-                first_seen_timestamp=datetime.now(timezone.utc),
+                first_seen_timestamp=datetime.now(UTC),
                 gender="unknown",
                 confidence_score=round(random.uniform(0.7, 1.0), 2),
                 theme="star_wars",

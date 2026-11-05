@@ -4,7 +4,7 @@ This is the **DEFINITIVE** technology selection table. All development must use 
 
 | Category | Technology | Version | Purpose | Rationale |
 |----------|------------|---------|---------|-----------|
-| **Runtime** | Python | 3.10+ | Application runtime environment | Balance of modern features (type hints, asyncio) with broad platform support. 3.9 dropped (EOL Oct 2025). 3.12 confirmed working. |
+| **Runtime** | Python | 3.11+ | Application runtime environment | Balance of modern features (type hints, asyncio) with broad platform support. 3.10 dropped (EOL Oct 2026, Story 11.1). 3.12 confirmed working. |
 | **CLI Framework** | Typer | 0.9+ | Command-line interface | Excellent type hints support, automatic help generation, based on Click (mature foundation). Simpler than argparse for complex CLIs. |
 | **NLP Library** | spaCy | 3.7+ (tested: 3.8.0) | French NER (entity detection) | Selected after Story 1.2 benchmark (2026-01-16). Achieves 29.5% F1 vs Stanza 11.9% F1 (both below 85% target). Mandatory validation mode required for MVP. Fine-tuning planned post-MVP. See docs/nlp-benchmark-report.md for full analysis. |
 | **NLP Model** | fr_core_news_lg | 3.8.0 | French language model | spaCy large model (~571MB). Downloaded post-install. Baseline accuracy requires validation mode + hybrid detection (NLP + regex patterns). |

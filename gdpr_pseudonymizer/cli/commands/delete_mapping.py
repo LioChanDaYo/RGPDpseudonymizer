@@ -14,7 +14,7 @@ from __future__ import annotations
 import sys
 import time
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Optional
 
@@ -188,7 +188,7 @@ def delete_mapping_command(
             for deleted in deleted_rows:
                 operation = Operation(
                     id=str(uuid.uuid4()),
-                    timestamp=datetime.now(timezone.utc),
+                    timestamp=datetime.now(UTC),
                     operation_type="ERASURE",
                     files_processed=[],
                     user_modifications={
