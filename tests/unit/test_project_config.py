@@ -108,8 +108,13 @@ def test_python_version_compatibility():
     assert current_version >= (3, 11), f"Python 3.11+ required, got {current_version}"
 
 
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 11.3 tests first: Python 3.13 is not set up yet",
+)
 def test_python_classifiers():
-    """Test that the classifiers list 3.11 and 3.12, and no longer 3.10."""
+    """Test that the classifiers list 3.11, 3.12 and 3.13, and no longer 3.10."""
     pyproject_path = Path(__file__).parent.parent.parent / "pyproject.toml"
 
     with open(pyproject_path, "rb") as f:
@@ -118,6 +123,7 @@ def test_python_classifiers():
     classifiers = config["tool"]["poetry"]["classifiers"]
 
     assert "Programming Language :: Python :: 3.10" not in classifiers
+    assert "Programming Language :: Python :: 3.13" in classifiers
     assert "Programming Language :: Python :: 3.11" in classifiers
     assert "Programming Language :: Python :: 3.12" in classifiers
 
@@ -134,8 +140,13 @@ def test_no_python_310_backport():
     assert "tomli" not in dev_dependencies
 
 
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 11.3 tests first: Python 3.13 is not set up yet",
+)
 def test_pyside6_python_marker():
-    """Test that the PySide6 marker starts at the 3.11 floor."""
+    """Test that the GUI extra installs PySide6 6.8.3, which supports Python 3.13 (Story 11.3)."""
     pyproject_path = Path(__file__).parent.parent.parent / "pyproject.toml"
 
     with open(pyproject_path, "rb") as f:
@@ -143,7 +154,11 @@ def test_pyside6_python_marker():
 
     dependencies = config["tool"]["poetry"]["dependencies"]
 
-    assert dependencies["PySide6-Essentials"]["python"] == ">=3.11,<3.13"
+    assert dependencies["PySide6-Essentials"] == {
+        "version": "~6.8.3",
+        "optional": True,
+        "python": ">=3.11,<3.14",
+    }
 
 
 def test_defusedxml_with_openpyxl():
@@ -286,8 +301,13 @@ def test_github_workflows_exist():
     assert quality_workflow.exists(), "code-quality.yaml workflow not found"
 
 
-def test_ci_oldest_python_job():
-    """Test that the CI oldest-Python job runs 3.11 without coverage."""
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 11.3 tests first: Python 3.13 is not set up yet",
+)
+def test_ci_test_matrix():
+    """Test the CI test matrix: 3.11 with coverage, 3.13, macOS and Windows 3.12 (Story 11.3)."""
     ci_path = Path(__file__).parent.parent.parent / ".github" / "workflows" / "ci.yaml"
 
     with open(ci_path, encoding="utf-8") as f:
@@ -296,12 +316,13 @@ def test_ci_oldest_python_job():
     matrix = ci_config["jobs"]["test"]["strategy"]["matrix"]["include"]
     versions = [entry["python-version"] for entry in matrix]
 
+    assert matrix == [
+        {"os": "ubuntu-22.04", "python-version": "3.11", "coverage": True},
+        {"os": "ubuntu-22.04", "python-version": "3.13", "coverage": False},
+        {"os": "macos-latest", "python-version": "3.12", "coverage": False},
+        {"os": "windows-latest", "python-version": "3.12", "coverage": False},
+    ]
     assert "3.10" not in versions
-    assert {
-        "os": "ubuntu-22.04",
-        "python-version": "3.11",
-        "coverage": False,
-    } in matrix
 
 
 def test_pytest_ini_exists():
