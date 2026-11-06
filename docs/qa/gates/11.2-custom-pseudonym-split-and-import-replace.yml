@@ -1,0 +1,102 @@
+schema: 1
+story: '11.2'
+story_title: '2.3.1 Fixes: Custom Pseudonyms Refused at Finalization, Particle Surname Split, Import Replace Ignored'
+scope: 'Review of draft PR #120 at head 9cfd4ed (branch story/11.2-custom-pseudonym-fixes, base main 047717f): commits 9a8e3bf (story), badda97 (tests first, 21 strict xfail), b6ca77e (order fix in _bound_parts), e8b79ef (D1 rule), d0ce58b (replace_mapping and "  Replaced: <n>"), 9cfd4ed (CHANGELOG, BACKLOG, Dev Agent Record). QA folder: rgpd-analysis/r112/qa (logs/checks.log, story_files.log, mut_*.log, qa112.log, qa112_k.log, sm_probes_head.log).'
+gate: PASS
+status_reason: 'Every acceptance criterion QA can check holds on 9cfd4ed: the review and finalization now accept and store the same parts in either order (CLI, desktop check, finalize_document; realistic pairs « Aurore Bruneau » with « Aurore Le Goff », « de La Fontaine », « du Pré », « Des Lys », « De Sousa », hyphenated first names, and three people sharing « Élodie »), true conflicts are still refused, D1 splits as Lionel decided while stored rows keep their split, and a yes to "Replace existing mapping?" replaces in place with the approved "  Replaced: <n>" line and no name in any error or log. The only finding with a product effect is low and outside the story''s premise (SPLIT-112-01: two linking words next to a pseudonym starting with the same linking word store two first-name parts for one first name); AC13 (CI on 9cfd4ed, Codex) is the orchestrator''s.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-11-06T18:55:00Z'
+
+waiver: { active: false }
+
+quality_score: 100
+expires: '2026-11-20T18:55:00Z'
+
+merge_blockers: []
+
+merge_notes:
+  - 'AC13 (orchestrator): CI on 9cfd4ed (expected ubuntu 3.11, ubuntu 3.13 and macOS 3357 passed, Windows 3207 passed + 3 skipped, no xfail) and on this gate commit; QA did not read them. Then the one read-only codex exec review under the story''s stopping rule. QA started no Codex, Forge, Anvil or Cato process and never merges.'
+  - 'SPLIT-112-01 is outside the stopping rule''s premise (surnames with two linking words, KL-007) and leaves no name in clear. Its only text consequence: KL-007''s sentence "Next to another custom pseudonym with the same first name it is split right" is true next to « Aurore Bruneau » or « Aurore Le Goff », not next to « Aurore de Sousa ». Whether to reword KL-007 is Lionel''s call through the orchestrator (a BACKLOG text change); QA did not edit it.'
+  - 'Task 2.4 is unticked although the Debug Log records STOP A done (badda97 pushed, PR #120 opened, CI 42264348421 read) (DOC-112-01). Task 7.1 stays unticked: QA writes only under QA Results.'
+  - 'After the merge, performance.yaml runs on main (the change touches core/ and data/).'
+  - 'This gate commit (docs only) starts its own CI run on the PR.'
+
+top_issues:
+  - id: 'SPLIT-112-01'
+    severity: low
+    finding: 'Two people of one document share « Élodie »; the user gives « Élodie Martin » « Aurore de Sousa » and « Élodie Dupont » « Aurore de La Fontaine ». Both are accepted at set time in either order and finalization writes both in either dict order, but the stored rows give « Élodie » two first-name parts: Martin (Aurore, de Sousa), Dupont (Aurore de, La Fontaine). Same with « Aurore De Sousa », and with « Aurore Van Damme » next to « Aurore van der Berg » (Aurore van, der Berg). Cause: _bound_parts splits the pseudonym under check with the stored parts only to build the hint; under D1 « Aurore de La Fontaine » alone gives « Aurore de » (KL-007''s split), and « Aurore de Sousa » starts with « Aurore de », so the Fontaine check sees Sousa as (Aurore de, Sousa) while the Sousa check sees Fontaine as (Aurore, de La Fontaine). Each check is order-independent, but the two names'' views disagree. At 047717f the same pair was refused. Next: a later lone « Élodie » is written « Aurore » here (the first stored part read wins), so no name in clear and nothing odd shown in this run; which of the two parts binds later names depends on which stored row is read first (not measured further). Not reproduced with single linking words: « Aurore Le Goff » next to « Aurore de La Fontaine » stores (Aurore, de La Fontaine), and next to « Aurore de Sousa » (Aurore, Le Goff)/(Aurore, de Sousa). Realism: needs a shared real first name, two custom pseudonyms, a double-particle surname and the other surname starting with the same linking word; rarer than KL-007 alone, which was backlogged as rare. Outside the story''s premise (stopping rule item 5).'
+    suggested_action: 'Orchestrator: tell Lionel; if he wants, extend KL-007''s text to this case (its pull trigger stays a user report). No code change in this story.'
+    refs: ['gdpr_pseudonymizer/core/custom_pseudonym.py:475-515', 'docs/BACKLOG.md (KL-007)', 'rgpd-analysis/r112/qa/logs/qa112_k.log']
+    suggested_owner: po
+  - id: 'DOC-112-01'
+    severity: low
+    finding: 'Task 2.4 ("push ... STOP A") is unticked; the Debug Log''s "Task 2.4 / STOP A" entry records it done (commits 9a8e3bf and badda97 pushed, PR #120 opened by the orchestrator, CI run 42264348421 read).'
+    suggested_action: 'Orchestrator or dev: tick Task 2.4.'
+    refs: ['docs/stories/11.2.custom-pseudonym-split-and-import-replace.story.md']
+    suggested_owner: dev
+  - id: 'MNT-112-01'
+    severity: low
+    finding: 'custom_entity_fields'' docstring line 733 is 105 characters ("(Story 11.2), as ``check_custom_pseudonym`` splits them. On a one-word name the last part has no real"); the file had no line over 88 at 047717f. black does not wrap docstrings and ruff ignores E501, so every check is green. Cosmetic.'
+    suggested_action: 'Rewrap if the file is touched again.'
+    refs: ['gdpr_pseudonymizer/core/custom_pseudonym.py:733']
+    suggested_owner: dev
+  - id: 'TEST-112-01'
+    severity: info
+    finding: 'QA in-process mutants on the final tests (logs/mut_*.log): M1 (order fix reverted) is caught only by T20 (2 cases): D1 alone already fixes the « Dravin Le Vorlan » pair, as the story planned ("T20 pins AC1''s change on its own"). M5 (the hint overwrites a stored part instead of setdefault) survives all 103 cases; it differs only when the pseudonym under check does not start with its stored part, which Q-D then refuses anyway with the same required part, so it is equivalent in practice.'
+    suggested_action: 'None.'
+    refs: ['tests/unit/test_custom_pseudonym_refused_at_finalization.py']
+    suggested_owner: po
+  - id: 'OBS-112-01'
+    severity: info
+    finding: 'Not new: when the set-time check is bypassed (finalize_document called directly with two different first-name parts for one first name, e.g. « Aurore Le Goff » / « Claire Le Goff » on an empty database), finalization fails with the "different part in the mapping database" text. Same at 047717f. CLI and desktop never reach it: the set-time check refuses the second pseudonym first (QA probe C_diff_first_*). The text stays true for its remaining cause (T7).'
+    suggested_action: 'None.'
+    refs: ['gdpr_pseudonymizer/core/custom_pseudonym.py']
+    suggested_owner: po
+  - id: 'OBS-112-02'
+    severity: info
+    finding: 'By design: a target row saved decomposed (« Hélène Dupont » NFD, an older version) replaced from a composed source keeps its NFD full_name bytes and takes the source''s composed first_name. Both are compared folded (fold uses NFKD), and a later document with the composed name gets the new pseudonym (QA probe NFD: "Anouk Xavier a appelé.", 1 row).'
+    suggested_action: 'None.'
+    refs: ['gdpr_pseudonymizer/data/repositories/mapping_repository.py:906-948']
+    suggested_owner: po
+
+evidence:
+  tests_reviewed: 103
+  risks_identified: 1
+  environment: 'Windows, the main Poetry venv (gdpr-pseudonymizer-_kRLwMSQ-py3.11, Python 3.11.9). Poetry commands through cmd.exe /c .bat with no HOME or USERPROFILE override; pytest through the venv''s python.exe with a scratch HOME under r112\qa\home and short --basetemp; GUI files last. No install, no worktree, no repo copy; every database new under the QA temp folder. Nothing under held_out/, final_exam/ or tests/accuracy/ opened; C:\Users\devea\.gdpr-pseudo.yaml not touched. git pull --ff-only: "Already up to date" at 9cfd4ed.'
+  local_checks: 'black --check . "339 files would be left unchanged."; ruff check . exit 0; mypy gdpr_pseudonymizer "Success: no issues found in 107 source files"; poetry check --lock exit 0.'
+  tests: 'The four new files, T37''s file, the 13 files of Dev Notes "Testing" and both import files (gui files last): "441 passed in 188.72s". The whole tests/unit and the full CI line were not re-run by QA (the dev''s 3162 passed + 3 skipped and 3347 + 10 skipped; CI on 9cfd4ed is the orchestrator''s).'
+  tests_first: 'git diff badda97 9cfd4ed -- tests/ removes only the three marker definitions and their uses, adds T13 and rewrites T37''s docstring; so the final tests on the 047717f code equal --runxfail on badda97. QA reverted the custom-pseudonym fixes in process (mutant BASE: _bound_parts without own, split without D1; plus a no-op replace_mapping): "21 failed, 82 passed": exactly the 19 marked custom-pseudonym cases (T1 x2, T2 x2, T3, T20 x2, T6 x5, T14, T15, T16 x2, T8 x2, T37) each at an AssertionError on its expected line, none at a PRE, StopIteration or timeout, plus T9 and T13. T10 passes under BASE because the head''s summary line is not reverted, so for T9 and T10 on the tests-first commit QA cites the dev''s --runxfail lines (test_import_replace_ignored.py:188 and :201) and CI run 42264348421 (orchestrator''s reading: 21 XFAIL per leg, 0 XPASS; 3335 passed + 21 xfailed on ubuntu 3.11 cov, ubuntu 3.13 and macOS; Windows 3185 passed + 3 skipped + 21 xfailed; main 047717f 3320 / 3170 + 3 skipped).'
+  mutants: 'QA plugin qa_mutant.py, in process, on the 5 files (103 cases; logs/mut_*.log): M1 order fix reverted: 2 failed (T20 x2). M2 D1 reverted: 10 (T6 x5, T14, T15, T16 x2, T37). M3 replace_mapping a no-op: 2 (T9, T13). M4 the hint returned with the parts: 6 (T4 x4, T20 x2). M5 the hint overwrites a stored part: 0, equivalent in practice (TEST-112-01). M6 D1 before the bound-part checks: 4 (T18, T19, T20 x2). M8 D1 on two words: 1 (T17 two_words). M9 D1 not folded: 9 (T6 le, de, all_capitals, after_two_first_words; T14, T15, T16 x2, T37). M10 replace also rewrites full_name and first_seen: 2 (T9, T13). M11 replace keeps the old parts: 2 (T9, T13). BASE (M1+M2+M3): 21 (the 19 custom-pseudonym marked cases, T9, T13).'
+  order_fix: 'Read and probed. own''s pseudonym is split with its own stored parts; its parts fill a hint (setdefault, so a stored part is never overridden); the others are split with the hint; the returned mapping is built from stored and the others'' parts only, so a pseudonym never satisfies Q-D by itself (mutant M4, the hint returned, is caught by T4 x4 and T20 x2). Realistic probes (qa112.log), set-time check both orders and finalize_document both dict orders: « Aurore Bruneau » with « Aurore Le Goff », « Aurore de La Fontaine », « Aurore du Pré », « Aurore Des Lys »; « Anne-Laure Bruneau »/« Anne-Laure Le Goff »; « Jean-Paul Bruneau »/« Jean-Paul Le Goff »; « Aurore Le Goff »/« Aurore de Sousa »: all accepted, same written text and same stored parts whatever the order. Real CLI process ([C] on each): A1, A2, A6 and A6 reversed written, stored (Aurore, Bruneau) and (Aurore, Le Goff) or (Aurore, de La Fontaine). True conflicts still refused at set time in both orders: « Aurore Le Goff »/« Claire Le Goff » (required Aurore, or Claire), « Aurore Bruneau »/« Claire Le Goff »; CLI shows "The first name ''Élodie'' is already replaced by ''Aurore''..." (the StopIteration after it is the probe running out of scripted answers at the re-prompt, as the story describes). Family sharing a last name, « Élodie Martin »/« Paul Martin »: « Aurore Le Goff »/« Marc Le Goff » stored (Aurore, Le Goff)/(Marc, Le Goff) both orders; « Marc Bruneau » refused (required Le Goff or Bruneau); « Marc Goff » gives (Aurore Le, Goff), MW-001 (b) by design (E8''s shape). Out of premise, three « Élodie »s with « Aurore Bruneau », « Aurore Le Goff », « Aurore de La Fontaine »: all 6 dict orders succeed with the same parts.'
+  d1_rule: 'Placed after the bound_last and bound_first checks and before the library loop, exactly the story''s two lines; LINKING_WORDS unchanged (AC6 diff read: module docstring, split docstring and rule, _bound_parts, check_custom_pseudonym Q-D paragraph and call, custom_entity_fields docstring and call, nothing else). The SM''s probes re-run on 9cfd4ed with no prototype plugin (sm_probes_head.log, 26 passed) print exactly the SM''s "BOTH" prototype results: every E1 split as D1 says, E2-E5 unchanged, E6 (KL-007) « Aurore de » + « La Fontaine », A5 (Inès, Le Goff) then « Inès a appelé. », « Inès Moreau » accepted and « Claire Moreau » refused (required Inès), E10 old row kept (« Inès Le a appelé. », « Inès Moreau » refused, « Inès Le Moreau » accepted), E8 (Inès Le, Goff), Q-I unchanged; QA''s Finding 5 cases all written, the « Aurore Martin Dupont » pair refused as in every SM mode (Q-C).'
+  import: 'replace_mapping: abstract on MappingRepository before the SQLite implementation (AC8); one commit(), one rollback(); sets the five encrypted fields and five metadata fields; keeps id, entity_type, full_name, first_seen_timestamp; returns _decrypt_entity(row), a copy, so the ORM row is never left holding plaintext. Its two DatabaseError texts hold no name; the only caller (import_mappings_command) catches DatabaseError (DuplicateEntityError is a subclass), counts an error and logs entity_type and error_type only. Probes (qa112.log): B1 real CLI, yes: "Imported: 0 / Replaced: 1 / Skipped:  0", the row takes « Anouk Xavier » (Anouk, Xavier); a mixed run (one new person, one person and one LOCATION duplicate, yes): "Imported: 1 / Replaced: 2 / Skipped:  0", the place''s None parts replaced without error; a failing commit (OperationalError injected): "Errors:   1", "Failed to replace" nowhere in the output, row unchanged, the captured log record {"entity_type": "PERSON", "error_type": "DatabaseError", "event": "import_entity_error"} (import_mappings.py:196), no name. The SM''s B1 probe re-run: "Replaced: 1", save() not called. T11/T12 (no, default skip) unchanged with no "Replaced:" line.'
+  no_name_in_clear: 'No new log line or exception carries a name or pseudonym (diff read; error probe above). New tests: invented names only; every other word of their string literals is English UI or code text, and the French and linking words (Présents, et, a, signé, le, contrat, Le, De, du, de, La, LE), run per word through scripts/accuracy_heldout_blind_check.py: "checked=12 not_in_main_corpus=0". CHANGELOG and BACKLOG use the story''s realistic names, as 2.3.0 did.'
+  texts: 'AC7: git diff 047717f...9cfd4ed -- gdpr_pseudonymizer/gui/i18n/ gdpr_pseudonymizer/locale/ prints nothing; the only user-visible string added under gdpr_pseudonymizer/ is "  Replaced: [green]{replaced}[/green]" (shown only when replaced > 0); the other literals are "import_entity_error" (existing event) and the two DatabaseError texts, never shown. AC10: every line the CHANGELOG and BACKLOG diff adds is a line of the story''s "Exact texts", word for word (the three ### Fixed entries, both Status/Outcome pairs, KL-007); the one removed line is the l.763 sentence, replaced by exactly the story''s amendment ("KL-006 and KL-007 have their own source and decision, in their entries."), which the story itself asks for. ### Fixed sits after ### Changed and before ### Security. The texts are true on the head, except KL-007''s "split right" sentence in SPLIT-112-01''s sub-case.'
+  lock: 'git diff --stat 047717f...9cfd4ed -- poetry.lock pyproject.toml prints nothing: no package entered or left the lock.'
+  files: 'AC11: git diff --name-only 047717f...9cfd4ed lists exactly the 11 files of Dev Notes "File Locations"; nothing under docs/prd/ or docs/qa/ (before this gate). AC9: git grep -n "xfail" on the four new files prints nothing (exit 1); git grep -n "Story 11.2 tests first" on test_custom_pseudonym_review.py prints nothing (exit 1).'
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+    ac_gaps: [13]
+    notes: 'AC1: T1 x2, T2 x2, T3, T8 x2, T20 x2 pass (story_files.log). AC2: T4 x4, T5 pass on the head and under BASE. AC3: T9, T11, T12, T13. AC4: T10 byte for byte, T11/T12 no Replaced line. AC5: T6 x5, T14, T15, T16 x2, T37 pass; T17 x6, T18, T19 pass on the head and under BASE. AC12: commit order matches Tasks 1-6; staging by path (git show --stat of each of the 6 commits lists only files of File Locations; git log 047717f..9cfd4ed on .claude/settings.local.json and the arm64 log: 0 commits). AC13: CI on 9cfd4ed and Codex are the orchestrator''s; QA gives PASS here.'
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'No name or pseudonym in any new log line or exception; replace_mapping encrypts every name and pseudonym field as _encrypt_entity does and keeps the stored encrypted name byte for byte; no new dependency.'
+  performance:
+    status: PASS
+    notes: 'One extra split of the pseudonym under check per _bound_parts call; negligible next to PERF-002''s existing tokenization.'
+  reliability:
+    status: PASS
+    notes: 'Set-time check, finalization check and stored parts agree in either order for two custom pseudonyms (and for three in QA''s probe); replace runs in one transaction with rollback; 441 related tests green locally.'
+  maintainability:
+    status: PASS
+    notes: 'Small, documented changes in the agreed places only; one 105-character docstring line (MNT-112-01).'
+
+recommendations:
+  immediate: []
+  future:
+    - action: 'Lionel''s call through the orchestrator: extend KL-007''s text to the shared-first-name case of SPLIT-112-01, or leave it.'
+      refs: ['docs/BACKLOG.md']
+    - action: 'Tick Task 2.4 (DOC-112-01); rewrap custom_entity_fields'' docstring line when the file is next touched (MNT-112-01).'
+      refs: ['docs/stories/11.2.custom-pseudonym-split-and-import-replace.story.md', 'gdpr_pseudonymizer/core/custom_pseudonym.py:733']
