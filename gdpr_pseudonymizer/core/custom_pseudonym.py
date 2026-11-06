@@ -11,10 +11,12 @@ finalization:
 - the custom pseudonym is normalized like a mapping key (titles and, for a
   place, a leading preposition removed; spaces collapsed);
 - for a person it is split into a first-name part and a last-name part
-  (Lionel's Q4 and Q-G): a part the real last or first name already has is
-  matched whole first; else at its last space, except that the library's own
-  last names of two or more words stay whole; a one-word pseudonym has no
-  parts;
+  (Lionel's Q4 and Q-G, widened by his D1 in Story 11.2): a part the real
+  last or first name already has is matched whole first; else, in a
+  pseudonym of three or more words, a linking word just before the last word
+  stays with the last name; else at its last space, except that the
+  library's own last names of two or more words stay whole; a one-word
+  pseudonym has no parts;
 - it is checked against Lionel's rules, in this order: a name that already
   has a stored pseudonym keeps it (Q1); a real first or last name that
   already has a part keeps it (Q-D); it may not be, in whole or in part,
@@ -131,16 +133,19 @@ def split_custom_pseudonym(
     bound_last: str | None = None,
 ) -> tuple[str | None, str | None]:
     """A person's custom pseudonym split into a first-name part and a
-    last-name part (Lionel's Q4 and Q-G; AC17 (b)).
+    last-name part (Lionel's Q4 and Q-G; AC17 (b); Lionel's D1, Story 11.2).
 
     In this order: when the pseudonym ends with the part the real last name
     already has (``bound_last``, as whole words), the split falls just
     before it; else, when it starts with the part the real first name
     already has (``bound_first``), just after it (QA MW-001, PO A2); else,
-    when it ends with one of the library's last names of two or more words,
-    just before that name (Q-G); else at its last space (Q4). At least one
-    word stays on each side; words are compared folded, and each part keeps
-    the spelling typed.
+    in a pseudonym of three or more words whose word just before the last
+    word is a linking word (``LINKING_WORDS``, Q-I's list), just before that
+    linking word, which stays with the last name (Lionel's D1, 2026-11-05);
+    else, when it ends with one of the library's last names of two or more
+    words, just before that name (Q-G); else at its last space (Q4). At
+    least one word stays on each side; words are compared folded, and each
+    part keeps the spelling typed.
 
     Returns (first-name part, last-name part); (None, None) for a one-word
     pseudonym and for any other type.
@@ -156,6 +161,8 @@ def split_custom_pseudonym(
     if bound_first and _starts_with(words, bound_first):
         size = len(bound_first.split())
         return " ".join(words[:size]), " ".join(words[size:])
+    if len(words) >= 3 and fold(words[-2]) in LINKING_WORDS:
+        return " ".join(words[:-2]), " ".join(words[-2:])
     for library_name in library_two_word_last_names():
         if _ends_with(words, library_name):
             size = len(library_name.split())

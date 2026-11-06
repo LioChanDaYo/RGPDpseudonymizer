@@ -46,12 +46,6 @@ from tests.unit.test_custom_pseudonym_fixes_cli import (
     pre,
 )
 
-PARTICLE_SPLIT = pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 11.2 tests first: particle surname split from its surname",
-)
-
 ZQ = "Zorbal Quentrix"
 PARTICLE = "Dravin Le Vorlan"
 ZQ_DOC = "Zorbal Quentrix a signé le contrat."
@@ -119,7 +113,6 @@ def _lone_first_name(tmp_path: Path, db: str) -> str:
 # ---------------------------------------------------------------------------
 
 
-@PARTICLE_SPLIT
 @pytest.mark.parametrize(
     "custom, parts",
     [
@@ -148,7 +141,6 @@ def test_particle_surname_stays_with_last_name(
     assert stored[4:] == parts, stored  # expected failure
 
 
-@PARTICLE_SPLIT
 def test_later_full_name_takes_first_part_without_particle(tmp_path: Path) -> None:
     """T14 (AC5): after « Dravin Le Vorlan » is stored for « Zorbal
     Quentrix », a later « Zorbal Brindel » (generated) takes « Dravin » as
@@ -172,7 +164,6 @@ def test_later_full_name_takes_first_part_without_particle(tmp_path: Path) -> No
     assert stored[5] and written == f"Dravin {stored[5]}", written
 
 
-@PARTICLE_SPLIT
 def test_later_lone_first_name_takes_first_part(tmp_path: Path) -> None:
     """T15 (AC5): after « Dravin Le Vorlan » is stored for « Zorbal
     Quentrix », a later lone « Zorbal » is written « Dravin »."""
@@ -182,7 +173,6 @@ def test_later_lone_first_name_takes_first_part(tmp_path: Path) -> None:
     assert written == "Dravin", written  # expected failure
 
 
-@PARTICLE_SPLIT
 @pytest.mark.parametrize("case", ["accepted", "refused"])
 def test_later_custom_must_start_with_first_part(tmp_path: Path, case: str) -> None:
     """T16 (AC5): after « Dravin Le Vorlan » is stored for « Zorbal
