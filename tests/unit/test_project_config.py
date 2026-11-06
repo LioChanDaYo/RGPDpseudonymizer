@@ -159,9 +159,15 @@ def test_pyside6_python_marker():
     assert "PySide6-Essentials" in extras["all"]
 
 
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 11.3 tests first: the DMG declares macOS 12, its bundled NumPy needs 14",
+)
 def test_macos_bundle_minimum_version():
-    """Test that the macOS bundle's Info.plist declares macOS 12 (Story 11.3).
+    """Test that the macOS bundle's Info.plist declares macOS 14 (Story 11.3).
 
+    macOS 14 is the DMG's real minimum: it bundles NumPy's macOS 14 build.
     Reads gdpr-pseudo-gui.spec with ``ast`` and checks the ``info_plist``
     dict passed to ``BUNDLE(...)``.
     """
@@ -188,7 +194,7 @@ def test_macos_bundle_minimum_version():
     }
     minimum = entries.get("LSMinimumSystemVersion")
     assert isinstance(minimum, ast.Constant)
-    assert minimum.value == "12.0.0"
+    assert minimum.value == "14.0.0"
 
 
 def test_defusedxml_with_openpyxl():
