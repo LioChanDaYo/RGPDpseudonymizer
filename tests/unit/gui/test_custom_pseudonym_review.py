@@ -1121,7 +1121,16 @@ def test_own_part_set_on_lone_name_keeps_later_full_names(  # type: ignore[no-un
     "case",
     [
         "one_of_the_library_names",
-        "not_a_library_name",
+        pytest.param(
+            "not_a_library_name",
+            marks=pytest.mark.xfail(
+                strict=True,
+                raises=AssertionError,
+                reason=(
+                    "Story 11.2 tests first: particle surname split from its surname"
+                ),
+            ),
+        ),
     ],
 )
 def test_three_word_pseudonym_parts(  # type: ignore[no-untyped-def]
@@ -1145,7 +1154,7 @@ def test_three_word_pseudonym_parts(  # type: ignore[no-untyped-def]
     if case == "one_of_the_library_names":
         custom, parts = "Xantor Le Vellion", ("Xantor", "Le Vellion")
     else:
-        custom, parts = "Xantor Le Velmar", ("Xantor Le", "Velmar")
+        custom, parts = "Xantor Le Velmar", ("Xantor", "Le Velmar")
     _type_in(monkeypatch, custom)
     sd.vs._show_change_pseudonym_dialog(sd.row(QZ).entity_id)
     assert dialogs.calls == [], "PRE: accepted"
