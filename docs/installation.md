@@ -28,7 +28,7 @@ For non-technical users, pre-built standalone executables are available. No Pyth
 - **macOS (Apple Silicon):** `gdpr-pseudonymizer-2.3.0-macos-arm64.dmg` — Open DMG, drag to Applications
 - **Linux:** `gdpr-pseudonymizer-2.3.0-linux.AppImage` — `chmod +x` then run
 
-On a Mac, the desktop app needs macOS 12 or later, from the DMG or from `pip install gdpr-pseudonymizer[gui]`.
+On a Mac, the DMG needs macOS 14 or later. With `pip install gdpr-pseudonymizer[gui]`, the desktop app needs macOS 12 or later, and reading PDF files (the `formats` extra) needs macOS 13 or later.
 
 !!! note "Intel Macs"
     No DMG is published for Intel Macs. GitHub retired its Intel macOS runners, and an
