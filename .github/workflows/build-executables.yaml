@@ -142,7 +142,7 @@ jobs:
   # macOS -- Apple Silicon (arm64)
   # =========================================================================
   build-macos-arm64:
-    runs-on: macos-14
+    runs-on: macos-26
     timeout-minutes: 45
     env:
       HAS_APPLE_CERT: ${{ secrets.APPLE_CERT_BASE64 != '' }}
