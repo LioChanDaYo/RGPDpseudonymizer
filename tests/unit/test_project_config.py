@@ -159,11 +159,6 @@ def test_pyside6_python_marker():
     assert "PySide6-Essentials" in extras["all"]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 11.3 tests first: the macOS bundle declares no minimum yet",
-)
 def test_macos_bundle_minimum_version():
     """Test that the macOS bundle's Info.plist declares macOS 12 (Story 11.3).
 

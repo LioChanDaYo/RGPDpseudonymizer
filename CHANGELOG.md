@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Python 3.13 is tested in CI (Story 11.3).** The second Ubuntu Python 3.11 test job now runs Python 3.13, desktop GUI tests included; Python 3.11 stays tested by the coverage job. Validated: Python 3.11, 3.12 and 3.13.
 
-- **The desktop app moves to Qt 6.8 (PySide6-Essentials 6.7.3 → 6.8.3, Story 11.3).** PySide6 6.7 does not install on Python 3.13; 6.8.3 does, so `pip install gdpr-pseudonymizer[gui]` now installs the desktop app on Python 3.13. This applies to every Python version and to the desktop builds. The desktop app now needs macOS 12 or later (it needed macOS 11).
+- **The desktop app moves to Qt 6.8 (PySide6-Essentials 6.7.3 → 6.8.3, Story 11.3).** PySide6 6.7 does not install on Python 3.13; 6.8.3 does, so `pip install gdpr-pseudonymizer[gui]` now installs the desktop app on Python 3.13. This applies to every Python version and to the desktop builds. The desktop app now needs macOS 12 or later (it needed macOS 11). On Linux on ARM processors (aarch64, for example a Raspberry Pi or an ARM server), `pip install gdpr-pseudonymizer[gui]` now needs glibc 2.39 or later, such as Ubuntu 24.04 or Debian 13 (it needed glibc 2.31). The Linux AppImage is built for x86_64 and is not affected.
 
 ### Security
 
