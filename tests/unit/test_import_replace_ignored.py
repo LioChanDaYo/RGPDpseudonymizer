@@ -1,4 +1,4 @@
-"""Story 11.2: import replace ignored (T9-T12).
+"""Story 11.2: import replace ignored (T9-T13).
 
 With ``gdpr-pseudo import-mappings <source> --no-skip-duplicates``, a yes to
 "Replace existing mapping?" built a new row for a name the target already
@@ -29,6 +29,7 @@ from unittest.mock import patch
 
 import pytest
 from rich.prompt import Confirm
+from sqlalchemy import text
 from typer.testing import CliRunner
 
 from gdpr_pseudonymizer.cli.main import app
@@ -37,12 +38,7 @@ from gdpr_pseudonymizer.data.models import Entity
 from gdpr_pseudonymizer.data.repositories.mapping_repository import (
     SQLiteMappingRepository,
 )
-
-IMPORT_REPLACE_IGNORED = pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 11.2 tests first: import replace ignored",
-)
+from gdpr_pseudonymizer.exceptions import DatabaseError
 
 PASSPHRASE = "zorbalia_pass_A_123!"
 ENV = {"GDPR_PSEUDO_PASSPHRASE": PASSPHRASE}
@@ -174,7 +170,6 @@ def _summary(output: str) -> list[str]:
 # ---------------------------------------------------------------------------
 
 
-@IMPORT_REPLACE_IGNORED
 def test_replace_yes_updates_the_existing_row(tmp_path: Path) -> None:
     """T9 (AC3): a yes to "Replace existing mapping?" leaves exactly one
     target row for the name, with the source's pseudonym, parts and theme,
@@ -192,7 +187,6 @@ def test_replace_yes_updates_the_existing_row(tmp_path: Path) -> None:
     assert row.first_seen == run.before.first_seen, row
 
 
-@IMPORT_REPLACE_IGNORED
 def test_replace_yes_counted_as_replaced(tmp_path: Path) -> None:
     """T10 (AC4): the summary shows "  Imported: 0", "  Replaced: 1" and
     "  Skipped:  0", in that order."""
@@ -231,3 +225,77 @@ def test_default_skips_duplicates(tmp_path: Path) -> None:
     assert _rows(tmp_path / "target.db") == [run.before]
     assert _summary(run.output) == ["  Imported: 0", "  Skipped:  1"], run.output
     assert "Replaced:" not in run.output
+
+
+# ---------------------------------------------------------------------------
+# The repository method (T13)
+# ---------------------------------------------------------------------------
+
+
+def _table(db: Path) -> list[tuple[Any, ...]]:
+    """(id, encrypted full_name, first_seen_timestamp) of every row, read
+    from the table itself."""
+    with open_database(str(db), PASSPHRASE) as session:
+        return [
+            tuple(row)
+            for row in session.session.execute(
+                text("SELECT id, full_name, first_seen_timestamp FROM entities")
+            )
+        ]
+
+
+def test_replace_mapping_keeps_id_name_and_first_seen(tmp_path: Path) -> None:
+    """T13 (AC3, AC8): ``replace_mapping`` gives the stored row the other
+    row's pseudonym and parts; the row keeps its id, its encrypted name
+    (byte for byte) and its first-seen time; the lookup then finds the new
+    pseudonym. A missing id raises ``DatabaseError`` with no name in it."""
+    db = _init(tmp_path / "target.db")
+    _save(db, "Morvane Vorlan", "Morvane", "Vorlan", "neutral")
+    before = _table(db)
+    pre(len(before) == 1, "one row stored")
+    row_id, _, _ = before[0]
+    source = Entity(
+        entity_type="PERSON",
+        full_name=NAME,
+        first_name="Xantor",
+        last_name="Velmar",
+        pseudonym_full="Dravin Brontel",
+        pseudonym_first="Dravin",
+        pseudonym_last="Brontel",
+        theme="custom",
+    )
+    with open_database(str(db), PASSPHRASE) as session:
+        returned = SQLiteMappingRepository(session).replace_mapping(row_id, source)
+        returned_values = (
+            returned.id,
+            returned.full_name,
+            returned.pseudonym_full,
+            returned.pseudonym_first,
+            returned.pseudonym_last,
+            returned.theme,
+        )
+    assert returned_values == (
+        row_id,
+        NAME,
+        "Dravin Brontel",
+        "Dravin",
+        "Brontel",
+        "custom",
+    )
+    assert _table(db) == before
+    with open_database(str(db), PASSPHRASE) as session:
+        found = SQLiteMappingRepository(session).find_by_full_name_and_type(
+            NAME, "PERSON"
+        )
+        assert found is not None
+        assert (found.pseudonym_full, found.pseudonym_first, found.pseudonym_last) == (
+            "Dravin Brontel",
+            "Dravin",
+            "Brontel",
+        )
+    with open_database(str(db), PASSPHRASE) as session:
+        with pytest.raises(DatabaseError) as raised:
+            SQLiteMappingRepository(session).replace_mapping("no-such-id", source)
+    message = str(raised.value)
+    for word in ("Xantor", "Velmar", "Dravin", "Brontel", "Morvane", "Vorlan"):
+        assert word not in message, message

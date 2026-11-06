@@ -357,6 +357,24 @@ class MappingRepository(ABC):
         pass
 
     @abstractmethod
+    def replace_mapping(self, entity_id: str, entity: Entity) -> Entity:
+        """Replace a stored row's mapping with another row's, in one
+        transaction (Story 11.2).
+
+        Args:
+            entity_id: UUID of the stored row to replace
+            entity: The row whose pseudonym, parts, name parts and metadata
+                replace the stored row's
+
+        Returns:
+            The replaced row, decrypted
+
+        Raises:
+            DatabaseError: If the row is gone or the write fails
+        """
+        pass
+
+    @abstractmethod
     def save_batch(self, entities: list[Entity]) -> list[Entity]:
         """Persist multiple entities in single transaction.
 
@@ -884,6 +902,50 @@ class SQLiteMappingRepository(MappingRepository):
         except OperationalError as e:
             self._session.rollback()
             raise DatabaseError(f"Database operation failed: {e}") from e
+
+    def replace_mapping(self, entity_id: str, entity: Entity) -> Entity:
+        """Replace a stored row's mapping with another row's, in one
+        transaction (Story 11.2).
+
+        The stored row keeps its id, its type, its name text (the bytes as
+        stored: since Story 10.20 the lookup that found it also reaches a
+        name saved in another Unicode form) and its first-seen time. It takes
+        ``entity``'s pseudonym and its parts, its first and last name, and its
+        theme, gender, confidence and ambiguity. The error messages name no
+        name and no pseudonym.
+
+        Args:
+            entity_id: UUID of the stored row to replace
+            entity: The row with plaintext fields whose mapping replaces the
+                stored row's
+
+        Returns:
+            The replaced row, decrypted
+
+        Raises:
+            DatabaseError: If the row is gone or the write fails
+        """
+        from sqlalchemy.exc import IntegrityError, OperationalError
+
+        row = self._session.query(Entity).filter(Entity.id == entity_id).first()
+        if row is None:
+            raise DatabaseError("Entity to replace not found")
+        try:
+            row.pseudonym_full = self._encryption.encrypt(entity.pseudonym_full)
+            row.pseudonym_first = self._encryption.encrypt(entity.pseudonym_first)
+            row.pseudonym_last = self._encryption.encrypt(entity.pseudonym_last)
+            row.first_name = self._encryption.encrypt(entity.first_name)
+            row.last_name = self._encryption.encrypt(entity.last_name)
+            row.theme = entity.theme
+            row.gender = entity.gender
+            row.confidence_score = entity.confidence_score
+            row.is_ambiguous = entity.is_ambiguous
+            row.ambiguity_reason = entity.ambiguity_reason
+            self._session.commit()
+        except (OperationalError, IntegrityError) as e:
+            self._session.rollback()
+            raise DatabaseError(f"Failed to replace entity: {type(e).__name__}") from e
+        return self._decrypt_entity(row)
 
     def save_batch(self, entities: list[Entity]) -> list[Entity]:
         """Persist multiple entities in single transaction with race condition handling.

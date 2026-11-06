@@ -20,7 +20,7 @@ from gdpr_pseudonymizer.data.database import open_database
 from gdpr_pseudonymizer.data.repositories.mapping_repository import (
     SQLiteMappingRepository,
 )
-from gdpr_pseudonymizer.exceptions import DuplicateEntityError
+from gdpr_pseudonymizer.exceptions import DatabaseError, DuplicateEntityError
 from gdpr_pseudonymizer.utils.logger import configure_logging, get_logger
 
 # Configure logging
@@ -119,6 +119,7 @@ def import_mappings_command(
 
         # Import statistics
         imported = 0
+        replaced = 0
         skipped = 0
         errors = 0
 
@@ -183,6 +184,22 @@ def import_mappings_command(
                         skipped += 1
                         continue
 
+                    # Story 11.2: a yes replaces the existing row's mapping
+                    # in one transaction; the row keeps its id, its name as
+                    # stored and its first-seen time
+                    try:
+                        target_repo.replace_mapping(existing.id, entity)
+                        replaced += 1
+                    except DatabaseError as e:
+                        errors += 1
+                        # The type and the error's kind, never the name
+                        logger.error(
+                            "import_entity_error",
+                            entity_type=entity.entity_type,
+                            error_type=type(e).__name__,
+                        )
+                    continue
+
                 try:
                     # Create new entity without ID (let DB generate new one)
                     from gdpr_pseudonymizer.data.models import Entity as EntityModel
@@ -228,6 +245,8 @@ def import_mappings_command(
         # Display results
         console.print("\n[bold]Import Complete[/bold]\n")
         console.print(f"  Imported: [green]{imported}[/green]")
+        if replaced:
+            console.print(f"  Replaced: [green]{replaced}[/green]")
         console.print(f"  Skipped:  [yellow]{skipped}[/yellow]")
         if errors:
             console.print(f"  Errors:   [red]{errors}[/red]")
@@ -236,6 +255,7 @@ def import_mappings_command(
             "import_complete",
             source=str(source_db),
             imported=imported,
+            replaced=replaced,
             skipped=skipped,
             errors=errors,
         )
