@@ -10,11 +10,11 @@ Ce guide couvre l'installation sur Windows, macOS et Linux.
 
 | Prérequis | Version | Comment vérifier |
 |-------------|---------|--------------|
-| **Python** | 3.11 ou 3.12 | `python --version` |
+| **Python** | 3.11, 3.12 ou 3.13 | `python --version` |
 | **Espace disque** | ~1 Go disponible | Pour le modèle spaCy français (téléchargé automatiquement au premier lancement) |
 | **Connexion Internet** | Requise pour l'installation | Téléchargement du modèle : ~571 Mo |
 
-**Important :** Python 3.11-3.12 sont validés dans les tests CI/CD. Python 3.10 n'est plus pris en charge (fin de vie en octobre 2026) ; sous Python 3.10, pip installe la version 2.3.0. Python 3.13+ n'a pas encore été testé.
+**Important :** Python 3.11-3.13 sont validés dans les tests CI/CD. Python 3.10 n'est plus pris en charge (fin de vie en octobre 2026) ; sous Python 3.10, pip installe la version 2.3.0. Python 3.14+ n'a pas encore été testé.
 
 ---
 
@@ -27,6 +27,8 @@ Pour les utilisateurs non techniques, des exécutables autonomes pré-compilés 
 - **Windows :** `gdpr-pseudonymizer-2.3.0-windows-setup.exe` — Lancez l'installeur
 - **macOS (Apple Silicon) :** `gdpr-pseudonymizer-2.3.0-macos-arm64.dmg` — Ouvrez le DMG, glissez vers Applications
 - **Linux :** `gdpr-pseudonymizer-2.3.0-linux.AppImage` — `chmod +x` puis exécutez
+
+Sur Mac, le DMG nécessite macOS 14 ou une version ultérieure. Avec `pip install gdpr-pseudonymizer[gui]`, l'application de bureau nécessite macOS 12 ou une version ultérieure, et la lecture des fichiers PDF (l'extra `formats`) nécessite macOS 13 ou une version ultérieure.
 
 !!! note "Macs Intel"
     Aucun DMG n'est publié pour les Macs Intel. GitHub a retiré ses runners macOS Intel, et
@@ -456,17 +458,17 @@ poetry run gdpr-pseudo config
 **Erreur :** `The currently activated Python version X.Y.Z is not supported`
 
 **Solution :**
-1. Installez Python 3.11 ou 3.12
+1. Installez Python 3.11, 3.12 ou 3.13
 2. Configurez Poetry pour utiliser la bonne version :
    ```bash
    poetry env use python3.11
    poetry install
    ```
 
-**Note :** Si votre système a Python 3.13+ mais que Poetry utilise 3.11-3.12, l'outil fonctionne correctement. Poetry gère son propre environnement virtuel indépendamment de Python au niveau système. Vérifiez avec :
+**Note :** Si votre système a Python 3.14+ mais que Poetry utilise 3.11-3.13, l'outil fonctionne correctement. Poetry gère son propre environnement virtuel indépendamment de Python au niveau système. Vérifiez avec :
 ```bash
 poetry env info
-# Recherchez « Virtualenv Python: 3.11.x » (doit être 3.11-3.12)
+# Recherchez « Virtualenv Python: 3.11.x » (doit être 3.11-3.13)
 ```
 
 ---
@@ -521,7 +523,7 @@ poetry env info
 ### `poetry install` échoue avec des conflits de dépendances
 
 **Solution :**
-1. Vérifiez la version Python (doit être 3.11-3.12)
+1. Vérifiez la version Python (doit être 3.11-3.13)
 2. Videz l'environnement virtuel et réinstallez :
    ```bash
    poetry env remove python

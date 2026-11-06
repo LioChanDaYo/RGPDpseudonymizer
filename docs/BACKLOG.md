@@ -824,12 +824,14 @@ Further non-leak items decided during Epic 10 are listed in the Backlog sections
 3. Run full test suite on target version
 4. If passing: Update CI matrix, pyproject.toml, and documentation (see TD-004)
 
-**Current Status (2026-03-17):**
+**Current Status (2026-11-05):**
 | Python | spaCy Status | CI Status | Action Needed |
 |--------|--------------|-----------|---------------|
 | 3.12 | ✅ Verified | ✅ In matrix | None |
-| 3.13 | ❌ Blocked (thinc v9.1.1 lacks cp313 wheels) | ❌ Not in matrix | Monitor thinc releases |
-| 3.14 | ❌ Pre-release | N/A | Monitor |
+| 3.13 | ✅ Verified (thinc 8.3.13 has cp313 wheels) | ✅ In matrix (Story 11.3) | None: closed for 3.13 |
+| 3.14 | Not measured | ❌ Not in matrix (`python = "<3.14"`) | Monitor |
+
+**Story 11.3 Measurement (2026-11-05):** The thinc blocker is gone: the locked thinc 8.3.13, spaCy 3.8.14, numpy 2.2.6, srsly 2.5.3, blis 1.3.3, cymem, preshed and murmurhash publish cp313 wheels. Python 3.13 is tested in CI from Story 11.3 (`test (ubuntu-22.04, 3.13, false)`). Correction to the Story 7.6 line below: PySide6-Essentials 6.7 does not support Python 3.13. Every 6.7 release declares `Requires-Python <3.13`; the first release that allows 3.13 is 6.8.0.2 (2024-10-24). Story 11.3 moved PySide6-Essentials to 6.8.3 for every Python version; the desktop app now needs macOS 12 or later with pip, and the DMG declares macOS 14 (it bundles NumPy's macOS 14 build). 3.14 stays monitored.
 
 **Story 7.6 Confirmation (2026-03-17):** Python 3.13 still blocked by `thinc` v9.1.1 (no cp313 wheels). PySide6-Essentials supports 3.13 via stable ABI. Documented in CHANGELOG.md Known Issues. Will be added once thinc ships cp313 wheels.
 
@@ -962,7 +964,7 @@ When adding items from future stories:
 **Backlog Maintained By:** Sarah (Product Owner)
 **Review Cadence:** End of each epic
 **Last Review:** 2026-03-17 (Epic 7 complete — v2.1.0 release, all backlog items assigned to Epic 7 marked Done)
-**Last Update:** 2026-03-17 (Epic 7 completion — FE-011/012/015/016/017/018/019/020 Done, MON-005 re-confirmed)
+**Last Update:** 2026-11-05 (Story 11.3 — MON-005 closed for Python 3.13)
 **Next Review:** After Epic 8 planning or next feature cycle
 
 ---

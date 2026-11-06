@@ -24,7 +24,7 @@ Since this is a **local-first CLI tool** rather than a cloud-hosted application,
 
 **Primary Platform:** **Local User Machine (Consumer Hardware)**
 - **Runtime Environment:** Python 3.11+ interpreter
-- **Operating Systems:** Windows 10/11, macOS 11+ (Intel & Apple Silicon), Linux (Ubuntu 20.04+, Debian 11+, Fedora 35+)
+- **Operating Systems:** Windows 10/11, macOS 12+ with pip (Intel & Apple Silicon) or 14+ for the Apple Silicon DMG, Linux (Ubuntu 20.04+, Debian 11+, Fedora 35+)
 - **Hardware Requirements:** 8GB RAM, dual-core 2.0GHz+ CPU, 2GB disk space (including NLP models)
 
 **Distribution Platform:** **PyPI (Python Package Index)**

@@ -21,12 +21,12 @@ The CI pipeline runs tests across **4 configurations** to ensure cross-platform 
 
 | Operating System | Python Versions | Total Configs |
 |-----------------|----------------|---------------|
-| Ubuntu 22.04 | 3.11 (two jobs: with and without coverage) | 2 |
+| Ubuntu 22.04 | 3.11 (with coverage), 3.13 | 2 |
 | macOS (latest) | 3.12 | 1 |
 | Windows (latest) | 3.12 | 1 |
 
 **Rationale:**
-- Python 3.11+ required (3.11 and 3.12 tested)
+- Python 3.11+ required (3.11, 3.12 and 3.13 tested)
 - Ubuntu 22.04: Primary development platform
 - macOS/Windows: Ensure cross-platform compatibility
 - Matrix runs in parallel for fast feedback
@@ -327,7 +327,7 @@ To merge a PR, the following checks **must pass**:
 1. **CI Checks (5 required, `ci.yaml`):**
    - `lint` - Ruff, Black, mypy (runs once, before the tests)
    - `test (ubuntu-22.04, 3.11, true)` - Primary platform, with coverage
-   - `test (ubuntu-22.04, 3.11, false)` - Oldest supported Python
+   - `test (ubuntu-22.04, 3.13, false)` - Newest supported Python
    - `test (macos-latest, 3.12, false)` - macOS compatibility
    - `test (windows-latest, 3.12, false)` - Windows compatibility
 
@@ -351,7 +351,7 @@ To merge a PR, the following checks **must pass**:
    - **Status checks that are required:**
      - `lint`
      - `test (ubuntu-22.04, 3.11, true)`
-     - `test (ubuntu-22.04, 3.11, false)`
+     - `test (ubuntu-22.04, 3.13, false)`
      - `test (macos-latest, 3.12, false)`
      - `test (windows-latest, 3.12, false)`
      - `quality`

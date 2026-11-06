@@ -1200,7 +1200,9 @@ class BatchScreen(QWidget):
 
     @staticmethod
     def _update_card(card: QWidget, value: str) -> None:
-        val_label = card.layout().itemAt(0).widget()
+        layout = card.layout()
+        item = layout.itemAt(0) if layout is not None else None
+        val_label = item.widget() if item is not None else None
         if isinstance(val_label, QLabel):
             val_label.setText(value)
 

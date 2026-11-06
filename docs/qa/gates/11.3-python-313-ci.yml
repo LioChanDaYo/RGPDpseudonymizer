@@ -1,0 +1,85 @@
+schema: 1
+story: '11.3'
+story_title: 'Python 3.13 in CI'
+scope: 'Final head 8f004e2 (PR #119, base main 283e211): commits b4287f7, d10ddcb (tests first), 90fa3b6, a4cd319 (AC6 fix), 19b0fa9, 8f004e2. French doc lines read as text in the working tree (STOP B, not committed). QA folder: rgpd-analysis/r113/qa.'
+gate: CONCERNS
+status_reason: 'Every dev-owned AC (1-13) is met and re-measured: the lock moves exactly the four packages (11 lines), tests first proven both ways, AC6 fix behaviour-identical at runtime on Qt 6.8.3, docs true, history untouched. The one medium item is not caused by the diff: GitHub refused the macos-14 runner for the build-executables macOS job, so the macOS bundle (AC14) has no reading, and the 2.3.1 tag build uses the same runner.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-11-05T23:07:21Z'
+
+top_issues:
+  - id: 'REL-113-01'
+    severity: medium
+    finding: 'build-executables run 42125588803 (workflow_dispatch on 8f004e2): build-macos-arm64 cancelled before step 1 (0 steps, 22:55:59Z-22:56:00Z) with the annotation "The configuration ''macos-14-arm64-us-default'' is not supported". The same runs-on: macos-14 (build-executables.yaml l.145, unchanged since 79bd754) built green for Story 11.1 at 15:26Z the same day (run 42054961099). Not caused by this story. AC14 needs three bundles holding PySide6 6.8.3; the macOS one has no reading. The v2.3.0 tag push ran through this workflow (run 41604734608), so the 2.3.1 tag DMG would hit the same runner.'
+    suggested_action: 'Orchestrator: re-run the failed macOS job once. If it goes green, compare its normalized WARNING lines with 11.1''s macOS build log (as QA did for Linux). If GitHub refuses the label again, changing runs-on is a workflow change outside this story''s touch list: take it to Lionel. If the runner changes, re-check the DMG''s minimum macOS before "macOS 12 or later" stays in the docs.'
+    suggested_owner: po
+  - id: 'TEST-113-01'
+    severity: low
+    finding: 'No test asserts the batch summary card values. test_summary_displays_results runs _show_summary, so it executes the changed _update_card lines, but asserts only the phase and the table row count. The gap predates this story. The new None checks can only turn an AttributeError that never happens (_make_card always builds a QVBoxLayout) into a silent no-op.'
+    suggested_action: 'Optional, future: one assertion on the value label text of a card in test_summary_displays_results. Not needed for this story.'
+    suggested_owner: dev
+  - id: 'DOC-113-01'
+    severity: low
+    finding: 'The Linux ARM64 wheels of PySide6-Essentials and shiboken6 move from manylinux_2_31_aarch64 (6.7.3) to manylinux_2_39_aarch64 (6.8.3), and the lock lists no sdist, so pip install gdpr-pseudonymizer[gui] no longer resolves on ARM64 Linux with glibc below 2.39 (for example Ubuntu 22.04 ARM, Raspberry Pi OS bookworm). The Lionel-approved CHANGELOG bullet names only the macOS 12 change. No doc claims ARM Linux support, and the AppImage is x86_64. Realistic for very few users.'
+    suggested_action: 'Optional, Lionel''s call: half a sentence in the CHANGELOG Qt 6.8 bullet. Otherwise nothing.'
+    suggested_owner: po
+
+waiver: { active: false }
+
+quality_score: 90
+expires: '2026-11-19T23:07:21Z'
+
+merge_blockers: []
+
+merge_notes:
+  - 'REL-113-01 does not block the merge (build-executables is not a required check); it blocks the 2.3.1 DMG and Task 8.5 if it persists.'
+  - 'build-windows of run 42125588803 was still in progress when QA wrote this gate: no reading. build-linux is green, and its normalized WARNING lines are identical to 11.1''s Qt 6.7.3 Linux build (job 127340727286): the same 8 unresolved xcb libraries x4 and the same 3 SQLAlchemy hidden imports, nothing new about PySide6 or shiboken6.'
+  - 'Ruleset rename (Task 8.2): "test (ubuntu-22.04, 3.11, false)" waiting as Expected is by design until the orchestrator renames it just before the merge (Lionel said yes).'
+  - 'French docs (AC9, STOP B): 14 lines still match on the committed head, 0 in the working tree; the draft mirrors the English lines one for one (QA Results). Not staged or committed by QA.'
+  - 'QA started no Codex, Forge, Anvil or Cato process. Codex review (Task 7.2) is the orchestrator''s.'
+  - 'This gate commit sits after commit 5 and before the French-docs commit; it is the commit the orchestrator asked for, not an AC13 deviation.'
+
+evidence:
+  tests_reviewed: 3319
+  risks_identified: 3
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13]
+    ac_gaps: [9, 14]
+  ac_notes:
+    AC9: 'Pending STOP B (Lionel''s yes), as the story plans.'
+    AC14: 'Orchestrator and Lionel: macOS bundle no reading (REL-113-01), Windows bundle no reading, rename and alert count after merge.'
+  measured_by_qa:
+    - 'Lock check (story script, QA copy r113/qa/lockdiff.py) on the working tree at 8f004e2: exactly the 11 expected lines; poetry check --lock exit 0; pip check "No broken requirements found."'
+    - 'AC3: 6.8.3 6.8.3; stanza 1.15.0, orjson 3.13.0 on Python 3.11.9.'
+    - 'AC4: test_project_config.py 22 passed; xfail grep empty. d10ddcb test file with the d10ddcb (= 283e211) pyproject.toml and ci.yaml: 3 xfailed; --runxfail: 3 failed with AssertionError at l.126, l.157, l.319. Same file with the 8f004e2 config: 3 XPASS(strict); --runxfail: 3 passed.'
+    - 'AC6 runtime on Qt 6.8.3 (offscreen): _update_card sets the value label to "7"; a card without a layout raises nothing; the toast animation targets the toast, propertyName b"pos", ends at end_x, no Qt warning from the app.'
+    - 'Defusedxml check: orjson is imported only by stanza (excluded from the bundle, gdpr-pseudo-gui.spec) and mypy (optional, try/except); PySide6/shiboken6 required only by gdpr-pseudonymizer and PySide6-Essentials; outside importers PIL.ImageQt (Pillow excluded) and pytestqt (excluded).'
+    - 'PyInstaller 6.21.0 ships hook-PySide6.QtGraphsWidgets.py (a Qt 6.8 module) and hook-shiboken6.py; its only Qt version gate is qt_version < [6, 1].'
+    - 'Windows native platform: colorScheme Dark, style windows11, high-contrast auto-override off.'
+  measured_by_orchestrator:
+    - 'CI on d10ddcb (run 42116027804): 3 XFAIL per leg, 0 XPASS, 3316p+3xf x3, Windows 3166p/3s+3xf.'
+    - 'CI on 8f004e2 (run 42122905458, Code Quality 42122905418): 9 checks green; ubuntu 3.11 cov 3319p, ubuntu 3.13 3319p (Python 3.13.18, QA re-read the log), macOS 3319p, Windows 3169p/3s; PySide6 6.8.3 on every leg.'
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'Alert #109 (stanza pickle RCE, dev scope) addressed by stanza 1.15.0; stanza and orjson stay out of the desktop bundle. No product code path touched beyond two type-only edits.'
+  performance:
+    status: PASS
+    notes: 'No product logic change. The 3.13 leg ran 534 s against 337 s for 3.11; its first run built the venv from nothing.'
+  reliability:
+    status: CONCERNS
+    notes: 'macOS bundle on Qt 6.8.3 has no reading (REL-113-01); Windows bundle no reading yet. Linux bundle green with an unchanged warning set.'
+  maintainability:
+    status: PASS
+    notes: 'T1-T3 pin the matrix, classifier and PySide6 spec exactly; no type: ignore added; history files untouched.'
+
+recommendations:
+  immediate:
+    - action: 'Re-run the macOS build job; if refused again, take the runner label to Lionel before the 2.3.1 tag (REL-113-01).'
+      refs: ['.github/workflows/build-executables.yaml']
+  future:
+    - action: 'Assert a card value in test_summary_displays_results (TEST-113-01).'
+      refs: ['tests/unit/gui/test_batch_screen.py']
+    - action: 'Optionally name the ARM64 Linux glibc 2.39 floor in the CHANGELOG (DOC-113-01).'
+      refs: ['CHANGELOG.md']

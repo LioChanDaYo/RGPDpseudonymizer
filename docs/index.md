@@ -99,6 +99,6 @@ GDPR Pseudonymizer supports compliance with Articles 4(5), 25, 30, 32, and 89 of
 
 **Current release:** v2.3.0 (November 2026) — Detection precision, names added or corrected replaced at every place, custom pseudonyms used, complete erasure with no name in the erasure log, safer batch runs. See the [changelog](https://github.com/LioChanDaYo/RGPDpseudonymizer/blob/main/CHANGELOG.md).
 
-**Supported:** Python 3.11-3.12 | Windows, macOS, Linux | .txt, .md, .pdf, .docx, .xlsx, .csv formats | French language | Desktop GUI: `pip install gdpr-pseudonymizer[gui]`
+**Supported:** Python 3.11-3.13 | Windows, macOS, Linux | .txt, .md, .pdf, .docx, .xlsx, .csv formats | French language | Desktop GUI: `pip install gdpr-pseudonymizer[gui]`
 
 See the [FAQ](faq.md) for the product roadmap.

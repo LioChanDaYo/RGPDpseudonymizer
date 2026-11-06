@@ -48,9 +48,21 @@ jobs:
   test:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ['3.11', '3.12']
+        include:
+          - os: ubuntu-22.04
+            python-version: '3.11'
+            coverage: true
+          - os: ubuntu-22.04
+            python-version: '3.13'
+            coverage: false
+          - os: macos-latest
+            python-version: '3.12'
+            coverage: false
+          - os: windows-latest
+            python-version: '3.12'
+            coverage: false
 
     steps:
       - uses: actions/checkout@v4
@@ -65,9 +77,9 @@ jobs:
 ```
 
 **Test Matrix Coverage:**
-- **Operating Systems:** Ubuntu, macOS, Windows
-- **Python Versions:** 3.11, 3.12
-- **Total Configurations:** 6 (3 OS × 2 Python versions)
+- **Operating Systems:** Ubuntu 22.04, macOS (latest), Windows (latest)
+- **Python Versions:** 3.11 (with coverage) and 3.13 on Ubuntu, 3.12 on macOS and Windows
+- **Total Configurations:** 4 (the `include` list of `.github/workflows/ci.yaml`)
 
 ---
 

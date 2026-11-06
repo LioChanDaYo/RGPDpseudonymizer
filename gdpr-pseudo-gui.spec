@@ -270,5 +270,6 @@ if _is_macos:
             "NSHighResolutionCapable": True,
             "CFBundleShortVersionString": _version,
             "CFBundleName": "GDPR Pseudonymizer",
+            "LSMinimumSystemVersion": "14.0.0",
         },
     )
