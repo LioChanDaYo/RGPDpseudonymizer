@@ -465,13 +465,38 @@ def _bound_of(bound: _Bound, name: str) -> tuple[str | None, str | None]:
     return first, last
 
 
-def _bound_parts(stored: _Bound, other_customs: Mapping[NameKey, str]) -> _Bound:
+def _bound_parts(
+    stored: _Bound,
+    other_customs: Mapping[NameKey, str],
+    own: tuple[str, str, str] | None = None,
+) -> _Bound:
     """The stored parts, then the parts this review's other custom
-    pseudonyms give (each split with its own real names' stored parts)."""
+    pseudonyms give.
+
+    Each other custom pseudonym is split with its own real names' stored
+    parts and, when ``own`` (the name, type and custom pseudonym under
+    check) is given, the parts that pseudonym gives its real names: a part
+    another custom pseudonym of the review gives is matched whole first,
+    both ways (MW-001 (b); Story 11.2). So the result does not depend on the
+    order the names are checked in. Those hint parts only guide the split:
+    they are never returned, so a pseudonym never satisfies Q-D by itself.
+    """
     bound = dict(stored)
+    hint = dict(stored)
+    if own is not None:
+        own_name, own_type, own_pseudonym = own
+        own_first, own_last = split_custom_pseudonym(
+            own_pseudonym, own_type, *_bound_of(stored, own_name)
+        )
+        if own_first and own_last:
+            real_first, real_last = person_parts(own_name)
+            if real_first:
+                hint.setdefault((fold(real_first), "first"), own_first)
+            if real_last:
+                hint.setdefault((fold(real_last), "last"), own_last)
     for (other_name, other_type), other in other_customs.items():
         first, last = split_custom_pseudonym(
-            other, other_type, *_bound_of(stored, other_name)
+            other, other_type, *_bound_of(hint, other_name)
         )
         if not first or not last:
             continue
@@ -544,6 +569,11 @@ def check_custom_pseudonym(
     capitalised word of the document is. The document's other words in small
     letters still do not count (Q-C).
 
+    Q-D reads the parts the real names already have: the stored ones, then
+    those this review's other custom pseudonyms give, each split with the
+    parts this one gives (Story 11.2), so a check when a pseudonym is set
+    and the check at finalization agree, whatever the order.
+
     Args:
         stored_rows: The decrypted mapping rows, or None when the database
             could not be opened (the stored parts of the checks are skipped)
@@ -578,7 +608,7 @@ def check_custom_pseudonym(
     others = {
         key: value for key, value in other_customs.items() if key != (name, entity_type)
     }
-    bound = _bound_parts(_stored_bound(rows), others)
+    bound = _bound_parts(_stored_bound(rows), others, (name, entity_type, pseudonym))
     part_refusal = _part_refusal(bound, name, entity_type, pseudonym)
     if part_refusal is not None:  # Q-D
         return part_refusal
@@ -692,7 +722,8 @@ def custom_entity_fields(
     first and last name as the engine reads them, and the pseudonym's parts
     as ``split_custom_pseudonym`` splits it, with the parts the real names
     already have in ``stored_rows`` or in this run's other custom
-    pseudonyms (AC17 (b)). On a one-word name the last part has no real
+    pseudonyms (AC17 (b)), each of those split with the parts this one gives
+    (Story 11.2), as ``check_custom_pseudonym`` splits them. On a one-word name the last part has no real
     counterpart (``last_name`` None). A one-word custom pseudonym, a place
     and an organisation have no parts.
     """
@@ -707,7 +738,9 @@ def custom_entity_fields(
         for key, value in (other_customs or {}).items()
         if key != (name, entity_type)
     }
-    bound = _bound_parts(_stored_bound(list(stored_rows)), others)
+    bound = _bound_parts(
+        _stored_bound(list(stored_rows)), others, (name, entity_type, pseudonym)
+    )
     first, last = split_custom_pseudonym(
         pseudonym, entity_type, *_bound_of(bound, name)
     )

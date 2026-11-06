@@ -55,12 +55,6 @@ from tests.unit.test_custom_pseudonym_fixes_cli import (
     pre,
 )
 
-REFUSED_AT_FINALIZATION = pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 11.2 tests first: custom pseudonyms refused at finalization",
-)
-
 # Lionel's approved finalization error for a part changed in the database
 # (Story 10.11, Q-A); unchanged by Story 11.2 (AC7).
 PART_CHANGED = (
@@ -124,7 +118,6 @@ def _rows(db: str) -> list[Entity]:
 # ---------------------------------------------------------------------------
 
 
-@REFUSED_AT_FINALIZATION
 @pytest.mark.parametrize("order", ORDERS)
 def test_cli_shared_first_name_particle_surname_written(
     tmp_path: Path, order: str
@@ -167,7 +160,6 @@ def test_cli_shared_first_name_particle_surname_written(
     )
 
 
-@REFUSED_AT_FINALIZATION
 @pytest.mark.parametrize("order", ORDERS)
 def test_finalization_accepts_what_the_review_accepted(
     tmp_path: Path, order: str
@@ -200,7 +192,6 @@ def test_finalization_accepts_what_the_review_accepted(
     )
 
 
-@REFUSED_AT_FINALIZATION
 def test_check_accepts_plain_pseudonym_after_particle_surname() -> None:
     """T3 (AC1): with « Dravin Le Vorlan » already set for « Xantor
     Quentrel », « Dravin Brontel » for « Xantor Velmar » is accepted."""
@@ -215,7 +206,6 @@ def test_check_accepts_plain_pseudonym_after_particle_surname() -> None:
     assert refusal is None, refusal  # expected failure
 
 
-@REFUSED_AT_FINALIZATION
 @pytest.mark.parametrize("order", ORDERS)
 def test_finalization_accepts_double_particle_next_to_shared_first_name(
     tmp_path: Path, order: str

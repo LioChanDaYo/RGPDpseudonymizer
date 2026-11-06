@@ -41,12 +41,6 @@ from tests.unit.gui.test_custom_pseudonym_fixes_review import (
     pre,
 )
 
-REFUSED_AT_FINALIZATION = pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 11.2 tests first: custom pseudonyms refused at finalization",
-)
-
 VELMAR = "Xantor Velmar"
 QUENTREL = "Xantor Quentrel"
 PLAIN = "Dravin Brontel"
@@ -68,7 +62,6 @@ def _entities() -> list[DetectedEntity]:
     ]
 
 
-@REFUSED_AT_FINALIZATION
 @pytest.mark.parametrize("order", ["velmar_first", "quentrel_first"])
 def test_desktop_shared_first_name_particle_surname_written(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, monkeypatch, order
