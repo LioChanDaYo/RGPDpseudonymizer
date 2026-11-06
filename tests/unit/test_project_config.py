@@ -4,6 +4,7 @@ Unit tests for CI/CD configuration validation.
 Tests verify project configuration files are valid and dependencies are correctly specified.
 """
 
+import ast
 import configparser
 import sys
 import tomllib
@@ -136,19 +137,63 @@ def test_no_python_310_backport():
 
 
 def test_pyside6_python_marker():
-    """Test that the GUI extra installs PySide6 6.8.3, which supports Python 3.13 (Story 11.3)."""
+    """Test the PySide6 metadata in pyproject.toml (Story 11.3).
+
+    The PySide6-Essentials dependency entry is 6.8.3, optional, for Python
+    3.11 to 3.13, and the ``gui`` and ``all`` extras list it.
+    """
     pyproject_path = Path(__file__).parent.parent.parent / "pyproject.toml"
 
     with open(pyproject_path, "rb") as f:
         config = tomllib.load(f)
 
     dependencies = config["tool"]["poetry"]["dependencies"]
+    extras = config["tool"]["poetry"]["extras"]
 
     assert dependencies["PySide6-Essentials"] == {
         "version": "~6.8.3",
         "optional": True,
         "python": ">=3.11,<3.14",
     }
+    assert "PySide6-Essentials" in extras["gui"]
+    assert "PySide6-Essentials" in extras["all"]
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 11.3 tests first: the macOS bundle declares no minimum yet",
+)
+def test_macos_bundle_minimum_version():
+    """Test that the macOS bundle's Info.plist declares macOS 12 (Story 11.3).
+
+    Reads gdpr-pseudo-gui.spec with ``ast`` and checks the ``info_plist``
+    dict passed to ``BUNDLE(...)``.
+    """
+    spec_path = Path(__file__).parent.parent.parent / "gdpr-pseudo-gui.spec"
+    tree = ast.parse(spec_path.read_text(encoding="utf-8"))
+
+    bundles = [
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "BUNDLE"
+    ]
+    assert len(bundles) == 1, "expected exactly one BUNDLE(...) call"
+    info_plists = [kw.value for kw in bundles[0].keywords if kw.arg == "info_plist"]
+    assert len(info_plists) == 1, "BUNDLE(...) has no info_plist"
+    info_plist = info_plists[0]
+    assert isinstance(info_plist, ast.Dict)
+
+    entries = {
+        key.value: value
+        for key, value in zip(info_plist.keys, info_plist.values, strict=True)
+        if isinstance(key, ast.Constant)
+    }
+    minimum = entries.get("LSMinimumSystemVersion")
+    assert isinstance(minimum, ast.Constant)
+    assert minimum.value == "12.0.0"
 
 
 def test_defusedxml_with_openpyxl():
