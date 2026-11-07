@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [2.3.1] - 2026-11-07
+
 ### Changed
 
 - **Python 3.11 is the new minimum (Story 11.1).** Python 3.10 is no longer supported: it reached end of life in October 2026. On Python 3.10, `pip install gdpr-pseudonymizer` keeps installing 2.3.0, the last version that supports it. Validated: Python 3.11 and 3.12.
