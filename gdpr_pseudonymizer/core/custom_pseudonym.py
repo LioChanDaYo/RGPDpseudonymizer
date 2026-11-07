@@ -11,10 +11,12 @@ finalization:
 - the custom pseudonym is normalized like a mapping key (titles and, for a
   place, a leading preposition removed; spaces collapsed);
 - for a person it is split into a first-name part and a last-name part
-  (Lionel's Q4 and Q-G): a part the real last or first name already has is
-  matched whole first; else at its last space, except that the library's own
-  last names of two or more words stay whole; a one-word pseudonym has no
-  parts;
+  (Lionel's Q4 and Q-G, widened by his D1 in Story 11.2): a part the real
+  last or first name already has is matched whole first; else, in a
+  pseudonym of three or more words, a linking word just before the last word
+  stays with the last name; else at its last space, except that the
+  library's own last names of two or more words stay whole; a one-word
+  pseudonym has no parts;
 - it is checked against Lionel's rules, in this order: a name that already
   has a stored pseudonym keeps it (Q1); a real first or last name that
   already has a part keeps it (Q-D); it may not be, in whole or in part,
@@ -131,16 +133,19 @@ def split_custom_pseudonym(
     bound_last: str | None = None,
 ) -> tuple[str | None, str | None]:
     """A person's custom pseudonym split into a first-name part and a
-    last-name part (Lionel's Q4 and Q-G; AC17 (b)).
+    last-name part (Lionel's Q4 and Q-G; AC17 (b); Lionel's D1, Story 11.2).
 
     In this order: when the pseudonym ends with the part the real last name
     already has (``bound_last``, as whole words), the split falls just
     before it; else, when it starts with the part the real first name
     already has (``bound_first``), just after it (QA MW-001, PO A2); else,
-    when it ends with one of the library's last names of two or more words,
-    just before that name (Q-G); else at its last space (Q4). At least one
-    word stays on each side; words are compared folded, and each part keeps
-    the spelling typed.
+    in a pseudonym of three or more words whose word just before the last
+    word is a linking word (``LINKING_WORDS``, Q-I's list), just before that
+    linking word, which stays with the last name (Lionel's D1, 2026-11-05);
+    else, when it ends with one of the library's last names of two or more
+    words, just before that name (Q-G); else at its last space (Q4). At
+    least one word stays on each side; words are compared folded, and each
+    part keeps the spelling typed.
 
     Returns (first-name part, last-name part); (None, None) for a one-word
     pseudonym and for any other type.
@@ -156,6 +161,8 @@ def split_custom_pseudonym(
     if bound_first and _starts_with(words, bound_first):
         size = len(bound_first.split())
         return " ".join(words[:size]), " ".join(words[size:])
+    if len(words) >= 3 and fold(words[-2]) in LINKING_WORDS:
+        return " ".join(words[:-2]), " ".join(words[-2:])
     for library_name in library_two_word_last_names():
         if _ends_with(words, library_name):
             size = len(library_name.split())
@@ -465,13 +472,38 @@ def _bound_of(bound: _Bound, name: str) -> tuple[str | None, str | None]:
     return first, last
 
 
-def _bound_parts(stored: _Bound, other_customs: Mapping[NameKey, str]) -> _Bound:
+def _bound_parts(
+    stored: _Bound,
+    other_customs: Mapping[NameKey, str],
+    own: tuple[str, str, str] | None = None,
+) -> _Bound:
     """The stored parts, then the parts this review's other custom
-    pseudonyms give (each split with its own real names' stored parts)."""
+    pseudonyms give.
+
+    Each other custom pseudonym is split with its own real names' stored
+    parts and, when ``own`` (the name, type and custom pseudonym under
+    check) is given, the parts that pseudonym gives its real names: a part
+    another custom pseudonym of the review gives is matched whole first,
+    both ways (MW-001 (b); Story 11.2). So the result does not depend on the
+    order the names are checked in. Those hint parts only guide the split:
+    they are never returned, so a pseudonym never satisfies Q-D by itself.
+    """
     bound = dict(stored)
+    hint = dict(stored)
+    if own is not None:
+        own_name, own_type, own_pseudonym = own
+        own_first, own_last = split_custom_pseudonym(
+            own_pseudonym, own_type, *_bound_of(stored, own_name)
+        )
+        if own_first and own_last:
+            real_first, real_last = person_parts(own_name)
+            if real_first:
+                hint.setdefault((fold(real_first), "first"), own_first)
+            if real_last:
+                hint.setdefault((fold(real_last), "last"), own_last)
     for (other_name, other_type), other in other_customs.items():
         first, last = split_custom_pseudonym(
-            other, other_type, *_bound_of(stored, other_name)
+            other, other_type, *_bound_of(hint, other_name)
         )
         if not first or not last:
             continue
@@ -544,6 +576,11 @@ def check_custom_pseudonym(
     capitalised word of the document is. The document's other words in small
     letters still do not count (Q-C).
 
+    Q-D reads the parts the real names already have: the stored ones, then
+    those this review's other custom pseudonyms give, each split with the
+    parts this one gives (Story 11.2), so a check when a pseudonym is set
+    and the check at finalization agree, whatever the order.
+
     Args:
         stored_rows: The decrypted mapping rows, or None when the database
             could not be opened (the stored parts of the checks are skipped)
@@ -578,7 +615,7 @@ def check_custom_pseudonym(
     others = {
         key: value for key, value in other_customs.items() if key != (name, entity_type)
     }
-    bound = _bound_parts(_stored_bound(rows), others)
+    bound = _bound_parts(_stored_bound(rows), others, (name, entity_type, pseudonym))
     part_refusal = _part_refusal(bound, name, entity_type, pseudonym)
     if part_refusal is not None:  # Q-D
         return part_refusal
@@ -692,7 +729,8 @@ def custom_entity_fields(
     first and last name as the engine reads them, and the pseudonym's parts
     as ``split_custom_pseudonym`` splits it, with the parts the real names
     already have in ``stored_rows`` or in this run's other custom
-    pseudonyms (AC17 (b)). On a one-word name the last part has no real
+    pseudonyms (AC17 (b)), each of those split with the parts this one gives
+    (Story 11.2), as ``check_custom_pseudonym`` splits them. On a one-word name the last part has no real
     counterpart (``last_name`` None). A one-word custom pseudonym, a place
     and an organisation have no parts.
     """
@@ -707,7 +745,9 @@ def custom_entity_fields(
         for key, value in (other_customs or {}).items()
         if key != (name, entity_type)
     }
-    bound = _bound_parts(_stored_bound(list(stored_rows)), others)
+    bound = _bound_parts(
+        _stored_bound(list(stored_rows)), others, (name, entity_type, pseudonym)
+    )
     first, last = split_custom_pseudonym(
         pseudonym, entity_type, *_bound_of(bound, name)
     )

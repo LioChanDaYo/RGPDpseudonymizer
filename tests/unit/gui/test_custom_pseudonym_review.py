@@ -1127,11 +1127,12 @@ def test_own_part_set_on_lone_name_keeps_later_full_names(  # type: ignore[no-un
 def test_three_word_pseudonym_parts(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, monkeypatch, case
 ) -> None:
-    """T37 (Q4 as Lionel's Q-G refines it): a three-word custom pseudonym is
-    split at its last space, except that one of the library's two-word last
-    names stays whole (the library's set is replaced in the test by the
-    invented "Le Vellion"); a later lone first and last name take the
-    parts."""
+    """T37 (Q4 as Lionel's Q-G and Story 11.2's D1 refine it): a three-word
+    custom pseudonym is split at its last space, except that a linking word
+    just before the last word stays with the last name, and one of the
+    library's two-word last names stays whole (the library's set is replaced
+    in the test by the invented "Le Vellion"); a later lone first and last
+    name take the parts."""
     monkeypatch.setattr(
         custom_module,
         "library_two_word_last_names",
@@ -1145,7 +1146,7 @@ def test_three_word_pseudonym_parts(  # type: ignore[no-untyped-def]
     if case == "one_of_the_library_names":
         custom, parts = "Xantor Le Vellion", ("Xantor", "Le Vellion")
     else:
-        custom, parts = "Xantor Le Velmar", ("Xantor Le", "Velmar")
+        custom, parts = "Xantor Le Velmar", ("Xantor", "Le Velmar")
     _type_in(monkeypatch, custom)
     sd.vs._show_change_pseudonym_dialog(sd.row(QZ).entity_id)
     assert dialogs.calls == [], "PRE: accepted"

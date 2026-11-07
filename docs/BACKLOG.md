@@ -743,6 +743,8 @@ Decided by Lionel on 2026-11-04, after the read-only Codex release review of v2.
 **Impact:** A refusal at the end of a review and odd later pseudonyms. No name in clear.
 **Where:** `core/custom_pseudonym.py` (finalization reparses the choice with the stored bindings only). New in v2.3.0 (Stories 10.11, 10.16).
 **Fix direction:** Keep the first-name/surname split accepted during review, and use the same split to check and to store.
+**Status:** ✅ **COMPLETED** — Fixed in Story 11.2 (v2.3.1)
+**Outcome:** The review and its end now split the review's custom pseudonyms the same way, so what the review accepts is written. A linking word just before the last word now stays with the last name (Lionel, 2026-11-05, widening his Story 10.11 Q-G rule), so « Inès Le Goff » is « Inès » + « Le Goff »; pseudonyms already saved keep their split. Surnames with two linking words: KL-007.
 
 #### BUG-002: `import-mappings --no-skip-duplicates` replaces nothing when you answer yes 📅 v2.3.1
 **Source:** v2.3.0 release review (Codex), verified by QA; first noted in Story 10.7
@@ -750,6 +752,8 @@ Decided by Lionel on 2026-11-04, after the read-only Codex release review of v2.
 **Impact:** Your answer is ignored and the old pseudonym stays. The summary says "Skipped: 1".
 **Where:** `cli/commands/import_mappings.py` (the replace branch builds a new entity). Already in v2.2.0.
 **Fix direction:** Update the confirmed existing row in one transaction.
+**Status:** ✅ **COMPLETED** — Fixed in Story 11.2 (v2.3.1)
+**Outcome:** A yes replaces the existing row's pseudonym in one transaction; the row keeps its id and its name as stored. The summary counts it on a "Replaced:" line.
 
 #### TD-005: Python 3.11 floor and dependency security refresh 📅 v2.3.1
 **Source:** 61 open Dependabot alerts on `poetry.lock` (2026-11-05), 6 critical (5 Pillow, 1 certifi)
@@ -760,7 +764,7 @@ Decided by Lionel on 2026-11-04, after the read-only Codex release review of v2.
 
 ## 🔎 Known limitations (not scheduled)
 
-KL-001 to KL-005 were found by the same release review. Each of those needs conditions a real user is very unlikely to meet, so none is scheduled (Lionel, 2026-11-04). KL-006 has its own source and decision, in its entry. Reopen one only if a real user reports it. None leaves a name in clear.
+KL-001 to KL-005 were found by the same release review. Each of those needs conditions a real user is very unlikely to meet, so none is scheduled (Lionel, 2026-11-04). KL-006 and KL-007 have their own source and decision, in their entries. Reopen one only if a real user reports it. None leaves a name in clear.
 
 - **KL-001:** `delete-mapping` can miss a v2.2.0 row of a name with five or more accented words, when that name's accents were stored two ways and v2.2.0 cut a « Mé… » word as the title « Me ». The command then reports the erasure as complete.
 - **KL-002:** Two programs opening a pre-2.3 database for the first time within the same milliseconds: one can wrongly report "format not recognised". Opening it again works.
@@ -768,6 +772,7 @@ KL-001 to KL-005 were found by the same release review. Each of those needs cond
 - **KL-004:** In single-document mode, if you open the next document and reach its review before the previous one finishes writing (0.1 to 0.25 s), the previous result is offered under the next file's name.
 - **KL-005:** `delete-mapping "Meprof"` erases the v2.2.0 row of « Mèprof » (a name made only of title abbreviations, saved as a lone accent).
 - **KL-006:** With the PER-001 style only (`--theme neutral_id`): after « Marie Dubois » and « Marie Dupont », a bare « Marie » gets PER-001-P in one run and PER-002-P in later runs. The default style gives the same pseudonym in every run (measured over three runs). Three places pick the pseudonym of a bare first name, each by its own rule: the first matching name in the document (`core/document_processor.py:625`), the reload of saved mappings, where the last saved wins (`pseudonym/library_manager.py:790-792`), and the database lookup, where the first saved wins but which is never reached, because the reloaded value is checked first (`pseudonym/assignment_engine.py:359-374`). Which Marie a bare « Marie » means can never be known from the text. Found on 2026-11-05, not by the release review; Lionel, 2026-11-05: "backlog it". Reopen if a `neutral_id` user reports it.
+- **KL-007:** A custom pseudonym whose surname has two linking words (« Aurore de La Fontaine », « Aurore van der Berg »), chosen for « Élodie Martin » when no other custom pseudonym of the review shares its first name, keeps only the last linking word with the last name: first name « Aurore de », last name « La Fontaine ». A later « Élodie » alone is then written « Aurore de ». Next to another custom pseudonym with the same first name it is usually split right; but when that other pseudonym's surname starts with the same linking word (« Aurore de Sousa » next to « Aurore de La Fontaine »), the two are stored with different first names (« Aurore » and « Aurore de »), and a later « Élodie » alone is written « Aurore ». No name is left in clear. Found by the Story 11.2 SM's check of the rule Lionel chose on 2026-11-05 ("2: widen the rule (Recommended)"); backlogged as rare on the orchestrator's instruction. Reopen if a user reports it.
 
 Further non-leak items decided during Epic 10 are listed in the Backlog sections of Stories 10.19 to 10.22 (`docs/stories/`).
 
