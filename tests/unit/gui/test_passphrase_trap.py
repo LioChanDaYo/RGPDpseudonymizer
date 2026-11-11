@@ -13,8 +13,10 @@ Written by the BMAD dev agent (Claude).
 The real passphrase window, screens and workers run offscreen. Error windows
 are recorded (``_Dialogs``), never shown. The passphrase window opened by a
 screen is replaced by a counter that answers « Annuler ». Detection is
-replaced by a stand-in that finds the invented « Quentrel Zorbalia »; no
-spaCy model is loaded.
+replaced by a stand-in that finds the invented « Quentrel Zorbalia »: for a
+single document at ``DocumentProcessor.detect_entities`` (what
+``DetectionWorker`` calls), for a batch at ``DocumentProcessor._get_detector``
+(what every batch path reaches). No spaCy model is loaded.
 
 Preconditions fail with ``pytest.fail("PRE: ...")`` (``pre``), never with an
 ``assert``. The first ``assert`` after them is the expected failure on the
@@ -375,31 +377,71 @@ def _batch(main_window: Any, tmp_path: Path, db: Path, passphrase: str) -> Any:
     return bs
 
 
-def _run(qtbot: Any, bs: Any) -> None:
-    """One run started with « Démarrer », the cached passphrase used."""
-    with _stand_in():
+class _FakeDetector:
+    """The NLP detector of a batch, replaced: it finds the invented name at
+    the start of a text and loads no model. Records each text it reads."""
+
+    def __init__(self) -> None:
+        self.texts: list[str] = []
+
+    def detect_entities(self, text: str) -> list[DetectedEntity]:
+        self.texts.append(text)
+        return [_entity()] if text.startswith(NAME) else []
+
+
+def _batch_detection(detector: _FakeDetector | None = None) -> Any:
+    """Every detection path of a batch reaches the NLP model through
+    ``DocumentProcessor._get_detector``: ``_detect_and_filter_entities``
+    (text files without a review, and every file with a review per
+    document) and ``detect_entities_tabular`` (.csv and .xlsx without a
+    review). Patched here: it hands out ``detector``, or, with None, raises,
+    so that a detection the start check should have prevented fails the file
+    instead of waiting for a review. The patch is the spy (``call_count``)."""
+    if detector is None:
+        return patch.object(
+            DocumentProcessor,
+            "_get_detector",
+            side_effect=RuntimeError("detection reached"),
+        )
+    return patch.object(DocumentProcessor, "_get_detector", return_value=detector)
+
+
+def _run(qtbot: Any, bs: Any, detector: _FakeDetector) -> Any:
+    """One run started with « Démarrer », the cached passphrase used; returns
+    the detection spy."""
+    with _batch_detection(detector) as spy:
         bs._start_batch()
         qtbot.waitUntil(lambda: bs._worker is None, timeout=60000)
+    return spy
 
 
-def test_batch_worker_refuses_wrong_passphrase_at_start(tmp_path):  # type: ignore[no-untyped-def]
+@pytest.mark.parametrize("review", [False, True], ids=["no_review", "review"])
+@pytest.mark.parametrize("suffix", [".txt", ".csv"], ids=["text", "table"])
+def test_batch_worker_refuses_wrong_passphrase_at_start(  # type: ignore[no-untyped-def]
+    tmp_path, review, suffix
+):
     """T15 (AC4): the batch worker refuses a wrong passphrase before any
-    file, and flags it."""
+    file, and flags it; no detection path is reached, with or without a
+    review per document, for a text file or a table."""
     db = tmp_path / "existante.db"
     init_database(str(db), PASSPHRASE)
-    doc = tmp_path / "document.txt"
+    doc = tmp_path / f"document{suffix}"
     doc.write_text(TEXT, encoding="utf-8")
     errors: list[str] = []
     finished: list[object] = []
     worker = BatchWorker(
-        files=[doc], output_dir=tmp_path / "out", db_path=str(db), passphrase=WRONG
+        files=[doc],
+        output_dir=tmp_path / "out",
+        db_path=str(db),
+        passphrase=WRONG,
+        validate_per_document=review,
     )
     worker.setAutoDelete(False)
     worker.signals.error.connect(errors.append)
     worker.signals.finished.connect(finished.append)
-    with _stand_in() as detect:
+    with _batch_detection() as detect:
         worker.run()
-    assert errors == [MSG_BAD]  # expected failure
+    assert errors == [MSG_BAD]
     assert finished == []
     assert detect.call_count == 0
     assert getattr(worker, "is_passphrase_error", False) is True
@@ -415,9 +457,12 @@ def test_batch_forgets_wrong_passphrase(  # type: ignore[no-untyped-def]
     db = tmp_path / "existante.db"
     init_database(str(db), PASSPHRASE)
     bs = _batch(main_window, tmp_path, db, WRONG)
-    _run(qtbot, bs)
+    detector = _FakeDetector()
+    detect = _run(qtbot, bs, detector)
     pre(asked.count == 0, "the window not asked for the first run")
-    assert dialogs.messages == [MSG_BAD]  # expected failure
+    assert dialogs.messages == [MSG_BAD]
+    assert detect.call_count == 0
+    assert detector.texts == []
     assert getattr(bs, "_batch_result", None) is None
     assert main_window.cached_passphrase is None
     assert bs._phases.currentIndex() == 0
@@ -429,12 +474,18 @@ def test_batch_forgets_wrong_passphrase(  # type: ignore[no-untyped-def]
 def test_batch_right_passphrase_unchanged(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, monkeypatch
 ):
-    """T17 (AC4, control): the right passphrase still processes both files."""
+    """T17 (AC4, control): the right passphrase still processes both files,
+    through the detection stand-in (no NLP model)."""
     dialogs = _Dialogs(monkeypatch)
     db = tmp_path / "existante.db"
     init_database(str(db), PASSPHRASE)
     bs = _batch(main_window, tmp_path, db, PASSPHRASE)
-    _run(qtbot, bs)
+    detector = _FakeDetector()
+    _run(qtbot, bs, detector)
+    pre(
+        detector.texts == [TEXT, TEXT],
+        f"both files read by the stand-in: {detector.texts}",
+    )
     assert dialogs.messages == []
     result = getattr(bs, "_batch_result", None)
     assert result is not None
@@ -450,7 +501,7 @@ def test_batch_creation_refusal_still_forgotten(  # type: ignore[no-untyped-def]
     dialogs = _Dialogs(monkeypatch)
     db = tmp_path / "nouvelle.db"
     bs = _batch(main_window, tmp_path, db, SHORT_8)
-    _run(qtbot, bs)
+    _run(qtbot, bs, _FakeDetector())
     assert len(dialogs.messages) == 1
     assert dialogs.messages[0].startswith(MSG_CREATE)
     assert main_window.cached_passphrase is None
