@@ -190,8 +190,10 @@ class TestLibraryLoading:
             "theme": "insufficient",
             "data_sources": [],
             "first_names": {
-                "male": ["Name"] * 300,
-                "female": ["Name"] * 300,
+                # Story 11.6: 600 distinct first names, so the floors (which
+                # count distinct names) refuse the last names tested here
+                "male": [f"Name{index:03d}" for index in range(300)],
+                "female": [f"Name{index:03d}" for index in range(300, 600)],
                 "neutral": [],
             },
             "last_names": ["Last"] * 100,  # Only 100, need 500

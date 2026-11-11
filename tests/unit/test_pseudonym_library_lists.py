@@ -22,12 +22,6 @@ from gdpr_pseudonymizer.pseudonym.library_manager import (
     LibraryBasedPseudonymManager,
 )
 
-TESTS_FIRST = pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 11.6 tests first: a drawn pseudonym can be a word of the document",
-)
-
 REPO = Path(__file__).resolve().parents[2]
 PACKAGE_LIBRARIES = REPO / "gdpr_pseudonymizer" / "resources" / "pseudonyms"
 DATA_LIBRARIES = REPO / "data" / "pseudonyms"
@@ -45,7 +39,6 @@ def _lists(library: dict[str, Any]) -> Iterator[tuple[str, list[str]]]:
         yield f"organizations.{category}", values
 
 
-@TESTS_FIRST
 @pytest.mark.parametrize("theme", THEMES)
 def test_no_duplicate_in_pseudonym_library(theme: str) -> None:
     """T19 (AC14): no two entries of a library fold alike, within a list or
@@ -75,7 +68,6 @@ def test_pseudonym_library_copies_identical(theme: str) -> None:
     assert package == data
 
 
-@TESTS_FIRST
 def test_library_floor_counts_distinct_names(tmp_path: Path) -> None:
     """T23 (AC16): 500 last-name entries of which 499 are distinct do not
     meet the floor of 500 last names."""

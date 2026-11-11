@@ -62,12 +62,6 @@ from tests.unit.test_parallel_saved_pseudonym import (
     _spans,
 )
 
-TESTS_FIRST = pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 11.6 tests first: a drawn pseudonym can be a word of the document",
-)
-
 PERSON, ORG, LOCATION = "PERSON", "ORG", "LOCATION"
 ZQ = "Zorbal Quentrix"
 
@@ -618,7 +612,6 @@ def test_custom_hyphenated_word_still_compared_whole() -> None:
 # ---------------------------------------------------------------------------
 
 
-@TESTS_FIRST
 def test_lone_first_and_last_names_never_share_a_pseudonym(tmp_path: Path) -> None:
     """T21 (AC15): a value drawn as « Zorbal »'s first part in one document
     is never drawn as « Quentrix »'s last part in the next, so a lone
@@ -652,7 +645,6 @@ def test_lone_first_and_last_names_never_share_a_pseudonym(tmp_path: Path) -> No
     assert later is not None and fold(saved[4]) != fold(later[5] or "")
 
 
-@TESTS_FIRST
 @pytest.mark.parametrize("case", ["other_role", "accent_variant"])
 def test_saved_part_is_not_drawn_again(tmp_path: Path, case: str) -> None:
     """T22 (AC15, the guard): in a database used before, a first part drawn
