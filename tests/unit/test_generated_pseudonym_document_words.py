@@ -672,3 +672,33 @@ def test_saved_part_is_not_drawn_again(tmp_path: Path, case: str) -> None:
     assert stored is not None
     assert fold(stored[4] or "") != fold(saved_part), stored  # expected failure
     assert fold(lone_zorbal) != fold(lone_other), (lone_zorbal, lone_other)
+
+
+@pytest.mark.parametrize("case", ["same_spelling", "accent_variant"])
+def test_saved_first_part_is_not_drawn_as_a_last_name(
+    tmp_path: Path, case: str
+) -> None:
+    """T24 (AC15, the guard's other role in the last-name draw; QA
+    TEST-116-01): in a database used before, a last part drawn for
+    « Brontel » is never a first part saved for another name, in the same
+    spelling or with other accents, so the lone « Brontel » and the lone
+    « Xantor » are never written alike."""
+    db = _new_db(tmp_path)
+    if case == "same_spelling":
+        offered = saved_part = _shared_first_name()
+    else:
+        offered, saved_part = _accented_first_name()
+        pre(offered != saved_part, "A0 differs from A")
+    _save_person(db, "Xantor Quentrix", "Xantor", "Quentrix", saved_part, "Morvane")
+    text = "Zorbal Brontel a signé le contrat. Brontel a signé. Xantor a signé."
+    names = [("Zorbal Brontel", PERSON), ("Brontel", PERSON), ("Xantor", PERSON)]
+    output = tmp_path / "out.txt"
+    with _forced({"last": [offered]}) as offers:
+        result = _finalize(db, text, names, output)
+    pre(offers.n > 0 and result.success, "offered, document written")
+    _, lone_brontel, lone_xantor = _written_at(output, text, names)
+    stored = _stored(db, "Zorbal Brontel", PERSON)
+    pre(stored is not None, "« Zorbal Brontel » saved")
+    assert stored is not None
+    assert fold(stored[5] or "") != fold(saved_part), stored
+    assert fold(lone_brontel) != fold(lone_xantor), (lone_brontel, lone_xantor)
