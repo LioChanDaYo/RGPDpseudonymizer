@@ -192,11 +192,6 @@ def test_macos_bundle_minimum_version():
     assert minimum.value == "14.0.0"
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 11.4 tests first: version label",
-)
 def test_gui_bundle_copies_package_metadata():
     """T11 (Story 11.4, AC8): the desktop bundle carries the package's own
     metadata, so the app can read its version with importlib.metadata.

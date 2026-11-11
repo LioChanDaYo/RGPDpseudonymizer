@@ -18,12 +18,6 @@ from typing import Any
 
 import pytest
 
-_VERSION = pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 11.4 tests first: version label",
-)
-
 FAKE = "9.8.7"
 PACKAGE = "gdpr-pseudonymizer"
 
@@ -51,7 +45,6 @@ def _fake_version(monkeypatch: pytest.MonkeyPatch, value: str | None) -> None:
     monkeypatch.setattr(importlib.metadata, "version", fake)
 
 
-@_VERSION
 @pytest.mark.parametrize(
     "value,shown", [(FAKE, FAKE), (None, "?")], ids=["metadata", "fallback"]
 )
@@ -71,7 +64,6 @@ def test_about_shows_package_version(main_window, monkeypatch, value, shown):  #
     assert f"<p>Version {shown}</p>" in texts[0]  # expected failure
 
 
-@_VERSION
 def test_splash_shows_package_version(qapp, monkeypatch):  # type: ignore[no-untyped-def]
     """T9 (AC7): the splash screen shows the package version."""
     from PySide6 import QtGui
@@ -92,7 +84,6 @@ def test_splash_shows_package_version(qapp, monkeypatch):  # type: ignore[no-unt
     assert f"v{FAKE}" in drawn  # expected failure
 
 
-@_VERSION
 def test_application_version(monkeypatch):  # type: ignore[no-untyped-def]
     """T10 (AC7): the application's version is the package version."""
     from PySide6 import QtWidgets

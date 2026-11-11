@@ -170,6 +170,9 @@ hiddenimports += thinc_hiddenimports
 # readchar uses importlib.metadata.version() at import time — bundle its metadata
 datas += copy_metadata("readchar")
 
+# The desktop app reads its own version with importlib.metadata (Story 11.4)
+datas += copy_metadata("gdpr-pseudonymizer")
+
 # ---------------------------------------------------------------------------
 # Analysis
 # ---------------------------------------------------------------------------
