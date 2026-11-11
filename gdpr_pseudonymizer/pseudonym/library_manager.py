@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+import functools
 import json
 import secrets
+from collections.abc import Callable
 from typing import Any, TypedDict
 
+from gdpr_pseudonymizer.core.custom_pseudonym import fold
 from gdpr_pseudonymizer.pseudonym.assignment_engine import (
     PseudonymAssignment,
     PseudonymManager,
@@ -16,6 +19,10 @@ from gdpr_pseudonymizer.pseudonym.neutral_id_generator import (
 from gdpr_pseudonymizer.utils.logger import get_logger
 
 logger = get_logger(__name__)
+
+# Story 11.6: the comparison form of a name (capitals, accents and repeated
+# spaces ignored), memoised: the guard folds each saved part once per run
+_fold = functools.lru_cache(maxsize=65536)(fold)
 
 
 class DataSource(TypedDict):
@@ -112,6 +119,10 @@ class LibraryBasedPseudonymManager(PseudonymManager):
         }
 
         self._neutral_id_generator: NeutralIdPseudonymGenerator | None = None
+
+        # Story 11.6: the real-name check of the document being written; a
+        # drawn value it accepts is drawn again (set by the processor)
+        self._real_name_check: Callable[[str], bool] | None = None
 
     def load_library(self, theme: str) -> None:
         """Load pseudonym library from JSON file or initialize neutral_id generator.
@@ -212,6 +223,16 @@ class LibraryBasedPseudonymManager(PseudonymManager):
             Pseudonym component if found, None otherwise
         """
         return self._component_mappings.get((component, component_type))
+
+    def set_real_name_check(self, check: Callable[[str], bool] | None) -> None:
+        """The real-name check of the document being written (Story 11.6): a
+        drawn value it accepts is drawn again. None removes it.
+
+        Args:
+            check: Takes a drawn first name, last name, place or
+                organisation; True when it is a real name of the document
+        """
+        self._real_name_check = check
 
     def _flatten_location_list(
         self, locations: Locations | dict[Any, Any]
@@ -329,29 +350,37 @@ class LibraryBasedPseudonymManager(PseudonymManager):
             if not isinstance(organizations[org_key], list):
                 raise ValueError(f"organizations.{org_key} must be a list")
 
-        # Check minimum name counts (≥500 first names total, ≥500 last names)
-        total_first_names = (
-            len(first_names["male"])
-            + len(first_names["female"])
-            + len(first_names["neutral"])
+        # Check minimum name counts (≥500 first names total, ≥500 last names).
+        # Story 11.6: every floor counts distinct names, folded
+        total_first_names = len(
+            {
+                _fold(name)
+                for gender_key in required_gender_keys
+                for name in first_names[gender_key]
+            }
         )
         if total_first_names < 500:
             raise ValueError(
                 f"Insufficient first names: {total_first_names} < 500 required"
             )
 
-        if len(library_data["last_names"]) < 500:
+        total_last_names = len({_fold(name) for name in library_data["last_names"]})
+        if total_last_names < 500:
             raise ValueError(
-                f"Insufficient last names: {len(library_data['last_names'])} < 500 required"
+                f"Insufficient last names: {total_last_names} < 500 required"
             )
 
         # Check minimum location counts (≥80 total)
-        total_locations = len(self._flatten_location_list(locations))
+        total_locations = len(
+            {_fold(name) for name in self._flatten_location_list(locations)}
+        )
         if total_locations < 80:
             raise ValueError(f"Insufficient locations: {total_locations} < 80 required")
 
         # Check minimum organization counts (≥35 total)
-        total_organizations = len(self._flatten_organization_list(organizations))
+        total_organizations = len(
+            {_fold(name) for name in self._flatten_organization_list(organizations)}
+        )
         if total_organizations < 35:
             raise ValueError(
                 f"Insufficient organizations: {total_organizations} < 35 required"
@@ -582,18 +611,29 @@ class LibraryBasedPseudonymManager(PseudonymManager):
         max_attempts = 100
         for attempt in range(max_attempts):
             candidate = secrets.choice(candidates)
+            # Story 11.6: a real name of the document is drawn again
+            if self._real_name_check is not None and self._real_name_check(candidate):
+                continue
 
-            # Check if this pseudonym component already used for different real component
+            # Check if this pseudonym component already used for different real
+            # component. Story 11.6: compared folded, and never a last-name
+            # part (two names would share a pseudonym; the guard)
             is_collision = False
+            folded = _fold(candidate)
             for (
                 real_comp,
                 comp_type,
             ), pseudo_comp in self._component_mappings.items():
-                if comp_type == "first_name" and pseudo_comp == candidate:
+                if _fold(pseudo_comp) != folded:
+                    continue
+                if comp_type == "first_name":
                     # This pseudonym is already used for a different real first name
                     if real_first_name and real_comp != real_first_name:
                         is_collision = True
                         break
+                else:
+                    is_collision = True
+                    break
 
             if not is_collision:
                 # No collision - safe to use this pseudonym component
@@ -635,15 +675,26 @@ class LibraryBasedPseudonymManager(PseudonymManager):
         max_attempts = 100
         for attempt in range(max_attempts):
             candidate = secrets.choice(self.last_names)
+            # Story 11.6: a real name of the document is drawn again
+            if self._real_name_check is not None and self._real_name_check(candidate):
+                continue
 
-            # Check if this pseudonym component already used for different real component
+            # Check if this pseudonym component already used for different real
+            # component. Story 11.6: compared folded, and never a first-name
+            # part (two names would share a pseudonym; the guard)
             is_collision = False
+            folded = _fold(candidate)
             for (real_comp, comp_type), pseudo_comp in self._component_mappings.items():
-                if comp_type == "last_name" and pseudo_comp == candidate:
+                if _fold(pseudo_comp) != folded:
+                    continue
+                if comp_type == "last_name":
                     # This pseudonym is already used for a different real last name
                     if real_last_name and real_comp != real_last_name:
                         is_collision = True
                         break
+                else:
+                    is_collision = True
+                    break
 
             if not is_collision:
                 # No collision - safe to use this pseudonym component
@@ -679,6 +730,9 @@ class LibraryBasedPseudonymManager(PseudonymManager):
         max_attempts = 100
         for attempt in range(max_attempts):
             candidate = secrets.choice(candidates)
+            # Story 11.6: a real name of the document is drawn again
+            if self._real_name_check is not None and self._real_name_check(candidate):
+                continue
             if candidate not in self._used_pseudonyms:
                 return candidate
 
@@ -711,6 +765,9 @@ class LibraryBasedPseudonymManager(PseudonymManager):
         max_attempts = 100
         for attempt in range(max_attempts):
             candidate = secrets.choice(candidates)
+            # Story 11.6: a real name of the document is drawn again
+            if self._real_name_check is not None and self._real_name_check(candidate):
+                continue
             if candidate not in self._used_pseudonyms:
                 return candidate
 

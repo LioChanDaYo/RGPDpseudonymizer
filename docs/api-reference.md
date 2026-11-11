@@ -498,7 +498,7 @@ Create a JSON file in `data/pseudonyms/` following this schema:
 }
 ```
 
-**Minimum requirements:** 500+ first names, 500+ last names, 80+ locations, 35+ organizations.
+**Minimum requirements:** 500+ distinct first names, 500+ distinct last names, 80+ distinct locations, 35+ distinct organizations.
 
 **Usage:**
 ```python

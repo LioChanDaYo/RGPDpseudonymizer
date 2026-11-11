@@ -29,6 +29,7 @@ from gdpr_pseudonymizer.core.custom_pseudonym import (
     document_words,
     finalization_message,
     fold,
+    real_name_check,
     takes_custom_value,
     untracked_custom_values,
 )
@@ -871,11 +872,13 @@ class DocumentProcessor:
         entities_reused = 0
         type_counts: dict[str, int] = {}
         # Story 10.16 (Codex #8): the names sent count in the custom
-        # pseudonyms' real-name check, read only when there is one (AC10)
-        sent_names = (
-            [self._normalize_entity_text(ctx, entity) for entity in validated_entities]
-            if custom_pseudonyms
-            else []
+        # pseudonyms' real-name check. Story 11.6: also the drawn pseudonyms'
+        # real-name check, so always
+        sent_names = [
+            self._normalize_entity_text(ctx, entity) for entity in validated_entities
+        ]
+        ctx.pseudonym_manager.set_real_name_check(
+            real_name_check(document_text, sent_names)
         )
         # Story 10.11: custom names whose first occurrence is still to come
         custom_unseen = self._register_custom_pseudonyms(

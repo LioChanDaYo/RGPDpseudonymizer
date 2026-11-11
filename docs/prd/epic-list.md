@@ -70,7 +70,7 @@
 
 ### Epic 11: v2.3.1 — Maintenance Fixes
 
-**Goal:** Raise the Python floor to 3.11 so a dependency refresh can close the open Dependabot alerts on `poetry.lock` (Lionel, 2026-11-05), test Python 3.13 in CI so it is not untested anymore (Lionel, 2026-11-05), and fix the two v2.3.0 release-review bugs: custom pseudonyms refused at finalization, and the import "replace" answer ignored (Lionel, 2026-11-04). Nothing else enters 2.3.1; no tag or PyPI release without Lionel's explicit go.
+**Goal:** Raise the Python floor to 3.11 so a dependency refresh can close the open Dependabot alerts on `poetry.lock` (Lionel, 2026-11-05), test Python 3.13 in CI so it is not untested anymore (Lionel, 2026-11-05), and fix the two v2.3.0 release-review bugs: custom pseudonyms refused at finalization, and the import "replace" answer ignored (Lionel, 2026-11-04); fix the passphrase traps and the hardcoded version label found by Lionel's hand check of a 2.3.1 desktop build; fix a real leak, a generated pseudonym that reuses a word of the document, and two people given one pseudonym through values shared by the first-name and last-name lists; and let users find and replace stored pseudonyms that leak a word of their own name (Lionel, 2026-11-10). The review-list fix moves to v2.3.2. Nothing else enters 2.3.1; no tag or PyPI release without Lionel's explicit go.
 
 ---
 
