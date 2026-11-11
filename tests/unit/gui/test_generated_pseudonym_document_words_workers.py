@@ -36,7 +36,6 @@ from tests.unit.test_generated_pseudonym_document_words import (
     OWN_FRONT,
     OWN_NAMES,
     OWN_WORDS,
-    TESTS_FIRST,
     _forced,
 )
 from tests.unit.test_parallel_saved_pseudonym import (
@@ -110,7 +109,6 @@ def _desktop_written(
     return output.read_text(encoding="utf-8") if output.exists() else None
 
 
-@TESTS_FIRST
 @pytest.mark.parametrize(
     "case",
     [

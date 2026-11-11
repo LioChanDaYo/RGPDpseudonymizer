@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -125,6 +126,17 @@ class PseudonymManager(ABC):
 
         Returns:
             Pseudonym component if found, None otherwise
+        """
+        pass
+
+    @abstractmethod
+    def set_real_name_check(self, check: Callable[[str], bool] | None) -> None:
+        """The real-name check of the document being written (Story 11.6): a
+        drawn value it accepts is drawn again. None removes it.
+
+        Args:
+            check: Takes a drawn first name, last name, place or
+                organisation; True when it is a real name of the document
         """
         pass
 

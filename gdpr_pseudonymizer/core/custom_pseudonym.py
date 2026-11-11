@@ -30,6 +30,9 @@ finalization:
   checked, so the checks do not depend on where it is split (QA MW-001,
   PO A1).
 
+The same comparison serves the values the library draws, on every word of
+them and every part of a hyphenated word (``real_name_check``, Story 11.6).
+
 Nothing here logs or raises with a name or a pseudonym in it.
 """
 
@@ -38,7 +41,7 @@ from __future__ import annotations
 import functools
 import json
 import unicodedata
-from collections.abc import Callable, Iterable, Mapping
+from collections.abc import Callable, Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from enum import Enum
 from typing import TYPE_CHECKING, Any
@@ -435,7 +438,15 @@ def _document_runs(pseudonym: str, entity_type: str) -> list[str]:
     that holds it and a linking word at the end are kept."""
     if entity_type != "PERSON":
         return [pseudonym]
-    words = pseudonym.split()
+    return _runs_by_word(pseudonym)
+
+
+def _runs_by_word(text: str) -> list[str]:
+    """Every run of ``text``'s words (cut at spaces), longer runs first, left
+    to right, without a linking word that another word follows, on its own
+    (Q-I). A person's runs in ``_document_runs``; every drawn value's in
+    ``_drawn_runs`` (Story 11.6)."""
+    words = text.split()
     return [
         " ".join(words[start : start + size])
         for size in range(len(words), 0, -1)
@@ -444,6 +455,82 @@ def _document_runs(pseudonym: str, entity_type: str) -> list[str]:
             size == 1 and start < len(words) - 1 and fold(words[start]) in LINKING_WORDS
         )
     ]
+
+
+def _drawn_runs(text: str) -> list[str]:
+    """The runs of a value the library draws (Story 11.6): ``_runs_by_word``,
+    then each part of a hyphenated word that is not a linking word, once,
+    after the runs (the orchestrator's reading of Lionel's "widen"; a word
+    joined by an apostrophe stays whole)."""
+    runs = _runs_by_word(text)
+    seen = set(runs)
+    for word in text.split():
+        if "-" not in word:
+            continue
+        for part in word.split("-"):
+            if part and fold(part) not in LINKING_WORDS and part not in seen:
+                seen.add(part)
+                runs.append(part)
+    return runs
+
+
+def _names_index(names: Iterable[str]) -> dict[str, list[DocumentWords]]:
+    """Each distinct non-blank name read once (``document_words``), under
+    each of its folded words. Only a name that holds a run's first word can
+    hold the run, so looking that word up finds every name to compare
+    (Story 11.6: the cost does not grow with draws times names)."""
+    index: dict[str, list[DocumentWords]] = {}
+    for text in dict.fromkeys(names):
+        if not text.strip():
+            continue
+        name_words = document_words(text)
+        for word in name_words.where:
+            index.setdefault(word, []).append(name_words)
+    return index
+
+
+def _real_name_run(
+    runs: Iterable[str],
+    words: DocumentWords,
+    names: Mapping[str, Sequence[DocumentWords]],
+) -> str | None:
+    """The first run that is a real name of the document, or None (Q-C, Q-I,
+    Story 10.16): a capitalised run of the document, or a run of one of the
+    names, whatever their capitals. The one comparison of the custom
+    pseudonyms' document half and of the values the library draws (Story
+    11.6); the two differ only in the runs they pass."""
+    for run in runs:
+        if _capitalised_occurrence(run, words):
+            return run
+        first = _WORD.search(run)
+        if first is None:
+            continue
+        if any(
+            _occurrence(run, name_words, capitalised=False)
+            for name_words in names.get(fold(first.group()), ())
+        ):
+            return run
+    return None
+
+
+def real_name_check(document_text: str, names: Iterable[str]) -> Callable[[str], bool]:
+    """Story 11.6: whether a value the library draws is a real name of this
+    document: the comparison of check_custom_pseudonym's document half (Q-C,
+    Q-I, Story 10.16), on every run of the value's words and every part of a
+    hyphenated word, a place or an organisation included (Lionel,
+    2026-11-10, and the orchestrator's reading of it).
+
+    The document and the names are read once; the returned check takes a
+    drawn value and is True when it must be drawn again.
+    """
+    words = document_words(document_text)
+    index = _names_index(names)
+
+    def check(value: str) -> bool:
+        composed = unicodedata.normalize("NFC", value)
+        return _real_name_run(_drawn_runs(composed), words, index) is not None
+
+    return check
 
 
 # (folded real first or last name, "first" or "last") -> the part it has
@@ -634,23 +721,20 @@ def check_custom_pseudonym(
     if words is None:
         words = document_words(document_text)
     # Story 10.16: the name and the review's names, each read as a short text
-    names = [
-        document_words(text)
-        for text in dict.fromkeys([name, *review_names])
-        if text.strip()
-    ]
+    # (Story 11.6: indexed by word)
+    names = _names_index([name, *review_names])
     # Story 10.16 (Codex's review of 463481a): the runs are cut from the
     # pseudonym's composed form (NFC), as document_words reads the document
     # and the names, so a separate accent mark stays inside its word. The
     # refusal keeps the pseudonym as received; nothing typed is changed.
     composed = unicodedata.normalize("NFC", pseudonym)
-    for run in _document_runs(composed, entity_type):  # Q2, Q-C, Q-I
-        if _capitalised_occurrence(run, words) or any(
-            _occurrence(run, name_words, capitalised=False) for name_words in names
-        ):
-            return Refusal(
-                CustomPseudonymRefusal.REAL_NAME, pseudonym, run, in_document=True
-            )
+    run = _real_name_run(
+        _document_runs(composed, entity_type), words, names
+    )  # Q2, Q-C, Q-I
+    if run is not None:
+        return Refusal(
+            CustomPseudonymRefusal.REAL_NAME, pseudonym, run, in_document=True
+        )
     # Q-C2: a stored full name. Story 10.20: each saved name folded, and its
     # key read today (v1.7: a title or preposition an earlier version kept,
     # taken off); v1.10 (the second Codex review): each whole text a saved

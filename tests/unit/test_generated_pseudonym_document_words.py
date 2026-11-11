@@ -325,7 +325,6 @@ def _own_word_written(tmp_path: Path, case: str) -> str | None:
     return written
 
 
-@TESTS_FIRST
 @pytest.mark.parametrize(
     "case", ["finalize", "cli_review", "no_review", "parallel_worker", "csv"]
 )
@@ -343,7 +342,6 @@ def test_own_word_never_written(tmp_path: Path, case: str) -> None:
 # ---------------------------------------------------------------------------
 
 
-@TESTS_FIRST
 def test_other_name_of_the_document_never_drawn(tmp_path: Path) -> None:
     """T2 (AC2): « Brontel », another name sent, is never drawn as « Zorbal
     Quentrix »'s last name."""
@@ -360,7 +358,6 @@ def test_other_name_of_the_document_never_drawn(tmp_path: Path) -> None:
     assert stored is not None and stored[5] != "Brontel", stored
 
 
-@TESTS_FIRST
 def test_capitalised_word_not_detected_never_drawn(tmp_path: Path) -> None:
     """T3 (AC2): « Brontel », capitalised in the document but not detected,
     is never drawn."""
@@ -375,7 +372,6 @@ def test_capitalised_word_not_detected_never_drawn(tmp_path: Path) -> None:
     assert written.split()[-1] != "Brontel", written  # expected failure
 
 
-@TESTS_FIRST
 def test_lone_name_never_gets_its_own_word(tmp_path: Path) -> None:
     """T4 (AC2): a one-word name draws a last part with no real last name
     attached; that part is never the name itself."""
@@ -426,7 +422,6 @@ def test_linking_word_not_compared_alone(tmp_path: Path) -> None:
 # ---------------------------------------------------------------------------
 
 
-@TESTS_FIRST
 def test_library_out_of_last_names(tmp_path: Path) -> None:
     """T7 (AC4): the only last name is the name's own: today's exhaustion
     error, no file, no row."""
@@ -442,7 +437,6 @@ def test_library_out_of_last_names(tmp_path: Path) -> None:
     assert _row_count(db) == 0
 
 
-@TESTS_FIRST
 def test_library_out_of_places(tmp_path: Path) -> None:
     """T8 (AC4): the only place is the place itself: today's fallback."""
     db = _new_db(tmp_path)
@@ -513,7 +507,6 @@ def test_neutral_id_unchanged(tmp_path: Path) -> None:
 # ---------------------------------------------------------------------------
 
 
-@TESTS_FIRST
 def test_drawn_organisation_word_is_a_place_of_the_document(tmp_path: Path) -> None:
     """T12 (AC3, Lionel's "widen"): a drawn « Groupe Zorbaville » is drawn
     again in a document that names Zorbaville."""
@@ -530,7 +523,6 @@ def test_drawn_organisation_word_is_a_place_of_the_document(tmp_path: Path) -> N
     assert stored is not None and stored[3] != "Groupe Zorbaville", stored
 
 
-@TESTS_FIRST
 def test_drawn_place_word_is_a_name_of_the_document(tmp_path: Path) -> None:
     """T13 (AC3): a drawn place « Vellionne de Quentrix » is drawn again in a
     document that names « Zorbal Quentrix »."""
@@ -575,7 +567,6 @@ def test_linking_word_of_a_drawn_place_not_compared_alone(tmp_path: Path) -> Non
     assert _written_at(output, text, names)[1] == "Le Vellionnais"
 
 
-@TESTS_FIRST
 def test_drawn_compound_first_name_holding_the_first_name(tmp_path: Path) -> None:
     """T16 (AC3, the orchestrator's ruling): a drawn first name
     « Xantor-Zorbal » is drawn again for « Zorbal Quentrix »."""
@@ -591,7 +582,6 @@ def test_drawn_compound_first_name_holding_the_first_name(tmp_path: Path) -> Non
     assert stored is not None and stored[4] != "Xantor-Zorbal", stored
 
 
-@TESTS_FIRST
 def test_drawn_hyphenated_place_holding_a_name(tmp_path: Path) -> None:
     """T17 (AC3, the orchestrator's ruling): a drawn place
     « Vellionne-Quentrix » is drawn again in a document naming « Zorbal
