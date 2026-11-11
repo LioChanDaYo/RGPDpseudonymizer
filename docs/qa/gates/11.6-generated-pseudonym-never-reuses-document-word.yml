@@ -1,0 +1,73 @@
+schema: 1
+story: '11.6'
+story_title: 'Generated Pseudonyms Never Reuse a Word of the Document'
+scope: 'Final head 710ac56 (PR #122, draft; base main 8bf265d): commits e188b7f, dcdb8d8 (tests first), 7c2a030 (the rule), 410a1bc (epic), e37d556 (libraries, floors, guard), 710ac56 (CHANGELOG, BACKLOG). QA folder: rgpd-analysis/r116/qa (scripts and logs, never committed).'
+gate: PASS
+status_reason: 'Every AC is met and re-measured on the final head: the redraw sits at the one draw point of all four loops, every write path is covered, 0 own-word and 0 other-name hits in 10,000 runs, 0 pairs over 49 regenerated databases, the shipped libraries match Fix design 5 byte for byte with 0 folded duplicates, AC8 within 15%, CI green with the expected totals. Three low items for the dev and Lionel, none leaves a name in clear.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-11-11T09:30:00Z'
+
+top_issues:
+  - id: 'TEST-116-01'
+    severity: low
+    finding: 'The guard in _select_last_name (library_manager.py:686-697) has no test: neither its other-role branch (a saved first-name part refuses a last-name draw) nor its folded same-role comparison. QA mutation run (in memory, qa_mut.py): removing the other-role branch from _select_last_name, or comparing it as typed, leaves the new files, test_library_manager*.py, tests/unit/pseudonym, test_document_processor.py and test_parallel_saved_pseudonym.py at 186 passed; the same mutation in _select_first_name fails T22[other_role] (control). T21 cannot reach it on the head: its V is in no last-name list, so nothing is forced (the story says so). The code is right by reading, symmetric with the tested first-name branch. Realistic case it would guard: a Star Wars or Lord of the Rings database used with 2.3.0 that saved a canon surname such as « Skywalker » as a first-name part (it was a first name then); a later last-name draw of « Skywalker » for another real last name would give a lone first name and a lone last name one pseudonym.'
+    suggested_action: 'Optional, dev, a later story or a follow-up: one T22-style case with a saved first part forced as a last-name draw (insert=True), and one with a saved last part in another accent form. No code change.'
+    suggested_owner: dev
+  - id: 'DOC-116-01'
+    severity: low
+    finding: 'CHANGELOG ### Security (Lionel-approved): "about 1 run in 133 to 1 in 21 (2,000 runs of each of five test documents)". The v1.0 log behind it is gone. QA re-ran v1.0''s counting (a person''s part, a place or organisation whole; reconstructed from the story, collide116_v10.py) on 8bf265d''s package: 2,000 runs gave 0.70% to 7.05% (1 in 143 to 1 in 14); 20,000 runs gave 0.60% to 5.95% (1 in 167 to 1 in 17), home-visit report 1,189/20,000. So the upper end is about 1 in 17, not 1 in 21; the "up to 16% of runs" for another real name holds (16.41% at 20,000 runs). Not reworded by QA.'
+    suggested_action: 'Lionel''s call: keep the sentence (it is "about", and the v1.0 run did read 1 in 21 per the PO), or change the range to the 20,000-run reading ("about 1 run in 165 to 1 in 17").'
+    suggested_owner: po
+  - id: 'DOC-116-02'
+    severity: low
+    finding: 'Two committed sentences are true only once Story 11.7 ships in 2.3.1: the Security entry''s last sentence ("Story 11.7 of this release handles those saved pseudonyms.") and KL-008''s "Story 11.7 finds those and warns when such a document is written" (11.7 v1.2 does plan that notice, Fix design 6). The story already flags the first for the release PR; the second is not flagged.'
+    suggested_action: 'Release PR (Epic 11, Release step 1): align or remove both sentences if 11.7 does not ship in 2.3.1.'
+    suggested_owner: po
+
+waiver: { active: false }
+
+quality_score: 100
+
+expires: '2026-11-25T09:30:00Z'
+
+merge_blockers: []
+
+merge_notes:
+  - 'All three findings are low. None leaves a name in clear, so none reopens the story under its Codex stopping rule.'
+  - 'The CHANGELOG Fixed sentence "at most 88 of the 202 female first names of Star Wars and 83 of the 187 of Lord of the Rings were used" is the dev''s run. QA''s re-run of the same 26 databases read 80/202 and 86/187 (draws use secrets, so they vary); "still enough" holds: 0 failures. Not an issue.'
+  - 'This gate file and the story''s QA Results are the expected exception to AC11''s file list (QA''s own outputs).'
+  - 'QA started no Codex, Forge, Anvil or Cato process. Codex (Task 5.2) is the orchestrator''s.'
+
+evidence:
+  tests_reviewed: 36
+  risks_identified: 3
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+    ac_gaps: []
+  ac_notes:
+    AC9: 'QA ran the head''s three new files against 8bf265d''s package (git archive base8bf, imported first; dcdb8d8 -> HEAD only removes markers): 22 failed, each at an AssertionError on its expected-failure line, 0 PRE, 14 passed (11 controls + T19 x3, which read the working-tree files by path). T19 on the base files: 145 / 647 / 465 folded duplicates, the counts of its base messages. CI on dcdb8d8: 25 xfailed, 0 XPASS per leg (dev record).'
+    AC12: 'QA local run on 710ac56: black, ruff, mypy clean; tests/unit 3198 passed, 3 skipped; full CI line 3383 passed, 10 skipped.'
+    AC13: 'CI on 710ac56 all green: ubuntu 3.11, ubuntu 3.13, macOS 3.12 3393 passed; Windows 3.12 3243 passed, 3 skipped (main + 36, as CI Facts expect); lint, quality, CodeQL pass. Codex pending (orchestrator).'
+    AC15: 'Last-name guard covered by code reading only (TEST-116-01).'
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'The check is set in _resolve_pseudonyms before any draw, on every write path; one continue at the top of each of the four loops, before any write to _component_mappings; no new log line (AC7 grep empty). Forced end-to-end probe on the head: every own word, other real name, undetected capitalised word, « Groupe Commercial Lyon », « Jean-Pierre », « Saint-Denis » redrawn; the guard refuses a saved « Tanguy » (other role) and « Felix » (accent).'
+  performance:
+    status: PASS
+    notes: 'AC8, perf116.py, 5 runs, base8bf vs head alternating, 4 passes: shapes.txt -2% to +10%, 200 people +3% to +6%, 300 distinct people +3%, +22%, +8%, +11% (the first reading counts under AC8: +2% / +3% / +3%). Head is a few percent slower on many distinct names, within bound.'
+  reliability:
+    status: PASS
+    notes: 'Exhaustion as today (AC4: RuntimeError text byte for byte, no file, 0 rows; Location-001). 49 regenerated databases (23 default, 26 themed): every document succeeded, no "Unable to find unique ... component".'
+  maintainability:
+    status: PASS
+    notes: 'One comparison (_real_name_run) shared by the custom and the drawn checks; _document_runs unchanged in output; black, ruff, mypy clean.'
+
+recommendations:
+  immediate: []
+  future:
+    - action: 'Test the last-name guard (TEST-116-01).'
+      refs: ['gdpr_pseudonymizer/pseudonym/library_manager.py:686-697', 'tests/unit/test_generated_pseudonym_document_words.py']
+    - action: 'Release PR: the two Story 11.7 sentences (DOC-116-02).'
+      refs: ['CHANGELOG.md', 'docs/BACKLOG.md']
