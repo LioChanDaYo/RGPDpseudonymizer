@@ -124,6 +124,10 @@ class BatchWorker(QRunnable):
         self._validation_mode = validation_mode
 
         self._cancelled = False
+        # Story 11.4: set when the passphrase is refused at the start, read
+        # by the screen as the database screen reads
+        # DatabaseWorker.is_passphrase_error
+        self.is_passphrase_error = False
         self._paused = False
         self._mutex = QMutex()
         self._pause_condition = QWaitCondition()
@@ -200,8 +204,25 @@ class BatchWorker(QRunnable):
     def _run_batch(self) -> None:
         """Internal batch processing loop."""
         from gdpr_pseudonymizer.core.document_processor import DocumentProcessor
-        from gdpr_pseudonymizer.data.database import init_database
+        from gdpr_pseudonymizer.data.database import init_database, open_database
         from gdpr_pseudonymizer.exceptions import FileProcessingError
+
+        # Story 11.4: check the passphrase of an existing database before
+        # any file (the check the database screen makes), so a wrong one is
+        # refused here, not file by file at the end
+        if Path(self._db_path).exists():
+            try:
+                with open_database(self._db_path, self._passphrase):
+                    pass
+            except ValueError:
+                self.is_passphrase_error = True
+                self.signals.error.emit(
+                    "Phrase secrète incorrecte. Veuillez réessayer."
+                )
+                return
+            except Exception as e:
+                # Anything else is left to the steps that follow, as before
+                logger.warning("db_passphrase_check_skipped", exc_type=type(e).__name__)
 
         batch_result = BatchResult(total_files=len(self._files))
         start_time = time.time()

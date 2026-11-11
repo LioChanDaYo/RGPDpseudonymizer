@@ -981,6 +981,11 @@ ou cliquez pour ouvrir</source>
         <source>Nouvelle base sera créée</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <location filename="../widgets/passphrase_dialog.py" line="150"/>
+        <source>La phrase secrète doit contenir au moins 12 caractères.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>ProcessingScreen</name>

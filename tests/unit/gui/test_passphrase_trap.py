@@ -38,17 +38,6 @@ from gdpr_pseudonymizer.gui.workers.batch_worker import BatchWorker
 from gdpr_pseudonymizer.gui.workers.detection_worker import DetectionWorker
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 
-_TRAP = pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 11.4 tests first: passphrase trap",
-)
-_WRONG = pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 11.4 tests first: wrong passphrase on an existing database",
-)
-
 # The window's new label and the worker's message for a new database (T-FR1,
 # W-MSG12), and the worker's message for a wrong passphrase (W-MSGBAD).
 MSG_12 = "La phrase secrète doit contenir au moins 12 caractères."
@@ -147,7 +136,6 @@ def _dialog_new_db(qtbot: Any, path: Path) -> pd.PassphraseDialog:
     return dialog
 
 
-@_TRAP
 @pytest.mark.parametrize("short", [SHORT_8, SHORT_11], ids=["8", "11"])
 def test_new_database_short_passphrase_refused(qtbot, tmp_path, short):  # type: ignore[no-untyped-def]
     """T1 (AC1): for a new database, fewer than 12 characters keep
@@ -192,7 +180,6 @@ def test_existing_database_short_passphrase_accepted_by_window(qtbot, tmp_path):
     assert dialog.get_result() == (str(db), SHORT_8, True)
 
 
-@_TRAP
 def test_message_follows_the_selected_database(qtbot, tmp_path):  # type: ignore[no-untyped-def]
     """T4 (AC1): the refusal follows the database chosen."""
     existing = tmp_path / "existante.db"
@@ -256,7 +243,6 @@ def _open_named(
     return proc
 
 
-@_TRAP
 def test_single_document_forgets_refused_passphrase(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, monkeypatch
 ):
@@ -286,14 +272,13 @@ def test_other_error_keeps_cache(qtbot, main_window, tmp_path, monkeypatch):  # 
     with patch.object(
         DocumentProcessor,
         "detect_entities",
-        side_effect=FileProcessingError("fichier corrompu"),
+        side_effect=FileProcessingError("Zorbalix vrombu"),
     ):
         _open_plain(qtbot, main_window, tmp_path / "document1.txt", dialogs)
     pre(len(dialogs.messages) == 1, f"one message shown: {dialogs.messages}")
     assert main_window.cached_passphrase == (str(db), PASSPHRASE)
 
 
-@_TRAP
 def test_worker_flags_refused_passphrase(tmp_path):  # type: ignore[no-untyped-def]
     """T7 (AC3): the worker flags a passphrase refused for a new database."""
     db = tmp_path / "nouvelle.db"
@@ -309,7 +294,6 @@ def test_worker_flags_refused_passphrase(tmp_path):  # type: ignore[no-untyped-d
     assert not db.exists()
 
 
-@_WRONG
 def test_worker_refuses_wrong_passphrase_at_start(tmp_path):  # type: ignore[no-untyped-def]
     """T12 (AC4): a wrong passphrase for an existing database is refused
     before detection, and flagged."""
@@ -331,7 +315,6 @@ def test_worker_refuses_wrong_passphrase_at_start(tmp_path):  # type: ignore[no-
     assert getattr(worker, "is_passphrase_error", False) is True
 
 
-@_WRONG
 def test_single_document_forgets_wrong_passphrase(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, monkeypatch
 ):
@@ -399,7 +382,6 @@ def _run(qtbot: Any, bs: Any) -> None:
         qtbot.waitUntil(lambda: bs._worker is None, timeout=60000)
 
 
-@_WRONG
 def test_batch_worker_refuses_wrong_passphrase_at_start(tmp_path):  # type: ignore[no-untyped-def]
     """T15 (AC4): the batch worker refuses a wrong passphrase before any
     file, and flags it."""
@@ -423,7 +405,6 @@ def test_batch_worker_refuses_wrong_passphrase_at_start(tmp_path):  # type: igno
     assert getattr(worker, "is_passphrase_error", False) is True
 
 
-@_WRONG
 def test_batch_forgets_wrong_passphrase(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, monkeypatch
 ):

@@ -66,6 +66,10 @@ class DetectionWorker(QRunnable):
         self._passphrase = passphrase
         self._theme = theme
         self._cancelled = False
+        # Story 11.4: set when the passphrase is refused at the start, read
+        # by the screen as the database screen reads
+        # DatabaseWorker.is_passphrase_error
+        self.is_passphrase_error = False
         self.setAutoDelete(True)
 
     def cancel(self) -> None:
@@ -88,7 +92,8 @@ class DetectionWorker(QRunnable):
     def _run_detection(self) -> None:
         """Internal detection logic with progress emission."""
         from gdpr_pseudonymizer.core.document_processor import DocumentProcessor
-        from gdpr_pseudonymizer.data.database import init_database
+        from gdpr_pseudonymizer.data.database import init_database, open_database
+        from gdpr_pseudonymizer.data.encryption import EncryptionService
         from gdpr_pseudonymizer.exceptions import FileProcessingError
         from gdpr_pseudonymizer.validation.models import candidate_key
 
@@ -101,7 +106,29 @@ class DetectionWorker(QRunnable):
             return
 
         # Create mapping database if it doesn't exist yet
-        if not Path(self._db_path).exists():
+        if Path(self._db_path).exists():
+            # Story 11.4: check the passphrase of an existing database before
+            # the document is analysed (the check the database screen makes),
+            # so a wrong one is refused here, not at the end of the review
+            try:
+                with open_database(self._db_path, self._passphrase):
+                    pass
+            except ValueError:
+                self.is_passphrase_error = True
+                self.signals.error.emit(
+                    "Phrase secrète incorrecte. Veuillez réessayer."
+                )
+                return
+            except Exception as e:
+                # Anything else is left to the steps that follow, as before
+                logger.warning("db_passphrase_check_skipped", exc_type=type(e).__name__)
+        else:
+            if not EncryptionService.validate_passphrase(self._passphrase)[0]:
+                self.is_passphrase_error = True
+                self.signals.error.emit(
+                    "La phrase secrète doit contenir au moins 12 caractères."
+                )
+                return
             try:
                 self.signals.progress.emit(
                     8, "Création de la base de correspondances..."
