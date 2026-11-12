@@ -23,6 +23,7 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
 )
 
+from gdpr_pseudonymizer.data.encryption import EncryptionService
 from gdpr_pseudonymizer.gui.config import add_recent_database, save_gui_config
 
 if TYPE_CHECKING:
@@ -94,6 +95,14 @@ class PassphraseDialog(QDialog):
         pass_row.addWidget(self._visibility_btn)
         layout.addLayout(pass_row)
 
+        # Story 11.4: shown when a new database would get a passphrase that
+        # database creation refuses (fewer than 12 characters)
+        self._pass_error = QLabel("")
+        self._pass_error.setObjectName("errorLabel")
+        self._pass_error.setWordWrap(True)
+        self._pass_error.setVisible(False)
+        layout.addWidget(self._pass_error)
+
         # Remember checkbox
         self._remember_check = QCheckBox()
         self._remember_check.setChecked(True)
@@ -137,6 +146,9 @@ class PassphraseDialog(QDialog):
             self.tr("Afficher/masquer la phrase secr\u00e8te")
         )
         self._remember_check.setText(self.tr("M\u00e9moriser pour cette session"))
+        self._pass_error.setText(
+            self.tr("La phrase secrète doit contenir au moins 12 caractères.")
+        )
         self._cancel_btn.setText(self.tr("Annuler"))
         self._confirm_btn.setText(self.tr("Continuer \u25b6"))
 
@@ -265,13 +277,28 @@ class PassphraseDialog(QDialog):
 
     def _update_confirm_state(self, _text: str = "") -> None:
         """Enable confirm button only when passphrase and DB path are valid."""
-        has_passphrase = bool(self._passphrase_edit.text().strip())
+        text = self._passphrase_edit.text()
+        has_passphrase = bool(text.strip())
         db_data = self._db_combo.currentData()
         has_db = db_data not in (_BROWSE_ITEM, _CREATE_ITEM, None)
-        self._confirm_btn.setEnabled(has_passphrase and has_db)
+        # Story 11.4: a new database is created with this passphrase, and
+        # creation refuses one that EncryptionService refuses. An existing
+        # database has its passphrase checked when the document starts.
+        refused = (
+            has_db
+            and bool(text)
+            and not Path(str(db_data)).exists()
+            and not EncryptionService.validate_passphrase(text)[0]
+        )
+        self._pass_error.setVisible(refused)
+        self._confirm_btn.setEnabled(has_passphrase and has_db and not refused)
 
     def _on_confirm(self) -> None:
         """Accept dialog and store result."""
+        # Story 11.4: never return a passphrase the window refuses
+        self._update_confirm_state()
+        if not self._confirm_btn.isEnabled():
+            return
         db_path = self._db_combo.currentData()
         passphrase = self._passphrase_edit.text()
         remember = self._remember_check.isChecked()
@@ -308,6 +335,10 @@ class PassphraseDialog(QDialog):
     @property
     def confirm_button(self) -> QPushButton:
         return self._confirm_btn
+
+    @property
+    def passphrase_error_label(self) -> QLabel:
+        return self._pass_error
 
     @property
     def cancel_button(self) -> QPushButton:

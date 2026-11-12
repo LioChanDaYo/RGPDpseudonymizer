@@ -192,6 +192,30 @@ def test_macos_bundle_minimum_version():
     assert minimum.value == "14.0.0"
 
 
+def test_gui_bundle_copies_package_metadata():
+    """T11 (Story 11.4, AC8): the desktop bundle carries the package's own
+    metadata, so the app can read its version with importlib.metadata.
+
+    Reads gdpr-pseudo-gui.spec with ``ast`` and collects the constant first
+    argument of every ``copy_metadata(...)`` call.
+    """
+    spec_path = Path(__file__).parent.parent.parent / "gdpr-pseudo-gui.spec"
+    tree = ast.parse(spec_path.read_text(encoding="utf-8"))
+
+    copied = [
+        node.args[0].value
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "copy_metadata"
+        and node.args
+        and isinstance(node.args[0], ast.Constant)
+    ]
+    if "readchar" not in copied:
+        pytest.fail(f"PRE: the spec copies readchar's metadata: {copied}")
+    assert "gdpr-pseudonymizer" in copied  # expected failure
+
+
 def test_defusedxml_with_openpyxl():
     """Test that every extra with openpyxl also installs defusedxml.
 

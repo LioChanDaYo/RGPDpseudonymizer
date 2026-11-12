@@ -459,11 +459,13 @@ class MainWindow(QMainWindow):
     def _show_about(self) -> None:
         from PySide6.QtWidgets import QMessageBox
 
+        from gdpr_pseudonymizer.gui.app import app_version
+
         QMessageBox.about(
             self,
             self.tr("À propos"),
             "<h3>GDPR Pseudonymizer</h3>"
-            "<p>Version 2.0.0</p>"
+            f"<p>Version {app_version()}</p>"
             "<p>"
             + self.tr(
                 "Outil de pseudonymisation conforme au RGPD "

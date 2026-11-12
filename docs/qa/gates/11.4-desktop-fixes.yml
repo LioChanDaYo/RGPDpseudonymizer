@@ -1,0 +1,75 @@
+schema: 1
+story: '11.4'
+story_title: '2.3.1 Desktop Fixes: Two Passphrase Traps and the Version Label'
+scope: 'Final head 4027cfd (PR #123, draft; base main 3cd82ba): commits a9043ab (story), 3d3dbcd (tests first), a7c887a (passphrase traps), e898d68 (version label), 4027cfd (CHANGELOG). QA folder: rgpd-analysis/r114/qa (scripts and logs, never committed).'
+gate: PASS
+status_reason: 'Every AC is met and re-measured on the final head: the window refuses fewer than 12 characters only for a database that does not exist, a wrong passphrase for an existing database is refused at the start of a document and of a batch, and a refused passphrase is forgotten on both paths; the SM''s three reproductions flip from the trap on base to the fix on head, the start check keeps base behaviour on a locked, garbage or empty file, and the desktop builds carry the package metadata. One low documentation note.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-11-11T11:30:00Z'
+
+top_issues:
+  - id: 'DOC-114-01'
+    severity: low
+    finding: 'AC12 and Dev Notes "Exact texts" still say that [Unreleased] "gains a ### Fixed section" and that the numstat is "6 0". Story 11.6 had already added ### Fixed (and ### Security), so commit 5 adds the three bullets under 11.6''s heading, after its bullet, with no blank lines: numstat "3 0". This follows the orchestrator''s ruling of 2026-11-11 with Lionel''s yes, recorded in the Debug Log (Task 0.3, Task 5.1). QA checked: the three added lines are byte-identical to the approved bullets (same sha256, ee144dd7...), ### Fixed comes before ### Security, [2.3.1] untouched, nothing removed. The result is right; only the AC text is stale.'
+    suggested_action: 'Nothing for the code. Story owner may note the 3 0 outcome next to AC12; the release PR folds the bullets into [2.3.1] as planned.'
+    suggested_owner: sm
+
+waiver: { active: false }
+
+quality_score: 100
+
+expires: '2026-11-25T11:30:00Z'
+
+merge_blockers: []
+
+merge_notes:
+  - 'Status still reads Approved (v1.4), not Review as the review task expects. QA did not change it (not QA''s section).'
+  - 'Task 5.4 read by QA: CI on 4027cfd (run 43007121516) ubuntu 3.11, ubuntu 3.13, macOS 3.12 3415 passed; Windows 3.12 3265 passed, 3 skipped; 0 xfailed; lint, quality, CodeQL pass. Equal to the dev''s expectation.'
+  - 'Installers: build-executables run 43007249031 (workflow_dispatch, version dev, on 4027cfd) green on all three build jobs (upload-release skipped, tags only). Each job logs "Installing the current project: gdpr-pseudonymizer (2.3.1)". No PyInstaller warning mentions gdpr-pseudonymizer, copy_metadata or dist-info (only the usual hidden-import and, on Linux, Qt xcb library warnings). copy_metadata raises at build time when the package is missing, so a green build means the dist-info was found. QA inspected the Linux artifact without running it (unsquashfs at offset 193728 of gdpr-pseudonymizer-dev-linux.AppImage): _internal/gdpr_pseudonymizer-2.3.1.dist-info/METADATA reads "Name: gdpr-pseudonymizer", "Version: 2.3.1", next to _internal/readchar-4.2.2.dist-info, whose version lookup already works in shipped builds. So the installer named "dev" carries 2.3.1, and the frozen app''s importlib.metadata reads 2.3.1. macOS and Windows bundles not opened: they rest on the same spec and their clean logs.'
+  - 'Which version a build shows: the app reads the bundled dist-info, which carries pyproject.toml''s version at the built commit. The workflow''s version input (dev, or the tag) only names the installer files. So this dev build shows 2.3.1, and a v2.3.1 tag on a commit whose pyproject.toml says 2.3.1 shows 2.3.1. A tag pushed without bumping pyproject.toml would show the old version: a release-process point, not a finding here.'
+  - 'Not findings (outside the premise or no realistic user): a damaged salt or iteration count in the metadata raises ValueError in open_database, so the start check shows W-MSGBAD and forgets the cache, exactly as DatabaseWorker does today; typing only spaces (fewer than 12) shows the 12-character label while Continuer is disabled anyway, a true text.'
+  - 'This gate file and the story''s QA Results are the expected exception to AC11''s file list (QA''s own outputs).'
+  - 'QA started no Codex, Forge, Anvil or Cato process. Codex (Task 7.1) is the orchestrator''s.'
+
+evidence:
+  tests_reviewed: 20
+  risks_identified: 1
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+    ac_gaps: []
+  ac_notes:
+    AC1: 'T1 (x2), T4 pass; control T2. Window logic read: refused = has_db and text and file absent and validate_passphrase refuses; _on_confirm re-checks; errorLabel styled in light, dark and high-contrast qss.'
+    AC2: 'Control T3; test_passphrase_dialog.py unchanged and green in the GUI suites (789 passed).'
+    AC3: 'T7; detection_worker.py validates before init_database and returns with the flag set.'
+    AC4: 'T12, T13, T15, T16; controls T14, T17. logger. counts differ only in detection_worker.py 4->5 and batch_worker.py 6->7; both db_passphrase_check_skipped calls carry exc_type only. QA probe (probe_edge.py): under an exclusive and under a write lock held by another connection (WAL), the right passphrase still detects (previews=1) and a batch finishes once the lock is released; the wrong one is refused with W-MSGBAD, flag set, single document and batch. A garbage file and an empty file behave as on base (previews 0, batch 0 ok / 1 failed), each logging only "db_passphrase_check_skipped exc_type=Exception".'
+    AC5: 'T5, T13, T16; controls T6, T17, T18. SM reproductions re-run on base and head (see QA Results).'
+    AC6: 'QA qm_compare over HEAD en.ts, 3cd82ba en.qm vs HEAD en.qm: one DIFF line (the new message), messages=321 differing=1. fr.qm rebuilt from HEAD fr.ts: fc /b identical to 3cd82ba fr.qm.'
+    AC7: 'T8 (x2), T9, T10; git grep 2\.0\.0 in gui prints nothing.'
+    AC8: 'T11; build-executables green (see merge_notes).'
+    AC9: 'self.tr( counts differ only in passphrase_dialog.py 18->19; en.ts and fr.ts 5 0 each; string literals on + lines: T-FR1, W-MSG12/W-MSGBAD, "?", f"v{app_version()}", f"<p>Version {app_version()}</p>", plus non-visible "", "errorLabel", "gdpr-pseudonymizer", "is_passphrase_error", "db_passphrase_check_skipped".'
+    AC10: 'QA ran 3d3dbcd (git archive, imported first): 29 passed, 14 xfailed; with --runxfail 14 failed, 29 passed, each an AssertionError on its # expected failure line, no PRE failure. CI on 3d3dbcd: 3401 passed + 14 xfailed (ubuntu x2, macOS), Windows 3251 passed, 3 skipped, 14 xfailed. No marker left on the head.'
+    AC11: 'git diff --name-only 3cd82ba...HEAD lists only the File Locations files.'
+    AC12: 'Bullets byte-identical; 3 0 instead of 6 0 (DOC-114-01).'
+    AC13: 'Not re-run by QA; the dev''s start-up check output is in the Debug Log (application version 2.3.1, real config unchanged: True).'
+    AC14: 'Commit order and staging as the story says; .claude/settings.local.json, the arm64 log and the 11.5/11.7 story files never staged.'
+    AC15: 'Required checks green on 4027cfd; build-executables green; QA PASS here; Codex and Lionel''s hand check (Task 8.3) pending.'
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'No new crypto: the start check is the existing open_database canary check. The two new log lines carry the exception type only (measured in probe_edge.py). No message or log carries a path or the passphrase. A refused passphrase is cleared from the in-memory cache only when the cached path equals the screen''s database.'
+  performance:
+    status: PASS
+    notes: 'One extra open_database (one PBKDF2 derivation) per document and per batch run, not per file. Measured in the probe: single-document start check plus stand-in detection 0.1 s on a fresh database.'
+  reliability:
+    status: PASS
+    notes: 'Locked, garbage and empty database files keep base behaviour; a right passphrase is never refused (T14, T17, probe). The batch flag is read before the worker reference is dropped and after the stale-run check.'
+  maintainability:
+    status: PASS
+    notes: 'Flag-based clearing copies the database screen''s pattern; black, ruff, mypy green in CI (lint, quality).'
+
+recommendations:
+  immediate: []
+  future:
+    - action: 'Optionally annotate AC12 with the 3 0 outcome (DOC-114-01).'
+      refs: ['docs/stories/11.4.desktop-fixes.story.md']

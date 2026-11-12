@@ -931,11 +931,20 @@ class BatchScreen(QWidget):
         """Handle fatal worker error."""
         if self._is_stale(run_id, "error"):
             return
+        # Story 11.4: read the worker's flag before the reference is dropped
+        is_passphrase_error = (
+            getattr(self._worker, "is_passphrase_error", False) is True
+        )
         self._worker = None
         self._awaiting_doc_index = None
 
         # Clear cached passphrase on auth errors so user can retry
         if "passphrase" in error_msg.lower() or "decrypt" in error_msg.lower():
+            self._main_window.cached_passphrase = None
+        # Story 11.4: a passphrase the worker refused at the start of the run
+        # (flag-based, as the database screen does)
+        cached = self._main_window.cached_passphrase
+        if is_passphrase_error and cached is not None and cached[0] == self._db_path:
             self._main_window.cached_passphrase = None
 
         from gdpr_pseudonymizer.gui.widgets.confirm_dialog import ConfirmDialog

@@ -14,6 +14,17 @@ if TYPE_CHECKING:
     from gdpr_pseudonymizer.gui.main_window import MainWindow
 
 
+def app_version() -> str:
+    """The installed package's version (Story 11.4), or "?" when its
+    metadata is missing."""
+    from importlib.metadata import PackageNotFoundError, version
+
+    try:
+        return version("gdpr-pseudonymizer")
+    except PackageNotFoundError:
+        return "?"
+
+
 def main() -> None:
     """Application entry point — called by gdpr-pseudo-gui script."""
     try:
@@ -41,7 +52,7 @@ def main() -> None:
 
     app = QApplication(sys.argv)
     app.setApplicationName("GDPR Pseudonymizer")
-    app.setApplicationVersion("2.0.0")
+    app.setApplicationVersion(app_version())
 
     # High-DPI is automatic in Qt6, no attribute needed
 
@@ -130,7 +141,9 @@ def _create_splash_pixmap() -> QPixmap:
     # Version
     ver_font = QFont("Segoe UI", 12)
     painter.setFont(ver_font)
-    painter.drawText(0, 140, width, 30, Qt.AlignmentFlag.AlignCenter, "v2.0.0")
+    painter.drawText(
+        0, 140, width, 30, Qt.AlignmentFlag.AlignCenter, f"v{app_version()}"
+    )
 
     # Loading text
     loading_font = QFont("Segoe UI", 10)

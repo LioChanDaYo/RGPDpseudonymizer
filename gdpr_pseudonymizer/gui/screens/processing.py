@@ -28,7 +28,10 @@ from gdpr_pseudonymizer.utils.logger import get_logger
 
 if TYPE_CHECKING:
     from gdpr_pseudonymizer.gui.main_window import MainWindow
-    from gdpr_pseudonymizer.gui.workers.detection_worker import DetectionResult
+    from gdpr_pseudonymizer.gui.workers.detection_worker import (
+        DetectionResult,
+        DetectionWorker,
+    )
     from gdpr_pseudonymizer.gui.workers.processing_worker import GUIProcessingResult
 
 logger = get_logger(__name__)
@@ -42,6 +45,9 @@ class ProcessingScreen(QWidget):
         self._main_window = main_window
         self._result: GUIProcessingResult | None = None
         self._detection_result: DetectionResult | None = None
+        # Story 11.4: the running detection worker, whose passphrase flag
+        # _on_error reads
+        self._current_worker: DetectionWorker | None = None
         self._file_path = ""
         self._db_path = ""
         self._passphrase = ""
@@ -277,6 +283,7 @@ class ProcessingScreen(QWidget):
         worker.signals.finished.connect(self._on_finished)
         worker.signals.error.connect(self._on_error)
 
+        self._current_worker = worker
         QThreadPool.globalInstance().start(worker)
 
     def _on_progress(self, percent: int, phase: str) -> None:
@@ -297,6 +304,7 @@ class ProcessingScreen(QWidget):
             return
 
         self._detection_result = result
+        self._current_worker = None
         self._is_processing = False
 
         # Update progress to 100%
@@ -335,6 +343,16 @@ class ProcessingScreen(QWidget):
     def _on_error(self, error_msg: str) -> None:
         """Processing failed — show error and return to home."""
         self._is_processing = False
+        # Story 11.4: forget a refused cached passphrase (flag-based, as the
+        # database screen does), so the next document asks again
+        is_passphrase_error = (
+            self._current_worker is not None
+            and self._current_worker.is_passphrase_error
+        )
+        self._current_worker = None
+        cached = self._main_window.cached_passphrase
+        if is_passphrase_error and cached is not None and cached[0] == self._db_path:
+            self._main_window.cached_passphrase = None
         self._progress_bar.setMaximum(100)
         self._progress_bar.setValue(0)
         self._phase_label.setText(self.tr("Erreur"))
