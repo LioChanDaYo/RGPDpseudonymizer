@@ -361,3 +361,65 @@ def test_desktop_batch_carries_the_count(tmp_path: Path) -> None:
     result = results[0]
     pre(isinstance(result, BatchResult) and result.successful_files == 2, "2 written")
     assert result.own_word_rows == 3
+
+
+@pytest.mark.parametrize("operation", ["replace", "delete"])
+def test_a_running_change_is_never_cancelled_by_a_filter(
+    screen: DatabaseScreen, toasts: list[str], operation: str
+) -> None:
+    """G9 (Codex review 1, P1): over 200 rows, while a replacement (or a
+    deletion) runs or waits for the database lock, the tick box is disabled,
+    and ticking it anyway starts no search worker: the running change keeps
+    its worker and its completion, and the screen's controls come back when
+    it completes."""
+    from gdpr_pseudonymizer.core.saved_own_words import (
+        ReplacementPlan,
+        ReplacementResult,
+    )
+
+    entities = []
+    for index in range(250):
+        entity = MagicMock()
+        entity.id = f"id{index}"
+        entity.entity_type = PERSON
+        entity.full_name = f"Zorbal {index}"
+        entity.pseudonym_full = f"Pivel {index}"
+        entity.first_seen_timestamp = None
+        entities.append(entity)
+    screen._entities = entities
+    screen._own_words = {"id1": "Zorbal"}
+    screen._refresh_own_words()
+    screen._populate_entity_table()
+    pre(not screen.own_words_only.isHidden(), "the tick box is shown")
+
+    started: list[Any] = []
+    with patch("PySide6.QtCore.QThreadPool.start", side_effect=started.append):
+        if operation == "replace":
+            change = DatabaseWorker(
+                "replace", "x.db", "p", entity_ids=["id1"], confirmed=frozenset({"id1"})
+            )
+            change.signals.finished.connect(screen._on_replace_complete)
+            outcome: Any = ReplacementResult(ReplacementPlan())
+        else:
+            change = DatabaseWorker("delete", "x.db", "p", entity_ids=["id1"])
+            change.signals.finished.connect(screen._on_delete_complete)
+            outcome = 1
+        change.signals.error.connect(screen._on_db_error)
+        screen._start_worker(change, non_cancellable=True)
+        pre(screen._current_worker is change, "the change runs")
+
+        assert not screen.own_words_only.isEnabled()  # expected failure
+        screen.own_words_only.setChecked(True)
+        assert screen._current_worker is change
+        assert not change._cancelled.is_set()
+        assert [worker for worker in started if worker is not change] == []
+
+        change.signals.finished.emit(outcome)
+    assert screen._current_worker is not change
+    for control in (
+        screen.own_words_only,
+        screen.search_field,
+        screen.type_filter,
+        screen.export_button,
+    ):
+        assert control.isEnabled(), control

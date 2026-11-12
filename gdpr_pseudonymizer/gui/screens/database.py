@@ -366,8 +366,19 @@ class DatabaseScreen(QWidget):
         Args:
             worker: The DatabaseWorker to run.
             non_cancellable: If True, disable interactive controls during operation.
+
+        A worker that changes the database (delete, replace, export) is never
+        cancelled or replaced: while it runs or waits for the database lock,
+        another worker is not started (Codex review of Story 11.7: a search
+        started by the tick box cancelled a replacement that still committed,
+        and left the screen with old values and disabled controls). The
+        change's completion reloads the table.
         """
         from PySide6.QtCore import QThreadPool
+
+        if self._current_worker is not None and self._is_non_cancellable_op:
+            logger.info("db_worker_not_started_during_change")
+            return
 
         self._cancel_current_worker()
         self._current_worker = worker
@@ -386,6 +397,11 @@ class DatabaseScreen(QWidget):
             self._delete_btn.setEnabled(False)
             self._replace_btn.setEnabled(False)
             self._export_btn.setEnabled(False)
+            # Every other control that starts a worker (Codex review of
+            # Story 11.7)
+            self._own_words_only.setEnabled(False)
+            self._open_btn.setEnabled(False)
+            self._browse_btn.setEnabled(False)
 
         QThreadPool.globalInstance().start(worker)
 
@@ -405,6 +421,9 @@ class DatabaseScreen(QWidget):
         if self._is_non_cancellable_op:
             self._search_field.setEnabled(True)
             self._type_filter.setEnabled(True)
+            self._own_words_only.setEnabled(True)
+            self._open_btn.setEnabled(True)
+            self._browse_btn.setEnabled(True)
             # Re-enable buttons based on state
             self._update_status()
             self._export_btn.setEnabled(len(self._entities) > 0)
