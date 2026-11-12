@@ -423,3 +423,88 @@ def test_a_running_change_is_never_cancelled_by_a_filter(
         screen.export_button,
     ):
         assert control.isEnabled(), control
+
+
+@pytest.mark.parametrize("ending", ["finished", "error"])
+@pytest.mark.parametrize("operation", ["replace", "delete"])
+def test_ticking_a_row_during_a_change_enables_no_action(
+    screen: DatabaseScreen, toasts: list[str], operation: str, ending: str
+) -> None:
+    """G10 (Codex review 2, P1): while a replacement (or a deletion) runs or
+    waits for the database lock, ticking rows in the table enables neither
+    « Remplacer la sélection » nor « Supprimer la sélection », and asking for
+    either opens no confirmation and starts nothing: no request can be
+    confirmed and then dropped. When the change ends, successfully or with an
+    error, the buttons follow the ticked rows again."""
+    from gdpr_pseudonymizer.core.saved_own_words import (
+        ReplacementPlan,
+        ReplacementResult,
+    )
+
+    entities = []
+    for index in range(4):
+        entity = MagicMock()
+        entity.id = f"id{index}"
+        entity.entity_type = PERSON
+        entity.full_name = f"Zorbal Quentrix{index}"
+        entity.pseudonym_full = f"Zorbal Pivel{index}"
+        entity.first_name = "Zorbal"
+        entity.last_name = f"Quentrix{index}"
+        entity.pseudonym_first = "Zorbal"
+        entity.pseudonym_last = f"Pivel{index}"
+        entity.theme = "neutral"
+        entity.first_seen_timestamp = None
+        entities.append(entity)
+    screen._entities = entities
+    screen._own_words = {entity.id: "Zorbal" for entity in entities}
+    screen._refresh_own_words()
+    screen._populate_entity_table()
+    first, other = "Zorbal Quentrix0", "Zorbal Quentrix2"
+    _tick(screen, first)
+
+    started: list[Any] = []
+    dialog = _Confirm(accept=True)
+    with (
+        patch("PySide6.QtCore.QThreadPool.start", side_effect=started.append),
+        _confirming(dialog),
+    ):
+        if operation == "replace":
+            change = DatabaseWorker(
+                "replace", "x.db", "p", entity_ids=["id0"], confirmed=frozenset({"id0"})
+            )
+            change.signals.finished.connect(screen._on_replace_complete)
+            outcome: Any = ReplacementResult(ReplacementPlan())
+        else:
+            change = DatabaseWorker("delete", "x.db", "p", entity_ids=["id0"])
+            change.signals.finished.connect(screen._on_delete_complete)
+            outcome = 1
+        change.signals.error.connect(screen._on_db_error)
+        screen._start_worker(change, non_cancellable=True)
+        pre(screen._current_worker is change, "the change runs")
+
+        # While it waits: untick the first row, tick another one
+        screen.entity_table.item(_row_of(screen, first), 0).setCheckState(
+            Qt.CheckState.Unchecked
+        )
+        _tick(screen, other)
+        pre(screen._selected_ids == {"id2"}, "another row ticked")
+        assert not screen.replace_button.isEnabled()  # expected failure
+        assert not screen.delete_button.isEnabled()
+
+        # Asked anyway (the handlers themselves): nothing is confirmed
+        screen._replace_selected()
+        screen._delete_selected()
+        assert dialog.calls == []
+        assert started == [change]
+        assert screen._current_worker is change
+
+        if ending == "finished":
+            change.signals.finished.emit(outcome)
+        else:
+            change.signals.error.emit("Phrase secrète incorrecte.")
+    assert screen._current_worker is not change
+    # The table is not reloaded here (the thread pool is a recorder), so the
+    # ticked row is still ticked: the buttons follow it again
+    if screen._selected_ids == {"id2"}:
+        assert screen.replace_button.isEnabled()
+        assert screen.delete_button.isEnabled()

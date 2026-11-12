@@ -376,7 +376,7 @@ class DatabaseScreen(QWidget):
         """
         from PySide6.QtCore import QThreadPool
 
-        if self._current_worker is not None and self._is_non_cancellable_op:
+        if self._change_running():
             logger.info("db_worker_not_started_during_change")
             return
 
@@ -404,6 +404,11 @@ class DatabaseScreen(QWidget):
             self._browse_btn.setEnabled(False)
 
         QThreadPool.globalInstance().start(worker)
+
+    def _change_running(self) -> bool:
+        """Whether a worker that changes the database (delete, replace,
+        export) runs or waits for the database lock."""
+        return self._current_worker is not None and self._is_non_cancellable_op
 
     def _on_progress(self, percent: int, message: str) -> None:
         """Update progress bar from worker signal."""
@@ -724,7 +729,9 @@ class DatabaseScreen(QWidget):
         self._delete_btn.setText(
             qarg(self.tr("Supprimer la sélection (%1)"), str(selected))
         )
-        self._delete_btn.setEnabled(selected > 0)
+        # Codex review 2 of Story 11.7: ticking rows while a change runs
+        # enables no action (the change's end enables them again)
+        self._delete_btn.setEnabled(selected > 0 and not self._change_running())
         self._update_replace_button()
 
     # ------------------------------------------------------------------
@@ -763,7 +770,7 @@ class DatabaseScreen(QWidget):
         self._replace_btn.setText(
             qarg(self.tr("Remplacer la sélection (%1)"), str(count))
         )
-        self._replace_btn.setEnabled(count > 0)
+        self._replace_btn.setEnabled(count > 0 and not self._change_running())
 
     def _confirm_lines(self, lines: list[str]) -> str:
         """A list of the confirmation, cut after 10 lines (D19)."""
@@ -779,7 +786,11 @@ class DatabaseScreen(QWidget):
 
     def _replace_selected(self) -> None:
         """Show what changes, then replace the ticked rows the check found
-        and the rows that share their parts (``DatabaseWorker("replace")``)."""
+        and the rows that share their parts (``DatabaseWorker("replace")``).
+        Nothing is asked while a change runs, so no confirmed request can be
+        dropped (Codex review 2 of Story 11.7)."""
+        if self._change_running():
+            return
         entity_ids = self._ticked_own_words()
         if not entity_ids:
             return
@@ -914,7 +925,9 @@ class DatabaseScreen(QWidget):
     # ------------------------------------------------------------------
 
     def _delete_selected(self) -> None:
-        if not self._selected_ids:
+        # Nothing is asked while a change runs, so no confirmed request can be
+        # dropped (Codex review 2 of Story 11.7)
+        if self._change_running() or not self._selected_ids:
             return
 
         # Build confirmation list
@@ -974,6 +987,9 @@ class DatabaseScreen(QWidget):
     # ------------------------------------------------------------------
 
     def _export_csv(self) -> None:
+        # Nothing is asked while a change runs (Codex review 2 of Story 11.7)
+        if self._change_running():
+            return
         filepath, _ = QFileDialog.getSaveFileName(
             self,
             self.tr("Exporter les entités"),
