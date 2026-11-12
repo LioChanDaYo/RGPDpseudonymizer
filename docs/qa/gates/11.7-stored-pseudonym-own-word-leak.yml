@@ -1,0 +1,97 @@
+schema: 1
+story: '11.7'
+story_title: 'Stored Pseudonyms That Leak a Word of Their Own Name'
+scope: 'Final head 73587f4 (PR #124, draft; base main 7be0a07): commits f18b5cf (story), 18bb82e (tests first), 3de7fe8 (test width), b8a795f (flaky test), af018ca (core and command line), deea967 (desktop), 73587f4 (docs, CHANGELOG, T18). QA folder: rgpd-analysis/r117/qa (scripts and logs, never committed).'
+gate: CONCERNS
+status_reason: 'The find, the replacement and the notice are correct and were re-measured on the head: 107 rows found on the 22 databases, 0 left after --all, every invariant at 0, the leak of the reproduction gone, AC12 within budget, CI green. One approved text is wrong: the singular of the note after a document (C18) says "their own name" where the approved text says "its own name", and T18 pins the wrong string, so this blocks PASS until it is fixed.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-11-12T09:05:00Z'
+
+top_issues:
+  - id: 'DOC-117-01'
+    severity: medium
+    finding: 'C18 singular differs from the approved text. Approved (stopb-11.7-texts-final.md and Dev Notes "Exact texts"): "Note: 1 saved pseudonym holds a word of its own name. See ''gdpr-pseudo validate-mappings --own-words''." Head: notice_line(1) builds "Note: 1 saved pseudonym holds a word of their own name. ..." (gdpr_pseudonymizer/core/saved_own_words.py:535-539, the shared tail " a word of their own name." is the plural''s). T18''s C18_ONE (tests/unit/test_stored_pseudonym_own_word.py:1027-1030) holds the same wrong string, which is why T18 and CI pass. Realistic: a database with exactly one row found prints it after every process and batch; in the SM''s 22 databases, 5 have exactly one (common_3, common_4, mix_2, mixb_1, mixb_8). Every other C, D and CL1 text matches byte for byte (QA tools/texts.py), the French help texts too.'
+    suggested_action: 'Dev: the singular says "its own name" in notice_line and in T18''s C18_ONE (one word each). Not reworded by QA (brief: report text mismatches). Then QA re-gates.'
+    suggested_owner: dev
+  - id: 'REQ-117-01'
+    severity: low
+    finding: 'The find rule in code goes further than the story text, and the code is the right one. The story ("The rule (find)", Fix design 1, the SM''s find117_main.py) takes the first run of the pseudonym found in the name, then applies the places-and-organisations filter to it. own_word(pseudonym, name, keep) (custom_pseudonym.py:536) moves on to the next run when the filter refuses one. When an organisation''s pseudonym shares a common word before a city, the story''s reading drops a real leak that Lionel''s rule reports (a library place shared). QA probe on the head (qa_repro.py): « Chambre de Commerce et d''Industrie Grand Lille » saved as « Commerce International Lille »: first run « Commerce », story reading not reported, product reports « Lille »; « Marseille Innovation » saved as « Innovation Marseille SAS »: product « Marseille », story reading nothing; « Groupe Hospitalier Est Lyon » saved as « Groupe Commercial Lyon »: product « Lyon », story reading nothing. The product only adds rows that meet Lionel''s criterion; on the 22 databases both readings give the same 100 and 7 rows. No test pins this case (T1''s org_place_word shares only the place).'
+    suggested_action: 'SM: align "The rule (find)" and Fix design 1 with the code ("a refused run does not stop the search; the next run is compared"). Optional, dev: one T1 case with an organisation that shares a common word and a library place.'
+    suggested_owner: sm
+  - id: 'PERF-117-01'
+    severity: low
+    finding: 'The desktop builds the replacement plan on the window''s thread when « Remplacer la sélection » is clicked (_replace_selected, gui/screens/database.py:773, plan_replacement, which runs the whole check again). QA timing on real-shaped rows (qa_plan_cost.py): 273 ms at 10,000 rows, 549 ms at 20,000. Fix design 7 asks for exactly this, and AC3 governs the report (the "list" worker computes own_words in its thread, as required), so this is not an AC3 failure. The window freezes for a quarter to half a second on one click on a large database.'
+    suggested_action: 'Later, dev: plan from the worker''s own_words, or build the plan in a DatabaseWorker operation.'
+    suggested_owner: dev
+  - id: 'REL-117-01'
+    severity: low
+    finding: 'Wrong message on one stop. When the ticked rows are no longer found under the lock (the screen was listed, then another program, for example gdpr-pseudo replace-pseudonym --all, replaced them), replace_own_word_rows returns stop_reason "not_found", and _on_replace_complete (gui/screens/database.py:867, through _show_replace_stop :847) shows D15 « Aucun nouveau pseudonyme libre n''a été trouvé... » instead of D14 « La base de données a changé depuis l''affichage... ». Nothing is written; only the message misleads. Needs two programs on one database at once (the realism of O6, accepted as rare but real).'
+    suggested_action: 'Later, dev: map "not_found" from the worker to D14 (database changed). No new text needed.'
+    suggested_owner: dev
+  - id: 'TEST-117-01'
+    severity: low
+    finding: 'The notice is tested on process (T17, T21), the parallel batch (T20) and the desktop single document (G6), not on the sequential command line batch, the desktop BatchWorker count or the two tabular write paths. All go through DocumentProcessor._own_word_count by construction. QA probe on the sequential batch (--workers 1, two documents, T4''s rows): the note printed once with the count 3.'
+    suggested_action: 'Optional, dev: one sequential batch case and one BatchWorker case.'
+    suggested_owner: dev
+
+waiver: { active: false }
+
+quality_score: 90
+
+expires: '2026-11-26T09:05:00Z'
+
+merge_blockers:
+  - 'DOC-117-01: the C18 singular. One word in notice_line and in T18; then QA re-gates. Codex (Task 6.3) starts after the PASS.'
+
+merge_notes:
+  - 'The four low findings leave no name in clear and write nothing the user did not confirm; none is in the Codex stopping rule''s fix list.'
+  - 'Observation: in a database where every library place is already used (all « mix » databases: 0 of 80 places drawable), a replaced place gets a Location-NNN fallback, as AC6 allows and the user sees (2 in the 22 databases). Organisations keep 37 to 60 of 196 drawable values.'
+  - 'Observation: replace_own_word_rows(session, None, None) on a database with nothing found writes a REPLACEMENT entry with count 0. No user path reaches it: the command prints C17d and exits first, the desktop button needs a found row.'
+  - 'The flaky-test fix (b8a795f, outside the File List, orchestrator''s request) is correct and keeps the test meaningful: step 2 now goes through the lone-name path the product uses; if the in-memory reuse broke, it would draw a lone name with no last part and the assertion would fail.'
+  - 'This gate file and the story''s QA Results are QA''s own outputs, the expected exception to AC16''s file list.'
+  - 'QA started no Codex, Forge, Anvil or Cato process.'
+
+evidence:
+  tests_reviewed: 40
+  risks_identified: 5
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 16, 17, 18]
+    ac_gaps: [14]
+  ac_notes:
+    AC1: 'T1-T3; QA on copies of the 22 databases: 107 rows (100 common, 7 mix), the SM''s counts.'
+    AC6: 'qa117_rep.py, written apart from the dev''s script, on copies of the 22 databases with --all: 31 groups, 247 rows changed, 0 stops, 0 rows found after, 0 changed outside the plan, 0 planned rows unchanged, 0 other columns changed, 0 duplicate full pseudonym involving a changed row, 0 real word with a new second part, 0 part with a new second real word, the first/last overlap never grew, 0 new part equal to a saved part in either role, 0 word of a new value that is a word of a saved name, whole-row replacements keep no parts, 2 Location fallbacks, 0 Org fallbacks; a second --all changes nothing.'
+    AC7: 'T13 (three cases); replace_own_word_rows re-plans under pseudonym_lock (BEGIN IMMEDIATE, WAL so readers never wait) and writes once through replace_pseudonyms.'
+    AC8: '31 later documents (one per group: the name, the lone word, a new person sharing it; or the place or organisation) finalized on the replaced copies: 0 hold a replaced word. Reproduction (qa_repro.py): before, « Élodie », « Marseille », « Lyon » written in clear, note count 5 then 6 (the rows the document saved included); replace-pseudonym --all --force exit 0, 6 rows; after, none written, note count 0, validate-mappings --own-words prints C6.'
+    AC9: 'T12; the eight new logger lines carry counts and error types only; REPLACEMENT entries hold no name in the 22 runs.'
+    AC12: 'perf116''s three documents, each run on a fresh copy of common_1.db (1,061 rows, 8 found), base7be (git archive 7be0a07 gdpr_pseudonymizer, asserted imported) and head interleaved, 3 x 3 runs each, medians of the three batch medians: shapes 138 -> 168 ms (+30), 200 people 339 -> 357 ms (+18), 300 people 696 -> 693 ms (noise). Budget about 64 ms on 1,061 rows.'
+    AC13: 'b8a795f (base + test files only): CI 37 xfailed, 0 XPASS on all four legs (ubuntu 3.11/3.13, macOS 3419 passed; Windows 3269 passed, 3 skipped); strict xfail with raises=AssertionError, so each case failed at an assert. No marker left (git grep in tests/unit and tests/integration, rc 1).'
+    AC14: 'DOC-117-01 (C18 singular). Everything else byte for byte: C1-C17g and C18 plural in the code, the four cli.po entries not fuzzy, D1-D19 French sources and en.ts English, CL1; docs/CLI-REFERENCE.fr.md additions identical to the draft Lionel approved (with his --id/--all line), docs/CLI-REFERENCE.md identical to the English additions; --lang fr and --lang en help through the real command.'
+    AC18: 'CI on 73587f4 green: ubuntu 3.11, 3.13, macOS 3458 passed; Windows 3308 passed, 3 skipped; lint, quality, CodeQL pass. Installer builds and Codex are the orchestrator''s.'
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'No name, pseudonym or word in a log line or in the REPLACEMENT entry; replacement only after the typed yes or --force, re-planned under the lock and stopped when the rows differ; the leak of the reproduction gone and 0 replaced word in 31 later documents.'
+  performance:
+    status: PASS
+    notes: 'AC12 within budget (+18 to +30 ms on 1,061 rows). Find 260 ms at 10,000 rows (dev). The desktop click-time plan, 273 ms at 10,000 rows, is PERF-117-01 (low).'
+  reliability:
+    status: PASS
+    notes: 'One commit for all rows, rollback on error; exhaustion, custom row and changed-database stops write nothing (T8, T14, T22, T13); the notice never stops a written document (failures count 0). One misleading stop message on the desktop (REL-117-01, low).'
+  maintainability:
+    status: CONCERNS
+    notes: 'One rule (own_word calls 11.6''s helpers), one module for the command line and the desktop, abstract method first; black, ruff, mypy clean. T18, the byte-for-byte guard, pins one wrong constant (DOC-117-01), and the story''s find-rule text lags the code (REQ-117-01).'
+
+recommendations:
+  immediate:
+    - action: 'C18 singular: "its own name" in notice_line and T18''s C18_ONE (DOC-117-01).'
+      refs: ['gdpr_pseudonymizer/core/saved_own_words.py:535-539', 'tests/unit/test_stored_pseudonym_own_word.py:1027-1030']
+  future:
+    - action: 'Align the story''s find rule with the code; optional T1 case (REQ-117-01).'
+      refs: ['docs/stories/11.7.stored-pseudonym-own-word-leak.story.md (The rule (find), Fix design 1)', 'gdpr_pseudonymizer/core/custom_pseudonym.py:536']
+    - action: 'Plan off the window''s thread (PERF-117-01).'
+      refs: ['gdpr_pseudonymizer/gui/screens/database.py:773']
+    - action: 'Map "not_found" to D14 on the desktop (REL-117-01).'
+      refs: ['gdpr_pseudonymizer/gui/screens/database.py:847-890']
+    - action: 'Notice tests for the sequential batch and BatchWorker (TEST-117-01).'
+      refs: ['tests/unit/test_stored_pseudonym_own_word.py', 'tests/unit/gui/test_stored_pseudonym_own_word_screen.py']
