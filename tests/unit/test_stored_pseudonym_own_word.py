@@ -36,10 +36,11 @@ from collections.abc import Iterator, Sequence
 from contextlib import ExitStack, closing, contextmanager
 from pathlib import Path
 from typing import Any
-from unittest.mock import patch
+from unittest.mock import PropertyMock, patch
 
 import pytest
 import readchar
+from rich.console import Console, ConsoleDimensions
 from rich.prompt import Confirm, Prompt
 from typer.testing import CliRunner
 
@@ -157,7 +158,12 @@ CHOSEN = "Chosen Pseudonym"
 NOTICE = "saved pseudonym"
 NOTICE_SEE = "validate-mappings --own-words"
 
-ENV = {"GDPR_PSEUDO_PASSPHRASE": PASSPHRASE, "COLUMNS": "400"}
+ENV = {"GDPR_PSEUDO_PASSPHRASE": PASSPHRASE}
+# Every Rich console of the command line is created at import, and one
+# created while COLUMNS is set keeps that width (so an environment that sets
+# it, as the Linux CI runners did, cut the table at 80 columns): every
+# console reads this size while a command runs, whatever the OS
+_WIDE = ConsoleDimensions(400, 100)
 _ANSI = re.compile(r"\x1b\[[0-9;?]*[A-Za-z]")
 _PERSON_FALLBACK = re.compile(r"^Person-\d+$")
 
@@ -255,8 +261,11 @@ def _replacements_logged(db: str) -> list[tuple[Any, ...]]:
 
 
 def _cli(*args: str, typed: str | None = None) -> tuple[int, str]:
-    """One ``gdpr-pseudo`` run: its exit code and what it shows."""
-    result = CliRunner().invoke(app, list(args), env=ENV, input=typed)
+    """One ``gdpr-pseudo`` run: its exit code and what it shows, every
+    console 400 columns wide."""
+    with patch.object(Console, "size", new_callable=PropertyMock) as size:
+        size.return_value = _WIDE
+        result = CliRunner().invoke(app, list(args), env=ENV, input=typed)
     return result.exit_code, _ANSI.sub("", result.output)
 
 
