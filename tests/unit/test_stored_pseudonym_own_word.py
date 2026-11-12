@@ -269,11 +269,12 @@ def _replacements_logged(db: str) -> list[tuple[Any, ...]]:
 # ---------------------------------------------------------------------------
 
 
-def _cli(*args: str, typed: str | None = None) -> tuple[int, str]:
+def _cli(*args: str, typed: str | None = None, width: int = 400) -> tuple[int, str]:
     """One ``gdpr-pseudo`` run: its exit code and what it shows, every
-    console 400 columns wide."""
+    console ``width`` columns wide (400 unless a test reads a narrow
+    terminal)."""
     with patch.object(Console, "size", new_callable=PropertyMock) as size:
-        size.return_value = _WIDE
+        size.return_value = _WIDE if width == 400 else ConsoleDimensions(width, 100)
         result = CliRunner().invoke(app, list(args), env=ENV, input=typed)
     return result.exit_code, _ANSI.sub("", result.output)
 
@@ -416,11 +417,13 @@ def test_own_word_row_is_reported(tmp_path: Path, case: str) -> None:
         line = _line_of(shown, short_id)
         assert row[1] in line and word in line, line
         assert "replace-pseudonym" in _flat(shown)
-        assert "OWN" in table
+        # The flag on the row itself, not the summary line (Codex review 3)
+        assert "OWN" in _line_of(table, row[1])
     else:
         assert short_id not in shown
         assert NONE_FOUND in _flat(shown)
         assert "OWN" not in table
+        assert "OK" in _line_of(table, row[1])
 
 
 def test_clean_rows_are_not_reported(tmp_path: Path) -> None:
@@ -1247,3 +1250,31 @@ def test_notice_after_a_sequential_batch(tmp_path: Path) -> None:
     pre(code == 0, f"batch ran: {shown!r}")
     assert C18_MANY.format(n=3) in _lines(shown), shown
     assert _flat(shown).count(NOTICE) == 1
+
+
+@pytest.mark.parametrize("width", [80, 100, 400])
+def test_every_row_shows_its_flag_in_a_narrow_terminal(
+    tmp_path: Path, width: int
+) -> None:
+    """T25 (Codex review 3, P2; Lionel: "fix"): in an 80-column terminal the
+    table of `validate-mappings` keeps its Flags column: each row shows its
+    own flag (`OWN` on T4's three rows, `OK` on the clean one), not only the
+    summary; `--own-words` keeps its ID and Word columns."""
+    db, ids = _db(tmp_path, T4_ROWS)
+    code, shown = _cli("validate-mappings", "--db", db, width=width)
+    pre(code == 0, f"validate-mappings ran: {shown!r}")
+    rows = [line for line in shown.splitlines() if re.match(r"^\s*│\s*\d+\s*│", line)]
+    pre(len(rows) == 4, f"four table rows: {shown}")
+    for line in rows:
+        flag = "OK" if "Quilla" in line else "OWN"
+        assert re.search(rf"│\s*{flag}\s*│", line), (width, shown)
+    assert all(len(line) <= width for line in shown.splitlines()), shown
+
+    code, shown = _cli("validate-mappings", "--db", db, "--own-words", width=width)
+    pre(code == 0, f"--own-words ran: {shown!r}")
+    header = _line_of(shown, " ID ")
+    assert " Word " in header, (width, shown)
+    for name in (ZQ, ZM):
+        line = _line_of(shown, ids[name][:8])
+        assert line.rstrip().rstrip("│").rstrip().endswith("Zorbal"), (width, shown)
+    assert all(len(line) <= width for line in shown.splitlines()), shown

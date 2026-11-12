@@ -203,14 +203,19 @@ def _display_validation_table(
         "[dim]This is a read-only view. No modifications will be made.[/dim]\n"
     )
 
+    # Story 11.7 (Codex review 3): the table fits an 80-column terminal with
+    # every row's flags visible. The short columns keep their width; the
+    # name and the pseudonym wrap (a word longer than the column is folded);
+    # Flags comes before Created, so a terminal narrower still cuts the
+    # date, never the flags.
     table = Table(show_header=True, header_style="bold cyan")
-    table.add_column("#", width=4)
-    table.add_column("Type", width=10)
-    table.add_column("Original", min_width=18)
-    table.add_column("Pseudonym", min_width=18)
-    table.add_column("Confidence", width=10, justify="right")
-    table.add_column("Created", width=12)
-    table.add_column("Flags", width=10)
+    table.add_column("#", no_wrap=True)
+    table.add_column("Type", no_wrap=True)
+    table.add_column("Original", overflow="fold")
+    table.add_column("Pseudonym", overflow="fold")
+    table.add_column("Confidence", justify="right", no_wrap=True)
+    table.add_column("Flags", no_wrap=True)
+    table.add_column("Created", no_wrap=True)
 
     for idx, entity in enumerate(entities, 1):
         # Format confidence
@@ -244,8 +249,8 @@ def _display_validation_table(
             entity.full_name,
             entity.pseudonym_full,
             f"[{conf_color}]{conf_str}[/{conf_color}]",
-            timestamp_str,
             flags_str,
+            timestamp_str,
         )
 
     console.print(table)
@@ -283,12 +288,13 @@ def _display_own_words(entities: list[Entity], found: dict[str, OwnWordRow]) -> 
         console.print("\nNo pseudonym holds a word of its own name.")
         return
 
+    # Fits an 80-column terminal, ID and Word always visible (Codex review 3)
     table = Table(show_header=True, header_style="bold cyan")
-    table.add_column("ID", width=10)
-    table.add_column("Type", width=10)
-    table.add_column("Original", min_width=18)
-    table.add_column("Pseudonym", min_width=18)
-    table.add_column("Word", min_width=10)
+    table.add_column("ID", no_wrap=True)
+    table.add_column("Type", no_wrap=True)
+    table.add_column("Original", overflow="fold")
+    table.add_column("Pseudonym", overflow="fold")
+    table.add_column("Word", overflow="fold")
     for entity in rows:
         table.add_row(
             entity.id[:8] if entity.id else "-",
