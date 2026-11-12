@@ -16,6 +16,9 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from gdpr_pseudonymizer.pseudonym.assignment_engine import (
+    CompositionalPseudonymEngine,
+)
 from gdpr_pseudonymizer.pseudonym.library_manager import (
     LibraryBasedPseudonymManager,
 )
@@ -201,13 +204,16 @@ class TestComponentCollisionPrevention:
         dubois_pseudo = assignment1.pseudonym_last
 
         # Step 2: Assign standalone "Dubois" (last name only)
-        # This should reuse the Dubois->dubois_pseudo mapping
-        assignment2 = manager.assign_pseudonym(
-            entity_type="PERSON",
-            first_name=None,
-            last_name="Dubois",
-            gender=None,
+        # This should reuse the Dubois->dubois_pseudo mapping. It goes through
+        # the product path for a lone name (the compositional engine, which
+        # reuses the saved part without drawing): calling assign_pseudonym
+        # with first_name=None drew a first name, which repeated step 1's
+        # about once in 739 runs, so the full name collided and the fallback
+        # Person-001 replaced the part (CI, 1 run in about 185)
+        engine = CompositionalPseudonymEngine(
+            manager, MagicMock(find_by_component=MagicMock(return_value=[]))
         )
+        assignment2 = engine.assign_compositional_pseudonym("Dubois", "PERSON")
         assert assignment2.pseudonym_last == dubois_pseudo
 
         # Step 3: Assign "Marie Dupont" (reuse Marie, new last name)
