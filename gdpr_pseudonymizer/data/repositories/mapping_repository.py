@@ -5,6 +5,7 @@ from __future__ import annotations
 import re
 import unicodedata
 from abc import ABC, abstractmethod
+from collections.abc import Sequence
 
 from gdpr_pseudonymizer.core.legacy_names import matches_search, title_words
 from gdpr_pseudonymizer.core.mapping_key import (
@@ -371,6 +372,26 @@ class MappingRepository(ABC):
 
         Raises:
             DatabaseError: If the row is gone or the write fails
+        """
+        pass
+
+    @abstractmethod
+    def replace_pseudonyms(
+        self, changes: Sequence[tuple[str, str, str | None, str | None]]
+    ) -> list[Entity]:
+        """Give stored rows new pseudonyms, all in one transaction (Story
+        11.7).
+
+        Args:
+            changes: (row id, new full pseudonym, new first part, new last
+                part) per row; every other field of the row is kept
+
+        Returns:
+            The changed rows, decrypted, in the order given
+
+        Raises:
+            DatabaseError: If a row is gone or the write fails; nothing is
+                written then
         """
         pass
 
@@ -946,6 +967,51 @@ class SQLiteMappingRepository(MappingRepository):
             self._session.rollback()
             raise DatabaseError(f"Failed to replace entity: {type(e).__name__}") from e
         return self._decrypt_entity(row)
+
+    def replace_pseudonyms(
+        self, changes: Sequence[tuple[str, str, str | None, str | None]]
+    ) -> list[Entity]:
+        """Give stored rows new pseudonyms, all in one transaction (Story
+        11.7).
+
+        Only the three pseudonym columns of each row change; its id, name,
+        name parts, type, theme, gender, confidence, first-seen time and
+        ambiguity are kept. One commit for every row: an error rolls them all
+        back. The error messages name no name and no pseudonym.
+
+        Args:
+            changes: (row id, new full pseudonym, new first part, new last
+                part) per row
+
+        Returns:
+            The changed rows, decrypted, in the order given
+
+        Raises:
+            DatabaseError: If a row is gone (before any write) or the write
+                fails (rolled back)
+        """
+        from sqlalchemy.exc import IntegrityError, OperationalError
+
+        ids = [change[0] for change in changes]
+        found = {
+            row.id: row
+            for row in self._session.query(Entity).filter(Entity.id.in_(ids)).all()
+        }
+        if any(entity_id not in found for entity_id in ids):
+            raise DatabaseError("Entity to replace not found")
+        try:
+            for entity_id, full, first, last in changes:
+                row = found[entity_id]
+                row.pseudonym_full = self._encryption.encrypt(full)
+                row.pseudonym_first = self._encryption.encrypt(first)
+                row.pseudonym_last = self._encryption.encrypt(last)
+            self._session.commit()
+        except (OperationalError, IntegrityError) as e:
+            self._session.rollback()
+            raise DatabaseError(
+                f"Failed to replace pseudonyms: {type(e).__name__}"
+            ) from e
+        return [self._decrypt_entity(found[entity_id]) for entity_id in ids]
 
     def save_batch(self, entities: list[Entity]) -> list[Entity]:
         """Persist multiple entities in single transaction with race condition handling.

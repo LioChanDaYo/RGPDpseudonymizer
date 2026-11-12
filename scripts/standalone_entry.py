@@ -26,6 +26,7 @@ CLI_SUBCOMMANDS = frozenset(
         "import-mappings",
         "export",
         "delete-mapping",
+        "replace-pseudonym",
         "list-entities",
         "destroy-table",
         "config",

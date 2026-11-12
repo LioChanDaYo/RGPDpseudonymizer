@@ -121,6 +121,9 @@ msgstr "Examiner les correspondances existantes sans traitement"
 msgid "Interactive mode to review each mapping"
 msgstr "Mode interactif pour examiner chaque correspondance"
 
+msgid "Show only the mappings whose pseudonym contains a word of the name it replaces"
+msgstr "Afficher uniquement les correspondances dont le pseudonyme contient un mot du nom qu'il remplace"
+
 # --- stats command ---
 
 msgid "Show database statistics and usage information"
@@ -185,6 +188,17 @@ msgstr "Référence de la demande, conservée dans le journal d'audit (ex. : GDP
 
 msgid "Skip confirmation prompt"
 msgstr "Ignorer la demande de confirmation"
+
+# --- replace-pseudonym command ---
+
+msgid "Replace pseudonyms that contain a word of the name they replace"
+msgstr "Remplacer les pseudonymes qui contiennent un mot du nom qu'ils remplacent"
+
+msgid "ID of the mapping to replace (see 'validate-mappings --own-words')"
+msgstr "Identifiant de la correspondance à remplacer (voir validate-mappings --own-words)"
+
+msgid "Replace every pseudonym that contains a word of the name it replaces"
+msgstr "Remplacer tous les pseudonymes qui contiennent un mot du nom qu'ils remplacent"
 
 # --- list-entities command ---
 

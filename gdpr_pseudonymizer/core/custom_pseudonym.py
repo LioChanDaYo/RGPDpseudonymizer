@@ -533,6 +533,36 @@ def real_name_check(document_text: str, names: Iterable[str]) -> Callable[[str],
     return check
 
 
+def own_word(
+    pseudonym: str, name: str, keep: Callable[[str], bool] | None = None
+) -> str | None:
+    """Story 11.7: the word or words of a saved pseudonym that are a word of
+    its own name, by Story 11.6's rule for a drawn value, names half only (no
+    document); None if none.
+
+    The runs are ``_drawn_runs`` (longest first, then the parts of a
+    hyphenated word), each compared with the name by ``_real_name_run``
+    with an empty document. ``keep`` (the check's places-and-organisations
+    filter, Lionel's "report only real leaks") skips a run it refuses and
+    goes on with the next one.
+    """
+    composed_value = unicodedata.normalize("NFC", pseudonym)
+    no_document = document_words("")
+    index = _names_index([name])
+    for run in _drawn_runs(composed_value):
+        if _real_name_run([run], no_document, index) is None:
+            continue
+        if keep is None or keep(run):
+            return run
+    return None
+
+
+def holds_words(text: str, words: str) -> bool:
+    """Story 11.7: whether ``words`` occur in ``text`` as consecutive whole
+    words, capitals and accents ignored (``_occurrence``, the names half)."""
+    return _occurrence(words, document_words(text), capitalised=False)
+
+
 # (folded real first or last name, "first" or "last") -> the part it has
 _Bound = dict[tuple[str, str], str]
 

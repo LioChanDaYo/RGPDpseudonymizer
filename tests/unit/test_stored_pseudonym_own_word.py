@@ -72,12 +72,6 @@ from tests.unit.test_parallel_saved_pseudonym import (
     _written,
 )
 
-_FIRST = pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 11.7 tests first: saved pseudonyms that hold a word of their own name",
-)
-
 PERSON, LOCATION, ORG = "PERSON", "LOCATION", "ORG"
 CORE = "gdpr_pseudonymizer.core.saved_own_words"
 COMMAND = "gdpr_pseudonymizer.cli.commands.replace_pseudonym"
@@ -389,7 +383,6 @@ def _line_of(output: str, text: str) -> str:
 # ---------------------------------------------------------------------------
 
 
-@_FIRST
 @pytest.mark.parametrize("case", list(T1_CASES))
 def test_own_word_row_is_reported(tmp_path: Path, case: str) -> None:
     """T1 (AC1, AC2, AC10): one saved row each. `--own-words` lists it with
@@ -415,7 +408,6 @@ def test_own_word_row_is_reported(tmp_path: Path, case: str) -> None:
         assert "OWN" not in table
 
 
-@_FIRST
 def test_clean_rows_are_not_reported(tmp_path: Path) -> None:
     """T2 (AC1, AC2): rows that hold no word of their own name, « Le » not
     compared alone, a custom row and a ``neutral_id`` row: `--own-words`
@@ -453,7 +445,6 @@ def test_clean_rows_are_not_reported(tmp_path: Path) -> None:
     assert table_code == 0 and "OWN" not in table, table
 
 
-@_FIRST
 def test_check_is_read_only(tmp_path: Path) -> None:
     """T3 (AC1): `--own-words` changes no row, no audit entry and no
     metadata."""
@@ -493,7 +484,6 @@ def test_validate_mappings_unchanged_without_leak(tmp_path: Path) -> None:
 # ---------------------------------------------------------------------------
 
 
-@_FIRST
 def test_replace_moves_the_whole_group(tmp_path: Path) -> None:
     """T4 (AC4, AC6): replacing « Zorbal Quentrix » gives the three rows of
     the real first name Zorbal one new first part; last parts, ids, names
@@ -524,7 +514,6 @@ def test_replace_moves_the_whole_group(tmp_path: Path) -> None:
     assert all(_kept(now[key]) == _kept(before[key]) for key in before)
 
 
-@_FIRST
 def test_replace_shows_and_moves_a_clean_row(tmp_path: Path) -> None:
     """T5 (AC4, AC6): « Xantor Brontel »'s last part is its own first name;
     « Zorbal Brontel » holds the same part for the same real last name. The
@@ -544,7 +533,6 @@ def test_replace_shows_and_moves_a_clean_row(tmp_path: Path) -> None:
     assert after["Zorbal Brontel"].pseudonym_first == "Quilla"
 
 
-@_FIRST
 def test_replace_all(tmp_path: Path) -> None:
     """T6 (AC4, AC10): `--all --force` on T1's rows and two clean rows:
     nothing is found afterwards; the organisation that shares only a common
@@ -565,7 +553,6 @@ def test_replace_all(tmp_path: Path) -> None:
     assert all(now[key] == before[key] for key in unchanged)
 
 
-@_FIRST
 @pytest.mark.parametrize(
     "case",
     [
@@ -616,7 +603,6 @@ def test_new_value_is_drawn_again(tmp_path: Path, case: str) -> None:
     )
 
 
-@_FIRST
 def test_library_out_of_names_changes_nothing(tmp_path: Path) -> None:
     """T8 (AC6): the only last name left is the row's own word: the
     replacement stops, nothing written, no audit entry."""
@@ -630,7 +616,6 @@ def test_library_out_of_names_changes_nothing(tmp_path: Path) -> None:
     assert _replacements_logged(db) == []
 
 
-@_FIRST
 def test_clean_id_is_refused(tmp_path: Path) -> None:
     """T9 (AC4): an --id the check does not find is refused; nothing
     changes."""
@@ -645,7 +630,6 @@ def test_clean_id_is_refused(tmp_path: Path) -> None:
     assert _snapshot(db) == before
 
 
-@_FIRST
 def test_cancel_changes_nothing(tmp_path: Path) -> None:
     """T10 (AC4): answering « no » cancels; nothing changes."""
     db, ids = _db(tmp_path, T4_ROWS)
@@ -657,7 +641,6 @@ def test_cancel_changes_nothing(tmp_path: Path) -> None:
     assert _replacements_logged(db) == []
 
 
-@_FIRST
 def test_custom_row_in_group_stops(tmp_path: Path) -> None:
     """T14 (AC6): the group of « Xantor Brontel »'s last part holds a
     pseudonym the user chose (« Zorbal Brontel », theme custom): the
@@ -672,7 +655,6 @@ def test_custom_row_in_group_stops(tmp_path: Path) -> None:
     assert _replacements_logged(db) == []
 
 
-@_FIRST
 def test_place_fallback_is_a_new_name(tmp_path: Path) -> None:
     """T19 (AC6): the library's one place is the row's own name: the place
     gets the next fallback after the saved one, never a saved one."""
@@ -692,7 +674,6 @@ def test_place_fallback_is_a_new_name(tmp_path: Path) -> None:
     assert _snapshot(db)[ids["Pivelle"]] == before[ids["Pivelle"]]
 
 
-@_FIRST
 def test_groups_of_one_replacement_never_share_a_new_part(tmp_path: Path) -> None:
     """T22 (AC6, PO v1.4): two last-part groups and one free last name: the
     first group drawn takes it, the second has none left, so nothing is
@@ -726,7 +707,6 @@ def test_groups_of_one_replacement_never_share_a_new_part(tmp_path: Path) -> Non
 # ---------------------------------------------------------------------------
 
 
-@_FIRST
 def test_later_document_writes_the_new_part(tmp_path: Path) -> None:
     """T11 (AC8): after the replacement, a document naming the replaced
     name, the lone first name and a new person sharing it writes no
@@ -743,7 +723,6 @@ def test_later_document_writes_the_new_part(tmp_path: Path) -> None:
     assert _by_name(db)[ZD].pseudonym_first == new
 
 
-@_FIRST
 def test_audit_and_logs_hold_no_name(tmp_path: Path) -> None:
     """T12 (AC9): one REPLACEMENT entry with the row ids; neither it nor any
     log call of the new code holds a name, an old or new pseudonym or the
@@ -773,7 +752,6 @@ def test_audit_and_logs_hold_no_name(tmp_path: Path) -> None:
     assert not secret & set(_words(repr(recorder.calls)))
 
 
-@_FIRST
 @pytest.mark.parametrize(
     "case",
     ["waits_for_a_document", "document_waits_for_it", "row_added_after_the_list"],
@@ -902,7 +880,6 @@ def test_replace_and_documents_one_at_a_time(tmp_path: Path, case: str) -> None:
 # ---------------------------------------------------------------------------
 
 
-@_FIRST
 def test_notice_after_a_document(tmp_path: Path) -> None:
     """T17 (AC10): `process` on a database that holds T4's three rows
     prints the note once, with the count 3."""
@@ -915,7 +892,6 @@ def test_notice_after_a_document(tmp_path: Path) -> None:
     assert NOTICE_SEE in flat
 
 
-@_FIRST
 def test_no_notice_without_leaking_rows(tmp_path: Path) -> None:
     """T20 (AC10): `batch --workers 2` (the parallel path, its worker's
     dict) prints the note once on a database that holds T4's rows; `process`
@@ -935,7 +911,6 @@ def test_no_notice_without_leaking_rows(tmp_path: Path) -> None:
     assert NOTICE not in _flat(shown)
 
 
-@_FIRST
 def test_notice_counts_a_row_this_document_saved(tmp_path: Path) -> None:
     """T21 (AC10, Story 11.6's KL-008): the real first name Xantor keeps its
     part « Brontel », a word of the new « Xantor Brontel »'s own name: the

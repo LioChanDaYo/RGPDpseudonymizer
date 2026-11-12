@@ -29,6 +29,7 @@ from gdpr_pseudonymizer.cli.validators import (
     validate_theme_or_exit,
 )
 from gdpr_pseudonymizer.core.document_processor import DocumentProcessor
+from gdpr_pseudonymizer.core.saved_own_words import notice_line, own_word_rows_of
 from gdpr_pseudonymizer.exceptions import FileProcessingError
 from gdpr_pseudonymizer.utils.logger import configure_logging, get_logger
 
@@ -234,6 +235,12 @@ def process_command(
                 console.print(
                     f"[cyan]ℹ  {result.entities_reused} entity mapping(s) reused from database (idempotent processing)[/cyan]\n"
                 )
+
+            # Story 11.7: the database holds saved pseudonyms that hold a word
+            # of their own name (the rows this document saved included)
+            own_word_rows = own_word_rows_of(result)
+            if own_word_rows > 0:
+                console.print(notice_line(own_word_rows), markup=False)
 
             logger.info(
                 "processing_complete",
