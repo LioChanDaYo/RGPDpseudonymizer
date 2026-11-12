@@ -927,6 +927,10 @@ class BatchScreen(QWidget):
         # Show summary
         self._show_summary(result)
 
+        # Story 11.7: one notice per session when the database holds saved
+        # pseudonyms that hold a word of their own name
+        self._main_window.notify_own_word_rows(result.own_word_rows)
+
     def _on_error(self, error_msg: str, run_id: int | None = None) -> None:
         """Handle fatal worker error."""
         if self._is_stale(run_id, "error"):

@@ -125,8 +125,10 @@ def setup_focus_order_batch(screen: BatchScreen) -> None:
 def setup_focus_order_database(screen: DatabaseScreen) -> None:
     """Configure tab order for Database screen.
 
-    Order: DB combo -> Browse button -> Open button -> Search field ->
-           Type filter -> Entity table -> Delete button -> Export button
+    Order: DB combo -> Browse button -> Open button -> "show only these"
+           tick box (Story 11.7) -> Search field -> Type filter -> Entity
+           table -> Replace button (Story 11.7) -> Delete button -> Export
+           button
     """
     from PySide6.QtWidgets import QWidget
 
@@ -134,8 +136,12 @@ def setup_focus_order_database(screen: DatabaseScreen) -> None:
     QWidget.setTabOrder(screen._db_combo, screen._browse_btn)
     QWidget.setTabOrder(screen._browse_btn, screen._open_btn)
 
-    # Search/filter flow
-    QWidget.setTabOrder(screen._open_btn, screen._search_field)
+    # Search/filter flow (Story 11.7: the tick box first, when shown)
+    if hasattr(screen, "_own_words_only"):
+        QWidget.setTabOrder(screen._open_btn, screen._own_words_only)
+        QWidget.setTabOrder(screen._own_words_only, screen._search_field)
+    else:
+        QWidget.setTabOrder(screen._open_btn, screen._search_field)
     QWidget.setTabOrder(screen._search_field, screen._type_filter)
 
     # Table and actions
@@ -143,7 +149,12 @@ def setup_focus_order_database(screen: DatabaseScreen) -> None:
 
     # Action buttons (delete, export)
     if hasattr(screen, "_delete_btn"):
-        QWidget.setTabOrder(screen._entity_table, screen._delete_btn)
+        if hasattr(screen, "_replace_btn"):
+            # Story 11.7: the replace button before the delete button
+            QWidget.setTabOrder(screen._entity_table, screen._replace_btn)
+            QWidget.setTabOrder(screen._replace_btn, screen._delete_btn)
+        else:
+            QWidget.setTabOrder(screen._entity_table, screen._delete_btn)
         if hasattr(screen, "_export_btn"):
             QWidget.setTabOrder(screen._delete_btn, screen._export_btn)
     elif hasattr(screen, "_export_btn"):

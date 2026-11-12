@@ -79,6 +79,7 @@ class FinalizationWorker(QRunnable):
     def _run_finalization(self) -> None:
         """Internal finalization logic with progress emission."""
         from gdpr_pseudonymizer.core.document_processor import DocumentProcessor
+        from gdpr_pseudonymizer.core.saved_own_words import own_word_rows_of
 
         self.signals.progress.emit(10, "Résolution des pseudonymes...")
 
@@ -158,5 +159,6 @@ class FinalizationWorker(QRunnable):
             pseudonymized_content=pseudonymized_content,
             entity_type_counts=entity_type_counts,
             entity_mappings=entity_mappings,
+            own_word_rows=own_word_rows_of(result),
         )
         self.signals.finished.emit(gui_result)

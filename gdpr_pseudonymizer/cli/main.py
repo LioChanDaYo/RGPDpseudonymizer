@@ -431,6 +431,13 @@ def _validate_mappings(
         "-t",
         help=_("Filter by entity type (PERSON/LOCATION/ORG)"),
     ),
+    own_words: bool = typer.Option(
+        False,
+        "--own-words",
+        help=_(
+            "Show only the mappings whose pseudonym contains a word of the name it replaces"
+        ),
+    ),
 ) -> None:
     """Review existing mappings without processing."""
     from gdpr_pseudonymizer.cli.commands.validate_mappings import (
@@ -442,6 +449,7 @@ def _validate_mappings(
         passphrase=passphrase,
         interactive=interactive,
         entity_type=entity_type,
+        own_words=own_words,
     )
 
 
@@ -624,6 +632,49 @@ def _delete_mapping(
         passphrase=passphrase,
         entity_id=entity_id,
         reason=reason,
+        force=force,
+    )
+
+
+@app.command(
+    name="replace-pseudonym",
+    help=_("Replace pseudonyms that contain a word of the name they replace"),
+)
+def _replace_pseudonym(
+    db_path: str = typer.Option("mappings.db", "--db", help=_("Database file path")),
+    passphrase: Optional[str] = typer.Option(
+        None,
+        "--passphrase",
+        "-p",
+        help=_("Database passphrase (or use GDPR_PSEUDO_PASSPHRASE env var)"),
+    ),
+    entity_id: Optional[str] = typer.Option(
+        None,
+        "--id",
+        help=_("ID of the mapping to replace (see 'validate-mappings --own-words')"),
+    ),
+    replace_all: bool = typer.Option(
+        False,
+        "--all",
+        help=_("Replace every pseudonym that contains a word of the name it replaces"),
+    ),
+    force: bool = typer.Option(
+        False,
+        "--force/--no-force",
+        "-f",
+        help=_("Skip confirmation prompt"),
+    ),
+) -> None:
+    """Replace pseudonyms that contain a word of the name they replace (Story 11.7)."""
+    from gdpr_pseudonymizer.cli.commands.replace_pseudonym import (
+        replace_pseudonym_command,
+    )
+
+    replace_pseudonym_command(
+        db_path=db_path,
+        passphrase=passphrase,
+        entity_id=entity_id,
+        replace_all=replace_all,
         force=force,
     )
 

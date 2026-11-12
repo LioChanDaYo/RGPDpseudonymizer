@@ -34,6 +34,9 @@ class GUIProcessingResult:
     entity_type_counts: dict[str, int]
     entity_mappings: list[tuple[str, str]]  # (pseudonym_full, entity_type)
     error_message: str | None = None
+    # Story 11.7: saved pseudonyms holding a word of their own name, counted
+    # once the document was written (the desktop notice)
+    own_word_rows: int = 0
 
 
 class ProcessingWorker(QRunnable):

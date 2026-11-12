@@ -41,6 +41,7 @@ from gdpr_pseudonymizer.cli.validators import (
     validate_theme_or_exit,
 )
 from gdpr_pseudonymizer.core.document_processor import DocumentProcessor
+from gdpr_pseudonymizer.core.saved_own_words import notice_line, own_word_rows_of
 from gdpr_pseudonymizer.data.database import open_database
 from gdpr_pseudonymizer.exceptions import DatabaseConversionError
 from gdpr_pseudonymizer.utils.logger import configure_logging, get_logger
@@ -68,6 +69,9 @@ class BatchResult:
     reused_entities: int = 0
     total_time_seconds: float = 0.0
     errors: list[str] = field(default_factory=list)
+    # Story 11.7: the largest count of saved pseudonyms holding a word of
+    # their own name after a document of this run was written
+    own_word_rows: int = 0
 
 
 def _process_single_document_worker(
@@ -92,6 +96,7 @@ def _process_single_document_worker(
         - entities_reused: int (if success)
         - processing_time: float (if success)
         - error: str (if failure)
+        - own_word_rows: int (Story 11.7, the notice's count)
     """
     input_path, output_path, db_path, passphrase, theme, model, entity_types_csv = args
 
@@ -126,6 +131,7 @@ def _process_single_document_worker(
             "entities_reused": result.entities_reused,
             "processing_time": result.processing_time_seconds,
             "error": result.error_message if not result.success else None,
+            "own_word_rows": own_word_rows_of(result) if result.success else 0,
         }
     except Exception as e:
         return {
@@ -136,6 +142,7 @@ def _process_single_document_worker(
             "entities_reused": 0,
             "processing_time": 0.0,
             "error": str(e),
+            "own_word_rows": 0,
         }
 
 
@@ -246,6 +253,10 @@ def _process_batch_parallel(
                     batch_result.total_entities += result["entities_detected"]
                     batch_result.new_entities += result["entities_new"]
                     batch_result.reused_entities += result["entities_reused"]
+                    batch_result.own_word_rows = max(
+                        batch_result.own_word_rows,
+                        result.get("own_word_rows", 0) or 0,
+                    )
                 else:
                     batch_result.failed_files += 1
                     error_msg = result.get("error", "Unknown error")
@@ -615,6 +626,9 @@ def batch_command(
                             batch_result.total_entities += result.entities_detected
                             batch_result.new_entities += result.entities_new
                             batch_result.reused_entities += result.entities_reused
+                            batch_result.own_word_rows = max(
+                                batch_result.own_word_rows, own_word_rows_of(result)
+                            )
 
                             # Update progress tracker
                             progress_tracker.update_file_complete(
@@ -691,6 +705,10 @@ def batch_command(
 
         # Display summary report
         _display_batch_summary(batch_result)
+
+        # Story 11.7: one note per run, the largest count of its documents
+        if batch_result.own_word_rows > 0:
+            console.print(notice_line(batch_result.own_word_rows), markup=False)
 
         logger.info(
             "batch_complete",

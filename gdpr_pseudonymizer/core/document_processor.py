@@ -15,7 +15,7 @@ from __future__ import annotations
 import re
 import time
 from collections.abc import Callable, Iterable, Mapping
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field, replace
 from datetime import UTC, datetime
 
 from gdpr_pseudonymizer.core.custom_pseudonym import (
@@ -34,6 +34,7 @@ from gdpr_pseudonymizer.core.custom_pseudonym import (
     untracked_custom_values,
 )
 from gdpr_pseudonymizer.core.mapping_key import mapping_key
+from gdpr_pseudonymizer.core.saved_own_words import count_own_word_rows
 from gdpr_pseudonymizer.data.database import (
     DatabaseSession,
     open_database,
@@ -100,6 +101,9 @@ class ProcessingResult:
         processing_time_seconds: Total processing time in seconds
         error_message: Error description if processing failed
         entity_type_counts: Per-type entity counts from this document
+        own_word_rows: Saved rows whose pseudonym holds a word of their own
+            name, counted once this document is written (Story 11.7), the
+            rows it saved included
     """
 
     success: bool
@@ -111,6 +115,7 @@ class ProcessingResult:
     processing_time_seconds: float
     error_message: str | None = None
     entity_type_counts: dict[str, int] | None = None
+    own_word_rows: int = 0
 
 
 @dataclass
@@ -135,6 +140,8 @@ class _ResolveResult:
     entities_new: int
     entities_reused: int
     entity_type_counts: dict[str, int]
+    # Story 11.7: the rows this document saved (for the notice's count)
+    saved_entities: list[Entity] = field(default_factory=list)
 
 
 class DocumentProcessor:
@@ -965,6 +972,7 @@ class DocumentProcessor:
             entities_new=entities_new,
             entities_reused=entities_reused,
             entity_type_counts=type_counts,
+            saved_entities=list(new_entities),
         )
 
     @staticmethod
@@ -1009,7 +1017,7 @@ class DocumentProcessor:
 
         return result
 
-    def _reset_pseudonym_state(self, ctx: _ProcessingContext) -> None:
+    def _reset_pseudonym_state(self, ctx: _ProcessingContext) -> list[Entity]:
         """Reset pseudonym manager after validation preview.
 
         The validation preview generates pseudonyms that are never saved.
@@ -1018,6 +1026,10 @@ class DocumentProcessor:
 
         Args:
             ctx: Processing context with pseudonym_manager and mapping_repo
+
+        Returns:
+            The saved rows it read (Story 11.7: the notice's count reads them
+            once the lock is released, with no second read)
         """
         ctx.pseudonym_manager.reset_preview_state()
         existing_entities = ctx.mapping_repo.find_all()
@@ -1028,6 +1040,23 @@ class DocumentProcessor:
             "pseudonym_manager_reset_after_validation",
             existing_mappings_reloaded=len(existing_entities),
         )
+        return existing_entities
+
+    @staticmethod
+    def _own_word_count(
+        existing_rows: Iterable[Entity] | None, resolve_result: _ResolveResult
+    ) -> int:
+        """Story 11.7: the saved rows whose pseudonym holds a word of their
+        own name, the rows this document saved included (the notice when a
+        document is written). Run after the lock is released, on the rows
+        already read. The notice never stops a written document: a failure
+        counts 0."""
+        try:
+            rows = list(existing_rows or []) + list(resolve_result.saved_entities)
+            return count_own_word_rows(rows)
+        except Exception as e:  # noqa: BLE001 - the notice only
+            logger.warning("saved_own_words_check_failed", error_type=type(e).__name__)
+            return 0
 
     def _init_processing_context(
         self, db_session: DatabaseSession
@@ -1251,7 +1280,7 @@ class DocumentProcessor:
                 # Story 10.22: the pseudonyms are chosen and saved under the
                 # database's write lock, one document at a time
                 with pseudonym_lock(db_session):
-                    self._reset_pseudonym_state(ctx)
+                    existing_rows = self._reset_pseudonym_state(ctx)
                     resolve_result = self._resolve_pseudonyms(
                         ctx,
                         validated_entities,
@@ -1272,6 +1301,7 @@ class DocumentProcessor:
                     entities_reused=resolve_result.entities_reused,
                     processing_time_seconds=processing_time,
                     entity_type_counts=resolve_result.entity_type_counts,
+                    own_word_rows=self._own_word_count(existing_rows, resolve_result),
                 )
         except Exception as e:
             return self._handle_processing_error(e, "", output_path, start_time)
@@ -1314,7 +1344,7 @@ class DocumentProcessor:
                 # Story 10.22: the pseudonyms are chosen and saved under the
                 # database's write lock, one document at a time
                 with pseudonym_lock(db_session):
-                    self._reset_pseudonym_state(ctx)
+                    existing_rows = self._reset_pseudonym_state(ctx)
                     resolve_result = self._resolve_pseudonyms(
                         ctx,
                         validated_entities,
@@ -1338,6 +1368,7 @@ class DocumentProcessor:
                     entities_reused=resolve_result.entities_reused,
                     processing_time_seconds=processing_time,
                     entity_type_counts=resolve_result.entity_type_counts,
+                    own_word_rows=self._own_word_count(existing_rows, resolve_result),
                 )
         except Exception as e:
             return self._handle_processing_error(e, input_path, output_path, start_time)
@@ -1380,7 +1411,7 @@ class DocumentProcessor:
                 # Story 10.22: the pseudonyms are chosen and saved under the
                 # database's write lock, one document at a time
                 with pseudonym_lock(db_session):
-                    self._reset_pseudonym_state(ctx)
+                    existing_rows = self._reset_pseudonym_state(ctx)
                     resolve_result = self._resolve_pseudonyms(
                         ctx,
                         validated_entities,
@@ -1408,6 +1439,7 @@ class DocumentProcessor:
                     entities_reused=resolve_result.entities_reused,
                     processing_time_seconds=processing_time,
                     entity_type_counts=resolve_result.entity_type_counts,
+                    own_word_rows=self._own_word_count(existing_rows, resolve_result),
                 )
         except Exception as e:
             return self._handle_processing_error(e, input_path, output_path, start_time)
@@ -1495,7 +1527,7 @@ class DocumentProcessor:
                 # Story 10.22: the pseudonyms are chosen and saved under the
                 # database's write lock, one document at a time
                 with pseudonym_lock(db_session):
-                    self._reset_pseudonym_state(ctx)
+                    existing_rows = self._reset_pseudonym_state(ctx)
                     resolve_result = self._resolve_pseudonyms(ctx, validated_entities)
 
                 self._apply_tabular_replacements(
@@ -1515,6 +1547,7 @@ class DocumentProcessor:
                     entities_reused=resolve_result.entities_reused,
                     processing_time_seconds=processing_time,
                     entity_type_counts=resolve_result.entity_type_counts,
+                    own_word_rows=self._own_word_count(existing_rows, resolve_result),
                 )
         except Exception as e:
             return self._handle_processing_error(e, input_path, output_path, start_time)

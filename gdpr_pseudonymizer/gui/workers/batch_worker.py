@@ -44,6 +44,9 @@ class BatchResult:
     cancelled: bool = False
     errors: list[str] = field(default_factory=list)
     per_document_results: list[DocumentResult] = field(default_factory=list)
+    # Story 11.7: the largest count of saved pseudonyms holding a word of
+    # their own name after a document of this run was written
+    own_word_rows: int = 0
 
 
 @dataclass
@@ -204,6 +207,7 @@ class BatchWorker(QRunnable):
     def _run_batch(self) -> None:
         """Internal batch processing loop."""
         from gdpr_pseudonymizer.core.document_processor import DocumentProcessor
+        from gdpr_pseudonymizer.core.saved_own_words import own_word_rows_of
         from gdpr_pseudonymizer.data.database import init_database, open_database
         from gdpr_pseudonymizer.exceptions import FileProcessingError
 
@@ -321,6 +325,9 @@ class BatchWorker(QRunnable):
                     batch_result.total_entities += result.entities_detected
                     batch_result.new_entities += result.entities_new
                     batch_result.reused_entities += result.entities_reused
+                    batch_result.own_word_rows = max(
+                        batch_result.own_word_rows, own_word_rows_of(result)
+                    )
 
                     # Track written file for cancel cleanup
                     if output_file.exists():

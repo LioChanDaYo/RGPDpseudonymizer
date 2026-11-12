@@ -16,6 +16,7 @@ This document provides complete reference documentation for the `gdpr-pseudo` co
   - [import-mappings](#import-mappings)
   - [export](#export)
   - [delete-mapping](#delete-mapping)
+  - [replace-pseudonym](#replace-pseudonym)
   - [list-entities](#list-entities)
   - [destroy-table](#destroy-table)
 - [GDPR Compliance](#gdpr-compliance)
@@ -323,6 +324,7 @@ gdpr-pseudo validate-mappings [OPTIONS]
 | `--passphrase TEXT` | `-p` | (prompt) | Database passphrase |
 | `--interactive` | `-i` | | Interactive mode to review each mapping |
 | `--type TEXT` | `-t` | | Filter by entity type |
+| `--own-words` | | | Show only the mappings whose pseudonym contains a word of the name it replaces |
 
 **Examples:**
 ```bash
@@ -334,9 +336,14 @@ gdpr-pseudo validate-mappings --interactive
 
 # Filter by entity type
 gdpr-pseudo validate-mappings --type PERSON
+
+# Show only the pseudonyms that hold a word of their own name
+gdpr-pseudo validate-mappings --own-words
 ```
 
 **Note:** This command is read-only and does not modify the database.
+
+**Pseudonyms that hold a word of their own name:** a database filled before version 2.3.1 can hold pseudonyms that keep a word of the name they stand for ("Élodie Martin" saved as "Élodie Lucas"). The table flags them `OWN`, and the summary counts them. `--own-words` lists only them, with their ID and the word found; replace them with [`replace-pseudonym`](#replace-pseudonym).
 
 ---
 
@@ -515,6 +522,55 @@ Every deletion creates an `ERASURE` entry in the operations table with:
 - Optional reason text (from `--reason` flag): your request reference, never the person's name
 
 The entry does not keep the deleted name (since version 2.3.0).
+
+---
+
+### replace-pseudonym
+
+Replace pseudonyms that contain a word of the name they replace.
+
+A database filled before version 2.3.1 can hold such pseudonyms ("Élodie Martin" saved as "Élodie Lucas"): every later document writes that word in clear, and a saved first or last name is passed on to everyone who shares it. `validate-mappings --own-words` lists them. This command gives them a new pseudonym. The pseudonyms of the names that share the replaced first or last name change with them, so that one name keeps one pseudonym. Every row that will change is listed before you confirm.
+
+Documents already written keep the old pseudonyms, and this database will no longer say which name they stood for. Process their original documents again to write the new pseudonyms. Replaced pseudonyms are free again: one may later be given to another name, so old and new documents could then use the same pseudonym for two different names.
+
+**Usage:**
+```bash
+gdpr-pseudo replace-pseudonym [OPTIONS]
+```
+
+**Options:**
+
+| Option | Short | Default | Description |
+|--------|-------|---------|-------------|
+| `--db PATH` | | `mappings.db` | Database file path |
+| `--passphrase TEXT` | `-p` | (prompt) | Database passphrase |
+| `--id TEXT` | | | ID of the mapping to replace (see 'validate-mappings --own-words') |
+| `--all` | | | Replace every pseudonym that contains a word of the name it replaces |
+| `--force` | `-f` | | Skip confirmation prompt |
+
+Give exactly one of `--id` and `--all`.
+
+**Examples:**
+```bash
+# List the pseudonyms that hold a word of their own name, with their ID
+gdpr-pseudo validate-mappings --own-words
+
+# Replace one (interactive confirmation)
+gdpr-pseudo replace-pseudonym --id abc12345
+
+# Replace all of them
+gdpr-pseudo replace-pseudonym --all
+
+# Replace all of them without confirmation (for automation)
+gdpr-pseudo replace-pseudonym --all --force
+```
+
+**Exit codes:** 0 when replaced or cancelled, 1 when refused (the pseudonym of that ID holds no word of its own name, the database changed after the list was shown, the library has no free name left, or a pseudonym you chose yourself shares the replaced name), 2 on an unexpected error. When refused, nothing is replaced.
+
+**Audit Trail:**
+Every replacement creates one `REPLACEMENT` entry in the operations table with the IDs and types of the rows replaced and their count; it keeps no name and no pseudonym.
+
+When a document is written (`process`, `batch`) and the database holds such pseudonyms, the command prints a note that points to `validate-mappings --own-words`.
 
 ---
 

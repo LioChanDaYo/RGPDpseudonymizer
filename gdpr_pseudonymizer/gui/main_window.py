@@ -68,6 +68,10 @@ class MainWindow(QMainWindow):
         # Session passphrase cache: (db_path, passphrase) -- cleared on exit
         self._cached_passphrase: tuple[str, str] | None = None
 
+        # Story 11.7: the notice on saved pseudonyms that hold a word of their
+        # own name is shown once per session (reset only by a restart)
+        self._own_word_notice_shown = False
+
         # Screens added later via add_screen()
         self._screens: dict[str, int] = {}
 
@@ -142,6 +146,28 @@ class MainWindow(QMainWindow):
     @cached_passphrase.setter
     def cached_passphrase(self, value: tuple[str, str] | None) -> None:
         self._cached_passphrase = value
+
+    def notify_own_word_rows(self, count: int) -> None:
+        """Story 11.7: after a document is written, when the database holds
+        saved pseudonyms that hold a word of their own name, one toast per
+        session (D18)."""
+        if count <= 0 or self._own_word_notice_shown:
+            return
+        self._own_word_notice_shown = True
+        from gdpr_pseudonymizer.gui.i18n import qarg
+        from gdpr_pseudonymizer.gui.widgets.toast import Toast
+
+        Toast.show_message(
+            qarg(
+                self.tr(
+                    "Pseudonymes enregistrés contenant un mot du nom qu'ils "
+                    "remplacent : %1. Voir l'écran Base de correspondances."
+                ),
+                str(count),
+            ),
+            self,
+            duration_ms=8000,
+        )
 
     # ------------------------------------------------------------------
     # Menu bar

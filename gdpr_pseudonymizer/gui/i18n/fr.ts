@@ -523,6 +523,100 @@
         <source>Erreur lors de l&apos;export.</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <location filename="../screens/database.py" line="720"/>
+        <source>Pseudonymes contenant un mot du nom qu&apos;ils remplacent : %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../screens/database.py" line="314"/>
+        <source>Afficher seulement ceux-ci</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../screens/database.py" line="593"/>
+        <source>Ce pseudonyme contient un mot du nom qu&apos;il remplace : %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../screens/database.py" line="745"/>
+        <source>Remplacer la sélection (%1)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../screens/database.py" line="315"/>
+        <source>Remplacer les pseudonymes cochés</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../screens/database.py" line="318"/>
+        <source>Modifier les pseudonymes cochés qui contiennent un mot du nom qu&apos;ils remplacent</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../screens/database.py" line="826"/>
+        <source>Remplacer %1 pseudonyme(s) ?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../screens/database.py" line="790"/>
+        <source>Ces pseudonymes contiennent un mot du nom qu&apos;ils remplacent et vont être modifiés :
+
+%1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../screens/database.py" line="806"/>
+        <source>Ces correspondances partagent leur prénom ou leur nom de famille avec les précédentes et changeront aussi, pour qu&apos;un même nom garde un seul pseudonyme :
+
+%1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../screens/database.py" line="813"/>
+        <source>Les documents déjà écrits gardent l&apos;ancien pseudonyme, et la base de données ne dira plus à quel nom il correspondait. Traitez à nouveau leurs documents d&apos;origine pour écrire le nouveau pseudonyme. Un pseudonyme remplacé redevient libre : il pourra plus tard être donné à un autre nom, et un même pseudonyme pourrait alors désigner deux noms différents dans les anciens et les nouveaux documents.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../screens/database.py" line="781"/>
+        <source>• %1 → %2 (mot : %3)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../screens/database.py" line="798"/>
+        <source>• %1 → %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../screens/database.py" line="828"/>
+        <source>Remplacer (%1)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../screens/database.py" line="886"/>
+        <source>%1 pseudonyme(s) remplacé(s).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../screens/database.py" line="851"/>
+        <source>La base de données a changé depuis l&apos;affichage. Aucun pseudonyme n&apos;a été remplacé ; réessayez.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../screens/database.py" line="862"/>
+        <source>Aucun nouveau pseudonyme libre n&apos;a été trouvé. Aucun pseudonyme n&apos;a été remplacé.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../screens/database.py" line="856"/>
+        <source>Le pseudonyme à remplacer partage un prénom ou un nom de famille avec un pseudonyme que vous avez choisi. Aucun pseudonyme n&apos;a été remplacé.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../screens/database.py" line="755"/>
+        <source>… et %1 autre(s)</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>DropZone</name>
@@ -890,6 +984,11 @@ ou cliquez pour ouvrir</source>
     <message>
         <location filename="../main_window.py" line="414"/>
         <source>Outil de pseudonymisation conforme au RGPD pour les documents en français.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main_window.py" line="163"/>
+        <source>Pseudonymes enregistrés contenant un mot du nom qu&apos;ils remplacent : %1. Voir l&apos;écran Base de correspondances.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

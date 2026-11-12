@@ -17,6 +17,7 @@ from rich.table import Table
 
 from gdpr_pseudonymizer.cli.formatters import format_error_message
 from gdpr_pseudonymizer.cli.passphrase import resolve_passphrase
+from gdpr_pseudonymizer.core.saved_own_words import OwnWordRow, find_own_word_rows
 from gdpr_pseudonymizer.data.database import open_database
 from gdpr_pseudonymizer.data.models import Entity
 from gdpr_pseudonymizer.data.repositories.mapping_repository import (
@@ -56,6 +57,14 @@ def validate_mappings_command(
         "-t",
         help="Filter by entity type (PERSON/LOCATION/ORG)",
     ),
+    own_words: bool = typer.Option(
+        False,
+        "--own-words",
+        help=(
+            "Show only the mappings whose pseudonym contains a word of the "
+            "name it replaces"
+        ),
+    ),
 ) -> None:
     """Review existing mappings without processing documents.
 
@@ -71,6 +80,9 @@ def validate_mappings_command(
 
         # Interactive review mode
         gdpr-pseudo validate-mappings --interactive
+
+        # Only the pseudonyms that hold a word of their own name (Story 11.7)
+        gdpr-pseudo validate-mappings --own-words
 
         # Filter by entity type
         gdpr-pseudo validate-mappings --type PERSON
@@ -117,10 +129,16 @@ def validate_mappings_command(
                 console.print("\n[yellow]No mappings found in database.[/yellow]")
                 sys.exit(0)
 
-            if interactive:
+            # Story 11.7: the saved pseudonyms that hold a word of their own
+            # name (read-only)
+            found = {row.entity_id: row for row in find_own_word_rows(entities)}
+
+            if own_words:
+                _display_own_words(entities, found)
+            elif interactive:
                 _interactive_review(entities)
             else:
-                _display_validation_table(entities)
+                _display_validation_table(entities, found)
 
             logger.info(
                 "mappings_validated",
@@ -167,12 +185,17 @@ def validate_mappings_command(
         sys.exit(2)
 
 
-def _display_validation_table(entities: list[Entity]) -> None:
+def _display_validation_table(
+    entities: list[Entity], found: dict[str, OwnWordRow] | None = None
+) -> None:
     """Display mappings in a validation table with metadata.
 
     Args:
         entities: List of entities to display
+        found: The rows whose pseudonym holds a word of their own name, by id
+            (Story 11.7: flagged OWN)
     """
+    found = found or {}
     console.print(
         f"\n[bold]Mapping Validation Review[/bold] ({len(entities)} mappings)\n"
     )
@@ -180,14 +203,19 @@ def _display_validation_table(entities: list[Entity]) -> None:
         "[dim]This is a read-only view. No modifications will be made.[/dim]\n"
     )
 
+    # Story 11.7 (Codex review 3): the table fits an 80-column terminal with
+    # every row's flags visible. The short columns keep their width; the
+    # name and the pseudonym wrap (a word longer than the column is folded);
+    # Flags comes before Created, so a terminal narrower still cuts the
+    # date, never the flags.
     table = Table(show_header=True, header_style="bold cyan")
-    table.add_column("#", width=4)
-    table.add_column("Type", width=10)
-    table.add_column("Original", min_width=18)
-    table.add_column("Pseudonym", min_width=18)
-    table.add_column("Confidence", width=10, justify="right")
-    table.add_column("Created", width=12)
-    table.add_column("Flags", width=10)
+    table.add_column("#", no_wrap=True)
+    table.add_column("Type", no_wrap=True)
+    table.add_column("Original", overflow="fold")
+    table.add_column("Pseudonym", overflow="fold")
+    table.add_column("Confidence", justify="right", no_wrap=True)
+    table.add_column("Flags", no_wrap=True)
+    table.add_column("Created", no_wrap=True)
 
     for idx, entity in enumerate(entities, 1):
         # Format confidence
@@ -211,6 +239,8 @@ def _display_validation_table(entities: list[Entity]) -> None:
             flags.append("[yellow]AMB[/yellow]")
         if entity.confidence_score and entity.confidence_score < 0.85:
             flags.append("[red]LOW[/red]")
+        if entity.id in found:
+            flags.append("[red]OWN[/red]")
         flags_str = " ".join(flags) if flags else "[green]OK[/green]"
 
         table.add_row(
@@ -219,8 +249,8 @@ def _display_validation_table(entities: list[Entity]) -> None:
             entity.full_name,
             entity.pseudonym_full,
             f"[{conf_color}]{conf_str}[/{conf_color}]",
-            timestamp_str,
             flags_str,
+            timestamp_str,
         )
 
     console.print(table)
@@ -237,6 +267,48 @@ def _display_validation_table(entities: list[Entity]) -> None:
         console.print(f"  • Ambiguous (AMB): [yellow]{ambiguous_count}[/yellow]")
     if low_conf_count:
         console.print(f"  • Low confidence (LOW): [red]{low_conf_count}[/red]")
+    own_count = sum(1 for e in entities if e.id in found)
+    if own_count:
+        console.print(
+            f"  • Pseudonym holds a word of its own name (OWN): [red]{own_count}[/red]"
+        )
+
+
+def _display_own_words(entities: list[Entity], found: dict[str, OwnWordRow]) -> None:
+    """Story 11.7: only the mappings whose pseudonym holds a word of their own
+    name, with their ID (as list-entities shows it) and the word found, then
+    how to replace them. Read-only.
+
+    Args:
+        entities: The mappings read
+        found: The rows the check finds, by id
+    """
+    rows = [entity for entity in entities if entity.id in found]
+    if not rows:
+        console.print("\nNo pseudonym holds a word of its own name.")
+        return
+
+    # Fits an 80-column terminal, ID and Word always visible (Codex review 3)
+    table = Table(show_header=True, header_style="bold cyan")
+    table.add_column("ID", no_wrap=True)
+    table.add_column("Type", no_wrap=True)
+    table.add_column("Original", overflow="fold")
+    table.add_column("Pseudonym", overflow="fold")
+    table.add_column("Word", overflow="fold")
+    for entity in rows:
+        table.add_row(
+            entity.id[:8] if entity.id else "-",
+            entity.entity_type,
+            entity.full_name,
+            entity.pseudonym_full,
+            found[entity.id].word,
+        )
+    console.print()
+    console.print(table)
+    console.print(
+        "\nReplace one with 'gdpr-pseudo replace-pseudonym --id <id>', or all of "
+        "them with 'gdpr-pseudo replace-pseudonym --all'."
+    )
 
 
 def _interactive_review(entities: list[Entity]) -> None:

@@ -1,4 +1,6 @@
-"""Database management screen for entity listing, search, deletion, and export.
+"""Database management screen for entity listing, search, deletion, export,
+and the replacement of saved pseudonyms that hold a word of their own name
+(Story 11.7).
 
 Provides Article 17 RGPD-compliant entity deletion with audit logging.
 All database operations run on background threads via DatabaseWorker.
@@ -11,6 +13,7 @@ from typing import TYPE_CHECKING, Any
 
 from PySide6.QtCore import QEvent, Qt, QTimer
 from PySide6.QtWidgets import (
+    QCheckBox,
     QComboBox,
     QFileDialog,
     QHBoxLayout,
@@ -55,6 +58,10 @@ ENTITY_TYPE_LABELS: dict[str, str] = {
 # Threshold: use background thread for search/filter above this count
 _SEARCH_BACKGROUND_THRESHOLD = 200
 
+# Story 11.7: each list of the replacement's confirmation shows at most this
+# many lines (ConfirmDialog has no scroll)
+_CONFIRM_LIST_LINES = 10
+
 
 class DatabaseScreen(QWidget):
     """Database management screen with entity listing, search, delete, export."""
@@ -68,6 +75,9 @@ class DatabaseScreen(QWidget):
         self._db_path = ""
         self._passphrase = ""
         self._selected_ids: set[str] = set()
+        # Story 11.7: the rows whose pseudonym holds a word of their own name
+        # (row id -> word), found by the "list" worker
+        self._own_words: dict[str, str] = {}
 
         # Worker lifecycle
         self._current_worker: DatabaseWorker | None = None
@@ -154,6 +164,20 @@ class DatabaseScreen(QWidget):
         self._info_label.setObjectName("secondaryLabel")
         layout.addWidget(self._info_label)
 
+        # Story 11.7: the count of saved pseudonyms that hold a word of their
+        # own name, and a tick box that shows only them (hidden at 0)
+        own_row = QHBoxLayout()
+        self._own_words_label = QLabel("")
+        self._own_words_label.setObjectName("secondaryLabel")
+        self._own_words_label.setVisible(False)
+        own_row.addWidget(self._own_words_label)
+        self._own_words_only = QCheckBox()
+        self._own_words_only.setVisible(False)
+        self._own_words_only.toggled.connect(self._on_own_words_only_toggled)
+        own_row.addWidget(self._own_words_only)
+        own_row.addStretch()
+        layout.addLayout(own_row)
+
         # Loading indicator (hidden by default)
         self._progress_bar = QProgressBar()
         self._progress_bar.setRange(0, 0)  # indeterminate by default
@@ -220,6 +244,13 @@ class DatabaseScreen(QWidget):
 
         action_row.addStretch()
 
+        # Story 11.7: replace the ticked rows the check found
+        self._replace_btn = QPushButton()
+        self._replace_btn.setObjectName("secondaryButton")
+        self._replace_btn.setEnabled(False)
+        self._replace_btn.clicked.connect(self._replace_selected)
+        action_row.addWidget(self._replace_btn)
+
         self._delete_btn = QPushButton()
         self._delete_btn.setObjectName("secondaryButton")
         self._delete_btn.setEnabled(False)
@@ -279,6 +310,17 @@ class DatabaseScreen(QWidget):
         )
         self._status_label.setText(self.tr("0 correspondances"))
         self._delete_btn.setText(self.tr("Supprimer la sélection (0)"))
+        # Story 11.7
+        self._own_words_only.setText(self.tr("Afficher seulement ceux-ci"))
+        self._replace_btn.setAccessibleName(self.tr("Remplacer les pseudonymes cochés"))
+        self._replace_btn.setAccessibleDescription(
+            self.tr(
+                "Modifier les pseudonymes cochés qui contiennent un mot du nom "
+                "qu'ils remplacent"
+            )
+        )
+        self._refresh_own_words()
+        self._update_replace_button()
         self._export_btn.setText(self.tr("Exporter"))
         # Loading indicator i18n
         self._progress_bar.setAccessibleName(self.tr("Indicateur de chargement"))
@@ -324,8 +366,19 @@ class DatabaseScreen(QWidget):
         Args:
             worker: The DatabaseWorker to run.
             non_cancellable: If True, disable interactive controls during operation.
+
+        A worker that changes the database (delete, replace, export) is never
+        cancelled or replaced: while it runs or waits for the database lock,
+        another worker is not started (Codex review of Story 11.7: a search
+        started by the tick box cancelled a replacement that still committed,
+        and left the screen with old values and disabled controls). The
+        change's completion reloads the table.
         """
         from PySide6.QtCore import QThreadPool
+
+        if self._change_running():
+            logger.info("db_worker_not_started_during_change")
+            return
 
         self._cancel_current_worker()
         self._current_worker = worker
@@ -342,9 +395,20 @@ class DatabaseScreen(QWidget):
             self._search_field.setEnabled(False)
             self._type_filter.setEnabled(False)
             self._delete_btn.setEnabled(False)
+            self._replace_btn.setEnabled(False)
             self._export_btn.setEnabled(False)
+            # Every other control that starts a worker (Codex review of
+            # Story 11.7)
+            self._own_words_only.setEnabled(False)
+            self._open_btn.setEnabled(False)
+            self._browse_btn.setEnabled(False)
 
         QThreadPool.globalInstance().start(worker)
+
+    def _change_running(self) -> bool:
+        """Whether a worker that changes the database (delete, replace,
+        export) runs or waits for the database lock."""
+        return self._current_worker is not None and self._is_non_cancellable_op
 
     def _on_progress(self, percent: int, message: str) -> None:
         """Update progress bar from worker signal."""
@@ -362,6 +426,9 @@ class DatabaseScreen(QWidget):
         if self._is_non_cancellable_op:
             self._search_field.setEnabled(True)
             self._type_filter.setEnabled(True)
+            self._own_words_only.setEnabled(True)
+            self._open_btn.setEnabled(True)
+            self._browse_btn.setEnabled(True)
             # Re-enable buttons based on state
             self._update_status()
             self._export_btn.setEnabled(len(self._entities) > 0)
@@ -478,6 +545,9 @@ class DatabaseScreen(QWidget):
             return
 
         self._entities = result.entities
+        # Story 11.7: found in the worker thread
+        self._own_words = dict(getattr(result, "own_words", {}) or {})
+        self._refresh_own_words()
 
         self._info_label.setText(
             qarg(
@@ -537,8 +607,19 @@ class DatabaseScreen(QWidget):
             # Entity name
             self._entity_table.setItem(row, 2, QTableWidgetItem(entity.full_name))
 
-            # Pseudonym
-            self._entity_table.setItem(row, 3, QTableWidgetItem(entity.pseudonym_full))
+            # Pseudonym (Story 11.7: a found row's cell names the word)
+            pseudonym_item = QTableWidgetItem(entity.pseudonym_full)
+            word = self._own_words.get(entity.id)
+            if word is not None:
+                pseudonym_item.setToolTip(
+                    qarg(
+                        self.tr(
+                            "Ce pseudonyme contient un mot du nom qu'il remplace : %1"
+                        ),
+                        word,
+                    )
+                )
+            self._entity_table.setItem(row, 3, pseudonym_item)
 
         self._entity_table.blockSignals(False)
         self._update_status()
@@ -558,7 +639,8 @@ class DatabaseScreen(QWidget):
         search = composed(self._search_field.text().strip())
         type_filter = self._type_filter.currentData()
 
-        if not search and not type_filter:
+        only = self._own_words_only.isChecked() and bool(self._own_words)
+        if not search and not type_filter and not only:
             self._populate_entity_table()
             return
 
@@ -568,9 +650,16 @@ class DatabaseScreen(QWidget):
         else:
             self._apply_filters_inline(search, type_filter)
 
+    def _filter_base(self) -> list[Entity]:
+        """The rows the filters start from: Story 11.7's tick box narrows
+        them to the rows the check found."""
+        if self._own_words_only.isChecked() and self._own_words:
+            return [e for e in self._entities if e.id in self._own_words]
+        return self._entities
+
     def _apply_filters_inline(self, search: str, type_filter: str) -> None:
         """In-memory filtering for small datasets (GUI thread)."""
-        filtered = self._entities
+        filtered = self._filter_base()
         if type_filter:
             filtered = [e for e in filtered if e.entity_type == type_filter]
         if search:
@@ -592,7 +681,7 @@ class DatabaseScreen(QWidget):
 
         worker = DatabaseWorker(
             "search",
-            entities=list(self._entities),  # shallow copy for thread safety
+            entities=list(self._filter_base()),  # shallow copy for thread safety
             search_text=search,
             type_filter=type_filter,
         )
@@ -640,14 +729,205 @@ class DatabaseScreen(QWidget):
         self._delete_btn.setText(
             qarg(self.tr("Supprimer la sélection (%1)"), str(selected))
         )
-        self._delete_btn.setEnabled(selected > 0)
+        # Codex review 2 of Story 11.7: ticking rows while a change runs
+        # enables no action (the change's end enables them again)
+        self._delete_btn.setEnabled(selected > 0 and not self._change_running())
+        self._update_replace_button()
+
+    # ------------------------------------------------------------------
+    # Story 11.7: saved pseudonyms that hold a word of their own name
+    # ------------------------------------------------------------------
+
+    def _refresh_own_words(self) -> None:
+        """The count line and the tick box, shown only when rows are found."""
+        count = len(self._own_words)
+        self._own_words_label.setText(
+            qarg(
+                self.tr("Pseudonymes contenant un mot du nom qu'ils remplacent : %1"),
+                str(count),
+            )
+        )
+        self._own_words_label.setVisible(count > 0)
+        self._own_words_only.setVisible(count > 0)
+        if count == 0 and self._own_words_only.isChecked():
+            self._own_words_only.blockSignals(True)
+            self._own_words_only.setChecked(False)
+            self._own_words_only.blockSignals(False)
+
+    def _on_own_words_only_toggled(self, _checked: bool) -> None:
+        self._apply_filters()
+
+    def _ticked_own_words(self) -> list[str]:
+        """The ticked rows the check found (other ticked rows are ignored)."""
+        return [
+            e.id
+            for e in self._entities
+            if e.id in self._selected_ids and e.id in self._own_words
+        ]
+
+    def _update_replace_button(self) -> None:
+        count = len(self._ticked_own_words())
+        self._replace_btn.setText(
+            qarg(self.tr("Remplacer la sélection (%1)"), str(count))
+        )
+        self._replace_btn.setEnabled(count > 0 and not self._change_running())
+
+    def _confirm_lines(self, lines: list[str]) -> str:
+        """A list of the confirmation, cut after 10 lines (D19)."""
+        shown = lines[:_CONFIRM_LIST_LINES]
+        if len(lines) > _CONFIRM_LIST_LINES:
+            shown.append(
+                qarg(
+                    self.tr("\u2026 et %1 autre(s)"),
+                    str(len(lines) - _CONFIRM_LIST_LINES),
+                )
+            )
+        return "\n".join(shown)
+
+    def _replace_selected(self) -> None:
+        """Show what changes, then replace the ticked rows the check found
+        and the rows that share their parts (``DatabaseWorker("replace")``).
+        Nothing is asked while a change runs, so no confirmed request can be
+        dropped (Codex review 2 of Story 11.7)."""
+        if self._change_running():
+            return
+        entity_ids = self._ticked_own_words()
+        if not entity_ids:
+            return
+
+        from gdpr_pseudonymizer.core.saved_own_words import (
+            STOP_CUSTOM_ROW,
+            plan_replacement,
+        )
+
+        plan = plan_replacement(self._entities, entity_ids)
+        if plan.stop_reason is not None:
+            self._show_replace_stop(plan.stop_reason == STOP_CUSTOM_ROW, False)
+            return
+
+        by_id = {e.id: e for e in self._entities}
+        leaking = [
+            qarg(
+                self.tr("\u2022 %1 \u2192 %2 (mot : %3)"),
+                by_id[own.entity_id].full_name,
+                by_id[own.entity_id].pseudonym_full,
+                own.word,
+            )
+            for own in plan.leaking
+        ]
+        message = qarg(
+            self.tr(
+                "Ces pseudonymes contiennent un mot du nom qu'ils remplacent et "
+                "vont être modifiés :\n\n%1"
+            ),
+            self._confirm_lines(leaking),
+        )
+        if plan.others:
+            others = [
+                qarg(
+                    self.tr("\u2022 %1 \u2192 %2"),
+                    by_id[other_id].full_name,
+                    by_id[other_id].pseudonym_full,
+                )
+                for other_id in plan.others
+            ]
+            message += "\n\n" + qarg(
+                self.tr(
+                    "Ces correspondances partagent leur prénom ou leur nom de "
+                    "famille avec les précédentes et changeront aussi, pour "
+                    "qu'un même nom garde un seul pseudonyme :\n\n%1"
+                ),
+                self._confirm_lines(others),
+            )
+        message += "\n\n" + self.tr(
+            "Les documents déjà écrits gardent l'ancien pseudonyme, et la base "
+            "de données ne dira plus à quel nom il correspondait. Traitez à "
+            "nouveau leurs documents d'origine pour écrire le nouveau "
+            "pseudonyme. Un pseudonyme remplacé redevient libre : il pourra "
+            "plus tard être donné à un autre nom, et un même pseudonyme "
+            "pourrait alors désigner deux noms différents dans les anciens et "
+            "les nouveaux documents."
+        )
+        count = str(len(plan.changed_ids))
+
+        from gdpr_pseudonymizer.gui.widgets.confirm_dialog import ConfirmDialog
+
+        dlg = ConfirmDialog.destructive(
+            qarg(self.tr("Remplacer %1 pseudonyme(s) ?"), count),
+            message,
+            qarg(self.tr("Remplacer (%1)"), count),
+            parent=self._main_window,
+        )
+        if not dlg.exec():
+            return
+
+        from gdpr_pseudonymizer.gui.workers.database_worker import DatabaseWorker
+
+        worker = DatabaseWorker(
+            "replace",
+            self._db_path,
+            self._passphrase,
+            entity_ids=entity_ids,
+            confirmed=plan.changed_ids,
+        )
+        worker.signals.finished.connect(self._on_replace_complete)
+        worker.signals.error.connect(self._on_db_error)
+        self._start_worker(worker, non_cancellable=True)
+
+    def _show_replace_stop(self, custom_row: bool, changed: bool) -> None:
+        """Why nothing was replaced (D14, D15, D16)."""
+        if changed:
+            message = self.tr(
+                "La base de données a changé depuis l'affichage. Aucun "
+                "pseudonyme n'a été remplacé ; réessayez."
+            )
+        elif custom_row:
+            message = self.tr(
+                "Le pseudonyme à remplacer partage un prénom ou un nom de famille "
+                "avec un pseudonyme que vous avez choisi. Aucun pseudonyme n'a "
+                "été remplacé."
+            )
+        else:
+            message = self.tr(
+                "Aucun nouveau pseudonyme libre n'a été trouvé. Aucun pseudonyme "
+                "n'a été remplacé."
+            )
+        Toast.show_message(message, self._main_window, duration_ms=6000)
+
+    def _on_replace_complete(self, result: Any) -> None:
+        """The replacement's outcome; the table is read again."""
+        from gdpr_pseudonymizer.core.saved_own_words import (
+            STOP_CHANGED,
+            STOP_CUSTOM_ROW,
+            ReplacementResult,
+        )
+
+        self._finish_operation()
+        if not isinstance(result, ReplacementResult):
+            return
+        if result.stop_reason is not None:
+            self._show_replace_stop(
+                result.stop_reason == STOP_CUSTOM_ROW,
+                result.stop_reason == STOP_CHANGED,
+            )
+        else:
+            Toast.show_message(
+                qarg(
+                    self.tr("%1 pseudonyme(s) remplacé(s)."),
+                    str(len(result.changes)),
+                ),
+                self._main_window,
+            )
+        self._load_entities()
 
     # ------------------------------------------------------------------
     # Deletion (Article 17 RGPD) — Background
     # ------------------------------------------------------------------
 
     def _delete_selected(self) -> None:
-        if not self._selected_ids:
+        # Nothing is asked while a change runs, so no confirmed request can be
+        # dropped (Codex review 2 of Story 11.7)
+        if self._change_running() or not self._selected_ids:
             return
 
         # Build confirmation list
@@ -707,6 +987,9 @@ class DatabaseScreen(QWidget):
     # ------------------------------------------------------------------
 
     def _export_csv(self) -> None:
+        # Nothing is asked while a change runs (Codex review 2 of Story 11.7)
+        if self._change_running():
+            return
         filepath, _ = QFileDialog.getSaveFileName(
             self,
             self.tr("Exporter les entités"),
@@ -757,6 +1040,18 @@ class DatabaseScreen(QWidget):
     @property
     def delete_button(self) -> QPushButton:
         return self._delete_btn
+
+    @property
+    def replace_button(self) -> QPushButton:
+        return self._replace_btn
+
+    @property
+    def own_words_label(self) -> QLabel:
+        return self._own_words_label
+
+    @property
+    def own_words_only(self) -> QCheckBox:
+        return self._own_words_only
 
     @property
     def export_button(self) -> QPushButton:

@@ -1,4 +1,5 @@
-"""Background worker for database operations (list, search, delete, export).
+"""Background worker for database operations (list, search, delete, export,
+replace).
 
 Runs database queries and file I/O on a QThreadPool thread, emitting progress
 signals for each stage. Supports cancellation via threading.Event.
@@ -31,12 +32,16 @@ class ListEntitiesResult:
     db_created_str: str = ""
     entity_count: int = 0
     last_op_str: str = ""
+    # Story 11.7: the rows whose pseudonym holds a word of their own name,
+    # row id -> the word found (checked in this worker thread)
+    own_words: dict[str, str] = field(default_factory=dict)
 
 
 class DatabaseWorker(QRunnable):
     """Background worker for database screen operations.
 
-    Supports four operation types: list, search, delete, export.
+    Supports five operation types: list, search, delete, export, replace
+    (Story 11.7).
     Each operation opens its own database session (no shared state).
 
     On success: emits ``finished`` with operation-specific result.
@@ -78,6 +83,8 @@ class DatabaseWorker(QRunnable):
                 self._delete_entities()
             elif self._operation == "export":
                 self._export_csv()
+            elif self._operation == "replace":
+                self._replace_own_words()
             else:
                 logger.error("database_worker_unknown_op", operation=self._operation)
                 self.signals.error.emit("Opération inconnue.")
@@ -128,6 +135,15 @@ class DatabaseWorker(QRunnable):
                 if self._cancelled.is_set():
                     return
 
+                # Story 11.7: the check, read-only, in this thread
+                from gdpr_pseudonymizer.core.saved_own_words import (
+                    find_own_word_rows,
+                )
+
+                own_words = {
+                    row.entity_id: row.word for row in find_own_word_rows(entities)
+                }
+
                 self.signals.progress.emit(70, "Lecture des métadonnées...")
 
                 # DB file creation date
@@ -162,6 +178,7 @@ class DatabaseWorker(QRunnable):
                     db_created_str=db_created_str,
                     entity_count=len(entities),
                     last_op_str=last_op_str,
+                    own_words=own_words,
                 )
             )
 
@@ -359,6 +376,68 @@ class DatabaseWorker(QRunnable):
             )
             self.signals.error.emit(
                 "Erreur inattendue lors de la suppression des entités."
+            )
+
+    def _replace_own_words(self) -> None:
+        """Story 11.7: replace the rows asked (``entity_ids``) and the rows
+        that share their parts, if they are still the rows the user saw
+        (``confirmed``). Emits the ``ReplacementResult``; the screen shows
+        its outcome. No name, pseudonym or word is logged."""
+        from gdpr_pseudonymizer.core.saved_own_words import replace_own_word_rows
+        from gdpr_pseudonymizer.data.database import open_database
+        from gdpr_pseudonymizer.exceptions import (
+            CorruptedDatabaseError,
+            DatabaseError,
+            EncryptionError,
+        )
+
+        entity_ids: list[str] | None = self._kwargs.get("entity_ids")
+        confirmed: frozenset[str] | None = self._kwargs.get("confirmed")
+
+        self.signals.progress.emit(5, "Remplacement des pseudonymes...")
+
+        if self._cancelled.is_set():
+            return
+
+        try:
+            with open_database(self._db_path, self._passphrase) as db_session:
+                result = replace_own_word_rows(db_session, entity_ids, confirmed)
+
+            self.signals.progress.emit(100, "Terminé")
+            self.signals.finished.emit(result)
+
+        except ValueError as e:
+            if "passphrase" in str(e).lower():
+                self.is_passphrase_error = True
+                self.signals.error.emit("Phrase secrète incorrecte.")
+            else:
+                logger.error("db_replace_failed", error_type=type(e).__name__)
+                self.signals.error.emit(
+                    "Erreur inattendue lors du remplacement des pseudonymes."
+                )
+
+        except EncryptionError:
+            self.signals.error.emit(
+                "Erreur de déchiffrement. Les données sont peut-être corrompues."
+            )
+
+        except CorruptedDatabaseError:
+            self.signals.error.emit("La base de données est corrompue ou invalide.")
+
+        except DatabaseError as e:
+            logger.error("db_replace_failed", error_type=type(e).__name__)
+            self.signals.error.emit("Erreur lors de l'accès à la base de données.")
+
+        except OSError as e:
+            logger.error("db_replace_io_error", error_type=type(e).__name__)
+            self.signals.error.emit(
+                "Impossible d'accéder au fichier de base de données."
+            )
+
+        except Exception as e:
+            logger.error("db_replace_unexpected", error_type=type(e).__name__)
+            self.signals.error.emit(
+                "Erreur inattendue lors du remplacement des pseudonymes."
             )
 
     def _export_csv(self) -> None:

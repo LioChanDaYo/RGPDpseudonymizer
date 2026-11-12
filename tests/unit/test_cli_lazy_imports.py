@@ -17,6 +17,7 @@ EXPECTED_COMMANDS = [
     "init",
     "list-mappings",
     "process",
+    "replace-pseudonym",
     "stats",
     "validate-mappings",
 ]

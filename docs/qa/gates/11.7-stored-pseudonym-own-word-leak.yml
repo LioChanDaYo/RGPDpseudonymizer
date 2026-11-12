@@ -1,0 +1,67 @@
+schema: 1
+story: '11.7'
+story_title: 'Stored Pseudonyms That Leak a Word of Their Own Name'
+scope: 'Re-gate on head df60c84 (PR #124, draft; base main 7be0a07), the dev''s fix of the first gate''s findings on top of QA''s 0acecf5. First gate: CONCERNS on 73587f4 (DOC-117-01 medium; REQ-117-01, PERF-117-01, REL-117-01, TEST-117-01 low). QA folder: rgpd-analysis/r117/qa (scripts and logs, never committed).'
+gate: PASS
+status_reason: 'Every finding of the first gate is fixed on df60c84 except PERF-117-01, left by the orchestrator because Fix design 7 asks for it (low, a short freeze on one click). The C18 singular now matches the approved text, the new tests fail on the parent package at the asserts that pin the fixes and pass on the head, and the local suites are green.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-11-12T10:30:00Z'
+
+top_issues:
+  - id: 'PERF-117-01'
+    severity: low
+    finding: 'The desktop builds the replacement plan on the window''s thread when « Remplacer la sélection » is clicked (_replace_selected, gui/screens/database.py:773, plan_replacement, which runs the whole check again). QA timing on real-shaped rows: 273 ms at 10,000 rows, 549 ms at 20,000. Fix design 7 asks for exactly this, and AC3''s report check runs in the "list" worker as required. Left as is by the orchestrator (2026-11-12).'
+    suggested_action: 'Lionel''s yes or no on a BACKLOG entry: plan from the worker''s own_words, or build the plan in a DatabaseWorker operation, with a pull trigger such as a user report of a frozen window on a large database.'
+    suggested_owner: po
+
+waiver: { active: false }
+
+quality_score: 100
+
+expires: '2026-11-26T10:30:00Z'
+
+merge_blockers: []
+
+merge_notes:
+  - 'DOC-117-01 fixed: notice_line(1) == "Note: 1 saved pseudonym holds a word of its own name. See ''gdpr-pseudo validate-mappings --own-words''.", and the plural is unchanged, both equal to stopb-11.7-texts-final.md (QA direct call). T18''s C18_ONE corrected. QA''s texts.py finds every other C, D and CL1 text unchanged and matching.'
+  - 'REL-117-01 fixed: replace_own_word_rows returns "changed" for any stop found under the lock when the user confirmed a plan (saved_own_words.py:464-469). Both entry points exit on a plan-time stop before confirming, so a stop under the lock can only come from rows that changed in between; --all with confirmed=None behaves as before. The command line now prints C17e, the desktop D14.'
+  - 'REQ-117-01 resolved by the orchestrator: The rule (find) and Fix design 1 now describe the code (a refused run goes on to the next one); the new T1 case « Groupe Pivelard Est Lyon » -> « Groupe Commercial Lyon » (word « Lyon ») passes. Held-out-blind check of its words: Est, Commercial, Lyon pass; Pivelard is flagged only because it is an invented name (like « Pivel », « Pivelle »), which the story exempts.'
+  - 'TEST-117-01 fixed: T24 (batch --workers 1: the note once, count 3) and G8 (desktop BatchWorker own_word_rows == 3). The two tabular write paths stay covered by the shared _own_word_count only, by construction.'
+  - 'The 22-database --all check was not re-run: df60c84 changes only the note text and the stop reason when a confirmed plan meets a stop; --all with confirmed=None, the draw and the write are untouched. The first gate''s reading stands: 107 found, 31 groups, 247 rows changed, every invariant at 0, 31 later documents with no leak.'
+  - 'Observation for Lionel (unchanged): where every library place is already used (all « mix » databases), a replaced place gets a Location-NNN fallback, as AC6 allows and the user sees.'
+  - 'This gate file and the story''s QA Results are QA''s own outputs, the expected exception to AC16''s file list.'
+  - 'QA started no Codex, Forge, Anvil or Cato process. Codex (Task 6.3) is the orchestrator''s, now that QA gives a PASS.'
+
+evidence:
+  tests_reviewed: 45
+  risks_identified: 5
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
+    ac_gaps: []
+  ac_notes:
+    fix_proof: 'Head''s tests against 0acecf5''s package (git archive 0acecf5 gdpr_pseudonymizer, imported first and asserted; basepytest.py): T18 fails at "assert C18_ONE in _lines(shown)", T23 at "assert _holds_lines(shown, *C17E)", G7 at "assert stops == [(False, True)]"; T1 org_place_word_after_common_word, T24 and G8 pass there (they pin behaviour the code already had). On df60c84 all six pass.'
+    tests: 'df60c84 local: the two new files and the leakage guards (GUI last) 59 passed; tests/unit -m "not slow" -n auto --dist loadscope --timeout=300 3268 passed, 3 skipped (73587f4 + the 5 new cases).'
+    AC12: 'Unchanged by df60c84 (the note''s text and a stop reason only). First gate: +30, +18 ms and noise on 1,061 rows against about 64 ms.'
+    AC13: 'Tests first proven on b8a795f (first gate): 37 xfailed, 0 XPASS on all four legs. The fix commit''s new tests are QA-requested additions, unmarked, proven above against the parent package.'
+    AC14: 'All texts byte for byte, the C18 singular included.'
+    AC18: 'CI on df60c84 when QA read it: lint, quality, Analyze (actions, python), CodeQL pass; the four test legs pending (no reading). Installer builds and Codex are the orchestrator''s.'
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'Unchanged by df60c84: no name in logs or in the REPLACEMENT entry; writes only as confirmed; the leak of the reproduction gone and 0 replaced words in 31 later documents (first gate).'
+  performance:
+    status: PASS
+    notes: 'AC12 within budget. PERF-117-01 (low): the desktop''s click-time plan, 273 ms at 10,000 rows, left as is by decision.'
+  reliability:
+    status: PASS
+    notes: 'A replacement whose rows changed after the user confirmed now says so on both entry points (C17e, D14); nothing is written in every stop (T8, T13, T14, T22, T23, G7).'
+  maintainability:
+    status: PASS
+    notes: 'T18 pins the approved texts; the story''s find rule describes the code; black, ruff, mypy clean on df60c84 (QA, through Poetry: 348 files unchanged, ruff rc 0, mypy no issues in 109 source files).'
+
+recommendations:
+  immediate: []
+  future:
+    - action: 'Plan off the window''s thread if Lionel files it (PERF-117-01).'
+      refs: ['gdpr_pseudonymizer/gui/screens/database.py:773']
