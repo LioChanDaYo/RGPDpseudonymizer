@@ -462,7 +462,11 @@ def replace_own_word_rows(
         rows = repo.find_all()
         plan = plan_replacement(rows, entity_ids)
         if plan.stop_reason is not None:
-            return ReplacementResult(plan, stop_reason=plan.stop_reason)
+            # QA REL-117-01: the user confirmed a plan that held no stop, so a
+            # stop on the rows read now means the database changed in between
+            # (another program replaced or saved rows)
+            reason = STOP_CHANGED if confirmed is not None else plan.stop_reason
+            return ReplacementResult(plan, stop_reason=reason)
         if confirmed is not None and plan.changed_ids != frozenset(confirmed):
             return ReplacementResult(plan, stop_reason=STOP_CHANGED)
 
@@ -532,13 +536,10 @@ def notice_line(count: int) -> str:
     """The command line's note after ``process`` or ``batch`` when the
     database holds such rows (Story 11.7, C18)."""
     if count == 1:
-        held = "1 saved pseudonym holds"
+        held = "1 saved pseudonym holds a word of its own name."
     else:
-        held = f"{count} saved pseudonyms hold"
-    return (
-        f"Note: {held} a word of their own name. "
-        "See 'gdpr-pseudo validate-mappings --own-words'."
-    )
+        held = f"{count} saved pseudonyms hold a word of their own name."
+    return f"Note: {held} See 'gdpr-pseudo validate-mappings --own-words'."
 
 
 def own_word_rows_of(result: object) -> int:

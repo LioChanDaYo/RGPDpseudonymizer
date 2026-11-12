@@ -299,3 +299,65 @@ def test_notice_once_per_session(
         if "Voir" in message and "Base" in message and "3" in message
     ]
     assert len(notices) == 1, toasts  # expected failure
+
+
+def test_rows_replaced_elsewhere_say_the_database_changed(
+    screen: DatabaseScreen, tmp_path: Path, toasts: list[str]
+) -> None:
+    """G7 (QA REL-117-01): the screen listed T4's rows, then another program
+    replaced them: replacing the ticked row says the database changed (D14),
+    not that no free pseudonym was found (D15); nothing more is written."""
+    from gdpr_pseudonymizer.core.saved_own_words import replace_own_word_rows
+    from gdpr_pseudonymizer.data.database import open_database
+
+    db, _ = _db(tmp_path, T4_ROWS)
+    _open(screen, db)
+    with open_database(db, PASSPHRASE) as session:
+        other = replace_own_word_rows(session, None, None)
+    pre(other.stop_reason is None and bool(other.changes), "replaced elsewhere")
+    after = {name: row.pseudonym_full for name, row in _by_name(db).items()}
+    _tick(screen, ZQ)
+    stops: list[tuple[bool, bool]] = []
+
+    def record(custom_row: bool, changed: bool) -> None:
+        stops.append((custom_row, changed))
+
+    with (
+        patch.object(screen, "_show_replace_stop", side_effect=record),
+        _confirming(_Confirm(accept=True)),
+        patch("PySide6.QtCore.QThreadPool.start", side_effect=_sync),
+    ):
+        screen.replace_button.click()
+    assert stops == [(False, True)]
+    assert {name: row.pseudonym_full for name, row in _by_name(db).items()} == after
+
+
+def test_desktop_batch_carries_the_count(tmp_path: Path) -> None:
+    """G8 (QA TEST-117-01): the desktop batch worker's result carries the
+    largest count of its documents (3, T4's rows)."""
+    from gdpr_pseudonymizer.core.document_processor import DocumentProcessor
+    from gdpr_pseudonymizer.gui.workers.batch_worker import BatchResult, BatchWorker
+
+    db, _ = _db(tmp_path / "db", T4_ROWS)
+    files = []
+    for index in range(2):
+        path = tmp_path / f"doc{index}.txt"
+        path.write_text(DOC_QD, encoding="utf-8")
+        files.append(path)
+    output = tmp_path / "out"
+    output.mkdir()
+    worker = BatchWorker(files, output, db, PASSPHRASE)
+    results: list[Any] = []
+    errors: list[str] = []
+    worker.signals.finished.connect(results.append)
+    worker.signals.error.connect(errors.append)
+    with patch.object(
+        DocumentProcessor,
+        "_detect_and_filter_entities",
+        lambda self, text, entity_type_filter=None: _found(text, [(QD, PERSON)]),
+    ):
+        worker.run()
+    pre(len(results) == 1 and not errors, f"the batch ran: {errors}")
+    result = results[0]
+    pre(isinstance(result, BatchResult) and result.successful_files == 2, "2 written")
+    assert result.own_word_rows == 3

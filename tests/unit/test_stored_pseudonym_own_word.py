@@ -128,6 +128,21 @@ T1_CASES: dict[str, tuple[Row, str, bool]] = {
         "Groupe",
         False,
     ),
+    # QA REQ-117-01 (orchestrator, 2026-11-12): the first shared run is a
+    # common word (« Groupe »), a later one a place of the library
+    "org_place_word_after_common_word": (
+        (
+            ORG,
+            "Groupe Pivelard Est Lyon",
+            "Groupe Commercial Lyon",
+            None,
+            None,
+            None,
+            None,
+        ),
+        "Lyon",
+        True,
+    ),
 }
 T1_ROWS = [row for row, _, _ in T1_CASES.values()]
 
@@ -1025,7 +1040,7 @@ C18_MANY = (
     "See 'gdpr-pseudo validate-mappings --own-words'."
 )
 C18_ONE = (
-    "Note: 1 saved pseudonym holds a word of their own name. "
+    "Note: 1 saved pseudonym holds a word of its own name. "
     "See 'gdpr-pseudo validate-mappings --own-words'."
 )
 
@@ -1175,3 +1190,60 @@ def test_texts_byte_for_byte(tmp_path: Path) -> None:
     code, shown = _process(tmp_path, single, DOC_QD, [(QD, PERSON)], "one")
     pre(code == 0, f"process ran: {shown!r}")
     assert C18_ONE in _lines(shown), shown
+
+
+# ---------------------------------------------------------------------------
+# After QA (T23, T24; 2026-11-12)
+# ---------------------------------------------------------------------------
+
+
+def test_rows_replaced_while_the_question_waits(tmp_path: Path) -> None:
+    """T23 (QA REL-117-01): another program replaces the rows while the
+    question waits; the answer « yes » then replaces nothing and says the
+    database changed (C17e), not that the ID holds no own word (C17c)."""
+    from gdpr_pseudonymizer.core.saved_own_words import replace_own_word_rows
+
+    db, ids = _db(tmp_path, T4_ROWS)
+    other: dict[str, Any] = {}
+
+    def answer(prompt: Any, *args: Any, **kwargs: Any) -> str:
+        with open_database(db, PASSPHRASE) as session:
+            other["result"] = replace_own_word_rows(session, None, None)
+        return "yes"
+
+    with patch.object(Prompt, "ask", answer):
+        code, shown = _replace(db, "--id", ids[ZQ][:8])
+    replaced = other.get("result")
+    pre(
+        replaced is not None and replaced.stop_reason is None and replaced.changes,
+        "the other program replaced the rows",
+    )
+    after = _snapshot(db)
+    assert _holds_lines(shown, *C17E), shown
+    assert code == 1
+    assert _snapshot(db) == after
+    assert len(_replacements_logged(db)) == 1
+
+
+def test_notice_after_a_sequential_batch(tmp_path: Path) -> None:
+    """T24 (QA TEST-117-01): `batch --workers 1` (the sequential path, with
+    its review) prints the note once, the largest count of its documents."""
+    db, _ = _db(tmp_path / "db", T4_ROWS)
+    source = tmp_path / "docs"
+    source.mkdir()
+    for index in range(2):
+        (source / f"doc{index}.txt").write_text(DOC_QD, encoding="utf-8")
+    with _documents([(QD, PERSON)]):
+        code, shown = _cli(
+            "batch",
+            str(source),
+            "--db",
+            db,
+            "--workers",
+            "1",
+            "-o",
+            str(tmp_path / "out"),
+        )
+    pre(code == 0, f"batch ran: {shown!r}")
+    assert C18_MANY.format(n=3) in _lines(shown), shown
+    assert _flat(shown).count(NOTICE) == 1
