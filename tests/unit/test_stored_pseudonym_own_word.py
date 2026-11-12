@@ -945,3 +945,233 @@ def test_notice_counts_a_row_this_document_saved(tmp_path: Path) -> None:
     assert listed_code == 0, listed
     line = _line_of(listed, saved.id[:8])
     assert XB in line and "Brontel" in line
+
+
+# ---------------------------------------------------------------------------
+# The approved texts (T18, commit 5)
+# ---------------------------------------------------------------------------
+
+# Dev Notes "Exact texts", C1-C18, byte for byte (English: the PO's check;
+# the French help texts are cli.po's, shown with --lang fr)
+C2 = "  • Pseudonym holds a word of its own name (OWN): {n}"
+C3 = "Show only the mappings whose pseudonym contains a word of the name it replaces"
+C5 = (
+    "Replace one with 'gdpr-pseudo replace-pseudonym --id <id>', or all of them "
+    "with 'gdpr-pseudo replace-pseudonym --all'."
+)
+C6 = "No pseudonym holds a word of its own name."
+C7 = "Replace pseudonyms that contain a word of the name they replace"
+C8 = "ID of the mapping to replace (see 'validate-mappings --own-words')"
+C9 = "Replace every pseudonym that contains a word of the name it replaces"
+C10 = "Skip confirmation prompt"
+C11 = "These pseudonyms hold a word of their own name and will be replaced:"
+C11_LINE = "  {name} ({type}): {pseudonym}   (word: {word})"
+C12 = (
+    "These share their first or last name with them and will change too, so "
+    "that one name keeps one pseudonym:"
+)
+C12_LINE = "  {name} ({type}): {pseudonym}"
+C13 = (
+    "Documents already written keep the old pseudonyms, and this database will "
+    "no longer say which name they stood for. Process their original documents "
+    "again to write the new pseudonyms. Replaced pseudonyms are free again: one "
+    "may later be given to another name, so old and new documents could then "
+    "use the same pseudonym for two different names."
+)
+C14 = "Type 'yes' to replace these pseudonyms"
+C15 = "Replacement cancelled. No changes made."
+C16_MANY = "{n} pseudonyms replaced:"
+C16_ONE = "1 pseudonym replaced:"
+C16_LINE = "  {name} ({type}): {old} \u2192 {new}"
+C16_AUDIT = re.compile(
+    r"^REPLACEMENT audit log entry created \(operation [0-9a-f-]{8}\.\.\.\)\.$"
+)
+USAGE = (
+    "Use 'gdpr-pseudo replace-pseudonym --id <id>' or "
+    "'gdpr-pseudo replace-pseudonym --all'."
+)
+C17A = (
+    "X Error: Invalid Arguments",
+    "Provide either --id or --all, not both.",
+    f"> {USAGE}",
+)
+C17B = ("X Error: Missing Argument", "No mapping specified.", f"> {USAGE}")
+C17C = (
+    "X Error: Nothing to Replace",
+    "No mapping with this ID holds a word of its own name: {id}",
+    "> Use 'gdpr-pseudo validate-mappings --own-words' to list them.",
+)
+C17D = "No pseudonym holds a word of its own name. Nothing to replace."
+C17E = (
+    "X Error: Database Changed",
+    "The database has changed since the list was shown. Nothing was replaced.",
+    "> Run the command again.",
+)
+C17F = (
+    "X Error: No Free Pseudonym",
+    "The pseudonym library has no free name left for one of these pseudonyms. "
+    "Nothing was replaced.",
+    "> Replace the others one at a time with --id, or report this issue.",
+)
+C17G = (
+    "X Error: Chosen Pseudonym",
+    "The pseudonym of {name} shares a first or last name with a pseudonym you "
+    "chose yourself ({pseudonym}). Nothing was replaced.",
+    "> Replace the others one at a time with --id. To replace this one, first "
+    "delete the mapping of the pseudonym you chose ('gdpr-pseudo delete-mapping').",
+)
+C18_MANY = (
+    "Note: {n} saved pseudonyms hold a word of their own name. "
+    "See 'gdpr-pseudo validate-mappings --own-words'."
+)
+C18_ONE = (
+    "Note: 1 saved pseudonym holds a word of their own name. "
+    "See 'gdpr-pseudo validate-mappings --own-words'."
+)
+
+
+def _lines(shown: str) -> list[str]:
+    return [line.rstrip() for line in shown.splitlines()]
+
+
+def _holds_lines(shown: str, *expected: str) -> bool:
+    """Whether ``expected`` are consecutive non-blank lines of ``shown``."""
+    lines = [line for line in _lines(shown) if line.strip()]
+    size = len(expected)
+    return any(
+        lines[start : start + size] == list(expected)
+        for start in range(len(lines) - size + 1)
+    )
+
+
+def _help(*command: str) -> str:
+    """A command's English help, whitespace collapsed (the panel's borders
+    left out)."""
+    from gdpr_pseudonymizer.cli.i18n import set_language
+
+    try:
+        _, shown = _cli("--lang", "en", *command, "--help")
+    finally:
+        set_language("en")
+    return _flat(shown.replace("│", " "))
+
+
+def test_texts_byte_for_byte(tmp_path: Path) -> None:
+    """T18 (AC14): every command line text, C1 to C18, as approved, through
+    the commands (the singulars of C16 and C18 included)."""
+    # C3, C7-C10: the help texts
+    assert C3 in _help("validate-mappings")
+    replace_help = _help("replace-pseudonym")
+    for text in (C7, C8, C9, C10):
+        assert text in replace_help, text
+
+    # C1, C2, C4, C5: a database that holds T4's three rows
+    db, ids = _db(tmp_path / "t4", T4_ROWS)
+    code, shown = _validate(db)
+    assert code == 0, shown
+    assert C2.format(n=3) in _lines(shown)
+    assert shown.count("OWN") == 4, shown  # three flags and the summary line
+    code, shown = _own_words(db)
+    assert code == 0, shown
+    header = _line_of(shown, " ID ")
+    assert " Word " in header, header
+    assert C5 in _lines(shown)
+
+    # C6 and C17d: a database with none
+    clean, _ = _db(tmp_path / "clean", [QD_ROW])
+    code, shown = _own_words(clean)
+    assert code == 0 and C6 in _lines(shown), shown
+    code, shown = _replace(clean, "--all", "--force")
+    assert code == 0 and C17D in _lines(shown), shown
+
+    # C11, C13, C14, C15: the question, answered « no »
+    code, shown = _replace(db, "--id", ids[ZQ][:8], typed="no\n")
+    assert code == 0, shown
+    assert C11 in _lines(shown)
+    word_line = C11_LINE.format(
+        name=ZQ, type=PERSON, pseudonym="Zorbal Brontel", word="Zorbal"
+    )
+    assert word_line in _lines(shown)
+    assert C13 in _lines(shown)
+    assert f"{C14}:" in shown
+    assert C15 in _lines(shown)
+
+    # C12: a row that changes with the one replaced
+    shared, shared_ids = _db(tmp_path / "t5", [XB_ROW, ZB_ROW])
+    code, shown = _replace(shared, "--id", shared_ids[XB][:8], typed="no\n")
+    assert code == 0, shown
+    assert _holds_lines(
+        shown,
+        C12,
+        C12_LINE.format(name="Zorbal Brontel", type=PERSON, pseudonym="Quilla Xantor"),
+    ), shown
+
+    # C16, plural then singular
+    before = _by_name(db)
+    code, shown = _replace(db, "--id", ids[ZQ][:8], "--force")
+    assert code == 0, shown
+    after = _by_name(db)
+    assert C16_MANY.format(n=3) in _lines(shown)
+    for name in (ZQ, ZM, "Zorbal"):
+        line = C16_LINE.format(
+            name=name,
+            type=PERSON,
+            old=before[name].pseudonym_full,
+            new=after[name].pseudonym_full,
+        )
+        assert line in _lines(shown), line
+    assert any(C16_AUDIT.match(line) for line in _lines(shown)), shown
+    lone, lone_ids = _db(tmp_path / "lone", [LONE_ROW])
+    code, shown = _replace(lone, "--id", lone_ids["Zorbal"], "--force")
+    assert code == 0 and C16_ONE in _lines(shown), shown
+
+    # C17a, C17b, C17c, C17f, C17g
+    code, shown = _replace(db, "--id", "1234", "--all")
+    assert code == 1 and _holds_lines(shown, *C17A), shown
+    code, shown = _replace(db)
+    assert code == 1 and _holds_lines(shown, *C17B), shown
+    clean_id = _by_name(clean)[QD].id[:8]
+    code, shown = _replace(clean, "--id", clean_id)
+    expected = (C17C[0], C17C[1].format(id=clean_id), C17C[2])
+    assert code == 1 and _holds_lines(shown, *expected), shown
+    exhausted, exhausted_ids = _db(tmp_path / "t8", [XB_ROW])
+    with _forced({}, last_names=["Xantor"]):
+        code, shown = _replace(exhausted, "--id", exhausted_ids[XB][:8], "--force")
+    assert code == 1 and _holds_lines(shown, *C17F), shown
+    chosen, chosen_ids = _db(tmp_path / "t14", [XB_ROW])
+    _save(chosen, [ZB_ROW], "custom")
+    code, shown = _replace(chosen, "--id", chosen_ids[XB][:8], "--force")
+    expected = (
+        C17G[0],
+        C17G[1].format(name=XB, pseudonym="Quilla Xantor"),
+        C17G[2],
+    )
+    assert code == 1 and _holds_lines(shown, *expected), shown
+
+    # C17e: the rows changed between the list and the replacement
+    import gdpr_pseudonymizer.cli.commands.replace_pseudonym as command
+    from gdpr_pseudonymizer.core.saved_own_words import (
+        ReplacementPlan,
+        ReplacementResult,
+    )
+
+    changed, changed_ids = _db(tmp_path / "t13", [ZQ_ROW])
+    with patch.object(
+        command,
+        "replace_own_word_rows",
+        lambda *args, **kwargs: ReplacementResult(
+            ReplacementPlan(), stop_reason="changed"
+        ),
+    ):
+        code, shown = _replace(changed, "--id", changed_ids[ZQ][:8], "--force")
+    assert code == 1 and _holds_lines(shown, *C17E), shown
+
+    # C18, plural then singular
+    notice, _ = _db(tmp_path / "notice", T4_ROWS)
+    code, shown = _process(tmp_path, notice, DOC_QD, [(QD, PERSON)], "many")
+    pre(code == 0, f"process ran: {shown!r}")
+    assert C18_MANY.format(n=3) in _lines(shown), shown
+    single, _ = _db(tmp_path / "single", [LONE_ROW, QD_ROW])
+    code, shown = _process(tmp_path, single, DOC_QD, [(QD, PERSON)], "one")
+    pre(code == 0, f"process ran: {shown!r}")
+    assert C18_ONE in _lines(shown), shown

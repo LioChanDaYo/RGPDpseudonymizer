@@ -16,6 +16,7 @@ Ce document décrit en détail toutes les commandes et options de l'interface en
   - [import-mappings](#import-mappings)
   - [export](#export)
   - [delete-mapping](#delete-mapping)
+  - [replace-pseudonym](#replace-pseudonym)
   - [list-entities](#list-entities)
   - [destroy-table](#destroy-table)
 - [Conformité RGPD](#conformite-rgpd)
@@ -323,6 +324,7 @@ gdpr-pseudo validate-mappings [OPTIONS]
 | `--passphrase TEXTE` | `-p` | (saisie interactive) | Mot de passe de la base de données |
 | `--interactive` | `-i` | | Mode interactif : chaque correspondance est présentée individuellement |
 | `--type TEXTE` | `-t` | | Filtrer par type d'entité |
+| `--own-words` | | | Afficher uniquement les correspondances dont le pseudonyme contient un mot du nom qu'il remplace |
 
 **Exemples :**
 ```bash
@@ -334,9 +336,14 @@ gdpr-pseudo validate-mappings --interactive
 
 # Filtrer par type
 gdpr-pseudo validate-mappings --type PERSON
+
+# Afficher uniquement les pseudonymes qui contiennent un mot du nom qu'ils remplacent
+gdpr-pseudo validate-mappings --own-words
 ```
 
 **Remarque :** cette commande est en lecture seule et ne modifie pas la base de données.
+
+**Pseudonymes qui contiennent un mot du nom qu'ils remplacent :** une base de données remplie avant la version 2.3.1 peut contenir des pseudonymes qui gardent un mot du nom qu'ils remplacent (« Élodie Martin » enregistré sous « Élodie Lucas »). Le tableau les signale par `OWN` et le récapitulatif les compte. `--own-words` n'affiche qu'eux, avec leur identifiant et le mot trouvé ; remplacez-les avec [`replace-pseudonym`](#replace-pseudonym).
 
 ---
 
@@ -515,6 +522,55 @@ Chaque suppression crée une entrée `ERASURE` dans la table des opérations con
 - Le motif éventuel (option `--reason`) : la référence de la demande, jamais le nom de la personne
 
 L'entrée ne conserve pas le nom de la personne (depuis la version 2.3.0).
+
+---
+
+### replace-pseudonym
+
+Remplace les pseudonymes qui contiennent un mot du nom qu'ils remplacent.
+
+Une base de données remplie avant la version 2.3.1 peut contenir de tels pseudonymes (« Élodie Martin » enregistré sous « Élodie Lucas ») : chaque document écrit ensuite laisse ce mot en clair, et un prénom ou un nom de famille enregistré est transmis à toutes les personnes qui le partagent. `validate-mappings --own-words` les affiche. Cette commande leur donne un nouveau pseudonyme. Les pseudonymes des noms qui partagent le prénom ou le nom de famille remplacé changent avec eux, pour qu'un même nom garde un seul pseudonyme. Toutes les correspondances qui vont changer sont affichées avant la confirmation.
+
+Les documents déjà écrits gardent l'ancien pseudonyme, et la base de données ne dira plus à quel nom il correspondait. Traitez à nouveau leurs documents d'origine pour écrire le nouveau pseudonyme. Un pseudonyme remplacé redevient libre : il pourra plus tard être donné à un autre nom, et un même pseudonyme pourrait alors désigner deux noms différents dans les anciens et les nouveaux documents.
+
+**Syntaxe :**
+```bash
+gdpr-pseudo replace-pseudonym [OPTIONS]
+```
+
+**Options :**
+
+| Option | Abrégé | Défaut | Description |
+|--------|--------|--------|-------------|
+| `--db CHEMIN` | | `mappings.db` | Chemin de la base de données |
+| `--passphrase TEXTE` | `-p` | (saisie interactive) | Mot de passe de la base de données |
+| `--id TEXTE` | | | Identifiant de la correspondance à remplacer (voir validate-mappings --own-words) |
+| `--all` | | | Remplacer tous les pseudonymes qui contiennent un mot du nom qu'ils remplacent |
+| `--force` | `-f` | | Ignorer la demande de confirmation |
+
+Vous ne pouvez pas utiliser `--id` et `--all` en même temps.
+
+**Exemples :**
+```bash
+# Afficher les pseudonymes qui contiennent un mot du nom qu'ils remplacent, avec leur identifiant
+gdpr-pseudo validate-mappings --own-words
+
+# En remplacer un (avec confirmation interactive)
+gdpr-pseudo replace-pseudonym --id abc12345
+
+# Les remplacer tous
+gdpr-pseudo replace-pseudonym --all
+
+# Les remplacer tous sans confirmation (pour l'automatisation)
+gdpr-pseudo replace-pseudonym --all --force
+```
+
+**Codes de sortie :** 0 si les pseudonymes sont remplacés ou si l'opération est annulée, 1 si elle est refusée (le pseudonyme de cet identifiant ne contient aucun mot du nom qu'il remplace, la base de données a changé depuis l'affichage, la bibliothèque n'a plus de nom libre, ou un pseudonyme que vous avez choisi partage le nom remplacé), 2 en cas d'erreur inattendue. En cas de refus, aucun pseudonyme n'est remplacé.
+
+**Traçabilité :**
+Chaque remplacement crée une entrée `REPLACEMENT` dans la table des opérations contenant les identifiants et les types des correspondances remplacées et leur nombre ; elle ne conserve ni nom ni pseudonyme.
+
+Quand un document est écrit (`process`, `batch`) et que la base de données contient de tels pseudonymes, la commande affiche une remarque qui renvoie à `validate-mappings --own-words`.
 
 ---
 

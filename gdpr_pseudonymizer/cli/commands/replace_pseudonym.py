@@ -147,9 +147,9 @@ def replace_pseudonym_command(
             _display_plan(plan, by_id)
 
             if not force:
-                answer = Prompt.ask(PROMPT, default="")
+                answer = Prompt.ask(PROMPT, default="", show_default=False)
                 if answer.lower() != "yes":
-                    console.print(CANCELLED)
+                    console.print("\n" + CANCELLED, markup=False)
                     sys.exit(0)
 
             result = replace_own_word_rows(
