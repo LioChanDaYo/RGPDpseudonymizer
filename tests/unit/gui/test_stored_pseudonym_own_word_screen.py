@@ -52,12 +52,6 @@ from tests.unit.test_stored_pseudonym_own_word import (
     _db,
 )
 
-_FIRST = pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 11.7 tests first: saved pseudonyms that hold a word of their own name",
-)
-
 WRONG = "zorbalia_pass_B_456!"
 NAME_COLUMN = 2
 PSEUDONYM_COLUMN = 3
@@ -155,7 +149,6 @@ def _confirming(dialog: _Confirm) -> Any:
     )
 
 
-@_FIRST
 def test_screen_counts_and_filters_rows_found(
     screen: DatabaseScreen, tmp_path: Path, toasts: list[str]
 ) -> None:
@@ -174,7 +167,6 @@ def test_screen_counts_and_filters_rows_found(
     assert "Zorbal" in cell.toolTip(), cell.toolTip()
 
 
-@_FIRST
 def test_replace_selection(
     screen: DatabaseScreen, tmp_path: Path, toasts: list[str]
 ) -> None:
@@ -206,7 +198,6 @@ def test_replace_selection(
     assert shown[ZQ] == f"{new} Brontel" and shown["Zorbal"] == new, shown
 
 
-@_FIRST
 def test_replace_ignores_clean_rows(
     screen: DatabaseScreen, tmp_path: Path, toasts: list[str]
 ) -> None:
@@ -222,7 +213,6 @@ def test_replace_ignores_clean_rows(
     assert "0" in button.text(), button.text()
 
 
-@_FIRST
 def test_confirmation_lists_moved_rows_and_warning(
     screen: DatabaseScreen, tmp_path: Path, toasts: list[str]
 ) -> None:
@@ -249,7 +239,6 @@ def test_confirmation_lists_moved_rows_and_warning(
     assert {name: row.pseudonym_full for name, row in _by_name(db).items()} == before
 
 
-@_FIRST
 def test_wrong_passphrase_is_forgotten(
     screen: DatabaseScreen, tmp_path: Path, toasts: list[str]
 ) -> None:
@@ -277,7 +266,6 @@ def test_wrong_passphrase_is_forgotten(
     assert screen._main_window.cached_passphrase is None
 
 
-@_FIRST
 def test_notice_once_per_session(
     main_window: Any, tmp_path: Path, toasts: list[str]
 ) -> None:

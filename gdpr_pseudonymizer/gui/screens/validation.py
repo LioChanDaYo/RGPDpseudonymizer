@@ -1175,6 +1175,10 @@ class ValidationScreen(QWidget):
         self._finalize_progress.setVisible(False)
         self._finalize_label.setVisible(False)
 
+        # Story 11.7: one notice per session when the database holds saved
+        # pseudonyms that hold a word of their own name
+        self._main_window.notify_own_word_rows(result.own_word_rows)
+
         self._main_window.step_indicator.set_step(3)
 
         # Navigate to results screen
