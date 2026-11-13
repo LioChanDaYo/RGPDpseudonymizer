@@ -61,9 +61,9 @@ Des exécutables autonomes pré-compilés sont disponibles pour Windows, macOS e
 
 | Plateforme | Fichier | Notes |
 |------------|---------|-------|
-| **Windows** | `gdpr-pseudonymizer-2.3.0-windows-setup.exe` | Lancer l'installeur. Ajoute un raccourci au menu Démarrer. |
-| **macOS (Apple Silicon)** | `gdpr-pseudonymizer-2.3.0-macos-arm64.dmg` | Ouvrir le DMG, glisser vers Applications. |
-| **Linux** | `gdpr-pseudonymizer-2.3.0-linux.AppImage` | `chmod +x` puis exécuter. |
+| **Windows** | `gdpr-pseudonymizer-2.3.1-windows-setup.exe` | Lancer l'installeur. Ajoute un raccourci au menu Démarrer. |
+| **macOS (Apple Silicon)** | `gdpr-pseudonymizer-2.3.1-macos-arm64.dmg` | Ouvrir le DMG, glisser vers Applications. |
+| **Linux** | `gdpr-pseudonymizer-2.3.1-linux.AppImage` | `chmod +x` puis exécuter. |
 
 > **Macs Intel :** aucun DMG n'est publié. GitHub a retiré ses runners macOS Intel, et un
 > runner Apple Silicon ne peut pas compiler un bundle x86_64 fonctionnel. Installez plutôt
@@ -140,7 +140,7 @@ GDPR Pseudonymizer est un **outil CLI et GUI conçu pour la confidentialité**. 
 
 ## 🚀 Prise en main rapide
 
-**Version actuelle :** 🎉 **v2.3.0** (novembre 2026) — Détection plus précise, corrections à chaque endroit et effacement complet
+**Version actuelle :** 🎉 **v2.3.1** (novembre 2026) — Correctifs de sécurité sur les pseudonymes, phrase secrète vérifiée dès le départ et Python 3.11 à 3.13
 
 ### Pour commencer
 
@@ -528,7 +528,7 @@ L'interface de validation offre un parcours intuitif piloté au clavier pour pas
 
 ## 🛠️ État du développement
 
-**Epics 1-7 et 10 terminés** — la version actuelle v2.3.0 (novembre 2026) a clôturé l'Epic 10 : détection plus précise, corrections à chaque endroit, effacement complet. La v2.1.0 (mars 2026) a clôturé l'Epic 7.
+**Epics 1-7, 10 et 11 terminés** — la version actuelle v2.3.1 (novembre 2026) a clôturé l'Epic 11 : correctifs de sécurité sur les pseudonymes, phrase secrète vérifiée dès le départ dans l'application de bureau, Python 3.11 à 3.13. La v2.3.0 (novembre 2026) a clôturé l'Epic 10 ; la v2.1.0 (mars 2026), l'Epic 7.
 
 - ✅ **Epic 1 :** Fondations et validation NLP (9 stories) — Intégration spaCy, interface de validation, détection hybride, déduplication des entités
 - ✅ **Epic 2 :** Moteur de pseudonymisation (9 stories) — Bibliothèques de pseudonymes, chiffrement, journaux d'audit, traitement par lot, correspondance 1:1 RGPD
@@ -740,7 +740,7 @@ La suite de tests d'intégration couvre :
 
 | Métrique | Valeur | Statut |
 |----------|--------|--------|
-| **Avancement** | v2.3.0 | ✅ Epics 1-7 et 10 terminés |
+| **Avancement** | v2.3.1 | ✅ Epics 1-7, 10 et 11 terminés |
 | **Stories terminées** | 60 (Epics 1-7) | ✅ Tous les epics terminés |
 | **Utilité LLM (NFR10)** | 4,27/5,0 (85,4 %) | ✅ VALIDÉ (seuil : 80 %) |
 | **Succès d'installation (NFR3)** | 87,5 % (7/8 plateformes) | ✅ VALIDÉ (seuil : 85 %) |
@@ -780,4 +780,4 @@ La suite de tests d'intégration couvre :
 
 ---
 
-**Dernière mise à jour :** 2026-11-03 (v2.3.0 — Détection plus précise, corrections à chaque endroit, effacement complet)
+**Dernière mise à jour :** 2026-11-13 (v2.3.1 — correctifs de sécurité sur les pseudonymes, phrase secrète vérifiée dès le départ, Python 3.11 à 3.13)
