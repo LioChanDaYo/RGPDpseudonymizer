@@ -24,9 +24,9 @@ Pour les utilisateurs non techniques, des exécutables autonomes pré-compilés 
 
 **[Télécharger la dernière version](https://github.com/LioChanDaYo/RGPDpseudonymizer/releases/latest)**
 
-- **Windows :** `gdpr-pseudonymizer-2.3.0-windows-setup.exe` — Lancez l'installeur
-- **macOS (Apple Silicon) :** `gdpr-pseudonymizer-2.3.0-macos-arm64.dmg` — Ouvrez le DMG, glissez vers Applications
-- **Linux :** `gdpr-pseudonymizer-2.3.0-linux.AppImage` — `chmod +x` puis exécutez
+- **Windows :** `gdpr-pseudonymizer-2.3.1-windows-setup.exe` — Lancez l'installeur
+- **macOS (Apple Silicon) :** `gdpr-pseudonymizer-2.3.1-macos-arm64.dmg` — Ouvrez le DMG, glissez vers Applications
+- **Linux :** `gdpr-pseudonymizer-2.3.1-linux.AppImage` — `chmod +x` puis exécutez
 
 Sur Mac, le DMG nécessite macOS 14 ou une version ultérieure. Avec `pip install gdpr-pseudonymizer[gui]`, l'application de bureau nécessite macOS 12 ou une version ultérieure, et la lecture des fichiers PDF (l'extra `formats`) nécessite macOS 13 ou une version ultérieure.
 
