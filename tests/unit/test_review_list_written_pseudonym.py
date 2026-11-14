@@ -29,7 +29,7 @@ from __future__ import annotations
 import csv
 import inspect
 from collections.abc import Callable, Iterator, Mapping, Sequence
-from contextlib import contextmanager
+from contextlib import ExitStack, contextmanager
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -364,7 +364,8 @@ def _cell(output: Path) -> str:
 @dataclass
 class _Review:
     """One command-line run: the pseudonym each group showed (by entity
-    text, first time shown), the result and the output path."""
+    text, first time shown, in the order shown), the result and the output
+    path."""
 
     shown: dict[str, str]
     result: ProcessingResult
@@ -378,10 +379,13 @@ def _cli(
     names: list[tuple[str, str]],
     suffix: str = ".txt",
     theme: str = "neutral",
+    keys: list[str] | None = None,
+    typed: list[str] | None = None,
 ) -> _Review:
     """``process_document`` with its interactive review, every group
-    confirmed. A ``.csv`` holds one header cell « nom » and one cell of
-    text."""
+    confirmed unless ``keys`` gives the answers to ``get_user_action``
+    (then ``typed`` gives those to ``get_text_input``). A ``.csv`` holds one
+    header cell « nom » and one cell of text."""
     source = tmp_path / f"doc{suffix}"
     if suffix == ".csv":
         source.write_text(f"nom\n{text}\n", encoding="utf-8")
@@ -408,12 +412,20 @@ def _cli(
         patch("gdpr_pseudonymizer.validation.ui.readchar.readkey", return_value="\r"),
         patch(
             "gdpr_pseudonymizer.validation.workflow.get_user_action",
-            side_effect=["confirm"] * 20,
+            side_effect=keys if keys is not None else ["confirm"] * 20,
         ),
         patch(
             "gdpr_pseudonymizer.validation.workflow.get_confirmation", return_value=True
         ),
+        ExitStack() as answers,
     ):
+        if typed is not None:
+            answers.enter_context(
+                patch(
+                    "gdpr_pseudonymizer.validation.workflow.get_text_input",
+                    side_effect=typed,
+                )
+            )
         result = DocumentProcessor(
             db_path=db, passphrase=PASSPHRASE, theme=theme
         ).process_document(str(source), str(output))
@@ -784,6 +796,110 @@ def test_list_never_shows_a_name_of_the_document(
             shown = next(iter(previews.values()))
     pre(len(shown.split(" ")) == 2, f"two parts shown: {shown!r}")
     assert shown.split(" ")[1] == second  # expected failure
+
+
+# --- T40-T42: the command line after a custom pseudonym (AC21) --------------
+
+AFTER_DOC = f"{ZQ} a signé le contrat. {ZM} a signé le contrat."
+AFTER_LAST_DOC = f"{ZQ} a signé le contrat. Vorlan Quentrix a signé le contrat."
+AFTER_OTHER_DOC = f"{ZQ} a signé le contrat. Xantor Brontel a signé le contrat."
+BEFORE_DOC = f"{ZM} a signé le contrat. {ZQ} a signé le contrat."
+CUSTOM_FIRST = ["change_pseudonym"] + ["confirm"] * 20
+
+
+@contextmanager
+def _male_first_name_second(value: str) -> Iterator[None]:
+    """Every library loaded puts ``value`` second in its male first names,
+    so second in the list a name of no known gender draws from."""
+    real = LibraryBasedPseudonymManager.load_library
+
+    def load(self: Any, theme: str) -> None:
+        real(self, theme)
+        male = [v for v in self.first_names["male"] if v != value]
+        self.first_names["male"] = male[:1] + [value] + male[1:]
+
+    with patch.object(LibraryBasedPseudonymManager, "load_library", load):
+        yield
+
+
+@pytest.mark.xfail(strict=True, raises=AssertionError, reason=WRITTEN)
+@pytest.mark.parametrize("case", ["shared_first_name", "shared_last_name"])
+def test_cli_group_after_custom_shows_its_part(
+    tmp_path: Path, draws: _Draws, case: str
+) -> None:
+    """T40 (AC21; Lionel, 2026-11-14): a group reviewed after a [C] that
+    shares a real first or last name with it shows the custom pseudonym's
+    part; that is written, and nothing is reported."""
+    db = _new_db(tmp_path)
+    later = ZM if case == "shared_first_name" else "Vorlan Quentrix"
+    text = AFTER_DOC if case == "shared_first_name" else AFTER_LAST_DOC
+    names = [(ZQ, PERSON), (later, PERSON)]
+    review = _cli(tmp_path, db, text, names, keys=CUSTOM_FIRST, typed=[DB_PS])
+    pre(list(review.shown) == [ZQ, later], f"order shown: {list(review.shown)}")
+    shown = review.shown[later]
+    part = shown.split(" ")[0] if case == "shared_first_name" else shown.split(" ")[-1]
+    expected = "Dravin" if case == "shared_first_name" else "Brontel"
+    assert part == expected  # expected failure
+    assert _written(review.output, text, names) == [DB_PS, shown]
+    assert _changed(review.result) == []
+
+
+@pytest.mark.xfail(strict=True, raises=AssertionError, reason=WRITTEN)
+def test_cli_group_after_custom_never_shows_its_value(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, draws: _Draws
+) -> None:
+    """T41 (AC21): a group reviewed after a [C] never shows a part that the
+    custom pseudonym gives another real name."""
+    names = [(ZQ, PERSON), ("Xantor Brontel", PERSON)]
+    dry, real = tmp_path / "dry", tmp_path / "real"
+    dry.mkdir()
+    real.mkdir()
+    with _male_first_name_second("Morvane"):
+        rehearsal = _cli(dry, _new_db(dry), AFTER_OTHER_DOC, names)
+        pre(
+            rehearsal.shown["Xantor Brontel"].startswith("Morvane "),
+            f"the setup shows the value: {rehearsal.shown}",
+        )
+        install_draws(monkeypatch)
+        review = _cli(
+            real,
+            _new_db(real),
+            AFTER_OTHER_DOC,
+            names,
+            keys=CUSTOM_FIRST,
+            typed=[MV_PS],
+        )
+    pre(list(review.shown)[0] == ZQ, f"order shown: {list(review.shown)}")
+    shown = review.shown["Xantor Brontel"]
+    first_word = shown.split(" ")[0]
+    assert first_word != "Morvane"  # expected failure
+    assert _written(review.output, AFTER_OTHER_DOC, names) == [MV_PS, shown]
+    assert _changed(review.result) == []
+
+
+@pytest.mark.xfail(strict=True, raises=AssertionError, reason=WRITTEN)
+def test_cli_group_shown_before_custom_stays_reported(
+    tmp_path: Path, draws: _Draws
+) -> None:
+    """T42 (AC21, AC6): a group shown before the [C] keeps what it showed;
+    the custom pseudonym makes it unusable, so it is drawn again with its
+    part and reported."""
+    db = _new_db(tmp_path)
+    names = [(ZM, PERSON), (ZQ, PERSON)]
+    review = _cli(
+        tmp_path,
+        db,
+        BEFORE_DOC,
+        names,
+        keys=["confirm", "change_pseudonym"] + ["confirm"] * 20,
+        typed=[DB_PS],
+    )
+    pre(list(review.shown) == [ZM, ZQ], f"order shown: {list(review.shown)}")
+    written = _written(review.output, BEFORE_DOC, names)
+    changed = _changed(review.result)
+    expected = [(ZM, PERSON, review.shown[ZM], written[0])]
+    assert changed == expected  # expected failure
+    assert written[0].split(" ")[0] == "Dravin" and written[1] == DB_PS
 
 
 # --- T38: the review's update (Fix design B.8) -------------------------------
