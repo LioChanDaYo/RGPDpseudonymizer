@@ -101,11 +101,6 @@ WORD_DOC = f"{ZQ} a signé le contrat avec Brontel."
 
 STANDALONE = "Standalone component without full name context"
 
-WRITTEN = (
-    "Story 11.5 tests first: the review list shows a pseudonym that is not written"
-)
-DOCUMENT = "Story 11.5 tests first: the review list shows a name of the document"
-
 
 # --- The library's draw -----------------------------------------------------
 
@@ -442,7 +437,6 @@ def _untitled(shown: str) -> str:
 # --- T1, T2: the command line writes what its review shows -------------------
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError, reason=WRITTEN)
 @pytest.mark.parametrize("case", ["one_name", "title", "two_people_one_first_name"])
 def test_cli_review_writes_what_it_shows(
     tmp_path: Path, draws: _Draws, case: str
@@ -464,7 +458,6 @@ def test_cli_review_writes_what_it_shows(
     assert _changed(review.result) == []
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError, reason=WRITTEN)
 def test_cli_spreadsheet_review_writes_what_it_shows(
     tmp_path: Path, draws: _Draws
 ) -> None:
@@ -481,7 +474,6 @@ def test_cli_spreadsheet_review_writes_what_it_shows(
 # --- T3: a free proposal is kept --------------------------------------------
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError, reason=WRITTEN)
 @pytest.mark.parametrize(
     "case",
     [
@@ -553,7 +545,6 @@ def test_free_proposal_is_kept(tmp_path: Path, draws: _Draws, case: str) -> None
 # --- T4-T11, T18, T19: not free at the end, drawn again and reported --------
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError, reason=WRITTEN)
 def test_proposal_given_to_another_name_since_the_review(
     tmp_path: Path, draws: _Draws
 ) -> None:
@@ -586,7 +577,6 @@ def test_proposal_given_to_another_name_since_the_review(
     assert _written(tmp_path / "b.txt", VM_DOC, names) == [row_b.pseudonym_full]
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError, reason=WRITTEN)
 def test_name_saved_since_the_review_keeps_its_saved_pseudonym(
     tmp_path: Path, draws: _Draws
 ) -> None:
@@ -608,7 +598,6 @@ def test_name_saved_since_the_review_keeps_its_saved_pseudonym(
     assert _written(tmp_path / "b.txt", ONE_DOC, names) == [DB_PS]
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError, reason=WRITTEN)
 def test_first_name_part_saved_since_the_review(tmp_path: Path, draws: _Draws) -> None:
     """T6 (AC5): the real first name got a part meanwhile: drawn again with
     that part, reported."""
@@ -627,7 +616,6 @@ def test_first_name_part_saved_since_the_review(tmp_path: Path, draws: _Draws) -
     assert row.pseudonym_first == "Dravin"
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError, reason=WRITTEN)
 def test_proposal_of_another_type_of_the_same_text(
     tmp_path: Path, draws: _Draws
 ) -> None:
@@ -649,7 +637,6 @@ def test_proposal_of_another_type_of_the_same_text(
     assert row.pseudonym_full != taken
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError, reason=WRITTEN)
 def test_proposal_using_a_custom_value(tmp_path: Path, draws: _Draws) -> None:
     """T8 (AC5, Story 10.11 AC3): the pseudonym shown takes a value of
     another name's custom pseudonym: drawn again, reported."""
@@ -669,7 +656,6 @@ def test_proposal_using_a_custom_value(tmp_path: Path, draws: _Draws) -> None:
     assert row.pseudonym_first != "Dravin"
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError, reason=WRITTEN)
 def test_proposal_part_is_a_real_name_at_the_end(tmp_path: Path, draws: _Draws) -> None:
     """T9 (AC6, AC8): a name sent at the end (added in the review) makes a
     part shown a real name of the document: drawn again, reported."""
@@ -691,7 +677,6 @@ def test_proposal_part_is_a_real_name_at_the_end(tmp_path: Path, draws: _Draws) 
     assert written[0].split(" ")[-1] != "Brontel"
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError, reason=WRITTEN)
 def test_type_changed_since_the_preview(tmp_path: Path, draws: _Draws) -> None:
     """T10 (AC5, AC6): a pseudonym shown for another type (a CLI [T], or the
     end's backstop when the list could not update): drawn again, reported."""
@@ -709,7 +694,6 @@ def test_type_changed_since_the_preview(tmp_path: Path, draws: _Draws) -> None:
     assert row.pseudonym_full in _organisations()
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError, reason=WRITTEN)
 def test_custom_pseudonym_on_a_name_sharing_the_first_name(
     tmp_path: Path, draws: _Draws
 ) -> None:
@@ -732,7 +716,6 @@ def test_custom_pseudonym_on_a_name_sharing_the_first_name(
     assert row.pseudonym_first == "Dravin"
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError, reason=WRITTEN)
 def test_proposal_part_saved_in_the_other_role(tmp_path: Path, draws: _Draws) -> None:
     """T18 (AC5; Story 11.6's other-role guard): a part shown is saved
     meanwhile as another name's part in the other role: drawn again,
@@ -752,7 +735,6 @@ def test_proposal_part_saved_in_the_other_role(tmp_path: Path, draws: _Draws) ->
     assert (row.pseudonym_first or "").casefold() != "morvane"
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError, reason=WRITTEN)
 def test_proposal_of_another_theme(tmp_path: Path, draws: _Draws) -> None:
     """T19 (AC5): a pseudonym shown from another theme is never kept."""
     db = _new_db(tmp_path)
@@ -774,7 +756,6 @@ def test_proposal_of_another_theme(tmp_path: Path, draws: _Draws) -> None:
 # --- T27: the list never shows a name of the document ------------------------
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError, reason=DOCUMENT)
 @pytest.mark.parametrize("case", ["cli_capitalised_word", "preview_own_last_name"])
 def test_list_never_shows_a_name_of_the_document(
     tmp_path: Path, draws: _Draws, case: str
@@ -822,7 +803,6 @@ def _male_first_name_second(value: str) -> Iterator[None]:
         yield
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError, reason=WRITTEN)
 @pytest.mark.parametrize("case", ["shared_first_name", "shared_last_name"])
 def test_cli_group_after_custom_shows_its_part(
     tmp_path: Path, draws: _Draws, case: str
@@ -844,7 +824,6 @@ def test_cli_group_after_custom_shows_its_part(
     assert _changed(review.result) == []
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError, reason=WRITTEN)
 def test_cli_group_after_custom_never_shows_its_value(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, draws: _Draws
 ) -> None:
@@ -877,7 +856,6 @@ def test_cli_group_after_custom_never_shows_its_value(
     assert _changed(review.result) == []
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError, reason=WRITTEN)
 def test_cli_group_shown_before_custom_stays_reported(
     tmp_path: Path, draws: _Draws
 ) -> None:
@@ -905,7 +883,6 @@ def test_cli_group_shown_before_custom_stays_reported(
 # --- T38: the review's update (Fix design B.8) -------------------------------
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError, reason=WRITTEN)
 @pytest.mark.parametrize("case", ["retyped", "shared_first_name", "stored_since"])
 def test_refresh_review_proposals(tmp_path: Path, draws: _Draws, case: str) -> None:
     """T38 (AC19): what the end would write now, for the names whose value

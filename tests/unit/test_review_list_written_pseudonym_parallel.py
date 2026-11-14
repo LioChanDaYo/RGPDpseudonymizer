@@ -45,7 +45,6 @@ from tests.unit.test_review_list_written_pseudonym import (
     MV_PS,
     PERSON,
     VM,
-    WRITTEN,
     ZM,
     ZQ,
     _changed,
@@ -114,7 +113,6 @@ def _both_written(a: ProcessingResult, b: ProcessingResult) -> None:
         pytest.fail(f"PRE: both written: {a.error_message} {b.error_message}")
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError, reason=WRITTEN)
 @pytest.mark.parametrize(
     "theme", ["neutral", "neutral_id"], ids=["default", "neutral_id"]
 )
@@ -149,7 +147,6 @@ def test_two_documents_one_proposal_two_names(
     assert _written(tmp_path, "b", DOC_B_VM, [(VM, PERSON)]) == [row_b.pseudonym_full]
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError, reason=WRITTEN)
 def test_two_documents_one_name_two_proposals(tmp_path: Path, draws: _Draws) -> None:
     """T14 (AC7): one name shown two pseudonyms in two reviews: one row; the
     document whose pseudonym was not kept reports it."""
@@ -172,7 +169,6 @@ def test_two_documents_one_name_two_proposals(tmp_path: Path, draws: _Draws) -> 
     assert written == ([DB_PS], [DB_PS])
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError, reason=WRITTEN)
 def test_two_documents_one_first_name(tmp_path: Path, draws: _Draws) -> None:
     """T17 (AC7; Story 10.22): two names sharing a real first name, shown
     different first-name parts in two reviews: one first-name part saved; the

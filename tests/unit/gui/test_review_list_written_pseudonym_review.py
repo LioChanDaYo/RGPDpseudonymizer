@@ -56,7 +56,6 @@ from tests.unit.test_review_list_written_pseudonym import (
     TITLE_DOC,
     TITLED,
     TWO_DOC,
-    WRITTEN,
     ZM,
     ZQ,
     ZQ_CUT,
@@ -81,6 +80,9 @@ pytestmark = pytest.mark.filterwarnings(
 WAIT_MS = 60000
 PENDING = EntityReviewState.PENDING
 
+WRITTEN = (
+    "Story 11.5 tests first: the review list shows a pseudonym that is not written"
+)
 TITLE = "Story 11.5 tests first: a stored titled name loses its title in the list"
 THEME = "Story 11.5 tests first: the desktop batch previews ignore the theme"
 UPDATE = (
