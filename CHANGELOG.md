@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **The review list shows the pseudonym that is written (Story 11.5).** In the desktop app and the command line, the pseudonym shown next to a new name during the review is now the one written in the document and saved. Before, it was drawn again when the document was written, so the document almost never held the pseudonym shown. In the desktop list, changing a name's type, or setting a custom pseudonym that another listed name must share, now updates those names at once; one undo reverts both. If a pseudonym shown can no longer be used when the document is written (for example, another document gave it to another name in the meantime), another one is written and a message lists each change. The list also no longer shows a newly drawn pseudonym that is a name of the document; since 2.3.1 such a draw is not written (Story 11.6), but the list could still show it.
+- **Desktop batch review: the pseudonyms shown use your theme (Story 11.5).** Before, the list showed pseudonyms of the default theme.
+- **Desktop review: a saved name with a title keeps its title in the list (Story 11.5).** « Mme Élodie Martin », saved earlier, now shows « Mme Isabelle Almeida », as the document reads. Before, the list showed « Isabelle Almeida ».
+
 ---
 
 ## [2.3.1] - 2026-11-12

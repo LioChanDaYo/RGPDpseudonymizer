@@ -20,7 +20,11 @@ from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
 from gdpr_pseudonymizer.cli.config import load_config
-from gdpr_pseudonymizer.cli.formatters import format_error_message, rich_notifier
+from gdpr_pseudonymizer.cli.formatters import (
+    format_error_message,
+    format_pseudonyms_changed,
+    rich_notifier,
+)
 from gdpr_pseudonymizer.cli.passphrase import resolve_passphrase
 from gdpr_pseudonymizer.cli.validators import (
     ensure_database,
@@ -28,7 +32,10 @@ from gdpr_pseudonymizer.cli.validators import (
     validate_model_or_exit,
     validate_theme_or_exit,
 )
-from gdpr_pseudonymizer.core.document_processor import DocumentProcessor
+from gdpr_pseudonymizer.core.document_processor import (
+    DocumentProcessor,
+    pseudonyms_changed_of,
+)
 from gdpr_pseudonymizer.core.saved_own_words import notice_line, own_word_rows_of
 from gdpr_pseudonymizer.exceptions import FileProcessingError
 from gdpr_pseudonymizer.utils.logger import configure_logging, get_logger
@@ -235,6 +242,11 @@ def process_command(
                 console.print(
                     f"[cyan]ℹ  {result.entities_reused} entity mapping(s) reused from database (idempotent processing)[/cyan]\n"
                 )
+
+            # Story 11.5: the pseudonyms shown that could not be written
+            changed = format_pseudonyms_changed(pseudonyms_changed_of(result))
+            if changed is not None:
+                console.print(changed, markup=False, style="yellow")
 
             # Story 11.7: the database holds saved pseudonyms that hold a word
             # of their own name (the rows this document saved included)

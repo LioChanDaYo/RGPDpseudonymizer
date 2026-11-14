@@ -234,6 +234,41 @@ class LibraryBasedPseudonymManager(PseudonymManager):
         """
         self._real_name_check = check
 
+    def accepts_value(
+        self, value: str, kind: str, real_component: str | None = None
+    ) -> bool:
+        """Whether a draw would accept this value now (Story 11.5): the
+        real-name check (Story 11.6), and the value not taken. ``kind`` is
+        "first_name", "last_name", "LOCATION" or "ORG". The four draws call
+        it, so a draw and the still-free check of a pseudonym shown in the
+        review accept the same values.
+
+        A first or last name is taken when its folded value is the part of
+        another real component of the same kind, or any part of the other
+        kind (Story 11.6's guard); a place or organisation when it is a
+        pseudonym already given.
+        """
+        # Story 11.6: a real name of the document is drawn again
+        if self._real_name_check is not None and self._real_name_check(value):
+            return False
+        if kind in ("first_name", "last_name"):
+            folded = _fold(value)
+            for (real_comp, comp_type), pseudo_comp in self._component_mappings.items():
+                if _fold(pseudo_comp) != folded:
+                    continue
+                if comp_type == kind:
+                    # Already used for a different real component
+                    if real_component and real_comp != real_component:
+                        return False
+                else:
+                    return False
+            return True
+        return value not in self._used_pseudonyms
+
+    def is_used(self, pseudonym_full: str) -> bool:
+        """Whether a full pseudonym is already given (Story 11.5)."""
+        return pseudonym_full in self._used_pseudonyms
+
     def _flatten_location_list(
         self, locations: Locations | dict[Any, Any]
     ) -> list[str]:
@@ -611,31 +646,11 @@ class LibraryBasedPseudonymManager(PseudonymManager):
         max_attempts = 100
         for attempt in range(max_attempts):
             candidate = secrets.choice(candidates)
-            # Story 11.6: a real name of the document is drawn again
-            if self._real_name_check is not None and self._real_name_check(candidate):
-                continue
-
-            # Check if this pseudonym component already used for different real
-            # component. Story 11.6: compared folded, and never a last-name
-            # part (two names would share a pseudonym; the guard)
-            is_collision = False
-            folded = _fold(candidate)
-            for (
-                real_comp,
-                comp_type,
-            ), pseudo_comp in self._component_mappings.items():
-                if _fold(pseudo_comp) != folded:
-                    continue
-                if comp_type == "first_name":
-                    # This pseudonym is already used for a different real first name
-                    if real_first_name and real_comp != real_first_name:
-                        is_collision = True
-                        break
-                else:
-                    is_collision = True
-                    break
-
-            if not is_collision:
+            # Story 11.6: neither a real name of the document, nor a part of
+            # another real first name, nor any last-name part (compared
+            # folded; the guard). Story 11.5: one check for the draws and
+            # the review's pseudonyms
+            if self.accepts_value(candidate, "first_name", real_first_name):
                 # No collision - safe to use this pseudonym component
                 if real_first_name:
                     self._component_mappings[(real_first_name, "first_name")] = (
@@ -675,28 +690,11 @@ class LibraryBasedPseudonymManager(PseudonymManager):
         max_attempts = 100
         for attempt in range(max_attempts):
             candidate = secrets.choice(self.last_names)
-            # Story 11.6: a real name of the document is drawn again
-            if self._real_name_check is not None and self._real_name_check(candidate):
-                continue
-
-            # Check if this pseudonym component already used for different real
-            # component. Story 11.6: compared folded, and never a first-name
-            # part (two names would share a pseudonym; the guard)
-            is_collision = False
-            folded = _fold(candidate)
-            for (real_comp, comp_type), pseudo_comp in self._component_mappings.items():
-                if _fold(pseudo_comp) != folded:
-                    continue
-                if comp_type == "last_name":
-                    # This pseudonym is already used for a different real last name
-                    if real_last_name and real_comp != real_last_name:
-                        is_collision = True
-                        break
-                else:
-                    is_collision = True
-                    break
-
-            if not is_collision:
+            # Story 11.6: neither a real name of the document, nor a part of
+            # another real last name, nor any first-name part (compared
+            # folded; the guard). Story 11.5: one check for the draws and
+            # the review's pseudonyms
+            if self.accepts_value(candidate, "last_name", real_last_name):
                 # No collision - safe to use this pseudonym component
                 if real_last_name:
                     self._component_mappings[(real_last_name, "last_name")] = candidate
@@ -730,10 +728,9 @@ class LibraryBasedPseudonymManager(PseudonymManager):
         max_attempts = 100
         for attempt in range(max_attempts):
             candidate = secrets.choice(candidates)
-            # Story 11.6: a real name of the document is drawn again
-            if self._real_name_check is not None and self._real_name_check(candidate):
-                continue
-            if candidate not in self._used_pseudonyms:
+            # Story 11.6: not a real name of the document; not given yet.
+            # Story 11.5: one check for the draws and the review's pseudonyms
+            if self.accepts_value(candidate, "LOCATION"):
                 return candidate
 
         # Library exhausted - use fallback naming (Location-001, Location-002, etc.)
@@ -765,10 +762,9 @@ class LibraryBasedPseudonymManager(PseudonymManager):
         max_attempts = 100
         for attempt in range(max_attempts):
             candidate = secrets.choice(candidates)
-            # Story 11.6: a real name of the document is drawn again
-            if self._real_name_check is not None and self._real_name_check(candidate):
-                continue
-            if candidate not in self._used_pseudonyms:
+            # Story 11.6: not a real name of the document; not given yet.
+            # Story 11.5: one check for the draws and the review's pseudonyms
+            if self.accepts_value(candidate, "ORG"):
                 return candidate
 
         # Library exhausted - use fallback naming (Org-001, Org-002, etc.)

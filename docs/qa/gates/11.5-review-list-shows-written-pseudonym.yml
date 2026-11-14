@@ -1,0 +1,82 @@
+schema: 1
+story: '11.5'
+story_title: 'The Review List Shows the Pseudonym That Will Be Written'
+scope: 'Final head b806e3a (PR #127, draft; base main fe44a7d): commits a9281aa, 099c0c7 and e740d3d (tests first), 97a4fe0 (library, core, CLI), c6315a9 (desktop), 8d83886 (texts), 5aa73da (CHANGELOG, BACKLOG), b806e3a (record). QA folder: rgpd-analysis/r115b/qa (scripts, logs and databases, never committed).'
+gate: CONCERNS
+status_reason: 'Every AC but AC18 is met and re-measured on the head: shown = written on 210 of 210 CLI groups, 190 of 190 desktop rows (fresh and stored) and 132 of 132 batch rows in both themes, 0 refused previews, concurrency invariants hold. One medium finding goes to Lionel as the story asks: the desktop list''s immediate update freezes the window about 1.0 s per type change and 1.8 s per custom pseudonym at 10,000 saved names.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-11-14T17:30:00Z'
+
+top_issues:
+  - id: 'PERF-115-01'
+    severity: medium
+    finding: 'The immediate update (AC19, D.6) runs on the GUI thread and reads the whole database. One click through the screen''s own handlers (timing2.py, median of 5): at 10,000 saved names, a type change takes 1,031 to 1,038 ms and a custom pseudonym the check accepts takes 1,824 to 1,825 ms; at 2,500 names, 303 to 310 ms and 489 to 512 ms; on an empty database, 44 ms and 75 ms. The window is frozen meanwhile, with no feedback. Cost drivers at 10,000 rows: open_database (PBKDF2) about 35 ms; one find_all() decrypt about 420 ms, run twice by refresh_review_proposals (core/document_processor.py:1471 through _init_processing_context, :1475 its own read, both by B.8) and a third time by custom_pseudonym_refusal (gui/models/validation_state.py:911, since Story 10.11, about 0.5 s of the custom figure); load_library 0.3 ms; load_existing_mappings about 27 ms; GenderDetector.load() 0.3 ms. Realistic scenario: a user whose database holds 10,000 names retypes « Élodie », found as a place in « … Élodie a ensuite appelé M. Lefèvre » (the SM''s shapes.txt), and the window freezes about 1 s; setting a custom pseudonym on « Sophie Bernard » freezes it about 1.8 s. The 0.5 s bar of Task 7.1 is crossed above roughly 2,500 names. Overfitting check: (1) measured on the real handlers with realistic French documents; (2) a type change is a common review action (the SM measured « Élodie » found as a place). The 10,000-row database is synthetic (9,400 people, 550 organisations, 50 places, saved through save_batch). Severity is medium because it is four to seven times PERF-117-01 (low, 273 ms), it hits every type change and custom pseudonym, and it grows linearly with the database.'
+    suggested_action: 'Lionel''s call, not fixed here (Task 7.1). Options: accept it (waive), or before the merge reuse _init_processing_context''s rows in the refresh (one decrypt fewer, about 0.4 s at 10,000 rows) and/or run the refresh off the GUI thread.'
+    suggested_owner: po
+  - id: 'REQ-115-01'
+    severity: low
+    finding: 'A custom pseudonym set on a titled row shows without its title in the list, while the file keeps the title: « Aurore Bruneau » set on « Mme Élodie Martin » shows « Aurore Bruneau », and the file reads « Mme Aurore Bruneau » (hand115.py, 3 of 3 runs; the only list-to-file differences of 57 rows). It predates this story: get_pseudonym returns the custom pseudonym as stored (gui/models/validation_state.py:1462-1468, unchanged since fe44a7d), and Q-H compares in the stored form on purpose. It sits outside the story''s ACs (AC1 and AC3 concern pseudonyms sent without a custom one; AC9 concerns stored names), but it is the same list-to-file gap AC9 closes for stored names. Nothing is left in clear. Overfitting check: (1) yes, on the real handlers; (2) plausible (titles are common), less frequent than AC9''s case.'
+    suggested_action: 'Lionel''s call: leave it, or put it in docs/BACKLOG.md with a pull trigger (show the custom pseudonym with the row''s title, as _with_title does for proposals).'
+    suggested_owner: po
+
+waiver: { active: false }
+
+quality_score: 90
+
+expires: '2026-11-28T17:30:00Z'
+
+merge_blockers:
+  - 'PERF-115-01 waits for Lionel''s decision (accept or fix). The stopping rule''s Codex review comes after QA''s PASS, so the orchestrator routes this first.'
+
+merge_notes:
+  - 'Concurrency (conc115.py). In 20 runs of two documents written at once on one database, with a shared name, a shared first name and a shared place, the first document kept 3 of 3 and the second reported 60 of 60 exactly. In 10 runs with one full pseudonym shown for two different names, the same held. There were 0 invariant breaks: no pseudonym on two names, and one part per real first or last name. In the CLI with a save during the review and on the desktop with a save before the end, the stale names were reported with C1 and C3, and with F1, F3 and F4. The immediate update and the CLI hook returned in 37 ms and 0 ms while another connection held pseudonym_lock, and saved nothing.'
+  - 'Lionel''s decisions, driven through the real handlers (hand115.py). A custom pseudonym updates the rows sharing its part at once: « Élodie Dupont » shows « Aurore … », the lone « Élodie » shows « Aurore », « Madame Sophie » shows « Madame Aurore ». A type change updates the row at once. Undoing and redoing everything restored the lists 9 of 9, with the database unopenable (0 opens). The file matches the list except REQ-115-01.'
+  - 'Lone forms before their full name (« Martin … Élodie Martin », « M. Lefèvre … Paul Lefèvre ») take the full name''s part with no row of their own: 3 rows saved, nothing reported, CLI and desktop, as B.5 says. A lone name that is its own group keeps its own two-part value (O19).'
+  - 'The existing component_matched_in_batch debug line (core/document_processor.py:780, :788; matched_entity=full_name) now also runs during the still-free check and the update. It never reaches a user: every product path configures INFO, and --verbose and logging.level are parsed but never applied. A --verbose process run emitted 16 records, none with a name. It is latent and predates this story; it is not an AC13 breach.'
+  - 'This gate file and the story''s QA Results are the expected exception to AC16''s file list (QA''s own outputs).'
+  - 'QA started no Codex, Forge, Anvil or Cato process. Codex (Task 7.2) is the orchestrator''s.'
+  - 'QA drove the desktop offscreen through the real screens and workers. No human looked at a real window, so the dialog''s layout was not seen.'
+
+evidence:
+  tests_reviewed: 41
+  risks_identified: 2
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 19, 20, 21]
+    ac_gaps: []
+  ac_notes:
+    AC1-AC4: 'Re-measured (cli_repro, gui_repro, batch_repro on the head): CLI text 190 of 190 groups, .csv 20 of 20; desktop 95 of 95 fresh and 95 of 95 with stored names (0 title gaps); batch star_wars 33 of 33 plus 33 of 33 (previews and file from star_wars.json), neutral 33 of 33 plus 33 of 33. pseudonyms_changed was empty everywhere and no dialog appeared. On fe44a7d (SM) these were 0, 0, 0, 80, 0 and 1.'
+    AC7: 'conc115.py as in merge_notes; T13, T14 and T17 pass.'
+    AC8: 'realname_probe.py with the document text, as both desktop paths pass it: 0 of 300 previews per document hold a value the 11.6 rule refuses (fe44a7d: 1, 50 and 27). CLI: 0 of 210 groups. Finalizations: 0 refused, and forced draws are drawn again.'
+    AC11: 'textcheck.py: F1-F7 are byte-exact against texts-11.5-final.md in the code (ValidationScreen and BatchScreen), in en.ts (the PO''s English) and in fr.ts (unfinished, source shown). C1-C3 from format_pseudonyms_changed are byte-exact against the story, and format([]) is None. The CHANGELOG ### Fixed block and KL-011 are byte-exact, KL-006 to KL-011 is updated, and each claim is true against the code and the probes.'
+    AC12: 'git diff fe44a7d...HEAD -- gdpr_pseudonymizer/data/database.py is empty, and test_parallel_saved_pseudonym.py is unchanged and passes.'
+    AC13: 'Four new logger calls: review_pseudonyms_resolved (kept, changed), review_pseudonyms_refreshed (redrawn), review_refresh_failed and cli_custom_rebase_failed (exc_type). There is no name or pseudonym. accepts_value and is_used are declared in PseudonymManager first, and the four draws call accepts_value (an exact extraction).'
+    AC14: 'CI 099c0c7: 3476 passed, 44 xfailed (ubuntu 3.11, ubuntu 3.13, macOS); 3326 passed, 3 skipped, 44 xfailed (Windows); 0 XPASS. CI e740d3d: the same with 48 xfailed. strict=True, raises=AssertionError. Read, not re-run: the dev''s --runxfail log gives 48 failed at AssertionError and 4 passed. No marker is left in the named test files.'
+    AC16: 'Only the File Locations files, plus test_known_entities_type_aware.py:122 (right per AC9) and QA''s two outputs.'
+    AC18: 'Open. CI on b806e3a is green: 3530 passed on ubuntu 3.11, ubuntu 3.13 and macOS; 3380 passed, 3 skipped on Windows; lint, quality and CodeQL pass. This gate is CONCERNS, and Codex has not run yet.'
+    local: 'On b806e3a: the new files, GUI last, 58 passed; leakage guards 15 passed; the story''s Testing files plus test_batch_run_isolation.py, GUI last, 541 passed; tests/unit -m "not slow" -n auto 3335 passed, 3 skipped.'
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'No name in a new log line or exception. The still-free check runs under the existing lock after the reload. The immediate update and the CLI hook only read and save nothing (Part E). The latent debug line is unreachable in product paths (merge_notes).'
+  performance:
+    status: CONCERNS
+    notes: 'PERF-115-01. End-of-review cost was not separately benchmarked. The CLI and desktop suites ran at their usual times, and CI timings are in line.'
+  reliability:
+    status: PASS
+    notes: 'Concurrency invariants hold in 30 two-document runs. A refresher that fails gives the story''s fallback (T37). A preview fallback is never kept (T28). Undo and redo never open the database.'
+  maintainability:
+    status: PASS
+    notes: 'One acceptance check shared by the draws and the still-free check. One rebase shared by the desktop update and the CLI hook. Docstrings on every new method. black, ruff and mypy are clean.'
+
+recommendations:
+  immediate:
+    - action: 'Lionel decides PERF-115-01: waive it, or fix it before the merge (reuse the context''s rows in the refresh; optionally run it off the GUI thread).'
+      refs: ['gdpr_pseudonymizer/core/document_processor.py:1445-1511', 'gdpr_pseudonymizer/gui/models/validation_state.py:788-853']
+  future:
+    - action: 'REQ-115-01 if Lionel files it: show a custom pseudonym with the row''s title.'
+      refs: ['gdpr_pseudonymizer/gui/models/validation_state.py:1462-1468']
+    - action: 'If --verbose or logging.level is ever wired to configure_logging, drop matched_entity from component_matched_in_batch first.'
+      refs: ['gdpr_pseudonymizer/core/document_processor.py:780', 'gdpr_pseudonymizer/cli/main.py:77']
+    - action: 'Later docs pass: list accepts_value and is_used in the internal interfaces document.'
+      refs: ['docs/architecture/5-internal-module-interfaces.md']

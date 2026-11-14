@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import dataclasses
 import uuid
+from collections.abc import Callable, Mapping, Sequence
 from typing import TYPE_CHECKING
 
 from PySide6.QtCore import QObject, Signal
@@ -21,6 +22,7 @@ from gdpr_pseudonymizer.core.custom_pseudonym import (
 )
 from gdpr_pseudonymizer.core.mapping_key import mapping_key
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
+from gdpr_pseudonymizer.utils.logger import get_logger
 from gdpr_pseudonymizer.validation.models import (
     ADDED_BY_HAND_SOURCE,
     CORRECTED_BY_HAND_SOURCE,
@@ -40,7 +42,22 @@ from gdpr_pseudonymizer.validation.models import (
 from gdpr_pseudonymizer.validation.workflow import ValidationWorkflow
 
 if TYPE_CHECKING:
+    from gdpr_pseudonymizer.core.document_processor import PseudonymProposal
     from gdpr_pseudonymizer.gui.workers.detection_worker import DetectionResult
+
+    # Story 11.5: what the end would write now for the review's names
+    # (``DocumentProcessor.refresh_review_proposals``)
+    ProposalRefresher = Callable[
+        [
+            str,
+            Sequence[NameKey],
+            Mapping[NameKey, str],
+            Mapping[NameKey, PseudonymProposal],
+        ],
+        Mapping[NameKey, "PseudonymProposal | str"],
+    ]
+
+logger = get_logger(__name__)
 
 # The kinds of decision a row can hold (Story 10.10, AC14): kept (the row is
 # sent: accepted, corrected, added) or dropped (rejected). Pending is neither.
@@ -120,6 +137,13 @@ class GUIValidationState(QObject):
         self._undo_stack = QUndoStack(self)
         self._known_entity_ids: set[str] = set()
         self._pseudonym_previews: dict[CandidateKey, str] = {}
+        # Story 11.5: the pseudonym each detected row's preview shows, by
+        # candidate key (kept at the end if still free), and the rows whose
+        # proposal the list's update replaced (None: no proposal, a stored
+        # name or an update that could not run)
+        self._pseudonym_proposals: dict[CandidateKey, PseudonymProposal] = {}
+        self._proposal_by_id: dict[str, PseudonymProposal | None] = {}
+        self._proposal_refresher: ProposalRefresher | None = None
         # Map entity_id -> EntityReview for fast lookup
         self._reviews_by_id: dict[str, EntityReview] = {}
         # Variant occurrence map: canonical candidate key (text, start_pos,
@@ -200,6 +224,10 @@ class GUIValidationState(QObject):
             document_text=detection_result.document_text,
         )
         self._pseudonym_previews = dict(detection_result.pseudonym_previews)
+        self._pseudonym_proposals = dict(
+            getattr(detection_result, "pseudonym_proposals", None) or {}
+        )
+        self._proposal_by_id.clear()
         self._variant_occurrences = dict(detection_result.variant_occurrences or {})
         self._rows_per_place = rows_per_place
         self._reviews_by_id.clear()
@@ -267,7 +295,11 @@ class GUIValidationState(QObject):
                     if existing:
                         self._known_entity_ids.add(review.entity_id)
                         review.state = EntityReviewState.CONFIRMED
-                        review.suggested_pseudonym = existing.pseudonym_full
+                        # Story 11.5 (AC9): with the title in front, by the
+                        # preview's own rule
+                        review.suggested_pseudonym = ValidationWorkflow._with_title(
+                            review.entity, existing.pseudonym_full
+                        )
         except Exception:
             pass  # Non-fatal: unknown entities just stay PENDING
 
@@ -650,6 +682,27 @@ class GUIValidationState(QObject):
         """
         review = self._reviews_by_id.get(entity_id)
         rows = self._pseudonym_rows(review) if review is not None else []
+        if self._proposal_refresher is not None:
+            # Story 11.5 (AC19, AC20): the rows the custom pseudonym changes
+            # are updated at once, in the same undo step
+            label = (
+                "Changer le pseudonyme du groupe"
+                if len(rows) > 1
+                else "Changer le pseudonyme"
+            )
+            self._undo_stack.beginMacro(label)
+            if len(rows) > 1:
+                for row in rows:
+                    self._undo_stack.push(
+                        _ChangePseudonymCommand(self, row.entity_id, new_pseudonym)
+                    )
+            else:
+                self._undo_stack.push(
+                    _ChangePseudonymCommand(self, entity_id, new_pseudonym, alone=True)
+                )
+            self._push_proposal_updates(retyped=())
+            self._undo_stack.endMacro()
+            return
         if len(rows) > 1:
             self._undo_stack.beginMacro("Changer le pseudonyme du groupe")
             for row in rows:
@@ -689,6 +742,115 @@ class GUIValidationState(QObject):
         text = review.user_modification or review.entity.text
         entity_type = review.entity.entity_type
         return (mapping_key(text, entity_type), entity_type)
+
+    # ------------------------------------------------------------------
+    # Story 11.5: the pseudonyms the list shows, kept at the end
+    # ------------------------------------------------------------------
+
+    def set_proposal_refresher(self, refresher: ProposalRefresher | None) -> None:
+        """What the end would write now for the review's names (Story 11.5,
+        AC19): called after a type change or a custom pseudonym, so the rows
+        they affect show at once what is written. None turns the update
+        off."""
+        self._proposal_refresher = refresher
+
+    def _row_proposal(self, review: EntityReview) -> PseudonymProposal | None:
+        """The pseudonym a row shows, as drawn: the list's update for the
+        row when there is one, else its preview's (by the key stored at
+        init); None for a stored name or a row added by hand."""
+        if review.entity_id in self._proposal_by_id:
+            return self._proposal_by_id[review.entity_id]
+        key = self._candidate_key_by_id.get(review.entity_id)
+        return self._pseudonym_proposals.get(key) if key is not None else None
+
+    def get_pseudonym_proposals(self) -> dict[NameKey, list[PseudonymProposal]]:
+        """The pseudonyms the list shows for each name sent with no custom
+        pseudonym, in the order of its rows, without repeats (Story 11.5):
+        a corrected row sends its own under its corrected name."""
+        proposals: dict[NameKey, list[PseudonymProposal]] = {}
+        for review, _entity in self._validated_rows():
+            if review.custom_pseudonym:
+                continue
+            proposal = self._row_proposal(review)
+            if proposal is None:
+                continue
+            shown = proposals.setdefault(self._sent_name(review), [])
+            if proposal not in shown:
+                shown.append(proposal)
+        return proposals
+
+    def _first_place(self, review: EntityReview) -> int:
+        """The first place in the document a row stands for."""
+        starts = [review.entity.start_pos]
+        starts += [e.start_pos for e in self._occurrences(review) or []]
+        return min(starts)
+
+    def _push_proposal_updates(self, retyped: Sequence[str]) -> None:
+        """Push one ``_ProposalCommand`` per row whose pseudonym changes now
+        (Story 11.5, AC19), inside the caller's undo macro.
+
+        The refresher reads the review as it stands: every name not rejected,
+        once, in the order of its first place; the first custom pseudonym of
+        each name; each name's current proposal. When it is missing or
+        raises, the rows ``retyped`` show nothing (their old-type pseudonym
+        is no longer true) and the others keep what they show.
+        """
+        rows = [
+            review
+            for review in self._session._entity_reviews
+            if review.state != EntityReviewState.REJECTED
+        ]
+        first: dict[NameKey, int] = {}
+        customs: dict[NameKey, str] = {}
+        current: dict[NameKey, PseudonymProposal] = {}
+        for review in rows:
+            name = self._sent_name(review)
+            place = self._first_place(review)
+            if name not in first or place < first[name]:
+                first[name] = place
+            if review.custom_pseudonym:
+                customs.setdefault(name, review.custom_pseudonym)
+        for review in rows:
+            name = self._sent_name(review)
+            if name in current or name in customs:
+                continue
+            proposal = self._row_proposal(review)
+            if proposal is not None:
+                current[name] = proposal
+        names = sorted(first, key=lambda name: first[name])
+        try:
+            if self._proposal_refresher is None:
+                raise RuntimeError("no refresher")
+            updates = dict(
+                self._proposal_refresher(
+                    self._session.document_text, names, customs, current
+                )
+            )
+        except Exception as error:
+            logger.warning("review_refresh_failed", exc_type=type(error).__name__)
+            for entity_id in retyped:
+                retyped_row = self._reviews_by_id.get(entity_id)
+                if retyped_row is not None and not retyped_row.custom_pseudonym:
+                    self._undo_stack.push(_ProposalCommand(self, entity_id, None, None))
+            return
+        for review in rows:
+            if review.custom_pseudonym:
+                continue
+            value = updates.get(self._sent_name(review))
+            if value is None:
+                continue
+            if isinstance(value, str):
+                shown, proposal = value, None
+            else:
+                shown, proposal = value.pseudonym_full, value
+            titled = ValidationWorkflow._with_title(review.entity, shown)
+            if titled == review.suggested_pseudonym and proposal == self._row_proposal(
+                review
+            ):
+                continue
+            self._undo_stack.push(
+                _ProposalCommand(self, review.entity_id, titled, proposal)
+            )
 
     def get_custom_pseudonyms(self) -> dict[NameKey, str]:
         """The custom pseudonym of each name sent to finalization (10.11).
@@ -784,6 +946,25 @@ class GUIValidationState(QObject):
         """
         review = self._reviews_by_id.get(entity_id)
         rows = self._action_rows(review) if review is not None else []
+        if self._proposal_refresher is not None:
+            # Story 11.5 (AC19, AC20): every row retyped shows at once a
+            # pseudonym of its new type, in the same undo step
+            label = "Changer le type du groupe" if len(rows) > 1 else "Changer le type"
+            self._undo_stack.beginMacro(label)
+            if len(rows) > 1:
+                for row in rows:
+                    self._undo_stack.push(
+                        _ChangeTypeCommand(self, row.entity_id, new_type)
+                    )
+                retyped = [row.entity_id for row in rows]
+            else:
+                self._undo_stack.push(
+                    _ChangeTypeCommand(self, entity_id, new_type, alone=True)
+                )
+                retyped = [entity_id]
+            self._push_proposal_updates(retyped=retyped)
+            self._undo_stack.endMacro()
+            return
         if len(rows) > 1:
             self._undo_stack.beginMacro("Changer le type du groupe")
             for row in rows:
@@ -1536,6 +1717,48 @@ class _ChangeTypeCommand(QUndoCommand):
             if self._old_state is not None:
                 review.state = self._old_state
             self._state._set_own(self._entity_id, self._old_own)
+            self._state.state_changed.emit(self._entity_id)
+
+
+class _ProposalCommand(QUndoCommand):
+    """Show a row's new pseudonym after a type change or a custom pseudonym
+    (Story 11.5, AC19, AC20). The value drawn lives in the command, so undo
+    and redo never open the database or draw."""
+
+    def __init__(
+        self,
+        state: GUIValidationState,
+        entity_id: str,
+        shown: str | None,
+        proposal: PseudonymProposal | None,
+    ) -> None:
+        super().__init__("Changer le pseudonyme")
+        self._state = state
+        self._entity_id = entity_id
+        self._shown = shown
+        self._proposal = proposal
+        self._old_shown: str | None = None
+        self._had_override = False
+        self._old_proposal: PseudonymProposal | None = None
+
+    def redo(self) -> None:
+        review = self._state._reviews_by_id.get(self._entity_id)
+        if review:
+            self._old_shown = review.suggested_pseudonym
+            self._had_override = self._entity_id in self._state._proposal_by_id
+            self._old_proposal = self._state._proposal_by_id.get(self._entity_id)
+            review.suggested_pseudonym = self._shown
+            self._state._proposal_by_id[self._entity_id] = self._proposal
+            self._state.state_changed.emit(self._entity_id)
+
+    def undo(self) -> None:
+        review = self._state._reviews_by_id.get(self._entity_id)
+        if review:
+            review.suggested_pseudonym = self._old_shown
+            if self._had_override:
+                self._state._proposal_by_id[self._entity_id] = self._old_proposal
+            else:
+                self._state._proposal_by_id.pop(self._entity_id, None)
             self._state.state_changed.emit(self._entity_id)
 
 

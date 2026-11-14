@@ -335,6 +335,31 @@
         <source>Revenir au lot</source>
         <translation>Back to the batch</translation>
     </message>
+    <message>
+        <location filename="../screens/batch.py" line="1220"/>
+        <source>Pseudonymes remplacés</source>
+        <translation>Pseudonyms replaced</translation>
+    </message>
+    <message>
+        <location filename="../screens/batch.py" line="1215"/>
+        <source>• %1 : %2 → %3</source>
+        <translation>• %1: %2 → %3</translation>
+    </message>
+    <message>
+        <location filename="../screens/batch.py" line="1213"/>
+        <source>Document « %1 » :</source>
+        <translation>Document &quot;%1&quot;:</translation>
+    </message>
+    <message>
+        <location filename="../screens/batch.py" line="1199"/>
+        <source>Un pseudonyme affiché dans une liste ne pouvait plus être utilisé au moment d&apos;écrire son document. Un autre a été écrit à sa place :</source>
+        <translation>A pseudonym shown in a list could no longer be used when its document was written. Another one was written in its place:</translation>
+    </message>
+    <message>
+        <location filename="../screens/batch.py" line="1205"/>
+        <source>%1 pseudonymes affichés dans les listes ne pouvaient plus être utilisés au moment d&apos;écrire leur document. D&apos;autres ont été écrits à leur place :</source>
+        <translation>%1 pseudonyms shown in the lists could no longer be used when their document was written. Others were written in their place:</translation>
+    </message>
 </context>
 <context>
     <name>ConfirmDialog</name>
@@ -1606,6 +1631,26 @@ Continue anyway?</translation>
         <location filename="../screens/validation.py" line="230"/>
         <source>Annuler le lot</source>
         <translation>Cancel batch</translation>
+    </message>
+    <message>
+        <location filename="../screens/validation.py" line="1216"/>
+        <source>Pseudonymes remplacés</source>
+        <translation>Pseudonyms replaced</translation>
+    </message>
+    <message>
+        <location filename="../screens/validation.py" line="1200"/>
+        <source>Un pseudonyme affiché dans la liste ne pouvait plus être utilisé au moment d&apos;écrire le document. Un autre a été écrit à sa place :</source>
+        <translation>A pseudonym shown in the list could no longer be used when the document was written. Another one was written in its place:</translation>
+    </message>
+    <message>
+        <location filename="../screens/validation.py" line="1206"/>
+        <source>%1 pseudonymes affichés dans la liste ne pouvaient plus être utilisés au moment d&apos;écrire le document. D&apos;autres ont été écrits à leur place :</source>
+        <translation>%1 pseudonyms shown in the list could no longer be used when the document was written. Others were written in their place:</translation>
+    </message>
+    <message>
+        <location filename="../screens/validation.py" line="1213"/>
+        <source>• %1 : %2 → %3</source>
+        <translation>• %1: %2 → %3</translation>
     </message>
 </context>
 <context>

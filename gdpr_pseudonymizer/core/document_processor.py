@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import re
 import time
-from collections.abc import Callable, Iterable, Mapping
+from collections.abc import Callable, Iterable, Mapping, Sequence
 from dataclasses import dataclass, field, replace
 from datetime import UTC, datetime
 
@@ -87,6 +87,44 @@ logger = get_logger(__name__)
 SPREADSHEET_CELL_ERROR = "A name you validated could not be placed in its cell in the Excel or CSV file, so it would have stayed in plain text. No output was written for this file and no pseudonym was stored. Please report this problem."
 
 
+@dataclass(frozen=True)
+class PseudonymProposal:
+    """A pseudonym the review showed for a name not yet stored (Story 11.5)."""
+
+    entity_type: str  # the type it was drawn for
+    theme: str  # the theme it was drawn from
+    pseudonym_full: str  # without a title
+    pseudonym_first: str | None
+    pseudonym_last: str | None
+    is_ambiguous: bool = False
+    ambiguity_reason: str | None = None
+
+
+@dataclass(frozen=True)
+class ChangedPseudonym:
+    """A name written with another pseudonym than the one shown (Story 11.5)."""
+
+    name: str  # the mapping key of the name sent
+    entity_type: str
+    shown: str
+    written: str
+
+
+def pseudonyms_changed_of(result: object) -> list[ChangedPseudonym]:
+    """The pseudonyms shown that could not be written, carried by a
+    processing result (``pseudonyms_changed``; Story 11.5); empty when the
+    result has none (a result built elsewhere)."""
+    changed = getattr(result, "pseudonyms_changed", None)
+    if not isinstance(changed, list):
+        return []
+    return [item for item in changed if isinstance(item, ChangedPseudonym)]
+
+
+# Story 11.5: a pseudonym shown for a name, with the name and the confidence
+# its saved row would carry, in the order the names are checked
+_OrderedProposal = tuple[NameKey, PseudonymProposal, float | None]
+
+
 @dataclass
 class ProcessingResult:
     """Result of document processing operation.
@@ -104,6 +142,9 @@ class ProcessingResult:
         own_word_rows: Saved rows whose pseudonym holds a word of their own
             name, counted once this document is written (Story 11.7), the
             rows it saved included
+        pseudonyms_changed: The pseudonyms the review showed that could not
+            be written, each with the one written (Story 11.5); empty when
+            every pseudonym shown was written, and without a review
     """
 
     success: bool
@@ -116,6 +157,7 @@ class ProcessingResult:
     error_message: str | None = None
     entity_type_counts: dict[str, int] | None = None
     own_word_rows: int = 0
+    pseudonyms_changed: list[ChangedPseudonym] = field(default_factory=list)
 
 
 @dataclass
@@ -142,6 +184,8 @@ class _ResolveResult:
     entity_type_counts: dict[str, int]
     # Story 11.7: the rows this document saved (for the notice's count)
     saved_entities: list[Entity] = field(default_factory=list)
+    # Story 11.5: the pseudonyms shown that could not be written
+    pseudonyms_changed: list[ChangedPseudonym] = field(default_factory=list)
 
 
 class DocumentProcessor:
@@ -283,7 +327,9 @@ class DocumentProcessor:
         return mapping_key(entity.text, entity.entity_type)
 
     def _build_pseudonym_assigner(
-        self, ctx: _ProcessingContext
+        self,
+        ctx: _ProcessingContext,
+        proposals: dict[NameKey, PseudonymProposal] | None = None,
     ) -> Callable[[DetectedEntity], str]:
         """Build a closure that generates pseudonym previews for validation.
 
@@ -293,6 +339,10 @@ class DocumentProcessor:
 
         Args:
             ctx: Processing context with repos and engine
+            proposals: When given, each new pseudonym drawn is recorded there,
+                keyed by (mapping key, type), in the order drawn (Story 11.5:
+                what the review showed, kept at the end if still free). A
+                stored name's pseudonym and the fallback are not recorded.
 
         Returns:
             Callable that maps DetectedEntity -> pseudonym preview string
@@ -321,6 +371,19 @@ class DocumentProcessor:
                     gender=None,
                 )
                 preview_cache[cache_key] = assignment.pseudonym_full
+                if proposals is not None:
+                    proposals.setdefault(
+                        cache_key,
+                        PseudonymProposal(
+                            entity_type=entity.entity_type,
+                            theme=self.theme,
+                            pseudonym_full=assignment.pseudonym_full,
+                            pseudonym_first=assignment.pseudonym_first,
+                            pseudonym_last=assignment.pseudonym_last,
+                            is_ambiguous=assignment.is_ambiguous,
+                            ambiguity_reason=assignment.ambiguity_reason,
+                        ),
+                    )
                 return assignment.pseudonym_full
             except (ValueError, RuntimeError) as e:
                 logger.warning(
@@ -343,12 +406,17 @@ class DocumentProcessor:
         custom_pseudonyms: dict[NameKey, str] | None = None,
         cells: dict[str, str] | None = None,
         types_selected: bool = False,
+        shown_names: dict[NameKey, list[NameKey]] | None = None,
+        on_custom_set: Callable[[Mapping[NameKey, str]], None] | None = None,
     ) -> list[DetectedEntity]:
         """Run entity validation workflow (interactive or auto-accept).
 
         ``custom_pseudonyms``, when given, is filled with the custom
         pseudonyms the user set in the review (Story 10.11), keyed by
-        (mapping key, type) of the name sent. ``cells`` (cell reference ->
+        (mapping key, type) of the name sent. ``shown_names``, when given,
+        is filled with the names each name sent was shown for, and
+        ``on_custom_set`` is called after each custom pseudonym set (Story
+        11.5; ``run_validation_workflow``). ``cells`` (cell reference ->
         cell text) is given for a spreadsheet, whose entities' positions
         point into their cells (Story 10.15); None for a text document.
         The places the user typed (added with [A] or corrected with [E]) are
@@ -411,6 +479,8 @@ class DocumentProcessor:
                     # Names known in the mapping database are written without review.
                     sent_without_review=known_entities,
                     cells=cells,
+                    shown_names=shown_names,
+                    on_custom_set=on_custom_set,
                 )
             else:
                 # Story 10.18: nothing is left to review; the command line
@@ -588,6 +658,26 @@ class DocumentProcessor:
         if not custom_pseudonyms:
             return set()
         stored = ctx.mapping_repo.find_all()
+        self._check_custom_pseudonyms(
+            stored, custom_pseudonyms, document_text, sent_names
+        )
+        return self._register_custom_rows(
+            ctx, custom_pseudonyms, stored, entity_cache, new_entities
+        )
+
+    @staticmethod
+    def _check_custom_pseudonyms(
+        stored: list[Entity],
+        custom_pseudonyms: Mapping[NameKey, str],
+        document_text: str,
+        sent_names: Iterable[str] = (),
+    ) -> None:
+        """The last check of every custom pseudonym (Story 10.11), against
+        the stored rows given.
+
+        Raises:
+            CustomPseudonymError: If a custom pseudonym breaks a rule
+        """
         names = sorted(custom_pseudonyms)
         words = document_words(document_text)  # read once (QA PERF-001, PO A5)
         sent = list(sent_names)
@@ -606,6 +696,28 @@ class DocumentProcessor:
             if refusal is not None:
                 logger.warning("custom_pseudonym_refused", reason=refusal.reason.value)
                 raise CustomPseudonymError(finalization_message(refusal))
+
+    def _register_custom_rows(
+        self,
+        ctx: _ProcessingContext,
+        custom_pseudonyms: Mapping[NameKey, str],
+        stored: list[Entity],
+        entity_cache: dict[tuple[str, str], str],
+        new_entities: list[Entity],
+    ) -> set[NameKey]:
+        """Register every custom pseudonym first (Story 10.11), the stored
+        rows given: each name gets its new row, the library marks its
+        pseudonym and its bound parts as used, the values a generated
+        pseudonym must not take are kept (AC19), and the run's cache holds
+        it. Story 11.5: shared by the end (after its check) and the review's
+        update (without it).
+
+        Returns:
+            The names registered
+        """
+        if not custom_pseudonyms:
+            return set()
+        names = sorted(custom_pseudonyms)
         custom_rows: list[Entity] = []
         for name in names:
             text, entity_type = name
@@ -852,12 +964,196 @@ class DocumentProcessor:
         )
         return assignment.pseudonym_full, untaken
 
+    def _part_accepted(
+        self,
+        ctx: _ProcessingContext,
+        part: str | None,
+        real: str | None,
+        kind: str,
+    ) -> bool:
+        """Whether a person's proposed part is what a draw would give now
+        (Story 11.5, B.5 condition 7): the part the real word already has,
+        when it has one (kept for consistency, not checked further, as in a
+        draw); otherwise a part the library's one acceptance check accepts."""
+        if not part:
+            return False
+        if real:
+            existing = ctx.compositional_engine.find_standalone_components(real, kind)
+            if existing is not None:
+                return part == existing
+        return ctx.pseudonym_manager.accepts_value(part, kind, real)
+
+    def _proposal_row(
+        self,
+        ctx: _ProcessingContext,
+        name: NameKey,
+        proposal: PseudonymProposal,
+        confidence: float | None,
+        entity_cache: dict[tuple[str, str], str],
+        new_entities: list[Entity],
+    ) -> Entity | None:
+        """The row a pseudonym shown for ``name`` is saved with when a draw
+        at this moment would accept it, else None (Story 11.5, AC5; Fix
+        design B.5's nine conditions)."""
+        text, entity_type = name
+        engine = ctx.compositional_engine
+        manager = ctx.pseudonym_manager
+        if name in entity_cache:
+            return None
+        if ctx.mapping_repo.find_by_full_name_and_type(text, entity_type):
+            return None
+        if proposal.entity_type != entity_type or proposal.theme != self.theme:
+            return None
+        if manager.is_used(proposal.pseudonym_full):
+            return None
+        if proposal.pseudonym_full in self._pseudonyms_of_other_types(
+            ctx, text, entity_type, entity_cache
+        ):
+            return None
+        original_first = original_last = None
+        gender = None
+        if entity_type == "PERSON":
+            if self._check_component_match(ctx, text, new_entities) is not None:
+                # A lone name matched within the run: the loop resolves it
+                return None
+            original_first, original_last, is_ambiguous = engine.parse_full_name(text)
+            if self.theme != "neutral_id":
+                if is_ambiguous and original_first and not original_last:
+                    accepted = self._lone_name_accepted(ctx, original_first, proposal)
+                else:
+                    accepted = self._part_accepted(
+                        ctx, proposal.pseudonym_first, original_first, "first_name"
+                    ) and self._part_accepted(
+                        ctx, proposal.pseudonym_last, original_last, "last_name"
+                    )
+                if not accepted:
+                    return None
+            if engine.gender_detector is not None:
+                gender = engine.gender_detector.detect_gender_from_full_name(
+                    text, entity_type
+                )
+        elif self.theme != "neutral_id" and not manager.accepts_value(
+            proposal.pseudonym_full, entity_type
+        ):
+            return None
+        row = Entity(
+            entity_type=entity_type,
+            first_name=original_first,
+            last_name=original_last,
+            full_name=text,
+            pseudonym_first=proposal.pseudonym_first,
+            pseudonym_last=proposal.pseudonym_last,
+            pseudonym_full=proposal.pseudonym_full,
+            first_seen_timestamp=datetime.now(UTC),
+            gender=gender,
+            confidence_score=confidence,
+            theme=self.theme,
+            is_ambiguous=proposal.is_ambiguous,
+            ambiguity_reason=proposal.ambiguity_reason,
+        )
+        if takes_custom_value(row, self._custom_taken):
+            return None
+        return row
+
+    @staticmethod
+    def _lone_name_accepted(
+        ctx: _ProcessingContext, word: str, proposal: PseudonymProposal
+    ) -> bool:
+        """A one-word person name's proposal, as ``_handle_standalone_component``
+        would draw it now: an existing first-name part, else an existing
+        last-name part, must equal it; with none, its first part must be
+        accepted for the word as a real first name and its last part with no
+        real last name (Story 11.5)."""
+        engine = ctx.compositional_engine
+        for kind in ("first_name", "last_name"):
+            existing = engine.find_standalone_components(word, kind)
+            if existing:
+                return proposal.pseudonym_full == existing
+        manager = ctx.pseudonym_manager
+        return bool(
+            proposal.pseudonym_first
+            and proposal.pseudonym_last
+            and manager.accepts_value(proposal.pseudonym_first, "first_name", word)
+            and manager.accepts_value(proposal.pseudonym_last, "last_name", None)
+        )
+
+    def _register_proposals(
+        self,
+        ctx: _ProcessingContext,
+        ordered: Sequence[_OrderedProposal],
+        entity_cache: dict[tuple[str, str], str],
+        new_entities: list[Entity],
+    ) -> set[NameKey]:
+        """Keep each pseudonym shown that is still free (Story 11.5, AC5),
+        in the order given (the names' first places): its row joins the
+        run's new rows and the library marks it and its parts as used, so a
+        later name is checked against it. Draws nothing.
+
+        Returns:
+            The names kept (their first occurrence counts as new)
+        """
+        kept: set[NameKey] = set()
+        for name, proposal, confidence in ordered:
+            row = self._proposal_row(
+                ctx, name, proposal, confidence, entity_cache, new_entities
+            )
+            if row is None:
+                continue
+            ctx.pseudonym_manager.load_existing_mappings([row])
+            entity_cache[name] = proposal.pseudonym_full
+            new_entities.append(row)
+            kept.add(name)
+        return kept
+
+    @staticmethod
+    def _sent_in_order(
+        ctx: _ProcessingContext, validated_entities: list[DetectedEntity]
+    ) -> list[tuple[NameKey, float | None]]:
+        """Each name sent once, in the order of its first place in the list
+        (the order the per-occurrence loop resolves names in)."""
+        seen: dict[NameKey, float | None] = {}
+        for entity in validated_entities:
+            name = (
+                DocumentProcessor._normalize_entity_text(ctx, entity),
+                entity.entity_type,
+            )
+            seen.setdefault(name, getattr(entity, "confidence", None))
+        return list(seen.items())
+
+    @staticmethod
+    def _changed_pseudonyms(
+        names: Sequence[NameKey],
+        proposals: Mapping[NameKey, Sequence[PseudonymProposal]],
+        entity_cache: Mapping[tuple[str, str], str],
+        customs: Mapping[NameKey, str],
+    ) -> list[ChangedPseudonym]:
+        """Every pseudonym shown for a name sent that differs from the one
+        written for it, in the order of the names' first places (AC6)."""
+        changed: list[ChangedPseudonym] = []
+        for name in names:
+            if name in customs or name not in entity_cache:
+                continue
+            written = entity_cache[name]
+            shown: list[str] = []
+            for proposal in proposals.get(name, ()):
+                if proposal.pseudonym_full not in shown:
+                    shown.append(proposal.pseudonym_full)
+            changed.extend(
+                ChangedPseudonym(
+                    name=name[0], entity_type=name[1], shown=value, written=written
+                )
+                for value in shown
+                if value != written
+            )
+        return changed
+
     def _resolve_pseudonyms(
         self,
         ctx: _ProcessingContext,
         validated_entities: list[DetectedEntity],
         custom_pseudonyms: dict[NameKey, str] | None = None,
         document_text: str = "",
+        proposals: Mapping[NameKey, Sequence[PseudonymProposal]] | None = None,
     ) -> _ResolveResult:
         """Resolve pseudonyms for all validated entities.
 
@@ -865,6 +1161,13 @@ class DocumentProcessor:
         key, type), are checked again and registered before any occurrence
         is resolved (``_register_custom_pseudonyms``); ``document_text`` is
         the text their real-name check reads.
+
+        Story 11.5: ``proposals`` holds, for each name sent, the pseudonyms
+        the review showed for it, in the order of its rows or groups. The
+        first is kept when a draw at this moment would accept it
+        (``_register_proposals``, after the custom pseudonyms); any other
+        name is resolved as before. Each pseudonym shown that differs from
+        the one written is listed in the result's ``pseudonyms_changed``.
         """
         logger.info(
             "starting_entity_processing",
@@ -896,6 +1199,21 @@ class DocumentProcessor:
             new_entities,
             sent_names=sent_names,
         )
+        # Story 11.5: the pseudonyms the review showed, kept when still free
+        sent_in_order = self._sent_in_order(ctx, validated_entities)
+        kept: set[NameKey] = set()
+        if proposals:
+            kept = self._register_proposals(
+                ctx,
+                [
+                    (name, proposals[name][0], confidence)
+                    for name, confidence in sent_in_order
+                    if proposals.get(name)
+                ],
+                entity_cache,
+                new_entities,
+            )
+            custom_unseen |= kept
 
         for entity in validated_entities:
             logger.debug(
@@ -967,12 +1285,29 @@ class DocumentProcessor:
                 )
                 raise
 
+        changed = (
+            self._changed_pseudonyms(
+                [name for name, _ in sent_in_order],
+                proposals,
+                entity_cache,
+                custom_pseudonyms or {},
+            )
+            if proposals
+            else []
+        )
+        if proposals:
+            logger.info(
+                "review_pseudonyms_resolved",
+                kept=len(kept),
+                changed=len(changed),
+            )
         return _ResolveResult(
             replacements=replacements,
             entities_new=entities_new,
             entities_reused=entities_reused,
             entity_type_counts=type_counts,
             saved_entities=list(new_entities),
+            pseudonyms_changed=changed,
         )
 
     @staticmethod
@@ -1016,6 +1351,164 @@ class DocumentProcessor:
             result = result[:start_pos] + pseudonym + result[end_pos:]
 
         return result
+
+    @staticmethod
+    def _set_real_name_check(
+        ctx: _ProcessingContext,
+        document_text: str,
+        entities: Iterable[DetectedEntity],
+    ) -> None:
+        """Story 11.5 (AC8): Story 11.6's real-name check, set before the
+        review's draws from the document and the names detected, so the
+        list never shows a value a draw at the end would refuse for them."""
+        ctx.pseudonym_manager.set_real_name_check(
+            real_name_check(
+                document_text,
+                [DocumentProcessor._normalize_entity_text(ctx, e) for e in entities],
+            )
+        )
+
+    def _rebase_preview_context(
+        self,
+        ctx: _ProcessingContext,
+        stored: list[Entity],
+        customs: Mapping[NameKey, str],
+        ordered: Sequence[_OrderedProposal],
+    ) -> tuple[dict[tuple[str, str], str], list[Entity]]:
+        """Rebuild a review's context as the end would see it now (Story
+        11.5, B.8 and C): the stored rows, the custom pseudonyms (registered
+        without their re-check: each was checked when it was set; a refusal
+        is the end's to raise) and the pseudonyms shown that are still free.
+        Draws nothing, saves nothing.
+
+        Returns:
+            The run's cache and new rows of the custom pseudonyms and the
+            pseudonyms kept
+        """
+        ctx.pseudonym_manager.reset_preview_state()
+        ctx.pseudonym_manager.load_existing_mappings(stored)
+        self._custom_taken = untracked_custom_values(stored)
+        entity_cache: dict[tuple[str, str], str] = {}
+        new_entities: list[Entity] = []
+        self._register_custom_rows(ctx, customs, stored, entity_cache, new_entities)
+        self._register_proposals(ctx, ordered, entity_cache, new_entities)
+        return entity_cache, new_entities
+
+    def _build_custom_set_hook(
+        self,
+        ctx: _ProcessingContext,
+        recorded: Mapping[NameKey, PseudonymProposal],
+    ) -> Callable[[Mapping[NameKey, str]], None]:
+        """The command line's hook after [C] (Story 11.5, AC21): the review's
+        context is rebased on the stored rows, the custom pseudonyms set and
+        the pseudonyms shown still free (in the order drawn), so every group
+        displayed later is drawn as the end would draw it. No lock, no save,
+        no text."""
+
+        def on_custom_set(customs: Mapping[NameKey, str]) -> None:
+            stored = ctx.mapping_repo.find_all()
+            self._rebase_preview_context(
+                ctx,
+                stored,
+                customs,
+                [
+                    (name, proposal, None)
+                    for name, proposal in recorded.items()
+                    if name not in customs
+                ],
+            )
+
+        return on_custom_set
+
+    @staticmethod
+    def _review_proposals(
+        shown_names: Mapping[NameKey, list[NameKey]],
+        recorded: Mapping[NameKey, PseudonymProposal],
+        custom_pseudonyms: Mapping[NameKey, str],
+    ) -> dict[NameKey, list[PseudonymProposal]]:
+        """The pseudonyms the command line's review showed for each name
+        sent with no custom pseudonym, in the order of its groups (Story
+        11.5, B.6)."""
+        proposals: dict[NameKey, list[PseudonymProposal]] = {}
+        for sent, drawn_fors in shown_names.items():
+            if sent in custom_pseudonyms:
+                continue
+            shown: list[PseudonymProposal] = []
+            for drawn_for in drawn_fors:
+                proposal = recorded.get(drawn_for)
+                if proposal is not None and proposal not in shown:
+                    shown.append(proposal)
+            if shown:
+                proposals[sent] = shown
+        return proposals
+
+    def refresh_review_proposals(
+        self,
+        document_text: str,
+        names: Sequence[NameKey],
+        customs: Mapping[NameKey, str],
+        proposals: Mapping[NameKey, PseudonymProposal],
+    ) -> dict[NameKey, PseudonymProposal | str]:
+        """What the end would write now for the review's names, without
+        writing anything (Story 11.5, AC19; the desktop list's update after a
+        type change or a custom pseudonym).
+
+        Args:
+            document_text: The document's text (the real-name check reads it)
+            names: Every name of the review not rejected, each once, in the
+                order of its first place in the document
+            customs: The custom pseudonym of each name that has one
+            proposals: The pseudonym each name currently shows (its
+                proposal)
+
+        Returns:
+            Only the names whose value changes: a name stored now gives its
+            stored pseudonym, any other a new proposal, drawn as a draw at
+            the end would draw it
+        """
+        refreshed: dict[NameKey, PseudonymProposal | str] = {}
+        with open_database(self.db_path, self.passphrase) as db_session:
+            ctx = self._init_processing_context(db_session)
+            ctx.pseudonym_manager.set_real_name_check(
+                real_name_check(document_text, [name[0] for name in names])
+            )
+            stored = ctx.mapping_repo.find_all()
+            entity_cache, _ = self._rebase_preview_context(
+                ctx,
+                stored,
+                customs,
+                [
+                    (name, proposals[name], None)
+                    for name in names
+                    if name in proposals and name not in customs
+                ],
+            )
+            recorded: dict[NameKey, PseudonymProposal] = {}
+            assigner = self._build_pseudonym_assigner(ctx, proposals=recorded)
+            for name in names:
+                if name in customs or name in entity_cache:
+                    continue
+                current = proposals.get(name)
+                stored_row = ctx.mapping_repo.find_by_full_name_and_type(*name)
+                value: PseudonymProposal | str
+                if stored_row is not None:
+                    value = stored_row.pseudonym_full
+                    if current is None or current.pseudonym_full != value:
+                        refreshed[name] = value
+                    continue
+                shown = assigner(
+                    DetectedEntity(
+                        text=name[0],
+                        entity_type=name[1],
+                        start_pos=0,
+                        end_pos=len(name[0]),
+                    )
+                )
+                value = recorded.get(name, shown)
+                if value != current:
+                    refreshed[name] = value
+        logger.info("review_pseudonyms_refreshed", redrawn=len(refreshed))
+        return refreshed
 
     def _reset_pseudonym_state(self, ctx: _ProcessingContext) -> list[Entity]:
         """Reset pseudonym manager after validation preview.
@@ -1208,6 +1701,8 @@ class DocumentProcessor:
     def build_pseudonym_previews(
         self,
         detected_entities: list[DetectedEntity],
+        document_text: str = "",
+        proposals: dict[CandidateKey, PseudonymProposal] | None = None,
     ) -> dict[CandidateKey, str]:
         """Generate pseudonym previews for detected entities.
 
@@ -1217,8 +1712,16 @@ class DocumentProcessor:
         Preserves title prefixes in pseudonyms to match entity.text
         (e.g., "Dr. Jean Dupont" → "Dr. Luke Skywalker").
 
+        Story 11.5: Story 11.6's real-name check is set first, from
+        ``document_text`` and the names detected (AC8), so no preview is a
+        value a draw at the end would refuse for them.
+
         Args:
             detected_entities: Entities from detect_entities()
+            document_text: The document's text (empty: the names alone)
+            proposals: When given, filled with each new name's pseudonym, by
+                the entity's candidate key (Story 11.5: kept at the end if
+                still free)
 
         Returns:
             Dict mapping each candidate's key (text, start_pos, entity_type),
@@ -1230,11 +1733,19 @@ class DocumentProcessor:
 
         with open_database(self.db_path, self.passphrase) as db_session:
             ctx = self._init_processing_context(db_session)
-            assigner = self._build_pseudonym_assigner(ctx)
+            self._set_real_name_check(ctx, document_text, detected_entities)
+            recorded: dict[NameKey, PseudonymProposal] = {}
+            assigner = self._build_pseudonym_assigner(ctx, proposals=recorded)
             previews: dict[CandidateKey, str] = {}
             for entity in detected_entities:
                 key = candidate_key(entity)
                 base_pseudonym = assigner(entity)
+                if proposals is not None:
+                    proposal = recorded.get(
+                        (self._normalize_entity_text(ctx, entity), entity.entity_type)
+                    )
+                    if proposal is not None:
+                        proposals[key] = proposal
 
                 # Preserve title prefix for PERSON entities (same logic as CLI)
                 if entity.entity_type == "PERSON":
@@ -1257,6 +1768,7 @@ class DocumentProcessor:
         validated_entities: list[DetectedEntity],
         output_path: str,
         custom_pseudonyms: dict[NameKey, str] | None = None,
+        proposals: Mapping[NameKey, Sequence[PseudonymProposal]] | None = None,
     ) -> ProcessingResult:
         """Phase 2: Resolve pseudonyms, apply replacements, write output.
 
@@ -1269,6 +1781,8 @@ class DocumentProcessor:
             output_path: Path to write pseudonymized output
             custom_pseudonyms: The custom pseudonyms set in the review, keyed
                 by (mapping key, type) of the name sent (Story 10.11)
+            proposals: The pseudonyms the review showed for each name sent,
+                in the order of its rows (Story 11.5)
 
         Returns:
             ProcessingResult with success/failure details
@@ -1286,6 +1800,7 @@ class DocumentProcessor:
                         validated_entities,
                         custom_pseudonyms=custom_pseudonyms,
                         document_text=document_text,
+                        proposals=proposals,
                     )
                 pseudonymized_text = self._apply_replacements(
                     document_text, resolve_result.replacements
@@ -1302,6 +1817,7 @@ class DocumentProcessor:
                     processing_time_seconds=processing_time,
                     entity_type_counts=resolve_result.entity_type_counts,
                     own_word_rows=self._own_word_count(existing_rows, resolve_result),
+                    pseudonyms_changed=resolve_result.pseudonyms_changed,
                 )
         except Exception as e:
             return self._handle_processing_error(e, "", output_path, start_time)
@@ -1329,7 +1845,15 @@ class DocumentProcessor:
             )
             with open_database(self.db_path, self.passphrase) as db_session:
                 ctx = self._init_processing_context(db_session)
-                pseudonym_assigner = self._build_pseudonym_assigner(ctx)
+                # Story 11.5: what the review shows is what a draw at the end
+                # would accept (AC8), and is kept at the end if still free
+                if not skip_validation:
+                    self._set_real_name_check(ctx, document_text, detected_entities)
+                recorded: dict[NameKey, PseudonymProposal] = {}
+                shown_names: dict[NameKey, list[NameKey]] = {}
+                pseudonym_assigner = self._build_pseudonym_assigner(
+                    ctx, proposals=recorded
+                )
                 custom_pseudonyms: dict[NameKey, str] = {}
                 validated_entities = self._run_validation(
                     ctx=ctx,
@@ -1340,6 +1864,11 @@ class DocumentProcessor:
                     pseudonym_assigner=pseudonym_assigner,
                     custom_pseudonyms=custom_pseudonyms,
                     types_selected=entity_type_filter is not None,
+                    shown_names=shown_names,
+                    on_custom_set=self._build_custom_set_hook(ctx, recorded),
+                )
+                proposals = self._review_proposals(
+                    shown_names, recorded, custom_pseudonyms
                 )
                 # Story 10.22: the pseudonyms are chosen and saved under the
                 # database's write lock, one document at a time
@@ -1350,6 +1879,7 @@ class DocumentProcessor:
                         validated_entities,
                         custom_pseudonyms=custom_pseudonyms,
                         document_text=document_text,
+                        proposals=proposals,
                     )
                 pseudonymized_text = self._apply_replacements(
                     document_text, resolve_result.replacements
@@ -1369,6 +1899,7 @@ class DocumentProcessor:
                     processing_time_seconds=processing_time,
                     entity_type_counts=resolve_result.entity_type_counts,
                     own_word_rows=self._own_word_count(existing_rows, resolve_result),
+                    pseudonyms_changed=resolve_result.pseudonyms_changed,
                 )
         except Exception as e:
             return self._handle_processing_error(e, input_path, output_path, start_time)
@@ -1392,7 +1923,15 @@ class DocumentProcessor:
 
             with open_database(self.db_path, self.passphrase) as db_session:
                 ctx = self._init_processing_context(db_session)
-                pseudonym_assigner = self._build_pseudonym_assigner(ctx)
+                # Story 11.5: what the review shows is what a draw at the end
+                # would accept (AC8), and is kept at the end if still free
+                if not skip_validation:
+                    self._set_real_name_check(ctx, document_text, detected_entities)
+                recorded: dict[NameKey, PseudonymProposal] = {}
+                shown_names: dict[NameKey, list[NameKey]] = {}
+                pseudonym_assigner = self._build_pseudonym_assigner(
+                    ctx, proposals=recorded
+                )
                 custom_pseudonyms: dict[NameKey, str] = {}
                 validated_entities = self._run_validation(
                     ctx=ctx,
@@ -1404,6 +1943,11 @@ class DocumentProcessor:
                     custom_pseudonyms=custom_pseudonyms,
                     cells={cell.cell_ref: cell.value for cell in tabular_doc.cells},
                     types_selected=entity_type_filter is not None,
+                    shown_names=shown_names,
+                    on_custom_set=self._build_custom_set_hook(ctx, recorded),
+                )
+                proposals = self._review_proposals(
+                    shown_names, recorded, custom_pseudonyms
                 )
                 # Story 10.15 (AC4): every name has its cell, before any
                 # pseudonym is stored
@@ -1417,6 +1961,7 @@ class DocumentProcessor:
                         validated_entities,
                         custom_pseudonyms=custom_pseudonyms,
                         document_text=document_text,
+                        proposals=proposals,
                     )
 
                 self._apply_tabular_replacements(
@@ -1440,6 +1985,7 @@ class DocumentProcessor:
                     processing_time_seconds=processing_time,
                     entity_type_counts=resolve_result.entity_type_counts,
                     own_word_rows=self._own_word_count(existing_rows, resolve_result),
+                    pseudonyms_changed=resolve_result.pseudonyms_changed,
                 )
         except Exception as e:
             return self._handle_processing_error(e, input_path, output_path, start_time)
@@ -1548,6 +2094,7 @@ class DocumentProcessor:
                     processing_time_seconds=processing_time,
                     entity_type_counts=resolve_result.entity_type_counts,
                     own_word_rows=self._own_word_count(existing_rows, resolve_result),
+                    pseudonyms_changed=resolve_result.pseudonyms_changed,
                 )
         except Exception as e:
             return self._handle_processing_error(e, input_path, output_path, start_time)

@@ -140,6 +140,31 @@ class PseudonymManager(ABC):
         """
         pass
 
+    @abstractmethod
+    def accepts_value(
+        self, value: str, kind: str, real_component: str | None = None
+    ) -> bool:
+        """Whether a draw would accept this value now (Story 11.5): the
+        real-name check (Story 11.6), and the value not taken. ``kind`` is
+        "first_name", "last_name", "LOCATION" or "ORG".
+
+        Args:
+            value: A first name, last name, place or organisation
+            kind: What the value is drawn as
+            real_component: The real first or last name the part is for
+                (persons only), None for a lone word's other part
+
+        Returns:
+            True when a draw for ``kind`` would keep the value
+        """
+        pass
+
+    @abstractmethod
+    def is_used(self, pseudonym_full: str) -> bool:
+        """Whether a full pseudonym is already given (stored rows, custom
+        pseudonyms, pseudonyms of this run; Story 11.5)."""
+        pass
+
 
 class CompositionalPseudonymEngine:
     """Assigns pseudonyms using compositional strict matching logic.
