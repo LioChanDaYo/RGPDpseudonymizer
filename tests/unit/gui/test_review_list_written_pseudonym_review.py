@@ -80,16 +80,6 @@ pytestmark = pytest.mark.filterwarnings(
 WAIT_MS = 60000
 PENDING = EntityReviewState.PENDING
 
-WRITTEN = (
-    "Story 11.5 tests first: the review list shows a pseudonym that is not written"
-)
-TITLE = "Story 11.5 tests first: a stored titled name loses its title in the list"
-THEME = "Story 11.5 tests first: the desktop batch previews ignore the theme"
-UPDATE = (
-    "Story 11.5 tests first: the desktop list does not update after a type "
-    "change or a custom pseudonym"
-)
-
 LONE_AFTER = f"{ZQ} a signé le contrat. Zorbal a signé le contrat."
 TWICE = f"{ZQ} a signé le contrat. {ZQ} a signé le contrat."
 
@@ -370,7 +360,6 @@ def _spans(entities: list[DetectedEntity]) -> list[tuple[int, int]]:
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError, reason=WRITTEN)
 @pytest.mark.parametrize("case", ["one_name", "two_people_one_first_name", "title"])
 def test_desktop_list_shows_what_is_written(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, monkeypatch, draws, case
@@ -394,7 +383,6 @@ def test_desktop_list_shows_what_is_written(  # type: ignore[no-untyped-def]
     assert saved == [value.removeprefix("Mme ") for value in shown]
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError, reason=TITLE)
 @pytest.mark.parametrize("case", ["single", "batch"])
 def test_desktop_saved_titled_name_keeps_its_title(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, draws, case
@@ -415,7 +403,6 @@ def test_desktop_saved_titled_name_keeps_its_title(  # type: ignore[no-untyped-d
     assert shown == f"Mme {DB_PS}"  # expected failure
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError, reason=THEME)
 def test_desktop_batch_previews_use_the_theme_and_are_written(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, monkeypatch, draws
 ) -> None:
@@ -436,7 +423,6 @@ def test_desktop_batch_previews_use_the_theme_and_are_written(  # type: ignore[n
     assert _replacements(batch.output(), ONE_DOC, _spans(entities)) == [shown]
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError, reason=WRITTEN)
 def test_desktop_ok_unchanged_keeps_the_shown_pseudonym(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, monkeypatch, draws
 ) -> None:
@@ -458,7 +444,6 @@ def test_desktop_ok_unchanged_keeps_the_shown_pseudonym(  # type: ignore[no-unty
     assert customs == {}
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError, reason=WRITTEN)
 def test_desktop_corrected_text_keeps_the_shown_pseudonym(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, monkeypatch, draws
 ) -> None:
@@ -480,7 +465,6 @@ def test_desktop_corrected_text_keeps_the_shown_pseudonym(  # type: ignore[no-un
     assert sd.state.get_pseudonym(row.entity_id) == before
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError, reason=WRITTEN)
 def test_desktop_two_rows_corrected_into_one_name(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, monkeypatch, draws
 ) -> None:
@@ -526,7 +510,6 @@ def test_desktop_saved_untitled_name_unchanged(  # type: ignore[no-untyped-def]
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError, reason=UPDATE)
 @pytest.mark.parametrize("case", ["single", "batch"])
 def test_desktop_type_change_updates_the_list_at_once(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, monkeypatch, draws, case
@@ -566,7 +549,6 @@ def test_desktop_type_change_updates_the_list_at_once(  # type: ignore[no-untype
     assert ends.changed() == []
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError, reason=UPDATE)
 def test_desktop_custom_pseudonym_updates_the_sharing_row_at_once(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, monkeypatch, draws
 ) -> None:
@@ -588,7 +570,6 @@ def test_desktop_custom_pseudonym_updates_the_sharing_row_at_once(  # type: igno
     assert ends.changed() == []
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError, reason=UPDATE)
 def test_desktop_lone_name_takes_the_custom_part_at_once(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, draws
 ) -> None:
@@ -607,7 +588,6 @@ def test_desktop_lone_name_takes_the_custom_part_at_once(  # type: ignore[no-unt
     assert shown == "Dravin"  # expected failure
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError, reason=UPDATE)
 def test_desktop_undo_restores_the_list_without_the_database(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, monkeypatch, draws
 ) -> None:
@@ -640,7 +620,6 @@ def test_desktop_undo_restores_the_list_without_the_database(  # type: ignore[no
     assert (undone, redone) == (before, after)
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError, reason=UPDATE)
 def test_desktop_update_that_cannot_run(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, monkeypatch, draws
 ) -> None:

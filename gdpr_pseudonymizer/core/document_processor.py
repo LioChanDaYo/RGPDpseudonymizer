@@ -110,6 +110,16 @@ class ChangedPseudonym:
     written: str
 
 
+def pseudonyms_changed_of(result: object) -> list[ChangedPseudonym]:
+    """The pseudonyms shown that could not be written, carried by a
+    processing result (``pseudonyms_changed``; Story 11.5); empty when the
+    result has none (a result built elsewhere)."""
+    changed = getattr(result, "pseudonyms_changed", None)
+    if not isinstance(changed, list):
+        return []
+    return [item for item in changed if isinstance(item, ChangedPseudonym)]
+
+
 # Story 11.5: a pseudonym shown for a name, with the name and the confidence
 # its saved row would carry, in the order the names are checked
 _OrderedProposal = tuple[NameKey, PseudonymProposal, float | None]

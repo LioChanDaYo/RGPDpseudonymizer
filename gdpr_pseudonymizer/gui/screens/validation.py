@@ -8,6 +8,7 @@ find bar, finalization flow, and first-use contextual hints.
 from __future__ import annotations
 
 import copy
+from collections.abc import Mapping, Sequence
 from typing import TYPE_CHECKING
 
 from PySide6.QtCore import QEvent, Qt, QThreadPool, Signal
@@ -25,6 +26,7 @@ from PySide6.QtWidgets import (
 
 from gdpr_pseudonymizer.core.custom_pseudonym import (
     CustomPseudonymRefusal,
+    NameKey,
     Refusal,
     normalize_custom_pseudonym,
 )
@@ -41,7 +43,9 @@ from gdpr_pseudonymizer.utils.text_form import composed
 from gdpr_pseudonymizer.validation.workflow import ValidationWorkflow
 
 if TYPE_CHECKING:
+    from gdpr_pseudonymizer.core.document_processor import PseudonymProposal
     from gdpr_pseudonymizer.gui.main_window import MainWindow
+    from gdpr_pseudonymizer.gui.models.validation_state import ProposalRefresher
     from gdpr_pseudonymizer.gui.screens.batch import BatchScreen
     from gdpr_pseudonymizer.gui.workers.detection_worker import DetectionResult
     from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
@@ -347,6 +351,11 @@ class ValidationScreen(QWidget):
         self._validation_state.classify_known_entities(
             detection_result.db_path, detection_result.passphrase
         )
+        # Story 11.5 (AC19): a type change or a custom pseudonym updates the
+        # rows it affects at once
+        self._validation_state.set_proposal_refresher(
+            self._proposal_refresher(detection_result)
+        )
 
         # Wire state change signals
         self._validation_state.state_changed.connect(self._on_entity_state_changed)
@@ -418,6 +427,12 @@ class ValidationScreen(QWidget):
         pseudonym_previews = kw.get("pseudonym_previews", {})
         db_path = str(kw.get("db_path", ""))
         passphrase = str(kw.get("passphrase", ""))
+        # Story 11.5: the previews' pseudonyms (kept at the end if still
+        # free) and the batch's theme, so the list's update draws with it
+        pseudonym_proposals = kw.get("pseudonym_proposals") or {}
+        theme = str(
+            kw.get("theme") or self._main_window.config.get("default_theme", "neutral")
+        )
 
         from gdpr_pseudonymizer.gui.workers.detection_worker import DetectionResult
 
@@ -427,10 +442,11 @@ class ValidationScreen(QWidget):
             input_file=document_path,
             db_path=db_path,
             passphrase=passphrase,
-            theme=self._main_window.config.get("default_theme", "neutral"),
+            theme=theme,
             pseudonym_previews=pseudonym_previews,
             entity_type_counts={},
             detection_time_seconds=0.0,
+            pseudonym_proposals=pseudonym_proposals,
         )
 
         # Story 10.10: in batch mode each document keeps its review state for
@@ -466,6 +482,7 @@ class ValidationScreen(QWidget):
         """
         self._detection_result = detection_result
         self._validation_state = state
+        state.set_proposal_refresher(self._proposal_refresher(detection_result))
         self._editor.set_validation_state(state)
         self._panel.set_validation_state(state)
         self._update_status_label()
@@ -473,6 +490,30 @@ class ValidationScreen(QWidget):
         self._finalize_label.setVisible(False)
         self._back_btn.setEnabled(True)
         self._set_review_enabled(True)
+
+    @staticmethod
+    def _proposal_refresher(
+        detection_result: DetectionResult,
+    ) -> ProposalRefresher:
+        """The review's update (Story 11.5, AC19): what the end would write
+        now, read on the review's database with its theme."""
+        db_path = detection_result.db_path
+        passphrase = detection_result.passphrase
+        theme = detection_result.theme
+
+        def refresher(
+            document_text: str,
+            names: Sequence[NameKey],
+            customs: Mapping[NameKey, str],
+            proposals: Mapping[NameKey, PseudonymProposal],
+        ) -> Mapping[NameKey, PseudonymProposal | str]:
+            from gdpr_pseudonymizer.core.document_processor import DocumentProcessor
+
+            return DocumentProcessor(
+                db_path=db_path, passphrase=passphrase, theme=theme
+            ).refresh_review_proposals(document_text, names, customs, proposals)
+
+        return refresher
 
     def _batch_screen(self) -> BatchScreen | None:
         """The main window's batch screen, if there is one."""
@@ -1115,6 +1156,8 @@ class ValidationScreen(QWidget):
         # change what is written.
         validated = copy.deepcopy(self._validation_state.expand_validated_entities())
         customs = copy.deepcopy(self._validation_state.get_custom_pseudonyms())
+        # Story 11.5: the pseudonyms the list shows, kept at the end if free
+        proposals = copy.deepcopy(self._validation_state.get_pseudonym_proposals())
 
         self._finalize_btn.setEnabled(False)
         self._back_btn.setEnabled(False)
@@ -1133,6 +1176,7 @@ class ValidationScreen(QWidget):
             theme=self._detection_result.theme,
             input_path=self._detection_result.input_file,
             custom_pseudonyms=customs,
+            proposals=proposals,
         )
         worker.signals.progress.connect(self._on_finalize_progress)
         worker.signals.finished.connect(self._on_finalize_finished)
