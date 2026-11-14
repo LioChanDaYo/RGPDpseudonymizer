@@ -933,6 +933,10 @@ class BatchScreen(QWidget):
         # Show summary
         self._show_summary(result)
 
+        # Story 11.5 (AC11): the pseudonyms shown that could not be written,
+        # after the summary and before Story 11.7's notice
+        self._show_pseudonyms_changed(result)
+
         # Story 11.7: one notice per session when the database holds saved
         # pseudonyms that hold a word of their own name
         self._main_window.notify_own_word_rows(result.own_word_rows)
@@ -1174,6 +1178,49 @@ class BatchScreen(QWidget):
     # ------------------------------------------------------------------
     # Summary Phase Logic
     # ------------------------------------------------------------------
+
+    def _show_pseudonyms_changed(self, result: BatchResult) -> None:
+        """Tell the user which pseudonyms shown in the batch's lists could
+        not be written, and what was written instead, by document (Story
+        11.5, AC11; texts F1 and F4 to F7, approved by Lionel on
+        2026-11-14). Nothing when every pseudonym shown was written."""
+        from gdpr_pseudonymizer.gui.widgets.confirm_dialog import ConfirmDialog
+
+        documents = [
+            (doc.filename, list(doc.pseudonyms_changed))
+            for doc in result.per_document_results
+            if getattr(doc, "pseudonyms_changed", None)
+        ]
+        count = sum(len(changes) for _, changes in documents)
+        if count == 0:
+            return
+        if count == 1:
+            intro = self.tr(
+                "Un pseudonyme affiché dans une liste ne pouvait plus être utilisé "
+                "au moment d'écrire son document. Un autre a été écrit à sa place :"
+            )
+        else:
+            intro = qarg(
+                self.tr(
+                    "%1 pseudonymes affichés dans les listes ne pouvaient plus être "
+                    "utilisés au moment d'écrire leur document. D'autres ont été "
+                    "écrits à leur place :"
+                ),
+                str(count),
+            )
+        blocks = [intro]
+        for filename, changes in documents:
+            lines = [qarg(self.tr("Document « %1 » :"), filename)]
+            lines += [
+                qarg(self.tr("• %1 : %2 → %3"), c.name, c.shown, c.written)
+                for c in changes
+            ]
+            blocks.append("\n".join(lines))
+        ConfirmDialog.informational(
+            self.tr("Pseudonymes remplacés"),
+            "\n\n".join(blocks),
+            parent=self._main_window,
+        ).exec()
 
     def _show_summary(self, result: BatchResult) -> None:
         self._phases.setCurrentIndex(2)

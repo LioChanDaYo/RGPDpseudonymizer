@@ -1184,6 +1184,40 @@ class ValidationScreen(QWidget):
 
         QThreadPool.globalInstance().start(worker)
 
+    def _show_pseudonyms_changed(self, changes: Sequence[object]) -> None:
+        """Tell the user which pseudonyms shown in the list could not be
+        written, and what was written instead (Story 11.5, AC11; texts F1 to
+        F4, approved by Lionel on 2026-11-14). Nothing when every pseudonym
+        shown was written."""
+        from gdpr_pseudonymizer.core.document_processor import ChangedPseudonym
+        from gdpr_pseudonymizer.gui.widgets.confirm_dialog import ConfirmDialog
+
+        changed = [c for c in changes if isinstance(c, ChangedPseudonym)]
+        if not changed:
+            return
+        if len(changed) == 1:
+            intro = self.tr(
+                "Un pseudonyme affiché dans la liste ne pouvait plus être utilisé "
+                "au moment d'écrire le document. Un autre a été écrit à sa place :"
+            )
+        else:
+            intro = qarg(
+                self.tr(
+                    "%1 pseudonymes affichés dans la liste ne pouvaient plus être "
+                    "utilisés au moment d'écrire le document. D'autres ont été "
+                    "écrits à leur place :"
+                ),
+                str(len(changed)),
+            )
+        lines = [
+            qarg(self.tr("• %1 : %2 → %3"), c.name, c.shown, c.written) for c in changed
+        ]
+        ConfirmDialog.informational(
+            self.tr("Pseudonymes remplacés"),
+            "\n".join([intro, *lines]),
+            parent=self._main_window,
+        ).exec()
+
     def _set_review_enabled(self, enabled: bool) -> None:
         """Enable or disable the review while a single document is written.
 
@@ -1218,6 +1252,10 @@ class ValidationScreen(QWidget):
 
         self._finalize_progress.setVisible(False)
         self._finalize_label.setVisible(False)
+
+        # Story 11.5 (AC11): the pseudonyms shown that could not be written,
+        # before Story 11.7's notice
+        self._show_pseudonyms_changed(result.pseudonyms_changed)
 
         # Story 11.7: one notice per session when the database holds saved
         # pseudonyms that hold a word of their own name

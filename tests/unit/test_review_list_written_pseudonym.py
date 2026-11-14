@@ -965,3 +965,99 @@ def test_preview_fallback_is_not_kept(tmp_path: Path, draws: _Draws) -> None:
     row = _row(db, ZQ, PERSON)
     assert _written(review.output, ONE_DOC, [(ZQ, PERSON)]) == [row.pseudonym_full]
     assert _changed(review.result) in ([], None)
+
+
+# --- T30, T31: the command line tells the user (AC11; texts C1-C3) ----------
+
+C1 = (
+    "⚠ 1 pseudonym shown in the review could no longer be used when the "
+    "document was written. Another one was written in its place:"
+)
+C2 = (
+    "⚠ {n} pseudonyms shown in the review could no longer be used when the "
+    "document was written. Others were written in their place:"
+)
+C3 = "  • {name}: {shown} → {written}"
+STALE_ORGS = [ORG_NAME, PLACE]
+
+
+@contextmanager
+def _made_stale(db: str, shown: dict[str, str]) -> Iterator[None]:
+    """Each group the review displays has its pseudonym given meanwhile to an
+    organisation saved by another document (Zorbtech, then Zorbaville), so
+    it is not free at the end."""
+    original = ReviewScreen.display_entity
+
+    def display(
+        self: Any,
+        entity: DetectedEntity,
+        context: str,
+        pseudonym: str,
+        *a: Any,
+        **k: Any,
+    ) -> Any:
+        if entity.text not in shown:
+            shown[entity.text] = pseudonym
+            _store(db, STALE_ORGS[len(shown) - 1], ORG, pseudonym)
+        return original(self, entity, context, pseudonym, *a, **k)
+
+    with patch.object(ReviewScreen, "display_entity", display):
+        yield
+
+
+def _told(output: str, names: list[str], shown: dict[str, str], db: str) -> None:
+    """The end message, byte for byte, after the ANSI codes are stripped."""
+    rows = {name: _row(db, name, PERSON).pseudonym_full for name in names}
+    head = C1 if len(names) == 1 else C2.format(n=len(names))
+    expected = [head] + [
+        C3.format(name=name, shown=shown[name], written=rows[name]) for name in names
+    ]
+    lines = output.splitlines()
+    pre(head in lines, f"the message is shown: {output!r}")
+    start = lines.index(head)
+    assert lines[start : start + len(expected)] == expected
+
+
+@pytest.mark.parametrize("case", ["one", "several"])
+def test_cli_tells_the_changes(tmp_path: Path, case: str) -> None:
+    """T30 (AC11): `process` lists each pseudonym shown that could not be
+    written, with the one written."""
+    from tests.unit.test_stored_pseudonym_own_word import _cli as _command
+    from tests.unit.test_stored_pseudonym_own_word import _documents
+
+    db = _new_db(tmp_path)
+    text, names = (ONE_DOC, [ZQ]) if case == "one" else (CUSTOM_DOC, [ZQ, VM])
+    source = tmp_path / "doc.txt"
+    source.write_text(text, encoding="utf-8")
+    shown: dict[str, str] = {}
+    with _documents([(name, PERSON) for name in names]), _made_stale(db, shown):
+        code, output = _command(
+            "process", str(source), "--db", db, "-o", str(tmp_path / "out.txt")
+        )
+    pre(code == 0, f"written: {output!r}")
+    _told(output, names, shown, db)
+
+
+def test_cli_batch_sequential_tells_the_changes(tmp_path: Path) -> None:
+    """T31 (AC11): `batch --workers 1` lists them after the document."""
+    from tests.unit.test_stored_pseudonym_own_word import _cli as _command
+    from tests.unit.test_stored_pseudonym_own_word import _documents
+
+    db = _new_db(tmp_path)
+    folder = tmp_path / "in"
+    folder.mkdir()
+    (folder / "doc0.txt").write_text(ONE_DOC, encoding="utf-8")
+    shown: dict[str, str] = {}
+    with _documents([(ZQ, PERSON)]), _made_stale(db, shown):
+        code, output = _command(
+            "batch",
+            str(folder),
+            "--db",
+            db,
+            "--workers",
+            "1",
+            "-o",
+            str(tmp_path / "out"),
+        )
+    pre(code == 0, f"written: {output!r}")
+    _told(output, [ZQ], shown, db)

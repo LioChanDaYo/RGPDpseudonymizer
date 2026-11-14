@@ -31,7 +31,11 @@ from rich.table import Table
 from rich.text import Text
 
 from gdpr_pseudonymizer.cli.config import load_config
-from gdpr_pseudonymizer.cli.formatters import format_error_message, rich_notifier
+from gdpr_pseudonymizer.cli.formatters import (
+    format_error_message,
+    format_pseudonyms_changed,
+    rich_notifier,
+)
 from gdpr_pseudonymizer.cli.passphrase import resolve_passphrase
 from gdpr_pseudonymizer.cli.progress import ETAColumn, ProgressTracker
 from gdpr_pseudonymizer.cli.validators import (
@@ -40,7 +44,10 @@ from gdpr_pseudonymizer.cli.validators import (
     validate_model_or_exit,
     validate_theme_or_exit,
 )
-from gdpr_pseudonymizer.core.document_processor import DocumentProcessor
+from gdpr_pseudonymizer.core.document_processor import (
+    DocumentProcessor,
+    pseudonyms_changed_of,
+)
 from gdpr_pseudonymizer.core.saved_own_words import notice_line, own_word_rows_of
 from gdpr_pseudonymizer.data.database import open_database
 from gdpr_pseudonymizer.exceptions import DatabaseConversionError
@@ -615,6 +622,14 @@ def batch_command(
                             output_path=str(output_file),
                             entity_type_filter=entity_type_filter,
                         )
+
+                        # Story 11.5: the pseudonyms shown in this document's
+                        # review that could not be written
+                        changed = format_pseudonyms_changed(
+                            pseudonyms_changed_of(result)
+                        )
+                        if changed is not None:
+                            console.print(changed, markup=False, style="yellow")
 
                         # Restart live display for progress updates
                         live.start()

@@ -50,12 +50,15 @@ from tests.unit.test_review_list_written_pseudonym import (
     DB_PS,
     LOCATION,
     ONE_DOC,
+    ORG,
     PERSON,
     PLACE,
     PLACE_DOC,
+    STALE_ORGS,
     TITLE_DOC,
     TITLED,
     TWO_DOC,
+    VM,
     ZM,
     ZQ,
     ZQ_CUT,
@@ -644,3 +647,88 @@ def test_desktop_update_that_cannot_run(  # type: ignore[no-untyped-def]
     written = _replacements(sd.finalize(dialogs), PLACE_DOC, _spans(entities))
     assert _is_person_draw(written[0])
     assert ends.changed() == []
+
+
+# ---------------------------------------------------------------------------
+# T32, T33: the desktop tells the user (AC11; texts F1 to F7, approved by
+# Lionel one by one on 2026-11-14, F1 with his change « remplacés »)
+# ---------------------------------------------------------------------------
+
+F1 = "Pseudonymes remplacés"
+F2 = (
+    "Un pseudonyme affiché dans la liste ne pouvait plus être utilisé au moment "
+    "d'écrire le document. Un autre a été écrit à sa place :"
+)
+F3 = (
+    "%1 pseudonymes affichés dans la liste ne pouvaient plus être utilisés au "
+    "moment d'écrire le document. D'autres ont été écrits à leur place :"
+)
+F4 = "• %1 : %2 → %3"
+F5 = "Document « %1 » :"
+F6 = (
+    "Un pseudonyme affiché dans une liste ne pouvait plus être utilisé au moment "
+    "d'écrire son document. Un autre a été écrit à sa place :"
+)
+F7 = (
+    "%1 pseudonymes affichés dans les listes ne pouvaient plus être utilisés au "
+    "moment d'écrire leur document. D'autres ont été écrits à leur place :"
+)
+CUSTOM_DOC_GUI = f"{ZQ} et {VM} ont signé le contrat."
+
+
+def _line(db: str, name: str, shown: str) -> str:
+    written = _row(db, name, PERSON).pseudonym_full
+    return F4.replace("%1", name).replace("%2", shown).replace("%3", written)
+
+
+@pytest.mark.parametrize("case", ["one", "several"])
+def test_desktop_dialog_tells_the_changes(  # type: ignore[no-untyped-def]
+    qtbot, main_window, tmp_path, monkeypatch, case
+) -> None:
+    """T32 (AC11): when pseudonyms shown are no longer free at the end (given
+    meanwhile to organisations saved by another document), the dialog lists
+    each with the one written, byte for byte, before Story 11.7's notice."""
+    dialogs = _Dialogs(monkeypatch)
+    events: list[str] = []
+    real_notify = main_window.notify_own_word_rows
+
+    def notify(count: int) -> None:
+        events.append(f"notice:{len(dialogs.calls)}")
+        real_notify(count)
+
+    monkeypatch.setattr(main_window, "notify_own_word_rows", notify)
+    db = _new_db(tmp_path)
+    text, names = (ONE_DOC, [ZQ]) if case == "one" else (CUSTOM_DOC_GUI, [ZQ, VM])
+    entities = [_first(text, name, PERSON) for name in names]
+    sd = _Single(qtbot, main_window, tmp_path, db, text, entities)
+    shown = {name: sd.shown(name) for name in names}
+    for index, name in enumerate(names):
+        _store(db, STALE_ORGS[index], ORG, shown[name])
+    sd.finalize(dialogs)
+    intro = F2 if case == "one" else F3.replace("%1", str(len(names)))
+    message = "\n".join([intro, *(_line(db, n, shown[n]) for n in names)])
+    assert dialogs.calls == [(F1, message)]
+    assert events == ["notice:1"]
+
+
+def test_desktop_batch_dialog_tells_the_changes(  # type: ignore[no-untyped-def]
+    qtbot, main_window, tmp_path, monkeypatch
+) -> None:
+    """T33 (AC11): after the batch's summary, one dialog lists, by document,
+    each pseudonym shown that could not be written, byte for byte."""
+    dialogs = _Dialogs(monkeypatch)
+    entities = [_first(ONE_DOC, ZQ, PERSON)]
+    batch = _Batch(qtbot, main_window, tmp_path, ONE_DOC, entities)
+
+    def body(record: dict[str, Any]) -> None:
+        state = batch.wait_doc()
+        record["shown"] = state.get_pseudonym(_one_row(state).entity_id)
+        _store(batch.db, STALE_ORGS[0], ORG, record["shown"])
+        batch.accept_pending_and_validate()
+
+    shown = batch.run(body).get("shown", "")
+    pre(bool(shown), "the row shows a pseudonym")
+    told = [call for call in dialogs.calls if call[0] == F1]
+    heading = F5.replace("%1", "doc0.txt")
+    message = "\n\n".join([F6, "\n".join([heading, _line(batch.db, ZQ, shown)])])
+    assert told == [(F1, message)]
