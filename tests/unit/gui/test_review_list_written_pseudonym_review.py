@@ -789,14 +789,6 @@ def test_update_shows_the_busy_cursor(  # type: ignore[no-untyped-def]
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=(
-        "Story 11.5 tests first: a custom pseudonym on a titled row loses its "
-        "title in the list"
-    ),
-)
 @pytest.mark.parametrize("mode", ["single", "batch"])
 def test_custom_pseudonym_on_titled_row_shows_the_title(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, monkeypatch, draws, mode

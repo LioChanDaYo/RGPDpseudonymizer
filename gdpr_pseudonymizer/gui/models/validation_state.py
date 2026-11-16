@@ -1465,7 +1465,15 @@ class GUIValidationState(QObject):
         if review is None:
             return ""
         if review.custom_pseudonym:
-            return review.custom_pseudonym
+            # REQ-115-01 (Lionel, 2026-11-16: "it should show the title"):
+            # with the row's title in front, as the file writes it (AC9's
+            # rule)
+            sent = (
+                self._edited_entity(review)
+                if review.user_modification
+                else review.entity
+            )
+            return ValidationWorkflow._with_title(sent, review.custom_pseudonym)
         return review.suggested_pseudonym or ""
 
 

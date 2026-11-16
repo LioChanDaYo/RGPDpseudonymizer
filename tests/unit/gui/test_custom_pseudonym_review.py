@@ -996,7 +996,9 @@ def test_custom_reaches_titled_form(  # type: ignore[no-untyped-def]
     r1, r2 = state.get_all_entities()
     state.change_pseudonym(r1.entity_id, CUSTOM)
     shown = [state.get_pseudonym(r.entity_id) for r in (r1, r2)]
-    assert shown == [CUSTOM, CUSTOM], shown  # expected failure
+    # Story 11.5, REQ-115-01 (Lionel, 2026-11-16: "it should show the
+    # title"): the titled row shows the custom pseudonym with its title
+    assert shown == [CUSTOM, f"M. {CUSTOM}"], shown  # expected failure
     assert [r1.state, r2.state] == [MODIFIED, MODIFIED]
 
 
