@@ -732,3 +732,91 @@ def test_desktop_batch_dialog_tells_the_changes(  # type: ignore[no-untyped-def]
     heading = F5.replace("%1", "doc0.txt")
     message = "\n\n".join([F6, "\n".join([heading, _line(batch.db, ZQ, shown)])])
     assert told == [(F1, message)]
+
+
+# ---------------------------------------------------------------------------
+# PERF-115-01 (Lionel, 2026-11-16: "read once plus busy cursor"): the busy
+# cursor is shown while the list's update runs, and restored after it
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("outcome", ["success", "error"])
+@pytest.mark.parametrize("change", ["type_change", "custom_pseudonym"])
+@pytest.mark.parametrize("mode", ["single", "batch"])
+def test_update_shows_the_busy_cursor(  # type: ignore[no-untyped-def]
+    qtbot, main_window, tmp_path, monkeypatch, draws, mode, change, outcome
+) -> None:
+    """The update after a type change or a custom pseudonym runs under the
+    busy cursor, restored after it returns or raises (single and batch)."""
+    from PySide6.QtCore import Qt
+    from PySide6.QtWidgets import QApplication
+
+    pre(QApplication.overrideCursor() is None, "no cursor set before")
+    real = DocumentProcessor.refresh_review_proposals
+    during: list[Any] = []
+
+    def refresh(self: Any, *args: Any, **kwargs: Any) -> Any:
+        cursor = QApplication.overrideCursor()
+        during.append(None if cursor is None else cursor.shape())
+        if outcome == "error":
+            raise OSError("database not reachable")
+        return real(self, *args, **kwargs)
+
+    monkeypatch.setattr(DocumentProcessor, "refresh_review_proposals", refresh)
+    db = _new_db(tmp_path)
+    text, name, etype = (
+        (PLACE_DOC, PLACE, LOCATION)
+        if change == "type_change"
+        else (ONE_DOC, ZQ, PERSON)
+    )
+    entities = [_first(text, name, etype)]
+    if mode == "single":
+        state = _Single(qtbot, main_window, tmp_path, db, text, entities).state
+    else:
+        state = _batch_state(main_window, db, text, entities)
+    row = _one_row(state)
+    if change == "type_change":
+        state.change_entity_type(row.entity_id, PERSON)
+    else:
+        state.change_pseudonym(row.entity_id, DB_PS)
+    assert during == [Qt.CursorShape.WaitCursor]
+    assert QApplication.overrideCursor() is None
+
+
+# ---------------------------------------------------------------------------
+# REQ-115-01 (Lionel, 2026-11-16: "it should show the title"): a custom
+# pseudonym set on a titled row shows with the title, as the file writes it
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason=(
+        "Story 11.5 tests first: a custom pseudonym on a titled row loses its "
+        "title in the list"
+    ),
+)
+@pytest.mark.parametrize("mode", ["single", "batch"])
+def test_custom_pseudonym_on_titled_row_shows_the_title(  # type: ignore[no-untyped-def]
+    qtbot, main_window, tmp_path, monkeypatch, draws, mode
+) -> None:
+    """REQ-115-01 (AC9's rule for a custom pseudonym): « Mme Zorbal
+    Quentrix » with the custom « Dravin Brontel » shows « Mme Dravin
+    Brontel », which is what the file holds."""
+    dialogs = _Dialogs(monkeypatch)
+    db = _new_db(tmp_path)
+    entities = [_first(TITLE_DOC, TITLED, PERSON)]
+    if mode == "single":
+        sd = _Single(qtbot, main_window, tmp_path, db, TITLE_DOC, entities)
+        state = sd.state
+    else:
+        state = _batch_state(main_window, db, TITLE_DOC, entities)
+    row = _one_row(state)
+    state.change_pseudonym(row.entity_id, DB_PS)
+    pre(row.custom_pseudonym == DB_PS, f"custom set: {row.custom_pseudonym!r}")
+    shown = state.get_pseudonym(row.entity_id)
+    assert shown == f"Mme {DB_PS}"  # expected failure
+    if mode == "single":
+        written = _replacements(sd.finalize(dialogs), TITLE_DOC, _spans(entities))
+        assert written == [shown]

@@ -1468,11 +1468,14 @@ class DocumentProcessor:
         """
         refreshed: dict[NameKey, PseudonymProposal | str] = {}
         with open_database(self.db_path, self.passphrase) as db_session:
-            ctx = self._init_processing_context(db_session)
+            # PERF-115-01 (Lionel, 2026-11-16: "read once plus busy cursor"):
+            # the stored rows are read and decrypted once, for the context
+            # and for the rebase
+            stored = SQLiteMappingRepository(db_session).find_all()
+            ctx = self._init_processing_context(db_session, existing_entities=stored)
             ctx.pseudonym_manager.set_real_name_check(
                 real_name_check(document_text, [name[0] for name in names])
             )
-            stored = ctx.mapping_repo.find_all()
             entity_cache, _ = self._rebase_preview_context(
                 ctx,
                 stored,
@@ -1552,7 +1555,9 @@ class DocumentProcessor:
             return 0
 
     def _init_processing_context(
-        self, db_session: DatabaseSession
+        self,
+        db_session: DatabaseSession,
+        existing_entities: list[Entity] | None = None,
     ) -> _ProcessingContext:
         """Initialize repositories and engines for document processing.
 
@@ -1561,6 +1566,9 @@ class DocumentProcessor:
 
         Args:
             db_session: Open database session
+            existing_entities: The stored rows when the caller has read them
+                already in this session (Story 11.5, PERF-115-01: the list's
+                update reads them once); None reads them here
 
         Returns:
             _ProcessingContext with all initialized dependencies
@@ -1571,7 +1579,8 @@ class DocumentProcessor:
         pseudonym_manager = LibraryBasedPseudonymManager()
         pseudonym_manager.load_library(self.theme)
 
-        existing_entities = mapping_repo.find_all()
+        if existing_entities is None:
+            existing_entities = mapping_repo.find_all()
         pseudonym_manager.load_existing_mappings(existing_entities)
 
         gender_detector = GenderDetector()

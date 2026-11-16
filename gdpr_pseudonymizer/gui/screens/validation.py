@@ -14,6 +14,7 @@ from typing import TYPE_CHECKING
 from PySide6.QtCore import QEvent, Qt, QThreadPool, Signal
 from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import (
+    QApplication,
     QHBoxLayout,
     QInputDialog,
     QLabel,
@@ -509,9 +510,15 @@ class ValidationScreen(QWidget):
         ) -> Mapping[NameKey, PseudonymProposal | str]:
             from gdpr_pseudonymizer.core.document_processor import DocumentProcessor
 
-            return DocumentProcessor(
-                db_path=db_path, passphrase=passphrase, theme=theme
-            ).refresh_review_proposals(document_text, names, customs, proposals)
+            # PERF-115-01 (Lionel, 2026-11-16: "read once plus busy cursor"):
+            # the update runs on the GUI thread under the busy cursor
+            QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
+            try:
+                return DocumentProcessor(
+                    db_path=db_path, passphrase=passphrase, theme=theme
+                ).refresh_review_proposals(document_text, names, customs, proposals)
+            finally:
+                QApplication.restoreOverrideCursor()
 
         return refresher
 
