@@ -76,7 +76,26 @@ Section "!${APPNAME}" SecMain
     ; the app shows the earlier version number. Only _internal is removed: the
     ; two top-level executables are overwritten, and the chosen folder may hold
     ; other things.
+    ; Skip it while the app or the command line is open: their files are
+    ; locked, so only part of _internal would go, and cancelling at the
+    ; locked-file prompt of the copy below would leave the old version broken.
+    ; An executable in use cannot be opened for writing. Append mode ("a")
+    ; neither changes nor truncates it, but would create it if missing, hence
+    ; IfFileExists first.
+    IfFileExists "$INSTDIR\gdpr-pseudonymizer.exe" 0 check_cli_in_use
+    ClearErrors
+    FileOpen $0 "$INSTDIR\gdpr-pseudonymizer.exe" a
+    IfErrors skip_cleanup
+    FileClose $0
+    check_cli_in_use:
+    IfFileExists "$INSTDIR\gdpr-pseudo.exe" 0 remove_internal
+    ClearErrors
+    FileOpen $0 "$INSTDIR\gdpr-pseudo.exe" a
+    IfErrors skip_cleanup
+    FileClose $0
+    remove_internal:
     RMDir /r "$INSTDIR\_internal"
+    skip_cleanup:
 
     ; Copy entire PyInstaller output directory
     File /r "${DISTDIR}\*.*"
