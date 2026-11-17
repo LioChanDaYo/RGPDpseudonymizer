@@ -61,9 +61,9 @@ Pre-built standalone executables are available for Windows, macOS, and Linux. No
 
 | Platform | File | Notes |
 |----------|------|-------|
-| **Windows** | `gdpr-pseudonymizer-2.3.1-windows-setup.exe` | Run the installer. Adds Start Menu shortcut. |
-| **macOS (Apple Silicon)** | `gdpr-pseudonymizer-2.3.1-macos-arm64.dmg` | Open DMG, drag to Applications. |
-| **Linux** | `gdpr-pseudonymizer-2.3.1-linux.AppImage` | `chmod +x` then run. |
+| **Windows** | `gdpr-pseudonymizer-2.3.2-windows-setup.exe` | Run the installer. Adds Start Menu shortcut. |
+| **macOS (Apple Silicon)** | `gdpr-pseudonymizer-2.3.2-macos-arm64.dmg` | Open DMG, drag to Applications. |
+| **Linux** | `gdpr-pseudonymizer-2.3.2-linux.AppImage` | `chmod +x` then run. |
 
 > **Intel Macs:** no DMG is published. GitHub retired its Intel macOS runners, and an
 > Apple Silicon runner cannot cross-build a working x86_64 bundle. Install with
@@ -141,7 +141,7 @@ GDPR Pseudonymizer is a **privacy-first CLI and GUI tool** that combines AI effi
 
 ## 🚀 Quick Start
 
-**Status:** 🎉 **v2.3.1** (November 2026) — Security Fixes for Pseudonyms, Passphrase Checked at the Start & Python 3.11-3.13
+**Status:** 🎉 **v2.3.2** (November 2026) — The Review List Shows the Pseudonym That Is Written & a Clean Windows Upgrade
 
 ### Getting Started
 
@@ -529,7 +529,7 @@ The validation UI provides an intuitive keyboard-driven interface for reviewing 
 
 ## 🛠️ Development Status
 
-**Epics 1-7, 10 and 11 Complete** — current release v2.3.1 (November 2026) closed Epic 11: security fixes for pseudonyms, the desktop passphrase checked at the start, Python 3.11 to 3.13. v2.3.0 (November 2026) closed Epic 10; v2.1.0 (March 2026), Epic 7.
+**Epics 1-7, 10 and 11 Complete** — current release v2.3.2 (November 2026) shows in the review list the pseudonym that is written. v2.3.1 (November 2026) closed Epic 11: security fixes for pseudonyms, the desktop passphrase checked at the start, Python 3.11 to 3.13. v2.3.0 (November 2026) closed Epic 10; v2.1.0 (March 2026), Epic 7.
 
 - ✅ **Epic 1:** Foundation & NLP Validation (9 stories) — spaCy integration, validation UI, hybrid detection, entity deduplication
 - ✅ **Epic 2:** Core Pseudonymization Engine (9 stories) — pseudonym libraries, encryption, audit logging, batch processing, GDPR 1:1 mapping
@@ -741,7 +741,7 @@ The integration test suite covers:
 
 | Metric | Value | Status |
 |--------|-------|--------|
-| **Development Progress** | v2.3.1 | ✅ Epics 1-7, 10 and 11 complete |
+| **Development Progress** | v2.3.2 | ✅ Epics 1-7, 10 and 11 complete |
 | **Stories Complete** | 60 (Epics 1-7) | ✅ All epics complete |
 | **LLM Utility (NFR10)** | 4.27/5.0 (85.4%) | ✅ PASSED (threshold: 80%) |
 | **Installation Success (NFR3)** | 87.5% (7/8 platforms) | ✅ PASSED (threshold: 85%) |
@@ -781,4 +781,4 @@ The integration test suite covers:
 
 ---
 
-**Last Updated:** 2026-11-13 (v2.3.1 — security fixes for pseudonyms, passphrase checked at the start, Python 3.11-3.13)
+**Last Updated:** 2026-11-17 (v2.3.2 — the review list shows the pseudonym that is written, Windows installer fixed)
