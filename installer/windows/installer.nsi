@@ -71,6 +71,13 @@ Section "!${APPNAME}" SecMain
 
     SetOutPath "$INSTDIR"
 
+    ; Remove the _internal folder of an earlier version first. Otherwise its
+    ; version stamp (*.dist-info) and libraries stay next to the new ones, and
+    ; the app shows the earlier version number. Only _internal is removed: the
+    ; two top-level executables are overwritten, and the chosen folder may hold
+    ; other things.
+    RMDir /r "$INSTDIR\_internal"
+
     ; Copy entire PyInstaller output directory
     File /r "${DISTDIR}\*.*"
 
