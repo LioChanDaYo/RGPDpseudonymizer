@@ -1,4 +1,4 @@
-; GDPR Pseudonymizer — NSIS Installer Script
+﻿; GDPR Pseudonymizer — NSIS Installer Script
 ; Wraps the PyInstaller --onedir output into a single .exe installer
 ;
 ; Usage:  makensis /DVERSION=1.1.0 installer.nsi
@@ -63,11 +63,41 @@ Unicode true
 !insertmacro MUI_LANGUAGE "English"
 !insertmacro MUI_LANGUAGE "French"
 
+; Shown when the app or the command line is open during the install.
+; This file is saved as UTF-8 with a BOM so makensis reads the accented
+; letters correctly whatever the build machine's code page.
+LangString MSG_APP_OPEN ${LANG_ENGLISH} "GDPR Pseudonymizer is open. Close the app and any command window using gdpr-pseudo, then click Retry."
+LangString MSG_APP_OPEN ${LANG_FRENCH} "GDPR Pseudonymizer est ouvert. Fermez l'application et toute fenêtre de commande qui utilise gdpr-pseudo, puis cliquez sur Réessayer."
+
 ;---------------------------------------------------------------------------
 ; Sections
 ;---------------------------------------------------------------------------
 Section "!${APPNAME}" SecMain
     SectionIn RO  ; Required — cannot be deselected
+
+    ; Refuse to install while the app or the command line is open. Their files
+    ; are locked: only part of the earlier version could be removed, and the
+    ; install would end with both versions' files. An executable in use cannot
+    ; be opened for writing. Append mode ("a") neither changes nor truncates
+    ; it, but would create it if missing, hence IfFileExists first. Nothing is
+    ; changed before this check passes; Cancel (and a silent install) aborts.
+    check_app_closed:
+    IfFileExists "$INSTDIR\gdpr-pseudonymizer.exe" 0 check_cli_closed
+    ClearErrors
+    FileOpen $0 "$INSTDIR\gdpr-pseudonymizer.exe" a
+    IfErrors app_open
+    FileClose $0
+    check_cli_closed:
+    IfFileExists "$INSTDIR\gdpr-pseudo.exe" 0 app_closed
+    ClearErrors
+    FileOpen $0 "$INSTDIR\gdpr-pseudo.exe" a
+    IfErrors app_open
+    FileClose $0
+    Goto app_closed
+    app_open:
+    MessageBox MB_RETRYCANCEL|MB_ICONEXCLAMATION "$(MSG_APP_OPEN)" /SD IDCANCEL IDRETRY check_app_closed
+    Abort
+    app_closed:
 
     SetOutPath "$INSTDIR"
 
@@ -76,26 +106,7 @@ Section "!${APPNAME}" SecMain
     ; the app shows the earlier version number. Only _internal is removed: the
     ; two top-level executables are overwritten, and the chosen folder may hold
     ; other things.
-    ; Skip it while the app or the command line is open: their files are
-    ; locked, so only part of _internal would go, and cancelling at the
-    ; locked-file prompt of the copy below would leave the old version broken.
-    ; An executable in use cannot be opened for writing. Append mode ("a")
-    ; neither changes nor truncates it, but would create it if missing, hence
-    ; IfFileExists first.
-    IfFileExists "$INSTDIR\gdpr-pseudonymizer.exe" 0 check_cli_in_use
-    ClearErrors
-    FileOpen $0 "$INSTDIR\gdpr-pseudonymizer.exe" a
-    IfErrors skip_cleanup
-    FileClose $0
-    check_cli_in_use:
-    IfFileExists "$INSTDIR\gdpr-pseudo.exe" 0 remove_internal
-    ClearErrors
-    FileOpen $0 "$INSTDIR\gdpr-pseudo.exe" a
-    IfErrors skip_cleanup
-    FileClose $0
-    remove_internal:
     RMDir /r "$INSTDIR\_internal"
-    skip_cleanup:
 
     ; Copy entire PyInstaller output directory
     File /r "${DISTDIR}\*.*"
