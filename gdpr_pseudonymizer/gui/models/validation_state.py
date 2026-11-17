@@ -7,6 +7,7 @@ core validation models with Qt undo/redo and signal infrastructure.
 from __future__ import annotations
 
 import dataclasses
+import re
 import uuid
 from collections.abc import Callable, Mapping, Sequence
 from typing import TYPE_CHECKING
@@ -58,6 +59,9 @@ if TYPE_CHECKING:
     ]
 
 logger = get_logger(__name__)
+
+# A preview that could not be drawn (``[PERSON_PREVIEW]``): nothing was shown
+_PLACEHOLDER = re.compile(r"^\[[A-Z]+_PREVIEW\]$")
 
 # The kinds of decision a row can hold (Story 10.10, AC14): kept (the row is
 # sent: accepted, corrected, added) or dropped (rejected). Pending is neither.
@@ -766,18 +770,45 @@ class GUIValidationState(QObject):
     def get_pseudonym_proposals(self) -> dict[NameKey, list[PseudonymProposal]]:
         """The pseudonyms the list shows for each name sent with no custom
         pseudonym, in the order of its rows, without repeats (Story 11.5):
-        a corrected row sends its own under its corrected name."""
+        a corrected row sends its own under its corrected name.
+
+        Codex review 1, P0: a row that shows a value with no proposal (a
+        stored name's pseudonym) sends it too, marked ``shown_only``: never
+        kept, but reported when the end writes another one (a stored row
+        corrected into a new name)."""
+        from gdpr_pseudonymizer.core.document_processor import PseudonymProposal
+
         proposals: dict[NameKey, list[PseudonymProposal]] = {}
         for review, _entity in self._validated_rows():
             if review.custom_pseudonym:
                 continue
             proposal = self._row_proposal(review)
+            name = self._sent_name(review)
             if proposal is None:
-                continue
-            shown = proposals.setdefault(self._sent_name(review), [])
+                value = self._untitled(review, review.suggested_pseudonym or "")
+                if not value or _PLACEHOLDER.match(value):
+                    continue
+                proposal = PseudonymProposal(
+                    entity_type=name[1],
+                    theme="",
+                    pseudonym_full=value,
+                    pseudonym_first=None,
+                    pseudonym_last=None,
+                    shown_only=True,
+                )
+            shown = proposals.setdefault(name, [])
             if proposal not in shown:
                 shown.append(proposal)
         return proposals
+
+    @staticmethod
+    def _untitled(review: EntityReview, shown: str) -> str:
+        """A value the list shows, without the row's title (the list puts it
+        in front, ``ValidationWorkflow._with_title``)."""
+        prefix = ValidationWorkflow._with_title(review.entity, "")
+        if prefix and shown.startswith(prefix):
+            return shown[len(prefix) :]
+        return shown
 
     def _first_place(self, review: EntityReview) -> int:
         """The first place in the document a row stands for."""

@@ -1061,3 +1061,60 @@ def test_cli_batch_sequential_tells_the_changes(tmp_path: Path) -> None:
         )
     pre(code == 0, f"written: {output!r}")
     _told(output, [ZQ], shown, db)
+
+
+# --- Codex review 1, P1: a one-word custom pseudonym's value ------------------
+
+
+@contextmanager
+def _male_first_name_at(value: str, index: int) -> Iterator[None]:
+    """Every library loaded puts ``value`` at ``index`` of its male first
+    names (so at that index of the list a name of no known gender draws
+    from)."""
+    real = LibraryBasedPseudonymManager.load_library
+
+    def load(self: Any, theme: str) -> None:
+        real(self, theme)
+        male = [v for v in self.first_names["male"] if v != value]
+        self.first_names["male"] = male[:index] + [value] + male[index:]
+
+    with patch.object(LibraryBasedPseudonymManager, "load_library", load):
+        yield
+
+
+def test_cli_group_after_one_word_custom_never_shows_its_value(
+    tmp_path: Path, draws: _Draws
+) -> None:
+    """Codex review 1, P1 (AC21): after [C] sets the one-word custom
+    pseudonym « Dravin » on « Zorbal Quentrix », a later group never shows
+    « Dravin » (the end would refuse it: ``takes_custom_value``); what it
+    shows is written, and nothing is reported."""
+    db = _new_db(tmp_path)
+    names = [(ZQ, PERSON), (VM, PERSON)]
+    with _male_first_name_at("Dravin", 1):
+        review = _cli(
+            tmp_path, db, CUSTOM_DOC, names, keys=CUSTOM_FIRST, typed=["Dravin"]
+        )
+    pre(list(review.shown) == [ZQ, VM], f"order shown: {list(review.shown)}")
+    shown = review.shown[VM]
+    first_word = shown.split(" ")[0]
+    assert first_word != "Dravin"  # expected failure
+    assert _written(review.output, CUSTOM_DOC, names) == ["Dravin", shown]
+    assert _changed(review.result) == []
+
+
+def test_refresh_never_draws_a_one_word_custom_value(
+    tmp_path: Path, draws: _Draws
+) -> None:
+    """Codex review 1, P1 (AC19): the desktop list's update draws as the end
+    would: with the one-word custom pseudonym « Dravin » set on « Zorbal
+    Quentrix », « Vorlan Mestrix » is never shown « Dravin … »."""
+    db = _new_db(tmp_path)
+    zq, vm = _key(ZQ, PERSON), _key(VM, PERSON)
+    with _male_first_name_at("Dravin", 0):
+        refreshed = _refresh(db, CUSTOM_DOC, [zq, vm], {zq: "Dravin"}, {})
+    pre(list(refreshed) == [vm], f"one name redrawn: {list(refreshed)}")
+    value = refreshed[vm]
+    words = value.pseudonym_full.split(" ")
+    assert "Dravin" not in words  # expected failure
+    assert value.entity_type == PERSON and len(words) == 2

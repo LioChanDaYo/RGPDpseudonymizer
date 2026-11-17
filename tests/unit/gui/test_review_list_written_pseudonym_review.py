@@ -812,3 +812,55 @@ def test_custom_pseudonym_on_titled_row_shows_the_title(  # type: ignore[no-unty
     if mode == "single":
         written = _replacements(sd.finalize(dialogs), TITLE_DOC, _spans(entities))
         assert written == [shown]
+
+
+# ---------------------------------------------------------------------------
+# Codex review 1, P0: a stored name's row corrected into a new name
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("mode", ["single", "batch"])
+def test_corrected_stored_row_is_reported_when_not_kept(  # type: ignore[no-untyped-def]
+    qtbot, main_window, tmp_path, monkeypatch, draws, mode
+) -> None:
+    """Codex review 1, P0 (AC6; Lionel's answer 1): « Zorbal », saved by an
+    earlier document as « Dravin Brontel », is found alone in « Zorbal
+    Quentrix a signé le contrat. » and corrected to « Zorbal Quentrix ». The
+    list showed « Dravin Brontel »; the new name cannot keep it (it is
+    another name's), so another is written, and the end reports it."""
+    ends = _Ends(monkeypatch)
+    # The end's message (F1) is recorded, not shown, in both modes
+    dialogs = _Dialogs(monkeypatch)
+    entities = [_at(ONE_DOC, "Zorbal", PERSON, 0)]
+    if mode == "single":
+        db = _new_db(tmp_path)
+        _store(db, "Zorbal", PERSON, DB_PS, "Zorbal", None)
+        sd = _Single(qtbot, main_window, tmp_path, db, ONE_DOC, entities)
+        row = sd.row("Zorbal")
+        before = sd.state.get_pseudonym(row.entity_id)
+        _type_in(monkeypatch, ZQ)
+        sd.vs._show_modify_text_dialog(row.entity_id)
+        pre(row.user_modification == ZQ, f"corrected: {row.user_modification!r}")
+        sd.finalize(dialogs)
+    else:
+        batch = _Batch(qtbot, main_window, tmp_path, ONE_DOC, entities)
+        _store(batch.db, "Zorbal", PERSON, DB_PS, "Zorbal", None)
+
+        def body(record: dict[str, Any]) -> None:
+            state = batch.wait_doc()
+            row = _one_row(state)
+            record["before"] = state.get_pseudonym(row.entity_id)
+            _type_in(monkeypatch, ZQ)
+            batch.vs._show_modify_text_dialog(row.entity_id)
+            record["corrected"] = row.user_modification
+            batch.accept_pending_and_validate()
+
+        record = batch.run(body)
+        pre(record.get("corrected") == ZQ, f"corrected: {record}")
+        before = record["before"]
+        db = batch.db
+    pre(before == DB_PS, f"the stored pseudonym shown: {before!r}")
+    written = _row(db, ZQ, PERSON).pseudonym_full
+    pre(written != DB_PS, "another pseudonym written")
+    changed = ends.changed()
+    assert changed == [(ZQ, PERSON, DB_PS, written)]  # expected failure

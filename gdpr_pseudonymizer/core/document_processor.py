@@ -52,6 +52,7 @@ from gdpr_pseudonymizer.nlp.hybrid_detector import HybridDetector
 from gdpr_pseudonymizer.nlp.model_names import resolve_spacy_model
 from gdpr_pseudonymizer.pseudonym.assignment_engine import (
     CompositionalPseudonymEngine,
+    PseudonymAssignment,
 )
 from gdpr_pseudonymizer.pseudonym.gender_detector import GenderDetector
 from gdpr_pseudonymizer.pseudonym.library_manager import LibraryBasedPseudonymManager
@@ -98,6 +99,10 @@ class PseudonymProposal:
     pseudonym_last: str | None
     is_ambiguous: bool = False
     ambiguity_reason: str | None = None
+    # Codex review 1, P0: a value the list showed that is never kept (a
+    # stored name's pseudonym shown on a row corrected or retyped since),
+    # sent only so that the end reports it when another is written
+    shown_only: bool = False
 
 
 @dataclass(frozen=True)
@@ -370,6 +375,13 @@ class DocumentProcessor:
                     entity_type=entity.entity_type,
                     gender=None,
                 )
+                # Codex review 1, P1: a draw that takes a value of a custom
+                # pseudonym is drawn again, as the end draws it
+                # (``_uses_custom_part``, ``_assign_untaken_pseudonym``)
+                if self._custom_taken:
+                    assignment = self._untaken_preview(
+                        ctx, entity.entity_type, entity_text_stripped, assignment
+                    )
                 preview_cache[cache_key] = assignment.pseudonym_full
                 if proposals is not None:
                     proposals.setdefault(
@@ -394,6 +406,46 @@ class DocumentProcessor:
                 return f"[{entity.entity_type}_PREVIEW]"
 
         return pseudonym_assigner
+
+    def _untaken_preview(
+        self,
+        ctx: _ProcessingContext,
+        entity_type: str,
+        text: str,
+        assignment: PseudonymAssignment,
+    ) -> PseudonymAssignment:
+        """The review's draw as the end would keep it (Codex review 1, P1):
+        one that takes a value of a custom pseudonym (``takes_custom_value``,
+        the one-word custom pseudonyms the library does not track included)
+        is drawn again by ``_assign_untaken_pseudonym``, with no parts, as
+        the end draws it."""
+        first = last = None
+        if entity_type == "PERSON":
+            first, last, _ = ctx.compositional_engine.parse_full_name(text)
+        row = Entity(
+            entity_type=entity_type,
+            first_name=first,
+            last_name=last,
+            full_name=text,
+            pseudonym_first=assignment.pseudonym_first,
+            pseudonym_last=assignment.pseudonym_last,
+            pseudonym_full=assignment.pseudonym_full,
+            theme=self.theme,
+        )
+        if not self._uses_custom_part(row):
+            return assignment
+        pseudonym, _untaken = self._assign_untaken_pseudonym(
+            ctx, row, set(), self._custom_taken
+        )
+        return PseudonymAssignment(
+            pseudonym_full=pseudonym,
+            pseudonym_first=None,
+            pseudonym_last=None,
+            theme=assignment.theme,
+            exhaustion_percentage=assignment.exhaustion_percentage,
+            is_ambiguous=assignment.is_ambiguous,
+            ambiguity_reason=assignment.ambiguity_reason,
+        )
 
     def _run_validation(
         self,
@@ -998,7 +1050,7 @@ class DocumentProcessor:
         text, entity_type = name
         engine = ctx.compositional_engine
         manager = ctx.pseudonym_manager
-        if name in entity_cache:
+        if proposal.shown_only or name in entity_cache:
             return None
         if ctx.mapping_repo.find_by_full_name_and_type(text, entity_type):
             return None
@@ -1017,7 +1069,16 @@ class DocumentProcessor:
                 # A lone name matched within the run: the loop resolves it
                 return None
             original_first, original_last, is_ambiguous = engine.parse_full_name(text)
-            if self.theme != "neutral_id":
+            if self.theme == "neutral_id":
+                pass
+            elif proposal.pseudonym_first is None and proposal.pseudonym_last is None:
+                # Codex review 1, P1: a draw that took a custom value was
+                # drawn again as the end draws it (``_assign_untaken_pseudonym``:
+                # no parts, no component link): the whole value is checked
+                if not manager.accepts_value(proposal.pseudonym_full, entity_type):
+                    return None
+                original_first = original_last = None
+            else:
                 if is_ambiguous and original_first and not original_last:
                     accepted = self._lone_name_accepted(ctx, original_first, proposal)
                 else:
