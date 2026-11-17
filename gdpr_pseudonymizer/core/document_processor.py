@@ -363,6 +363,22 @@ class DocumentProcessor:
                 entity_text_stripped, entity.entity_type
             )
             if existing_entity:
+                # Codex review 2, P0: a stored name's pseudonym shown is
+                # recorded too, never to be kept, only compared, so the end
+                # reports it when the name sent is written with another
+                # (a group corrected with [E] after its name was saved)
+                if proposals is not None:
+                    proposals.setdefault(
+                        (entity_text_stripped, entity.entity_type),
+                        PseudonymProposal(
+                            entity_type=entity.entity_type,
+                            theme=self.theme,
+                            pseudonym_full=existing_entity.pseudonym_full,
+                            pseudonym_first=existing_entity.pseudonym_first,
+                            pseudonym_last=existing_entity.pseudonym_last,
+                            shown_only=True,
+                        ),
+                    )
                 return existing_entity.pseudonym_full
 
             cache_key = (entity_text_stripped, entity.entity_type)
@@ -1643,6 +1659,12 @@ class DocumentProcessor:
         if existing_entities is None:
             existing_entities = mapping_repo.find_all()
         pseudonym_manager.load_existing_mappings(existing_entities)
+        # Codex review 2, P1: the stored custom values a generated pseudonym
+        # must not take (the one-word ones the library does not track
+        # included), from the first draw of every review (CLI, desktop
+        # previews, the list's update); the end sets them again under the
+        # lock (``_reset_pseudonym_state``)
+        self._custom_taken = untracked_custom_values(existing_entities)
 
         gender_detector = GenderDetector()
         gender_detector.load()

@@ -1118,3 +1118,89 @@ def test_refresh_never_draws_a_one_word_custom_value(
     words = value.pseudonym_full.split(" ")
     assert "Dravin" not in words  # expected failure
     assert value.entity_type == PERSON and len(words) == 2
+
+
+# --- Codex review 2 (Lionel, 2026-11-17: "fix both") --------------------------
+
+STORED_MIDWAY_DOC = f"{VM} a signé le contrat. {ZQ} a signé le contrat."
+
+
+@pytest.mark.parametrize("suffix", [".txt", ".csv"])
+def test_cli_corrected_group_shown_a_stored_value_is_reported(
+    tmp_path: Path, draws: _Draws, suffix: str
+) -> None:
+    """Codex review 2, P0 (AC6): « Zorbal » (found alone in « Zorbal
+    Quentrix ») is unknown when the review starts; while « Vorlan Mestrix »
+    is reviewed, another document saves « Zorbal » as « Dravin Brontel »;
+    the « Zorbal » group then shows that saved value; the user corrects it
+    to « Zorbal Quentrix » with [E]. Another pseudonym is written, and the
+    end reports the one shown."""
+    db = _new_db(tmp_path)
+    names = [(VM, PERSON), ("Zorbal", PERSON)]
+    original = ReviewScreen.display_entity
+    saved = {"done": False}
+
+    def display(self: Any, entity: DetectedEntity, *a: Any, **k: Any) -> Any:
+        if entity.text == VM and not saved["done"]:
+            _store(db, "Zorbal", PERSON, DB_PS, "Zorbal", None)
+            saved["done"] = True
+        return original(self, entity, *a, **k)
+
+    with patch.object(ReviewScreen, "display_entity", display):
+        review = _cli(
+            tmp_path,
+            db,
+            STORED_MIDWAY_DOC,
+            names,
+            suffix=suffix,
+            keys=["confirm", "modify"] + ["confirm"] * 20,
+            typed=[ZQ],
+        )
+    pre(review.shown.get("Zorbal") == DB_PS, f"the saved value shown: {review.shown}")
+    written = _row(db, ZQ, PERSON).pseudonym_full
+    pre(written != DB_PS, "another pseudonym written")
+    changed = _changed(review.result)
+    assert changed == [(ZQ, PERSON, DB_PS, written)]  # expected failure
+
+
+def _store_one_word_custom(tmp_path: Path, db: str) -> None:
+    """An earlier document saved « Xantor Brontel » with the one-word custom
+    pseudonym « Dravin » (the product's path)."""
+    text = "Xantor Brontel a signé le contrat."
+    _finalize(
+        db,
+        text,
+        _found(text, [("Xantor Brontel", PERSON)]),
+        tmp_path / "earlier.txt",
+        custom={_key("Xantor Brontel", PERSON): "Dravin"},
+    )
+    pre(_row(db, "Xantor Brontel", PERSON).pseudonym_full == "Dravin", "custom saved")
+
+
+@pytest.mark.parametrize("path", ["cli", "previews"])
+def test_first_preview_never_draws_a_stored_one_word_custom_value(
+    tmp_path: Path, draws: _Draws, path: str
+) -> None:
+    """Codex review 2, P1 (AC5, AC8): with « Dravin » saved as the one-word
+    custom pseudonym of another name, the first preview of « Vorlan Mestrix »
+    never shows « Dravin … » (the end would refuse it), on the command line
+    and in the desktop previews (single document and batch build them
+    alike); on the command line it is written, and nothing is reported."""
+    db = _new_db(tmp_path)
+    _store_one_word_custom(tmp_path, db)
+    names = [(VM, PERSON)]
+    with _male_first_name_at("Dravin", 0):
+        if path == "cli":
+            review = _cli(tmp_path, db, VM_DOC, names)
+            shown = review.shown[VM]
+        else:
+            previews = DocumentProcessor(
+                db_path=db, passphrase=PASSPHRASE
+            ).build_pseudonym_previews(_found(VM_DOC, names), document_text=VM_DOC)
+            pre(len(previews) == 1, f"one preview: {previews}")
+            shown = next(iter(previews.values()))
+    words = shown.split(" ")
+    assert "Dravin" not in words  # expected failure
+    if path == "cli":
+        assert _written(review.output, VM_DOC, names) == [shown]
+        assert _changed(review.result) == []
