@@ -119,7 +119,8 @@ def test_titled_form_is_known_with_the_core_key(qtbot, tmp_path: Path) -> None: 
     state = _state(db_path, [titled])
 
     assert _known(state) == [("Dr Zorbalia", "PERSON", EntityReviewState.CONFIRMED)]
-    assert state.get_all_entities()[0].suggested_pseudonym == "Quentrix"
+    # Story 11.5 (AC9): a stored titled name keeps its title in the list
+    assert state.get_all_entities()[0].suggested_pseudonym == "Dr Quentrix"
 
 
 def test_pre_10_7_file_is_converted_first(qtbot, tmp_path: Path) -> None:  # type: ignore[no-untyped-def]

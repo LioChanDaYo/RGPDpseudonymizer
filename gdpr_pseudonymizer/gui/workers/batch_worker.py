@@ -19,8 +19,10 @@ from gdpr_pseudonymizer.utils.logger import get_logger
 
 if TYPE_CHECKING:
     from gdpr_pseudonymizer.core.document_processor import (
+        ChangedPseudonym,
         DocumentProcessor,
         ProcessingResult,
+        PseudonymProposal,
     )
     from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 
@@ -61,6 +63,9 @@ class DocumentResult:
     entities_reused: int = 0
     processing_time: float = 0.0
     error_message: str = ""
+    # Story 11.5: the pseudonyms shown in the review that could not be
+    # written, each with the one written
+    pseudonyms_changed: list[ChangedPseudonym] = field(default_factory=list)
 
 
 def collect_files(input_path: Path, recursive: bool = False) -> list[Path]:
@@ -141,6 +146,8 @@ class BatchWorker(QRunnable):
         self._validated_entities: list[DetectedEntity] | None = None
         # Story 10.11: the custom pseudonyms of the review, with the list
         self._custom_pseudonyms: dict[tuple[str, str], str] | None = None
+        # Story 11.5: the pseudonyms the list showed, with the list
+        self._proposals: dict[tuple[str, str], list[PseudonymProposal]] | None = None
 
         # Track written output files for cancel cleanup (Task 1.8)
         self._written_files: list[Path] = []
@@ -177,6 +184,7 @@ class BatchWorker(QRunnable):
         self,
         entities: list[DetectedEntity],
         custom_pseudonyms: dict[tuple[str, str], str] | None = None,
+        proposals: dict[tuple[str, str], list[PseudonymProposal]] | None = None,
     ) -> None:
         """Submit validated entities from the GUI thread to unblock the worker.
 
@@ -187,11 +195,25 @@ class BatchWorker(QRunnable):
             entities: User-validated entity list to use for finalization.
             custom_pseudonyms: The review's custom pseudonyms, keyed by
                 (mapping key, type) of the name sent (Story 10.11).
+            proposals: The pseudonyms the review's list showed for each name
+                sent (Story 11.5).
         """
         self._mutex.lock()
         self._validated_entities = entities
         self._custom_pseudonyms = custom_pseudonyms
+        if proposals is not None:
+            self._proposals = proposals
         self._validation_condition.wakeAll()
+        self._mutex.unlock()
+
+    def submit_validation_proposals(
+        self, proposals: dict[tuple[str, str], list[PseudonymProposal]] | None
+    ) -> None:
+        """Store the pseudonyms the review's list showed (Story 11.5), from
+        the GUI thread, before ``submit_validation_result`` wakes the worker;
+        the worker reads them with the validated entities."""
+        self._mutex.lock()
+        self._proposals = proposals or None
         self._mutex.unlock()
 
     def run(self) -> None:
@@ -206,7 +228,10 @@ class BatchWorker(QRunnable):
 
     def _run_batch(self) -> None:
         """Internal batch processing loop."""
-        from gdpr_pseudonymizer.core.document_processor import DocumentProcessor
+        from gdpr_pseudonymizer.core.document_processor import (
+            DocumentProcessor,
+            pseudonyms_changed_of,
+        )
         from gdpr_pseudonymizer.core.saved_own_words import own_word_rows_of
         from gdpr_pseudonymizer.data.database import init_database, open_database
         from gdpr_pseudonymizer.exceptions import FileProcessingError
@@ -320,6 +345,7 @@ class BatchWorker(QRunnable):
                     doc_result.entities_new = result.entities_new
                     doc_result.entities_reused = result.entities_reused
                     doc_result.processing_time = doc_time
+                    doc_result.pseudonyms_changed = pseudonyms_changed_of(result)
 
                     batch_result.successful_files += 1
                     batch_result.total_entities += result.entities_detected
@@ -408,10 +434,12 @@ class BatchWorker(QRunnable):
         self._waiting_for_validation = True
         self._validated_entities = None
         self._custom_pseudonyms = None
+        self._proposals = None
         self._validation_condition.wait(self._mutex)
         self._waiting_for_validation = False
         validated = self._validated_entities
         customs = self._custom_pseudonyms
+        proposals = self._proposals
         self._mutex.unlock()
 
         if self._cancelled:
@@ -423,17 +451,17 @@ class BatchWorker(QRunnable):
         # Phase 2: Finalize with validated entities. Story 10.11: the custom
         # pseudonyms go with them only when the review holds one, so a review
         # without one calls finalize_document exactly as before.
+        # Story 11.5: likewise for the pseudonyms the list showed.
+        extra: dict[str, object] = {}
         if customs:
-            return processor.finalize_document(
-                document_text=document_text,
-                validated_entities=validated,
-                output_path=str(output_file),
-                custom_pseudonyms=customs,
-            )
+            extra["custom_pseudonyms"] = customs
+        if proposals:
+            extra["proposals"] = proposals
         result = processor.finalize_document(
             document_text=document_text,
             validated_entities=validated,
             output_path=str(output_file),
+            **extra,
         )
         return result
 

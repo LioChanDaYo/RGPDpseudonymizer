@@ -1,0 +1,73 @@
+schema: 1
+story: '11.5'
+story_title: 'The Review List Shows the Pseudonym That Will Be Written'
+scope: 'Re-gate on head 7566233 (PR #127, draft; base main fe44a7d): the dev''s fixes of the first gate''s findings, 85ef250 (PERF-115-01) and 7566233 (REQ-115-01), on top of QA''s a047486. First gate: CONCERNS on b806e3a (PERF-115-01 medium, REQ-115-01 low). QA folder: rgpd-analysis/r115b/qa (scripts, logs and databases, never committed).'
+gate: PASS
+status_reason: 'Both findings are fixed as Lionel decided ("read once plus busy cursor"; "it should show the title") and verified on 7566233. The update now reads the database once under a busy cursor that is restored on error, and a titled row''s custom pseudonym shows its title, list = file in single and batch. The first gate''s measurements still hold (shown = written on every path, concurrency invariants), and the local suites are green. The remaining time of the update is information for Lionel, not a blocker.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-11-16T12:00:00Z'
+
+top_issues:
+  - id: 'PERF-115-01'
+    severity: low
+    finding: 'Fixed as Lionel decided ("read once plus busy cursor", 85ef250); the remaining time is information for him, not a blocker. refresh_review_proposals now reads and decrypts the stored rows once and passes them to _init_processing_context(existing_entities=...) (core/document_processor.py:1474-1475). ValidationScreen._proposal_refresher sets Qt.WaitCursor and restores it in a finally (gui/screens/validation.py:515-521), used by the single and batch reviews. QA re-timed one click through the screen''s handlers on the GUI thread (timing2.py, median of 5, fresh copies; first gate in brackets): at 10,000 rows, a type change takes 610 to 612 ms [1,031 to 1,038] and an accepted custom pseudonym 1,348 to 1,389 ms [1,824 to 1,825]; at 2,500 rows, 150 to 157 ms [303 to 310] and 398 to 406 ms [489 to 512]; on an empty database, 43 to 45 ms and 72 to 73 ms (unchanged). About 0.5 s of the custom figure is Story 10.11''s custom_pseudonym_refusal read (gui/models/validation_state.py:911), outside Lionel''s decision. The cursor is WaitCursor during the update and None after it, also when the update raises (fix_probe.py, directly and through _handle_entity_action; the row then shows the T37 fallback).'
+    suggested_action: 'None for this story. If Lionel wants less: the 10.11 refusal check''s own read, or moving the update off the GUI thread.'
+    suggested_owner: po
+
+waiver: { active: false }
+
+quality_score: 100
+
+expires: '2026-11-30T12:00:00Z'
+
+merge_blockers: []
+
+merge_notes:
+  - 'REQ-115-01 fixed (7566233): GUIValidationState.get_pseudonym puts the row''s title before a custom pseudonym (the corrected entity''s, if any; gui/models/validation_state.py:1462-1477). Re-checked through the real handlers on shapes.txt, 3 runs single and 3 batch (batch via the real BatchScreen slots and a stub worker): « Aurore Bruneau » set on « Mme Élodie Martin » shows « Mme Aurore Bruneau », the file holds it, every row list = file, no dialog. Q-H still holds: OK on the pre-filled « Mme Aurore Bruneau » is a no-op, because normalize_custom_pseudonym drops the title. The CLI is untouched.'
+  - 'The changed Story 10.11 line, tests/unit/gui/test_custom_pseudonym_review.py:999 (test_custom_reaches_titled_form), is right. The rows « Zorbal » and « M. Zorbal » now expect [CUSTOM, "M. CUSTOM"], which is what the file writes; it was [CUSTOM, CUSTOM]. The test still compares the whole list and keeps its state assertion. Nothing else in that file changed.'
+  - 'New tests on 7566233: test_update_shows_the_busy_cursor has 8 cases (single and batch, type change and custom pseudonym, success and error), asserting the cursor during and after the update. test_custom_pseudonym_on_titled_row_shows_the_title has 2 cases (single and batch), asserting list = file. Per the dev''s record, both failed before their fix at the first assertion.'
+  - 'First gate, still valid: shown = written on 210 of 210 CLI groups, 190 of 190 desktop rows and 132 of 132 batch rows. There were 0 refused previews in 900. Concurrency held over 30 two-document runs with 0 invariant breaks. The texts are byte-exact, KL-011 holds on the head, and the lone forms behave as B.5 says (see the story''s QA Results of 2026-11-14). The two fixes touch neither the end''s check nor the CLI.'
+  - 'The existing component_matched_in_batch debug line (core/document_processor.py:780, :788) is latent and never reaches a user. It predates this story (first gate).'
+  - 'This gate file and the story''s QA Results are the expected exception to AC16''s file list (QA''s own outputs).'
+  - 'QA started no Codex, Forge, Anvil or Cato process. Codex (Task 7.2) is the orchestrator''s, now that the gate is PASS.'
+  - 'QA drove the desktop offscreen through the real screens and workers. No human looked at a real window: the dialog''s layout and the busy cursor were not seen on screen. The cursor was read through QApplication.overrideCursor().'
+
+evidence:
+  tests_reviewed: 51
+  risks_identified: 2
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 19, 20, 21]
+    ac_gaps: []
+  ac_notes:
+    AC1-AC4: 'First gate on b806e3a: CLI 190 of 190 and .csv 20 of 20; desktop 95 of 95 fresh and 95 of 95 stored; batch star_wars and neutral 33 of 33 plus 33 of 33. On 7566233, a titled custom row is also list = file (single and batch).'
+    AC9: 'Extended by Lionel''s note (2026-11-16) to custom pseudonyms on titled rows; verified as above.'
+    AC12: 'database.py is still untouched. The update still takes no lock: it reads once and saves nothing.'
+    AC13: 'No new logger call in 85ef250 or 7566233.'
+    AC14: 'As at the first gate (CI 099c0c7 44 xfailed, e740d3d 48 xfailed, 0 XPASS). No marker is left in the named test files.'
+    AC18: 'CI on 7566233: Code Quality is green; the test matrix was still running when this gate was written (85ef250''s matrix too). The orchestrator reads it before Codex. CI on b806e3a was green: 3530 passed; Windows 3380 passed, 3 skipped.'
+    AC19-AC20: 'Re-timed and cursor checked as in PERF-115-01. Undo and redo are unchanged by the fixes (first gate: 9 of 9, 0 database opens).'
+    local: 'On 7566233: the three new files plus test_custom_pseudonym_review.py, GUI last, 134 passed; leakage guards 15 passed; tests/unit -m "not slow" -n auto 3345 passed, 3 skipped.'
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'No new log line. The update reads once and saves nothing. The title shown is the row''s own text''s title, so no new data reaches the list.'
+  performance:
+    status: PASS
+    notes: 'PERF-115-01 remedy as decided: about 0.61 s for a type change and about 1.35 to 1.39 s for a custom pseudonym at 10,000 rows, about half of it from the 10.11 check, all under the busy cursor. Information for Lionel.'
+  reliability:
+    status: PASS
+    notes: 'The cursor is restored in a finally, also on error. The update''s failure fallback (T37) is unchanged. Concurrency is as at the first gate.'
+  maintainability:
+    status: PASS
+    notes: 'One optional parameter (existing_entities) with the old default behaviour. The title rule reuses ValidationWorkflow._with_title. black, ruff and mypy are clean (dev record; Code Quality green on 7566233).'
+
+recommendations:
+  immediate: []
+  future:
+    - action: 'If Lionel wants a faster custom pseudonym: Story 10.11''s refusal check reads the whole database on the GUI thread too.'
+      refs: ['gdpr_pseudonymizer/gui/models/validation_state.py:911']
+    - action: 'If --verbose or logging.level is ever wired to configure_logging, drop matched_entity from component_matched_in_batch first.'
+      refs: ['gdpr_pseudonymizer/core/document_processor.py:780', 'gdpr_pseudonymizer/cli/main.py:77']
+    - action: 'Later docs pass: list accepts_value and is_used in the internal interfaces document.'
+      refs: ['docs/architecture/5-internal-module-interfaces.md']

@@ -41,9 +41,11 @@ from gdpr_pseudonymizer.gui.workers.batch_worker import (
 from gdpr_pseudonymizer.utils.logger import get_logger
 
 if TYPE_CHECKING:
+    from gdpr_pseudonymizer.core.document_processor import PseudonymProposal
     from gdpr_pseudonymizer.gui.main_window import MainWindow
     from gdpr_pseudonymizer.gui.models.validation_state import GUIValidationState
     from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
+    from gdpr_pseudonymizer.validation.models import CandidateKey
 
 logger = get_logger(__name__)
 
@@ -62,6 +64,8 @@ class BatchScreen(QWidget):
         self._cumulative_validation_time: float = 0.0
         self._docs_completed: int = 0
         self._is_paused: bool = False
+        # Story 11.5 (AC4): the theme of the batch run, for its previews
+        self._theme: str | None = None
         # Story 10.10: the document the worker waits on (taken from its own
         # validation_required), and the review state of each document shown
         # in this batch run, kept for "Précédent" and "Suivant".
@@ -719,6 +723,8 @@ class BatchScreen(QWidget):
             output_dir = Path(folder) / "_pseudonymized" if folder else Path(".")
 
         theme = self._config.get("default_theme", "neutral")
+        # Story 11.5 (AC4): the batch's theme, for its previews too
+        self._theme = theme
         continue_on_error = self._config.get("continue_on_error", True)
         validation_mode = self._config.get("batch_validation_mode", "per_document")
         validate_per_document = self._validate_checkbox.isChecked()
@@ -927,6 +933,10 @@ class BatchScreen(QWidget):
         # Show summary
         self._show_summary(result)
 
+        # Story 11.5 (AC11): the pseudonyms shown that could not be written,
+        # after the summary and before Story 11.7's notice
+        self._show_pseudonyms_changed(result)
+
         # Story 11.7: one notice per session when the database holds saved
         # pseudonyms that hold a word of their own name
         self._main_window.notify_own_word_rows(result.own_word_rows)
@@ -1029,15 +1039,23 @@ class BatchScreen(QWidget):
             status_item.setForeground(Qt.GlobalColor.darkYellow)
             self._doc_table.setItem(doc_index, 3, status_item)
 
-        # Generate pseudonym previews
+        # Generate pseudonym previews. Story 11.5: with the batch's theme
+        # (AC4), Story 11.6's rule for the document's names (AC8), and the
+        # pseudonyms they show kept for the end
+        theme = self._theme or self._config.get("default_theme", "neutral")
+        proposals: dict[CandidateKey, PseudonymProposal] = {}
         try:
             processor = DocumentProcessor(
                 db_path=self._db_path,
                 passphrase=self._passphrase,
+                theme=theme,
             )
-            previews = processor.build_pseudonym_previews(entity_list)
+            previews = processor.build_pseudonym_previews(
+                entity_list, document_text=document_text, proposals=proposals
+            )
         except Exception:
             previews = {}
+            proposals = {}
             logger.warning("batch_preview_generation_failed", doc_index=doc_index)
 
         # Cache full context for prev/next navigation (FUNC-001)
@@ -1047,6 +1065,8 @@ class BatchScreen(QWidget):
             "document_text": document_text,
             "document_path": doc_path,
             "pseudonym_previews": previews,
+            "pseudonym_proposals": proposals,
+            "theme": theme,
             "db_path": self._db_path,
             "passphrase": self._passphrase,
             "batch_mode": True,
@@ -1119,8 +1139,15 @@ class BatchScreen(QWidget):
             status_item.setForeground(Qt.GlobalColor.blue)
             self._doc_table.setItem(current_doc_idx, 3, status_item)
 
+        # Story 11.5: the pseudonyms the document's list shows, read from its
+        # kept review state at the confirm
+        state = self.review_state(current_doc_idx)
+        proposals = state.get_pseudonym_proposals() if state is not None else {}
+
         # Submit to worker and navigate back
         if self._worker is not None and self._worker.run_id == self._run_id:
+            # Stored first, so the submission's own call is unchanged
+            self._worker.submit_validation_proposals(proposals)
             self._worker.submit_validation_result(entity_list, customs)
 
         self._main_window.navigate_to("batch")
@@ -1151,6 +1178,49 @@ class BatchScreen(QWidget):
     # ------------------------------------------------------------------
     # Summary Phase Logic
     # ------------------------------------------------------------------
+
+    def _show_pseudonyms_changed(self, result: BatchResult) -> None:
+        """Tell the user which pseudonyms shown in the batch's lists could
+        not be written, and what was written instead, by document (Story
+        11.5, AC11; texts F1 and F4 to F7, approved by Lionel on
+        2026-11-14). Nothing when every pseudonym shown was written."""
+        from gdpr_pseudonymizer.gui.widgets.confirm_dialog import ConfirmDialog
+
+        documents = [
+            (doc.filename, list(doc.pseudonyms_changed))
+            for doc in result.per_document_results
+            if getattr(doc, "pseudonyms_changed", None)
+        ]
+        count = sum(len(changes) for _, changes in documents)
+        if count == 0:
+            return
+        if count == 1:
+            intro = self.tr(
+                "Un pseudonyme affiché dans une liste ne pouvait plus être utilisé "
+                "au moment d'écrire son document. Un autre a été écrit à sa place :"
+            )
+        else:
+            intro = qarg(
+                self.tr(
+                    "%1 pseudonymes affichés dans les listes ne pouvaient plus être "
+                    "utilisés au moment d'écrire leur document. D'autres ont été "
+                    "écrits à leur place :"
+                ),
+                str(count),
+            )
+        blocks = [intro]
+        for filename, changes in documents:
+            lines = [qarg(self.tr("Document « %1 » :"), filename)]
+            lines += [
+                qarg(self.tr("• %1 : %2 → %3"), c.name, c.shown, c.written)
+                for c in changes
+            ]
+            blocks.append("\n".join(lines))
+        ConfirmDialog.informational(
+            self.tr("Pseudonymes remplacés"),
+            "\n\n".join(blocks),
+            parent=self._main_window,
+        ).exec()
 
     def _show_summary(self, result: BatchResult) -> None:
         self._phases.setCurrentIndex(2)

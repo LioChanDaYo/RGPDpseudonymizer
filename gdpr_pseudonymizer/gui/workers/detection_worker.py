@@ -17,6 +17,7 @@ from gdpr_pseudonymizer.gui.workers.signals import WorkerSignals
 from gdpr_pseudonymizer.utils.logger import get_logger
 
 if TYPE_CHECKING:
+    from gdpr_pseudonymizer.core.document_processor import PseudonymProposal
     from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
     from gdpr_pseudonymizer.validation.models import CandidateKey
 
@@ -40,6 +41,9 @@ class DetectionResult:
     # to ALL occurrences in that variant group — used to expand back during
     # finalization.
     variant_occurrences: dict[CandidateKey, list[DetectedEntity]] | None = None
+    # Story 11.5: the pseudonym each new name's preview shows, by candidate
+    # key, kept at the end if still free
+    pseudonym_proposals: dict[CandidateKey, PseudonymProposal] | None = None
 
 
 class DetectionWorker(QRunnable):
@@ -226,12 +230,20 @@ class DetectionWorker(QRunnable):
         # Phase 3: Build pseudonym previews (80-100%)
         self.signals.progress.emit(85, "Génération des pseudonymes...")
 
+        # Story 11.5: the previews keep what they show, with Story 11.6's
+        # rule for the document's names (AC8)
+        pseudonym_proposals: dict[CandidateKey, PseudonymProposal] = {}
         try:
-            pseudonym_previews = processor.build_pseudonym_previews(detected_entities)
+            pseudonym_previews = processor.build_pseudonym_previews(
+                detected_entities,
+                document_text=document_text,
+                proposals=pseudonym_proposals,
+            )
         except Exception as e:
             logger.error("preview_generation_failed", error=str(e))
             # Non-fatal: proceed with empty previews
             pseudonym_previews = {}
+            pseudonym_proposals = {}
 
         if self._cancelled:
             return
@@ -257,5 +269,6 @@ class DetectionWorker(QRunnable):
             input_file=self._file_path,
             detection_time_seconds=detection_time,
             variant_occurrences=variant_occurrences,
+            pseudonym_proposals=pseudonym_proposals,
         )
         self.signals.finished.emit(result)

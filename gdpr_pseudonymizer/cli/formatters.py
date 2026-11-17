@@ -13,11 +13,14 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
+
+if TYPE_CHECKING:
+    from gdpr_pseudonymizer.core.document_processor import ChangedPseudonym
 
 # Create Rich console for output
 console = Console()
@@ -277,6 +280,29 @@ def get_error_info(error_code: ErrorCode) -> Optional[ErrorInfo]:
         ErrorInfo dataclass with description, action, docs, or None if not found
     """
     return ERROR_CATALOG.get(error_code)
+
+
+def format_pseudonyms_changed(changes: list[ChangedPseudonym]) -> str | None:
+    """The end message of a review whose shown pseudonyms could not all be
+    written (Story 11.5, C1-C3): one line saying how many, then one line per
+    change. None when every pseudonym shown was written."""
+    if not changes:
+        return None
+    if len(changes) == 1:
+        lines = [
+            "⚠ 1 pseudonym shown in the review could no longer be used when "
+            "the document was written. Another one was written in its place:"
+        ]
+    else:
+        lines = [
+            f"⚠ {len(changes)} pseudonyms shown in the review could no longer "
+            "be used when the document was written. Others were written in "
+            "their place:"
+        ]
+    lines += [
+        f"  • {change.name}: {change.shown} → {change.written}" for change in changes
+    ]
+    return "\n".join(lines)
 
 
 def format_validation_cancelled() -> None:

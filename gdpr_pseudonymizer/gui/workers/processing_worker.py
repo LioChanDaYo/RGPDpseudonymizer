@@ -8,13 +8,17 @@ content and entity type breakdown on success.
 from __future__ import annotations
 
 import tempfile
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from PySide6.QtCore import QRunnable
 
 from gdpr_pseudonymizer.gui.workers.signals import WorkerSignals
 from gdpr_pseudonymizer.utils.logger import get_logger
+
+if TYPE_CHECKING:
+    from gdpr_pseudonymizer.core.document_processor import ChangedPseudonym
 
 logger = get_logger(__name__)
 
@@ -37,6 +41,9 @@ class GUIProcessingResult:
     # Story 11.7: saved pseudonyms holding a word of their own name, counted
     # once the document was written (the desktop notice)
     own_word_rows: int = 0
+    # Story 11.5: the pseudonyms shown in the review that could not be
+    # written, each with the one written
+    pseudonyms_changed: list[ChangedPseudonym] = field(default_factory=list)
 
 
 class ProcessingWorker(QRunnable):

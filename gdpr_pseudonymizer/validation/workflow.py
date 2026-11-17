@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import re
 from collections import defaultdict
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from dataclasses import replace
 
 from gdpr_pseudonymizer.core.custom_pseudonym import (
@@ -22,6 +22,7 @@ from gdpr_pseudonymizer.core.mapping_key import mapping_key
 from gdpr_pseudonymizer.exceptions import NoAnswerError
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 from gdpr_pseudonymizer.utils.french_patterns import FRENCH_TITLE_PATTERN
+from gdpr_pseudonymizer.utils.logger import get_logger
 from gdpr_pseudonymizer.utils.text_form import is_mark
 from gdpr_pseudonymizer.validation.context_precomputer import ContextPrecomputer
 from gdpr_pseudonymizer.validation.models import (
@@ -45,6 +46,8 @@ from gdpr_pseudonymizer.validation.ui import (
     get_text_input,
     get_user_action,
 )
+
+logger = get_logger(__name__)
 
 # Story 10.19 (v1.19; the fifth Codex review's P0-1, "fix the class, not the
 # case"): a word is read by what it is, not by the characters that end it:
@@ -180,6 +183,8 @@ class ValidationWorkflow:
         custom_pseudonyms: dict[NameKey, str] | None = None,
         sent_without_review: list[DetectedEntity] | None = None,
         cells: dict[str, str] | None = None,
+        shown_names: dict[NameKey, list[NameKey]] | None = None,
+        on_custom_set: Callable[[Mapping[NameKey, str]], None] | None = None,
     ) -> list[DetectedEntity]:
         """Execute the validation workflow.
 
@@ -198,6 +203,12 @@ class ValidationWorkflow:
             cells: Cell reference -> cell text of a spreadsheet, whose
                 entities' positions point into their cells (Story 10.15);
                 None for a text document.
+            shown_names: When given, filled at the end with, for each name
+                sent with no custom pseudonym, the (mapping key, type) of
+                each detected entity its reviews showed a pseudonym for, in
+                the order of the reviews (Story 11.5; optional)
+            on_custom_set: Called with the review's custom pseudonyms each
+                time [C] sets one (Story 11.5, AC21; optional)
 
         Returns:
             List of validated entities after user review
@@ -246,7 +257,7 @@ class ValidationWorkflow:
         # Step 2: Review entities by type (PERSON → ORG → LOCATION)
         try:
             self._review_entities_by_type(
-                session, pseudonym_assigner, pseudonym_checker
+                session, pseudonym_assigner, pseudonym_checker, on_custom_set
             )
         except KeyboardInterrupt as e:
             # If this was an intentional quit (from Q key), don't prompt again
@@ -265,6 +276,8 @@ class ValidationWorkflow:
                 custom_pseudonyms,
                 sent_without_review=sent_without_review,
                 cells=cells,
+                shown_names=shown_names,
+                on_custom_set=on_custom_set,
             )
 
         # Step 3: Ambiguous entities are handled during review
@@ -289,6 +302,8 @@ class ValidationWorkflow:
                 custom_pseudonyms,
                 sent_without_review=sent_without_review,
                 cells=cells,
+                shown_names=shown_names,
+                on_custom_set=on_custom_set,
             )
 
         # Step 5: Return validated entities (and, Story 10.11, the custom
@@ -297,6 +312,9 @@ class ValidationWorkflow:
         if custom_pseudonyms is not None:
             custom_pseudonyms.clear()
             custom_pseudonyms.update(session.get_custom_pseudonyms())
+        if shown_names is not None:
+            shown_names.clear()
+            shown_names.update(self._shown_names(session))
         display_info_message(
             f"Validation complete. Processing {len(validated_entities)} entities."
         )
@@ -326,11 +344,38 @@ class ValidationWorkflow:
         self.summary_screen.display(len(entities), dict(entity_counts), unique_count)
         self.summary_screen.wait_for_enter()
 
+    @staticmethod
+    def _shown_names(session: ValidationSession) -> dict[NameKey, list[NameKey]]:
+        """For each name sent with no custom pseudonym, the (mapping key,
+        type) of the detected entity of each of its reviews, in the order of
+        the reviews, without repeats (Story 11.5): the names the review drew
+        a pseudonym for (a correction sends the pseudonym shown before it;
+        a type change, one of the old type)."""
+        names: dict[NameKey, list[NameKey]] = {}
+        for review in session._entity_reviews:
+            if review.custom_pseudonym or review.state not in (
+                EntityReviewState.CONFIRMED,
+                EntityReviewState.MODIFIED,
+            ):
+                continue
+            sent = ValidationSession._sent_entity(review)
+            name = (mapping_key(sent.text, sent.entity_type), sent.entity_type)
+            detected = review.entity
+            drawn_for = (
+                mapping_key(detected.text, detected.entity_type),
+                detected.entity_type,
+            )
+            drawn_fors = names.setdefault(name, [])
+            if drawn_for not in drawn_fors:
+                drawn_fors.append(drawn_for)
+        return names
+
     def _review_entities_by_type(
         self,
         session: ValidationSession,
         pseudonym_assigner: Callable[[DetectedEntity], str] | None = None,
         pseudonym_checker: PseudonymChecker | None = None,
+        on_custom_set: Callable[[Mapping[NameKey, str]], None] | None = None,
     ) -> None:
         """Review entities by type in priority order using entity groups.
 
@@ -339,6 +384,9 @@ class ValidationWorkflow:
             pseudonym_assigner: Function to assign pseudonyms (optional)
             pseudonym_checker: Checks a custom pseudonym set with [C]
                 (Story 10.11; optional)
+            on_custom_set: Called with the review's custom pseudonyms each
+                time [C] sets one, so the groups displayed later are drawn
+                with it (Story 11.5, AC21; optional)
         """
         # Review in priority order: PERSON → ORG → LOCATION
         priority_order = ["PERSON", "ORG", "LOCATION"]
@@ -490,6 +538,16 @@ class ValidationWorkflow:
                                     session.change_pseudonym(entity, pseudonym)
                                 else:
                                     session.mark_confirmed(entity)
+                            # Story 11.5 (AC21): the groups displayed later
+                            # are drawn with this custom pseudonym
+                            if on_custom_set is not None:
+                                try:
+                                    on_custom_set(session.get_custom_pseudonyms())
+                                except Exception as error:
+                                    logger.warning(
+                                        "cli_custom_rebase_failed",
+                                        exc_type=type(error).__name__,
+                                    )
                         else:
                             for entity in group.occurrences:
                                 session.mark_confirmed(entity)
@@ -1044,6 +1102,8 @@ def run_validation_workflow(
     custom_pseudonyms: dict[NameKey, str] | None = None,
     sent_without_review: list[DetectedEntity] | None = None,
     cells: dict[str, str] | None = None,
+    shown_names: dict[NameKey, list[NameKey]] | None = None,
+    on_custom_set: Callable[[Mapping[NameKey, str]], None] | None = None,
 ) -> list[DetectedEntity]:
     """Execute interactive validation workflow.
 
@@ -1062,6 +1122,10 @@ def run_validation_workflow(
             in Story 10.13 coverage per Lionel's decision of 2026-10-16.
         cells: Cell reference -> cell text of a spreadsheet (Story 10.15);
             None for a text document.
+        shown_names: When given, filled with the names each name sent was
+            shown a pseudonym for (Story 11.5)
+        on_custom_set: Called after each custom pseudonym set with [C]
+            (Story 11.5, AC21)
 
     Returns:
         List of validated entities after user review
@@ -1079,4 +1143,6 @@ def run_validation_workflow(
         custom_pseudonyms,
         sent_without_review=sent_without_review,
         cells=cells,
+        shown_names=shown_names,
+        on_custom_set=on_custom_set,
     )
