@@ -9,11 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [2.3.2] - 2026-11-17
+
 ### Fixed
 
 - **The review list shows the pseudonym that is written (Story 11.5).** In the desktop app and the command line, the pseudonym shown next to a new name during the review is now the one written in the document and saved. Before, it was drawn again when the document was written, so the document almost never held the pseudonym shown. In the desktop list, changing a name's type, or setting a custom pseudonym that another listed name must share, now updates those names at once; one undo reverts both. If a pseudonym shown can no longer be used when the document is written (for example, another document gave it to another name in the meantime), another one is written and a message lists each change. The list also no longer shows a newly drawn pseudonym that is a name of the document; since 2.3.1 such a draw is not written (Story 11.6), but the list could still show it.
-- **Desktop batch review: the pseudonyms shown use your theme (Story 11.5).** Before, the list showed pseudonyms of the default theme.
-- **Desktop review: a saved name with a title keeps its title in the list (Story 11.5).** « Mme Élodie Martin », saved earlier, now shows « Mme Isabelle Almeida », as the document reads. Before, the list showed « Isabelle Almeida ».
+- **Desktop batch review: the new pseudonyms shown use your theme (Story 11.5).** Before, the list showed new pseudonyms of the default theme. Names already saved keep their saved pseudonym, whatever the theme.
+- **Desktop review: a saved name with a title keeps its title in the list (Story 11.5).** « Mme Élodie Martin », saved earlier, now shows « Mme Isabelle Almeida », as the document reads. Before, the list showed « Isabelle Almeida ». One exception remains, recorded as KL-011: a name with two titles, such as « M. le Dr Paul Lefèvre », is listed with « M. » in front of its pseudonym while the document holds the pseudonym alone; no part of the name is left in clear.
+- **Windows installer: installing over an earlier version shows the right version number.** Installing over an earlier version left the earlier version's files in place, so the desktop app showed the earlier version number: installing 2.3.2 over 2.3.1 showed "2.3.1". The installer now removes them first. If the desktop app or the command line is open, the installer now asks you to close it first, and installs nothing until you do.
 
 ---
 
