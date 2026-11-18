@@ -16,6 +16,7 @@ are invented; the other words are the generic words of the rules
 from __future__ import annotations
 
 import time
+from collections.abc import Callable
 from typing import Any
 
 import pytest
@@ -58,6 +59,26 @@ def _ent(
 
 def _at(doc: str, text: str, entity_type: str, source: str = "spacy") -> DetectedEntity:
     return _ent(text, entity_type, doc.index(text), source)
+
+
+def _alternating_ratio(
+    small: Callable[[], object], large: Callable[[], object], gap: int, rounds: int
+) -> tuple[float, float, float]:
+    # Per-call time at the large size over per-call time at the small size,
+    # with the two per-call times. Each round times ``gap`` small calls, then
+    # one large call, so on linear code both intervals take about as long and
+    # see the same runner load; the best round is kept for each size
+    # (Story 11.8).
+    best_small = best_large = float("inf")
+    for _ in range(rounds):
+        start = time.perf_counter()
+        for _ in range(gap):
+            small()
+        best_small = min(best_small, (time.perf_counter() - start) / gap)
+        start = time.perf_counter()
+        large()
+        best_large = min(best_large, time.perf_counter() - start)
+    return best_large / best_small, best_small, best_large
 
 
 def _fix(
@@ -675,25 +696,25 @@ class TestParticleRefinements:
     def test_trailing_particle_search_scales_linearly(
         self, detector: HybridDetector
     ) -> None:
-        # PERF-001: a span ending in a long particle run; the search looks at
-        # the last few tokens only. A ratio, not an absolute time.
+        # PERF-001: a span that holds a long particle run followed by a name,
+        # the shape on which the old tail regex backtracked (quadratic); the
+        # search looks at the last few tokens only. Story 11.8: from 125 to
+        # 8,000 particles (64x), timed in alternating rounds, today's code
+        # gives about 19 to 25 (the fixed cost of a call weighs more at the
+        # small size) and the old regex about 3,900; the cap 300 sits near the
+        # middle on a log scale, so a slow runner cannot fail the test.
         blocked = hd._SpanIndex([])
 
-        def run(n: int) -> float:
+        def call(n: int) -> Callable[[], object]:
             doc = "Zorbal" + " le" * n + " Quentrix"
-            entity = _ent(doc[: -len(" Quentrix")], "PERSON", 0)
-            best = float("inf")
-            for _ in range(3):
-                start = time.perf_counter()
-                for _ in range(20):
-                    HybridDetector._extend_particles(entity, doc, blocked)
-                best = min(best, time.perf_counter() - start)
-            return best
+            entity = _ent(doc, "PERSON", 0)
+            assert HybridDetector._extend_particles(entity, doc, blocked) is None
+            return lambda: HybridDetector._extend_particles(entity, doc, blocked)
 
-        run(1_000)  # warm-up
-        small = run(5_000)
-        large = run(20_000)
-        assert large / small < 10, (small, large)
+        ratio, small, large = _alternating_ratio(
+            call(125), call(8_000), gap=64, rounds=7
+        )
+        assert ratio < 300, (ratio, small, large)
 
 
 class TestCommaRoleGuard:

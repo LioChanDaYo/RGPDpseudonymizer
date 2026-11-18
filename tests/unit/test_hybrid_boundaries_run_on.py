@@ -16,9 +16,12 @@ legal forms, title words) or words of the main-corpus text (AC11).
 
 from __future__ import annotations
 
+import dataclasses
 import random
 import re
 import time
+from collections.abc import Callable
+from typing import Any
 
 import pytest
 
@@ -43,15 +46,59 @@ def detector() -> HybridDetector:
 
 
 def _ent(
-    text: str, entity_type: str, start: int, source: str = "spacy"
+    text: str,
+    entity_type: str,
+    start: int,
+    source: str = "spacy",
+    *,
+    cls: type[DetectedEntity] = DetectedEntity,
 ) -> DetectedEntity:
-    return DetectedEntity(
+    return cls(
         text=text,
         entity_type=entity_type,
         start_pos=start,
         end_pos=start + len(text),
         source=source,
     )
+
+
+_ENTITY_FIELDS = frozenset(f.name for f in dataclasses.fields(DetectedEntity))
+
+
+def _field_read_counter() -> tuple[type[DetectedEntity], dict[str, int]]:
+    # A DetectedEntity subclass that counts reads of its dataclass fields.
+    # A scan of a list of entities reads fields of every entity it passes, so
+    # this count is the work done on entities, the same on every runner
+    # (Story 11.8; a copy of the one in test_hybrid_overlap_role_filter.py).
+    reads = {"n": 0}
+
+    class Counted(DetectedEntity):
+        def __getattribute__(self, name: str) -> Any:
+            if name in _ENTITY_FIELDS:
+                reads["n"] += 1
+            return super().__getattribute__(name)
+
+    return Counted, reads
+
+
+def _alternating_ratio(
+    small: Callable[[], object], large: Callable[[], object], gap: int, rounds: int
+) -> tuple[float, float, float]:
+    # Per-call time at the large size over per-call time at the small size,
+    # with the two per-call times. Each round times ``gap`` small calls, then
+    # one large call, so on linear code both intervals take about as long and
+    # see the same runner load; the best round is kept for each size
+    # (Story 11.8; a copy of the one in test_hybrid_particles_location_noise.py).
+    best_small = best_large = float("inf")
+    for _ in range(rounds):
+        start = time.perf_counter()
+        for _ in range(gap):
+            small()
+        best_small = min(best_small, (time.perf_counter() - start) / gap)
+        start = time.perf_counter()
+        large()
+        best_large = min(best_large, time.perf_counter() - start)
+    return best_large / best_small, best_small, best_large
 
 
 def _at(doc: str, text: str, entity_type: str, source: str = "spacy") -> DetectedEntity:
@@ -209,9 +256,11 @@ class TestOrgNameShape:
     def test_adversarial_line_is_linear(self, matcher: RegexMatcher) -> None:
         # Technical Constraints: a 50 KB line of capitalised words, commas and
         # connectors must not trigger catastrophic backtracking. A ratio check
-        # on the same machine, not an absolute limit (10.3a follow-up): 8x the
-        # line length must cost under 24x the time, best of five. Linear
-        # matching gives about 8, quadratic backtracking about 64.
+        # on the same machine, not an absolute limit (10.3a follow-up). Story
+        # 11.8: from 390 to 50,000 characters (128x), timed in alternating
+        # rounds, linear matching gives about 124 to 138 and pattern 0 with no
+        # bound on the name's length about 14,800; the cap 1,400 sits near the
+        # middle on a log scale, so a slow runner cannot fail the test.
         lines = [
             "Zorbal Quentrix " * 3200,
             "Zorbal, Quentrix de Vardel " * 2000,
@@ -222,20 +271,21 @@ class TestOrgNameShape:
             _pattern(matcher, "organizations", 1),
         ]
 
-        def best_time(length: int) -> float:
+        def scan(length: int) -> Callable[[], object]:
             cut = [line[:length] for line in lines]
-            best = float("inf")
-            for _ in range(5):
-                start = time.perf_counter()
+
+            def run() -> None:
                 for line in cut:
                     for regex in regexes:
                         for _ in regex.finditer(line):
                             pass
-                best = min(best, time.perf_counter() - start)
-            return best
 
-        ratio = best_time(50_000) / best_time(6_250)
-        assert ratio < 24, ratio
+            return run
+
+        ratio, small, large = _alternating_ratio(
+            scan(390), scan(50_000), gap=128, rounds=5
+        )
+        assert ratio < 1_400, (ratio, small, large)
 
     def test_heading_line_no_longer_feeds_a_union_leak(
         self, matcher: RegexMatcher, detector: HybridDetector
@@ -512,7 +562,9 @@ class TestWrappedNameJoin:
 # ---------------------------------------------------------------------------
 
 
-def _join_input(units: int, wrapped: bool) -> tuple[str, list[DetectedEntity]]:
+def _join_input(
+    units: int, wrapped: bool, *, cls: type[DetectedEntity] = DetectedEntity
+) -> tuple[str, list[DetectedEntity]]:
     """``units`` copies of one line, two one-word PERSON entities per copy."""
     sep = "\n" if wrapped else " "
     line = f"le contrat est signé par Zorbalia{sep}Quentrix, avec le projet\n"
@@ -520,28 +572,33 @@ def _join_input(units: int, wrapped: bool) -> tuple[str, list[DetectedEntity]]:
     for i in range(units):
         base = i * len(line)
         for name in ("Zorbalia", "Quentrix"):
-            entities.append(_ent(name, "PERSON", base + line.index(name)))
+            entities.append(_ent(name, "PERSON", base + line.index(name), cls=cls))
     return line * units, entities
 
 
 class TestWrappedNameJoinCost:
-    def test_join_time_grows_linearly(self) -> None:
+    @pytest.mark.parametrize("wrapped", [False, True], ids=["line", "wrapped"])
+    def test_join_work_grows_linearly(self, wrapped: bool) -> None:
         # The join used to scan the whole entity list once per PERSON
-        # (quadratic: 8x the entities took about 64x the time). A ratio check
-        # on the same machine, best of five runs: linear work gives about 8.
-        def best_time(units: int, wrapped: bool) -> float:
-            doc, entities = _join_input(units, wrapped)
-            best = float("inf")
-            for _ in range(5):
-                start = time.perf_counter()
-                out = HybridDetector._join_wrapped_names(entities, doc)
-                best = min(best, time.perf_counter() - start)
-            assert len(out) == (units if wrapped else 2 * units)
-            return best
+        # (quadratic: 8x the entities read about 64x as many entity fields).
+        # Story 11.8: the test counts reads of entity fields, not time, so a
+        # slow runner cannot fail it. From 125 to 1,000 units (8x), linear
+        # work reads exactly 8x as many fields; the old join about 64x.
+        counted, reads = _field_read_counter()
 
-        for wrapped in (False, True):
-            ratio = best_time(8000, wrapped) / best_time(1000, wrapped)
-            assert ratio < 24, (wrapped, ratio)
+        def count(units: int) -> int:
+            doc, entities = _join_input(units, wrapped, cls=counted)
+            reads["n"] = 0
+            out = HybridDetector._join_wrapped_names(entities, doc)
+            work = reads["n"]
+            assert all(type(e) is counted for e in out)
+            assert len(out) == (units if wrapped else 2 * units)
+            return work
+
+        small = count(125)
+        large = count(1_000)
+        ratio = large / small
+        assert ratio < 16, (ratio, small, large)
 
     def test_order_is_kept_inputs_then_joined_spans(self) -> None:
         # Output order is unchanged by the PERF-001 rewrite: the kept input

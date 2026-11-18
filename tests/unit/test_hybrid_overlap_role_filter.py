@@ -15,6 +15,7 @@ from the generic words of the rules themselves (role acronyms, "Europe",
 
 from __future__ import annotations
 
+import dataclasses
 from collections.abc import Iterator
 from typing import Any
 
@@ -71,14 +72,35 @@ def _ent(
     start: int,
     source: str = "regex",
     end: int | None = None,
+    *,
+    cls: type[DetectedEntity] = DetectedEntity,
 ) -> DetectedEntity:
-    return DetectedEntity(
+    return cls(
         text=text,
         entity_type=entity_type,
         start_pos=start,
         end_pos=start + len(text) if end is None else end,
         source=source,
     )
+
+
+_ENTITY_FIELDS = frozenset(f.name for f in dataclasses.fields(DetectedEntity))
+
+
+def _field_read_counter() -> tuple[type[DetectedEntity], dict[str, int]]:
+    # A DetectedEntity subclass that counts reads of its dataclass fields.
+    # A scan of a list of entities reads fields of every entity it passes, so
+    # this count is the work done on entities, the same on every runner
+    # (Story 11.8).
+    reads = {"n": 0}
+
+    class Counted(DetectedEntity):
+        def __getattribute__(self, name: str) -> Any:
+            if name in _ENTITY_FIELDS:
+                reads["n"] += 1
+            return super().__getattribute__(name)
+
+    return Counted, reads
 
 
 # ---------------------------------------------------------------------------
@@ -623,33 +645,38 @@ class TestSameTypeDedup:
                     ), (doc, e, out)
 
     def test_large_input_uses_an_active_window(self, detector: HybridDetector) -> None:
-        """QA PERF-001: the walk scales linearly, not quadratically.
+        """QA PERF-001: the walk scales linearly, not quadratically."""
+        # QA PERF-001: the walk does a fixed amount of work per entity.
+        #
+        # Pairs of overlapping same-type entities along a long document. The
+        # test counts reads of entity fields, not time, so a slow runner cannot
+        # fail it (Story 11.8). From 250 to 2,000 pairs (8x), the active window
+        # reads 8x as many fields; a full scan of the kept list reads about 61x
+        # as many.
+        counted, reads = _field_read_counter()
 
-        Pairs of overlapping same-type entities along a long document. Going
-        from 1,500 to 6,000 pairs (4x) costs about 4x with the active window
-        and about 16x with a full scan of the kept list. The ratio is used
-        instead of an absolute time, so slow or instrumented CI legs do not
-        make the test flaky.
-        """
-        import time
-
-        def run(pairs: int) -> float:
+        def count(pairs: int) -> int:
             entities: list[DetectedEntity] = []
             for i in range(pairs):
                 base = i * 40
-                entities.append(_ent("Zorbalia Quentin", "PERSON", base, "spacy"))
-                entities.append(_ent("Quentin", "PERSON", base + 9, "regex"))
-            start = time.perf_counter()
+                entities.append(
+                    _ent("Zorbalia Quentin", "PERSON", base, "spacy", cls=counted)
+                )
+                entities.append(
+                    _ent("Quentin", "PERSON", base + 9, "regex", cls=counted)
+                )
+            reads["n"] = 0
             out = detector._dedup_same_type_overlaps(entities)
-            elapsed = time.perf_counter() - start
+            work = reads["n"]
+            assert all(type(e) is counted for e in out)
             assert len(out) == pairs
             assert all(e.text == "Zorbalia Quentin" for e in out)
-            return elapsed
+            return work
 
-        run(500)  # warm-up
-        small = min(run(1_500) for _ in range(2))
-        large = min(run(6_000) for _ in range(2))
-        assert large / small < 10, (small, large)
+        small = count(250)
+        large = count(2_000)
+        ratio = large / small
+        assert ratio < 16, (ratio, small, large)
 
     def test_window_keeps_rechecking_retired_entities_after_a_union(
         self, detector: HybridDetector
@@ -990,7 +1017,7 @@ class TestReviewThreeFixes:
     # The two tests below bound the work by the number of walks, not by
     # wall-clock time, so a slow runner cannot fail them (10.3a follow-up:
     # the chain took 6.95 s against a 5 s limit on a macOS CI runner). The
-    # cost of one walk is covered by the ratio check in
+    # cost of one walk is covered by the count of entity field reads in
     # test_large_input_uses_an_active_window.
 
     def test_pass_cap_bounds_an_adversarial_chain(
