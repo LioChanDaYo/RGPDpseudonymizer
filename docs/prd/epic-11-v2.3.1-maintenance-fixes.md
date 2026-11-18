@@ -10,7 +10,7 @@
 
 ## Scope Rule
 
-Exactly eleven items in six stories enter 2.3.1: Python 3.11 floor with the dependency refresh (Story 11.1), Python 3.13 in CI (Story 11.3), the two bugs (Story 11.2), generated pseudonyms that reuse a word of the document and two people given one pseudonym through values shared by the first-name and last-name lists (Story 11.6), four desktop problems (Story 11.4: the short-passphrase trap on a new database, the wrong-passphrase trap on a single document, the same trap in a batch, and the version label), and stored pseudonyms that leak a word of their own name (Story 11.7). Nothing else. Story 11.5 moves to v2.3.2. KL-001 to KL-005 and the two-Maries limitation (backlogged by Story 11.1) stay in `docs/BACKLOG.md` with their pull triggers.
+Exactly eleven items in six stories enter 2.3.1: Python 3.11 floor with the dependency refresh (Story 11.1), Python 3.13 in CI (Story 11.3), the two bugs (Story 11.2), generated pseudonyms that reuse a word of the document and two people given one pseudonym through values shared by the first-name and last-name lists (Story 11.6), four desktop problems (Story 11.4: the short-passphrase trap on a new database, the wrong-passphrase trap on a single document, the same trap in a batch, and the version label), and stored pseudonyms that leak a word of their own name (Story 11.7). Nothing else. Story 11.5 moves to v2.3.2. KL-001 to KL-005 and the two-Maries limitation (backlogged by Story 11.1) stay in `docs/BACKLOG.md` with their pull triggers. Story 11.8 (added 2026-11-18, after v2.3.2) is tests only and enters no release: it lands on main with no version bump.
 
 Lionel's decisions, word for word:
 
@@ -24,6 +24,7 @@ Lionel's decisions, word for word:
 - Stories 11.6 and 11.7, Lionel, 2026-11-10: after a replacement, the old pseudonym is freed (as `delete-mapping` does); a place or organisation is reported only when the shared part is its whole name, its whole pseudonym, or a place from the pseudonym library; the app gives a notice when a document is written; every value that is also a first name is removed from the last-name list (Story 11.6). His words: "1) forget 2) report only real leaks 3) when a document is written ; about the new bug: remove all shared from last name list".
 - Story 11.6, Lionel, 2026-11-10: no name is held twice in the three pseudonym libraries, whether repeated in one list, as an accent variant (« Félix » and « Felix », « Lefèvre » and « Lefevre ») or in two lists; the lists are refilled with new names; « Nancy » leaves the first names. In the star_wars and lotr libraries, a real surname of that world (« Skywalker ») stays a last name and leaves the first names; every other value in both lists leaves the last names. His words: "Félix and Felix ARE duplicates. Same for Lefevre and Lefèvre. how are there so many duplicates in star wars and lotr. Just generate more, i don't want any duplicate. Remove Nancy as a first name"; "yes, a real surname should stay a surname".
 - Story 11.6, Lionel, 2026-11-11: one name in two spellings (« Mathieu » and « Matthieu », « Gray » and « Grey ») is kept once, as the lists were built. His words: "i think you overcorrected a bit with the different spellings, but let's keep it anyway".
+- Story 11.8, Lionel, 2026-11-18: a small tests-only story makes the four timing tests that fail on slow macOS CI runners measure the work done (or use a much bigger size gap) instead of the raw time, each proved by failing on a deliberately slowed copy of the code; it lands on main with no release. The question asked: "Shall the BMAD agents write a small tests-only story that makes the four timing tests measure the work done (or use a much bigger size gap) instead of the raw time, proved by each test failing on a deliberately slowed copy of the code?" His answer: "yes".
 
 ---
 
@@ -37,7 +38,7 @@ Lionel's decisions, word for word:
 
 ## Stories
 
-Story 11.1 lands first (merged 2026-11-05). Story 11.3 lands next. Story 11.2 branches from main after 11.3 merges. The numbers stay: 11.2 keeps its approved number and text. 11.1, 11.3 and 11.2 are merged, and the first release commit (`chore(release): v2.3.1`, #121) is on main; the tag is not pushed. Story 11.6 lands next, then Story 11.4, then Story 11.7, then the release (a second release commit). Story 11.5 moves to v2.3.2.
+Story 11.1 lands first (merged 2026-11-05). Story 11.3 lands next. Story 11.2 branches from main after 11.3 merges. The numbers stay: 11.2 keeps its approved number and text. 11.1, 11.3 and 11.2 are merged, and the first release commit (`chore(release): v2.3.1`, #121) is on main; the tag is not pushed. Story 11.6 lands next, then Story 11.4, then Story 11.7, then the release (a second release commit). Story 11.5 moves to v2.3.2. Story 11.8 (tests only) branches from main at or after `9dafd44` (v2.3.2) and ships with no release and no version bump.
 
 ### Story 11.1: Python 3.11 Floor and Dependency Security Refresh
 
@@ -175,6 +176,37 @@ Moved to v2.3.2 (Lionel, 2026-11-10: the leak fix ships first, the list fix in t
 
 **Risk:** the "still free" check. A miss could give two people one pseudonym, the class of bug Story 10.22 fixed. The story requires tests with two documents finalized concurrently against one database.
 
+### Story 11.8: Timing Tests Measure the Work, Not the Runner's Speed
+
+Tests only. It lands on main with no release and no version bump (Lionel, 2026-11-18).
+
+**Problem** (measured by the orchestrator on 2026-11-18 from GitHub Actions job logs; raw data in `C:\Users\devea\Documents\GitHub\rgpd-analysis\timing-1118\`): four unit tests time a small input and a bigger one and assert that the ratio of the two times stays under a cap. CI runs them with `pytest -n auto`, so on GitHub's macOS runners they share the CPU with other test workers, and some macOS runners are slow (the failing jobs took 13 to 18 minutes, against about 5 usually).
+
+- `tests/unit/test_hybrid_overlap_role_filter.py::TestSameTypeDedup::test_large_input_uses_an_active_window` (l.~625): 1,500 against 6,000 pairs (4x), cap 10. Its docstring: healthy code costs about 4x, the full scan of the kept list it guards about 16x.
+- `tests/unit/test_hybrid_particles_location_noise.py::TestParticleRefinements::test_trailing_particle_search_scales_linearly` (l.~675): 5,000 against 20,000 particles (4x), cap 10; the small measurement is about 1 ms in total.
+- `tests/unit/test_hybrid_boundaries_run_on.py::TestOrgNameShape::test_adversarial_line_is_linear` (l.~209): 6,250 against 50,000 characters (8x), cap 24 (linear about 8, quadratic about 64).
+- `tests/unit/test_hybrid_boundaries_run_on.py::TestWrappedNameJoinCost::test_join_time_grows_linearly` (l.~525-544): 1,000 against 8,000 entities (8x), cap 24, asserted twice, once with wrapped names and once without.
+
+Since 2026-10-19 (292 CI runs): 16 first-attempt failures on macOS (15 in the API logs, 1 noted only in the orchestration log), each green on one rerun: the large-input test 8 times (10.3x to 14x measured on healthy code), the trailing-particle test 7 times (10.9x to 20x), the adversarial-line test once (24.44 against a cap of 24). On main, 4 of 24 merges went red (2026-11-04, 2026-11-13, 2026-11-17 and 2026-11-18). None on Ubuntu or Windows in that period. A wider cap cannot fix the large-input test: slow Macs already measure healthy code at up to 14x, and the bug it guards costs about 16x.
+
+**Scope (the SM writes the detailed story):**
+
+- Tests only: no product code change, no user-facing text, no French text, no release, no version bump.
+- The four tests above stop depending on runner speed. Where possible they count the work done, as `_count_walks(monkeypatch)` already counts the dedup walks for `test_pass_cap_bounds_an_adversarial_chain` in `test_hybrid_overlap_role_filter.py`; otherwise they keep timing with a much bigger size gap, so healthy and broken code are far apart. The mechanism for each test is the SM's and the dev's choice.
+- A fact for that choice: the full scan of the kept list happens inside one dedup walk, so counting walks alone does not catch it.
+- The comment above `test_pass_cap_bounds_an_adversarial_chain` (`test_hybrid_overlap_role_filter.py` l.~990-994) says the cost of one walk is covered by the large-input test. That stays true, or the comment is updated.
+- Proof for each test: it passes on today's code and fails on a deliberately slowed copy of the code it guards (for the large-input test, the old full scan of the kept list; for the wrapped-name join, both of its cases). The slowed copies are not committed into product code; the runs are recorded in the story.
+- Process for Every Story applies: QA review and one read-only Codex review of the final head. The slowed-copy runs are the "fails first" evidence for these tests.
+- Out of scope: the `performance.yaml` benchmark workflow, `@pytest.mark.slow` tests, product performance.
+
+**Acceptance (epic level):**
+
+1. Each of the four tests counts the work done, or keeps timing with a size gap large enough that healthy code on a slow runner stays far below the cap and broken code far above it.
+2. Each test passes on today's code on the final head, in full CI (all legs green).
+3. Each test fails on a deliberately slowed copy of the code it guards, and the story records the run; for the large-input test the slowed copy is the old full scan of the kept list; for the wrapped-name join, both cases fail.
+4. No product code changes (nothing under `gdpr_pseudonymizer/`), and no slowed copy is committed.
+5. The walk-cost comment above `test_pass_cap_bounds_an_adversarial_chain` is true of the new tests.
+
 ---
 
 ## Process for Every Story
@@ -231,6 +263,10 @@ No tag and no PyPI release without Lionel's explicit go.
 
 - [ ] Story 11.5 merged: on every path the review list shows the pseudonym that is written, or the user is told it was redrawn; batch previews use the real theme; stored titled names keep their title in the list; concurrent two-document tests green
 
+### Main only, no release
+
+- [ ] Story 11.8 merged: the four timing tests no longer depend on runner speed (they count the work done, or time with a much bigger size gap); each passes on today's code and fails on a deliberately slowed copy, recorded in the story and not committed; no product code, user text or version change; QA review and read-only Codex review of the final head
+
 ---
 
 ## Story Manager Handoff
@@ -244,6 +280,7 @@ No tag and no PyPI release without Lionel's explicit go.
 - Story 11.6 integration points: `gdpr_pseudonymizer/pseudonym/library_manager.py`, the three pseudonym libraries in `gdpr_pseudonymizer/resources/pseudonyms/*.json` (a copy also sits in `data/pseudonyms/`) and the library loader's floors, `core/document_processor.py`, the real-name rule in `core/custom_pseudonym.py`, the CLI process and batch commands (parallel workers included), the tabular path, the desktop single-document and batch paths, the no-review `ProcessingWorker`.
 - Story 11.7 integration points: the real-name rule in `gdpr_pseudonymizer/core/custom_pseudonym.py` and Story 11.6's draw, the mapping data layer (`data/`), a CLI entry point (`cli/commands/`, next to `delete_mapping.py`), the desktop database screen (`gui/screens/database.py`), the place where a document is written (for the notice); the SM proposes where.
 - Story 11.5 (v2.3.2) integration points: `gdpr_pseudonymizer/core/document_processor.py`, `pseudonym/library_manager.py`, `gui/screens/batch.py`, `gui/models/validation_state.py`, the CLI process and batch commands, the tabular path.
+- Story 11.8 (tests only, no release) integration points: `tests/unit/test_hybrid_overlap_role_filter.py` (the large-input test, `_count_walks`, the walk-cost comment), `tests/unit/test_hybrid_particles_location_noise.py`, `tests/unit/test_hybrid_boundaries_run_on.py` (two tests); for context, `.github/workflows/ci.yaml` runs the suite with `pytest -n auto`. Each test is proved by failing on a deliberately slowed copy, not committed.
 - Story 11.1 lands first (merged); Story 11.3 lands next; Story 11.2 branches from main after 11.3 merges. All three are merged. Story 11.6 lands next, then Story 11.4, then Story 11.7, then the second release commit. Story 11.5 moves to v2.3.2.
 - Story 11.3 stops for a report if the lock moves any package other than pyside6-essentials and shiboken6 (6.7.3 → 6.8.3), stanza (1.14.0 → 1.15.0) and the new orjson, or if a 3.13 test failure has no small, real fix.
 - Name the two bugs by their problem, never by a finding number alone.
