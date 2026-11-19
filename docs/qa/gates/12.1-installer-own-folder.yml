@@ -1,0 +1,86 @@
+schema: 1
+story: '12.1'
+story_title: 'The Windows Installer Uses Its Own Folder and the Uninstaller Removes Only Its Own Files'
+scope: 'Review of head d1644d8 (PR #131, draft; base 9dafd44). Tests first 1098c9e, fix f4c36eb, CHANGELOG and KL-012 d1644d8. QA folder: rgpd-analysis/r121/qa (scripts and logs, never committed).'
+gate: PASS
+status_reason: 'Every AC that can be checked before merge is met, and the NSIS behaviour the fix relies on is confirmed in the NSIS source. The tests fail on the base at an assert and pass on the head; all 24 of the dev''s mutants and 17 of QA''s 20 are caught. The three findings are low: one outcome-neutral difference between the test interpreter and NSIS, one uncaught mutant that a real install cannot tell apart, and one wording nuance in KL-012.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-11-19T09:09:00Z'
+
+top_issues:
+  - id: 'TEST-121-01'
+    severity: low
+    finding: '_Nsis._strcpy treats a negative start offset beyond the start of the string as 0 and returns the whole string. Real NSIS leaves the variable empty: exec.c EW_ASSIGNVAR, l.668-669 (`if (start<0) start=srclen+start; if (start>=0) {...}`), kichik/nsis a96303e. The story''s Test Plan states the same wrong rule ("counts from the start"). The outcome is the same for installer.nsi: a string shorter than 19 characters is never equal to the 19-character `\GDPR Pseudonymizer`, so OwnFolderOf appends the subfolder either way. TrimFolder on an empty string gives "" in both.'
+    suggested_action: 'When the file is next touched: return "" in _strcpy for that case, and correct the Test Plan sentence. No change needed for this merge.'
+    suggested_owner: dev
+  - id: 'TEST-121-02'
+    severity: low
+    finding: 'QA mutant Q3 survives: if the message is gated on gdpr-pseudo.exe instead of gdpr-pseudonymizer.exe, no test fails. Lionel''s answer to question 2 names gdpr-pseudonymizer.exe, and no T5 case has one executable without the other. Every release installs both, so a real install would behave the same.'
+    suggested_action: 'Optional: add a T5 case whose old folder holds only gdpr-pseudo.exe (expect no message).'
+    suggested_owner: dev
+  - id: 'DOC-121-01'
+    severity: low
+    finding: 'KL-012 says the old uninstaller "matters only for a folder typed by hand". Strictly, the v2.0.0 to v2.3.2 uninstaller (`RMDir /r "$INSTDIR"`, `RMDir /r "$SMPROGRAMS\${APPNAME}"`; identical in every tag) also deletes a file the user saved inside a default or Browse « GDPR Pseudonymizer » folder. For practical purposes it is true: the default folder is under Program Files (x86), which needs admin rights to write to, and the app writes nothing there. The text is Lionel''s, word for word (question 3).'
+    suggested_action: 'Report only. Any change to the KL-012 text needs Lionel''s approval.'
+    suggested_owner: po
+
+waiver: { active: false }
+
+quality_score: 100
+
+expires: '2026-12-03T09:09:00Z'
+
+merge_blockers: []
+
+merge_notes:
+  - 'NSIS (item 1), checked against the NSIS source (kichik/nsis master a96303e; QA copy in r121/qa/nsis-src): on Next, Ui.c runs the page''s leave callback (l.537) and then NotifyCurWnd(WM_NOTIFY_INIGO_MONTOYA) (l.549). DirProc then reads the folder field back into $INSTDIR: GetUIText(IDC_DIR,dir) and validate_filename(dir) (l.975-977). The field write in OwnFolderLeave is therefore needed. It uses the same handles as MUI2 Directory.nsh (FindWindow "#32770" "" $HWNDPARENT, GetDlgItem 1019, l.106/109), and the leave define comes right before MUI_PAGE_DIRECTORY (installer.nsi l.52-53; Directory.nsh l.122-124).'
+  - 'NSIS order before .onInit: the /D= folder is copied raw (Main.c l.275-278). The registry folder is read only when that folder is not valid, and gets a trailing backslash (Ui.c l.309-349). InstallDir is the fallback (l.353-355). Only then does .onInit run (l.396). So ReadRegStr (installer.nsi l.128) runs before WriteRegStr, which is at the end of SecMain (l.239), on the same key and value as InstallDirRegKey. TrimFolder is what keeps the default folder, with its trailing backslash, in place.'
+  - 'TrimFolder and OwnFolderOf: the loop stops on an empty string. They compare the last 19 characters, with an explicit maxlen and offset (exec.c l.666-677), case-insensitively. Every register they use is pushed and popped (T1 and T12 sentinels). /SD IDOK: in silent mode my_MessageBox returns the default without showing the box (util.c l.140-141), and MB_OK has no jump. The uninstaller uses RMDir without /r on the install folder and the Start Menu folder. The only RMDir /r in the script is "$INSTDIR\_internal" (T10).'
+  - 'Browse: Ui.c l.1054-1063 appends « GDPR Pseudonymizer » unless the chosen folder''s name already equals it (lstrcmpi). A Browse folder therefore always ends in it and is upgraded in place, as is the default folder. In every released installer (v2.0.0 to v2.3.1 byte-identical on these lines; v2.3.2 adds only `RMDir /r "$INSTDIR\_internal"`), APPNAME, INSTALLDIR, InstallDirRegKey, the InstallDir WriteRegStr and the three CreateShortCut lines are unchanged. Every release builds with PyInstaller 6 (6.19/6.21) and no contents_directory, so all 25 downloads hold the four items the new uninstaller removes. v1.1.0 had no installer.'
+  - 'The model (item 2): T12''s order (leave, then read-back trimmed) and the start state (raw /D=; the registry folder with a trailing backslash; then InstallDir; a drive root ignored) match the source. Model differences: TEST-121-01 (StrCpy). The read-back trims only trailing backslashes and spaces, while validate_filename also strips *?|<>/": and control characters (no case uses them). Registry values with quotes or .exe and other invalid /D= paths are not modelled. FileOpen on a file in use is not in _Nsis; the old _run covers it. $(MSG_OLD_COPY) is not expanded; the 0-warning compile and AC9 step 3 are the proof. The RMDir error flag and RMDir /r''s refusal of an invalid path are not modelled. File /r copies a fixed list; AC12 pins the real one. None of these changes an outcome for installer.nsi.'
+  - '2.3.2 checks (item 3): the five existing tests and their helpers are byte-identical to 9dafd44 (ast comparison) and pass. On a typed-folder upgrade, the app-open check looks at the new subfolder, not the old copy. That is harmless: nothing in the old folder is touched.'
+  - 'CHANGELOG CL1 and KL-012 (item 4) are byte-equal to the story texts. F1 is byte-equal to b983ab3 in both languages. CL1 is true as written. KL-012: see DOC-121-01.'
+  - 'AC11 (item 5): git diff --name-only 9dafd44...HEAD adds docs/prd/epic-12-windows-installer-own-folder.md and docs/prd/epic-list.md to File Locations. Both come from the PM commit d6735f5, which is on this branch and not on origin/main. git diff --name-only d6735f5...HEAD lists exactly File Locations plus this story. Accepted.'
+  - 'Story Status still reads Approved, not Review (a review-story prerequisite). Status belongs to the story owner; QA did not change it.'
+  - 'This gate file and the story''s QA Results are QA''s own outputs, the expected exception to AC11''s file list. QA started no Codex, Forge, Anvil or Cato process. Codex (Task 6.3) is the orchestrator''s, now that QA gives a PASS. Lionel''s hand check (AC9) remains before the release.'
+
+evidence:
+  tests_reviewed: 43
+  risks_identified: 3
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12]
+    ac_gaps: []
+  ac_notes:
+    AC1_AC3: 'T1 (11 cases), T2, T3 (5), T12 (3); control C1. Mutants M1-M6, M20-M22, M24, Q7-Q11, Q13-Q15 caught.'
+    AC2: 'T8-T11, control C2. M13-M17, Q16-Q20 caught.'
+    AC4: 'T4-T7. M7-M12, Q1, Q4, Q5, Q12 caught. Q3 survives (TEST-121-02). Q2 and Q6 are equivalent mutants.'
+    AC5: 'git diff 9dafd44...HEAD -- tests/unit/test_windows_installer_script.py: 968 insertions, 0 deletions. Hunks: docstring, imports, then after the fifth existing test. The five tests and _run are unchanged; all pass.'
+    AC6: 'Head unit file: 43 passed. QA CI line on d1644d8 (pytest -m "not slow" -n auto --dist loadscope --timeout=300): 3581 passed, 10 skipped, 234.91 s. Dev mutants121.py re-run on the head: 24 mutants, 0 not caught, the same tests as the Dev Agent Record. build-executables 44488738901 on f4c36eb: all three jobs green, makensis 0 warnings. d1644d8 changes only CHANGELOG, BACKLOG and the story, so that build covers the head''s installer. PR CI on d1644d8 (Test Matrix run 44491444329, success): ubuntu x2 and macOS 3592 passed; Windows 3442 passed, 3 skipped; 0 xfailed, 0 XPASS.'
+    AC7: 'Both MSG_OLD_COPY lines are byte-equal to F1 at b983ab3. T7 pins them, and M18/M23 are caught.'
+    AC8: 'git diff 9dafd44...HEAD -- CHANGELOG.md: one [Unreleased] ### Fixed entry, CL1, byte-equal. It has no "delete by hand" sentence.'
+    AC9: 'Lionel''s hand check before release: not a merge gate, not done yet (no reading).'
+    AC10: 'Worktree at 1098c9e, its own test file run from the main checkout. Plain run: 7 passed, 36 xfailed. With --runxfail: 36 failed, 7 passed, all 36 at AssertionError (12 marked functions: T1 11, T2 1, T3 5, T4 1, T5 9, T6-T11 1 each, T12 3). Each of the 12 markers is xfail(strict=True, raises=AssertionError); C1 and C2 are unmarked. The test file changes between 1098c9e and f4c36eb only by the marker removal. CI on 1098c9e (run 44484754551): ubuntu x2 and macOS 3556 passed, 36 xfailed; Windows 3406 passed, 3 skipped, 36 xfailed; 0 XPASS. git grep "Story 12.1 tests first" -- tests/ prints nothing (exit 1).'
+    AC11: 'See merge_notes. installer.nsi: UTF-8 with BOM (ef bb bf), i/lf w/lf, 0 CR.'
+    AC12: 'The step''s line in run 44488738901: "dist\gdpr-pseudonymizer: _internal, gdpr-pseudo.exe, gdpr-pseudonymizer.exe".'
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'This is the point of the story. Install and uninstall remove only the installer''s own items. The only recursive removal targets $INSTDIR\_internal, and $INSTDIR always ends in \GDPR Pseudonymizer when SecMain runs (T3, SecMain alone). Nothing is written to or deleted from the old folder (T5 path events). No new input beyond the HKLM InstallDir value the installer itself writes.'
+  performance:
+    status: PASS
+    notes: 'A few string operations at init, on the page and in SecMain; no new file scan.'
+  reliability:
+    status: PASS
+    notes: 'A silent install never waits: the old-copy box has /SD IDOK, and the 2.3.2 prompt keeps /SD IDCANCEL. An aborted install never shows the message (it is the last statement of SecMain). A default or Browse install is upgraded in place.'
+  maintainability:
+    status: PASS
+    notes: '_Nsis fails on any unknown command or name, so a script change forces a test update. Through Poetry, black --check . reports 352 files unchanged, ruff exits with rc 0 and mypy finds no issues in 109 source files. The PR lint and quality checks pass.'
+
+recommendations:
+  immediate: []
+  future:
+    - action: 'Align _Nsis._strcpy with NSIS for a negative offset beyond the start, and fix the Test Plan sentence (TEST-121-01).'
+      refs: ['tests/unit/test_windows_installer_script.py:_Nsis._strcpy']
+    - action: 'Optionally pin the message gate to gdpr-pseudonymizer.exe with a one-executable T5 case (TEST-121-02).'
+      refs: ['tests/unit/test_windows_installer_script.py:_PREVIOUS_INSTALLS']
