@@ -1,0 +1,85 @@
+schema: 1
+story: '11.8'
+story_title: 'Timing Tests Measure the Work, Not the Runner''s Speed'
+scope: 'Gate on head a770821 (branch story/11.8-timing-tests-measure-work, pushed, no PR yet; base origin/main 9dafd44). Tests only. QA folder: rgpd-analysis/r118/qa (scripts and logs, never committed).'
+gate: PASS
+status_reason: 'The four tests no longer depend on runner speed: the two counting tests are exact (8.00 healthy), and the two timed tests hold their ratios under twice the CPU load. Each slowed copy P1-P4 fails its test at the ratio assertion on the head, and nothing else changes; CI (AC8) and Codex are still to come.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-11-18T19:05:00Z'
+
+top_issues:
+  - id: 'DOC-118-01'
+    severity: low
+    finding: 'AC9 says git diff --stat main...HEAD lists only the three test files and this story; it lists five: the three test files, this story, and docs/prd/epic-11-v2.3.1-maintenance-fixes.md (+39/-2), which comes from the PM''s 9388d0d (Story 11.8''s own epic section, docs only).'
+    suggested_action: 'None in code. Read AC9 as "the three test files, this story and its epic section"; whoever touches the story next may reword it.'
+    suggested_owner: sm
+  - id: 'TEST-118-01'
+    severity: low
+    finding: 'The field-read counter sees work done on entities only. The class assertion catches entities rebuilt as plain DetectedEntity objects, and a zero count fails at large / small (ZeroDivisionError). A future rewrite that copies offsets into plain numbers or tuples and then scans those would read no entity field during the scan, so the count would not see it. The historical bugs (P1 full scan, P4 old join) are caught exactly: 61.49 and 64.10 / 63.88 against cap 16.'
+    suggested_action: 'No change now. If the dedup walk or the join is rewritten to scan projected values, count that scan as well (or add a slowed copy of the new shape) in the same story.'
+    suggested_owner: dev
+  - id: 'PERF-118-01'
+    severity: low
+    finding: 'The timed margins are proven on Windows only: quiet, with one busy process per CPU, and with two per CPU. A macOS runner has not been measured. The flake rate it removes (16 first-attempt macOS failures in 292 runs) cannot be shown by one green CI run.'
+    suggested_action: 'If one of the five ids fails on CI again, the AssertionError line now carries (ratio, small, large): take that number to Lionel, with a pull trigger rather than a watch.'
+    suggested_owner: po
+
+waiver: { active: false }
+
+quality_score: 100
+
+expires: '2026-12-02T19:05:00Z'
+
+merge_blockers:
+  - 'AC8: the four test legs and lint green on the PR''s first run (or one rerun of a failure that is not one of these tests), totals as expected: macOS 3.12, ubuntu 3.13, ubuntu 3.11 3554 passed; Windows 3.12 3404 passed, 3 skipped. No reading yet: CI runs only on a PR, and the draft PR waits for Lionel''s yes on its text.'
+  - 'AC10: one read-only Codex review of the final head under the stopping rule (orchestrator).'
+
+merge_notes:
+  - 'Deviation 1 (ids): the blind check refused one_line (not_in_main_corpus=1, dev blind_ids.log); the Isolation Rule says a word that fails is replaced, not used. [line] is wrapped=False, the one-line case; the meaning is intact, and AC7''s "both ids fail" is visible (P4: [line] 64.10, [wrapped] 63.88).'
+  - 'Deviation 2 (docstring): the "Exact texts" words the blind check refused stand word for word in a # comment under the original one-line docstring, which is still true (the count is linear). The story''s Exact texts note allows English words in code comments, and the blind check covers strings.'
+  - 'Isolation Rule on the final diff (QA string_words.py, tokenize over origin/main and HEAD of the three files): 0 words in a HEAD string literal that are not already in that file''s string literals at origin/main. test_held_out_leakage.py reads whole files, comments included (l.93-110), and passes on the head. No held_out, final_exam or accuracy path was opened.'
+  - 'The healthy particle ratio 37.61 (dev, healthy5 run 3) is 1.6x the usual ~23, 8x under the cap 300 and about 100x under the slowed copy (~3,900). For a healthy run to fail, the best of 7 large calls must be slowed about 13x more than the small calls in the same rounds. QA, 32 busy processes on 16 CPUs: per-call times 2.5x to 7x slower, ratios unchanged (particles 21.4-24.6 over 20 runs, adversarial 125-135 over 5).'
+  - 'n log n stays legal: 8 x ln2000/ln250 = 11.0 (dedup), 8 x ln1000/ln125 = 11.4 (join), both under 16; 64 x ln8000/ln125 = 119 (cap 300); 128 x ln50000/ln390 = 232 (cap 1400). n log^2 n would give 15.2 (dedup) and 16.4 (join, over the cap).'
+  - 'The dev''s P3 log took its git status after P4 had been applied (recorded in the Debug Log). QA re-ran the four patches strictly one after another, each revert in a shell trap, and the tree was clean after each.'
+  - 'This gate file and the story''s QA Results are QA''s own outputs. QA changed no test or product file, opened no PR, and started no Codex, Forge, Anvil or Cato process. The Status line still reads Approved; the story owner sets it.'
+
+evidence:
+  tests_reviewed: 5
+  risks_identified: 3
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 9]
+    ac_gaps: []
+    ac_pending: [8, 10]
+  ac_notes:
+    AC1: 'Large-input test: no clock, counts 13,249 -> 105,999 (8.0005), cap 16; class assertion and both result assertions kept. P1: 61.486 (261,750 -> 16,094,000) at assert ratio < 16.'
+    AC2: 'Join test renamed and parametrized, ids [line] and [wrapped] (deviation 1); healthy 8.00 both (dev healthy5); P4: 64.100 and 63.883 at assert ratio < 16, both ids.'
+    AC3: 'Particle test: new input (run followed by a name inside the span), is None asserted per size, 125 -> 8,000, 7 rounds, cap 300. Healthy 21.2-24.9 (QA probes and stress); P2: 3,945.8 at assert ratio < 300.'
+    AC4: 'Adversarial test: same lines and patterns, 390 -> 50,000, 5 rounds, cap 1,400. Healthy 125-135 (QA); P3: 14,944 at assert ratio < 1_400 (68.5 s run).'
+    AC5: 'sed output equals the Exact texts comment (QA ac_git.log).'
+    AC6: 'QA: the five ids 20 of 20 "5 passed" (0.72-0.89 s), one process each; full CI line 3544 passed, 10 skipped in 172.69 s.'
+    AC7: 'QA re-ran each patch once on a770821 (Task 4.1); the dev ran each 3 of 3 on d1c2eba. No other test failed under any patch.'
+    AC8: 'Pending, no reading: no PR yet.'
+    AC9: 'git log origin/main..HEAD -p -- gdpr_pseudonymizer CHANGELOG.md pyproject.toml: 0 lines; git grep SLOWED COPY: none. Diff lists the epic file too (DOC-118-01).'
+    AC10: 'Local checks green (black 352 unchanged, ruff rc 0, mypy no issues in 109 files, five files 299 passed). QA review done here; Codex pending.'
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'Tests only; invented names only; Isolation Rule met on the final diff (0 new string words; leakage guards pass).'
+  performance:
+    status: PASS
+    notes: 'No product change. The five ids run in under 1 s; each slowed copy stays under the 300 s timeout (P3: 68 s). PERF-118-01 (low): macOS not measured.'
+  reliability:
+    status: PASS
+    notes: 'The counting tests are exact on every runner. The timed ratios held under 2 busy processes per CPU, with a cap about 13x from the healthy ratio and about 13x from the slowed copy, measured on a log scale.'
+  maintainability:
+    status: PASS
+    notes: 'Every ratio message carries (ratio, small, large); each comment states the measure, gap, healthy and slowed ratios and the story; helper copies point at each other. TEST-118-01 (low) records what the counter cannot see.'
+
+recommendations:
+  immediate: []
+  future:
+    - action: 'If the dedup walk or the join is rewritten to scan projected values, count that scan too (TEST-118-01).'
+      refs: ['tests/unit/test_hybrid_overlap_role_filter.py', 'tests/unit/test_hybrid_boundaries_run_on.py']
+    - action: 'On a new CI failure of one of the five ids, take the AssertionError ratio to Lionel (PERF-118-01).'
+      refs: ['tests/unit/test_hybrid_particles_location_noise.py', 'tests/unit/test_hybrid_boundaries_run_on.py']
