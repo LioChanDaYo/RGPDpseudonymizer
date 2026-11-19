@@ -87,6 +87,17 @@ jobs:
       - name: Smoke test -- CLI help
         run: dist\gdpr-pseudonymizer\gdpr-pseudo.exe --cli --help
 
+      - name: Check the build's top level (the uninstaller's file list)
+        shell: pwsh
+        run: |
+          $found = @(Get-ChildItem -Force dist\gdpr-pseudonymizer | ForEach-Object Name)
+          $expected = @('_internal', 'gdpr-pseudo.exe', 'gdpr-pseudonymizer.exe')
+          if (Compare-Object $found $expected) {
+            Write-Error "dist\gdpr-pseudonymizer holds: $($found -join ', '). installer\windows\installer.nsi uninstalls exactly: $($expected -join ', '), Uninstall.exe."
+            exit 1
+          }
+          Write-Output "dist\gdpr-pseudonymizer: $($found -join ', ')"
+
       # -- Code Signing (conditional) --
       - name: Sign executable (Authenticode)
         if: env.HAS_WINDOWS_CERT == 'true'

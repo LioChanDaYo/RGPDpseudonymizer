@@ -74,6 +74,12 @@
 
 ---
 
+### Epic 12: Windows Installer Uses Its Own Folder (next release, none planned)
+
+**Goal:** The Windows installer always installs into a folder of its own whose name is « GDPR Pseudonymizer », and the uninstaller removes only the files the installer put there, then the folder only if it is empty, so neither can delete a file the installer did not put there (Lionel, 2026-11-18). An upgrade from an install in a hand-typed folder goes into a new subfolder, leaves the old copy untouched, and says so during the installation. Windows installer only; lands on main first; no tag or PyPI release without Lionel's explicit go.
+
+---
+
 **Timeline: Epics 0-4: 14 weeks (v1.0 MVP). Epic 5: 6-7 weeks (v1.1). Epic 6: 10-14 weeks (v2.0). Epic 7: 4-6 weeks (v2.1). Epic 8: 5-7 weeks (v2.4). Epic 9: 8-12 weeks (v3.0). Epic 10: 13.5-20 weeks + 10.6 in parallel (v2.3 candidate, runs before Epic 9)**
 
 ---
