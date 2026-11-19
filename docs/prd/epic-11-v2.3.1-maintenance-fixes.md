@@ -265,7 +265,7 @@ No tag and no PyPI release without Lionel's explicit go.
 
 ### Main only, no release
 
-- [ ] Story 11.8 merged: the four timing tests no longer depend on runner speed (they count the work done, or time with a much bigger size gap); each passes on today's code and fails on a deliberately slowed copy, recorded in the story and not committed; no product code, user text or version change; QA review and read-only Codex review of the final head
+- [x] Story 11.8 merged: the four timing tests no longer depend on runner speed (they count the work done, or time with a much bigger size gap); each passes on today's code and fails on a deliberately slowed copy, recorded in the story and not committed; no product code, user text or version change; QA review and read-only Codex review of the final head. Merged 2026-11-19 as PR #130, squash `5e270fa`; main's CI green on the first attempt
 
 ---
 
