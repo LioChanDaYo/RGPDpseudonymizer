@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Windows installer: the app always gets a folder of its own, and uninstalling removes only the app's files (Story 12.1).** The installer now always installs into a folder named "GDPR Pseudonymizer": if you type another folder, such as `D:\Outils`, it installs into `D:\Outils\GDPR Pseudonymizer`. The uninstaller now removes only the files, shortcuts and registry entries the installer created, then the folder if it is empty; before, it deleted the whole install folder, including files of yours saved in it. An installation in the default folder, or in a folder chosen with Browse, is upgraded in place as before. If your earlier version is in a folder you typed, the new version goes into its "GDPR Pseudonymizer" subfolder, the earlier version is left as it is, and the installer tells you so.
+
 ---
 
 ## [2.3.2] - 2026-11-17
