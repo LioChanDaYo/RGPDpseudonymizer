@@ -48,6 +48,8 @@ Unicode true
 ;---------------------------------------------------------------------------
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_LICENSE "..\..\LICENSE"
+; A folder typed on this page gets its own "GDPR Pseudonymizer" subfolder.
+!define MUI_PAGE_CUSTOMFUNCTION_LEAVE OwnFolderLeave
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_COMPONENTS
 !insertmacro MUI_PAGE_INSTFILES
@@ -63,17 +65,116 @@ Unicode true
 !insertmacro MUI_LANGUAGE "English"
 !insertmacro MUI_LANGUAGE "French"
 
+; The previous install's folder, read in .onInit before anything writes it.
+; Declared before the LangStrings that show it.
+Var OldInstDir
+
 ; Shown when the app or the command line is open during the install.
 ; This file is saved as UTF-8 with a BOM so makensis reads the accented
 ; letters correctly whatever the build machine's code page.
 LangString MSG_APP_OPEN ${LANG_ENGLISH} "GDPR Pseudonymizer is open. Close the app and any command window using gdpr-pseudo, then click Retry."
 LangString MSG_APP_OPEN ${LANG_FRENCH} "GDPR Pseudonymizer est ouvert. Fermez l'application et toute fenêtre de commande qui utilise gdpr-pseudo, puis cliquez sur Réessayer."
 
+; Shown after an upgrade from a folder typed by hand: the new copy is in its
+; own subfolder and the earlier one is still where it was (Story 12.1).
+LangString MSG_OLD_COPY ${LANG_ENGLISH} "GDPR Pseudonymizer is now installed in:$\r$\n$INSTDIR$\r$\n$\r$\nThe earlier version is still in:$\r$\n$OldInstDir$\r$\nYou can delete it by hand. In that folder, delete only _internal, gdpr-pseudonymizer.exe, gdpr-pseudo.exe and Uninstall.exe.$\r$\n$\r$\nDo not run that Uninstall.exe: it would delete everything in the folder, your own files included."
+LangString MSG_OLD_COPY ${LANG_FRENCH} "GDPR Pseudonymizer est maintenant installé dans :$\r$\n$INSTDIR$\r$\n$\r$\nL'ancienne version est toujours dans :$\r$\n$OldInstDir$\r$\nVous pouvez la supprimer à la main. Dans ce dossier, supprimez uniquement _internal, gdpr-pseudonymizer.exe, gdpr-pseudo.exe et Uninstall.exe.$\r$\n$\r$\nN'exécutez pas ce fichier Uninstall.exe : il supprimerait tout le contenu du dossier, y compris vos propres fichiers."
+
+;---------------------------------------------------------------------------
+; Functions: the install folder always ends in \GDPR Pseudonymizer
+;---------------------------------------------------------------------------
+
+; In: a folder on the stack. Out: the same folder without trailing
+; backslashes or spaces.
+Function TrimFolder
+    Exch $0
+    Push $1
+    trim_loop:
+    StrCpy $1 $0 1 -1
+    StrCmp $1 "\" trim_one
+    StrCmp $1 " " trim_one trim_done
+    trim_one:
+    StrCpy $0 $0 -1
+    Goto trim_loop
+    trim_done:
+    Pop $1
+    Exch $0
+FunctionEnd
+
+; In: a folder on the stack. Out: that folder, trimmed, ending in
+; \GDPR Pseudonymizer (capitals ignored): the folder itself when it already
+; ends so, otherwise its « GDPR Pseudonymizer » subfolder. The last 19
+; characters are compared, backslash included, so D:\XGDPR Pseudonymizer
+; still gets the subfolder.
+Function OwnFolderOf
+    Call TrimFolder
+    Exch $0
+    Push $1
+    Push $2
+    StrLen $2 "\${APPNAME}"   ; 19
+    IntOp $1 0 - $2           ; -19
+    StrCpy $1 $0 $2 $1        ; the last 19 characters
+    StrCmp $1 "\${APPNAME}" own_done
+    StrCpy $0 "$0\${APPNAME}"
+    own_done:
+    Pop $2
+    Pop $1
+    Exch $0
+FunctionEnd
+
+; $INSTDIR holds the /D= folder or the registry folder here, so a silent
+; install and the directory page both start from the final folder.
+Function .onInit
+    ReadRegStr $OldInstDir HKLM "Software\${APPNAME}" "InstallDir"
+    Push $INSTDIR
+    Call OwnFolderOf
+    Pop $INSTDIR
+FunctionEnd
+
+; NSIS reads the folder field back into $INSTDIR after this function, so
+; the result is also written into the field (control 1019).
+Function OwnFolderLeave
+    Push $1
+    Push $INSTDIR
+    Call OwnFolderOf
+    Pop $INSTDIR
+    FindWindow $1 "#32770" "" $HWNDPARENT
+    GetDlgItem $1 $1 1019
+    SendMessage $1 ${WM_SETTEXT} 0 "STR:$INSTDIR"
+    Pop $1
+FunctionEnd
+
+; After an upgrade from a folder typed by hand, the earlier copy stays where it
+; was. Tell where both are, which files to delete by hand, and not to run the
+; earlier Uninstall.exe: it would delete its whole folder (Story 12.1).
+Function OldCopyMessage
+    Push $0
+    StrCmp $OldInstDir "" old_done
+    Push $OldInstDir
+    Call TrimFolder
+    Pop $OldInstDir
+    Push $OldInstDir
+    Call OwnFolderOf
+    Pop $0
+    StrCmp $0 $OldInstDir old_done
+    IfFileExists "$OldInstDir\gdpr-pseudonymizer.exe" 0 old_done
+    MessageBox MB_OK|MB_ICONINFORMATION "$(MSG_OLD_COPY)" /SD IDOK
+    old_done:
+    Pop $0
+FunctionEnd
+
 ;---------------------------------------------------------------------------
 ; Sections
 ;---------------------------------------------------------------------------
 Section "!${APPNAME}" SecMain
     SectionIn RO  ; Required — cannot be deselected
+
+    ; Install only into a folder of its own, whatever set $INSTDIR (the
+    ; directory page, /D=, the registry): the cleanup below then never runs
+    ; in a folder the user chose for other things.
+    Push $INSTDIR
+    Call OwnFolderOf
+    Pop $INSTDIR
 
     ; Refuse to install while the app or the command line is open. Their files
     ; are locked: only part of the earlier version could be removed, and the
@@ -136,6 +237,10 @@ Section "!${APPNAME}" SecMain
 
     ; Save install dir in app registry key
     WriteRegStr HKLM "Software\${APPNAME}" "InstallDir" "$INSTDIR"
+
+    ; Last, so the message is true when shown and an aborted install never
+    ; shows it.
+    Call OldCopyMessage
 SectionEnd
 
 Section "Desktop Shortcut" SecDesktop
@@ -154,11 +259,18 @@ SectionEnd
 ; Uninstaller
 ;---------------------------------------------------------------------------
 Section "Uninstall"
-    ; Remove files (entire install directory)
-    RMDir /r "$INSTDIR"
+    ; Remove only what the installer put there, then the folder if it is
+    ; empty. Anything else in it stays (Story 12.1).
+    Delete "$INSTDIR\gdpr-pseudonymizer.exe"
+    Delete "$INSTDIR\gdpr-pseudo.exe"
+    RMDir /r "$INSTDIR\_internal"
+    Delete "$INSTDIR\Uninstall.exe"
+    RMDir "$INSTDIR"
 
-    ; Remove Start Menu shortcuts
-    RMDir /r "$SMPROGRAMS\${APPNAME}"
+    ; Remove Start Menu shortcuts, then their folder if it is empty
+    Delete "$SMPROGRAMS\${APPNAME}\${APPNAME}.lnk"
+    Delete "$SMPROGRAMS\${APPNAME}\Uninstall.lnk"
+    RMDir "$SMPROGRAMS\${APPNAME}"
 
     ; Remove Desktop shortcut
     Delete "$DESKTOP\${APPNAME}.lnk"

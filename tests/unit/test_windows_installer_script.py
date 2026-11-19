@@ -895,11 +895,6 @@ _OWN_FOLDER_CASES = [
 ]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 12.1 tests first: the installer uses its own folder",
-)
 @pytest.mark.parametrize(("folder", "expected"), _OWN_FOLDER_CASES)
 def test_own_folder_rule(folder: str, expected: str) -> None:
     """Any folder becomes one whose last part is "GDPR Pseudonymizer"."""
@@ -918,11 +913,6 @@ def _find_run(statements: list[list[str]], run: list[list[str]]) -> int:
     return -1
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 12.1 tests first: the installer uses its own folder",
-)
 def test_own_folder_rule_runs_everywhere() -> None:
     """The rule runs in .onInit, the directory page's leave function and SecMain."""
     on_init = _plain_all(_block("Function", ".onInit"))
@@ -984,11 +974,6 @@ _INSTALL_STARTS = [
 ]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 12.1 tests first: the installer uses its own folder",
-)
 @pytest.mark.parametrize(("start", "on_init", "own"), _INSTALL_STARTS)
 def test_install_cleanup_only_in_own_folder(
     start: dict[str, object], on_init: bool, own: str
@@ -1010,11 +995,6 @@ def test_install_cleanup_only_in_own_folder(
         assert nsis.exists(f"{own}\\{item}"), f"{item} not installed in {own}"
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 12.1 tests first: the installer uses its own folder",
-)
 def test_previous_folder_read_in_on_init() -> None:
     """.onInit reads the previous folder from the key SecMain writes it to."""
     assert "OldInstDir" in _declared_vars(), "no Var OldInstDir"
@@ -1091,11 +1071,6 @@ _PREVIOUS_INSTALLS = [
 ]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 12.1 tests first: the installer uses its own folder",
-)
 @pytest.mark.parametrize(
     ("previous", "files", "dest", "silent", "installed", "message"), _PREVIOUS_INSTALLS
 )
@@ -1144,11 +1119,6 @@ def test_previous_install_cases(
             assert nsis.exists(path), f"{path} was removed"
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 12.1 tests first: the installer uses its own folder",
-)
 def test_old_copy_message_box() -> None:
     """The message is an OK box a silent install skips, shown last in SecMain."""
     function = _plain_all(_block("Function", "OldCopyMessage"))
@@ -1160,11 +1130,6 @@ def test_old_copy_message_box() -> None:
     assert main[-1:] == [["Call", "OldCopyMessage"]], f"SecMain ends with {main[-1:]}"
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 12.1 tests first: the installer uses its own folder",
-)
 def test_old_copy_message_text() -> None:
     """The message exists in English and French, word for word as approved."""
     raw = INSTALLER_PATH.read_bytes()
@@ -1196,11 +1161,6 @@ def test_old_copy_message_text() -> None:
     assert found["FRENCH"] != found["ENGLISH"]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 12.1 tests first: the installer uses its own folder",
-)
 def test_uninstaller_keeps_other_files() -> None:
     """The uninstaller leaves other files, and so the folder, in place."""
     folder = _TYPED_OWN
@@ -1213,11 +1173,6 @@ def test_uninstaller_keeps_other_files() -> None:
     assert nsis.exists(folder), "the folder was removed with a file of the user in it"
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 12.1 tests first: the installer uses its own folder",
-)
 def test_uninstaller_list_matches_installer() -> None:
     """The uninstaller removes exactly the items the build and installer create."""
     spec = SPEC_PATH.read_text(encoding="utf-8")
@@ -1242,11 +1197,6 @@ def test_uninstaller_list_matches_installer() -> None:
     assert sorted(removed) == expected, f"removes {removed}, expected {expected}"
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 12.1 tests first: the installer uses its own folder",
-)
 def test_only_recursive_removal_is_internal() -> None:
     """In the whole script, only "$INSTDIR\\_internal" is removed with its content."""
     recursive = [
@@ -1259,11 +1209,6 @@ def test_only_recursive_removal_is_internal() -> None:
         assert tokens[-1] == '"$INSTDIR\\_internal"', f"removes more: {tokens}"
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 12.1 tests first: the installer uses its own folder",
-)
 def test_uninstaller_removes_its_shortcuts_and_registry() -> None:
     """The uninstaller deletes its shortcuts, an empty Start Menu folder, its keys."""
     shortcuts = [
@@ -1306,11 +1251,6 @@ _DIRECTORY_PAGE_CASES = [
 ]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 12.1 tests first: the installer uses its own folder",
-)
 @pytest.mark.parametrize(("typed", "expected"), _DIRECTORY_PAGE_CASES)
 def test_directory_page_leave_keeps_own_folder(typed: str, expected: str) -> None:
     """Next on the directory page keeps the own folder, in $INSTDIR and the field."""
