@@ -1,0 +1,102 @@
+schema: 1
+story: '13.1'
+story_title: 'A Place Pseudonym Fits the Word Before the Place'
+scope: 'Gate on head cfa2477 (branch story/13.1-place-same-kind, pushed, draft PR #133; base origin/main 851b37d). Tests-first commit f459965. QA folder: rgpd-analysis/r131/qa (scripts and logs, never committed).'
+gate: CONCERNS
+status_reason: 'Every AC QA can check holds on cfa2477: the words are read and the pools are drawn as Lionel approved, every place path passes the word, the 76 tests-first cases fail at an assert on the base, and all 45 of the dev''s mutant entries are killed. One medium finding: once the default theme''s place names are used up, each place draw is about 350 times slower than before (an end of 100 new places 1.7 to 2.7 s against 0.3 s), which a database of a few dozen business documents reaches.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-11-20T19:21:39Z'
+
+top_issues:
+  - id: 'PERF-131-01'
+    severity: medium
+    finding: 'A place draw whose names are used up costs 12 to 20 ms, against 0.056 ms on the base (QA perf_draw.py, neutral, every place used: no word 19.5 ms, « à » 12.2 ms per draw; base 0.056 ms). Cause, in the diff: _select_location now tries up to 100 draws per tier (4 tiers for no word, so up to 400 attempts where the base made 100), and each attempt calls accepts_value, which builds _flatten_location_list and calls fits, which rebuilds every tier through draw_tiers (about 0.05 ms), before the used-name check. Through the real end (finalize_document, the desktop single and batch end): a document of 100 new places in a database already holding 100 places takes 1,657 ms after « à » and 2,685 ms with no word, against 283 and 303 ms on 851b37d (QA perf_end.py, median of 3). The review''s previews draw each new place too, so a reviewed document pays it twice. Realistic: the 25 dev documents read as one database already hold 77 distinct places (m131y part 5) against 83 names for no word, so a database that has seen a few dozen business documents takes this path for every new place. The story''s cost check covered only the desktop refresh''s reading of words (no AC sets a timing bound), and performance.yaml runs only on main after the merge.'
+    suggested_action: 'Inside _select_location the fit check is redundant: every name of draw_tiers fits the word by construction (QA mutant Q6, the draw''s accepts_value without place_word: 109 passed). Skip it there (keep it for _proposal_row), check the used names first, or compute the tiers once per call; then measure a used-up draw again against the base. Lionel decides: fix in this story, or ship and backlog with this number.'
+    suggested_owner: dev
+  - id: 'TEST-131-01'
+    severity: low
+    finding: 'P11[batch] and P12[batch] (tests/unit/gui/test_place_word_review.py) do not install Story 11.5''s _Dialogs. When the review and the end disagree, which is exactly what their assertions check for, the batch screen opens the real « Pseudonymes remplacés » dialog (batch.py:1223, ConfirmDialog.informational(...).exec(), a modal loop on the GUI thread) inside batch.run(), before any assertion runs; a batch error dialog (batch.py:966-970) would block the same way. QA reproduced it on a worktree of cfa2477 with M24 and --timeout=60: the stack ends in _show_pseudonyms_changed -> exec(), no pytest summary, 62 s (the process ended by pytest-timeout''s thread method). With _Dialogs(monkeypatch) added to the batch branches (scratch edit, worktree only), the same mutant fails at assert _fits(shown) (AssertionError: Lyon) in 1.4 s. Healthy code passes. pyproject sets no default timeout, so a local run without --timeout would hang. The same pattern is older: Story 11.5''s T22 and T25[batch] install no _Dialogs either.'
+    suggested_action: 'Add _Dialogs(monkeypatch) to the batch branches of P11 and P12, and optionally assert no dialog was shown. Story 11.5''s T22 and T25[batch] could get the same line in a later story.'
+    suggested_owner: dev
+  - id: 'TEST-131-02'
+    severity: low
+    finding: 'Five QA mutants beyond the story''s table survive the new tests (QA mutants_qa.tsv): Q1, the in-span « d'' »/« l'' » branch of word_before disabled (82 passed); Q2, the in-span lone « A » disabled (82 passed); Q3, draw_words ignoring the cells'' order (82 passed); Q4, refresh_review_proposals without ctx.place_text = None (113 passed, with Story 11.5''s desktop file); Q5, _place_word_of not recording the word it reads (96 passed). Q1 and Q2 are mostly masked: without them the look-back reads no word, whose first tier is the real place''s letter class, which for « d''Ostrelle » already gives vowel cities. The gold dev corpus has 0 prepositions inside a span; the detector''s spans were not checked.'
+    suggested_action: 'No change needed for this story. If one of these paths is touched later, add a W1 case with the preposition inside the span for « d'' » and « A », and a two-cell case for the cells'' order.'
+    suggested_owner: dev
+  - id: 'DOC-131-01'
+    severity: low
+    finding: 'Three wording points. (1) AC9''s check, git grep over tests/ as a whole, is a search the Rules forbid; the dev and QA ran it on tests/unit/ and tests/integration/ (nothing, rc 1). (2) Fix design 4''s "under 3 %" for the desktop refresh used a model of draw_words that skips mapping_key: 1.6 ms at 10,000 places, where the shipped draw_words takes about 25 ms (QA qa_check.py part D). Measured through the screen on Story 11.5''s documents, one type-change click is the same on the head and the base (10,000 rows: 608/598/689 ms against 615/665/658 ms; empty database: 41 to 46 ms both), so the claim holds for those documents; at 10,000 places the reading is about 25 ms, roughly 4 % of a 0.6 s refresh. (3) docs/architecture/5-internal-module-interfaces.md#5.3 still shows assign_pseudonym without the new keywords, as the story defers.'
+    suggested_action: 'Whoever touches the story next may reword AC9 to tests/unit/ and tests/integration/ and correct the refresh figure; the architecture doc in a later docs pass.'
+    suggested_owner: sm
+
+waiver: { active: false }
+
+quality_score: 90
+
+expires: '2026-12-04T19:21:39Z'
+
+merge_blockers:
+  - 'PERF-131-01: Lionel''s decision, fix in this story (then QA re-times a used-up draw and the end) or ship with a backlog entry carrying the numbers.'
+  - 'AC9: CI of cfa2477 green on all legs, totals passed + 82 against main, no xfailed (expected macOS, ubuntu 3.11, ubuntu 3.13 3674 passed; Windows 3524 passed, 3 skipped). The orchestrator reads it; QA has no reading of it.'
+  - 'AC9: one read-only Codex review of the final head under the stopping rule (its rule 1 says after QA''s PASS; this gate is CONCERNS, so the orchestrator decides when).'
+  - 'AC11: Lionel''s hand check before the release (not a merge gate).'
+
+merge_notes:
+  - 'Tests-first commit f459965, run from a detached worktree outside the repo (rgpd-analysis/r131/qa/wt_f459965, removed afterwards) with the venv''s python; the import path was the worktree''s, neutral countries 20. --runxfail: 76 failed, 6 passed; all 76 at AssertionError (17 at test_place_word.py:356, 4 at :391, 11 at :417, 6 at :492, 5 at :528-532, 1 at :544, 8 at :600, 7 at :735, :758, :794, :821, 9 at :865-879, 3 at test_place_word_review.py:110, 2 at :144); no TypeError, AttributeError, ImportError, Failed: PRE or timeout. Plain run: 6 passed, 76 xfailed, 0 XPASS. f459965 changes no file under gdpr_pseudonymizer/ or data/.'
+  - 'Mutants: the dev''s 45 entries (M1-M44, M34a and M34b), each m line taken verbatim from r131/dev/mutants.sh, run on a detached worktree of cfa2477 (never the main checkout), import path checked per run: all killed, the same first failing tests as the dev''s table. Changes from the dev''s harness: M15 with the dev''s corrected # pattern (mutants2.sh); M24 on its two single-document cases (2 failed), its batch case shown separately (TEST-131-01); M36 with the base library from 851b37d (HEAD now holds the new one): 3 failed, 2 passed. Every file restored and compared; worktree clean; removed afterwards.'
+  - 'm131y re-run on the head (QA copy m131y_qa.py, only its output folder changed): its log equals the dev''s m131y_head.log line for line (269 lines). Part M 198 of 198 shipped tier lists equal the probe''s model; every pool equals W1, W3 and Pool sizes; misfit-in-preferred [] everywhere; 263 of 263 inside a document, 254 of 263 as one database; examples 23 of 23.'
+  - 'The shipped word_before against the probe''s reader over the 263 annotated places of the dev corpus: 0 differences (à 38, de 31, en 10, du 6, région 5, d'' 2, le 2, la 1, l'' 1, les 1, none 166). 58 edge-case checks pass (in-span words with and without a following space, « d’ », lone « A », lowercase « a », line breaks, CRLF, no-break spaces, tabs, positions outside the text: never raises; draw_words with cells and mechanism 2).'
+  - 'Before and after: each of the 24 "after" examples (12 neutral, 6 star_wars, 6 lotr) is in the first tier of the shipped draw_tiers for the word the shipped reader gives, every name of that first tier is in QA''s own model of the word''s names, and every "today" name is outside them; the known-limit row too.'
+  - 'Every place draw passes its word: grep of assign_pseudonym(, assign_compositional_pseudonym(, _select_location( and accepts_value( in gdpr_pseudonymizer/; each hit that can be a LOCATION passes it (document_processor.py:435, 963, 1066, 1186; assignment_engine.py:295; library_manager.py:515, 764); saved_own_words.py:432 passes real_place only, as Story 11.7''s flow has no document; the others are PERSON, ORG or a person''s part (saved_own_words.py:400; document_processor.py:1126, 1168, 1230-1231; assignment_engine.py:302, 329, 497).'
+  - 'This gate file and the story''s QA Results are QA''s own outputs. QA changed no product or test file in the repo (scratch edits only in worktrees outside it, removed), opened no PR, and started no Codex, Forge, Anvil or Cato process. The Status line still reads Approved; the story owner sets it.'
+
+evidence:
+  tests_reviewed: 82
+  risks_identified: 4
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 13, 14]
+    ac_gaps: []
+    ac_pending: [9, 11]
+  ac_notes:
+    AC1: 'W1-W5, W7, P1-P7, T-untaken, T-replace, T-cli-added, P11, P12, U1-U9, C2, C6 pass on cfa2477 (553 passed). Call sites classified (merge_notes). Item 1 of the brief: word_before reads the in-span word only with a following space, « d’ » and « l’ », a lone capital « A » (lowercase « a » none), across line breaks; a position outside the text gives no word without raising (qa_check.py part A).'
+    AC2: 'Pools per word equal L3 (48, 14, 49, 13, 19, 83; Q4 19, 9, 5, 2, 35 then 83); L1''s 12 names never fit any word; Q5''s 15 fit « du », « le », « région » and no word, never « à », « en », « de », « d'' » (qa_check.py part C).'
+    AC3: 'draw_words: first epic word in document order, else first Q4 word, else none, keyed by mapping_key; cells by their order (qa_check.py; W2).'
+    AC4: '24 of 24 examples plus the known-limit row against the shipped pools.'
+    AC5: 'The neutral.json diff is Lionel''s 15 names, in his order, after « Limousin », and nothing else; _MASCULINE holds the 4 plus the 15; _PLURAL the 2.'
+    AC6: 'C1 passes; existing_last reuse is unchanged and runs before any draw.'
+    AC7: 'Story 11.6''s rule runs first in accepts_value for every tier; _library_places is unchanged (95 places). Tests files of Dev Notes "Testing" pass; the only existing test edited is T15 (« Zorbanne Le Vellion »), as planned.'
+    AC8: 'm131y re-run equals Pool sizes, W1 and W3.'
+    AC9: 'Tests-first proven locally (merge_notes); no marker left (git grep over tests/unit/ and tests/integration/: nothing). CI of cfa2477 pending (orchestrator). Codex pending.'
+    AC10: 'One entry under [Unreleased] ### Fixed, after Story 12.1''s; byte-equal to the draft of Exact texts with exactly Lionel''s replacement sentence (cmp). Item 5 of the brief: every claim checked true on the shipped code (examples drawn there, the "no more" names refused, 48/14/49/13/19, 80 places before, 12 article names never drawn, stored pseudonyms kept by C1).'
+    AC11: 'Lionel''s hand check, before the release.'
+    AC12: 'git diff 851b37d...HEAD -- gdpr_pseudonymizer/ | grep "^+.*logger\." prints nothing; no new raise, warning or print; mypy Success, 111 source files.'
+    AC13: 'Name-only list = File Locations plus the two epic files from the fold and CHANGELOG.md; numstat 16 1 for each neutral.json copy; sha256 34e183d5... for both, in the tree and at HEAD; star_wars, lotr, french_geography, both allowlists, french_patterns.py, mapping_key.py and nlp/ unchanged (rc 0).'
+    AC14: 'Commits follow Tasks 1 to 3; local checks on cfa2477: black 356 unchanged, ruff rc 0, mypy Success, the story''s files 553 passed, full line -n 4 offscreen 3664 passed, 10 skipped (the dev''s numbers).'
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'No new log line, exception or message holds a place, pseudonym or word (AC12). Story 11.6''s real-name check still runs first on every draw.'
+  performance:
+    status: CONCERNS
+    notes: 'PERF-131-01. The desktop refresh''s added reading is within noise on Story 11.5''s documents (DOC-131-01).'
+  reliability:
+    status: PASS
+    notes: 'Words read without raising on any position; stored pseudonyms reused as stored (C1). TEST-131-01 is a test hazard, not a product one.'
+  maintainability:
+    status: PASS
+    notes: 'Two small pure modules with the approved lists in one place; tiers keep library order. TEST-131-02 lists untested branches.'
+
+recommendations:
+  immediate:
+    - action: 'PERF-131-01: drop or reorder the redundant fit check inside _select_location, then re-time against the base (or Lionel ships it with a backlog entry).'
+      refs: ['gdpr_pseudonymizer/pseudonym/library_manager.py:757-765', 'gdpr_pseudonymizer/pseudonym/library_manager.py:264-270', 'gdpr_pseudonymizer/pseudonym/place_names.py:208-217']
+    - action: 'TEST-131-01: _Dialogs(monkeypatch) in the batch branches of P11 and P12.'
+      refs: ['tests/unit/gui/test_place_word_review.py:88-99', 'tests/unit/gui/test_place_word_review.py:125-134']
+  future:
+    - action: 'TEST-131-02: in-span « d'' » and « A » cases, a two-cell order case.'
+      refs: ['tests/unit/test_place_word.py']
+    - action: 'Story 11.5''s T22 and T25[batch]: the same _Dialogs line.'
+      refs: ['tests/unit/gui/test_review_list_written_pseudonym_review.py:409-428', 'tests/unit/gui/test_review_list_written_pseudonym_review.py:517-552']
+    - action: 'DOC-131-01: AC9''s wording, the refresh figure, architecture 5.3.'
+      refs: ['docs/stories/13.1.place-same-kind.story.md', 'docs/architecture/5-internal-module-interfaces.md']
