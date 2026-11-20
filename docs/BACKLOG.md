@@ -854,6 +854,21 @@ Further non-leak items decided during Epic 10 are listed in the Backlog sections
 
 ---
 
+## 🧪 Test maintenance (not scheduled)
+
+Test gaps found during a story and kept out of its scope. Each waits for its pull trigger.
+
+#### TD-006: The long-line test checks only the first organisation pattern ⏸️ Until the organisation patterns change
+**Source:** Story 11.8, the SM's probe (Dev Notes "Found while preparing, not in scope"), 2026-11-18
+**Description:** `tests/unit/test_hybrid_boundaries_run_on.py::TestOrgNameShape::test_adversarial_line_is_linear` runs organisation patterns 0 and 1 over three long lines, but no line contains a keyword such as « Société » or « Institut ». So pattern 1 fails at once at every position and is never exercised: it took 0.29 ms whether healthy or slowed. The test guards pattern 0 only.
+**Impact:** None today. A change that made pattern 1 backtrack on a long line would not fail this test.
+**Where:** `gdpr_pseudonymizer/resources/detection_patterns.yaml`, `organizations` pattern 1 (the prefix keyword pattern, l.88); the test above.
+**Fix direction:** A long line led by a keyword, so the test guards pattern 1 too.
+**Pull trigger:** The next change to the organisation patterns in `gdpr_pseudonymizer/resources/detection_patterns.yaml`.
+**Decision:** Lionel, 2026-11-19. The question asked: "Shall docs/BACKLOG.md get a line saying the long-line test only checks the first organisation pattern, to look at again the next time the organisation patterns change?" His answer: "yes".
+
+---
+
 ## 🚀 Epic 2+ Planned Features
 
 ### Epic 2: Core Pseudonymization Engine (Week 6-10)
