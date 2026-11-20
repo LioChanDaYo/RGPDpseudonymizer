@@ -523,14 +523,6 @@ def test_no_free_name(case: str) -> None:
         assert written == "Location-001", written  # expected failure
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=(
-        "Story 13.1 PERF-131-01 tests first: a used-up place draw rebuilds "
-        "its tiers on every attempt"
-    ),
-)
 @pytest.mark.parametrize("word", ["no_word", "a"])
 def test_used_up_draw_builds_its_tiers_once(word: str) -> None:
     """W8 (QA's PERF-131-01): a place draw whose names are all used builds
