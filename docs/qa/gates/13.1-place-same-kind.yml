@@ -3,7 +3,7 @@ story: '13.1'
 story_title: 'A Place Pseudonym Fits the Word Before the Place'
 scope: 'Gate on head cfa2477 (branch story/13.1-place-same-kind, pushed, draft PR #133; base origin/main 851b37d). Tests-first commit f459965. QA folder: rgpd-analysis/r131/qa (scripts and logs, never committed).'
 gate: CONCERNS
-status_reason: 'Every AC QA can check holds on cfa2477: the words are read and the pools are drawn as Lionel approved, every place path passes the word, the 76 tests-first cases fail at an assert on the base, and all 45 of the dev''s mutant entries are killed. One medium finding: once the default theme''s place names are used up, each place draw is about 350 times slower than before (an end of 100 new places 1.7 to 2.7 s against 0.3 s), which a database of a few dozen business documents reaches.'
+status_reason: 'Every AC QA can check holds on cfa2477: the words are read and the pools are drawn as Lionel approved, every place path passes the word, the 76 tests-first cases fail at an assert on the base, and all 45 of the dev''s mutant entries are killed. One medium finding: once the default theme''s place names are used up, each place draw is 200 to 350 times slower than before, and an end of 100 new places 6 to 9 times slower (1.7 to 2.7 s against 0.3 s), which a database of a few dozen business documents reaches.'
 reviewer: 'Quinn (Test Architect)'
 updated: '2026-11-20T19:21:39Z'
 
