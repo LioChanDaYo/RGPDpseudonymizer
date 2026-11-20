@@ -83,6 +83,8 @@ def test_desktop_retyped_place_fits_the_word(  # type: ignore[no-untyped-def]
     every place the end receives; it is written, and nothing is reported."""
     _en_names()  # read before the review, with every draw real
     ends = _Ends(monkeypatch)
+    # TEST-131-01 (QA): every case, so a failure never blocks on a real dialog
+    dialogs = _Dialogs(monkeypatch)
     text = LATER_TEXT if case == "single_later_word" else SITE_TEXT
     entities = _every(text, ORG)
     if case == "batch":
@@ -98,7 +100,6 @@ def test_desktop_retyped_place_fits_the_word(  # type: ignore[no-untyped-def]
         shown = str(batch.run(body).get("shown", ""))
         output = batch.output()
     else:
-        dialogs = _Dialogs(monkeypatch)
         sd = _Single(qtbot, main_window, tmp_path, _new_db(tmp_path), text, entities)
         row = sd.row(V)
         sd.state.change_entity_type(row.entity_id, LOCATION)
@@ -121,6 +122,8 @@ def test_desktop_preview_reads_every_place(  # type: ignore[no-untyped-def]
     _en_names()  # read before the review, with every draw real
     ends = _Ends(monkeypatch)
     text = PREVIEW_TEXT if case == "single" else EN_TEXT
+    # TEST-131-01 (QA): every case, so a failure never blocks on a real dialog
+    dialogs = _Dialogs(monkeypatch)
     entities = _every(text, LOCATION)
     if case == "batch":
         batch = _Batch(qtbot, main_window, tmp_path, text, entities)
@@ -133,7 +136,6 @@ def test_desktop_preview_reads_every_place(  # type: ignore[no-untyped-def]
         shown = str(batch.run(body).get("shown", ""))
         output = batch.output()
     else:
-        dialogs = _Dialogs(monkeypatch)
         sd = _Single(qtbot, main_window, tmp_path, _new_db(tmp_path), text, entities)
         shown = sd.shown(V)
         output = sd.finalize(dialogs)

@@ -39,6 +39,7 @@ from unittest.mock import Mock, patch
 import pytest
 
 import gdpr_pseudonymizer.pseudonym.library_manager as library_module
+import gdpr_pseudonymizer.pseudonym.place_names as place_names_module
 from gdpr_pseudonymizer.cli.commands.batch import _process_single_document_worker
 from gdpr_pseudonymizer.core.document_processor import (
     DocumentProcessor,
@@ -520,6 +521,44 @@ def test_no_free_name(case: str) -> None:
         assert written in countries and _vowel(written), written  # expected failure
     else:
         assert written == "Location-001", written  # expected failure
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason=(
+        "Story 13.1 PERF-131-01 tests first: a used-up place draw rebuilds "
+        "its tiers on every attempt"
+    ),
+)
+@pytest.mark.parametrize("word", ["no_word", "a"])
+def test_used_up_draw_builds_its_tiers_once(word: str) -> None:
+    """W8 (QA's PERF-131-01): a place draw whose names are all used builds
+    the word's tiers once, not once per attempt. The work is counted (each
+    ``draw_tiers`` call, ``fits``' own included), never timed: a timing test
+    fails on a slow runner (Story 11.8)."""
+    manager = copy.deepcopy(_loaded(THEME))
+    manager._used_pseudonyms.update(_places(THEME))
+    place_word = {"no_word": None, "a": place_names_module.A}[word]
+    real = place_names_module.draw_tiers
+    builds = {"n": 0}
+
+    def counting(*args: Any, **kwargs: Any) -> list[list[str]]:
+        builds["n"] += 1
+        return real(*args, **kwargs)
+
+    with (
+        patch.object(place_names_module, "draw_tiers", counting),
+        patch.object(library_module, "draw_tiers", counting),
+        _offers(()),
+    ):
+        value = manager.assign_pseudonym(
+            LOCATION, place_word=place_word, real_place=V
+        ).pseudonym_full
+    pre(value == "Location-001", f"the fallback name written: {value!r}")
+    assert (
+        builds["n"] <= 1
+    ), f"{builds['n']} tier builds for one draw"  # expected failure
 
 
 def test_article_name_never_drawn() -> None:
