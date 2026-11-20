@@ -1,22 +1,17 @@
 schema: 1
 story: '13.1'
 story_title: 'A Place Pseudonym Fits the Word Before the Place'
-scope: 'Gate on head cfa2477 (branch story/13.1-place-same-kind, pushed, draft PR #133; base origin/main 851b37d). Tests-first commit f459965. QA folder: rgpd-analysis/r131/qa (scripts and logs, never committed).'
-gate: CONCERNS
-status_reason: 'Every AC QA can check holds on cfa2477: the words are read and the pools are drawn as Lionel approved, every place path passes the word, the 76 tests-first cases fail at an assert on the base, and all 45 of the dev''s mutant entries are killed. One medium finding: once the default theme''s place names are used up, each place draw is 200 to 350 times slower than before, and an end of 100 new places 6 to 9 times slower (1.7 to 2.7 s against 0.3 s), which a database of a few dozen business documents reaches.'
+scope: 'QA round on head 24b9c86 (branch story/13.1-place-same-kind, pushed, draft PR #133; base origin/main 851b37d), after Lionel''s "yes, fix both" for PERF-131-01 and TEST-131-01. The round''s tests-first commit is 87b3a42 and its fix is 24b9c86; round 1 was on cfa2477 (tests-first f459965). QA folder: rgpd-analysis/r131/qa (scripts and logs, never committed; this round''s logs in logs/qr and logs/qr2).'
+gate: PASS
+status_reason: 'Both findings Lionel asked to fix are fixed, and the fix changes no behaviour. PERF-131-01: a used-up place draw builds its tiers once (401 and 201 builds before, 1 and 1 now; « la » 501 before, 1 now), costs 0.17 to 0.25 ms against 20 to 35 ms on cfa2477, and an end of 100 new places takes 155 to 163 ms, below the base in the same session (277 to 814 ms). Behaviour: every tier name fits its word and is accepted by accepts_value (12,270 checked); accepts_value''s answers and 18,000 seeded draws are identical on cfa2477''s code and on the head (same SHA-256); no drawn name is refused by the review''s check right after the draw (4,854). TEST-131-01: every P11 and P12 case installs _Dialogs, and M24''s batch case fails at its assert in 1.3 s. CI of 24b9c86 is green with the expected totals. 49 of the 50 mutant entries of the story''s table are killed; M45a survives, adds one tier build per successful draw only, and brings back no per-attempt work (TEST-131-03, low). Left open: the read-only Codex review (AC9) and Lionel''s hand check (AC11).'
 reviewer: 'Quinn (Test Architect)'
-updated: '2026-11-20T19:21:39Z'
+updated: '2026-11-20T23:35:39Z'
 
 top_issues:
-  - id: 'PERF-131-01'
-    severity: medium
-    finding: 'A place draw whose names are used up costs 12 to 20 ms, against 0.056 ms on the base (QA perf_draw.py, neutral, every place used: no word 19.5 ms, « à » 12.2 ms per draw; base 0.056 ms). Cause, in the diff: _select_location now tries up to 100 draws per tier (4 tiers for no word, so up to 400 attempts where the base made 100), and each attempt calls accepts_value, which builds _flatten_location_list and calls fits, which rebuilds every tier through draw_tiers (about 0.05 ms), before the used-name check. Through the real end (finalize_document, the desktop single and batch end): a document of 100 new places in a database already holding 100 places takes 1,657 ms after « à » and 2,685 ms with no word, against 283 and 303 ms on 851b37d (QA perf_end.py, median of 3). The review''s previews draw each new place too, so a reviewed document pays it twice. Realistic: the 25 dev documents read as one database already hold 77 distinct places (m131y part 5) against 83 names for no word, so a database that has seen a few dozen business documents takes this path for every new place. The story''s cost check covered only the desktop refresh''s reading of words (no AC sets a timing bound), and performance.yaml runs only on main after the merge.'
-    suggested_action: 'Inside _select_location the fit check is redundant: every name of draw_tiers fits the word by construction (QA mutant Q6, the draw''s accepts_value without place_word: 109 passed). Skip it there (keep it for _proposal_row), check the used names first, or compute the tiers once per call; then measure a used-up draw again against the base. Lionel decides: fix in this story, or ship and backlog with this number.'
-    suggested_owner: dev
-  - id: 'TEST-131-01'
+  - id: 'TEST-131-03'
     severity: low
-    finding: 'P11[batch] and P12[batch] (tests/unit/gui/test_place_word_review.py) do not install Story 11.5''s _Dialogs. When the review and the end disagree, which is exactly what their assertions check for, the batch screen opens the real « Pseudonymes remplacés » dialog (batch.py:1223, ConfirmDialog.informational(...).exec(), a modal loop on the GUI thread) inside batch.run(), before any assertion runs; a batch error dialog (batch.py:966-970) would block the same way. QA reproduced it on a worktree of cfa2477 with M24 and --timeout=60: the stack ends in _show_pseudonyms_changed -> exec(), no pytest summary, 62 s (the process ended by pytest-timeout''s thread method). With _Dialogs(monkeypatch) added to the batch branches (scratch edit, worktree only), the same mutant fails at assert _fits(shown) (AssertionError: Lyon) in 1.4 s. Healthy code passes. pyproject sets no default timeout, so a local run without --timeout would hang. The same pattern is older: Story 11.5''s T22 and T25[batch] install no _Dialogs either.'
-    suggested_action: 'Add _Dialogs(monkeypatch) to the batch branches of P11 and P12, and optionally assert no dialog was shown. Story 11.5''s T22 and T25[batch] could get the same line in a later story.'
+    finding: 'Three shapes of the PERF-131-01 fix are not pinned by any test (QA logs/qr/mutants.tsv, logs/qr2). (1) M45a, the draw calling accepts_value(candidate, "LOCATION", place_word=...) again instead of _place_free: W8 2 passed. Its cost, measured under M45a (qr_count.py): 1 tier build for a used-up draw (as the fix), 2 for every successful draw at 0, 50 and 90 % used (the fix: 1); a fresh draw 0.13 to 0.15 ms against 0.07 to 0.08 ms; 400 places one after the other 99 ms against 88 ms; the end of 100 places 153 and 168 ms, as the head; qr_equiv.py digests identical, so no behaviour change. A used or refused name returns before fits, and a free name fits by construction and ends the draw, so the extra build is at most one per draw: it does not bring back per-attempt work. (2) M45e, accepts_value checking the fit before _place_free while the draw is unchanged: W8 2 passed. It costs one tier build per review proposal checked (_proposal_row), never per draw attempt. (3) Q8, accepts_value''s place branch without its _place_free call: 152 passed on the story''s files with Story 11.5''s and 11.6''s, and 3666 passed, 10 skipped on tests/unit and tests/integration (-n 4). Its used half is masked by _proposal_row''s own is_used check (document_processor.py:1149); its real-name half is reached only when the end''s names refuse a place the review''s names did not, which no test builds. Before the fix the draw went through accepts_value, so the draw tests covered that branch; the shared helper _place_free is pinned (QA Q7, the real-name check removed from it: 8 failed). Wording: Fix design 3 says "W8 pins it (one tier build per draw)"; W8 pins a used-up draw only.'
+    suggested_action: 'Not blocking. If the draw or accepts_value is touched again: a W8 case on a fresh library asserting 1 build per draw (kills M45a), and a _proposal_row case where the end''s real-name check refuses a shown place (kills Q8). The orchestrator decides whether to add them now or record them in the backlog.'
     suggested_owner: dev
   - id: 'TEST-131-02'
     severity: low
@@ -29,34 +24,61 @@ top_issues:
     suggested_action: 'Whoever touches the story next may reword AC9 to tests/unit/ and tests/integration/ and correct the refresh figure; the architecture doc in a later docs pass.'
     suggested_owner: sm
 
+resolved_issues:
+  - id: 'PERF-131-01'
+    severity: medium
+    raised_on: cfa2477
+    finding_summary: 'Round 1: once the default theme''s place names were used up, each place draw cost 12 to 20 ms against 0.056 ms on the base, and an end of 100 new places 1.7 to 2.7 s against 0.3 s, because every attempt''s accepts_value rebuilt every tier through fits before the used check.'
+    resolution: 'Fixed in 24b9c86 (tests first 87b3a42), Lionel''s "yes, fix both". _select_location builds its tiers once and keeps an attempt if _place_free (not used, then Story 11.6''s real-name check); accepts_value checks _place_free before the fit. QA re-measured with its own harness (merge_notes, round 2): work 401 to 1, 201 to 1, 501 to 1; a used-up draw 0.17 to 0.25 ms; the end below the base.'
+  - id: 'TEST-131-01'
+    severity: low
+    raised_on: cfa2477
+    finding_summary: 'Round 1: P11[batch] and P12[batch] installed no _Dialogs, so a review and end disagreement blocked on the real « Pseudonymes remplacés » dialog until the timeout.'
+    resolution: 'Fixed in 87b3a42: _Dialogs(monkeypatch) moved before the case branch in both tests (tests/unit/gui/test_place_word_review.py:87 and :126), so every case installs it. QA: M24 fails its three cases in 2.21 s; P11[batch] alone (M24b) fails at test_place_word_review.py:109, AssertionError (Lyon), in 1.31 s. Story 11.5''s T22 and T25[batch] keep the same gap, outside this story: recorded in the story''s Debug Log and Completion Notes and in this gate''s future list; docs/BACKLOG.md has no entry yet.'
+
 waiver: { active: false }
 
-quality_score: 90
+quality_score: 100
 
-expires: '2026-12-04T19:21:39Z'
+expires: '2026-12-04T23:35:39Z'
 
 merge_blockers:
-  - 'PERF-131-01: Lionel''s decision, fix in this story (then QA re-times a used-up draw and the end) or ship with a backlog entry carrying the numbers.'
-  - 'AC9: CI of cfa2477 green on all legs, totals passed + 82 against main, no xfailed (expected macOS, ubuntu 3.11, ubuntu 3.13 3674 passed; Windows 3524 passed, 3 skipped). The orchestrator reads it; QA has no reading of it.'
-  - 'AC9: one read-only Codex review of the final head under the stopping rule (its rule 1 says after QA''s PASS; this gate is CONCERNS, so the orchestrator decides when).'
-  - 'AC11: Lionel''s hand check before the release (not a merge gate).'
+  - 'AC9: one read-only Codex review of the final head 24b9c86 under the stopping rule (its rule 1: after QA''s PASS, which this gate now is).'
+  - 'AC11: Lionel''s hand check before the release (a release step, not a merge gate).'
 
 merge_notes:
-  - 'Tests-first commit f459965, run from a detached worktree outside the repo (rgpd-analysis/r131/qa/wt_f459965, removed afterwards) with the venv''s python; the import path was the worktree''s, neutral countries 20. --runxfail: 76 failed, 6 passed; all 76 at AssertionError (17 at test_place_word.py:356, 4 at :391, 11 at :417, 6 at :492, 5 at :528-532, 1 at :544, 8 at :600, 7 at :735, :758, :794, :821, 9 at :865-879, 3 at test_place_word_review.py:110, 2 at :144); no TypeError, AttributeError, ImportError, Failed: PRE or timeout. Plain run: 6 passed, 76 xfailed, 0 XPASS. f459965 changes no file under gdpr_pseudonymizer/ or data/.'
-  - 'Mutants: the dev''s 45 entries (M1-M44, M34a and M34b), each m line taken verbatim from r131/dev/mutants.sh, run on a detached worktree of cfa2477 (never the main checkout), import path checked per run: all killed, the same first failing tests as the dev''s table. Changes from the dev''s harness: M15 with the dev''s corrected # pattern (mutants2.sh); M24 on its two single-document cases (2 failed), its batch case shown separately (TEST-131-01); M36 with the base library from 851b37d (HEAD now holds the new one): 3 failed, 2 passed. Every file restored and compared; worktree clean; removed afterwards.'
-  - 'm131y re-run on the head (QA copy m131y_qa.py, only its output folder changed): its log equals the dev''s m131y_head.log line for line (269 lines). Part M 198 of 198 shipped tier lists equal the probe''s model; every pool equals W1, W3 and Pool sizes; misfit-in-preferred [] everywhere; 263 of 263 inside a document, 254 of 263 as one database; examples 23 of 23.'
-  - 'The shipped word_before against the probe''s reader over the 263 annotated places of the dev corpus: 0 differences (à 38, de 31, en 10, du 6, région 5, d'' 2, le 2, la 1, l'' 1, les 1, none 166). 58 edge-case checks pass (in-span words with and without a following space, « d’ », lone « A », lowercase « a », line breaks, CRLF, no-break spaces, tabs, positions outside the text: never raises; draw_words with cells and mechanism 2).'
-  - 'Before and after: each of the 24 "after" examples (12 neutral, 6 star_wars, 6 lotr) is in the first tier of the shipped draw_tiers for the word the shipped reader gives, every name of that first tier is in QA''s own model of the word''s names, and every "today" name is outside them; the known-limit row too.'
-  - 'Every place draw passes its word: grep of assign_pseudonym(, assign_compositional_pseudonym(, _select_location( and accepts_value( in gdpr_pseudonymizer/; each hit that can be a LOCATION passes it (document_processor.py:435, 963, 1066, 1186; assignment_engine.py:295; library_manager.py:515, 764); saved_own_words.py:432 passes real_place only, as Story 11.7''s flow has no document; the others are PERSON, ORG or a person''s part (saved_own_words.py:400; document_processor.py:1126, 1168, 1230-1231; assignment_engine.py:302, 329, 497).'
-  - 'This gate file and the story''s QA Results are QA''s own outputs. QA changed no product or test file in the repo (scratch edits only in worktrees outside it, removed), opened no PR, and started no Codex, Forge, Anvil or Cato process. The Status line still reads Approved; the story owner sets it.'
+  - 'Round 2, rule break by QA, reported first: one read-only command began with cd /tmp && before gh run list (the CI listing). Every other gh call used -R with no cd. The dev''s own breaks of this round (about ten read-only cd commands, one git diff naming tests/) are in the story''s Debug Log.'
+  - 'Round 2, worktrees: wt_base (851b37d), wt_tf (87b3a42, whose code is cfa2477''s) and wt_head (24b9c86), detached, under rgpd-analysis/r131/qa, removed afterwards. Every run logged its import path (the worktree''s).'
+  - 'Round 2, CI of 24b9c86: CI - Test Matrix 44831085744 success, ubuntu 3.11 3676 passed, ubuntu 3.13 3676 passed, macOS 3676 passed, Windows 3526 passed, 3 skipped, no xfailed; Code Quality 44831085719 success. These are the Counts'' expected totals (main + 84).'
+  - 'Round 2, work count (qr_count.py, neutral, 30 draws per cell, W8''s patching of draw_tiers in both modules): tier builds per draw with every place used, cfa2477 against 24b9c86: no word 401 / 1, « à » 201 / 1, « en » 201 / 1, « la » 501 / 1 (min = max). At 90 % and 50 % used, cfa2477 2 to 201 builds; on a fresh library 2; the head 1 in every cell.'
+  - 'Round 2, timings (logs/qr2, perf_draw.py and perf_end.py of round 1 unchanged; base, head, cfa2477, base, head back to back; the machine was loaded, so only this session''s numbers are compared). One used-up draw: base 0.055 to 0.059 ms, head 0.170 to 0.245 ms, cfa2477 19.9 ms (no word) and 34.7 ms (« à »). A fresh draw: base 0.007 to 0.013 ms, head 0.070 to 0.078 ms, cfa2477 0.13 to 0.37 ms. N new places one after the other, no word, 50/95/200/400: base 0/1/7/20 ms, head 3/12/37/88 to 89 ms, cfa2477 201/1889/7862/19078 ms. The end, 100 new places in a database already holding 100 (median of 3): after « à » base 277 and 279 ms, head 156 and 155 ms, cfa2477 4528 ms; with « avec » base 802 and 814 ms, head 162 and 163 ms, cfa2477 7439 ms. The base « avec » end read 303 ms in round 1 with the same script; QA has no explanation for the difference, and the head is below the base in both runs. QA''s reading, not measured: the base runs the real-name check before the used check on each of its 100 attempts, the head the used check first.'
+  - 'Round 2, behaviour (qr_equiv.py, run on wt_tf and wt_head). A: every name of every tier of draw_tiers, 3 themes x 13 words (none, empty, an unknown word, the 5 epic and 5 Q4 words) x 5 real places (none, vowel, consonant, two « y » forms): 12,270 names, 0 outside fits for its word, 0 refused by accepts_value. B: accepts_value("LOCATION") over every library place plus a fallback and a custom value x 13 words x used or not x refused by the real-name check or not: 13,572 answers, SHA-256 3722e204... on both trees. C: secrets.choice replaced by a seeded random.Random; 120 scenarios (random used sets and real-name checks) x 150 draws with random words and real places: 18,000 draws, 13,854 Location-NNN, 4,647,621 choice calls, SHA-256 c41a1c63... on both trees. D: 4,854 library draws, each checked with accepts_value(value, "LOCATION", place_word=word) right after _select_location: 0 refused (Story 11.5''s one check). The reorder is safe only if the real-name checks are pure: real_name_check (core/custom_pseudonym.py:516) and saved_own_words.py''s whole_check and check only read their inputs.'
+  - 'Round 2, why it holds in general: the union of draw_tiers'' tiers for a word does not depend on the real place''s letter class (each word''s branch splits or filters the same lists), so every tier name is in fits(word), which builds the tiers with real_place None. _names reads every key of locations while _flatten_location_list reads three; a name outside the three skips the fit in accepts_value, so the mismatch can only make accepts_value accept more, never refuse a drawn name. The fix changes only library_manager.py; the words the draw and the review''s check receive (ctx.place_words) are unchanged from cfa2477 and covered by P1-P7, P11, P12 and C3.'
+  - 'Round 2, mutants (qr_mutants.sh on wt_head, logs/qr/mutants.tsv): the dev''s 47 m lines verbatim from r131/dev/mutants_qr.sh (M1-M44 with M34a and M34b, M24 with its batch case, M24b, M45a, M45b), M45c and M45d from mutants_qr2.sh, and M36 with the base library from 851b37d: 50 entries, every first failing test as the dev''s table; 49 killed, M45a survives (2 passed). QA''s own: Q7 (_place_free without the real-name check) killed, 8 failed, 103 passed, first test_own_word_never_written[finalize]; Q8 and M45e survive (TEST-131-03). Every file restored from a backup and compared; wt_head clean afterwards.'
+  - 'Round 2, W8: on 87b3a42 with --runxfail, 2 failed at test_place_word.py:559, AssertionError "401 tier builds for one draw" and "201 tier builds for one draw"; plain run of the two new files 82 passed, 2 xfailed. On 24b9c86, W8 run 20 times in a row: 2 passed each time. It is deterministic by construction: every place is used, so no attempt succeeds whatever secrets.choice returns, and the count is the draw''s own build (1) plus one per fits call (0 on the head, 4 x 100 or 2 x 100 on cfa2477). M45b, M45c and M45d fail it at :551 with 401 and 201.'
+  - 'Round 2, local tests on wt_head (offscreen, --timeout=300, stdin closed): the two new files, Story 11.5''s three files (review list, parallel, desktop), Story 11.6''s test_generated_pseudonym_document_words.py, test_library_manager*.py and test_pseudonym_library_lists.py: 265 passed. The full line was not run on the unmutated head; CI covers it, and the Q8 run of tests/unit and tests/integration (-n 4) gave 3666 passed, 10 skipped with only accepts_value''s free call removed.'
+  - 'Round 2, the story''s record of the round (Fix design 3, Test Plan W8, P11 and P12, Counts, Mutants M45, Change Log 2.7, the Debug Log and Completion Notes) matches the code and QA''s measurements, with one wording point in TEST-131-03. The 84 cases and passed + 84 against main match CI.'
+  - 'Round 1 (cfa2477): Tests-first commit f459965, run from a detached worktree outside the repo (rgpd-analysis/r131/qa/wt_f459965, removed afterwards) with the venv''s python; the import path was the worktree''s, neutral countries 20. --runxfail: 76 failed, 6 passed; all 76 at AssertionError (17 at test_place_word.py:356, 4 at :391, 11 at :417, 6 at :492, 5 at :528-532, 1 at :544, 8 at :600, 7 at :735, :758, :794, :821, 9 at :865-879, 3 at test_place_word_review.py:110, 2 at :144); no TypeError, AttributeError, ImportError, Failed: PRE or timeout. Plain run: 6 passed, 76 xfailed, 0 XPASS. f459965 changes no file under gdpr_pseudonymizer/ or data/.'
+  - 'Round 1 (cfa2477): Mutants: the dev''s 45 entries (M1-M44, M34a and M34b), each m line taken verbatim from r131/dev/mutants.sh, run on a detached worktree of cfa2477 (never the main checkout), import path checked per run: all killed, the same first failing tests as the dev''s table. Changes from the dev''s harness: M15 with the dev''s corrected # pattern (mutants2.sh); M24 on its two single-document cases (2 failed), its batch case shown separately (TEST-131-01); M36 with the base library from 851b37d (HEAD now holds the new one): 3 failed, 2 passed. Every file restored and compared; worktree clean; removed afterwards.'
+  - 'Round 1 (cfa2477): m131y re-run on the head (QA copy m131y_qa.py, only its output folder changed): its log equals the dev''s m131y_head.log line for line (269 lines). Part M 198 of 198 shipped tier lists equal the probe''s model; every pool equals W1, W3 and Pool sizes; misfit-in-preferred [] everywhere; 263 of 263 inside a document, 254 of 263 as one database; examples 23 of 23.'
+  - 'Round 1 (cfa2477): The shipped word_before against the probe''s reader over the 263 annotated places of the dev corpus: 0 differences (à 38, de 31, en 10, du 6, région 5, d'' 2, le 2, la 1, l'' 1, les 1, none 166). 58 edge-case checks pass (in-span words with and without a following space, « d’ », lone « A », lowercase « a », line breaks, CRLF, no-break spaces, tabs, positions outside the text: never raises; draw_words with cells and mechanism 2).'
+  - 'Round 1 (cfa2477): Before and after: each of the 24 "after" examples (12 neutral, 6 star_wars, 6 lotr) is in the first tier of the shipped draw_tiers for the word the shipped reader gives, every name of that first tier is in QA''s own model of the word''s names, and every "today" name is outside them; the known-limit row too.'
+  - 'Round 1 (cfa2477): Every place draw passes its word: grep of assign_pseudonym(, assign_compositional_pseudonym(, _select_location( and accepts_value( in gdpr_pseudonymizer/; each hit that can be a LOCATION passes it (document_processor.py:435, 963, 1066, 1186; assignment_engine.py:295; library_manager.py:515, 764); saved_own_words.py:432 passes real_place only, as Story 11.7''s flow has no document; the others are PERSON, ORG or a person''s part (saved_own_words.py:400; document_processor.py:1126, 1168, 1230-1231; assignment_engine.py:302, 329, 497).'
+  - 'Round 1 (cfa2477): This gate file and the story''s QA Results are QA''s own outputs. QA changed no product or test file in the repo (scratch edits only in worktrees outside it, removed), opened no PR, and started no Codex, Forge, Anvil or Cato process. The Status line still reads Approved; the story owner sets it.'
 
 evidence:
-  tests_reviewed: 82
-  risks_identified: 4
+  tests_reviewed: 84
+  risks_identified: 5
   trace:
     ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 13, 14]
     ac_gaps: []
     ac_pending: [9, 11]
+  ac_notes_qa_round:
+    AC1: 'The draw and the review''s check still accept the same places (qr_equiv.py A, B, D); every path is unchanged (only library_manager.py changed in the round).'
+    AC7: 'Story 11.6''s real-name check still decides every drawn place (in _place_free, after the used check); accepts_value''s answers are identical to cfa2477''s on 13,572 inputs.'
+    AC9: 'Tests first proven for the round (87b3a42, W8 2 failed at its assert with --runxfail); CI of 24b9c86 green with the expected totals; Codex pending.'
+    AC12: 'The round adds no log line, raise, warning or print (git diff 37b690b..24b9c86 -- gdpr_pseudonymizer/).'
+    AC14: 'CI Code Quality green on 24b9c86; the dev''s local checks are in the Debug Log.'
   ac_notes:
     AC1: 'W1-W5, W7, P1-P7, T-untaken, T-replace, T-cli-added, P11, P12, U1-U9, C2, C6 pass on cfa2477 (553 passed). Call sites classified (merge_notes). Item 1 of the brief: word_before reads the in-span word only with a following space, « d’ » and « l’ », a lone capital « A » (lowercase « a » none), across line breaks; a position outside the text gives no word without raising (qa_check.py part A).'
     AC2: 'Pools per word equal L3 (48, 14, 49, 13, 19, 83; Q4 19, 9, 5, 2, 35 then 83); L1''s 12 names never fit any word; Q5''s 15 fit « du », « le », « région » and no word, never « à », « en », « de », « d'' » (qa_check.py part C).'
@@ -76,24 +98,22 @@ evidence:
 nfr_validation:
   security:
     status: PASS
-    notes: 'No new log line, exception or message holds a place, pseudonym or word (AC12). Story 11.6''s real-name check still runs first on every draw.'
+    notes: 'No new log line, exception or message holds a place, pseudonym or word (AC12). Story 11.6''s real-name check still decides every drawn place; for a place it now runs after the used check, with the same answers (qr_equiv.py B and C).'
   performance:
-    status: CONCERNS
-    notes: 'PERF-131-01. The desktop refresh''s added reading is within noise on Story 11.5''s documents (DOC-131-01).'
+    status: PASS
+    notes: 'PERF-131-01 resolved: one tier build per place draw; a used-up draw 0.17 to 0.25 ms; the end of 100 new places 155 to 163 ms, at or below the base in the same session. The desktop refresh''s added reading is within noise on Story 11.5''s documents (DOC-131-01).'
   reliability:
     status: PASS
-    notes: 'Words read without raising on any position; stored pseudonyms reused as stored (C1). TEST-131-01 is a test hazard, not a product one.'
+    notes: 'Words read without raising on any position; stored pseudonyms reused as stored (C1). TEST-131-01 resolved: no batch review test can block on a real dialog.'
   maintainability:
     status: PASS
-    notes: 'Two small pure modules with the approved lists in one place; tiers keep library order. TEST-131-02 lists untested branches.'
+    notes: 'Two small pure modules with the approved lists in one place; tiers keep library order; _place_free is the one free check of the place draw and of accepts_value. TEST-131-02 and TEST-131-03 list untested branches.'
 
 recommendations:
-  immediate:
-    - action: 'PERF-131-01: drop or reorder the redundant fit check inside _select_location, then re-time against the base (or Lionel ships it with a backlog entry).'
-      refs: ['gdpr_pseudonymizer/pseudonym/library_manager.py:757-765', 'gdpr_pseudonymizer/pseudonym/library_manager.py:264-270', 'gdpr_pseudonymizer/pseudonym/place_names.py:208-217']
-    - action: 'TEST-131-01: _Dialogs(monkeypatch) in the batch branches of P11 and P12.'
-      refs: ['tests/unit/gui/test_place_word_review.py:88-99', 'tests/unit/gui/test_place_word_review.py:125-134']
+  immediate: []
   future:
+    - action: 'TEST-131-03: a W8 case on a fresh library (1 build per draw) and a _proposal_row case with a real-name refusal at the end.'
+      refs: ['tests/unit/test_place_word.py:526-553', 'gdpr_pseudonymizer/pseudonym/library_manager.py:263-270', 'gdpr_pseudonymizer/pseudonym/library_manager.py:288-295', 'gdpr_pseudonymizer/pseudonym/library_manager.py:772-779']
     - action: 'TEST-131-02: in-span « d'' » and « A » cases, a two-cell order case.'
       refs: ['tests/unit/test_place_word.py']
     - action: 'Story 11.5''s T22 and T25[batch]: the same _Dialogs line.'
