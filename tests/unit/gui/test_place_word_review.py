@@ -34,7 +34,6 @@ from tests.unit.gui.test_review_list_written_pseudonym_review import (
 from tests.unit.test_custom_pseudonym_fixes_cli import _replacements, pre
 from tests.unit.test_place_word import (
     EN_TEXT,
-    FIRST,
     LOCATION,
     ORG,
     THEME,
@@ -75,7 +74,6 @@ def _fits(value: str) -> bool:
     return value in _list(THEME, "countries") and value in _en_names()
 
 
-@FIRST
 @pytest.mark.parametrize("case", ["single", "batch", "single_later_word"])
 def test_desktop_retyped_place_fits_the_word(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, monkeypatch, draws, case
@@ -112,7 +110,6 @@ def test_desktop_retyped_place_fits_the_word(  # type: ignore[no-untyped-def]
     assert ends.changed() == []
 
 
-@FIRST
 @pytest.mark.parametrize("case", ["single", "batch"])
 def test_desktop_preview_reads_every_place(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, monkeypatch, draws, case

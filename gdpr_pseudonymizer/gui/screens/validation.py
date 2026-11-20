@@ -507,6 +507,7 @@ class ValidationScreen(QWidget):
             names: Sequence[NameKey],
             customs: Mapping[NameKey, str],
             proposals: Mapping[NameKey, PseudonymProposal],
+            entities: Sequence[DetectedEntity],
         ) -> Mapping[NameKey, PseudonymProposal | str]:
             from gdpr_pseudonymizer.core.document_processor import DocumentProcessor
 
@@ -514,9 +515,13 @@ class ValidationScreen(QWidget):
             # the update runs on the GUI thread under the busy cursor
             QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
             try:
+                # Story 13.1: each place's word read from every place the
+                # end will receive
                 return DocumentProcessor(
                     db_path=db_path, passphrase=passphrase, theme=theme
-                ).refresh_review_proposals(document_text, names, customs, proposals)
+                ).refresh_review_proposals(
+                    document_text, names, customs, proposals, entities=entities
+                )
             finally:
                 QApplication.restoreOverrideCursor()
 

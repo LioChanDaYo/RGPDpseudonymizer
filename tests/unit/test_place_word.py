@@ -86,11 +86,6 @@ from tests.unit.test_stored_pseudonym_own_word import _by_name, _replace
 LOCATION, ORG = "LOCATION", "ORG"
 THEME = "neutral"
 
-REASON = (
-    "Story 13.1 tests first: a place pseudonym does not fit the word before "
-    "the place"
-)
-FIRST = pytest.mark.xfail(strict=True, raises=AssertionError, reason=REASON)
 
 # Invented places: consonant first (V, T, Z), vowel first (OS, AM, AU)
 V = "Vellionie"
@@ -345,7 +340,6 @@ def draws(monkeypatch: pytest.MonkeyPatch) -> _Draws:
 # ---------------------------------------------------------------------------
 
 
-@FIRST
 @pytest.mark.parametrize("case", list(W1))
 def test_word_read(case: str) -> None:
     """W1 (AC1, AC2): the names a place can get after each word, as read
@@ -380,7 +374,6 @@ W2: dict[str, tuple[str, bool, int]] = {
 }
 
 
-@FIRST
 @pytest.mark.parametrize("case", list(W2))
 def test_first_occurrence_sets_the_word(case: str) -> None:
     """W2 (AC1, AC3): one word per place, in document order: the first
@@ -406,7 +399,6 @@ W3: dict[str, int] = {
 }
 
 
-@FIRST
 @pytest.mark.parametrize("case", list(W3))
 def test_pool_size(case: str) -> None:
     """W3 (AC1, AC8): Pool sizes for `star_wars` and `lotr` (after « du » or
@@ -472,7 +464,6 @@ def _w4(case: str) -> tuple[str, str, str, bool, frozenset[str]]:
     }[case]
 
 
-@FIRST
 @pytest.mark.parametrize(
     "case",
     [
@@ -493,7 +484,6 @@ def test_same_letter_first(case: str) -> None:
     assert written in allowed, written
 
 
-@FIRST
 @pytest.mark.parametrize(
     "case",
     ["de_regions_next", "d_regions_next", "a_used_up", "en_used_up", "du_used_up"],
@@ -532,7 +522,6 @@ def test_no_free_name(case: str) -> None:
         assert written == "Location-001", written  # expected failure
 
 
-@FIRST
 def test_article_name_never_drawn() -> None:
     """W6 (AC2, L1): a name that starts with an article is never drawn, even
     offered first."""
@@ -575,7 +564,6 @@ def _w7(
     return theme, text, real, used, forced, role == "city", vowel
 
 
-@FIRST
 @pytest.mark.parametrize(
     "case",
     [
@@ -710,7 +698,6 @@ def _path_written(
     return written[0], _stored_place(db, V), extra
 
 
-@FIRST
 @pytest.mark.parametrize(
     "path",
     [
@@ -745,7 +732,6 @@ def test_word_reaches_the_draw(tmp_path: Path, path: str) -> None:
 # ---------------------------------------------------------------------------
 
 
-@FIRST
 def test_untaken_redraw_keeps_the_word() -> None:
     """T-untaken (AC1): the redraw for a value another type or a custom
     pseudonym holds keeps the place's word."""
@@ -776,7 +762,6 @@ def _ostrelle_a_city() -> Iterator[None]:
         yield
 
 
-@FIRST
 def test_replace_flow_keeps_the_letter(tmp_path: Path) -> None:
     """T-replace (AC1): Story 11.7's replacement of a saved place draws as for
     no such word, ordered by the stored real place's first letter."""
@@ -795,7 +780,6 @@ def test_replace_flow_keeps_the_letter(tmp_path: Path) -> None:
     assert new in cities, new
 
 
-@FIRST
 def test_cli_added_place_fits_the_word(tmp_path: Path) -> None:
     """T-cli-added (AC1, AC7): a place added by hand in the command-line
     review ([A], during the review of « Zorbtech ») is shown with a name of
@@ -844,7 +828,6 @@ U: dict[str, tuple[str, str]] = {
 }
 
 
-@FIRST
 @pytest.mark.parametrize("case", list(U))
 def test_unlisted_word(case: str) -> None:
     """U1-U9 (AC1, AC2): « la » a consonant-first feminine region, « l' » a

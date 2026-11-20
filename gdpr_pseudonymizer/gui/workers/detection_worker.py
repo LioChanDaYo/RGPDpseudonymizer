@@ -238,6 +238,13 @@ class DetectionWorker(QRunnable):
                 detected_entities,
                 document_text=document_text,
                 proposals=pseudonym_proposals,
+                # Story 13.1: each place's word read from every place
+                # detected, not from its one canonical row
+                occurrences=[
+                    occurrence
+                    for occurrences in variant_occurrences.values()
+                    for occurrence in occurrences
+                ],
             )
         except Exception as e:
             logger.error("preview_generation_failed", error=str(e))

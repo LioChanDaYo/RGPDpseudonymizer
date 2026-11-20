@@ -16,6 +16,7 @@ from gdpr_pseudonymizer.pseudonym.assignment_engine import (
 from gdpr_pseudonymizer.pseudonym.neutral_id_generator import (
     NeutralIdPseudonymGenerator,
 )
+from gdpr_pseudonymizer.pseudonym.place_names import draw_tiers, fits
 from gdpr_pseudonymizer.utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -235,7 +236,11 @@ class LibraryBasedPseudonymManager(PseudonymManager):
         self._real_name_check = check
 
     def accepts_value(
-        self, value: str, kind: str, real_component: str | None = None
+        self,
+        value: str,
+        kind: str,
+        real_component: str | None = None,
+        place_word: str | None = None,
     ) -> bool:
         """Whether a draw would accept this value now (Story 11.5): the
         real-name check (Story 11.6), and the value not taken. ``kind`` is
@@ -247,9 +252,21 @@ class LibraryBasedPseudonymManager(PseudonymManager):
         another real component of the same kind, or any part of the other
         kind (Story 11.6's guard); a place or organisation when it is a
         pseudonym already given.
+
+        Story 13.1: a place of the library that does not fit ``place_word``
+        (the word before the place; None is no such word) is refused. A
+        value from no library list (a fallback name, a custom value) is
+        judged as before.
         """
         # Story 11.6: a real name of the document is drawn again
         if self._real_name_check is not None and self._real_name_check(value):
+            return False
+        if (
+            kind == "LOCATION"
+            and self.theme != "neutral_id"
+            and value in self._flatten_location_list(self.locations)
+            and not fits(self.theme, self.locations, value, place_word)
+        ):
             return False
         if kind in ("first_name", "last_name"):
             folded = _fold(value)
@@ -429,6 +446,8 @@ class LibraryBasedPseudonymManager(PseudonymManager):
         gender: str | None = None,
         existing_first: str | None = None,
         existing_last: str | None = None,
+        place_word: str | None = None,
+        real_place: str | None = None,
     ) -> PseudonymAssignment:
         """Assign pseudonym using gender-matching logic and exhaustion handling.
 
@@ -439,6 +458,10 @@ class LibraryBasedPseudonymManager(PseudonymManager):
             gender: Gender hint for name selection (male/female/neutral/unknown)
             existing_first: Existing first name pseudonym to reuse (Story 2.2)
             existing_last: Existing last name pseudonym to reuse (Story 2.2)
+            place_word: LOCATION only: the word before the place (Story 13.1);
+                None is no such word
+            real_place: LOCATION only: the real place's text, whose first
+                letter orders the names (Story 13.1)
 
         Returns:
             PseudonymAssignment with selected pseudonym and metadata
@@ -489,7 +512,7 @@ class LibraryBasedPseudonymManager(PseudonymManager):
                 # Reuse existing location pseudonym for consistency
                 pseudonym_full = existing_last
             else:
-                pseudonym_full = self._select_location()
+                pseudonym_full = self._select_location(place_word, real_place)
         elif entity_type == "ORG":
             # ORG entities use dedicated organization library (no components)
             pseudonym_first_name = None
@@ -706,8 +729,14 @@ class LibraryBasedPseudonymManager(PseudonymManager):
             f"after {max_attempts} attempts. Library may be exhausted."
         )
 
-    def _select_location(self) -> str:
+    def _select_location(
+        self, place_word: str | None = None, real_place: str | None = None
+    ) -> str:
         """Select location pseudonym from library with collision prevention.
+
+        Story 13.1: the names that fit the word before the place
+        (``place_word``; None is no such word) are drawn tier by tier, the
+        real place's letter class first (``place_names.draw_tiers``).
 
         Returns:
             Selected location name
@@ -724,14 +753,16 @@ class LibraryBasedPseudonymManager(PseudonymManager):
         if not candidates:
             raise RuntimeError("No location candidates available in library")
 
-        # Select with collision prevention
+        # Select with collision prevention, each tier in turn
         max_attempts = 100
-        for attempt in range(max_attempts):
-            candidate = secrets.choice(candidates)
-            # Story 11.6: not a real name of the document; not given yet.
-            # Story 11.5: one check for the draws and the review's pseudonyms
-            if self.accepts_value(candidate, "LOCATION"):
-                return candidate
+        for tier in draw_tiers(self.theme, self.locations, place_word, real_place):
+            for _attempt in range(max_attempts):
+                candidate = secrets.choice(tier)
+                # Story 11.6: not a real name of the document; not given yet.
+                # Story 11.5: one check for the draws and the review's
+                # pseudonyms. Story 13.1: it fits the word
+                if self.accepts_value(candidate, "LOCATION", place_word=place_word):
+                    return candidate
 
         # Library exhausted - use fallback naming (Location-001, Location-002, etc.)
         logger.warning(
