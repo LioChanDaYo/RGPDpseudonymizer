@@ -101,10 +101,10 @@ Story 12.1 lands on main with its CHANGELOG `[Unreleased]` entry and ships with 
 
 ## Definition of Done
 
-- [ ] Story 12.1 merged: every install lands in a folder whose last part is « GDPR Pseudonymizer »; the uninstaller removes only the installer's own files, shortcuts and registry entries, then the folder only if it is empty; a typed-folder upgrade goes into the subfolder, leaves the old copy untouched and says so during the installation, in English and in French, naming the files to delete and warning not to run the old `Uninstall.exe` (silent installs skip it); the 2.3.2 checks unchanged; tests on the .nsi script; CHANGELOG `[Unreleased]` entry
-- [ ] French text approved word for word by Lionel before it is committed
-- [ ] Tests-first commit and draft PR, QA review, read-only Codex review of the final head
-- [ ] No regression in existing features (full CI green, `build-executables` Windows job green on the branch head)
+- [x] Story 12.1 merged: every install lands in a folder whose last part is « GDPR Pseudonymizer »; the uninstaller removes only the installer's own files, shortcuts and registry entries, then the folder only if it is empty; a typed-folder upgrade goes into the subfolder, leaves the old copy untouched and says so during the installation, in English and in French, naming the files to delete and warning not to run the old `Uninstall.exe` (silent installs skip it); the 2.3.2 checks unchanged; tests on the .nsi script; CHANGELOG `[Unreleased]` entry. Merged 2026-11-19 as PR #131, squash `851b37d`
+- [x] French text approved word for word by Lionel before it is committed (2026-11-18, before the fix commit `f4c36eb`)
+- [x] Tests-first commit and draft PR, QA review, read-only Codex review of the final head (tests first `1098c9e`, draft PR #131; QA gate PASS on `d1644d8`; Codex review 1 on `7c26b39`: APPROVE, no findings)
+- [x] No regression in existing features (full CI green, `build-executables` Windows job green on the branch head). Main's CI on `851b37d` green (Test Matrix 44624454539: 3,592 passed on each of ubuntu 3.11, ubuntu 3.13 and macOS; Windows 3,442 passed, 3 skipped; Code Quality, Documentation and CodeQL green); `build-executables` run 44488738901 green on `f4c36eb`, the last commit to change the installer (later branch commits change only docs)
 - [ ] Before the next release: Lionel's hand check of an installer build passes its three steps
 
 ---

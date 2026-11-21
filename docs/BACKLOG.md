@@ -867,6 +867,24 @@ Test gaps found during a story and kept out of its scope. Each waits for its pul
 **Pull trigger:** The next change to the organisation patterns in `gdpr_pseudonymizer/resources/detection_patterns.yaml`.
 **Decision:** Lionel, 2026-11-19. The question asked: "Shall docs/BACKLOG.md get a line saying the long-line test only checks the first organisation pattern, to look at again the next time the organisation patterns change?" His answer: "yes".
 
+#### TD-008: Two desktop batch tests of Story 11.5 do not patch the dialogs ⏸️ Until the desktop batch screen or its review flow changes
+**Source:** Story 13.1 QA, TEST-131-01 (QA Results, round of 2026-11-21, section 4), 2026-11-21
+**Description:** `tests/unit/gui/test_review_list_written_pseudonym_review.py::test_desktop_batch_previews_use_the_theme_and_are_written` (Story 11.5's T22) installs no `_Dialogs(monkeypatch)`, and `::test_desktop_type_change_updates_the_list_at_once[batch]` (T25) installs it only in its `single` branch. If a regression made the review and the end disagree, these two cases would open the real « Pseudonymes remplacés » dialog (`gdpr_pseudonymizer/gui/screens/validation.py:1228`) and block until the pytest timeout, instead of failing fast. Story 13.1 fixed the same gap in its own P11 and P12 with `_Dialogs(monkeypatch)` in every case (`87b3a42`); under mutant M24 the batch case went from the 300 s timeout to 1.3 s.
+**Impact:** None while the code is right. Such a regression would show in these two cases as a 300 s timeout, not as a failed assert.
+**Where:** the two tests above.
+**Fix direction:** `dialogs = _Dialogs(monkeypatch)` at the start of each test, before the case branch, as Story 13.1's P11 and P12 do (`tests/unit/gui/test_place_word_review.py`).
+**Pull trigger:** The next change to the desktop batch screen or its review flow.
+**Decision:** Lionel, 2026-11-21: Story 11.5's T22 and T25[`batch`] get this backlog line, to be fixed at the next change to the desktop batch screen or its review flow. His answer: "yes".
+
+#### TD-009: Three details of Story 13.1's place-draw speed fix are not pinned by a test ⏸️ Until the place draw changes
+**Source:** Story 13.1 QA, TEST-131-03 (QA Results, round of 2026-11-21; `docs/qa/gates/13.1-place-same-kind.yml`), 2026-11-21
+**Description:** Three details of the speed fix (PERF-131-01) pass every test. M45a: the draw re-calling `accepts_value` on each attempt adds at most one tier build per successful draw. M45e: `accepts_value` checking the fit before the free check costs one tier build per review proposal. Q8: `accepts_value`'s place branch without `_place_free`; its used half is masked by `_proposal_row`'s own used check, and its real-name half matters only when the end's names refuse a place the review's names did not. None changes what is drawn or brings back per-attempt work.
+**Impact:** None today. A later change could bring one of these back without a test failing.
+**Where:** `gdpr_pseudonymizer/pseudonym/library_manager.py`, `_select_location` (l.744), `accepts_value` (l.238) and `_place_free` (l.288); `gdpr_pseudonymizer/core/document_processor.py`, `_proposal_row` (l.1128); W8, `tests/unit/test_place_word.py::test_used_up_draw_builds_its_tiers_once`.
+**Fix direction:** From QA: a W8 case on a fresh library, and a `_proposal_row` case where the end refuses a place on its real-name check.
+**Pull trigger:** The next change to how place pseudonyms are drawn (`library_manager.py` `_select_location` / `accepts_value`).
+**Decision:** Lionel, 2026-11-21: these three details of Story 13.1's speed fix get this backlog line, to be pinned at the next change to how place pseudonyms are drawn. His answer: "yes".
+
 ---
 
 ## 🚀 Epic 2+ Planned Features
