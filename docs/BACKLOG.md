@@ -764,7 +764,7 @@ Decided by Lionel on 2026-11-04, after the read-only Codex release review of v2.
 
 ## 🔎 Known limitations (not scheduled)
 
-KL-001 to KL-005 were found by the same release review. Each of those needs conditions a real user is very unlikely to meet, so none is scheduled (Lionel, 2026-11-04). KL-006 to KL-012 have their own source and decision, in their entries. Reopen one only if a real user reports it. None leaves a full name in clear; KL-008 and KL-010 say where one word can.
+KL-001 to KL-005 were found by the same release review. Each of those needs conditions a real user is very unlikely to meet, so none is scheduled (Lionel, 2026-11-04). KL-006 to KL-013 have their own source and decision, in their entries. Reopen one only if a real user reports it (KL-013 also for a database far larger than 20,000 names). None leaves a full name in clear; KL-008 and KL-010 say where one word can.
 
 - **KL-001:** `delete-mapping` can miss a v2.2.0 row of a name with five or more accented words, when that name's accents were stored two ways and v2.2.0 cut a « Mé… » word as the title « Me ». The command then reports the erasure as complete.
 - **KL-002:** Two programs opening a pre-2.3 database for the first time within the same milliseconds: one can wrongly report "format not recognised". Opening it again works.
@@ -778,6 +778,7 @@ KL-001 to KL-005 were found by the same release review. Each of those needs cond
 - **KL-010:** A document being written while `replace-pseudonym` or « Remplacer la sélection » runs on the same mapping database can still write the old pseudonym: it chose its pseudonyms before the replacement and writes its file after. Only that document is affected, as a document already written is; process its original document again to write the new pseudonym. It needs a replacement and a document being processed at the same time on one database; not measured. Found by the Codex review of Story 11.7. Kept by Lionel, 2026-11-12. Reopen if a user reports it.
 - **KL-011:** For a name found with two titles (« M. le Dr Paul Lefèvre »), the review list shows « M. » in front of the pseudonym, while the file replaces the whole « M. le Dr Paul Lefèvre » with the pseudonym alone. Of 14 title forms measured, it is the only one where the list and the file differ. Nothing is left in clear. Found by the Story 11.5 SM's title probe. Kept by Lionel, 2026-11-13. Reopen if a user reports it.
 - **KL-012:** An install of 2.3.2 or earlier that is never upgraded keeps its old uninstaller, which deletes the whole install folder, including files the installer did not put there. It matters only for a folder typed by hand during the install. Installing the next version first gives the new uninstaller (or, for a typed folder, a copy in its own subfolder and a message saying how to delete the old one). Found by the orchestrator, 2026-11-18. Reopen if a user reports it.
+- **KL-013:** In the desktop « Base de données » screen, with the own-word rows shown (Story 11.7), clicking « Remplacer la sélection (N) » builds the replacement plan on the window's thread before the confirmation dialog appears, so the window does not respond for that moment: about 273 ms at 10,000 saved names and 549 ms at 20,000. Nothing is written during it, and the replacement itself runs in the background as before. Found by Story 11.7 QA (QA Results, PERF-117-01, low). Lionel, 2026-11-21: recorded as a known limitation. His answer: "yes". Reopen if a user reports the pause, or for a database far larger than 20,000 names.
 
 Further non-leak items decided during Epic 10 are listed in the Backlog sections of Stories 10.19 to 10.22 (`docs/stories/`).
 
@@ -866,6 +867,24 @@ Test gaps found during a story and kept out of its scope. Each waits for its pul
 **Fix direction:** A long line led by a keyword, so the test guards pattern 1 too.
 **Pull trigger:** The next change to the organisation patterns in `gdpr_pseudonymizer/resources/detection_patterns.yaml`.
 **Decision:** Lionel, 2026-11-19. The question asked: "Shall docs/BACKLOG.md get a line saying the long-line test only checks the first organisation pattern, to look at again the next time the organisation patterns change?" His answer: "yes".
+
+#### TD-008: Two desktop batch tests of Story 11.5 do not patch the dialogs ⏸️ Until the desktop batch screen or its review flow changes
+**Source:** Story 13.1 QA, TEST-131-01 (QA Results, round of 2026-11-21, section 4), 2026-11-21
+**Description:** `tests/unit/gui/test_review_list_written_pseudonym_review.py::test_desktop_batch_previews_use_the_theme_and_are_written` (Story 11.5's T22) installs no `_Dialogs(monkeypatch)`, and `::test_desktop_type_change_updates_the_list_at_once[batch]` (T25) installs it only in its `single` branch. If a regression made the review and the end disagree, these two cases would open the real « Pseudonymes remplacés » dialog (`gdpr_pseudonymizer/gui/screens/batch.py:1220`, title; `:1223`, `.exec()`) and block until the pytest timeout, instead of failing fast. Story 13.1 fixed the same gap in its own P11 and P12 with `_Dialogs(monkeypatch)` in every case (`87b3a42`); under mutant M24 the batch case went from the 300 s timeout to 1.3 s.
+**Impact:** None while the code is right. Such a regression would show in these two cases as a 300 s timeout, not as a failed assert.
+**Where:** the two tests above.
+**Fix direction:** `dialogs = _Dialogs(monkeypatch)` at the start of each test, before the case branch, as Story 13.1's P11 and P12 do (`tests/unit/gui/test_place_word_review.py`).
+**Pull trigger:** The next change to the desktop batch screen or its review flow.
+**Decision:** Lionel, 2026-11-21: Story 11.5's T22 and T25[`batch`] get this backlog line, to be fixed at the next change to the desktop batch screen or its review flow. His answer: "yes".
+
+#### TD-009: Three details of Story 13.1's place-draw speed fix are not pinned by a test ⏸️ Until the place draw changes
+**Source:** Story 13.1 QA, TEST-131-03 (QA Results, round of 2026-11-21; `docs/qa/gates/13.1-place-same-kind.yml`), 2026-11-21
+**Description:** Three details of the speed fix (PERF-131-01) pass every test. M45a: the draw re-calling `accepts_value` on each attempt adds at most one tier build per successful draw. M45e: `accepts_value` checking the fit before the free check costs one tier build per review proposal. Q8: `accepts_value`'s place branch without `_place_free`; its used half is masked by `_proposal_row`'s own used check, and its real-name half matters only when the end's names refuse a place the review's names did not. None changes what is drawn or brings back per-attempt work.
+**Impact:** None today. A later change could bring one of these back without a test failing.
+**Where:** `gdpr_pseudonymizer/pseudonym/library_manager.py`, `_select_location` (l.744), `accepts_value` (l.238) and `_place_free` (l.288); `gdpr_pseudonymizer/core/document_processor.py`, `_proposal_row` (l.1128); W8, `tests/unit/test_place_word.py::test_used_up_draw_builds_its_tiers_once`.
+**Fix direction:** From QA: a W8 case on a fresh library, and a `_proposal_row` case where the end refuses a place on its real-name check.
+**Pull trigger:** The next change to how place pseudonyms are drawn (`library_manager.py` `_select_location` / `accepts_value`).
+**Decision:** Lionel, 2026-11-21: these three details of Story 13.1's speed fix get this backlog line, to be pinned at the next change to how place pseudonyms are drawn. His answer: "yes".
 
 ---
 

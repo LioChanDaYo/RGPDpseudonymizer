@@ -146,10 +146,10 @@ Story 13.1 lands on main with its CHANGELOG `[Unreleased]` entry and ships with 
 
 ## Definition of Done
 
-- [ ] Story 13.1 merged: a place pseudonym fits the word right before the place where it first appears (with a tested rule for a word no free name fits, for `star_wars` and `lotr`, and for Story 11.7's replace flow); no drawn place name reads wrong after the word it was chosen for in the `neutral` theme; one place keeps one pseudonym in every document; stored pseudonyms reused as stored; Story 11.6 and 11.5 rules still hold; pool sizes measured; CHANGELOG `[Unreleased]` entry
-- [ ] Every change to French lists or French output text approved word for word by Lionel before it is committed
-- [ ] Tests-first commit and draft PR, QA review, read-only Codex review of the final head
-- [ ] No regression in existing features (full CI green)
+- [x] Story 13.1 merged: a place pseudonym fits the word right before the place where it first appears (with a tested rule for a word no free name fits, for `star_wars` and `lotr`, and for Story 11.7's replace flow); no drawn place name reads wrong after the word it was chosen for in the `neutral` theme; one place keeps one pseudonym in every document; stored pseudonyms reused as stored; Story 11.6 and 11.5 rules still hold; pool sizes measured; CHANGELOG `[Unreleased]` entry. Merged 2026-11-21 as PR #133, squash `c145963`
+- [x] Every change to French lists or French output text approved word for word by Lionel before it is committed (the lists L1 to L6, the 15 names and the CHANGELOG entry at STOP B, all on 2026-11-20; Story 13.1, Decisions Recorded)
+- [x] Tests-first commit and draft PR, QA review, read-only Codex review of the final head (tests first `f459965`, draft PR #133; QA gate PASS on `24b9c86`; Codex review 1 on `6f766a7`: APPROVE, no findings)
+- [x] No regression in existing features (full CI green). Main's CI on `c145963` green (Test Matrix 44878820615: 3,676 passed on each of ubuntu 3.11, ubuntu 3.13 and macOS; Windows 3,526 passed, 3 skipped; Code Quality, Documentation and CodeQL green; Performance & Stability 44878820682: 4 passed, 3 skipped)
 - [ ] Before the next release: Lionel's hand check of a document with places after « à », « en », « de », « d' », « du » and « au », and with no word before them, passes
 
 ---
