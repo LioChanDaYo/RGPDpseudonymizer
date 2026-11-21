@@ -74,6 +74,8 @@ class PseudonymManager(ABC):
         gender: str | None = None,
         existing_first: str | None = None,
         existing_last: str | None = None,
+        place_word: str | None = None,
+        real_place: str | None = None,
     ) -> PseudonymAssignment:
         """Assign pseudonym using compositional logic.
 
@@ -87,6 +89,10 @@ class PseudonymManager(ABC):
             gender: Gender hint for name selection (male/female/neutral/unknown)
             existing_first: Existing first name pseudonym to reuse
             existing_last: Existing last name pseudonym to reuse
+            place_word: LOCATION only: the word before the place, one of
+                ``place_names``' words; None is no such word (Story 13.1)
+            real_place: LOCATION only: the real place's text, whose first
+                letter orders the names (Story 13.1)
 
         Returns:
             PseudonymAssignment with selected pseudonym and metadata
@@ -142,7 +148,11 @@ class PseudonymManager(ABC):
 
     @abstractmethod
     def accepts_value(
-        self, value: str, kind: str, real_component: str | None = None
+        self,
+        value: str,
+        kind: str,
+        real_component: str | None = None,
+        place_word: str | None = None,
     ) -> bool:
         """Whether a draw would accept this value now (Story 11.5): the
         real-name check (Story 11.6), and the value not taken. ``kind`` is
@@ -153,6 +163,8 @@ class PseudonymManager(ABC):
             kind: What the value is drawn as
             real_component: The real first or last name the part is for
                 (persons only), None for a lone word's other part
+            place_word: LOCATION only: the word the value must fit (Story
+                13.1); None is no such word
 
         Returns:
             True when a draw for ``kind`` would keep the value
@@ -249,6 +261,7 @@ class CompositionalPseudonymEngine:
         entity_text: str,
         entity_type: str,
         gender: str | None = None,
+        place_word: str | None = None,
     ) -> PseudonymAssignment:
         """Assign pseudonym using compositional logic.
 
@@ -263,6 +276,8 @@ class CompositionalPseudonymEngine:
             entity_text: Entity text to pseudonymize (e.g., "Marie Dubois")
             entity_type: Entity type (PERSON, LOCATION, ORG)
             gender: Gender hint for name selection (male/female/neutral/unknown)
+            place_word: LOCATION only: the word before the place (Story
+                13.1); None is no such word
 
         Returns:
             PseudonymAssignment with full pseudonym and components
@@ -274,6 +289,15 @@ class CompositionalPseudonymEngine:
             )
 
         # Non-PERSON entities: use simple assignment (no compositional logic)
+        if entity_type == "LOCATION":
+            # Story 13.1: the place is drawn for its word, the real place's
+            # first letter first
+            return self.pseudonym_manager.assign_pseudonym(
+                entity_type=entity_type,
+                gender=gender,
+                place_word=place_word,
+                real_place=entity_text,
+            )
         if entity_type != "PERSON":
             assignment = self.pseudonym_manager.assign_pseudonym(
                 entity_type=entity_type, gender=gender

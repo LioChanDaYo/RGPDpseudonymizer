@@ -549,16 +549,18 @@ def test_custom_place_or_organisation_still_compared_whole() -> None:
 
 
 def test_linking_word_of_a_drawn_place_not_compared_alone(tmp_path: Path) -> None:
-    """T15 (a control; Q-I inside a place): « Le Vellionnais » is kept
-    although « Le » starts a sentence of the document."""
+    """T15 (a control; Q-I inside a place): « Zorbanne Le Vellion » is kept
+    although « Le » starts a sentence of the document. The article is inside
+    the place, not at its start: since Story 13.1 a place that starts with
+    an article is never drawn (L1)."""
     db = _new_db(tmp_path)
     text = "Zorbal Quentrix a signé le contrat à Zorbaville. Le contrat est signé."
     names = [(ZQ, PERSON), ("Zorbaville", LOCATION)]
     output = tmp_path / "out.txt"
-    with _forced({"place": ["Le Vellionnais"]}) as offers:
+    with _forced({"place": ["Zorbanne Le Vellion"]}) as offers:
         result = _finalize(db, text, names, output)
     pre(offers.n > 0 and result.success, "offered, document written")
-    assert _written_at(output, text, names)[1] == "Le Vellionnais"
+    assert _written_at(output, text, names)[1] == "Zorbanne Le Vellion"
 
 
 def test_drawn_compound_first_name_holding_the_first_name(tmp_path: Path) -> None:

@@ -34,6 +34,7 @@ from gdpr_pseudonymizer.core.custom_pseudonym import (
     untracked_custom_values,
 )
 from gdpr_pseudonymizer.core.mapping_key import mapping_key
+from gdpr_pseudonymizer.core.place_word import draw_words, word_before
 from gdpr_pseudonymizer.core.saved_own_words import count_own_word_rows
 from gdpr_pseudonymizer.data.database import (
     DatabaseSession,
@@ -177,6 +178,11 @@ class _ProcessingContext:
     audit_repo: AuditRepository
     pseudonym_manager: LibraryBasedPseudonymManager
     compositional_engine: CompositionalPseudonymEngine
+    # Story 13.1: each place's word (``place_word.draw_words``), and the
+    # text an entity's position points into (its cell, else the document);
+    # None when no words were set
+    place_words: dict[NameKey, str] = field(default_factory=dict)
+    place_text: Callable[[DetectedEntity], str] | None = None
 
 
 @dataclass
@@ -331,6 +337,43 @@ class DocumentProcessor:
         """
         return mapping_key(entity.text, entity.entity_type)
 
+    @staticmethod
+    def _set_place_words(
+        ctx: _ProcessingContext,
+        entities: Iterable[DetectedEntity],
+        document_text: str,
+        cells: Mapping[str, str] | None = None,
+    ) -> None:
+        """Story 13.1: each place's word, read from ``entities`` (each in its
+        cell when ``cells`` holds it, else in ``document_text``), and the
+        text an entity's position points into."""
+        ctx.place_words = draw_words(entities, document_text, cells)
+
+        def place_text(entity: DetectedEntity) -> str:
+            label = entity.context_label
+            if cells is not None and label is not None and label in cells:
+                return cells[label]
+            return document_text
+
+        ctx.place_text = place_text
+
+    @staticmethod
+    def _place_word_of(
+        ctx: _ProcessingContext, entity: DetectedEntity, name: NameKey
+    ) -> str | None:
+        """Story 13.1: the word of a place the preview assigner draws: its
+        word in ``ctx.place_words``; else, for a place the map does not hold
+        (added by hand or edited in the command-line review), the word read
+        at the entity, recorded so the end agrees. No word when no words
+        were set."""
+        if name in ctx.place_words:
+            return ctx.place_words[name]
+        if ctx.place_text is None:
+            return None
+        word = word_before(ctx.place_text(entity), entity.start_pos, entity.end_pos)
+        ctx.place_words[name] = word
+        return word
+
     def _build_pseudonym_assigner(
         self,
         ctx: _ProcessingContext,
@@ -386,11 +429,24 @@ class DocumentProcessor:
                 return preview_cache[cache_key]
 
             try:
-                assignment = ctx.compositional_engine.assign_compositional_pseudonym(
-                    entity_text=entity_text_stripped,
-                    entity_type=entity.entity_type,
-                    gender=None,
-                )
+                if entity.entity_type == "LOCATION":
+                    # Story 13.1: drawn for the place's word
+                    assignment = (
+                        ctx.compositional_engine.assign_compositional_pseudonym(
+                            entity_text=entity_text_stripped,
+                            entity_type=entity.entity_type,
+                            gender=None,
+                            place_word=self._place_word_of(ctx, entity, cache_key),
+                        )
+                    )
+                else:
+                    assignment = (
+                        ctx.compositional_engine.assign_compositional_pseudonym(
+                            entity_text=entity_text_stripped,
+                            entity_type=entity.entity_type,
+                            gender=None,
+                        )
+                    )
                 # Codex review 1, P1: a draw that takes a value of a custom
                 # pseudonym is drawn again, as the end draws it
                 # (``_uses_custom_part``, ``_assign_untaken_pseudonym``)
@@ -902,11 +958,20 @@ class DocumentProcessor:
         entity_text_stripped: str,
     ) -> tuple[str, Entity]:
         """Assign a new compositional pseudonym and create the Entity record."""
-        assignment = ctx.compositional_engine.assign_compositional_pseudonym(
-            entity_text=entity_text_stripped,
-            entity_type=entity.entity_type,
-            gender=None,
-        )
+        if entity.entity_type == "LOCATION":
+            # Story 13.1: drawn for the place's word
+            assignment = ctx.compositional_engine.assign_compositional_pseudonym(
+                entity_text=entity_text_stripped,
+                entity_type=entity.entity_type,
+                gender=None,
+                place_word=ctx.place_words.get((entity_text_stripped, "LOCATION")),
+            )
+        else:
+            assignment = ctx.compositional_engine.assign_compositional_pseudonym(
+                entity_text=entity_text_stripped,
+                entity_type=entity.entity_type,
+                gender=None,
+            )
         original_first = None
         original_last = None
         detected_gender = None
@@ -996,9 +1061,18 @@ class DocumentProcessor:
         """
         custom_taken = custom_taken or {}
         for _attempt in range(len(taken) + len(custom_taken) + 1):
-            assignment = ctx.pseudonym_manager.assign_pseudonym(
-                entity_type=new_entity.entity_type, gender=None
-            )
+            if new_entity.entity_type == "LOCATION":
+                # Story 13.1: drawn again for the place's word
+                assignment = ctx.pseudonym_manager.assign_pseudonym(
+                    entity_type=new_entity.entity_type,
+                    gender=None,
+                    place_word=ctx.place_words.get((new_entity.full_name, "LOCATION")),
+                    real_place=new_entity.full_name,
+                )
+            else:
+                assignment = ctx.pseudonym_manager.assign_pseudonym(
+                    entity_type=new_entity.entity_type, gender=None
+                )
             parts = (
                 assignment.pseudonym_full,
                 assignment.pseudonym_first,
@@ -1110,7 +1184,10 @@ class DocumentProcessor:
                     text, entity_type
                 )
         elif self.theme != "neutral_id" and not manager.accepts_value(
-            proposal.pseudonym_full, entity_type
+            proposal.pseudonym_full,
+            entity_type,
+            # Story 13.1: a place shown is kept only if it fits its word
+            place_word=ctx.place_words.get(name) if entity_type == "LOCATION" else None,
         ):
             return None
         row = Entity(
@@ -1231,8 +1308,13 @@ class DocumentProcessor:
         custom_pseudonyms: dict[NameKey, str] | None = None,
         document_text: str = "",
         proposals: Mapping[NameKey, Sequence[PseudonymProposal]] | None = None,
+        cells: Mapping[str, str] | None = None,
     ) -> _ResolveResult:
         """Resolve pseudonyms for all validated entities.
+
+        Story 13.1: each place is drawn for its word, read first thing from
+        the entities sent (each in its cell when ``cells``, cell reference
+        -> cell text, holds it; else in ``document_text``).
 
         Story 10.11: the custom pseudonyms the user set, keyed by (mapping
         key, type), are checked again and registered before any occurrence
@@ -1246,6 +1328,8 @@ class DocumentProcessor:
         name is resolved as before. Each pseudonym shown that differs from
         the one written is listed in the result's ``pseudonyms_changed``.
         """
+        # Story 13.1: the words read from what is written
+        self._set_place_words(ctx, validated_entities, document_text, cells)
         logger.info(
             "starting_entity_processing",
             validated_count=len(validated_entities),
@@ -1525,6 +1609,7 @@ class DocumentProcessor:
         names: Sequence[NameKey],
         customs: Mapping[NameKey, str],
         proposals: Mapping[NameKey, PseudonymProposal],
+        entities: Sequence[DetectedEntity] | None = None,
     ) -> dict[NameKey, PseudonymProposal | str]:
         """What the end would write now for the review's names, without
         writing anything (Story 11.5, AC19; the desktop list's update after a
@@ -1537,6 +1622,9 @@ class DocumentProcessor:
             customs: The custom pseudonym of each name that has one
             proposals: The pseudonym each name currently shows (its
                 proposal)
+            entities: Every place the end will receive (Story 13.1: each
+                place's word is read from them); None draws every place as
+                for no such word
 
         Returns:
             Only the names whose value changes: a name stored now gives its
@@ -1553,6 +1641,11 @@ class DocumentProcessor:
             ctx.pseudonym_manager.set_real_name_check(
                 real_name_check(document_text, [name[0] for name in names])
             )
+            # Story 13.1: each place drawn for its word. The assigner below
+            # gets a stand-in entity at position 0, which is not the place:
+            # a name the entities do not hold is drawn as for no such word
+            self._set_place_words(ctx, entities or [], document_text)
+            ctx.place_text = None
             entity_cache, _ = self._rebase_preview_context(
                 ctx,
                 stored,
@@ -1795,6 +1888,7 @@ class DocumentProcessor:
         detected_entities: list[DetectedEntity],
         document_text: str = "",
         proposals: dict[CandidateKey, PseudonymProposal] | None = None,
+        occurrences: Sequence[DetectedEntity] | None = None,
     ) -> dict[CandidateKey, str]:
         """Generate pseudonym previews for detected entities.
 
@@ -1814,6 +1908,10 @@ class DocumentProcessor:
             proposals: When given, filled with each new name's pseudonym, by
                 the entity's candidate key (Story 11.5: kept at the end if
                 still free)
+            occurrences: Every place detected, when ``detected_entities``
+                holds one row per name (Story 13.1: each place's word is
+                read from every place the end will receive); None reads
+                ``detected_entities``
 
         Returns:
             Dict mapping each candidate's key (text, start_pos, entity_type),
@@ -1826,6 +1924,12 @@ class DocumentProcessor:
         with open_database(self.db_path, self.passphrase) as db_session:
             ctx = self._init_processing_context(db_session)
             self._set_real_name_check(ctx, document_text, detected_entities)
+            # Story 13.1: each place previewed for its word
+            self._set_place_words(
+                ctx,
+                occurrences if occurrences is not None else detected_entities,
+                document_text,
+            )
             recorded: dict[NameKey, PseudonymProposal] = {}
             assigner = self._build_pseudonym_assigner(ctx, proposals=recorded)
             previews: dict[CandidateKey, str] = {}
@@ -1941,6 +2045,8 @@ class DocumentProcessor:
                 # would accept (AC8), and is kept at the end if still free
                 if not skip_validation:
                     self._set_real_name_check(ctx, document_text, detected_entities)
+                # Story 13.1: the review draws each place for its word
+                self._set_place_words(ctx, detected_entities, document_text)
                 recorded: dict[NameKey, PseudonymProposal] = {}
                 shown_names: dict[NameKey, list[NameKey]] = {}
                 pseudonym_assigner = self._build_pseudonym_assigner(
@@ -2019,6 +2125,10 @@ class DocumentProcessor:
                 # would accept (AC8), and is kept at the end if still free
                 if not skip_validation:
                     self._set_real_name_check(ctx, document_text, detected_entities)
+                cells = {cell.cell_ref: cell.value for cell in tabular_doc.cells}
+                # Story 13.1: the review draws each place for its word, read
+                # in the place's own cell
+                self._set_place_words(ctx, detected_entities, document_text, cells)
                 recorded: dict[NameKey, PseudonymProposal] = {}
                 shown_names: dict[NameKey, list[NameKey]] = {}
                 pseudonym_assigner = self._build_pseudonym_assigner(
@@ -2033,7 +2143,7 @@ class DocumentProcessor:
                     skip_validation=skip_validation,
                     pseudonym_assigner=pseudonym_assigner,
                     custom_pseudonyms=custom_pseudonyms,
-                    cells={cell.cell_ref: cell.value for cell in tabular_doc.cells},
+                    cells=cells,
                     types_selected=entity_type_filter is not None,
                     shown_names=shown_names,
                     on_custom_set=self._build_custom_set_hook(ctx, recorded),
@@ -2054,6 +2164,7 @@ class DocumentProcessor:
                         custom_pseudonyms=custom_pseudonyms,
                         document_text=document_text,
                         proposals=proposals,
+                        cells=cells,
                     )
 
                 self._apply_tabular_replacements(
@@ -2166,7 +2277,12 @@ class DocumentProcessor:
                 # database's write lock, one document at a time
                 with pseudonym_lock(db_session):
                     existing_rows = self._reset_pseudonym_state(ctx)
-                    resolve_result = self._resolve_pseudonyms(ctx, validated_entities)
+                    # Story 13.1: each place's word read in its own cell
+                    resolve_result = self._resolve_pseudonyms(
+                        ctx,
+                        validated_entities,
+                        cells={cell.cell_ref: cell.value for cell in tabular_doc.cells},
+                    )
 
                 self._apply_tabular_replacements(
                     tabular_doc,

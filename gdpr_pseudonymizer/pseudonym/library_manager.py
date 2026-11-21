@@ -16,6 +16,7 @@ from gdpr_pseudonymizer.pseudonym.assignment_engine import (
 from gdpr_pseudonymizer.pseudonym.neutral_id_generator import (
     NeutralIdPseudonymGenerator,
 )
+from gdpr_pseudonymizer.pseudonym.place_names import draw_tiers, fits
 from gdpr_pseudonymizer.utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -235,19 +236,38 @@ class LibraryBasedPseudonymManager(PseudonymManager):
         self._real_name_check = check
 
     def accepts_value(
-        self, value: str, kind: str, real_component: str | None = None
+        self,
+        value: str,
+        kind: str,
+        real_component: str | None = None,
+        place_word: str | None = None,
     ) -> bool:
         """Whether a draw would accept this value now (Story 11.5): the
         real-name check (Story 11.6), and the value not taken. ``kind`` is
         "first_name", "last_name", "LOCATION" or "ORG". The four draws call
-        it, so a draw and the still-free check of a pseudonym shown in the
-        review accept the same values.
+        it (the place draw its free part, ``_place_free``, on names that fit
+        by construction), so a draw and the still-free check of a pseudonym
+        shown in the review accept the same values.
 
         A first or last name is taken when its folded value is the part of
         another real component of the same kind, or any part of the other
         kind (Story 11.6's guard); a place or organisation when it is a
         pseudonym already given.
+
+        Story 13.1: a place of the library that does not fit ``place_word``
+        (the word before the place; None is no such word) is refused. A
+        value from no library list (a fallback name, a custom value) is
+        judged as before. A place is checked free first (``_place_free``),
+        then the fit, which builds the word's names.
         """
+        if kind == "LOCATION":
+            if not self._place_free(value):
+                return False
+            return not (
+                self.theme != "neutral_id"
+                and value in self._flatten_location_list(self.locations)
+                and not fits(self.theme, self.locations, value, place_word)
+            )
         # Story 11.6: a real name of the document is drawn again
         if self._real_name_check is not None and self._real_name_check(value):
             return False
@@ -264,6 +284,15 @@ class LibraryBasedPseudonymManager(PseudonymManager):
                     return False
             return True
         return value not in self._used_pseudonyms
+
+    def _place_free(self, value: str) -> bool:
+        """Whether a place value is free (Story 13.1, PERF-131-01): not
+        given yet, then not a real name of the document (Story 11.6). The
+        cheap part of ``accepts_value`` for a place; a place draw checks
+        only this, since every name of its tier fits the word."""
+        if value in self._used_pseudonyms:
+            return False
+        return self._real_name_check is None or not self._real_name_check(value)
 
     def is_used(self, pseudonym_full: str) -> bool:
         """Whether a full pseudonym is already given (Story 11.5)."""
@@ -429,6 +458,8 @@ class LibraryBasedPseudonymManager(PseudonymManager):
         gender: str | None = None,
         existing_first: str | None = None,
         existing_last: str | None = None,
+        place_word: str | None = None,
+        real_place: str | None = None,
     ) -> PseudonymAssignment:
         """Assign pseudonym using gender-matching logic and exhaustion handling.
 
@@ -439,6 +470,10 @@ class LibraryBasedPseudonymManager(PseudonymManager):
             gender: Gender hint for name selection (male/female/neutral/unknown)
             existing_first: Existing first name pseudonym to reuse (Story 2.2)
             existing_last: Existing last name pseudonym to reuse (Story 2.2)
+            place_word: LOCATION only: the word before the place (Story 13.1);
+                None is no such word
+            real_place: LOCATION only: the real place's text, whose first
+                letter orders the names (Story 13.1)
 
         Returns:
             PseudonymAssignment with selected pseudonym and metadata
@@ -489,7 +524,7 @@ class LibraryBasedPseudonymManager(PseudonymManager):
                 # Reuse existing location pseudonym for consistency
                 pseudonym_full = existing_last
             else:
-                pseudonym_full = self._select_location()
+                pseudonym_full = self._select_location(place_word, real_place)
         elif entity_type == "ORG":
             # ORG entities use dedicated organization library (no components)
             pseudonym_first_name = None
@@ -706,8 +741,14 @@ class LibraryBasedPseudonymManager(PseudonymManager):
             f"after {max_attempts} attempts. Library may be exhausted."
         )
 
-    def _select_location(self) -> str:
+    def _select_location(
+        self, place_word: str | None = None, real_place: str | None = None
+    ) -> str:
         """Select location pseudonym from library with collision prevention.
+
+        Story 13.1: the names that fit the word before the place
+        (``place_word``; None is no such word) are drawn tier by tier, the
+        real place's letter class first (``place_names.draw_tiers``).
 
         Returns:
             Selected location name
@@ -724,14 +765,18 @@ class LibraryBasedPseudonymManager(PseudonymManager):
         if not candidates:
             raise RuntimeError("No location candidates available in library")
 
-        # Select with collision prevention
+        # Select with collision prevention, each tier in turn. Story 13.1
+        # (PERF-131-01): the tiers are built once per draw, and every name of
+        # a tier fits the word, so an attempt checks only that it is free
         max_attempts = 100
-        for attempt in range(max_attempts):
-            candidate = secrets.choice(candidates)
-            # Story 11.6: not a real name of the document; not given yet.
-            # Story 11.5: one check for the draws and the review's pseudonyms
-            if self.accepts_value(candidate, "LOCATION"):
-                return candidate
+        for tier in draw_tiers(self.theme, self.locations, place_word, real_place):
+            for _attempt in range(max_attempts):
+                candidate = secrets.choice(tier)
+                # Story 11.6: not a real name of the document; not given yet.
+                # Story 11.5: accepts_value's checks, which the review's
+                # pseudonyms pass; the fit (Story 13.1) is the tier's own
+                if self._place_free(candidate):
+                    return candidate
 
         # Library exhausted - use fallback naming (Location-001, Location-002, etc.)
         logger.warning(

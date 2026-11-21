@@ -427,7 +427,13 @@ def _draw_group(
 
     manager.set_real_name_check(whole_check)
     try:
-        assignment = manager.assign_pseudonym(lead.entity_type, gender=lead.gender)
+        # Story 13.1: no document, so a place is drawn as for no word before
+        # it, the stored real place's first letter first
+        assignment = manager.assign_pseudonym(
+            lead.entity_type,
+            gender=lead.gender,
+            real_place=lead.full_name if lead.entity_type == "LOCATION" else None,
+        )
     except RuntimeError:
         return None, STOP_EXHAUSTED
     full = assignment.pseudonym_full

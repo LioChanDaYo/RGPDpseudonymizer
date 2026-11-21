@@ -84,6 +84,12 @@
 
 ---
 
+### Epic 13: Place Pseudonyms That Fit the Word Before Them (next release, none planned)
+
+**Goal:** A place pseudonym is chosen to fit the word right before the place where it first appears (« à », « en », « de », « d' », « du », « au », or no such word), so no drawn place name reads wrong (no more « à Grand Est » or « de Le Centre-Ville »); one place keeps one pseudonym in every document; stored pseudonyms are reused as stored. First decided as a pseudonym of the same kind (Lionel, 2026-11-19: "yes"); redesigned around the word before the place, the geography list no longer the basis (Lionel, 2026-11-20: "yes, redesign it"). Story 13.1 only; lands on main first; no tag or PyPI release without Lionel's explicit go.
+
+---
+
 ### Epic Definitions of Done
 
 **Epic 0 DoD:**

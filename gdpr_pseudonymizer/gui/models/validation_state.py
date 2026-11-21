@@ -47,13 +47,15 @@ if TYPE_CHECKING:
     from gdpr_pseudonymizer.gui.workers.detection_worker import DetectionResult
 
     # Story 11.5: what the end would write now for the review's names
-    # (``DocumentProcessor.refresh_review_proposals``)
+    # (``DocumentProcessor.refresh_review_proposals``); Story 13.1: the
+    # last argument is every place the end will receive
     ProposalRefresher = Callable[
         [
             str,
             Sequence[NameKey],
             Mapping[NameKey, str],
             Mapping[NameKey, PseudonymProposal],
+            Sequence[DetectedEntity],
         ],
         Mapping[NameKey, "PseudonymProposal | str"],
     ]
@@ -854,7 +856,12 @@ class GUIValidationState(QObject):
                 raise RuntimeError("no refresher")
             updates = dict(
                 self._proposal_refresher(
-                    self._session.document_text, names, customs, current
+                    self._session.document_text,
+                    names,
+                    customs,
+                    current,
+                    # Story 13.1: every place the end will receive
+                    self._review_entities(),
                 )
             )
         except Exception as error:
@@ -1416,13 +1423,10 @@ class GUIValidationState(QObject):
                 expanded.extend(self._variant_occurrences[key])
         return expanded
 
-    def _review_names(self) -> list[str]:
-        """The mapping keys of the review's names that are not rejected
-        (Story 10.16, Codex #8): the entities every row still to review,
-        accepted, corrected, retyped or added by hand would send, expanded
-        to their variant occurrences exactly as ``expand_validated_entities``
-        expands the rows it sends."""
-        rows = [
+    def _review_rows(self) -> list[tuple[EntityReview, DetectedEntity]]:
+        """(row, entity it would send) for every row not rejected, pending
+        rows included."""
+        return [
             (
                 review,
                 (
@@ -1434,8 +1438,26 @@ class GUIValidationState(QObject):
             for review in self._session._entity_reviews
             if review.state != EntityReviewState.REJECTED
         ]
-        names = (mapping_key(e.text, e.entity_type) for e in self._expand(rows))
+
+    def _review_names(self) -> list[str]:
+        """The mapping keys of the review's names that are not rejected
+        (Story 10.16, Codex #8): the entities every row still to review,
+        accepted, corrected, retyped or added by hand would send, expanded
+        to their variant occurrences exactly as ``expand_validated_entities``
+        expands the rows it sends."""
+        names = (
+            mapping_key(e.text, e.entity_type)
+            for e in self._expand(self._review_rows())
+        )
         return list(dict.fromkeys(names))
+
+    def _review_entities(self) -> list[DetectedEntity]:
+        """Story 13.1: every place the end would receive if every pending row
+        were accepted: each row not rejected, as it would send it, expanded
+        and widened as ``expand_validated_entities`` expands and widens the
+        rows it sends. The list's update reads each place's word from
+        them."""
+        return _widen_typed_places(self._expand(self._review_rows()))
 
     def get_all_entity_ranges(self) -> list[tuple[int, int, str]]:
         """Return (start, end, entity_id) for all entities including variant occurrences.
