@@ -9,16 +9,18 @@ from __future__ import annotations
 import bisect
 from typing import TYPE_CHECKING
 
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import QEvent, QPoint, Qt, Signal
 from PySide6.QtGui import (
     QColor,
     QFont,
+    QHelpEvent,
     QKeyEvent,
     QMouseEvent,
     QTextCharFormat,
     QTextCursor,
+    QTextLine,
 )
-from PySide6.QtWidgets import QMenu, QTextEdit
+from PySide6.QtWidgets import QMenu, QTextEdit, QToolTip
 
 from gdpr_pseudonymizer.gui.i18n import qarg
 
@@ -42,6 +44,11 @@ _DARK_COLORS: dict[str, tuple[str, str]] = {
 
 _REJECTED_LIGHT = ("#FFCDD2", "#B71C1C")
 _REJECTED_DARK = ("#4E342E", "#FFCDD2")
+
+# Story 15.1: placeholder for the last line N3 of a hover block whose
+# pseudonym is not written at the pointer, until Task 3.2 writes the approved
+# text (Lionel's Q2); not translated, never shipped
+_N3_PLACEHOLDER = "(N3)"
 
 
 class EntityEditor(QTextEdit):
@@ -72,6 +79,9 @@ class EntityEditor(QTextEdit):
         self._validation_state: GUIValidationState | None = None
         # Sorted list of (start_pos, end_pos, entity_id) for click detection
         self._entity_ranges: list[tuple[int, int, str]] = []
+        # Story 15.1 (H.2): (start, end, entity_id) of each highlight drawn
+        # for a row, for the hover text
+        self._shown_ranges: list[tuple[int, int, str]] = []
         self._hide_rejected = False
         self._hide_confirmed = False
         self._dark_theme = False
@@ -156,11 +166,7 @@ class EntityEditor(QTextEdit):
         state_str = review.state.value
 
         # Translate entity type and state for announcements
-        type_name = {
-            "PERSON": self.tr("Personne"),
-            "LOCATION": self.tr("Lieu"),
-            "ORG": self.tr("Organisation"),
-        }.get(entity_type, entity_type)
+        type_name = self._type_label(entity_type)
 
         state_name = {
             "pending": self.tr("en attente"),
@@ -205,6 +211,7 @@ class EntityEditor(QTextEdit):
 
     def _apply_highlights(self) -> None:
         """Apply extra selections for all entities."""
+        self._shown_ranges = []
         if self._validation_state is None:
             self.setExtraSelections([])
             return
@@ -266,19 +273,9 @@ class EntityEditor(QTextEdit):
                 fmt.setUnderlineColor(QColor(underline_color))
 
             # Tooltip: pseudonym + type + confidence + cell reference
-            pseudonym = self._validation_state.get_pseudonym(entity_id)
-            confidence = review.entity.confidence
-            conf_str = f"{confidence:.0%}" if confidence is not None else "N/A"
-            context_line = ""
-            if review.entity.context_label:
-                context_line = f"\n[{review.entity.context_label}]"
-            tooltip = (
-                f"{review.entity.entity_type}: {review.entity.text}\n"
-                f"\u2192 {pseudonym}\n"
-                + qarg(self.tr("Confiance : %1"), conf_str)
-                + context_line
-            )
-            fmt.setToolTip(tooltip)
+            fmt.setToolTip(self._tooltip_block(entity_id, review))
+            # Story 15.1 (H.2): the range drawn for the row, for the hover
+            self._shown_ranges.append((start, end, entity_id))
 
             # Build extra selection
             sel = QTextEdit.ExtraSelection()
@@ -305,6 +302,140 @@ class EntityEditor(QTextEdit):
             selections.append(sel)
 
         self.setExtraSelections(selections)
+
+    # ------------------------------------------------------------------
+    # Story 15.1: the hover text (Fix design H; Lionel's Q4)
+    # ------------------------------------------------------------------
+
+    def _type_label(self, entity_type: str) -> str:
+        """The type's label (« Personne », « Lieu », « Organisation »);
+        any other type is shown as its code."""
+        return {
+            "PERSON": self.tr("Personne"),
+            "LOCATION": self.tr("Lieu"),
+            "ORG": self.tr("Organisation"),
+        }.get(entity_type, entity_type)
+
+    def _tooltip_block(self, entity_id: str, review: EntityReview) -> str:
+        """A row's block of the hover text: type and text, « → » pseudonym,
+        confidence, and the cell when there is one (H.1)."""
+        if self._validation_state is None:
+            return ""
+        pseudonym = self._validation_state.get_pseudonym(entity_id)
+        confidence = review.entity.confidence
+        conf_str = f"{confidence:.0%}" if confidence is not None else "N/A"
+        context_line = ""
+        if review.entity.context_label:
+            context_line = f"\n[{review.entity.context_label}]"
+        return (
+            f"{review.entity.entity_type}: {review.entity.text}\n"
+            f"→ {pseudonym}\n"
+            + qarg(self.tr("Confiance : %1"), conf_str)
+            + context_line
+        )
+
+    def _not_written_line(self, writer: EntityReview) -> str:
+        """The last line of a block whose pseudonym is not written at the
+        pointer, naming the row written there (N3).
+
+        Story 15.1: a placeholder until Task 3.2 writes the approved text
+        (Lionel's Q2)."""
+        label = self._type_label(writer.entity.entity_type)
+        return f"{_N3_PLACEHOLDER} {writer.entity.text} ({label})"
+
+    def _char_box(self, position: int) -> tuple[float, float, float, float] | None:
+        """(left, right, top, bottom) of character ``position`` in the
+        viewport, or None for the end of a paragraph or of the document.
+
+        The position comes from ``cursorRect``; the width from the
+        character's own visual line (``QTextLine.cursorToX``), so the last
+        character of a wrapped line keeps its own box."""
+        document = self.document()
+        if position < 0 or position >= document.characterCount() - 1:
+            return None
+        block = document.findBlock(position)
+        offset = position - block.position()
+        if offset >= block.length() - 1:
+            return None
+        layout = block.layout()
+        if layout is None:
+            return None
+        line = layout.lineForTextPosition(offset)
+        if not line.isValid():
+            return None
+        cursor = QTextCursor(document)
+        cursor.setPosition(position)
+        rect = self.cursorRect(cursor)
+        left = self._line_x(line, offset)
+        right = self._line_x(line, offset + 1)
+        x = float(rect.x())
+        top = float(rect.top())
+        return (x, x + (right - left), top, top + line.height())
+
+    @staticmethod
+    def _line_x(line: QTextLine, offset: int) -> float:
+        """``QTextLine.cursorToX`` as a number (PySide6 may return it with
+        the position it was given)."""
+        value: object = line.cursorToX(offset)
+        if isinstance(value, tuple):
+            value = value[0]
+        return float(value) if isinstance(value, int | float) else 0.0
+
+    def _char_at(self, point: QPoint) -> int | None:
+        """The character under ``point`` (viewport coordinates), or None
+        over blank space (H.3).
+
+        ``cursorForPosition`` gives the nearest boundary; of the characters
+        on each side of it, the one whose box holds the point."""
+        boundary = self.cursorForPosition(point).position()
+        for position in (boundary - 1, boundary):
+            box = self._char_box(position)
+            if box is None:
+                continue
+            left, right, top, bottom = box
+            if left <= point.x() < right and top <= point.y() < bottom:
+                return position
+        return None
+
+    def _hover_text(self, position: int) -> str:
+        """The hover text at character ``position``: the block of each row
+        highlighted there, in the order of the ranges, separated by a blank
+        line; a block whose pseudonym is not the one the end would write at
+        that character ends with N3 (H.4). Empty when no row is there."""
+        state = self._validation_state
+        if state is None:
+            return ""
+        ids: list[str] = []
+        for start, end, entity_id in self._shown_ranges:
+            if start <= position < end and entity_id not in ids:
+                ids.append(entity_id)
+        writer_id = state.writer_at(position) if ids else None
+        writer = state.get_review(writer_id) if writer_id is not None else None
+        blocks: list[str] = []
+        for entity_id in ids:
+            review = state.get_review(entity_id)
+            if review is None:
+                continue
+            block = self._tooltip_block(entity_id, review)
+            if writer is not None and entity_id != writer_id:
+                block += "\n" + self._not_written_line(writer)
+            blocks.append(block)
+        return "\n\n".join(blocks)
+
+    def viewportEvent(self, event: QEvent) -> bool:
+        """Answer a tooltip request over the document itself (H.4): the
+        highlights are ``ExtraSelection`` formats, whose hover text
+        ``QTextEdit`` never shows."""
+        if event.type() == QEvent.Type.ToolTip and isinstance(event, QHelpEvent):
+            position = self._char_at(event.pos())
+            text = self._hover_text(position) if position is not None else ""
+            if not text:
+                QToolTip.hideText()
+                event.ignore()
+                return True
+            QToolTip.showText(event.globalPos(), text, self.viewport())
+            return True
+        return super().viewportEvent(event)
 
     # ------------------------------------------------------------------
     # Click detection via binary search

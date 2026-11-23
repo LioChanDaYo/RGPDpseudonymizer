@@ -296,6 +296,11 @@ def _pseudonym(db: Path, name: str, entity_type: str) -> str:
     return found[0][2]
 
 
+def _no_row(db: Path, name: str, entity_type: str) -> bool:
+    """Story 15.1 (E): whether no row is stored for (name, type)."""
+    return not [row for row in _rows(db) if row[:2] == (name, entity_type)]
+
+
 def _files(tmp_path: Path, ext: str, tag: str = "") -> tuple[Path, Path]:
     return tmp_path / f"in{tag}{ext}", tmp_path / f"out{tag}{ext}"
 
@@ -575,7 +580,9 @@ def test_add_overlapping_a_written_name(tmp_path: Path, db: Path, ext: str) -> N
     )
     _pre(run.exit_code == 0, "exit code 0")
     pseudonym = _pseudonym(db, ZQ, "PERSON")
-    _pseudonym(db, VZ, "PERSON")
+    # Story 15.1 (E): the found name under the widened typed place is not
+    # written, so it is not saved
+    assert _no_row(db, VZ, "PERSON")
     if ext == ".txt":
         written = _text(output)
         assert "Quentrix" not in written and "Vorlan" not in written  # expected failure
@@ -1040,12 +1047,14 @@ def test_correction_overlapping_accepted_name(
         [ZQ],
     )
     _pre(run.exit_code == 0, "exit code 0")
-    _pseudonym(db, VZ, "PERSON")
+    # Story 15.1 (E): the found name under the widened typed place is not
+    # written, so it is not saved
+    assert _no_row(db, VZ, "PERSON")
     pseudonym = _pseudonym(db, ZQ, "PERSON")
     written = _overlap_written(output)
     assert [part for part in NAME_PARTS if part in written] == []  # expected failure
     assert written == f"{pseudonym} a signé."
-    assert _names(db) == sorted([(VZ, "PERSON"), (ZQ, "PERSON")])
+    assert _names(db) == [(ZQ, "PERSON")]
 
 
 @pytest.mark.parametrize("ext", [".txt", ".xlsx", ".csv"])
@@ -1063,12 +1072,14 @@ def test_correction_then_accepted_overlap(tmp_path: Path, db: Path, ext: str) ->
         [ZQ],
     )
     _pre(run.exit_code == 0, "exit code 0")
-    _pseudonym(db, QV, "PERSON")
+    # Story 15.1 (E): the found name under the widened typed place is not
+    # written, so it is not saved
+    assert _no_row(db, QV, "PERSON")
     pseudonym = _pseudonym(db, ZQ, "PERSON")
     written = _overlap_written(output)
     assert [part for part in NAME_PARTS if part in written] == []  # expected failure
     assert written == f"{pseudonym} a signé."
-    assert _names(db) == sorted([(QV, "PERSON"), (ZQ, "PERSON")])
+    assert _names(db) == [(ZQ, "PERSON")]
 
 
 @pytest.mark.parametrize("ext", [".txt", ".xlsx"])
@@ -1118,12 +1129,14 @@ def test_batch_correction_overlap(tmp_path: Path, db: Path, ext: str) -> None:
     )
     _pre(run.exit_code == 0, "exit code 0")
     output = out_folder / f"in_pseudonymized{ext}"
-    _pseudonym(db, VZ, "PERSON")
+    # Story 15.1 (E): the found name under the widened typed place is not
+    # written, so it is not saved
+    assert _no_row(db, VZ, "PERSON")
     pseudonym = _pseudonym(db, ZQ, "PERSON")
     written = _overlap_written(output)
     assert [part for part in NAME_PARTS if part in written] == []  # expected failure
     assert written == f"{pseudonym} a signé."
-    assert _names(db) == sorted([(VZ, "PERSON"), (ZQ, "PERSON")])
+    assert _names(db) == [(ZQ, "PERSON")]
 
 
 # --- v1.5: every place [E] reaches is typed (the PO's N4) ----------------------
@@ -1152,12 +1165,14 @@ def test_correction_overlap_at_second_place(tmp_path: Path, db: Path, ext: str) 
         [ZQ],
     )
     _pre(run.exit_code == 0, "exit code 0")
-    _pseudonym(db, VZ, "PERSON")
+    # Story 15.1 (E): the found name under the widened typed place is not
+    # written, so it is not saved
+    assert _no_row(db, VZ, "PERSON")
     pseudonym = _pseudonym(db, ZQ, "PERSON")
     written = _overlap_written(output)
     assert [part for part in NAME_PARTS if part in written] == []  # expected failure
     assert written == f"{pseudonym} valide. {pseudonym} a signé."
-    assert _names(db) == sorted([(VZ, "PERSON"), (ZQ, "PERSON")])
+    assert _names(db) == [(ZQ, "PERSON")]
 
 
 @pytest.mark.parametrize("ext", [".xlsx", ".csv"])
@@ -1182,7 +1197,9 @@ def test_correction_overlap_in_another_cell(tmp_path: Path, db: Path, ext: str) 
         [ZQ],
     )
     _pre(run.exit_code == 0, "exit code 0")
-    _pseudonym(db, VZ, "PERSON")
+    # Story 15.1 (E): the found name under the widened typed place is not
+    # written, so it is not saved
+    assert _no_row(db, VZ, "PERSON")
     pseudonym = _pseudonym(db, ZQ, "PERSON")
     cells = _cells(output)
     _pre(
@@ -1195,7 +1212,7 @@ def test_correction_overlap_in_another_cell(tmp_path: Path, db: Path, ext: str) 
     both = f"{b2}\n{b3}"
     assert [part for part in NAME_PARTS if part in both] == []  # expected failure
     assert (b2, b3) == (f"{pseudonym} valide.", f"{pseudonym} a signé.")
-    assert _names(db) == sorted([(VZ, "PERSON"), (ZQ, "PERSON")])
+    assert _names(db) == [(ZQ, "PERSON")]
 
 
 # --- Guards from QA's re-check: the widening's fixed point and the tie rule
@@ -1262,5 +1279,7 @@ def test_overlapping_typed_places_first_in_list_wins(tmp_path: Path, db: Path) -
     parts = (*NAME_PARTS, "Brimel")
     assert [part for part in parts if part in written] == []
     assert written == f"{_pseudonym(db, VZ, 'PERSON')} a signé."
-    _pseudonym(db, ZQ, "PERSON")
+    # Story 15.1 (E): the found name under the widened typed place is not
+    # written, so it is not saved
+    assert _no_row(db, ZQ, "PERSON")
     assert _pseudonym(db, QB, "PERSON") == stored

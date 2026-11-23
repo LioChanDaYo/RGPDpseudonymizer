@@ -295,9 +295,10 @@ class TestResolution:
         output = processor._apply_replacements(text, result.replacements)
 
         assert output == "Quentrel est loin."
+        # Story 15.1 (E): the ORG on the same span is not written, so it is
+        # neither drawn nor saved
         rows = _rows(db_path, "Zorbaville")
-        assert [t for t, _p in rows] == ["LOCATION", "ORG"]
-        assert rows[1][1] != "Quentrel"
+        assert [t for t, _p in rows] == ["LOCATION"]
 
     @pytest.mark.parametrize("order", ["location_first", "person_first"])
     def test_two_rows_of_one_key_never_share_a_pseudonym(

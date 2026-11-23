@@ -36,6 +36,7 @@ from gdpr_pseudonymizer.core.custom_pseudonym import (
 from gdpr_pseudonymizer.core.mapping_key import mapping_key
 from gdpr_pseudonymizer.core.place_word import draw_words, word_before
 from gdpr_pseudonymizer.core.saved_own_words import count_own_word_rows
+from gdpr_pseudonymizer.core.written_spans import written_parts
 from gdpr_pseudonymizer.data.database import (
     DatabaseSession,
     open_database,
@@ -197,6 +198,8 @@ class _ResolveResult:
     saved_entities: list[Entity] = field(default_factory=list)
     # Story 11.5: the pseudonyms shown that could not be written
     pseudonyms_changed: list[ChangedPseudonym] = field(default_factory=list)
+    # Story 15.1: the entities written, one for each replacement (in order)
+    written_entities: list[DetectedEntity] = field(default_factory=list)
 
 
 class DocumentProcessor:
@@ -759,8 +762,13 @@ class DocumentProcessor:
         entity_cache: dict[tuple[str, str], str],
         new_entities: list[Entity],
         sent_names: Iterable[str] = (),
+        written_names: Iterable[NameKey] | None = None,
     ) -> set[NameKey]:
         """Check every custom pseudonym again, then register it first (10.11).
+
+        Story 15.1 (E.3): every custom pseudonym given is checked, but only
+        those of ``written_names`` (the names the end writes at one place at
+        least; None: every name) are registered and saved.
 
         The last check: the database may have changed since the pseudonym
         was set, and ``sent_names`` (the mapping keys of the names sent)
@@ -785,6 +793,13 @@ class DocumentProcessor:
         self._check_custom_pseudonyms(
             stored, custom_pseudonyms, document_text, sent_names
         )
+        if written_names is not None:
+            written = set(written_names)
+            custom_pseudonyms = {
+                name: value
+                for name, value in custom_pseudonyms.items()
+                if name in written
+            }
         return self._register_custom_rows(
             ctx, custom_pseudonyms, stored, entity_cache, new_entities
         )
@@ -1327,6 +1342,14 @@ class DocumentProcessor:
         (``_register_proposals``, after the custom pseudonyms); any other
         name is resolved as before. Each pseudonym shown that differs from
         the one written is listed in the result's ``pseudonyms_changed``.
+
+        Story 15.1 (E.3): the end resolves the overlaps first, with the
+        writer's one rule (``written_parts``, the crossing rule included).
+        An entity it does not write is not looked up, drawn, saved or
+        counted, and no proposal or custom pseudonym of a name never written
+        is registered; it still counts in the real-name check. Each
+        replacement covers its entity's written part, and the result's
+        ``written_entities`` holds the entity of each, one for one.
         """
         # Story 13.1: the words read from what is written
         self._set_place_words(ctx, validated_entities, document_text, cells)
@@ -1334,6 +1357,29 @@ class DocumentProcessor:
             "starting_entity_processing",
             validated_count=len(validated_entities),
         )
+        # Story 15.1 (E.3): the part of each entity the end writes
+        texts: Mapping[str, str] = cells if cells is not None else {"": document_text}
+        parts = written_parts(
+            [
+                (
+                    (entity.context_label or "") if cells is not None else "",
+                    entity.start_pos,
+                    entity.end_pos,
+                )
+                for entity in validated_entities
+            ],
+            texts,
+        )
+        written = [
+            (entity, part)
+            for entity, part in zip(validated_entities, parts)
+            if part is not None
+        ]
+        written_entities = [entity for entity, _ in written]
+        written_names = {
+            (self._normalize_entity_text(ctx, entity), entity.entity_type)
+            for entity in written_entities
+        }
         replacements: list[tuple[int, int, str]] = []
         new_entities: list[Entity] = []
         # Keyed on (mapping key, entity type): one row and one pseudonym per
@@ -1359,9 +1405,11 @@ class DocumentProcessor:
             entity_cache,
             new_entities,
             sent_names=sent_names,
+            written_names=written_names,
         )
         # Story 11.5: the pseudonyms the review showed, kept when still free
-        sent_in_order = self._sent_in_order(ctx, validated_entities)
+        # (Story 15.1: for the names written only)
+        sent_in_order = self._sent_in_order(ctx, written_entities)
         kept: set[NameKey] = set()
         if proposals:
             kept = self._register_proposals(
@@ -1376,7 +1424,7 @@ class DocumentProcessor:
             )
             custom_unseen |= kept
 
-        for entity in validated_entities:
+        for entity, (part_start, part_end) in written:
             logger.debug(
                 "processing_entity",
                 entity_text=entity.text,
@@ -1432,7 +1480,7 @@ class DocumentProcessor:
                         entities_new += 1
 
             prefix = self._compute_replacement_prefix(ctx, entity)
-            replacements.append((entity.start_pos, entity.end_pos, prefix + pseudonym))
+            replacements.append((part_start, part_end, prefix + pseudonym))
 
         if new_entities:
             try:
@@ -1469,6 +1517,7 @@ class DocumentProcessor:
             entity_type_counts=type_counts,
             saved_entities=list(new_entities),
             pseudonyms_changed=changed,
+            written_entities=written_entities,
         )
 
     @staticmethod
@@ -1476,11 +1525,15 @@ class DocumentProcessor:
         document_text: str,
         replacements: list[tuple[int, int, str]],
     ) -> str:
-        """Deduplicate overlapping replacements and apply to document text.
+        """Resolve overlapping replacements and apply to document text.
 
-        Overlapping spans are resolved by keeping the first (longest) span
-        in sorted order. Replacements are applied from end to start to
-        preserve character positions.
+        Story 15.1 (E.2): the overlaps are resolved by the writer's one rule
+        (``written_parts``): a replacement is written over its part, whole
+        or, under the crossing rule, over its own words after the one it
+        crosses; any other is dropped. The list ``_resolve_pseudonyms``
+        gives is already its parts, which the rule keeps as they are.
+        Replacements are applied from end to start to preserve character
+        positions.
 
         Args:
             document_text: Original document text
@@ -1489,14 +1542,15 @@ class DocumentProcessor:
         Returns:
             Document text with all replacements applied
         """
-        # Deduplicate overlapping replacements
-        deduplicated: list[tuple[int, int, str]] = []
-        sorted_repls = sorted(replacements, key=lambda x: (x[0], -x[1]))
-
-        for start, end, pseudo in sorted_repls:
-            overlaps = any(not (end <= ks or start >= ke) for ks, ke, _ in deduplicated)
-            if not overlaps:
-                deduplicated.append((start, end, pseudo))
+        parts = written_parts(
+            [("", start, end) for start, end, _ in replacements],
+            {"": document_text},
+        )
+        deduplicated: list[tuple[int, int, str]] = [
+            (part[0], part[1], pseudo)
+            for (_, _, pseudo), part in zip(replacements, parts)
+            if part is not None
+        ]
 
         logger.debug(
             "replacements_deduplicated",
@@ -2167,9 +2221,11 @@ class DocumentProcessor:
                         cells=cells,
                     )
 
+                # Story 15.1 (E.4): the entities written, one for each
+                # replacement
                 self._apply_tabular_replacements(
                     tabular_doc,
-                    validated_entities,
+                    resolve_result.written_entities,
                     resolve_result.replacements,
                     output_path,
                 )
@@ -2284,9 +2340,11 @@ class DocumentProcessor:
                         cells={cell.cell_ref: cell.value for cell in tabular_doc.cells},
                     )
 
+                # Story 15.1 (E.4): the entities written, one for each
+                # replacement
                 self._apply_tabular_replacements(
                     tabular_doc,
-                    validated_entities,
+                    resolve_result.written_entities,
                     resolve_result.replacements,
                     output_path,
                 )
@@ -2321,7 +2379,8 @@ class DocumentProcessor:
 
         Args:
             tabular_doc: Document with cell data (modified in place)
-            validated_entities: Entities with context_label for cell matching
+            validated_entities: Entities with context_label for cell matching,
+                one for each replacement (Story 15.1: the entities written)
             replacements: List of (start, end, pseudonym) tuples
             output_path: Output file path (extension determines format)
         """

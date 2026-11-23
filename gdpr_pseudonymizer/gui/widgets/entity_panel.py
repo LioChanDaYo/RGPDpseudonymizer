@@ -24,6 +24,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from gdpr_pseudonymizer.core.written_spans import NotWritten
 from gdpr_pseudonymizer.gui.i18n import qarg
 from gdpr_pseudonymizer.utils.text_form import composed
 
@@ -39,6 +40,11 @@ _STATUS_ICONS: dict[str, str] = {
     "modified": "\u270e",  # ✎
     "added": "\u2713",  # ✓ (same as confirmed for display)
 }
+
+# Story 15.1: placeholders for the marks N1 and N2 until Task 3.2 writes the
+# approved texts (Lionel's Q2); not translated, never shipped
+_N1_PLACEHOLDER = "(N1)"
+_N2_PLACEHOLDER = "(N2)"
 
 # Entity type display names and section headers
 _TYPE_ORDER = ["PERSON", "LOCATION", "ORG"]
@@ -74,6 +80,8 @@ class EntityPanel(QWidget):
         self._entity_row_map: dict[str, int] = {}
         # Checked entity_ids
         self._checked_ids: set[str] = set()
+        # Story 15.1 (B.2): the mark each row shows (None: none)
+        self._shown_marks: dict[str, NotWritten | None] = {}
         self._filter_text = ""
         self._hide_rejected = False
         self._hide_confirmed = False
@@ -206,6 +214,7 @@ class EntityPanel(QWidget):
         self._list_widget.clear()
         self._row_entity_map.clear()
         self._entity_row_map.clear()
+        self._shown_marks.clear()
 
         if self._validation_state is None:
             return
@@ -296,28 +305,66 @@ class EntityPanel(QWidget):
 
     def update_entity_row(self, entity_id: str) -> None:
         """Update a single entity row after state change."""
+        if self._validation_state is None:
+            return
         row = self._entity_row_map.get(entity_id)
-        if row is None or self._validation_state is None:
-            return
         review = self._validation_state.get_review(entity_id)
-        if review is None:
-            return
-        item = self._list_widget.item(row)
-        if item:
-            status_icon = _STATUS_ICONS.get(review.state.value, "?")
-            pseudonym = self._validation_state.get_pseudonym(entity_id)
-            is_known = self._validation_state.is_entity_known(entity_id)
-            known_badge = "  " + self.tr("d\u00e9j\u00e0 connu") if is_known else ""
-            context_prefix = ""
-            if review.entity.context_label:
-                context_prefix = f"[{review.entity.context_label}] "
-            text = (
-                f"{status_icon} {context_prefix}{review.entity.text}{known_badge}\n"
-                f"      \u2192 {pseudonym}"
-            )
-            item.setText(text)
+        if row is not None and review is not None:
+            item = self._list_widget.item(row)
+            if item:
+                item.setText(self._row_text(review))
+        # Story 15.1 (B.2): a decision can change another row's mark (the
+        # row written over the same text), so every row whose mark changed
+        # is updated too, also when the row acted on is not in the list (a
+        # hidden row)
+        for other_id, other_row in self._entity_row_map.items():
+            if other_id == entity_id:
+                continue
+            other = self._validation_state.get_review(other_id)
+            if other is None:
+                continue
+            mark = self._validation_state.not_written(other_id)
+            if self._shown_marks.get(other_id) == mark:
+                continue
+            other_item = self._list_widget.item(other_row)
+            if other_item:
+                other_item.setText(self._row_text(other))
         self._update_pending_counter()
         self._update_bulk_button_counts()
+
+    def _not_written_text(self, mark: NotWritten | None) -> str:
+        """The mark shown between \u00ab \u2192 \u00bb and a row's pseudonym, with its
+        space; empty for a row written at every place.
+
+        Story 15.1: placeholders until Task 3.2 writes the approved texts N1
+        and N2 (Lionel's Q2)."""
+        if mark is None:
+            return ""
+        if mark.lost >= mark.places:
+            return _N1_PLACEHOLDER + " "
+        return f"{_N2_PLACEHOLDER} {mark.lost}/{mark.places} "
+
+    def _row_text(self, review: EntityReview) -> str:
+        """A row's two lines: its decision, cell, text and \u00ab d\u00e9j\u00e0 connu \u00bb;
+        then \u00ab \u2192 \u00bb, its mark if its pseudonym is not written (Story 15.1),
+        and its pseudonym."""
+        status_icon = _STATUS_ICONS.get(review.state.value, "?")
+        pseudonym = ""
+        is_known = False
+        mark: NotWritten | None = None
+        if self._validation_state:
+            pseudonym = self._validation_state.get_pseudonym(review.entity_id)
+            is_known = self._validation_state.is_entity_known(review.entity_id)
+            mark = self._validation_state.not_written(review.entity_id)
+        self._shown_marks[review.entity_id] = mark
+        known_badge = "  " + self.tr("d\u00e9j\u00e0 connu") if is_known else ""
+        context_prefix = ""
+        if review.entity.context_label:
+            context_prefix = f"[{review.entity.context_label}] "
+        return (
+            f"{status_icon} {context_prefix}{review.entity.text}{known_badge}\n"
+            f"      \u2192 {self._not_written_text(mark)}{pseudonym}"
+        )
 
     @property
     def hide_rejected_checkbox(self) -> QCheckBox:
@@ -365,7 +412,6 @@ class EntityPanel(QWidget):
 
     def _create_entity_item(self, review: EntityReview) -> QListWidgetItem:
         """Create a QListWidgetItem for an entity."""
-        status_icon = _STATUS_ICONS.get(review.state.value, "?")
         pseudonym = ""
         if self._validation_state:
             pseudonym = self._validation_state.get_pseudonym(review.entity_id)
@@ -374,19 +420,10 @@ class EntityPanel(QWidget):
             if self._validation_state
             else False
         )
-        known_badge = "  " + self.tr("d\u00e9j\u00e0 connu") if is_known else ""
 
-        # Show cell reference context for tabular files
-        context_prefix = ""
-        if review.entity.context_label:
-            context_prefix = f"[{review.entity.context_label}] "
-
-        text = (
-            f"{status_icon} {context_prefix}{review.entity.text}{known_badge}\n"
-            f"      \u2192 {pseudonym}"
-        )
-
-        item = QListWidgetItem(text)
+        # Cell reference shown for tabular files; the mark of a row not
+        # written (Story 15.1)
+        item = QListWidgetItem(self._row_text(review))
         item.setFlags(
             Qt.ItemFlag.ItemIsEnabled
             | Qt.ItemFlag.ItemIsSelectable

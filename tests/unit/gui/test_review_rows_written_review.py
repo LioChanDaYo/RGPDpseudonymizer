@@ -68,7 +68,6 @@ from tests.unit.test_review_rows_written import (
     S3_SPANS,
     S4,
     S4_SPANS,
-    TESTS_FIRST,
     ZORBAL,
     ZQ,
     Span,
@@ -242,7 +241,6 @@ def _block_line(entity_type: str, text: str) -> str:
 # ---------------------------------------------------------------------------
 
 
-@TESTS_FIRST
 @pytest.mark.parametrize(
     "case", ["single_place_first", "single_person_first", "batch_place_first"]
 )
@@ -286,7 +284,6 @@ def test_row_not_written_is_marked(  # type: ignore[no-untyped-def]
     assert _replacements(written, S1, [ZORBAL_SPAN]) == [record["shown"]]
 
 
-@TESTS_FIRST
 def test_mark_goes_when_the_written_row_is_rejected(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, monkeypatch, draws
 ) -> None:
@@ -306,7 +303,6 @@ def test_mark_goes_when_the_written_row_is_rejected(  # type: ignore[no-untyped-
     assert _replacements(sd.finalize(dialogs), S1, [ZORBAL_SPAN]) == [shown]
 
 
-@TESTS_FIRST
 def test_organisation_under_a_place_with_its_preposition_is_marked(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, draws
 ) -> None:
@@ -320,7 +316,6 @@ def test_organisation_under_a_place_with_its_preposition_is_marked(  # type: ign
     assert _not_written(sd.state, rows[(AT_ORG, LOCATION)].entity_id) is None
 
 
-@TESTS_FIRST
 def test_row_not_written_at_some_places_is_marked(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, draws
 ) -> None:
@@ -344,7 +339,6 @@ def test_row_not_written_at_some_places_is_marked(  # type: ignore[no-untyped-de
     assert _writer_at(sd.state, second_place) == org.entity_id
 
 
-@TESTS_FIRST
 def test_batch_worker_marks_and_saves_only_the_name_written(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, draws
 ) -> None:
@@ -366,7 +360,6 @@ def test_batch_worker_marks_and_saves_only_the_name_written(  # type: ignore[no-
     assert _names(batch.db) == [(ZORBAL, LOCATION)]
 
 
-@TESTS_FIRST
 def test_undo_brings_the_mark_back(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, draws
 ) -> None:
@@ -383,7 +376,6 @@ def test_undo_brings_the_mark_back(  # type: ignore[no-untyped-def]
     assert after == (1, 1, ((ZORBAL, LOCATION),))  # expected failure
 
 
-@TESTS_FIRST
 def test_crossing_row_is_not_marked(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, draws
 ) -> None:
@@ -405,7 +397,6 @@ def test_crossing_row_is_not_marked(  # type: ignore[no-untyped-def]
 # ---------------------------------------------------------------------------
 
 
-@TESTS_FIRST
 def test_hover_shows_both_rows_of_one_text(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, draws
 ) -> None:
@@ -435,7 +426,6 @@ def test_hover_shows_both_rows_of_one_text(  # type: ignore[no-untyped-def]
     assert _hover(qtbot, editor, last) == (True, text)
 
 
-@TESTS_FIRST
 def test_hover_shows_every_row_at_the_character(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, draws
 ) -> None:
@@ -462,7 +452,6 @@ def test_hover_shows_every_row_at_the_character(  # type: ignore[no-untyped-def]
     assert visible and place_line in text and org_line not in text
 
 
-@TESTS_FIRST
 def test_hover_leaves_out_hidden_rows(  # type: ignore[no-untyped-def]
     qtbot, main_window, tmp_path, draws
 ) -> None:

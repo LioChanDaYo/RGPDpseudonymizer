@@ -12,6 +12,7 @@ from rich.panel import Panel
 from rich.prompt import Confirm, Prompt
 from rich.table import Table
 
+from gdpr_pseudonymizer.core.written_spans import NotWritten
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 from gdpr_pseudonymizer.utils.text_form import composed
 
@@ -235,6 +236,7 @@ class ReviewScreen:
         occurrence_count: int = 1,
         context_index: int = 1,
         variant_texts: list[str] | None = None,
+        not_written: NotWritten | None = None,
     ) -> None:
         """Display single entity for review.
 
@@ -248,6 +250,9 @@ class ReviewScreen:
             occurrence_count: Number of occurrences (default 1 for single entities)
             context_index: Current context being displayed (1-based, for cycling)
             variant_texts: Non-canonical variant text forms (optional, for grouped entities)
+            not_written: The places where the end would write another
+                group's pseudonym (Story 15.1, B.5); None when it writes this
+                one at every place. Its lines (C1, C2) are written at Task 3.2.
         """
         self.console.clear()
         self.console.print()

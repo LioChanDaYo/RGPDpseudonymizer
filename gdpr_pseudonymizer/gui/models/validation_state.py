@@ -6,6 +6,7 @@ core validation models with Qt undo/redo and signal infrastructure.
 
 from __future__ import annotations
 
+import bisect
 import dataclasses
 import re
 import uuid
@@ -22,6 +23,7 @@ from gdpr_pseudonymizer.core.custom_pseudonym import (
     document_words,
 )
 from gdpr_pseudonymizer.core.mapping_key import mapping_key
+from gdpr_pseudonymizer.core.written_spans import NotWritten, written_parts
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 from gdpr_pseudonymizer.utils.logger import get_logger
 from gdpr_pseudonymizer.validation.models import (
@@ -126,6 +128,18 @@ def _widen_typed_places(entities: list[DetectedEntity]) -> list[DetectedEntity]:
     return DocumentProcessor._widen_added_places(entities)
 
 
+@dataclasses.dataclass(frozen=True)
+class _WrittenView:
+    """What the end would write if the document were written now (Story
+    15.1, Fix design B.1): each row's mark, and the parts written, by start,
+    with the row written there."""
+
+    marks: dict[str, NotWritten]
+    part_starts: list[int]
+    part_ends: list[int]
+    part_owners: list[str]
+
+
 class GUIValidationState(QObject):
     """Manages validation state for the GUI, wrapping core ValidationSession.
 
@@ -200,6 +214,14 @@ class GUIValidationState(QObject):
         # (as a variant group holds its canonical), all with the name as
         # added (Story 10.17, AC13 (d)).
         self._hand_places_by_id: dict[str, list[DetectedEntity]] = {}
+        # Story 15.1 (Fix design B.1): what the end would write now, over
+        # the list it would receive; computed when read, dropped on every
+        # change (a decision, an edit, a type change, an add, undo, redo)
+        self._written_view: _WrittenView | None = None
+        self.state_changed.connect(self._drop_written_view)
+        self.entity_added.connect(self._drop_written_view)
+        self.entity_removed.connect(self._drop_written_view)
+        self._undo_stack.indexChanged.connect(self._drop_written_view)
 
     @property
     def undo_stack(self) -> QUndoStack:
@@ -245,6 +267,7 @@ class GUIValidationState(QObject):
         self._undo_stack.clear()
         self._hand_spans_by_id.clear()
         self._hand_places_by_id.clear()
+        self._written_view = None
 
         # Story 10.17: the places the detector found, before any decision.
         self._found_places = {}
@@ -1227,7 +1250,9 @@ class GUIValidationState(QObject):
             occurrences = self._variant_occurrences.get(key, [review.entity])
             name = (review.entity.text, review.entity.entity_type)
             pending.append((name, [place_of(entity) for entity in occurrences]))
-        return count_names_left_in_clear(pending, sent)
+        return count_names_left_in_clear(
+            pending, sent, {"": self._session.document_text}
+        )
 
     def get_summary(self) -> dict[str, int]:
         """Summary counts: accepted, rejected, modified, added."""
@@ -1371,6 +1396,104 @@ class GUIValidationState(QObject):
         is widened over the names it partly overlaps (Story 10.17, AC8).
         """
         return _widen_typed_places(self._expand(self._validated_rows()))
+
+    # ------------------------------------------------------------------
+    # Story 15.1: which rows the end would write (Fix design B.1)
+    # ------------------------------------------------------------------
+
+    def not_written(self, entity_id: str) -> NotWritten | None:
+        """The places of a row whose pseudonym the end would not write if
+        the document were written now, or None.
+
+        None when at least one character of every place of the row is
+        written (a place written in part, under the crossing rule, counts
+        as written), or when the row is not sent (pending, rejected). The
+        rows written over its lost places are named in ``by``; the desktop
+        shows known rows, which can be rejected, so ``by_known`` is all
+        False.
+        """
+        return self._written().marks.get(entity_id)
+
+    def writer_at(self, position: int) -> str | None:
+        """The id of the row whose pseudonym the end would write over
+        character ``position`` of the document now, or None."""
+        view = self._written()
+        index = bisect.bisect_right(view.part_starts, position) - 1
+        if index >= 0 and position < view.part_ends[index]:
+            return view.part_owners[index]
+        return None
+
+    def _drop_written_view(self, *_: object) -> None:
+        self._written_view = None
+
+    def _written(self) -> _WrittenView:
+        if self._written_view is None:
+            self._written_view = self._compute_written_view()
+        return self._written_view
+
+    def _compute_written_view(self) -> _WrittenView:
+        """The end's rule (``written_parts``) over the list the end would
+        receive now: ``expand_validated_entities()`` in single-document
+        validation, ``get_validated_entities()`` in batch validation (a row
+        per place). Each place's row is known by expanding row by row
+        (``_widen_typed_places`` keeps one place per place, in order)."""
+        rows = self._validated_rows()
+        places: list[DetectedEntity] = []
+        owners: list[str] = []
+        names: dict[str, tuple[str, str]] = {}
+        for review, entity in rows:
+            sent = (
+                [entity] if self._rows_per_place else self._expand([(review, entity)])
+            )
+            places.extend(sent)
+            owners.extend([review.entity_id] * len(sent))
+            names[review.entity_id] = (entity.text, entity.entity_type)
+        widened = _widen_typed_places(places)
+        if len(widened) != len(places):  # pragma: no cover - the rule's contract
+            widened = places
+        parts = written_parts(
+            [("", e.start_pos, e.end_pos) for e in widened],
+            {"": self._session.document_text},
+        )
+        written = sorted(
+            (part[0], part[1], owner)
+            for part, owner in zip(parts, owners)
+            if part is not None and part[1] > part[0]
+        )
+        starts = [start for start, _, _ in written]
+        ends = [end for _, end, _ in written]
+        written_owners = [owner for _, _, owner in written]
+        counts: dict[str, list[int]] = {}
+        lost_by: dict[str, list[tuple[int, str]]] = {}
+        for place, part, owner in zip(widened, parts, owners):
+            count = counts.setdefault(owner, [0, 0])
+            count[1] += 1
+            if part is not None:
+                continue
+            count[0] += 1
+            # The written parts over this place: those ending after its
+            # start and starting before its end (disjoint, so contiguous)
+            low = bisect.bisect_right(ends, place.start_pos)
+            high = bisect.bisect_left(starts, place.end_pos)
+            lost_by.setdefault(owner, []).extend(
+                (starts[k], written_owners[k]) for k in range(low, high)
+            )
+        marks: dict[str, NotWritten] = {}
+        for owner, (lost, sent_places) in counts.items():
+            if lost == 0:
+                continue
+            by: list[tuple[str, str]] = []
+            for _, winner in sorted(lost_by.get(owner, [])):
+                name = names[winner]
+                if name not in by:
+                    by.append(name)
+            marks[owner] = NotWritten(
+                lost=lost,
+                places=sent_places,
+                by=tuple(by),
+                by_known=(False,) * len(by),
+            )
+        return _WrittenView(marks, starts, ends, written_owners)
 
     def _expand(
         self, rows: list[tuple[EntityReview, DetectedEntity]]

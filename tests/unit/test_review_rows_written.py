@@ -31,6 +31,7 @@ only. No spaCy model, no Qt.
 from __future__ import annotations
 
 import copy
+import csv
 import importlib
 import importlib.util
 import itertools
@@ -89,12 +90,6 @@ ORG_ZORBAL = "Zorbtech Zorbal"
 CUSTOM = "Xantor Vellion"
 
 ABSENT = "absent"
-
-TESTS_FIRST = pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 15.1 tests first: a review row shows a pseudonym that is not written",
-)
 
 # --- The test documents (Test Plan, "Conventions") ---------------------------
 
@@ -239,7 +234,6 @@ def _violations(
     return found
 
 
-@TESTS_FIRST
 @pytest.mark.parametrize("case", ["grid", "random"])
 def test_written_parts_keeps_todays_rule(case: str) -> None:
     """W1 (AC12): ``written_parts`` writes whole exactly the spans today's
@@ -453,7 +447,6 @@ def _prefix(entity: DetectedEntity) -> str:
 # --- E1, E3: the end saves and counts only the name written ------------------
 
 
-@TESTS_FIRST
 @pytest.mark.parametrize(
     "case", ["desktop_finalize", "cli_process", "csv_cell", "custom_not_written"]
 )
@@ -483,7 +476,6 @@ def test_end_saves_only_the_name_written(
     assert [row for row in _saved(db) if row.pseudonym_full == CUSTOM] == []
 
 
-@TESTS_FIRST
 def test_end_counts_only_the_name_written(tmp_path: Path, draws: _Draws) -> None:
     """E3 (AC12): S1 through ``finalize_document``: one new name, one
     place counted."""
@@ -496,7 +488,6 @@ def test_end_counts_only_the_name_written(tmp_path: Path, draws: _Draws) -> None
 # --- E4: the crossing rule ---------------------------------------------------
 
 
-@TESTS_FIRST
 @pytest.mark.parametrize("case", ["desktop_finalize", "cli_process"])
 def test_crossing_detection_written_over_its_own_words(
     tmp_path: Path, draws: _Draws, case: str
@@ -529,7 +520,6 @@ def test_crossing_detection_written_over_its_own_words(
 # --- R1 to R6: the command line marks a group not written --------------------
 
 
-@TESTS_FIRST
 @pytest.mark.parametrize("order", ["place_first", "person_first"])
 def test_cli_marks_the_group_not_written(
     tmp_path: Path, draws: _Draws, order: str
@@ -552,7 +542,6 @@ def test_cli_marks_the_group_not_written(
     assert run.marks[(ZORBAL, first)] is None
 
 
-@TESTS_FIRST
 def test_cli_marks_a_group_not_written_at_some_places(
     tmp_path: Path, draws: _Draws
 ) -> None:
@@ -574,7 +563,6 @@ def test_cli_marks_a_group_not_written_at_some_places(
     assert run.marks[(ORG_PLACE, ORG)] is None
 
 
-@TESTS_FIRST
 def test_cli_marks_the_organisation_under_a_place_with_its_preposition(
     tmp_path: Path, draws: _Draws
 ) -> None:
@@ -592,7 +580,6 @@ def test_cli_marks_the_organisation_under_a_place_with_its_preposition(
     assert run.marks[(AT_ORG, LOCATION)] is None
 
 
-@TESTS_FIRST
 def test_cli_crossing_group_is_not_marked(tmp_path: Path, draws: _Draws) -> None:
     """R4 (AC1, the crossing rule): S4: the person is written over
     « Quentrix », so neither group is marked; both get the keyword."""
@@ -607,7 +594,6 @@ def test_cli_crossing_group_is_not_marked(tmp_path: Path, draws: _Draws) -> None
     assert run.marks[(ORG_ZORBAL, ORG)] is None
 
 
-@TESTS_FIRST
 def test_cli_marks_a_group_lost_to_a_known_name(tmp_path: Path, draws: _Draws) -> None:
     """R5 (AC1): S1 with the place first, « Zorbal » already saved as a
     place: the place is written without review, so the person group is
@@ -621,7 +607,6 @@ def test_cli_marks_a_group_lost_to_a_known_name(tmp_path: Path, draws: _Draws) -
     assert _known(value) == (True,)
 
 
-@TESTS_FIRST
 def test_cli_spreadsheet_marks_per_cell(tmp_path: Path, draws: _Draws) -> None:
     """R6 (AC1): S5 as a ``.csv``: cell 1's person group is marked (the
     place « Zorbal » of the same cell is written); the place « Zorbaville »
@@ -669,6 +654,40 @@ def test_written_spans_and_types_unchanged(
     written = _replacements(
         run.written(), text, [(e.start_pos, e.end_pos) for e in kept]
     )
+    assert written == expected
+
+
+def test_written_spans_and_types_unchanged_per_cell(
+    tmp_path: Path, draws: _Draws
+) -> None:
+    """K1[csv] (AC6; Task 2.3, added for M6): S5 as a ``.csv``, every group
+    confirmed: in each cell, the spans written and their types are those
+    today's rule gives over the cell's places the end receives, so each
+    cell's replacements stay with their own entities."""
+    cells = [(S5_CELL1, S5_CELL1_SPANS), (S5_CELL2, S5_CELL2_SPANS)]
+    db = _new_db(tmp_path)
+    run = _csv_cli(tmp_path, db, cells)
+    received = run.received()
+    pre(run.output.exists(), f"output written: {run.output}")
+    with run.output.open(encoding="utf-8-sig", newline="") as handle:
+        rows = [row for row in csv.reader(handle) if row]
+    pre(len(rows) == 3, f"a header and two cells: {rows}")
+    labels = sorted({entity.context_label or "" for entity in received})
+    pre(len(labels) == 2, f"two cells sent: {labels}")
+    written: list[list[str]] = []
+    expected: list[list[str]] = []
+    for label, (source, _), row in zip(labels, cells, rows[1:]):
+        mine = [e for e in received if (e.context_label or "") == label]
+        kept = sorted(
+            (mine[i] for i in _today([(e.start_pos, e.end_pos) for e in mine])),
+            key=lambda entity: entity.start_pos,
+        )
+        expected.append(
+            [_prefix(e) + _row(db, e.text, e.entity_type).pseudonym_full for e in kept]
+        )
+        written.append(
+            _replacements(row[0], source, [(e.start_pos, e.end_pos) for e in kept])
+        )
     assert written == expected
 
 

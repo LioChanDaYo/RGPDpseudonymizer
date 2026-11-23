@@ -5,13 +5,14 @@ from __future__ import annotations
 import re
 import unicodedata
 import uuid
-from collections.abc import Iterable
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field, replace
 from datetime import datetime
 from enum import Enum
 from typing import TypeAlias
 
 from gdpr_pseudonymizer.core.mapping_key import mapping_key
+from gdpr_pseudonymizer.core.written_spans import written_parts
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 from gdpr_pseudonymizer.utils.french_patterns import (
     strip_french_prepositions,
@@ -263,34 +264,40 @@ def place_of(entity: DetectedEntity) -> Place:
     return (entity.context_label or "", entity.start_pos, entity.end_pos)
 
 
-def written_places(sent: Iterable[DetectedEntity]) -> list[Place]:
+def written_places(
+    sent: Iterable[DetectedEntity], texts: Mapping[str, str]
+) -> list[Place]:
     """Apply finalization's overlap rule per cell for Story 10.13.
 
-    Lionel's decision of 2026-10-16 counts only spans actually replaced:
-    earlier starts win, with longer spans first when starts are equal.
+    Lionel's decision of 2026-10-16 counts only spans actually replaced.
+    Story 15.1: those are the parts the end's one rule writes
+    (``written_parts``): earlier starts win, with longer spans first when
+    starts are equal, and a place crossing one written whole is written
+    over its own words after it (the crossing rule). ``texts`` maps each
+    cell to its text (the cell "" outside spreadsheets).
     """
-    kept_by_cell: dict[str, list[Place]] = {}
-    for place in sorted(
-        (place_of(entity) for entity in sent),
-        key=lambda item: (item[0], item[1], -item[2]),
-    ):
-        cell, start, end = place
-        kept = kept_by_cell.setdefault(cell, [])
-        if not any(not (end <= other[1] or start >= other[2]) for other in kept):
-            kept.append(place)
-    return [place for kept in kept_by_cell.values() for place in kept]
+    places = [place_of(entity) for entity in sent]
+    parts = written_parts(places, texts)
+    return [
+        (cell, part[0], part[1])
+        for (cell, _, _), part in zip(places, parts)
+        if part is not None
+    ]
 
 
 def count_names_left_in_clear(
     pending: Iterable[tuple[NameOfReview, Iterable[Place]]],
     sent: Iterable[DetectedEntity],
+    texts: Mapping[str, str],
 ) -> int:
     """Count distinct pending names left in clear for Story 10.13.
 
     Per Lionel's decision of 2026-10-16, a place is covered only by one
     containing written span in the same cell, regardless of entity type.
+    ``texts`` maps each cell to its text (Story 15.1: the crossing rule
+    reads it).
     """
-    written = written_places(sent)
+    written = written_places(sent, texts)
     uncovered_names: set[NameOfReview] = set()
     for name, places in pending:
         for cell, start, end in places:
@@ -798,7 +805,9 @@ class ValidationSession:
             if places:
                 pending.append((group.unique_key, places))
         return count_names_left_in_clear(
-            pending, [*self.get_validated_entities(), *sent_without_review]
+            pending,
+            [*self.get_validated_entities(), *sent_without_review],
+            self.cell_texts or {"": self.document_text},
         )
 
     def get_summary_stats(self) -> dict[str, int]:

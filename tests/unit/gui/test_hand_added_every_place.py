@@ -602,7 +602,12 @@ def test_overlap_takes_the_added_name(  # type: ignore[no-untyped-def]
 
     review.run(drive)
     output = review.output()
-    review.pseudonym(VZ)
+    if known is not None:
+        review.pseudonym(VZ)
+    else:
+        # Story 15.1 (E): the found name under the widened place is not
+        # written, so it is not saved
+        assert not review.has_row(VZ, "PERSON")
     zq = review.pseudonym(ZQ)
     assert "Quentrix" not in output and "Vorlan" not in output  # expected failure
     assert output == f"{zq} a signé. Le contrat avec {zq}."
@@ -961,13 +966,15 @@ def test_correction_overlapping_accepted_name(  # type: ignore[no-untyped-def]
 
     review.run(drive)
     output = review.output()
-    review.pseudonym(VZ)
+    # Story 15.1 (E): the found name under the widened typed place is not
+    # written, so it is not saved
+    assert not review.has_row(VZ, "PERSON")
     zq = review.pseudonym(ZQ)
     assert not any(  # expected failure
         part in output for part in ("Vorlan", "Zorbal", "Quentrix")
     )
     assert output == f"{zq} a signé."
-    assert len(review.stored()) == 2
+    assert len(review.stored()) == 1
 
 
 @pytest.mark.parametrize("mode", MODES)
@@ -992,13 +999,15 @@ def test_correction_then_accepted_overlap(  # type: ignore[no-untyped-def]
 
     review.run(drive)
     output = review.output()
-    review.pseudonym(QV)
+    # Story 15.1 (E): the found name under the widened typed place is not
+    # written, so it is not saved
+    assert not review.has_row(QV, "PERSON")
     zq = review.pseudonym(ZQ)
     assert not any(  # expected failure
         part in output for part in ("Vorlan", "Zorbal", "Quentrix")
     )
     assert output == f"{zq} a signé."
-    assert len(review.stored()) == 2
+    assert len(review.stored()) == 1
 
 
 @pytest.mark.parametrize("mode", MODES)
@@ -1031,13 +1040,15 @@ def test_correction_overlap_at_second_place(  # type: ignore[no-untyped-def]
 
     review.run(drive)
     output = review.output()
-    review.pseudonym(VZ)
+    # Story 15.1 (E): the found name under the widened typed place is not
+    # written, so it is not saved
+    assert not review.has_row(VZ, "PERSON")
     zq = review.pseudonym(ZQ)
     assert not any(  # expected failure
         part in output for part in ("Vorlan", "Zorbal", "Quentrix")
     )
     assert output == f"{zq} a validé. {zq} a signé."
-    assert len(review.stored()) == 2
+    assert len(review.stored()) == 1
 
 
 # ---------------------------------------------------------------------------
