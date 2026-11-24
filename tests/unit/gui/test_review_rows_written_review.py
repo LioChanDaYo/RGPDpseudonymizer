@@ -737,3 +737,35 @@ def test_hover_first_lines_are_the_labels(  # type: ignore[no-untyped-def]
     pre(visible, "the tooltip shows")
     assert "Lieu : Zorbal" in text and "Personne : Zorbal" in text
     assert [code for code in (PERSON, LOCATION, ORG) if code in text] == []
+
+
+# ---------------------------------------------------------------------------
+# QA round 1 (TEST-151-01): the counters after a decision on a hidden row
+# ---------------------------------------------------------------------------
+
+
+def test_counters_follow_a_decision_on_a_hidden_row(  # type: ignore[no-untyped-def]
+    qtbot, main_window, tmp_path, draws
+) -> None:
+    """QA's TEST-151-01: S1, the place row accepted, the accepted rows hidden
+    in the list, then the accept undone: the pending counter and the bulk
+    buttons already show what they would show if updated now (two rows
+    pending), though the row acted on is not in the list."""
+    sd = _single(qtbot, main_window, tmp_path, _new_db(tmp_path), S1, S1_PLACE_FIRST)
+    panel = sd.vs._panel
+    place = _rows(sd.state)[(ZORBAL, LOCATION)]
+    sd.state.accept_entity(place.entity_id)
+    panel.hide_confirmed_checkbox.setChecked(True)
+    pre(place.entity_id not in panel._entity_row_map, "the accepted row hidden")
+    sd.state.undo_stack.undo()
+    pre(sd.state.get_pending_count() == 2, "two rows pending again")
+    buttons = (
+        panel.accept_selection_button,
+        panel.reject_selection_button,
+        panel.accept_type_button,
+        panel.accept_known_button,
+    )
+    shown = (panel.pending_label.text(), [b.text() for b in buttons])
+    panel._update_pending_counter()
+    panel._update_bulk_button_counts()
+    assert shown == (panel.pending_label.text(), [b.text() for b in buttons])

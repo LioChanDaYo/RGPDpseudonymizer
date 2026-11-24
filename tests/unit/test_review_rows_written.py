@@ -45,7 +45,9 @@ from unittest.mock import patch
 
 import pytest
 from rich.console import Console
+from typer.testing import CliRunner
 
+from gdpr_pseudonymizer.cli.main import app
 from gdpr_pseudonymizer.core.document_processor import (
     DocumentProcessor,
     ProcessingResult,
@@ -55,6 +57,14 @@ from gdpr_pseudonymizer.data.database import open_database
 from gdpr_pseudonymizer.data.repositories.audit_repository import AuditRepository
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 from gdpr_pseudonymizer.validation.ui import ReviewScreen
+from tests.unit.test_cli_corrections_hand_added import (
+    ENTER,
+    ENV,
+    SPACE,
+    VM,
+    _process,
+    _text,
+)
 from tests.unit.test_custom_pseudonym_fixes_cli import (
     PASSPHRASE,
     _new_db,
@@ -857,3 +867,96 @@ def test_cli_condition_is_its_own_row() -> None:
     assert second[:column].strip() == ""
     assert second[column:].rstrip() == "unless that group is rejected"
     assert "Written instead:" not in _displayed(None)
+
+
+# --- QA round 1 (CLI-151-01): the command line's mark after [A] --------------
+
+QA_TESTS_FIRST = pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 15.1 tests first: the command line's mark after [A] names another group",
+)
+
+# (text, names found, keys, typed, the group added, the found groups expected
+# marked, as (text, type) -> (lost, places, by))
+ADD_CASES = {
+    "place_while_on_a_person": (
+        f"{VM} a signé le contrat à {PLACE}.",
+        [(VM, PERSON)],
+        [ENTER, "a"],
+        [PLACE, LOCATION],
+        (PLACE, LOCATION),
+        {},
+    ),
+    "organisation_over_a_found_place": (
+        f"{VM} a signé le contrat à {ORG_PLACE}.",
+        [(VM, PERSON), (PLACE, LOCATION)],
+        [ENTER, "a"],
+        [ORG_PLACE, ORG],
+        (ORG_PLACE, ORG),
+        {(PLACE, LOCATION): (1, 1, ((ORG_PLACE, ORG),))},
+    ),
+    "place_at_two_places": (
+        f"{VM} est basé à {PLACE}. Le contrat est signé à {PLACE}.",
+        [(VM, PERSON)],
+        [ENTER, "a"],
+        [PLACE, LOCATION],
+        (PLACE, LOCATION),
+        {},
+    ),
+    "back_to_the_confirmed_group": (
+        f"{VM} a signé le contrat à {PLACE}. {ZORBAL} a signé le contrat.",
+        [(VM, PERSON), (ZORBAL, LOCATION)],
+        [ENTER, "a", SPACE, SPACE, "p", SPACE, SPACE],
+        [PLACE, LOCATION],
+        (PLACE, LOCATION),
+        {},
+    ),
+}
+
+
+@pytest.fixture
+def cli_db(tmp_path: Path) -> Path:
+    """A new database, made by the real ``init`` command (Story 10.15's
+    harness)."""
+    path = tmp_path / "mappings.db"
+    result = CliRunner().invoke(
+        app, ["init", "--db", str(path)], env=ENV, catch_exceptions=False
+    )
+    pre(result.exit_code == 0 and path.is_file(), "init made the database")
+    return path
+
+
+@QA_TESTS_FIRST
+@pytest.mark.parametrize("case", list(ADD_CASES))
+def test_cli_mark_after_an_add_names_no_group_written(
+    tmp_path: Path, cli_db: Path, monkeypatch: pytest.MonkeyPatch, case: str
+) -> None:
+    """QA's CLI-151-01 (AC1): a name added with [A] while reviewing another
+    type is written at every place, so its group is displayed with no mark,
+    every time (also when going back to it with [P] once it is confirmed);
+    a found group it covers is marked by it."""
+    text, names, keys, typed, added, marked = ADD_CASES[case]
+    displays: list[tuple[str, str, Any]] = []
+    real = ReviewScreen.display_entity
+
+    def display(self: Any, entity: DetectedEntity, *a: Any, **k: Any) -> Any:
+        mark = k["not_written"] if "not_written" in k else ABSENT
+        displays.append((entity.text, entity.entity_type, mark))
+        return real(self, entity, *a, **k)
+
+    monkeypatch.setattr(ReviewScreen, "display_entity", display)
+    source, output = tmp_path / "in.txt", tmp_path / "out.txt"
+    source.write_text(text, encoding="utf-8")
+    run = _process(source, output, cli_db, names, keys, typed)
+    pre(run.exit_code == 0, f"exit code {run.exit_code}")
+    shown = [mark for name, etype, mark in displays if (name, etype) == added]
+    expected_displays = 2 if case == "back_to_the_confirmed_group" else 1
+    pre(len(shown) == expected_displays, f"the added group shown: {displays}")
+    assert [_mark(mark) for mark in shown] == [None] * expected_displays
+    for group, mark in marked.items():
+        got = [m for name, etype, m in displays if (name, etype) == group]
+        pre(len(got) == 1, f"{group} shown once")
+        assert _mark(got[0]) == mark
+    written = _text(output)
+    assert added[0] not in written and VM not in written
