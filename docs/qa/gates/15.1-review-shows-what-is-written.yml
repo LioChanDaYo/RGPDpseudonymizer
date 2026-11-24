@@ -1,0 +1,91 @@
+schema: 1
+story: '15.1'
+story_title: 'Every Review Row Matches What Is Written'
+scope: 'QA round 1 on head 9d24e8e (branch story/15.1-review-shows-what-is-written, draft PR #135; base origin/main 1bb6f57; tests-first 82334cb, fix cb19601, texts and CHANGELOG 9d24e8e). QA folder: rgpd-analysis/r151/qa (scratch trees tree_base, tree_tf, tree_head, tree_k1 made with git archive of the code, tests/unit, tests/integration and the three dev-corpus folders only; probes, plugins and logs; never committed).'
+gate: CONCERNS
+status_reason: 'The end, the desktop marks, the hover text and the texts hold everywhere QA measured: G2 identical to the baseline, AC4 reproduced on base and head with 0 rows unmarked and 0 rows wrongly marked, the 33 base rows checked by hand, the desktop mark list equal to the end list in 137 of 137 comparisons, the real hover shown through the real window and Qt own timer. One defect on a real path: in the command line, a name added with [A] under a type reviewed later (for example a place added while reviewing persons) is then displayed with a mark that names itself (« at 1 of 2 places, the pseudonym of Zorbaville (LOCATION) »), although it is written at every place (CLI-151-01, medium). Recommended: fix it, tests first, before merge.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-11-24T08:20:00Z'
+
+top_issues:
+  - id: 'CLI-151-01'
+    severity: medium
+    finding: 'ValidationWorkflow._not_written (validation/workflow.py:719-731) builds its list from every review not rejected, then appends every ADD decision. ValidationSession.add_manual_entity (validation/models.py:577-592) stores an added place both as a review in state ADDED and as an ADD decision, so each place added with [A] is in the mark list twice, while the end (get_validated_entities: CONFIRMED and MODIFIED reviews, then the ADD decisions) has it once. QA plugin qa_listcheck (list of the mark against the list the end receives, at the moment the end receives it): 16 of 16 command-line runs with an [A] add differ by exactly these duplicates, 93 others equal. The duplicate is never written, so it never changes another group mark (step 1 drops it behind its first copy; step 2 skips it, its kept span already crossed), and the written file is right. It changes the mark of the added group itself, and the review shows that group when its type is reviewed after the add (get_entity_groups is read per type, workflow.py:407). QA probe qa_test_add_mark.py (the real process command, Story 10.15 harness, invented names): a LOCATION added while on a PERSON is displayed with lost 1 of 2 places, by itself (« Written instead: at 1 of 2 places, the pseudonym of Zorbaville (LOCATION), unless that group is rejected »), and the file reads « à Mulhouse »; two places give 2 of 4; an ORG added over a found place gives 1 of 2, by itself (the found place row is marked right). Overfitting Check: met (an ordinary French document, [A] for a missed place or organisation while reviewing persons, process or batch with review). Stopping-rule item 1 (a row marked not written although it is written). No test reads a mark after [A]: QA mutant qadd (the ADD entries left out of the list) survives, 138 passed.'
+    suggested_action: 'Tests first: a case that adds a place with [A] while on a person and asserts the added group is displayed with not_written None, and that the end list and the mark list are equal. Then leave the ADDED-state reviews out of the review loop of _not_written (the ADD decisions already carry those places, in the end order), or drop the ADD-decision entries; keep pending reviews counted as kept.'
+    suggested_owner: dev
+  - id: 'TEST-151-01'
+    severity: low
+    finding: 'Beyond the plan, EntityPanel.update_entity_row no longer returns early for a row not in the list, so the pending counter and the bulk buttons update after a decision on a hidden row. QA measured it (qa_test_counters.py, the real screen, S1): with « Masquer les validées » on, undoing the accept of a hidden row gives « Reste : 1 » with 2 rows pending on the base and « Reste : 2 » on the head. A real fix, but no test pins it: QA mutant qcount (the counters skipped for a row not in the list, the other rows still updated) survives, 136 passed on the story files, test_entity_panel.py, test_validation_screen.py, test_batch_validation.py and Story 11.5 desktop file. The CHANGELOG entry Lionel approved does not mention it.'
+    suggested_action: 'With the CLI-151-01 fix: one case that undoes an accept on a hidden row and reads the pending counter. Lionel decides whether the CHANGELOG names it.'
+    suggested_owner: dev
+  - id: 'DOC-151-01'
+    severity: low
+    finding: 'AC9 check is git grep over tests/ as a whole, a search the Rules forbid; the dev and QA ran it on tests/unit/ and tests/integration/ (nothing, rc 1). The story Context says the CSV path count of rows written nowhere on the head (23) is measured; it is the dev probe only (sm151h.py), with no independent measure (the PO po2_parts.py covered desktop single, batch and CLI text).'
+    suggested_action: 'Whoever touches the story next rewords AC9 to tests/unit/ and tests/integration/.'
+    suggested_owner: sm
+
+waiver: { active: false }
+
+quality_score: 80
+
+expires: '2026-12-08T08:20:00Z'
+
+merge_blockers:
+  - 'CLI-151-01: the fix, tests first, and a QA re-check of that round (QA recommends it before merge; the orchestrator and Lionel decide).'
+  - 'AC9: one read-only Codex review of the final head under the stopping rule; its rule 1 starts after QA PASS, which this gate is not.'
+  - 'AC7 G1: run 45348172645 on 9d24e8e is compared by the orchestrator.'
+  - 'AC11: Lionel hand check before the release (not a merge gate).'
+
+merge_notes:
+  - 'Rule breaks by QA, reported first: four Bash calls began with cd /tmp; inside a compound command (a grep of the texts, the CHANGELOG comparison, two hashes of the draft); read-only, no file changed. Deviations: Python ran through .bat files with the Poetry venv python.exe called directly (not poetry run), so that the scratch tree, not the repository, is what gets imported; every pytest run checked the import path in every process (plugin qa_imp). The first qa_texts.py run used python -I, which ignores PYTHONDONTWRITEBYTECODE, and wrote __pycache__ into the scratch tree tree_head (not the repository). git ls-tree --name-only listed the names of the repository root, tests/ and tests/test_corpus/ to choose what to archive; nothing in held_out/, final_exam/ or tests/accuracy/ was archived, opened or searched. The native Windows hover probe opened a real window on Lionel screen for about 15 seconds; nothing waited on a key or a dialog.'
+  - 'CI on 9d24e8e: CI - Test Matrix 45345244165, Code Quality 45345244309 and CodeQL 45345238469 success (gh run list; the per-leg totals were read by the orchestrator). Local, on tree_head: the new files and every file of Dev Notes Testing plus Story 10.13 files and the gui batch and validation files, gui last, -n 4: 782 passed, 7 skipped. black --check 359 unchanged, ruff rc 0, mypy Success 112 source files (on the checkout).'
+  - 'AC9, tests first: on tree_tf (82334cb), single process: 13 passed, 28 xfailed, 0 XPASS; with --runxfail 28 failed, 13 passed, each at AssertionError on its expected-failure line (test_review_rows_written.py:251 x2, :482 x4, :493, :524 x2, :551 x2, :573, :591, :606, :620, :636; gui :284 x3, :302, :319, :340, :365, :383, :398, :423, :457, :480). The AttributeError lines in that log are the existing model_version_unavailable warning, not failures. No marker on the head (git grep over tests/unit/ and tests/integration/: nothing).'
+  - 'AC7, G2: run 45348394285 (workflow_dispatch on 9d24e8e, success), artifact accuracy-results downloaded to rgpd-analysis/r151/qa/acc/r45348394285/ (sha256 of accuracy-output.txt 8516ad12...). Its 31 bracket lines are identical to the saved baseline 39998847851 (sha256 d181036d... checked first); the file differs only in the runner Python patch version (3.11.17 to 3.11.18), the plugin order and the timing line. The 8 lines: [Overall] P=0.8068 R=0.8465 F1=0.8262; [PERSON] P=0.9219 R=0.9774; [LOCATION] P=0.7491 R=0.8061; [ORG] P=0.5766 R=0.5849; [HELD-OUT Overall] P=0.7911 R=0.7706; [HELD-OUT PERSON] P=0.8661 R=0.8661; [HELD-OUT LOCATION] P=0.7761 R=0.7647; [HELD-OUT ORG] P=0.6304 R=0.5686.'
+  - 'AC4, base (the SM sm151.py unchanged, on tree_base, fresh databases under qa/ac4_base): rows written nowhere 33 (desktop single, 18 documents), 74 (batch, 21), 30 (CLI text, 17), 25 (CLI CSV, 17); rows with some places not written 14, 17, 14; saved but never written 33, 30, 30, 25; CLI audit 2,324 counted, 2,250 written. Equal to the SM log numbers; the pseudonyms differ (draws).'
+  - 'AC4, hand check of the 33 base rows (qa_hand33.py): each row places from the detector grouped as the desktop groups them, the source at each span, and the base written file aligned with difflib (not the writer rule). 33 of 33: the shown pseudonym is at none of the row places and nowhere in the file; at each place the winner text is written. Read one by one, among them « Benelux » in board_minutes.txt, « Product Management » under « à Toulon », « Dr. Bruno Canard » under an organisation pseudonym, « France » 4 times in meeting_minutes.txt, and the two partial overlaps with « Thomas Kim » and « Ferrari » still in clear on the base.'
+  - 'AC4 and AC6, head (the dev sm151h.py and sm151d_head.py, on tree_head): rows written nowhere 31, 72, 28, 23; some places 14, 0, 17, 14; rows not written without a mark 0 and rows marked but written 0 on every path; 25 of 25 files rebuilt from the end parts on every path; saved but never written 0 everywhere; CLI audit entity_count 2,324 (Q5). sm151d_head part 10a 8,421 lists, 716 with a trim; part 10b on the four paths 17 characters newly replaced, 0 replaced today left in clear, 2 trims (« Thomas Kim », « Ferrari »), each writing its shown pseudonym. sm151h is not circular: its not-written side is the end written_entities checked against the written file, its mark side is state.not_written or the CLI keyword.'
+  - 'AC1 beyond the dev corpus (qa_listcheck plugin over 19 test files, 444 passed): desktop single and batch, the mark list equals the list the end receives in 137 of 137 comparisons (edits, type changes, hand-added rows, corrections, undo); the other 4 are Story 10.14 handoff tests, which change the review after the write started from a snapshot (expected). Command line: 93 equal; 16 differ only by the [A] duplicates (CLI-151-01); 9 runs end with pending reviews, which the mark counts as kept by design (B.5), and one of those is a plugin artefact (a desktop write on another thread compared with the CLI session).'
+  - 'AC15, the hover in the real app (qa_test_hover_real.py, offscreen): the real main window with its theme style sheet (viewport at 10,8), the validation screen own editor, the pointer moved with QTest.mouseMove and Qt own tooltip timer, no QHelpEvent sent. S1 single and batch: both blocks (« Lieu : Zorbal », « Personne : Zorbal ») and N3 under the person; S3 over « Zorbaville » inside « Zorbtech Zorbaville »: the organisation and place blocks, N3 under the place naming « Zorbtech Zorbaville » (Organisation); moving to blank space hides it. Control with M22 (override removed): nothing shown. Native Windows platform: QTest.mouseMove does not arm Qt timer, not even for a plain QTextEdit with a document tooltip, so the pointer step there is no reading; a ToolTip event on the native platform shows the right text. Real macOS and Linux desktops not checked (AC11).'
+  - 'AC3, texts letter for letter: N0 « %1 : %2 », N1, N2, N3 in entity_editor.py and entity_panel.py, and the en.ts translations, grep -F against the story Exact texts and Lionel answers in stopA-answers.md: each found once; U+0020 spaces, « » U+00AB/U+00BB, no U+00A0, U+202F or U+2019. At runtime (qa_texts.py): French sources as approved; with en.qm, %1: %2, the N3 English, (not written), (not written at %1 of %2 places), and the labels Person, Location, Organization. C1 and C2 rendered by the real display_entity at 80 columns for one winner, three winners, C2, one known, two known, known and shown: each line as Exact texts; rich markup in a name is escaped.'
+  - 'AC10: the CHANGELOG entry is byte-equal to the bold title plus the story draft, and the draft is byte-equal to the one Lionel was shown at 5868b91 (line 916 then, 928 now); one ### Fixed under [Unreleased], after Stories 12.1 and 13.1.'
+  - 'AC12 to AC14: git diff 1bb6f57...9d24e8e -- gdpr_pseudonymizer/ adds no logger., raise, print or warnings line; nlp, resources, data and tests/test_corpus unchanged (git diff --quiet rc 0); name-only = File Locations plus the PM epic files. The per-entity loop of _resolve_pseudonyms appends one replacement per entity written (no continue), so the tabular zip stays one for one. K1[csv] passes on the base code (the head test file in a scratch copy of the base, single process).'
+  - 'Mutants, in memory (plugins loaded with -p on tree_head, single process; no file of the repository or of a tree changed): M9 killed (test_list_mark_goes_from_the_other_row, test_list_marks_a_row_written_at_some_places); M29 killed (test_cli_prints_what_is_written_instead[r5_known], [one_known_one_shown]); M30 killed (test_count_rule_cases[dedup_dropped]; without it 18 passed); M10 killed (test_cli_marks_a_group_lost_to_a_known_name); M23 killed (6 hover tests); M26 killed (test_hover_shows_both_rows_of_one_text); M20 killed (W1 grid and random, E4 x2); QA qcount survives (TEST-151-01); QA qadd survives (CLI-151-01).'
+  - 'The changes beyond the plan: the 27 existing cases that moved in Task 2 (17 in test_cli_corrections_hand_added.py, 8 in gui/test_hand_added_every_place.py, dedup_dropped, test_one_span_both_types_first_in_validated_list_wins) and the Task 3.2 tooltip test were read hunk by hunk: every assert on the written text is unchanged except dedup_dropped, which now expects the crossing part (9-17) written too and no warning, true to the crossing rule; the reads of a hidden name stored row became asserts that it is absent (E); the stored counts drop by that name. validation/models.py written_places now returns the parts of written_parts, so Story 10.13 counts a place covered only by what the end writes, crossing part included (M30 pins it).'
+  - 'Logs: no new log line holds a name, a pseudonym or document text. The existing debug line processing_entity (document_processor.py:1428-1432) logs entity_text; it predates this story.'
+
+evidence:
+  tests_reviewed: 83
+  risks_identified: 3
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 13, 14, 15]
+    ac_gaps: [1]
+    ac_pending: [9, 11]
+  ac_notes:
+    AC1: 'Desktop single and batch, CLI text and CSV: 0 rows unmarked and 0 wrongly marked on the dev corpus; desktop mark list equal to the end list in 137 of 137 test comparisons. Gap: the CLI mark of a group added with [A] (CLI-151-01).'
+    AC5: 'R1 and G1 pass; S1 both orders through the real paths.'
+    AC8: 'Story 11.5 and 11.6 files pass on tree_head (782 passed); K3 passes.'
+    AC9: 'Tests first proven (28 xfailed, 28 AssertionError with --runxfail); CI green on 9d24e8e; Codex pending.'
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'No new log line or exception holds a name, pseudonym or text (AC13). The mapping table no longer saves names never written (0 on every path). Story 11.6 real-name check still runs over every entity sent.'
+  performance:
+    status: PASS
+    notes: 'Command line (qa_test_perf.py on tree_head, a session of 2,300 entities in 1,500 groups): the mark costs 10.6 ms per display, about 16 s spread over a review of all 1,500 groups. Desktop at 2,000 names and 10,000 places: no reading; on the base itself a bulk accept of the 2,000 rows did not finish within 600 s in this harness (each decision redraws the editor highlights), so base and head could not be compared. written_parts is O(n log n) by reading and W1 grid runs in seconds.'
+  reliability:
+    status: CONCERNS
+    notes: 'CLI-151-01: a wrong mark on the command line after [A]. The written file is right on every path measured.'
+  maintainability:
+    status: PASS
+    notes: 'The writer rule exists once (written_parts), used by the end, the desktop state, the CLI and Story 10.13 count; typed; small module with no log.'
+
+recommendations:
+  immediate:
+    - action: 'CLI-151-01: leave the ADDED reviews (or the ADD decisions) out of the mark list, tests first.'
+      refs: ['gdpr_pseudonymizer/validation/workflow.py:719-731', 'gdpr_pseudonymizer/validation/models.py:577-592']
+  future:
+    - action: 'TEST-151-01: a case that undoes an accept on a hidden row and reads the pending counter.'
+      refs: ['gdpr_pseudonymizer/gui/widgets/entity_panel.py:301-327']
+    - action: 'DOC-151-01: AC9 wording.'
+      refs: ['docs/stories/15.1.review-shows-what-is-written.story.md']
