@@ -871,12 +871,6 @@ def test_cli_condition_is_its_own_row() -> None:
 
 # --- QA round 1 (CLI-151-01): the command line's mark after [A] --------------
 
-QA_TESTS_FIRST = pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 15.1 tests first: the command line's mark after [A] names another group",
-)
-
 # (text, names found, keys, typed, the group added, the found groups expected
 # marked, as (text, type) -> (lost, places, by))
 ADD_CASES = {
@@ -904,6 +898,14 @@ ADD_CASES = {
         (PLACE, LOCATION),
         {},
     ),
+    "organisation_added_then_rejected": (
+        f"{VM} a signé le contrat à {ORG_PLACE}.",
+        [(VM, PERSON), (PLACE, LOCATION)],
+        [ENTER, "a", SPACE, "r"],
+        [ORG_PLACE, ORG],
+        (ORG_PLACE, ORG),
+        {(PLACE, LOCATION): (1, 1, ((ORG_PLACE, ORG),))},
+    ),
     "back_to_the_confirmed_group": (
         f"{VM} a signé le contrat à {PLACE}. {ZORBAL} a signé le contrat.",
         [(VM, PERSON), (ZORBAL, LOCATION)],
@@ -927,7 +929,6 @@ def cli_db(tmp_path: Path) -> Path:
     return path
 
 
-@QA_TESTS_FIRST
 @pytest.mark.parametrize("case", list(ADD_CASES))
 def test_cli_mark_after_an_add_names_no_group_written(
     tmp_path: Path, cli_db: Path, monkeypatch: pytest.MonkeyPatch, case: str
@@ -959,4 +960,6 @@ def test_cli_mark_after_an_add_names_no_group_written(
         pre(len(got) == 1, f"{group} shown once")
         assert _mark(got[0]) == mark
     written = _text(output)
-    assert added[0] not in written and VM not in written
+    # the end writes the added name, rejected or not (its ADD decision is
+    # always sent), so no word of it stays in clear
+    assert [w for w in (*added[0].split(), VM) if w in written] == []

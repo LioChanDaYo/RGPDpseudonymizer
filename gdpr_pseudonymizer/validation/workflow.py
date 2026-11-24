@@ -720,15 +720,21 @@ class ValidationWorkflow:
         entries: list[tuple[DetectedEntity, DetectedEntity | None]] = [
             (entity, None) for entity in sent_without_review
         ]
+        # A place added with [A] is both a review and an ADD decision
+        # (``add_manual_entity``); it counts once, through its decision,
+        # whatever its review's state (QA's CLI-151-01)
+        added = [
+            decision.modified_entity
+            for decision in session.user_decisions
+            if decision.action == "ADD" and decision.modified_entity
+        ]
         for review in session._entity_reviews:
             if review.state == EntityReviewState.REJECTED:
                 continue
+            if any(review.entity is place for place in added):
+                continue
             entries.append((ValidationSession._sent_entity(review), review.entity))
-        entries.extend(
-            (decision.modified_entity, decision.modified_entity)
-            for decision in session.user_decisions
-            if decision.action == "ADD" and decision.modified_entity
-        )
+        entries.extend((place, place) for place in added)
         sent = DocumentProcessor._widen_added_places([e for e, _ in entries])
         cells = list(session.cell_texts)
         texts: Mapping[str, str] = (
