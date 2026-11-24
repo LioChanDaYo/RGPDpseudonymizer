@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import re
 from collections import defaultdict
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import replace
 
 from gdpr_pseudonymizer.core.custom_pseudonym import (
@@ -19,6 +19,7 @@ from gdpr_pseudonymizer.core.custom_pseudonym import (
     normalize_custom_pseudonym,
 )
 from gdpr_pseudonymizer.core.mapping_key import mapping_key
+from gdpr_pseudonymizer.core.written_spans import NotWritten, written_parts
 from gdpr_pseudonymizer.exceptions import NoAnswerError
 from gdpr_pseudonymizer.nlp.entity_detector import DetectedEntity
 from gdpr_pseudonymizer.utils.french_patterns import FRENCH_TITLE_PATTERN
@@ -28,6 +29,7 @@ from gdpr_pseudonymizer.validation.context_precomputer import ContextPrecomputer
 from gdpr_pseudonymizer.validation.models import (
     CORRECTED_BY_HAND_SOURCE,
     EntityGroup,
+    EntityReview,
     EntityReviewState,
     ValidationSession,
     fold,
@@ -257,7 +259,11 @@ class ValidationWorkflow:
         # Step 2: Review entities by type (PERSON → ORG → LOCATION)
         try:
             self._review_entities_by_type(
-                session, pseudonym_assigner, pseudonym_checker, on_custom_set
+                session,
+                pseudonym_assigner,
+                pseudonym_checker,
+                on_custom_set,
+                sent_without_review=sent_without_review or [],
             )
         except KeyboardInterrupt as e:
             # If this was an intentional quit (from Q key), don't prompt again
@@ -376,8 +382,14 @@ class ValidationWorkflow:
         pseudonym_assigner: Callable[[DetectedEntity], str] | None = None,
         pseudonym_checker: PseudonymChecker | None = None,
         on_custom_set: Callable[[Mapping[NameKey, str]], None] | None = None,
+        sent_without_review: Sequence[DetectedEntity] = (),
     ) -> None:
         """Review entities by type in priority order using entity groups.
+
+        Story 15.1 (B.5): each group is displayed with ``not_written``, the
+        places where the end would write another pseudonym, given the known
+        names ``sent_without_review`` and every group not rejected (pending
+        ones counted as kept); None when it writes the group at every place.
 
         Args:
             session: Validation session with entities
@@ -449,6 +461,9 @@ class ValidationWorkflow:
                         context_index=group.current_context_index + 1,
                         variant_texts=(
                             group.non_canonical_variants if group.has_variants else None
+                        ),
+                        not_written=self._not_written(
+                            session, group, sent_without_review
                         ),
                     )
 
@@ -683,6 +698,114 @@ class ValidationWorkflow:
             sent = ValidationSession._sent_entity(review)
             names[mapping_key(sent.text, sent.entity_type)] = None
         return list(names)
+
+    @staticmethod
+    def _mark_entries(
+        session: ValidationSession,
+        sent_without_review: Sequence[DetectedEntity],
+    ) -> list[tuple[DetectedEntity, EntityReview | None]]:
+        """Story 15.1 (Fix design B.5; Codex round 1): the list the end
+        receives (``_run_validation``), with the review each entity comes
+        from: the known names first (``sent_without_review``, no review),
+        then ``ValidationSession.sent_entities``, the function the end's
+        ``get_validated_entities`` reads, with a pending review counted as
+        kept. A name added with [A] is there as the end has it: its ADD
+        decision, and its review too once confirmed or corrected."""
+        known: list[tuple[DetectedEntity, EntityReview | None]] = [
+            (entity, None) for entity in sent_without_review
+        ]
+        return known + session.sent_entities(pending_kept=True)
+
+    @staticmethod
+    def _not_written(
+        session: ValidationSession,
+        group: EntityGroup,
+        sent_without_review: Sequence[DetectedEntity],
+    ) -> NotWritten | None:
+        """Story 15.1 (Fix design B.5): the places of ``group`` where the end
+        would not write its pseudonym, or None.
+
+        The end's rule (``written_parts``) runs over the list the end
+        receives (``_mark_entries``), every typed place widened, per cell on
+        a spreadsheet. A place of the group is one review of it: it is
+        written when one of the entities that review sends is written (a
+        place added with [A] can be sent twice: its ADD decision and its
+        confirmed or corrected review). ``by`` names each other group
+        written over a lost place (a corrected review by the text it sends;
+        a known name by its own text, marked in ``by_known``: the review
+        never shows it)."""
+        from gdpr_pseudonymizer.core.document_processor import DocumentProcessor
+
+        entries = ValidationWorkflow._mark_entries(session, sent_without_review)
+        sent = DocumentProcessor._widen_added_places([e for e, _ in entries])
+        cells = list(session.cell_texts)
+        texts: Mapping[str, str] = (
+            session.cell_texts if cells else {"": session.document_text}
+        )
+
+        def cell(entity: DetectedEntity) -> str:
+            return (entity.context_label or "") if cells else ""
+
+        parts = written_parts([(cell(e), e.start_pos, e.end_pos) for e in sent], texts)
+        # The group's places: its reviews, each with the entities it sends
+        places: dict[int, list[int]] = {}
+        for index, (_, review) in enumerate(entries):
+            if review is not None and any(
+                review.entity == occurrence for occurrence in group.occurrences
+            ):
+                places.setdefault(id(review), []).append(index)
+        lost = [
+            indices
+            for indices in places.values()
+            if all(parts[index] is None for index in indices)
+        ]
+        if not places or not lost:
+            return None
+        groups = session.get_entity_groups()
+
+        def winner(index: int) -> tuple[str, str]:
+            entity, review = entries[index]
+            if review is not None and entity is review.entity:
+                for other in groups:
+                    if any(review.entity == o for o in other.occurrences):
+                        return (other.unique_key[0], other.unique_key[1])
+            return (entity.text, entity.entity_type)
+
+        order = {name: rank for rank, name in enumerate(cells)}
+        found: list[tuple[int, int, tuple[str, str], bool]] = []
+        for indices in lost:
+            for index in indices:
+                place = sent[index]
+                for other, part in enumerate(parts):
+                    review = entries[other][1]
+                    if (
+                        part is None
+                        or part[1] <= part[0]
+                        or (review is not None and id(review) in places)
+                        or cell(sent[other]) != cell(place)
+                        or not (part[0] < place.end_pos and part[1] > place.start_pos)
+                    ):
+                        continue
+                    found.append(
+                        (
+                            order.get(cell(place), 0),
+                            part[0],
+                            winner(other),
+                            review is None,
+                        )
+                    )
+        by: list[tuple[str, str]] = []
+        by_known: list[bool] = []
+        for _, _, name, known in sorted(found):
+            if name not in by:
+                by.append(name)
+                by_known.append(known)
+        return NotWritten(
+            lost=len(lost),
+            places=len(places),
+            by=tuple(by),
+            by_known=tuple(by_known),
+        )
 
     @staticmethod
     def _group_custom_pseudonym(session: ValidationSession, group: EntityGroup) -> str:

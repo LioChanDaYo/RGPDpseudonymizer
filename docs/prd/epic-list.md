@@ -84,6 +84,12 @@
 
 ---
 
+### Epic 15: The Review List Matches the Written File (next release, none planned)
+
+**Goal:** Every row the review list shows matches what is written in the output file (desktop single document and batch, command-line review, every output format): two detections that overlap or cover the same text never both show a pseudonym when only one will be written. Today, on the 25 dev documents, 32 review rows in 17 documents show a pseudonym written nowhere in the file, and no notice tells the user (PO of Story 14.1, 2026-11-22, `1bb6f57`; text search, QA confirms by hand), which breaks Story 11.5's promise. The SM and the dev choose the mechanism; each candidate goes to Lionel with what the user sees and an example, and any new French text is approved by Lionel word for word. No detection change and no accuracy drop without Lionel's go (Lionel, 2026-11-22: "we need to fix the old bug", then "yes, its own story first"). Story 15.1 only; lands on main first, before Story 14.1; no tag or PyPI release without Lionel's explicit go.
+
+---
+
 ### Epic 13: Place Pseudonyms That Fit the Word Before Them (next release, none planned)
 
 **Goal:** A place pseudonym is chosen to fit the word right before the place where it first appears (« à », « en », « de », « d' », « du », « au », or no such word), so no drawn place name reads wrong (no more « à Grand Est » or « de Le Centre-Ville »); one place keeps one pseudonym in every document; stored pseudonyms are reused as stored. First decided as a pseudonym of the same kind (Lionel, 2026-11-19: "yes"); redesigned around the word before the place, the geography list no longer the basis (Lionel, 2026-11-20: "yes, redesign it"). Story 13.1 only; lands on main first; no tag or PyPI release without Lionel's explicit go.

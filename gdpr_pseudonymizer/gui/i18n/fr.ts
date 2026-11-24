@@ -727,6 +727,16 @@ ou cliquez pour ouvrir</source>
         <source>Ajouter comme entitu00e9</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <location filename="../widgets/entity_editor.py" line="327"/>
+        <source>%1 : %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../widgets/entity_editor.py" line="343"/>
+        <source>Pseudonyme non écrit ici : c&apos;est celui de « %1 » (%2) qui est écrit.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>EntityPanel</name>
@@ -805,6 +815,16 @@ ou cliquez pour ouvrir</source>
     <message>
         <location filename="../widgets/entity_panel.py" line="384"/>
         <source>Rejeter la su00e9lection (%1)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../widgets/entity_panel.py" line="337"/>
+        <source>(non écrit)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../widgets/entity_panel.py" line="340"/>
+        <source>(non écrit %1 fois sur %2)</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

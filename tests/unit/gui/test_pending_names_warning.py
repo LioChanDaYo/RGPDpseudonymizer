@@ -549,6 +549,15 @@ def test_count_rule_cases(
     single.vs.finalize_button.click()
     output = single.output()
 
+    if case == "dedup_dropped":
+        # Story 15.1 (the crossing rule): the ORG « rel Zorbalia » crosses
+        # the PERSON « Quentrel » and is written over its own words after
+        # it, « Zorbalia »; so the pending place « Zorbalia » is not left in
+        # clear, and no warning counts it
+        warning_title = warn_fr(1)[0]
+        assert [w for w in dialogs.shown if w[0] == warning_title] == []
+        assert_written_as_today(output, DOC_P, [(0, 8), (9, 17)])
+        return
     assert dialogs.shown[:1] == [warn_fr(1)]  # expected failure
     spans = [(0, 8), (9, 17)] if case == "two_pieces" else [(0, 8)]
     assert_written_as_today(output, DOC_P, spans)
