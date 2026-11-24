@@ -996,19 +996,12 @@ ADD_EDIT_CASES = {
 }
 
 
-CODEX_TESTS_FIRST = pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 15.1 tests first: the command line's mark after [A] then [E]",
-)
-
-
 @pytest.mark.parametrize(
     "case",
     [
-        pytest.param("edit_to_a_longer_span", marks=CODEX_TESTS_FIRST),
+        "edit_to_a_longer_span",
         "edit_to_a_shorter_span",
-        pytest.param("edit_then_back_with_p", marks=CODEX_TESTS_FIRST),
+        "edit_then_back_with_p",
     ],
 )
 def test_cli_mark_after_an_add_then_a_correction(

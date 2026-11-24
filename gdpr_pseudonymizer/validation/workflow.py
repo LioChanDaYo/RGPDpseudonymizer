@@ -29,6 +29,7 @@ from gdpr_pseudonymizer.validation.context_precomputer import ContextPrecomputer
 from gdpr_pseudonymizer.validation.models import (
     CORRECTED_BY_HAND_SOURCE,
     EntityGroup,
+    EntityReview,
     EntityReviewState,
     ValidationSession,
     fold,
@@ -699,6 +700,23 @@ class ValidationWorkflow:
         return list(names)
 
     @staticmethod
+    def _mark_entries(
+        session: ValidationSession,
+        sent_without_review: Sequence[DetectedEntity],
+    ) -> list[tuple[DetectedEntity, EntityReview | None]]:
+        """Story 15.1 (Fix design B.5; Codex round 1): the list the end
+        receives (``_run_validation``), with the review each entity comes
+        from: the known names first (``sent_without_review``, no review),
+        then ``ValidationSession.sent_entities``, the function the end's
+        ``get_validated_entities`` reads, with a pending review counted as
+        kept. A name added with [A] is there as the end has it: its ADD
+        decision, and its review too once confirmed or corrected."""
+        known: list[tuple[DetectedEntity, EntityReview | None]] = [
+            (entity, None) for entity in sent_without_review
+        ]
+        return known + session.sent_entities(pending_kept=True)
+
+    @staticmethod
     def _not_written(
         session: ValidationSession,
         group: EntityGroup,
@@ -707,34 +725,18 @@ class ValidationWorkflow:
         """Story 15.1 (Fix design B.5): the places of ``group`` where the end
         would not write its pseudonym, or None.
 
-        The list is the one the end receives (``_run_validation``): the
-        known names first (``sent_without_review``), then each review not
-        rejected (a pending one counted as kept) as it would be sent, then
-        the names added, every typed place widened; the end's rule
-        (``written_parts``) runs over it, per cell on a spreadsheet. ``by``
-        names each group written over a lost place (a known name by its own
-        text, marked in ``by_known``: the review never shows it)."""
+        The end's rule (``written_parts``) runs over the list the end
+        receives (``_mark_entries``), every typed place widened, per cell on
+        a spreadsheet. A place of the group is one review of it: it is
+        written when one of the entities that review sends is written (a
+        place added with [A] can be sent twice: its ADD decision and its
+        confirmed or corrected review). ``by`` names each other group
+        written over a lost place (a corrected review by the text it sends;
+        a known name by its own text, marked in ``by_known``: the review
+        never shows it)."""
         from gdpr_pseudonymizer.core.document_processor import DocumentProcessor
 
-        # (entity sent, entity reviewed or None for a known name)
-        entries: list[tuple[DetectedEntity, DetectedEntity | None]] = [
-            (entity, None) for entity in sent_without_review
-        ]
-        # A place added with [A] is both a review and an ADD decision
-        # (``add_manual_entity``); it counts once, through its decision,
-        # whatever its review's state (QA's CLI-151-01)
-        added = [
-            decision.modified_entity
-            for decision in session.user_decisions
-            if decision.action == "ADD" and decision.modified_entity
-        ]
-        for review in session._entity_reviews:
-            if review.state == EntityReviewState.REJECTED:
-                continue
-            if any(review.entity is place for place in added):
-                continue
-            entries.append((ValidationSession._sent_entity(review), review.entity))
-        entries.extend((place, place) for place in added)
+        entries = ValidationWorkflow._mark_entries(session, sent_without_review)
         sent = DocumentProcessor._widen_added_places([e for e, _ in entries])
         cells = list(session.cell_texts)
         texts: Mapping[str, str] = (
@@ -745,46 +747,53 @@ class ValidationWorkflow:
             return (entity.context_label or "") if cells else ""
 
         parts = written_parts([(cell(e), e.start_pos, e.end_pos) for e in sent], texts)
-        mine = [
-            index
-            for index, (_, reviewed) in enumerate(entries)
-            if reviewed is not None
-            and any(reviewed == occurrence for occurrence in group.occurrences)
+        # The group's places: its reviews, each with the entities it sends
+        places: dict[int, list[int]] = {}
+        for index, (_, review) in enumerate(entries):
+            if review is not None and any(
+                review.entity == occurrence for occurrence in group.occurrences
+            ):
+                places.setdefault(id(review), []).append(index)
+        lost = [
+            indices
+            for indices in places.values()
+            if all(parts[index] is None for index in indices)
         ]
-        lost = [index for index in mine if parts[index] is None]
-        if not mine or not lost:
+        if not places or not lost:
             return None
         groups = session.get_entity_groups()
 
         def winner(index: int) -> tuple[str, str]:
-            reviewed = entries[index][1]
-            if reviewed is not None:
+            entity, review = entries[index]
+            if review is not None and entity is review.entity:
                 for other in groups:
-                    if any(reviewed == o for o in other.occurrences):
+                    if any(review.entity == o for o in other.occurrences):
                         return (other.unique_key[0], other.unique_key[1])
-            entity = sent[index]
             return (entity.text, entity.entity_type)
 
         order = {name: rank for rank, name in enumerate(cells)}
         found: list[tuple[int, int, tuple[str, str], bool]] = []
-        for index in lost:
-            place = sent[index]
-            for other, part in enumerate(parts):
-                if (
-                    part is None
-                    or part[1] <= part[0]
-                    or cell(sent[other]) != cell(place)
-                    or not (part[0] < place.end_pos and part[1] > place.start_pos)
-                ):
-                    continue
-                found.append(
-                    (
-                        order.get(cell(place), 0),
-                        part[0],
-                        winner(other),
-                        entries[other][1] is None,
+        for indices in lost:
+            for index in indices:
+                place = sent[index]
+                for other, part in enumerate(parts):
+                    review = entries[other][1]
+                    if (
+                        part is None
+                        or part[1] <= part[0]
+                        or (review is not None and id(review) in places)
+                        or cell(sent[other]) != cell(place)
+                        or not (part[0] < place.end_pos and part[1] > place.start_pos)
+                    ):
+                        continue
+                    found.append(
+                        (
+                            order.get(cell(place), 0),
+                            part[0],
+                            winner(other),
+                            review is None,
+                        )
                     )
-                )
         by: list[tuple[str, str]] = []
         by_known: list[bool] = []
         for _, _, name, known in sorted(found):
@@ -793,7 +802,7 @@ class ValidationWorkflow:
                 by_known.append(known)
         return NotWritten(
             lost=len(lost),
-            places=len(mine),
+            places=len(places),
             by=tuple(by),
             by_known=tuple(by_known),
         )

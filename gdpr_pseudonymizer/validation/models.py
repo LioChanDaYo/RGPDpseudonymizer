@@ -645,22 +645,36 @@ class ValidationSession:
         Returns:
             List of validated entities ready for pseudonymization
         """
-        added_entities = [
-            d.modified_entity
+        return [entity for entity, _ in self.sent_entities()]
+
+    def sent_entities(
+        self, pending_kept: bool = False
+    ) -> list[tuple[DetectedEntity, EntityReview | None]]:
+        """Each entity ``get_validated_entities`` sends, with the review it
+        comes from, in the same order: every review confirmed or modified,
+        as it sends it, then every name added with [A] (its ADD decision,
+        whatever its review's state; a place added and then confirmed or
+        corrected is so sent twice).
+
+        Story 15.1: the command line's mark reads this list, with
+        ``pending_kept`` counting a pending review as kept, so the mark and
+        the end read one list.
+        """
+        kept = (EntityReviewState.CONFIRMED, EntityReviewState.MODIFIED) + (
+            (EntityReviewState.PENDING,) if pending_kept else ()
+        )
+        reviews = {review.entity_id: review for review in self._entity_reviews}
+        added: list[tuple[DetectedEntity, EntityReview | None]] = [
+            (d.modified_entity, reviews.get(d.entity_id))
             for d in self.user_decisions
             if d.action == "ADD" and d.modified_entity
         ]
-
-        validated = []
-        for review in self._entity_reviews:
-            if review.state not in (
-                EntityReviewState.CONFIRMED,
-                EntityReviewState.MODIFIED,
-            ):
-                continue
-            validated.append(self._sent_entity(review))
-
-        return validated + added_entities
+        validated: list[tuple[DetectedEntity, EntityReview | None]] = [
+            (self._sent_entity(review), review)
+            for review in self._entity_reviews
+            if review.state in kept
+        ]
+        return validated + added
 
     @staticmethod
     def _sent_entity(review: EntityReview) -> DetectedEntity:
