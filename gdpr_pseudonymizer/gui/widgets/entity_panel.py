@@ -41,11 +41,6 @@ _STATUS_ICONS: dict[str, str] = {
     "added": "\u2713",  # ✓ (same as confirmed for display)
 }
 
-# Story 15.1: placeholders for the marks N1 and N2 until Task 3.2 writes the
-# approved texts (Lionel's Q2); not translated, never shipped
-_N1_PLACEHOLDER = "(N1)"
-_N2_PLACEHOLDER = "(N2)"
-
 # Entity type display names and section headers
 _TYPE_ORDER = ["PERSON", "LOCATION", "ORG"]
 _TYPE_DISPLAY: dict[str, str] = {
@@ -334,15 +329,20 @@ class EntityPanel(QWidget):
 
     def _not_written_text(self, mark: NotWritten | None) -> str:
         """The mark shown between \u00ab \u2192 \u00bb and a row's pseudonym, with its
-        space; empty for a row written at every place.
-
-        Story 15.1: placeholders until Task 3.2 writes the approved texts N1
-        and N2 (Lionel's Q2)."""
+        space; empty for a row written at every place (Story 15.1: N1 and N2,
+        Lionel's Q2, texts 2 and 3)."""
         if mark is None:
             return ""
         if mark.lost >= mark.places:
-            return _N1_PLACEHOLDER + " "
-        return f"{_N2_PLACEHOLDER} {mark.lost}/{mark.places} "
+            return self.tr("(non écrit)") + " "
+        return (
+            qarg(
+                self.tr("(non écrit %1 fois sur %2)"),
+                str(mark.lost),
+                str(mark.places),
+            )
+            + " "
+        )
 
     def _row_text(self, review: EntityReview) -> str:
         """A row's two lines: its decision, cell, text and \u00ab d\u00e9j\u00e0 connu \u00bb;

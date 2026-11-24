@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import readchar
 from rich.console import Console
+from rich.markup import escape
 from rich.panel import Panel
 from rich.prompt import Confirm, Prompt
 from rich.table import Table
@@ -214,6 +215,43 @@ class SummaryScreen:
         readchar.readkey()
 
 
+def not_written_lines(not_written: NotWritten) -> tuple[str, str] | None:
+    """The two lines a review group gets when the end would write another
+    group's pseudonym at some of its places (Story 15.1, C1 and C2): what is
+    written instead, naming every group that wins (a known name marked
+    « known »), then the condition. None when no group is named.
+    """
+    by = list(not_written.by)
+    if not by:
+        return None
+    known = list(not_written.by_known) + [False] * (len(by) - len(not_written.by_known))
+    names = [
+        f"{text} ({entity_type}, known)" if is_known else f"{text} ({entity_type})"
+        for (text, entity_type), is_known in zip(by, known)
+    ]
+    if len(names) == 1:
+        written = f"the pseudonym of {names[0]},"
+    else:
+        written = f"the pseudonyms of {', '.join(names[:-1])} and {names[-1]},"
+    if not_written.lost < not_written.places:
+        written = f"at {not_written.lost} of {not_written.places} places, {written}"
+    if not any(known):
+        condition = (
+            "unless that group is rejected"
+            if len(by) == 1
+            else "unless one of those groups is rejected"
+        )
+    elif all(known):
+        condition = (
+            "written without review: you cannot reject it here"
+            if len(by) == 1
+            else "written without review: you cannot reject them here"
+        )
+    else:
+        condition = "unless one of those not marked known is rejected"
+    return written, condition
+
+
 class ReviewScreen:
     """Entity review screen for single entity validation."""
 
@@ -252,7 +290,8 @@ class ReviewScreen:
             variant_texts: Non-canonical variant text forms (optional, for grouped entities)
             not_written: The places where the end would write another
                 group's pseudonym (Story 15.1, B.5); None when it writes this
-                one at every place. Its lines (C1, C2) are written at Task 3.2.
+                one at every place. Shown as two rows (C1, C2) after the
+                pseudonym, from ``not_written_lines``.
         """
         self.console.clear()
         self.console.print()
@@ -302,6 +341,11 @@ class ReviewScreen:
             )
 
         table.add_row("→ Pseudonym:", f"[green]{pseudonym}[/green]")
+        # Story 15.1 (C1, C2): what is written instead, then the condition
+        lines = not_written_lines(not_written) if not_written is not None else None
+        if lines is not None:
+            table.add_row("Written instead:", escape(lines[0]))
+            table.add_row("", escape(lines[1]))
         table.add_row("", "")
 
         # Context with cycling indicator for groups

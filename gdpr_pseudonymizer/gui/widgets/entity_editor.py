@@ -45,11 +45,6 @@ _DARK_COLORS: dict[str, tuple[str, str]] = {
 _REJECTED_LIGHT = ("#FFCDD2", "#B71C1C")
 _REJECTED_DARK = ("#4E342E", "#FFCDD2")
 
-# Story 15.1: placeholder for the last line N3 of a hover block whose
-# pseudonym is not written at the pointer, until Task 3.2 writes the approved
-# text (Lionel's Q2); not translated, never shipped
-_N3_PLACEHOLDER = "(N3)"
-
 
 class EntityEditor(QTextEdit):
     """Read-only document editor with entity highlights and navigation.
@@ -327,8 +322,14 @@ class EntityEditor(QTextEdit):
         context_line = ""
         if review.entity.context_label:
             context_line = f"\n[{review.entity.context_label}]"
+        # Story 15.1 (Lionel's Q2, text 1): the type's label, then the text
+        first_line = qarg(
+            self.tr("%1 : %2"),
+            self._type_label(review.entity.entity_type),
+            review.entity.text,
+        )
         return (
-            f"{review.entity.entity_type}: {review.entity.text}\n"
+            f"{first_line}\n"
             f"→ {pseudonym}\n"
             + qarg(self.tr("Confiance : %1"), conf_str)
             + context_line
@@ -336,12 +337,14 @@ class EntityEditor(QTextEdit):
 
     def _not_written_line(self, writer: EntityReview) -> str:
         """The last line of a block whose pseudonym is not written at the
-        pointer, naming the row written there (N3).
-
-        Story 15.1: a placeholder until Task 3.2 writes the approved text
-        (Lionel's Q2)."""
-        label = self._type_label(writer.entity.entity_type)
-        return f"{_N3_PLACEHOLDER} {writer.entity.text} ({label})"
+        pointer, naming the row written there (N3; Lionel's Q2, text 4)."""
+        return qarg(
+            self.tr(
+                "Pseudonyme non écrit ici : c'est celui de « %1 » (%2) qui est écrit."
+            ),
+            writer.entity.text,
+            self._type_label(writer.entity.entity_type),
+        )
 
     def _char_box(self, position: int) -> tuple[float, float, float, float] | None:
         """(left, right, top, bottom) of character ``position`` in the

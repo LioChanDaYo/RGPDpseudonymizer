@@ -72,7 +72,9 @@ class TestEntityHighlighting:
         # First selection should have a tooltip with entity info
         assert len(selections) > 0
         tooltip = selections[0].format.toolTip()
-        assert "PERSON" in tooltip or "LOCATION" in tooltip or "ORG" in tooltip
+        # Story 15.1 (Lionel's Q2, text 1): the type's label, not its code
+        assert tooltip.startswith(("Personne : ", "Lieu : ", "Organisation : "))
+        assert not any(code in tooltip for code in ("PERSON", "LOCATION", "ORG"))
 
     def test_accepted_entity_has_green_underline(
         self, editor_with_state: tuple[EntityEditor, GUIValidationState]

@@ -231,9 +231,44 @@ def _format_blocks(editor: EntityEditor, position: int) -> list[str]:
     ]
 
 
+# The approved texts, letter for letter (Story 15.1, "Exact texts"; Lionel's
+# Q2, 2026-11-23); the French sources, no translator installed
+N0 = "%1 : %2"
+N1 = "(non écrit)"
+N2 = "(non écrit %1 fois sur %2)"
+N3 = "Pseudonyme non écrit ici : c'est celui de « %1 » (%2) qui est écrit."
+LABELS = {PERSON: "Personne", LOCATION: "Lieu", ORG: "Organisation"}
+
+
+def _fill(template: str, *values: str) -> str:
+    """``%1``, ``%2``... filled in, as ``qarg`` does."""
+    for index, value in enumerate(values, start=1):
+        template = template.replace(f"%{index}", value)
+    return template
+
+
 def _block_line(entity_type: str, text: str) -> str:
-    """The first line of a row's block today (``entity_editor.py:274``)."""
-    return f"{entity_type}: {text}"
+    """The first line of a row's block (N0): the type's label and the text."""
+    return _fill(N0, LABELS[entity_type], text)
+
+
+def _block(text: str, first_line: str) -> str:
+    """The block of the hover text that starts with ``first_line``."""
+    found = [b for b in text.split("\n\n") if b.split("\n", 1)[0] == first_line]
+    pre(len(found) == 1, f"one block {first_line!r}: {len(found)}")
+    return found[0]
+
+
+def _list_text(sd: _Single, entity_id: str) -> str:
+    """A row's text in the review list, read from the list itself."""
+    panel = sd.vs._panel
+    row = panel._entity_row_map.get(entity_id)
+    if row is None:
+        pytest.fail(f"PRE: the row is in the list: {entity_id}")
+    item = panel.list_widget.item(row)
+    pre(item is not None, "the list item")
+    text: str = item.text()
+    return text
 
 
 # ---------------------------------------------------------------------------
@@ -576,3 +611,129 @@ def test_no_tooltip_without_a_row(  # type: ignore[no-untyped-def]
     end = _rect(editor, len(ZORBAL))
     visible, _ = _hover(qtbot, editor, QPoint(end.x() + 40, end.center().y()))
     assert not visible
+
+
+# ---------------------------------------------------------------------------
+# T1 (after STOP B): the approved texts, letter for letter
+# ---------------------------------------------------------------------------
+
+
+def test_list_marks_a_row_written_nowhere(  # type: ignore[no-untyped-def]
+    qtbot, main_window, tmp_path, draws
+) -> None:
+    """T1 (AC3, N1): S1 with the place first, every row accepted: the person
+    row's second line reads « → (non écrit) » before its pseudonym; the
+    place row's has no mark."""
+    sd = _single(qtbot, main_window, tmp_path, _new_db(tmp_path), S1, S1_PLACE_FIRST)
+    _accept_all(sd.state)
+    rows = _rows(sd.state)
+    place, person = rows[(ZORBAL, LOCATION)], rows[(ZORBAL, PERSON)]
+    shown = sd.state.get_pseudonym(person.entity_id)
+    assert f"→ {N1} {shown}" in _list_text(sd, person.entity_id)
+    place_shown = sd.state.get_pseudonym(place.entity_id)
+    assert _list_text(sd, place.entity_id).endswith(f"→ {place_shown}")
+
+
+def test_list_marks_a_row_written_at_some_places(  # type: ignore[no-untyped-def]
+    qtbot, main_window, tmp_path, draws
+) -> None:
+    """T1 (AC3, N2): S3, every row accepted: the place row « à Zorbaville »
+    reads « → (non écrit 1 fois sur 2) » before its pseudonym."""
+    sd = _single(qtbot, main_window, tmp_path, _new_db(tmp_path), S3, S3_SPANS)
+    _accept_all(sd.state)
+    place = _rows(sd.state)[(AT_PLACE, LOCATION)]
+    shown = sd.state.get_pseudonym(place.entity_id)
+    mark = _fill(N2, "1", "2")
+    assert mark == "(non écrit 1 fois sur 2)"
+    assert f"→ {mark} {shown}" in _list_text(sd, place.entity_id)
+
+
+def test_list_mark_goes_from_the_other_row(  # type: ignore[no-untyped-def]
+    qtbot, main_window, tmp_path, draws
+) -> None:
+    """T1 (M9): S1 with the place first, every row accepted: the place row
+    rejected, the person row's own text in the list (not the row acted on)
+    no longer holds the mark."""
+    sd = _single(qtbot, main_window, tmp_path, _new_db(tmp_path), S1, S1_PLACE_FIRST)
+    _accept_all(sd.state)
+    rows = _rows(sd.state)
+    place, person = rows[(ZORBAL, LOCATION)], rows[(ZORBAL, PERSON)]
+    pre(N1 in _list_text(sd, person.entity_id), "the person row marked first")
+    sd.state.reject_entity(place.entity_id)
+    shown = sd.state.get_pseudonym(person.entity_id)
+    text = _list_text(sd, person.entity_id)
+    assert N1 not in text
+    assert text.endswith(f"→ {shown}")
+
+
+def test_hover_names_the_organisation_written_over_a_place(  # type: ignore[no-untyped-def]
+    qtbot, main_window, tmp_path, draws
+) -> None:
+    """T1 (AC15, N3): S3, every row accepted: over « Zorbaville » inside
+    « Zorbtech Zorbaville », the place's block ends with N3 naming the
+    organisation; the organisation's block has none."""
+    sd = _single(qtbot, main_window, tmp_path, _new_db(tmp_path), S3, S3_SPANS)
+    _accept_all(sd.state)
+    editor = _editor(qtbot, sd.state)
+    inside = S3.index("Zorbaville", S3.index(ORG_NAME)) + 4
+    visible, text = _hover(qtbot, editor, _mid(editor, inside))
+    pre(visible, "the tooltip shows")
+    n3 = _fill(N3, ORG_PLACE, "Organisation")
+    place_block = _block(text, _block_line(LOCATION, AT_PLACE))
+    assert place_block.endswith("\n" + n3)
+    assert n3 not in _block(text, _block_line(ORG, ORG_PLACE))
+
+
+def test_hover_explains_per_character(  # type: ignore[no-untyped-def]
+    qtbot, main_window, tmp_path, draws
+) -> None:
+    """T1 (AC15, M25): S4, every row accepted: over « Zorbal » (12) the
+    person's block ends with N3 naming « Zorbtech Zorbal »; over
+    « Quentrix » (20), written with the person's pseudonym, it has none."""
+    sd = _single(qtbot, main_window, tmp_path, _new_db(tmp_path), S4, S4_SPANS)
+    _accept_all(sd.state)
+    editor = _editor(qtbot, sd.state)
+    visible, text = _hover(qtbot, editor, _mid(editor, 12))
+    pre(visible, "the tooltip shows over Zorbal")
+    n3 = _fill(N3, ORG_ZORBAL, "Organisation")
+    assert _block(text, _block_line(PERSON, ZQ)).endswith("\n" + n3)
+    visible, text = _hover(qtbot, editor, _mid(editor, 20))
+    pre(visible, "the tooltip shows over Quentrix")
+    person_block = _block(text, _block_line(PERSON, ZQ))
+    assert _fill(N3, ORG_ZORBAL, "Organisation") not in person_block
+    assert N3.split(" :", 1)[0] not in text
+
+
+def test_hover_explains_a_pending_row(  # type: ignore[no-untyped-def]
+    qtbot, main_window, tmp_path, draws
+) -> None:
+    """T1 (AC15; Lionel's Q2, text 5): S1 with the place first, the place
+    accepted and the person pending: the person's block ends with N3
+    naming « Zorbal » (Lieu); the place's block has none."""
+    sd = _single(qtbot, main_window, tmp_path, _new_db(tmp_path), S1, S1_PLACE_FIRST)
+    rows = _rows(sd.state)
+    sd.state.accept_entity(rows[(ZORBAL, LOCATION)].entity_id)
+    pre(rows[(ZORBAL, PERSON)].state.value == "pending", "the person pending")
+    editor = _editor(qtbot, sd.state)
+    visible, text = _hover(qtbot, editor, _mid(editor, 14))
+    pre(visible, "the tooltip shows")
+    n3 = _fill(N3, ZORBAL, "Lieu")
+    assert n3 == (
+        "Pseudonyme non écrit ici : c'est celui de « Zorbal » (Lieu) qui est écrit."
+    )
+    assert _block(text, _block_line(PERSON, ZORBAL)).endswith("\n" + n3)
+    assert n3 not in _block(text, _block_line(LOCATION, ZORBAL))
+
+
+def test_hover_first_lines_are_the_labels(  # type: ignore[no-untyped-def]
+    qtbot, main_window, tmp_path, draws
+) -> None:
+    """T1 (Lionel's Q2, text 1): H1's hover holds « Lieu : Zorbal » and
+    « Personne : Zorbal », and none of the type codes."""
+    sd = _single(qtbot, main_window, tmp_path, _new_db(tmp_path), S1, S1_PLACE_FIRST)
+    _accept_all(sd.state)
+    editor = _editor(qtbot, sd.state)
+    visible, text = _hover(qtbot, editor, _mid(editor, 14))
+    pre(visible, "the tooltip shows")
+    assert "Lieu : Zorbal" in text and "Personne : Zorbal" in text
+    assert [code for code in (PERSON, LOCATION, ORG) if code in text] == []

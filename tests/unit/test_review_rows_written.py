@@ -44,6 +44,7 @@ from typing import Any
 from unittest.mock import patch
 
 import pytest
+from rich.console import Console
 
 from gdpr_pseudonymizer.core.document_processor import (
     DocumentProcessor,
@@ -742,3 +743,117 @@ def test_audit_counts_every_entity_sent(tmp_path: Path, draws: _Draws) -> None:
         )
         counts = [operation.entity_count for operation in operations]
     assert counts == [2]
+
+
+# --- T2 (after STOP B): the command line's lines C1 and C2 -------------------
+
+SHOWN_PERSON = "Vorlan Quentrix"
+
+
+def _displayed(not_written: Any) -> str:
+    """``ReviewScreen.display_entity`` of the person « Zorbal » of S1 at 80
+    columns, with ``not_written``; the text printed."""
+    console = Console(width=80, record=True)
+    ReviewScreen(console=console).display_entity(
+        _entity(ZORBAL, PERSON, 11, S1),
+        S1,
+        SHOWN_PERSON,
+        1,
+        1,
+        PERSON,
+        not_written=not_written,
+    )
+    return console.export_text()
+
+
+def _one_line(text: str) -> str:
+    """The text with every run of whitespace one space (a long value wraps
+    inside its column)."""
+    return " ".join(text.split())
+
+
+@pytest.mark.parametrize(
+    "case, by, known, lost, places, expected",
+    [
+        (
+            "r1",
+            ((ZORBAL, LOCATION),),
+            (False,),
+            1,
+            1,
+            "Written instead: the pseudonym of Zorbal (LOCATION), "
+            "unless that group is rejected",
+        ),
+        (
+            "r2",
+            ((ORG_PLACE, ORG),),
+            (False,),
+            1,
+            2,
+            "Written instead: at 1 of 2 places, the pseudonym of "
+            "Zorbtech Zorbaville (ORG), unless that group is rejected",
+        ),
+        (
+            "two_groups",
+            ((ORG_PLACE, ORG), (ORG_NAME, ORG)),
+            (False, False),
+            1,
+            1,
+            "Written instead: the pseudonyms of Zorbtech Zorbaville (ORG) and "
+            "Zorbtech (ORG), unless one of those groups is rejected",
+        ),
+        (
+            "r5_known",
+            ((ZORBAL, LOCATION),),
+            (True,),
+            1,
+            1,
+            "Written instead: the pseudonym of Zorbal (LOCATION, known), "
+            "written without review: you cannot reject it here",
+        ),
+        (
+            "one_known_one_shown",
+            ((ORG_PLACE, ORG), (ORG_NAME, ORG)),
+            (True, False),
+            1,
+            1,
+            "Written instead: the pseudonyms of Zorbtech Zorbaville (ORG, known) "
+            "and Zorbtech (ORG), unless one of those not marked known is rejected",
+        ),
+    ],
+    ids=["r1", "r2", "two_groups", "r5_known", "one_known_one_shown"],
+)
+def test_cli_prints_what_is_written_instead(
+    case: str,
+    by: tuple[tuple[str, str], ...],
+    known: tuple[bool, ...],
+    lost: int,
+    places: int,
+    expected: str,
+) -> None:
+    """T2 (AC3, C1 and C2; M29): the group's display names, under
+    `→ Pseudonym:`, every group written instead (a known one marked
+    « known ») and the condition, letter for letter."""
+    from gdpr_pseudonymizer.core.written_spans import NotWritten
+
+    text = _displayed(NotWritten(lost, places, by, known))
+    assert expected in _one_line(text)
+    if all(known):
+        assert "unless" not in text
+
+
+def test_cli_condition_is_its_own_row() -> None:
+    """T2: R1's display: the row after `Written instead:` is blank up to the
+    column where that row's value starts, then reads the condition; and a
+    group written everywhere gets no such row."""
+    from gdpr_pseudonymizer.core.written_spans import NotWritten
+
+    lines = _displayed(NotWritten(1, 1, ((ZORBAL, LOCATION),), (False,))).splitlines()
+    at = [i for i, line in enumerate(lines) if "Written instead:" in line]
+    pre(len(at) == 1 and at[0] + 1 < len(lines), f"one row: {at}")
+    first, second = lines[at[0]], lines[at[0] + 1]
+    column = first.index("the pseudonym of")
+    assert first[column:].rstrip() == "the pseudonym of Zorbal (LOCATION),"
+    assert second[:column].strip() == ""
+    assert second[column:].rstrip() == "unless that group is rejected"
+    assert "Written instead:" not in _displayed(None)
