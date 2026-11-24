@@ -963,3 +963,126 @@ def test_cli_mark_after_an_add_names_no_group_written(
     # the end writes the added name, rejected or not (its ADD decision is
     # always sent), so no word of it stays in clear
     assert [w for w in (*added[0].split(), VM) if w in written] == []
+
+
+# --- Codex round 1: the command line's mark after [A] then [E] ---------------
+
+ORG_OTHER = "Vorlantech"
+
+# (text, names found, keys, typed, the added group (text, type) as displayed,
+# the found place)
+ADD_EDIT_CASES = {
+    "edit_to_a_longer_span": (
+        f"{VM} a signé le contrat à {ORG_PLACE}.",
+        [(VM, PERSON), (PLACE, LOCATION)],
+        [ENTER, "a", SPACE, "e", SPACE],
+        [ORG_NAME, ORG, ORG_PLACE],
+        (ORG_NAME, ORG),
+    ),
+    "edit_to_a_shorter_span": (
+        f"{VM} a signé le contrat à {ORG_PLACE}.",
+        [(VM, PERSON), (PLACE, LOCATION)],
+        [ENTER, "a", SPACE, "e", SPACE],
+        [ORG_PLACE, ORG, ORG_NAME],
+        (ORG_PLACE, ORG),
+    ),
+    "edit_then_back_with_p": (
+        f"{VM} a signé le contrat à {ORG_PLACE}. {ORG_OTHER} a signé le contrat.",
+        [(VM, PERSON), (PLACE, LOCATION), (ORG_OTHER, ORG)],
+        [ENTER, "a", SPACE, "e", "p", SPACE, SPACE, SPACE],
+        [ORG_NAME, ORG, ORG_PLACE],
+        (ORG_NAME, ORG),
+    ),
+}
+
+
+CODEX_TESTS_FIRST = pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Story 15.1 tests first: the command line's mark after [A] then [E]",
+)
+
+
+@pytest.mark.parametrize(
+    "case",
+    [
+        pytest.param("edit_to_a_longer_span", marks=CODEX_TESTS_FIRST),
+        "edit_to_a_shorter_span",
+        pytest.param("edit_then_back_with_p", marks=CODEX_TESTS_FIRST),
+    ],
+)
+def test_cli_mark_after_an_add_then_a_correction(
+    tmp_path: Path, cli_db: Path, monkeypatch: pytest.MonkeyPatch, case: str
+) -> None:
+    """Codex round 1 (AC1): an organisation added with [A] while reviewing
+    a person, then corrected with [E]. Each mark is compared with what the
+    end writes (the entities it writes, recorded at the end): the place
+    found under the organisation is marked by the entity written over it,
+    with that entity's text and type; the added group, written at its place,
+    is displayed with no mark, also when going back to it with [P]."""
+    text, names, keys, typed, added = ADD_EDIT_CASES[case]
+    displays: list[tuple[str, str, Any]] = []
+    ends: list[tuple[list[DetectedEntity], list[DetectedEntity]]] = []
+    real_display = ReviewScreen.display_entity
+    real_resolve = DocumentProcessor._resolve_pseudonyms
+
+    def display(self: Any, entity: DetectedEntity, *a: Any, **k: Any) -> Any:
+        mark = k["not_written"] if "not_written" in k else ABSENT
+        displays.append((entity.text, entity.entity_type, mark))
+        return real_display(self, entity, *a, **k)
+
+    def resolve(
+        self: Any, ctx: Any, entities: list[DetectedEntity], *a: Any, **k: Any
+    ) -> Any:
+        result = real_resolve(self, ctx, entities, *a, **k)
+        ends.append(
+            (
+                [copy.copy(e) for e in entities],
+                [copy.copy(e) for e in result.written_entities],
+            )
+        )
+        return result
+
+    monkeypatch.setattr(ReviewScreen, "display_entity", display)
+    monkeypatch.setattr(DocumentProcessor, "_resolve_pseudonyms", resolve)
+    source, output = tmp_path / "in.txt", tmp_path / "out.txt"
+    source.write_text(text, encoding="utf-8")
+    run = _process(source, output, cli_db, names, keys, typed)
+    pre(run.exit_code == 0, f"exit code {run.exit_code}")
+    pre(len(ends) == 1, f"the end ran once: {len(ends)}")
+    _, written = ends[0]
+    place_start = text.index(PLACE, text.index(ORG_NAME))
+    place_span = (place_start, place_start + len(PLACE))
+    over_place = [
+        (e.text, e.entity_type)
+        for e in written
+        if e.start_pos < place_span[1] and e.end_pos > place_span[0]
+    ]
+    pre(over_place != [], f"something written over the place: {written}")
+    place_written = (PLACE, LOCATION) in over_place
+    # The mark of the found place, from what the end writes over it
+    expected_place = (
+        None
+        if place_written
+        else (
+            1,
+            1,
+            tuple(dict.fromkeys(n for n in over_place if n != (PLACE, LOCATION))),
+        )
+    )
+    place_marks = [m for n, t, m in displays if (n, t) == (PLACE, LOCATION)]
+    pre(len(place_marks) == 1, f"the place shown once: {displays}")
+    assert _mark(place_marks[0]) == expected_place
+    # The added group: the end writes an organisation at its place
+    added_start = text.index(ORG_NAME)
+    pre(
+        any(
+            e.entity_type == ORG and e.start_pos <= added_start < e.end_pos
+            for e in written
+        ),
+        f"an organisation written at the added place: {written}",
+    )
+    added_marks = [m for n, t, m in displays if (n, t) == added]
+    expected_displays = 2 if case == "edit_then_back_with_p" else 1
+    pre(len(added_marks) == expected_displays, f"the added group shown: {displays}")
+    assert [_mark(m) for m in added_marks] == [None] * expected_displays
