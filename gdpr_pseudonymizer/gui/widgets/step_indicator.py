@@ -224,14 +224,14 @@ class StepIndicator(QWidget):
     def _steps(self) -> list[str]:
         if self._mode == StepMode.BATCH:
             return [
-                self.tr("S\u00e9lection"),
+                self.tr("Sélection"),
                 self.tr("Traitement"),
                 self.tr("Validation"),
-                self.tr("R\u00e9sum\u00e9"),
+                self.tr("Résumé"),
             ]
         return [
-            self.tr("S\u00e9lection"),
+            self.tr("Sélection"),
             self.tr("Analyse"),
             self.tr("Validation"),
-            self.tr("R\u00e9sultat"),
+            self.tr("Résultat"),
         ]

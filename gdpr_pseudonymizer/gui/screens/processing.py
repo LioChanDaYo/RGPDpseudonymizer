@@ -175,7 +175,7 @@ class ProcessingScreen(QWidget):
             )
         )
         self._cancel_btn.setText(self.tr("Annuler"))
-        self._continue_btn.setText(self.tr("Continuer \u25b6"))
+        self._continue_btn.setText(self.tr("Continuer ▶"))
 
     def changeEvent(self, event: QEvent) -> None:
         if event.type() == QEvent.Type.LanguageChange:

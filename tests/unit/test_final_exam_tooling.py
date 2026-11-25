@@ -910,9 +910,16 @@ def _served(ws: Path, tmp_path: Path) -> Iterator[str]:
 
 
 def _call(
-    base: str, path: str, body: object = None, headers: dict[str, str] | None = None
+    base: str,
+    path: str,
+    body: object = None,
+    headers: dict[str, str] | None = None,
+    raw: bytes | None = None,
 ) -> tuple[int, bytes]:
-    data = None if body is None else json.dumps(body).encode("utf-8")
+    """*raw* is sent as the body as it is (``b""``: a POST with no body)."""
+    data = raw
+    if body is not None:
+        data = json.dumps(body).encode("utf-8")
     req = urllib.request.Request(
         base + path,
         data=data,
@@ -1160,11 +1167,20 @@ def test_serve_refuses_foreign_host_and_origin(tmp_path: Path) -> None:
         assert (
             _call(base, "/api/state", headers={"Host": "zorbaville.example"})[0] == 403
         )
-        body = {"gid": "g001", "decision": "A"}
+        # The refused POST carries no body: the server refuses before reading
+        # one, and on Windows closing with an unread body resets the
+        # connection before the 403 is read (WinError 10053). Accepting this
+        # Origin would answer 500 here (no "gid"), never 403.
         assert (
-            _call(base, "/api/group", body, {"Origin": "http://zorbaville.example"})[0]
+            _call(
+                base,
+                "/api/group",
+                headers={"Origin": "http://zorbaville.example"},
+                raw=b"",
+            )[0]
             == 403
         )
+        body = {"gid": "g001", "decision": "A"}
         assert _call(base, "/api/group", body, {"Origin": base})[0] == 200
 
 

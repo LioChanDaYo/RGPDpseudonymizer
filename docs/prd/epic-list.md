@@ -80,6 +80,12 @@
 
 ---
 
+### Epic 16: English Labels That Show in French (next release, none planned)
+
+**Goal:** In the desktop app set to English, every text shows English. Story 16.1: the 29 labels whose English translation already exists show that English (review screen, passphrase window, back and continue buttons, step bar). Today their key in `en.ts` was extracted with a broken `\u` escape (`Ajouter comme entitu00e9`), so the English is never found and the French shows, at 31 places in the code (PM, 2026-11-23, `1bb6f57`). Story 16.1 fixes the keys in `en.ts` and `fr.ts`, puts back the symbol in the 9 English translations that hold the same broken escape (« Continue ▶ », « ◀ Back »…), gives English to 5 labels of the same cause, rebuilds the `.qm` files as Story 11.5 did, and adds a guard so it cannot happen again (Lionel, 2026-11-23: "yes"). Story 16.2: the 116 other `tr()` calls with no English (Lionel saw 121, 5 of them now in 16.1), the shortcut list of the settings screen and the 40 entries `fr.ts` lacks, with a guard that every `self.tr` source has an `en.ts` key (Lionel, 2026-11-24: "yes"). The English is new text: the SM writes it and the PO checks it; no French wording changes, and any French source that would change goes to Lionel word for word. Order: 15.1, 16.1, 14.1 (rebased on both), 16.2; no tag or PyPI release without Lionel's explicit go.
+
+---
+
 **Timeline: Epics 0-4: 14 weeks (v1.0 MVP). Epic 5: 6-7 weeks (v1.1). Epic 6: 10-14 weeks (v2.0). Epic 7: 4-6 weeks (v2.1). Epic 8: 5-7 weeks (v2.4). Epic 9: 8-12 weeks (v3.0). Epic 10: 13.5-20 weeks + 10.6 in parallel (v2.3 candidate, runs before Epic 9)**
 
 ---

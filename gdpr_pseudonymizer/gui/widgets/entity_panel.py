@@ -178,12 +178,12 @@ class EntityPanel(QWidget):
 
     def retranslateUi(self) -> None:
         """Re-set all translatable UI text."""
-        self._title_label.setText(self.tr("Entit\u00e9s (0)"))
+        self._title_label.setText(self.tr("Entités (0)"))
         self._pending_label.setText(self.tr("Reste : 0"))
-        self._hide_rejected_cb.setText(self.tr("Masquer les rejet\u00e9es"))
-        self._hide_confirmed_cb.setText(self.tr("Masquer les valid\u00e9es"))
-        self._find_field.setPlaceholderText(self.tr("Filtrer les entit\u00e9s..."))
-        self._accept_known_btn.setText(self.tr("Accepter les d\u00e9j\u00e0 connues"))
+        self._hide_rejected_cb.setText(self.tr("Masquer les rejetées"))
+        self._hide_confirmed_cb.setText(self.tr("Masquer les validées"))
+        self._find_field.setPlaceholderText(self.tr("Filtrer les entités..."))
+        self._accept_known_btn.setText(self.tr("Accepter les déjà connues"))
         self._accept_type_btn.setText(
             qarg(self.tr("Tout accepter : %1"), self.tr("PERSONNES"))
         )
@@ -275,7 +275,7 @@ class EntityPanel(QWidget):
                 self._row_entity_map[row_idx] = review.entity_id
                 self._entity_row_map[review.entity_id] = row_idx
 
-        self._title_label.setText(qarg(self.tr("Entit\u00e9s (%1)"), str(total)))
+        self._title_label.setText(qarg(self.tr("Entités (%1)"), str(total)))
         self._update_pending_counter()
         self._update_bulk_button_counts()
 
@@ -357,7 +357,7 @@ class EntityPanel(QWidget):
             is_known = self._validation_state.is_entity_known(review.entity_id)
             mark = self._validation_state.not_written(review.entity_id)
         self._shown_marks[review.entity_id] = mark
-        known_badge = "  " + self.tr("d\u00e9j\u00e0 connu") if is_known else ""
+        known_badge = "  " + self.tr("déjà connu") if is_known else ""
         context_prefix = ""
         if review.entity.context_label:
             context_prefix = f"[{review.entity.context_label}] "
@@ -488,7 +488,7 @@ class EntityPanel(QWidget):
             return
         pending = self._validation_state.get_pending_count()
         if pending == 0:
-            self._pending_label.setText(self.tr("Toutes v\u00e9rifi\u00e9es"))
+            self._pending_label.setText(self.tr("Toutes vérifiées"))
             self._pending_label.setStyleSheet("color: #2E7D32; font-weight: bold;")
         else:
             self._pending_label.setText(qarg(self.tr("Reste : %1"), str(pending)))
@@ -498,11 +498,9 @@ class EntityPanel(QWidget):
         """Update bulk action button labels with current counts."""
         n = len(self._checked_ids)
         self._accept_sel_btn.setText(
-            qarg(self.tr("Accepter la s\u00e9lection (%1)"), str(n))
+            qarg(self.tr("Accepter la sélection (%1)"), str(n))
         )
-        self._reject_sel_btn.setText(
-            qarg(self.tr("Rejeter la s\u00e9lection (%1)"), str(n))
-        )
+        self._reject_sel_btn.setText(qarg(self.tr("Rejeter la sélection (%1)"), str(n)))
         self._accept_sel_btn.setEnabled(n > 0)
         self._reject_sel_btn.setEnabled(n > 0)
 

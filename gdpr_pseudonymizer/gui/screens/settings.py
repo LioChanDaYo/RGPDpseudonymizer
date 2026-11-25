@@ -277,7 +277,7 @@ class SettingsScreen(QWidget):
 
     def retranslateUi(self) -> None:
         """Re-set all translatable static UI text."""
-        self._back_btn.setText(self.tr("\u2190 Retour"))
+        self._back_btn.setText(self.tr("← Retour"))
         self._title.setText(self.tr("Paramètres"))
 
         # Apparence
