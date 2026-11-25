@@ -5,8 +5,8 @@
     <name>BatchScreen</name>
     <message>
         <location filename="../screens/batch.py" line="320"/>
-        <source>u25c0 Retour</source>
-        <translation>u25c0 Back</translation>
+        <source>◀ Retour</source>
+        <translation>◀ Back</translation>
     </message>
     <message>
         <location filename="../screens/batch.py" line="321"/>
@@ -373,8 +373,8 @@
     <name>DatabaseScreen</name>
     <message>
         <location filename="../screens/database.py" line="188"/>
-        <source>u25c0 Retour</source>
-        <translation>u25c0 Back</translation>
+        <source>◀ Retour</source>
+        <translation>◀ Back</translation>
     </message>
     <message>
         <location filename="../screens/database.py" line="189"/>
@@ -673,12 +673,12 @@ or click to open</translation>
     <name>EntityEditor</name>
     <message>
         <location filename="../widgets/entity_editor.py" line="65"/>
-        <source>u00c9diteur de document</source>
+        <source>Éditeur de document</source>
         <translation>Document Editor</translation>
     </message>
     <message>
         <location filename="../widgets/entity_editor.py" line="70"/>
-        <source>Affiche le document avec les entitu00e9s surlignu00e9es en couleur</source>
+        <source>Affiche le document avec les entités surlignées en couleur</source>
         <translation>Displays the document with color-highlighted entities</translation>
     </message>
     <message>
@@ -731,7 +731,7 @@ or click to open</translation>
     </message>
     <message>
         <location filename="../widgets/entity_editor.py" line="351"/>
-        <source>Ajouter comme entitu00e9</source>
+        <source>Ajouter comme entité</source>
         <translation>Add as entity</translation>
     </message>
     <message>
@@ -765,7 +765,7 @@ or click to open</translation>
     </message>
     <message>
         <location filename="../widgets/entity_panel.py" line="165"/>
-        <source>Entitu00e9s (0)</source>
+        <source>Entités (0)</source>
         <translation>Entities (0)</translation>
     </message>
     <message>
@@ -775,17 +775,17 @@ or click to open</translation>
     </message>
     <message>
         <location filename="../widgets/entity_panel.py" line="167"/>
-        <source>Masquer les rejetu00e9es</source>
+        <source>Masquer les rejetées</source>
         <translation>Hide rejected</translation>
     </message>
     <message>
         <location filename="../widgets/entity_panel.py" line="168"/>
-        <source>Filtrer les entitu00e9s...</source>
+        <source>Filtrer les entités...</source>
         <translation>Filter entities...</translation>
     </message>
     <message>
         <location filename="../widgets/entity_panel.py" line="169"/>
-        <source>Accepter les du00e9ju00e0 connues</source>
+        <source>Accepter les déjà connues</source>
         <translation>Accept already known</translation>
     </message>
     <message>
@@ -795,18 +795,18 @@ or click to open</translation>
     </message>
     <message>
         <location filename="../widgets/entity_panel.py" line="238"/>
-        <source>Entitu00e9s (%1)</source>
+        <source>Entités (%1)</source>
         <translation>Entities (%1)</translation>
     </message>
     <message>
         <location filename="../widgets/entity_panel.py" line="264"/>
         <location filename="../widgets/entity_panel.py" line="324"/>
-        <source>du00e9ju00e0 connu</source>
+        <source>déjà connu</source>
         <translation>already known</translation>
     </message>
     <message>
         <location filename="../widgets/entity_panel.py" line="371"/>
-        <source>Toutes vu00e9rifiu00e9es</source>
+        <source>Toutes vérifiées</source>
         <translation>All verified</translation>
     </message>
     <message>
@@ -816,12 +816,12 @@ or click to open</translation>
     </message>
     <message>
         <location filename="../widgets/entity_panel.py" line="381"/>
-        <source>Accepter la su00e9lection (%1)</source>
+        <source>Accepter la sélection (%1)</source>
         <translation>Accept selection (%1)</translation>
     </message>
     <message>
         <location filename="../widgets/entity_panel.py" line="384"/>
-        <source>Rejeter la su00e9lection (%1)</source>
+        <source>Rejeter la sélection (%1)</source>
         <translation>Reject selection (%1)</translation>
     </message>
     <message>
@@ -833,6 +833,11 @@ or click to open</translation>
         <location filename="../widgets/entity_panel.py" line="340"/>
         <source>(non écrit %1 fois sur %2)</source>
         <translation>(not written at %1 of %2 places)</translation>
+    </message>
+    <message>
+        <location filename="../widgets/entity_panel.py" line="184"/>
+        <source>Masquer les validées</source>
+        <translation>Hide confirmed</translation>
     </message>
 </context>
 <context>
@@ -1048,7 +1053,7 @@ or click to open</translation>
     <name>PassphraseDialog</name>
     <message>
         <location filename="../widgets/passphrase_dialog.py" line="128"/>
-        <source>Phrase secru00e8te</source>
+        <source>Phrase secrète</source>
         <translation>Passphrase</translation>
     </message>
     <message>
@@ -1058,22 +1063,22 @@ or click to open</translation>
     </message>
     <message>
         <location filename="../widgets/passphrase_dialog.py" line="130"/>
-        <source>Phrase secru00e8te :</source>
+        <source>Phrase secrète :</source>
         <translation>Passphrase:</translation>
     </message>
     <message>
         <location filename="../widgets/passphrase_dialog.py" line="133"/>
-        <source>Entrez votre phrase secru00e8te</source>
+        <source>Entrez votre phrase secrète</source>
         <translation>Enter your passphrase</translation>
     </message>
     <message>
         <location filename="../widgets/passphrase_dialog.py" line="136"/>
-        <source>Afficher/masquer la phrase secru00e8te</source>
+        <source>Afficher/masquer la phrase secrète</source>
         <translation>Show/hide passphrase</translation>
     </message>
     <message>
         <location filename="../widgets/passphrase_dialog.py" line="137"/>
-        <source>Mu00e9moriser pour cette session</source>
+        <source>Mémoriser pour cette session</source>
         <translation>Remember for this session</translation>
     </message>
     <message>
@@ -1083,8 +1088,8 @@ or click to open</translation>
     </message>
     <message>
         <location filename="../widgets/passphrase_dialog.py" line="139"/>
-        <source>Continuer u25b6</source>
-        <translation>Continue u25b6</translation>
+        <source>Continuer ▶</source>
+        <translation>Continue ▶</translation>
     </message>
     <message>
         <location filename="../widgets/passphrase_dialog.py" line="177"/>
@@ -1103,8 +1108,8 @@ or click to open</translation>
     </message>
     <message>
         <location filename="../widgets/passphrase_dialog.py" line="186"/>
-        <source>Aucune base détectée u2014 créez-en une nouvelle</source>
-        <translation>No database detected u2014 create a new one</translation>
+        <source>Aucune base détectée — créez-en une nouvelle</source>
+        <translation>No database detected — create a new one</translation>
     </message>
     <message>
         <location filename="../widgets/passphrase_dialog.py" line="200"/>
@@ -1157,8 +1162,8 @@ or click to open</translation>
     </message>
     <message>
         <location filename="../screens/processing.py" line="149"/>
-        <source>Continuer u25b6</source>
-        <translation>Continue u25b6</translation>
+        <source>Continuer ▶</source>
+        <translation>Continue ▶</translation>
     </message>
     <message>
         <location filename="../screens/processing.py" line="177"/>
@@ -1243,8 +1248,8 @@ or click to open</translation>
     <name>SettingsScreen</name>
     <message>
         <location filename="../screens/settings.py" line="245"/>
-        <source>u2190 Retour</source>
-        <translation>u2190 Back</translation>
+        <source>← Retour</source>
+        <translation>← Back</translation>
     </message>
     <message>
         <location filename="../screens/settings.py" line="246"/>
@@ -1425,7 +1430,7 @@ or click to open</translation>
     <message>
         <location filename="../widgets/step_indicator.py" line="211"/>
         <location filename="../widgets/step_indicator.py" line="217"/>
-        <source>Su00e9lection</source>
+        <source>Sélection</source>
         <translation>Selection</translation>
     </message>
     <message>
@@ -1441,7 +1446,7 @@ or click to open</translation>
     </message>
     <message>
         <location filename="../widgets/step_indicator.py" line="214"/>
-        <source>Ru00e9sumu00e9</source>
+        <source>Résumé</source>
         <translation>Summary</translation>
     </message>
     <message>
@@ -1451,7 +1456,7 @@ or click to open</translation>
     </message>
     <message>
         <location filename="../widgets/step_indicator.py" line="220"/>
-        <source>Ru00e9sultat</source>
+        <source>Résultat</source>
         <translation>Result</translation>
     </message>
 </context>
@@ -1464,21 +1469,21 @@ or click to open</translation>
     </message>
     <message>
         <location filename="../screens/stub.py" line="39"/>
-        <source>u2190 Retour à l&apos;accueil</source>
-        <translation>u2190 Back to home</translation>
+        <source>← Retour à l&apos;accueil</source>
+        <translation>← Back to home</translation>
     </message>
 </context>
 <context>
     <name>ValidationScreen</name>
     <message>
         <location filename="../screens/validation.py" line="117"/>
-        <source>u25c0 Retour</source>
-        <translation>u25c0 Back</translation>
+        <source>◀ Retour</source>
+        <translation>◀ Back</translation>
     </message>
     <message>
         <location filename="../screens/validation.py" line="118"/>
-        <source>Finaliser u25b6</source>
-        <translation>Finalize u25b6</translation>
+        <source>Finaliser ▶</source>
+        <translation>Finalize ▶</translation>
     </message>
     <message>
         <location filename="../screens/validation.py" line="278"/>
@@ -1671,6 +1676,26 @@ Continue anyway?</translation>
         <location filename="../screens/validation.py" line="1213"/>
         <source>• %1 : %2 → %3</source>
         <translation>• %1: %2 → %3</translation>
+    </message>
+    <message>
+        <location filename="../screens/validation.py" line="234"/>
+        <source>◀ Précédent</source>
+        <translation>◀ Previous</translation>
+    </message>
+    <message>
+        <location filename="../screens/validation.py" line="235"/>
+        <source>Suivant ▶</source>
+        <translation>Next ▶</translation>
+    </message>
+    <message>
+        <location filename="../screens/validation.py" line="249"/>
+        <source>Valider et terminer ▶</source>
+        <translation>Validate and finish ▶</translation>
+    </message>
+    <message>
+        <location filename="../screens/validation.py" line="251"/>
+        <source>Valider et continuer ▶</source>
+        <translation>Validate and continue ▶</translation>
     </message>
 </context>
 <context>

@@ -36,7 +36,7 @@ class StubScreen(QWidget):
     def retranslateUi(self) -> None:
         """Re-set all translatable UI text."""
         self._message.setText(self.tr("En cours de développement"))
-        self._back_btn.setText(self.tr("\u2190 Retour à l'accueil"))
+        self._back_btn.setText(self.tr("← Retour à l'accueil"))
 
     def changeEvent(self, event: QEvent) -> None:
         if event.type() == QEvent.Type.LanguageChange:

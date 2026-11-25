@@ -38,12 +38,6 @@ ROOT = Path(__file__).resolve().parents[2]
 GUI_DIR = ROOT / "gdpr_pseudonymizer" / "gui"
 I18N_DIR = GUI_DIR / "i18n"
 
-TESTS_FIRST = pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 16.1 tests first: an English label shows in French",
-)
-
 # One escape: an escaped backslash is consumed whole (the ``.`` branch), so
 # ``\\u00e9`` (a backslash then ``u00e9``) is not read as ``\u00e9``.
 ESCAPE = re.compile(
@@ -131,7 +125,6 @@ def scan(text: str, name: str) -> list[str]:
 # ---------------------------------------------------------------------------
 
 
-@TESTS_FIRST
 def test_g1_no_escape_by_code_or_name_in_tr_literals() -> None:
     files = sorted(GUI_DIR.rglob("*.py"))
     if not files:
@@ -176,7 +169,6 @@ def _ts_messages(lang: str) -> list[tuple[str, str, str]]:
     return rows
 
 
-@TESTS_FIRST
 @pytest.mark.parametrize("lang", ["en", "fr"])
 def test_g2_no_broken_run_in_ts(lang: str) -> None:
     rows = _ts_messages(lang)

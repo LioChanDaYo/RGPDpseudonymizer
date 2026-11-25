@@ -288,7 +288,7 @@ class DatabaseScreen(QWidget):
 
     def retranslateUi(self) -> None:
         """Re-set all translatable static UI text."""
-        self._back_btn.setText(self.tr("\u25c0 Retour"))
+        self._back_btn.setText(self.tr("◀ Retour"))
         self._title.setText(self.tr("Base de correspondances"))
         self._db_label.setText(self.tr("Base de données :"))
         self._browse_btn.setText(self.tr("Parcourir..."))
@@ -778,7 +778,7 @@ class DatabaseScreen(QWidget):
         if len(lines) > _CONFIRM_LIST_LINES:
             shown.append(
                 qarg(
-                    self.tr("\u2026 et %1 autre(s)"),
+                    self.tr("… et %1 autre(s)"),
                     str(len(lines) - _CONFIRM_LIST_LINES),
                 )
             )
@@ -808,7 +808,7 @@ class DatabaseScreen(QWidget):
         by_id = {e.id: e for e in self._entities}
         leaking = [
             qarg(
-                self.tr("\u2022 %1 \u2192 %2 (mot : %3)"),
+                self.tr("• %1 → %2 (mot : %3)"),
                 by_id[own.entity_id].full_name,
                 by_id[own.entity_id].pseudonym_full,
                 own.word,
@@ -825,7 +825,7 @@ class DatabaseScreen(QWidget):
         if plan.others:
             others = [
                 qarg(
-                    self.tr("\u2022 %1 \u2192 %2"),
+                    self.tr("• %1 → %2"),
                     by_id[other_id].full_name,
                     by_id[other_id].pseudonym_full,
                 )

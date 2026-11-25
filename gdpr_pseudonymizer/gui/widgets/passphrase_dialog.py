@@ -136,21 +136,17 @@ class PassphraseDialog(QDialog):
 
     def retranslateUi(self) -> None:
         """Re-set all translatable UI text."""
-        self.setWindowTitle(self.tr("Phrase secr\u00e8te"))
+        self.setWindowTitle(self.tr("Phrase secrète"))
         self._db_label.setText(self.tr("Base de correspondances :"))
-        self._pass_label.setText(self.tr("Phrase secr\u00e8te :"))
-        self._passphrase_edit.setPlaceholderText(
-            self.tr("Entrez votre phrase secr\u00e8te")
-        )
-        self._visibility_btn.setToolTip(
-            self.tr("Afficher/masquer la phrase secr\u00e8te")
-        )
-        self._remember_check.setText(self.tr("M\u00e9moriser pour cette session"))
+        self._pass_label.setText(self.tr("Phrase secrète :"))
+        self._passphrase_edit.setPlaceholderText(self.tr("Entrez votre phrase secrète"))
+        self._visibility_btn.setToolTip(self.tr("Afficher/masquer la phrase secrète"))
+        self._remember_check.setText(self.tr("Mémoriser pour cette session"))
         self._pass_error.setText(
             self.tr("La phrase secrète doit contenir au moins 12 caractères.")
         )
         self._cancel_btn.setText(self.tr("Annuler"))
-        self._confirm_btn.setText(self.tr("Continuer \u25b6"))
+        self._confirm_btn.setText(self.tr("Continuer ▶"))
 
     def changeEvent(self, event: QEvent) -> None:
         if event.type() == QEvent.Type.LanguageChange:
@@ -201,7 +197,7 @@ class PassphraseDialog(QDialog):
                     self._db_combo.setCurrentIndex(default_idx)
         else:
             self._db_hint.setText(
-                self.tr("Aucune base détectée \u2014 créez-en une nouvelle")
+                self.tr("Aucune base détectée — créez-en une nouvelle")
             )
             # Default to "Create new" if no existing DB found
             create_idx = self._db_combo.findData(_CREATE_ITEM)

@@ -511,7 +511,7 @@ class BatchScreen(QWidget):
     def retranslateUi(self) -> None:
         """Re-set all translatable static UI text."""
         # Phase 0: Selection
-        self._sel_back_btn.setText(self.tr("\u25c0 Retour"))
+        self._sel_back_btn.setText(self.tr("◀ Retour"))
         self._sel_title.setText(self.tr("Traitement par lot"))
         self._folder_label.setText(self.tr("Dossier source :"))
         self._folder_input.setPlaceholderText(self.tr("Sélectionnez un dossier..."))

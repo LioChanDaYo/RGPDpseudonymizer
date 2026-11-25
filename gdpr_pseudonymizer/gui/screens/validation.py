@@ -228,11 +228,11 @@ class ValidationScreen(QWidget):
 
     def retranslateUi(self) -> None:
         """Re-set all translatable static UI text."""
-        self._back_btn.setText(self.tr("\u25c0 Retour"))
+        self._back_btn.setText(self.tr("◀ Retour"))
 
         # Batch mode navigation buttons
-        self._prev_btn.setText(self.tr("\u25c0 Précédent"))
-        self._next_btn.setText(self.tr("Suivant \u25b6"))
+        self._prev_btn.setText(self.tr("◀ Précédent"))
+        self._next_btn.setText(self.tr("Suivant ▶"))
         self._batch_cancel_btn.setText(self.tr("Annuler le lot"))
         # Text approved by Lionel on 2026-10-14 (Story 10.10 AC12).
         self._batch_notice.setText(
@@ -246,11 +246,11 @@ class ValidationScreen(QWidget):
         # Finalize button text depends on batch mode state (CODE-003)
         if self._batch_mode:
             if self._doc_index >= self._total_docs - 1:
-                self._finalize_btn.setText(self.tr("Valider et terminer \u25b6"))
+                self._finalize_btn.setText(self.tr("Valider et terminer ▶"))
             else:
-                self._finalize_btn.setText(self.tr("Valider et continuer \u25b6"))
+                self._finalize_btn.setText(self.tr("Valider et continuer ▶"))
         else:
-            self._finalize_btn.setText(self.tr("Finaliser \u25b6"))
+            self._finalize_btn.setText(self.tr("Finaliser ▶"))
 
     def changeEvent(self, event: QEvent) -> None:
         if event.type() == QEvent.Type.LanguageChange:

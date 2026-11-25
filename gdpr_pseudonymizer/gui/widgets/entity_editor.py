@@ -64,11 +64,9 @@ class EntityEditor(QTextEdit):
         self.setReadOnly(True)
         self.setMinimumWidth(400)
         self.setFont(QFont("Consolas", 11))
-        self.setAccessibleName(self.tr("\u00c9diteur de document"))
+        self.setAccessibleName(self.tr("Éditeur de document"))
         self.setAccessibleDescription(
-            self.tr(
-                "Affiche le document avec les entit\u00e9s surlign\u00e9es en couleur"
-            )
+            self.tr("Affiche le document avec les entités surlignées en couleur")
         )
 
         self._validation_state: GUIValidationState | None = None
@@ -549,7 +547,7 @@ class EntityEditor(QTextEdit):
 
     def _build_add_entity_menu(self, menu: QMenu, sel_start: int, sel_end: int) -> None:
         """Populate 'Add as entity' submenu for selected text."""
-        add_menu = menu.addMenu(self.tr("Ajouter comme entit\u00e9"))
+        add_menu = menu.addMenu(self.tr("Ajouter comme entité"))
         for type_label, type_val in [
             (self.tr("Personne"), "PERSON"),
             (self.tr("Lieu"), "LOCATION"),

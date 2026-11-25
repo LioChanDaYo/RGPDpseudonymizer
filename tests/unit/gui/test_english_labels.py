@@ -45,12 +45,6 @@ ROOT = Path(__file__).resolve().parents[3]
 GUI_DIR = ROOT / "gdpr_pseudonymizer" / "gui"
 I18N_DIR = GUI_DIR / "i18n"
 
-TESTS_FIRST = pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 16.1 tests first: an English label shows in French",
-)
-
 # (row, file under gdpr_pseudonymizer/gui/, context, French, English)
 ROWS: list[tuple[str, str, str, str, str]] = [
     ("1", "widgets/entity_panel.py", "EntityPanel", "Entités (0)", "Entities (0)"),
@@ -295,7 +289,6 @@ def _qm(name: str) -> QTranslator:
 # ---------------------------------------------------------------------------
 
 
-@TESTS_FIRST
 @pytest.mark.parametrize(
     ("row", "file", "context", "french", "english"),
     BROKEN_ROWS,
@@ -314,7 +307,6 @@ def test_l1_broken_key_gives_english(
     assert got == english, f"row {row} [{context}]: en.qm gives {got!r}"
 
 
-@TESTS_FIRST
 @pytest.mark.parametrize(
     ("row", "file", "context", "french", "english"),
     NEW_ROWS,
@@ -338,7 +330,6 @@ def test_l2_new_label_gives_english(
 # ---------------------------------------------------------------------------
 
 
-@TESTS_FIRST
 def test_x1_entity_panel_shows_english(qapp: QCoreApplication, qtbot: QtBot) -> None:
     _pre_same_checkout()
     if not switch_language(qapp, "en"):
