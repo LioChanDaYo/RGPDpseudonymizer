@@ -1145,7 +1145,7 @@ ou cliquez pour ouvrir</source>
     </message>
     <message>
         <location filename="../screens/processing.py" line="147"/>
-        <source>Aucune entité détectée. Le document ne contient peut-être pas de données personnelles, ou le format n&apos;est pas supporté pour l&apos;analyse NLP.</source>
+        <source>Aucun nom détecté. Un nom peut malgré tout échapper à la détection, en particulier un prénom seul dans un texte court : relisez le texte à l&apos;étape suivante. Pour ajouter un nom oublié : sélectionnez-le, clic droit, « Ajouter comme entité », puis « Personne » ou le type voulu.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

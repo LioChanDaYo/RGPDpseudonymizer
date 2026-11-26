@@ -26,18 +26,9 @@ APPROVED_EN = (
     "the right type."
 )
 
-REASSURES = pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=(
-        "Story 14.1 tests first: the no-entity message says the document may "
-        "hold nothing personal"
-    ),
-)
-
 
 def pre(condition: bool, message: str) -> None:
-    """Fail a precondition outside strict AssertionError-only xfail handling."""
+    """Fail a precondition as a setup failure, not as the checked assert."""
     if not condition:
         pytest.fail(f"PRE: {message}")
 
@@ -83,11 +74,9 @@ def _show_no_entity_panel(screen: ProcessingScreen) -> str:
     return screen._warning_label.text()
 
 
-@REASSURES
 def test_no_entity_panel_french(processing_screen):  # type: ignore[no-untyped-def]
     assert _show_no_entity_panel(processing_screen) == APPROVED_FR
 
 
-@REASSURES
 def test_no_entity_panel_english(processing_screen, english):  # type: ignore[no-untyped-def]
     assert _show_no_entity_panel(processing_screen) == APPROVED_EN

@@ -53,11 +53,6 @@ def _title_sample() -> list[str]:
     return (library["male"] + library["female"])[:100]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 14.1 tests first: a lone first name in a short text is missed",
-)
 @pytest.mark.parametrize("sentence", list(SHORT_TEXTS))
 def test_sample_names_in_short_texts(detector: HybridDetector, sentence: str) -> None:
     template = SHORT_TEXTS[sentence]

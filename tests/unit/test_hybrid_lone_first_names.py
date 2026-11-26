@@ -30,12 +30,6 @@ INVENTED_FIRST_NAMES = {"Zorbalia", "Quentrel"}
 # The rule's list holds folded names (accents removed, case-folded)
 INVENTED_LIST = frozenset({"zorbalia", "quentrel"})
 
-MISSED = pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Story 14.1 tests first: a lone first name in a short text is missed",
-)
-
 
 @pytest.fixture
 def detector() -> HybridDetector:
@@ -162,7 +156,6 @@ FOUND: dict[
 }
 
 
-@MISSED
 @pytest.mark.parametrize("case", list(FOUND))
 def test_lone_first_name_found(
     monkeypatch: pytest.MonkeyPatch,
@@ -254,7 +247,6 @@ def test_stays_as_today(
 # ---------------------------------------------------------------------------
 
 
-@MISSED
 def test_rule_leaves_a_name_a_person_holds(
     detector: HybridDetector, invented_names: None
 ) -> None:
@@ -273,7 +265,6 @@ def test_rule_leaves_a_name_a_person_holds(
 # ---------------------------------------------------------------------------
 
 
-@MISSED
 def test_list_is_the_union_of_both_files() -> None:
     loader = getattr(hd, "load_lone_first_names", None)
     assert loader is not None
