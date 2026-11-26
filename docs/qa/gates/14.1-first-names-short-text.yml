@@ -1,0 +1,93 @@
+schema: 1
+story: '14.1'
+story_title: 'A Lone First Name on Short Text Is Found, and « Aucune entité détectée » No Longer Reassures'
+scope: 'QA review of head 0439076 (tests first 282af61, fix 4367cfe, CHANGELOG 0439076), branch story/14.1-first-names-short-text, draft PR #137, base c4f26fe (main with Stories 15.1 and 16.1). QA folder: rgpd-analysis/r143/qa (scratch trees made with git archive: tree_282af61 and tree_head, holding gdpr_pseudonymizer, pyproject.toml, tests/conftest.py and the named tests/unit files only; probes, plugins, logs and outputs never committed).'
+gate: PASS
+status_reason: 'Every AC check QA could run passes on the head: the 22 marked cases fail at their assert on 282af61 and pass on the head, 7 QA mutants are all killed, the QA accuracy run 45781934884 prints the same 31 lines as 45776619159, and on the 25 dev documents nothing replaced today is left in clear on any path (review, batch, CLI). Four low notes, none blocking; one is for Lionel: on the paths with no review, the wrong persons he accepted are written into the file with nobody to reject them (REQ-141-01).'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-11-26T08:55:00Z'
+
+top_issues:
+  - id: 'REQ-141-01'
+    severity: low
+    finding: 'Lionel accepted the wrong persons because a user "rejects them in the review" (Q5, Q6, G3, the CHANGELOG: "you reject it in the review"). The CLI batch with workers, the desktop batch without review and the desktop processing worker call process_document(skip_validation=True): there is no review, so every such word is written as a person pseudonym. QA paths143.py, CSV and XLSX through process_document: a colour column « Rose », « Ambre », « Marine » and a month « Avril » become person names (« Rose » -> « Judith Leal »); « Pierre de taille pour la façade. » becomes « Cyprien Loureiro de taille pour la façade. ». QA written143.py: audit_summary.txt holds « Azure » 7 times in the file written with the rule off and 0 times with it on (each replaced by a person name). Never a leak, and today 110 PERSON false positives are already written the same way in batch. The same paths gain: a lone first name in a « Prénom » column (« Nadia », « Sarah », « Véronique ») and « Bernard » in a « Nom » column were in clear with the rule off and are replaced with it on.'
+    suggested_action: 'Not blocking. Lionel decides whether the "reject it in the review" wording (CHANGELOG, PR text) should also say that batch runs without review write these words as names. If he wants a different behaviour on no-review paths, a story of its own (docs/BACKLOG.md).'
+    suggested_owner: po
+  - id: 'PERF-141-01'
+    severity: low
+    finding: 'The rule checks every listed word against every person already found (a list scan, hybrid_detector.py _lone_first_names), so its own time grows with the square of the number of names. QA perf143.py, real model, Windows: a 10,158-word document made of 13 dev documents, detection 5.41 s without the rule, 5.57 s with it, the rule alone 86 ms. Lists of « - <first name> » lines: 1,000 lines 23 ms, 3,000 lines 208 ms, 10,000 lines 2.17 s (detection 9.60 s -> 12.87 s, which also holds the merge of 3,292 more persons).'
+    suggested_action: 'Future: keep the persons sorted and look them up with bisect, as written_parts does. Only a document holding thousands of lone first names sees it.'
+    suggested_owner: dev
+  - id: 'DOC-141-01'
+    severity: low
+    finding: 'G3: the question Lionel answered (stopA-answers.md, 2026-11-26) shows the PERSON numbers and "places and organisations unchanged", not the [Overall] line (P 0.8068 -> 0.8001, R 0.8465 -> 0.8474; NFR9 false-positive rate 19.32% -> 19.99%, against a target below 15% that was already missed). AC6 asks for every drop with the numbers in front of him. The [Overall] drop is exactly the same 20 wrong persons (overall FP 449 -> 469 = PERSON FP 110 -> 130), so nothing new is hidden; the G3 record in the story lists the [Overall] line as the orchestrator read it.'
+    suggested_action: 'Show the [Overall] line in the final PR text Lionel approves.'
+    suggested_owner: po
+  - id: 'DOC-141-02'
+    severity: low
+    finding: 'Story text against what shipped: AC12 git diff --name-only also lists the PM epic files (docs/prd/epic-14-first-names-short-text.md, docs/prd/epic-list.md), which File Locations does not name (the Branch section does: the PM commit abf5885). AC8 command greps tests/ as a whole, which the isolation rule forbids; QA ran it on tests/unit and tests/integration. Tasks 2 and 3 went into one commit on the orchestrator word, so the commit subjects differ from the Tasks wording (Debug Log, Task 2).'
+    suggested_action: 'None needed for the merge; for the next story, scope the AC greps to tests/unit and tests/integration.'
+    suggested_owner: sm
+
+waiver: { active: false }
+
+quality_score: 100
+
+expires: '2026-12-10T08:55:00Z'
+
+merge_blockers:
+  - 'AC8: one read-only Codex review of the final head under the stopping rule; its rule 1 starts with this PASS.'
+  - 'performance.yaml has not run on this branch (gh run list: its last runs are on main); on merge it runs on main (nlp/** changed) and must be green (CI Facts).'
+  - 'AC10: Lionel hand check before the release (not a merge gate).'
+
+merge_notes:
+  - 'Rule breaks and deviations by QA, reported first. (1) The first written143.py run had no __main__ guard: the CLI batch step it held started 2 worker processes, which on Windows re-ran the whole script and wiped and rewrote rgpd-analysis/r143/qa/out/written and the log. QA read the command line of every python.exe running (all 5 were this probe and its workers) and stopped that process tree only; the CLI step moved to cli143.py, guarded, and both were re-run. No repository file changed (git status: only Lionel two files). (2) pyproject.toml was put into both scratch trees by git archive so that pytest gets its configuration; QA never opened it. (3) For the scratch trees the Poetry venv python.exe was called directly (not poetry run), so the tree is what gets imported; the import path was printed in every run (plugin qa_where). (4) head_checks.bat ran poetry run black, ruff, mypy and pytest without -B; PYTHONDONTWRITEBYTECODE=1 was set and find shows 0 new .pyc under gdpr_pseudonymizer/, tests/unit, tests/integration and scripts/. No cd in a compound command, no listing of the repository root, tests/ or tests/test_corpus/, nothing in held_out/, final_exam/ or tests/accuracy/ opened, searched or imported; offscreen only, nothing waited on a key or a dialog.'
+  - 'CI on 0439076 (gh): CI - Test Matrix 45781754652 lint success, ubuntu 3.11, ubuntu 3.13 and macOS 3854 passed, Windows 3699 passed, 3 skipped (the brief 4367cfe totals); Code Quality 45781754831 and PR check 45781749999 success. Local on the checkout at 0439076: black 364 unchanged, ruff rc 0, mypy Success 112 source files; the three new files, test_hybrid_greetings_org_country.py, gui/test_processing_screen.py and gui/test_i18n.py: 182 passed.'
+  - 'AC8, tests first, on tree_282af61 (git archive of 282af61; QA_WHERE shows the tree imported, rule absent): with the markers 8 passed, 22 xfailed, 0 XPASS; with --runxfail 22 failed, 8 passed, each at an AssertionError (14 L1 « assert [] == [(name, start, end, regex)] », L3 and L4 « assert None is not None », S1 33, 26, 12, 28 of 100 missed, N1 and N2 the old French and English text); none at TypeError, AttributeError, ImportError or a timeout. On the head git grep "Story 14.1 tests first" over tests/unit and tests/integration prints nothing. Between 282af61 and the head the three files lose only their markers (git diff).'
+  - 'AC6, G2: QA dispatched run 45781934884 on 0439076 (workflow_dispatch, success) and downloaded it with 45776619159 (G1, 4367cfe) and 45716792695 (tests first, 282af61) to rgpd-analysis/r143/qa/acc/. The saved baseline 39998847851 (sha256 d181036d...) is checked first. 45716792695: 31 of 31 bracket lines identical to the baseline. 45781934884 against 45776619159: 31 of 31 bracket lines identical; the files differ only in the timing line, and accuracy-per-document.json only in run_id and commit. The 8 lines: [Overall] P=0.8001 R=0.8474 F1=0.8231 TP=1877 FP=469 FN=338; [PERSON] P=0.9091 R=0.9789 F1=0.9427 TP=1300 FP=130 FN=28; [LOCATION] P=0.7491 R=0.8061; [ORG] P=0.5766 R=0.5849 (both unchanged); [HELD-OUT Overall] P=0.7948 R=0.7879 (up from 0.7911 and 0.7706); [HELD-OUT PERSON] P=0.8707 R=0.9018 TP=101 FP=15 FN=11 (up from 0.8661 and 0.8661); [HELD-OUT LOCATION] and [HELD-OUT ORG] unchanged. G5: no held-out loss. [source=regex] P 0.8720 -> 0.8088 (TP 218 -> 220, FP 32 -> 52): the same 20 wrong persons and 2 real ones.'
+  - 'Written files, the 25 dev documents, every row accepted, rule OFF (the detector _lone_first_names switched off on the instance, i.e. the base detection) against ON (head), the writer _apply_replacements wrapped to record the characters it replaces. process_document(skip_validation=True) (written143.py): 0 characters replaced OFF and left in clear ON; gold characters in clear 1,746 -> 1,721 (audit_summary 208 -> 198, incident_report 129 -> 119, partnership_agreement 175 -> 170), 0 newly in clear; detections 22 added, 0 removed: « Azure » x19, « Ruby », « Sarah », « Kevin », the story list exactly. The desktop review path (review25.py: DetectionWorker detection, GUIValidationState, every row accepted, expand_validated_entities, finalize_document): 0 characters lost, gold in clear 1,746 -> 1,721, 0 newly in clear; review rows 1,488 -> 1,497, rows marked « (non écrit) » 45 -> 47 (hr_announcement 2 -> 4: « Sarah », « Kevin »). The CLI batch --workers 2 (cli143.py, the real command, every row accepted in its workers): 25 files, 0 gold texts more often in the CLI file than in the rule-OFF file. A text-only count once flagged « Lyon » (meeting_minutes, first run) and once « Petit » (interview_09, second run), each 0 then 1; the character check is the measure and shows 0 newly in clear in both runs, and « Petit » is a drawn pseudonym (« Mme Flavie Petit »; the source « M. Petit » is replaced).'
+  - 'Real user paths (paths143.py, head, OFF against ON). Desktop single review: « Réponse de Diego : d accord. » shows « ✓ Diego / → (non écrit) <person> » and « ✓ Diego / → <town> », writes the town, and after rejecting the place row writes the person with no mark left; « Merci Nadia pour votre aide. », « Cordialement,⏎Véronique⏎Responsable du projet » and « Pierre de taille pour la façade. » go from no row to one person row; « Je reporterai à Sarah demain. » unchanged (a spaCy PERSON « Sarah demain » holds the name: guard (a)); « Le Dr Nadia Martin est là. » stays one person; « Bonsoir Florence, » and « Cher Timéo, » stay one organisation or place row with no person (the Known limitation, never in clear); no accepted name in clear in any written file. CSV and XLSX cells (process_document, the route of the desktop batch and the CLI): 0 cells replaced OFF and in clear ON, in both formats.'
+  - 'Story 15.1 crossing rule: a new person is one word, and guard (b) leaves it only where a place or organisation is that same word (« Diego ») or holds it with a preposition (« à Sarah », nested). It never overlaps one in part, so the crossing rule never applies to the new rows; both shapes were run on the real paths above.'
+  - 'AC4 and AC5, the message: Lionel French and the kept English cut by QA from stopA-answers.md (« Story 14.1 Q2, the message reworded by Lionel »; 276 and 232 characters, U+0020 spaces, apostrophe U+0027, no U+00A0, U+202F or U+2019). msg143.py: the live label equals the French; after switch_language the English, and French again after switching back; fr.ts source equal, translation unfinished and empty; en.ts source and translation equal; en.qm translates the French to the English; en.qm gives "Add as entity" and "Person" for the menu the English names. qm143.py: en.qm rebuilt from the head en.ts (filter "removed 3", lrelease "Generated 355") is byte-equal to the committed en.qm; qm_compare base en.qm against head en.qm: one DIFF (ProcessingScreen, this message), messages=358 differing=1; fr.qm rebuilt byte-equal and unchanged from the base. git grep "données personnelles" over gdpr_pseudonymizer/gui/: nothing. The panel, offscreen, real MainWindow after _on_finished with no entity: French 54 px (about 4 lines) at 1,200 px and 68 px (5) at 900 px, English 40 px (3) and 54 px (4); the label gets the height it needs (nothing cut) and every visible button of the screen is inside the window.'
+  - 'AC9: the CHANGELOG line is byte-equal (cmp) to the story Exact texts draft without its two-space indent, with the literal « ⏎ » (U+23CE, bytes e2 8f 8e); under ## [Unreleased], the one ### Fixed, after Story 16.1 entry.'
+  - 'The six Story 10.4 values: only the two parametrisations change; the three capitalised sentences expect exactly [(word, "PERSON", doc.index(word))] (« Pierre » at 14, « Blanche » at 0, « Pierre » at 0) and ["M. Zorbalia Quentrel", word]; the two lower-case sentences keep [] and ["M. Zorbalia Quentrel"]; _salutation_lines(doc) == [] kept. That is what Lionel rule gives: a capitalised listed word that no detection holds is a person, a lower-case one never is (the one-element list also proves the lower-case « pierre » of « Pierre après pierre » is not taken).'
+  - 'AC7, AC11, AC12 (git, base c4f26fe): gdpr_pseudonymizer/ changes only hybrid_detector.py (+110), processing.py, en.ts, fr.ts, en.qm; git diff --exit-code over french_names.json, pseudonyms/, name_dictionary.py, salutations.yaml and both leakage allowlists rc 0. Logs: the one added logger line is logger.debug("lone_first_name_added", start=start, end=end); captured at DEBUG (structlog capture_logs) on a text with two names: [{start: 6, end: 11}, {start: 43, end: 52}], no word of the text. No raise, print or warning added. The new rows also pass through the existing debug line processing_entity, which logs entity_text and predates this story (15.1 gate).'
+  - 'Mutants, on tree_head (git archive of 0439076), each a one-line change of hybrid_detector.py, run on test_hybrid_lone_first_names.py and test_hybrid_greetings_org_country.py (control: 138 passed), the file restored after: Q1 no person guard (M1) killed by L4; Q3 guard (b) across a line break (M3) killed by L1[next_line_role]; Q4 the token itself counts as the other word (close to M4) killed by L1[next_line_role], [title_in_an_org], [on_a_place]; Q5 accents kept (M5) killed by L1[accent]; Q14 a title counts as another word (M14) killed by L1[title_in_an_org]; QA QN1 istitle() in place of a capital first letter killed by L1[capitals]; QA QN2 guard (b) on organisations only killed by L2[article_place].'
+  - 'AC1 (Task 2.4 re-run by QA): the dev copy wide143_dev.py run on the checkout at 0439076 in mode base (the shipped rule, no in-memory patch; the probe prints "shipped rule present: True"), output in rgpd-analysis/r143/qa/outW: dets.jsonl, 26,727 lines, byte-identical (cmp) to the dev file A (282af61 + the rule as a patch) and file B (4367cfe). Its numbers equal the Wide rule column: grid 0 of 7,390 missed, the 161 french_names.json-only names 0 of 1,610, chat lines 0 of 5,912 and 0 of 1,288, e-mail and other lines 0 of 10,346; « Le rapport de M. X est prêt. » 723 kept whole, 0 shrunk; in-memory [Overall] P=0.8001 R=0.8474 and [PERSON] P=0.9091 R=0.9789 TP=1300 FP=130 FN=28, equal to the CI run. S1 on the head: 0 missed on 4 x 100 names.'
+
+evidence:
+  tests_reviewed: 30
+  risks_identified: 4
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13]
+    ac_gaps: []
+    ac_pending: [10]
+  ac_notes:
+    AC1: 'Task 2.4 probe re-run by QA on the head: 0 missed on every set, detection lists byte-identical to the dev files A and B (merge_notes).'
+    AC2: 'Decisions Recorded hold Q1, Q4, Q3 (a), Q3 (b), Q2 (b), Q5, Q6, Q2 (F2, reworded, test string), G3 and STOP B; the Q5, Q6, Q2 and G3 questions and answers checked against stopA-answers.md.'
+    AC6: 'G1 45776619159 and QA G2 45781934884 identical; PERSON precision drop accepted by Lionel (G3 "yes"); the [Overall] line not in the question he saw (DOC-141-01).'
+    AC8: 'Tests first proven on a scratch tree; CI green on the head; Codex pending (merge_blockers).'
+    AC10: 'Lionel hand check before the release, pending.'
+    AC13: 'STOP A and STOP B recorded; Tasks 2 and 3 in one commit on the orchestrator word (DOC-141-02).'
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'No new log line or exception holds a name or document text (captured at DEBUG). Nothing replaced today is left in clear on the 25 dev documents on any path; 25 more gold characters replaced. The rule reads neutral.json, which the app already ships for pseudonyms.'
+  performance:
+    status: PASS
+    notes: '+86 ms on a 10,158-word document (detection 5.41 s -> 5.57 s). Quadratic on long name lists (2.17 s on 10,000 lines), PERF-141-01, low.'
+  reliability:
+    status: PASS
+    notes: 'The rule only adds regex PERSONs before the merge; no detection removed on the 25 documents; the place-plus-person pair is written and marked as Story 15.1 decides, and rejecting the written row writes the other.'
+  maintainability:
+    status: PASS
+    notes: 'Its own loader (lru_cache), never merged into NameDictionary (L3); three small helpers with docstrings; each guard pinned by a test that kills its mutant.'
+
+recommendations:
+  immediate: []
+  future:
+    - action: 'Sorted persons with bisect in _lone_first_names (PERF-141-01).'
+      refs: ['gdpr_pseudonymizer/nlp/hybrid_detector.py']
+    - action: 'Tell Lionel that batch runs without review write the accepted wrong persons; his call on wording or a story (REQ-141-01).'
+      refs: ['CHANGELOG.md']
