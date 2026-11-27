@@ -108,6 +108,12 @@
 
 ---
 
+### Epic 17: The Desktop App Writes a Processing Entry in the Audit Log (next release, none planned)
+
+**Goal:** Every document the desktop app writes after a review gets one PROCESS entry in the audit log, equal to the command line's entry for the same document (the input file, `entity_count` of every entity sent, model and version, theme, success), apart from the timestamp, the processing time and the path. Today the desktop single document and the desktop batch with review end in `finalize_document`, which logs nothing on success, and a failure row without its file (PM, 2026-11-27, `379eb2b`; 0 rows after a desktop finalize, as Story 15.1's PO measured). A desktop document that fails gets the failure entry the command line writes, with its file. No double entries on the paths that already log (desktop batch without review, CLI `process` and `batch`). No new text on screen, no change to what the command line writes, no schema or export change, detection untouched (Lionel, 2026-11-27: "Yes write a proceeded entry, own small story"). Story 17.1 only; independent of Story 16.2; no tag or PyPI release without Lionel's explicit go.
+
+---
+
 ### Epic Definitions of Done
 
 **Epic 0 DoD:**
