@@ -104,7 +104,7 @@ So a desktop failure at the write already leaves a row, without its file, and a 
 
 1. Tests first on CI: they fail on `379eb2b` for each missing entry and pass after the fix.
 2. The real desktop single path (`DetectionWorker` then `FinalizationWorker`) and the real desktop batch with review (`BatchWorker` with review on) each leave exactly one PROCESS row per document written.
-3. For the same text input (`.txt`, `.md`, `.pdf`, `.docx`), each desktop row equals the CLI `process` row field by field, apart from the timestamp, `processing_time_seconds` and the path: operation type, `entity_count`, model name, model version, theme, success, error message, `user_modifications`.
+3. For the same text input (`.txt`, `.md`, `.pdf`, `.docx`) and the same decisions (every row accepted on both sides; the CLI accepts known names without showing them, the desktop lets the user reject them), each desktop row equals the CLI `process` row field by field, apart from the timestamp, `processing_time_seconds` and the path: operation type, `entity_count`, model name, model version, theme, success, error message, `user_modifications`.
 4. Each failure case above leaves the row the CLI leaves, with the input file; the `[""]` row is gone; a review stopped before the write leaves none.
 5. Desktop batch without review, CLI `process` and CLI `batch` (sequential and parallel) still leave exactly one row per document; a test pins it.
 6. No detected name and no pseudonym in any audit field of the new rows (a test reads every field of the rows written for a text with known names).
