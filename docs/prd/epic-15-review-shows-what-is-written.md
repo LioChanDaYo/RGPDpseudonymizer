@@ -132,13 +132,13 @@ Story 15.1 lands on main with its CHANGELOG `[Unreleased]` entry, before Story 1
 
 ## Definition of Done
 
-- [ ] Story 15.1 merged: every review row matches the written file, in the desktop app (single and batch) and the command line, in every output format; CHANGELOG `[Unreleased]` entry
-- [ ] The mechanism chosen by Lionel from the candidates shown to him; every new French text approved word for word before it is committed
-- [ ] The 32 rows confirmed by hand and measured before and after; the « Réponse de X : » case tested
-- [ ] CI accuracy run and QA re-run cited; no recall or precision drop unless Lionel accepted it
-- [ ] Tests-first commit and draft PR, QA review, read-only Codex review of the final head
-- [ ] No regression in existing features (full CI green)
-- [ ] Story 14.1 rebased on Story 15.1, its Q4 recorded as answered by Lionel's two decisions above
+- [x] Story 15.1 merged: every review row matches the written file, in the desktop app (single and batch) and the command line, in every output format; CHANGELOG `[Unreleased]` entry. Merged 2026-11-24 as PR #135, squash `4c40dc2`
+- [x] The mechanism chosen by Lionel from the candidates shown to him; every new French text approved word for word before it is committed (mechanism B, 2026-11-22; the desktop texts, 2026-11-23; the CHANGELOG entry at STOP B and its « Reste » sentence, 2026-11-24; Story 15.1, Decisions Recorded)
+- [x] The 32 rows confirmed by hand and measured before and after; the « Réponse de X : » case tested (the SM's probe found the PO's 32 plus one, 33; QA checked the 33 rows by hand and re-ran `sm151.py` on the base and the head; the « Réponse de X : » case tested on main by R1 and G1, then checked again after Story 14.1's rebase by its Task 2.6 and its QA, « Réponse de Diego : d'accord. »)
+- [x] CI accuracy run and QA re-run cited; no recall or precision drop unless Lionel accepted it (G1 run 45348172645 and QA's G2 run 45348394285, both on `9d24e8e`, identical to the baseline 39998847851; no later commit changed detection)
+- [x] Tests-first commit and draft PR, QA review, read-only Codex review of the final head (tests first `82334cb`, draft PR #135; QA round 1 on `9d24e8e`, CONCERNS, round 2 on `41e2af7`, gate PASS; Codex review 1 on `0c451f7`: a P2, fixed tests first on Lionel's answer; Codex review 2 on `f675e58`: PASS)
+- [x] No regression in existing features (full CI green). Main's CI on `4c40dc2` green (Test Matrix 45497424510: 3,740 passed on each of ubuntu 3.11, ubuntu 3.13 and macOS; Windows 3,590 passed, 3 skipped; Code Quality, Documentation and CodeQL green; Performance & Stability 45497424495: 4 passed, 3 skipped)
+- [x] Story 14.1 rebased on Story 15.1, its Q4 recorded as answered by Lionel's two decisions above (rebased on `main` `c4f26fe`, after Stories 15.1 and 16.1; Story 14.1, Decisions Recorded, Q4)
 - [ ] Before the next release: Lionel's hand check of a document with two overlapping detections passes
 
 ---

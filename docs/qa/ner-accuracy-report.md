@@ -1353,3 +1353,75 @@ The same run printed the regular 16 lines unchanged. They are byte-identical to 
 ### Public number (B15.2)
 
 Lionel chose, on 2026-10-13: **"Final exam as headline (Recommended)"**. README, README.fr, the FAQ, the docs home page and the tutorial lead with the final exam and give the development-corpus and held-out figures as context, all from these runs. The previous figure (F1 58.53%, v2.2.0) stays in the README's historical table.
+
+## A first name on its own (Story 14.1, 2026-11-26)
+
+**Detector change, same ground truth.** No annotation, scorer or held-out change. The ground truth is the 10.1 one (2,215 main-corpus annotations).
+
+**What changed in the detector** (rule text and Lionel's decisions: story 14.1): a capitalised word whose folded form is a first name of the pseudonym library or of `french_names.json` becomes a PERSON wherever it stands alone, that is, unless a PERSON already overlaps it, or a LOCATION or ORG overlaps it and holds another name word of the same line (`HybridDetector._lone_first_names`). A name that is exactly a place or an organisation also gets a PERSON; Story 15.1's review marks the row whose pseudonym is not written.
+
+**Sources:**
+- Before: the baseline run `39998847851` (`workflow_dispatch`, 2026-10-23), whose 16 lines equal run `38212303870`'s, printed above in "Final exam". The tests-first control run `45716792695` (`282af61`, Story 14.1's tests on main's detector) gives the same 31 bracketed lines. Stories 15.1 and 16.1 left detection unchanged: their runs `45348172645` and `45664641640` give the same lines too.
+- **After: G1 run `45776619159`** (`4367cfe`, the fix). QA's G2 run `45781934884` (`0439076`, the story's head) and the `main` push run `45954644200` (`2f18895`, PR #137's merge) give the same 31 bracketed lines.
+- Saved copy of the new baseline, since CI artifacts expire: `C:\Users\devea\Documents\GitHub\rgpd-analysis\r143\acc\r45776619159\accuracy-output.txt` (129 lines, 31 bracketed; sha256 `79478a04ddb126427bba2c09cbebd613f1b929eb5b3bd7d22da50f8a6d245cb1`). Later stories compare their bracketed lines with it.
+
+### Lines from `accuracy-output.txt`, verbatim
+
+Run `45776619159` (G1; the new baseline):
+
+```
+[Overall] P=0.8001 R=0.8474 F1=0.8231 TP=1877 FP=469 FN=338 FN%=15.26 FP%=19.99
+[PERSON] P=0.9091 R=0.9789 F1=0.9427 TP=1300 FP=130 FN=28
+[LOCATION] P=0.7491 R=0.8061 F1=0.7766 TP=212 FP=71 FN=51
+[ORG] P=0.5766 R=0.5849 F1=0.5807 TP=365 FP=268 FN=259
+[HELD-OUT Overall] P=0.7948 R=0.7879 F1=0.7913 TP=182 FP=47 FN=49 FN%=21.21 FP%=20.52
+[HELD-OUT PERSON] P=0.8707 R=0.9018 F1=0.8860 TP=101 FP=15 FN=11
+[HELD-OUT LOCATION] P=0.7761 R=0.7647 F1=0.7704 TP=52 FP=15 FN=16
+[HELD-OUT ORG] P=0.6304 R=0.5686 F1=0.5979 TP=29 FP=17 FN=22
+[CI95 Overall] P=[0.7677,0.8365] R=[0.8233,0.8671] F1=[0.8002,0.8448] unit=document docs=25 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[CI95 PERSON] P=[0.8918,0.9287] R=[0.9672,0.9884] F1=[0.9327,0.9542] unit=document docs=25 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[CI95 LOCATION] P=[0.6519,0.8275] R=[0.7570,0.8589] F1=[0.7136,0.8290] unit=document docs=25 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[CI95 ORG] P=[0.4801,0.6652] R=[0.4844,0.6800] F1=[0.4876,0.6635] unit=document docs=25 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[CI95 HELD-OUT Overall] P=[0.7224,0.8599] R=[0.7251,0.8439] F1=[0.7284,0.8456] unit=document docs=6 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[CI95 HELD-OUT PERSON] P=[0.8065,0.9310] R=[0.8731,0.9400] F1=[0.8571,0.9120] unit=document docs=6 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[CI95 HELD-OUT LOCATION] P=[0.6719,0.8939] R=[0.6866,0.8281] F1=[0.6870,0.8516] unit=document docs=6 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+[CI95 HELD-OUT ORG] P=[0.4286,0.7692] R=[0.3261,0.7606] F1=[0.3704,0.7500] unit=document docs=6 resamples=10000 seed=20261008 undef_P=0 undef_R=0 undef_F1=0
+```
+
+### Main corpus, before / after
+
+| | Precision | Recall | F1 | TP | FP | FN |
+|---|---|---|---|---|---|---|
+| Overall, before (`39998847851`) | 80.68% | 84.65% | 82.62% | 1,875 | 449 | 340 |
+| **Overall, after (`45776619159`)** | **80.01%** | **84.74%** | **82.31%** | 1,877 | 469 | 338 |
+| PERSON, before | 92.19% | 97.74% | 94.88% | 1,298 | 110 | 30 |
+| **PERSON, after** | **90.91%** | **97.89%** | **94.27%** | 1,300 | 130 | 28 |
+| LOCATION, before and after | 74.91% | 80.61% | 77.66% | 212 | 71 | 51 |
+| ORG, before and after | 57.66% | 58.49% | 58.07% | 365 | 268 | 259 |
+
+The 20 new PERSON false positives are words that are also first names, offered as persons: « Azure » ×19 and « Ruby » ×1 (Story 14.1, Dev Notes "Measurements"). The two new true positives are « Kevin » and « Sarah », which the app had found only as a place or an organisation.
+
+### Recall (G3, strict)
+
+No recall drop in any type: FN Overall 340 → 338, PERSON 30 → 28, LOCATION and ORG unchanged.
+
+**The precision drop and Lionel's decision (G3).** Epic 14's rule stops the story on any precision drop. Lionel accepted the PERSON numbers on 2026-11-26 ("yes"); his question showed main-corpus PERSON wrong rows 110 → 130, missed 30 → 28, P 92.2% → 90.9%, R 97.7% → 97.9%, the held-out PERSON numbers below, and places and organisations unchanged (Story 14.1, Decisions Recorded, G3). The `[Overall]` line (P 80.68% → 80.01%, from the same 20 wrong persons) was not in that question; it reached him in the final PR text of PR #137, which he approved the same day (QA's DOC-141-01).
+
+### Held-out set (G5)
+
+Aggregates only (lines above).
+
+| | Precision | Recall | F1 | TP | FP | FN |
+|---|---|---|---|---|---|---|
+| Overall, before | 79.11% | 77.06% | 78.07% | 178 | 47 | 53 |
+| **Overall, after** | **79.48%** | **78.79%** | **79.13%** | 182 | 47 | 49 |
+| PERSON, before | 86.61% | 86.61% | 86.61% | 97 | 15 | 15 |
+| **PERSON, after** | **87.07%** | **90.18%** | **88.60%** | 101 | 15 | 11 |
+| LOCATION, ORG | unchanged | | | | | |
+
+Four more held-out persons found and no new wrong row, so no held-out loss. Small-sample note: held-out PERSON holds 112 annotations, so 1 FN is about 0.9 points of recall; the held-out documents are not opened.
+
+### Notes
+
+- Not computed here: the paired delta (`scripts/accuracy_paired_delta.py`) and a performance comparison. Story 14.1 QA measured the rule's own cost: 86 ms on a 10,158-word document, and about 2.17 s on a 10,000-line list of names, since the rule's overlap scan grows with the square of the number of names (PERF-141-01, `docs/BACKLOG.md` TD-012). On `main` at `2f18895`, Performance & Stability Tests run `45954642908` passed (4 passed, 3 skipped).
+- README, README.fr, the FAQ and the docs home page (English and French) still give the development-corpus and held-out figures of run `38212303870` (F1 82.6% and 78.1%). They are not updated here; the new figures are 82.3% and 79.1%. The final-exam headline (run `38382553368`) stays: the final exam was scored once.
