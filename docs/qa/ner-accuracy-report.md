@@ -1367,7 +1367,7 @@ Lionel chose, on 2026-10-13: **"Final exam as headline (Recommended)"**. README,
 
 ### Lines from `accuracy-output.txt`, verbatim
 
-Run `45776619159` (G1; the new baseline):
+Run `45776619159` (G1; the new baseline). Copied from the saved run output `C:\Users\devea\Documents\GitHub\rgpd-analysis\r143\acc\r45776619159\accuracy-output.txt` (sha256 `79478a04…`), where each of the 16 lines appears byte for byte. The four CI95 lines that changed (`[CI95 Overall]`, `[CI95 PERSON]`, `[CI95 HELD-OUT Overall]`, `[CI95 HELD-OUT PERSON]`) are recorded only there and here, not in Story 14.1 or its gate, which give the point figures:
 
 ```
 [Overall] P=0.8001 R=0.8474 F1=0.8231 TP=1877 FP=469 FN=338 FN%=15.26 FP%=19.99
@@ -1405,7 +1405,7 @@ The 20 new PERSON false positives are words that are also first names, offered a
 
 No recall drop in any type: FN Overall 340 → 338, PERSON 30 → 28, LOCATION and ORG unchanged.
 
-**The precision drop and Lionel's decision (G3).** Epic 14's rule stops the story on any precision drop. Lionel accepted the PERSON numbers on 2026-11-26 ("yes"); his question showed main-corpus PERSON wrong rows 110 → 130, missed 30 → 28, P 92.2% → 90.9%, R 97.7% → 97.9%, the held-out PERSON numbers below, and places and organisations unchanged (Story 14.1, Decisions Recorded, G3). The `[Overall]` line (P 80.68% → 80.01%, from the same 20 wrong persons) was not in that question; it reached him in the final PR text of PR #137, which he approved the same day (QA's DOC-141-01).
+**The precision drop and Lionel's decision (G3).** Epic 14's rule stops the story on any precision drop. Lionel accepted the PERSON numbers on 2026-11-26 ("yes"); his question showed main-corpus PERSON wrong rows 110 → 130, missed 30 → 28, P 92.2% → 90.9%, R 97.7% → 97.9%, the held-out PERSON numbers below, and places and organisations unchanged (Story 14.1, Decisions Recorded, G3). The `[Overall]` line (P 80.68% → 80.01%, from the same 20 wrong persons) was not in that question; it reached him in the final PR text of PR #137, « Overall, main corpus: precision 80.7% → 80.0%, recall 84.65% → 84.74% », which he approved the same day ("yes"; Story 14.1, Decisions Recorded, "The final PR text"; QA's DOC-141-01).
 
 ### Held-out set (G5)
 

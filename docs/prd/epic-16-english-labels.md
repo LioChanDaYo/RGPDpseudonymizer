@@ -218,7 +218,7 @@ Order on main: Story 15.1, Story 16.1, Story 14.1 (rebased on both), Story 16.2,
 
 ## Definition of Done
 
-- [x] Story 16.1 merged: the 29 labels show their English in the English app (31 call sites), the 9 ⚠ ones with their symbol back, and the 5 same-cause labels with the English the PO checked, measured with `translate()` on the shipped `en.qm`; the French app unchanged; CHANGELOG `[Unreleased]` entry. Merged 2026-11-25 as PR #136, squash `c4f26fe`
+- [x] Story 16.1 merged: the 29 labels show their English in the English app (30 call sites: 31 when this epic was written, until Story 15.1 merged the two « déjà connu » calls into one, `gui/widgets/entity_panel.py:360`), the 9 ⚠ ones with their symbol back, and the 5 same-cause labels with the English the PO checked, measured with `translate()` on the shipped `en.qm`; the French app unchanged; CHANGELOG `[Unreleased]` entry. Merged 2026-11-25 as PR #136, squash `c4f26fe`
 - [x] `en.ts` and `fr.ts` hold no broken `\u` run; `.qm` rebuilt as in Story 11.5; `fr.qm` byte-identical; `qm_compare.py` shows only the intended messages (`messages=358 differing=34` and `messages=353 differing=29`; QA's rebuild of `en.qm` byte-identical to the committed file)
 - [x] Story 16.1's guard on CI, shown to fail when a key is broken again (tests first `22d7b36`: 38 xfailed, 0 XPASS on each CI leg; QA re-ran the tests-first commit with `--runxfail` and the mutants)
 - [ ] Story 16.2 merged: every `tr()` call has English in the shipped `en.qm` apart from the three file filters; `fr.ts` holds the 40 `ShortcutsHelpDialog` entries; the full guard on CI with no known-gaps list, shown to fail when a key is removed
