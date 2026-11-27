@@ -102,6 +102,12 @@
 
 ---
 
+### Epic 14: First Names Found on Short Text (next release, none planned)
+
+**Goal:** A first name on its own in a short text (an email greeting or sign-off, a chat, a one-line note, a single spreadsheet cell) is found and offered for review far more often than today, so it is not left in clear text: QA measured 23.5% of the library's first names missed in 10 short French sentences, mostly spaCy MISC spans the app drops (2026-11-22, `1bb6f57`). The SM and the dev choose the mechanism; the trade-off between missed names and non-names replaced goes to Lionel with numbers before it is fixed. When nothing is found, the desktop app no longer says the document may hold no personal data; any new French text is approved by Lionel word for word. No accuracy drop on the dev corpus without Lionel's go (Lionel, 2026-11-22: "yes, write the story"). Story 14.1 only; lands on main first; no tag or PyPI release without Lionel's explicit go.
+
+---
+
 ### Epic Definitions of Done
 
 **Epic 0 DoD:**

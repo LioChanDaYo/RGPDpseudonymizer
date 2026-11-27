@@ -169,9 +169,11 @@ class ProcessingScreen(QWidget):
         self._phase_label.setText(self.tr("En attente..."))
         self._warning_label.setText(
             self.tr(
-                "Aucune entité détectée. Le document ne contient peut-être pas "
-                "de données personnelles, ou le format n'est pas supporté pour "
-                "l'analyse NLP."
+                "Aucun nom détecté. Un nom peut malgré tout échapper à la "
+                "détection, en particulier un prénom seul dans un texte court : "
+                "relisez le texte à l'étape suivante. Pour ajouter un nom "
+                "oublié : sélectionnez-le, clic droit, « Ajouter comme entité », "
+                "puis « Personne » ou le type voulu."
             )
         )
         self._cancel_btn.setText(self.tr("Annuler"))

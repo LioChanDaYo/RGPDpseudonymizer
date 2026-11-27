@@ -27,10 +27,12 @@ from gdpr_pseudonymizer.nlp.regex_matcher import HSPACE, RegexMatcher
 from gdpr_pseudonymizer.nlp.spacy_detector import SpaCyDetector
 from gdpr_pseudonymizer.resources import (
     FRENCH_GEOGRAPHY_PATH,
+    FRENCH_NAMES_PATH,
     LOCATION_NOISE_FILTER_PATH,
     ORG_ROLE_FILTER_PATH,
     PERSON_BOUNDARIES_PATH,
     PLACE_ABBREVIATIONS_PATH,
+    PSEUDONYMS_DIR,
     SALUTATIONS_PATH,
 )
 from gdpr_pseudonymizer.utils.french_patterns import (
@@ -297,6 +299,60 @@ def _fold(text: str) -> str:
     return "".join(
         c for c in unicodedata.normalize("NFD", text) if not unicodedata.combining(c)
     ).casefold()
+
+
+# ---------------------------------------------------------------------------
+# Lone first names (Story 14.1, Lionel's Q6: "yes, wherever it stands alone")
+# ---------------------------------------------------------------------------
+
+# A name token joined to no letter, digit, underscore or hyphen on either side
+_LONE_TOKEN_RE = re.compile(f"(?<![\\w-])({_NAME_TOKEN})(?![\\w-])")
+_TITLE_TOKEN_RE = re.compile(f"(?:{FRENCH_TITLE_PATTERN})", re.IGNORECASE)
+
+
+@functools.lru_cache(maxsize=1)
+def load_lone_first_names() -> frozenset[str]:
+    """First names a lone token may be (Story 14.1): the default pseudonym
+    library's first names and french_names.json's, through _fold.
+
+    Always the ``neutral`` library, whatever theme the user picked. Read only
+    by ``HybridDetector._lone_first_names``; never merged into the name
+    dictionary.
+    """
+    with open(PSEUDONYMS_DIR / "neutral.json", encoding="utf-8") as f:
+        library: dict[str, list[str]] = json.load(f)["first_names"]
+    with open(FRENCH_NAMES_PATH, encoding="utf-8") as f:
+        french: list[str] = json.load(f)["first_names"]
+    names = [name for group in library.values() for name in group] + french
+    return frozenset(_fold(name) for name in names)
+
+
+def _is_title_token(word: str) -> bool:
+    """A title (« M. », « Dr », « Madame »...), not a word of a name."""
+    word = word.strip()
+    return bool(_TITLE_TOKEN_RE.fullmatch(word + " ")) or bool(
+        _TITLE_TOKEN_RE.fullmatch(word)
+    )
+
+
+def _holds_another_name_word(
+    text: str, entity: DetectedEntity, start: int, end: int
+) -> bool:
+    """Whether a place or organisation detection holds, besides the token at
+    ``start:end``, another name token on the same line that is not a title:
+    the token is then part of a longer name (Story 14.1, guard (b))."""
+    span = text[entity.start_pos : entity.end_pos]
+    for match in _LONE_TOKEN_RE.finditer(span):
+        other_start = entity.start_pos + match.start(1)
+        other_end = entity.start_pos + match.end(1)
+        if other_start == start:
+            continue
+        if "\n" in text[min(start, other_start) : max(end, other_end)]:
+            continue
+        if _is_title_token(match.group(1)):
+            continue
+        return True
+    return False
 
 
 def _org_initials(text: str) -> str | None:
@@ -836,6 +892,11 @@ class HybridDetector(EntityDetector):
         salutation_lines = self._salutation_lines(text)
         regex_entities = regex_entities + self._salutation_names(
             text, salutation_lines, spacy_entities, regex_entities
+        )
+        # Story 14.1 (Lionel, Q6): a listed first name standing alone joins
+        # the regex list
+        regex_entities = regex_entities + self._lone_first_names(
+            text, spacy_entities, regex_entities
         )
 
         # Step 3: PERSON boundaries before the merge, on both sources (Story
@@ -1560,6 +1621,55 @@ class HybridDetector(EntityDetector):
                     start=start,
                     end=end,
                 )
+        return added
+
+    def _lone_first_names(
+        self,
+        text: str,
+        spacy_entities: list[DetectedEntity],
+        regex_entities: list[DetectedEntity],
+    ) -> list[DetectedEntity]:
+        """Story 14.1 (Lionel, Q6: "yes, wherever it stands alone"): a word
+        that starts with a capital and whose folded form is a first name of
+        ``load_lone_first_names`` becomes a regex PERSON (confidence 0.80)
+        wherever it stands alone. It does not stand alone when (a) a PERSON
+        of either list, or one this rule added, overlaps it, or (b) a
+        LOCATION or ORG overlaps it and holds another name token of the same
+        line that is not a title. A name that is exactly a place or an
+        organisation gets a PERSON too (Q4). Only adds detections."""
+        names = load_lone_first_names()
+        entities = spacy_entities + regex_entities
+        persons = [
+            (e.start_pos, e.end_pos) for e in entities if e.entity_type == "PERSON"
+        ]
+        others = [e for e in entities if e.entity_type in ("LOCATION", "ORG")]
+        added: list[DetectedEntity] = []
+        for match in _LONE_TOKEN_RE.finditer(text):
+            token = match.group(1)
+            start, end = match.span(1)
+            if not (token[:1].isupper() and _fold(token) in names):
+                continue
+            if any(a < end and start < b for a, b in persons):
+                continue
+            if any(
+                other.start_pos < end
+                and start < other.end_pos
+                and _holds_another_name_word(text, other, start, end)
+                for other in others
+            ):
+                continue
+            persons.append((start, end))
+            added.append(
+                DetectedEntity(
+                    text=token,
+                    entity_type="PERSON",
+                    start_pos=start,
+                    end_pos=end,
+                    confidence=0.80,
+                    source="regex",
+                )
+            )
+            logger.debug("lone_first_name_added", start=start, end=end)
         return added
 
     def _split_salutation_pairs(

@@ -1152,8 +1152,8 @@ or click to open</translation>
     </message>
     <message>
         <location filename="../screens/processing.py" line="147"/>
-        <source>Aucune entité détectée. Le document ne contient peut-être pas de données personnelles, ou le format n&apos;est pas supporté pour l&apos;analyse NLP.</source>
-        <translation>No entities detected. The document may not contain personal data, or the format is not supported for NLP analysis.</translation>
+        <source>Aucun nom détecté. Un nom peut malgré tout échapper à la détection, en particulier un prénom seul dans un texte court : relisez le texte à l&apos;étape suivante. Pour ajouter un nom oublié : sélectionnez-le, clic droit, « Ajouter comme entité », puis « Personne » ou le type voulu.</source>
+        <translation>No name detected. A name can still escape detection, especially a first name on its own in a short text: read the text in the next step. To add a missed name: select it, right-click, &quot;Add as entity&quot;, then &quot;Person&quot; or the right type.</translation>
     </message>
     <message>
         <location filename="../screens/processing.py" line="148"/>

@@ -439,23 +439,31 @@ class TestSalutationBareName:
 
 class TestRunningText:
     @pytest.mark.parametrize(
-        "doc",
+        ("doc", "word"),
         [
-            "Le rapport de Pierre et du comité est prêt.",
-            "Une pierre sur le bureau du comité.",
-            "Une page blanche pour le rapport.",
-            "Blanche, la page du rapport reste sur le bureau.",
-            "Pierre après pierre, le projet reste solide.",
+            ("Le rapport de Pierre et du comité est prêt.", "Pierre"),
+            ("Une pierre sur le bureau du comité.", None),
+            ("Une page blanche pour le rapport.", None),
+            ("Blanche, la page du rapport reste sur le bureau.", "Blanche"),
+            ("Pierre après pierre, le projet reste solide.", "Pierre"),
         ],
     )
     def test_real_first_names_in_running_text(
-        self, detector: HybridDetector, monkeypatch: pytest.MonkeyPatch, doc: str
+        self,
+        detector: HybridDetector,
+        monkeypatch: pytest.MonkeyPatch,
+        doc: str,
+        word: str | None,
     ) -> None:
         # the real name dictionary: "Pierre" and "Blanche" are first names
         assert detector._known_first_name("Pierre")
         assert detector._known_first_name("Blanche")
         assert detector._salutation_lines(doc) == []
-        assert _detect(monkeypatch, detector, doc) == []
+        # Story 14.1 (Lionel, Q6: "yes, wherever it stands alone"): the
+        # capitalised listed first name is now a PERSON; the lower-case word
+        # is not
+        expected = [] if word is None else [(word, "PERSON", doc.index(word))]
+        assert _detect(monkeypatch, detector, doc) == expected
 
     def test_invented_first_names_in_running_text(
         self,
@@ -807,23 +815,31 @@ class TestDocumentFirstName:
         assert _persons(found) == ["Zorbalia Quentrel"]
 
     @pytest.mark.parametrize(
-        "doc",
+        ("doc", "word"),
         [
-            "Pierre après pierre, le projet reste solide.",
-            "Le rapport de Pierre et du comité est prêt.",
-            "Blanche, la page du rapport reste sur le bureau.",
-            "Une pierre sur le bureau du comité.",
-            "Une page blanche pour le rapport.",
+            ("Pierre après pierre, le projet reste solide.", "Pierre"),
+            ("Le rapport de Pierre et du comité est prêt.", "Pierre"),
+            ("Blanche, la page du rapport reste sur le bureau.", "Blanche"),
+            ("Une pierre sur le bureau du comité.", None),
+            ("Une page blanche pour le rapport.", None),
         ],
     )
     def test_common_words_in_a_document_naming_no_such_person(
-        self, detector: HybridDetector, monkeypatch: pytest.MonkeyPatch, doc: str
+        self,
+        detector: HybridDetector,
+        monkeypatch: pytest.MonkeyPatch,
+        doc: str,
+        word: str | None,
     ) -> None:
         # AC3 as read for AC5 ("never on a common-word use"); real dictionary
         doc = f"M. Zorbalia Quentrel a signé le rapport.\n{doc}\n"
         person = _at(doc, "M. Zorbalia Quentrel", "PERSON")
         found = _detect(monkeypatch, detector, doc, spacy_entities=[person])
-        assert _persons(found) == ["M. Zorbalia Quentrel"]
+        # Story 14.1 (Lionel, Q6: "yes, wherever it stands alone"): the
+        # capitalised listed first name is now a PERSON; the lower-case word
+        # is not
+        expected = ["M. Zorbalia Quentrel"] + ([] if word is None else [word])
+        assert _persons(found) == expected
 
     def test_accepted_residual(
         self, detector: HybridDetector, monkeypatch: pytest.MonkeyPatch
