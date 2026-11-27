@@ -218,13 +218,13 @@ Order on main: Story 15.1, Story 16.1, Story 14.1 (rebased on both), Story 16.2,
 
 ## Definition of Done
 
-- [ ] Story 16.1 merged: the 29 labels show their English in the English app (31 call sites), the 9 ⚠ ones with their symbol back, and the 5 same-cause labels with the English the PO checked, measured with `translate()` on the shipped `en.qm`; the French app unchanged; CHANGELOG `[Unreleased]` entry
-- [ ] `en.ts` and `fr.ts` hold no broken `\u` run; `.qm` rebuilt as in Story 11.5; `fr.qm` byte-identical; `qm_compare.py` shows only the intended messages
-- [ ] Story 16.1's guard on CI, shown to fail when a key is broken again
+- [x] Story 16.1 merged: the 29 labels show their English in the English app (30 call sites: 31 when this epic was written, until Story 15.1 merged the two « déjà connu » calls into one, `gui/widgets/entity_panel.py:360`), the 9 ⚠ ones with their symbol back, and the 5 same-cause labels with the English the PO checked, measured with `translate()` on the shipped `en.qm`; the French app unchanged; CHANGELOG `[Unreleased]` entry. Merged 2026-11-25 as PR #136, squash `c4f26fe`
+- [x] `en.ts` and `fr.ts` hold no broken `\u` run; `.qm` rebuilt as in Story 11.5; `fr.qm` byte-identical; `qm_compare.py` shows only the intended messages (`messages=358 differing=34` and `messages=353 differing=29`; QA's rebuild of `en.qm` byte-identical to the committed file)
+- [x] Story 16.1's guard on CI, shown to fail when a key is broken again (tests first `22d7b36`: 38 xfailed, 0 XPASS on each CI leg; QA re-ran the tests-first commit with `--runxfail` and the mutants)
 - [ ] Story 16.2 merged: every `tr()` call has English in the shipped `en.qm` apart from the three file filters; `fr.ts` holds the 40 `ShortcutsHelpDialog` entries; the full guard on CI with no known-gaps list, shown to fail when a key is removed
-- [ ] For each story: tests-first commit and draft PR, QA review, read-only Codex review of the final head
-- [ ] No regression in existing features (full CI green)
-- [ ] Order kept: 15.1, 16.1, 14.1 (rebased on both), 16.2
+- [ ] For each story: tests-first commit and draft PR, QA review, read-only Codex review of the final head (Story 16.1: tests first `22d7b36`, draft PR #136; QA gate PASS on `a531f85`; Codex review 1 on `6b0348b`: no findings. Story 16.2 to come)
+- [ ] No regression in existing features (full CI green) (Story 16.1: main's CI on `c4f26fe` green, Test Matrix 45707113923: 3,824 passed on each of ubuntu 3.11, ubuntu 3.13 and macOS; Windows 3,674 passed, 3 skipped; Code Quality, Documentation and CodeQL green. Story 16.2 to come)
+- [ ] Order kept: 15.1, 16.1, 14.1 (rebased on both), 16.2 (15.1 merged 2026-11-24, `4c40dc2`; 16.1 on 2026-11-25, `c4f26fe`; 14.1, rebased on `c4f26fe`, on 2026-11-27, `2f18895`. 16.2 to come)
 - [ ] Before the next release: Lionel's hand check of the English app passes
 
 ---

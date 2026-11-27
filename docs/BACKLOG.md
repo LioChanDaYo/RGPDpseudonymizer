@@ -888,6 +888,39 @@ Test gaps found during a story and kept out of its scope. Each waits for its pul
 
 ---
 
+## 🔧 Code and data maintenance (not scheduled)
+
+Items found during a story, kept out of its scope, that are not test gaps. Each waits for its pull trigger.
+
+#### TD-010: Re-running the gender lookup script would change three sets of names ⏸️ Until someone re-runs `scripts/build_gender_lookup.py`
+**Source:** Story 11.6 (Dev Notes, "The gender lookup is not changed by this story"), 2026-11-10; raised again by the orchestrator, 2026-11-22
+**Description:** `gdpr_pseudonymizer/resources/french_gender_lookup.json` was built once by `scripts/build_gender_lookup.py` (Story 5.2) from the `neutral` pseudonym library's male and female first names and `french_names.json`. Story 11.6 cleaned the pseudonym lists but did not re-run the script, so the table still reflects the old lists. Re-running it on today's lists would make three changes: « Felix » (male today, l.270) and « Nancy » (female today, l.828) drop out of the table, and « Ayden » and « Ayoub » (ambiguous today, l.948-949) become male only. See also Story 11.6's note, which lists further plain forms that would drop out (« Anaelle », « Annaelle »). The same note also names « Andrea », but the script keeps « Andrea » ambiguous whatever the lists say (`KNOWN_AMBIGUOUS`, `scripts/build_gender_lookup.py:48`, applied at l.391-395), so it would not drop out.
+**Impact:** None today: nothing runs the script. The script writes only `data/french_gender_lookup.json` (`scripts/build_gender_lookup.py:422-424`), while the app reads `gdpr_pseudonymizer/resources/french_gender_lookup.json` (`resources/__init__.py:11`, `pseudonym/gender_detector.py:41-43`); Story 11.6 found the two copies identical. The changes reach users only if a re-run's table is also copied into the resource: then a real « Felix » or « Nancy » would get no gender (the detector does not fold accents), and a real « Ayden » or « Ayoub » would always get a male pseudonym.
+**Where:** `scripts/build_gender_lookup.py`; `data/french_gender_lookup.json` (the script's output); `gdpr_pseudonymizer/resources/french_gender_lookup.json` (the copy the app reads, through `resources/__init__.py` `FRENCH_GENDER_LOOKUP_PATH` and `pseudonym/gender_detector.py`).
+**Fix direction:** Before copying a re-run's table into the resource, diff it against today's and decide these names on purpose, not by the script's side effect.
+**Pull trigger:** Any re-run of `scripts/build_gender_lookup.py`, or any change to either copy of `french_gender_lookup.json`.
+**Decision:** Lionel, 2026-11-22, recorded in the orchestrator's decision log (no story holds it), after the context was explained to him (the table built once from the pseudonym lists, Story 11.6 cleaning the lists but not the table, and the three changes above). The question asked: "Should the next docs PR add a backlog line warning not to re-run the gender lookup script without checking these three changes?" His answer: "yes, add the line".
+
+#### TD-011: Debug log lines hold detected names ⏸️ Until a user can turn on DEBUG logging
+**Source:** Codex review 1 of Story 14.1, P2 (on `ac72640`; Story 14.1, Task 5.2 and Decisions Recorded), 2026-11-26
+**Description:** 11 DEBUG log calls put detected text or a name in a field (counted by the PO on `2f18895`): in `gdpr_pseudonymizer/nlp/hybrid_detector.py`, `duplicate_entity_removed` (l.1017), `org_supersedes_person` (l.1051), `ambiguous_entity_added` (l.1063, `regex_text` and `spacy_text`), `junk_only_entity_filtered` (l.2087), `entity_boundary_trimmed` (l.2098), `title_only_entity_filtered` (l.2137) and `label_word_entity_filtered` (l.2177); in `gdpr_pseudonymizer/core/document_processor.py`, `component_matched_in_batch` (l.918 and l.926, `component` and `matched_entity`) and `processing_entity` (l.1428, `entity_text`); in `gdpr_pseudonymizer/nlp/entity_grouping.py`, `ambiguous_person_names_detected` (l.296, the names themselves). Codex's example: Story 14.1's rule adds a person inside an organisation spaCy found, and the merge then logs both texts in `ambiguous_entity_added`.
+**Impact:** None today: no user can reach DEBUG. The CLI commands call `configure_logging()` at its default, INFO (`utils/logger.py:16`), and the desktop app calls `configure_logging("INFO")` (`gui/app.py:49`). The config file's `logging.level` is checked and parsed (`utils/config_manager.py:134` into `config.log_level`; `cli/config.py:247`) but never passed to `configure_logging`, although `gdpr-pseudo config set logging.level DEBUG` is accepted and shown as an example (`cli/commands/config_show.py:332`, `:380`): a user can set DEBUG and nothing changes. `--verbose` sets nothing (`cli/main.py:150-158`). Once DEBUG is reachable, these lines write names to the log in clear.
+**Where:** the 11 calls above; `gdpr_pseudonymizer/utils/logger.py`.
+**Fix direction:** Log positions, types and counts instead of text, as Story 14.1's `lone_first_name_added` (`hybrid_detector.py:1672`) does. The fix includes a test that no log line holds a name: detection and processing run at DEBUG on a text with invented names, and none of them appears in the captured log.
+**Pull trigger:** Before any user-facing way to turn on DEBUG logging (applying `logging.level`, a working `--verbose`, a desktop option).
+**Decision:** Lionel, 2026-11-26. The question asked: "Should the names in debug logs go on the backlog, to be fixed before anything lets a user turn on debug logging? (~35 debug lines in hybrid_detector.py and document_processor.py log detected text; no user path reaches DEBUG today: CLI and GUI call configure_logging at INFO, config logging.level parsed but never applied, --verbose sets nothing; includes the old 'processing_entity' line. Options a backlog, b own story after 14.1, c fix in 14.1 + 2nd Codex. The P3 speed finding to the backlog too.)" His answer: "a", the backlog: no story of its own and no fix in Story 14.1. The question's "~35" counted more widely; the 11 calls above are those whose fields hold text, one of them in a third file.
+
+#### TD-012: The lone-first-name rule's overlap scan grows with the square of the number of names ⏸️ Until the rule changes or a user reports slowness
+**Source:** Story 14.1 QA, PERF-141-01 (QA Results; `docs/qa/gates/14.1-first-names-short-text.yml`), and Codex review 1 of Story 14.1, P3, 2026-11-26
+**Description:** `_lone_first_names` (`gdpr_pseudonymizer/nlp/hybrid_detector.py:1626`) checks each listed first name it meets against every person span found so far, including the ones it has just added (`any(a < end and start < b for a, b in persons)`, l.1652), so its time grows with the square of the number of names. QA measured: a 10,000-line list of names adds about 2.17 s; a 10,158-word document adds 86 ms (detection 5.41 s → 5.57 s).
+**Impact:** Negligible on ordinary documents next to spaCy; a long list of names is slower to process.
+**Where:** `_lone_first_names`, above.
+**Fix direction:** From QA: keep the persons sorted and find overlaps with `bisect`.
+**Pull trigger:** The next change to that rule, or a user report of slowness.
+**Decision:** Lionel, 2026-11-26, in the same question as TD-011 ("The P3 speed finding to the backlog too."). His answer: "a", the backlog.
+
+---
+
 ## 🚀 Epic 2+ Planned Features
 
 ### Epic 2: Core Pseudonymization Engine (Week 6-10)

@@ -145,12 +145,12 @@ Story 14.1 lands on main with its CHANGELOG `[Unreleased]` entry and ships with 
 
 ## Definition of Done
 
-- [ ] Story 14.1 merged: fewer lone first names missed on short text with the mechanism Lionel chose; the « Aucune entité détectée » message no longer suggests the document holds nothing personal; CHANGELOG `[Unreleased]` entry
-- [ ] Grid, non-name sentences and dev corpus measured before and after, and the trade-off decided by Lionel with numbers
-- [ ] Every new French text approved word for word by Lionel before it is committed
-- [ ] CI accuracy run and QA re-run cited; no recall or precision drop unless Lionel accepted it
-- [ ] Tests-first commit and draft PR, QA review, read-only Codex review of the final head
-- [ ] No regression in existing features (full CI green)
+- [x] Story 14.1 merged: fewer lone first names missed on short text with the mechanism Lionel chose; the « Aucune entité détectée » message no longer suggests the document holds nothing personal; CHANGELOG `[Unreleased]` entry. Merged 2026-11-27 as PR #137, squash `2f18895`
+- [x] Grid, non-name sentences and dev corpus measured before and after, and the trade-off decided by Lionel with numbers (Story 14.1, Dev Notes "Measurements" and Decisions Recorded: Q6, "yes, wherever it stands alone", on 2026-11-24; G3 on 2026-11-26. On the head, 0 of the grid's 7,390 cases missed, against 1,738 before, Task 2.4 and QA)
+- [x] Every new French text approved word for word by Lionel before it is committed (the message in his own wording, 2026-11-25; the CHANGELOG entry at STOP B, 2026-11-26; Story 14.1, Decisions Recorded)
+- [x] CI accuracy run and QA re-run cited; no recall or precision drop unless Lionel accepted it (G1 run 45776619159 on `4367cfe`, QA's G2 run 45781934884 on `0439076`, identical; main's run 45954644200 on `2f18895`, identical. PERSON precision 0.9219 → 0.9091 accepted by Lionel at G3, 2026-11-26; the `[Overall]` precision 0.8068 → 0.8001, the same 20 wrong persons, shown to him in the final PR text of PR #137, which he approved the same day (Story 14.1, Decisions Recorded, "The final PR text"); no recall drop; `docs/qa/ner-accuracy-report.md`, Story 14.1 section)
+- [x] Tests-first commit and draft PR, QA review, read-only Codex review of the final head (tests first `282af61`, draft PR #137, 22 xfailed on each CI leg, 18 on Windows, 0 XPASS; QA gate PASS on `0439076`; Codex review 1 on `ac72640`: no P0/P1, its P2 and P3 to `docs/BACKLOG.md` TD-011 and TD-012 on Lionel's answer)
+- [x] No regression in existing features (full CI green). Main's CI on `2f18895` green (Test Matrix 45954642815: 3,854 passed on each of ubuntu 3.11, ubuntu 3.13 and macOS; Windows 3,699 passed, 3 skipped; Code Quality, Documentation and CodeQL green; Performance & Stability 45954642908: 4 passed, 3 skipped)
 - [ ] Before the next release: Lionel's hand check of short texts with lone first names, and of a document where nothing is found, passes
 
 ---
